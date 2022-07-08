@@ -360,12 +360,6 @@ namespace SceneUtil
 
         SupportedMethods mSupported;
 
-        static constexpr auto mMaxLightsLowerLimit = 2;
-        static constexpr auto mMaxLightsUpperLimit = 64;
-        static constexpr auto mFFPMaxLights = 8;
-
-        static const std::unordered_map<std::string, LightingMethod> mLightingMethodSettingMap;
-
         std::shared_ptr<PPLightBuffer> mPPLightBuffer;
     };
 

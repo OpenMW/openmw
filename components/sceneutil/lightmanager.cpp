@@ -24,6 +24,10 @@
 
 namespace
 {
+    constexpr int maxLightsLowerLimit = 2;
+    constexpr int maxLightsUpperLimit = 64;
+    constexpr int ffpMaxLights = 8;
+
     bool sortLights(const SceneUtil::LightManager::LightSourceViewBound* left, const SceneUtil::LightManager::LightSourceViewBound* right)
     {
         static auto constexpr illuminationBias = 81.f;
@@ -70,6 +74,15 @@ namespace
 
 namespace SceneUtil
 {
+    namespace
+    {
+        const std::unordered_map<std::string, LightingMethod> lightingMethodSettingMap = {
+            {"legacy", LightingMethod::FFP},
+            {"shaders compatibility", LightingMethod::PerObjectUniform},
+            {"shaders", LightingMethod::SingleUBO},
+        };
+    }
+
     static int sLightId = 0;
 
     // Handles a GLSL shared layout by using configured offsets and strides to fill a continuous buffer, making the data upload to GPU simpler.
@@ -756,16 +769,10 @@ namespace SceneUtil
         mTemplate->configureLayout(offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
     }
 
-    const std::unordered_map<std::string, LightingMethod> LightManager::mLightingMethodSettingMap = {
-         {"legacy", LightingMethod::FFP}
-        ,{"shaders compatibility", LightingMethod::PerObjectUniform}
-        ,{"shaders", LightingMethod::SingleUBO}
-    };
-
     LightingMethod LightManager::getLightingMethodFromString(const std::string& value)
     {
-        auto it = LightManager::mLightingMethodSettingMap.find(value);
-        if (it != LightManager::mLightingMethodSettingMap.end())
+        auto it = lightingMethodSettingMap.find(value);
+        if (it != lightingMethodSettingMap.end())
             return it->second;
 
         constexpr const char* fallback = "shaders compatibility";
@@ -775,7 +782,7 @@ namespace SceneUtil
 
     std::string LightManager::getLightingMethodString(LightingMethod method)
     {
-        for (const auto& p : LightManager::mLightingMethodSettingMap)
+        for (const auto& p : lightingMethodSettingMap)
             if (p.second == method)
                 return p.first;
         return "";
@@ -801,7 +808,7 @@ namespace SceneUtil
 
         if (ffp)
         {
-            initFFP(mFFPMaxLights);
+            initFFP(ffpMaxLights);
             return;
         }
 
@@ -819,7 +826,8 @@ namespace SceneUtil
             hasLoggedWarnings = true;
         }
 
-        int targetLights = std::clamp(Settings::Manager::getInt("max lights", "Shaders"), mMaxLightsLowerLimit, mMaxLightsUpperLimit);
+        const int targetLights = std::clamp(Settings::Manager::getInt("max lights", "Shaders"),
+                                            maxLightsLowerLimit, maxLightsUpperLimit);
 
         if (!supportsUBO || !supportsGPU4 || lightingMethod == LightingMethod::PerObjectUniform)
             initPerObjectUniform(targetLights);
@@ -902,7 +910,7 @@ namespace SceneUtil
         if (usingFFP())
             return;
 
-        setMaxLights(std::clamp(Settings::Manager::getInt("max lights", "Shaders"), mMaxLightsLowerLimit, mMaxLightsUpperLimit));
+        setMaxLights(std::clamp(Settings::Manager::getInt("max lights", "Shaders"), maxLightsLowerLimit, maxLightsUpperLimit));
 
         if (getLightingMethod() == LightingMethod::PerObjectUniform)
         {
