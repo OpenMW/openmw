@@ -756,16 +756,16 @@ namespace SceneUtil
         mTemplate->configureLayout(offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
     }
 
-    const std::unordered_map<std::string, LightingMethod> LightManager::mLightingMethodSettingMap = {
-         {"legacy", LightingMethod::FFP}
-        ,{"shaders compatibility", LightingMethod::PerObjectUniform}
-        ,{"shaders", LightingMethod::SingleUBO}
+    const std::unordered_map<std::string, LightingMethod> LightManager::sLightingMethodSettingMap = {
+        {"legacy", LightingMethod::FFP},
+        {"shaders compatibility", LightingMethod::PerObjectUniform},
+        {"shaders", LightingMethod::SingleUBO},
     };
 
     LightingMethod LightManager::getLightingMethodFromString(const std::string& value)
     {
-        auto it = LightManager::mLightingMethodSettingMap.find(value);
-        if (it != LightManager::mLightingMethodSettingMap.end())
+        auto it = LightManager::sLightingMethodSettingMap.find(value);
+        if (it != LightManager::sLightingMethodSettingMap.end())
             return it->second;
 
         constexpr const char* fallback = "shaders compatibility";
@@ -775,7 +775,7 @@ namespace SceneUtil
 
     std::string LightManager::getLightingMethodString(LightingMethod method)
     {
-        for (const auto& p : LightManager::mLightingMethodSettingMap)
+        for (const auto& p : LightManager::sLightingMethodSettingMap)
             if (p.second == method)
                 return p.first;
         return "";
@@ -801,7 +801,7 @@ namespace SceneUtil
 
         if (ffp)
         {
-            initFFP(mFFPMaxLights);
+            initFFP(sFFPMaxLights);
             return;
         }
 
@@ -819,7 +819,7 @@ namespace SceneUtil
             hasLoggedWarnings = true;
         }
 
-        int targetLights = std::clamp(Settings::Manager::getInt("max lights", "Shaders"), mMaxLightsLowerLimit, mMaxLightsUpperLimit);
+        int targetLights = std::clamp(Settings::Manager::getInt("max lights", "Shaders"), sMaxLightsLowerLimit, sMaxLightsUpperLimit);
 
         if (!supportsUBO || !supportsGPU4 || lightingMethod == LightingMethod::PerObjectUniform)
             initPerObjectUniform(targetLights);
@@ -902,7 +902,7 @@ namespace SceneUtil
         if (usingFFP())
             return;
 
-        setMaxLights(std::clamp(Settings::Manager::getInt("max lights", "Shaders"), mMaxLightsLowerLimit, mMaxLightsUpperLimit));
+        setMaxLights(std::clamp(Settings::Manager::getInt("max lights", "Shaders"), sMaxLightsLowerLimit, sMaxLightsUpperLimit));
 
         if (getLightingMethod() == LightingMethod::PerObjectUniform)
         {
