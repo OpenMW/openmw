@@ -220,7 +220,7 @@ namespace Gui
         {
             std::filesystem::path path = name;
             if (Misc::getFileExtension(name) == "omwfont")
-                MyGUI::ResourceManager::getInstance().load(path.filename());
+                MyGUI::ResourceManager::getInstance().load(path.filename().string());
         }
 
         dataManager->setResourcePath(oldDataPath);
