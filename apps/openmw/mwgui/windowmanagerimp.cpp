@@ -128,7 +128,7 @@ namespace MWGui
 {
     WindowManager::WindowManager(
             SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-            const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
+            const std::string& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
             ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, bool useShaders)
       : mOldUpdateMask(0)
       , mOldCullMask(0)
@@ -195,7 +195,7 @@ namespace MWGui
     {
         mScalingFactor = std::clamp(Settings::Manager::getFloat("scaling factor", "GUI"), 0.5f, 8.f);
         mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), mScalingFactor);
-        mGuiPlatform->initialise(resourceSystem->getVFS(), resourcePath, (std::filesystem::path(logpath) / "MyGUI.log").generic_string());
+        mGuiPlatform->initialise(resourceSystem->getVFS(), "mygui", (std::filesystem::path(logpath) / "MyGUI.log").generic_string());
 
         mGui = new MyGUI::Gui;
         mGui->initialise("");

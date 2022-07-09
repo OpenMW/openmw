@@ -135,7 +135,7 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
 
     WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                  const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
+                  const std::string& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
                   ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, bool useShaders);
     virtual ~WindowManager();
 

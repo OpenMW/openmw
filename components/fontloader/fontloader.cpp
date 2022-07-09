@@ -213,11 +213,18 @@ namespace Gui
             return;
         }
 
+        std::string oldDataPath = dataManager->getDataPath("");
+        dataManager->setResourcePath("fonts");
+
         for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
+            std::filesystem::path path = name;
+            std::cout << name << std::endl;
             if (Misc::getFileExtension(name) == "omwfont")
-                MyGUI::ResourceManager::getInstance().load(name);
+                MyGUI::ResourceManager::getInstance().load(path.filename());
         }
+
+        dataManager->setResourcePath(oldDataPath);
     }
 
     typedef struct

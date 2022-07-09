@@ -521,7 +521,6 @@ void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     mDataDirs = dataDirs;
     mDataDirs.insert(mDataDirs.begin(), (mResDir / "vfs"));
-    mDataDirs.insert(mDataDirs.begin(), (mResDir / "mygui"));
     mFileCollections = Files::Collections (mDataDirs, !mFSStrict);
 }
 
@@ -701,7 +700,7 @@ void OMW::Engine::createWindow()
 void OMW::Engine::setWindowIcon()
 {
     std::ifstream windowIconStream;
-    std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
+    std::string windowIcon = (mResDir / "openmw.png").string();
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
         Log(Debug::Error) << "Error: Failed to open " << windowIcon;
@@ -816,7 +815,6 @@ void OMW::Engine::prepareEngine()
         exts->glRenderbufferStorageMultisampleCoverageNV = nullptr;
 #endif
 
-    std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
     guiRoot->setName("GUI Root");
     guiRoot->setNodeMask(MWRender::Mask_GUI);
@@ -824,7 +822,7 @@ void OMW::Engine::prepareEngine()
     rootNode->addChild(guiRoot);
 
     mWindowManager = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
-                mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
+                mCfgMgr.getLogPath().string() + std::string("/"),
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
                 Version::getOpenmwVersionDescription(mResDir.string()), shadersSupported);
     mEnvironment.setWindowManager(*mWindowManager);
