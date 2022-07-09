@@ -73,7 +73,7 @@ return function(registerRenderer)
         registerRenderer('checkbox', function(value, set, argument)
             argument = applyDefaults(argument, defaultArgument)
             local l10n = core.l10n(argument.l10n)
-            return disable(argument.disabled, paddedBox {
+            local box = paddedBox {
                 template = I.MWUI.templates.padding,
                 content = ui.content {
                     {
@@ -81,12 +81,13 @@ return function(registerRenderer)
                         props = {
                             text = l10n(value and argument.trueLabel or argument.falseLabel)
                         },
-                        events = {
-                            mouseClick = async:callback(function() set(not value) end),
-                        },
                     },
-                }
-            })
+                },
+            }
+            box.events = {
+                mouseClick = async:callback(function() set(not value) end)
+            }
+            return disable(argument.disabled, box)
         end)
     end
 
