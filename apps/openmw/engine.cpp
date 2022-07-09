@@ -521,6 +521,7 @@ void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     mDataDirs = dataDirs;
     mDataDirs.insert(mDataDirs.begin(), (mResDir / "vfs"));
+    mDataDirs.insert(mDataDirs.begin(), (mResDir / "mygui"));
     mFileCollections = Files::Collections (mDataDirs, !mFSStrict);
 }
 
@@ -825,7 +826,7 @@ void OMW::Engine::prepareEngine()
     mWindowManager = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
-                Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string(), shadersSupported);
+                Version::getOpenmwVersionDescription(mResDir.string()), shadersSupported);
     mEnvironment.setWindowManager(*mWindowManager);
 
     mInputManager = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler,

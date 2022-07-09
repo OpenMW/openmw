@@ -151,9 +151,8 @@ namespace
 namespace Gui
 {
 
-    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath, float scalingFactor)
+    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor)
         : mVFS(vfs)
-        , mUserDataPath(userDataPath)
         , mFontHeight(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 20))
         , mScalingFactor(scalingFactor)
     {
@@ -214,15 +213,11 @@ namespace Gui
             return;
         }
 
-        dataManager->setUseVfs(true);
-
         for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
             if (Misc::getFileExtension(name) == "omwfont")
                 MyGUI::ResourceManager::getInstance().load(name);
         }
-
-        dataManager->setUseVfs(false);
     }
 
     typedef struct

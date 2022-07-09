@@ -18,8 +18,6 @@ public:
 
     void setResourcePath(const std::string& path);
 
-    void setUseVfs(bool useVfs);
-
     void setVfs(const VFS::Manager* vfs);
 
     /** Get data stream from specified resource name.
@@ -52,8 +50,6 @@ private:
     std::string mResourcePath;
 
     const VFS::Manager* mVfs;
-
-    bool mUseVfs{false};
 };
 
 }
