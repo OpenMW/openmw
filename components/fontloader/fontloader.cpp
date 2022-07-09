@@ -219,7 +219,6 @@ namespace Gui
         for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
             std::filesystem::path path = name;
-            std::cout << name << std::endl;
             if (Misc::getFileExtension(name) == "omwfont")
                 MyGUI::ResourceManager::getInstance().load(path.filename());
         }
@@ -625,11 +624,13 @@ namespace Gui
 
     std::string FontLoader::getInternalFontName(const std::string& name)
     {
-        if (name == Settings::Manager::getString("default font", "GUI"))
+        const std::string lowerName = Misc::StringUtils::lowerCase(name);
+
+        if (lowerName == Misc::StringUtils::lowerCase(Settings::Manager::getString("default font", "GUI")))
             return "DefaultFont";
-        if (name == Settings::Manager::getString("scroll font", "GUI"))
+        if (lowerName == Misc::StringUtils::lowerCase(Settings::Manager::getString("scroll font", "GUI")))
             return "ScrollFont";
-        if (name == Settings::Manager::getString("mono font", "GUI"))
+        if (lowerName == Misc::StringUtils::lowerCase(Settings::Manager::getString("mono font", "GUI")))
             return "MonoFont";
 
         return name;
