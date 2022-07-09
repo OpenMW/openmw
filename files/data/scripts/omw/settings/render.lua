@@ -150,6 +150,13 @@ local function renderGroup(group, global)
 
     local resetButtonLayout = {
         template = I.MWUI.templates.box,
+        events = {
+            mouseClick = async:callback(function()
+                for _, setting in pairs(group.settings) do
+                    setSettingValue(global, group.key, setting.key, setting.default)
+                end
+            end),
+        },
         content = ui.content {
             {
                 template = I.MWUI.templates.padding,
@@ -158,13 +165,6 @@ local function renderGroup(group, global)
                         template = I.MWUI.templates.textNormal,
                         props = {
                             text = interfaceL10n('Reset')
-                        },
-                        events = {
-                            mouseClick = async:callback(function()
-                                for _, setting in pairs(group.settings) do
-                                    setSettingValue(global, group.key, setting.key, setting.default)
-                                end
-                            end),
                         },
                     },
                 },
