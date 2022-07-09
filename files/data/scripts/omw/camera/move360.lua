@@ -62,6 +62,7 @@ function M.onInputAction(action)
     if not active or core.isWorldPaused() or
        not input.getControlSwitch(input.CONTROL_SWITCH.ViewMode) or
        not input.getControlSwitch(input.CONTROL_SWITCH.Controls) or
+       input.isActionPressed(input.ACTION.TogglePOV) or
        not I.Camera.isModeControlEnabled() then
         return
     end
