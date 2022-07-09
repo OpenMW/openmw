@@ -1,3 +1,6 @@
+#ifndef OPENMW_FRAGMENT_H_GLSL
+#define OPENMW_FRAGMENT_H_GLSL
+
 @link "openmw_fragment.glsl" if !@useOVR_multiview
 @link "openmw_fragment_multiview.glsl" if @useOVR_multiview
 
@@ -9,3 +12,9 @@ float mw_sampleRefractionDepthMap(vec2 uv);
 #endif
 
 vec4 mw_samplerLastShader(vec2 uv);
+
+#if @skyBlending
+vec3 mw_sampleSkyColor(vec2 uv);
+#endif
+
+#endif  // OPENMW_FRAGMENT_H_GLSL
