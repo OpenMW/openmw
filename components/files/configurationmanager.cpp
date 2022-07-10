@@ -106,7 +106,6 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
             continue;
         }
         alreadyParsedPaths.insert(path);
-        mActiveConfigPaths.push_back(path);
         config = loadConfig(path, description);
         if (config && hasReplaceConfig(*config) && parsedConfigs.size() > 1)
         {
