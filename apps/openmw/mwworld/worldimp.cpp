@@ -3931,7 +3931,7 @@ namespace MWWorld
     DetourNavigator::AgentBounds World::getPathfindingAgentBounds(const MWWorld::ConstPtr& actor) const
     {
         const MWPhysics::Actor* physicsActor = mPhysics->getActor(actor);
-        if (physicsActor == nullptr || (actor.isInCell() && actor.getCell()->isExterior()))
+        if (physicsActor == nullptr || !actor.isInCell() || actor.getCell()->isExterior())
             return DetourNavigator::AgentBounds {DetourNavigator::defaultCollisionShapeType, mDefaultHalfExtents};
         else
             return DetourNavigator::AgentBounds {physicsActor->getCollisionShapeType(), physicsActor->getHalfExtents()};

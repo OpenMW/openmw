@@ -1,6 +1,7 @@
 #include "types.hpp"
 
 #include <components/lua/luastate.hpp>
+#include <components/detournavigator/agentbounds.hpp>
 
 #include <apps/openmw/mwmechanics/drawstate.hpp>
 #include <apps/openmw/mwmechanics/creaturestats.hpp>
@@ -242,6 +243,14 @@ namespace MWLua
                     eqp[slot] = value.as<std::string>();
             }
             context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
+        };
+        actor["getPathfindingAgentBounds"] = [context](const LObject& o)
+        {
+            const DetourNavigator::AgentBounds agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(o.ptr());
+            sol::table result = context.mLua->newTable();
+            result["shapeType"] = agentBounds.mShapeType;
+            result["halfExtents"] = agentBounds.mHalfExtents;
+            return result;
         };
 
         addActorStatsBindings(actor, context);
