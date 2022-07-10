@@ -1,4 +1,5 @@
 local core = require('openmw.core')
+local util = require('openmw.util')
 
 local M = {}
 local currentLocalTest = nil
@@ -73,6 +74,83 @@ end
 function M.expectEqual(v1, v2, msg)
     if not (v1 == v2) then
         error(string.format('%s: %s ~= %s', msg or '', v1, v2), 2)
+    end
+end
+
+function M.closeToVector(expected, maxDistance)
+    return function(actual)
+        local distance = (expected - actual):length()
+        if distance <= maxDistance then
+            return ''
+        end
+        return string.format('%s is too far from expected %s: %s > %s', actual, expected, distance, maxDistance)
+    end
+end
+
+---
+-- Matcher verifying that given value is an array each element of which matches elements of expected.
+-- @function elementsAreArray
+-- @param expected#array of values or matcher functions.
+-- @usage
+-- local t = {42, 13}
+-- local matcher = function(actual)
+--     if actual ~= 42 then
+--         return string.format('%s is not 42', actual)
+--     end
+--     return ''
+-- end
+-- expectThat({42, 13}, elementsAreArray({matcher, 13}))
+function M.elementsAreArray(expected)
+    local expected_matchers = {}
+    for i, v in ipairs(expected) do
+        if type(v) == 'function' then
+            expected_matchers[i] = v
+        else
+            expected_matchers[i] = function (other)
+                if expected[i].__eq(expected[i], other) then
+                    return ''
+                end
+                return string.format('%s element %s does no match expected: %s', i, other, expected[i])
+            end
+        end
+    end
+    return function(actual)
+        if #actual < #expected_matchers then
+            return string.format('number of elements is less than expected: %s < %s', #actual, #expected_matchers)
+        end
+        local message = ''
+        for i, v in ipairs(actual) do
+            if i > #expected_matchers then
+                message = string.format('%s\n%s element is out of expected range: %s', message, i, #expected_matchers)
+                break
+            end
+            local match_message = expected_matchers[i](v)
+            if match_message ~= '' then
+                message = string.format('%s\n%s', message, match_message)
+            end
+        end
+        return message
+    end
+end
+
+---
+-- Verifies that given value matches provided matcher.
+-- @function expectThat
+-- @param value#any any value to match.
+-- @param matcher#function a function returing empty string in the case of success or a message explaining the mismatch.
+-- @param msg#string a message to prefix failure reason.
+-- @usage
+-- local matcher = function(actual)
+--     if actual == 42 then
+--         return ''
+--     end
+--     return string.format('%s is not 42', actual)
+-- end
+-- expectThat(42, matcher)
+function M.expectThat(value, matcher, msg)
+    local message = matcher(value)
+    if message ~= '' then
+        error(string.format('%s: actual does not match expected: %s', msg or 'Failure', message), 2)
     end
 end
 
