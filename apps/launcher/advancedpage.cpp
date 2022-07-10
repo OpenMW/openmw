@@ -256,6 +256,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
         saveSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
         saveSettingInt(physicsThreadsSpinBox, "async num threads", "Physics");
+        saveSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
     }
 
     // Visuals
