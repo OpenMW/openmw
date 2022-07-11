@@ -539,7 +539,7 @@ Windows_MSBuild_RelWithDebInfo:
   variables:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
-    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+    executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
   # temporarily enabled while we're linking these on the downloads page
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
