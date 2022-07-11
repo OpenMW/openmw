@@ -16,8 +16,7 @@ namespace CSMPrefs
 
         public:
 
-            ModifierSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
-                const std::string& label);
+            ModifierSetting(Category* parent,  QMutex* mutex, const std::string& key, const std::string& label);
 
             std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
 

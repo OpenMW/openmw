@@ -12,9 +12,9 @@
 #include "category.hpp"
 #include "state.hpp"
 
-CSMPrefs::DoubleSetting::DoubleSetting (Category *parent, Settings::Manager *values,
+CSMPrefs::DoubleSetting::DoubleSetting (Category *parent,
   QMutex *mutex, const std::string& key, const std::string& label, double default_)
-: Setting (parent, values, mutex, key, label),
+: Setting (parent, mutex, key, label),
   mPrecision(2), mMin (0), mMax (std::numeric_limits<double>::max()),
   mDefault (default_), mWidget(nullptr)
 {}
@@ -75,7 +75,7 @@ void CSMPrefs::DoubleSetting::updateWidget()
 {
     if (mWidget)
     {
-        mWidget->setValue(getValues().getFloat(getKey(), getParent()->getKey()));
+        mWidget->setValue(Settings::Manager::getFloat(getKey(), getParent()->getKey()));
     }
 }
 
@@ -83,7 +83,7 @@ void CSMPrefs::DoubleSetting::valueChanged (double value)
 {
     {
         QMutexLocker lock (getMutex());
-        getValues().setFloat (getKey(), getParent()->getKey(), value);
+        Settings::Manager::setFloat (getKey(), getParent()->getKey(), value);
     }
 
     getParent()->getState()->update (*this);

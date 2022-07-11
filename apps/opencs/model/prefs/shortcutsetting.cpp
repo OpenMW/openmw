@@ -8,14 +8,16 @@
 #include <QWidget>
 #include <QString>
 
+#include <components/settings/settings.hpp>
+
 #include "state.hpp"
 #include "shortcutmanager.hpp"
 
 namespace CSMPrefs
 {
-    ShortcutSetting::ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
+    ShortcutSetting::ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key,
         const std::string& label)
-        : Setting(parent, values, mutex, key, label)
+        : Setting(parent, mutex, key, label)
         , mButton(nullptr)
         , mEditorActive(false)
         , mEditorPos(0)
@@ -53,7 +55,7 @@ namespace CSMPrefs
     {
         if (mButton)
         {
-            std::string shortcut = getValues().getString(getKey(), getParent()->getKey());
+            std::string shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
 
             QKeySequence sequence;
             State::get().getShortcutManager().convertFromString(shortcut, sequence);
@@ -179,7 +181,7 @@ namespace CSMPrefs
 
         {
             QMutexLocker lock(getMutex());
-            getValues().setString(getKey(), getParent()->getKey(), value);
+            Settings::Manager::setString(getKey(), getParent()->getKey(), value);
         }
 
         getParent()->getState()->update(*this);

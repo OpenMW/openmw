@@ -41,7 +41,7 @@ namespace CSMPrefs
 
         public:
 
-            EnumSetting (Category *parent, Settings::Manager *values,
+            EnumSetting (Category *parent,
                 QMutex *mutex, const std::string& key, const std::string& label,
                 const EnumValue& default_);
 

@@ -20,7 +20,7 @@ namespace CSMPrefs
 
         public:
 
-            DoubleSetting (Category *parent, Settings::Manager *values,
+            DoubleSetting (Category *parent,
                 QMutex *mutex, const std::string& key, const std::string& label,
                 double default_);
 

@@ -10,7 +10,6 @@
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
-#include <components/settings/settings.hpp>
 #endif
 #include "ui_mainwindow.h"
 
@@ -95,7 +94,6 @@ namespace Launcher
         Files::ConfigurationManager mCfgMgr;
 
         Config::GameSettings mGameSettings;
-        Settings::Manager mEngineSettings;
         Config::LauncherSettings mLauncherSettings;
 
     };

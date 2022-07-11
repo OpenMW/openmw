@@ -4,23 +4,19 @@
 #include <QColor>
 #include <QMutexLocker>
 
+#include <components/settings/settings.hpp>
+
 #include "category.hpp"
 #include "state.hpp"
-
-Settings::Manager& CSMPrefs::Setting::getValues()
-{
-    return *mValues;
-}
 
 QMutex *CSMPrefs::Setting::getMutex()
 {
     return mMutex;
 }
 
-CSMPrefs::Setting::Setting (Category *parent, Settings::Manager *values, QMutex *mutex,
+CSMPrefs::Setting::Setting (Category *parent, QMutex *mutex,
     const std::string& key, const std::string& label)
-: QObject (parent->getState()), mParent (parent), mValues (values), mMutex (mutex), mKey (key),
-  mLabel (label)
+: QObject (parent->getState()), mParent (parent), mMutex (mutex), mKey (key), mLabel (label)
 {}
 
 CSMPrefs::Setting:: ~Setting() {}
@@ -52,25 +48,25 @@ const std::string& CSMPrefs::Setting::getLabel() const
 int CSMPrefs::Setting::toInt() const
 {
     QMutexLocker lock (mMutex);
-    return mValues->getInt (mKey, mParent->getKey());
+    return Settings::Manager::getInt (mKey, mParent->getKey());
 }
 
 double CSMPrefs::Setting::toDouble() const
 {
     QMutexLocker lock (mMutex);
-    return mValues->getFloat (mKey, mParent->getKey());
+    return Settings::Manager::getFloat (mKey, mParent->getKey());
 }
 
 std::string CSMPrefs::Setting::toString() const
 {
     QMutexLocker lock (mMutex);
-    return mValues->getString (mKey, mParent->getKey());
+    return Settings::Manager::getString (mKey, mParent->getKey());
 }
 
 bool CSMPrefs::Setting::isTrue() const
 {
     QMutexLocker lock (mMutex);
-    return mValues->getBool (mKey, mParent->getKey());
+    return Settings::Manager::getBool (mKey, mParent->getKey());
 }
 
 QColor CSMPrefs::Setting::toColor() const
