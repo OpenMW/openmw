@@ -615,9 +615,7 @@ namespace MWRender
     protected:
         void setDefaults(osg::StateSet* stateset) override
         {
-            if (Stereo::getMultiview())
-                stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrixMultiView", 2), osg::StateAttribute::OVERRIDE);
-            else
+            if (!Stereo::getMultiview())
                 stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrix"), osg::StateAttribute::OVERRIDE);
 
         }
@@ -626,7 +624,7 @@ namespace MWRender
         {
             if (Stereo::getMultiview())
             {
-                auto* projectionMatrixMultiViewUniform = stateset->getUniform("projectionMatrixMultiView");
+                std::array<osg::Matrix, 2> projectionMatrices;
                 auto& sm = Stereo::Manager::instance();
 
                 for (int view : {0, 1})
@@ -636,8 +634,10 @@ namespace MWRender
                     for (int col : {0, 1, 2})
                         viewOffsetMatrix(3, col) = 0;
 
-                    projectionMatrixMultiViewUniform->setElement(view, viewOffsetMatrix * projectionMatrix);
+                    projectionMatrices[view] = viewOffsetMatrix * projectionMatrix;
                 }
+
+                Stereo::setMultiviewMatrices(stateset, projectionMatrices);
             }
         }
         void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* /*cv*/) override

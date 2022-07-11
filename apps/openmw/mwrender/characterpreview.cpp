@@ -25,6 +25,7 @@
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/stereo/multiview.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
@@ -179,20 +180,6 @@ namespace MWRender
             camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
             SceneUtil::setCameraClearDepth(camera);
 
-#ifdef OSG_HAS_MULTIVIEW
-            if (shouldDoTextureArray())
-            {
-                auto* viewUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "viewMatrixMultiView", 2);
-                auto* projUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrixMultiView", 2);
-                viewUniform->setElement(0, osg::Matrix::identity());
-                viewUniform->setElement(1, osg::Matrix::identity());
-                projUniform->setElement(0, mPerspectiveMatrix);
-                projUniform->setElement(1, mPerspectiveMatrix);
-                mGroup->getOrCreateStateSet()->addUniform(viewUniform, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-                mGroup->getOrCreateStateSet()->addUniform(projUniform, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            }
-#endif
-
             camera->setNodeMask(Mask_RenderToTexture);
             camera->addChild(mGroup);
         };
@@ -202,6 +189,9 @@ namespace MWRender
             if(mCameraStateset)
                 camera->setStateSet(mCameraStateset);
             camera->setViewMatrix(mViewMatrix);
+
+            if (shouldDoTextureArray())
+                Stereo::setMultiviewMatrices(mGroup->getOrCreateStateSet(), { mPerspectiveMatrix, mPerspectiveMatrix });
         };
 
         void addChild(osg::Node* node)

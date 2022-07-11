@@ -97,7 +97,6 @@ namespace Stereo
     protected:
         virtual void setDefaults(osg::StateSet* stateset)
         {
-            stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrixMultiView", 2));
             stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "invProjectionMatrixMultiView", 2));
         }
 
@@ -195,8 +194,8 @@ namespace Stereo
         mEyeResolutionOverride = eyeResolution;
         mEyeResolutionOverriden = true;
 
-        if (mMultiviewFramebuffer)
-            updateStereoFramebuffer();
+        //if (mMultiviewFramebuffer)
+        //    updateStereoFramebuffer();
     }
 
     void Manager::screenResolutionChanged()
@@ -302,14 +301,14 @@ namespace Stereo
     void Manager::updateStereoFramebuffer()
     {
         //VR-TODO: in VR, still need to have this framebuffer attached before the postprocessor is created
-        auto samples = Settings::Manager::getInt("antialiasing", "Video");
-        auto eyeRes = eyeResolution();
+        //auto samples = Settings::Manager::getInt("antialiasing", "Video");
+        //auto eyeRes = eyeResolution();
 
         //if (mMultiviewFramebuffer)
         //    mMultiviewFramebuffer->detachFrom(mMainCamera);
-        mMultiviewFramebuffer = std::make_shared<MultiviewFramebuffer>(static_cast<int>(eyeRes.x()), static_cast<int>(eyeRes.y()), samples);
-        mMultiviewFramebuffer->attachColorComponent(SceneUtil::Color::colorSourceFormat(), SceneUtil::Color::colorSourceType(), SceneUtil::Color::colorInternalFormat());
-        mMultiviewFramebuffer->attachDepthComponent(SceneUtil::AutoDepth::depthSourceFormat(), SceneUtil::AutoDepth::depthSourceType(), SceneUtil::AutoDepth::depthInternalFormat());
+        //mMultiviewFramebuffer = std::make_shared<MultiviewFramebuffer>(static_cast<int>(eyeRes.x()), static_cast<int>(eyeRes.y()), samples);
+        //mMultiviewFramebuffer->attachColorComponent(SceneUtil::Color::colorSourceFormat(), SceneUtil::Color::colorSourceType(), SceneUtil::Color::colorInternalFormat());
+        //mMultiviewFramebuffer->attachDepthComponent(SceneUtil::AutoDepth::depthSourceFormat(), SceneUtil::AutoDepth::depthSourceType(), SceneUtil::AutoDepth::depthInternalFormat());
         //mMultiviewFramebuffer->attachTo(mMainCamera);
     }
 
@@ -376,17 +375,12 @@ namespace Stereo
 
     void Manager::updateMultiviewStateset(osg::StateSet* stateset)
     {
-        // Update stereo uniforms
-        auto * projectionMatrixMultiViewUniform = stateset->getUniform("projectionMatrixMultiView");
-        auto * invProjectionMatrixMultiViewUniform = stateset->getUniform("invProjectionMatrixMultiView");
+        std::array<osg::Matrix, 2> projectionMatrices;
 
         for (int view : {0, 1})
-        {
-            auto projectionMatrix = computeEyeViewOffset(view) * computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
-            auto invProjectionMatrix = osg::Matrix::inverse(projectionMatrix);
-            projectionMatrixMultiViewUniform->setElement(view, projectionMatrix);
-            invProjectionMatrixMultiViewUniform->setElement(view, invProjectionMatrix);
-        }
+            projectionMatrices[view] = computeEyeViewOffset(view) * computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
+
+        Stereo::setMultiviewMatrices(stateset, projectionMatrices, true);
     }
 
     void Manager::setUpdateViewCallback(std::shared_ptr<UpdateViewCallback> cb)
