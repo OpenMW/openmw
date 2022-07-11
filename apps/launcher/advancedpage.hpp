@@ -30,6 +30,7 @@ namespace Launcher
         void on_runScriptAfterStartupBrowseButton_clicked();
         void slotAnimSourcesToggled(bool checked);
         void slotPostProcessToggled(bool checked);
+        void slotSkyBlendingToggled(bool checked);
 
     private:
         Config::GameSettings &mGameSettings;
