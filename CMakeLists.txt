@@ -690,7 +690,7 @@ if (WIN32)
 
     # Play a bit with the warning levels
 
-    set(WARNINGS "/W4")
+    set(WARNINGS /W4)
 
     set(WARNINGS_DISABLE
         4100 # Unreferenced formal parameter (-Wunused-parameter)
@@ -712,8 +712,12 @@ if (WIN32)
     endif()
 
     foreach(d ${WARNINGS_DISABLE})
-        set(WARNINGS "${WARNINGS} /wd${d}")
+        list(APPEND WARNINGS /wd${d})
     endforeach(d)
+
+    if(OPENMW_MSVC_WERROR)
+        list(APPEND WARNINGS /WX)
+    endif()
 
     set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS}")

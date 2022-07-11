@@ -76,6 +76,8 @@ GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
 BUILD_BENCHMARKS=""
 OSG_MULTIVIEW_BUILD=""
+USE_WERROR=""
+USE_CLANG_TIDY=""
 
 ACTIVATE_MSVC=""
 SINGLE_CONFIG=""
@@ -116,7 +118,7 @@ while [ $# -gt 0 ]; do
 
 			n )
 				NMAKE=true ;;
-			
+
 			N )
 				NINJA=true ;;
 
@@ -140,10 +142,16 @@ while [ $# -gt 0 ]; do
 
 			b )
 				BUILD_BENCHMARKS=true ;;
-            
-            M )
-                OSG_MULTIVIEW_BUILD=true ;;
-                
+
+			M )
+				OSG_MULTIVIEW_BUILD=true ;;
+
+			E )
+				USE_WERROR=true ;;
+
+			T )
+				USE_CLANG_TIDY=true ;;
+
 			h )
 				cat <<EOF
 Usage: $0 [-cdehkpuvVi]
@@ -182,8 +190,12 @@ Options:
 		CMake install prefix
 	-b
 		Build benchmarks
-    -M
-        Use a multiview build of OSG
+	-M
+		Use a multiview build of OSG
+	-E
+		Use warnings as errors (/WX)
+	-T
+		Run clang-tidy
 EOF
 				wrappedExit 0
 				;;
@@ -516,6 +528,14 @@ fi
 
 if ! [ -z $USE_CCACHE ]; then
 	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+fi
+
+if ! [ -z "$USE_WERROR" ]; then
+  add_cmake_opts "-DOPENMW_MSVC_WERROR=ON"
+fi
+
+if ! [ -z "$USE_CLANG_TIDY" ]; then
+  add_cmake_opts "-DCMAKE_CXX_CLANG_TIDY=\"clang-tidy --warnings-as-errors=*\""
 fi
 
 ICU_VER="70_1"
