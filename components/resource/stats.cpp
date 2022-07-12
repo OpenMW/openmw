@@ -369,7 +369,6 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "FrameNumber",
             "",
             "Compiling",
-            "UnrefQueue",
             "WorkQueue",
             "WorkThread",
             "",
