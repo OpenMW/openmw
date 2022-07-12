@@ -319,7 +319,7 @@ void CSMWorld::InfoCollection::removeRows (int index, int count)
                     ++it;
                 }
                 else
-                    iter->second.erase(it);
+                    it = iter->second.erase(it);
             }
             else
                 ++it;
