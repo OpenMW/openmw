@@ -1,5 +1,6 @@
 #include "stats.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <string_view>
@@ -29,14 +30,11 @@ namespace
     }
 
     template<class T, class G>
-    void addProp(const MWLua::Context& context, sol::usertype<T>& type, std::string_view prop, G getter, bool readOnly = false)
+    void addProp(const MWLua::Context& context, sol::usertype<T>& type, std::string_view prop, G getter)
     {
-        if(readOnly)
-            type[prop] = sol::property([=](const T& stat) { return stat.get(context, prop, getter); });
-        else
-            type[prop] = sol::property(
-                [=](const T& stat) { return stat.get(context, prop, getter); },
-                [=](const T& stat, const sol::object& value) { stat.cache(context, prop, value); });
+        type[prop] = sol::property(
+            [=](const T& stat) { return stat.get(context, prop, getter); },
+            [=](const T& stat, const sol::object& value) { stat.cache(context, prop, value); });
     }
 
     using SelfObject = MWLua::LocalScripts::SelfObject;
@@ -209,6 +207,14 @@ namespace MWLua
             });
         }
 
+        float getModified(const Context& context) const
+        {
+            auto base = get(context, "base", &MWMechanics::AttributeValue::getBase).as<float>();
+            auto damage = get(context, "damage", &MWMechanics::AttributeValue::getDamage).as<float>();
+            auto modifier = get(context, "modifier", &MWMechanics::AttributeValue::getModifier).as<float>();
+            return std::max(0.f, base - damage + modifier); // Should match AttributeValue::getModified
+        }
+
         static std::optional<AttributeStat> create(StatObject object, int index)
         {
             if(!getObject(object)->ptr().getClass().isActor())
@@ -271,6 +277,14 @@ namespace MWLua
                 const auto& ptr = obj->ptr();
                 return (ptr.getClass().getNpcStats(ptr).getSkill(mIndex).*getter)();
             });
+        }
+
+        float getModified(const Context& context) const
+        {
+            auto base = get(context, "base", &MWMechanics::SkillValue::getBase).as<float>();
+            auto damage = get(context, "damage", &MWMechanics::SkillValue::getDamage).as<float>();
+            auto modifier = get(context, "modifier", &MWMechanics::SkillValue::getModifier).as<float>();
+            return std::max(0.f, base - damage + modifier); // Should match SkillValue::getModified
         }
 
         sol::object getProgress(const Context& context) const
@@ -357,7 +371,7 @@ namespace MWLua
         auto attributeStatT = context.mLua->sol().new_usertype<AttributeStat>("AttributeStat");
         addProp(context, attributeStatT, "base", &MWMechanics::AttributeValue::getBase);
         addProp(context, attributeStatT, "damage", &MWMechanics::AttributeValue::getDamage);
-        addProp(context, attributeStatT, "modified", &MWMechanics::AttributeValue::getModified, true);
+        attributeStatT["modified"] = sol::property([=](const AttributeStat& stat) { return stat.getModified(context); });
         addProp(context, attributeStatT, "modifier", &MWMechanics::AttributeValue::getModifier);
         sol::table attributes(context.mLua->sol(), sol::create);
         stats["attributes"] = LuaUtil::makeReadOnly(attributes);
@@ -376,7 +390,7 @@ namespace MWLua
         auto skillStatT = context.mLua->sol().new_usertype<SkillStat>("SkillStat");
         addProp(context, skillStatT, "base", &MWMechanics::SkillValue::getBase);
         addProp(context, skillStatT, "damage", &MWMechanics::SkillValue::getDamage);
-        addProp(context, skillStatT, "modified", &MWMechanics::SkillValue::getModified, true);
+        skillStatT["modified"] = sol::property([=](const SkillStat& stat) { return stat.getModified(context); });
         addProp(context, skillStatT, "modifier", &MWMechanics::SkillValue::getModifier);
         skillStatT["progress"] = sol::property(
             [context](const SkillStat& stat) { return stat.getProgress(context); },
