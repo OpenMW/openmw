@@ -33,9 +33,8 @@
 namespace
 {
     template <class Mutex>
-    std::optional<std::unique_lock<Mutex>> makeExclusiveLock(Mutex& mutex, int threadCount)
+    std::optional<std::unique_lock<Mutex>> makeExclusiveLock(Mutex& mutex, unsigned threadCount)
     {
-        assert(threadCount >= 0);
         if (threadCount > 0)
             return std::unique_lock(mutex);
         return {};
@@ -48,7 +47,7 @@ namespace
         public:
             /// @param mutex a mutex
             /// @param threadCount decide wether the excluse lock will be taken
-            explicit MaybeExclusiveLock(Mutex& mutex, int threadCount)
+            explicit MaybeExclusiveLock(Mutex& mutex, unsigned threadCount)
                 : mImpl(makeExclusiveLock(mutex, threadCount))
             {}
 
@@ -57,9 +56,8 @@ namespace
     };
 
     template <class Mutex>
-    std::optional<std::shared_lock<Mutex>> makeSharedLock(Mutex& mutex, int threadCount)
+    std::optional<std::shared_lock<Mutex>> makeSharedLock(Mutex& mutex, unsigned threadCount)
     {
-        assert(threadCount >= 0);
         if (threadCount > 0)
             return std::shared_lock(mutex);
         return {};
@@ -72,7 +70,7 @@ namespace
         public:
             /// @param mutex a shared mutex
             /// @param threadCount decide wether the shared lock will be taken
-            explicit MaybeSharedLock(Mutex& mutex, int threadCount)
+            explicit MaybeSharedLock(Mutex& mutex, unsigned threadCount)
                 : mImpl(makeSharedLock(mutex, threadCount))
             {}
 
@@ -81,9 +79,8 @@ namespace
     };
 
     template <class Mutex>
-    std::variant<std::monostate, std::unique_lock<Mutex>, std::shared_lock<Mutex>> makeLock(Mutex& mutex, int threadCount)
+    std::variant<std::monostate, std::unique_lock<Mutex>, std::shared_lock<Mutex>> makeLock(Mutex& mutex, unsigned threadCount)
     {
-        assert(threadCount >= 0);
         if (threadCount > 1)
             return std::shared_lock(mutex);
         if (threadCount == 1)
@@ -98,7 +95,7 @@ namespace
         public:
             /// @param mutex a shared mutex
             /// @param threadCount decide wether the lock will be shared, exclusive or inexistent
-            explicit MaybeLock(Mutex& mutex, int threadCount)
+            explicit MaybeLock(Mutex& mutex, unsigned threadCount)
                 : mImpl(makeLock(mutex, threadCount)) {}
 
         private:
@@ -132,7 +129,7 @@ namespace
         {
             const Impl& mImpl;
             std::shared_mutex& mCollisionWorldMutex;
-            const int mNumJobs;
+            const unsigned mNumThreads;
 
             template <class Ptr, class FrameData>
             void operator()(MWPhysics::SimulationImpl<Ptr, FrameData>& sim) const
@@ -144,7 +141,7 @@ namespace
                 // Locked shared_ptr has to be destructed after releasing mCollisionWorldMutex to avoid
                 // possible deadlock. Ptr destructor also acquires mCollisionWorldMutex.
                 const std::pair arg(std::move(ptr), frameData);
-                const Lock<std::shared_mutex> lock(mCollisionWorldMutex, mNumJobs);
+                const Lock<std::shared_mutex> lock(mCollisionWorldMutex, mNumThreads);
                 mImpl(arg);
             }
         };
@@ -288,7 +285,7 @@ namespace
     namespace Config
     {
         /// @return either the number of thread as configured by the user, or 1 if Bullet doesn't support multithreading and user requested more than 1 background threads
-        int computeNumThreads()
+        unsigned computeNumThreads()
         {
             int wantedThread = Settings::Manager::getInt("async num threads", "Physics");
 
@@ -300,7 +297,7 @@ namespace
                 Log(Debug::Warning) << "Bullet was not compiled with multithreading support, 1 async thread will be used";
                 return 1;
             }
-            return std::max(0, wantedThread);
+            return static_cast<unsigned>(std::max(0, wantedThread));
         }
     }
 }
@@ -335,7 +332,7 @@ namespace MWPhysics
     {
         if (mNumThreads >= 1)
         {
-            for (int i = 0; i < mNumThreads; ++i)
+            for (unsigned i = 0; i < mNumThreads; ++i)
                 mThreads.emplace_back([&] { worker(); } );
         }
         else
