@@ -75,6 +75,7 @@ file(GLOB UNITTEST_SRC_FILES
     esmloader/record.cpp
 
     files/hash.cpp
+    files/conversion_tests.cpp
 
     toutf8/toutf8.cpp
 
