@@ -14,5 +14,5 @@ docker build -f docs/source/Dockerfile.luadoc -t openmw.luadoc docs/source
 Run following command from OpenMW source directory to generate HTML pages:
 ```bash
 docker run --rm --tty --interactive --user "$(id -u)":"$(id -g)" \
-    --volume "${PWD}":/openmw openmw.luadoc /openmw/docs/source/generate_luadoc_in_docker.sh
+    --volume "${PWD}":/openmw openmw.luadoc /openmw/docs/source/generate_luadoc.sh
 ```

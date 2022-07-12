@@ -24,3 +24,8 @@ RUN cd /tmp && \
     luarocks pack openmwluadocumentor-0.1.1-1.rockspec && \
     luarocks install openmwluadocumentor-0.1.1-1.src.rock && \
     rm /tmp/openmwluadocumentor-0.1.1-1.rockspec /tmp/openmwluadocumentor-0.1.1-1.src.rock
+
+VOLUME /openmw
+
+ENV DOCS_SOURCE_DIR=/openmw/docs/source
+ENV DOCUMENTOR_PATH=/usr/local/bin/openmwluadocumentor
