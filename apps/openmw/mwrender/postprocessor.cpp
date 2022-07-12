@@ -9,10 +9,6 @@
 #include <osg/Texture3D>
 #include <osg/Texture2DArray>
 
-#ifdef OSG_HAS_MULTIVIEW
-#include <osg/Texture2DMultisampleArray>
-#endif
-
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/color.hpp>
@@ -75,53 +71,6 @@ namespace
         }
     };
 
-
-    static void setTextureSize(osg::Texture* tex, int w, int h)
-    {
-        switch (tex->getTextureTarget())
-        {
-        case GL_TEXTURE_2D:
-            static_cast<osg::Texture2D*>(tex)->setTextureSize(w, h);
-            break;
-        case GL_TEXTURE_2D_ARRAY:
-            static_cast<osg::Texture2DArray*>(tex)->setTextureSize(w, h, 2);
-            break;
-        case GL_TEXTURE_2D_MULTISAMPLE:
-            static_cast<osg::Texture2DMultisample*>(tex)->setTextureSize(w, h);
-            break;
-#ifdef OSG_HAS_MULTIVIEW
-        case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
-            static_cast<osg::Texture2DMultisampleArray*>(tex)->setTextureSize(w, h, 2);
-            break;
-#endif
-        default:
-            throw std::logic_error("Invalid texture type received");
-        }
-    }
-
-    static void setAttachment(osg::FrameBufferObject* fbo, osg::Camera::BufferComponent component, osg::Texture* tex)
-    {
-        switch (tex->getTextureTarget())
-        {
-        case GL_TEXTURE_2D:
-        {
-            auto* tex2d = static_cast<osg::Texture2D*>(tex);
-            fbo->setAttachment(component, osg::FrameBufferAttachment(tex2d));
-        }
-        break;
-        case GL_TEXTURE_2D_ARRAY:
-        {
-#ifdef OSG_HAS_MULTIVIEW
-            auto* tex2dArray = static_cast<osg::Texture2DArray*>(tex);
-            fbo->setAttachment(component, osg::FrameBufferAttachment(tex2dArray, osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, 0));
-#endif
-        }
-        break;
-        default:
-            throw std::logic_error("Invalid texture type received");
-        }
-    }
-
     enum class Usage
     {
         RENDER_BUFFER,
@@ -136,35 +85,7 @@ namespace
             return osg::FrameBufferAttachment(attachment);
         }
 
-        osg::FrameBufferAttachment attachment;
-
-#ifdef OSG_HAS_MULTIVIEW
-        if (Stereo::getMultiview())
-        {
-            if (samples > 1)
-            {
-                attachment = osg::FrameBufferAttachment(new osg::Texture2DMultisampleArray(), osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, 0);
-            }
-            else
-            {
-                attachment = osg::FrameBufferAttachment(new osg::Texture2DArray(), osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, 0);
-            }
-        }
-        else
-#endif
-        {
-            if (samples > 1)
-            {
-                attachment = osg::FrameBufferAttachment(new osg::Texture2DMultisample());
-            }
-            else
-            {
-                attachment =  osg::FrameBufferAttachment(new osg::Texture2D());
-            }
-        }
-
-        osg::Texture* texture = attachment.getTexture();
-        setTextureSize(texture, width, height);
+        auto texture = Stereo::createMultiviewCompatibleTexture(width, height, samples);
         texture->setSourceFormat(template_->getSourceFormat());
         texture->setSourceType(template_->getSourceType());
         texture->setInternalFormat(template_->getInternalFormat());
@@ -173,7 +94,7 @@ namespace
         texture->setWrap(osg::Texture::WRAP_S, template_->getWrap(osg::Texture2D::WRAP_S));
         texture->setWrap(osg::Texture::WRAP_T, template_->getWrap(osg::Texture2D::WRAP_T));
 
-        return attachment;
+        return Stereo::createMultiviewCompatibleAttachment(texture);
     }
 }
 
@@ -547,15 +468,15 @@ namespace MWRender
             if (!tex)
                 continue;
 
-            setTextureSize(tex, width, height);
+            Stereo::setMultiviewCompatibleTextureSize(tex, width, height);
             tex->dirtyTextureObject();
         }
 
         fbos[FBO_Primary] = new osg::FrameBufferObject;
-        setAttachment(fbos[FBO_Primary], osg::Camera::COLOR_BUFFER0, textures[Tex_Scene]);
+        fbos[FBO_Primary]->setAttachment(osg::Camera::COLOR_BUFFER0, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
         if (mNormals && mNormalsSupported)
-            setAttachment(fbos[FBO_Primary], osg::Camera::COLOR_BUFFER1, textures[Tex_Normal]);
-        setAttachment(fbos[FBO_Primary], osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, textures[Tex_Depth]);
+            fbos[FBO_Primary]->setAttachment(osg::Camera::COLOR_BUFFER1, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
+        fbos[FBO_Primary]->setAttachment(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Depth]));
 
         fbos[FBO_FirstPerson] = new osg::FrameBufferObject;
 
@@ -581,20 +502,20 @@ namespace MWRender
             fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, colorRB);
 
             fbos[FBO_Intercept] = new osg::FrameBufferObject;
-            setAttachment(fbos[FBO_Intercept], osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, textures[Tex_Scene]);
-            setAttachment(fbos[FBO_Intercept], osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, textures[Tex_Normal]);
+            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
+            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
         }
         else
         {
-            setAttachment(fbos[FBO_FirstPerson], osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, textures[Tex_Scene]);
+            fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
             if (mNormals && mNormalsSupported)
-                setAttachment(fbos[FBO_FirstPerson], osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, textures[Tex_Normal]);
+                fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
         }
 
         if (textures[Tex_OpaqueDepth])
         {
             fbos[FBO_OpaqueDepth] = new osg::FrameBufferObject;
-            setAttachment(fbos[FBO_OpaqueDepth], osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, textures[Tex_OpaqueDepth]);
+            fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, Stereo::createMultiviewCompatibleAttachment(textures[Tex_OpaqueDepth]));
         }
 
 #ifdef __APPLE__
@@ -799,7 +720,7 @@ namespace MWRender
                 else
                     texture = new osg::Texture2D;
             }
-            setTextureSize(texture, width, height);
+            Stereo::setMultiviewCompatibleTextureSize(texture, width, height);
             texture->setSourceFormat(GL_RGBA);
             texture->setSourceType(GL_UNSIGNED_BYTE);
             texture->setInternalFormat(GL_RGBA);

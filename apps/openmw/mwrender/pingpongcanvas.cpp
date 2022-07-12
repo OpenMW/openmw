@@ -67,25 +67,8 @@ namespace MWRender
 
     static void attachCloneOfTemplate(osg::FrameBufferObject* fbo, osg::Camera::BufferComponent component, osg::Texture* tex)
     {
-        switch (tex->getTextureTarget())
-        {
-        case GL_TEXTURE_2D:
-        {
-            auto* tex2d = new osg::Texture2D(*static_cast<osg::Texture2D*>(tex));
-            fbo->setAttachment(component, osg::FrameBufferAttachment(tex2d));
-        }
-        break;
-        case GL_TEXTURE_2D_ARRAY:
-        {
-#ifdef OSG_HAS_MULTIVIEW
-            auto* tex2dArray = new osg::Texture2DArray(*static_cast<osg::Texture2DArray*>(tex));
-            fbo->setAttachment(component, osg::FrameBufferAttachment(tex2dArray, osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, 0));
-#endif
-        }
-        break;
-        default:
-            throw std::logic_error("Invalid texture type received");
-        }
+        osg::ref_ptr<osg::Texture> clone = static_cast<osg::Texture*>(tex->clone(osg::CopyOp::SHALLOW_COPY));
+        fbo->setAttachment(component, Stereo::createMultiviewCompatibleAttachment(clone));
     }
 
     void PingPongCanvas::drawImplementation(osg::RenderInfo& renderInfo) const

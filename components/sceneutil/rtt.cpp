@@ -200,21 +200,20 @@ namespace SceneUtil
             if (camera->getBufferAttachmentMap().count(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER))
                 vdd->mDepthTexture = camera->getBufferAttachmentMap()[osg::Camera::PACKED_DEPTH_STENCIL_BUFFER]._texture;
 
-#ifdef OSG_HAS_MULTIVIEW
             if (shouldDoTextureArray())
             {
                 // Create any buffer attachments not added in setDefaults
                 if (camera->getBufferAttachmentMap().count(osg::Camera::COLOR_BUFFER) == 0)
                 {
                     vdd->mColorTexture = createTextureArray(mColorBufferInternalFormat);
-                    camera->attach(osg::Camera::COLOR_BUFFER, vdd->mColorTexture, 0, osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, mGenerateMipmaps, mSamples);
-                    SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, vdd->mColorTexture, 0, osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, mGenerateMipmaps);
+                    camera->attach(osg::Camera::COLOR_BUFFER, vdd->mColorTexture, 0, Stereo::osgFaceControlledByMultiviewShader(), mGenerateMipmaps, mSamples);
+                    SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, vdd->mColorTexture, 0, Stereo::osgFaceControlledByMultiviewShader(), mGenerateMipmaps);
                 }
 
                 if (camera->getBufferAttachmentMap().count(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER) == 0)
                 {
                     vdd->mDepthTexture = createTextureArray(mDepthBufferInternalFormat);
-                    camera->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, vdd->mDepthTexture, 0, osg::Camera::FACE_CONTROLLED_BY_MULTIVIEW_SHADER, false, mSamples);
+                    camera->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, vdd->mDepthTexture, 0, Stereo::osgFaceControlledByMultiviewShader(), false, mSamples);
                 }
 
                 if (shouldDoTextureView())
@@ -226,7 +225,6 @@ namespace SceneUtil
                 }
             }
             else
-#endif
             {
                 // Create any buffer attachments not added in setDefaults
                 if (camera->getBufferAttachmentMap().count(osg::Camera::COLOR_BUFFER) == 0)

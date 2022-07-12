@@ -702,16 +702,7 @@ void LocalMapRenderToTexture::setDefaults(osg::Camera* camera)
     stateset->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(mProjectionMatrix)), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
     if (Stereo::getMultiview())
-    {
-        auto* viewUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "viewMatrixMultiView", 2);
-        auto* projUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrixMultiView", 2);
-        viewUniform->setElement(0, osg::Matrix::identity());
-        viewUniform->setElement(1, osg::Matrix::identity());
-        projUniform->setElement(0, mProjectionMatrix);
-        projUniform->setElement(1, mProjectionMatrix);
-        stateset->addUniform(viewUniform, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-        stateset->addUniform(projUniform, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-    }
+        Stereo::setMultiviewMatrices(stateset, { mProjectionMatrix, mProjectionMatrix });
 
     // assign large value to effectively turn off fog
     // shaders don't respect glDisable(GL_FOG)
