@@ -43,18 +43,24 @@ namespace
 
     void modStat(MWMechanics::AttributeValue& stat, float amount)
     {
-        float base = stat.getBase();
-        float modifier = stat.getModifier() - stat.getDamage();
-        float modified = base + modifier;
-        if(modified <= 0.f && amount < 0.f)
-            amount = 0.f;
-        else if(amount < 0.f && modified + amount < 0.f)
-            amount = -modified;
-        else if((modifier <= 0.f || base >= 100.f) && amount > 0.f)
+        const float base = stat.getBase();
+        const float modifier = stat.getModifier() - stat.getDamage();
+        const float modified = base + modifier;
+        // Clamp to 100 unless base < 100 and we have a fortification going
+        if((modifier <= 0.f || base >= 100.f) && amount > 0.f)
             amount = std::clamp(100.f - modified, 0.f, amount);
-        stat.setBase(std::min(base + amount, 100.f), true);
-        modifier += base - stat.getBase() + amount;
-        stat.setModifier(modifier);
+        // Clamp the modified value in a way that doesn't properly account for negative numbers
+        float newModified = modified + amount;
+        if(newModified < 0.f)
+        {
+            if(modified >= 0.f)
+                newModified = 0.f;
+            else if(newModified < modified)
+                newModified = modified;
+        }
+        // Calculate damage/fortification based on the clamped base value
+        stat.setBase(std::clamp(base + amount, 0.f, 100.f), true);
+        stat.setModifier(newModified - stat.getBase());
     }
 }
 
