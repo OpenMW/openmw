@@ -17,6 +17,8 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/fallback/fallback.hpp>
+
 #include <components/vfs/manager.hpp>
 
 #include <components/misc/pathhelpers.hpp>
@@ -626,12 +628,12 @@ namespace Gui
     {
         const std::string lowerName = Misc::StringUtils::lowerCase(name);
 
-        if (lowerName == Misc::StringUtils::lowerCase(Settings::Manager::getString("default font", "GUI")))
+        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_0")))
             return "DefaultFont";
-        if (lowerName == Misc::StringUtils::lowerCase(Settings::Manager::getString("scroll font", "GUI")))
-            return "ScrollFont";
-        if (lowerName == Misc::StringUtils::lowerCase(Settings::Manager::getString("mono font", "GUI")))
+        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_1")))
             return "MonoFont";
+        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_2")))
+            return "ScrollFont";
 
         return name;
     }
