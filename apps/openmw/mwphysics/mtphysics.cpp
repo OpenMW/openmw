@@ -1,4 +1,8 @@
 #include <functional>
+#include <variant>
+#include <optional>
+#include <shared_mutex>
+#include <mutex>
 
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
@@ -28,6 +32,15 @@
 
 namespace
 {
+    template <class Mutex>
+    std::optional<std::unique_lock<Mutex>> makeExclusiveLock(Mutex& mutex, int threadCount)
+    {
+        assert(threadCount >= 0);
+        if (threadCount > 0)
+            return std::unique_lock(mutex);
+        return {};
+    }
+
     /// @brief A scoped lock that is either exclusive or inexistent depending on configuration
     template<class Mutex>
     class MaybeExclusiveLock
@@ -35,23 +48,22 @@ namespace
         public:
             /// @param mutex a mutex
             /// @param threadCount decide wether the excluse lock will be taken
-            MaybeExclusiveLock(Mutex& mutex, int threadCount) : mMutex(mutex), mThreadCount(threadCount)
-            {
-                assert(threadCount >= 0);
-                if (mThreadCount > 0)
-                    mMutex.lock();
-            }
-
-            ~MaybeExclusiveLock()
-            {
-                if (mThreadCount > 0)
-                    mMutex.unlock();
-            }
+            explicit MaybeExclusiveLock(Mutex& mutex, int threadCount)
+                : mImpl(makeExclusiveLock(mutex, threadCount))
+            {}
 
         private:
-            Mutex& mMutex;
-            unsigned int mThreadCount;
+            std::optional<std::unique_lock<Mutex>> mImpl;
     };
+
+    template <class Mutex>
+    std::optional<std::shared_lock<Mutex>> makeSharedLock(Mutex& mutex, int threadCount)
+    {
+        assert(threadCount >= 0);
+        if (threadCount > 0)
+            return std::shared_lock(mutex);
+        return {};
+    }
 
     /// @brief A scoped lock that is either shared or inexistent depending on configuration
     template<class Mutex>
@@ -60,23 +72,24 @@ namespace
         public:
             /// @param mutex a shared mutex
             /// @param threadCount decide wether the shared lock will be taken
-            MaybeSharedLock(Mutex& mutex, int threadCount) : mMutex(mutex), mThreadCount(threadCount)
-            {
-                assert(threadCount >= 0);
-                if (mThreadCount > 0)
-                    mMutex.lock_shared();
-            }
-
-            ~MaybeSharedLock()
-            {
-                if (mThreadCount > 0)
-                    mMutex.unlock_shared();
-            }
+            explicit MaybeSharedLock(Mutex& mutex, int threadCount)
+                : mImpl(makeSharedLock(mutex, threadCount))
+            {}
 
         private:
-            Mutex& mMutex;
-            unsigned int mThreadCount;
+            std::optional<std::shared_lock<Mutex>> mImpl;
     };
+
+    template <class Mutex>
+    std::variant<std::monostate, std::unique_lock<Mutex>, std::shared_lock<Mutex>> makeLock(Mutex& mutex, int threadCount)
+    {
+        assert(threadCount >= 0);
+        if (threadCount > 1)
+            return std::shared_lock(mutex);
+        if (threadCount == 1)
+            return std::unique_lock(mutex);
+        return std::monostate {};
+    }
 
     /// @brief A scoped lock that is either shared, exclusive or inexistent depending on configuration
     template<class Mutex>
@@ -85,25 +98,11 @@ namespace
         public:
             /// @param mutex a shared mutex
             /// @param threadCount decide wether the lock will be shared, exclusive or inexistent
-            MaybeLock(Mutex& mutex, int threadCount) : mMutex(mutex), mThreadCount(threadCount)
-            {
-                assert(threadCount >= 0);
-                if (mThreadCount > 1)
-                    mMutex.lock_shared();
-                else if(mThreadCount == 1)
-                    mMutex.lock();
-            }
+            explicit MaybeLock(Mutex& mutex, int threadCount)
+                : mImpl(makeLock(mutex, threadCount)) {}
 
-            ~MaybeLock()
-            {
-                if (mThreadCount > 1)
-                    mMutex.unlock_shared();
-                else if(mThreadCount == 1)
-                    mMutex.unlock();
-            }
         private:
-            Mutex& mMutex;
-            unsigned int mThreadCount;
+            std::variant<std::monostate, std::unique_lock<Mutex>, std::shared_lock<Mutex>> mImpl;
     };
 
     bool isUnderWater(const MWPhysics::ActorFrameData& actorData)
