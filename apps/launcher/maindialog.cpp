@@ -423,14 +423,14 @@ bool Launcher::MainDialog::setupGameData()
 
 bool Launcher::MainDialog::setupGraphicsSettings()
 {
-    mEngineSettings.clear();  // Ensure to clear previous settings in case we had already loaded settings.
+    Settings::Manager::clear();  // Ensure to clear previous settings in case we had already loaded settings.
     try
     {
         boost::program_options::variables_map variables;
         boost::program_options::options_description desc;
         mCfgMgr.addCommonOptions(desc);
         mCfgMgr.readConfiguration(variables, desc, true);
-        mEngineSettings.load(mCfgMgr);
+        Settings::Manager::load(mCfgMgr);
         return true;
     }
     catch (std::exception& e)
@@ -513,7 +513,7 @@ bool Launcher::MainDialog::writeSettings()
     // Graphics settings
     const std::string settingsPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
     try {
-        mEngineSettings.saveUser(settingsPath);
+        Settings::Manager::saveUser(settingsPath);
     }
     catch (std::exception& e) {
         std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +

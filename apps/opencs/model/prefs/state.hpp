@@ -11,8 +11,6 @@
 #include <components/files/configurationmanager.hpp>
 #endif
 
-#include <components/settings/settings.hpp>
-
 #include "category.hpp"
 #include "setting.hpp"
 #include "enumsetting.hpp"
@@ -51,7 +49,6 @@ namespace CSMPrefs
             const std::string mDefaultConfigFile;
             const Files::ConfigurationManager& mConfigurationManager;
             ShortcutManager mShortcutManager;
-            Settings::Manager mSettings;
             Collection mCategories;
             Iterator mCurrentCategory;
             QMutex mMutex;
@@ -61,8 +58,6 @@ namespace CSMPrefs
             State& operator= (const State&);
 
         private:
-
-            void load();
 
             void declare();
 

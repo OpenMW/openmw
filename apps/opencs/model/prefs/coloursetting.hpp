@@ -22,7 +22,7 @@ namespace CSMPrefs
 
         public:
 
-            ColourSetting (Category *parent, Settings::Manager *values,
+            ColourSetting (Category *parent,
                 QMutex *mutex, const std::string& key, const std::string& label,
                 QColor default_);
 

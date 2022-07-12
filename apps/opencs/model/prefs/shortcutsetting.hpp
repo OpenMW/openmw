@@ -16,7 +16,7 @@ namespace CSMPrefs
 
         public:
 
-            ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
+            ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key,
                 const std::string& label);
 
             std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;

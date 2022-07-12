@@ -17,7 +17,7 @@ namespace CSMPrefs
 
         public:
 
-            StringSetting (Category *parent, Settings::Manager *values,
+            StringSetting (Category *parent,
                 QMutex *mutex, const std::string& key, const std::string& label, std::string default_);
 
             StringSetting& setTooltip (const std::string& tooltip);

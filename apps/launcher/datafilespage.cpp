@@ -19,6 +19,7 @@
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
+#include <components/settings/settings.hpp>
 #include <components/bsa/compressedbsafile.hpp>
 #include <components/navmeshtool/protocol.hpp>
 #include <components/vfs/bsaarchive.hpp>

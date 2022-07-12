@@ -10,11 +10,6 @@ class QWidget;
 class QColor;
 class QMutex;
 
-namespace Settings
-{
-    class Manager;
-}
-
 namespace CSMPrefs
 {
     class Category;
@@ -24,20 +19,17 @@ namespace CSMPrefs
             Q_OBJECT
 
             Category *mParent;
-            Settings::Manager *mValues;
             QMutex *mMutex;
             std::string mKey;
             std::string mLabel;
 
         protected:
 
-            Settings::Manager& getValues();
-
             QMutex *getMutex();
 
         public:
 
-            Setting (Category *parent, Settings::Manager *values, QMutex *mutex, const std::string& key, const std::string& label);
+            Setting (Category *parent, QMutex *mutex, const std::string& key, const std::string& label);
 
             virtual ~Setting();
 
