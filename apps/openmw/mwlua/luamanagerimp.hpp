@@ -29,6 +29,9 @@ namespace MWLua
     public:
         LuaManager(const VFS::Manager* vfs, const std::string& libsDir);
 
+        // Called by engine.cpp before UI setup.
+        void initL10n();
+
         // Called by engine.cpp when the environment is fully initialized.
         void init();
 
@@ -38,6 +41,8 @@ namespace MWLua
         // Called by engine.cpp every frame. For performance reasons it works in a separate
         // thread (in parallel with osg Cull). Can not use scene graph.
         void update();
+
+        std::string translate(const std::string& contextName, const std::string& key) override;
 
         // Called by engine.cpp from the main thread. Can use scene graph.
         void synchronizedUpdate();

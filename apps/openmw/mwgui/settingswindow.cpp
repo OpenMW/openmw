@@ -11,6 +11,7 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
+#include <MyGUI_LanguageManager.h>
 
 #include <SDL_video.h>
 
@@ -37,12 +38,32 @@ namespace
 {
     std::string textureMipmappingToStr(const std::string& val)
     {
-        if (val == "linear")  return "Trilinear";
-        if (val == "nearest") return "Bilinear";
-        if (val != "none")
-            Log(Debug::Warning) << "Warning: Invalid texture mipmap option: "<< val;
+        if (val == "linear")  return "#{SettingsMenu:TextureFilteringTrilinear}";
+        if (val == "nearest") return "#{SettingsMenu:TextureFilteringBilinear}";
+        if (val == "none") return "#{SettingsMenu:TextureFilteringDisabled}";
 
-        return "Other";
+        Log(Debug::Warning) << "Warning: Invalid texture mipmap option: "<< val;
+        return "#{SettingsMenu:TextureFilteringOther}";
+    }
+
+    std::string lightingMethodToStr(SceneUtil::LightingMethod method)
+    {
+        std::string result;
+        switch (method)
+        {
+        case SceneUtil::LightingMethod::FFP:
+            result = "#{SettingsMenu:LightingMethodLegacy}";
+            break;
+        case SceneUtil::LightingMethod::PerObjectUniform:
+            result = "#{SettingsMenu:LightingMethodShadersCompatibility}";
+            break;
+        case SceneUtil::LightingMethod::SingleUBO:
+        default:
+            result = "#{SettingsMenu:LightingMethodShaders}";
+            break;
+        }
+
+        return MyGUI::LanguageManager::getInstance().replaceTags(result);
     }
 
     void parseResolution (int &x, int &y, const std::string& str)
@@ -306,7 +327,7 @@ namespace MWGui
         highlightCurrentResolution();
 
         std::string tmip = Settings::Manager::getString("texture mipmap", "General");
-        mTextureFilteringButton->setCaption(textureMipmappingToStr(tmip));
+        mTextureFilteringButton->setCaptionWithReplacing(textureMipmappingToStr(tmip));
 
         int waterTextureSize = Settings::Manager::getInt("rtt size", "Water");
         if (waterTextureSize >= 512)
@@ -426,10 +447,10 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE)
             return;
 
-        std::string message = "This change requires a restart to take effect.";
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, {"#{sOK}"}, true);
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{SettingsMenu:ChangeRequiresRestart}", {"#{sOK}"}, true);
 
-        Settings::Manager::setString("lighting method", "Shaders", _sender->getItemNameAt(pos));
+        const auto settingsNames = _sender->getUserData<std::vector<std::string>>();
+        Settings::Manager::setString("lighting method", "Shaders", settingsNames->at(pos));
         apply();
     }
 
@@ -454,8 +475,7 @@ namespace MWGui
     void SettingsWindow::onLightsResetButtonClicked(MyGUI::Widget* _sender)
     {
         std::vector<std::string> buttons = {"#{sYes}", "#{sNo}"};
-        std::string message = "Resets to default values, would you like to continue? Changes to lighting method will require a restart.";
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons, true);
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{SettingsMenu:LightingResetToDefaults}", buttons, true);
         int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
         if (selectedButton == 1 || selectedButton == -1)
             return;
@@ -471,7 +491,9 @@ namespace MWGui
         for (const auto& setting : settings)
             Settings::Manager::setString(setting, "Shaders", Settings::Manager::mDefaultSettings[{"Shaders", setting}]);
 
-        mLightingMethodButton->setIndexSelected(mLightingMethodButton->findItemIndexWith(Settings::Manager::mDefaultSettings[{"Shaders", "lighting method"}]));
+        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::mDefaultSettings[{"Shaders", "lighting method"}]);
+        auto lightIndex = mLightingMethodButton->findItemIndexWith(lightingMethodToStr(lightingMethod));
+        mLightingMethodButton->setIndexSelected(lightIndex);
         updateMaxLightsComboBox(mMaxLights);
 
         apply();
@@ -636,7 +658,7 @@ namespace MWGui
     void SettingsWindow::updateLightSettings()
     {
         auto lightingMethod = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getLightingMethod();
-        std::string lightingMethodStr = SceneUtil::LightManager::getLightingMethodString(lightingMethod);
+        std::string lightingMethodStr = lightingMethodToStr(lightingMethod);
 
         mLightingMethodButton->removeAllItems();
 
@@ -646,14 +668,17 @@ namespace MWGui
             SceneUtil::LightingMethod::SingleUBO,
         };
 
+        std::vector<std::string> userData;
         for (const auto& method : methods)
         {
             if (!MWBase::Environment::get().getResourceSystem()->getSceneManager()->isSupportedLightingMethod(method))
                 continue;
 
-            mLightingMethodButton->addItem(SceneUtil::LightManager::getLightingMethodString(method));
+            mLightingMethodButton->addItem(lightingMethodToStr(method));
+            userData.emplace_back(SceneUtil::LightManager::getLightingMethodString(method));
         }
 
+        mLightingMethodButton->setUserData(userData);
         mLightingMethodButton->setIndexSelected(mLightingMethodButton->findItemIndexWith(lightingMethodStr));
     }
 

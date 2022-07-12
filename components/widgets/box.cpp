@@ -1,9 +1,28 @@
 #include "box.hpp"
 
 #include <MyGUI_EditText.h>
+#include <MyGUI_LanguageManager.h>
 
 namespace Gui
 {
+    // TODO: Since 3.4.2 MyGUI is supposed to automatically translate tags
+    // If the 3.4.2 become a required minimum version, the ComboBox class may be removed.
+    void ComboBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+    {
+#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,4,2)
+        MyGUI::ComboBox::setPropertyOverride (_key, _value);
+#else
+        if (_key == "AddItem")
+        {
+            const std::string value = MyGUI::LanguageManager::getInstance().replaceTags(_value);
+            MyGUI::ComboBox::setPropertyOverride (_key, value);
+        }
+        else
+        {
+            MyGUI::ComboBox::setPropertyOverride (_key, _value);
+        }
+#endif
+    }
 
     void AutoSizedWidget::notifySizeChange (MyGUI::Widget* w)
     {

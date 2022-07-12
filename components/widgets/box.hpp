@@ -5,11 +5,20 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_ComboBox.h>
 
 #include "fontwrapper.hpp"
 
 namespace Gui
 {
+    class ComboBox : public FontWrapper<MyGUI::ComboBox>
+    {
+        MYGUI_RTTI_DERIVED( ComboBox )
+
+    protected:
+        void setPropertyOverride(const std::string& _key, const std::string& _value) override;
+    };
+
     class Button : public FontWrapper<MyGUI::Button>
     {
         MYGUI_RTTI_DERIVED( Button )

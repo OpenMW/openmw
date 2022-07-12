@@ -207,7 +207,7 @@ namespace MWGui
 
         mCharacterSelection->setIndexSelected(selectedIndex);
         if (selectedIndex == MyGUI::ITEM_NONE)
-            mCharacterSelection->setCaption("Select Character ...");
+            mCharacterSelection->setCaptionWithReplacing("#{SavegameMenu:SelectCharacter}");
 
         fillSaveList();
 
@@ -423,7 +423,7 @@ namespace MWGui
 
         if (Settings::Manager::getBool("timeplayed","Saves"))
         {
-            text << "\n" << "Time played: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
+            text << "\n" << "#{SavegameMenu:TimePlayed}: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
         }
 
         mInfoText->setCaptionWithReplacing(text.str());

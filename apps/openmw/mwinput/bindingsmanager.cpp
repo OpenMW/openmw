@@ -426,13 +426,13 @@ namespace MWInput
         switch (action)
         {
             case A_Screenshot:
-                return "Screenshot";
+                return "#{SettingsMenu:Screenshot}";
             case A_ZoomIn:
-                return "Zoom In";
+                return "#{SettingsMenu:CameraZoomIn}";
             case A_ZoomOut:
-                return "Zoom Out";
+                return "#{SettingsMenu:CameraZoomOut}";
             case A_ToggleHUD:
-                return "Toggle HUD";
+                return "#{SettingsMenu:ToggleHUD}";
             case A_Use:
                 return "#{sUse}";
             case A_Activate:
@@ -504,7 +504,7 @@ namespace MWInput
             case A_QuickLoad:
                 return "#{sQuickLoadCmd}";
             case A_TogglePostProcessorHUD:
-                return "Toggle Post Processor HUD";
+                return "#{SettingsMenu:TogglePostProcessorHUD}";
             default:
                 return std::string(); // not configurable
         }

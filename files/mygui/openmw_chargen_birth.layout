@@ -22,7 +22,7 @@
                 <Property key="Caption" value="#{sBack}"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton">
-                <Property key="Caption" value="OK"/>
+                <Property key="Caption" value="#{sOk}"/>
             </Widget>
         </Widget>
 

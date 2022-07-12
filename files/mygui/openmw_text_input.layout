@@ -12,7 +12,7 @@
         <!-- Dialog buttons -->
         <Widget type="AutoSizedButton" skin="MW_Button" position="264 60 42 23" name="OKButton">
             <Property key="ExpandDirection" value="Left"/>
-            <Property key="Caption" value="OK"/>
+            <Property key="Caption" value="#{sOk}"/>
         </Widget>
     </Widget>
 </MyGUI>

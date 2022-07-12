@@ -218,7 +218,7 @@ namespace DetourNavigator
     {
         if (mSettings.get().mWaitUntilMinDistanceToPlayer == 0)
             return;
-        listener.setLabel("Building navigation mesh");
+        listener.setLabel("#{Navigation:BuildingNavigationMesh}");
         const std::size_t initialJobsLeft = getTotalJobs();
         std::size_t maxProgress = initialJobsLeft + mThreads.size();
         listener.setProgressRange(maxProgress);

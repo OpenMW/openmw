@@ -12,10 +12,20 @@ set(BUILTIN_DATA_FILES
 
     l10n/Calendar/en.yaml
     l10n/Calendar/ru.yaml
+    l10n/DebugMenu/en.yaml
+    l10n/DebugMenu/ru.yaml
     l10n/Interface/en.yaml
     l10n/Interface/ru.yaml
+    l10n/Navigation/en.yaml
+    l10n/Navigation/ru.yaml
     l10n/OMWCamera/en.yaml
     l10n/OMWCamera/ru.yaml
+    l10n/PostProcessing/en.yaml
+    l10n/PostProcessing/ru.yaml
+    l10n/SavegameMenu/en.yaml
+    l10n/SavegameMenu/ru.yaml
+    l10n/SettingsMenu/en.yaml
+    l10n/SettingsMenu/ru.yaml
 
     openmw_aux/util.lua
     openmw_aux/time.lua

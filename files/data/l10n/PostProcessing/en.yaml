@@ -1,0 +1,20 @@
+Abovewater: "Abovewater"
+Author: "Author"
+Configuration: "Configuration"
+Description: "Description"
+InExteriors: "Exteriors"
+InInteriors: "Interiors"
+KeyboardControls: |
+    Keyboard controls:
+
+    Shift+Right-Arrow > Activate shader
+    Shift+Left-Arrow > Deactive shader
+    Shift+Up-Arrow > Move shader up
+    Shift+Down-Arrow > Move shader down
+PostProcessHUD: "Postprocess HUD"
+ResetShader: "Reset shader to default state"
+ShaderLocked: "Locked"
+ShaderLockedDescription: "Cannot be toggled or moved, controlled by external Lua script"
+ShaderResetUniform: "r"
+Underwater: "Underwater"
+Version: "Version"
