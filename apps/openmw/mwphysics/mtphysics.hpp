@@ -92,7 +92,7 @@ namespace MWPhysics
             std::unique_ptr<Misc::Barrier> mPostStepBarrier;
             std::unique_ptr<Misc::Barrier> mPostSimBarrier;
 
-            int mNumThreads;
+            unsigned mNumThreads;
             int mNumJobs;
             int mRemainingSteps;
             int mLOSCacheExpiry;

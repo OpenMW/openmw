@@ -1,7 +1,6 @@
 #ifndef OPENMW_BARRIER_H
 #define OPENMW_BARRIER_H
 
-#include <cassert>
 #include <condition_variable>
 #include <mutex>
 
@@ -12,9 +11,8 @@ namespace Misc
     {
         public:
             /// @param count number of threads to wait on
-            explicit Barrier(int count) : mThreadCount(count), mRendezvousCount(0), mGeneration(0)
+            explicit Barrier(unsigned count) : mThreadCount(count), mRendezvousCount(0), mGeneration(0)
             {
-                assert(count >= 0);
             }
 
             /// @brief stop execution of threads until count distinct threads reach this point
