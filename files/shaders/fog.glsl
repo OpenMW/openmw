@@ -1,7 +1,8 @@
 uniform float far;
 
 #if @skyBlending
-uniform sampler2D sky;
+#include "openmw_fragment.h.glsl"
+
 uniform float skyBlendingStart;
 #endif
 
@@ -23,14 +24,13 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist)
     color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
 #endif
 
-#if @skyBlending && !@useOVR_multiview
+#if @skyBlending
     float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
     fadeValue *= fadeValue;
 #ifdef ADDITIVE_BLENDING
     color.xyz *= fadeValue;
 #else
-    vec3 skyColor = texture2D(sky, gl_FragCoord.xy / screenRes).xyz;
-    color.xyz = mix(skyColor, color.xyz, fadeValue);
+    color.xyz = mix(mw_sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
 #endif
 #endif
 

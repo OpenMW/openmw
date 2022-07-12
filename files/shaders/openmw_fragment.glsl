@@ -31,3 +31,12 @@ vec4 mw_samplerLastShader(vec2 uv)
 {
     return texture2D(omw_SamplerLastShader, uv);
 }
+
+#if @skyBlending
+uniform sampler2D sky;
+
+vec3 mw_sampleSkyColor(vec2 uv)
+{
+    return texture2D(sky, uv).xyz;
+}
+#endif
