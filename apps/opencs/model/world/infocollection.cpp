@@ -58,7 +58,8 @@ namespace CSMWorld
             for (int i = 0; i < size; ++i)
             {
                 buffer[newOrder[i]] = std::move(mRecords[baseIndex+i]);
-                buffer[newOrder[i]]->setModified(buffer[newOrder[i]]->get());
+                if (buffer[newOrder[i]])
+                    buffer[newOrder[i]]->setModified(buffer[newOrder[i]]->get());
             }
 
             std::move(buffer.begin(), buffer.end(), mRecords.begin()+baseIndex);
@@ -319,7 +320,7 @@ void CSMWorld::InfoCollection::removeRows (int index, int count)
                     ++it;
                 }
                 else
-                    iter->second.erase(it);
+                    it = iter->second.erase(it);
             }
             else
                 ++it;
