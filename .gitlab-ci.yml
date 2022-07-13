@@ -55,26 +55,6 @@ variables:
     paths:
       - build/install/
 
-Clang_Tidy:
-  extends: .Ubuntu_Image
-  stage: build
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-  before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic clang-tidy clang
-  script:
-    - CI/before_script.linux.sh
-    - cd build
-    - cmake --build . -- -j $(nproc) openmw esmtool bsatool niftest openmw-wizard openmw-launcher openmw-iniimporter openmw-essimporter
-  variables:
-    CC: clang
-    CXX: clang++
-    CI_CLANG_TIDY: 1
-  timeout: 8h
-  artifacts:
-    paths: []
-    expire_in: 1 minute
-
 Coverity:
   extends: .Ubuntu_Image
   stage: build
@@ -261,12 +241,13 @@ Ubuntu_GCC:
 Ubuntu_Clang:
   extends: .Ubuntu
   before_script:
-    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
+    - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
   cache:
     key: Ubuntu_Clang.v2
   variables:
     CC: clang
     CXX: clang++
+    CI_CLANG_TIDY: 1
     CCACHE_SIZE: 2G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
