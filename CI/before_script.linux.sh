@@ -43,7 +43,7 @@ fi
 
 if [[ $CI_CLANG_TIDY ]]; then
 	CMAKE_CONF_OPTS+=(
-	      -DCMAKE_CXX_CLANG_TIDY="clang-tidy;-checks=-*,boost-*,clang-analyzer-*,concurrency-*,performance-*,-header-filter=.*,bugprone-*,misc-definitions-in-headers,misc-misplaced-const,misc-redundant-expression,-bugprone-narrowing-conversions"
+	      -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
 	)
 fi
 
