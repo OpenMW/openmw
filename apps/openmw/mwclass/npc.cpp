@@ -956,7 +956,7 @@ namespace MWClass
     {
         // TODO: This function is called several times per frame for each NPC.
         // It would be better to calculate it only once per frame for each NPC and save the result in CreatureStats.
-        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const MWMechanics::NpcStats& stats = getNpcStats(ptr);
         bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
         if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead())
             return 0.f;
@@ -964,8 +964,7 @@ namespace MWClass
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const GMST& gmst = getGmst();
 
-        const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
-        const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
+        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
 
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
@@ -981,7 +980,7 @@ namespace MWClass
         else if(mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 &&
                 world->isLevitationEnabled())
         {
-            float flySpeed = 0.01f*(npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified() +
+            float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
                                     mageffects.get(ESM::MagicEffect::Levitate).getMagnitude());
             flySpeed = gmst.fMinFlySpeed->mValue.getFloat() + flySpeed*(gmst.fMaxFlySpeed->mValue.getFloat() - gmst.fMinFlySpeed->mValue.getFloat());
             flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat() * normalizedEncumbrance;
@@ -995,7 +994,7 @@ namespace MWClass
         else
             moveSpeed = getWalkSpeed(ptr);
 
-        if(npcdata->mNpcStats.isWerewolf() && running && npcdata->mNpcStats.getDrawState() == MWMechanics::DrawState_Nothing)
+        if(stats.isWerewolf() && running && stats.getDrawState() == MWMechanics::DrawState_Nothing)
             moveSpeed *= gmst.fWereWolfRunMult->mValue.getFloat();
 
         return moveSpeed;
@@ -1006,14 +1005,13 @@ namespace MWClass
         if(getEncumbrance(ptr) > getCapacity(ptr))
             return 0.f;
 
-        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const MWMechanics::NpcStats& stats = getNpcStats(ptr);
         bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
         if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead())
             return 0.f;
 
-        const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const GMST& gmst = getGmst();
-        const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
+        const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
         const float encumbranceTerm = gmst.fJumpEncumbranceBase->mValue.getFloat() +
                                           gmst.fJumpEncumbranceMultiplier->mValue.getFloat() *
                                           (1.0f - Npc::getNormalizedEncumbrance(ptr));
@@ -1034,7 +1032,7 @@ namespace MWClass
 
         if(stats.getStance(MWMechanics::CreatureStats::Stance_Run))
             x *= gmst.fJumpRunMultiplier->mValue.getFloat();
-        x *= npcdata->mNpcStats.getFatigueTerm();
+        x *= stats.getFatigueTerm();
         x -= -Constants::GravityConst * Constants::UnitsPerMeter;
         x /= 3.0f;
 
@@ -1467,12 +1465,12 @@ namespace MWClass
     float Npc::getWalkSpeed(const MWWorld::Ptr& ptr) const
     {
         const GMST& gmst = getGmst();
-        const NpcCustomData* npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
+        const MWMechanics::NpcStats& stats = getNpcStats(ptr);
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
         const bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr);
 
         float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat()
-                + 0.01f * npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()
+                + 0.01f * stats.getAttribute(ESM::Attribute::Speed).getModified()
                 * (gmst.fMaxWalkSpeed->mValue.getFloat() - gmst.fMinWalkSpeed->mValue.getFloat());
         walkSpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat()*normalizedEncumbrance;
         walkSpeed = std::max(0.0f, walkSpeed);
@@ -1493,9 +1491,8 @@ namespace MWClass
     float Npc::getSwimSpeed(const MWWorld::Ptr& ptr) const
     {
         const MWBase::World* world = MWBase::Environment::get().getWorld();
-        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
-        const NpcCustomData* npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
-        const MWMechanics::MagicEffects& mageffects = npcdata->mNpcStats.getMagicEffects();
+        const MWMechanics::NpcStats& stats = getNpcStats(ptr);
+        const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
         const bool swimming = world->isSwimming(ptr);
         const bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
         const bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run)
