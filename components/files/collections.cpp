@@ -25,7 +25,7 @@ namespace Files
         if (iter==mCollections.end())
         {
             std::pair<MultiDirCollectionContainer::iterator, bool> result =
-                mCollections.insert(std::make_pair(ext, MultiDirCollection(mDirectories, ext, mFoldCase)));
+                mCollections.emplace(ext, MultiDirCollection(mDirectories, ext, mFoldCase));
 
             iter = result.first;
         }
