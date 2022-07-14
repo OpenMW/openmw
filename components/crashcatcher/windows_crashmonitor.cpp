@@ -24,21 +24,14 @@ namespace Crash
     // See: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-ishungappwindow
     static IsHungAppWindowFn getIsHungAppWindow() noexcept
     {
-        static IsHungAppWindowFn isHungAppWindow = nullptr;
-        static bool isHungAppWindowInitialized = false;
-
-        if (isHungAppWindowInitialized)
-            return isHungAppWindow;
-
         auto user32Handle = LoadLibraryA("user32.dll");
         if (user32Handle == nullptr)
             return nullptr;
 
-        isHungAppWindow = reinterpret_cast<IsHungAppWindowFn>(GetProcAddress(user32Handle, "IsHungAppWindow"));
-        isHungAppWindowInitialized = true;
-
-        return isHungAppWindow;
+        return reinterpret_cast<IsHungAppWindowFn>(GetProcAddress(user32Handle, "IsHungAppWindow"));
     }
+
+    static const IsHungAppWindowFn sIsHungAppWindow = getIsHungAppWindow();
     
     CrashMonitor::CrashMonitor(HANDLE shmHandle)
         : mShmHandle(shmHandle)
@@ -145,8 +138,8 @@ namespace Crash
             else
                 return false;
         }
-        if (auto isHungAppWindow = getIsHungAppWindow(); isHungAppWindow != nullptr)
-            return isHungAppWindow(mAppWindowHandle);
+        if (sIsHungAppWindow != nullptr)
+            return sIsHungAppWindow(mAppWindowHandle);
         else
         {
             BOOL debuggerPresent;
