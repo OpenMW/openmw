@@ -225,7 +225,7 @@ namespace Crash
         signalApp();
     }
 
-    std::wstring utf8ToUtf16(const std::string& utf8)
+    static std::wstring utf8ToUtf16(const std::string& utf8)
     {
         const int nLenWide = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.size(), nullptr, 0);
 
