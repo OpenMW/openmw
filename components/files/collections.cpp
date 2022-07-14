@@ -21,7 +21,7 @@ namespace Files
     const MultiDirCollection& Collections::getCollection(const std::string& extension) const
     {
         std::string ext = Misc::StringUtils::lowerCase(extension);
-        MultiDirCollectionContainer::iterator iter = mCollections.find(ext);
+        auto iter = mCollections.find(ext);
         if (iter==mCollections.end())
         {
             std::pair<MultiDirCollectionContainer::iterator, bool> result =
