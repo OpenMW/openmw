@@ -151,7 +151,11 @@ def setup(app):
     app.add_stylesheet('figures.css')
     app.add_stylesheet('luadoc.css')
     try:
-        subprocess.call(project_root + '/docs/source/generate_luadoc.sh')
+        # Assume we need to setup openmw-luadocumentor only when running this script in a Docker container because
+        # readthedocs pipeline runs there.
+        if os.path.exists('/.dockerenv'):
+            subprocess.check_call(os.path.join(project_root, 'docs/source/setup_openmw_luadocumentor.sh'))
+        subprocess.check_call(os.path.join(project_root, 'docs/source/generate_luadoc.sh'))
     except Exception as e:
         print('Can\'t generate Lua API documentation:', e)
 
