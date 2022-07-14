@@ -20,11 +20,12 @@ namespace Files
 
     const MultiDirCollection& Collections::getCollection(const std::string& extension) const
     {
-        MultiDirCollectionContainer::iterator iter = mCollections.find(extension);
+        std::string ext = Misc::StringUtils::lowerCase(extension);
+        auto iter = mCollections.find(ext);
         if (iter==mCollections.end())
         {
             std::pair<MultiDirCollectionContainer::iterator, bool> result =
-                mCollections.insert(std::make_pair(extension, MultiDirCollection(mDirectories, extension, mFoldCase)));
+                mCollections.emplace(ext, MultiDirCollection(mDirectories, ext, mFoldCase));
 
             iter = result.first;
         }
