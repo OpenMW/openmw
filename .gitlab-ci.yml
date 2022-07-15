@@ -38,6 +38,11 @@ variables:
     - CI/before_script.linux.sh
     - cd build
     - cmake --build . -- -j $(nproc)
+    - df -h
+    - du -sh .
+    - find . | grep '\.o$' | xargs rm -f
+    - df -h
+    - du -sh .
     - cmake --install .
     - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:tests.xml"; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
