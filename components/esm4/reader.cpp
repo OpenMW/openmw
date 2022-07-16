@@ -49,6 +49,7 @@
 
 #include <components/bsa/memorystream.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/files/constrainedfilestream.hpp>
 
 #include "formid.hpp"
 
@@ -180,6 +181,16 @@ void Reader::open(Files::IStreamPtr&& stream, const std::string &filename)
     }
 
     throw std::runtime_error("Unknown file format"); // can't yet use fail() as mCtx is not setup
+}
+
+void Reader::openRaw(const std::string& filename)
+{
+    openRaw(Files::openConstrainedFileStream(filename), filename);
+}
+
+void Reader::open(const std::string& filename)
+{
+    open(Files::openConstrainedFileStream(filename), filename);
 }
 
 void Reader::setRecHeaderSize(const std::size_t size)

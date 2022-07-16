@@ -3,6 +3,8 @@
 
 #include "archive.hpp"
 
+#include <string>
+
 namespace VFS
 {
 

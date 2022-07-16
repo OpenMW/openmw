@@ -26,10 +26,13 @@
 #include <map>
 #include <cstddef>
 #include <memory>
+#include <istream>
 
 #include "common.hpp"
 #include "loadtes4.hpp"
 #include "../esm/reader.hpp"
+
+#include <components/files/istreamptr.hpp>
 
 namespace ESM4 {
     //                                                   bytes read from group, updated by
@@ -129,15 +132,9 @@ namespace ESM4 {
         ~Reader();
 
         // FIXME: should be private but ESMTool uses it
-        void openRaw(const std::string& filename)
-        {
-            openRaw(Files::openConstrainedFileStream(filename), filename);
-        }
+        void openRaw(const std::string& filename);
 
-        void open(const std::string& filename)
-        {
-            open(Files::openConstrainedFileStream(filename), filename);
-        }
+        void open(const std::string& filename);
 
         void close() final;
 

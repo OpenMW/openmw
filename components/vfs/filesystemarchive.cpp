@@ -5,6 +5,7 @@
 #include <filesystem>
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/constrainedfilestream.hpp>
 
 namespace VFS
 {

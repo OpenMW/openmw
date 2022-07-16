@@ -1,11 +1,12 @@
 #ifndef OPENMW_COMPONENTS_RESOURCEMANAGER_H
 #define OPENMW_COMPONENTS_RESOURCEMANAGER_H
 
-#include <components/files/constrainedfilestream.hpp>
+#include <components/files/istreamptr.hpp>
 
 #include <vector>
 #include <map>
 #include <memory>
+#include <string>
 
 namespace VFS
 {

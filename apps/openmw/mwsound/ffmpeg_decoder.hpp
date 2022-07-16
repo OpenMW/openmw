@@ -24,7 +24,7 @@ extern "C"
     #pragma warning (pop)
 #endif
 
-#include <components/files/constrainedfilestream.hpp>
+#include <components/files/istreamptr.hpp>
 
 #include <string>
 

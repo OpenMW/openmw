@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include <components/files/constrainedfilestream.hpp>
+#include <components/files/istreamptr.hpp>
 
 namespace VFS
 {

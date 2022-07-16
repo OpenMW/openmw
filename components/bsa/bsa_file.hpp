@@ -28,8 +28,7 @@
 #include <string>
 #include <vector>
 
-#include <components/files/constrainedfilestream.hpp>
-
+#include <components/files/istreamptr.hpp>
 
 namespace Bsa
 {
@@ -123,10 +122,7 @@ public:
     /** Open a file contained in the archive.
      * @note Thread safe.
     */
-    Files::IStreamPtr getFile(const FileStruct *file)
-    {
-        return Files::openConstrainedFileStream(mFilename, file->offset, file->fileSize);
-    }
+    Files::IStreamPtr getFile(const FileStruct *file);
 
     void addFile(const std::string& filename, std::istream& file);
 

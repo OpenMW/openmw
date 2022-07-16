@@ -23,6 +23,8 @@
 
 #include "bsa_file.hpp"
 
+#include <components/files/constrainedfilestream.hpp>
+
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -254,6 +256,11 @@ void Bsa::BSAFile::close()
     mFiles.clear();
     mStringBuf.clear();
     mIsLoaded = false;
+}
+
+Files::IStreamPtr Bsa::BSAFile::getFile(const FileStruct *file)
+{
+    return Files::openConstrainedFileStream(mFilename, file->offset, file->fileSize);
 }
 
 void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)

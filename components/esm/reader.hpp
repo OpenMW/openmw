@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include <components/files/constrainedfilestream.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "common.hpp" // MasterData
