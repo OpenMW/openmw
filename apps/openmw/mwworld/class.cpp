@@ -521,7 +521,7 @@ namespace MWWorld
         return result;
     }
 
-    void Class::setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const
+    void Class::setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const
     {
         throw std::runtime_error ("class does not have creature stats");
     }

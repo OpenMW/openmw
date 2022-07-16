@@ -162,7 +162,7 @@ namespace MWClass
             std::string getPrimaryFaction(const MWWorld::ConstPtr &ptr) const override;
             int getPrimaryFactionRank(const MWWorld::ConstPtr &ptr) const override;
 
-            void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const override;
+            void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const override;
 
             void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const override;
 

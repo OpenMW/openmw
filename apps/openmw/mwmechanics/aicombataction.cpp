@@ -468,7 +468,7 @@ namespace MWMechanics
         const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        int flee = stats.getAiSetting(CreatureStats::AI_Flee).getModified();
+        const int flee = stats.getAiSetting(AiSetting::Flee).getModified();
         if (flee >= 100)
             return flee;
 

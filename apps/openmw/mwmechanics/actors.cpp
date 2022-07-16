@@ -372,7 +372,7 @@ namespace MWMechanics
             return;
 
         const CreatureStats &stats = actor.getClass().getCreatureStats(actor);
-        if (stats.getAiSetting(CreatureStats::AI_Hello).getModified() == 0)
+        if (stats.getAiSetting(AiSetting::Hello).getModified() == 0)
             return;
 
         const MWMechanics::AiSequence& seq = stats.getAiSequence();
@@ -463,7 +463,7 @@ namespace MWMechanics
         static const int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
             .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->mValue.getInteger();
 
-        const float helloDistance = static_cast<float>(actorStats.getAiSetting(CreatureStats::AI_Hello).getModified() * iGreetDistanceMultiplier);
+        const float helloDistance = static_cast<float>(actorStats.getAiSetting(AiSetting::Hello).getModified() * iGreetDistanceMultiplier);
         const auto& playerStats = player.getClass().getCreatureStats(player);
 
         int greetingTimer = actorState.getGreetingTimer();
@@ -1089,7 +1089,7 @@ namespace MWMechanics
                 // Reset factors to attack
                 creatureStats.setAttacked(false);
                 creatureStats.setAlarmed(false);
-                creatureStats.setAiSetting(CreatureStats::AI_Fight, ptr.getClass().getBaseFightRating(ptr));
+                creatureStats.setAiSetting(AiSetting::Fight, ptr.getClass().getBaseFightRating(ptr));
 
                 // Update witness crime id
                 npcStats.setCrimeId(-1);

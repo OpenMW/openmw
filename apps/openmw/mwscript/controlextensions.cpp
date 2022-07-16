@@ -14,6 +14,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 

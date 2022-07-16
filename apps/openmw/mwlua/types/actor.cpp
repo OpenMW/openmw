@@ -3,6 +3,7 @@
 #include <components/lua/luastate.hpp>
 
 #include <apps/openmw/mwmechanics/drawstate.hpp>
+#include <apps/openmw/mwmechanics/creaturestats.hpp>
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <apps/openmw/mwworld/class.hpp>
 

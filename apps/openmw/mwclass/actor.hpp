@@ -3,7 +3,10 @@
 
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/magiceffects.hpp"
+
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {

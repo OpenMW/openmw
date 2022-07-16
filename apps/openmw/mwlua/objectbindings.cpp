@@ -9,6 +9,8 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "eventqueue.hpp"
 #include "luamanagerimp.hpp"
 #include "types/types.hpp"

@@ -1,6 +1,7 @@
 #include "creaturestats.hpp"
 
 #include <algorithm>
+#include <type_traits>
 
 #include <components/esm3/creaturestats.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -99,7 +100,7 @@ namespace MWMechanics
 
     Stat<int> CreatureStats::getAiSetting (AiSetting index) const
     {
-        return mAiSettings[index];
+        return mAiSettings[static_cast<std::underlying_type_t<AiSetting>>(index)];
     }
 
     const DynamicStat<float> &CreatureStats::getDynamic(int index) const
@@ -212,7 +213,7 @@ namespace MWMechanics
 
     void CreatureStats::setAiSetting (AiSetting index, Stat<int> value)
     {
-        mAiSettings[index] = value;
+        mAiSettings[static_cast<std::underlying_type_t<AiSetting>>(index)] = value;
     }
 
     void CreatureStats::setAiSetting (AiSetting index, int base)

@@ -12,6 +12,7 @@
 #include "activespells.hpp"
 #include "aisequence.hpp"
 #include "drawstate.hpp"
+#include "aisetting.hpp"
 
 #include <components/esm/attr.hpp>
 #include <components/esm3/magiceffects.hpp>
@@ -154,13 +155,6 @@ namespace MWMechanics
 
         void setLevel(int level);
 
-        enum AiSetting
-        {
-            AI_Hello = 0,
-            AI_Fight = 1,
-            AI_Flee = 2,
-            AI_Alarm = 3
-        };
         void setAiSetting (AiSetting index, Stat<int> value);
         void setAiSetting (AiSetting index, int base);
         Stat<int> getAiSetting (AiSetting index) const;
