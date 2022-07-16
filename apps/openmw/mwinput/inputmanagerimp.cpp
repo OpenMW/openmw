@@ -31,29 +31,21 @@ namespace MWInput
             const std::string& userFile, bool userFileExists, const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
         : mControlsDisabled(false)
+        , mInputWrapper(std::make_unique<SDLUtil::InputWrapper>(window, viewer, grab))
+        , mBindingsManager(std::make_unique<BindingsManager>(userFile, userFileExists))
+        , mControlSwitch(std::make_unique<ControlSwitch>())
+        , mActionManager(std::make_unique<ActionManager>(mBindingsManager.get(), screenCaptureOperation, viewer, screenCaptureHandler))
+        , mKeyboardManager(std::make_unique<KeyboardManager>(mBindingsManager.get()))
+        , mMouseManager(std::make_unique<MouseManager>(mBindingsManager.get(), mInputWrapper.get(), window))
+        , mControllerManager(std::make_unique<ControllerManager>(mBindingsManager.get(), mActionManager.get(), mMouseManager.get(), userControllerBindingsFile, controllerBindingsFile))
+        , mSensorManager(std::make_unique<SensorManager>())
+        , mGyroManager(std::make_unique<GyroManager>())
     {
-        mInputWrapper = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputWrapper->setWindowEventCallback(MWBase::Environment::get().getWindowManager());
-
-        mBindingsManager = new BindingsManager(userFile, userFileExists);
-
-        mControlSwitch = new ControlSwitch();
-
-        mActionManager = new ActionManager(mBindingsManager, screenCaptureOperation, viewer, screenCaptureHandler);
-
-        mKeyboardManager = new KeyboardManager(mBindingsManager);
-        mInputWrapper->setKeyboardEventCallback(mKeyboardManager);
-
-        mMouseManager = new MouseManager(mBindingsManager, mInputWrapper, window);
-        mInputWrapper->setMouseEventCallback(mMouseManager);
-
-        mControllerManager = new ControllerManager(mBindingsManager, mActionManager, mMouseManager, userControllerBindingsFile, controllerBindingsFile);
-        mInputWrapper->setControllerEventCallback(mControllerManager);
-
-        mSensorManager = new SensorManager();
-        mInputWrapper->setSensorEventCallback(mSensorManager);
-
-        mGyroManager = new GyroManager();
+        mInputWrapper->setKeyboardEventCallback(mKeyboardManager.get());
+        mInputWrapper->setMouseEventCallback(mMouseManager.get());
+        mInputWrapper->setControllerEventCallback(mControllerManager.get());
+        mInputWrapper->setSensorEventCallback(mSensorManager.get());
     }
 
     void InputManager::clear()
@@ -62,22 +54,7 @@ namespace MWInput
         mControlSwitch->clear();
     }
 
-    InputManager::~InputManager()
-    {
-        delete mActionManager;
-        delete mControllerManager;
-        delete mKeyboardManager;
-        delete mMouseManager;
-        delete mSensorManager;
-
-        delete mControlSwitch;
-
-        delete mBindingsManager;
-
-        delete mInputWrapper;
-
-        delete mGyroManager;
-    }
+    InputManager::~InputManager() {}
 
     void InputManager::setAttemptJump(bool jumping)
     {
