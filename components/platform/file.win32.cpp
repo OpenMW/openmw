@@ -5,6 +5,7 @@
 
 #include <components/windows.hpp>
 #include <string>
+#include <stdexcept>
 #include <boost/locale.hpp>
 
 namespace Platform::File {
@@ -31,9 +32,7 @@ namespace Platform::File {
         HANDLE handle = CreateFileW(wname.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
         if (handle == INVALID_HANDLE_VALUE)
         {
-            std::ostringstream os;
-            os << "Failed to open '" << filename << "' for reading: " << GetLastError();
-            throw std::runtime_error(os.str());
+            throw std::runtime_error(std::string("Failed to open '") + filename + "' for reading: " + std::to_string(GetLastError()));
         }
         return static_cast<Handle>(reinterpret_cast<intptr_t>(handle));
     }
@@ -53,7 +52,7 @@ namespace Platform::File {
         {
             if (auto errCode = GetLastError(); errCode != ERROR_SUCCESS)
             {
-                throw std::runtime_error("An fseek() call failed: " + std::to_string(errCode));
+                throw std::runtime_error(std::string("An fseek() call failed: ") + std::to_string(errCode));
             }
         }
     }
@@ -93,7 +92,7 @@ namespace Platform::File {
         DWORD bytesRead{};
 
         if (!ReadFile(nativeHandle, data, static_cast<DWORD>(size), &bytesRead, nullptr))
-            throw std::runtime_error("A read operation on a file failed: " + std::to_string(GetLastError()));
+            throw std::runtime_error(std::string("A read operation on a file failed: ") + std::to_string(GetLastError()));
 
         return bytesRead;
     }

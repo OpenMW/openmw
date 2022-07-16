@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <stdexcept>
+#include <string>
 
 namespace Platform::File {
 
@@ -29,7 +31,6 @@ namespace Platform::File {
 
     Handle open(const char* filename)
     {
-        // Posix
 #ifdef O_BINARY
         static const int openFlags = O_RDONLY | O_BINARY;
 #else
@@ -39,9 +40,7 @@ namespace Platform::File {
         auto handle = ::open(filename, openFlags, 0);
         if (handle == -1)
         {
-            std::ostringstream os;
-            os << "Failed to open '" << filename << "' for reading: " << strerror(errno);
-            throw std::runtime_error(os.str());
+            throw std::runtime_error(std::string("Failed to open '") + filename + "' for reading: " + strerror(errno));
         }
         return static_cast<Handle>(handle);
     }
@@ -58,7 +57,7 @@ namespace Platform::File {
         const auto nativeHandle = getNativeHandle(handle);
         const auto nativeSeekType = getNativeSeekType(type);
 
-        if (::lseek(toNativeHandle(mHandle), position, SEEK_SET) == -1)
+        if (::lseek(nativeHandle, position, nativeSeekType) == -1)
         {
             throw std::runtime_error("An lseek() call failed: " + std::string(strerror(errno)));
         }
@@ -66,14 +65,14 @@ namespace Platform::File {
 
     size_t size(Handle handle)
     {
-        auto nativeHandle = getNativeHandle(handle);
-
-        auto oldPos = tell(handle);
+        const auto oldPos = tell(handle);
 
         seek(handle, 0, SeekType::End);
-        auto size = tell(handle);
+        const auto fileSize = tell(handle);
+        seek(handle, oldPos, SeekType::Begin);
 
-        return static_cast<size_t>(size);
+
+        return static_cast<size_t>(fileSize);
     }
 
     size_t tell(Handle handle)
@@ -92,7 +91,7 @@ namespace Platform::File {
     {
         auto nativeHandle = getNativeHandle(handle);
 
-        int amount = ::read(toNativeHandle(mHandle), data, size);
+        int amount = ::read(nativeHandle, data, size);
         if (amount == -1)
         {
             throw std::runtime_error("An attempt to read " + std::to_string(size) + " bytes failed: " + strerror(errno));

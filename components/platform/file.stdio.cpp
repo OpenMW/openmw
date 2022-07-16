@@ -5,6 +5,8 @@
 
 #include <errno.h>
 #include <string.h>
+#include <string>
+#include <stdexcept>
 
 namespace Platform::File {
 
@@ -26,13 +28,10 @@ namespace Platform::File {
 
     Handle open(const char* filename)
     {
-        // Stdio
         FILE* handle = fopen(filename, "rb");
         if (handle == nullptr)
         {
-            std::ostringstream os;
-            os << "Failed to open '" << filename << "' for reading: " << strerror(errno);
-            throw std::runtime_error(os.str());
+            throw std::runtime_error(std::string("Failed to open '") + filename + "' for reading: " + strerror(errno));
         }
         return static_cast<Handle>(reinterpret_cast<intptr_t>(handle));
     }
@@ -49,19 +48,20 @@ namespace Platform::File {
         const auto nativeSeekType = getNativeSeekType(type);
         if (fseek(nativeHandle, position, nativeSeekType) != 0)
         {
-            throw std::runtime_error("An fseek() call failed: " + std::string(strerror(errno)));
+            throw std::runtime_error(std::string("An fseek() call failed: ") + strerror(errno));
         }
     }
 
     size_t size(Handle handle)
     {
         auto nativeHandle = getNativeHandle(handle);
-        auto oldPos = tell(handle);
-
+        
+        const auto oldPos = tell(handle);
         seek(handle, 0, SeekType::End);
-        auto size = tell(handle);
+        const auto fileSize = tell(handle);
+        seek(handle, oldPos, SeekType::Begin);
 
-        return static_cast<size_t>(size);
+        return static_cast<size_t>(fileSize);
     }
 
     size_t tell(Handle handle)
@@ -71,7 +71,7 @@ namespace Platform::File {
         long position = ftell(nativeHandle);
         if (position == -1)
         {
-            throw std::runtime_error("An ftell() call failed: " + std::string(strerror(errno)));
+            throw std::runtime_error(std::string("An ftell() call failed: ") + strerror(errno));
         }
         return static_cast<size_t>(position);
     }
@@ -83,7 +83,7 @@ namespace Platform::File {
         int amount = fread(data, 1, size, nativeHandle);
         if (amount == 0 && ferror(nativeHandle))
         {
-            throw std::runtime_error("An attempt to read " + std::to_string(size) + " bytes failed: " + strerror(errno));
+            throw std::runtime_error(std::string("An attempt to read ") + std::to_string(size) + " bytes failed: " + strerror(errno));
         }
         return static_cast<size_t>(amount);
     }
