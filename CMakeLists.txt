@@ -690,7 +690,7 @@ if (WIN32)
 
     # Play a bit with the warning levels
 
-    set(WARNINGS /W4)
+    set(WARNINGS "/W4")
 
     set(WARNINGS_DISABLE
         4100 # Unreferenced formal parameter (-Wunused-parameter)
@@ -712,11 +712,11 @@ if (WIN32)
     endif()
 
     foreach(d ${WARNINGS_DISABLE})
-        list(APPEND WARNINGS /wd${d})
+        set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
     if(OPENMW_MSVC_WERROR)
-        list(APPEND WARNINGS /WX)
+        set(WARNINGS "${WARNINGS} /WX")
     endif()
 
     set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
@@ -771,7 +771,8 @@ if (WIN32)
     endif()
 
     if (BUILD_BULLETOBJECTTOOL)
-        set_target_properties(openmw-bulletobjecttool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set(WARNINGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw-bulletobjecttool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
   endif(MSVC)
 

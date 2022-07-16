@@ -376,7 +376,7 @@ macOS12_Xcode13:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview -E
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config
@@ -439,8 +439,7 @@ macOS12_Xcode13:
     - .Windows_Ninja_Base
   variables:
     config: "RelWithDebInfo"
-    # Gitlab can't successfully execute following binaries due to unknown reason
-    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+    executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
 
 .Windows_MSBuild_Base:
   tags:
@@ -478,7 +477,7 @@ macOS12_Xcode13:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview -E
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview  -E
     - cd MSVC2019_64
     - cmake --build . --config $config
     - ccache --show-stats
@@ -538,7 +537,6 @@ Windows_MSBuild_RelWithDebInfo:
     - .Windows_MSBuild_Base
   variables:
     config: "RelWithDebInfo"
-    # Gitlab can't successfully execute following binaries due to unknown reason
     executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
   # temporarily enabled while we're linking these on the downloads page
   rules:
