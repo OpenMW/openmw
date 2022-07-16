@@ -27,10 +27,6 @@ namespace MWMechanics
 {
     class AiPackage;
     class CharacterController;
-    
-    template< class Base > class DerivedClassStorage;
-    struct AiTemporaryBase;
-    typedef DerivedClassStorage<AiTemporaryBase> AiState;
 
     using AiPackages = std::vector<std::shared_ptr<AiPackage>>;
 

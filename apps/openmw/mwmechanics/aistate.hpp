@@ -1,6 +1,7 @@
 #ifndef AISTATE_H
 #define AISTATE_H
 
+#include "aistatefwd.hpp"
 #include "aitemporarybase.hpp"
 
 namespace MWMechanics
@@ -71,9 +72,6 @@ namespace MWMechanics
                 delete mStorage;
         }
     };
-
-    /// \brief Container for AI package status.
-    typedef DerivedClassStorage<AiTemporaryBase> AiState;
 }
 
 #endif // AISTATE_H
