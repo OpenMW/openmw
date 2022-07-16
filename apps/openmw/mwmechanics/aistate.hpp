@@ -1,8 +1,6 @@
 #ifndef AISTATE_H
 #define AISTATE_H
 
-#include <typeinfo>
-
 namespace MWMechanics
 {
 
@@ -63,17 +61,7 @@ namespace MWMechanics
                 delete mStorage;
             mStorage = p;
         }
-        
-        bool empty() const
-        {
-            return mStorage == nullptr;
-        }
-        
-        const std::type_info& getType() const
-        {
-            return typeid(mStorage);
-        }
-        
+
         DerivedClassStorage():mStorage(nullptr){}
         ~DerivedClassStorage()
         {
