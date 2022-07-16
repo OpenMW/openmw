@@ -34,12 +34,11 @@ bool isBSA(const std::string & filename)
 }
 
 /// Check all the nif files in a given VFS::Archive
-/// \note Takes ownership!
 /// \note Can not read a bsa file inside of a bsa file.
-void readVFS(VFS::Archive* anArchive,std::string archivePath = "")
+void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, std::string archivePath = "")
 {
     VFS::Manager myManager(true);
-    myManager.addArchive(anArchive);
+    myManager.addArchive(std::move(anArchive));
     myManager.buildIndex();
 
     for(const auto& name : myManager.getRecursiveDirectoryIterator(""))
@@ -55,7 +54,7 @@ void readVFS(VFS::Archive* anArchive,std::string archivePath = "")
                 if(!archivePath.empty() && !isBSA(archivePath))
                 {
 //                     std::cout << "Reading BSA File: " << name << std::endl;
-                    readVFS(new VFS::BsaArchive(archivePath+name),archivePath+name+"/");
+                    readVFS(std::make_unique<VFS::BsaArchive>(archivePath + name), archivePath + name + "/");
 //                     std::cout << "Done with BSA File: " << name << std::endl;
                 }
             }
@@ -135,12 +134,12 @@ int main(int argc, char **argv)
              else if(isBSA(name))
              {
 //                 std::cout << "Reading BSA File: " << name << std::endl;
-                readVFS(new VFS::BsaArchive(name));
+                readVFS(std::make_unique<VFS::BsaArchive>(name));
              }
              else if(std::filesystem::is_directory(std::filesystem::path(name)))
              {
 //                 std::cout << "Reading All Files in: " << name << std::endl;
-                readVFS(new VFS::FileSystemArchive(name),name);
+                readVFS(std::make_unique<VFS::FileSystemArchive>(name), name);
              }
              else
              {

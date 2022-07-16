@@ -64,7 +64,7 @@ namespace TestingOpenMW
     inline std::unique_ptr<VFS::Manager> createTestVFS(std::map<std::string, VFS::File*> files)
     {
         auto vfs = std::make_unique<VFS::Manager>(true);
-        vfs->addArchive(new VFSTestData(std::move(files)));
+        vfs->addArchive(std::make_unique<VFSTestData>(std::move(files)));
         vfs->buildIndex();
         return vfs;
     }

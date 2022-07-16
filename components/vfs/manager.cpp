@@ -36,30 +36,25 @@ namespace VFS
 
     }
 
-    Manager::~Manager()
-    {
-        reset();
-    }
+    Manager::~Manager() {}
 
     void Manager::reset()
     {
         mIndex.clear();
-        for (std::vector<Archive*>::iterator it = mArchives.begin(); it != mArchives.end(); ++it)
-            delete *it;
         mArchives.clear();
     }
 
-    void Manager::addArchive(Archive *archive)
+    void Manager::addArchive(std::unique_ptr<Archive>&& archive)
     {
-        mArchives.push_back(archive);
+        mArchives.push_back(std::move(archive));
     }
 
     void Manager::buildIndex()
     {
         mIndex.clear();
 
-        for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
-            (*it)->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+        for (const auto& archive : mArchives)
+            archive->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
     }
 
     Files::IStreamPtr Manager::get(const std::string &name) const
