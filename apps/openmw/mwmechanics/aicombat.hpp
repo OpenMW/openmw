@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_AICOMBAT_H
 
 #include "typedaipackage.hpp"
+#include "aitemporarybase.hpp"
 
 #include "../mwworld/cellstore.hpp" // for Doors
 

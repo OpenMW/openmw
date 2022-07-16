@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_AIFOLLOW_H
 
 #include "typedaipackage.hpp"
+#include "aitemporarybase.hpp"
 
 #include <string>
 #include <string_view>
