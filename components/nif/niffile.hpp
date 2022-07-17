@@ -6,9 +6,10 @@
 #include <stdexcept>
 #include <vector>
 #include <atomic>
+#include <limits>
 
 #include <components/debug/debuglog.hpp>
-#include <components/files/constrainedfilestream.hpp>
+#include <components/files/istreamptr.hpp>
 
 #include "record.hpp"
 

@@ -1,6 +1,7 @@
 #include "manager.hpp"
 
 #include <stdexcept>
+#include <istream>
 
 #include <components/misc/stringops.hpp>
 

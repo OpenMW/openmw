@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <istream>
 
 namespace VFS
 {
