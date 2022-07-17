@@ -76,6 +76,8 @@ GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
 BUILD_BENCHMARKS=""
 OSG_MULTIVIEW_BUILD=""
+USE_WERROR=""
+USE_CLANG_TIDY=""
 
 ACTIVATE_MSVC=""
 SINGLE_CONFIG=""
@@ -116,7 +118,7 @@ while [ $# -gt 0 ]; do
 
 			n )
 				NMAKE=true ;;
-			
+
 			N )
 				NINJA=true ;;
 
@@ -140,10 +142,16 @@ while [ $# -gt 0 ]; do
 
 			b )
 				BUILD_BENCHMARKS=true ;;
-            
-            M )
-                OSG_MULTIVIEW_BUILD=true ;;
-                
+
+			M )
+				OSG_MULTIVIEW_BUILD=true ;;
+
+			E )
+				USE_WERROR=true ;;
+
+			T )
+				USE_CLANG_TIDY=true ;;
+
 			h )
 				cat <<EOF
 Usage: $0 [-cdehkpuvVi]
@@ -182,8 +190,12 @@ Options:
 		CMake install prefix
 	-b
 		Build benchmarks
-    -M
-        Use a multiview build of OSG
+	-M
+		Use a multiview build of OSG
+	-E
+		Use warnings as errors (/WX)
+	-T
+		Run clang-tidy
 EOF
 				wrappedExit 0
 				;;
@@ -518,6 +530,14 @@ if ! [ -z $USE_CCACHE ]; then
 	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 fi
 
+if ! [ -z "$USE_WERROR" ]; then
+  add_cmake_opts "-DOPENMW_MSVC_WERROR=ON"
+fi
+
+if ! [ -z "$USE_CLANG_TIDY" ]; then
+  add_cmake_opts "-DCMAKE_CXX_CLANG_TIDY=\"clang-tidy --warnings-as-errors=*\""
+fi
+
 ICU_VER="70_1"
 
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
@@ -835,108 +855,77 @@ printf "${OSG_ARCHIVE_NAME}... "
 cd $DEPS
 echo
 # Qt
-if [ -z $APPVEYOR ]; then
-	printf "Qt 5.15.0... "
-else
-	printf "Qt 5.13 AppVeyor... "
-fi
+printf "Qt 5.15.2... "
 {
 	if [ $BITS -eq 64 ]; then
 		SUFFIX="_64"
 	else
 		SUFFIX=""
 	fi
-	if [ -z $APPVEYOR ]; then
-		cd $DEPS_INSTALL
 
-		qt_version="5.15.0"
-		if [ "win${BITS}_msvc${MSVC_REAL_YEAR}${SUFFIX}" == "win64_msvc2017_64" ]; then
-			echo "This combination of options is known not to work. Falling back to Qt 5.14.2."
-			qt_version="5.14.2"
+	cd $DEPS_INSTALL
+
+	qt_version="5.15.2"
+
+	QT_SDK="$(real_pwd)/Qt/${qt_version}/msvc${MSVC_REAL_YEAR}${SUFFIX}"
+
+	if [ -d "Qt/${qt_version}" ]; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		if [ $MISSINGPYTHON -ne 0 ]; then
+			echo "Can't be automatically installed without Python."
+			wrappedExit 1
 		fi
 
-		QT_SDK="$(real_pwd)/Qt/${qt_version}/msvc${MSVC_REAL_YEAR}${SUFFIX}"
-
-		if [ -d "Qt/${qt_version}" ]; then
-			printf "Exists. "
-		elif [ -z $SKIP_EXTRACT ]; then
-			if [ $MISSINGPYTHON -ne 0 ]; then
-				echo "Can't be automatically installed without Python."
-				wrappedExit 1
-			fi
-
-			pushd "$DEPS" > /dev/null
-			if ! [ -d 'aqt-venv' ]; then
-				echo "  Creating Virtualenv for aqt..."
-				run_cmd python -m venv aqt-venv
-			fi
-			if [ -d 'aqt-venv/bin' ]; then
-				VENV_BIN_DIR='bin'
-			elif [ -d 'aqt-venv/Scripts' ]; then
-				VENV_BIN_DIR='Scripts'
-			else
-				echo "Error: Failed to create virtualenv in expected location."
-				wrappedExit 1
-			fi
-
-			# check version
-			aqt-venv/${VENV_BIN_DIR}/pip list | grep 'aqtinstall\s*1.1.3' || [ $? -ne 0 ]
-			if [ $? -eq 0 ]; then
-				echo "  Installing aqt wheel into virtualenv..."
-				run_cmd "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall==1.1.3
-			fi
-			popd > /dev/null
-
-			rm -rf Qt
-
-			mkdir Qt
-			cd Qt
-
-			run_cmd "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install $qt_version windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}${SUFFIX}"
-
-			printf "  Cleaning up extraneous data... "
-			rm -rf Qt/{aqtinstall.log,Tools}
-
-			echo Done.
+		pushd "$DEPS" > /dev/null
+		if ! [ -d 'aqt-venv' ]; then
+			echo "  Creating Virtualenv for aqt..."
+			run_cmd python -m venv aqt-venv
+		fi
+		if [ -d 'aqt-venv/bin' ]; then
+			VENV_BIN_DIR='bin'
+		elif [ -d 'aqt-venv/Scripts' ]; then
+			VENV_BIN_DIR='Scripts'
+		else
+			echo "Error: Failed to create virtualenv in expected location."
+			wrappedExit 1
 		fi
 
-		cd $QT_SDK
-		add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
-			-DCMAKE_PREFIX_PATH="$QT_SDK"
-		for CONFIGURATION in ${CONFIGURATIONS[@]}; do
-			if [ $CONFIGURATION == "Debug" ]; then
-				DLLSUFFIX="d"
-			else
-				DLLSUFFIX=""
-			fi
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
-			add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
-			add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
-		done
-		echo Done.
-	else
-		# default to msvc2019 which pre-loads Qt 5.15.2
-		qt_version="5.15.2"
-		if [ "msvc${MSVC_REAL_YEAR}" == "msvc2017" ]; then
-			qt_version="5.13"
-    	fi
-		QT_SDK="C:/Qt/${qt_version}/msvc${MSVC_REAL_YEAR}${SUFFIX}"
+		# check version
+		aqt-venv/${VENV_BIN_DIR}/pip list | grep 'aqtinstall\s*1.1.3' || [ $? -ne 0 ]
+		if [ $? -eq 0 ]; then
+			echo "  Installing aqt wheel into virtualenv..."
+			run_cmd "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall==1.1.3
+		fi
+		popd > /dev/null
 
-		add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
-			-DCMAKE_PREFIX_PATH="$QT_SDK"
-		for CONFIGURATION in ${CONFIGURATIONS[@]}; do
-			if [ $CONFIGURATION == "Debug" ]; then
-				DLLSUFFIX="d"
-			else
-				DLLSUFFIX=""
-			fi
-			DIR=$(windowsPathAsUnix "${QT_SDK}")
-			add_runtime_dlls $CONFIGURATION "${DIR}/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
-			add_qt_platform_dlls $CONFIGURATION "${DIR}/plugins/platforms/qwindows${DLLSUFFIX}.dll"
-			add_qt_style_dlls $CONFIGURATION "${DIR}/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
-		done
+		rm -rf Qt
+
+		mkdir Qt
+		cd Qt
+
+		run_cmd "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install $qt_version windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}${SUFFIX}"
+
+		printf "  Cleaning up extraneous data... "
+		rm -rf Qt/{aqtinstall.log,Tools}
+
 		echo Done.
 	fi
+
+	cd $QT_SDK
+	add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
+		-DCMAKE_PREFIX_PATH="$QT_SDK"
+	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+		if [ $CONFIGURATION == "Debug" ]; then
+			DLLSUFFIX="d"
+		else
+			DLLSUFFIX=""
+		fi
+		add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
+		add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
+		add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
+	done
+	echo Done.
 }
 cd $DEPS
 echo

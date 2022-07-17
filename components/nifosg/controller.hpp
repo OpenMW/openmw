@@ -225,6 +225,14 @@ namespace NifOsg
         std::vector<FloatInterpolator> mKeyFrames;
     };
 
+#ifdef _MSC_VER
+#pragma warning( push )
+ /*
+  * Warning C4250: 'NifOsg::KeyframeController': inherits 'osg::Callback::osg::Callback::asCallback' via dominance,
+  * there is no way to solved this if an object must inherit from both osg::Object and osg::Callback
+  */
+#pragma warning( disable : 4250 )
+#endif
     class KeyframeController : public SceneUtil::KeyframeController, public SceneUtil::NodeCallback<KeyframeController, NifOsg::MatrixTransform*>
     {
     public:
@@ -253,6 +261,9 @@ namespace NifOsg
 
         osg::Quat getXYZRotation(float time) const;
     };
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
     class UVController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {

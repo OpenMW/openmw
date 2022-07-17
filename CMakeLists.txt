@@ -715,6 +715,10 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
+    if(OPENMW_MSVC_WERROR)
+        set(WARNINGS "${WARNINGS} /WX")
+    endif()
+
     set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     
@@ -767,7 +771,8 @@ if (WIN32)
     endif()
 
     if (BUILD_BULLETOBJECTTOOL)
-        set_target_properties(openmw-bulletobjecttool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        set(WARNINGS "${WARNINGS} ${MT_BUILD}")
+        set_target_properties(openmw-bulletobjecttool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     endif()
   endif(MSVC)
 
