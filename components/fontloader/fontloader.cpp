@@ -628,8 +628,8 @@ namespace Gui
 
         if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_0")))
             return "DefaultFont";
-        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_1")))
-            return "MonoFont";
+        if (lowerName == "dejavusansmono")
+            return "MonoFont"; // We need to use a TrueType monospace font to display debug texts properly.
         if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_2")))
             return "ScrollFont";
 
@@ -644,8 +644,6 @@ namespace Gui
             return "DefaultFont";
         if (lowerFace == "daedric")
             return "ScrollFont";
-        if (lowerFace == "century gothic")
-            return "MonoFont";
 
         return face;
     }
