@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <map>
+#include <memory>
 
 namespace VFS
 {
@@ -58,8 +59,7 @@ namespace VFS
         void reset();
 
         /// Register the given archive. All files contained in it will be added to the index on the next buildIndex() call.
-        /// @note Takes ownership of the given pointer.
-        void addArchive(Archive* archive);
+        void addArchive(std::unique_ptr<Archive>&& archive);
 
         /// Build the file index. Should be called when all archives have been registered.
         void buildIndex();
@@ -98,7 +98,7 @@ namespace VFS
     private:
         bool mStrict;
 
-        std::vector<Archive*> mArchives;
+        std::vector<std::unique_ptr<Archive>> mArchives;
 
         std::map<std::string, File*> mIndex;
     };
