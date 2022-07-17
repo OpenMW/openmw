@@ -1184,8 +1184,8 @@ void Record<ESM::Region>::print()
     std::cout << "    Thunder: " << (int)mData.mData.mThunder << std::endl;
     std::cout << "    Ash: " << (int)mData.mData.mAsh << std::endl;
     std::cout << "    Blight: " << (int)mData.mData.mBlight << std::endl;
-    std::cout << "    UnknownA: " << (int)mData.mData.mA << std::endl;
-    std::cout << "    UnknownB: " << (int)mData.mData.mB << std::endl;
+    std::cout << "    Snow: " << (int)mData.mData.mSnow << std::endl;
+    std::cout << "    Blizzard: " << (int)mData.mData.mBlizzard << std::endl;
     std::cout << "  Map Color: " << mData.mMapColor << std::endl;
     if (!mData.mSleepList.empty())
         std::cout << "  Sleep List: " << mData.mSleepList << std::endl;

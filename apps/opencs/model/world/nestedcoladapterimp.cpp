@@ -1059,8 +1059,8 @@ namespace CSMWorld
                 case 5: return region.mData.mThunder;
                 case 6: return region.mData.mAsh;
                 case 7: return region.mData.mBlight;
-                case 8: return region.mData.mA; // Snow
-                case 9: return region.mData.mB; // Blizzard
+                case 8: return region.mData.mSnow;
+                case 9: return region.mData.mBlizzard;
                 default: break;
             }
         }
@@ -1086,8 +1086,8 @@ namespace CSMWorld
                 case 5: region.mData.mThunder = chance; break;
                 case 6: region.mData.mAsh = chance; break;
                 case 7: region.mData.mBlight = chance; break;
-                case 8: region.mData.mA = chance; break;
-                case 9: region.mData.mB = chance; break;
+                case 8: region.mData.mSnow = chance; break;
+                case 9: region.mData.mBlizzard = chance; break;
                 default: throw std::runtime_error("index out of range");
             }
 

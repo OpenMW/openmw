@@ -26,15 +26,15 @@ namespace ESM
                 case fourCC("WEAT"):
                 {
                     esm.getSubHeader();
-                    // May include the additional two bytes (but not necessarily)
+                    // Cold weather not included before 1.3
                     if (esm.getSubSize() == sizeof(mData))
                     {
                         esm.getT(mData);
                     }
                     else if (esm.getSubSize() == sizeof(mData) - 2)
                     {
-                        mData.mA = 0;
-                        mData.mB = 0;
+                        mData.mSnow = 0;
+                        mData.mBlizzard = 0;
                         esm.getExact(&mData, sizeof(mData) - 2);
                     }
                     else
@@ -105,7 +105,7 @@ namespace ESM
     {
         mRecordFlags = 0;
         mData.mClear = mData.mCloudy = mData.mFoggy = mData.mOvercast = mData.mRain =
-            mData.mThunder = mData.mAsh = mData.mBlight = mData.mA = mData.mB = 0;
+            mData.mThunder = mData.mAsh = mData.mBlight = mData.mSnow = mData.mBlizzard = 0;
 
         mMapColor = 0;
 

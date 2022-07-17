@@ -286,8 +286,8 @@ namespace
         mChances.push_back(region.mData.mThunder);
         mChances.push_back(region.mData.mAsh);
         mChances.push_back(region.mData.mBlight);
-        mChances.push_back(region.mData.mA);
-        mChances.push_back(region.mData.mB);
+        mChances.push_back(region.mData.mSnow);
+        mChances.push_back(region.mData.mBlizzard);
     }
 
     RegionWeather::RegionWeather(const ESM::RegionWeatherState& state)
