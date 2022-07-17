@@ -1104,9 +1104,9 @@ bool CharacterController::updateState(CharacterState idle)
     const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
     int weaptype = ESM::Weapon::None;
-    if(stats.getDrawState() == DrawState_Weapon)
+    if(stats.getDrawState() == DrawState::Weapon)
         weaptype = ESM::Weapon::HandToHand;
-    else if (stats.getDrawState() == DrawState_Spell)
+    else if (stats.getDrawState() == DrawState::Spell)
         weaptype = ESM::Weapon::Spell;
 
     const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
@@ -1118,7 +1118,7 @@ bool CharacterController::updateState(CharacterState idle)
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weapon = getActiveWeapon(mPtr, &weaptype);
-        if(stats.getDrawState() == DrawState_Spell)
+        if(stats.getDrawState() == DrawState::Spell)
             weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
         if(weapon != inv.end() && mWeaponType != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::Spell && weaptype != ESM::Weapon::None)
@@ -1910,7 +1910,7 @@ void CharacterController::update(float duration)
         else if (canMove)
         {
             float targetMovementAngle = vec.y() >= 0 ? std::atan2(-vec.x(), vec.y()) : std::atan2(vec.x(), -vec.y());
-            movementSettings.mIsStrafing = (stats.getDrawState() != MWMechanics::DrawState_Nothing || inwater)
+            movementSettings.mIsStrafing = (stats.getDrawState() != MWMechanics::DrawState::Nothing || inwater)
                                            && std::abs(targetMovementAngle) > osg::DegreesToRadians(60.0f);
             if (movementSettings.mIsStrafing)
                 targetMovementAngle = 0;
@@ -1929,7 +1929,7 @@ void CharacterController::update(float duration)
         }
 
         mAnimation->setLegsYawRadians(stats.getSideMovementAngle());
-        if (stats.getDrawState() == MWMechanics::DrawState_Nothing || inwater)
+        if (stats.getDrawState() == MWMechanics::DrawState::Nothing || inwater)
             mAnimation->setUpperBodyYawRadians(stats.getSideMovementAngle() / 2);
         else
             mAnimation->setUpperBodyYawRadians(stats.getSideMovementAngle() / 4);

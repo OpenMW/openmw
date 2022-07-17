@@ -72,7 +72,7 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
         return false;
 
-    actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+    actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
 
     AiFollowStorage& storage = state.get<AiFollowStorage>();
 

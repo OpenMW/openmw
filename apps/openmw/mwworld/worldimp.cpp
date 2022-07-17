@@ -3619,7 +3619,7 @@ namespace MWWorld
                 mPlayer->setAttackingOrSpell(false);
             }
 
-            mPlayer->setDrawState(MWMechanics::DrawState_Nothing);
+            mPlayer->setDrawState(MWMechanics::DrawState::Nothing);
             mGoToJail = false;
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);

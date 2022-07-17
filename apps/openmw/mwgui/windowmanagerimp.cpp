@@ -1376,8 +1376,8 @@ namespace MWGui
         mHud->unsetSelectedSpell();
 
         MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
-        if (player->getDrawState() == MWMechanics::DrawState_Spell)
-            player->setDrawState(MWMechanics::DrawState_Nothing);
+        if (player->getDrawState() == MWMechanics::DrawState::Spell)
+            player->setDrawState(MWMechanics::DrawState::Nothing);
 
         mSpellWindow->setTitle("#{sNone}");
     }

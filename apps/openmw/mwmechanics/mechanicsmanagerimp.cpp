@@ -571,7 +571,7 @@ namespace MWMechanics
             x += fDispDiseaseMod;
 
         static const float fDispWeaponDrawn = gmst.find("fDispWeaponDrawn")->mValue.getFloat();
-        if (playerStats.getDrawState() == MWMechanics::DrawState_Weapon)
+        if (playerStats.getDrawState() == MWMechanics::DrawState::Weapon)
             x += fDispWeaponDrawn;
 
         x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).getMagnitude();
@@ -1789,8 +1789,8 @@ namespace MWMechanics
         MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
 
         // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
-        if (npcStats.getDrawState() == MWMechanics::DrawState_Spell)
-            npcStats.setDrawState(MWMechanics::DrawState_Nothing);
+        if (npcStats.getDrawState() == MWMechanics::DrawState::Spell)
+            npcStats.setDrawState(MWMechanics::DrawState::Nothing);
 
         npcStats.setWerewolf(werewolf);
 

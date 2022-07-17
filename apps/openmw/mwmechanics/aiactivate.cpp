@@ -22,7 +22,7 @@ namespace MWMechanics
     {
         const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mObjectId, false); //The target to follow
 
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
 
         // Stop if the target doesn't exist
         // Really we should be checking whether the target is currently registered with the MechanicsManager

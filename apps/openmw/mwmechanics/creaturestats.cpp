@@ -19,7 +19,7 @@ namespace MWMechanics
     int CreatureStats::sActorId = 0;
 
     CreatureStats::CreatureStats()
-        : mDrawState (DrawState_Nothing), mDead (false), mDeathAnimationFinished(false), mDied (false), mMurdered(false), mFriendlyHits (0),
+        : mDrawState (DrawState::Nothing), mDead (false), mDeathAnimationFinished(false), mDied (false), mMurdered(false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false), mAttacked (false),
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
           mHitRecovery(false), mBlock(false), mMovementFlags(0),
@@ -499,12 +499,12 @@ namespace MWMechanics
         }
     }
 
-    DrawState_ CreatureStats::getDrawState() const
+    DrawState CreatureStats::getDrawState() const
     {
         return mDrawState;
     }
 
-    void CreatureStats::setDrawState(DrawState_ state)
+    void CreatureStats::setDrawState(DrawState state)
     {
         mDrawState = state;
     }
@@ -542,7 +542,7 @@ namespace MWMechanics
         state.mLastHitObject = mLastHitObject;
         state.mLastHitAttemptObject = mLastHitAttemptObject;
         state.mRecalcDynamicStats = false;
-        state.mDrawState = mDrawState;
+        state.mDrawState = static_cast<int>(mDrawState);
         state.mLevel = mLevel;
         state.mActorId = mActorId;
         state.mDeathAnimation = mDeathAnimation;
@@ -596,7 +596,7 @@ namespace MWMechanics
         mFallHeight = state.mFallHeight;
         mLastHitObject = state.mLastHitObject;
         mLastHitAttemptObject = state.mLastHitAttemptObject;
-        mDrawState = DrawState_(state.mDrawState);
+        mDrawState = DrawState(state.mDrawState);
         mLevel = state.mLevel;
         mActorId = state.mActorId;
         mDeathAnimation = state.mDeathAnimation;

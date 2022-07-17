@@ -40,7 +40,7 @@ namespace MWMechanics
     void ActionSpell::prepare(const MWWorld::Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(mSpellId);
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Spell);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Spell);
         if (actor.getClass().hasInventoryStore(actor))
         {
             MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
@@ -64,7 +64,7 @@ namespace MWMechanics
     {
         actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(std::string());
         actor.getClass().getInventoryStore(actor).setSelectedEnchantItem(mItem);
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Spell);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Spell);
     }
 
     float ActionEnchantedItem::getCombatRange(bool& isRanged) const
@@ -106,7 +106,7 @@ namespace MWMechanics
                 equip.execute(actor);
             }
         }
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Weapon);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Weapon);
     }
 
     float ActionWeapon::getCombatRange(bool& isRanged) const
@@ -324,7 +324,7 @@ namespace MWMechanics
             static const float fHandToHandReach = gmst.find("fHandToHandReach")->mValue.getFloat();
             dist = fHandToHandReach;
         }
-        else if (stats.getDrawState() == MWMechanics::DrawState_Spell)
+        else if (stats.getDrawState() == MWMechanics::DrawState::Spell)
         {
             dist = 1.0f;
             if (!selectedSpellId.empty())
