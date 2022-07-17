@@ -696,6 +696,7 @@ if (WIN32)
         4100 # Unreferenced formal parameter (-Wunused-parameter)
         4127 # Conditional expression is constant
         4996 # Function was declared deprecated
+        5054 # Deprecated operations between enumerations of different types caused by Qt headers
         )
     
     if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.0" )
