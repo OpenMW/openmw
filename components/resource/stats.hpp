@@ -13,6 +13,11 @@ namespace osg
     class Switch;
 }
 
+namespace osgText
+{
+    class Font;
+}
+
 namespace VFS
 {
     class Manager;
@@ -27,7 +32,11 @@ namespace Resource
         bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
     private:
+        void setUpFonts();
+
         bool _offlineCollect;
+        bool _initFonts;
+        osg::ref_ptr<osgText::Font> _textFont;
     };
 
     class StatsHandler : public osgGA::GUIEventHandler
@@ -65,7 +74,7 @@ namespace Resource
 
         int _resourceStatsChildNum;
 
-        VFS::Manager* _VFS;
+        osg::ref_ptr<osgText::Font> _textFont;
     };
 
     void CollectStatistics(osgViewer::ViewerBase* viewer);
