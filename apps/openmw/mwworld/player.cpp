@@ -152,7 +152,7 @@ namespace MWWorld
         return mSign;
     }
 
-    void Player::setDrawState (MWMechanics::DrawState_ state)
+    void Player::setDrawState (MWMechanics::DrawState state)
     {
          MWWorld::Ptr ptr = getPlayer();
          ptr.getClass().getNpcStats(ptr).setDrawState (state);
@@ -229,7 +229,7 @@ namespace MWWorld
         ptr.getClass().getMovementSettings(ptr).mRotation[1] += roll;
     }
 
-    MWMechanics::DrawState_ Player::getDrawState()
+    MWMechanics::DrawState Player::getDrawState()
     {
          MWWorld::Ptr ptr = getPlayer();
          return ptr.getClass().getNpcStats(ptr).getDrawState();

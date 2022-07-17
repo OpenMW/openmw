@@ -355,11 +355,11 @@ namespace MWInput
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player.getPlayer()))
             return;
 
-        MWMechanics::DrawState_ state = player.getDrawState();
-        if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
-            player.setDrawState(MWMechanics::DrawState_Spell);
+        MWMechanics::DrawState state = player.getDrawState();
+        if (state == MWMechanics::DrawState::Weapon || state == MWMechanics::DrawState::Nothing)
+            player.setDrawState(MWMechanics::DrawState::Spell);
         else
-            player.setDrawState(MWMechanics::DrawState_Nothing);
+            player.setDrawState(MWMechanics::DrawState::Nothing);
     }
 
     void ActionManager::quickLoad()
@@ -390,11 +390,11 @@ namespace MWInput
         else if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player.getPlayer()))
             return;
 
-        MWMechanics::DrawState_ state = player.getDrawState();
-        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-            player.setDrawState(MWMechanics::DrawState_Weapon);
+        MWMechanics::DrawState state = player.getDrawState();
+        if (state == MWMechanics::DrawState::Spell || state == MWMechanics::DrawState::Nothing)
+            player.setDrawState(MWMechanics::DrawState::Weapon);
         else
-            player.setDrawState(MWMechanics::DrawState_Nothing);
+            player.setDrawState(MWMechanics::DrawState::Nothing);
     }
 
     void ActionManager::rest()

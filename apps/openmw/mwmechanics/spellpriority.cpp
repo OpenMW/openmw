@@ -249,7 +249,7 @@ namespace MWMechanics
                     return 0.f;
 
                 // Enemy doesn't attack
-                if (stats.getDrawState() != MWMechanics::DrawState_Weapon)
+                if (stats.getDrawState() != MWMechanics::DrawState::Weapon)
                     return 0.f;
 
                 break;
@@ -270,7 +270,7 @@ namespace MWMechanics
                     return 0.f;
 
                 // Enemy doesn't cast spells
-                if (stats.getDrawState() != MWMechanics::DrawState_Spell)
+                if (stats.getDrawState() != MWMechanics::DrawState::Spell)
                     return 0.f;
 
                 break;
@@ -288,7 +288,7 @@ namespace MWMechanics
                     return 0.f;
 
                 // Enemy doesn't cast spells
-                if (stats.getDrawState() != MWMechanics::DrawState_Spell)
+                if (stats.getDrawState() != MWMechanics::DrawState::Spell)
                     return 0.f;
                 break;
             }

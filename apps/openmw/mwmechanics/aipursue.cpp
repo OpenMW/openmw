@@ -44,7 +44,7 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if (target.getClass().getCreatureStats(target).isDead())
         return true;
 
-    actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+    actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
 
     //Set the target destination
     const osg::Vec3f dest = target.getRefData().getPosition().asVec3();

@@ -416,7 +416,7 @@ namespace MWGui
                 // change draw state only if the item is in player's right hand
                 if (rightHand != store.end() && item == *rightHand)
                 {
-                    MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+                    MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Weapon);
                 }
             }
             else if (key->type == Type_MagicItem)
@@ -432,7 +432,7 @@ namespace MWGui
                 }
 
                 store.setSelectedEnchantItem(it);
-                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
+                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Spell);
             }
         }
         else if (key->type == Type_Magic)
@@ -452,12 +452,12 @@ namespace MWGui
             store.setSelectedEnchantItem(store.end());
             MWBase::Environment::get().getWindowManager()
                 ->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
-            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
+            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Spell);
         }
         else if (key->type == Type_HandToHand)
         {
             store.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, player);
-            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Weapon);
         }
     }
 

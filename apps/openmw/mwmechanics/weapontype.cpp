@@ -11,13 +11,13 @@ namespace MWMechanics
     {
         MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
-        if(stats.getDrawState() == MWMechanics::DrawState_Spell)
+        if(stats.getDrawState() == MWMechanics::DrawState::Spell)
         {
             *weaptype = ESM::Weapon::Spell;
             return inv.end();
         }
 
-        if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
+        if(stats.getDrawState() == MWMechanics::DrawState::Weapon)
         {
             MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             if(weapon == inv.end())

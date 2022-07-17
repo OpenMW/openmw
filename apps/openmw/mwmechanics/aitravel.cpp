@@ -68,7 +68,7 @@ namespace MWMechanics
         const osg::Vec3f targetPos(mX, mY, mZ);
 
         stats.setMovementFlag(CreatureStats::Flag_Run, false);
-        stats.setDrawState(DrawState_Nothing);
+        stats.setDrawState(DrawState::Nothing);
 
         // Note: we should cancel internal "return after combat" package, if original location is too far away
         if (!isWithinMaxRange(targetPos, actorPos))

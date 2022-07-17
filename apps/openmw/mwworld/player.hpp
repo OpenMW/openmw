@@ -86,8 +86,8 @@ namespace MWWorld
         void setBirthSign(const std::string &sign);
         const std::string &getBirthSign() const;
 
-        void setDrawState (MWMechanics::DrawState_ state);
-        MWMechanics::DrawState_ getDrawState(); /// \todo constness
+        void setDrawState (MWMechanics::DrawState state);
+        MWMechanics::DrawState getDrawState(); /// \todo constness
 
         /// Activate the object under the crosshair, if any
         void activate();

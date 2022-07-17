@@ -178,7 +178,7 @@ bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
                 const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
                 if (shield != inv.end() && shield->getType() == ESM::Armor::sRecordId && !getSheathedShieldMesh(*shield).empty())
                 {
-                    if(stats.getDrawState() != MWMechanics::DrawState_Weapon)
+                    if(stats.getDrawState() != MWMechanics::DrawState::Weapon)
                         return false;
 
                     if (weapon != inv.end())

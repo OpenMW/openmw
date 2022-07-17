@@ -38,7 +38,7 @@ namespace MWMechanics
     class CreatureStats
     {
         static int sActorId;
-        DrawState_ mDrawState;
+        DrawState mDrawState;
         AttributeValue mAttributes[ESM::Attribute::Length];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         Spells mSpells;
@@ -98,8 +98,8 @@ namespace MWMechanics
     public:
         CreatureStats();
 
-        DrawState_ getDrawState() const;
-        void setDrawState(DrawState_ state);
+        DrawState getDrawState() const;
+        void setDrawState(DrawState state);
 
         void recalculateMagicka();
 

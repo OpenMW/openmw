@@ -190,7 +190,7 @@ namespace
 
         // change draw state only if the item is in player's right hand
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
-            player.setDrawState(MWMechanics::DrawState_Weapon);
+            player.setDrawState(MWMechanics::DrawState::Weapon);
 
         if (prevItem != store.end())
             player.setPreviousItem(itemId, prevItem->getCellRef().getRefId());

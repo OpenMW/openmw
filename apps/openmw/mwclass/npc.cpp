@@ -995,7 +995,7 @@ namespace MWClass
         else
             moveSpeed = getWalkSpeed(ptr);
 
-        if(stats.isWerewolf() && running && stats.getDrawState() == MWMechanics::DrawState_Nothing)
+        if(stats.isWerewolf() && running && stats.getDrawState() == MWMechanics::DrawState::Nothing)
             moveSpeed *= gmst.fWereWolfRunMult->mValue.getFloat();
 
         return moveSpeed;

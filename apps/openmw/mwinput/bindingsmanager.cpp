@@ -709,8 +709,8 @@ namespace MWInput
                 else
                 {
                     MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-                    MWMechanics::DrawState_ state = player.getDrawState();
-                    player.setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState_Nothing);
+                    MWMechanics::DrawState state = player.getDrawState();
+                    player.setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState::Nothing);
                 }
             }
             else if (action == A_Jump)
