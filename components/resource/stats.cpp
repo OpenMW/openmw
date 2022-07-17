@@ -30,7 +30,7 @@ static bool collectStatFrameRate = false;
 static bool collectStatUpdate = false;
 static bool collectStatEngine = false;
 
-inline static std::string sFontName = "Fonts\\DejaVuLGCSansMono.ttf";
+static std::string sFontName = "Fonts/DejaVuLGCSansMono.ttf";
 
 static void setupStatCollection()
 {

@@ -14,6 +14,28 @@ namespace Misc
         }
         return {};
     }
+
+    inline std::string_view getFileName(std::string_view path)
+    {
+        if (auto namePos = path.find_last_of("/\\"); namePos != std::string::npos)
+        {
+            path.remove_prefix(namePos + 1);
+        }
+
+        return path;
+    }
+
+    inline std::string_view stemFile(std::string_view path)
+    {
+        path = getFileName(path);
+
+        if (auto extPos = path.find_last_of("."); extPos != std::string::npos)
+        {
+            path.remove_suffix(path.size() - extPos);
+        }
+
+        return path;
+    }
 }
 
 #endif

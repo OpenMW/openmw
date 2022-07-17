@@ -1,6 +1,5 @@
 #include "fontloader.hpp"
 
-#include <filesystem>
 #include <stdexcept>
 #include <string_view>
 #include <array>
@@ -199,10 +198,10 @@ namespace Gui
 
     void FontLoader::loadBitmapFonts(bool exportToFile)
     {
-        for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
+        for (const auto& path : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
-            if (Misc::getFileExtension(name) == "fnt")
-                loadBitmapFont(name, exportToFile);
+            if (Misc::getFileExtension(path) == "fnt")
+                loadBitmapFont(path, exportToFile);
         }
     }
 
@@ -218,11 +217,10 @@ namespace Gui
         std::string oldDataPath = dataManager->getDataPath("");
         dataManager->setResourcePath("fonts");
 
-        for (const auto& name : mVFS->getRecursiveDirectoryIterator("Fonts/"))
+        for (const auto& path : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
-            std::filesystem::path path = name;
-            if (Misc::getFileExtension(name) == "omwfont")
-                MyGUI::ResourceManager::getInstance().load(path.filename().string());
+            if (Misc::getFileExtension(path) == "omwfont")
+                MyGUI::ResourceManager::getInstance().load(std::string(Misc::getFileName(path)));
         }
 
         dataManager->setResourcePath(oldDataPath);
@@ -344,7 +342,7 @@ namespace Gui
         MyGUI::xml::Document xmlDocument;
         MyGUI::xml::ElementPtr root = xmlDocument.createRoot("ResourceManualFont");
 
-        const std::string baseName = Misc::StringUtils::lowerCase(std::filesystem::path(mVFS->getAbsoluteFileName(fileName)).stem().string());
+        std::string baseName(Misc::stemFile(fileName));
         root->addAttribute("name", getInternalFontName(baseName));
 
         MyGUI::xml::ElementPtr defaultHeight = root->createChild("Property");

@@ -162,5 +162,3 @@ set(BUILTIN_DATA_FILES
 foreach (f ${BUILTIN_DATA_FILES})
     copy_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${OPENMW_RESOURCES_ROOT}" "resources/vfs/${f}")
 endforeach (f)
-
-copy_resource_file("../launcher/images/openmw.png" "${OPENMW_RESOURCES_ROOT}" "resources/openmw.png")

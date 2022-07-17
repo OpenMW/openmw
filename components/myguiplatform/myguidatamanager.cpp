@@ -22,10 +22,9 @@ MyGUI::IDataStream *DataManager::getData(const std::string &name) const
 {
     // Note: MyGUI is supposed to read/free input steam itself,
     // so copy data from VFS stream to the string stream and pass it to MyGUI.
-    Files::IStreamPtr streamPtr = mVfs->get(mResourcePath + "\\" + name);
+    Files::IStreamPtr streamPtr = mVfs->get(mResourcePath + "/" + name);
     std::istream* fileStream = streamPtr.get();
-    std::unique_ptr<std::stringstream> dataStream;
-    dataStream.reset(new std::stringstream);
+    auto dataStream = std::make_unique<std::stringstream>();
     *dataStream << fileStream->rdbuf();
     return new MyGUI::DataStream(dataStream.release());
 }
@@ -37,7 +36,7 @@ void DataManager::freeData(MyGUI::IDataStream *data)
 
 bool DataManager::isDataExist(const std::string &name) const
 {
-    return mVfs->exists(mResourcePath + "\\" + name);
+    return mVfs->exists(mResourcePath + "/" + name);
 }
 
 void DataManager::setVfs(const VFS::Manager* vfs)
@@ -61,7 +60,7 @@ const std::string &DataManager::getDataPath(const std::string &name) const
     if (!isDataExist(name))
         return result;
 
-    result = mResourcePath + "\\" + name;
+    result = mResourcePath + "/" + name;
     return result;
 }
 
