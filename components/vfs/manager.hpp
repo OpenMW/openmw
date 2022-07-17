@@ -66,34 +66,34 @@ namespace VFS
 
         /// Does a file with this name exist?
         /// @note May be called from any thread once the index has been built.
-        bool exists(const std::string& name) const;
+        bool exists(std::string_view name) const;
 
         /// Normalize the given filename, making slashes/backslashes consistent, and lower-casing if mStrict is false.
         /// @note May be called from any thread once the index has been built.
-        [[nodiscard]] std::string normalizeFilename(const std::string& name) const;
+        [[nodiscard]] std::string normalizeFilename(std::string_view name) const;
 
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
-        Files::IStreamPtr get(const std::string& name) const;
+        Files::IStreamPtr get(std::string_view name) const;
 
         /// Retrieve a file by name (name is already normalized).
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
         Files::IStreamPtr getNormalized(const std::string& normalizedName) const;
 
-        std::string getArchive(const std::string& name) const;
+        std::string getArchive(std::string_view name) const;
 
         /// Recursivly iterate over the elements of the given path
         /// In practice it return all files of the VFS starting with the given path
         /// @note the path is normalized
         /// @note May be called from any thread once the index has been built.
-        RecursiveDirectoryRange getRecursiveDirectoryIterator(const std::string& path) const;
+        RecursiveDirectoryRange getRecursiveDirectoryIterator(std::string_view path) const;
 
         /// Retrieve the absolute path to the file
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
-        std::string getAbsoluteFileName(const std::string& name) const;
+        std::string getAbsoluteFileName(std::string_view name) const;
 
     private:
         bool mStrict;

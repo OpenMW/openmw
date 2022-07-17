@@ -57,9 +57,9 @@ namespace VFS
             archive->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
     }
 
-    Files::IStreamPtr Manager::get(const std::string &name) const
+    Files::IStreamPtr Manager::get(std::string_view name) const
     {
-        std::string normalized = name;
+        std::string normalized(name);
         normalize_path(normalized, mStrict);
 
         return getNormalized(normalized);
@@ -73,24 +73,24 @@ namespace VFS
         return found->second->open();
     }
 
-    bool Manager::exists(const std::string &name) const
+    bool Manager::exists(std::string_view name) const
     {
-        std::string normalized = name;
+        std::string normalized(name);
         normalize_path(normalized, mStrict);
 
         return mIndex.find(normalized) != mIndex.end();
     }
 
-    std::string Manager::normalizeFilename(const std::string& name) const
+    std::string Manager::normalizeFilename(std::string_view name) const
     {
-        std::string result = name;
+        std::string result(name);
         normalize_path(result, mStrict);
         return result;
     }
 
-    std::string Manager::getArchive(const std::string& name) const
+    std::string Manager::getArchive(std::string_view name) const
     {
-        std::string normalized = name;
+        std::string normalized(name);
         normalize_path(normalized, mStrict);
         for(auto it = mArchives.rbegin(); it != mArchives.rend(); ++it)
         {
@@ -100,9 +100,9 @@ namespace VFS
         return {};
     }
 
-    std::string Manager::getAbsoluteFileName(const std::string& name) const
+    std::string Manager::getAbsoluteFileName(std::string_view name) const
     {
-        std::string normalized = name;
+        std::string normalized(name);
         normalize_path(normalized, mStrict);
 
         std::map<std::string, File*>::const_iterator found = mIndex.find(normalized);
@@ -119,7 +119,7 @@ namespace VFS
         }
     }
 
-    Manager::RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(const std::string& path) const
+    Manager::RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(std::string_view path) const
     {
         if (path.empty())
             return { mIndex.begin(), mIndex.end() };
