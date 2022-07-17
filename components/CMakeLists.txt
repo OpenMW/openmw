@@ -337,7 +337,22 @@ add_component_dir(navmeshtool
 
 add_component_dir(platform
     platform
+    file
     )
+
+if (WIN32)
+    add_component_dir(platform
+        file.win32
+        )
+elseif (UNIX)
+    add_component_dir(platform
+        file.posix
+        )
+else ()
+    add_component_dir(platform
+        file.stdio
+        )
+endif()
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
