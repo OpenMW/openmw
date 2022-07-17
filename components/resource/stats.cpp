@@ -31,7 +31,7 @@ static bool collectStatFrameRate = false;
 static bool collectStatUpdate = false;
 static bool collectStatEngine = false;
 
-static std::string sFontName = "Fonts/DejaVuLGCSansMono.ttf";
+constexpr std::string_view sFontName = "Fonts/DejaVuLGCSansMono.ttf";
 
 static void setupStatCollection()
 {
