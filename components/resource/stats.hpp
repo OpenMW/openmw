@@ -61,11 +61,11 @@ namespace Resource
         float                               _statsWidth;
         float                               _statsHeight;
 
-        std::string                         _font;
         float                               _characterSize;
 
         int _resourceStatsChildNum;
 
+        VFS::Manager* _VFS;
     };
 
     void CollectStatistics(osgViewer::ViewerBase* viewer);

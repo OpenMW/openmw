@@ -6,6 +6,7 @@
 
 #include <osg/PolygonMode>
 
+#include <osgText/Font>
 #include <osgText/Text>
 
 #include <osgDB/Registry>
@@ -90,8 +91,8 @@ StatsHandler::StatsHandler(bool offlineCollect, VFS::Manager* vfs):
     _offlineCollect(offlineCollect),
     _statsWidth(1280.0f),
     _statsHeight(1024.0f),
-    _font(""),
-    _characterSize(18.0f)
+    _characterSize(18.0f),
+    _VFS(vfs)
 {
     _camera = new osg::Camera;
     _camera->getOrCreateStateSet()->setGlobalDefaults();
@@ -99,11 +100,6 @@ StatsHandler::StatsHandler(bool offlineCollect, VFS::Manager* vfs):
     _camera->setProjectionResizePolicy(osg::Camera::FIXED);
 
     _resourceStatsChildNum = 0;
-
-    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf") && vfs->exists(sFontName))
-    {
-        _font = vfs->getAbsoluteFileName(sFontName);
-    }
 }
 
 Profiler::Profiler(bool offlineCollect, VFS::Manager* vfs):
@@ -431,7 +427,6 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         osg::ref_ptr<osgText::Text> staticText = new osgText::Text;
         group->addChild( staticText.get() );
         staticText->setColor(staticTextColor);
-        staticText->setFont(_font);
         staticText->setCharacterSize(_characterSize);
         staticText->setPosition(pos);
 
@@ -457,11 +452,19 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         group->addChild( statsText.get() );
 
         statsText->setColor(dynamicTextColor);
-        statsText->setFont(_font);
         statsText->setCharacterSize(_characterSize);
         statsText->setPosition(pos);
         statsText->setText("");
         statsText->setDrawCallback(new ResourceStatsTextDrawCallback(viewer->getViewerStats(), statNames));
+
+        if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf") && _VFS->exists(sFontName))
+        {
+            Files::IStreamPtr streamPtr = _VFS->get(sFontName);
+            osg::ref_ptr<osgText::Font> font = osgText::readRefFontStream(*streamPtr.get());
+
+            staticText->setFont(font);
+            statsText->setFont(font);
+        }
     }
 }
 
