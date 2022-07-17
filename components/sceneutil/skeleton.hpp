@@ -15,20 +15,15 @@ namespace SceneUtil
     {
     public:
         Bone();
-        ~Bone();
 
         osg::Matrixf mMatrixInSkeletonSpace;
 
         osg::MatrixTransform* mNode;
 
-        std::vector<Bone*> mChildren;
+        std::vector<std::unique_ptr<Bone>> mChildren;
 
         /// Update the skeleton-space matrix of this bone and all its children.
         void update(const osg::Matrixf* parentMatrixInSkeletonSpace);
-
-    private:
-        Bone(const Bone&);
-        void operator=(const Bone&);
     };
 
     /// @brief Handles the bone matrices for any number of child RigGeometries.

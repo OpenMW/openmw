@@ -80,15 +80,16 @@ Bone* Skeleton::getBone(const std::string &name)
         {
             if (bone->mChildren[i]->mNode == matrixTransform)
             {
-                child = bone->mChildren[i];
+                child = bone->mChildren[i].get();
                 break;
             }
         }
 
-        if (!child)
+        if (child == nullptr)
         {
-            child = new Bone;
-            bone->mChildren.push_back(child);
+            auto childBone = std::make_unique<Bone>();
+            child = childBone.get();
+            bone->mChildren.push_back(std::move(childBone));
             mNeedToUpdateBoneMatrices = true;
         }
         bone = child;
@@ -163,13 +164,6 @@ void Skeleton::childRemoved(unsigned int, unsigned int)
 Bone::Bone()
     : mNode(nullptr)
 {
-}
-
-Bone::~Bone()
-{
-    for (unsigned int i=0; i<mChildren.size(); ++i)
-        delete mChildren[i];
-    mChildren.clear();
 }
 
 void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
