@@ -5,6 +5,8 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
+#include <algorithm>
+
 namespace SceneUtil
 {
 
@@ -75,24 +77,16 @@ Bone* Skeleton::getBone(const std::string &name)
     Bone* bone = mRootBone.get();
     for (osg::MatrixTransform* matrixTransform : found->second)
     {
-        Bone* child = nullptr;
-        for (unsigned int i=0; i<bone->mChildren.size(); ++i)
-        {
-            if (bone->mChildren[i]->mNode == matrixTransform)
-            {
-                child = bone->mChildren[i].get();
-                break;
-            }
-        }
+        const auto it = std::find_if(bone->mChildren.begin(), bone->mChildren.end(),
+                                     [&] (const auto& v) { return v->mNode == matrixTransform; });
 
-        if (child == nullptr)
+        if (it == bone->mChildren.end())
         {
-            auto childBone = std::make_unique<Bone>();
-            child = childBone.get();
-            bone->mChildren.push_back(std::move(childBone));
+            bone = bone->mChildren.emplace_back(std::make_unique<Bone>()).get();
             mNeedToUpdateBoneMatrices = true;
         }
-        bone = child;
+        else
+            bone = it->get();
 
         bone->mNode = matrixTransform;
     }
@@ -111,8 +105,8 @@ void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
     {
         if (mRootBone.get())
         {
-            for (unsigned int i=0; i<mRootBone->mChildren.size(); ++i)
-                mRootBone->mChildren[i]->update(nullptr);
+            for (const auto& child : mRootBone->mChildren)
+                child->update(nullptr);
         }
 
         mNeedToUpdateBoneMatrices = false;
@@ -178,10 +172,8 @@ void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
     else
         mMatrixInSkeletonSpace = mNode->getMatrix();
 
-    for (unsigned int i=0; i<mChildren.size(); ++i)
-    {
-        mChildren[i]->update(&mMatrixInSkeletonSpace);
-    }
+    for (const auto& child : mChildren)
+        child->update(&mMatrixInSkeletonSpace);
 }
 
 }
