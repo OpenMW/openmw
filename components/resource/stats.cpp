@@ -104,6 +104,17 @@ private:
     osgText::Font* mFont;
 };
 
+osg::ref_ptr<osgText::Font> getMonoFont(VFS::Manager* vfs)
+{
+    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf") && vfs->exists(sFontName))
+    {
+        Files::IStreamPtr streamPtr = vfs->get(sFontName);
+        return osgText::readRefFontStream(*streamPtr.get());
+    }
+
+    return nullptr;
+}
+
 StatsHandler::StatsHandler(bool offlineCollect, VFS::Manager* vfs):
     _key(osgGA::GUIEventAdapter::KEY_F4),
     _initialized(false),
@@ -120,11 +131,7 @@ StatsHandler::StatsHandler(bool offlineCollect, VFS::Manager* vfs):
 
     _resourceStatsChildNum = 0;
 
-    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf") && vfs->exists(sFontName))
-    {
-        Files::IStreamPtr streamPtr = vfs->get(sFontName);
-        _textFont = osgText::readRefFontStream(*streamPtr.get());
-    }
+    _textFont = getMonoFont(vfs);
 }
 
 Profiler::Profiler(bool offlineCollect, VFS::Manager* vfs):
@@ -134,11 +141,7 @@ Profiler::Profiler(bool offlineCollect, VFS::Manager* vfs):
     _characterSize = 18;
     _font.clear();
 
-    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf") && vfs->exists(sFontName))
-    {
-        Files::IStreamPtr streamPtr = vfs->get(sFontName);
-        _textFont = osgText::readRefFontStream(*streamPtr.get());
-    }
+    _textFont = getMonoFont(vfs);
 
     setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
     setupStatCollection();
