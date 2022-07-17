@@ -7,7 +7,7 @@
 
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
-#include "aistate.hpp"
+#include "aitemporarybase.hpp"
 #include "aitimer.hpp"
 
 namespace ESM

@@ -767,7 +767,7 @@ namespace MWMechanics
 
         ToWorldCoordinates(dest, actor.getCell()->getCell());
 
-        state.moveIn(new AiWanderStorage());
+        state.moveIn(std::make_unique<AiWanderStorage>());
 
         osg::Vec3f pos(static_cast<float>(dest.mX), static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         MWBase::Environment::get().getWorld()->moveObject(actor, pos);

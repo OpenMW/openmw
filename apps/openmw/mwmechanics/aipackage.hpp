@@ -4,12 +4,13 @@
 #include <memory>
 
 #include <components/detournavigator/areatype.hpp>
- 
+
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
-#include "aistate.hpp"
 #include "aipackagetypeid.hpp"
 #include "aitimer.hpp"
+#include "aistatefwd.hpp"
+
 #include "../mwworld/ptr.hpp"
 
 namespace ESM

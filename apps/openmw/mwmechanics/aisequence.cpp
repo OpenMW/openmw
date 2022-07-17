@@ -419,9 +419,9 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
     // Make sure that temporary storage is empty
     if (cancelOther)
     {
-        mAiState.moveIn(new AiCombatStorage());
-        mAiState.moveIn(new AiFollowStorage());
-        mAiState.moveIn(new AiWanderStorage());
+        mAiState.moveIn(std::make_unique<AiCombatStorage>());
+        mAiState.moveIn(std::make_unique<AiFollowStorage>());
+        mAiState.moveIn(std::make_unique<AiWanderStorage>());
     }
 }
 
