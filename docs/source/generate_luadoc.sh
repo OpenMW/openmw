@@ -33,7 +33,6 @@ fi
 
 if [ ! -x "${DOCUMENTOR_PATH:?}" ]; then
     # running on Windows?
-    echo windows
     DOCUMENTOR_PATH="${APPDATA:?}/LuaRocks/bin/openmwluadocumentor.bat"
 fi
 
