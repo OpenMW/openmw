@@ -1,7 +1,4 @@
-#include "platform.internal.hpp"
 #include "file.hpp"
-
-#if PLATFORM_TYPE == PLATFORM_TYPE_POSIX
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -100,5 +97,3 @@ namespace Platform::File {
     }
 
 }
-
-#endif

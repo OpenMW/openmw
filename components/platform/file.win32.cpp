@@ -1,7 +1,4 @@
-#include "platform.internal.hpp"
 #include "file.hpp"
-
-#if PLATFORM_TYPE == PLATFORM_TYPE_WIN32
 
 #include <components/windows.hpp>
 #include <string>
@@ -97,5 +94,3 @@ namespace Platform::File {
         return bytesRead;
     }
 }
-
-#endif

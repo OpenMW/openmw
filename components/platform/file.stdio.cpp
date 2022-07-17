@@ -1,7 +1,4 @@
-#include "platform.internal.hpp"
 #include "file.hpp"
-
-#if PLATFORM_TYPE == PLATFORM_TYPE_STDIO
 
 #include <errno.h>
 #include <string.h>
@@ -89,5 +86,3 @@ namespace Platform::File {
     }
 
 }
-
-#endif
