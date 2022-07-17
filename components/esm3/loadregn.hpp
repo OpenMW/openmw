@@ -29,11 +29,7 @@ struct Region
     struct WEATstruct
     {
         // These are probabilities that add up to 100
-        unsigned char mClear, mCloudy, mFoggy, mOvercast, mRain, mThunder, mAsh, mBlight,
-        // Unknown weather, probably snow and something. Only
-        // present in file version 1.3.
-        // the engine uses mA as "snow" and mB as "blizard"
-                mA, mB;
+        unsigned char mClear, mCloudy, mFoggy, mOvercast, mRain, mThunder, mAsh, mBlight, mSnow, mBlizzard;
     }; // 10 bytes
 #pragma pack(pop)
 
