@@ -583,20 +583,23 @@ void CharacterController::refreshMovementAnims(CharacterState movement, bool for
 
     MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
 
-    std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
-    if (swimpos == std::string::npos && !weapShortGroup.empty())
+    if(isRealWeapon(mWeaponType) || mPtr.getClass().isBipedal(mPtr))
     {
-        std::string weapMovementAnimName;
-        // Spellcasting stance turning is a special case
-        if (mWeaponType == ESM::Weapon::Spell && isTurning())
-            weapMovementAnimName = weapShortGroup + movementAnimName;
-        else
-            weapMovementAnimName = movementAnimName + weapShortGroup;
+        std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
+        if (swimpos == std::string::npos && !weapShortGroup.empty())
+        {
+            std::string weapMovementAnimName;
+            // Spellcasting stance turning is a special case
+            if (mWeaponType == ESM::Weapon::Spell && isTurning())
+                weapMovementAnimName = weapShortGroup + movementAnimName;
+            else
+                weapMovementAnimName = movementAnimName + weapShortGroup;
 
-        if (!mAnimation->hasAnimation(weapMovementAnimName))
-            weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
+            if (!mAnimation->hasAnimation(weapMovementAnimName))
+                weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
 
-        movementAnimName = weapMovementAnimName;
+            movementAnimName = weapMovementAnimName;
+        }
     }
 
     if (!mAnimation->hasAnimation(movementAnimName))
