@@ -12,6 +12,7 @@
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/aiwander.hpp"
 #include "../mwmechanics/aipackage.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "luamanagerimp.hpp"
 

@@ -22,6 +22,7 @@
 
 #include "../mwmechanics/spellutil.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "tooltips.hpp"
 #include "class.hpp"

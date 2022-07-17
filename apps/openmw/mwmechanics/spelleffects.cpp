@@ -40,7 +40,7 @@ namespace
         return effect.mMinMagnitude + Misc::Rng::rollDice(effect.mMaxMagnitude - effect.mMinMagnitude + 1, prng);
     }
 
-    void modifyAiSetting(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, ESM::MagicEffect::Effects creatureEffect, MWMechanics::CreatureStats::AiSetting setting, float magnitude, bool& invalid)
+    void modifyAiSetting(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, ESM::MagicEffect::Effects creatureEffect, MWMechanics::AiSetting setting, float magnitude, bool& invalid)
     {
         if(target == MWMechanics::getPlayer() || (effect.mEffectId == creatureEffect) == target.getClass().isNpc())
             invalid = true;
@@ -501,18 +501,18 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
             else
             {
                 auto& creatureStats = target.getClass().getCreatureStats(target);
-                Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
+                Stat<int> stat = creatureStats.getAiSetting(AiSetting::Flee);
                 stat.setModifier(static_cast<int>(stat.getModifier() + effect.mMagnitude));
-                creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
+                creatureStats.setAiSetting(AiSetting::Flee, stat);
             }
             break;
         case ESM::MagicEffect::FrenzyCreature:
         case ESM::MagicEffect::FrenzyHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, CreatureStats::AI_Fight, effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, AiSetting::Fight, effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::CalmCreature:
         case ESM::MagicEffect::CalmHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, CreatureStats::AI_Fight, -effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, AiSetting::Fight, -effect.mMagnitude, invalid);
             if(!invalid && effect.mMagnitude > 0)
             {
                 auto& creatureStats = target.getClass().getCreatureStats(target);
@@ -521,11 +521,11 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
             break;
         case ESM::MagicEffect::DemoralizeCreature:
         case ESM::MagicEffect::DemoralizeHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::DemoralizeCreature, CreatureStats::AI_Flee, effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::DemoralizeCreature, AiSetting::Flee, effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::RallyCreature:
         case ESM::MagicEffect::RallyHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, CreatureStats::AI_Flee, -effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, -effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::SummonScamp:
         case ESM::MagicEffect::SummonClannfear:
@@ -1006,26 +1006,26 @@ void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellPara
         case ESM::MagicEffect::TurnUndead:
             {
                 auto& creatureStats = target.getClass().getCreatureStats(target);
-                Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
+                Stat<int> stat = creatureStats.getAiSetting(AiSetting::Flee);
                 stat.setModifier(static_cast<int>(stat.getModifier() - effect.mMagnitude));
-                creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
+                creatureStats.setAiSetting(AiSetting::Flee, stat);
             }
             break;
         case ESM::MagicEffect::FrenzyCreature:
         case ESM::MagicEffect::FrenzyHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, CreatureStats::AI_Fight, -effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, AiSetting::Fight, -effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::CalmCreature:
         case ESM::MagicEffect::CalmHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, CreatureStats::AI_Fight, effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, AiSetting::Fight, effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::DemoralizeCreature:
         case ESM::MagicEffect::DemoralizeHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::DemoralizeCreature, CreatureStats::AI_Flee, -effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::DemoralizeCreature, AiSetting::Flee, -effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::RallyCreature:
         case ESM::MagicEffect::RallyHumanoid:
-            modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, CreatureStats::AI_Flee, effect.mMagnitude, invalid);
+            modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, effect.mMagnitude, invalid);
             break;
         case ESM::MagicEffect::SummonScamp:
         case ESM::MagicEffect::SummonClannfear:

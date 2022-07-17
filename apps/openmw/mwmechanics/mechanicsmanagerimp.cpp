@@ -678,11 +678,11 @@ namespace MWMechanics
             {
                 float s = floor(r * fPerDieRollMult * fPerTempMult);
 
-                int flee = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Flee).getBase();
-                int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
-                npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee,
+                const int flee = npcStats.getAiSetting(MWMechanics::AiSetting::Flee).getBase();
+                const int fight = npcStats.getAiSetting(MWMechanics::AiSetting::Fight).getBase();
+                npcStats.setAiSetting (MWMechanics::AiSetting::Flee,
                                        std::clamp(flee + int(std::max(iPerMinChange, s)), 0, 100));
-                npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight,
+                npcStats.setAiSetting (MWMechanics::AiSetting::Fight,
                                        std::clamp(fight + int(std::min(-iPerMinChange, -s)), 0, 100));
             }
 
@@ -719,11 +719,11 @@ namespace MWMechanics
             if (success)
             {
                 float s = c * fPerDieRollMult * fPerTempMult;
-                int flee = npcStats.getAiSetting (CreatureStats::AI_Flee).getBase();
-                int fight = npcStats.getAiSetting (CreatureStats::AI_Fight).getBase();
-                npcStats.setAiSetting(CreatureStats::AI_Flee,
+                const int flee = npcStats.getAiSetting(AiSetting::Flee).getBase();
+                const int fight = npcStats.getAiSetting(AiSetting::Fight).getBase();
+                npcStats.setAiSetting(AiSetting::Flee,
                                        std::clamp(flee + std::min(-int(iPerMinChange), int(-s)), 0, 100));
-                npcStats.setAiSetting(CreatureStats::AI_Fight,
+                npcStats.setAiSetting(AiSetting::Fight,
                                        std::clamp(fight + std::max(int(iPerMinChange), int(s)), 0, 100));
             }
             x = floor(-c * fPerDieRollMult);
@@ -1297,7 +1297,7 @@ namespace MWMechanics
                 continue;
 
             // Will the witness report the crime?
-            if (actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
+            if (actor.getClass().getCreatureStats(actor).getAiSetting(AiSetting::Alarm).getBase() >= 100)
             {
                 reported = true;
 
@@ -1329,7 +1329,7 @@ namespace MWMechanics
             {
                 float dispTerm = (actor == victim) ? dispVictim : disp;
 
-                float alarmTerm = 0.01f * actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Alarm).getBase();
+                float alarmTerm = 0.01f * actor.getClass().getCreatureStats(actor).getAiSetting(AiSetting::Alarm).getBase();
                 if (type == OT_Pickpocket && alarmTerm <= 0)
                     alarmTerm = 1.0;
 
@@ -1341,7 +1341,7 @@ namespace MWMechanics
                 fightTerm += getFightDistanceBias(actor, player);
                 fightTerm *= alarmTerm;
 
-                int observerFightRating = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Fight).getBase();
+                const int observerFightRating = actor.getClass().getCreatureStats(actor).getAiSetting(AiSetting::Fight).getBase();
                 if (observerFightRating + fightTerm > 100)
                     fightTerm = static_cast<float>(100 - observerFightRating);
                 fightTerm = std::max(0.f, fightTerm);
@@ -1353,7 +1353,7 @@ namespace MWMechanics
                     NpcStats& observerStats = actor.getClass().getNpcStats(actor);
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
-                    observerStats.setAiSetting(CreatureStats::AI_Fight, observerFightRating + static_cast<int>(fightTerm));
+                    observerStats.setAiSetting(AiSetting::Fight, observerFightRating + static_cast<int>(fightTerm));
 
                     observerStats.setBaseDisposition(observerStats.getBaseDisposition() + static_cast<int>(dispTerm));
 
@@ -1452,7 +1452,7 @@ namespace MWMechanics
                 std::string script = target.getClass().getScript(target);
                 if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == player)
                 {
-                    int fight = target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified();
+                    const int fight = target.getClass().getCreatureStats(target).getAiSetting(AiSetting::Fight).getModified();
                     peaceful = (fight == 0);
                 }
 
@@ -1736,7 +1736,7 @@ namespace MWMechanics
         if (ptr.getClass().isNpc())
             disposition = getDerivedDisposition(ptr);
 
-        int fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
+        int fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(AiSetting::Fight).getModified()
                 + static_cast<int>(getFightDistanceBias(ptr, target) + getFightDispositionBias(static_cast<float>(disposition)));
 
         if (ptr.getClass().isNpc() && target.getClass().isNpc())
@@ -1851,7 +1851,7 @@ namespace MWMechanics
                 if (MWBase::Environment::get().getWorld()->getLOS(neighbor, actor) && awarenessCheck(actor, neighbor))
                 {
                     detected = true;
-                    if (neighbor.getClass().getCreatureStats(neighbor).getAiSetting(MWMechanics::CreatureStats::AI_Alarm).getModified() > 0)
+                    if (neighbor.getClass().getCreatureStats(neighbor).getAiSetting(MWMechanics::AiSetting::Alarm).getModified() > 0)
                     {
                         reported = true;
                         break;

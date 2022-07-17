@@ -134,7 +134,7 @@ namespace MWClass
             void adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const override;
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
-            void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const override;
+            void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const override;
 
             void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const override;
 

@@ -6,6 +6,9 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
+#include "../mwmechanics/magiceffects.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+
 #include <components/esm3/loadmgef.hpp>
 
 namespace MWMechanics

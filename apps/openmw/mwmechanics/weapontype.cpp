@@ -1,5 +1,8 @@
 #include "weapontype.hpp"
 
+#include "drawstate.hpp"
+#include "creaturestats.hpp"
+
 #include "../mwworld/class.hpp"
 
 namespace MWMechanics

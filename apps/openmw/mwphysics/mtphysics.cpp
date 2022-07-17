@@ -16,7 +16,10 @@
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwrender/bulletdebugdraw.hpp"
+
 #include "../mwworld/class.hpp"
 
 #include "../mwbase/environment.hpp"

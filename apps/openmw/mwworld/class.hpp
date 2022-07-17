@@ -11,7 +11,8 @@
 
 #include "ptr.hpp"
 #include "doorstate.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+
+#include "../mwmechanics/aisetting.hpp"
 
 namespace ESM
 {
@@ -32,6 +33,7 @@ namespace MWMechanics
 {
     class NpcStats;
     struct Movement;
+    class CreatureStats;
 }
 
 namespace MWGui
@@ -361,7 +363,7 @@ namespace MWWorld
 
             virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 
-            virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
+            virtual void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const;
 
             virtual void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const;
     };
