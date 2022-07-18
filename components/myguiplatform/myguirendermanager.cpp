@@ -380,8 +380,6 @@ RenderManager::~RenderManager()
     mSceneRoot = nullptr;
     mViewer = nullptr;
 
-    destroyAllResources();
-
     MYGUI_PLATFORM_LOG(Info, getClassTypeName()<<" successfully shutdown");
     mIsInitialise = false;
 }
@@ -532,16 +530,13 @@ bool RenderManager::isFormatSupported(MyGUI::PixelFormat /*format*/, MyGUI::Text
 
 MyGUI::ITexture* RenderManager::createTexture(const std::string &name)
 {
-    MapTexture::iterator item = mTextures.find(name);
+    auto item = mTextures.find(name);
     if (item != mTextures.end())
-    {
-        delete item->second;
         mTextures.erase(item);
-    }
 
-    OSGTexture* texture = new OSGTexture(name, mImageManager);
-    mTextures.insert(std::make_pair(name, texture));
-    return texture;
+    item = mTextures.emplace_hint(item, name, OSGTexture(name, mImageManager));
+
+    return &item->second;
 }
 
 void RenderManager::destroyTexture(MyGUI::ITexture *texture)
@@ -549,11 +544,10 @@ void RenderManager::destroyTexture(MyGUI::ITexture *texture)
     if(texture == nullptr)
         return;
 
-    MapTexture::iterator item = mTextures.find(texture->getName());
+    const auto item = mTextures.find(texture->getName());
     MYGUI_PLATFORM_ASSERT(item != mTextures.end(), "Texture '"<<texture->getName()<<"' not found");
 
     mTextures.erase(item);
-    delete texture;
 }
 
 MyGUI::ITexture* RenderManager::getTexture(const std::string &name)
@@ -561,21 +555,14 @@ MyGUI::ITexture* RenderManager::getTexture(const std::string &name)
     if (name.empty())
         return nullptr;
 
-    MapTexture::const_iterator item = mTextures.find(name);
+    const auto item = mTextures.find(name);
     if(item == mTextures.end())
     {
         MyGUI::ITexture* tex = createTexture(name);
         tex->loadFromFile(name);
         return tex;
     }
-    return item->second;
-}
-
-void RenderManager::destroyAllResources()
-{
-    for (MapTexture::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
-        delete it->second;
-    mTextures.clear();
+    return &item->second;
 }
 
 bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
