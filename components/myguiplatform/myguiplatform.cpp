@@ -7,30 +7,23 @@
 namespace osgMyGUI
 {
 
-Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::ImageManager *imageManager,
-    const VFS::Manager* vfs, float uiScalingFactor)
-    : mLogFacility(nullptr)
+Platform::Platform(osgViewer::Viewer *viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager,
+    const VFS::Manager* vfs, float uiScalingFactor, const std::string& resourcePath, const std::string& logName)
+    : mLogFacility(logName.empty() ? nullptr : std::make_unique<LogFacility>(logName, false))
     , mLogManager(std::make_unique<MyGUI::LogManager>())
     , mDataManager(std::make_unique<DataManager>(vfs))
     , mRenderManager(std::make_unique<RenderManager>(viewer, guiRoot, imageManager, uiScalingFactor))
 {
-}
-
-Platform::~Platform() {}
-
-void Platform::initialise(const std::string &resourcePath, const std::string &_logName)
-{
-    if (!_logName.empty() && !mLogFacility)
-    {
-        mLogFacility = std::make_unique<LogFacility>(_logName, false);
+    if (mLogFacility != nullptr)
         mLogManager->addLogSource(mLogFacility->getSource());
-    }
 
     mDataManager->setResourcePath(resourcePath);
 
     mRenderManager->initialise();
     mDataManager->initialise();
 }
+
+Platform::~Platform() = default;
 
 void Platform::shutdown()
 {
