@@ -53,7 +53,7 @@ namespace MWWorld
         mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
 
         template <class T>
-        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[GetRecordTypeId(T)]);};
+        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[GetRecordTypeId(T)]);}
 
         /// Validate entries in store after setup
         void validate();
