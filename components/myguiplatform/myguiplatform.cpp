@@ -7,34 +7,22 @@
 namespace osgMyGUI
 {
 
-Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::ImageManager *imageManager, const VFS::Manager* vfs, float uiScalingFactor)
-    : mRenderManager(nullptr)
-    , mDataManager(nullptr)
-    , mLogManager(nullptr)
-    , mLogFacility(nullptr)
+Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::ImageManager *imageManager,
+    const VFS::Manager* vfs, float uiScalingFactor)
+    : mLogFacility(nullptr)
+    , mLogManager(std::make_unique<MyGUI::LogManager>())
+    , mDataManager(std::make_unique<DataManager>(vfs))
+    , mRenderManager(std::make_unique<RenderManager>(viewer, guiRoot, imageManager, uiScalingFactor))
 {
-    mLogManager = new MyGUI::LogManager();
-    mRenderManager = new RenderManager(viewer, guiRoot, imageManager, uiScalingFactor);
-    mDataManager = new DataManager(vfs);
 }
 
-Platform::~Platform()
-{
-    delete mRenderManager;
-    mRenderManager = nullptr;
-    delete mDataManager;
-    mDataManager = nullptr;
-    delete mLogManager;
-    mLogManager = nullptr;
-    delete mLogFacility;
-    mLogFacility = nullptr;
-}
+Platform::~Platform() {}
 
 void Platform::initialise(const std::string &resourcePath, const std::string &_logName)
 {
     if (!_logName.empty() && !mLogFacility)
     {
-        mLogFacility = new LogFacility(_logName, false);
+        mLogFacility = std::make_unique<LogFacility>(_logName, false);
         mLogManager->addLogSource(mLogFacility->getSource());
     }
 
@@ -52,13 +40,12 @@ void Platform::shutdown()
 
 RenderManager *Platform::getRenderManagerPtr()
 {
-    return mRenderManager;
+    return mRenderManager.get();
 }
 
 DataManager *Platform::getDataManagerPtr()
 {
-    return mDataManager;
+    return mDataManager.get();
 }
-
 
 }

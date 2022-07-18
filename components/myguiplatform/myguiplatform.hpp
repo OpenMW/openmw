@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIPLATFORM_H
 
 #include <string>
+#include <memory>
 
 #include <components/vfs/manager.hpp>
 
@@ -45,13 +46,10 @@ namespace osgMyGUI
         DataManager* getDataManagerPtr();
 
     private:
-        RenderManager* mRenderManager;
-        DataManager* mDataManager;
-        MyGUI::LogManager* mLogManager;
-        LogFacility* mLogFacility;
-
-        void operator=(const Platform&);
-        Platform(const Platform&);
+        std::unique_ptr<LogFacility> mLogFacility;
+        std::unique_ptr<MyGUI::LogManager> mLogManager;
+        std::unique_ptr<DataManager> mDataManager;
+        std::unique_ptr<RenderManager> mRenderManager;
     };
 
 }
