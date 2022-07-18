@@ -17,38 +17,38 @@ Wizard::InstallationPage::InstallationPage(QWidget *parent, Config::GameSettings
 
     mFinished = false;
 
-    mThread = new QThread();
-    mUnshield = new UnshieldWorker(mGameSettings.value("morrowind-bsa-filesize").toLongLong());
-    mUnshield->moveToThread(mThread);
+    mThread = std::make_unique<QThread>();
+    mUnshield = std::make_unique<UnshieldWorker>(mGameSettings.value("morrowind-bsa-filesize").toLongLong());
+    mUnshield->moveToThread(mThread.get());
 
-    connect(mThread, SIGNAL(started()),
-            mUnshield, SLOT(extract()));
+    connect(mThread.get(), SIGNAL(started()),
+            mUnshield.get(), SLOT(extract()));
 
-    connect(mUnshield, SIGNAL(finished()),
-            mThread, SLOT(quit()));
+    connect(mUnshield.get(), SIGNAL(finished()),
+            mThread.get(), SLOT(quit()));
 
-    connect(mUnshield, SIGNAL(finished()),
+    connect(mUnshield.get(), SIGNAL(finished()),
             this, SLOT(installationFinished()), Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(error(QString, QString)),
+    connect(mUnshield.get(), SIGNAL(error(QString, QString)),
             this, SLOT(installationError(QString, QString)), Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(textChanged(QString)),
+    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
             installProgressLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(textChanged(QString)),
+    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
             logTextEdit, SLOT(appendPlainText(QString)),  Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(textChanged(QString)),
+    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
             mWizard, SLOT(addLogText(QString)),  Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(progressChanged(int)),
+    connect(mUnshield.get(), SIGNAL(progressChanged(int)),
             installProgressBar, SLOT(setValue(int)),  Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(requestFileDialog(Wizard::Component)),
+    connect(mUnshield.get(), SIGNAL(requestFileDialog(Wizard::Component)),
             this, SLOT(showFileDialog(Wizard::Component)), Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(requestOldVersionDialog()),
+    connect(mUnshield.get(), SIGNAL(requestOldVersionDialog()),
             this, SLOT(showOldVersionDialog())
             , Qt::QueuedConnection);
 }
@@ -60,9 +60,6 @@ Wizard::InstallationPage::~InstallationPage()
         mThread->quit();
         mThread->wait();
     }
-
-    delete mUnshield;
-    delete mThread;
 }
 
 void Wizard::InstallationPage::initializePage()

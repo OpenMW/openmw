@@ -1,6 +1,8 @@
 #ifndef INSTALLATIONPAGE_HPP
 #define INSTALLATIONPAGE_HPP
 
+#include <memory>
+
 #include <QWizardPage>
 
 #include "unshield/unshieldworker.hpp"
@@ -30,8 +32,8 @@ namespace Wizard
         MainWizard *mWizard;
         bool mFinished;
 
-        QThread* mThread;
-        UnshieldWorker *mUnshield;
+        std::unique_ptr<QThread> mThread;
+        std::unique_ptr<UnshieldWorker> mUnshield;
 
         void startInstallation();
 
