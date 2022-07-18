@@ -29,7 +29,17 @@ namespace Platform::File {
 
     size_t read(Handle handle, void* data, size_t size);
 
+    class ScopedHandle
+    {
+        Handle mHandle{ Handle::Invalid };
+        
+    public:
+        ScopedHandle() = default;
+        ScopedHandle(Handle handle) : mHandle(handle) {}
+        ~ScopedHandle() { close(mHandle); }
 
+        operator Handle() const { return mHandle; }
+    };
 }
 
 #endif // OPENMW_COMPONENTS_PLATFORM_FILE_HPP

@@ -22,7 +22,7 @@ namespace Files
     private:
         std::size_t mOrigin;
         std::size_t mSize;
-        Platform::File::Handle mFile{ Platform::File::Handle::Invalid };
+        Platform::File::ScopedHandle mFile;
         char mBuffer[8192]{ 0 };
     };
 }
