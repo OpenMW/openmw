@@ -16,7 +16,7 @@ namespace osgMyGUI
 class DataManager : public MyGUI::DataManager
 {
 public:
-    DataManager(const VFS::Manager* vfs);
+    explicit DataManager(const std::string& path, const VFS::Manager* vfs);
 
     void setResourcePath(const std::string& path);
 

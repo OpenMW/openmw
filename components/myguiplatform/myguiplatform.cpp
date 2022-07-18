@@ -11,13 +11,11 @@ Platform::Platform(osgViewer::Viewer *viewer, osg::Group* guiRoot, Resource::Ima
     const VFS::Manager* vfs, float uiScalingFactor, const std::string& resourcePath, const std::string& logName)
     : mLogFacility(logName.empty() ? nullptr : std::make_unique<LogFacility>(logName, false))
     , mLogManager(std::make_unique<MyGUI::LogManager>())
-    , mDataManager(std::make_unique<DataManager>(vfs))
+    , mDataManager(std::make_unique<DataManager>(resourcePath, vfs))
     , mRenderManager(std::make_unique<RenderManager>(viewer, guiRoot, imageManager, uiScalingFactor))
 {
     if (mLogFacility != nullptr)
         mLogManager->addLogSource(mLogFacility->getSource());
-
-    mDataManager->setResourcePath(resourcePath);
 
     mRenderManager->initialise();
 }
