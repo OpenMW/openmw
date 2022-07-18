@@ -5,8 +5,6 @@
 #include <osg/Referenced>
 #include <osg/Vec3f>
 
-#include <atomic>
-#include <limits>
 #include <memory>
 #include <set>
 
@@ -19,8 +17,6 @@ namespace osg
 {
     class Group;
     class Stats;
-    class Node;
-    class Object;
 }
 
 namespace Resource
@@ -40,61 +36,9 @@ namespace Terrain
     class TextureManager;
     class ChunkManager;
     class CompositeMapRenderer;
-
-    class HeightCullCallback : public SceneUtil::NodeCallback<HeightCullCallback>
-    {
-    public:
-        void setLowZ(float z)
-        {
-            mLowZ = z;
-        }
-        float getLowZ() const
-        {
-            return mLowZ;
-        }
-
-        void setHighZ(float highZ)
-        {
-            mHighZ = highZ;
-        }
-        float getHighZ() const
-        {
-            return mHighZ;
-        }
-
-        void setCullMask(unsigned int mask)
-        {
-            mMask = mask;
-        }
-        unsigned int getCullMask() const
-        {
-            return mMask;
-        }
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            if (mLowZ <= mHighZ)
-                traverse(node, nv);
-        }
-    private:
-        float mLowZ{-std::numeric_limits<float>::max()};
-        float mHighZ{std::numeric_limits<float>::max()};
-        unsigned int mMask{~0u};
-    };
-
-    /**
-     * @brief A View is a collection of rendering objects that are visible from a given camera/intersection.
-     * The base View class is part of the interface for usage in conjunction with preload feature.
-     */
-    class View : public osg::Referenced
-    {
-    public:
-        virtual ~View() {}
-
-        /// Reset internal structure so that the next addition to the view will override the previous frame's contents.
-        virtual void reset() = 0;
-    };
-
+    class View;
+    class HeightCullCallback;
+    
     /**
      * @brief The basic interface for a terrain world. How the terrain chunks are paged and displayed
      *  is up to the implementation.

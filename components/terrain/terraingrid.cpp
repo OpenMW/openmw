@@ -8,7 +8,10 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
+#include "view.hpp"
 #include "storage.hpp"
+#include "heightcull.hpp"
+
 namespace Terrain
 {
 

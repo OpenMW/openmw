@@ -7,8 +7,20 @@
 
 #include "world.hpp"
 
+namespace osg
+{
+    class Group;
+    class Stats;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
+
 namespace Terrain
 {
+    class Storage;
 
     /// @brief Simple terrain implementation that loads cells in a grid, with no LOD. Only requested cells are loaded.
     class TerrainGrid : public Terrain::World
