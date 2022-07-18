@@ -34,8 +34,21 @@ namespace Platform::File {
         Handle mHandle{ Handle::Invalid };
         
     public:
-        ScopedHandle() = default;
-        ScopedHandle(Handle handle) : mHandle(handle) {}
+        ScopedHandle() noexcept = default;
+        ScopedHandle(ScopedHandle& other) = delete;
+        ScopedHandle(Handle handle) noexcept : mHandle(handle) {}
+        ScopedHandle(ScopedHandle&& other) noexcept 
+            : mHandle(other.mHandle) 
+        { 
+            other.mHandle = Handle::Invalid; 
+        }
+        ScopedHandle& operator=(const ScopedHandle& other) = delete;
+        ScopedHandle& operator=(ScopedHandle&& other) noexcept
+        {
+            mHandle = other.mHandle;
+            other.mHandle = Handle::Invalid;
+            return *this;
+        }
         ~ScopedHandle() 
         { 
             if(mHandle != Handle::Invalid) 
