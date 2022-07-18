@@ -1,7 +1,7 @@
 #ifndef OPENMW_CONSTRAINEDFILESTREAMBUF_H
 #define OPENMW_CONSTRAINEDFILESTREAMBUF_H
 
-#include "lowlevelfile.hpp"
+#include <components/platform/file.hpp>
 
 #include <streambuf>
 
@@ -22,8 +22,8 @@ namespace Files
     private:
         std::size_t mOrigin;
         std::size_t mSize;
-        LowLevelFile mFile;
-        char mBuffer[8192]{0};
+        Platform::File::Handle mFile{ Platform::File::Handle::Invalid };
+        char mBuffer[8192]{ 0 };
     };
 }
 
