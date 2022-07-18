@@ -45,6 +45,8 @@ namespace Platform::File {
         ScopedHandle& operator=(const ScopedHandle& other) = delete;
         ScopedHandle& operator=(ScopedHandle&& other) noexcept
         {
+            if (mHandle != Handle::Invalid)
+                close(mHandle);
             mHandle = other.mHandle;
             other.mHandle = Handle::Invalid;
             return *this;
