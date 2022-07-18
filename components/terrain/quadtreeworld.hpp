@@ -5,6 +5,7 @@
 
 #include <mutex>
 #include <memory>
+#include <atomic>
 
 namespace osg
 {
