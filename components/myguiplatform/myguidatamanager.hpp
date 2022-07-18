@@ -16,9 +16,9 @@ public:
     void initialise() {}
     void shutdown() {}
 
-    void setResourcePath(const std::string& path);
+    DataManager(const VFS::Manager* vfs);
 
-    void setVfs(const VFS::Manager* vfs);
+    void setResourcePath(const std::string& path);
 
     /** Get data stream from specified resource name.
         @param _name Resource name (usually file name).

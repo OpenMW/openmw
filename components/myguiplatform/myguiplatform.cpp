@@ -7,7 +7,7 @@
 namespace osgMyGUI
 {
 
-Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::ImageManager *imageManager, float uiScalingFactor)
+Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::ImageManager *imageManager, const VFS::Manager* vfs, float uiScalingFactor)
     : mRenderManager(nullptr)
     , mDataManager(nullptr)
     , mLogManager(nullptr)
@@ -15,7 +15,7 @@ Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::Ima
 {
     mLogManager = new MyGUI::LogManager();
     mRenderManager = new RenderManager(viewer, guiRoot, imageManager, uiScalingFactor);
-    mDataManager = new DataManager();
+    mDataManager = new DataManager(vfs);
 }
 
 Platform::~Platform()
@@ -30,7 +30,7 @@ Platform::~Platform()
     mLogFacility = nullptr;
 }
 
-void Platform::initialise(const VFS::Manager* vfs, const std::string &resourcePath, const std::string &_logName)
+void Platform::initialise(const std::string &resourcePath, const std::string &_logName)
 {
     if (!_logName.empty() && !mLogFacility)
     {
@@ -39,7 +39,6 @@ void Platform::initialise(const VFS::Manager* vfs, const std::string &resourcePa
     }
 
     mDataManager->setResourcePath(resourcePath);
-    mDataManager->setVfs(vfs);
 
     mRenderManager->initialise();
     mDataManager->initialise();
