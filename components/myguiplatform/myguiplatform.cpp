@@ -20,7 +20,6 @@ Platform::Platform(osgViewer::Viewer *viewer, osg::Group* guiRoot, Resource::Ima
     mDataManager->setResourcePath(resourcePath);
 
     mRenderManager->initialise();
-    mDataManager->initialise();
 }
 
 Platform::~Platform() = default;
@@ -28,7 +27,6 @@ Platform::~Platform() = default;
 void Platform::shutdown()
 {
     mRenderManager->shutdown();
-    mDataManager->shutdown();
 }
 
 RenderManager *Platform::getRenderManagerPtr()
