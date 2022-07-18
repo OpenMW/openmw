@@ -7,6 +7,7 @@
 #include <filesystem>
 
 #include <components/debug/debuglog.hpp>
+#include <components/vfs/manager.hpp>
 
 namespace LuaUtil
 {

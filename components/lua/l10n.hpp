@@ -5,6 +5,11 @@
 
 #include <components/l10n/messagebundles.hpp>
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace LuaUtil
 {
 
