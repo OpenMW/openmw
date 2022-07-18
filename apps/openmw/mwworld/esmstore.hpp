@@ -114,7 +114,7 @@ namespace MWWorld
         void load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
 
         template <class T>
-        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[GetRecordTypeId(T)]);};
+        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[GetRecordTypeId(T)]);}
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>

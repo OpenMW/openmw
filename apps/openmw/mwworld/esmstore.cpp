@@ -129,7 +129,7 @@ namespace
 
 static int sRecordTypeCounter = 0;
 
-#define AddStoreType(__Type) const int MWWorld::SRecordType<__Type>::recordId = sRecordTypeCounter++;
+#define AddStoreType(__Type)template<> const int MWWorld::SRecordType<__Type>::recordId = sRecordTypeCounter++;
 
 AddStoreType(ESM::Activator);
 AddStoreType(ESM::Potion);
