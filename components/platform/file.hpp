@@ -36,7 +36,11 @@ namespace Platform::File {
     public:
         ScopedHandle() = default;
         ScopedHandle(Handle handle) : mHandle(handle) {}
-        ~ScopedHandle() { close(mHandle); }
+        ~ScopedHandle() 
+        { 
+            if(mHandle != Handle::Invalid) 
+                close(mHandle); 
+        }
 
         operator Handle() const { return mHandle; }
     };
