@@ -4,8 +4,6 @@
 #include <string>
 #include <memory>
 
-#include <components/vfs/manager.hpp>
-
 namespace osgViewer
 {
     class Viewer;
@@ -21,6 +19,10 @@ namespace Resource
 namespace MyGUI
 {
     class LogManager;
+}
+namespace VFS
+{
+    class Manager;
 }
 
 namespace osgMyGUI

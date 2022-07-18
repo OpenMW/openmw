@@ -5,7 +5,10 @@
 
 #include <string>
 
-#include <components/vfs/manager.hpp>
+namespace VFS
+{
+    class Manager;
+}
 
 namespace osgMyGUI
 {

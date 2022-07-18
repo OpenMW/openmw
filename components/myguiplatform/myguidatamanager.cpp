@@ -2,13 +2,11 @@
 
 #include <memory>
 #include <string>
+#include <stdexcept>
 
 #include <MyGUI_DataFileStream.h>
 
-#include <filesystem>
-#include <fstream>
-
-#include <components/debug/debuglog.hpp>
+#include <components/vfs/manager.hpp>
 
 namespace
 {
