@@ -453,7 +453,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mScriptConsoleMode (false)
   , mActivationDistanceOverride(-1)
   , mGrab(true)
-  , mExportFonts(false)
   , mRandomSeed(0)
   , mFSStrict (false)
   , mScriptBlacklistUse (true)
@@ -700,7 +699,7 @@ void OMW::Engine::createWindow()
 void OMW::Engine::setWindowIcon()
 {
     std::ifstream windowIconStream;
-    std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
+    std::string windowIcon = (mResDir / "openmw.png").string();
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
         Log(Debug::Error) << "Error: Failed to open " << windowIcon;
@@ -815,7 +814,6 @@ void OMW::Engine::prepareEngine()
         exts->glRenderbufferStorageMultisampleCoverageNV = nullptr;
 #endif
 
-    std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
     guiRoot->setName("GUI Root");
     guiRoot->setNodeMask(MWRender::Mask_GUI);
@@ -823,9 +821,9 @@ void OMW::Engine::prepareEngine()
     rootNode->addChild(guiRoot);
 
     mWindowManager = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
-                mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
-                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
-                Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string(), shadersSupported);
+                mCfgMgr.getLogPath().string() + std::string("/"),
+                mScriptConsoleMode, mTranslationDataStorage, mEncoding,
+                Version::getOpenmwVersionDescription(mResDir.string()), shadersSupported);
     mEnvironment.setWindowManager(*mWindowManager);
 
     mInputManager = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler,
@@ -1037,13 +1035,13 @@ void OMW::Engine::go()
     }
 
     // Setup profiler
-    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler(stats.is_open());
+    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler(stats.is_open(), mVFS.get());
 
     initStatsHandler(*statshandler);
 
     mViewer->addEventHandler(statshandler);
 
-    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler(stats.is_open());
+    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler(stats.is_open(), mVFS.get());
     mViewer->addEventHandler(resourceshandler);
 
     if (stats.is_open())
@@ -1185,11 +1183,6 @@ void OMW::Engine::setScriptBlacklist (const std::vector<std::string>& list)
 void OMW::Engine::setScriptBlacklistUse (bool use)
 {
     mScriptBlacklistUse = use;
-}
-
-void OMW::Engine::enableFontExport(bool exportFonts)
-{
-    mExportFonts = exportFonts;
 }
 
 void OMW::Engine::setSaveGameFile(const std::string &savegame)

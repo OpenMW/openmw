@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Resource" version="1.1">
+    <Resource type="ResourceTrueTypeFont" name="pelagiad">
+        <Property key="Source" value="Pelagiad.ttf"/>
+        <Property key="Antialias" value="false"/>
+        <Property key="TabWidth" value="8"/>
+        <Property key="OffsetHeight" value="0"/>
+        <Codes>
+            <Code range="33 126"/>
+            <Code range="161"/>
+            <Code range="173"/>
+            <Code range="180"/>
+            <Code range="191 255"/>
+            <Code range="260 263"/>
+            <Code range="268 271"/>
+            <Code range="280 283"/>
+            <Code range="305"/>
+            <Code range="321 324"/>
+            <Code range="327 328"/>
+            <Code range="339"/>
+            <Code range="344 347"/>
+            <Code range="352 353"/>
+            <Code range="356 357"/>
+            <Code range="366 367"/>
+            <Code range="377 382"/>
+            <Code range="1025"/>
+            <Code range="1040 1103"/>
+            <Code range="1105"/>
+	    <Code range="8208 8212"/>
+            <Code range="8216 8217"/>
+            <Code range="8220 8221"/>
+            <Code range="8228 8230"/>
+            <Code hide="198"/>
+            <Code hide="208"/>
+            <Code hide="215 216"/>
+	    <Code hide="222"/>
+            <Code hide="230"/>
+            <Code hide="240"/>
+            <Code hide="247 248"/>
+            <Code hide="254"/>
+        </Codes>
+    </Resource>
+</MyGUI>

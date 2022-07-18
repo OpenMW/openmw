@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI>
     <MyGUI type="Font">
-        <Property key="Default" value="Magic Cards"/>
+        <Property key="Default" value="DefaultFont"/>
 
     </MyGUI>
     <MyGUI type="Pointer">

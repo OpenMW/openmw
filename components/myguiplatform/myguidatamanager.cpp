@@ -20,15 +20,13 @@ void DataManager::setResourcePath(const std::string &path)
 
 MyGUI::IDataStream *DataManager::getData(const std::string &name) const
 {
-    std::string fullpath = getDataPath(name);
-    auto stream = std::make_unique<std::ifstream>();
-    stream->open(fullpath, std::ios::binary);
-    if (stream->fail())
-    {
-        Log(Debug::Error) << "DataManager::getData: Failed to open '" << name << "'";
-        return nullptr;
-    }
-    return new MyGUI::DataFileStream(stream.release());
+    // Note: MyGUI is supposed to read/free input steam itself,
+    // so copy data from VFS stream to the string stream and pass it to MyGUI.
+    Files::IStreamPtr streamPtr = mVfs->get(mResourcePath + "/" + name);
+    std::istream* fileStream = streamPtr.get();
+    auto dataStream = std::make_unique<std::stringstream>();
+    *dataStream << fileStream->rdbuf();
+    return new MyGUI::DataStream(dataStream.release());
 }
 
 void DataManager::freeData(MyGUI::IDataStream *data)
@@ -38,27 +36,30 @@ void DataManager::freeData(MyGUI::IDataStream *data)
 
 bool DataManager::isDataExist(const std::string &name) const
 {
-    std::string fullpath = mResourcePath + "/" + name;
-    return std::filesystem::exists(fullpath);
+    return mVfs->exists(mResourcePath + "/" + name);
+}
+
+void DataManager::setVfs(const VFS::Manager* vfs)
+{
+    mVfs = vfs;
 }
 
 const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern) const
 {
-    // TODO: pattern matching (unused?)
-    static MyGUI::VectorString strings;
-    strings.clear();
-    strings.push_back(getDataPath(pattern));
-    return strings;
+    throw std::runtime_error("DataManager::getDataListNames is not implemented - VFS is used");
 }
 
 const std::string &DataManager::getDataPath(const std::string &name) const
 {
     static std::string result;
     result.clear();
+
+    if (name.empty())
+        return mResourcePath;
+
     if (!isDataExist(name))
-    {
         return result;
-    }
+
     result = mResourcePath + "/" + name;
     return result;
 }

@@ -145,6 +145,8 @@
     Feature #4297: Implement APPLIED_ONCE flag for magic effects
     Feature #4414: Handle duration of EXTRA SPELL magic effect
     Feature #4595: Unique object identifier
+    Feature #4974: Overridable MyGUI layout
+    Feature #4975: Built-in TrueType fonts
     Feature #5198: Implement "Magic effect expired" event
     Feature #5454: Clear active spells from actor when he disappears from scene
     Feature #5489: MCP: Telekinesis fix for activators

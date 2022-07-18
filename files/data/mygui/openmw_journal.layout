@@ -25,12 +25,12 @@
       </Widget>
 
       <Widget type="TextBox" skin="NormalText" position="150 350 32 16" name="PageOneNum">
-        <Property key="FontName" value="Journalbook Magic Cards"/>
+        <Property key="FontName" value="Journalbook DefaultFont"/>
         <Property key="TextColour" value="0 0 0"/>
       </Widget>
 
       <Widget type="TextBox" skin="NormalText" position="410 350 32 16" name="PageTwoNum">
-        <Property key="FontName" value="Journalbook Magic Cards"/>
+        <Property key="FontName" value="Journalbook DefaultFont"/>
         <Property key="TextColour" value="0 0 0"/>
       </Widget>
 

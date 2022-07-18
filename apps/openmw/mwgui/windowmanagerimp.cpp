@@ -128,8 +128,8 @@ namespace MWGui
 {
     WindowManager::WindowManager(
             SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-            const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
-            ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, const std::string& userDataPath, bool useShaders)
+            const std::string& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
+            ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders)
       : mOldUpdateMask(0)
       , mOldCullMask(0)
       , mStore(nullptr)
@@ -195,7 +195,7 @@ namespace MWGui
     {
         mScalingFactor = std::clamp(Settings::Manager::getFloat("scaling factor", "GUI"), 0.5f, 8.f);
         mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), mScalingFactor);
-        mGuiPlatform->initialise(resourcePath, (std::filesystem::path(logpath) / "MyGUI.log").generic_string());
+        mGuiPlatform->initialise(resourceSystem->getVFS(), "mygui", (std::filesystem::path(logpath) / "MyGUI.log").generic_string());
 
         mGui = new MyGUI::Gui;
         mGui->initialise("");
@@ -205,8 +205,8 @@ namespace MWGui
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
-        mFontLoader = std::make_unique<Gui::FontLoader>(encoding, resourceSystem->getVFS(), userDataPath, mScalingFactor);
-        mFontLoader->loadBitmapFonts(exportFonts);
+        mFontLoader = std::make_unique<Gui::FontLoader>(encoding, resourceSystem->getVFS(), mScalingFactor);
+        mFontLoader->loadBitmapFonts();
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
@@ -234,7 +234,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::FactoryManager::getInstance().registerFactory<AutoSizedResourceSkin>("Resource", "AutoSizedResourceSkin");
         MyGUI::ResourceManager::getInstance().load("core.xml");
-        WindowManager::loadUserFonts();
+        mFontLoader->loadTrueTypeFonts();
 
         bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
         mKeyboardNavigation = std::make_unique<KeyboardNavigation>();
@@ -288,11 +288,6 @@ namespace MWGui
             mGuiPlatform->getRenderManagerPtr()->enableShaders(mResourceSystem->getSceneManager()->getShaderManager());
 
         mStatsWatcher = std::make_unique<StatsWatcher>();
-    }
-
-    void WindowManager::loadUserFonts()
-    {
-        mFontLoader->loadTrueTypeFonts();
     }
 
     void WindowManager::initUI()
@@ -1179,7 +1174,7 @@ namespace MWGui
             window->onResChange(x, y);
 
         // We should reload TrueType fonts to fit new resolution
-        loadUserFonts();
+        mFontLoader->loadTrueTypeFonts();
 
         // TODO: check if any windows are now off-screen and move them back if so
     }

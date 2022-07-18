@@ -25,29 +25,30 @@ namespace Gui
     class FontLoader
     {
     public:
-        FontLoader (ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath, float scalingFactor);
+        FontLoader (ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor);
         ~FontLoader();
 
-        /// @param exportToFile export the converted fonts (Images and XML with glyph metrics) to files?
-        void loadBitmapFonts (bool exportToFile);
+        void loadBitmapFonts ();
         void loadTrueTypeFonts ();
 
         void loadFontFromXml(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
 
         int getFontHeight();
 
+        static std::string getFontForFace(const std::string& face);
+
     private:
         ToUTF8::FromType mEncoding;
         const VFS::Manager* mVFS;
-        std::string mUserDataPath;
         int mFontHeight;
         float mScalingFactor;
 
         std::vector<MyGUI::ITexture*> mTextures;
         std::vector<MyGUI::ResourceManualFont*> mFonts;
 
-        /// @param exportToFile export the converted font (Image and XML with glyph metrics) to files?
-        void loadBitmapFont (const std::string& fileName, bool exportToFile);
+        std::string getInternalFontName(const std::string& name);
+
+        void loadBitmapFont (const std::string& fileName);
 
         FontLoader(const FontLoader&);
         void operator=(const FontLoader&);

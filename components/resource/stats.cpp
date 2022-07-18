@@ -6,6 +6,7 @@
 
 #include <osg/PolygonMode>
 
+#include <osgText/Font>
 #include <osgText/Text>
 
 #include <osgDB/Registry>
@@ -14,6 +15,8 @@
 #include <osgViewer/Renderer>
 
 #include <components/myguiplatform/myguidatamanager.hpp>
+
+#include <components/vfs/manager.hpp>
 
 namespace Resource
 {
@@ -27,6 +30,8 @@ static bool collectStatEvent = false;
 static bool collectStatFrameRate = false;
 static bool collectStatUpdate = false;
 static bool collectStatEngine = false;
+
+constexpr std::string_view sFontName = "Fonts/DejaVuLGCSansMono.ttf";
 
 static void setupStatCollection()
 {
@@ -79,14 +84,44 @@ static void setupStatCollection()
     }
 }
 
-StatsHandler::StatsHandler(bool offlineCollect):
+class SetFontVisitor : public osg::NodeVisitor
+{
+public:
+    SetFontVisitor(osgText::Font* font)
+        : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        , mFont(font)
+        {}
+
+    void apply(osg::Drawable& node) override
+    {
+        if (osgText::Text* text = dynamic_cast<osgText::Text*>(&node))
+        {
+            text->setFont(mFont);
+        }
+    }
+
+private:
+    osgText::Font* mFont;
+};
+
+osg::ref_ptr<osgText::Font> getMonoFont(VFS::Manager* vfs)
+{
+    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf") && vfs->exists(sFontName))
+    {
+        Files::IStreamPtr streamPtr = vfs->get(sFontName);
+        return osgText::readRefFontStream(*streamPtr.get());
+    }
+
+    return nullptr;
+}
+
+StatsHandler::StatsHandler(bool offlineCollect, VFS::Manager* vfs):
     _key(osgGA::GUIEventAdapter::KEY_F4),
     _initialized(false),
     _statsType(false),
     _offlineCollect(offlineCollect),
     _statsWidth(1280.0f),
     _statsHeight(1024.0f),
-    _font(""),
     _characterSize(18.0f)
 {
     _camera = new osg::Camera;
@@ -96,22 +131,31 @@ StatsHandler::StatsHandler(bool offlineCollect):
 
     _resourceStatsChildNum = 0;
 
-    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf"))
-        _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
+    _textFont = getMonoFont(vfs);
 }
 
-Profiler::Profiler(bool offlineCollect):
-    _offlineCollect(offlineCollect)
+Profiler::Profiler(bool offlineCollect, VFS::Manager* vfs):
+    _offlineCollect(offlineCollect),
+    _initFonts(false)
 {
-    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf"))
-        _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
-    else
-        _font.clear();
-
     _characterSize = 18;
+    _font.clear();
+
+    _textFont = getMonoFont(vfs);
 
     setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
     setupStatCollection();
+}
+
+void Profiler::setUpFonts()
+{
+    if (_textFont != nullptr)
+    {
+        SetFontVisitor visitor(_textFont);
+        _switch->accept(visitor);
+    }
+
+    _initFonts = true;
 }
 
 bool Profiler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
@@ -119,6 +163,8 @@ bool Profiler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter 
     osgViewer::ViewerBase* viewer = nullptr;
 
     bool handled = StatsHandler::handle(ea, aa);
+    if (_initialized && !_initFonts)
+        setUpFonts();
 
     auto* view = dynamic_cast<osgViewer::View*>(&aa);
     if (view)
@@ -423,7 +469,6 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         osg::ref_ptr<osgText::Text> staticText = new osgText::Text;
         group->addChild( staticText.get() );
         staticText->setColor(staticTextColor);
-        staticText->setFont(_font);
         staticText->setCharacterSize(_characterSize);
         staticText->setPosition(pos);
 
@@ -449,11 +494,16 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         group->addChild( statsText.get() );
 
         statsText->setColor(dynamicTextColor);
-        statsText->setFont(_font);
         statsText->setCharacterSize(_characterSize);
         statsText->setPosition(pos);
         statsText->setText("");
         statsText->setDrawCallback(new ResourceStatsTextDrawCallback(viewer->getViewerStats(), statNames));
+
+        if (_textFont)
+        {
+            staticText->setFont(_textFont);
+            statsText->setFont(_textFont);
+        }
     }
 }
 
