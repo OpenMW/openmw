@@ -628,9 +628,15 @@ namespace Gui
 
         if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_0")))
             return "DefaultFont";
+        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_2")))
+            return "ScrollFont";
         if (lowerName == "dejavusansmono")
             return "MonoFont"; // We need to use a TrueType monospace font to display debug texts properly.
-        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_2")))
+
+        // Use our TrueType fonts as a fallback.
+        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && name == "pelagiad")
+            return "DefaultFont";
+        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && name == "ayembedt")
             return "ScrollFont";
 
         return name;

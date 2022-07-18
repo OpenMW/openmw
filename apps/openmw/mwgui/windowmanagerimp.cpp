@@ -234,7 +234,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::FactoryManager::getInstance().registerFactory<AutoSizedResourceSkin>("Resource", "AutoSizedResourceSkin");
         MyGUI::ResourceManager::getInstance().load("core.xml");
-        WindowManager::loadUserFonts();
+        mFontLoader->loadTrueTypeFonts();
 
         bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
         mKeyboardNavigation = std::make_unique<KeyboardNavigation>();
@@ -288,11 +288,6 @@ namespace MWGui
             mGuiPlatform->getRenderManagerPtr()->enableShaders(mResourceSystem->getSceneManager()->getShaderManager());
 
         mStatsWatcher = std::make_unique<StatsWatcher>();
-    }
-
-    void WindowManager::loadUserFonts()
-    {
-        mFontLoader->loadTrueTypeFonts();
     }
 
     void WindowManager::initUI()
@@ -1179,7 +1174,7 @@ namespace MWGui
             window->onResChange(x, y);
 
         // We should reload TrueType fonts to fit new resolution
-        loadUserFonts();
+        mFontLoader->loadTrueTypeFonts();
 
         // TODO: check if any windows are now off-screen and move them back if so
     }
