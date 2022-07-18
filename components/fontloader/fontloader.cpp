@@ -196,12 +196,12 @@ namespace Gui
         mFonts.clear();
     }
 
-    void FontLoader::loadBitmapFonts(bool exportToFile)
+    void FontLoader::loadBitmapFonts()
     {
         for (const auto& path : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
             if (Misc::getFileExtension(path) == "fnt")
-                loadBitmapFont(path, exportToFile);
+                loadBitmapFont(path);
         }
     }
 
@@ -246,7 +246,7 @@ namespace Gui
         float ascent;
     } GlyphInfo;
 
-    void FontLoader::loadBitmapFont(const std::string &fileName, bool exportToFile)
+    void FontLoader::loadBitmapFont(const std::string &fileName)
     {
         Files::IStreamPtr file = mVFS->get(fileName);
 
@@ -306,17 +306,6 @@ namespace Gui
         bitmapFile.reset();
 
         std::string resourceName = name;
-
-        if (exportToFile)
-        {
-            osg::ref_ptr<osg::Image> image = new osg::Image;
-            image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-            assert (image->isDataContiguous());
-            memcpy(image->data(), &textureData[0], textureData.size());
-
-            Log(Debug::Info) << "Writing " << resourceName + ".png";
-            osgDB::writeImageFile(*image, resourceName + ".png");
-        }
 
         // Register the font with MyGUI
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
@@ -492,13 +481,6 @@ namespace Gui
             cursorCode->addAttribute("advance", "0");
             cursorCode->addAttribute("bearing", "0 0");
             cursorCode->addAttribute("size", "0 0");
-        }
-
-        if (exportToFile)
-        {
-            Log(Debug::Info) << "Writing " << resourceName + ".xml";
-            xmlDocument.createDeclaration();
-            xmlDocument.save(resourceName + ".xml");
         }
 
         font->deserialization(root, MyGUI::Version(3,2,0));

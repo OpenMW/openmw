@@ -453,7 +453,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mScriptConsoleMode (false)
   , mActivationDistanceOverride(-1)
   , mGrab(true)
-  , mExportFonts(false)
   , mRandomSeed(0)
   , mFSStrict (false)
   , mScriptBlacklistUse (true)
@@ -823,7 +822,7 @@ void OMW::Engine::prepareEngine()
 
     mWindowManager = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"),
-                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
+                mScriptConsoleMode, mTranslationDataStorage, mEncoding,
                 Version::getOpenmwVersionDescription(mResDir.string()), shadersSupported);
     mEnvironment.setWindowManager(*mWindowManager);
 
@@ -1184,11 +1183,6 @@ void OMW::Engine::setScriptBlacklist (const std::vector<std::string>& list)
 void OMW::Engine::setScriptBlacklistUse (bool use)
 {
     mScriptBlacklistUse = use;
-}
-
-void OMW::Engine::enableFontExport(bool exportFonts)
-{
-    mExportFonts = exportFonts;
 }
 
 void OMW::Engine::setSaveGameFile(const std::string &savegame)

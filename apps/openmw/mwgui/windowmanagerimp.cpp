@@ -129,7 +129,7 @@ namespace MWGui
     WindowManager::WindowManager(
             SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
             const std::string& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
-            ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, bool useShaders)
+            ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders)
       : mOldUpdateMask(0)
       , mOldCullMask(0)
       , mStore(nullptr)
@@ -206,7 +206,7 @@ namespace MWGui
 
         // Load fonts
         mFontLoader = std::make_unique<Gui::FontLoader>(encoding, resourceSystem->getVFS(), mScalingFactor);
-        mFontLoader->loadBitmapFonts(exportFonts);
+        mFontLoader->loadBitmapFonts();
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
