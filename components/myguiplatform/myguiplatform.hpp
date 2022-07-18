@@ -32,11 +32,11 @@ namespace osgMyGUI
     class Platform
     {
     public:
-        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager, float uiScalingFactor);
+        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager, const VFS::Manager* vfs, float uiScalingFactor);
 
         ~Platform();
 
-        void initialise(const VFS::Manager* vfs, const std::string& resourcePath, const std::string& _logName = "MyGUI.log");
+        void initialise(const std::string& resourcePath, const std::string& _logName = "MyGUI.log");
 
         void shutdown();
 

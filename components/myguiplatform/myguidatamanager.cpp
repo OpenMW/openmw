@@ -18,6 +18,11 @@ void DataManager::setResourcePath(const std::string &path)
     mResourcePath = path;
 }
 
+DataManager::DataManager(const VFS::Manager* vfs)
+    : mVfs(vfs)
+{
+}
+
 MyGUI::IDataStream *DataManager::getData(const std::string &name) const
 {
     // Note: MyGUI is supposed to read/free input steam itself,
@@ -37,11 +42,6 @@ void DataManager::freeData(MyGUI::IDataStream *data)
 bool DataManager::isDataExist(const std::string &name) const
 {
     return mVfs->exists(mResourcePath + "/" + name);
-}
-
-void DataManager::setVfs(const VFS::Manager* vfs)
-{
-    mVfs = vfs;
 }
 
 const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern) const
