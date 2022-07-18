@@ -3,6 +3,7 @@
 #include <unicode/errorcode.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/vfs/manager.hpp>
 
 namespace sol
 {

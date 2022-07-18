@@ -5,9 +5,12 @@
 
 #include <sol/sol.hpp>
 
-#include <components/vfs/manager.hpp>
-
 #include "configuration.hpp"
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace LuaUtil
 {
