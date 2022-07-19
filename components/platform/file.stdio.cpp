@@ -4,11 +4,14 @@
 #include <string.h>
 #include <string>
 #include <stdexcept>
+#include <cassert>
 
 namespace Platform::File {
 
     static auto getNativeHandle(Handle handle)
     {
+        assert(handle != Handle::Invalid);
+
         return reinterpret_cast<FILE*>(static_cast<intptr_t>(handle));
     }
 

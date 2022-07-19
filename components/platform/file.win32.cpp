@@ -4,11 +4,14 @@
 #include <string>
 #include <stdexcept>
 #include <boost/locale.hpp>
+#include <cassert>
 
 namespace Platform::File {
 
     static auto getNativeHandle(Handle handle)
     {
+        assert(handle != Handle::Invalid);
+
         return reinterpret_cast<HANDLE>(static_cast<intptr_t>(handle));
     }
 
@@ -57,8 +60,6 @@ namespace Platform::File {
     size_t size(Handle handle)
     {
         auto nativeHandle = getNativeHandle(handle);
-
-        assert(isValidHandle(mHandle));
 
         BY_HANDLE_FILE_INFORMATION info;
 

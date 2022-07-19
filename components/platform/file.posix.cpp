@@ -7,11 +7,14 @@
 #include <string.h>
 #include <stdexcept>
 #include <string>
+#include <cassert>
 
 namespace Platform::File {
 
     static auto getNativeHandle(Handle handle)
     {
+        assert(handle != Handle::Invalid);
+
         return static_cast<int>(handle);
     }
 
