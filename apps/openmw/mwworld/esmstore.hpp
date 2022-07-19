@@ -28,15 +28,14 @@ namespace MWWorld
     struct ESMStoreImp;
     template<typename T> struct SRecordType
     {
-        static const int recordId;
-        static int getId() { return recordId; };
+        static const int sRecordId;
+        static int getId() { return sRecordId; };
     };
-    #define GetRecordTypeId(__Type) SRecordType<__Type>::recordId
 
     class ESMStore
     {
         friend struct ESMStoreImp; //This allows StoreImp to extend esmstore without beeing included everywhere
-		std::unique_ptr<ESMStoreImp> mStoreImp;
+        std::unique_ptr<ESMStoreImp> mStoreImp;
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
@@ -53,7 +52,7 @@ namespace MWWorld
         mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
 
         template <class T>
-        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[GetRecordTypeId(T)]);}
+        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[SRecordType<T>::sRecordId]);}
 
         /// Validate entries in store after setup
         void validate();
@@ -114,7 +113,7 @@ namespace MWWorld
         void load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
 
         template <class T>
-        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[GetRecordTypeId(T)]);}
+        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[SRecordType<T>::sRecordId]);}
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>
