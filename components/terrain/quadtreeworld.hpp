@@ -1,15 +1,17 @@
 #ifndef COMPONENTS_TERRAIN_QUADTREEWORLD_H
 #define COMPONENTS_TERRAIN_QUADTREEWORLD_H
 
-#include "world.hpp"
 #include "terraingrid.hpp"
 
 #include <mutex>
 #include <memory>
+#include <atomic>
 
 namespace osg
 {
     class NodeVisitor;
+    class Group;
+    class Stats;
 }
 
 namespace Terrain

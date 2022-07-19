@@ -6,7 +6,7 @@
 
 #include <osg/Node>
 
-#include "world.hpp"
+#include "view.hpp"
 
 namespace Terrain
 {

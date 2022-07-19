@@ -10,6 +10,7 @@
 #include "texturemanager.hpp"
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
+#include "heightcull.hpp"
 
 namespace Terrain
 {
