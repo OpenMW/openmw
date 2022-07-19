@@ -43,7 +43,6 @@ namespace Gui
         int mFontHeight;
         float mScalingFactor;
 
-        std::vector<MyGUI::ITexture*> mTextures;
         std::vector<MyGUI::ResourceManualFont*> mFonts;
 
         std::string getInternalFontName(const std::string& name);
