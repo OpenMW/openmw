@@ -1,0 +1,21 @@
+Abovewater: "Ovan vatten"
+Author: "Skapare" # Author = Författare, but författare sounds very book-author-ish. Skapare, meaning "creator", sounds better in Swedish in this case. Ok?
+Configuration: "Konfiguration"
+Description: "Beskrivning"
+InExteriors: "Exteriörer"
+InInteriors: "Interiörer"
+KeyboardControls: |
+    Tangentbordskontroller:
+
+    Shift+Högerpil > Aktivera shader
+    Shift+Vänsterpil > Avaktivera shader
+    Shift+Pil upp > Flytta shader upp
+    Shift+Pil ner > Flytta shader ner
+PostProcessHUD: "Postprocess HUD"
+ResetShader: "Återställ shader to ursprungligt läge"
+ShaderLocked: "Låst"
+ShaderLockedDescription: "Kan ej aktiveras/inaktiveras eller flyttas. Kontrolleras av externt Lua-skript"
+ShaderResetUniform: "r"
+Underwater: "Under vatten"
+Version: "Version"
+
