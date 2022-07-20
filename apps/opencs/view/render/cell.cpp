@@ -1,7 +1,6 @@
 #include "cell.hpp"
 
 #include <osg/PositionAttitudeTransform>
-#include <osg/Geode>
 #include <osg/Group>
 
 #include <components/misc/stringops.hpp>

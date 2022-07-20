@@ -20,7 +20,6 @@ namespace osg
     class PositionAttitudeTransform;
     class Group;
     class Node;
-    class Geode;
 }
 
 namespace osgFX

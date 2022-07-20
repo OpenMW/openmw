@@ -1,14 +1,11 @@
-
 #include "cellarrow.hpp"
 
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
 #include "../../model/prefs/state.hpp"
-#include "../../model/prefs/shortcutmanager.hpp"
 
 #include <components/misc/constants.hpp>
 
@@ -159,10 +156,7 @@ void CSVRender::CellArrow::buildShape()
 
     geometry->getOrCreateStateSet()->setMode (GL_LIGHTING, osg::StateAttribute::OFF);
 
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-    geode->addDrawable (geometry);
-
-    mBaseNode->addChild (geode);
+    mBaseNode->addChild (geometry);
 }
 
 CSVRender::CellArrow::CellArrow (osg::Group *cellNode, Direction direction,
