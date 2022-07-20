@@ -10,6 +10,21 @@
 
 #include <components/debug/debuglog.hpp>
 
+namespace
+{
+    class DataStream final : public MyGUI::DataStream
+    {
+    public:
+        explicit DataStream(std::unique_ptr<std::istream>&& stream)
+            : MyGUI::DataStream(stream.get())
+            , mOwnedStream(std::move(stream))
+        {}
+
+    private:
+        std::unique_ptr<std::istream> mOwnedStream;
+    };
+}
+
 namespace osgMyGUI
 {
 
@@ -25,13 +40,7 @@ DataManager::DataManager(const VFS::Manager* vfs)
 
 MyGUI::IDataStream *DataManager::getData(const std::string &name) const
 {
-    // Note: MyGUI is supposed to read/free input steam itself,
-    // so copy data from VFS stream to the string stream and pass it to MyGUI.
-    Files::IStreamPtr streamPtr = mVfs->get(mResourcePath + "/" + name);
-    std::istream* fileStream = streamPtr.get();
-    auto dataStream = std::make_unique<std::stringstream>();
-    *dataStream << fileStream->rdbuf();
-    return new MyGUI::DataStream(dataStream.release());
+    return new DataStream(mVfs->get(mResourcePath + "/" + name));
 }
 
 void DataManager::freeData(MyGUI::IDataStream *data)
