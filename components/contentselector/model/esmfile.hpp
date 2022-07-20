@@ -28,7 +28,7 @@ namespace ContentSelectorModel
             FileProperty_GameFile       = 6
         };
 
-        EsmFile(QString fileName = QString(), ModelItem *parent = 0);
+        EsmFile(QString fileName = QString(), ModelItem *parent = nullptr);
      //   EsmFile(const EsmFile &);
 
         ~EsmFile()

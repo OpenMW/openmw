@@ -30,7 +30,7 @@ namespace CSVRender
         public:
 
             EditMode (WorldspaceWidget *worldspaceWidget, const QIcon& icon, unsigned int mask,
-                const QString& tooltip = "", QWidget *parent = 0);
+                const QString& tooltip = "", QWidget *parent = nullptr);
 
             unsigned int getInteractionMask() const;
 

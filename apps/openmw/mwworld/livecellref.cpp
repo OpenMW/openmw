@@ -1,16 +1,19 @@
 #include "livecellref.hpp"
 
+#include <sstream>
+
 #include <components/debug/debuglog.hpp>
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/objectstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "ptr.hpp"
 #include "class.hpp"
 #include "esmstore.hpp"
 
-MWWorld::LiveCellRefBase::LiveCellRefBase(const std::string& type, const ESM::CellRef &cref)
+MWWorld::LiveCellRefBase::LiveCellRefBase(unsigned int type, const ESM::CellRef &cref)
   : mClass(&Class::get(type)), mRef(cref), mData(cref)
 {
 }
@@ -52,6 +55,8 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
         Log(Debug::Warning) << "Soul '" << mRef.getSoul() << "' not found, removing the soul from soul gem";
         mRef.setSoul(std::string());
     }
+
+    MWBase::Environment::get().getLuaManager()->loadLocalScripts(ptr, state.mLuaScripts);
 }
 
 void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
@@ -61,6 +66,7 @@ void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
     ConstPtr ptr (this);
 
     mData.write (state, mClass->getScript (ptr));
+    MWBase::Environment::get().getLuaManager()->saveLocalScripts(Ptr(const_cast<LiveCellRefBase*>(this)), state.mLuaScripts);
 
     mClass->writeAdditionalState (ptr, state);
 }
@@ -68,4 +74,26 @@ void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
 bool MWWorld::LiveCellRefBase::checkStateImp (const ESM::ObjectState& state)
 {
     return true;
+}
+
+unsigned int MWWorld::LiveCellRefBase::getType() const
+{
+    return mClass->getType();
+}
+
+namespace MWWorld
+{
+    std::string makeDynamicCastErrorMessage(const LiveCellRefBase* value, std::string_view recordType)
+    {
+        std::stringstream message;
+
+        message << "Bad LiveCellRef cast to " << recordType << " from ";
+
+        if (value != nullptr)
+            message << value->getTypeDescription();
+        else
+            message << "an empty object";
+
+        return message.str();
+    }
 }

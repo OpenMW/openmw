@@ -1,15 +1,7 @@
 #include "filedialog.hpp"
 
-#include <QCheckBox>
 #include <QPushButton>
 #include <QDialogButtonBox>
-#include <QSortFilterProxyModel>
-#include <QRegExpValidator>
-#include <QRegExp>
-#include <QSpacerItem>
-#include <QPushButton>
-#include <QLabel>
-#include <QGroupBox>
 
 #include "components/contentselector/model/esmfile.hpp"
 #include "components/contentselector/view/contentselector.hpp"
@@ -18,19 +10,24 @@
 #include "adjusterwidget.hpp"
 
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
-    QDialog(parent), mSelector (0), mAction(ContentAction_Undefined), mFileWidget (0), mAdjusterWidget (0), mDialogBuilt(false)
+    QDialog(parent), mSelector (nullptr), mAction(ContentAction_Undefined), mFileWidget (nullptr), mAdjusterWidget (nullptr), mDialogBuilt(false)
 {
     ui.setupUi (this);
     resize(400, 400);
 
     setObjectName ("FileDialog");
-    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
+    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget, /*showOMWScripts=*/false);
     mAdjusterWidget = new AdjusterWidget (this);
 }
 
-void CSVDoc::FileDialog::addFiles(const QString &path)
+void CSVDoc::FileDialog::addFiles(const std::vector<boost::filesystem::path>& dataDirs)
 {
-    mSelector->addFiles(path);
+    for (auto iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
+    {
+        QString path = QString::fromUtf8(iter->string().c_str());
+        mSelector->addFiles(path);
+    }
+    mSelector->sortFiles();
 }
 
 void CSVDoc::FileDialog::setEncoding(const QString &encoding)
@@ -161,7 +158,7 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
     bool isNew = (mAction == ContentAction_New);
 
     if (isNew)
-        success = success && !(name.isEmpty());
+        success = !name.isEmpty();
     else if (success)
     {
         ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();

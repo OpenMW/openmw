@@ -95,7 +95,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
 
     mStatus = new QLabel;
 
-    mStatusBar = new QStatusBar;
+    mStatusBar = new QStatusBar(this);
 
     mStatusBar->addWidget (mStatus);
 

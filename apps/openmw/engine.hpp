@@ -21,6 +21,7 @@ namespace Resource
 namespace SceneUtil
 {
     class WorkQueue;
+    class AsyncScreenCaptureOperation;
 }
 
 namespace VFS
@@ -33,9 +34,49 @@ namespace Compiler
     class Context;
 }
 
-namespace MWScript
+namespace MWLua
 {
-    class ScriptManager;
+    class LuaManager;
+}
+
+namespace Stereo
+{
+    class Manager;
+}
+
+namespace Files
+{
+    struct ConfigurationManager;
+}
+
+namespace osgViewer
+{
+    class ScreenCaptureHandler;
+}
+
+namespace SceneUtil
+{
+    class SelectDepthFormatOperation;
+
+    namespace Color
+    {
+        class SelectColorFormatOperation;
+    }
+}
+
+namespace MWState
+{
+    class StateManager;
+}
+
+namespace MWGui
+{
+    class WindowManager;
+}
+
+namespace MWInput
+{
+    class InputManager;
 }
 
 namespace MWSound
@@ -48,19 +89,24 @@ namespace MWWorld
     class World;
 }
 
-namespace MWGui
+namespace MWScript
 {
-    class WindowManager;
+    class ScriptManager;
 }
 
-namespace Files
+namespace MWMechanics
 {
-    struct ConfigurationManager;
+    class MechanicsManager;
 }
 
-namespace osgViewer
+namespace MWDialogue
 {
-    class ScreenCaptureHandler;
+    class DialogueManager;
+}
+
+namespace MWDialogue
+{
+    class Journal;
 }
 
 struct SDL_Window;
@@ -74,17 +120,33 @@ namespace OMW
             std::unique_ptr<VFS::Manager> mVFS;
             std::unique_ptr<Resource::ResourceSystem> mResourceSystem;
             osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+            std::unique_ptr<MWWorld::World> mWorld;
+            std::unique_ptr<MWSound::SoundManager> mSoundManager;
+            std::unique_ptr<MWScript::ScriptManager> mScriptManager;
+            std::unique_ptr<MWGui::WindowManager> mWindowManager;
+            std::unique_ptr<MWMechanics::MechanicsManager> mMechanicsManager;
+            std::unique_ptr<MWDialogue::DialogueManager> mDialogueManager;
+            std::unique_ptr<MWDialogue::Journal> mJournal;
+            std::unique_ptr<MWInput::InputManager> mInputManager;
+            std::unique_ptr<MWState::StateManager> mStateManager;
+            std::unique_ptr<MWLua::LuaManager> mLuaManager;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
-            ToUTF8::Utf8Encoder* mEncoder;
+            std::unique_ptr<ToUTF8::Utf8Encoder> mEncoder;
             Files::PathContainer mDataDirs;
             std::vector<std::string> mArchives;
             boost::filesystem::path mResDir;
             osg::ref_ptr<osgViewer::Viewer> mViewer;
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
-            osgViewer::ScreenCaptureHandler::CaptureOperation *mScreenCaptureOperation;
+            osg::ref_ptr<SceneUtil::AsyncScreenCaptureOperation> mScreenCaptureOperation;
+            osg::ref_ptr<SceneUtil::SelectDepthFormatOperation> mSelectDepthFormatOperation;
+            osg::ref_ptr<SceneUtil::Color::SelectColorFormatOperation> mSelectColorFormatOperation;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
+            std::vector<std::string> mGroundcoverFiles;
+
+            std::unique_ptr<Stereo::Manager> mStereoManager;
+
             bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
@@ -98,11 +160,10 @@ namespace OMW
             // Grab mouse?
             bool mGrab;
 
-            bool mExportFonts;
             unsigned int mRandomSeed;
 
             Compiler::Extensions mExtensions;
-            Compiler::Context *mScriptContext;
+            std::unique_ptr<Compiler::Context> mScriptContext;
 
             Files::Collections mFileCollections;
             bool mFSStrict;
@@ -119,13 +180,10 @@ namespace OMW
 
             bool frame (float dt);
 
-            /// Load settings from various files, returns the path to the user settings file
-            std::string loadSettings (Settings::Manager & settings);
-
             /// Prepare engine for game play
-            void prepareEngine (Settings::Manager & settings);
+            void prepareEngine();
 
-            void createWindow(Settings::Manager& settings);
+            void createWindow();
             void setWindowIcon();
 
         public:
@@ -155,6 +213,7 @@ namespace OMW
              * @param file - filename (extension is required)
              */
             void addContentFile(const std::string& file);
+            void addGroundcoverFile(const std::string& file);
 
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
@@ -194,8 +253,6 @@ namespace OMW
 
             void setScriptBlacklistUse (bool use);
 
-            void enableFontExport(bool exportFonts);
-
             /// Set the save game file to load after initialising the engine.
             void setSaveGameFile(const std::string& savegame);
 
@@ -203,6 +260,8 @@ namespace OMW
 
         private:
             Files::ConfigurationManager& mCfgMgr;
+            class LuaWorker;
+            int mGlMaxTextureImageUnits;
     };
 }
 

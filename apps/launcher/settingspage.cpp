@@ -5,11 +5,6 @@
 #include <QDebug>
 #include <QDir>
 
-#include <components/files/configurationmanager.hpp>
-
-#include <components/config/gamesettings.hpp>
-#include <components/config/launchersettings.hpp>
-
 #include "utils/textinputdialog.hpp"
 #include "datafilespage.hpp"
 

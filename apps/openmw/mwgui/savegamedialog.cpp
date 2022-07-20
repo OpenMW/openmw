@@ -5,7 +5,6 @@
 
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_ImageBox.h>
-#include <MyGUI_ListBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
 
@@ -208,7 +207,7 @@ namespace MWGui
 
         mCharacterSelection->setIndexSelected(selectedIndex);
         if (selectedIndex == MyGUI::ITEM_NONE)
-            mCharacterSelection->setCaption("Select Character ...");
+            mCharacterSelection->setCaptionWithReplacing("#{SavegameMenu:SelectCharacter}");
 
         fillSaveList();
 
@@ -424,7 +423,7 @@ namespace MWGui
 
         if (Settings::Manager::getBool("timeplayed","Saves"))
         {
-            text << "\n" << "Time played: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
+            text << "\n" << "#{SavegameMenu:TimePlayed}: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
         }
 
         mInfoText->setCaptionWithReplacing(text.str());
@@ -450,6 +449,7 @@ namespace MWGui
 
         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
         texture->setImage(result.getImage());
+        texture->setInternalFormat(GL_RGB);
         texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
@@ -457,7 +457,7 @@ namespace MWGui
         texture->setResizeNonPowerOfTwoHint(false);
         texture->setUnRefImageDataAfterApply(true);
 
-        mScreenshotTexture.reset(new osgMyGUI::OSGTexture(texture));
+        mScreenshotTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
 
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
         mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));

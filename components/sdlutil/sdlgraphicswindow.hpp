@@ -24,7 +24,7 @@ class GraphicsWindowSDL2 : public osgViewer::GraphicsWindow
 public:
     GraphicsWindowSDL2(osg::GraphicsContext::Traits *traits);
 
-    bool isSameKindAs(const Object* object) const override { return dynamic_cast<const GraphicsWindowSDL2*>(object)!=0; }
+    bool isSameKindAs(const Object* object) const override { return dynamic_cast<const GraphicsWindowSDL2*>(object)!=nullptr; }
     const char* libraryName() const override { return "osgViewer"; }
     const char* className() const override { return "GraphicsWindowSDL2"; }
 

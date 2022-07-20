@@ -1,11 +1,10 @@
 #include "cellwater.hpp"
 
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -27,9 +26,9 @@ namespace CSVRender
         : mData(data)
         , mId(id)
         , mParentNode(cellNode)
-        , mWaterTransform(0)
-        , mWaterNode(0)
-        , mWaterGeometry(0)
+        , mWaterTransform(nullptr)
+        , mWaterGroup(nullptr)
+        , mWaterGeometry(nullptr)
         , mDeleted(false)
         , mExterior(false)
         , mHasWater(false)
@@ -41,8 +40,8 @@ namespace CSVRender
         mWaterTransform->setNodeMask(Mask_Water);
         mParentNode->addChild(mWaterTransform);
 
-        mWaterNode = new osg::Geode();
-        mWaterTransform->addChild(mWaterNode);
+        mWaterGroup = new osg::Group();
+        mWaterTransform->addChild(mWaterGroup);
 
         int cellIndex = mData.getCells().searchId(mId);
         if (cellIndex > -1)
@@ -136,8 +135,8 @@ namespace CSVRender
 
         if (mWaterGeometry)
         {
-            mWaterNode->removeDrawable(mWaterGeometry);
-            mWaterGeometry = 0;
+            mWaterGroup->removeChild(mWaterGeometry);
+            mWaterGeometry = nullptr;
         }
 
         if (mDeleted || !mHasWater)
@@ -177,6 +176,6 @@ namespace CSVRender
         mWaterGeometry->getStateSet()->setTextureAttributeAndModes(0, waterTexture, osg::StateAttribute::ON);
 
 
-        mWaterNode->addDrawable(mWaterGeometry);
+        mWaterGroup->addChild(mWaterGeometry);
     }
 }

@@ -2,7 +2,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include <components/compiler/opcodes.hpp>
 
@@ -17,6 +17,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/cellutils.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -32,7 +33,7 @@ namespace MWScript
             std::vector<MWWorld::Ptr> actors;
             MWBase::Environment::get().getWorld()->getActorsStandingOn (ptr, actors);
             for (auto& actor : actors)
-                MWBase::Environment::get().getWorld()->queueMovement(actor, diff);
+                MWBase::Environment::get().getWorld()->moveObjectBy(actor, diff);
         }
 
         template<class R>
@@ -42,9 +43,18 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    MWWorld::Ptr from = R()(runtime);
-                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    MWWorld::Ptr from = R()(runtime, !R::implicit);
+                    std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
+
+                    if (from.isEmpty())
+                    {
+                        std::string error = "Missing implicit ref";
+                        runtime.getContext().report(error);
+                        Log(Debug::Error) << error;
+                        runtime.push(0.f);
+                        return;
+                    }
 
                     if (from.getContainerStore()) // is the object contained?
                     {
@@ -65,7 +75,7 @@ namespace MWScript
                     const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->searchPtr(name, false);
                     if (to.isEmpty())
                     {
-                        std::string error = "Failed to find an instance of object '" + name + "'";
+                        std::string error = "Failed to find an instance of object '" + std::string(name) + "'";
                         runtime.getContext().report(error);
                         Log(Debug::Error) << error;
                         runtime.push(0.f);
@@ -146,7 +156,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float angle = osg::DegreesToRadians(runtime[0].mFloat);
                     runtime.pop();
@@ -158,17 +168,17 @@ namespace MWScript
                     // XYZ axis use the inverse (XYZ) rotation order like vanilla SetAngle.
                     // UWV axis use the standard (ZYX) rotation order like TESCS/OpenMW-CS and the rest of the game.
                     if (axis == "x")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az,MWBase::RotationFlag_inverseOrder);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,osg::Vec3f(angle,ay,az),MWBase::RotationFlag_inverseOrder);
                     else if (axis == "y")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az,MWBase::RotationFlag_inverseOrder);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,osg::Vec3f(ax,angle,az),MWBase::RotationFlag_inverseOrder);
                     else if (axis == "z")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle,MWBase::RotationFlag_inverseOrder);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,osg::Vec3f(ax,ay,angle),MWBase::RotationFlag_inverseOrder);
                     else if (axis == "u")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az,MWBase::RotationFlag_none);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,osg::Vec3f(angle,ay,az),MWBase::RotationFlag_none);
                     else if (axis == "w")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az,MWBase::RotationFlag_none);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,osg::Vec3f(ax,angle,az),MWBase::RotationFlag_none);
                     else if (axis == "v")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle,MWBase::RotationFlag_none);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,osg::Vec3f(ax,ay,angle),MWBase::RotationFlag_none);
                 }
         };
 
@@ -181,21 +191,26 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    if (axis == "x")
+                    float ret = 0.f;
+                    if (!axis.empty())
                     {
-                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[0]));
+                        if (axis[0] == 'x')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[0]);
+                        }
+                        else if (axis[0] == 'y')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[1]);
+                        }
+                        else if (axis[0] == 'z')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[2]);
+                        }
                     }
-                    else if (axis == "y")
-                    {
-                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[1]));
-                    }
-                    else if (axis == "z")
-                    {
-                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[2]));
-                    }
+                    runtime.push(ret);
                 }
         };
 
@@ -208,21 +223,26 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    if (axis=="x")
+                    float ret = 0.f;
+                    if (!axis.empty())
                     {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]));
+                        if (axis[0] == 'x')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
+                        }
+                        else if (axis[0] == 'y')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
+                        }
+                        else if (axis[0] == 'z')
+                        {
+                            ret = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]);
+                        }
                     }
-                    else if (axis=="y")
-                    {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]));
-                    }
-                    else if (axis=="z")
-                    {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]));
-                    }
+                    runtime.push(ret);
                 }
         };
 
@@ -235,21 +255,26 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "x")
+                    float ret = 0.f;
+                    if (!axis.empty())
                     {
-                        runtime.push(ptr.getRefData().getPosition().pos[0]);
+                        if (axis[0] == 'x')
+                        {
+                            ret = ptr.getRefData().getPosition().pos[0];
+                        }
+                        else if (axis[0] == 'y')
+                        {
+                            ret = ptr.getRefData().getPosition().pos[1];
+                        }
+                        else if (axis[0] == 'z')
+                        {
+                            ret = ptr.getRefData().getPosition().pos[2];
+                        }
                     }
-                    else if(axis == "y")
-                    {
-                        runtime.push(ptr.getRefData().getPosition().pos[1]);
-                    }
-                    else if(axis == "z")
-                    {
-                        runtime.push(ptr.getRefData().getPosition().pos[2]);
-                    }
+                    runtime.push(ret);
                 }
         };
 
@@ -262,28 +287,25 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (!ptr.isInCell())
-                        return;
-
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float pos = runtime[0].mFloat;
                     runtime.pop();
 
-                    float ax = ptr.getRefData().getPosition().pos[0];
-                    float ay = ptr.getRefData().getPosition().pos[1];
-                    float az = ptr.getRefData().getPosition().pos[2];
+                    if (!ptr.isInCell())
+                        return;
 
                     // Note: SetPos does not skip weather transitions in vanilla engine, so we do not call setTeleported(true) here.
 
-                    MWWorld::Ptr updated = ptr;
+                    const auto curPos = ptr.getRefData().getPosition().asVec3();
+                    auto newPos = curPos;
                     if(axis == "x")
                     {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az,true);
+                        newPos[0] = pos;
                     }
                     else if(axis == "y")
                     {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az,true);
+                        newPos[1] = pos;
                     }
                     else if(axis == "z")
                     {
@@ -292,20 +314,21 @@ namespace MWScript
                         {
                             float terrainHeight = -std::numeric_limits<float>::max();
                             if (ptr.getCell()->isExterior())
-                                terrainHeight = MWBase::Environment::get().getWorld()->getTerrainHeightAt(osg::Vec3f(ax, ay, az));
-
+                                terrainHeight = MWBase::Environment::get().getWorld()->getTerrainHeightAt(curPos);
+ 
                             if (pos < terrainHeight)
                                 pos = terrainHeight;
                         }
-
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos,true);
+ 
+                        newPos[2] = pos;
                     }
                     else
                     {
                         return;
                     }
 
-                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,updated);
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, newPos, true, true));
                 }
         };
 
@@ -318,21 +341,26 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "x")
+                    float ret = 0.f;
+                    if (!axis.empty())
                     {
-                        runtime.push(ptr.getCellRef().getPosition().pos[0]);
+                        if (axis[0] == 'x')
+                        {
+                            ret = ptr.getCellRef().getPosition().pos[0];
+                        }
+                        else if (axis[0] == 'y')
+                        {
+                            ret = ptr.getCellRef().getPosition().pos[1];
+                        }
+                        else if (axis[0] == 'z')
+                        {
+                            ret = ptr.getCellRef().getPosition().pos[2];
+                        }
                     }
-                    else if(axis == "y")
-                    {
-                        runtime.push(ptr.getCellRef().getPosition().pos[1]);
-                    }
-                    else if(axis == "z")
-                    {
-                        runtime.push(ptr.getCellRef().getPosition().pos[2]);
-                    }
+                    runtime.push(ret);
                 }
         };
 
@@ -345,14 +373,6 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr.getContainerStore())
-                        return;
-
-                    if (ptr == MWMechanics::getPlayer())
-                    {
-                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
-                    }
-
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
                     Interpreter::Type_Float y = runtime[0].mFloat;
@@ -361,42 +381,54 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
-                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string cellID{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    MWWorld::CellStore* store = 0;
+                    if (ptr.getContainerStore())
+                        return;
+
+                    bool isPlayer = ptr == MWMechanics::getPlayer();
+                    if (isPlayer)
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
+
+                    MWWorld::CellStore* store = nullptr;
                     try
                     {
                         store = MWBase::Environment::get().getWorld()->getInterior(cellID);
                     }
                     catch(std::exception&)
                     {
-                        // cell not found, move to exterior instead (vanilla PositionCell compatibility)
+                        // cell not found, move to exterior instead if moving the player (vanilla PositionCell compatibility)
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
-                        int cx,cy;
-                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                         if(!cell)
                         {
-                            std::string error = "Warning: PositionCell: unknown interior cell (" + cellID + "), moving to exterior instead";
+                            std::string error = "Warning: PositionCell: unknown interior cell (" + cellID + ")";
+                            if(isPlayer)
+                                error += ", moving to exterior instead";
                             runtime.getContext().report (error);
                             Log(Debug::Warning) << error;
+                            if(!isPlayer)
+                                return;
                         }
+                        const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                     }
                     if(store)
                     {
                         MWWorld::Ptr base = ptr;
-                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,store,osg::Vec3f(x,y,z));
                         dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
-                        float ax = ptr.getRefData().getPosition().rot[0];
-                        float ay = ptr.getRefData().getPosition().rot[1];
+                        auto rot = ptr.getRefData().getPosition().asRotationVec3();
                         // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                         // except for when you position the player, then degrees must be used.
                         // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
-                        if(ptr != MWMechanics::getPlayer())
+                        if(!isPlayer)
                             zRot = zRot/60.0f;
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,osg::DegreesToRadians(zRot));
+                        rot.z() = osg::DegreesToRadians(zRot);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,rot);
 
                         ptr.getClass().adjustPosition(ptr, false);
                     }
@@ -412,14 +444,6 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (!ptr.isInCell())
-                        return;
-
-                    if (ptr == MWMechanics::getPlayer())
-                    {
-                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
-                    }
-
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
                     Interpreter::Type_Float y = runtime[0].mFloat;
@@ -428,31 +452,38 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
-                    int cx,cy;
-                    MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+
+                    if (!ptr.isInCell())
+                        return;
+
+                    if (ptr == MWMechanics::getPlayer())
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
+                    const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
 
                     // another morrowind oddity: player will be moved to the exterior cell at this location,
                     // non-player actors will move within the cell they are in.
                     MWWorld::Ptr base = ptr;
                     if (ptr == MWMechanics::getPlayer())
                     {
-                        MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
-                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,cell,x,y,z);
+                        MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, cell, osg::Vec3(x, y, z));
                     }
                     else
                     {
-                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z, true);
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, osg::Vec3f(x, y, z), true, true);
                     }
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
-                    float ax = ptr.getRefData().getPosition().rot[0];
-                    float ay = ptr.getRefData().getPosition().rot[1];
+                    auto rot = ptr.getRefData().getPosition().asRotationVec3();
                     // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                     // except for when you position the player, then degrees must be used.
                     // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
                     if(ptr != MWMechanics::getPlayer())
                         zRot = zRot/60.0f;
-                    MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,osg::DegreesToRadians(zRot));
+                    rot.z() = osg::DegreesToRadians(zRot);
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr,rot);
                     ptr.getClass().adjustPosition(ptr, false);
                 }
         };
@@ -463,9 +494,9 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
-                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string cellID{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Float x = runtime[0].mFloat;
@@ -477,7 +508,7 @@ namespace MWScript
                     Interpreter::Type_Float zRotDegrees = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWWorld::CellStore* store = 0;
+                    MWWorld::CellStore* store = nullptr;
                     try
                     {
                         store = MWBase::Environment::get().getWorld()->getInterior(cellID);
@@ -485,9 +516,8 @@ namespace MWScript
                     catch(std::exception&)
                     {
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
-                        int cx,cy;
-                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                         if(!cell)
                         {
                             runtime.getContext().report ("unknown cell (" + cellID + ")");
@@ -503,6 +533,7 @@ namespace MWScript
                         pos.rot[0] = pos.rot[1] = 0;
                         pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                        ref.getPtr().mRef->mData.mPhysicsPostponed = !ref.getPtr().getClass().isActor();
                         ref.getPtr().getCellRef().setPosition(pos);
                         MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(),store,pos);
                         placed.getClass().adjustPosition(placed, true);
@@ -516,7 +547,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float x = runtime[0].mFloat;
@@ -536,9 +567,8 @@ namespace MWScript
                     MWWorld::CellStore* store = nullptr;
                     if (player.getCell()->isExterior())
                     {
-                        int cx,cy;
-                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                     }
                     else
                         store = player.getCell();
@@ -550,6 +580,7 @@ namespace MWScript
                     pos.rot[0] = pos.rot[1] = 0;
                     pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    ref.getPtr().mRef->mData.mPhysicsPostponed = !ref.getPtr().getClass().isActor();
                     ref.getPtr().getCellRef().setPosition(pos);
                     MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(),store,pos);
                     placed.getClass().adjustPosition(placed, true);
@@ -567,7 +598,7 @@ namespace MWScript
                         ? MWMechanics::getPlayer()
                         : R()(runtime);
 
-                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
@@ -590,6 +621,7 @@ namespace MWScript
                     {
                         // create item
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, 1);
+                        ref.getPtr().mRef->mData.mPhysicsPostponed = !ref.getPtr().getClass().isActor();
 
                         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), actor, actor.getCell(), direction, distance);
                         MWBase::Environment::get().getWorld()->scaleObject(ptr, actor.getCellRef().getScale());
@@ -606,21 +638,20 @@ namespace MWScript
                 {
                     const MWWorld::Ptr& ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float rotation = osg::DegreesToRadians(runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float ax = ptr.getRefData().getPosition().rot[0];
-                    float ay = ptr.getRefData().getPosition().rot[1];
-                    float az = ptr.getRefData().getPosition().rot[2];
-
-                    if (axis == "x")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az);
+                    auto rot = ptr.getRefData().getPosition().asRotationVec3();
+                    // Regardless of the axis argument, the player may only be rotated on Z
+                    if (axis == "z" || MWMechanics::getPlayer() == ptr)
+                        rot.z() += rotation;
+                    else if (axis == "x")
+                        rot.x() += rotation;
                     else if (axis == "y")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay+rotation,az);
-                    else if (axis == "z")
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,az+rotation);
+                        rot.y() += rotation;
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr,rot);
                 }
         };
 
@@ -633,7 +664,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float rotation = osg::DegreesToRadians(runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
@@ -672,15 +703,10 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    float xr = ptr.getCellRef().getPosition().rot[0];
-                    float yr = ptr.getCellRef().getPosition().rot[1];
-                    float zr = ptr.getCellRef().getPosition().rot[2];
-
-                    MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr, ptr.getCellRef().getPosition().asRotationVec3());
 
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
-                            ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]));
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().asVec3()));
 
                 }
         };
@@ -697,7 +723,7 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
@@ -723,14 +749,12 @@ namespace MWScript
                         return;
 
                     osg::Vec3f diff = ptr.getRefData().getBaseNode()->getAttitude() * posChange;
-                    osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
-                    worldPos += diff;
 
                     // We should move actors, standing on moving object, too.
                     // This approach can be used to create elevators.
                     moveStandingActors(ptr, diff);
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z()));
+                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff));
                 }
         };
 
@@ -746,20 +770,19 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view axis = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    const float *objPos = ptr.getRefData().getPosition().pos;
                     osg::Vec3f diff;
 
                     if (axis == "x")
-                        diff.x() += movement;
+                        diff.x() = movement;
                     else if (axis == "y")
-                        diff.y() += movement;
+                        diff.y() = movement;
                     else if (axis == "z")
-                        diff.z() += movement;
+                        diff.z() = movement;
                     else
                         return;
 
@@ -767,7 +790,7 @@ namespace MWScript
                     // This approach can be used to create elevators.
                     moveStandingActors(ptr, diff);
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+diff.x(), objPos[1]+diff.y(), objPos[2]+diff.z()));
+                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff));
                 }
         };
 
@@ -793,47 +816,47 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetDistance, new OpGetDistance<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetDistanceExplicit, new OpGetDistance<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeSetScale,new OpSetScale<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeSetScaleExplicit,new OpSetScale<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeSetAngle,new OpSetAngle<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeSetAngleExplicit,new OpSetAngle<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetScale,new OpGetScale<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetScaleExplicit,new OpGetScale<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetAngle,new OpGetAngle<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetAngleExplicit,new OpGetAngle<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetPos,new OpGetPos<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetPosExplicit,new OpGetPos<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeSetPos,new OpSetPos<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeSetPosExplicit,new OpSetPos<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingPos,new OpGetStartingPos<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingPosExplicit,new OpGetStartingPos<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePosition,new OpPosition<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePositionExplicit,new OpPosition<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePositionCell,new OpPositionCell<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAt<ImplicitRef, true>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAt<ImplicitRef, false>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAt<ExplicitRef, false>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeModScale,new OpModScale<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeModScaleExplicit,new OpModScale<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeRotate,new OpRotate<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeRotateExplicit,new OpRotate<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeRotateWorld,new OpRotateWorld<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeRotateWorldExplicit,new OpRotateWorld<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeSetAtStart,new OpSetAtStart<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeSetAtStartExplicit,new OpSetAtStart<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeMove,new OpMove<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeMoveExplicit,new OpMove<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeMoveWorld,new OpMoveWorld<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeMoveWorldExplicit,new OpMoveWorld<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngle, new OpGetStartingAngle<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngleExplicit, new OpGetStartingAngle<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeResetActors, new OpResetActors);
-            interpreter.installSegment5(Compiler::Transformation::opcodeFixme, new OpFixme);
+            interpreter.installSegment5<OpGetDistance<ImplicitRef>>(Compiler::Transformation::opcodeGetDistance);
+            interpreter.installSegment5<OpGetDistance<ExplicitRef>>(Compiler::Transformation::opcodeGetDistanceExplicit);
+            interpreter.installSegment5<OpSetScale<ImplicitRef>>(Compiler::Transformation::opcodeSetScale);
+            interpreter.installSegment5<OpSetScale<ExplicitRef>>(Compiler::Transformation::opcodeSetScaleExplicit);
+            interpreter.installSegment5<OpSetAngle<ImplicitRef>>(Compiler::Transformation::opcodeSetAngle);
+            interpreter.installSegment5<OpSetAngle<ExplicitRef>>(Compiler::Transformation::opcodeSetAngleExplicit);
+            interpreter.installSegment5<OpGetScale<ImplicitRef>>(Compiler::Transformation::opcodeGetScale);
+            interpreter.installSegment5<OpGetScale<ExplicitRef>>(Compiler::Transformation::opcodeGetScaleExplicit);
+            interpreter.installSegment5<OpGetAngle<ImplicitRef>>(Compiler::Transformation::opcodeGetAngle);
+            interpreter.installSegment5<OpGetAngle<ExplicitRef>>(Compiler::Transformation::opcodeGetAngleExplicit);
+            interpreter.installSegment5<OpGetPos<ImplicitRef>>(Compiler::Transformation::opcodeGetPos);
+            interpreter.installSegment5<OpGetPos<ExplicitRef>>(Compiler::Transformation::opcodeGetPosExplicit);
+            interpreter.installSegment5<OpSetPos<ImplicitRef>>(Compiler::Transformation::opcodeSetPos);
+            interpreter.installSegment5<OpSetPos<ExplicitRef>>(Compiler::Transformation::opcodeSetPosExplicit);
+            interpreter.installSegment5<OpGetStartingPos<ImplicitRef>>(Compiler::Transformation::opcodeGetStartingPos);
+            interpreter.installSegment5<OpGetStartingPos<ExplicitRef>>(Compiler::Transformation::opcodeGetStartingPosExplicit);
+            interpreter.installSegment5<OpPosition<ImplicitRef>>(Compiler::Transformation::opcodePosition);
+            interpreter.installSegment5<OpPosition<ExplicitRef>>(Compiler::Transformation::opcodePositionExplicit);
+            interpreter.installSegment5<OpPositionCell<ImplicitRef>>(Compiler::Transformation::opcodePositionCell);
+            interpreter.installSegment5<OpPositionCell<ExplicitRef>>(Compiler::Transformation::opcodePositionCellExplicit);
+            interpreter.installSegment5<OpPlaceItemCell>(Compiler::Transformation::opcodePlaceItemCell);
+            interpreter.installSegment5<OpPlaceItem>(Compiler::Transformation::opcodePlaceItem);
+            interpreter.installSegment5<OpPlaceAt<ImplicitRef, true>>(Compiler::Transformation::opcodePlaceAtPc);
+            interpreter.installSegment5<OpPlaceAt<ImplicitRef, false>>(Compiler::Transformation::opcodePlaceAtMe);
+            interpreter.installSegment5<OpPlaceAt<ExplicitRef, false>>(Compiler::Transformation::opcodePlaceAtMeExplicit);
+            interpreter.installSegment5<OpModScale<ImplicitRef>>(Compiler::Transformation::opcodeModScale);
+            interpreter.installSegment5<OpModScale<ExplicitRef>>(Compiler::Transformation::opcodeModScaleExplicit);
+            interpreter.installSegment5<OpRotate<ImplicitRef>>(Compiler::Transformation::opcodeRotate);
+            interpreter.installSegment5<OpRotate<ExplicitRef>>(Compiler::Transformation::opcodeRotateExplicit);
+            interpreter.installSegment5<OpRotateWorld<ImplicitRef>>(Compiler::Transformation::opcodeRotateWorld);
+            interpreter.installSegment5<OpRotateWorld<ExplicitRef>>(Compiler::Transformation::opcodeRotateWorldExplicit);
+            interpreter.installSegment5<OpSetAtStart<ImplicitRef>>(Compiler::Transformation::opcodeSetAtStart);
+            interpreter.installSegment5<OpSetAtStart<ExplicitRef>>(Compiler::Transformation::opcodeSetAtStartExplicit);
+            interpreter.installSegment5<OpMove<ImplicitRef>>(Compiler::Transformation::opcodeMove);
+            interpreter.installSegment5<OpMove<ExplicitRef>>(Compiler::Transformation::opcodeMoveExplicit);
+            interpreter.installSegment5<OpMoveWorld<ImplicitRef>>(Compiler::Transformation::opcodeMoveWorld);
+            interpreter.installSegment5<OpMoveWorld<ExplicitRef>>(Compiler::Transformation::opcodeMoveWorldExplicit);
+            interpreter.installSegment5<OpGetStartingAngle<ImplicitRef>>(Compiler::Transformation::opcodeGetStartingAngle);
+            interpreter.installSegment5<OpGetStartingAngle<ExplicitRef>>(Compiler::Transformation::opcodeGetStartingAngleExplicit);
+            interpreter.installSegment5<OpResetActors>(Compiler::Transformation::opcodeResetActors);
+            interpreter.installSegment5<OpFixme>(Compiler::Transformation::opcodeFixme);
         }
     }
 }

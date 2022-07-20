@@ -24,14 +24,13 @@ namespace MWSound
 namespace MWRender
 {
 
-class NeckController;
+class RotateController;
 class HeadAnimationTime;
 
 class NpcAnimation : public ActorAnimation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:
     void equipmentChanged() override;
-    void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew) override;
 
 public:
     typedef std::map<ESM::PartReferenceType,std::string> PartBoneMap;
@@ -84,20 +83,20 @@ private:
     NpcType getNpcType() const;
 
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
-                                        const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=nullptr);
+                                        const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight);
 
     void removeIndividualPart(ESM::PartReferenceType type);
     void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
 
     bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh,
-                                    bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
+                                    bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr, bool isLight = false);
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
 
     void setRenderBin();
 
-    osg::ref_ptr<NeckController> mFirstPersonNeckController;
+    osg::ref_ptr<RotateController> mFirstPersonNeckController;
 
     static bool isFirstPersonPart(const ESM::BodyPart* bodypart);
     static bool isFemalePart(const ESM::BodyPart* bodypart);
@@ -106,7 +105,7 @@ private:
 protected:
     void addControllers() override;
     bool isArrowAttached() const override;
-    std::string getShieldMesh(MWWorld::ConstPtr shield) const override;
+    std::string getSheathedShieldMesh(const MWWorld::ConstPtr& shield) const override;
 
 public:
     /**

@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <components/vfs/manager.hpp>
+
 namespace osgViewer
 {
     class Viewer;
@@ -30,7 +32,7 @@ namespace osgMyGUI
     class Platform
     {
     public:
-        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager, float uiScalingFactor);
+        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager, const VFS::Manager* vfs, float uiScalingFactor);
 
         ~Platform();
 

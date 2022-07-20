@@ -1,7 +1,5 @@
 #include "vartypedelegate.hpp"
 
-#include <QUndoStack>
-
 #include "../../model/world/commands.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/commandmacro.hpp"

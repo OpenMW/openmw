@@ -5,22 +5,26 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
+#include <boost/program_options/options_description.hpp>
+
+#include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/misc/rng.hpp>
 #include <components/nifosg/nifloader.hpp>
+#include <components/settings/settings.hpp>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <components/windows.hpp>
 #endif
 
 using namespace Fallback;
 
 CS::Editor::Editor (int argc, char **argv)
-: mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
+: mConfigVariables(readConfiguration()), mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
   mPid(""), mLock(), mMerge (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(nullptr), mClientSocket(nullptr)
 {
@@ -82,55 +86,67 @@ CS::Editor::~Editor ()
         remove(mPid.string().c_str())); // ignore any error
 }
 
-std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
+boost::program_options::variables_map CS::Editor::readConfiguration()
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
 
     desc.add_options()
-    ("data", boost::program_options::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")->multitoken()->composing())
-    ("data-local", boost::program_options::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""))
+    ("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing())
+    ("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-    ("encoding", boost::program_options::value<Files::EscapeHashString>()->default_value("win1252"))
-    ("resources", boost::program_options::value<Files::EscapePath>()->default_value(Files::EscapePath(), "resources"))
-    ("fallback-archive", boost::program_options::value<Files::EscapeStringVector>()->
-        default_value(Files::EscapeStringVector(), "fallback-archive")->multitoken())
+    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
+    ("resources", boost::program_options::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"))
+    ("fallback-archive", boost::program_options::value<std::vector<std::string>>()->
+        default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
     ("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
         ->multitoken()->composing(), "fallback values")
-    ("script-blacklist", boost::program_options::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+    ("script-blacklist", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
         ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
     ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
         ->default_value(true), "enable script blacklisting");
+    Files::ConfigurationManager::addCommonOptions(desc);
 
     boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc, false);
+    Settings::Manager::load(mCfgMgr, true);
+    setupLogging(mCfgMgr.getLogPath().string(), "OpenMW-CS");
+
+    return variables;
+}
+
+std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
+{
+    boost::program_options::variables_map& variables = mConfigVariables;
 
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
 
-    mEncodingName = variables["encoding"].as<Files::EscapeHashString>().toStdString();
+    mEncodingName = variables["encoding"].as<std::string>();
     mDocumentManager.setEncoding(ToUTF8::calculateEncoding(mEncodingName));
     mFileDialog.setEncoding (QString::fromUtf8(mEncodingName.c_str()));
 
-    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapePath>().mPath);
+    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::MaybeQuotedPath>());
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
-            variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
+            variables["script-blacklist"].as<std::vector<std::string>>());
 
     mFsStrict = variables["fs-strict"].as<bool>();
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty()) {
-        dataDirs = Files::PathContainer(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
+        dataDirs = asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>());
     }
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::EscapePath>().mPath);
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
     if (!local.empty())
+    {
+        boost::filesystem::create_directories(local);
         dataLocal.push_back(local);
-
-    mCfgMgr.processPaths (dataDirs);
-    mCfgMgr.processPaths (dataLocal, true);
+    }
+    mCfgMgr.filterOutNonExistingPaths(dataDirs);
+    mCfgMgr.filterOutNonExistingPaths(dataLocal);
 
     if (!dataLocal.empty())
         mLocal = dataLocal[0];
@@ -149,13 +165,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     //iterate the data directories and add them to the file dialog for loading
-    for (Files::PathContainer::const_reverse_iterator iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
-    {
-        QString path = QString::fromUtf8 (iter->string().c_str());
-        mFileDialog.addFiles(path);
-    }
+    mFileDialog.addFiles(dataDirs);
 
-    return std::make_pair (dataDirs, variables["fallback-archive"].as<Files::EscapeStringVector>().toStdStringVector());
+    return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string>>());
 }
 
 void CS::Editor::createGame()
@@ -364,7 +376,7 @@ int CS::Editor::run()
     else
     {
         ESM::ESMReader fileReader;
-        ToUTF8::Utf8Encoder encoder = ToUTF8::calculateEncoding(mEncodingName);
+        ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncodingName));
         fileReader.setEncoder(&encoder);
         fileReader.open(mFileToLoad.string());
 

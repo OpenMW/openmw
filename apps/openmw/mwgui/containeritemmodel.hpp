@@ -28,13 +28,15 @@ namespace MWGui
         bool onTakeItem(const MWWorld::Ptr &item, int count) override;
 
         ItemStack getItem (ModelIndex index) override;
-        ModelIndex getIndex (ItemStack item) override;
+        ModelIndex getIndex (const ItemStack &item) override;
         size_t getItemCount() override;
 
         MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
         void removeItem (const ItemStack& item, size_t count) override;
 
         void update() override;
+
+        bool usesContainer(const MWWorld::Ptr& container) override;
 
     private:
         std::vector<std::pair<MWWorld::Ptr, MWWorld::ResolutionHandle>> mItemSources;

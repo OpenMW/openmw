@@ -4,6 +4,7 @@
 #include <osg/Group>
 
 #include <memory>
+#include <unordered_map>
 
 namespace SceneUtil
 {
@@ -14,20 +15,15 @@ namespace SceneUtil
     {
     public:
         Bone();
-        ~Bone();
 
         osg::Matrixf mMatrixInSkeletonSpace;
 
         osg::MatrixTransform* mNode;
 
-        std::vector<Bone*> mChildren;
+        std::vector<std::unique_ptr<Bone>> mChildren;
 
         /// Update the skeleton-space matrix of this bone and all its children.
         void update(const osg::Matrixf* parentMatrixInSkeletonSpace);
-
-    private:
-        Bone(const Bone&);
-        void operator=(const Bone&);
     };
 
     /// @brief Handles the bone matrices for any number of child RigGeometries.
@@ -72,7 +68,7 @@ namespace SceneUtil
         // As far as the scene graph goes we support multiple root bones.
         std::unique_ptr<Bone> mRootBone;
 
-        typedef std::map<std::string, std::pair<osg::NodePath, osg::MatrixTransform*> > BoneCache;
+        typedef std::unordered_map<std::string, std::vector<osg::MatrixTransform*> > BoneCache;
         BoneCache mBoneCache;
         bool mBoneCacheInit;
 

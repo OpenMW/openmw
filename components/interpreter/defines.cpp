@@ -26,7 +26,7 @@ namespace Interpreter{
         return a.length() > b.length();
     }
 
-    std::string fixDefinesReal(std::string text, bool dialogue, Context& context)
+    static std::string fixDefinesReal(const std::string& text, bool dialogue, Context& context)
     {
         unsigned int start = 0;
         std::ostringstream retval;
@@ -172,11 +172,11 @@ namespace Interpreter{
 
                         for(unsigned int j = 0; j < globals.size(); j++){
                             if(globals[j].length() > temp.length()){ // Just in case there's a global with a huuuge name
-                                temp = text.substr(i+1, globals[j].length());
-                                transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+                                temp = Misc::StringUtils::lowerCase(text.substr(i+1, globals[j].length()));
                             }
 
-                            if((found = check(temp, globals[j], &i, &start))){
+                            found = check(temp, globals[j], &i, &start);
+                            if(found){
                                 char type = context.getGlobalType(globals[j]);
 
                                 switch(type){

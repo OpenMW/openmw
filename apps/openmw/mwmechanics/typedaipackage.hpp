@@ -11,6 +11,9 @@ namespace MWMechanics
         TypedAiPackage() :
             AiPackage(T::getTypeId(), T::makeDefaultOptions()) {}
 
+        TypedAiPackage(bool repeat) :
+            AiPackage(T::getTypeId(), T::makeDefaultOptions().withRepeat(repeat)) {}
+
         TypedAiPackage(const Options& options) :
             AiPackage(T::getTypeId(), options) {}
 

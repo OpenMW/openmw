@@ -5,8 +5,9 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
-#include <QtCore/qnamespace.h>
+#include <QMetaObject>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/helpviewer.hpp>
 #include <components/misc/stringops.hpp>
 
@@ -14,18 +15,16 @@
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/infotableproxymodel.hpp"
-#include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtablebase.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexturetableproxymodel.hpp"
-#include "../../model/world/record.hpp"
-#include "../../model/world/columns.hpp"
 #include "../../model/world/commanddispatcher.hpp"
 
 #include "../../model/prefs/state.hpp"
 #include "../../model/prefs/shortcut.hpp"
 
 #include "tableeditidaction.hpp"
+#include "tableheadermouseeventhandler.hpp"
 #include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
@@ -238,7 +237,7 @@ void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
     : DragRecordTable(document), mCreateAction (nullptr), mCloneAction(nullptr), mTouchAction(nullptr),
-    mRecordStatusDisplay (0), mJumpToAddedRecord(false), mUnselectAfterJump(false)
+    mRecordStatusDisplay (0), mJumpToAddedRecord(false), mUnselectAfterJump(false), mAutoJump (false)
 {
     mModel = &dynamic_cast<CSMWorld::IdTableBase&> (*mDocument.getData().getTableModel (id));
 
@@ -248,6 +247,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     if (isInfoTable)
     {
         mProxyModel = new CSMWorld::InfoTableProxyModel(id.getType(), this);
+        connect (this, &CSVWorld::DragRecordTable::moveRecordsFromSameTable, this, &CSVWorld::Table::moveRecords);
     }
     else if (isLtexTable)
     {
@@ -266,12 +266,6 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     verticalHeader()->hide();
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
-
-    setSortingEnabled (sorting);
-    if (sorting)
-    {
-        sortByColumn (mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id), Qt::AscendingOrder);
-    }
 
     int columns = mModel->columnCount();
     for (int i=0; i<columns; ++i)
@@ -292,6 +286,13 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
         else
             hideColumn (i);
     }
+
+    if (sorting)
+    {
+        // FIXME: some tables (e.g. CellRef) have this column hidden, which makes it confusing
+        sortByColumn (mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id), Qt::AscendingOrder);
+    }
+    setSortingEnabled (sorting);
 
     mEditAction = new QAction (tr ("Edit Record"), this);
     connect (mEditAction, SIGNAL (triggered()), this, SLOT (editRecord()));
@@ -403,7 +404,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     /// \note This signal could instead be connected to a slot that filters out changes not affecting
     /// the records status column (for permanence reasons)
     connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (tableSizeUpdate()));
+        this, SLOT (dataChangedEvent(const QModelIndex&, const QModelIndex&)));
 
     connect (selectionModel(), SIGNAL (selectionChanged (const QItemSelection&, const QItemSelection&)),
         this, SLOT (selectionSizeUpdate ()));
@@ -418,6 +419,8 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
         this, SLOT (settingChanged (const CSMPrefs::Setting *)));
     CSMPrefs::get()["ID Tables"].update();
+
+    new TableHeaderMouseEventHandler(this);
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -561,6 +564,77 @@ void CSVWorld::Table::moveDownRecord()
                 dynamic_cast<CSMWorld::IdTable&> (*mModel), row, newOrder));
         }
     }
+}
+
+void CSVWorld::Table::moveRecords(QDropEvent *event)
+{
+    if (mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
+        return;
+
+    QModelIndex targedIndex = indexAt(event->pos());
+
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+    int targetRowRaw = targedIndex.row();
+    int targetRow = mProxyModel->mapToSource (mProxyModel->index (targetRowRaw, 0)).row();
+    int baseRowRaw = targedIndex.row() - 1;
+    int baseRow = mProxyModel->mapToSource (mProxyModel->index (baseRowRaw, 0)).row();
+    int highestDifference = 0;
+
+    for (const auto& thisRowData : selectedRows)
+    {
+        int thisRow = mProxyModel->mapToSource (mProxyModel->index (thisRowData.row(), 0)).row();
+        if (std::abs(targetRow - thisRow) > highestDifference) highestDifference = std::abs(targetRow - thisRow);
+        if (thisRow - 1 < baseRow) baseRow = thisRow - 1;
+    }
+
+    std::vector<int> newOrder (highestDifference + 1);
+
+    for (long unsigned int i = 0; i < newOrder.size(); ++i)
+    {
+        newOrder[i] = i;
+    }
+
+    if (selectedRows.size() > 1)
+    {
+        Log(Debug::Warning) << "Move operation failed: Moving multiple selections isn't implemented.";
+        return;
+    }
+
+    for (const auto& thisRowData : selectedRows)
+    {
+        /*
+            Moving algorithm description
+            a) Remove the (ORIGIN + 1)th list member.
+            b) Add (ORIGIN+1)th list member with value TARGET
+            c) If ORIGIN > TARGET,d_INC; ELSE d_DEC
+            d_INC) increase all members after (and including) the TARGET by one, stop before hitting ORIGINth address
+            d_DEC)  decrease all members after the ORIGIN by one, stop after hitting address TARGET
+        */
+
+        int originRowRaw = thisRowData.row();
+        int originRow = mProxyModel->mapToSource (mProxyModel->index (originRowRaw, 0)).row();
+
+        newOrder.erase(newOrder.begin() +  originRow - baseRow - 1);
+        newOrder.emplace(newOrder.begin() + originRow - baseRow - 1, targetRow - baseRow - 1);
+
+        if (originRow > targetRow)
+        {
+            for (int i = targetRow - baseRow - 1; i < originRow - baseRow - 1; ++i)
+            {
+                ++newOrder[i];
+            }
+        }
+        else
+        {
+            for (int i = originRow - baseRow; i <= targetRow - baseRow - 1; ++i)
+            {
+                --newOrder[i];
+            }
+        }
+
+    }
+    mDocument.getUndoStack().push (new CSMWorld::ReorderRowsCommand (
+        dynamic_cast<CSMWorld::IdTable&> (*mModel), baseRow + 1, newOrder));
 }
 
 void CSVWorld::Table::editCell()
@@ -728,7 +802,7 @@ void CSVWorld::Table::tableSizeUpdate()
                     case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
                     case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
                     case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
-                    case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+                    case CSMWorld::RecordBase::State_Deleted: ++deleted; ++modified; break;
                 }
             }
         }
@@ -801,15 +875,47 @@ std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
     return idToDrag;
 }
 
+// parent, start and end depend on the model sending the signal, in this case mProxyModel
+//
+// If, for example, mModel was used instead, then scrolTo() should use the index
+//   mProxyModel->mapFromSource(mModel->index(end, 0))
 void CSVWorld::Table::rowAdded(const std::string &id)
 {
     tableSizeUpdate();
     if(mJumpToAddedRecord)
     {
         int idColumn = mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
-        selectRow(mProxyModel->getModelIndex(id, idColumn).row());
+        int end = mProxyModel->getModelIndex(id, idColumn).row();
+        selectRow(end);
+
+        // without this delay the scroll works but goes to top for add/clone
+        QMetaObject::invokeMethod(this, "queuedScrollTo", Qt::QueuedConnection, Q_ARG(int, end));
 
         if(mUnselectAfterJump)
             clearSelection();
     }
+}
+
+void CSVWorld::Table::queuedScrollTo(int row)
+{
+    scrollTo(mProxyModel->index(row, 0), QAbstractItemView::PositionAtCenter);
+}
+
+void CSVWorld::Table::dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+{
+    tableSizeUpdate();
+
+    if (mAutoJump)
+    {
+        selectRow(bottomRight.row());
+        scrollTo(bottomRight, QAbstractItemView::PositionAtCenter);
+    }
+}
+
+void CSVWorld::Table::jumpAfterModChanged(int state)
+{
+    if(state == Qt::Checked)
+        mAutoJump = true;
+    else
+        mAutoJump = false;
 }

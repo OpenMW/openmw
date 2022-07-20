@@ -1,7 +1,7 @@
 #ifndef ESMLOADER_HPP
 #define ESMLOADER_HPP
 
-#include <vector>
+#include <optional>
 
 #include "contentloader.hpp"
 
@@ -12,7 +12,8 @@ namespace ToUTF8
 
 namespace ESM
 {
-    class ESMReader;
+    class ReadersCache;
+    struct Dialogue;
 }
 
 namespace MWWorld
@@ -22,15 +23,18 @@ class ESMStore;
 
 struct EsmLoader : public ContentLoader
 {
-    EsmLoader(MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& readers,
-      ToUTF8::Utf8Encoder* encoder, Loading::Listener& listener);
+    explicit EsmLoader(MWWorld::ESMStore& store, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder);
 
-    void load(const boost::filesystem::path& filepath, int& index) override;
+    std::optional<int> getMasterFileFormat() const { return mMasterFileFormat; }
+
+    void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override;
 
     private:
-      std::vector<ESM::ESMReader>& mEsm;
-      MWWorld::ESMStore& mStore;
-      ToUTF8::Utf8Encoder* mEncoder;
+        ESM::ReadersCache& mReaders;
+        MWWorld::ESMStore& mStore;
+        ToUTF8::Utf8Encoder* mEncoder;
+        ESM::Dialogue* mDialogue;
+        std::optional<int> mMasterFileFormat;
 };
 
 } /* namespace MWWorld */

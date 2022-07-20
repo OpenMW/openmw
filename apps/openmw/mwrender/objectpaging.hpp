@@ -1,9 +1,9 @@
-#ifndef OPENMW_COMPONENTS_ESMPAGING_CHUNKMANAGER_H
-#define OPENMW_COMPONENTS_ESMPAGING_CHUNKMANAGER_H
+#ifndef OPENMW_MWRENDER_OBJECTPAGING_H
+#define OPENMW_MWRENDER_OBJECTPAGING_H
 
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/resource/resourcemanager.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include <mutex>
 
@@ -63,7 +63,7 @@ namespace MWRender
         {
             std::set<ESM::RefNum> mDisabled;
             std::set<ESM::RefNum> mBlacklist;
-            bool operator==(const RefTracker&other) { return mDisabled == other.mDisabled && mBlacklist == other.mBlacklist; }
+            bool operator==(const RefTracker&other) const { return mDisabled == other.mDisabled && mBlacklist == other.mBlacklist; }
         };
         RefTracker mRefTracker;
         RefTracker mRefTrackerNew;

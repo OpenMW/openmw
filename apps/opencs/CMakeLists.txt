@@ -8,29 +8,29 @@ opencs_units (model/doc
     document operation saving documentmanager loader runner operationholder
     )
 
-opencs_units_noqt (model/doc
+opencs_units (model/doc
     stage savingstate savingstages blacklist messages
     )
 
-opencs_hdrs_noqt (model/doc
+opencs_hdrs (model/doc
     state
     )
 
 
 opencs_units (model/world
     idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree infotableproxymodel landtexturetableproxymodel
-    actoradapter
+    actoradapter idcollection
     )
 
 
-opencs_units_noqt (model/world
+opencs_units (model/world
     universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
     idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
 
-opencs_hdrs_noqt (model/world
+opencs_hdrs (model/world
     columnimp idcollection collection info subcellcollection
     )
 
@@ -39,14 +39,14 @@ opencs_units (model/tools
     tools reportmodel mergeoperation
     )
 
-opencs_units_noqt (model/tools
+opencs_units (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
     mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck
     )
 
-opencs_hdrs_noqt (model/tools
+opencs_hdrs (model/tools
     mergestate
     )
 
@@ -57,11 +57,11 @@ opencs_units (view/doc
     )
 
 
-opencs_units_noqt (view/doc
+opencs_units (view/doc
     subviewfactory
     )
 
-opencs_hdrs_noqt (view/doc
+opencs_hdrs (view/doc
     subviewfactoryimp
     )
 
@@ -71,10 +71,10 @@ opencs_units (view/world
     cellcreator pathgridcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
-    bodypartcreator landtexturecreator landcreator
+    bodypartcreator landtexturecreator landcreator tableheadermouseeventhandler
     )
 
-opencs_units_noqt (view/world
+opencs_units (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
     scripthighlighter idvalidator dialoguecreator idcompletiondelegate
     colordelegate dragdroputils
@@ -89,15 +89,15 @@ opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
-    cellwater terraintexturemode actor terrainselection terrainshapemode brushdraw
+    cellwater terraintexturemode actor terrainselection terrainshapemode brushdraw commands
     )
 
-opencs_units_noqt (view/render
+opencs_units (view/render
     lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
     cellarrow cellmarker cellborder pathgrid
     )
 
-opencs_hdrs_noqt (view/render
+opencs_hdrs (view/render
     mask
     )
 
@@ -106,7 +106,7 @@ opencs_units (view/tools
     reportsubview reporttable searchsubview searchbox merge
     )
 
-opencs_units_noqt (view/tools
+opencs_units (view/tools
     subviews
     )
 
@@ -116,14 +116,14 @@ opencs_units (view/prefs
 
 opencs_units (model/prefs
     state setting intsetting doublesetting boolsetting enumsetting coloursetting shortcut
-    shortcuteventhandler shortcutmanager shortcutsetting modifiersetting
+    shortcuteventhandler shortcutmanager shortcutsetting modifiersetting stringsetting
     )
 
-opencs_units_noqt (model/prefs
+opencs_units (model/prefs
     category
     )
 
-opencs_units_noqt (model/filter
+opencs_units (model/filter
     node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
     )
 
@@ -150,7 +150,6 @@ if(WIN32)
 endif(WIN32)
 
 qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt5_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 # for compiled .ui files
@@ -158,7 +157,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
     set (OPENCS_MAC_ICON "${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns")
-    set (OPENCS_CFG "${OpenMW_BINARY_DIR}/openmw-cs.cfg")
+    set (OPENCS_CFG "${OpenMW_BINARY_DIR}/defaults-cs.bin")
     set (OPENCS_DEFAULT_FILTERS_FILE "${OpenMW_BINARY_DIR}/resources/defaultfilters")
     set (OPENCS_OPENMW_CFG "${OpenMW_BINARY_DIR}/openmw.cfg")
 else()
@@ -184,8 +183,7 @@ if(APPLE)
     set(OPENCS_BUNDLE_NAME "OpenMW-CS")
     set(OPENCS_BUNDLE_RESOURCES_DIR "${OpenMW_BINARY_DIR}/${OPENCS_BUNDLE_NAME}.app/Contents/Resources")
 
-    set(OPENMW_MYGUI_FILES_ROOT ${OPENCS_BUNDLE_RESOURCES_DIR})
-    set(OPENMW_SHADERS_ROOT ${OPENCS_BUNDLE_RESOURCES_DIR})
+    set(OPENMW_RESOURCES_ROOT ${OPENCS_BUNDLE_RESOURCES_DIR})
 
     add_subdirectory(../../files/ ${CMAKE_CURRENT_BINARY_DIR}/files)
 
@@ -215,17 +213,21 @@ if(APPLE)
 endif(APPLE)
 
 target_link_libraries(openmw-cs
-    ${OSG_LIBRARIES}
-    ${OSGTEXT_LIBRARIES}
-    ${OSGUTIL_LIBRARIES}
+    # CMake's built-in OSG finder does not use pkgconfig, so we have to
+    # manually ensure the order is correct for inter-library dependencies.
+    # This only makes a difference with `-DOPENMW_USE_SYSTEM_OSG=ON -DOSG_STATIC=ON`.
+    # https://gitlab.kitware.com/cmake/cmake/-/issues/21701
     ${OSGVIEWER_LIBRARIES}
-    ${OSGGA_LIBRARIES}
     ${OSGFX_LIBRARIES}
+    ${OSGGA_LIBRARIES}
+    ${OSGUTIL_LIBRARIES}
+    ${OSGTEXT_LIBRARIES}
+    ${OSG_LIBRARIES}
     ${EXTERN_OSGQT_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    components
+    components_qt
 )
 
 target_link_libraries(openmw-cs Qt5::Widgets Qt5::Core Qt5::Network Qt5::OpenGL)
@@ -241,7 +243,7 @@ if (WIN32)
         SET(INSTALL_SOURCE "${OpenMW_BINARY_DIR}")
     endif ()
 
-    INSTALL(FILES "${INSTALL_SOURCE}/openmw-cs.cfg" DESTINATION ".")
+    INSTALL(FILES "${INSTALL_SOURCE}/defaults-cs.bin" DESTINATION ".")
 endif()
 
 if (MSVC)
@@ -254,4 +256,23 @@ endif (MSVC)
 
 if(APPLE)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION "." COMPONENT Bundle)
+endif()
+
+if(USE_QT)
+    set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
+endif(USE_QT)
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(openmw-cs PRIVATE
+        <boost/filesystem.hpp>
+        <boost/program_options/options_description.hpp>
+
+        <algorithm>
+        <fstream>
+        <functional>
+        <ostream>
+        <string>
+        <string_view>
+        <vector>
+    )
 endif()

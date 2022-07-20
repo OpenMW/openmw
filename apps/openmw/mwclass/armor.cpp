@@ -1,8 +1,10 @@
 #include "armor.hpp"
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadgmst.hpp>
+#include <MyGUI_TextIterator.h>
+
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadgmst.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -24,8 +26,14 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
+    Armor::Armor()
+        : MWWorld::RegisteredClass<Armor>(ESM::Armor::sRecordId)
+    {
+    }
 
     void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -34,20 +42,9 @@ namespace MWClass
         }
     }
 
-    void Armor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
-    {
-        // TODO: add option somewhere to enable collision for placeable objects
-    }
-
     std::string Armor::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return "meshes\\" + model;
-        }
-        return "";
+        return getClassModel<ESM::Armor>(ptr);
     }
 
     std::string Armor::getName (const MWWorld::ConstPtr& ptr) const
@@ -58,7 +55,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Armor::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Armor::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -164,13 +161,6 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    void Armor::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Armor);
-
-        registerClass (typeid (ESM::Armor).name(), instance);
-    }
-
     std::string Armor::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
@@ -213,7 +203,9 @@ namespace MWClass
         // get armor type string (light/medium/heavy)
         std::string typeText;
         if (ref->mBase->mData.mWeight == 0)
-            typeText = "";
+        {
+            // no type
+        }
         else
         {
             int armorType = getEquipmentSkill(ptr);       
@@ -263,7 +255,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         ESM::Armor newItem = *ref->mBase;
-        newItem.mId="";
+        newItem.mId.clear();
         newItem.mName=newName;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
@@ -327,7 +319,7 @@ namespace MWClass
             if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
             {
                 MWWorld::ConstContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                if(weapon != invStore.end() && weapon->getTypeName() == typeid(ESM::Weapon).name())
+                if(weapon != invStore.end() && weapon->getType() == ESM::Weapon::sRecordId)
                 {
                     const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
                     if (MWMechanics::getWeaponType(ref->mBase->mData.mType)->mFlags & ESM::WeaponType::TwoHanded)
@@ -340,9 +332,9 @@ namespace MWClass
         return std::make_pair(1,"");
     }
 
-    std::shared_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEquip>(ptr, force);
 
         action->setSound(getUpSoundId(ptr));
 

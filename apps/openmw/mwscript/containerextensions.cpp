@@ -13,7 +13,8 @@
 
 #include <components/misc/stringops.hpp>
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadlevlist.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -26,6 +27,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/levelledlist.hpp"
@@ -50,7 +52,7 @@ namespace
 
     void addRandomToStore(const MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& owner, MWWorld::ContainerStore& store, bool topLevel = true)
     {
-        if(itemPtr.getTypeName() == typeid(ESM::ItemLevList).name())
+        if(itemPtr.getType() == ESM::ItemLevList::sRecordId)
         {
             const ESM::ItemLevList* levItemList = itemPtr.get<ESM::ItemLevList>()->mBase;
 
@@ -61,7 +63,8 @@ namespace
             }
             else
             {
-                std::string itemId = MWMechanics::getLevelledItem(itemPtr.get<ESM::ItemLevList>()->mBase, false);
+                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+                std::string itemId = MWMechanics::getLevelledItem(itemPtr.get<ESM::ItemLevList>()->mBase, false, prng);
                 if (itemId.empty())
                     return;
                 MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), itemId, 1);
@@ -86,14 +89,14 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
                     runtime.pop();
 
                     if (count<0)
-                        throw std::runtime_error ("second argument for AddItem must be non-negative");
+                        count = static_cast<uint16_t>(count);
 
                     // no-op
                     if (count == 0)
@@ -108,22 +111,22 @@ namespace MWScript
                     // Check if "item" can be placed in a container
                     MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), item, 1);
                     MWWorld::Ptr itemPtr = manualRef.getPtr();
-                    bool isLevelledList = itemPtr.getClass().getTypeName() == typeid(ESM::ItemLevList).name();
+                    bool isLevelledList = itemPtr.getClass().getType() == ESM::ItemLevList::sRecordId;
                     if(!isLevelledList)
                         MWWorld::ContainerStore::getType(itemPtr);
 
                     // Explicit calls to non-unique actors affect the base record
                     if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, count);
                         return;
                     }
 
                     // Calls to unresolved containers affect the base record
-                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() && (!ptr.getRefData().getCustomData() ||
+                    if(ptr.getClass().getType() == ESM::Container::sRecordId && (!ptr.getRefData().getCustomData() ||
                     !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, count);
                         const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
                         const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                         for(const auto& container : ptrs)
@@ -182,7 +185,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     if(::Misc::StringUtils::ciEqual(item, "gold_005")
@@ -206,7 +209,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
@@ -228,14 +231,14 @@ namespace MWScript
                     // Explicit calls to non-unique actors affect the base record
                     if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, -count);
                         return;
                     }
                     // Calls to unresolved containers affect the base record instead
-                    else if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() &&
+                    else if(ptr.getClass().getType() == ESM::Container::sRecordId &&
                         (!ptr.getRefData().getCustomData() || !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, -count);
                         const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
                         const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                         for(const auto& container : ptrs)
@@ -296,7 +299,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
@@ -308,7 +311,8 @@ namespace MWScript
                     }
                     if (it == invStore.end())
                     {
-                        it = ptr.getClass().getContainerStore (ptr).add (item, 1, ptr);
+                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), item, 1);
+                        it = ptr.getClass().getContainerStore (ptr).add (ref.getPtr(), 1, ptr, false);
                         Log(Debug::Warning) << "Implicitly adding one " << item << 
                             " to the inventory store of " << ptr.getCellRef().getRefId() <<
                             " to fulfill the requirements of Equip instruction";
@@ -318,7 +322,7 @@ namespace MWScript
                         MWBase::Environment::get().getWindowManager()->useItem(*it, true);
                     else
                     {
-                        std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it, true);
+                        std::unique_ptr<MWWorld::Action> action = it->getClass().use(*it, true);
                         action->execute(ptr, true);
                     }
                 }
@@ -379,7 +383,7 @@ namespace MWScript
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot (slot);
                     
-                    if (it == invStore.end() || it->getTypeName () != typeid(ESM::Armor).name())
+                    if (it == invStore.end() || it->getType () != ESM::Armor::sRecordId)
                     {
                         runtime.push(-1);
                         return;
@@ -406,7 +410,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
@@ -432,7 +436,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     int count = 0;
@@ -463,13 +467,13 @@ namespace MWScript
                         runtime.push(-1);
                         return;
                     }
-                    else if (it->getTypeName() != typeid(ESM::Weapon).name())
+                    else if (it->getType() != ESM::Weapon::sRecordId)
                     {
-                        if (it->getTypeName() == typeid(ESM::Lockpick).name())
+                        if (it->getType() == ESM::Lockpick::sRecordId)
                         {
                             runtime.push(-2);
                         }
-                        else if (it->getTypeName() == typeid(ESM::Probe).name())
+                        else if (it->getType() == ESM::Probe::sRecordId)
                         {
                             runtime.push(-3);
                         }
@@ -487,22 +491,22 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-             interpreter.installSegment5 (Compiler::Container::opcodeAddItem, new OpAddItem<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeAddItemExplicit, new OpAddItem<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetItemCount, new OpGetItemCount<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetItemCountExplicit, new OpGetItemCount<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeRemoveItem, new OpRemoveItem<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeRemoveItemExplicit, new OpRemoveItem<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeEquip, new OpEquip<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeEquipExplicit, new OpEquip<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetArmorType, new OpGetArmorType<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetArmorTypeExplicit, new OpGetArmorType<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeHasItemEquipped, new OpHasItemEquipped<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeHasItemEquippedExplicit, new OpHasItemEquipped<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeHasSoulGem, new OpHasSoulGem<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeHasSoulGemExplicit, new OpHasSoulGem<ExplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetWeaponType, new OpGetWeaponType<ImplicitRef>);
-             interpreter.installSegment5 (Compiler::Container::opcodeGetWeaponTypeExplicit, new OpGetWeaponType<ExplicitRef>);
+            interpreter.installSegment5<OpAddItem<ImplicitRef>>(Compiler::Container::opcodeAddItem);
+            interpreter.installSegment5<OpAddItem<ExplicitRef>>(Compiler::Container::opcodeAddItemExplicit);
+            interpreter.installSegment5<OpGetItemCount<ImplicitRef>>(Compiler::Container::opcodeGetItemCount);
+            interpreter.installSegment5<OpGetItemCount<ExplicitRef>>(Compiler::Container::opcodeGetItemCountExplicit);
+            interpreter.installSegment5<OpRemoveItem<ImplicitRef>>(Compiler::Container::opcodeRemoveItem);
+            interpreter.installSegment5<OpRemoveItem<ExplicitRef>>(Compiler::Container::opcodeRemoveItemExplicit);
+            interpreter.installSegment5<OpEquip<ImplicitRef>>(Compiler::Container::opcodeEquip);
+            interpreter.installSegment5<OpEquip<ExplicitRef>>(Compiler::Container::opcodeEquipExplicit);
+            interpreter.installSegment5<OpGetArmorType<ImplicitRef>>(Compiler::Container::opcodeGetArmorType);
+            interpreter.installSegment5<OpGetArmorType<ExplicitRef>>(Compiler::Container::opcodeGetArmorTypeExplicit);
+            interpreter.installSegment5<OpHasItemEquipped<ImplicitRef>>(Compiler::Container::opcodeHasItemEquipped);
+            interpreter.installSegment5<OpHasItemEquipped<ExplicitRef>>(Compiler::Container::opcodeHasItemEquippedExplicit);
+            interpreter.installSegment5<OpHasSoulGem<ImplicitRef>>(Compiler::Container::opcodeHasSoulGem);
+            interpreter.installSegment5<OpHasSoulGem<ExplicitRef>>(Compiler::Container::opcodeHasSoulGemExplicit);
+            interpreter.installSegment5<OpGetWeaponType<ImplicitRef>>(Compiler::Container::opcodeGetWeaponType);
+            interpreter.installSegment5<OpGetWeaponType<ExplicitRef>>(Compiler::Container::opcodeGetWeaponTypeExplicit);
         }
     }
 }

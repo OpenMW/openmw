@@ -6,7 +6,7 @@
 #include <osg/ref_ptr>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/esm/effectlist.hpp>
+#include <components/esm3/effectlist.hpp>
 
 #include "../mwbase/soundmanager.hpp"
 
@@ -49,12 +49,16 @@ namespace MWWorld
                 MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
-        void launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection);
+        void launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot);
 
-        void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
-                                       const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
+        void launchProjectile (const MWWorld::Ptr& actor, const MWWorld::ConstPtr& projectile,
+                                       const osg::Vec3f& pos, const osg::Quat& orient, const MWWorld::Ptr& bow, float speed, float attackStrength);
+
+        void updateCasters();
 
         void update(float dt);
+
+        void processHits();
 
         /// Removes all current projectiles. Should be called when switching to a new worldspace.
         void clear();
@@ -76,6 +80,7 @@ namespace MWWorld
             std::shared_ptr<MWRender::EffectAnimationTime> mEffectAnimationTime;
 
             int mActorId;
+            int mProjectileId;
 
             // TODO: this will break when the game is saved and reloaded, since there is currently
             // no way to write identifiers for non-actors to a savegame.
@@ -88,6 +93,8 @@ namespace MWWorld
 
             // MW-id of an arrow projectile
             std::string mIdArrow;
+
+            bool mToDelete;
         };
 
         struct MagicBoltState : public State
@@ -100,6 +107,7 @@ namespace MWWorld
             ESM::EffectList mEffects;
 
             float mSpeed;
+            int mSlot;
 
             std::vector<MWBase::Sound*> mSounds;
             std::set<std::string> mSoundIds;

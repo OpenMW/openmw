@@ -9,6 +9,8 @@
     #define USE_CRASH_CATCHER 0
 #endif
 
+constexpr char crash_switch[] = "--cc-handle-crash";
+
 #if USE_CRASH_CATCHER
 extern void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath);
 #else

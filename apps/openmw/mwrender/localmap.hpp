@@ -30,6 +30,8 @@ namespace osg
 
 namespace MWRender
 {
+    class LocalMapRenderToTexture;
+
     ///
     /// \brief Local map rendering
     ///
@@ -50,19 +52,13 @@ namespace MWRender
         void requestMap (const MWWorld::CellStore* cell);
 
         void addCell(MWWorld::CellStore* cell);
+        void removeExteriorCell(int x, int y);
 
         void removeCell (MWWorld::CellStore* cell);
 
         osg::ref_ptr<osg::Texture2D> getMapTexture (int x, int y);
 
         osg::ref_ptr<osg::Texture2D> getFogOfWarTexture (int x, int y);
-
-        void removeCamera(osg::Camera* cam);
-
-        /**
-         * Indicates a camera has been queued for rendering and can be cleaned up in the next frame. For internal use only.
-         */
-        void markForRemoval(osg::Camera* cam);
 
         /**
          * Removes cameras that have already been rendered. Should be called every frame to ensure that
@@ -103,11 +99,8 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRoot;
         osg::ref_ptr<osg::Node> mSceneRoot;
 
-        typedef std::vector< osg::ref_ptr<osg::Camera> > CameraVector;
-
-        CameraVector mActiveCameras;
-
-        CameraVector mCamerasPendingRemoval;
+        typedef std::vector< osg::ref_ptr<LocalMapRenderToTexture> > RTTVector;
+        RTTVector mLocalMapRTTs;
 
         typedef std::set<std::pair<int, int> > Grid;
         Grid mCurrentGrid;
@@ -115,7 +108,7 @@ namespace MWRender
         struct MapSegment
         {
             MapSegment();
-            ~MapSegment();
+            ~MapSegment() = default;
 
             void initFogOfWar();
             void loadFogOfWar(const ESM::FogTexture& fog);
@@ -126,13 +119,14 @@ namespace MWRender
             osg::ref_ptr<osg::Texture2D> mFogOfWarTexture;
             osg::ref_ptr<osg::Image> mFogOfWarImage;
 
-            Grid mGrid; // the grid that was active at the time of rendering this segment
+            bool needUpdate = true;
 
             bool mHasFogState;
         };
 
         typedef std::map<std::pair<int, int>, MapSegment> SegmentMap;
-        SegmentMap mSegments;
+        SegmentMap mExteriorSegments;
+        SegmentMap mInteriorSegments;
 
         int mMapResolution;
 
@@ -150,8 +144,7 @@ namespace MWRender
         void requestExteriorMap(const MWWorld::CellStore* cell);
         void requestInteriorMap(const MWWorld::CellStore* cell);
 
-        osg::ref_ptr<osg::Camera> createOrthographicCamera(float left, float top, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax);
-        void setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int y);
+        void setupRenderToTexture(int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
 
         bool mInterior;
         osg::BoundingBox mBounds;

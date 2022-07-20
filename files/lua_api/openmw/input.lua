@@ -1,0 +1,326 @@
+---
+-- `openmw.input` can be used only in scripts attached to a player.
+-- @module input
+-- @usage local input = require('openmw.input')
+
+
+
+---
+-- Is player idle.
+-- @function [parent=#input] isIdle
+-- @return #boolean
+
+---
+-- Is a specific control currently pressed.
+-- Input bindings can be changed ingame using Options/Controls menu.
+-- @function [parent=#input] isActionPressed
+-- @param #number actionId One of @{openmw.input#ACTION}
+-- @return #boolean
+
+---
+-- Is a keyboard button currently pressed.
+-- @function [parent=#input] isKeyPressed
+-- @param #number keyCode Key code (see @{openmw.input#KEY})
+-- @return #boolean
+
+---
+-- Is a controller button currently pressed.
+-- @function [parent=#input] isControllerButtonPressed
+-- @param #number buttonId Button index (see @{openmw.input#CONTROLLER_BUTTON})
+-- @return #boolean
+
+---
+-- Is `Shift` key pressed.
+-- @function [parent=#input] isShiftPressed
+-- @return #boolean
+
+---
+-- Is `Ctrl` key pressed.
+-- @function [parent=#input] isCtrlPressed
+-- @return #boolean
+
+---
+-- Is `Alt` key pressed.
+-- @function [parent=#input] isAltPressed
+-- @return #boolean
+
+---
+-- Is `Super`/`Win` key pressed.
+-- @function [parent=#input] isSuperPressed
+-- @return #boolean
+
+---
+-- Is a mouse button currently pressed.
+-- @function [parent=#input] isMouseButtonPressed
+-- @param #number buttonId Button index (1 - left, 2 - middle, 3 - right, 4 - X1, 5 - X2)
+-- @return #boolean
+
+---
+-- Horizontal mouse movement during the last frame.
+-- @function [parent=#input] getMouseMoveX
+-- @return #number
+
+---
+-- Vertical mouse movement during the last frame.
+-- @function [parent=#input] getMouseMoveY
+-- @return #number
+
+---
+-- Get value of an axis of a game controller.
+-- @function [parent=#input] getAxisValue
+-- @param #number axisId Index of a controller axis, one of @{openmw.input#CONTROLLER_AXIS}.
+-- @return #number Value in range [-1, 1].
+
+---
+-- Get state of a control switch. I.e. is player able to move/fight/jump/etc.
+-- @function [parent=#input] getControlSwitch
+-- @param #string key Control type (see @{openmw.input#CONTROL_SWITCH})
+-- @return #boolean
+
+---
+-- Set state of a control switch. I.e. forbid or allow player to move/fight/jump/etc.
+-- @function [parent=#input] setControlSwitch
+-- @param #string key Control type (see @{openmw.input#CONTROL_SWITCH})
+-- @param #boolean value
+
+---
+-- Returns a human readable name for the given key code
+-- @function [parent=#input] getKeyName
+-- @param #number code A key code (see @{openmw.input#KEY})
+-- @return #string
+
+---
+-- @type CONTROL_SWITCH
+-- @field [parent=#CONTROL_SWITCH] #string Controls Ability to move
+-- @field [parent=#CONTROL_SWITCH] #string Fighting Ability to attack
+-- @field [parent=#CONTROL_SWITCH] #string Jumping Ability to jump
+-- @field [parent=#CONTROL_SWITCH] #string Looking Ability to change view direction
+-- @field [parent=#CONTROL_SWITCH] #string Magic Ability to use magic
+-- @field [parent=#CONTROL_SWITCH] #string ViewMode Ability to toggle 1st/3rd person view
+-- @field [parent=#CONTROL_SWITCH] #string VanityMode Vanity view if player doesn't touch controls for a long time
+
+---
+-- Values that can be used with getControlSwitch/setControlSwitch.
+-- @field [parent=#input] #CONTROL_SWITCH CONTROL_SWITCH
+
+---
+-- @type ACTION
+-- @field [parent=#ACTION] #number GameMenu
+-- @field [parent=#ACTION] #number Screenshot
+-- @field [parent=#ACTION] #number Inventory
+-- @field [parent=#ACTION] #number Console
+-- @field [parent=#ACTION] #number MoveLeft
+-- @field [parent=#ACTION] #number MoveRight
+-- @field [parent=#ACTION] #number MoveForward
+-- @field [parent=#ACTION] #number MoveBackward
+-- @field [parent=#ACTION] #number Activate
+-- @field [parent=#ACTION] #number Use
+-- @field [parent=#ACTION] #number Jump
+-- @field [parent=#ACTION] #number AutoMove
+-- @field [parent=#ACTION] #number Journal
+-- @field [parent=#ACTION] #number Weapon
+-- @field [parent=#ACTION] #number Spell
+-- @field [parent=#ACTION] #number Run
+-- @field [parent=#ACTION] #number CycleSpellLeft
+-- @field [parent=#ACTION] #number CycleSpellRight
+-- @field [parent=#ACTION] #number CycleWeaponLeft
+-- @field [parent=#ACTION] #number CycleWeaponRight
+-- @field [parent=#ACTION] #number ToggleSneak
+-- @field [parent=#ACTION] #number AlwaysRun
+-- @field [parent=#ACTION] #number Sneak
+-- @field [parent=#ACTION] #number QuickSave
+-- @field [parent=#ACTION] #number QuickLoad
+-- @field [parent=#ACTION] #number QuickMenu
+-- @field [parent=#ACTION] #number ToggleWeapon
+-- @field [parent=#ACTION] #number ToggleSpell
+-- @field [parent=#ACTION] #number TogglePOV
+-- @field [parent=#ACTION] #number QuickKey1
+-- @field [parent=#ACTION] #number QuickKey2
+-- @field [parent=#ACTION] #number QuickKey3
+-- @field [parent=#ACTION] #number QuickKey4
+-- @field [parent=#ACTION] #number QuickKey5
+-- @field [parent=#ACTION] #number QuickKey6
+-- @field [parent=#ACTION] #number QuickKey7
+-- @field [parent=#ACTION] #number QuickKey8
+-- @field [parent=#ACTION] #number QuickKey9
+-- @field [parent=#ACTION] #number QuickKey10
+-- @field [parent=#ACTION] #number QuickKeysMenu
+-- @field [parent=#ACTION] #number ToggleHUD
+-- @field [parent=#ACTION] #number ToggleDebug
+-- @field [parent=#ACTION] #number ZoomIn
+-- @field [parent=#ACTION] #number ZoomOut
+-- @field [parent=#ACTION] #number TogglePostProcessorHUD
+
+---
+-- Values that can be used with isActionPressed.
+-- @field [parent=#input] #ACTION ACTION
+
+---
+-- @type CONTROLLER_BUTTON
+-- @field [parent=#CONTROLLER_BUTTON] #number A
+-- @field [parent=#CONTROLLER_BUTTON] #number B
+-- @field [parent=#CONTROLLER_BUTTON] #number X
+-- @field [parent=#CONTROLLER_BUTTON] #number Y
+-- @field [parent=#CONTROLLER_BUTTON] #number Back
+-- @field [parent=#CONTROLLER_BUTTON] #number Guide
+-- @field [parent=#CONTROLLER_BUTTON] #number Start
+-- @field [parent=#CONTROLLER_BUTTON] #number LeftStick
+-- @field [parent=#CONTROLLER_BUTTON] #number RightStick
+-- @field [parent=#CONTROLLER_BUTTON] #number LeftShoulder
+-- @field [parent=#CONTROLLER_BUTTON] #number RightShoulder
+-- @field [parent=#CONTROLLER_BUTTON] #number DPadUp
+-- @field [parent=#CONTROLLER_BUTTON] #number DPadDown
+-- @field [parent=#CONTROLLER_BUTTON] #number DPadLeft
+-- @field [parent=#CONTROLLER_BUTTON] #number DPadRight
+
+---
+-- Values that can be passed to onControllerButtonPress/onControllerButtonRelease engine handlers.
+-- @field [parent=#input] #CONTROLLER_BUTTON CONTROLLER_BUTTON
+
+---
+-- Ids of game controller axises. Used as an argument in getAxisValue.
+-- @type CONTROLLER_AXIS
+-- @field [parent=#CONTROLLER_AXIS] #number LeftX Left stick horizontal axis (from -1 to 1)
+-- @field [parent=#CONTROLLER_AXIS] #number LeftY Left stick vertical axis (from -1 to 1)
+-- @field [parent=#CONTROLLER_AXIS] #number RightX Right stick horizontal axis (from -1 to 1)
+-- @field [parent=#CONTROLLER_AXIS] #number RightY Right stick vertical axis (from -1 to 1)
+-- @field [parent=#CONTROLLER_AXIS] #number TriggerLeft Left trigger (from 0 to 1)
+-- @field [parent=#CONTROLLER_AXIS] #number TriggerRight Right trigger (from 0 to 1)
+-- @field [parent=#CONTROLLER_AXIS] #number LookUpDown View direction vertical axis (RightY by default, can be mapped to another axis in Options/Controls menu)
+-- @field [parent=#CONTROLLER_AXIS] #number LookLeftRight View direction horizontal axis (RightX by default, can be mapped to another axis in Options/Controls menu)
+-- @field [parent=#CONTROLLER_AXIS] #number MoveForwardBackward Movement forward/backward (LeftY by default, can be mapped to another axis in Options/Controls menu)
+-- @field [parent=#CONTROLLER_AXIS] #number MoveLeftRight Side movement (LeftX by default, can be mapped to another axis in Options/Controls menu)
+
+---
+-- Values that can be used with getAxisValue.
+-- @field [parent=#input] #CONTROLLER_AXIS CONTROLLER_AXIS
+
+---
+-- @type KEY
+-- @field #number _0
+-- @field #number _1
+-- @field #number _2
+-- @field #number _3
+-- @field #number _4
+-- @field #number _5
+-- @field #number _6
+-- @field #number _7
+-- @field #number _8
+-- @field #number _9
+-- @field #number NP_0
+-- @field #number NP_1
+-- @field #number NP_2
+-- @field #number NP_3
+-- @field #number NP_4
+-- @field #number NP_5
+-- @field #number NP_6
+-- @field #number NP_7
+-- @field #number NP_8
+-- @field #number NP_9
+-- @field #number NP_Divide
+-- @field #number NP_Enter
+-- @field #number NP_Minus
+-- @field #number NP_Multiply
+-- @field #number NP_Delete
+-- @field #number NP_Plus
+-- @field #number F1
+-- @field #number F2
+-- @field #number F3
+-- @field #number F4
+-- @field #number F5
+-- @field #number F6
+-- @field #number F7
+-- @field #number F8
+-- @field #number F9
+-- @field #number F10
+-- @field #number F11
+-- @field #number F12
+-- @field #number A
+-- @field #number B
+-- @field #number C
+-- @field #number D
+-- @field #number E
+-- @field #number F
+-- @field #number G
+-- @field #number H
+-- @field #number I
+-- @field #number J
+-- @field #number K
+-- @field #number L
+-- @field #number M
+-- @field #number N
+-- @field #number O
+-- @field #number P
+-- @field #number Q
+-- @field #number R
+-- @field #number S
+-- @field #number T
+-- @field #number U
+-- @field #number V
+-- @field #number W
+-- @field #number X
+-- @field #number Y
+-- @field #number Z
+-- @field #number LeftArrow
+-- @field #number RightArrow
+-- @field #number UpArrow
+-- @field #number DownArrow
+-- @field #number LeftAlt
+-- @field #number LeftCtrl
+-- @field #number LeftBracket
+-- @field #number LeftSuper
+-- @field #number LeftShift
+-- @field #number RightAlt
+-- @field #number RightCtrl
+-- @field #number RightBracket
+-- @field #number RightSuper
+-- @field #number RightShift
+-- @field #number Apostrophe
+-- @field #number BackSlash
+-- @field #number Backspace
+-- @field #number CapsLock
+-- @field #number Comma
+-- @field #number Delete
+-- @field #number End
+-- @field #number Enter
+-- @field #number Equals
+-- @field #number Escape
+-- @field #number Home
+-- @field #number Insert
+-- @field #number Minus
+-- @field #number NumLock
+-- @field #number PageDown
+-- @field #number PageUp
+-- @field #number Pause
+-- @field #number Period
+-- @field #number PrintScreen
+-- @field #number ScrollLock
+-- @field #number Semicolon
+-- @field #number Slash
+-- @field #number Space
+-- @field #number Tab
+
+---
+-- Key codes.
+-- @field [parent=#input] #KEY KEY
+
+---
+-- The argument of `onKeyPress`/`onKeyRelease` engine handlers.
+-- @type KeyboardEvent
+-- @field [parent=#KeyboardEvent] #string symbol The pressed symbol (1-symbol string if can be represented or an empty string otherwise).
+-- @field [parent=#KeyboardEvent] #string code Key code.
+-- @field [parent=#KeyboardEvent] #boolean withShift Is `Shift` key pressed.
+-- @field [parent=#KeyboardEvent] #boolean withCtrl Is `Control` key pressed.
+-- @field [parent=#KeyboardEvent] #boolean withAlt Is `Alt` key pressed.
+-- @field [parent=#KeyboardEvent] #boolean withSuper Is `Super`/`Win` key pressed.
+
+---
+-- The argument of onTouchPress/onTouchRelease/onTouchMove engine handlers.
+-- @type TouchEvent
+-- @field [parent=#TouchEvent] #number device Device id (there might be multiple touch devices connected). Note: the specific device ids are not guaranteed. Always use previous user input (onTouch... handlers) to get a valid device id (e. g. in your script's settings page).
+-- @field [parent=#TouchEvent] #number finger Finger id (the device might support multitouch).
+-- @field [parent=#TouchEvent] openmw.util#Vector2 position Relative position on the touch device (0 to 1 from top left corner),
+-- @field [parent=#TouchEvent] #number pressure Pressure of the finger.
+
+return nil
+

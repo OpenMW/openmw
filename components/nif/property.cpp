@@ -99,6 +99,109 @@ void NiTexturingProperty::post(NIFFile *nif)
         shaderTextures[i].post(nif);
 }
 
+void BSShaderProperty::read(NIFStream *nif)
+{
+    NiShadeProperty::read(nif);
+    if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+    {
+        type = nif->getUInt();
+        flags1 = nif->getUInt();
+        flags2 = nif->getUInt();
+        envMapIntensity = nif->getFloat();
+    }
+}
+
+void BSShaderLightingProperty::read(NIFStream *nif)
+{
+    BSShaderProperty::read(nif);
+    if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+        clamp = nif->getUInt();
+}
+
+void BSShaderPPLightingProperty::read(NIFStream *nif)
+{
+    BSShaderLightingProperty::read(nif);
+    textureSet.read(nif);
+    if (nif->getBethVersion() <= 14)
+        return;
+    refraction.strength = nif->getFloat();
+    refraction.period = nif->getInt();
+    if (nif->getBethVersion() <= 24)
+        return;
+    parallax.passes = nif->getFloat();
+    parallax.scale = nif->getFloat();
+}
+
+void BSShaderPPLightingProperty::post(NIFFile *nif)
+{
+    BSShaderLightingProperty::post(nif);
+    textureSet.post(nif);
+}
+
+void BSShaderNoLightingProperty::read(NIFStream *nif)
+{
+    BSShaderLightingProperty::read(nif);
+    filename = nif->getSizedString();
+    if (nif->getBethVersion() >= 27)
+        falloffParams = nif->getVector4();
+}
+
+void BSLightingShaderProperty::read(NIFStream *nif)
+{
+    type = nif->getUInt();
+    BSShaderProperty::read(nif);
+    flags1 = nif->getUInt();
+    flags2 = nif->getUInt();
+    nif->skip(8); // UV offset
+    nif->skip(8); // UV scale
+    mTextureSet.read(nif);
+    mEmissive = nif->getVector3();
+    mEmissiveMult = nif->getFloat();
+    mClamp = nif->getUInt();
+    mAlpha = nif->getFloat();
+    nif->getFloat(); // Refraction strength
+    mGlossiness = nif->getFloat();
+    mSpecular = nif->getVector3();
+    mSpecStrength = nif->getFloat();
+    nif->skip(8); // Lighting effects
+    switch (static_cast<BSLightingShaderType>(type))
+    {
+        case BSLightingShaderType::ShaderType_EnvMap:
+            nif->skip(4); // Environment map scale
+            break;
+        case BSLightingShaderType::ShaderType_SkinTint:
+        case BSLightingShaderType::ShaderType_HairTint:
+            nif->skip(12); // Tint color
+            break;
+        case BSLightingShaderType::ShaderType_ParallaxOcc:
+            nif->skip(4); // Max passes
+            nif->skip(4); // Scale
+            break;
+        case BSLightingShaderType::ShaderType_MultiLayerParallax:
+            nif->skip(4); // Inner layer thickness
+            nif->skip(4); // Refraction scale
+            nif->skip(8); // Inner layer texture scale
+            nif->skip(4); // Environment map strength
+            break;
+        case BSLightingShaderType::ShaderType_SparkleSnow:
+            nif->skip(16); // Sparkle parameters
+            break;
+        case BSLightingShaderType::ShaderType_EyeEnvmap:
+            nif->skip(4); // Cube map scale
+            nif->skip(12); // Left eye cube map offset
+            nif->skip(12); // Right eye cube map offset
+            break;
+        default:
+            break;
+    }
+}
+
+void BSLightingShaderProperty::post(NIFFile *nif)
+{
+    BSShaderProperty::post(nif);
+    mTextureSet.post(nif);
+}
+
 void NiFogProperty::read(NIFStream *nif)
 {
     Property::read(nif);
@@ -118,8 +221,8 @@ void S_MaterialProperty::read(NIFStream *nif)
     emissive = nif->getVector3();
     glossiness = nif->getFloat();
     alpha = nif->getFloat();
-    if (nif->getBethVersion() > 21)
-        emissive *= nif->getFloat();
+    if (nif->getBethVersion() >= 22)
+        emissiveMult = nif->getFloat();
 }
 
 void S_VertexColorProperty::read(NIFStream *nif)

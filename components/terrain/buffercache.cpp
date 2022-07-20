@@ -12,8 +12,8 @@ namespace
 template <typename IndexArrayType>
 osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int verts)
 {
-    // LOD level n means every 2^n-th vertex is kept
-    size_t lodLevel = (flags >> (4*4));
+    // LOD level n means every 2^n-th vertex is kept, but we currently handle LOD elsewhere.
+    size_t lodLevel = 0;//(flags >> (4*4));
 
     size_t lodDeltas[4];
     for (int i=0; i<4; ++i)
@@ -186,7 +186,7 @@ namespace Terrain
 
         int vertexCount = numVerts * numVerts;
 
-        osg::ref_ptr<osg::Vec2Array> uvs (new osg::Vec2Array);
+        osg::ref_ptr<osg::Vec2Array> uvs (new osg::Vec2Array(osg::Array::BIND_PER_VERTEX));
         uvs->reserve(vertexCount);
 
         for (unsigned int col = 0; col < numVerts; ++col)
@@ -245,13 +245,13 @@ namespace Terrain
     {
         {
             std::lock_guard<std::mutex> lock(mIndexBufferMutex);
-            for (auto indexbuffer : mIndexBufferMap)
-                indexbuffer.second->releaseGLObjects(state);
+            for (const auto& [_, indexbuffer] : mIndexBufferMap)
+                indexbuffer->releaseGLObjects(state);
         }
         {
             std::lock_guard<std::mutex> lock(mUvBufferMutex);
-            for (auto uvbuffer : mUvBufferMap)
-                uvbuffer.second->releaseGLObjects(state);
+            for (const auto& [_, uvbuffer] : mUvBufferMap)
+                uvbuffer->releaseGLObjects(state);
         }
     }
 

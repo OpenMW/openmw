@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <QWidget>
-#include <QtCore/qnamespace.h>
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/universalid.hpp"
@@ -25,7 +24,7 @@ namespace CSVFilter
             RecordFilterBox *mRecordFilterBox;
 
         public:
-            FilterBox (CSMWorld::Data& data, QWidget *parent = 0);
+            FilterBox (CSMWorld::Data& data, QWidget *parent = nullptr);
 
             void setRecordFilter (const std::string& filter);
 

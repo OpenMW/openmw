@@ -1,6 +1,6 @@
 #include "importplayer.hpp"
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 namespace ESSImport
 {
@@ -13,7 +13,7 @@ namespace ESSImport
 
         mActorData.load(esm);
 
-        esm.getHNOT(mPos, "DATA", 24);
+        esm.getHNOTSized<24>(mPos, "DATA");
     }
 
     void PCDT::load(ESM::ESMReader &esm)

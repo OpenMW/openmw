@@ -23,7 +23,7 @@ namespace ContentSelectorModel
     {
         Q_OBJECT
     public:
-        explicit ContentModel(QObject *parent, QIcon warningIcon);
+        explicit ContentModel(QObject *parent, QIcon warningIcon, bool showOMWScripts);
         ~ContentModel();
 
         void setEncoding(const QString &encoding);
@@ -43,7 +43,9 @@ namespace ContentSelectorModel
         QMimeData *mimeData(const QModelIndexList &indexes) const override;
         bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
 
-        void addFiles(const QString &path);
+        void addFiles(const QString &path, bool newfiles);
+        void sortFiles();
+        bool containsDataFiles(const QString &path);
         void clearFiles();
 
         QModelIndex indexFromItem(const EsmFile *item) const;
@@ -52,9 +54,11 @@ namespace ContentSelectorModel
         EsmFile *item(int row);
         QStringList gameFiles() const;
 
-        bool isEnabled (QModelIndex index) const;
+        bool isEnabled (const QModelIndex& index) const;
         bool isChecked(const QString &filepath) const;
         bool setCheckState(const QString &filepath, bool isChecked);
+        bool isNew(const QString &filepath) const;
+        void setNew(const QString &filepath, bool isChecked);
         void setContentList(const QStringList &fileList);
         ContentFileList checkedItems() const;
         void uncheckAll();
@@ -68,8 +72,6 @@ namespace ContentSelectorModel
 
         void addFile(EsmFile *file);
 
-        void sortFiles();
-
         /// Checks a specific plug-in for load order errors
         /// \return all errors found for specific plug-in
         QList<LoadOrderError> checkForLoadOrderErrors(const EsmFile *file, int row) const;
@@ -80,10 +82,13 @@ namespace ContentSelectorModel
         QString toolTip(const EsmFile *file) const;
 
         ContentFileList mFiles;
+        QStringList mArchives;
         QHash<QString, Qt::CheckState> mCheckStates;
+        QHash<QString, bool> mNewFiles;
         QSet<QString> mPluginsWithLoadOrderError;
         QString mEncoding;
         QIcon mWarningIcon;
+        bool mShowOMWScripts;
 
     public:
 

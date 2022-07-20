@@ -1,8 +1,6 @@
 #ifndef MWGUI_QUICKKEYS_H
 #define MWGUI_QUICKKEYS_H
 
-#include "../mwworld/ptr.hpp"
-
 #include "windowbase.hpp"
 
 #include "spellmodel.hpp"
@@ -78,7 +76,8 @@ namespace MWGui
 
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
-
+        // Check if quick key is still valid
+        inline void validate(int index);
         void unassign(keyData* key);
     };
 

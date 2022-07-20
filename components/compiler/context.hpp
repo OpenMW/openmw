@@ -13,14 +13,14 @@ namespace Compiler
 
         public:
 
-            Context() : mExtensions (0) {}
+            Context() : mExtensions (nullptr) {}
 
             virtual ~Context() = default;
 
             virtual bool canDeclareLocals() const = 0;
             ///< Is the compiler allowed to declare local variables?
 
-            void setExtensions (const Extensions *extensions = 0)
+            void setExtensions (const Extensions *extensions = nullptr)
             {
                 mExtensions = extensions;
             }
@@ -42,9 +42,6 @@ namespace Compiler
 
             virtual bool isId (const std::string& name) const = 0;
             ///< Does \a name match an ID, that can be referenced?
-
-            virtual bool isJournalId (const std::string& name) const = 0;
-            ///< Does \a name match a journal ID?
     };
 }
 

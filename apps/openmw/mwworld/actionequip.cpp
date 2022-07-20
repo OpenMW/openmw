@@ -65,11 +65,7 @@ namespace MWWorld
         }
 
         if (it == invStore.end())
-        {
-            std::stringstream error;
-            error << "ActionEquip can't find item " << object.getCellRef().getRefId();
-            throw std::runtime_error(error.str());
-        }
+            throw std::runtime_error("ActionEquip can't find item " + object.getCellRef().getRefId());
 
         // equip the item in the first free slot
         std::vector<int>::const_iterator slot=slots_.first.begin();
@@ -91,13 +87,29 @@ namespace MWWorld
         // move all slots one towards begin(), then equip the item in the slot that is now free
         if (slot == slots_.first.end())
         {
-            for (slot=slots_.first.begin();slot!=slots_.first.end(); ++slot)
+            ContainerStoreIterator enchItem = invStore.getSelectedEnchantItem();
+            bool reEquip = false;
+            for (slot = slots_.first.begin(); slot != slots_.first.end(); ++slot)
             {
                 invStore.unequipSlot(*slot, actor, false);
-                if (slot+1 != slots_.first.end())
-                    invStore.equip(*slot, invStore.getSlot(*(slot+1)), actor);
+                if (slot + 1 != slots_.first.end())
+                {
+                    invStore.equip(*slot, invStore.getSlot(*(slot + 1)), actor);
+                }
                 else
+                {
                     invStore.equip(*slot, it, actor);
+                }
+
+                //Fix for issue of selected enchated item getting remmoved on cycle
+                if (invStore.getSlot(*slot) == enchItem)
+                {
+                    reEquip = true;
+                }
+            }
+            if (reEquip)
+            {
+                invStore.setSelectedEnchantItem(enchItem);
             }
         }
     }

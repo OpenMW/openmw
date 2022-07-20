@@ -19,7 +19,7 @@ namespace MWRender
     /// another mask, or what type of node this mask is usually set on.
     /// @note The mask values are not serialized within models, nor used in any other way that would break backwards
     /// compatibility if the enumeration values were to be changed. Feel free to change them when it makes sense.
-    enum VisMask
+    enum VisMask : unsigned int
     {
         Mask_UpdateVisitor = 0x1, // reserved for separating UpdateVisitors from CullVisitors
 
@@ -53,8 +53,13 @@ namespace MWRender
         Mask_PreCompile = (1<<18),
 
         // Set on a camera's cull mask to enable the LightManager
-        Mask_Lighting = (1<<19)
+        Mask_Lighting = (1<<19),
+
+        Mask_Groundcover = (1<<20),
     };
+
+    // Defines masks to remove when using ToggleWorld command
+    constexpr static unsigned int sToggleWorldMask = Mask_Debug | Mask_Actor | Mask_Terrain | Mask_Object | Mask_Static | Mask_Groundcover;
 
 }
 

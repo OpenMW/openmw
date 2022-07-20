@@ -1,27 +1,26 @@
 #include "importer.hpp"
 
 #include <iomanip>
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 #include <osgDB/ReadFile>
 #include <osg/ImageUtils>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/esm/defs.hpp>
 
-#include <components/esm/savedgame.hpp>
-#include <components/esm/player.hpp>
+#include <components/esm3/savedgame.hpp>
+#include <components/esm3/player.hpp>
 
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadweap.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadlevlist.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadlevlist.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -264,48 +263,48 @@ namespace ESSImport
         const ESM::Header& header = esm.getHeader();
         context.mPlayerCellName = header.mGameData.mCurrentCell.toString();
 
-        const unsigned int recREFR = ESM::FourCC<'R','E','F','R'>::value;
-        const unsigned int recPCDT = ESM::FourCC<'P','C','D','T'>::value;
-        const unsigned int recFMAP = ESM::FourCC<'F','M','A','P'>::value;
-        const unsigned int recKLST = ESM::FourCC<'K','L','S','T'>::value;
-        const unsigned int recSTLN = ESM::FourCC<'S','T','L','N'>::value;
-        const unsigned int recGAME = ESM::FourCC<'G','A','M','E'>::value;
-        const unsigned int recJOUR = ESM::FourCC<'J','O','U','R'>::value;
-        const unsigned int recSPLM = ESM::FourCC<'S','P','L','M'>::value;
+        const unsigned int recREFR = ESM::fourCC("REFR");
+        const unsigned int recPCDT = ESM::fourCC("PCDT");
+        const unsigned int recFMAP = ESM::fourCC("FMAP");
+        const unsigned int recKLST = ESM::fourCC("KLST");
+        const unsigned int recSTLN = ESM::fourCC("STLN");
+        const unsigned int recGAME = ESM::fourCC("GAME");
+        const unsigned int recJOUR = ESM::fourCC("JOUR");
+        const unsigned int recSPLM = ESM::fourCC("SPLM");
 
-        std::map<unsigned int, std::shared_ptr<Converter> > converters;
-        converters[ESM::REC_GLOB] = std::shared_ptr<Converter>(new ConvertGlobal());
-        converters[ESM::REC_BOOK] = std::shared_ptr<Converter>(new ConvertBook());
-        converters[ESM::REC_NPC_] = std::shared_ptr<Converter>(new ConvertNPC());
-        converters[ESM::REC_CREA] = std::shared_ptr<Converter>(new ConvertCREA());
-        converters[ESM::REC_NPCC] = std::shared_ptr<Converter>(new ConvertNPCC());
-        converters[ESM::REC_CREC] = std::shared_ptr<Converter>(new ConvertCREC());
-        converters[recREFR      ] = std::shared_ptr<Converter>(new ConvertREFR());
-        converters[recPCDT      ] = std::shared_ptr<Converter>(new ConvertPCDT());
-        converters[recFMAP      ] = std::shared_ptr<Converter>(new ConvertFMAP());
-        converters[recKLST      ] = std::shared_ptr<Converter>(new ConvertKLST());
-        converters[recSTLN      ] = std::shared_ptr<Converter>(new ConvertSTLN());
-        converters[recGAME      ] = std::shared_ptr<Converter>(new ConvertGAME());
-        converters[ESM::REC_CELL] = std::shared_ptr<Converter>(new ConvertCell());
-        converters[ESM::REC_ALCH] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Potion>());
-        converters[ESM::REC_CLAS] = std::shared_ptr<Converter>(new ConvertClass());
-        converters[ESM::REC_SPEL] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Spell>());
-        converters[ESM::REC_ARMO] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Armor>());
-        converters[ESM::REC_WEAP] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Weapon>());
-        converters[ESM::REC_CLOT] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Clothing>());
-        converters[ESM::REC_ENCH] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Enchantment>());
-        converters[ESM::REC_WEAP] = std::shared_ptr<Converter>(new DefaultConverter<ESM::Weapon>());
-        converters[ESM::REC_LEVC] = std::shared_ptr<Converter>(new DefaultConverter<ESM::CreatureLevList>());
-        converters[ESM::REC_LEVI] = std::shared_ptr<Converter>(new DefaultConverter<ESM::ItemLevList>());
-        converters[ESM::REC_CNTC] = std::shared_ptr<Converter>(new ConvertCNTC());
-        converters[ESM::REC_FACT] = std::shared_ptr<Converter>(new ConvertFACT());
-        converters[ESM::REC_INFO] = std::shared_ptr<Converter>(new ConvertINFO());
-        converters[ESM::REC_DIAL] = std::shared_ptr<Converter>(new ConvertDIAL());
-        converters[ESM::REC_QUES] = std::shared_ptr<Converter>(new ConvertQUES());
-        converters[recJOUR      ] = std::shared_ptr<Converter>(new ConvertJOUR());
-        converters[ESM::REC_SCPT] = std::shared_ptr<Converter>(new ConvertSCPT());
-        converters[ESM::REC_PROJ] = std::shared_ptr<Converter>(new ConvertPROJ());
-        converters[recSPLM] = std::shared_ptr<Converter>(new ConvertSPLM());
+        std::map<unsigned int, std::unique_ptr<Converter>> converters;
+        converters[ESM::REC_GLOB] = std::make_unique<ConvertGlobal>();
+        converters[ESM::REC_BOOK] = std::make_unique<ConvertBook>();
+        converters[ESM::REC_NPC_] = std::make_unique<ConvertNPC>();
+        converters[ESM::REC_CREA] = std::make_unique<ConvertCREA>();
+        converters[ESM::REC_NPCC] = std::make_unique<ConvertNPCC>();
+        converters[ESM::REC_CREC] = std::make_unique<ConvertCREC>();
+        converters[recREFR      ] = std::make_unique<ConvertREFR>();
+        converters[recPCDT      ] = std::make_unique<ConvertPCDT>();
+        converters[recFMAP      ] = std::make_unique<ConvertFMAP>();
+        converters[recKLST      ] = std::make_unique<ConvertKLST>();
+        converters[recSTLN      ] = std::make_unique<ConvertSTLN>();
+        converters[recGAME      ] = std::make_unique<ConvertGAME>();
+        converters[ESM::REC_CELL] = std::make_unique<ConvertCell>();
+        converters[ESM::REC_ALCH] = std::make_unique<DefaultConverter<ESM::Potion>>();
+        converters[ESM::REC_CLAS] = std::make_unique<ConvertClass>();
+        converters[ESM::REC_SPEL] = std::make_unique<DefaultConverter<ESM::Spell>>();
+        converters[ESM::REC_ARMO] = std::make_unique<DefaultConverter<ESM::Armor>>();
+        converters[ESM::REC_WEAP] = std::make_unique<DefaultConverter<ESM::Weapon>>();
+        converters[ESM::REC_CLOT] = std::make_unique<DefaultConverter<ESM::Clothing>>();
+        converters[ESM::REC_ENCH] = std::make_unique<DefaultConverter<ESM::Enchantment>>();
+        converters[ESM::REC_WEAP] = std::make_unique<DefaultConverter<ESM::Weapon>>();
+        converters[ESM::REC_LEVC] = std::make_unique<DefaultConverter<ESM::CreatureLevList>>();
+        converters[ESM::REC_LEVI] = std::make_unique<DefaultConverter<ESM::ItemLevList>>();
+        converters[ESM::REC_CNTC] = std::make_unique<ConvertCNTC>();
+        converters[ESM::REC_FACT] = std::make_unique<ConvertFACT>();
+        converters[ESM::REC_INFO] = std::make_unique<ConvertINFO>();
+        converters[ESM::REC_DIAL] = std::make_unique<ConvertDIAL>();
+        converters[ESM::REC_QUES] = std::make_unique<ConvertQUES>();
+        converters[recJOUR      ] = std::make_unique<ConvertJOUR>();
+        converters[ESM::REC_SCPT] = std::make_unique<ConvertSCPT>();
+        converters[ESM::REC_PROJ] = std::make_unique<ConvertPROJ>();
+        converters[recSPLM] = std::make_unique<ConvertSPLM>();
 
         // TODO:
         // - REGN (weather in certain regions?)
@@ -324,14 +323,14 @@ namespace ESSImport
             ESM::NAME n = esm.getRecName();
             esm.getRecHeader();
 
-            auto it = converters.find(n.intval);
+            auto it = converters.find(n.toInt());
             if (it != converters.end())
             {
                 it->second->read(esm);
             }
             else
             {
-                if (unknownRecords.insert(n.intval).second)
+                if (unknownRecords.insert(n.toInt()).second)
                 {
                     std::ios::fmtflags f(std::cerr.flags());
                     std::cerr << "Error: unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
@@ -346,7 +345,7 @@ namespace ESSImport
 
         writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
-        boost::filesystem::ofstream stream(boost::filesystem::path(mOutFile), std::ios::out | std::ios::binary);
+        std::ofstream stream(std::filesystem::path(mOutFile), std::ios::out | std::ios::binary);
         // all unused
         writer.setVersion(0);
         writer.setType(0);
@@ -369,6 +368,7 @@ namespace ESSImport
         profile.mInGameTime.mGameHour = context.mHour;
         profile.mInGameTime.mMonth = context.mMonth;
         profile.mInGameTime.mYear = context.mYear;
+        profile.mTimePlayed = 0;
         profile.mPlayerCell = header.mGameData.mCurrentCell.toString();
         if (context.mPlayerBase.mClass == "NEWCLASSID_CHARGEN")
             profile.mPlayerClassName = context.mCustomPlayerClassName;
@@ -385,7 +385,7 @@ namespace ESSImport
 
         // Writing order should be Dynamic Store -> Cells -> Player,
         // so that references to dynamic records can be recognized when loading
-        for (std::map<unsigned int, std::shared_ptr<Converter> >::const_iterator it = converters.begin();
+        for (auto it = converters.begin();
              it != converters.end(); ++it)
         {
             if (it->second->getStage() != 0)
@@ -398,7 +398,7 @@ namespace ESSImport
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 
-        for (std::map<unsigned int, std::shared_ptr<Converter> >::const_iterator it = converters.begin();
+        for (auto it = converters.begin();
              it != converters.end(); ++it)
         {
             if (it->second->getStage() != 1)
@@ -423,7 +423,7 @@ namespace ESSImport
         writer.endRecord(ESM::REC_ACTC);
 
         // Stage 2 requires cell references to be written / actors IDs assigned
-        for (std::map<unsigned int, std::shared_ptr<Converter> >::const_iterator it = converters.begin();
+        for (auto it = converters.begin();
              it != converters.end(); ++it)
         {
             if (it->second->getStage() != 2)

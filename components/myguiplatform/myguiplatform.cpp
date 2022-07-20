@@ -7,7 +7,7 @@
 namespace osgMyGUI
 {
 
-Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::ImageManager *imageManager, float uiScalingFactor)
+Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::ImageManager *imageManager, const VFS::Manager* vfs, float uiScalingFactor)
     : mRenderManager(nullptr)
     , mDataManager(nullptr)
     , mLogManager(nullptr)
@@ -15,7 +15,7 @@ Platform::Platform(osgViewer::Viewer *viewer, osg::Group *guiRoot, Resource::Ima
 {
     mLogManager = new MyGUI::LogManager();
     mRenderManager = new RenderManager(viewer, guiRoot, imageManager, uiScalingFactor);
-    mDataManager = new DataManager();
+    mDataManager = new DataManager(vfs);
 }
 
 Platform::~Platform()

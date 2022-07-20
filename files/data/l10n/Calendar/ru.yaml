@@ -1,0 +1,40 @@
+# sources:
+#1. Morrowind.esm by 1C (month names)
+#2. http://tespedia.ru/calendar (weekday names)
+
+month1: "Месяц Утренней Звезды"
+month2: "Месяц Восхода"
+month3: "Месяц Первоцвета"
+month4: "Месяц Дождя"
+month5: "Месяц Сева"
+month6: "Месяц Середины Года"
+month7: "Месяц Солнцеворота"
+month8: "Месяц Урожая"
+month9: "Месяц Огня"
+month10: "Месяц Мороза"
+month11: "Месяц Заката"
+month12: "Месяц Вечерней Звезды"
+
+# The variant of month names in the context "day X of month Y".
+monthInGenitive1: "Утренней Звезды"
+monthInGenitive2: "Восхода"
+monthInGenitive3: "Первоцвета"
+monthInGenitive4: "Дождя"
+monthInGenitive5: "Сева"
+monthInGenitive6: "Середины Года"
+monthInGenitive7: "Солнцеворота"
+monthInGenitive8: "Урожая"
+monthInGenitive9: "Огня"
+monthInGenitive10: "Мороза"
+monthInGenitive11: "Заката"
+monthInGenitive12: "Вечерней Звезды"
+
+dateFormat: "день {day} {monthInGenitive} {year}"
+
+weekday1: "Сандас"
+weekday2: "Морндас"
+weekday3: "Тирдас"
+weekday4: "Миддас"
+weekday5: "Турдас"
+weekday6: "Фредас"
+weekday7: "Лордас"

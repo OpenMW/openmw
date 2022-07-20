@@ -4,14 +4,12 @@
 #include <map>
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QMessageBox>
 #include <QPushButton>
 
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columns.hpp"
-#include "../../model/world/universalid.hpp"
 #include "../../model/world/idcompletionmanager.hpp"
 
 #include "../../model/prefs/state.hpp"

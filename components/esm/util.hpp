@@ -13,7 +13,7 @@ struct Quaternion
 {
     float mValues[4];
 
-    Quaternion() {}
+    Quaternion() = default;
 
     Quaternion(const osg::Quat& q)
     {
@@ -33,7 +33,7 @@ struct Vector3
 {
     float mValues[3];
 
-    Vector3() {}
+    Vector3() = default;
 
     Vector3(const osg::Vec3f& v)
     {

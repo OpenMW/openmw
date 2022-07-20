@@ -86,7 +86,7 @@ size_t ContainerItemModel::getItemCount()
     return mItems.size();
 }
 
-ItemModel::ModelIndex ContainerItemModel::getIndex (ItemStack item)
+ItemModel::ModelIndex ContainerItemModel::getIndex (const ItemStack& item)
 {
     size_t i = 0;
     for (ItemStack& itemStack : mItems)
@@ -209,7 +209,7 @@ bool ContainerItemModel::onDropItem(const MWWorld::Ptr &item, int count)
 
     MWWorld::Ptr target = mItemSources[0].first;
 
-    if (target.getTypeName() != typeid(ESM::Container).name())
+    if (target.getType() != ESM::Container::sRecordId)
         return true;
 
     // check container organic flag
@@ -247,6 +247,16 @@ bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item, target, count);
 
     return true;
+}
+
+bool ContainerItemModel::usesContainer(const MWWorld::Ptr& container)
+{
+    for(const auto& source : mItemSources)
+    {
+        if(source.first == container)
+            return true;
+    }
+    return false;
 }
 
 }

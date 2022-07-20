@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Resource" version="1.1">
+
+	<Resource type="ResourceLayout" name="MW_ValueEditNumber" version="3.2.0">
+		<Widget type="Widget" skin="" position="0 0 100 50" align="Stretch" name="Root">
+            <Widget type="Widget" skin="BlackBG" position="0 0 100 50" name="Fill" align="Stretch">
+                <Property key="NeedMouse" value="false"/>
+                <Property key="NeedKey" value="false"/>
+                <Property key="Colour" value="#25436b"/>
+            </Widget>
+            <Widget type="HBox" skin="MW_Box" position_real="0 0 1 1" align="Stretch" name="Layout">
+                <UserString key="HStretch" value="true"/>
+                <UserString key="VStretch" value="true"/>
+                <Property key="Padding" value="4"/>
+
+                <Widget type="Button" skin="MW_ArrowLeft" position="0 0 12 12" align="VCenter Left" name="ButtonDecrease"/>
+                <Widget type="Widget" name="Dragger">
+                    <Widget type="TextBox" skin="HeaderText" align="Stretch" name="Value">
+                        <Property key="Caption" value="#{Interface:NotAvailableShort}"/>
+                        <Property key="NeedMouse" value="false"/>
+                        <Property key="TextAlign" value="Center"/>
+                    </Widget>
+                    <UserString key="HStretch" value="true"/>
+                    <UserString key="VStretch" value="true"/>
+                    <Property key="Pointer" value="hresize"/>
+                </Widget>
+                <Widget type="Button" skin="MW_ArrowRight" position="0 0 12 12" align="VCenter Right" name="ButtonIncrease"/>
+            </Widget>
+		</Widget>
+	</Resource>
+
+	<Resource type="ResourceLayout" name="MW_ValueEditBool" version="3.2.0">
+		<Widget type="Widget" skin="" position="0 0 100 50" align="Stretch" name="Root">
+            <Widget type="Widget" skin="BlackBG" position_real="0 0 1 1" name="Fill" align="Stretch">
+                <Property key="NeedMouse" value="false"/>
+                <Property key="NeedKey" value="false"/>
+                <Property key="Colour" value="#25436b"/>
+                <Property key="Visible" value="false"/>
+            </Widget>
+            <Widget type="HBox" skin="MW_Box" position_real="0 0 1 1" align="Stretch" name="Layout">
+                <UserString key="HStretch" value="true"/>
+                <UserString key="VStretch" value="true"/>
+
+                <Widget type="Button" skin="SandTextButton" align="Stretch" name="Checkbutton">
+                    <UserString key="HStretch" value="true"/>
+                    <UserString key="VStretch" value="true"/>
+                    <Property key="TextAlign" value="Center"/>
+                    <Property key="Caption" value="#{sOn}"/>
+                </Widget>
+            </Widget>
+		</Widget>
+	</Resource>
+
+    <Resource type="ResourceLayout" name="MW_UniformEdit" version="3.2.0">
+        <Widget type="Widget" position="0 0 300 22" name="Root">
+            <Widget type="HBox" position_real="0 0 1 1" align="Stretch">
+                <Property key="Padding" value="0"/>
+                <Property key="Spacing" value="8"/>
+                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 22 22" name="Reset">
+                    <UserString key="HStretch" value="false"/>
+                    <UserString key="VStretch" value="false"/>
+                    <Property key="Caption" value="#{PostProcessing:ShaderResetUniform}"/>
+                </Widget>
+                <Widget type="Widget" skin="BlackBG" position="0 0 225 22" name="Client">
+                    <UserString key="HStretch" value="false"/>
+                    <UserString key="VStretch" value="false"/>
+                    <Property key="Colour" value="0.2 0.2 0.2 0.05"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="Label" align="Top Right">
+                    <UserString key="HStretch" value="true"/>
+                    <UserString key="VStretch" value="true"/>
+                    <Property key="Padding" value="8"/>
+                    <Property key="TextAlign" value="Left Top"/>
+                    <Property key="NeedMouse" value="true"/>
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_UniformGroup" size="16 16">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left VCenter"/>
+        <Property key="TextColour" value="#{fontcolour=header}"/>
+
+        <Child type="Widget" skin="IB_B" offset="0 14 16 2" align="Bottom HStretch"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 14" align="Stretch"/>
+    </Resource>
+
+</MyGUI>

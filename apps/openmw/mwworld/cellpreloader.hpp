@@ -19,14 +19,14 @@ namespace Terrain
     class View;
 }
 
-namespace SceneUtil
-{
-    class UnrefQueue;
-}
-
 namespace MWRender
 {
     class LandManager;
+}
+
+namespace Loading
+{
+    class Listener;
 }
 
 namespace MWWorld
@@ -67,13 +67,12 @@ namespace MWWorld
 
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
-        void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
-
         typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
         void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
 
-        bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, int& progress, int& progressRange, double timestamp);
+        bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, double timestamp, Loading::Listener& listener);
         void abortTerrainPreloadExcept(const PositionCellGrid *exceptPos);
+        bool isTerrainLoaded(const CellPreloader::PositionCellGrid &position, double referenceTime) const;
 
     private:
         Resource::ResourceSystem* mResourceSystem;
@@ -81,14 +80,12 @@ namespace MWWorld
         Terrain::World* mTerrain;
         MWRender::LandManager* mLandManager;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
-        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
         double mExpiryDelay;
         unsigned int mMinCacheSize;
         unsigned int mMaxCacheSize;
         bool mPreloadInstances;
 
         double mLastResourceCacheUpdate;
-        int mStoreViewsFailCount;
 
         struct PreloadEntry
         {
@@ -114,6 +111,9 @@ namespace MWWorld
         std::vector<PositionCellGrid> mTerrainPreloadPositions;
         osg::ref_ptr<TerrainPreloadItem> mTerrainPreloadItem;
         osg::ref_ptr<SceneUtil::WorkItem> mUpdateCacheItem;
+
+        std::vector<PositionCellGrid> mLoadedTerrainPositions;
+        double mLoadedTerrainTimestamp;
     };
 
 }

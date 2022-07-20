@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <cstring>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -9,17 +10,14 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include <fstream>
+#include <filesystem>
 
 #include <pthread.h>
 #include <stdbool.h>
 #include <sys/ptrace.h>
 
 #include <components/debug/debuglog.hpp>
-
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
-
-namespace bfs = boost::filesystem;
 
 #include <SDL_messagebox.h>
 
@@ -43,7 +41,7 @@ namespace bfs = boost::filesystem;
 #include <sys/user.h>
 #endif
 
-static const char crash_switch[] = "--cc-handle-crash";
+#include "crashcatcher.hpp"
 
 static const char fatal_err[] = "\n\n*** Fatal Error ***\n";
 static const char pipe_err[] = "!!! Failed to create pipe\n";
@@ -55,8 +53,6 @@ static const char exec_err[] = "!!! Failed to exec debug process\n";
 #endif
 
 static char argv0[PATH_MAX];
-
-static char altstack[SIGSTKSZ];
 
 
 static struct {
@@ -146,11 +142,13 @@ static void gdb_info(pid_t pid)
     /*
      * Create a temp file to put gdb commands into.
      * Note: POSIX.1-2008 declares that the file should be already created with mode 0600 by default.
-     * Modern systems implement it and and suggest to do not touch masks in multithreaded applications.
+     * Modern systems implement it and suggest to do not touch masks in multithreaded applications.
      * So CoverityScan warning is valid only for ancient versions of stdlib.
     */
     strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
-    // coverity[secure_temp]
+#ifdef __COVERITY__
+    umask(0600);
+#endif
     if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != nullptr)
     {
         fprintf(f, "attach %d\n"
@@ -451,7 +449,7 @@ static void getExecPath(char **argv)
 
     if(argv[0][0] == '/')
         snprintf(argv0, sizeof(argv0), "%s", argv[0]);
-    else if (getcwd(argv0, sizeof(argv0)) != NULL)
+    else if (getcwd(argv0, sizeof(argv0)) != nullptr)
     {
         cwdlen = strlen(argv0);
         snprintf(argv0+cwdlen, sizeof(argv0)-cwdlen, "/%s", argv[0]);
@@ -473,9 +471,10 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
 
     /* Set an alternate signal stack so SIGSEGVs caused by stack overflows
      * still run */
+    static char* altstack = new char [SIGSTKSZ];
     altss.ss_sp = altstack;
     altss.ss_flags = 0;
-    altss.ss_size = sizeof(altstack);
+    altss.ss_size = SIGSTKSZ;
     sigaltstack(&altss, nullptr);
 
     memset(&sa, 0, sizeof(sa));
@@ -500,10 +499,10 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
 static bool is_debugger_present()
 {
 #if defined (__linux__)
-    bfs::path procstatus = bfs::path("/proc/self/status");
-    if (bfs::exists(procstatus))
+    std::filesystem::path procstatus = std::filesystem::path("/proc/self/status");
+    if (std::filesystem::exists(procstatus))
     {
-        bfs::ifstream file((procstatus));
+        std::ifstream file((procstatus));
         while (!file.eof())
         {
             std::string word;
@@ -561,9 +560,6 @@ static bool is_debugger_present()
 
 void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
 {
-    if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"))
-        if (std::atol(env) != 0)
-            return;
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {
         int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };

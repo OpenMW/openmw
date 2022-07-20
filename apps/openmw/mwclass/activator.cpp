@@ -1,6 +1,8 @@
 #include "activator.hpp"
 
-#include <components/esm/loadacti.hpp>
+#include <MyGUI_TextIterator.h>
+
+#include <components/esm3/loadacti.hpp>
 #include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -25,9 +27,14 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "classmodel.hpp"
 
 namespace MWClass
 {
+    Activator::Activator()
+        : MWWorld::RegisteredClass<Activator>(ESM::Activator::sRecordId)
+    {
+    }
 
     void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -38,21 +45,19 @@ namespace MWClass
         }
     }
 
-    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
+    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
     {
-        if(!model.empty())
-            physics.addObject(ptr, model);
+        insertObjectPhysics(ptr, model, rotation, physics);
+    }
+
+    void Activator::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
+    {
+        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
     }
 
     std::string Activator::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return "meshes\\" + model;
-        }
-        return "";
+        return getClassModel<ESM::Activator>(ptr);
     }
 
     bool Activator::isActivator() const
@@ -80,20 +85,9 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    void Activator::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Activator);
-
-        registerClass (typeid (ESM::Activator).name(), instance);
-    }
-
     bool Activator::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
         return !getName(ptr).empty();
-    }
-
-    bool Activator::allowTelekinesis(const MWWorld::ConstPtr &ptr) const {
-        return false;
     }
 
     MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
@@ -114,19 +108,20 @@ namespace MWClass
         return info;
     }
 
-    std::shared_ptr<MWWorld::Action> Activator::activate(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    std::unique_ptr<MWWorld::Action> Activator::activate(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator");
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator", prng);
 
-            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction);
+        return std::make_unique<MWWorld::NullAction>();
     }
 
 
@@ -142,10 +137,12 @@ namespace MWClass
         const std::string model = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore(); 
         std::string creatureId;
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         for (const ESM::Creature &iter : store.get<ESM::Creature>())
         {
-            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, "meshes\\" + iter.mModel))
+            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model,
+                Misc::ResourceHelpers::correctMeshPath(iter.mModel, vfs)))
             {
                 creatureId = !iter.mOriginal.empty() ? iter.mOriginal : iter.mId;
                 break;
@@ -155,6 +152,7 @@ namespace MWClass
         int type = getSndGenTypeFromName(name);
 
         std::vector<const ESM::SoundGenerator*> fallbacksounds;
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         if (!creatureId.empty())
         {
             std::vector<const ESM::SoundGenerator*> sounds;
@@ -167,9 +165,9 @@ namespace MWClass
             }
 
             if (!sounds.empty())
-                return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+                return sounds[Misc::Rng::rollDice(sounds.size(), prng)]->mSound;
             if (!fallbacksounds.empty())
-                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
         }
         else
         {
@@ -179,7 +177,7 @@ namespace MWClass
                     fallbacksounds.push_back(&*sound);
 
             if (!fallbacksounds.empty())
-                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
         }
 
         return std::string();

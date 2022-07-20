@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_SKILLCHECK_H
 #define CSM_TOOLS_SKILLCHECK_H
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../world/idcollection.hpp"
 

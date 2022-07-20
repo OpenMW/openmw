@@ -32,7 +32,7 @@ namespace CSVDoc
 
         public:
 
-            AdjusterWidget (QWidget *parent = 0);
+            AdjusterWidget (QWidget *parent = nullptr);
 
             void setLocalData (const boost::filesystem::path& localData);
             void setAction (ContentAction action);

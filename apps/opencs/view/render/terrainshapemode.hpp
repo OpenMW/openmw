@@ -92,6 +92,8 @@ namespace CSVRender
             void dragMoveEvent (QDragMoveEvent *event) override;
             void mouseMoveEvent (QMouseEvent *event) override;
 
+            std::shared_ptr<TerrainSelection> getTerrainSelection();
+
         private:
 
             /// Remove duplicates and sort mAlteredCells, then limitAlteredHeights forward and reverse
@@ -140,7 +142,7 @@ namespace CSVRender
             void handleSelection(int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections);
 
             /// Handle brush mechanics for terrain shape selection
-            void selectTerrainShapes (const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation);
+            void selectTerrainShapes (const std::pair<int, int>& vertexCoords, unsigned char selectMode);
 
             /// Push terrain shape edits to command macro
             void pushEditToCommand (const CSMWorld::LandHeightsColumn::DataType& newLandGrid, CSMDoc::Document& document,
@@ -176,7 +178,7 @@ namespace CSVRender
             int mDragMode = InteractionType_None;
             osg::Group* mParentNode;
             bool mIsEditing = false;
-            std::unique_ptr<TerrainSelection> mTerrainShapeSelection;
+            std::shared_ptr<TerrainSelection> mTerrainShapeSelection;
             int mTotalDiffY = 0;
             std::vector<CSMWorld::CellCoordinates> mAlteredCells;
             osg::Vec3d mEditingPos;

@@ -19,7 +19,7 @@ namespace CSVWorld
 
         public:
 
-            IdValidator (bool relaxed = false, QObject *parent = 0);
+            IdValidator (bool relaxed = false, QObject *parent = nullptr);
             ///< \param relaxed Relaxed rules for IDs that also functino as user visible text
 
             State validate (QString& input, int& pos) const override;

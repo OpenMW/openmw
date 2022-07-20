@@ -1,9 +1,9 @@
 #include "spellpriority.hpp"
 #include "weaponpriority.hpp"
 
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadspel.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadspel.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -17,7 +17,6 @@
 #include "creaturestats.hpp"
 #include "spellresistance.hpp"
 #include "weapontype.hpp"
-#include "combat.hpp"
 #include "summoning.hpp"
 #include "spellutil.hpp"
 
@@ -32,21 +31,20 @@ namespace
             // if the effect filter is not specified, take in account only spells effects. Leave potions, enchanted items etc.
             if (effectFilter == -1)
             {
-                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->getId());
                 if (!spell || spell->mData.mType != ESM::Spell::ST_Spell)
                     continue;
             }
 
-            const MWMechanics::ActiveSpells::ActiveSpellParams& params = it->second;
-            for (std::vector<MWMechanics::ActiveSpells::ActiveEffect>::const_iterator effectIt = params.mEffects.begin();
-                effectIt != params.mEffects.end(); ++effectIt)
+            const MWMechanics::ActiveSpells::ActiveSpellParams& params = *it;
+            for (const auto& effect : params.getEffects())
             {
-                int effectId = effectIt->mEffectId;
+                int effectId = effect.mEffectId;
                 if (effectFilter != -1 && effectId != effectFilter)
                     continue;
                 const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
 
-                if (effectIt->mDuration <= 3) // Don't attempt to dispel if effect runs out shortly anyway
+                if (effect.mDuration <= 3) // Don't attempt to dispel if effect runs out shortly anyway
                     continue;
 
                 if (negative && magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
@@ -65,18 +63,27 @@ namespace
         const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
         for (MWMechanics::ActiveSpells::TIterator it = activeSpells.begin(); it != activeSpells.end(); ++it)
         {
-            if (it->first != spellId)
+            if (it->getId() != spellId)
                 continue;
 
-            const MWMechanics::ActiveSpells::ActiveSpellParams& params = it->second;
-            for (std::vector<MWMechanics::ActiveSpells::ActiveEffect>::const_iterator effectIt = params.mEffects.begin();
-                effectIt != params.mEffects.end(); ++effectIt)
+            const MWMechanics::ActiveSpells::ActiveSpellParams& params = *it;
+            for (const auto& effect : params.getEffects())
             {
-                if (effectIt->mDuration > duration)
-                    duration = effectIt->mDuration;
+                if (effect.mDuration > duration)
+                    duration = effect.mDuration;
             }
         }
         return duration;
+    }
+
+    bool isSpellActive(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const std::string& id)
+    {
+        int actorId = caster.getClass().getCreatureStats(caster).getActorId();
+        const auto& active = target.getClass().getCreatureStats(target).getActiveSpells();
+        return std::find_if(active.begin(), active.end(), [&](const auto& spell)
+        {
+            return spell.getCasterActorId() == actorId && Misc::StringUtils::ciEqual(spell.getId(), id);
+        }) != active.end();
     }
 }
 
@@ -99,7 +106,7 @@ namespace MWMechanics
 
     float ratePotion (const MWWorld::Ptr &item, const MWWorld::Ptr& actor)
     {
-        if (item.getTypeName() != typeid(ESM::Potion).name())
+        if (item.getType() != ESM::Potion::sRecordId)
             return 0.f;
 
         const ESM::Potion* potion = item.get<ESM::Potion>()->mBase;
@@ -108,8 +115,6 @@ namespace MWMechanics
 
     float rateSpell(const ESM::Spell *spell, const MWWorld::Ptr &actor, const MWWorld::Ptr& enemy)
     {
-        const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-
         float successChance = MWMechanics::getSpellSuccessChance(spell, actor);
         if (successChance == 0.f)
             return 0.f;
@@ -128,9 +133,9 @@ namespace MWMechanics
 
         // Spells don't stack, so early out if the spell is still active on the target
         int types = getRangeTypes(spell->mEffects);
-        if ((types & Self) && stats.getActiveSpells().isSpellActive(spell->mId))
+        if ((types & Self) && isSpellActive(actor, actor, spell->mId))
             return 0.f;
-        if ( ((types & Touch) || (types & Target)) && enemy.getClass().getCreatureStats(enemy).getActiveSpells().isSpellActive(spell->mId))
+        if ( ((types & Touch) || (types & Target)) && isSpellActive(actor, enemy, spell->mId))
             return 0.f;
 
         return rateEffects(spell->mEffects, actor, enemy) * (successChance / 100.f);
@@ -244,7 +249,7 @@ namespace MWMechanics
                     return 0.f;
 
                 // Enemy doesn't attack
-                if (stats.getDrawState() != MWMechanics::DrawState_Weapon)
+                if (stats.getDrawState() != MWMechanics::DrawState::Weapon)
                     return 0.f;
 
                 break;
@@ -265,7 +270,7 @@ namespace MWMechanics
                     return 0.f;
 
                 // Enemy doesn't cast spells
-                if (stats.getDrawState() != MWMechanics::DrawState_Spell)
+                if (stats.getDrawState() != MWMechanics::DrawState::Spell)
                     return 0.f;
 
                 break;
@@ -283,7 +288,7 @@ namespace MWMechanics
                     return 0.f;
 
                 // Enemy doesn't cast spells
-                if (stats.getDrawState() != MWMechanics::DrawState_Spell)
+                if (stats.getDrawState() != MWMechanics::DrawState::Spell)
                     return 0.f;
                 break;
             }
@@ -370,6 +375,24 @@ namespace MWMechanics
             else
                 return 0.f;
 
+            break;
+        case ESM::MagicEffect::BoundShield:
+            if(!actor.getClass().hasInventoryStore(actor))
+                return 0.f;
+            else if(!actor.getClass().isNpc())
+            {
+                // If the actor is an NPC they can benefit from the armor rating, otherwise check if we've got a one-handed weapon to use with the shield
+                const auto& store = actor.getClass().getInventoryStore(actor);
+                auto oneHanded = std::find_if(store.cbegin(MWWorld::ContainerStore::Type_Weapon), store.cend(), [](const MWWorld::ConstPtr& weapon)
+                {
+                    if(weapon.getClass().getItemHealth(weapon) <= 0.f)
+                        return false;
+                    short type = weapon.get<ESM::Weapon>()->mBase->mData.mType;
+                    return !(MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded);
+                });
+                if(oneHanded == store.cend())
+                    return 0.f;
+            }
             break;
         // Creatures can not wear armor
         case ESM::MagicEffect::BoundCuirass:
@@ -553,6 +576,13 @@ namespace MWMechanics
             MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
 
             if (!creatureStats.getSummonedCreatureMap().empty())
+                return 0.f;
+        }
+        if(effect.mEffectID >= ESM::MagicEffect::BoundDagger && effect.mEffectID <= ESM::MagicEffect::BoundGloves)
+        {
+            // While rateSpell prevents actors from recasting the same spell, it doesn't prevent them from casting different spells with the same effect.
+            // Multiple instances of the same bound item don't stack so if the effect is already active, rate it as useless.
+            if(actor.getClass().getCreatureStats(actor).getMagicEffects().get(effect.mEffectID).getMagnitude() > 0.f)
                 return 0.f;
         }
 

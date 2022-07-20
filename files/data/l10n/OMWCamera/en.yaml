@@ -1,0 +1,72 @@
+Camera: "OpenMW Camera"
+settingsPageDescription: "OpenMW Camera settings"
+
+thirdPersonSettings: "Third person mode"
+
+viewOverShoulder: "View over the shoulder"
+viewOverShoulderDescription: |
+    Controls third person view mode.
+      No: view is centered on the character's head. Crosshair is hidden.
+      Yes: while weapon sheathed the camera is positioned behind the character's shoulder, crosshair is always visible.
+
+shoulderOffsetX: "Shoulder view horizontal offset"
+shoulderOffsetXDescription: >
+    Horizontal offset of the over-the-shoulder view.
+    For the left shoulder use a negative value.
+
+shoulderOffsetY: "Shoulder view vertical offset"
+shoulderOffsetYDescription: >
+    Vertical offset of the over-the-shoulder view.
+
+autoSwitchShoulder: "Auto switch shoulder"
+autoSwitchShoulderDescription: >
+    When there are obstacles that would push the camera close to the player character,
+    this setting makes the camera automatically switch to the shoulder farther away from the obstacles.
+
+zoomOutWhenMoveCoef: "Zoom out when move coef"
+zoomOutWhenMoveCoefDescription: >
+    Moves the camera away (positive value) or towards (negative value) the player character while the character is moving.
+    Works only if "view over the shoulder" is enabled. Set this to zero to disable (default: 20.0).
+
+previewIfStandStill: "Preview if stand still"
+previewIfStandStillDescription: >
+    Prevents the player character from turning towards the camera direction while they're idle and have their weapon sheathed.
+
+deferredPreviewRotation: "Deferred preview rotation"
+deferredPreviewRotationDescription: |
+    If enabled then the character smoothly rotates to the view direction after exiting preview or vanity mode.
+    If disabled then the camera rotates rather than the character.
+
+ignoreNC: "Ignore 'No Collision' flag"
+ignoreNCDescription: >
+    Prevents the camera from clipping through objects that have NC (No Collision) flag turned on in the NIF model.
+
+move360: "Move 360"
+move360Description: >
+    Makes the movement direction independent from the camera direction while the player character's weapon
+    is sheathed. For example, the player character will look at the camera while running backwards.
+
+move360TurnSpeed: "Move 360 turning speed"
+move360TurnSpeedDescription: "Turning speed multiplier (default: 5.0)."
+
+slowViewChange: "Smooth view change"
+slowViewChangeDescription: "Makes the transition from 1st person to 3rd person view non-instantaneous."
+
+povAutoSwitch: "First person auto switch"
+povAutoSwitchDescription: "Auto switch to the first person view if there is an obstacle right behind the player."
+
+
+headBobbingSettings: "Head bobbing in first person view"
+
+headBobbing_enabled: "Enabled"
+headBobbing_enabledDescription: ""
+
+headBobbing_step: "Base step length"
+headBobbing_stepDescription: "The length of each step (default: 90.0)."
+
+headBobbing_height: "Step height"
+headBobbing_heightDescription: "The amplitude of the head bobbing (default: 3.0)."
+
+headBobbing_roll: "Max roll angle"
+headBobbing_rollDescription: "The maximum roll angle in degrees (default: 0.2)."
+

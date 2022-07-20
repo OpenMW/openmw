@@ -4,11 +4,15 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LayerManager.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
+#include <components/compiler/lineparser.hpp>
+#include <components/compiler/scanner.hpp>
+#include <components/compiler/locals.hpp>
+#include <components/interpreter/interpreter.hpp>
 
 #include "../mwscript/extensions.hpp"
 
@@ -16,6 +20,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -36,7 +41,7 @@ namespace MWGui
     ConsoleInterpreterContext::ConsoleInterpreterContext (Console& console,
         MWWorld::Ptr reference)
     : MWScript::InterpreterContext (
-        reference.isEmpty() ? 0 : &reference.getRefData().getLocals(), reference),
+        reference.isEmpty() ? nullptr : &reference.getRefData().getLocals(), reference),
       mConsole (console)
     {}
 
@@ -157,25 +162,34 @@ namespace MWGui
         MyGUI::LayerManager::getInstance().upLayerItem(mMainWidget);
     }
 
-    void Console::print(const std::string &msg, const std::string& color)
+    void Console::print(const std::string &msg, std::string_view color)
     {
-        mHistory->addText(color + MyGUI::TextIterator::toTagsString(msg));
+        mHistory->addText(std::string(color) + MyGUI::TextIterator::toTagsString(msg));
     }
 
     void Console::printOK(const std::string &msg)
     {
-        print(msg + "\n", "#FF00FF");
+        print(msg + "\n", MWBase::WindowManager::sConsoleColor_Success);
     }
 
     void Console::printError(const std::string &msg)
     {
-        print(msg + "\n", "#FF2222");
+        print(msg + "\n", MWBase::WindowManager::sConsoleColor_Error);
     }
 
     void Console::execute (const std::string& command)
     {
         // Log the command
-        print("> " + command + "\n");
+        if (mConsoleMode.empty())
+            print("> " + command + "\n");
+        else
+            print(mConsoleMode + " " + command + "\n");
+
+        if (!mConsoleMode.empty() || (command.size() >= 3 && std::string_view(command).substr(0, 3) == "lua"))
+        {
+            MWBase::Environment::get().getLuaManager()->handleConsoleCommand(mConsoleMode, command, mPtr);
+            return;
+        }
 
         Compiler::Locals locals;
         if (!mPtr.isEmpty())
@@ -206,8 +220,7 @@ namespace MWGui
 
     void Console::executeFile (const std::string& path)
     {
-        namespace bfs = boost::filesystem;
-        bfs::ifstream stream ((bfs::path(path)));
+        std::ifstream stream ((std::filesystem::path(path)));
 
         if (!stream.is_open())
             printError ("failed to open file: " + path);
@@ -249,7 +262,7 @@ namespace MWGui
                 size_t length = mCommandLine->getTextCursor() - max;
                 if(length > 0)
                 {
-                    std::string text = caption;
+                    auto text = caption;
                     text.erase(max, length);
                     mCommandLine->setCaption(text);
                     mCommandLine->setTextCursor(max);
@@ -259,14 +272,14 @@ namespace MWGui
             {
                 if(mCommandLine->getTextCursor() > 0)
                 {
-                    std::string text = mCommandLine->getCaption();
+                    auto text = mCommandLine->getCaption();
                     text.erase(0, mCommandLine->getTextCursor());
                     mCommandLine->setCaption(text);
                     mCommandLine->setTextCursor(0);
                 }
             }
         }
-        else if(key == MyGUI::KeyCode::Tab)
+        else if(key == MyGUI::KeyCode::Tab && mConsoleMode.empty())
         {
             std::vector<std::string> matches;
             listNames();
@@ -331,6 +344,7 @@ namespace MWGui
             mCommandHistory.push_back(cm);
         mCurrent = mCommandHistory.end();
         mEditString.clear();
+        mHistory->setTextCursor(mHistory->getTextLength());
 
         // Reset the command line before the command execution.
         // It prevents the re-triggering of the acceptCommand() event for the same command 
@@ -469,7 +483,7 @@ namespace MWGui
 
     void Console::onResChange(int width, int height)
     {
-        setCoord(10,10, width-10, height/2);
+        setCoord(10, 10, width-10, height/2);
     }
 
     void Console::updateSelectedObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr)
@@ -483,23 +497,31 @@ namespace MWGui
         if (!object.isEmpty())
         {
             if (object == mPtr)
-            {
-                setTitle("#{sConsoleTitle}");
-                mPtr=MWWorld::Ptr();
-            }
+                mPtr = MWWorld::Ptr();
             else
-            {
-                setTitle("#{sConsoleTitle} (" + object.getCellRef().getRefId() + ")");
                 mPtr = object;
-            }
             // User clicked on an object. Restore focus to the console command line.
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
         }
         else
-        {
-            setTitle("#{sConsoleTitle}");
             mPtr = MWWorld::Ptr();
-        }
+        updateConsoleTitle();
+    }
+
+    void Console::updateConsoleTitle()
+    {
+        std::string title = "#{sConsoleTitle}";
+        if (!mConsoleMode.empty())
+            title = mConsoleMode + " " + title;
+        if (!mPtr.isEmpty())
+            title.append(" (" + mPtr.getCellRef().getRefId() + ")");
+        setTitle(title);
+    }
+
+    void Console::setConsoleMode(std::string_view mode)
+    {
+        mConsoleMode = std::string(mode);
+        updateConsoleTitle();
     }
 
     void Console::onReferenceUnavailable()

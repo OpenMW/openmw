@@ -30,55 +30,11 @@ command -v unixPathAsWindows >/dev/null 2>&1 || function unixPathAsWindows {
 	fi
 }
 
-function windowsSystemPathAsUnix {
-	if command -v cygpath >/dev/null 2>&1; then
-		cygpath -u -p $1
-	else
-		IFS=';' read -r -a paths <<< "$1"
-		declare -a convertedPaths
-		for entry in paths; do
-			convertedPaths+=(windowsPathAsUnix $entry)
-		done
-		convertedPath=printf ":%s" ${convertedPaths[@]}
-		echo ${convertedPath:1}
-	fi
-}
-
-# capture CMD environment so we know what's been changed
-declare -A originalCmdEnv
-originalIFS="$IFS"
-IFS=$'\n\r'
-for pair in $(cmd //c "set"); do
-    IFS='=' read -r -a separatedPair <<< "${pair}"
-    if [ ${#separatedPair[@]} -ne 2 ]; then
-        echo "Parsed '$pair' as ${#separatedPair[@]} parts, expected 2."
-        continue
-    fi
-    originalCmdEnv["${separatedPair[0]}"]="${separatedPair[1]}"
-done
 
 # capture CMD environment in a shell with MSVC activated
-cmdEnv="$(cmd //c "$(unixPathAsWindows "$(dirname "${BASH_SOURCE[0]}")")\ActivateMSVC.bat" "&&" set)"
-
-declare -A cmdEnvChanges
-for pair in $cmdEnv; do
-    if [ -n "$pair" ]; then
-        IFS='=' read -r -a separatedPair <<< "${pair}"
-        if [ ${#separatedPair[@]} -ne 2 ]; then
-            echo "Parsed '$pair' as ${#separatedPair[@]} parts, expected 2."
-            continue
-        fi
-        key="${separatedPair[0]}"
-        value="${separatedPair[1]}"
-        if ! [ ${originalCmdEnv[$key]+_} ] || [ "${originalCmdEnv[$key]}" != "$value" ]; then
-            if [ $key != 'PATH' ] && [ $key != 'path' ] && [ $key != 'Path' ]; then
-                export "$key=$value"
-            else
-                export PATH=$(windowsSystemPathAsUnix $value)
-            fi
-        fi
-    fi
-done
+cmd //c "$(unixPathAsWindows "$(dirname "${BASH_SOURCE[0]}")")\ActivateMSVC.bat" "&&" "bash" "-c" "declare -px > declared_env.sh"
+source ./declared_env.sh
+rm declared_env.sh
 
 MISSINGTOOLS=0
 
@@ -92,7 +48,5 @@ if [ $MISSINGTOOLS -ne 0 ]; then
     restoreOldSettings
     return 1
 fi
-
-IFS="$originalIFS"
 
 restoreOldSettings

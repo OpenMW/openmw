@@ -12,7 +12,7 @@ namespace Compiler
 
     bool DiscardParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==StartState || mState==CommaState || mState==MinusState)
+        if (mState==StartState || mState==MinusState)
         {
             if (isEmpty())
                 mTokenLoc = loc;
@@ -26,7 +26,7 @@ namespace Compiler
 
     bool DiscardParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==StartState || mState==CommaState || mState==MinusState)
+        if (mState==StartState || mState==MinusState)
         {
             if (isEmpty())
                 mTokenLoc = loc;
@@ -41,7 +41,7 @@ namespace Compiler
     bool DiscardParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        if (mState==StartState || mState==CommaState)
+        if (mState==StartState)
         {
             if (isEmpty())
                 mTokenLoc = loc;
@@ -55,18 +55,7 @@ namespace Compiler
 
     bool DiscardParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
-        if (code==Scanner::S_comma && mState==StartState)
-        {
-            if (isEmpty())
-                mTokenLoc = loc;
-
-            start();
-
-            mState = CommaState;
-            return true;
-        }
-
-        if (code==Scanner::S_minus && (mState==StartState || mState==CommaState))
+        if (code==Scanner::S_minus && mState==StartState)
         {
             if (isEmpty())
                 mTokenLoc = loc;

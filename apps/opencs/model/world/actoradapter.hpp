@@ -4,12 +4,14 @@
 #include <array>
 #include <map>
 #include <unordered_set>
+#include <string>
+#include <string_view>
 
 #include <QObject>
 #include <QModelIndex>
 
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbody.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbody.hpp>
 #include <components/misc/weakcache.hpp>
 
 #include "refidcollection.hpp"
@@ -93,7 +95,7 @@ namespace CSMWorld
             /// Returns the skeleton the actor should use for attaching parts to
             std::string getSkeleton() const;
             /// Retrieves the associated actor part
-            const std::string getPart(ESM::PartReferenceType index) const;
+            std::string_view getPart(ESM::PartReferenceType index) const;
             /// Checks if the actor has a data dependency
             bool hasDependency(const std::string& id) const;
 

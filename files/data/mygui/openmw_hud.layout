@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main" align="Stretch">
+        <!-- Energy bars -->
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Yellow" position="13 131 65 12" align="Left Bottom" name="EnemyHealth">
+            <Property key="Visible" value="false"/>
+        </Widget>
+        <Widget type="Button" skin="" position="13 146 65 12" align="Left Bottom" name="HealthFrame">
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="HealthToolTip"/>
+            <UserString key="ImageTexture_HealthImage" value="icons\k\health.dds"/>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 0 65 12" align="Left Bottom" name="Health">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+        <Widget type="Button" skin="" position="13 161 65 12" align="Left Bottom" name="MagickaFrame">
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="HealthToolTip"/>
+            <UserString key="ImageTexture_HealthImage" value="icons\k\magicka.dds"/>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="0 0 65 12" align="Left Bottom" name="Magicka">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+        <Widget type="Button" skin="" position="13 176 65 12" align="Left Bottom" name="FatigueFrame">
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="HealthToolTip"/>
+            <UserString key="ImageTexture_HealthImage" value="icons\k\fatigue.dds"/>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Green" position="0 0 65 12" align="Left Bottom" name="Stamina">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+
+        <!-- Equipped weapon/selected spell name display for a few seconds after it changes -->
+        <Widget type="TextBox" skin="SandText" position="13 118 270 24" name="WeaponSpellName" align="Left Bottom HStretch">
+            <Property key="Visible" value="false"/>
+            <Property key="TextAlign" value="Left"/>
+            <Property key="TextShadow" value="true"/>
+            <Property key="TextShadowColour" value="0 0 0"/>
+            <Property key="NeedMouse" value="false"/>
+        </Widget>
+
+        <!-- Equipped weapon box -->
+        <Widget type="Button" skin="" position="82 146 36 41" align="Left Bottom" name="WeapBox">
+            <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
+                <Property key="NeedMouse" value="false"/>
+                <Widget type="ItemWidget" skin="MW_ItemIconNoShadow" position="-3 -3 42 42" align="Left Top" name="WeapImage">
+                    <Property key="NeedMouse" value="false"/>
+                </Widget>
+            </Widget>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Weapon" position="0 36 36 6" align="Left Bottom" name="WeapStatus">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+
+        <!-- Selected spell box -->
+        <Widget type="Button" position="122 146 36 41" align="Left Bottom" name="SpellBox">
+            <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
+                <Widget type="SpellWidget" skin="MW_ItemIconNoShadow" position="-3 -3 42 42" align="Left Top" name="SpellImage"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Magic" position="0 36 36 6" align="Left Bottom" name="SpellStatus">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+
+        <!-- Sneak indicator box -->
+        <Widget type="Button" skin="" position="162 146 36 36" align="Left Bottom" name="SneakBox">
+            <Property key="Visible" value="false"/>
+            <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
+                <Property key="NeedMouse" value="false"/>
+                <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top" name="SneakImage">
+                    <Property key="NeedMouse" value="false"/>
+                    <Property key="ImageTexture" value="icons\k\stealth_sneak.dds"/>
+                </Widget>
+            </Widget>
+        </Widget>
+
+        <!-- Spell effects box -->
+        <Widget type="Widget" skin="HUD_Box_Transparent" position="199 168 20 20" align="Right Bottom" name="EffectBox">
+        </Widget>
+
+        <!-- Cell name display when cell changes -->
+        <Widget type="TextBox" skin="SandText" position="0 89 288 24" name="CellName" align="Left Bottom HStretch">
+            <Property key="Visible" value="false"/>
+            <Property key="TextAlign" value="Right"/>
+            <Property key="TextShadow" value="true"/>
+            <Property key="TextShadowColour" value="0 0 0"/>
+            <Property key="NeedMouse" value="false"/>
+        </Widget>
+
+        <!-- Map box -->
+        <Widget type="Widget" skin="" position="223 123 65 65" name="MiniMapBox" align="Right Bottom">
+            <Widget type="Widget" skin="HUD_Box" position="0 0 65 65" align="Center">
+
+                <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
+                    <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Bottom Left" name="Compass">
+                        <Property key="ImageTexture" value="textures\compass.dds"/>
+                    </Widget>
+
+                    <Widget type="Button" skin="" position_real="0 0 1 1" name="MiniMapButton" align="Stretch">
+                        <Property key="Depth" value="10"/>
+                    </Widget>
+
+                </Widget>
+
+            </Widget>
+        </Widget>
+
+        <!-- Crosshair -->
+        <Widget type="ImageBox" skin="HUD_Crosshair" position="0 0 32 32" align="Center Center" name="Crosshair">
+        </Widget>
+
+    </Widget>
+
+    <!-- Drowning bar -->
+    <Widget type="Widget" layer="DrowningBar" position="0 0 300 200" name="DrowningBar" align="Center Top">
+        <Property key="Visible" value="false"/>
+        <Widget type="Window" skin="MW_Dialog" position="0 36 230 58" align="Center Top" name="DrowningFrame">
+            <Widget type="TextBox" skin="SandText" position="0 3 222 24" name="DrowningTitle" align="Center Top HStretch">
+                <Property key="Caption" value="#{sBreath}"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+            </Widget>
+            <Widget type="Widget" skin="MW_Box" position="11 29 200 10" align="Stretch" name="BoundingBox"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Drowning_Full" position="13 31 196 6" align="Center Top" name="Drowning">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+            <Widget type="Widget" skin="MW_Progress_Drowning_Small" position="15 33 192 2" align="Center Top" name="Flash"/>
+        </Widget>
+    </Widget>
+
+</MyGUI>

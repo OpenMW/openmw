@@ -104,7 +104,6 @@ namespace MWGui
             std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
             bool mTrading;
-            float mScaleFactor;
             float mUpdateTimer;
 
             void toggleMaximized();
@@ -130,6 +129,9 @@ namespace MWGui
             void dirtyPreview();
             void updatePreviewSize();
             void updateArmorRating();
+
+            MyGUI::IntSize getPreviewViewportSize() const;
+            osg::Vec2f mapPreviewWindowToViewport(int x, int y) const;
 
             void adjustPanes();
 

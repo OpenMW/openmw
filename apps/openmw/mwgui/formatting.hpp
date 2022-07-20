@@ -14,7 +14,7 @@ namespace MWGui
         {
             TextStyle() :
                 mColour(0,0,0)
-                , mFont("Journalbook Magic Cards")
+                , mFont("Journalbook DefaultFont")
                 , mTextSize(16)
             {
             }
@@ -73,6 +73,8 @@ namespace MWGui
                 bool mClosingTag;
                 std::map<std::string, Events> mTagTypes;
                 std::string mBuffer;
+
+                size_t mPlainTextEnd;
         };
 
         class Paginator

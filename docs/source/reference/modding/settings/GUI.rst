@@ -5,12 +5,13 @@ scaling factor
 --------------
 
 :Type:		floating point
-:Range:		> 0.0
+:Range:		0.5 to 8.0
 :Default:	1.0
 
-This setting scales the GUI interface windows.
+This setting scales GUI windows.
 A value of 1.0 results in the normal scale. Larger values are useful to increase the scale of the GUI for high resolution displays.
-This setting can only be configured by editing the settings configuration file.
+
+This setting can be configured in the Interface section of Advanced tab of the launcher.
 
 font size
 ---------
@@ -69,7 +70,7 @@ stretch menu background
 Stretch or shrink the main menu screen, loading splash screens, introductory movie,
 and cut scenes to fill the specified video resolution, distorting their aspect ratio.
 The Bethesda provided assets have a 4:3 aspect ratio, but other assets are permitted to have other aspect ratios.
-If this setting is false, the assets will be centered in their correct aspect ratio,
+If this setting is false, the assets will be centered in the mentioned 4:3 aspect ratio,
 with black bars filling the remainder of the screen.
 
 This setting can be configured in the Interface section of Advanced tab of the launcher.

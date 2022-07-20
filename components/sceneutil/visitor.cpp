@@ -9,6 +9,9 @@
 
 #include <components/misc/stringops.hpp>
 
+#include <cstring>
+#include <string_view>
+
 namespace SceneUtil
 {
 
@@ -24,7 +27,7 @@ namespace SceneUtil
 
     void FindByClassVisitor::apply(osg::Node &node)
     {
-        if (Misc::StringUtils::ciEqual(node.className(), mNameToFind))
+        if (Misc::StringUtils::ciEqual(std::string_view(node.className()), mNameToFind))
             mFoundNodes.push_back(&node);
 
         traverse(node);
@@ -32,13 +35,13 @@ namespace SceneUtil
 
     void FindByNameVisitor::apply(osg::Group &group)
     {
-        if (!checkGroup(group))
+        if (!mFoundNode && !checkGroup(group))
             traverse(group);
     }
 
     void FindByNameVisitor::apply(osg::MatrixTransform &node)
     {
-        if (!checkGroup(node))
+        if (!mFoundNode && !checkGroup(node))
             traverse(node);
     }
 
@@ -46,22 +49,19 @@ namespace SceneUtil
     {
     }
 
-    void DisableFreezeOnCullVisitor::apply(osg::MatrixTransform &node)
-    {
-        traverse(node);
-    }
-
-    void DisableFreezeOnCullVisitor::apply(osg::Drawable& drw)
-    {
-        if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
-            partsys->setFreezeOnCull(false);
-    }
-
     void NodeMapVisitor::apply(osg::MatrixTransform& trans)
     {
-        // Take transformation for first found node in file
-        const std::string nodeName = Misc::StringUtils::lowerCase(trans.getName());
-        mMap.emplace(nodeName, &trans);
+        // Choose first found node in file
+
+        if (trans.libraryName() == std::string("osgAnimation"))
+        {
+            std::string nodeName = trans.getName();
+            // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses whitespace-separated names)
+            std::replace(nodeName.begin(), nodeName.end(), '_', ' ');
+            mMap.emplace(nodeName, &trans);
+        }
+        else
+            mMap.emplace(trans.getName(), &trans);
 
         traverse(trans);
     }

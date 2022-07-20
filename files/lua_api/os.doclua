@@ -1,0 +1,64 @@
+-------------------------------------------------------------------------------
+-- Operating System Facilities.
+-- This library is implemented through table os. 
+-- @module os
+
+
+-------------------------------------------------------------------------------
+-- Returns a string or a table containing date and time, formatted according
+-- to the given string `format`.
+--
+-- If the `time` argument is present, this is the time to be formatted
+-- (see the `os.time` function for a description of this value). Otherwise,
+-- `date` formats the current time.
+--
+-- If `format` starts with '`!`', then the date is formatted in Coordinated
+-- Universal Time. After this optional character, if `format` is the string
+-- "`*t`", then `date` returns a table with the following fields:
+--
+--   * `year` (four digits)
+--   * `month` (1--12)
+--   * `day` (1--31)
+--   * `hour` (0--23)
+--   * `min` (0--59)
+--   * `sec` (0--61)
+--   * `wday` (weekday, Sunday is 1)
+--   * `yday` (day of the year)
+--   * `isdst` (daylight saving flag, a boolean).
+--
+-- If `format` is not "`*t`", then `date` returns the date as a string,
+-- formatted according to the same rules as the C function `strftime`.
+-- When called without arguments, `date` returns a reasonable date and time
+-- representation that depends on the host system and on the current locale
+-- (that is, `os.date()` is equivalent to `os.date("%c")`).
+-- @function [parent=#os] date
+-- @param #string format format of date. (optional)
+-- @param #number time time to format. (default value is current time) 
+-- @return #string a formatted string representation of `time`. 
+
+-------------------------------------------------------------------------------
+-- Returns the number of seconds from time `t1` to time `t2`. In POSIX,
+-- Windows, and some other systems, this value is exactly `t2`*-*`t1`.
+-- @function [parent=#os] difftime
+-- @param #number t2
+-- @param #number t1 
+-- @return #number the number of seconds from time `t1` to time `t2`.
+
+-------------------------------------------------------------------------------
+-- Returns the current time when called without arguments, or a time
+-- representing the date and time specified by the given table. This table
+-- must have fields `year`, `month`, and `day`, and may have fields `hour`,
+-- `min`, `sec`, and `isdst` (for a description of these fields, see the
+-- `os.date` function).
+-- 
+-- The returned value is a number, whose meaning depends on your system. In
+-- POSIX, Windows, and some other systems, this number counts the number
+-- of seconds since some given start time (the "epoch"). In other systems,
+-- the meaning is not specified, and the number returned by `time` can be
+-- used only as an argument to `date` and `difftime`.
+-- @function [parent=#os] time
+-- @param #table table a table which describes a date.
+-- @return #number a number meaning a date.
+
+return nil
+

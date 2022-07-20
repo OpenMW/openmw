@@ -80,7 +80,7 @@ QRect CSVWidget::SceneToolToggle::getIconBox (int index) const
     int y = index / xMax;
     int x = index % xMax;
 
-    int total = mButtons.size();
+    int total = static_cast<int>(mButtons.size());
 
     int actualYIcons = total/xMax;
 
@@ -115,7 +115,7 @@ QRect CSVWidget::SceneToolToggle::getIconBox (int index) const
 CSVWidget::SceneToolToggle::SceneToolToggle (SceneToolbar *parent, const QString& toolTip,
     const std::string& emptyIcon)
 : SceneTool (parent), mEmptyIcon (emptyIcon), mButtonSize (parent->getButtonSize()),
-  mIconSize (parent->getIconSize()), mToolTip (toolTip), mFirst (0)
+  mIconSize (parent->getIconSize()), mToolTip (toolTip), mFirst (nullptr)
 {
     mPanel = new QFrame (this, Qt::Popup);
 
@@ -154,7 +154,7 @@ void CSVWidget::SceneToolToggle::addButton (const std::string& icon, unsigned in
     desc.mMask = mask;
     desc.mSmallIcon = smallIcon;
     desc.mName = name;
-    desc.mIndex = mButtons.size();
+    desc.mIndex = static_cast<int>(mButtons.size());
 
     mButtons.insert (std::make_pair (button, desc));
 

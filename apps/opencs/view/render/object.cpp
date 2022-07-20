@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <string>
-#include <iostream>
 
 #include <osg/Depth>
 #include <osg/Group>
@@ -10,17 +9,13 @@
 
 #include <osg/ShapeDrawable>
 #include <osg/Shape>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
 #include <osgFX/Scribe>
 
 #include "../../model/world/data.hpp"
-#include "../../model/world/ref.hpp"
-#include "../../model/world/refidcollection.hpp"
 #include "../../model/world/commands.hpp"
-#include "../../model/world/universalid.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/prefs/state.hpp"
@@ -43,15 +38,15 @@ const float CSVRender::Object::MarkerHeadLength = 50;
 namespace
 {
 
-    osg::ref_ptr<osg::Geode> createErrorCube()
+    osg::ref_ptr<osg::Group> createErrorCube()
     {
         osg::ref_ptr<osg::Box> shape(new osg::Box(osg::Vec3f(0,0,0), 50.f));
         osg::ref_ptr<osg::ShapeDrawable> shapedrawable(new osg::ShapeDrawable);
         shapedrawable->setShape(shape);
 
-        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-        geode->addDrawable(shapedrawable);
-        return geode;
+        osg::ref_ptr<osg::Group> group (new osg::Group);
+        group->addChild(shapedrawable);
+        return group;
     }
 
 }
@@ -61,7 +56,7 @@ CSVRender::ObjectTag::ObjectTag (Object* object)
 : TagBase (Mask_Reference), mObject (object)
 {}
 
-QString CSVRender::ObjectTag::getToolTip (bool hideBasics) const
+QString CSVRender::ObjectTag::getToolTip(bool /*hideBasics*/, const WorldspaceHitResult& /*hit*/) const
 {
     return QString::fromUtf8 (mObject->getReferenceableId().c_str());
 }
@@ -117,7 +112,7 @@ void CSVRender::Object::update()
     {
         if (recordType == CSMWorld::UniversalId::Type_Npc || recordType == CSMWorld::UniversalId::Type_Creature)
         {
-            if (!mActor) mActor.reset(new Actor(mReferenceableId, mData));
+            if (!mActor) mActor = std::make_unique<Actor>(mReferenceableId, mData);
             mActor->update();
             mBaseNode->addChild(mActor->getBaseNode());
         }
@@ -140,7 +135,7 @@ void CSVRender::Object::update()
     if (light)
     {
         bool isExterior = false; // FIXME
-        SceneUtil::addLight(mBaseNode, light, Mask_ParticleSystem, Mask_Lighting, isExterior);
+        SceneUtil::addLight(mBaseNode, light, Mask_Lighting, isExterior);
     }
 }
 
@@ -296,10 +291,10 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 
     setupCommonMarkerState(geometry);
 
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-    geode->addDrawable (geometry);
+    osg::ref_ptr<osg::Group> group (new osg::Group);
+    group->addChild(geometry);
 
-    return geode;
+    return group;
 }
 
 osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
@@ -308,7 +303,7 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
     const float OuterRadius = InnerRadius + MarkerShaftWidth;
 
     const float SegmentDistance = 100.f;
-    const size_t SegmentCount = std::min(64, std::max(24, (int)(OuterRadius * 2 * osg::PI / SegmentDistance)));
+    const size_t SegmentCount = std::clamp<int>(OuterRadius * 2 * osg::PI / SegmentDistance, 24, 64);
     const size_t VerticesPerSegment = 4;
     const size_t IndicesPerSegment = 24;
 
@@ -382,10 +377,10 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
 
     setupCommonMarkerState(geometry);
 
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    geode->addDrawable (geometry);
+    osg::ref_ptr<osg::Group> group = new osg::Group();
+    group->addChild(geometry);
 
-    return geode;
+    return group;
 }
 
 void CSVRender::Object::setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry)
@@ -413,7 +408,7 @@ osg::Vec3f CSVRender::Object::getMarkerPosition (float x, float y, float z, int 
 
 CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
-: mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero),
+: mData (data), mBaseNode(nullptr), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero),
   mScaleOverride (1), mOverrideFlags (0), mSubMode (-1), mMarkerTransparency(0.5f)
 {
     mRootNode = new osg::PositionAttitudeTransform;
@@ -682,18 +677,20 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
 
             int cellColumn = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
                 CSMWorld::Columns::ColumnId_Cell));
-            int refNumColumn = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
-                CSMWorld::Columns::ColumnId_RefNum));
+            int origCellColumn = collection.findColumnIndex(static_cast<CSMWorld::Columns::ColumnId> (
+                CSMWorld::Columns::ColumnId_OriginalCell));
 
             if (cellIndex != originalIndex)
             {
                 /// \todo figure out worldspace (not important until multiple worldspaces are supported)
+                std::string origCellId = CSMWorld::CellCoordinates(originalIndex).getId("");
                 std::string cellId = CSMWorld::CellCoordinates (cellIndex).getId ("");
 
                 commands.push (new CSMWorld::ModifyCommand (*model,
-                    model->index (recordIndex, cellColumn), QString::fromUtf8 (cellId.c_str())));
-                commands.push (new CSMWorld::ModifyCommand( *model,
-                    model->index (recordIndex, refNumColumn), 0));
+                    model->index (recordIndex, origCellColumn), QString::fromUtf8 (origCellId.c_str())));
+                commands.push(new CSMWorld::ModifyCommand(*model,
+                    model->index(recordIndex, cellColumn), QString::fromUtf8(cellId.c_str())));
+                // NOTE: refnum is not modified for moving a reference to another cell
             }
         }
 

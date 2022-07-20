@@ -1,7 +1,13 @@
 #ifndef GAME_SOUND_FFMPEG_DECODER_H
 #define GAME_SOUND_FFMPEG_DECODER_H
 
-#include <stdint.h>
+#include <cstdint>
+
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4244)
+#endif
+
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -14,10 +20,13 @@ extern "C"
 #include <libswresample/swresample.h>
 }
 
-#include <components/files/constrainedfilestream.hpp>
+#if defined(_MSC_VER)
+    #pragma warning (pop)
+#endif
+
+#include <components/files/istreamptr.hpp>
 
 #include <string>
-#include <istream>
 
 #include "sound_decoder.hpp"
 
@@ -69,15 +78,13 @@ namespace MWSound
         FFmpeg_Decoder& operator=(const FFmpeg_Decoder &rhs);
         FFmpeg_Decoder(const FFmpeg_Decoder &rhs);
 
-        FFmpeg_Decoder(const VFS::Manager* vfs);
     public:
+        explicit FFmpeg_Decoder(const VFS::Manager* vfs);
+
         virtual ~FFmpeg_Decoder();
 
         friend class SoundManager;
     };
-#ifndef DEFAULT_DECODER
-#define DEFAULT_DECODER (::MWSound::FFmpeg_Decoder)
-#endif
 }
 
 #endif

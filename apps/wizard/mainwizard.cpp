@@ -1,9 +1,7 @@
 #include "mainwizard.hpp"
 
 #include <QDebug>
-
-#include <QTime>
-#include <QCloseEvent>
+#include <QDateTime>
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QDir>
@@ -56,6 +54,9 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
                    <p>Please make sure you have the right permissions \
                    and try again.</p></body></html>");
 
+    boost::filesystem::create_directories(mCfgMgr.getUserConfigPath());
+    boost::filesystem::create_directories(mCfgMgr.getUserDataPath());
+
     setupLog();
     setupGameSettings();
     setupLauncherSettings();
@@ -88,8 +89,9 @@ void Wizard::MainWizard::setupLog()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(mLogError.arg(file.fileName()));
+        connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();
-        return qApp->quit();
+        return;
     }
 
     addLogText(QString("Started OpenMW Wizard on %1").arg(QDateTime::currentDateTime().toString()));
@@ -110,8 +112,9 @@ void Wizard::MainWizard::addLogText(const QString &text)
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(mLogError.arg(file.fileName()));
+        connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();
-        return qApp->quit();
+        return;
     }
 
     if (!file.isSequential())
@@ -148,14 +151,17 @@ void Wizard::MainWizard::setupGameSettings()
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(message.arg(file.fileName()));
+            connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
             msgBox.exec();
-            return qApp->quit();
+            return;
         }
         QTextStream stream(&file);
         stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
         mGameSettings.readUserFile(stream);
     }
+
+    file.close();
 
     // Now the rest
     QStringList paths;
@@ -175,8 +181,9 @@ void Wizard::MainWizard::setupGameSettings()
                 msgBox.setIcon(QMessageBox::Critical);
                 msgBox.setStandardButtons(QMessageBox::Ok);
                 msgBox.setText(message.arg(file.fileName()));
-
-                return qApp->quit();
+                connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
+                msgBox.exec();
+                return;
             }
             QTextStream stream(&file);
             stream.setCodec(QTextCodec::codecForName("UTF-8"));
@@ -208,8 +215,9 @@ void Wizard::MainWizard::setupLauncherSettings()
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(message.arg(file.fileName()));
+            connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
             msgBox.exec();
-            return qApp->quit();
+            return;
         }
         QTextStream stream(&file);
         stream.setCodec(QTextCodec::codecForName("UTF-8"));
@@ -319,7 +327,7 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_InstallationTarget, new InstallationTargetPage(this, mCfgMgr));
     setPage(Page_ComponentSelection, new ComponentSelectionPage(this));
 #ifdef OPENMW_USE_UNSHIELD
-    setPage(Page_Installation, new InstallationPage(this));
+    setPage(Page_Installation, new InstallationPage(this, mGameSettings));
 #endif
     setPage(Page_Import, new ImportPage(this));
     setPage(Page_Conclusion, new ConclusionPage(this));
@@ -392,8 +400,9 @@ void Wizard::MainWizard::writeSettings()
             msgBox.setText(tr("<html><head/><body><p><b>Could not create %1</b></p> \
                               <p>Please make sure you have the right permissions \
                               and try again.</p></body></html>").arg(userPath));
+            connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
             msgBox.exec();
-            return qApp->quit();
+            return;
         }
     }
 
@@ -409,8 +418,9 @@ void Wizard::MainWizard::writeSettings()
         msgBox.setText(tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
                           <p>Please make sure you have the right permissions \
                           and try again.</p></body></html>").arg(file.fileName()));
+        connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();
-        return qApp->quit();
+        return;
     }
 
     QTextStream stream(&file);
@@ -431,8 +441,9 @@ void Wizard::MainWizard::writeSettings()
         msgBox.setText(tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
                           <p>Please make sure you have the right permissions \
                           and try again.</p></body></html>").arg(file.fileName()));
+        connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();
-        return qApp->quit();
+        return;
     }
 
     stream.setDevice(&file);

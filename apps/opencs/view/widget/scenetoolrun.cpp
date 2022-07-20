@@ -30,7 +30,7 @@ void CSVWidget::SceneToolRun::updateIcon()
 
 void CSVWidget::SceneToolRun::updatePanel()
 {
-    mTable->setRowCount (mProfiles.size());
+    mTable->setRowCount (static_cast<int>(mProfiles.size()));
 
     int i = 0;
 

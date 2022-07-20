@@ -19,7 +19,7 @@ namespace CSVWorld
             CellData getCellData(int row, int column) const;
 
         public:
-            TableEditIdAction(const QTableView &table, QWidget *parent = 0);
+            TableEditIdAction(const QTableView &table, QWidget *parent = nullptr);
 
             void setCell(int row, int column);
 

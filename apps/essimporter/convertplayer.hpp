@@ -3,8 +3,8 @@
 
 #include "importplayer.hpp"
 
-#include <components/esm/player.hpp>
-#include <components/esm/controlsstate.hpp>
+#include <components/esm3/player.hpp>
+#include <components/esm3/controlsstate.hpp>
 
 namespace ESSImport
 {

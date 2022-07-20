@@ -5,7 +5,8 @@
 #include <set>
 #include <vector>
 
-#include <stdint.h>
+#include <SDL_gamecontroller.h>
+#include <cstdint>
 
 namespace Loading
 {
@@ -48,12 +49,20 @@ namespace MWBase
             virtual void setGamepadGuiCursorEnabled(bool enabled) = 0;
             virtual void setAttemptJump(bool jumping) = 0;
 
-            virtual void toggleControlSwitch (const std::string& sw, bool value) = 0;
-            virtual bool getControlSwitch (const std::string& sw) = 0;
+            virtual void toggleControlSwitch(std::string_view sw, bool value) = 0;
+            virtual bool getControlSwitch(std::string_view sw) = 0;
 
-            virtual std::string getActionDescription (int action) = 0;
-            virtual std::string getActionKeyBindingName (int action) = 0;
-            virtual std::string getActionControllerBindingName (int action) = 0;
+            virtual std::string getActionDescription (int action) const = 0;
+            virtual std::string getActionKeyBindingName (int action) const = 0;
+            virtual std::string getActionControllerBindingName (int action) const = 0;
+            virtual bool actionIsActive(int action) const = 0;
+
+            virtual float getActionValue(int action) const = 0;  // returns value in range [0, 1]
+            virtual bool isControllerButtonPressed(SDL_GameControllerButton button) const = 0;
+            virtual float getControllerAxisValue(SDL_GameControllerAxis axis) const = 0;  // returns value in range [-1, 1]
+            virtual int getMouseMoveX() const = 0;
+            virtual int getMouseMoveY() const = 0;
+
             ///Actions available for binding to keyboard buttons
             virtual std::vector<int> getActionKeySorting() = 0;
             ///Actions available for binding to controller buttons
@@ -74,6 +83,7 @@ namespace MWBase
             virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
 
             virtual void resetIdleTime() = 0;
+            virtual bool isIdle() const = 0;
 
             virtual void executeAction(int action) = 0;
 

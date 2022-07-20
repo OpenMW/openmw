@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include "importacdt.hpp"
 
@@ -27,7 +27,7 @@ namespace ESSImport
 
         void load(ESM::ESMReader& esm) override;
 
-        virtual ~CellRef() = default;
+        ~CellRef() override = default;
     };
 
 }

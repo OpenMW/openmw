@@ -23,8 +23,12 @@
 #include <osg/Geometry>
 #include <osg/io_utils>
 #include <osg/Depth>
+#include <osg/ClipControl>
 
 #include <sstream>
+#include <deque>
+#include <vector>
+
 #include "shadowsbin.hpp"
 
 namespace {
@@ -275,14 +279,7 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
     }
 #endif
     // bin has to go inside camera cull or the rendertexture stage will override it
-    static osg::ref_ptr<osg::StateSet> ss;
-    if (!ss)
-    {
-        ShadowsBinAdder adder("ShadowsBin");
-        ss = new osg::StateSet;
-        ss->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "ShadowsBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
-    }
-    cv->pushStateSet(ss);
+    cv->pushStateSet(_vdsm->getOrCreateShadowsBinStateSet());
     if (_vdsm->getShadowedScene())
     {
         _vdsm->getShadowedScene()->osg::Group::traverse(*nv);
@@ -349,16 +346,16 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 
 } // namespace
 
-MWShadowTechnique::ComputeLightSpaceBounds::ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix) :
+MWShadowTechnique::ComputeLightSpaceBounds::ComputeLightSpaceBounds() :
     osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
 {
     setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
+}
 
-    pushViewport(viewport);
-    pushProjectionMatrix(new osg::RefMatrix(projectionMatrix));
-    pushModelViewMatrix(new osg::RefMatrix(viewMatrix), osg::Transform::ABSOLUTE_RF);
-
-    setName("SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds,AcceptedByComponentsTerrainQuadTreeWorld");
+void MWShadowTechnique::ComputeLightSpaceBounds::reset()
+{
+    osg::CullStack::reset();
+    _bb = osg::BoundingBox();
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Node& node)
@@ -374,6 +371,11 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Node& node)
     popCurrentMask();
 }
 
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Group& node)
+{
+    apply(static_cast<osg::Node&>(node));
+}
+
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
 {
     if (isCulled(drawable)) return;
@@ -387,12 +389,9 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
     popCurrentMask();
 }
 
-void MWShadowTechnique::ComputeLightSpaceBounds::apply(Terrain::QuadTreeWorld & quadTreeWorld)
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Geometry& drawable)
 {
-    // For now, just expand the bounds fully as terrain will fill them up and possible ways to detect which terrain definitely won't cast shadows aren't implemented.
-
-    update(osg::Vec3(-1.0, -1.0, 0.0));
-    update(osg::Vec3(1.0, 1.0, 0.0));
+    apply(static_cast<osg::Drawable&>(drawable));
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Billboard&)
@@ -417,9 +416,9 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Transform& transform
     // absolute transforms won't affect a shadow map so their subgraphs should be ignored.
     if (transform.getReferenceFrame() == osg::Transform::RELATIVE_RF)
     {
-        osg::ref_ptr<osg::RefMatrix> matrix = new osg::RefMatrix(*getModelViewMatrix());
+        osg::RefMatrix* matrix = createOrReuseMatrix(*getModelViewMatrix());
         transform.computeLocalToWorldMatrix(*matrix, this);
-        pushModelViewMatrix(matrix.get(), transform.getReferenceFrame());
+        pushModelViewMatrix(matrix, transform.getReferenceFrame());
 
         traverse(transform);
 
@@ -428,7 +427,11 @@ void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Transform& transform
 
     // pop the culling mode.
     popCurrentMask();
+}
 
+void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::MatrixTransform& transform)
+{
+    apply(static_cast<osg::Transform&>(transform));
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Camera&)
@@ -492,7 +495,7 @@ void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const osg::L
         lightDir.set(-lightPos.x(), -lightPos.y(), -lightPos.z());
         lightDir.normalize();
         OSG_INFO<<"   Directional light, lightPos="<<lightPos<<", lightDir="<<lightDir<<std::endl;
-        if (lightMatrix.valid() && *lightMatrix != osg::Matrixf(modelViewMatrix))
+        if (lightMatrix.valid() && lightMatrix->operator==(osg::Matrixf(modelViewMatrix)))
         {
             OSG_INFO<<"   Light matrix "<<*lightMatrix<<std::endl;
             osg::Matrix lightToLocalMatrix(*lightMatrix * osg::Matrix::inverse(modelViewMatrix) );
@@ -566,8 +569,9 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     _camera = new osg::Camera;
     _camera->setName("ShadowCamera");
     _camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
+#ifndef __APPLE__ // workaround shadow issue on macOS, https://gitlab.com/OpenMW/openmw/-/issues/6057
     _camera->setImplicitBufferAttachmentMask(0, 0);
-
+#endif
     //_camera->setClearColor(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
     _camera->setClearColor(osg::Vec4(0.0f,0.0f,0.0f,0.0f));
 
@@ -629,6 +633,7 @@ void MWShadowTechnique::ShadowData::releaseGLObjects(osg::State* state) const
 // Frustum
 //
 MWShadowTechnique::Frustum::Frustum(osgUtil::CullVisitor* cv, double minZNear, double maxZFar):
+    useCustomClipSpace(false),
     corners(8),
     faces(6),
     edges(12)
@@ -648,18 +653,39 @@ MWShadowTechnique::Frustum::Frustum(osgUtil::CullVisitor* cv, double minZNear, d
         OSG_INFO<<"zNear = "<<zNear<<", zFar = "<<zFar<<std::endl;
         OSG_INFO<<"Projection matrix after clamping "<<projectionMatrix<<std::endl;
     }
+}
 
-    corners[0].set(-1.0,-1.0,-1.0);
-    corners[1].set(1.0,-1.0,-1.0);
-    corners[2].set(1.0,-1.0,1.0);
-    corners[3].set(-1.0,-1.0,1.0);
-    corners[4].set(-1.0,1.0,-1.0);
-    corners[5].set(1.0,1.0,-1.0);
-    corners[6].set(1.0,1.0,1.0);
-    corners[7].set(-1.0,1.0,1.0);
+void SceneUtil::MWShadowTechnique::Frustum::setCustomClipSpace(const osg::BoundingBoxd& clipCornersOverride)
+{
+    useCustomClipSpace = true;
+    customClipSpace = clipCornersOverride;
+}
 
+void SceneUtil::MWShadowTechnique::Frustum::init()
+{
     osg::Matrixd clipToWorld;
     clipToWorld.invert(modelViewMatrix * projectionMatrix);
+
+    if (useCustomClipSpace)
+    {
+        corners.clear();
+        // Add corners in the same order OSG expects them
+        for (int i : {0, 1, 5, 4, 2, 3, 7, 6})
+        {
+            corners.push_back(customClipSpace.corner(i));
+        }
+    }
+    else
+    {
+        corners[0].set(-1.0, -1.0, -1.0);
+        corners[1].set(1.0, -1.0, -1.0);
+        corners[2].set(1.0, -1.0, 1.0);
+        corners[3].set(-1.0, -1.0, 1.0);
+        corners[4].set(-1.0, 1.0, -1.0);
+        corners[5].set(1.0, 1.0, -1.0);
+        corners[6].set(1.0, 1.0, 1.0);
+        corners[7].set(-1.0, 1.0, 1.0);
+    }
 
     // transform frustum corners from clipspace to world coords, and compute center
     for(Vertices::iterator itr = corners.begin();
@@ -782,20 +808,26 @@ void MWShadowTechnique::ViewDependentData::releaseGLObjects(osg::State* state) c
 MWShadowTechnique::MWShadowTechnique():
     ShadowTechnique(),
     _enableShadows(false),
-    _debugHud(nullptr)
+    _debugHud(nullptr),
+    _castingPrograms{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
+    mSetDummyStateWhenDisabled = false;
 }
 
 MWShadowTechnique::MWShadowTechnique(const MWShadowTechnique& vdsm, const osg::CopyOp& copyop):
     ShadowTechnique(vdsm,copyop)
+    , _castingPrograms(vdsm._castingPrograms)
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
     _enableShadows = vdsm._enableShadows;
+    mSetDummyStateWhenDisabled = vdsm.mSetDummyStateWhenDisabled;
 }
 
 MWShadowTechnique::~MWShadowTechnique()
 {
+    if (_shadowsBin != nullptr)
+        osgUtil::RenderBin::removeRenderBinPrototype(_shadowsBin);
 }
 
 
@@ -820,9 +852,10 @@ void MWShadowTechnique::enableShadows()
     _enableShadows = true;
 }
 
-void MWShadowTechnique::disableShadows()
+void MWShadowTechnique::disableShadows(bool setDummyState)
 {
     _enableShadows = false;
+    mSetDummyStateWhenDisabled = setDummyState;
 }
 
 void SceneUtil::MWShadowTechnique::enableDebugHUD()
@@ -867,7 +900,10 @@ void SceneUtil::MWShadowTechnique::enableFrontFaceCulling()
     _useFrontFaceCulling = true;
 
     if (_shadowCastingStateSet)
+    {
         _shadowCastingStateSet->setAttribute(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+    }
 }
 
 void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
@@ -875,17 +911,30 @@ void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
     _useFrontFaceCulling = false;
 
     if (_shadowCastingStateSet)
+    {
+        _shadowCastingStateSet->removeAttribute(osg::StateAttribute::CULLFACE);
         _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+    }
 }
 
 void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
 {
     // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
-    
-    _castingProgram = new osg::Program();
 
-    _castingProgram->addShader(shaderManager.getShader("shadowcasting_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::VERTEX));
-    _castingProgram->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::FRAGMENT));
+    osg::ref_ptr<osg::Shader> castingVertexShader = shaderManager.getShader("shadowcasting_vertex.glsl", { }, osg::Shader::VERTEX);
+    osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
+    std::string useGPUShader4 = exts && exts->isGpuShader4Supported ? "1" : "0";
+    for (int alphaFunc = GL_NEVER; alphaFunc <= GL_ALWAYS; ++alphaFunc)
+    {
+        auto& program = _castingPrograms[alphaFunc - GL_NEVER];
+        program = new osg::Program();
+        program->addShader(castingVertexShader);
+        program->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", { {"alphaFunc", std::to_string(alphaFunc)},
+                                                                                    {"alphaToCoverage", "0"},
+                                                                                    {"adjustCoverage", "1"},
+                                                                                    {"useGPUShader4", useGPUShader4}
+                                                                                  }, osg::Shader::FRAGMENT));
+    }
 }
 
 MWShadowTechnique::ViewDependentData* MWShadowTechnique::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
@@ -904,6 +953,67 @@ MWShadowTechnique::ViewDependentData* MWShadowTechnique::getViewDependentData(os
     return vdd.release();
 }
 
+void SceneUtil::MWShadowTechnique::copyShadowMap(osgUtil::CullVisitor& cv, ViewDependentData* lhs, ViewDependentData* rhs)
+{
+    // Prepare for rendering shadows using the shadow map owned by rhs.
+
+    // To achieve this i first copy all data that is not specific to this cv's camera and thus read-only,
+    // trusting openmw and osg won't overwrite that data before this frame is done rendering.
+    // This works due to the double buffering of CullVisitors by osg, but also requires that cull passes are serialized (relative to one another).
+    // Then initialize new copies of the data that will be written with view-specific data 
+    // (the stateset and the texgens).
+
+    lhs->_viewDependentShadowMap = rhs->_viewDependentShadowMap;
+    auto* stateset = lhs->getStateSet(cv.getTraversalNumber());
+    stateset->clear();
+    lhs->_lightDataList = rhs->_lightDataList;
+    lhs->_numValidShadows = rhs->_numValidShadows;
+
+    ShadowDataList& sdl = lhs->getShadowDataList();
+    ShadowDataList previous_sdl;
+    previous_sdl.swap(sdl);
+    for (const auto& rhs_sd : rhs->getShadowDataList())
+    {
+        osg::ref_ptr<ShadowData> lhs_sd;
+
+        if (previous_sdl.empty())
+        {
+            OSG_INFO << "Create new ShadowData" << std::endl;
+            lhs_sd = new ShadowData(lhs);
+        }
+        else
+        {
+            OSG_INFO << "Taking ShadowData from from of previous_sdl" << std::endl;
+            lhs_sd = previous_sdl.front();
+            previous_sdl.erase(previous_sdl.begin());
+        }
+        lhs_sd->_camera = rhs_sd->_camera;
+        lhs_sd->_textureUnit = rhs_sd->_textureUnit;
+        lhs_sd->_texture = rhs_sd->_texture;
+        sdl.push_back(lhs_sd);
+    }
+
+    assignTexGenSettings(cv, lhs);
+
+    if (lhs->_numValidShadows > 0)
+    {
+        prepareStateSetForRenderingShadow(*lhs, cv.getTraversalNumber());
+    }
+}
+
+void SceneUtil::MWShadowTechnique::setCustomFrustumCallback(CustomFrustumCallback* cfc)
+{
+    _customFrustumCallback = cfc;
+}
+
+void SceneUtil::MWShadowTechnique::assignTexGenSettings(osgUtil::CullVisitor& cv, ViewDependentData* vdd)
+{
+    for (const auto& sd : vdd->getShadowDataList())
+    {
+        assignTexGenSettings(&cv, sd->_camera, sd->_textureUnit, sd->_texgen);
+    }
+}
+
 void MWShadowTechnique::update(osg::NodeVisitor& nv)
 {
     OSG_INFO<<"MWShadowTechnique::update(osg::NodeVisitor& "<<&nv<<")"<<std::endl;
@@ -912,9 +1022,31 @@ void MWShadowTechnique::update(osg::NodeVisitor& nv)
 
 void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 {
+
     if (!_enableShadows)
     {
+        if (mSetDummyStateWhenDisabled)
+        {
+            osg::ref_ptr<osg::StateSet> dummyState = new osg::StateSet();
+
+            ShadowSettings* settings = getShadowedScene()->getShadowSettings();
+            int baseUnit = settings->getBaseShadowTextureUnit();
+            int endUnit = baseUnit + settings->getNumShadowMapsPerLight();
+            for (int i = baseUnit; i < endUnit; ++i)
+            {
+                dummyState->setTextureAttributeAndModes(i, _fallbackShadowMapTexture, osg::StateAttribute::ON);
+                dummyState->addUniform(new osg::Uniform(("shadowTexture" + std::to_string(i - baseUnit)).c_str(), i));
+                dummyState->addUniform(new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseUnit)).c_str(), i));
+            }
+
+            cv.pushStateSet(dummyState);
+        }
+
         _shadowedScene->osg::Group::traverse(cv);
+
+        if (mSetDummyStateWhenDisabled)
+            cv.popStateSet();
+
         return;
     }
 
@@ -973,9 +1105,9 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     }
 
     // 1. Traverse main scene graph
-    cv.pushStateSet( _shadowRecievingPlaceholderStateSet.get() );
-
-    osg::ref_ptr<osgUtil::StateGraph> decoratorStateGraph = cv.getCurrentStateGraph();
+    auto* shadowReceiverStateSet = vdd->getStateSet(cv.getTraversalNumber());
+    shadowReceiverStateSet->clear();
+    cv.pushStateSet(shadowReceiverStateSet);
 
     cullShadowReceivingScene(&cv);
 
@@ -988,7 +1120,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
         // are all done correctly.
         cv.computeNearPlane();
     }
-
+ 
     // clamp the minZNear and maxZFar to those provided by ShadowSettings
     maxZFar = osg::minimum(settings->getMaximumShadowMapDistance(),maxZFar);
     if (minZNear>maxZFar) minZNear = maxZFar*settings->getMinimumShadowMapNearFarRatio();
@@ -999,6 +1131,36 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     cv.setNearFarRatio(minZNear / maxZFar);
 
     Frustum frustum(&cv, minZNear, maxZFar);
+    if (_customFrustumCallback)
+    {
+        OSG_INFO << "Calling custom frustum callback" << std::endl;
+        osgUtil::CullVisitor* sharedFrustumHint = nullptr;
+        _customClipSpace.init();
+        _customFrustumCallback->operator()(cv, _customClipSpace, sharedFrustumHint);
+        frustum.setCustomClipSpace(_customClipSpace);
+        if (sharedFrustumHint)
+        {
+            // user hinted another view shares its frustum
+            std::lock_guard<std::mutex> lock(_viewDependentDataMapMutex);
+            auto itr = _viewDependentDataMap.find(sharedFrustumHint);
+            if (itr != _viewDependentDataMap.end())
+            {
+                OSG_INFO << "User provided a valid shared frustum hint, re-using previously generated shadow map" << std::endl;
+
+                copyShadowMap(cv, vdd, itr->second);
+
+                // return compute near far mode back to it's original settings
+                cv.setComputeNearFarMode(cachedNearFarMode);
+                return;
+            }
+            else
+            {
+                OSG_INFO << "User provided a shared frustum hint, but it was not valid." << std::endl;
+            }
+        }
+    }
+
+    frustum.init();
     if (_debugHud)
     {
         osg::ref_ptr<osg::Vec3Array> vertexArray = new osg::Vec3Array();
@@ -1018,7 +1180,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
         reducedNear = minZNear;
         reducedFar = maxZFar;
     }
-
+ 
     // return compute near far mode back to it's original settings
     cv.setComputeNearFarMode(cachedNearFarMode);
 
@@ -1073,12 +1235,17 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
         // if we are using multiple shadow maps and CastShadowTraversalMask is being used
         // traverse the scene to compute the extents of the objects
-        if (/*numShadowMapsPerLight>1 &&*/ _shadowedScene->getCastsShadowTraversalMask()!=0xffffffff)
+        if (/*numShadowMapsPerLight>1 &&*/ (_shadowedScene->getCastsShadowTraversalMask() & _worldMask) == 0)
         {
             // osg::ElapsedTime timer;
 
             osg::ref_ptr<osg::Viewport> viewport = new osg::Viewport(0,0,2048,2048);
-            ComputeLightSpaceBounds clsb(viewport.get(), projectionMatrix, viewMatrix);
+            if (!_clsb) _clsb = new ComputeLightSpaceBounds;
+            ComputeLightSpaceBounds& clsb = *_clsb;
+            clsb.reset();
+            clsb.pushViewport(viewport);
+            clsb.pushProjectionMatrix(new osg::RefMatrix(projectionMatrix));
+            clsb.pushModelViewMatrix(new osg::RefMatrix(viewMatrix), osg::Transform::ABSOLUTE_RF);
             clsb.setTraversalMask(_shadowedScene->getCastsShadowTraversalMask());
 
             osg::Matrixd invertModelView;
@@ -1091,6 +1258,12 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             clsb.pushCullingSet();
 
             _shadowedScene->accept(clsb);
+
+            clsb.popCullingSet();
+
+            clsb.popModelViewMatrix();
+            clsb.popProjectionMatrix();
+            clsb.popViewport();
 
             // OSG_NOTICE<<"Extents of LightSpace "<<clsb._bb.xMin()<<", "<<clsb._bb.xMax()<<", "<<clsb._bb.yMin()<<", "<<clsb._bb.yMax()<<", "<<clsb._bb.zMin()<<", "<<clsb._bb.zMax()<<std::endl;
             // OSG_NOTICE<<"  time "<<timer.elapsedTime_m()<<"ms, mask = "<<std::hex<<_shadowedScene->getCastsShadowTraversalMask()<<std::endl;
@@ -1320,7 +1493,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             if (settings->getMultipleShadowMapHint() == ShadowSettings::CASCADED)
             {
                 cropShadowCameraToMainFrustum(frustum, camera, cascaseNear, cascadeFar, extraPlanes);
-                for (auto plane : extraPlanes)
+                for (const auto& plane : extraPlanes)
                     local_polytope.getPlaneList().push_back(plane);
                 local_polytope.setupMask();
             }
@@ -1347,7 +1520,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     std::string validRegionUniformName = "validRegionMatrix" + std::to_string(sm_i);
                     osg::ref_ptr<osg::Uniform> validRegionUniform;
 
-                    for (auto uniform : _uniforms[cv.getTraversalNumber() % 2])
+                    for (const auto & uniform : _uniforms[cv.getTraversalNumber() % 2])
                     {
                         if (uniform->getName() == validRegionUniformName)
                             validRegionUniform = uniform;
@@ -1371,7 +1544,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     vdsmCallback->getProjectionMatrix()->set(camera->getProjectionMatrix());
                 }
             }
-
+ 
             // 4.4 compute main scene graph TexGen + uniform settings + setup state
             //
             assignTexGenSettings(&cv, camera.get(), textureUnit, sd->_texgen.get());
@@ -1400,9 +1573,11 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
         }
     }
 
+    vdd->setNumValidShadows(numValidShadows);
+
     if (numValidShadows>0)
     {
-        decoratorStateGraph->setStateSet(selectStateSetForRenderingShadow(*vdd, cv.getTraversalNumber()));
+        prepareStateSetForRenderingShadow(*vdd, cv.getTraversalNumber());
     }
 
     // OSG_NOTICE<<"End of shadow setup Projection matrix "<<*cv.getProjectionMatrix()<<std::endl;
@@ -1577,19 +1752,24 @@ void MWShadowTechnique::createShaders()
         _fallbackShadowMapTexture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::REPEAT);
         _fallbackShadowMapTexture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::NEAREST);
         _fallbackShadowMapTexture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::NEAREST);
+        _fallbackShadowMapTexture->setShadowComparison(true);
+        _fallbackShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
 
     }
 
-    if (!_castingProgram)
+    if (!_castingPrograms[GL_ALWAYS - GL_NEVER])
         OSG_NOTICE << "Shadow casting shader has not been set up. Remember to call setupCastingShader(Shader::ShaderManager &)" << std::endl;
 
-    _shadowCastingStateSet->setAttributeAndModes(_castingProgram, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+    // Always use the GL_ALWAYS shader as the shadows bin will change it if necessary
+    _shadowCastingStateSet->setAttributeAndModes(_castingPrograms[GL_ALWAYS - GL_NEVER], osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
     // The casting program uses a sampler, so to avoid undefined behaviour, we must bind a dummy texture in case no other is supplied
     _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
     _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
     _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(true);
+    osg::ref_ptr<osg::ClipControl> clipcontrol = new osg::ClipControl(osg::ClipControl::LOWER_LEFT, osg::ClipControl::NEGATIVE_ONE_TO_ONE);
+    _shadowCastingStateSet->setAttribute(clipcontrol, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setAttribute(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
 
@@ -1601,7 +1781,14 @@ osg::Polytope MWShadowTechnique::computeLightViewFrustumPolytope(Frustum& frustu
     OSG_INFO<<"computeLightViewFrustumPolytope()"<<std::endl;
 
     osg::Polytope polytope;
-    polytope.setToUnitFrustum();
+    if (frustum.useCustomClipSpace)
+    {
+        polytope.setToBoundingBox(frustum.customClipSpace);
+    }
+    else
+    {
+        polytope.setToUnitFrustum();
+    }
 
     polytope.transformProvidingInverse( frustum.projectionMatrix );
     polytope.transformProvidingInverse( frustum.modelViewMatrix );
@@ -1883,8 +2070,9 @@ bool MWShadowTechnique::computeShadowCameraSettings(Frustum& frustum, LightData&
 struct ConvexHull
 {
     typedef std::vector<osg::Vec3d> Vertices;
-    typedef std::pair< osg::Vec3d, osg::Vec3d > Edge;
-    typedef std::list< Edge > Edges;
+    typedef std::pair<osg::Vec3d, osg::Vec3d> Edge;
+    typedef std::vector<Edge> Edges;
+    typedef std::vector<osg::Vec3d> VertexSet;
 
     Edges _edges;
 
@@ -1892,20 +2080,20 @@ struct ConvexHull
 
     void setToFrustum(MWShadowTechnique::Frustum& frustum)
     {
-        _edges.push_back( Edge(frustum.corners[0],frustum.corners[1]) );
-        _edges.push_back( Edge(frustum.corners[1],frustum.corners[2]) );
-        _edges.push_back( Edge(frustum.corners[2],frustum.corners[3]) );
-        _edges.push_back( Edge(frustum.corners[3],frustum.corners[0]) );
+        _edges.emplace_back(frustum.corners[0], frustum.corners[1]);
+        _edges.emplace_back(frustum.corners[1], frustum.corners[2]);
+        _edges.emplace_back(frustum.corners[2], frustum.corners[3]);
+        _edges.emplace_back(frustum.corners[3], frustum.corners[0]);
 
-        _edges.push_back( Edge(frustum.corners[4],frustum.corners[5]) );
-        _edges.push_back( Edge(frustum.corners[5],frustum.corners[6]) );
-        _edges.push_back( Edge(frustum.corners[6],frustum.corners[7]) );
-        _edges.push_back( Edge(frustum.corners[7],frustum.corners[4]) );
+        _edges.emplace_back(frustum.corners[4], frustum.corners[5]);
+        _edges.emplace_back(frustum.corners[5], frustum.corners[6]);
+        _edges.emplace_back(frustum.corners[6], frustum.corners[7]);
+        _edges.emplace_back(frustum.corners[7], frustum.corners[4]);
 
-        _edges.push_back( Edge(frustum.corners[0],frustum.corners[4]) );
-        _edges.push_back( Edge(frustum.corners[1],frustum.corners[5]) );
-        _edges.push_back( Edge(frustum.corners[2],frustum.corners[6]) );
-        _edges.push_back( Edge(frustum.corners[3],frustum.corners[7]) );
+        _edges.emplace_back(frustum.corners[0], frustum.corners[4]);
+        _edges.emplace_back(frustum.corners[1], frustum.corners[5]);
+        _edges.emplace_back(frustum.corners[2], frustum.corners[6]);
+        _edges.emplace_back(frustum.corners[3], frustum.corners[7]);
     }
 
     struct ConvexHull2D
@@ -1919,22 +2107,22 @@ struct ConvexHull
         }
 
         // Calculates the 2D convex hull and returns it as a vector containing the points in CCW order with the first and last point being the same.
-        static std::vector<Point> convexHull(std::set<Point> &P)
+        static Vertices convexHull(const VertexSet &P)
         {
             size_t n = P.size(), k = 0;
             if (n <= 3)
-                return std::vector<Point>(P.cbegin(), P.cend());
+                return Vertices(P.cbegin(), P.cend());
 
-            std::vector<Point> H(2 * n);
+            Vertices H(2 * n);
 
             // Points are already sorted in a std::set
 
             // Build lower hull
-            for (auto pItr = P.cbegin(); pItr != P.cend(); ++pItr)
+            for(const auto& vert : P)
             {
-                while (k >= 2 && cross(H[k - 2], H[k - 1], *pItr) <= 0)
+                while (k >= 2 && cross(H[k - 2], H[k - 1], vert) <= 0)
                     k--;
-                H[k++] = *pItr;
+                H[k++] = vert;
             }
 
             // Build upper hull
@@ -1951,22 +2139,22 @@ struct ConvexHull
         }
     };
 
-    Vertices findInternalEdges(osg::Vec3d mainVertex, Vertices connectedVertices)
+    Vertices findInternalEdges(const osg::Vec3d& mainVertex, const Vertices& connectedVertices)
     {
         Vertices internalEdgeVertices;
-        for (auto vertex : connectedVertices)
+        for (const auto& vertex : connectedVertices)
         {
             osg::Matrixd matrix;
             osg::Vec3d dir = vertex - mainVertex;
             matrix.makeLookAt(mainVertex, vertex, dir.z() == 0 ? osg::Vec3d(0, 0, 1) : osg::Vec3d(1, 0, 0));
             Vertices testVertices;
-            for (auto testVertex : connectedVertices)
+            for (const auto& testVertex : connectedVertices)
             {
                 if (vertex != testVertex)
                     testVertices.push_back(testVertex);
             }
             std::vector<double> bearings;
-            for (auto testVertex : testVertices)
+            for (const auto& testVertex : testVertices)
             {
                 osg::Vec3d transformedVertex = testVertex * matrix;
                 bearings.push_back(atan2(transformedVertex.y(), transformedVertex.x()));
@@ -1991,112 +2179,109 @@ struct ConvexHull
 
     void extendTowardsNegativeZ()
     {
-        typedef std::set<osg::Vec3d> VertexSet;
-
         // Collect the set of vertices
         VertexSet vertices;
-        for (Edge edge : _edges)
+        for (const Edge& edge : _edges)
         {
-            vertices.insert(edge.first);
-            vertices.insert(edge.second);
+            vertices.emplace_back(edge.first);
+            vertices.emplace_back(edge.second);
         }
+
+        // Sort and make unique.
+        std::sort(vertices.begin(), vertices.end());
+        vertices.erase(std::unique(vertices.begin(), vertices.end()), vertices.end());
 
         if (vertices.size() == 0)
             return;
 
         // Get the vertices contributing to the 2D convex hull
         Vertices extremeVertices = ConvexHull2D::convexHull(vertices);
-        VertexSet extremeVerticesSet(extremeVertices.cbegin(), extremeVertices.cend());
 
         // Add their extrusions to the final edge collection
         // We extrude as far as -1.5 as the coordinate space shouldn't ever put any shadow casters further than -1.0
         Edges finalEdges;
         // Add edges towards -Z
-        for (auto vertex : extremeVertices)
-            finalEdges.push_back(Edge(vertex, osg::Vec3d(vertex.x(), vertex.y(), -1.5)));
+        for (const auto& vertex : extremeVertices)
+            finalEdges.emplace_back(vertex, osg::Vec3d(vertex.x(), vertex.y(), -1.5));
         // Add edge loop to 'seal' the hull
         for (auto itr = extremeVertices.cbegin(); itr != extremeVertices.cend() - 1; ++itr)
-            finalEdges.push_back(Edge(osg::Vec3d(itr->x(), itr->y(), -1.5), osg::Vec3d((itr + 1)->x(), (itr + 1)->y(), -1.5)));
+            finalEdges.emplace_back(osg::Vec3d(itr->x(), itr->y(), -1.5), osg::Vec3d((itr + 1)->x(), (itr + 1)->y(), -1.5));
         // The convex hull algorithm we are using sometimes places a point at both ends of the vector, so we don't always need to add the last edge separately.
         if (extremeVertices.front() != extremeVertices.back())
-            finalEdges.push_back(Edge(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -1.5), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -1.5)));
+            finalEdges.emplace_back(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -1.5), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -1.5));
 
         // Remove internal edges connected to extreme vertices
-        for (auto vertex : extremeVertices)
+        for (const auto& vertex : extremeVertices)
         {
             Vertices connectedVertices;
-            for (Edge edge : _edges)
+            for (const Edge& edge : _edges)
             {
                 if (edge.first == vertex)
                     connectedVertices.push_back(edge.second);
                 else if (edge.second == vertex)
                     connectedVertices.push_back(edge.first);
             }
-            connectedVertices.push_back(osg::Vec3d(vertex.x(), vertex.y(), -1.5));
+            connectedVertices.emplace_back(vertex.x(), vertex.y(), -1.5);
 
             Vertices unwantedEdgeEnds = findInternalEdges(vertex, connectedVertices);
-            for (auto edgeEnd : unwantedEdgeEnds)
+            for (const auto& edgeEnd : unwantedEdgeEnds)
             {
-                for (auto itr = _edges.begin(); itr != _edges.end();)
-                {
-                    if (*itr == Edge(vertex, edgeEnd))
+                const auto edgeA = Edge(vertex, edgeEnd);
+                const auto edgeB = Edge(edgeEnd, vertex);
+                _edges.erase(std::remove_if(_edges.begin(), _edges.end(), [&](const auto& elem)
                     {
-                        itr = _edges.erase(itr);
-                        break;
-                    }
-                    else if (*itr == Edge(edgeEnd, vertex))
-                    {
-                        itr = _edges.erase(itr);
-                        break;
-                    }
-                    else
-                        ++itr;
-                }
+                        return elem == edgeA || elem == edgeB;
+                    }), _edges.end());
             }
         }
 
         // Gather connected vertices
-        VertexSet unprocessedConnectedVertices(extremeVertices.begin(), extremeVertices.end());
+        VertexSet unprocessedConnectedVertices = std::move(extremeVertices);
+
         VertexSet connectedVertices;
-        while (unprocessedConnectedVertices.size() > 0)
+        const auto containsVertex = [&](const auto& vert)
         {
-            osg::Vec3d vertex = *unprocessedConnectedVertices.begin();
-            unprocessedConnectedVertices.erase(unprocessedConnectedVertices.begin());
-            connectedVertices.insert(vertex);
-            for (Edge edge : _edges)
+            return std::find(connectedVertices.begin(), connectedVertices.end(), vert) != connectedVertices.end();
+        };
+
+        while (!unprocessedConnectedVertices.empty())
+        {
+            osg::Vec3d vertex = unprocessedConnectedVertices.back();
+            unprocessedConnectedVertices.pop_back();
+
+            connectedVertices.emplace_back(vertex);
+            for (const Edge& edge : _edges)
             {
                 osg::Vec3d otherEnd;
                 if (edge.first == vertex)
                     otherEnd = edge.second;
                 else if (edge.second == vertex)
-                    otherEnd - edge.first;
+                    otherEnd = edge.first;
                 else
                     continue;
 
-                if (connectedVertices.count(otherEnd))
+                if (containsVertex(otherEnd))
                     continue;
 
-                unprocessedConnectedVertices.insert(otherEnd);
+                unprocessedConnectedVertices.emplace_back(otherEnd);
             }
         }
 
-        for (Edge edge : _edges)
+        for (const Edge& edge : _edges)
         {
-            if (connectedVertices.count(edge.first) || connectedVertices.count(edge.second))
+            if (containsVertex(edge.first) || containsVertex(edge.second))
                 finalEdges.push_back(edge);
         }
 
-        _edges = finalEdges;
+        _edges = std::move(finalEdges);
     }
 
     void transform(const osg::Matrixd& m)
     {
-        for(Edges::iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for (auto& edge : _edges)
         {
-            itr->first = itr->first * m;
-            itr->second = itr->second * m;
+            edge.first = edge.first * m;
+            edge.second = edge.second * m;
         }
     }
 
@@ -2105,18 +2290,14 @@ struct ConvexHull
         Vertices intersections;
 
         // OSG_NOTICE<<"clip("<<plane<<") edges.size()="<<_edges.size()<<std::endl;
-        for(Edges::iterator itr = _edges.begin();
-            itr != _edges.end();
-            )
+        for(auto itr = _edges.begin(); itr != _edges.end();)
         {
             double d0 = plane.distance(itr->first);
             double d1 = plane.distance(itr->second);
             if (d0<0.0 && d1<0.0)
             {
                 // OSG_NOTICE<<"  Edge completely outside, removing"<<std::endl;
-                Edges::iterator to_delete_itr = itr;
-                ++itr;
-                _edges.erase(to_delete_itr);
+                itr = _edges.erase(itr);
             }
             else if (d0>=0.0 && d1>=0.0)
             {
@@ -2153,15 +2334,15 @@ struct ConvexHull
 
         if (intersections.size() == 2)
         {
-            _edges.push_back( Edge(intersections[0], intersections[1]) );
+            _edges.emplace_back(intersections[0], intersections[1]);
             return;
         }
 
         if (intersections.size() == 3)
         {
-            _edges.push_back( Edge(intersections[0], intersections[1]) );
-            _edges.push_back( Edge(intersections[1], intersections[2]) );
-            _edges.push_back( Edge(intersections[2], intersections[0]) );
+            _edges.emplace_back(intersections[0], intersections[1]);
+            _edges.emplace_back(intersections[1], intersections[2]);
+            _edges.emplace_back(intersections[2], intersections[0]);
             return;
         }
 
@@ -2179,11 +2360,9 @@ struct ConvexHull
         up.normalize();
 
         osg::Vec3d center;
-        for(Vertices::iterator itr = intersections.begin();
-            itr != intersections.end();
-            ++itr)
+        for(auto& vertex : intersections)
         {
-            center += *itr;
+            center += vertex;
 
             center.x() = osg::maximum(center.x(), -dbl_max);
             center.y() = osg::maximum(center.y(), -dbl_max);
@@ -2198,11 +2377,9 @@ struct ConvexHull
 
         typedef std::map<double, std::list<std::pair<osg::Vec3d, double>>> VertexMap;
         VertexMap vertexMap;
-        for(Vertices::iterator itr = intersections.begin();
-            itr != intersections.end();
-            ++itr)
+        for (const auto& vertex : intersections)
         {
-            osg::Vec3d dv = (*itr-center);
+            osg::Vec3d dv = vertex - center;
             double h = dv * side;
             double v = dv * up;
             double angle = atan2(h,v);
@@ -2223,20 +2400,18 @@ struct ConvexHull
                 auto listItr = vertexMap[angle].begin();
                 while (listItr != vertexMap[angle].end() && listItr->second < sortValue)
                     ++listItr;
-                vertexMap[angle].insert(listItr, std::make_pair(*itr, sortValue));
+                vertexMap[angle].emplace(listItr, std::make_pair(vertex, sortValue));
             }
             else
-                vertexMap[angle].push_back(std::make_pair(*itr, sortValue));
+                vertexMap[angle].emplace_back(vertex, sortValue);
         }
 
         osg::Vec3d previous_v = vertexMap.rbegin()->second.back().first;
-        for(VertexMap::iterator itr = vertexMap.begin();
-            itr != vertexMap.end();
-            ++itr)
+        for (auto itr = vertexMap.begin(); itr != vertexMap.end(); ++itr)
         {
-            for (auto vertex : itr->second)
+            for (const auto& vertex : itr->second)
             {
-                _edges.push_back(Edge(previous_v, vertex.first));
+                _edges.emplace_back(previous_v, vertex.first);
                 previous_v = vertex.first;
             }
         }
@@ -2247,24 +2422,19 @@ struct ConvexHull
     void clip(const osg::Polytope& polytope)
     {
         const osg::Polytope::PlaneList& planes = polytope.getPlaneList();
-        for(osg::Polytope::PlaneList::const_iterator itr = planes.begin();
-            itr != planes.end();
-            ++itr)
+        for(const auto& plane : planes)
         {
-            clip(*itr);
+            clip(plane);
         }
     }
 
     double min(unsigned int index) const
     {
         double m = dbl_max;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for(const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
-            if (edge.first[index]<m) m = edge.first[index];
-            if (edge.second[index]<m) m = edge.second[index];
+            if (edge.first[index] < m) m = edge.first[index];
+            if (edge.second[index] < m) m = edge.second[index];
         }
         return m;
     }
@@ -2272,13 +2442,10 @@ struct ConvexHull
     double max(unsigned int index) const
     {
         double m = -dbl_max;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for (const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
-            if (edge.first[index]>m) m = edge.first[index];
-            if (edge.second[index]>m) m = edge.second[index];
+            if (edge.first[index] > m) m = edge.first[index];
+            if (edge.second[index] > m) m = edge.second[index];
         }
         return m;
     }
@@ -2288,19 +2455,15 @@ struct ConvexHull
         double m = dbl_max;
         osg::Vec3d delta;
         double ratio;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for (const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
+            delta = edge.first - eye;
+            ratio = delta[index] / delta[1];
+            if (ratio < m) m = ratio;
 
-            delta = edge.first-eye;
-            ratio = delta[index]/delta[1];
-            if (ratio<m) m = ratio;
-
-            delta = edge.second-eye;
-            ratio = delta[index]/delta[1];
-            if (ratio<m) m = ratio;
+            delta = edge.second - eye;
+            ratio = delta[index] / delta[1];
+            if (ratio < m) m = ratio;
         }
         return m;
     }
@@ -2310,32 +2473,25 @@ struct ConvexHull
         double m = -dbl_max;
         osg::Vec3d delta;
         double ratio;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        for (const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
+            delta = edge.first - eye;
+            ratio = delta[index] / delta[1];
+            if (ratio > m) m = ratio;
 
-            delta = edge.first-eye;
-            ratio = delta[index]/delta[1];
-            if (ratio>m) m = ratio;
-
-            delta = edge.second-eye;
-            ratio = delta[index]/delta[1];
-            if (ratio>m) m = ratio;
+            delta = edge.second - eye;
+            ratio = delta[index] / delta[1];
+            if (ratio > m) m = ratio;
         }
         return m;
     }
 
     void output(std::ostream& out)
     {
-        out<<"ConvexHull"<<std::endl;
-        for(Edges::const_iterator itr = _edges.begin();
-            itr != _edges.end();
-            ++itr)
+        out << "ConvexHull" << std::endl;
+        for (const auto& edge : _edges)
         {
-            const Edge& edge = *itr;
-            out<<"   edge ("<<edge.first<<") ("<<edge.second<<")"<<std::endl;
+            out << "   edge (" << edge.first << ") (" << edge.second << ")" << std::endl;
         }
     }
 };
@@ -2978,9 +3134,9 @@ void MWShadowTechnique::cullShadowCastingScene(osgUtil::CullVisitor* cv, osg::Ca
     return;
 }
 
-osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const
+osg::StateSet* MWShadowTechnique::prepareStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const
 {
-    OSG_INFO<<"   selectStateSetForRenderingShadow() "<<vdd.getStateSet(traversalNumber)<<std::endl;
+    OSG_INFO<<"   prepareStateSetForRenderingShadow() "<<vdd.getStateSet(traversalNumber)<<std::endl;
 
     osg::ref_ptr<osg::StateSet> stateset = vdd.getStateSet(traversalNumber);
 
@@ -3209,4 +3365,19 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
 
     for(auto& uniformVector : mFrustumUniforms)
         uniformVector.push_back(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "transform"));
+}
+
+osg::ref_ptr<osg::StateSet> SceneUtil::MWShadowTechnique::getOrCreateShadowsBinStateSet()
+{
+    if (_shadowsBinStateSet == nullptr)
+    {
+        if (_shadowsBin == nullptr)
+        {
+            _shadowsBin = new ShadowsBin(_castingPrograms);
+            osgUtil::RenderBin::addRenderBinPrototype(_shadowsBinName, _shadowsBin);
+        }
+        _shadowsBinStateSet = new osg::StateSet;
+        _shadowsBinStateSet->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, _shadowsBinName, osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
+    }
+    return _shadowsBinStateSet;
 }

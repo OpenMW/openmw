@@ -5,6 +5,9 @@
 
 #include <osg/Vec3f>
 
+#include <vector>
+#include <tuple>
+
 namespace DetourNavigator
 {
     struct OffMeshConnection
@@ -13,6 +16,11 @@ namespace DetourNavigator
         osg::Vec3f mEnd;
         AreaType mAreaType;
     };
+
+    inline bool operator<(const OffMeshConnection& lhs, const OffMeshConnection& rhs)
+    {
+        return std::tie(lhs.mStart, lhs.mEnd, lhs.mAreaType) < std::tie(rhs.mStart, rhs.mEnd, rhs.mAreaType);
+    }
 }
 
 #endif

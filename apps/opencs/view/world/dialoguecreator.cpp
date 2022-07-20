@@ -1,12 +1,8 @@
 #include "dialoguecreator.hpp"
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/loaddial.hpp>
 
-#include "../../model/doc/document.hpp"
-
-#include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
-#include "../../model/world/columns.hpp"
 #include "../../model/world/idtable.hpp"
 
 void CSVWorld::DialogueCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const

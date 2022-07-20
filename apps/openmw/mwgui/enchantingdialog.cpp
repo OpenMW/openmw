@@ -109,7 +109,7 @@ namespace MWGui
     {
         mEnchantmentPoints->setCaption(std::to_string(static_cast<int>(mEnchanting.getEnchantPoints(false))) + " / " + std::to_string(mEnchanting.getMaxEnchantValue()));
         mCharge->setCaption(std::to_string(mEnchanting.getGemCharge()));
-        mSuccessChance->setCaption(std::to_string(std::max(0, std::min(100, mEnchanting.getEnchantChance()))));
+        mSuccessChance->setCaption(std::to_string(std::clamp(mEnchanting.getEnchantChance(), 0, 100)));
         mCastCost->setCaption(std::to_string(mEnchanting.getEffectiveCastCost()));
         mPrice->setCaption(std::to_string(mEnchanting.getEnchantPrice()));
 

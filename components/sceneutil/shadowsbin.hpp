@@ -1,29 +1,33 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_SHADOWBIN_H
 #define OPENMW_COMPONENTS_SCENEUTIL_SHADOWBIN_H
+#include <array>
 #include <unordered_set>
 #include <osgUtil/RenderBin>
 
 namespace osg
 {
     class Material;
+    class AlphaFunc;
 }
 
 namespace SceneUtil
 {
-
     /// renderbin which culls redundant state for shadow map rendering
     class ShadowsBin : public osgUtil::RenderBin
     {
-    private:
-        osg::ref_ptr<osg::StateSet> mNoTestStateSet;
-        osg::ref_ptr<osg::StateSet> mShaderAlphaTestStateSet;
     public:
+        template <class T>
+        using Array = std::array<T, GL_ALWAYS - GL_NEVER + 1>;
+
+        using CastingPrograms = Array<osg::ref_ptr<osg::Program>>;
+
         META_Object(SceneUtil, ShadowsBin)
-        ShadowsBin();
+        ShadowsBin(const CastingPrograms& castingPrograms);
         ShadowsBin(const ShadowsBin& rhs, const osg::CopyOp& copyop)
             : osgUtil::RenderBin(rhs, copyop)
             , mNoTestStateSet(rhs.mNoTestStateSet)
             , mShaderAlphaTestStateSet(rhs.mShaderAlphaTestStateSet)
+            , mAlphaFuncShaders(rhs.mAlphaFuncShaders)
             {}
 
         void sortImplementation() override;
@@ -33,8 +37,8 @@ namespace SceneUtil
             State()
                 : mAlphaBlend(false)
                 , mAlphaBlendOverride(false)
-                , mAlphaTest(false)
-                , mAlphaTestOverride(false)
+                , mAlphaFunc(nullptr)
+                , mAlphaFuncOverride(false)
                 , mMaterial(nullptr)
                 , mMaterialOverride(false)
                 , mImportantState(false)
@@ -42,35 +46,30 @@ namespace SceneUtil
 
             bool mAlphaBlend;
             bool mAlphaBlendOverride;
-            bool mAlphaTest;
-            bool mAlphaTestOverride;
+            osg::AlphaFunc* mAlphaFunc;
+            bool mAlphaFuncOverride;
             osg::Material* mMaterial;
             bool mMaterialOverride;
             bool mImportantState;
-            bool needTexture() const { return mAlphaBlend || mAlphaTest; }
+            bool needTexture() const;
             bool needShadows() const;
             // A state is interesting if there's anything about it that might affect whether we can optimise child state
             bool interesting() const
             {
-                return !needShadows() || needTexture() || mAlphaBlendOverride || mAlphaTestOverride || mMaterialOverride || mImportantState;
+                return !needShadows() || needTexture() || mAlphaBlendOverride || mAlphaFuncOverride || mMaterialOverride || mImportantState;
             }
         };
 
-        osgUtil::StateGraph* cullStateGraph(osgUtil::StateGraph* sg, osgUtil::StateGraph* root, std::unordered_set<osgUtil::StateGraph*>& uninteresting);
+        osgUtil::StateGraph* cullStateGraph(osgUtil::StateGraph* sg, osgUtil::StateGraph* root, std::unordered_set<osgUtil::StateGraph*>& uninteresting, bool cullFaceOverridden);
 
-        static void addPrototype(const std::string& name)
-        {
-            osg::ref_ptr<osgUtil::RenderBin> bin (new ShadowsBin);
-            osgUtil::RenderBin::addRenderBinPrototype(name, bin);
-        }
+    private:
+        ShadowsBin() {}
+
+        osg::ref_ptr<osg::StateSet> mNoTestStateSet;
+        osg::ref_ptr<osg::StateSet> mShaderAlphaTestStateSet;
+
+        Array<osg::ref_ptr<osg::StateSet>> mAlphaFuncShaders;
     };
-
-    class ShadowsBinAdder
-    {
-        public:
-        ShadowsBinAdder(const std::string& name){ ShadowsBin::addPrototype(name); }
-    };
-
 }
 
 #endif

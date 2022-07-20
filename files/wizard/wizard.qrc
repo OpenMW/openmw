@@ -4,6 +4,7 @@
     <file alias="index.theme">icons/tango/index.theme</file>
     <file alias="48x48/folder.png">icons/tango/48x48/folder.png</file>
     <file alias="48x48/system-installer.png">icons/tango/48x48/system-installer.png</file>
+    <file alias="48x48/dollar.png">icons/tango/48x48/dollar.png</file>
   </qresource>
   <qresource prefix="images">
     <file alias="intropage-background.png">images/intropage-background.png</file>    

@@ -11,7 +11,7 @@ namespace CSVRender
 
         public:
 
-            InstanceMoveMode (QWidget *parent = 0);
+            InstanceMoveMode (QWidget *parent = nullptr);
     };
 }
 

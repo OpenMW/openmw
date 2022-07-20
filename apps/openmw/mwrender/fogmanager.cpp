@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>
@@ -76,8 +76,8 @@ namespace MWRender
                 mLandFogStart = viewDistance * (1 - fogDepth);
                 mLandFogEnd = viewDistance;
             }
-            mUnderwaterFogStart = std::min(viewDistance, 6666.f) * (1 - underwaterFog);
-            mUnderwaterFogEnd = std::min(viewDistance, 6666.f);
+            mUnderwaterFogStart = std::min(viewDistance, 7168.f) * (1 - underwaterFog);
+            mUnderwaterFogEnd = std::min(viewDistance, 7168.f);
         }
         mFogColor = color;
     }

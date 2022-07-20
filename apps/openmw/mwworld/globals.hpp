@@ -5,10 +5,9 @@
 #include <string>
 #include <map>
 
-#include <stdint.h>
+#include <cstdint>
 
-#include <components/interpreter/types.hpp>
-#include <components/esm/loadglob.hpp>
+#include <components/esm3/loadglob.hpp>
 
 namespace ESM
 {
@@ -33,17 +32,17 @@ namespace MWWorld
 
             Collection mVariables; // type, value
 
-            Collection::const_iterator find (const std::string& name) const;
+            Collection::const_iterator find (std::string_view name) const;
 
-            Collection::iterator find (const std::string& name);
+            Collection::iterator find (std::string_view name);
 
         public:
 
-            const ESM::Variant& operator[] (const std::string& name) const;
+            const ESM::Variant& operator[] (std::string_view name) const;
 
-            ESM::Variant& operator[] (const std::string& name);
+            ESM::Variant& operator[] (std::string_view name);
 
-            char getType (const std::string& name) const;
+            char getType (std::string_view name) const;
             ///< If there is no global variable with this name, ' ' is returned.
 
             void fill (const MWWorld::ESMStore& store);

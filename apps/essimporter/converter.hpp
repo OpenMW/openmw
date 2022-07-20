@@ -6,23 +6,23 @@
 #include <osg/Image>
 #include <osg/ref_ptr>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loadglob.hpp>
-#include <components/esm/cellstate.hpp>
-#include <components/esm/loadfact.hpp>
-#include <components/esm/dialoguestate.hpp>
-#include <components/esm/custommarkerstate.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/weatherstate.hpp>
-#include <components/esm/globalscript.hpp>
-#include <components/esm/queststate.hpp>
-#include <components/esm/stolenitems.hpp>
-#include <components/esm/projectilestate.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/cellstate.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/dialoguestate.hpp>
+#include <components/esm3/custommarkerstate.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/weatherstate.hpp>
+#include <components/esm3/globalscript.hpp>
+#include <components/esm3/queststate.hpp>
+#include <components/esm3/stolenitems.hpp>
+#include <components/esm3/projectilestate.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -124,11 +124,9 @@ public:
         {
             mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt.mLevel;
             mContext->mPlayerBase = npc;
-            ESM::SpellState::SpellParams empty;
             // FIXME: player start spells and birthsign spells aren't listed here,
             // need to fix openmw to account for this
-            for (const auto & spell : npc.mSpells.mList)
-                mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[spell] = empty;
+            mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells = npc.mSpells.mList;
 
             // Clear the list now that we've written it, this prevents issues cropping up with
             // ensureCustomData() in OpenMW tripping over no longer existing spells, where an error would be fatal.
@@ -374,7 +372,7 @@ public:
     void write(ESM::ESMWriter &esm) override
     {
         esm.startRecord(ESM::REC_DCOU);
-        for (std::map<std::string, int>::const_iterator it = mKillCounter.begin(); it != mKillCounter.end(); ++it)
+        for (auto it = mKillCounter.begin(); it != mKillCounter.end(); ++it)
         {
             esm.writeHNString("ID__", it->first);
             esm.writeHNT ("COUN", it->second);
@@ -397,7 +395,7 @@ public:
         faction.load(esm, isDeleted);
         std::string id = Misc::StringUtils::lowerCase(faction.mId);
 
-        for (std::map<std::string, int>::const_iterator it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
+        for (auto it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
         {
             std::string faction2 = Misc::StringUtils::lowerCase(it->first);
             mContext->mDialogueState.mChangedFactionReaction[id].insert(std::make_pair(faction2, it->second));
@@ -431,7 +429,7 @@ public:
     void write(ESM::ESMWriter &esm) override
     {
         ESM::StolenItems items;
-        for (std::map<std::string, std::set<Owner> >::const_iterator it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
+        for (auto it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
         {
             std::map<std::pair<std::string, bool>, int> owners;
             for (const auto & ownerIt : it->second)
@@ -487,7 +485,7 @@ public:
     }
     void write(ESM::ESMWriter &esm) override
     {
-        for (std::map<std::string, DIAL>::const_iterator it = mDials.begin(); it != mDials.end(); ++it)
+        for (auto it = mDials.begin(); it != mDials.end(); ++it)
         {
             esm.startRecord(ESM::REC_QUES);
             ESM::QuestState state;
@@ -545,9 +543,7 @@ public:
         }
         else
         {
-            std::stringstream error;
-            error << "Invalid weather ID:" << weatherID << std::endl;
-            throw std::runtime_error(error.str());
+            throw std::runtime_error("Invalid weather ID: " + std::to_string(weatherID));
         }
     }
 

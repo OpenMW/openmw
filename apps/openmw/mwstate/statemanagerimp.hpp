@@ -31,7 +31,7 @@ namespace MWState
 
         public:
 
-            StateManager (const boost::filesystem::path& saves, const std::string& game);
+            StateManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles);
 
             void requestQuit() override;
 
@@ -46,14 +46,14 @@ namespace MWState
             ///
             /// \param bypass Skip new game mechanics.
 
-            void endGame() override;
+            void endGame();
 
             void resumeGame() override;
 
             void deleteGame (const MWState::Character *character, const MWState::Slot *slot) override;
             ///< Delete a saved game slot from this character. If all save slots are deleted, the character will be deleted too.
 
-            void saveGame (const std::string& description, const Slot *slot = 0) override;
+            void saveGame (const std::string& description, const Slot *slot = nullptr) override;
             ///< Write a saved game to \a slot or create a new slot if \a slot == 0.
             ///
             /// \note Slot must belong to the current character.
@@ -84,7 +84,7 @@ namespace MWState
 
             CharacterIterator characterEnd() override;
 
-            void update (float duration) override;
+            void update(float duration);
     };
 }
 

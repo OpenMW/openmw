@@ -15,7 +15,7 @@ Normal maps from Morrowind to OpenMW
     - `Tutorial - Morrowind, Part 2`_
 
 General introduction to normal map conversion
-------------------------------------------------
+---------------------------------------------
 
 :Authors: Joakim (Lysol) Berg, Alexei (Capo) Dobrohotov
 :Updated: 2020-03-03
@@ -34,7 +34,7 @@ There are several techniques for bump-mapping, and normal-mapping is the most co
 So let's get on with it.
 
 OpenMW normal-mapping
-************************
+*********************
 
 Normal-mapping in OpenMW works in a very simple way: The engine just looks for a texture with a *_n.dds* suffix,
 and you're done.
@@ -70,7 +70,7 @@ settings.cfg_-file. Add these rows where it would make sense:
 See OpenMW's wiki page about `texture modding`_ to read more about it.
 
 Morrowind bump-mapping
-*****************************************************
+**********************
 
 **Conversion difficulty:**
 *Varies. Sometimes quick and easy, sometimes time-consuming and hard.*
@@ -93,7 +93,7 @@ In this case you can benefit from OpenMW's normal-mapping support by using these
 This means that you will have to drop the bump-mapping references from the model and sometimes rename the texture.
 
 MGE XE normal-mapping
-***************************************
+*********************
 
 **Conversion difficulty:**
 *Easy*
@@ -169,7 +169,7 @@ depending on a few circumstances. In this tutorial, we will look at a very easy,
 although in some cases a bit time-consuming, example.
 
 Tutorial - Morrowind, Part 1
-**********************
+****************************
 
 We will be converting a quite popular texture replacer of the Hlaalu architecture, namely Lougian's `Hlaalu Bump mapped`_.
 Since this is just a texture pack and not a model replacer,
@@ -201,7 +201,7 @@ We ignored those model files since they are not needed with OpenMW. In this tuto
 we will convert a mod that includes new, custom-made models. In other words, we cannot just ignore those files this time.
 
 Tutorial - Morrowind, Part 2
-**********************
+****************************
 
 The sacks included in Apel's `Various Things - Sacks`_ come in two versions – without bump-mapping, and with bump-mapping.
 Since we want the glory of normal-mapping in our OpenMW setup, we will go with the bump-mapped version.

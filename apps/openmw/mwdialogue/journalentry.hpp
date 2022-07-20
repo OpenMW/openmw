@@ -22,7 +22,7 @@ namespace MWDialogue
         std::string mText;
         std::string mActorName; // optional
 
-        Entry();
+        Entry() = default;
 
         /// actor is optional
         Entry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor);
@@ -41,7 +41,7 @@ namespace MWDialogue
     {
         std::string mTopic;
 
-        JournalEntry();
+        JournalEntry() = default;
 
         JournalEntry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor);
 

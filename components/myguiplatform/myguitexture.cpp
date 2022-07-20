@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include <osg/Texture2D>
+#include <osg/StateSet>
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -21,9 +22,10 @@ namespace osgMyGUI
     {
     }
 
-    OSGTexture::OSGTexture(osg::Texture2D *texture)
+    OSGTexture::OSGTexture(osg::Texture2D *texture, osg::StateSet *injectState)
         : mImageManager(nullptr)
         , mTexture(texture)
+        , mInjectState(injectState)
         , mFormat(MyGUI::PixelFormat::Unknow)
         , mUsage(MyGUI::TextureUsage::Default)
         , mNumElemBytes(0)
@@ -115,16 +117,6 @@ namespace osgMyGUI
         Log(Debug::Warning) << "Would save image to file " << fname;
     }
 
-    int OSGTexture::getWidth()
-    {
-        return mWidth;
-    }
-
-    int OSGTexture::getHeight()
-    {
-        return mHeight;
-    }
-
     void *OSGTexture::lock(MyGUI::TextureUsage /*access*/)
     {
         if (!mTexture.valid())
@@ -167,15 +159,12 @@ namespace osgMyGUI
         mLockedImage = nullptr;
     }
 
-    bool OSGTexture::isLocked()
-    {
-        return mLockedImage.valid();
-    }
-
     // Render-to-texture not currently implemented.
     MyGUI::IRenderTarget* OSGTexture::getRenderTarget()
     {
         return nullptr;
     }
 
+    void OSGTexture::setShader(const std::string& _shaderName)
+    { Log(Debug::Warning) << "OSGTexture::setShader is not implemented"; }
 }

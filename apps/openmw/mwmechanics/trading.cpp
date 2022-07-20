@@ -23,7 +23,7 @@ namespace MWMechanics
         }
 
         // reject if npc is a creature
-        if ( merchant.getTypeName() != typeid(ESM::NPC).name() ) {
+        if ( merchant.getType() != ESM::NPC::sRecordId ) {
             return false;
         }
 
@@ -57,7 +57,8 @@ namespace MWMechanics
             + gmst.find("fBargainOfferBase")->mValue.getFloat()
             + int(pcTerm - npcTerm);
 
-        int roll = Misc::Rng::rollDice(100) + 1;
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        int roll = Misc::Rng::rollDice(100, prng) + 1;
 
         // reject if roll fails
         // (or if player tries to buy things and get money)
@@ -71,10 +72,10 @@ namespace MWMechanics
         int initialMerchantOffer = std::abs(merchantOffer);
 
         if ( !buying && (finalPrice > initialMerchantOffer) ) {
-            skillGain = floor(100.f * (finalPrice - initialMerchantOffer) / finalPrice);
+            skillGain = std::floor(100.f * (finalPrice - initialMerchantOffer) / finalPrice);
         }
         else if ( buying && (finalPrice < initialMerchantOffer) ) {
-            skillGain = floor(100.f * (initialMerchantOffer - finalPrice) / initialMerchantOffer);
+            skillGain = std::floor(100.f * (initialMerchantOffer - finalPrice) / initialMerchantOffer);
         }
         player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0, skillGain);
 

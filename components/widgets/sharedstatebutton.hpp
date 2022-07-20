@@ -34,7 +34,7 @@ namespace Gui
         bool _setState(const std::string &_value);
 
     public:
-        void shareStateWith(ButtonGroup shared);
+        void shareStateWith(const ButtonGroup &shared);
 
         /// @note The ButtonGroup connection will be destroyed when any widget in the group gets destroyed.
         static void createButtonGroup(ButtonGroup group);

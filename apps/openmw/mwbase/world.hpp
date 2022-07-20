@@ -6,9 +6,14 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <string_view>
 #include <deque>
 
-#include <components/esm/cellid.hpp>
+#include <components/esm3/cellid.hpp>
+#include <components/misc/rng.hpp>
+#include <components/misc/span.hpp>
+
+#include <osg/Timer>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/doorstate.hpp"
@@ -54,12 +59,16 @@ namespace ESM
 
 namespace MWPhysics
 {
+    class RayCastingResult;
     class RayCastingInterface;
 }
 
 namespace MWRender
 {
     class Animation;
+    class Camera;
+    class RenderingManager;
+    class PostProcessor;
 }
 
 namespace MWMechanics
@@ -70,6 +79,7 @@ namespace MWMechanics
 namespace DetourNavigator
 {
     struct Navigator;
+    struct AgentBounds;
 }
 
 namespace MWWorld
@@ -108,6 +118,9 @@ namespace MWBase
 
             virtual ~World() {}
 
+            virtual void setRandomSeed(uint32_t seed) = 0;
+            ///< \param seed The seed used when starting a new game.
+
             virtual void startNewGame (bool bypass) = 0;
             ///< \param bypass Bypass regular game start.
 
@@ -127,6 +140,8 @@ namespace MWBase
 
             virtual MWWorld::CellStore *getCell (const ESM::CellId& id) = 0;
 
+            virtual bool isCellActive(MWWorld::CellStore* cell) const = 0;
+
             virtual void testExteriorCells() = 0;
             virtual void testInteriorCells() = 0;
 
@@ -138,15 +153,11 @@ namespace MWBase
             virtual bool toggleWorld() = 0;
             virtual bool toggleBorders() = 0;
 
-            virtual void adjustSky() = 0;
-
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;
             virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
-
-            virtual std::vector<ESM::ESMReader>& getEsmReader() = 0;
 
             virtual MWWorld::LocalScripts& getLocalScripts() = 0;
 
@@ -163,35 +174,36 @@ namespace MWBase
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
-            virtual void setGlobalInt (const std::string& name, int value) = 0;
+            virtual void setGlobalInt(std::string_view name, int value) = 0;
             ///< Set value independently from real type.
 
-            virtual void setGlobalFloat (const std::string& name, float value) = 0;
+            virtual void setGlobalFloat(std::string_view name, float value) = 0;
             ///< Set value independently from real type.
 
-            virtual int getGlobalInt (const std::string& name) const = 0;
+            virtual int getGlobalInt(std::string_view name) const = 0;
             ///< Get value independently from real type.
 
-            virtual float getGlobalFloat (const std::string& name) const = 0;
+            virtual float getGlobalFloat(std::string_view name) const = 0;
             ///< Get value independently from real type.
 
-            virtual char getGlobalVariableType (const std::string& name) const = 0;
+            virtual char getGlobalVariableType(std::string_view name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
 
-            virtual std::string getCellName (const MWWorld::CellStore *cell = 0) const = 0;
+            virtual std::string getCellName (const MWWorld::CellStore *cell = nullptr) const = 0;
             ///< Return name of the cell.
             ///
             /// \note If cell==0, the cell the player is currently in will be used instead to
             /// generate a name.
+            virtual std::string getCellName(const ESM::Cell* cell) const = 0;
 
             virtual void removeRefScript (MWWorld::RefData *ref) = 0;
             //< Remove the script attached to ref from mLocalScripts
 
-            virtual MWWorld::Ptr getPtr (const std::string& name, bool activeOnly) = 0;
+            virtual MWWorld::Ptr getPtr (std::string_view name, bool activeOnly) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
-            virtual MWWorld::Ptr searchPtr (const std::string& name, bool activeOnly, bool searchInContainers = true) = 0;
+            virtual MWWorld::Ptr searchPtr (std::string_view name, bool activeOnly, bool searchInContainers = true) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
@@ -227,6 +239,10 @@ namespace MWBase
 
             virtual int getCurrentWeather() const = 0;
 
+            virtual int getNextWeather() const = 0;
+
+            virtual float getWeatherTransition() const = 0;
+
             virtual unsigned int getNightDayMode() const = 0;
 
             virtual int getMasserPhase() const = 0;
@@ -238,6 +254,10 @@ namespace MWBase
             virtual void modRegion(const std::string &regionid, const std::vector<char> &chances) = 0;
 
             virtual float getTimeScaleFactor() const = 0;
+
+            virtual float getSimulationTimeScale() const = 0;
+
+            virtual void setSimulationTimeScale(float scale) = 0;
 
             virtual void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) = 0;
             ///< Move to interior cell.
@@ -260,7 +280,7 @@ namespace MWBase
 
             virtual float getDistanceToFacedObject() = 0;
 
-            virtual float getMaxActivationDistance() = 0;
+            virtual float getMaxActivationDistance() const = 0;
 
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
@@ -278,18 +298,20 @@ namespace MWBase
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
             virtual void undeleteObject (const MWWorld::Ptr& ptr) = 0;
 
-            virtual MWWorld::Ptr moveObject (const MWWorld::Ptr& ptr, float x, float y, float z, bool moveToActive=false) = 0;
+            virtual MWWorld::Ptr moveObject (const MWWorld::Ptr& ptr, const osg::Vec3f& position, bool movePhysics=true, bool moveToActive=false) = 0;
             ///< @return an updated Ptr in case the Ptr's cell changes
 
-            virtual MWWorld::Ptr moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, float x, float y, float z, bool movePhysics=true) = 0;
+            virtual MWWorld::Ptr moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, const osg::Vec3f& position, bool movePhysics=true, bool keepActive=false) = 0;
             ///< @return an updated Ptr
 
-            virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
+            virtual MWWorld::Ptr moveObjectBy(const MWWorld::Ptr &ptr, const osg::Vec3f& vec) = 0;
+            ///< @return an updated Ptr
 
-            virtual void rotateObject(const MWWorld::Ptr& ptr, float x, float y, float z,
-                RotationFlags flags = RotationFlag_inverseOrder) = 0;
+            virtual void scaleObject (const MWWorld::Ptr& ptr, float scale, bool force = false) = 0;
 
-            virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
+            virtual void rotateObject(const MWWorld::Ptr& ptr, const osg::Vec3f& rot, RotationFlags flags = RotationFlag_inverseOrder) = 0;
+
+            virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, const ESM::Position& pos) = 0;
             ///< Place an object. Makes a copy of the Ptr.
 
             virtual MWWorld::Ptr safePlaceObject (const MWWorld::ConstPtr& ptr, const MWWorld::ConstPtr& referenceObject, MWWorld::CellStore* referenceCell, int direction, float distance) = 0;
@@ -299,9 +321,6 @@ namespace MWBase
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const = 0;
             ///< Convert cell numbers to position.
-
-            virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
-            ///< Convert position to cell numbers
 
             virtual void queueMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity) = 0;
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
@@ -317,6 +336,9 @@ namespace MWBase
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
 
             virtual bool castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore) = 0;
+
+            virtual bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
+                                          bool ignorePlayer, bool ignoreActors) = 0;
 
             virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external) = 0;
             virtual bool isActorCollisionEnabled(const MWWorld::Ptr& ptr) = 0;
@@ -390,11 +412,6 @@ namespace MWBase
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
-            virtual void update (float duration, bool paused) = 0;
-            virtual void updatePhysics (float duration, bool paused) = 0;
-
-            virtual void updateWindowManager () = 0;
-
             virtual MWWorld::Ptr placeObject (const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount) = 0;
             ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
@@ -426,16 +443,16 @@ namespace MWBase
 
             virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const = 0;
 
+            virtual MWRender::Camera* getCamera() = 0;
             virtual void togglePOV(bool force = false) = 0;
             virtual bool isFirstPerson() const = 0;
             virtual bool isPreviewModeEnabled() const = 0;
-            virtual void togglePreviewMode(bool enable) = 0;
             virtual bool toggleVanityMode(bool enable) = 0;
-            virtual void allowVanityMode(bool allow) = 0;
             virtual bool vanityRotateCamera(float * rot) = 0;
-            virtual void adjustCameraDistance(float dist) = 0;
             virtual void applyDeferredPreviewRotationToPlayer(float dt) = 0;
             virtual void disableDeferredPreviewRotation() = 0;
+
+            virtual void saveLoaded() = 0;
 
             virtual void setupPlayer() = 0;
             virtual void renderPlayer() = 0;
@@ -492,7 +509,7 @@ namespace MWBase
 
             /// \todo this does not belong here
             virtual void screenshot (osg::Image* image, int w, int h) = 0;
-            virtual bool screenshot360 (osg::Image* image, std::string settingStr) = 0;
+            virtual bool screenshot360 (osg::Image* image) = 0;
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise
@@ -514,7 +531,7 @@ namespace MWBase
             /// Returns true if levitation spell effect is allowed.
             virtual bool isLevitationEnabled() const = 0;
 
-            virtual bool getGodModeState() = 0;
+            virtual bool getGodModeState() const = 0;
 
             virtual bool toggleGodMode() = 0;
 
@@ -530,11 +547,12 @@ namespace MWBase
 
             virtual void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) = 0;
 
-            virtual void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) = 0;
+            virtual void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot) = 0;
             virtual void launchProjectile (MWWorld::Ptr& actor, MWWorld::Ptr& projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) = 0;
+            virtual void updateProjectilesCasters() = 0;
 
-            virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) = 0;
+            virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) const = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;
 
@@ -581,7 +599,7 @@ namespace MWBase
 
             virtual void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster,
                                       const MWWorld::Ptr& ignore, ESM::RangeType rangeType, const std::string& id,
-                                      const std::string& sourceName, const bool fromProjectile=false) = 0;
+                                      const std::string& sourceName, const bool fromProjectile=false, int slot = 0) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
 
@@ -598,7 +616,7 @@ namespace MWBase
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
-            virtual osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
+            virtual osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target, bool isRangedCombat) = 0;
 
             /// Return the distance between actor's weapon and target's collision box.
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
@@ -609,12 +627,11 @@ namespace MWBase
             virtual bool isPlayerInJail() const = 0;
 
             virtual void rest(double hours) = 0;
-            virtual void rechargeItems(double duration, bool activeOnly) = 0;
 
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;
 
-            virtual void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) = 0;
+            virtual void rotateWorldObject (const MWWorld::Ptr& ptr, const osg::Quat& rotate) = 0;
 
             /// Return terrain height at \a worldPos position.
             virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const = 0;
@@ -632,22 +649,30 @@ namespace MWBase
             virtual DetourNavigator::Navigator* getNavigator() const = 0;
 
             virtual void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
-                    const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const = 0;
+                const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end) const = 0;
 
             virtual void removeActorPath(const MWWorld::ConstPtr& actor) const = 0;
 
             virtual void setNavMeshNumberToRender(const std::size_t value) = 0;
 
-            /// Return physical half extents of the given actor to be used in pathfinding
-            virtual osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const = 0;
+            virtual DetourNavigator::AgentBounds getPathfindingAgentBounds(const MWWorld::ConstPtr& actor) const = 0;
 
             virtual bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
 
-            virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const = 0;
+            virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
+                const Misc::Span<const MWWorld::ConstPtr>& ignore, std::vector<MWWorld::Ptr>* occupyingActors = nullptr) const = 0;
 
             virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 
             virtual std::vector<MWWorld::Ptr> getAll(const std::string& id) = 0;
+
+            virtual Misc::Rng::Generator& getPrng() = 0;
+
+            virtual MWRender::RenderingManager* getRenderingManager() = 0;
+
+            virtual MWRender::PostProcessor* getPostProcessor() = 0;
+
+            virtual void setActorActive(const MWWorld::Ptr& ptr, bool value) = 0;
     };
 }
 

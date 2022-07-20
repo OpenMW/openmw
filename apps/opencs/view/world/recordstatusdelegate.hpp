@@ -2,8 +2,6 @@
 #define RECORDSTATUSDELEGATE_H
 
 #include "util.hpp"
-#include <QTextOption>
-#include <QFont>
 
 #include "datadisplaydelegate.hpp"
 #include "../../model/world/record.hpp"
@@ -19,7 +17,7 @@ namespace CSVWorld
 
         RecordStatusDelegate (const ValueList& values, const IconList& icons,
             CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document,
-            QObject *parent = 0);
+            QObject *parent = nullptr);
     };
 
     class RecordStatusDelegateFactory : public DataDisplayDelegateFactory

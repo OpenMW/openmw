@@ -1,12 +1,9 @@
 #ifndef MWGUI_SETTINGS_H
 #define MWGUI_SETTINGS_H
 
-#include "windowbase.hpp"
+#include <components/lua_ui/adapter.hpp>
 
-namespace MWGui
-{
-    class WindowManager;
-}
+#include "windowbase.hpp"
 
 namespace MWGui
 {
@@ -19,6 +16,10 @@ namespace MWGui
 
             void updateControlsBox();
 
+            void updateLightSettings();
+
+            void updateWindowModeSettings();
+
             void onResChange(int, int) override { center(); }
 
     protected:
@@ -27,13 +28,17 @@ namespace MWGui
 
             // graphics
             MyGUI::ListBox* mResolutionList;
-            MyGUI::Button* mFullscreenButton;
+            MyGUI::ComboBox* mWindowModeList;
             MyGUI::Button* mWindowBorderButton;
             MyGUI::ComboBox* mTextureFilteringButton;
-            MyGUI::Widget* mAnisotropyBox;
 
             MyGUI::ComboBox* mWaterTextureSize;
             MyGUI::ComboBox* mWaterReflectionDetail;
+            MyGUI::ComboBox* mWaterRainRippleDetail;
+
+            MyGUI::ComboBox* mMaxLights;
+            MyGUI::ComboBox* mLightingMethodButton;
+            MyGUI::Button* mLightsResetButton;
 
             // controls
             MyGUI::ScrollView* mControlsBox;
@@ -41,6 +46,13 @@ namespace MWGui
             MyGUI::Button* mKeyboardSwitch;
             MyGUI::Button* mControllerSwitch;
             bool mKeyboardMode; //if true, setting up the keyboard. Otherwise, it's controller
+
+            MyGUI::EditBox* mScriptFilter;
+            MyGUI::ListBox* mScriptList;
+            MyGUI::Widget* mScriptBox;
+            MyGUI::ScrollView* mScriptView;
+            LuaUi::LuaAdapter* mScriptAdapter;
+            int mCurrentPage;
 
             void onTabChanged(MyGUI::TabControl* _sender, size_t index);
             void onOkButtonClicked(MyGUI::Widget* _sender);
@@ -54,6 +66,13 @@ namespace MWGui
 
             void onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
             void onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos);
+            void onWaterRainRippleDetailChanged(MyGUI::ComboBox* _sender, size_t pos);
+
+            void onLightingMethodButtonChanged(MyGUI::ComboBox* _sender, size_t pos);
+            void onLightsResetButtonClicked(MyGUI::Widget* _sender);
+            void onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos);
+
+            void onWindowModeChanged(MyGUI::ComboBox* _sender, size_t pos);
 
             void onRebindAction(MyGUI::Widget* _sender);
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
@@ -64,13 +83,19 @@ namespace MWGui
 
             void onWindowResize(MyGUI::Window* _sender);
 
+            void onScriptFilterChange(MyGUI::EditBox*);
+            void onScriptListSelection(MyGUI::ListBox*, size_t index);
+
             void apply();
 
-            void configureWidgets(MyGUI::Widget* widget);
+            void configureWidgets(MyGUI::Widget* widget, bool init);
             void updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value);
 
             void layoutControlsBox();
-        
+            void renderScriptSettings();
+
+            void computeMinimumWindowSize();
+
         private:
             void resetScrollbars();
     };

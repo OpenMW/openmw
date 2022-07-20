@@ -59,9 +59,9 @@ namespace CSVWorld
             TableBottomBox (const CreatorFactoryBase& creatorFactory,
                             CSMDoc::Document& document,
                             const CSMWorld::UniversalId& id,
-                            QWidget *parent = 0);
+                            QWidget *parent = nullptr);
 
-            virtual ~TableBottomBox();
+            ~TableBottomBox() override;
 
             bool eventFilter(QObject *object, QEvent *event) override;
 

@@ -5,6 +5,8 @@
 #include <osg/Material>
 #include <osg/StateSet>
 
+#include "depth.hpp"
+
 namespace SceneUtil
 {
     // disable nonsense test against a worldsize bb what will always pass
@@ -76,14 +78,11 @@ namespace SceneUtil
         stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
-        osg::ref_ptr<osg::Depth> depth (new osg::Depth);
+        osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
         stateset->setRenderBinDetails(renderBin, "RenderBin");
-
-        // Let the shader know we're dealing with simple water here.
-        stateset->addUniform(new osg::Uniform("simpleWater", true));
 
         return stateset;
     }

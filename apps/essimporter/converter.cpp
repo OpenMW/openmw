@@ -5,8 +5,8 @@
 
 #include <osgDB/WriteFile>
 
-#include <components/esm/creaturestate.hpp>
-#include <components/esm/containerstate.hpp>
+#include <components/esm3/creaturestate.hpp>
+#include <components/esm3/containerstate.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -68,7 +68,7 @@ namespace
     {
         if (isIndexedRefId(indexedRefId))
         {
-            int refIndex;
+            int refIndex = 0;
             std::string refId;
             splitIndexedRefId(indexedRefId, refIndex, refId);
 
@@ -278,7 +278,7 @@ namespace ESSImport
         while (esm.isNextSub("MPCD"))
         {
             float notepos[3];
-            esm.getHT(notepos, 3*sizeof(float));
+            esm.getHTSized<3 * sizeof(float)>(notepos);
 
             // Markers seem to be arranged in a 32*32 grid, notepos has grid-indices.
             // This seems to be the reason markers can't be placed everywhere in interior cells,
@@ -320,6 +320,8 @@ namespace ESSImport
         esm.startRecord(ESM::REC_CSTA);
         ESM::CellState csta;
         csta.mHasFogOfWar = 0;
+        csta.mLastRespawn.mDay = 0;
+        csta.mLastRespawn.mHour = 0;
         csta.mId = esmcell.getCellId();
         csta.mId.save(esm);
         // TODO csta.mLastRespawn;
@@ -352,12 +354,12 @@ namespace ESSImport
             }
             else
             {
-                int refIndex;
+                int refIndex = 0;
                 splitIndexedRefId(cellref.mIndexedRefId, refIndex, out.mRefID);
 
                 std::string idLower = Misc::StringUtils::lowerCase(out.mRefID);
 
-                std::map<std::pair<int, std::string>, NPCC>::const_iterator npccIt = mContext->mNpcChanges.find(
+                auto npccIt = mContext->mNpcChanges.find(
                             std::make_pair(refIndex, out.mRefID));
                 if (npccIt != mContext->mNpcChanges.end())
                 {
@@ -369,6 +371,8 @@ namespace ESSImport
                     // from the ESM with default values
                     if (cellref.mHasACDT)
                         convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    else
+                        objstate.mCreatureStats.mMissingACDT = true;
                     if (cellref.mHasACSC)
                         convertACSC(cellref.mACSC, objstate.mCreatureStats);
                     convertNpcData(cellref, objstate.mNpcStats);
@@ -383,7 +387,7 @@ namespace ESSImport
                     continue;
                 }
 
-                std::map<std::pair<int, std::string>, CNTC>::const_iterator cntcIt = mContext->mContainerChanges.find(
+                auto cntcIt = mContext->mContainerChanges.find(
                             std::make_pair(refIndex, out.mRefID));
                 if (cntcIt != mContext->mContainerChanges.end())
                 {
@@ -398,7 +402,7 @@ namespace ESSImport
                     continue;
                 }
 
-                std::map<std::pair<int, std::string>, CREC>::const_iterator crecIt = mContext->mCreatureChanges.find(
+                auto crecIt = mContext->mCreatureChanges.find(
                             std::make_pair(refIndex, out.mRefID));
                 if (crecIt != mContext->mCreatureChanges.end())
                 {
@@ -410,6 +414,8 @@ namespace ESSImport
                     // from the ESM with default values
                     if (cellref.mHasACDT)
                         convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    else
+                        objstate.mCreatureStats.mMissingACDT = true;
                     if (cellref.mHasACSC)
                         convertACSC(cellref.mACSC, objstate.mCreatureStats);
                     convertCREC(crecIt->second, objstate);
@@ -486,6 +492,7 @@ namespace ESSImport
 
                 out.mSpellId = it->mSPDT.mId.toString();
                 out.mSpeed = pnam.mSpeed * 0.001f; // not sure where this factor comes from
+                out.mSlot = 0;
 
                 esm.startRecord(ESM::REC_MPRJ);
                 out.save(esm);

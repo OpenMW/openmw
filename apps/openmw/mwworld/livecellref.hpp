@@ -1,11 +1,11 @@
 #ifndef GAME_MWWORLD_LIVECELLREF_H
 #define GAME_MWWORLD_LIVECELLREF_H
 
-#include <typeinfo>
-
 #include "cellref.hpp"
 
 #include "refdata.hpp"
+
+#include <stdexcept>
 
 namespace ESM
 {
@@ -17,6 +17,9 @@ namespace MWWorld
     class Ptr;
     class ESMStore;
     class Class;
+
+    template <typename X>
+    struct LiveCellRef;
 
     /// Used to create pointers to hold any type of LiveCellRef<> object.
     struct LiveCellRefBase
@@ -31,7 +34,7 @@ namespace MWWorld
         /** runtime-data */
         RefData mData;
 
-        LiveCellRefBase(const std::string& type, const ESM::CellRef &cref=ESM::CellRef());
+        LiveCellRefBase(unsigned int type, const ESM::CellRef &cref=ESM::CellRef());
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() { }
 
@@ -42,6 +45,17 @@ namespace MWWorld
 
         virtual void save (ESM::ObjectState& state) const = 0;
         ///< Save LiveCellRef state into \a state.
+
+        virtual std::string_view getTypeDescription() const = 0;
+
+        unsigned int getType() const;
+        ///< @see MWWorld::Class::getType
+
+        template <class T>
+        static const LiveCellRef<T>* dynamicCast(const LiveCellRefBase* value);
+
+        template <class T>
+        static LiveCellRef<T>* dynamicCast(LiveCellRefBase* value);
 
         protected:
 
@@ -67,6 +81,24 @@ namespace MWWorld
         return cellRef.mRef.getRefNum()==refNum;
     }
 
+    std::string makeDynamicCastErrorMessage(const LiveCellRefBase* value, std::string_view recordType);
+
+    template <class T>
+    const LiveCellRef<T>* LiveCellRefBase::dynamicCast(const LiveCellRefBase* value)
+    {
+        if (const LiveCellRef<T>* ref = dynamic_cast<const LiveCellRef<T>*>(value))
+            return ref;
+        throw std::runtime_error(makeDynamicCastErrorMessage(value, T::getRecordType()));
+    }
+
+    template <class T>
+    LiveCellRef<T>* LiveCellRefBase::dynamicCast(LiveCellRefBase* value)
+    {
+        if (LiveCellRef<T>* ref = dynamic_cast<LiveCellRef<T>*>(value))
+            return ref;
+        throw std::runtime_error(makeDynamicCastErrorMessage(value, T::getRecordType()));
+    }
+
     /// A reference to one object (of any type) in a cell.
     ///
     /// Constructing this with a CellRef instance in the constructor means that
@@ -77,11 +109,11 @@ namespace MWWorld
     struct LiveCellRef : public LiveCellRefBase
     {
         LiveCellRef(const ESM::CellRef& cref, const X* b = nullptr)
-            : LiveCellRefBase(typeid(X).name(), cref), mBase(b)
+            : LiveCellRefBase(X::sRecordId, cref), mBase(b)
         {}
 
         LiveCellRef(const X* b = nullptr)
-            : LiveCellRefBase(typeid(X).name()), mBase(b)
+            : LiveCellRefBase(X::sRecordId), mBase(b)
         {}
 
         // The object that this instance is based on.
@@ -94,6 +126,8 @@ namespace MWWorld
 
         void save (ESM::ObjectState& state) const override;
         ///< Save LiveCellRef state into \a state.
+
+        std::string_view getTypeDescription() const override { return X::getRecordType(); }
 
         static bool checkState (const ESM::ObjectState& state);
         ///< Check if state is valid and report errors.
@@ -120,7 +154,6 @@ namespace MWWorld
     {
         return checkStateImp (state);
     }
-
 }
 
 #endif

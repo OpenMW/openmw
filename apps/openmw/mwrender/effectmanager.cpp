@@ -11,6 +11,8 @@
 #include "vismask.hpp"
 #include "util.hpp"
 
+#include <algorithm>
+
 namespace MWRender
 {
 
@@ -32,7 +34,7 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
     node->setNodeMask(Mask_Effect);
 
     Effect effect;
-    effect.mAnimTime.reset(new EffectAnimationTime);
+    effect.mAnimTime = std::make_shared<EffectAnimationTime>();
 
     SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
     node->accept(findMaxLengthVisitor);
@@ -42,6 +44,8 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
     trans->setPosition(worldPosition);
     trans->setScale(osg::Vec3f(scale, scale, scale));
     trans->addChild(node);
+
+    effect.mTransform = trans;
 
     SceneUtil::AssignControllerSourcesVisitor assignVisitor(effect.mAnimTime);
     node->accept(assignVisitor);
@@ -53,30 +57,32 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
 
     mParentNode->addChild(trans);
 
-    mEffects[trans] = effect;
+    mEffects.push_back(std::move(effect));
 }
 
 void EffectManager::update(float dt)
 {
-    for (EffectMap::iterator it = mEffects.begin(); it != mEffects.end(); )
-    {
-        it->second.mAnimTime->addTime(dt);
-
-        if (it->second.mAnimTime->getTime() >= it->second.mMaxControllerLength)
-        {
-            mParentNode->removeChild(it->first);
-            mEffects.erase(it++);
-        }
-        else
-            ++it;
-    }
+    mEffects.erase(
+        std::remove_if(
+            mEffects.begin(), 
+            mEffects.end(), 
+            [dt, this](Effect& effect)
+            {
+                effect.mAnimTime->addTime(dt);
+                const auto remove = effect.mAnimTime->getTime() >= effect.mMaxControllerLength;
+                if (remove)
+                    mParentNode->removeChild(effect.mTransform);
+                return remove;
+            }), 
+        mEffects.end()
+    );
 }
 
 void EffectManager::clear()
 {
-    for (EffectMap::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    for(const auto& effect : mEffects)
     {
-        mParentNode->removeChild(it->first);
+        mParentNode->removeChild(effect.mTransform);
     }
     mEffects.clear();
 }

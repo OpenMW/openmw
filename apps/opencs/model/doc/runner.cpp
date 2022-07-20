@@ -1,14 +1,14 @@
 #include "runner.hpp"
 
-#include <QApplication>
 #include <QDir>
 #include <QTemporaryFile>
 #include <QTextStream>
+#include <QCoreApplication>
 
 #include "operationholder.hpp"
 
 CSMDoc::Runner::Runner (const boost::filesystem::path& projectPath)
-: mRunning (false), mStartup (0), mProjectPath (projectPath)
+: mRunning (false), mStartup (nullptr), mProjectPath (projectPath)
 {
     connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),
         this, SLOT (finished (int, QProcess::ExitStatus)));
@@ -25,7 +25,7 @@ CSMDoc::Runner::~Runner()
 {
     if (mRunning)
     {
-        disconnect (&mProcess, 0, this, 0);
+        disconnect (&mProcess, nullptr, this, nullptr);
         mProcess.kill();
         mProcess.waitForFinished();
     }
@@ -36,7 +36,7 @@ void CSMDoc::Runner::start (bool delayed)
     if (mStartup)
     {
         delete mStartup;
-        mStartup = 0;
+        mStartup = nullptr;
     }
 
     if (!delayed)
@@ -78,10 +78,12 @@ void CSMDoc::Runner::start (bool delayed)
         else
             arguments << "--new-game=1";
 
-        arguments << ("--script-run="+mStartup->fileName());;
+        arguments << ("--script-run="+mStartup->fileName());
 
         arguments <<
             QString::fromUtf8 (("--data=\""+mProjectPath.parent_path().string()+"\"").c_str());
+
+        arguments << "--replace=content";
 
         for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
             iter!=mContentFiles.end(); ++iter)
@@ -102,7 +104,7 @@ void CSMDoc::Runner::start (bool delayed)
 void CSMDoc::Runner::stop()
 {
     delete mStartup;
-    mStartup = 0;
+    mStartup = nullptr;
 
     if (mProcess.state()==QProcess::NotRunning)
     {

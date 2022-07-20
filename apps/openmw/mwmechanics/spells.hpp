@@ -4,7 +4,6 @@
 #include <memory>
 #include <map>
 #include <string>
-#include <set>
 #include <vector>
 
 #include "../mwworld/timestamp.hpp"
@@ -30,19 +29,14 @@ namespace MWMechanics
     class Spells
     {
             std::shared_ptr<SpellList> mSpellList;
-            std::map<const ESM::Spell*, SpellParams> mSpells;
+            std::vector<const ESM::Spell*> mSpells;
 
             // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
             std::string mSelectedSpell;
 
-            std::map<const ESM::Spell*, MWWorld::TimeStamp> mUsedPowers;
+            std::vector<std::pair<const ESM::Spell*, MWWorld::TimeStamp>> mUsedPowers;
 
-            mutable bool mSpellsChanged;
-            mutable MagicEffects mEffects;
-            mutable std::map<const ESM::Spell*, MagicEffects> mSourcedEffects;
-            void rebuildEffects() const;
-
-            bool hasDisease(const ESM::Spell::SpellType type) const;
+            bool hasSpellType(const ESM::Spell::SpellType type) const;
 
             using SpellFilter = bool (*)(const ESM::Spell*);
             void purge(const SpellFilter& filter);
@@ -53,16 +47,15 @@ namespace MWMechanics
 
             friend class SpellList;
         public:
-            using TIterator = std::map<const ESM::Spell*, SpellParams>::const_iterator;
-
             Spells();
+
+            Spells(const Spells&);
+
+            Spells(Spells&& spells);
 
             ~Spells();
 
             static bool hasCorprusEffect(const ESM::Spell *spell);
-
-            void purgeEffect(int effectId);
-            void purgeEffect(int effectId, const std::string & sourceId);
 
             bool canUsePower (const ESM::Spell* spell) const;
             void usePower (const ESM::Spell* spell);
@@ -72,9 +65,9 @@ namespace MWMechanics
             void purgeCorprusDisease();
             void purgeCurses();
 
-            TIterator begin() const;
+            std::vector<const ESM::Spell*>::const_iterator begin() const;
 
-            TIterator end() const;
+            std::vector<const ESM::Spell*>::const_iterator end() const;
 
             bool hasSpell(const std::string& spell) const;
             bool hasSpell(const ESM::Spell* spell) const;
@@ -89,9 +82,6 @@ namespace MWMechanics
             ///< If the spell to be removed is the selected spell, the selected spell will be changed to
             /// no spell (empty string).
 
-            MagicEffects getMagicEffects() const;
-            ///< Return sum of magic effects resulting from abilities, blights, deseases and curses.
-
             void clear(bool modifyBase = false);
             ///< Remove all spells of al types.
 
@@ -101,16 +91,9 @@ namespace MWMechanics
             const std::string getSelectedSpell() const;
             ///< May return an empty string.
 
-            bool isSpellActive(const std::string& id) const;
-            ///< Are we under the effects of the given spell ID?
-
             bool hasCommonDisease() const;
 
             bool hasBlightDisease() const;
-
-            void removeEffects(const std::string& id);
-
-            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
 
             void readState (const ESM::SpellState& state, CreatureStats* creatureStats);
             void writeState (ESM::SpellState& state) const;

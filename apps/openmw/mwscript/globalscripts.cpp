@@ -2,8 +2,8 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
-#include <components/esm/esmwriter.hpp>
-#include <components/esm/globalscript.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/globalscript.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -12,13 +12,11 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-
 #include "interpretercontext.hpp"
 
 namespace
 {
-    struct ScriptCreatingVisitor : public boost::static_visitor<ESM::GlobalScript>
+    struct ScriptCreatingVisitor
     {
         ESM::GlobalScript operator()(const MWWorld::Ptr &ptr) const
         {
@@ -48,7 +46,7 @@ namespace
         }
     };
 
-    struct PtrGettingVisitor : public boost::static_visitor<const MWWorld::Ptr*>
+    struct PtrGettingVisitor
     {
         const MWWorld::Ptr* operator()(const MWWorld::Ptr &ptr) const
         {
@@ -61,7 +59,7 @@ namespace
         }
     };
 
-    struct PtrResolvingVisitor : public boost::static_visitor<MWWorld::Ptr>
+    struct PtrResolvingVisitor
     {
         MWWorld::Ptr operator()(const MWWorld::Ptr &ptr) const
         {
@@ -78,7 +76,7 @@ namespace
         }
     };
 
-    class MatchPtrVisitor : public boost::static_visitor<bool>
+    class MatchPtrVisitor
     {
         const MWWorld::Ptr& mPtr;
     public:
@@ -94,6 +92,21 @@ namespace
             return false;
         }
     };
+
+    struct IdGettingVisitor
+    {
+        std::string operator()(const MWWorld::Ptr& ptr) const
+        {
+            if(ptr.isEmpty())
+                return {};
+            return ptr.mRef->mRef.getRefId();
+        }
+
+        std::string operator()(const std::pair<ESM::RefNum, std::string>& pair) const
+        {
+            return pair.second;
+        }
+    };
 }
 
 namespace MWScript
@@ -102,14 +115,19 @@ namespace MWScript
 
     const MWWorld::Ptr* GlobalScriptDesc::getPtrIfPresent() const
     {
-        return boost::apply_visitor(PtrGettingVisitor(), mTarget);
+        return std::visit(PtrGettingVisitor(), mTarget);
     }
 
     MWWorld::Ptr GlobalScriptDesc::getPtr()
     {
-        MWWorld::Ptr ptr = boost::apply_visitor(PtrResolvingVisitor(), mTarget);
+        MWWorld::Ptr ptr = std::visit(PtrResolvingVisitor {}, mTarget);
         mTarget = ptr;
         return ptr;
+    }
+
+    std::string GlobalScriptDesc::getId() const
+    {
+        return std::visit(IdGettingVisitor {}, mTarget);
     }
 
 
@@ -117,20 +135,21 @@ namespace MWScript
     : mStore (store)
     {}
 
-    void GlobalScripts::addScript (const std::string& name, const MWWorld::Ptr& target)
+    void GlobalScripts::addScript(std::string_view name, const MWWorld::Ptr& target)
     {
-        const auto iter = mScripts.find (::Misc::StringUtils::lowerCase (name));
+        std::string lowerName = ::Misc::StringUtils::lowerCase(name);
+        const auto iter = mScripts.find(lowerName);
 
         if (iter==mScripts.end())
         {
-            if (const ESM::Script *script = mStore.get<ESM::Script>().search(name))
+            if (const ESM::Script *script = mStore.get<ESM::Script>().search(lowerName))
             {
                 auto desc = std::make_shared<GlobalScriptDesc>();
                 MWWorld::Ptr ptr = target;
                 desc->mTarget = ptr;
                 desc->mRunning = true;
                 desc->mLocals.configure (*script);
-                mScripts.insert (std::make_pair(name, desc));
+                mScripts.insert (std::make_pair(lowerName, desc));
             }
             else
             {
@@ -145,7 +164,7 @@ namespace MWScript
         }
     }
 
-    void GlobalScripts::removeScript (const std::string& name)
+    void GlobalScripts::removeScript (std::string_view name)
     {
         const auto iter = mScripts.find (::Misc::StringUtils::lowerCase (name));
 
@@ -153,7 +172,7 @@ namespace MWScript
             iter->second->mRunning = false;
     }
 
-    bool GlobalScripts::isRunning (const std::string& name) const
+    bool GlobalScripts::isRunning (std::string_view name) const
     {
         const auto iter = mScripts.find (::Misc::StringUtils::lowerCase (name));
 
@@ -219,15 +238,15 @@ namespace MWScript
 
     void GlobalScripts::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        for (const auto& iter : mScripts)
+        for (const auto& [id, desc] : mScripts)
         {
-            ESM::GlobalScript script = boost::apply_visitor (ScriptCreatingVisitor(), iter.second->mTarget);
+            ESM::GlobalScript script = std::visit(ScriptCreatingVisitor {}, desc->mTarget);
 
-            script.mId = iter.first;
+            script.mId = id;
 
-            iter.second->mLocals.write (script.mLocals, iter.first);
+            desc->mLocals.write(script.mLocals, id);
 
-            script.mRunning = iter.second->mRunning ? 1 : 0;
+            script.mRunning = desc->mRunning ? 1 : 0;
 
             writer.startRecord (ESM::REC_GSCR);
             script.save (writer);
@@ -235,12 +254,19 @@ namespace MWScript
         }
     }
 
-    bool GlobalScripts::readRecord (ESM::ESMReader& reader, uint32_t type)
+    bool GlobalScripts::readRecord (ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap)
     {
         if (type==ESM::REC_GSCR)
         {
             ESM::GlobalScript script;
             script.load (reader);
+
+            if (script.mTargetRef.hasContentFile())
+            {
+                auto iter = contentFileMap.find(script.mTargetRef.mContentFile);
+                if (iter != contentFileMap.end())
+                    script.mTargetRef.mContentFile = iter->second;
+            }
 
             auto iter = mScripts.find (script.mId);
 
@@ -281,14 +307,14 @@ namespace MWScript
         return false;
     }
 
-    Locals& GlobalScripts::getLocals (const std::string& name)
+    Locals& GlobalScripts::getLocals(std::string_view name)
     {
         std::string name2 = ::Misc::StringUtils::lowerCase (name);
         auto iter = mScripts.find (name2);
 
         if (iter==mScripts.end())
         {
-            const ESM::Script *script = mStore.get<ESM::Script>().find (name);
+            const ESM::Script *script = mStore.get<ESM::Script>().find(name2);
 
             auto desc = std::make_shared<GlobalScriptDesc>();
             desc->mLocals.configure (*script);
@@ -299,7 +325,7 @@ namespace MWScript
         return iter->second->mLocals;
     }
 
-    const Locals* GlobalScripts::getLocalsIfPresent (const std::string& name) const
+    const Locals* GlobalScripts::getLocalsIfPresent(std::string_view name) const
     {
         std::string name2 = ::Misc::StringUtils::lowerCase (name);
         auto iter = mScripts.find (name2);
@@ -313,7 +339,7 @@ namespace MWScript
         MatchPtrVisitor visitor(base);
         for (const auto& script : mScripts)
         {
-            if (boost::apply_visitor (visitor, script.second->mTarget))
+            if (std::visit (visitor, script.second->mTarget))
                 script.second->mTarget = updated;
         }
     }

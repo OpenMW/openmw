@@ -126,7 +126,7 @@ namespace CSVRender
         {
             // Try again without any mask
             boundsVisitor.reset();
-            boundsVisitor.setTraversalMask(~0);
+            boundsVisitor.setTraversalMask(~0u);
             root->accept(boundsVisitor);
 
             // Last resort, set a default
@@ -458,7 +458,7 @@ namespace CSVRender
         , mDown(false)
         , mRollLeft(false)
         , mRollRight(false)
-        , mPickingMask(~0)
+        , mPickingMask(~0u)
         , mCenter(0,0,0)
         , mDistance(0)
         , mOrbitSpeed(osg::PI / 4)

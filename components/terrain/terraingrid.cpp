@@ -8,7 +8,10 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
+#include "view.hpp"
 #include "storage.hpp"
+#include "heightcull.hpp"
+
 namespace Terrain
 {
 
@@ -20,8 +23,14 @@ public:
     void reset() override {}
 };
 
-TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask)
     : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
+    , mNumSplits(4)
+{
+}
+
+TerrainGrid::TerrainGrid(osg::Group* parent, Storage* storage, unsigned int nodeMask)
+    : Terrain::World(parent, storage, nodeMask)
     , mNumSplits(4)
 {
 }
@@ -107,6 +116,8 @@ void TerrainGrid::unloadCell(int x, int y)
 
 void TerrainGrid::updateWaterCulling()
 {
+    if (!mHeightCullCallback) return;
+
     osg::ComputeBoundsVisitor computeBoundsVisitor;
     mTerrainRoot->accept(computeBoundsVisitor);
     float lowZ = computeBoundsVisitor.getBoundingBox()._min.z();

@@ -1,14 +1,33 @@
 #include "box.hpp"
 
 #include <MyGUI_EditText.h>
+#include <MyGUI_LanguageManager.h>
 
 namespace Gui
 {
+    // TODO: Since 3.4.2 MyGUI is supposed to automatically translate tags
+    // If the 3.4.2 become a required minimum version, the ComboBox class may be removed.
+    void ComboBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+    {
+#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,4,2)
+        MyGUI::ComboBox::setPropertyOverride (_key, _value);
+#else
+        if (_key == "AddItem")
+        {
+            const std::string value = MyGUI::LanguageManager::getInstance().replaceTags(_value);
+            MyGUI::ComboBox::setPropertyOverride (_key, value);
+        }
+        else
+        {
+            MyGUI::ComboBox::setPropertyOverride (_key, _value);
+        }
+#endif
+    }
 
     void AutoSizedWidget::notifySizeChange (MyGUI::Widget* w)
     {
         MyGUI::Widget * parent = w->getParent();
-        if (parent != 0)
+        if (parent != nullptr)
         {
             if (mExpandDirection.isLeft())
             {
@@ -17,7 +36,7 @@ namespace Gui
             }
             w->setSize(getRequestedSize ());
 
-            while (parent != 0)
+            while (parent != nullptr)
             {
                 Box * b = dynamic_cast<Box*>(parent);
                 if (b)
@@ -32,7 +51,7 @@ namespace Gui
 
     MyGUI::IntSize AutoSizedTextBox::getRequestedSize()
     {
-        return getTextSize();
+        return getCaption().empty() ? MyGUI::IntSize{0, 0} : getTextSize();
     }
 
     void AutoSizedTextBox::setCaption(const MyGUI::UString& _value)
@@ -280,7 +299,7 @@ namespace Gui
     void HBox::initialiseOverride()
     {
         Base::initialiseOverride();
-        MyGUI::Widget* client = 0;
+        MyGUI::Widget* client = nullptr;
         assignWidget(client, "Client");
         setWidgetClient(client);
     }
@@ -435,7 +454,7 @@ namespace Gui
     void VBox::initialiseOverride()
     {
         Base::initialiseOverride();
-        MyGUI::Widget* client = 0;
+        MyGUI::Widget* client = nullptr;
         assignWidget(client, "Client");
         setWidgetClient(client);
     }

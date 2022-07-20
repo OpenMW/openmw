@@ -1,15 +1,15 @@
 #include "installationpage.hpp"
 
-#include <QDebug>
 #include <QTextCodec>
-#include <QFileInfo>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QThread>
 
 #include "mainwizard.hpp"
 
-Wizard::InstallationPage::InstallationPage(QWidget *parent) :
-    QWizardPage(parent)
+Wizard::InstallationPage::InstallationPage(QWidget *parent, Config::GameSettings &gameSettings) :
+    QWizardPage(parent),
+    mGameSettings(gameSettings)
 {
     mWizard = qobject_cast<MainWizard*>(parent);
 
@@ -17,36 +17,40 @@ Wizard::InstallationPage::InstallationPage(QWidget *parent) :
 
     mFinished = false;
 
-    mThread = new QThread();
-    mUnshield = new UnshieldWorker();
-    mUnshield->moveToThread(mThread);
+    mThread = std::make_unique<QThread>();
+    mUnshield = std::make_unique<UnshieldWorker>(mGameSettings.value("morrowind-bsa-filesize").toLongLong());
+    mUnshield->moveToThread(mThread.get());
 
-    connect(mThread, SIGNAL(started()),
-            mUnshield, SLOT(extract()));
+    connect(mThread.get(), SIGNAL(started()),
+            mUnshield.get(), SLOT(extract()));
 
-    connect(mUnshield, SIGNAL(finished()),
-            mThread, SLOT(quit()));
+    connect(mUnshield.get(), SIGNAL(finished()),
+            mThread.get(), SLOT(quit()));
 
-    connect(mUnshield, SIGNAL(finished()),
+    connect(mUnshield.get(), SIGNAL(finished()),
             this, SLOT(installationFinished()), Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(error(QString, QString)),
+    connect(mUnshield.get(), SIGNAL(error(QString, QString)),
             this, SLOT(installationError(QString, QString)), Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(textChanged(QString)),
+    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
             installProgressLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(textChanged(QString)),
+    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
             logTextEdit, SLOT(appendPlainText(QString)),  Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(textChanged(QString)),
+    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
             mWizard, SLOT(addLogText(QString)),  Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(progressChanged(int)),
+    connect(mUnshield.get(), SIGNAL(progressChanged(int)),
             installProgressBar, SLOT(setValue(int)),  Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(requestFileDialog(Wizard::Component)),
+    connect(mUnshield.get(), SIGNAL(requestFileDialog(Wizard::Component)),
             this, SLOT(showFileDialog(Wizard::Component)), Qt::QueuedConnection);
+
+    connect(mUnshield.get(), SIGNAL(requestOldVersionDialog()),
+            this, SLOT(showOldVersionDialog())
+            , Qt::QueuedConnection);
 }
 
 Wizard::InstallationPage::~InstallationPage()
@@ -56,9 +60,6 @@ Wizard::InstallationPage::~InstallationPage()
         mThread->quit();
         mThread->wait();
     }
-
-    delete mUnshield;
-    delete mThread;
 }
 
 void Wizard::InstallationPage::initializePage()
@@ -179,6 +180,34 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
     }
 
     mUnshield->setDiskPath(path);
+}
+
+void Wizard::InstallationPage::showOldVersionDialog()
+{
+    logTextEdit->appendHtml(tr("<p>Detected old version of component Morrowind.</p>"));
+    mWizard->addLogText(tr("Detected old version of component Morrowind."));
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Morrowind Installation"));
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setText(QObject::tr("There may be a more recent version of Morrowind available.<br><br>Do you wish to continue anyway?"));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::No)
+    {
+        logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
+                                    <b>Error: The installation was aborted by the user</b></span></p>"));
+
+        mWizard->addLogText(QLatin1String("Error: The installation was aborted by the user"));
+        mWizard->mError = true;
+
+        emit completeChanged();
+        return;
+    }
+
+    mUnshield->wakeAll();
 }
 
 void Wizard::InstallationPage::installationFinished()

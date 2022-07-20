@@ -3,9 +3,8 @@
 
 #include "../doc/subview.hpp"
 
-#include <QtCore/qnamespace.h>
-
 class QModelIndex;
+class QWidget;
 
 namespace CSMWorld
 {
@@ -35,6 +34,8 @@ namespace CSVWorld
             Table *mTable;
             TableBottomBox *mBottom;
             CSVFilter::FilterBox *mFilterBox;
+            bool mShowOptions;
+            QWidget *mOptions;
 
         public:
 
@@ -60,6 +61,7 @@ namespace CSVWorld
             void cloneRequest (const CSMWorld::UniversalId& toClone);
             void createFilterRequest(std::vector< CSMWorld::UniversalId >& types,
                                      Qt::DropAction action);
+            void toggleOptions ();
 
         public slots:
 

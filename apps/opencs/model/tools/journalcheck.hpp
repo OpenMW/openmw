@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_JOURNALCHECK_H
 #define CSM_TOOLS_JOURNALCHECK_H
 
-#include <components/esm/loaddial.hpp>
+#include <components/esm3/loaddial.hpp>
 
 #include "../world/idcollection.hpp"
 #include "../world/infocollection.hpp"

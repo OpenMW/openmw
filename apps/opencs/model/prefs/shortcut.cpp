@@ -23,7 +23,7 @@ namespace CSMPrefs
         , mLastPos(0)
         , mActivationStatus(AS_Inactive)
         , mModifierStatus(false)
-        , mAction(0)
+        , mAction(nullptr)
     {
         assert (parent);
 
@@ -42,7 +42,7 @@ namespace CSMPrefs
         , mLastPos(0)
         , mActivationStatus(AS_Inactive)
         , mModifierStatus(false)
-        , mAction(0)
+        , mAction(nullptr)
     {
         assert (parent);
 
@@ -62,7 +62,7 @@ namespace CSMPrefs
         , mLastPos(0)
         , mActivationStatus(AS_Inactive)
         , mModifierStatus(false)
-        , mAction(0)
+        , mAction(nullptr)
     {
         assert (parent);
 
@@ -218,6 +218,6 @@ namespace CSMPrefs
 
     void Shortcut::actionDeleted()
     {
-        mAction = 0;
+        mAction = nullptr;
     }
 }

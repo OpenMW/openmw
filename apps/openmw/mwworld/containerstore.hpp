@@ -6,18 +6,18 @@
 #include <memory>
 #include <utility>
 
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadingr.hpp>
-#include <components/esm/loadlock.hpp>
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadmisc.hpp>
-#include <components/esm/loadprob.hpp>
-#include <components/esm/loadrepa.hpp>
-#include <components/esm/loadweap.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlock.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadweap.hpp>
 
 #include <components/misc/rng.hpp>
 
@@ -58,7 +58,7 @@ namespace MWWorld
             std::shared_ptr<ResolutionListener> mListener;
         public:
             ResolutionHandle(std::shared_ptr<ResolutionListener> listener) : mListener(listener) {}
-            ResolutionHandle() {}
+            ResolutionHandle() = default;
     };
     
     class ContainerStoreListener
@@ -73,22 +73,22 @@ namespace MWWorld
     {
         public:
 
-            static const int Type_Potion = 0x0001;
-            static const int Type_Apparatus = 0x0002;
-            static const int Type_Armor = 0x0004;
-            static const int Type_Book = 0x0008;
-            static const int Type_Clothing = 0x0010;
-            static const int Type_Ingredient = 0x0020;
-            static const int Type_Light = 0x0040;
-            static const int Type_Lockpick = 0x0080;
-            static const int Type_Miscellaneous = 0x0100;
-            static const int Type_Probe = 0x0200;
-            static const int Type_Repair = 0x0400;
-            static const int Type_Weapon = 0x0800;
+            static constexpr int Type_Potion = 0x0001;
+            static constexpr int Type_Apparatus = 0x0002;
+            static constexpr int Type_Armor = 0x0004;
+            static constexpr int Type_Book = 0x0008;
+            static constexpr int Type_Clothing = 0x0010;
+            static constexpr int Type_Ingredient = 0x0020;
+            static constexpr int Type_Light = 0x0040;
+            static constexpr int Type_Lockpick = 0x0080;
+            static constexpr int Type_Miscellaneous = 0x0100;
+            static constexpr int Type_Probe = 0x0200;
+            static constexpr int Type_Repair = 0x0400;
+            static constexpr int Type_Weapon = 0x0800;
 
-            static const int Type_Last = Type_Weapon;
+            static constexpr int Type_Last = Type_Weapon;
 
-            static const int Type_All = 0xffff;
+            static constexpr int Type_All = 0xffff;
 
             static const std::string sGoldId;
 
@@ -126,8 +126,8 @@ namespace MWWorld
             std::weak_ptr<ResolutionListener> mResolutionListener;
 
             ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true);
-            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true);
+            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng::Generator* prng, bool topLevel=true);
+            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Generator* prng, bool topLevel=true);
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -153,7 +153,7 @@ namespace MWWorld
 
             virtual ~ContainerStore();
 
-            virtual ContainerStore* clone() { return new ContainerStore(*this); }
+            virtual std::unique_ptr<ContainerStore> clone() { return std::make_unique<ContainerStore>(*this); }
 
             ConstContainerStoreIterator cbegin (int mask = Type_All) const;
             ConstContainerStoreIterator cend() const;
@@ -175,10 +175,10 @@ namespace MWWorld
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
-            ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
+            ContainerStoreIterator add(std::string_view id, int count, const Ptr& actorPtr);
             ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
-            int remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
+            int remove(std::string_view itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
             ///< Remove \a count item(s) designated by \a itemId from this container.
             ///
             /// @return the number of items actually removed
@@ -201,7 +201,7 @@ namespace MWWorld
             /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
             /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-            int count (const std::string& id) const;
+            int count(std::string_view id) const;
             ///< @return How many items with refID \a id are in this container?
 
             ContainerStoreListener* getContListener() const;
@@ -221,7 +221,7 @@ namespace MWWorld
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Seed& seed = Misc::Rng::getSeed());
+            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Generator& seed);
             ///< Insert items into *this.
 
             void fillNonRandom (const ESM::InventoryList& items, const std::string& owner, unsigned int seed);
@@ -250,6 +250,7 @@ namespace MWWorld
 
             void resolve();
             ResolutionHandle resolveTemporarily();
+            void unresolve();
 
             friend class ContainerStoreIteratorBase<Ptr>;
             friend class ContainerStoreIteratorBase<ConstPtr>;
@@ -257,21 +258,19 @@ namespace MWWorld
             friend class MWClass::Container;
     };
 
-    
     template<class PtrType>
     class ContainerStoreIteratorBase
-        : public std::iterator<std::forward_iterator_tag, PtrType, std::ptrdiff_t, PtrType *, PtrType&>
     {
         template<class From, class To, class Dummy>
         struct IsConvertible
         {
-            static const bool value = true;
+            static constexpr bool value = true;
         };
 
         template<class Dummy>
         struct IsConvertible<ConstPtr, Ptr, Dummy>
         {
-            static const bool value = false;
+            static constexpr bool value = false;
         };
 
         template<class T, class U>
@@ -361,6 +360,12 @@ namespace MWWorld
         /// \return reached the end?
 
         public:
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = PtrType;
+            using difference_type = std::ptrdiff_t;
+            using pointer = PtrType*;
+            using reference = PtrType&;
+
             template<class T>
             ContainerStoreIteratorBase (const ContainerStoreIteratorBase<T>& other)
             {

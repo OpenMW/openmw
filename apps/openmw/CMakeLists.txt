@@ -2,6 +2,7 @@
 set(GAME
     main.cpp
     engine.cpp
+    options.cpp
 
     ${CMAKE_SOURCE_DIR}/files/windows/openmw.rc
     ${CMAKE_SOURCE_DIR}/files/windows/openmw.exe.manifest
@@ -18,15 +19,16 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
-    creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
-    bulletdebugdraw globalmap characterpreview camera viewovershoulder localmap water terrainstorage ripplesimulation
-    renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging
+    actors objects renderingmanager animation rotatecontroller sky skyutil npcanimation vismask
+    creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation screenshotmanager
+    bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
+    renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging groundcover
+    postprocessor pingpongcull hdr pingpongcanvas transparentpass navmeshmode
     )
 
 add_openmw_dir (mwinput
     actions actionmanager bindingsmanager controllermanager controlswitch
-    inputmanagerimp mousemanager keyboardmanager sdlmappings sensormanager
+    inputmanagerimp mousemanager keyboardmanager sensormanager gyromanager
     )
 
 add_openmw_dir (mwgui
@@ -42,6 +44,7 @@ add_openmw_dir (mwgui
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
     draganddrop timeadvancer jailscreen itemchargeview keyboardnavigation textcolours statswatcher
+    postprocessorhud
     )
 
 add_openmw_dir (mwdialogue
@@ -55,6 +58,13 @@ add_openmw_dir (mwscript
     animationextensions transformationextensions consoleextensions userextensions
     )
 
+add_openmw_dir (mwlua
+    luamanagerimp object worldview userdataserializer eventqueue
+    luabindings localscripts playerscripts objectbindings cellbindings asyncbindings
+    camerabindings uibindings inputbindings nearbybindings postprocessingbindings stats debugbindings
+    types/types types/door types/actor types/container types/weapon types/npc types/creature types/activator types/book types/lockpick types/probe types/apparatus types/potion types/misc types/repair
+    )
+
 add_openmw_dir (mwsound
     soundmanagerimp openal_output ffmpeg_decoder sound sound_buffer sound_decoder sound_output
     loudness movieaudiofactory alext efx efx-presets regionsoundselector watersoundupdater volumesettings
@@ -65,15 +75,15 @@ add_openmw_dir (mwworld
     containerstore actiontalk actiontake manualref player cellvisitors failedaction
     cells localscripts customdata inventorystore ptr actionopen actionread actionharvest
     actionequip timestamp actionalchemy cellstore actionapply actioneat
-    store esmstore recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader actiontrap cellreflist cellref physicssystem weather projectilemanager
-    cellpreloader datetimemanager
+    store esmstore fallback actionrepair actionsoulgem livecellref actiondoor
+    contentloader esmloader actiontrap cellreflist cellref weather projectilemanager
+    cellpreloader datetimemanager groundcoverstore magiceffects
     )
 
 add_openmw_dir (mwphysics
     physicssystem trace collisiontype actor convert object heightfield closestnotmerayresultcallback
-    contacttestresultcallback deepestnotmecontacttestresultcallback stepper movementsolver
-    closestnotmeconvexresultcallback raycasting mtphysics
+    contacttestresultcallback deepestnotmecontacttestresultcallback stepper movementsolver projectile
+    actorconvexcallback raycasting mtphysics contacttestwrapper projectileconvexcallback
     )
 
 add_openmw_dir (mwclass
@@ -85,9 +95,9 @@ add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat creaturestats magiceffects movement actorutil spelllist
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor aibreathe
     aicast aiescort aiface aiactivate aicombat recharge repair enchanting pathfinding pathgrid security spellcasting spellresistance
-    disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction actor summoning
-    character actors objects aistate trading weaponpriority spellpriority weapontype spellutil tickableeffects
-    spellabsorption linkedeffects
+    disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction summoning
+    character actors objects aistate trading weaponpriority spellpriority weapontype spellutil
+    spelleffects
     )
 
 add_openmw_dir (mwstate
@@ -122,15 +132,19 @@ include_directories(
 )
 
 target_link_libraries(openmw
-    ${OSG_LIBRARIES}
+    # CMake's built-in OSG finder does not use pkgconfig, so we have to
+    # manually ensure the order is correct for inter-library dependencies.
+    # This only makes a difference with `-DOPENMW_USE_SYSTEM_OSG=ON -DOSG_STATIC=ON`.
+    # https://gitlab.kitware.com/cmake/cmake/-/issues/21701
     ${OSGPARTICLE_LIBRARIES}
-    ${OSGUTIL_LIBRARIES}
-    ${OSGDB_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}
     ${OSGGA_LIBRARIES}
     ${OSGSHADOW_LIBRARIES}
+    ${OSGDB_LIBRARIES}
+    ${OSGUTIL_LIBRARIES}
+    ${OSG_LIBRARIES}
+
     ${Boost_SYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${OPENAL_LIBRARY}
@@ -143,29 +157,35 @@ target_link_libraries(openmw
     components
 )
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(openmw PRIVATE
+        <boost/filesystem.hpp>
+        <boost/program_options/options_description.hpp>
+
+        <sol/sol.hpp>
+
+        <osg/StateSet>
+        <osg/Node>
+        <osg/Drawable>
+        <osg/Camera>
+
+        <osgViewer/Viewer>
+
+        <MyGUI_Widget.h>
+
+        <algorithm>
+        <filesystem>
+        <fstream>
+        <functional>
+        <memory>
+        <string>
+        <string_view>
+        <vector>
+    )
+endif()
+
 if (ANDROID)
-    set (OSG_PLUGINS
-        -Wl,--whole-archive
-    )
-    foreach(PLUGIN_NAME ${USED_OSG_PLUGINS})
-        set(OSG_PLUGINS ${OSG_PLUGINS} ${OSG_PLUGINS_DIR}/lib${PLUGIN_NAME}.a)
-    endforeach()
-
-    set (OSG_PLUGINS
-        ${OSG_PLUGINS} -Wl,--no-whole-archive
-    )
-
-    target_link_libraries(openmw
-        EGL
-        android
-        log
-        dl
-        z
-        ${OPENSCENEGRAPH_LIBRARIES}
-        freetype
-        jpeg
-    	png
-    )
+    target_link_libraries(openmw EGL android log z)
 endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)
@@ -184,12 +204,11 @@ endif()
 if(APPLE)
     set(BUNDLE_RESOURCES_DIR "${APP_BUNDLE_DIR}/Contents/Resources")
 
-    set(OPENMW_MYGUI_FILES_ROOT ${BUNDLE_RESOURCES_DIR})
-    set(OPENMW_SHADERS_ROOT ${BUNDLE_RESOURCES_DIR})
+    set(OPENMW_RESOURCES_ROOT ${BUNDLE_RESOURCES_DIR})
 
     add_subdirectory(../../files/ ${CMAKE_CURRENT_BINARY_DIR}/files)
 
-    configure_file("${OpenMW_BINARY_DIR}/settings-default.cfg" ${BUNDLE_RESOURCES_DIR} COPYONLY)
+    configure_file("${OpenMW_BINARY_DIR}/defaults.bin" ${BUNDLE_RESOURCES_DIR} COPYONLY)
     configure_file("${OpenMW_BINARY_DIR}/openmw.cfg" ${BUNDLE_RESOURCES_DIR} COPYONLY)
     configure_file("${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" ${BUNDLE_RESOURCES_DIR} COPYONLY)
 
@@ -212,13 +231,6 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(openmw gcov)
 endif()
-
-if (MSVC)
-    # Debug version needs increased number of sections beyond 2^16
-    if (CMAKE_CL_64)
-        set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
-    endif (CMAKE_CL_64)
-endif (MSVC)
 
 if (WIN32)
     INSTALL(TARGETS openmw RUNTIME DESTINATION ".")

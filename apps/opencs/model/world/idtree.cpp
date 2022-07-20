@@ -201,7 +201,7 @@ QModelIndex CSMWorld::IdTree::parent (const QModelIndex& index) const
     const std::pair<int, int>& address(unfoldIndexAddress(id));
 
     if (address.first >= this->rowCount() || address.second >= this->columnCount())
-        throw "Parent index is not present in the model";
+        throw std::logic_error("Parent index is not present in the model");
 
     return createIndex(address.first, address.second);
 }
@@ -216,7 +216,7 @@ unsigned int CSMWorld::IdTree::foldIndexAddress (const QModelIndex& index) const
 std::pair< int, int > CSMWorld::IdTree::unfoldIndexAddress (unsigned int id) const
 {
     if (id == 0)
-        throw "Attempt to unfold index id of the top level data cell";
+        throw std::runtime_error("Attempt to unfold index id of the top level data cell");
 
     --id;
     int row = id / this->columnCount();

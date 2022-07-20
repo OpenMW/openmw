@@ -3,7 +3,7 @@
 
 #include <boost/filesystem/path.hpp>
 
-#include <components/esm/savedgame.hpp>
+#include <components/esm3/savedgame.hpp>
 
 namespace MWState
 {
@@ -15,6 +15,8 @@ namespace MWState
     };
 
     bool operator< (const Slot& left, const Slot& right);
+
+    std::string getFirstGameFile(const std::vector<std::string>& contentFiles);
 
     class Character
     {

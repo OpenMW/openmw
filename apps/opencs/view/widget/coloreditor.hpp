@@ -22,8 +22,8 @@ namespace CSVWidget
             QPoint calculatePopupPosition();
 
         public:
-            ColorEditor(const QColor &color, QWidget *parent = 0, const bool popupOnStart = false);
-            ColorEditor(const int colorInt, QWidget *parent = 0, const bool popupOnStart = false);
+            ColorEditor(const QColor &color, QWidget *parent = nullptr, const bool popupOnStart = false);
+            ColorEditor(const int colorInt, QWidget *parent = nullptr, const bool popupOnStart = false);
 
             QColor color() const;
 
@@ -41,7 +41,7 @@ namespace CSVWidget
             void showEvent(QShowEvent *event) override;
 
         private:
-            ColorEditor(QWidget *parent = 0, const bool popupOnStart = false);
+            ColorEditor(QWidget *parent = nullptr, const bool popupOnStart = false);
 
         private slots:
             void showPicker();

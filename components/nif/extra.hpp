@@ -29,15 +29,20 @@
 namespace Nif
 {
 
-class NiVertWeightsExtraData : public Extra
+struct NiExtraData : public Extra
 {
-public:
+    std::vector<char> data;
+
     void read(NIFStream *nif) override;
 };
 
-class NiTextKeyExtraData : public Extra
+struct NiVertWeightsExtraData : public Extra
 {
-public:
+    void read(NIFStream *nif) override;
+};
+
+struct NiTextKeyExtraData : public Extra
+{
     struct TextKey
     {
         float time;
@@ -48,12 +53,12 @@ public:
     void read(NIFStream *nif) override;
 };
 
-class NiStringExtraData : public Extra
+struct NiStringExtraData : public Extra
 {
-public:
-    /* Two known meanings:
+    /* Known meanings:
        "MRK" - marker, only visible in the editor, not rendered in-game
-       "NCO" - no collision
+       "NCC" - no collision except with the camera
+       Anything else starting with "NC" - no collision
     */
     std::string string;
 
@@ -112,6 +117,31 @@ struct NiFloatsExtraData : public Extra
 struct BSBound : public Extra
 {
     osg::Vec3f center, halfExtents;
+
+    void read(NIFStream *nif) override;
+};
+
+struct BSFurnitureMarker : public Extra
+{
+    struct LegacyFurniturePosition
+    {
+        osg::Vec3f mOffset;
+        uint16_t mOrientation;
+        uint8_t mPositionRef;
+        void read(NIFStream *nif);
+    };
+
+    struct FurniturePosition
+    {
+        osg::Vec3f mOffset;
+        float mHeading;
+        uint16_t mType;
+        uint16_t mEntryPoint;
+        void read(NIFStream *nif);
+    };
+
+    std::vector<LegacyFurniturePosition> mLegacyMarkers;
+    std::vector<FurniturePosition> mMarkers;
 
     void read(NIFStream *nif) override;
 };

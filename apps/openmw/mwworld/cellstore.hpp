@@ -11,35 +11,36 @@
 #include "livecellref.hpp"
 #include "cellreflist.hpp"
 
-#include <components/esm/loadacti.hpp>
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadarmo.hpp>
-#include <components/esm/loadbook.hpp>
-#include <components/esm/loadclot.hpp>
-#include <components/esm/loadcont.hpp>
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loaddoor.hpp>
-#include <components/esm/loadingr.hpp>
-#include <components/esm/loadlevlist.hpp>
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadlock.hpp>
-#include <components/esm/loadprob.hpp>
-#include <components/esm/loadrepa.hpp>
-#include <components/esm/loadstat.hpp>
-#include <components/esm/loadweap.hpp>
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadmisc.hpp>
-#include <components/esm/loadbody.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadlock.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/fogstate.hpp>
 
 #include "timestamp.hpp"
 #include "ptr.hpp"
 
 namespace ESM
 {
+    class ReadersCache;
     struct Cell;
     struct CellState;
-    struct FogState;
     struct CellId;
     struct RefNum;
 }
@@ -61,12 +62,12 @@ namespace MWWorld
         private:
 
             const MWWorld::ESMStore& mStore;
-            std::vector<ESM::ESMReader>& mReader;
+            ESM::ReadersCache& mReaders;
 
             // Even though fog actually belongs to the player and not cells,
             // it makes sense to store it here since we need it once for each cell.
             // Note this is nullptr until the cell is explored to save some memory
-            std::shared_ptr<ESM::FogState> mFogState;
+            std::unique_ptr<ESM::FogState> mFogState;
 
             const ESM::Cell *mCell;
             State mState;
@@ -127,7 +128,7 @@ namespace MWWorld
 
             void updateRechargingItems();
             void rechargeItems(float duration);
-            void checkItem(Ptr ptr);
+            void checkItem(const Ptr& ptr);
 
             // helper function for forEachInternal
             template<class Visitor, class List>
@@ -211,9 +212,7 @@ namespace MWWorld
             }
 
             /// @param readerList The readers to use for loading of the cell on-demand.
-            CellStore (const ESM::Cell *cell_,
-                       const MWWorld::ESMStore& store,
-                       std::vector<ESM::ESMReader>& readerList);
+            CellStore(const ESM::Cell* cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
 
             const ESM::Cell *getCell() const;
 
@@ -254,7 +253,7 @@ namespace MWWorld
 
             void setWaterLevel (float level);
 
-            void setFog (ESM::FogState* fog);
+            void setFog(std::unique_ptr<ESM::FogState>&& fog);
             ///< \note Takes ownership of the pointer
 
             ESM::FogState* getFog () const;
@@ -396,6 +395,8 @@ namespace MWWorld
 
             void respawn ();
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
+
+            Ptr getMovedActor(int actorId) const;
 
         private:
 

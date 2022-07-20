@@ -1,8 +1,8 @@
 #ifndef GAME_MWDIALOGUE_KEYWORDSEARCH_H
 #define GAME_MWDIALOGUE_KEYWORDSEARCH_H
 
-#include <map>
 #include <cctype>
+#include <map>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>    // std::reverse
@@ -30,7 +30,7 @@ public:
     {
         if (keyword.empty())
             return;
-        seed_impl  (/*std::move*/ (keyword), /*std::move*/ (value), 0, mRoot);
+        seed_impl  (std::move(keyword), std::move (value), 0, mRoot);
     }
 
     void clear ()
@@ -39,7 +39,7 @@ public:
         mRoot.mKeyword.clear ();
     }
 
-    bool containsKeyword (string_t keyword, value_t& value)
+    bool containsKeyword (const string_t& keyword, value_t& value)
     {
         typename Entry::childen_t::iterator current;
         typename Entry::childen_t::iterator next;
@@ -68,28 +68,19 @@ public:
         return false;
     }
 
+
     static bool sortMatches(const Match& left, const Match& right)
     {
         return left.mBeg < right.mBeg;
     }
 
-    void highlightKeywords (Point beg, Point end, std::vector<Match>& out)
+    void highlightKeywords (Point beg, Point end, std::vector<Match>& out) const
     {
         std::vector<Match> matches;
         for (Point i = beg; i != end; ++i)
         {
-            // check if previous character marked start of new word
-            if (i != beg)
-            {
-                Point prev = i;
-                --prev;
-                if(isalpha(*prev))
-                    continue;
-            }
-
-
             // check first character
-            typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (Misc::StringUtils::toLower (*i));
+            typename Entry::childen_t::const_iterator candidate = mRoot.mChildren.find (Misc::StringUtils::toLower (*i));
 
             // no match, on to next character
             if (candidate == mRoot.mChildren.end ())
@@ -100,11 +91,11 @@ public:
 
             // some keywords might be longer variations of other keywords, so we definitely need a list of candidates
             // the first element in the pair is length of the match, i.e. depth from the first character on
-            std::vector< typename std::pair<int, typename Entry::childen_t::iterator> > candidates;
+            std::vector< typename std::pair<int, typename Entry::childen_t::const_iterator> > candidates;
 
             while ((j + 1) != end)
             {
-                typename Entry::childen_t::iterator next = candidate->second.mChildren.find (Misc::StringUtils::toLower (*++j));
+                typename Entry::childen_t::const_iterator next = candidate->second.mChildren.find (Misc::StringUtils::toLower (*++j));
 
                 if (next == candidate->second.mChildren.end ())
                 {
@@ -125,7 +116,7 @@ public:
             // shorter candidates will be added to the vector first. however, we want to check against longer candidates first
             std::reverse(candidates.begin(), candidates.end());
 
-            for (typename std::vector< std::pair<int, typename Entry::childen_t::iterator> >::iterator it = candidates.begin();
+            for (typename std::vector< std::pair<int, typename Entry::childen_t::const_iterator> >::iterator it = candidates.begin();
                  it != candidates.end(); ++it)
             {
                 candidate = it->second;
@@ -218,8 +209,8 @@ private:
 
         if (j == entry.mChildren.end ())
         {
-            entry.mChildren [ch].mValue = /*std::move*/ (value);
-            entry.mChildren [ch].mKeyword = /*std::move*/ (keyword);
+            entry.mChildren [ch].mValue = std::move (value);
+            entry.mChildren [ch].mKeyword = std::move (keyword);
         }
         else
         {
@@ -228,22 +219,22 @@ private:
                 if (keyword == j->second.mKeyword)
                     throw std::runtime_error ("duplicate keyword inserted");
 
-                value_t pushValue = /*std::move*/ (j->second.mValue);
-                string_t pushKeyword = /*std::move*/ (j->second.mKeyword);
+                value_t pushValue = j->second.mValue;
+                string_t pushKeyword = j->second.mKeyword;
 
                 if (depth >= pushKeyword.size ())
                     throw std::runtime_error ("unexpected");
 
                 if (depth+1 < pushKeyword.size())
                 {
-                    seed_impl (/*std::move*/ (pushKeyword), /*std::move*/ (pushValue), depth+1, j->second);
+                    seed_impl (std::move (pushKeyword), std::move (pushValue), depth+1, j->second);
                     j->second.mKeyword.clear ();
                 }
             }
             if (depth+1 == keyword.size())
                 j->second.mKeyword = value;
             else // depth+1 < keyword.size()
-                seed_impl (/*std::move*/ (keyword), /*std::move*/ (value), depth+1, j->second);
+                seed_impl (std::move (keyword), std::move (value), depth+1, j->second);
         }
 
     }

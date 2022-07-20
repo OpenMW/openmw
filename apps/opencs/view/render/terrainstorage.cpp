@@ -1,9 +1,7 @@
 #include "terrainstorage.hpp"
 
-#include "../../model/world/land.hpp"
-#include "../../model/world/landtexture.hpp"
+#include <components/esm3terrain/storage.hpp>
 
-#include <components/esmterrain/storage.hpp>
 
 namespace CSVRender
 {
@@ -48,15 +46,14 @@ namespace CSVRender
     float TerrainStorage::getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY)
     {
         float height = 0.f;
-        osg::ref_ptr<const ESMTerrain::LandObject> land = getLand (cellX, cellY);
-        if (land)
-        {
-            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
-            if (data) height = getVertexHeight(data, inCellX, inCellY);
-        }
-        else return height;
-        return mAlteredHeight[inCellY*ESM::Land::LAND_SIZE + inCellX] + height;
 
+        int index = mData.getLand().searchId(CSMWorld::Land::createUniqueRecordId(cellX, cellY));
+        if (index == -1) // no land!
+            return height;
+
+        const ESM::Land::LandData* landData = mData.getLand().getRecord(index).get().getLandData(ESM::Land::DATA_VHGT);
+        height = landData->mHeights[inCellY*ESM::Land::LAND_SIZE + inCellX];
+        return mAlteredHeight[inCellY*ESM::Land::LAND_SIZE + inCellX] + height;
     }
 
     float* TerrainStorage::getAlteredHeight(int inCellX, int inCellY)

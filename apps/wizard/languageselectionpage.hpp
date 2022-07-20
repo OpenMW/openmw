@@ -1,8 +1,6 @@
 #ifndef LANGUAGESELECTIONPAGE_HPP
 #define LANGUAGESELECTIONPAGE_HPP
 
-#include <QWizardPage>
-
 #include "ui_languageselectionpage.h"
 
 namespace Wizard

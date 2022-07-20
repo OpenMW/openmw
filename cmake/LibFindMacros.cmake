@@ -19,11 +19,11 @@ macro (libfind_package PREFIX PKG)
 endmacro()
 
 # A simple wrapper to make pkg-config searches a bit easier.
-# Works the same as CMake's internal pkg_check_modules but is always quiet.
-macro (libfind_pkg_check_modules)
+# Works the same as CMake's internal pkg_search_module but is always quiet.
+macro (libfind_pkg_search_module)
   find_package(PkgConfig QUIET)
   if (PKG_CONFIG_FOUND)
-    pkg_check_modules(${ARGN} QUIET)
+    pkg_search_module(${ARGN} QUIET)
   endif()
 endmacro()
 
@@ -47,7 +47,7 @@ function (libfind_pkg_detect PREFIX)
     message(FATAL_ERROR "libfind_pkg_detect requires at least a pkg_config package name to be passed.")
   endif()
   # Find library
-  libfind_pkg_check_modules(${PREFIX}_PKGCONF ${pkgargs})
+  libfind_pkg_search_module(${PREFIX}_PKGCONF ${pkgargs})
   if (pathargs)
     find_path(${PREFIX}_INCLUDE_DIR NAMES ${pathargs} HINTS ${${PREFIX}_PKGCONF_INCLUDE_DIRS})
   endif()

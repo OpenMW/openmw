@@ -11,11 +11,11 @@
 namespace Nif
 {
 // An extra data record. All the extra data connected to an object form a linked list.
-class Extra : public Record
+struct Extra : public Record
 {
-public:
     std::string name;
     ExtraPtr next; // Next extra data record in the list
+    unsigned int recordSize{0u};
 
     void read(NIFStream *nif) override
     {
@@ -24,16 +24,27 @@ public:
         else if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0))
         {
             next.read(nif);
-            nif->getUInt(); // Size of the record
+            recordSize = nif->getUInt();
         }
     }
 
     void post(NIFFile *nif) override { next.post(nif); }
 };
 
-class Controller : public Record
+struct Controller : public Record
 {
-public:
+    enum Flags {
+        Flag_Active = 0x8
+    };
+
+    enum ExtrapolationMode
+    {
+        Cycle = 0,
+        Reverse = 2,
+        Constant = 4,
+        Mask = 6
+    };
+
     ControllerPtr next;
     int flags;
     float frequency, phase;
@@ -42,12 +53,14 @@ public:
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
+
+    bool isActive() const { return flags & Flag_Active; }
+    ExtrapolationMode extrapolationMode() const { return static_cast<ExtrapolationMode>(flags & Mask); }
 };
 
 /// Has name, extra-data and controller
-class Named : public Record
+struct Named : public Record
 {
-public:
     std::string name;
     ExtraPtr extra;
     ExtraList extralist;

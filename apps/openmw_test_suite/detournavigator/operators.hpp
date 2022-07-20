@@ -6,19 +6,9 @@
 
 #include <deque>
 #include <iomanip>
-#include <iostream>
 #include <limits>
-#include <sstream>
 
 #include <gtest/gtest.h>
-
-namespace DetourNavigator
-{
-    static inline bool operator ==(const TileBounds& lhs, const TileBounds& rhs)
-    {
-        return lhs.mMin == rhs.mMin && lhs.mMax == rhs.mMax;
-    }
-}
 
 namespace
 {
@@ -48,7 +38,7 @@ namespace testing
     template <>
     inline testing::Message& Message::operator <<(const osg::Vec3f& value)
     {
-        return (*this) << "osg::Vec3f(" << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.x()
+        return (*this) << "Vec3fEq(" << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.x()
             << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.y()
             << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.z()
             << ')';

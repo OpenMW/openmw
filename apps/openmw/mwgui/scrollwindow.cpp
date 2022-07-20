@@ -2,7 +2,7 @@
 
 #include <MyGUI_ScrollView.h>
 
-#include <components/esm/loadbook.hpp>
+#include <components/esm3/loadbook.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"

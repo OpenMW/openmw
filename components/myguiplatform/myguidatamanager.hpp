@@ -3,9 +3,12 @@
 
 #include <MyGUI_DataManager.h>
 
+#include <string>
+
+#include <components/vfs/manager.hpp>
+
 namespace osgMyGUI
 {
-
 
 class DataManager : public MyGUI::DataManager
 {
@@ -13,12 +16,14 @@ public:
     void initialise() {}
     void shutdown() {}
 
+    DataManager(const VFS::Manager* vfs);
+
     void setResourcePath(const std::string& path);
 
     /** Get data stream from specified resource name.
         @param _name Resource name (usually file name).
     */
-    MyGUI::IDataStream* getData(const std::string& _name) override;
+    MyGUI::IDataStream* getData(const std::string& _name) const override;
 
     /** Free data stream.
         @param _data Data stream.
@@ -28,21 +33,23 @@ public:
     /** Is data with specified name exist.
         @param _name Resource name.
     */
-    bool isDataExist(const std::string& _name) override;
+    bool isDataExist(const std::string& _name) const override;
 
     /** Get all data names with names that matches pattern.
         @param _pattern Pattern to match (for example "*.layout").
     */
-    const MyGUI::VectorString& getDataListNames(const std::string& _pattern) override;
+    const MyGUI::VectorString& getDataListNames(const std::string& _pattern) const override;
 
     /** Get full path to data.
         @param _name Resource name.
         @return Return full path to specified data.
     */
-    const std::string& getDataPath(const std::string& _name) override;
+    const std::string& getDataPath(const std::string& _name) const override;
 
 private:
     std::string mResourcePath;
+
+    const VFS::Manager* mVfs;
 };
 
 }

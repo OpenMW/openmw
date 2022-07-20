@@ -1,6 +1,7 @@
 #ifndef _SFO_EVENTS_H
 #define _SFO_EVENTS_H
 
+#include <SDL_version.h>
 #include <SDL_types.h>
 #include <SDL_events.h>
 
@@ -16,6 +17,24 @@ struct MouseMotionEvent : SDL_MouseMotionEvent {
 
     Sint32 zrel;
     Sint32 z;
+};
+
+struct TouchEvent {
+    int mDevice;
+    int mFinger;
+    float mX;
+    float mY;
+    float mPressure;
+
+    #if SDL_VERSION_ATLEAST(2, 0, 14)
+    explicit TouchEvent(const SDL_ControllerTouchpadEvent& arg)
+        : mDevice(arg.touchpad)
+        , mFinger(arg.finger)
+        , mX(arg.x)
+        , mY(arg.y)
+        , mPressure(arg.pressure)
+    {}
+    #endif
 };
 
 
@@ -50,24 +69,23 @@ public:
     virtual void keyReleased(const SDL_KeyboardEvent &arg) = 0;
 };
 
+
 class ControllerListener
 {
 public:
     virtual ~ControllerListener() {}
-    /** @remarks Joystick button down event */
-    virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &evt) = 0;
 
-    /** @remarks Joystick button up event */
+    virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &evt) = 0;
     virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &evt) = 0;
 
-    /** @remarks Joystick axis moved event */
     virtual void axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg) = 0;
 
-    /** @remarks Joystick Added **/
     virtual void controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg) = 0;
-
-    /** @remarks Joystick Removed **/
     virtual void controllerRemoved(const SDL_ControllerDeviceEvent &arg) = 0;
+
+    virtual void touchpadMoved(int deviceId, const TouchEvent& arg) = 0;
+    virtual void touchpadPressed(int deviceId, const TouchEvent& arg) = 0;
+    virtual void touchpadReleased(int deviceId, const TouchEvent& arg) = 0;
 
 };
 

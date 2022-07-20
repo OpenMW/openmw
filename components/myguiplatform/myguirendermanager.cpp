@@ -1,10 +1,8 @@
 #include "myguirendermanager.hpp"
 
-#include <MyGUI_Gui.h>
 #include <MyGUI_Timer.h>
 
 #include <osg/Drawable>
-#include <osg/BlendFunc>
 #include <osg/Texture2D>
 #include <osg/TexMat>
 
@@ -13,6 +11,8 @@
 #include <osgGA/GUIEventHandler>
 
 #include <components/resource/imagemanager.hpp>
+#include <components/shader/shadermanager.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "myguitexture.hpp"
 
@@ -46,7 +46,7 @@ class Drawable : public osg::Drawable {
 public:
 
     // Stage 0: update widget animations and controllers. Run during the Update traversal.
-    class FrameUpdate : public osg::Drawable::UpdateCallback
+    class FrameUpdate : public SceneUtil::NodeCallback<FrameUpdate>
     {
     public:
         FrameUpdate()
@@ -59,10 +59,9 @@ public:
             mRenderManager = renderManager;
         }
 
-        void update(osg::NodeVisitor*, osg::Drawable*) override
+        void operator()(osg::Node*, osg::NodeVisitor*)
         {
-            if (mRenderManager)
-                mRenderManager->update();
+            mRenderManager->update();
         }
 
     private:
@@ -70,7 +69,7 @@ public:
     };
 
     // Stage 1: collect draw calls. Run during the Cull traversal.
-    class CollectDrawCalls : public osg::Drawable::CullCallback
+    class CollectDrawCalls : public SceneUtil::NodeCallback<CollectDrawCalls>
     {
     public:
         CollectDrawCalls()
@@ -83,13 +82,9 @@ public:
             mRenderManager = renderManager;
         }
 
-        bool cull(osg::NodeVisitor*, osg::Drawable*, osg::State*) const override
+        void operator()(osg::Node*, osg::NodeVisitor*)
         {
-            if (!mRenderManager)
-                return false;
-
             mRenderManager->collectDrawCalls();
-            return false;
         }
 
     private:
@@ -123,11 +118,15 @@ public:
                 state->apply();
             }
 
+            // A GUI element without an associated texture would be extremely rare.
+            // It is worth it to use a dummy 1x1 black texture sampler instead of either adding a conditional or relinking shaders.
             osg::Texture2D* texture = batch.mTexture;
             if(texture)
                 state->applyTextureAttribute(0, texture);
+            else
+                state->applyTextureAttribute(0, mDummyTexture);
 
-            osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
+            osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : nullptr;
             if (bufferobject)
             {
                 state->bindVertexBufferObject(bufferobject);
@@ -138,9 +137,9 @@ public:
             }
             else
             {
-                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer());
-                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 12);
-                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 16);
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), reinterpret_cast<const char*>(vbo->getArray(0)->getDataPointer()));
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), reinterpret_cast<const char*>(vbo->getArray(0)->getDataPointer()) + 12);
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), reinterpret_cast<const char*>(vbo->getArray(0)->getDataPointer()) + 16);
             }
 
             glDrawArrays(GL_TRIANGLES, 0, batch.mVertexCount);
@@ -185,6 +184,10 @@ public:
         mStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         mStateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
 
+        mDummyTexture = new osg::Texture2D;
+        mDummyTexture->setInternalFormat(GL_RGB);
+        mDummyTexture->setTextureSize(1,1);
+
         // need to flip tex coords since MyGUI uses DirectX convention of top left image origin
         osg::Matrix flipMat;
         flipMat.preMultTranslate(osg::Vec3f(0,1,0));
@@ -197,6 +200,7 @@ public:
         , mStateSet(copy.mStateSet)
         , mWriteTo(0)
         , mReadFrom(0)
+        , mDummyTexture(copy.mDummyTexture)
     {
     }
 
@@ -227,6 +231,11 @@ public:
         mBatchVector[mWriteTo].clear();
     }
 
+    osg::StateSet* getDrawableStateSet()
+    {
+        return mStateSet;
+    }
+
     META_Object(osgMyGUI, Drawable)
 
 private:
@@ -238,6 +247,8 @@ private:
 
     int mWriteTo;
     mutable int mReadFrom;
+
+    osg::ref_ptr<osg::Texture2D> mDummyTexture;
 };
 
 class OSGVertexBuffer : public MyGUI::IVertexBuffer
@@ -263,7 +274,7 @@ public:
     osg::VertexBufferObject* getVertexBuffer();
 
     void setVertexCount(size_t count) override;
-    size_t getVertexCount() override;
+    size_t getVertexCount() const override;
 
     MyGUI::Vertex *lock() override;
     void unlock() override;
@@ -290,7 +301,7 @@ void OSGVertexBuffer::setVertexCount(size_t count)
     mNeedVertexCount = count;
 }
 
-size_t OSGVertexBuffer::getVertexCount()
+size_t OSGVertexBuffer::getVertexCount() const
 {
     return mNeedVertexCount;
 }
@@ -413,6 +424,16 @@ void RenderManager::shutdown()
     mSceneRoot->removeChild(mGuiRoot);
 }
 
+void RenderManager::enableShaders(Shader::ShaderManager& shaderManager)
+{
+    auto vertexShader = shaderManager.getShader("gui_vertex.glsl", {}, osg::Shader::VERTEX);
+    auto fragmentShader = shaderManager.getShader("gui_fragment.glsl", {}, osg::Shader::FRAGMENT);
+    auto program = shaderManager.getProgram(vertexShader, fragmentShader);
+
+    mDrawable->getDrawableStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON);
+    mDrawable->getDrawableStateSet()->addUniform(new osg::Uniform("diffuseMap", 0));
+}
+
 MyGUI::IVertexBuffer* RenderManager::createVertexBuffer()
 {
     return new OSGVertexBuffer();
@@ -438,11 +459,14 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
     batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getVertexBuffer();
     batch.mArray = static_cast<OSGVertexBuffer*>(buffer)->getVertexArray();
     static_cast<OSGVertexBuffer*>(buffer)->markUsed();
-    if (texture)
+
+    if (OSGTexture* osgtexture = static_cast<OSGTexture*>(texture))
     {
-        batch.mTexture = static_cast<OSGTexture*>(texture)->getTexture();
+        batch.mTexture = osgtexture->getTexture();
         if (batch.mTexture->getDataVariance() == osg::Object::DYNAMIC)
             mDrawable->setDataVariance(osg::Object::DYNAMIC); // only for this frame, reset in begin()
+        if (!mInjectState && osgtexture->getInjectState())
+            batch.mStateSet = osgtexture->getInjectState();
     }
     if (mInjectState)
         batch.mStateSet = mInjectState;
@@ -558,6 +582,14 @@ bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
 {
     // We support external textures that aren't registered via this manager, so can't implement this method sensibly.
     return true;
+}
+
+void RenderManager::registerShader(
+    const std::string& _shaderName,
+    const std::string& _vertexProgramFile,
+    const std::string& _fragmentProgramFile)
+{
+    MYGUI_PLATFORM_LOG(Warning, "osgMyGUI::RenderManager::registerShader is not implemented");
 }
 
 }

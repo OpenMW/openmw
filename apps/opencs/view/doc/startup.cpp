@@ -1,7 +1,6 @@
 #include "startup.hpp"
 
-#include <QApplication>
-#include <QDesktopWidget>
+#include <QGuiApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QRect>

@@ -55,7 +55,7 @@ namespace CSVRender
             /// Initiates a request to redraw the view
             void flagAsModified();
 
-            void setVisibilityMask(int mask);
+            void setVisibilityMask(unsigned int mask);
 
             osg::Camera *getCamera();
 
@@ -100,10 +100,15 @@ namespace CSVRender
             void mouseMoveEvent (QMouseEvent *event) override;
             void wheelEvent (QWheelEvent *event) override;
 
+            osg::ref_ptr<osg::Geometry> createGradientRectangle(QColor bgColour, QColor gradientColour);
+            osg::ref_ptr<osg::Camera> createGradientCamera(QColor bgColour, QColor gradientColour);
+            void updateGradientCamera(QColor bgColour, QColor gradientColour);
+
             std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
             Lighting* mLighting;
-
+            
+            osg::ref_ptr<osg::Camera> mGradientCamera;
             osg::Vec4f mDefaultAmbient;
             bool mHasDefaultAmbient;
             bool mIsExterior;

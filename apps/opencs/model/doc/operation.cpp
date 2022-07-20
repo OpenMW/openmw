@@ -7,7 +7,6 @@
 
 #include "../world/universalid.hpp"
 
-#include "state.hpp"
 #include "stage.hpp"
 
 void CSMDoc::Operation::prepareStages()

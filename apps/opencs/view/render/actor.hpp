@@ -2,12 +2,13 @@
 #define OPENCS_VIEW_RENDER_ACTOR_H
 
 #include <string>
+#include <string_view>
 
 #include <osg/ref_ptr>
 
 #include <QObject>
 
-#include <components/esm/loadarmo.hpp>
+#include <components/esm3/loadarmo.hpp>
 #include <components/sceneutil/visitor.hpp>
 
 #include "../../model/world/actoradapter.hpp"
@@ -54,7 +55,7 @@ namespace CSVRender
         void loadBodyParts();
         void attachBodyPart(ESM::PartReferenceType, const std::string& mesh);
 
-        std::string getBodyPartMesh(const std::string& bodyPartId);
+        std::string getBodyPartMesh(std::string_view bodyPartId);
 
         static const std::string MeshPrefix;
 

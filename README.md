@@ -1,24 +1,26 @@
 OpenMW
 ======
 
-[![Build Status](https://api.travis-ci.org/OpenMW/openmw.svg)](https://travis-ci.org/OpenMW/openmw) [![Build status](https://ci.appveyor.com/api/projects/status/github/openmw/openmw?svg=true)](https://ci.appveyor.com/project/psi29a/openmw)  [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740) [![pipeline status](https://gitlab.com/OpenMW/openmw/badges/master/pipeline.svg)](https://gitlab.com/OpenMW/openmw/commits/master)
-
-OpenMW is an open-source game engine that supports playing Morrowind by Bethesda Softworks. You need to own the game for OpenMW to play Morrowind.
+OpenMW is an open-source open-world RPG game engine that supports playing Morrowind by Bethesda Softworks. You need to own the game for OpenMW to play Morrowind.
 
 OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 
-* Version: 0.47.0
-* License: GPLv3 (see [LICENSE](https://github.com/OpenMW/openmw/blob/master/LICENSE) for more information)
+* Version: 0.48.0
+* License: GPLv3 (see [LICENSE](https://gitlab.com/OpenMW/openmw/-/raw/master/LICENSE) for more information)
 * Website: https://www.openmw.org
-* IRC: #openmw on irc.freenode.net
+* IRC: #openmw on irc.libera.chat
+* Discord: https://discord.gg/bWuqq2e
+
 
 Font Licenses:
-* DejaVuLGCSansMono.ttf: custom (see [files/mygui/DejaVuFontLicense.txt](https://github.com/OpenMW/openmw/blob/master/files/mygui/DejaVuFontLicense.txt) for more information)
+* DejaVuLGCSansMono.ttf: custom (see [files/data/fonts/DejaVuFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/DejaVuFontLicense.txt) for more information)
+* OMWAyembedt.ttf: SIL Open Font License (see [files/data/fonts/OMWAyembedtFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/OMWAyembedtFontLicense.txt) for more information)
+* Pelagiad.ttf: SIL Open Font License (see [files/data/fonts/PelagiadFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/PelagiadFontLicense.txt) for more information)
 
 Current Status
 --------------
 
-The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=1.0) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release however, OpenMW boasts some new [features](https://wiki.openmw.org/index.php?title=Features), such as improved graphics and user interfaces. 
+The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=1.0) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release however, OpenMW boasts some new [features](https://wiki.openmw.org/index.php?title=Features), such as improved graphics and user interfaces.
 
 Pre-existing modifications created for the original Morrowind engine can be hit-and-miss. The OpenMW script compiler performs more thorough error-checking than Morrowind does, meaning that a mod created for Morrowind may not necessarily run in OpenMW. Some mods also rely on quirky behaviour or engine bugs in order to work. We are considering such compatibility issues on a case-by-case basis - in some cases adding a workaround to OpenMW may be feasible, in other cases fixing the mod will be the only option. If you know of any mods that work or don't work, feel free to add them to the [Mod status](https://wiki.openmw.org/index.php?title=Mod_status) wiki page.
 
@@ -26,7 +28,7 @@ Getting Started
 ---------------
 
 * [Official forums](https://forum.openmw.org/)
-* [Installation instructions](https://wiki.openmw.org/index.php?title=Installation_Instructions)
+* [Installation instructions](https://openmw.readthedocs.io/en/latest/manuals/installation/index.html)
 * [Build from source](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
 * [Testing the game](https://wiki.openmw.org/index.php?title=Testing)
 * [How to contribute](https://wiki.openmw.org/index.php?title=Contribution_Wanted)

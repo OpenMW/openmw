@@ -7,9 +7,7 @@
 #include <set>
 #include <vector>
 
-#include <components/esm/loadspel.hpp>
-
-#include "magiceffects.hpp"
+#include <components/esm3/loadspel.hpp>
 
 namespace ESM
 {
@@ -18,12 +16,6 @@ namespace ESM
 
 namespace MWMechanics
 {
-    struct SpellParams
-    {
-        std::map<int, float> mEffectRands; // <effect index, normalised random magnitude>
-        std::set<int> mPurgedEffects; // indices of purged effects
-    };
-
     class Spells;
 
     /// Multiple instances of the same actor share the same spell list in Morrowind.
@@ -60,6 +52,8 @@ namespace MWMechanics
             void addListener(Spells* spells);
 
             void removeListener(Spells* spells);
+
+            void updateListener(Spells* before, Spells* after);
 
             const std::vector<std::string> getSpells() const;
     };

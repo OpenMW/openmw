@@ -13,18 +13,36 @@ namespace osg
     class Switch;
 }
 
+namespace osgText
+{
+    class Font;
+}
+
+namespace VFS
+{
+    class Manager;
+}
+
 namespace Resource
 {
     class Profiler : public osgViewer::StatsHandler
     {
     public:
-        Profiler();
+        Profiler(bool offlineCollect, VFS::Manager* vfs);
+        bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
+
+    private:
+        void setUpFonts();
+
+        bool _offlineCollect;
+        bool _initFonts;
+        osg::ref_ptr<osgText::Font> _textFont;
     };
 
     class StatsHandler : public osgGA::GUIEventHandler
     {
     public:
-        StatsHandler();
+        StatsHandler(bool offlineCollect, VFS::Manager* vfs);
 
         void setKey(int key) { _key = key; }
         int getKey() const { return _key; }
@@ -47,16 +65,19 @@ namespace Resource
         osg::ref_ptr<osg::Camera>  _camera;
         bool _initialized;
         bool _statsType;
+        bool _offlineCollect;
 
         float                               _statsWidth;
         float                               _statsHeight;
 
-        std::string                         _font;
         float                               _characterSize;
 
         int _resourceStatsChildNum;
 
+        osg::ref_ptr<osgText::Font> _textFont;
     };
+
+    void CollectStatistics(osgViewer::ViewerBase* viewer);
 
 }
 

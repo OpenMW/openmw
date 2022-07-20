@@ -33,14 +33,28 @@ bool WorkItem::isDone() const
     return mDone;
 }
 
-WorkQueue::WorkQueue(int workerThreads)
+WorkQueue::WorkQueue(std::size_t workerThreads)
     : mIsReleased(false)
 {
-    for (int i=0; i<workerThreads; ++i)
-        mThreads.emplace_back(std::make_unique<WorkThread>(*this));
+    start(workerThreads);
 }
 
 WorkQueue::~WorkQueue()
+{
+    stop();
+}
+
+void WorkQueue::start(std::size_t workerThreads)
+{
+    {
+        const std::lock_guard lock(mMutex);
+        mIsReleased = false;
+    }
+    while (mThreads.size() < workerThreads)
+        mThreads.emplace_back(std::make_unique<WorkThread>(*this));
+}
+
+void WorkQueue::stop()
 {
     {
         std::unique_lock<std::mutex> lock(mMutex);
@@ -63,9 +77,9 @@ void WorkQueue::addWorkItem(osg::ref_ptr<WorkItem> item, bool front)
 
     std::unique_lock<std::mutex> lock(mMutex);
     if (front)
-        mQueue.push_front(item);
+        mQueue.push_front(std::move(item));
     else
-        mQueue.push_back(item);
+        mQueue.push_back(std::move(item));
     mCondition.notify_one();
 }
 
@@ -78,12 +92,11 @@ osg::ref_ptr<WorkItem> WorkQueue::removeWorkItem()
     }
     if (!mQueue.empty())
     {
-        osg::ref_ptr<WorkItem> item = mQueue.front();
+        osg::ref_ptr<WorkItem> item = std::move(mQueue.front());
         mQueue.pop_front();
         return item;
     }
-    else
-        return nullptr;
+    return nullptr;
 }
 
 unsigned int WorkQueue::getNumItems() const

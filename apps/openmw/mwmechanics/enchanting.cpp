@@ -22,6 +22,7 @@ namespace MWMechanics
     Enchanting::Enchanting()
         : mCastStyle(ESM::Enchantment::CastOnce)
         , mSelfEnchanting(false)
+        , mObjectType(0)
         , mWeaponType(-1)
     {}
 
@@ -29,11 +30,11 @@ namespace MWMechanics
     {
         mOldItemPtr=oldItem;
         mWeaponType = -1;
-        mObjectType.clear();
+        mObjectType = 0;
         if(!itemEmpty())
         {
-            mObjectType = mOldItemPtr.getTypeName();
-            if (mObjectType == typeid(ESM::Weapon).name())
+            mObjectType = mOldItemPtr.getType();
+            if (mObjectType == ESM::Weapon::sRecordId)
                 mWeaponType = mOldItemPtr.get<ESM::Weapon>()->mBase->mData.mType;
         }
     }
@@ -75,7 +76,8 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(getEnchantChance() <= (Misc::Rng::roll0to99()))
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            if(getEnchantChance() <= (Misc::Rng::roll0to99(prng)))
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
@@ -115,7 +117,7 @@ namespace MWMechanics
 
         const bool powerfulSoul = getGemCharge() >= \
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->mValue.getInteger();
-        if ((mObjectType == typeid(ESM::Armor).name()) || (mObjectType == typeid(ESM::Clothing).name()))
+        if ((mObjectType == ESM::Armor::sRecordId) || (mObjectType == ESM::Clothing::sRecordId))
         { // Armor or Clothing
             switch(mCastStyle)
             {
@@ -150,7 +152,7 @@ namespace MWMechanics
                     return;
             }
         }
-        else if(mObjectType == typeid(ESM::Book).name())
+        else if(mObjectType == ESM::Book::sRecordId)
         { // Scroll or Book
             mCastStyle = ESM::Enchantment::CastOnce;
             return;
@@ -355,10 +357,10 @@ namespace MWMechanics
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
             if (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)
             {
-                static const float multiplier = std::max(0.f, std::min(1.0f, Settings::Manager::getFloat("projectiles enchant multiplier", "Game")));
+                static const float multiplier = std::clamp(Settings::Manager::getFloat("projectiles enchant multiplier", "Game"), 0.f, 1.f);
                 MWWorld::Ptr player = getPlayer();
-                int itemsInInventoryCount = player.getClass().getContainerStore(player).count(mOldItemPtr.getCellRef().getRefId());
-                count = std::min(itemsInInventoryCount, std::max(1, int(getGemCharge() * multiplier / enchantPoints)));
+                count = player.getClass().getContainerStore(player).count(mOldItemPtr.getCellRef().getRefId());
+                count = std::clamp<int>(getGemCharge() * multiplier / enchantPoints, 1, count);
             }
         }
 

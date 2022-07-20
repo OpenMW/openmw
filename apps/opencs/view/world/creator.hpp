@@ -96,7 +96,7 @@ namespace CSVWorld
     Creator *CreatorFactory<CreatorT, scope>::makeCreator (CSMDoc::Document& document,
                                                            const CSMWorld::UniversalId& id) const
     {
-        std::unique_ptr<CreatorT> creator (new CreatorT (document.getData(), document.getUndoStack(), id));
+        auto creator = std::make_unique<CreatorT>(document.getData(), document.getUndoStack(), id);
 
         creator->setScope (scope);
 

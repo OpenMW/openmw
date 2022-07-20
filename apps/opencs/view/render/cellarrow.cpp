@@ -1,14 +1,11 @@
-
 #include "cellarrow.hpp"
 
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
 #include "../../model/prefs/state.hpp"
-#include "../../model/prefs/shortcutmanager.hpp"
 
 #include <components/misc/constants.hpp>
 
@@ -23,7 +20,7 @@ CSVRender::CellArrow *CSVRender::CellArrowTag::getCellArrow() const
     return mArrow;
 }
 
-QString CSVRender::CellArrowTag::getToolTip (bool hideBasics) const
+QString CSVRender::CellArrowTag::getToolTip(bool hideBasics, const WorldspaceHitResult& /*hit*/) const
 {
     QString text ("Direction: ");
 
@@ -60,7 +57,7 @@ void CSVRender::CellArrow::adjustTransform()
 {
     // position
     const int cellSize = Constants::CellSizeInUnits;
-    const int offset = cellSize / 2 + 800;
+    const int offset = cellSize / 2 + 600;
 
     int x = mCoordinates.getX()*cellSize + cellSize/2;
     int y = mCoordinates.getY()*cellSize + cellSize/2;
@@ -92,9 +89,9 @@ void CSVRender::CellArrow::buildShape()
 {
     osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
 
-    const int arrowWidth = 4000;
-    const int arrowLength = 1500;
-    const int arrowHeight = 500;
+    const int arrowWidth = 2700;
+    const int arrowLength = 1350;
+    const int arrowHeight = 300;
 
     osg::Vec3Array *vertices = new osg::Vec3Array;
     for (int i2=0; i2<2; ++i2)
@@ -151,18 +148,15 @@ void CSVRender::CellArrow::buildShape()
     osg::Vec4Array *colours = new osg::Vec4Array;
 
     for (int i=0; i<6; ++i)
-        colours->push_back (osg::Vec4f (1.0f, 0.0f, 0.0f, 1.0f));
+        colours->push_back (osg::Vec4f (0.11f, 0.6f, 0.95f, 1.0f));
     for (int i=0; i<6; ++i)
-        colours->push_back (osg::Vec4f (0.8f, (i==2 || i==5) ? 0.6f : 0.4f, 0.0f, 1.0f));
+        colours->push_back (osg::Vec4f (0.08f, 0.44f, 0.7f, 1.0f));
 
     geometry->setColorArray (colours, osg::Array::BIND_PER_VERTEX);
 
     geometry->getOrCreateStateSet()->setMode (GL_LIGHTING, osg::StateAttribute::OFF);
 
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-    geode->addDrawable (geometry);
-
-    mBaseNode->addChild (geode);
+    mBaseNode->addChild (geometry);
 }
 
 CSVRender::CellArrow::CellArrow (osg::Group *cellNode, Direction direction,

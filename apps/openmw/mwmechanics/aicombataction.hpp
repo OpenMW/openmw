@@ -3,8 +3,6 @@
 
 #include <memory>
 
-#include <components/esm/loadspel.hpp>
-
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
 
@@ -87,7 +85,7 @@ namespace MWMechanics
         const ESM::Weapon* getWeapon() const override;
     };
 
-    std::shared_ptr<Action> prepareNextAction (const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
+    std::unique_ptr<Action> prepareNextAction (const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
     float getBestActionRating(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy);
 
     float getDistanceMinusHalfExtents(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool minusZDist=false);

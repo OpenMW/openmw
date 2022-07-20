@@ -148,7 +148,7 @@ namespace MWGui
         // We need this copy for when @# hyperlinks are replaced
         std::string text = mText;
 
-        size_t pos_end;
+        size_t pos_end = std::string::npos;
         for(;;)
         {
             size_t pos_begin = text.find('@');
@@ -306,7 +306,7 @@ namespace MWGui
         deleteLater();
         for (Link* link : mLinks)
             delete link;
-        for (auto link : mTopicLinks)
+        for (const auto& link : mTopicLinks)
             delete link.second;
         for (auto history : mHistoryContents)
             delete history;
@@ -347,8 +347,7 @@ namespace MWGui
     {
         if (!mScrollBar->getVisible())
             return;
-        mScrollBar->setScrollPosition(std::min(static_cast<int>(mScrollBar->getScrollRange()-1),
-                                               std::max(0, static_cast<int>(mScrollBar->getScrollPosition() - _rel*0.3))));
+        mScrollBar->setScrollPosition(std::clamp<int>(mScrollBar->getScrollPosition() - _rel*0.3, 0, mScrollBar->getScrollRange() - 1));
         onScrollbarMoved(mScrollBar, mScrollBar->getScrollPosition());
     }
 
@@ -369,15 +368,15 @@ namespace MWGui
 
         const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        const std::string sPersuasion = gmst.find("sPersuasion")->mValue.getString();
-        const std::string sCompanionShare = gmst.find("sCompanionShare")->mValue.getString();
-        const std::string sBarter = gmst.find("sBarter")->mValue.getString();
-        const std::string sSpells = gmst.find("sSpells")->mValue.getString();
-        const std::string sTravel = gmst.find("sTravel")->mValue.getString();
-        const std::string sSpellMakingMenuTitle = gmst.find("sSpellMakingMenuTitle")->mValue.getString();
-        const std::string sEnchanting = gmst.find("sEnchanting")->mValue.getString();
-        const std::string sServiceTrainingTitle = gmst.find("sServiceTrainingTitle")->mValue.getString();
-        const std::string sRepair = gmst.find("sRepair")->mValue.getString();
+        const std::string& sPersuasion = gmst.find("sPersuasion")->mValue.getString();
+        const std::string& sCompanionShare = gmst.find("sCompanionShare")->mValue.getString();
+        const std::string& sBarter = gmst.find("sBarter")->mValue.getString();
+        const std::string& sSpells = gmst.find("sSpells")->mValue.getString();
+        const std::string& sTravel = gmst.find("sTravel")->mValue.getString();
+        const std::string& sSpellMakingMenuTitle = gmst.find("sSpellMakingMenuTitle")->mValue.getString();
+        const std::string& sEnchanting = gmst.find("sEnchanting")->mValue.getString();
+        const std::string& sServiceTrainingTitle = gmst.find("sServiceTrainingTitle")->mValue.getString();
+        const std::string& sRepair = gmst.find("sRepair")->mValue.getString();
 
         if (topic != sPersuasion && topic != sCompanionShare && topic != sBarter 
          && topic != sSpells && topic != sTravel && topic != sSpellMakingMenuTitle 
@@ -451,6 +450,7 @@ namespace MWGui
         setTitle(mPtr.getClass().getName(mPtr));
 
         updateTopics();
+        updateTopicsPane(); // force update for new services
 
         updateDisposition();
         restock();
@@ -487,12 +487,14 @@ namespace MWGui
         mHistoryContents.clear();
     }
 
-    void DialogueWindow::setKeywords(std::list<std::string> keyWords)
+    bool DialogueWindow::setKeywords(const std::list<std::string>& keyWords)
     {
         if (mKeywords == keyWords && isCompanion() == mIsCompanion)
-            return;
+            return false;
         mIsCompanion = isCompanion();
         mKeywords = keyWords;
+        updateTopicsPane();
+        return true;
     }
 
     void DialogueWindow::updateTopicsPane()
@@ -505,13 +507,13 @@ namespace MWGui
 
         int services = mPtr.getClass().getServices(mPtr);
 
-        bool travel = (mPtr.getTypeName() == typeid(ESM::NPC).name() && !mPtr.get<ESM::NPC>()->mBase->getTransport().empty())
-                || (mPtr.getTypeName() == typeid(ESM::Creature).name() && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
+        bool travel = (mPtr.getType() == ESM::NPC::sRecordId && !mPtr.get<ESM::NPC>()->mBase->getTransport().empty())
+                || (mPtr.getType() == ESM::Creature::sRecordId && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+        if (mPtr.getType() == ESM::NPC::sRecordId)
             mTopicsList->addItem(gmst.find("sPersuasion")->mValue.getString());
 
         if (services & ESM::NPC::AllItems)
@@ -556,6 +558,8 @@ namespace MWGui
         mTopicsList->adjustSize();
 
         updateHistory();
+        // The topics list has been regenerated so topic formatting needs to be updated
+        updateTopicFormat();
     }
 
     void DialogueWindow::updateHistory(bool scrollbar)
@@ -601,10 +605,10 @@ namespace MWGui
             Goodbye* link = new Goodbye();
             link->eventActivated += MyGUI::newDelegate(this, &DialogueWindow::onGoodbyeActivated);
             mLinks.push_back(link);
-            std::string goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->mValue.getString();
+            const std::string& goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->mValue.getString();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
-                                                                              textColours.answerPressed,
-                                                                              TypesetBook::InteractiveId(link));
+                textColours.answerPressed,
+                TypesetBook::InteractiveId(link));
             typesetter->lineBreak();
             typesetter->write(questionStyle, to_utf8_span(goodbye.c_str()));
         }
@@ -758,9 +762,9 @@ namespace MWGui
 
     void DialogueWindow::updateTopics()
     {
-        setKeywords(MWBase::Environment::get().getDialogueManager()->getAvailableTopics());
-        updateTopicsPane();
-        updateTopicFormat();
+        // Topic formatting needs to be updated regardless of whether the topic list has changed
+        if (!setKeywords(MWBase::Environment::get().getDialogueManager()->getAvailableTopics()))
+            updateTopicFormat();
     }
 
     bool DialogueWindow::isCompanion()

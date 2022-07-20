@@ -8,7 +8,7 @@ namespace CSVRender
     /// @note See the respective file in OpenMW (apps/openmw/mwrender/vismask.hpp)
     /// for general usage hints about node masks.
     /// @copydoc MWRender::VisMask
-    enum Mask
+    enum Mask : unsigned int
     {
         // elements that are part of the actual scene
         Mask_Reference = 0x2,

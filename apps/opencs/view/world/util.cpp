@@ -4,13 +4,10 @@
 #include <stdexcept>
 
 #include <QUndoStack>
-#include <QMetaProperty>
 #include <QStyledItemDelegate>
 #include <QLineEdit>
-#include <QComboBox>
 #include <QCheckBox>
 #include <QPlainTextEdit>
-#include <QEvent>
 #include <QItemEditorFactory>
 
 #include "../../model/world/commands.hpp"
@@ -57,7 +54,7 @@ QVariant CSVWorld::NastyTableModelHack::getData() const
 CSVWorld::CommandDelegateFactory::~CommandDelegateFactory() {}
 
 
-CSVWorld::CommandDelegateFactoryCollection *CSVWorld::CommandDelegateFactoryCollection::sThis = 0;
+CSVWorld::CommandDelegateFactoryCollection *CSVWorld::CommandDelegateFactoryCollection::sThis = nullptr;
 
 CSVWorld::CommandDelegateFactoryCollection::CommandDelegateFactoryCollection()
 {
@@ -69,7 +66,7 @@ CSVWorld::CommandDelegateFactoryCollection::CommandDelegateFactoryCollection()
 
 CSVWorld::CommandDelegateFactoryCollection::~CommandDelegateFactoryCollection()
 {
-    sThis = 0;
+    sThis = nullptr;
 
     for (std::map<CSMWorld::ColumnBase::Display, CommandDelegateFactory *>::iterator iter (
         mFactories.begin());
@@ -193,7 +190,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         variant = index.data(Qt::DisplayRole);
         if (!variant.isValid())
         {
-            return 0;
+            return nullptr;
         }
     }
 
@@ -261,16 +258,10 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return dsb;
         }
 
+        /// \todo implement size limit. QPlainTextEdit does not support a size limit.
         case CSMWorld::ColumnBase::Display_LongString:
-        {
-            QPlainTextEdit *edit = new QPlainTextEdit(parent);
-            edit->setUndoRedoEnabled (false);
-            return edit;
-        }
-
         case CSMWorld::ColumnBase::Display_LongString256:
         {
-            /// \todo implement size limit. QPlainTextEdit does not support a size limit.
             QPlainTextEdit *edit = new QPlainTextEdit(parent);
             edit->setUndoRedoEnabled (false);
             return edit;
@@ -294,6 +285,14 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
             CSVWidget::DropLineEdit *widget = new CSVWidget::DropLineEdit(display, parent);
             widget->setMaxLength (32);
+            return widget;
+        }
+
+        case CSMWorld::ColumnBase::Display_String64:
+        {
+        // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
+            CSVWidget::DropLineEdit *widget = new CSVWidget::DropLineEdit(display, parent);
+            widget->setMaxLength (64);
             return widget;
         }
 
@@ -362,7 +361,7 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
     if (!n.isEmpty())
     {
         if (!variant.isValid())
-            variant = QVariant(editor->property(n).userType(), (const void *)0);
+            variant = QVariant(editor->property(n).userType(), (const void *)nullptr);
         editor->setProperty(n, variant);
     }
 

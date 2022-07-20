@@ -1,10 +1,8 @@
 #include "globalcreator.hpp"
 
-#include <components/esm/variant.hpp>
+#include <components/esm3/variant.hpp>
 
-#include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
-#include "../../model/world/columns.hpp"
 #include "../../model/world/idtable.hpp"
 
 namespace CSVWorld

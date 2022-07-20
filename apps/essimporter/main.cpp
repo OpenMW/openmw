@@ -1,15 +1,13 @@
 #include <iostream>
+#include <filesystem>
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
 
 #include <components/files/configurationmanager.hpp>
 
 #include "importer.hpp"
 
 namespace bpo = boost::program_options;
-namespace bfs = boost::filesystem;
-
 
 
 int main(int argc, char** argv)
@@ -26,6 +24,7 @@ int main(int argc, char** argv)
             ("encoding", boost::program_options::value<std::string>()->default_value("win1252"), "encoding of the save file")
         ;
         p_desc.add("mwsave", 1).add("output", 1);
+        Files::ConfigurationManager::addCommonOptions(desc);
 
         bpo::variables_map variables;
 
@@ -57,7 +56,7 @@ int main(int argc, char** argv)
         else
         {
             const std::string& ext = ".omwsave";
-            if (boost::filesystem::exists(boost::filesystem::path(outputFile))
+            if (std::filesystem::exists(std::filesystem::path(outputFile))
                     && (outputFile.size() < ext.size() || outputFile.substr(outputFile.size()-ext.size()) != ext))
             {
                 throw std::runtime_error("Output file already exists and does not end in .omwsave. Did you mean to use --compare?");

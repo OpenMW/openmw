@@ -3,7 +3,7 @@
 
 #include "importinventory.hpp"
 
-#include <components/esm/inventorystate.hpp>
+#include <components/esm3/inventorystate.hpp>
 
 namespace ESSImport
 {

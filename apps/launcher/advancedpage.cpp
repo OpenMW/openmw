@@ -1,27 +1,37 @@
 #include "advancedpage.hpp"
 
-#include <components/config/gamesettings.hpp>
-#include <components/config/launchersettings.hpp>
+#include <array>
+#include <string>
+#include <cmath>
+
 #include <QFileDialog>
 #include <QCompleter>
-#include <QProxyStyle>
+#include <QString>
+
+#include <components/config/gamesettings.hpp>
 #include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>
 
-#include <cmath>
+#include "utils/openalutil.hpp"
 
-Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg,
-                                     Config::GameSettings &gameSettings,
-                                     Settings::Manager &engineSettings, QWidget *parent)
+Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings, QWidget *parent)
         : QWidget(parent)
-        , mCfgMgr(cfg)
         , mGameSettings(gameSettings)
-        , mEngineSettings(engineSettings)
 {
     setObjectName ("AdvancedPage");
     setupUi(this);
 
+    for(const std::string& name : Launcher::enumerateOpenALDevices())
+    {
+        audioDeviceSelectorComboBox->addItem(QString::fromStdString(name), QString::fromStdString(name));
+    }
+    for(const std::string& name : Launcher::enumerateOpenALDevicesHrtf())
+    {
+        hrtfProfileSelectorComboBox->addItem(QString::fromStdString(name), QString::fromStdString(name));
+    }
+
     loadSettings();
+
     mCellNameCompleter.setModel(&mCellNameCompleterModel);
     startDefaultCharacterAtField->setCompleter(&mCellNameCompleter);
 }
@@ -64,12 +74,12 @@ namespace
 
     double convertToCells(double unitRadius)
     {
-        return std::round((unitRadius / 0.93 + 1024) / CellSizeInUnits);
+        return unitRadius / CellSizeInUnits;
     }
 
-    double convertToUnits(double CellGridRadius)
+    int convertToUnits(double CellGridRadius)
     {
-        return (CellSizeInUnits * CellGridRadius - 1024) * 0.93;
+        return static_cast<int>(CellSizeInUnits * CellGridRadius);
     }
 }
 
@@ -89,14 +99,15 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
         loadSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
         loadSettingBool(avoidCollisionsCheckBox, "NPCs avoid collisions", "Game");
-        int unarmedFactorsStrengthIndex = mEngineSettings.getInt("strength influences hand to hand", "Game");
+        int unarmedFactorsStrengthIndex = Settings::Manager::getInt("strength influences hand to hand", "Game");
         if (unarmedFactorsStrengthIndex >= 0 && unarmedFactorsStrengthIndex <= 2)
             unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
         loadSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
         loadSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
-        int numPhysicsThreads = mEngineSettings.getInt("async num threads", "Physics");
+        int numPhysicsThreads = Settings::Manager::getInt("async num threads", "Physics");
         if (numPhysicsThreads >= 0)
             physicsThreadsSpinBox->setValue(numPhysicsThreads);
+        loadSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
     }
 
     // Visuals
@@ -106,11 +117,15 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(autoUseTerrainNormalMapsCheckBox, "auto use terrain normal maps", "Shaders");
         loadSettingBool(autoUseTerrainSpecularMapsCheckBox, "auto use terrain specular maps", "Shaders");
         loadSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
-        loadSettingBool(radialFogCheckBox, "radial fog", "Shaders");
+        loadSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
+        loadSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
+        if (Settings::Manager::getInt("antialiasing", "Video") == 0) {
+            antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
+        }
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
-        if (animSourcesCheckBox->checkState())
+        if (animSourcesCheckBox->checkState() != Qt::Unchecked)
         {
             loadSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
             loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
@@ -118,27 +133,56 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(turnToMovementDirectionCheckBox, "turn to movement direction", "Game");
         loadSettingBool(smoothMovementCheckBox, "smooth movement", "Game");
 
-        const bool distantTerrain = mEngineSettings.getBool("distant terrain", "Terrain");
-        const bool objectPaging = mEngineSettings.getBool("object paging", "Terrain");
+        const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        const bool objectPaging = Settings::Manager::getBool("object paging", "Terrain");
         if (distantTerrain && objectPaging) {
             distantLandCheckBox->setCheckState(Qt::Checked);
         }
 
         loadSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
-        viewingDistanceComboBox->setValue(convertToCells(mEngineSettings.getInt("viewing distance", "Camera")));
+        viewingDistanceComboBox->setValue(convertToCells(Settings::Manager::getInt("viewing distance", "Camera")));
+        objectPagingMinSizeComboBox->setValue(Settings::Manager::getDouble("object paging min size", "Terrain"));
+
+        loadSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
+
+        connect(postprocessEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotPostProcessToggled(bool)));
+        loadSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
+        loadSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
+        loadSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
+        postprocessHDRTimeComboBox->setValue(Settings::Manager::getDouble("hdr exposure time", "Post Processing"));
+
+        connect(skyBlendingCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotSkyBlendingToggled(bool)));
+        loadSettingBool(radialFogCheckBox, "radial fog", "Fog");
+        loadSettingBool(exponentialFogCheckBox, "exponential fog", "Fog");
+        loadSettingBool(skyBlendingCheckBox, "sky blending", "Fog");
+        skyBlendingStartComboBox->setValue(Settings::Manager::getDouble("sky blending start", "Fog"));
     }
 
-    // Camera
+    // Audio
     {
-        loadSettingBool(viewOverShoulderCheckBox, "view over shoulder", "Camera");
-        connect(viewOverShoulderCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotViewOverShoulderToggled(bool)));
-        viewOverShoulderVerticalLayout->setEnabled(viewOverShoulderCheckBox->checkState());
-        loadSettingBool(autoSwitchShoulderCheckBox, "auto switch shoulder", "Camera");
-        loadSettingBool(previewIfStandStillCheckBox, "preview if stand still", "Camera");
-        loadSettingBool(deferredPreviewRotationCheckBox, "deferred preview rotation", "Camera");
-        loadSettingBool(headBobbingCheckBox, "head bobbing", "Camera");
-        defaultShoulderComboBox->setCurrentIndex(
-            mEngineSettings.getVector2("view over shoulder offset", "Camera").x() >= 0 ? 0 : 1);
+        std::string selectedAudioDevice = Settings::Manager::getString("device", "Sound");
+        if (selectedAudioDevice.empty() == false)
+        {
+            int audioDeviceIndex = audioDeviceSelectorComboBox->findData(QString::fromStdString(selectedAudioDevice));
+            if (audioDeviceIndex != -1)
+            {
+                audioDeviceSelectorComboBox->setCurrentIndex(audioDeviceIndex);
+            }
+        }
+        int hrtfEnabledIndex = Settings::Manager::getInt("hrtf enable", "Sound");
+        if (hrtfEnabledIndex >= -1 && hrtfEnabledIndex <= 1)
+        {
+            enableHRTFComboBox->setCurrentIndex(hrtfEnabledIndex + 1);
+        }
+        std::string selectedHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
+        if (selectedHRTFProfile.empty() == false)
+        {
+            int hrtfProfileIndex = hrtfProfileSelectorComboBox->findData(QString::fromStdString(selectedHRTFProfile));
+            if (hrtfProfileIndex != -1)
+            {
+                hrtfProfileSelectorComboBox->setCurrentIndex(hrtfProfileIndex);
+            }
+        }
     }
 
     // Interface Changes
@@ -148,11 +192,14 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
         loadSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
         loadSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
-        int showOwnedIndex = mEngineSettings.getInt("show owned", "Game");
+        int showOwnedIndex = Settings::Manager::getInt("show owned", "Game");
         // Match the index with the option (only 0, 1, 2, or 3 are valid). Will default to 0 if invalid.
         if (showOwnedIndex >= 0 && showOwnedIndex <= 3)
             showOwnedComboBox->setCurrentIndex(showOwnedIndex);
         loadSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
+        loadSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
+        loadSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
+        scalingSpinBox->setValue(Settings::Manager::getFloat("scaling factor", "GUI"));
     }
 
     // Bug fixes
@@ -165,13 +212,15 @@ bool Launcher::AdvancedPage::loadSettings()
     {
         // Saves
         loadSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        maximumQuicksavesComboBox->setValue(mEngineSettings.getInt("max quicksaves", "Saves"));
+        loadSettingInt(maximumQuicksavesComboBox,"max quicksaves", "Saves");
 
         // Other Settings
-        QString screenshotFormatString = QString::fromStdString(mEngineSettings.getString("screenshot format", "General")).toUpper();
+        QString screenshotFormatString = QString::fromStdString(Settings::Manager::getString("screenshot format", "General")).toUpper();
         if (screenshotFormatComboBox->findText(screenshotFormatString) == -1)
             screenshotFormatComboBox->addItem(screenshotFormatString);
         screenshotFormatComboBox->setCurrentIndex(screenshotFormatComboBox->findText(screenshotFormatString));
+
+        loadSettingBool(notifyOnSavedScreenshotCheckBox, "notify on saved screenshot", "General");
     }
 
     // Testing
@@ -208,14 +257,11 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
         saveSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
         saveSettingBool(avoidCollisionsCheckBox, "NPCs avoid collisions", "Game");
-        int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
-        if (unarmedFactorsStrengthIndex != mEngineSettings.getInt("strength influences hand to hand", "Game"))
-            mEngineSettings.setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
+        saveSettingInt(unarmedFactorsStrengthComboBox, "strength influences hand to hand", "Game");
         saveSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
         saveSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
-        int numPhysicsThreads = physicsThreadsSpinBox->value();
-        if (numPhysicsThreads != mEngineSettings.getInt("async num threads", "Physics"))
-            mEngineSettings.setInt("async num threads", "Physics", numPhysicsThreads);
+        saveSettingInt(physicsThreadsSpinBox, "async num threads", "Physics");
+        saveSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
     }
 
     // Visuals
@@ -225,7 +271,9 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(autoUseTerrainNormalMapsCheckBox, "auto use terrain normal maps", "Shaders");
         saveSettingBool(autoUseTerrainSpecularMapsCheckBox, "auto use terrain specular maps", "Shaders");
         saveSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
-        saveSettingBool(radialFogCheckBox, "radial fog", "Shaders");
+        saveSettingBool(radialFogCheckBox, "radial fog", "Fog");
+        saveSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
+        saveSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
         saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
         saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
@@ -233,38 +281,69 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(turnToMovementDirectionCheckBox, "turn to movement direction", "Game");
         saveSettingBool(smoothMovementCheckBox, "smooth movement", "Game");
 
-        const bool distantTerrain = mEngineSettings.getBool("distant terrain", "Terrain");
-        const bool objectPaging = mEngineSettings.getBool("object paging", "Terrain");
+        const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        const bool objectPaging = Settings::Manager::getBool("object paging", "Terrain");
         const bool wantDistantLand = distantLandCheckBox->checkState();
         if (wantDistantLand != (distantTerrain && objectPaging)) {
-            mEngineSettings.setBool("distant terrain", "Terrain", wantDistantLand);
-            mEngineSettings.setBool("object paging", "Terrain", wantDistantLand);
+            Settings::Manager::setBool("distant terrain", "Terrain", wantDistantLand);
+            Settings::Manager::setBool("object paging", "Terrain", wantDistantLand);
         }
 
         saveSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
-        double viewingDistance = viewingDistanceComboBox->value();
-        if (viewingDistance != convertToCells(mEngineSettings.getInt("viewing distance", "Camera")))
+        int viewingDistance = convertToUnits(viewingDistanceComboBox->value());
+        if (viewingDistance != Settings::Manager::getInt("viewing distance", "Camera"))
         {
-            mEngineSettings.setInt("viewing distance", "Camera", convertToUnits(viewingDistance));
+            Settings::Manager::setInt("viewing distance", "Camera", viewingDistance);
         }
+        double objectPagingMinSize = objectPagingMinSizeComboBox->value();
+        if (objectPagingMinSize != Settings::Manager::getDouble("object paging min size", "Terrain"))
+            Settings::Manager::setDouble("object paging min size", "Terrain", objectPagingMinSize);
+
+        saveSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
+
+        saveSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
+        saveSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
+        saveSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
+        double hdrExposureTime = postprocessHDRTimeComboBox->value();
+        if (hdrExposureTime != Settings::Manager::getDouble("hdr exposure time", "Post Processing"))
+            Settings::Manager::setDouble("hdr exposure time", "Post Processing", hdrExposureTime);
+
+        saveSettingBool(radialFogCheckBox, "radial fog", "Fog");
+        saveSettingBool(exponentialFogCheckBox, "exponential fog", "Fog");
+        saveSettingBool(skyBlendingCheckBox, "sky blending", "Fog");
+        Settings::Manager::setDouble("sky blending start", "Fog", skyBlendingStartComboBox->value());
     }
-
-    // Camera
+    
+    // Audio
     {
-        saveSettingBool(viewOverShoulderCheckBox, "view over shoulder", "Camera");
-        saveSettingBool(autoSwitchShoulderCheckBox, "auto switch shoulder", "Camera");
-        saveSettingBool(previewIfStandStillCheckBox, "preview if stand still", "Camera");
-        saveSettingBool(deferredPreviewRotationCheckBox, "deferred preview rotation", "Camera");
-        saveSettingBool(headBobbingCheckBox, "head bobbing", "Camera");
-
-        osg::Vec2f shoulderOffset = mEngineSettings.getVector2("view over shoulder offset", "Camera");
-        if (defaultShoulderComboBox->currentIndex() != (shoulderOffset.x() >= 0 ? 0 : 1))
+        int audioDeviceIndex = audioDeviceSelectorComboBox->currentIndex();
+        std::string prevAudioDevice = Settings::Manager::getString("device", "Sound");
+        if (audioDeviceIndex != 0)
         {
-            if (defaultShoulderComboBox->currentIndex() == 0)
-                shoulderOffset.x() = std::abs(shoulderOffset.x());
-            else
-                shoulderOffset.x() = -std::abs(shoulderOffset.x());
-            mEngineSettings.setVector2("view over shoulder offset", "Camera", shoulderOffset);
+            const std::string& newAudioDevice = audioDeviceSelectorComboBox->currentText().toUtf8().constData();
+            if (newAudioDevice != prevAudioDevice)
+                Settings::Manager::setString("device", "Sound", newAudioDevice);
+        }
+        else if (!prevAudioDevice.empty())
+        {
+            Settings::Manager::setString("device", "Sound", {});
+        }
+        int hrtfEnabledIndex = enableHRTFComboBox->currentIndex() - 1;
+        if (hrtfEnabledIndex != Settings::Manager::getInt("hrtf enable", "Sound"))
+        {
+            Settings::Manager::setInt("hrtf enable", "Sound", hrtfEnabledIndex);
+        }
+        int selectedHRTFProfileIndex = hrtfProfileSelectorComboBox->currentIndex();
+        std::string prevHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
+        if (selectedHRTFProfileIndex != 0)
+        {
+            const std::string& newHRTFProfile  = hrtfProfileSelectorComboBox->currentText().toUtf8().constData();
+            if (newHRTFProfile != prevHRTFProfile)
+                Settings::Manager::setString("hrtf", "Sound", newHRTFProfile);
+        }
+        else if (!prevHRTFProfile.empty())
+        {
+            Settings::Manager::setString("hrtf", "Sound", {});
         }
     }
 
@@ -275,10 +354,13 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
         saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
         saveSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
-        int showOwnedCurrentIndex = showOwnedComboBox->currentIndex();
-        if (showOwnedCurrentIndex != mEngineSettings.getInt("show owned", "Game"))
-            mEngineSettings.setInt("show owned", "Game", showOwnedCurrentIndex);
+        saveSettingInt(showOwnedComboBox,"show owned", "Game");
         saveSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
+        saveSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
+        saveSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
+        float uiScalingFactor = scalingSpinBox->value();
+        if (uiScalingFactor != Settings::Manager::getFloat("scaling factor", "GUI"))
+            Settings::Manager::setFloat("scaling factor", "GUI", uiScalingFactor);
     }
 
     // Bug fixes
@@ -291,16 +373,14 @@ void Launcher::AdvancedPage::saveSettings()
     {
         // Saves Settings
         saveSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        int maximumQuicksaves = maximumQuicksavesComboBox->value();
-        if (maximumQuicksaves != mEngineSettings.getInt("max quicksaves", "Saves"))
-        {
-            mEngineSettings.setInt("max quicksaves", "Saves", maximumQuicksaves);
-        }
+        saveSettingInt(maximumQuicksavesComboBox, "max quicksaves", "Saves");
 
         // Other Settings
         std::string screenshotFormatString = screenshotFormatComboBox->currentText().toLower().toStdString();
-        if (screenshotFormatString != mEngineSettings.getString("screenshot format", "General"))
-            mEngineSettings.setString("screenshot format", "General", screenshotFormatString);
+        if (screenshotFormatString != Settings::Manager::getString("screenshot format", "General"))
+            Settings::Manager::setString("screenshot format", "General", screenshotFormatString);
+
+        saveSettingBool(notifyOnSavedScreenshotCheckBox, "notify on saved screenshot", "General");
     }
 
     // Testing
@@ -324,15 +404,41 @@ void Launcher::AdvancedPage::saveSettings()
 
 void Launcher::AdvancedPage::loadSettingBool(QCheckBox *checkbox, const std::string &setting, const std::string &group)
 {
-    if (mEngineSettings.getBool(setting, group))
+    if (Settings::Manager::getBool(setting, group))
         checkbox->setCheckState(Qt::Checked);
 }
 
 void Launcher::AdvancedPage::saveSettingBool(QCheckBox *checkbox, const std::string &setting, const std::string &group)
 {
     bool cValue = checkbox->checkState();
-    if (cValue != mEngineSettings.getBool(setting, group))
-        mEngineSettings.setBool(setting, group, cValue);
+    if (cValue != Settings::Manager::getBool(setting, group))
+        Settings::Manager::setBool(setting, group, cValue);
+}
+
+void Launcher::AdvancedPage::loadSettingInt(QComboBox *comboBox, const std::string &setting, const std::string &group)
+{
+    int currentIndex = Settings::Manager::getInt(setting, group);
+    comboBox->setCurrentIndex(currentIndex);
+}
+
+void Launcher::AdvancedPage::saveSettingInt(QComboBox *comboBox, const std::string &setting, const std::string &group)
+{
+    int currentIndex = comboBox->currentIndex();
+    if (currentIndex != Settings::Manager::getInt(setting, group))
+        Settings::Manager::setInt(setting, group, currentIndex);
+}
+
+void Launcher::AdvancedPage::loadSettingInt(QSpinBox *spinBox, const std::string &setting, const std::string &group)
+{
+    int value = Settings::Manager::getInt(setting, group);
+    spinBox->setValue(value);
+}
+
+void Launcher::AdvancedPage::saveSettingInt(QSpinBox *spinBox, const std::string &setting, const std::string &group)
+{
+    int value = spinBox->value();
+    if (value != Settings::Manager::getInt(setting, group))
+        Settings::Manager::setInt(setting, group, value);
 }
 
 void Launcher::AdvancedPage::slotLoadedCellsChanged(QStringList cellNames)
@@ -351,7 +457,16 @@ void Launcher::AdvancedPage::slotAnimSourcesToggled(bool checked)
     }
 }
 
-void Launcher::AdvancedPage::slotViewOverShoulderToggled(bool checked)
+void Launcher::AdvancedPage::slotPostProcessToggled(bool checked)
 {
-    viewOverShoulderVerticalLayout->setEnabled(viewOverShoulderCheckBox->checkState());
+    postprocessLiveReloadCheckBox->setEnabled(checked);
+    postprocessTransparentPostpassCheckBox->setEnabled(checked);
+    postprocessHDRTimeComboBox->setEnabled(checked);
+    postprocessHDRTimeLabel->setEnabled(checked);
+}
+
+void Launcher::AdvancedPage::slotSkyBlendingToggled(bool checked)
+{
+    skyBlendingStartComboBox->setEnabled(checked);
+    skyBlendingStartLabel->setEnabled(checked);
 }

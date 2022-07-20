@@ -1,23 +1,28 @@
 #include "creaturelevlist.hpp"
 
-#include <components/esm/loadlevlist.hpp>
-#include <components/esm/creaturelevliststate.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/creaturelevliststate.hpp>
 
 #include "../mwmechanics/levelledlist.hpp"
 
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/manualref.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWClass
 {
-    class CreatureLevListCustomData : public MWWorld::CustomData
+    class CreatureLevListCustomData : public MWWorld::TypedCustomData<CreatureLevListCustomData>
     {
     public:
         // actorId of the creature we spawned
         int mSpawnActorId;
         bool mSpawn; // Should a new creature be spawned?
-
-        MWWorld::CustomData *clone() const override;
 
         CreatureLevListCustomData& asCreatureLevListCustomData() override
         {
@@ -29,9 +34,27 @@ namespace MWClass
         }
     };
 
-    MWWorld::CustomData *CreatureLevListCustomData::clone() const
+    CreatureLevList::CreatureLevList()
+        : MWWorld::RegisteredClass<CreatureLevList>(ESM::CreatureLevList::sRecordId)
     {
-        return new CreatureLevListCustomData (*this);
+    }
+
+    MWWorld::Ptr CreatureLevList::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
+    {
+        const MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = ptr.get<ESM::CreatureLevList>();
+
+        return MWWorld::Ptr(cell.insert(ref), &cell);
+    }
+
+    void CreatureLevList::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
+    {
+        if (ptr.getRefData().getCustomData() == nullptr)
+            return;
+
+        CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
+        MWWorld::Ptr creature = (customData.mSpawnActorId == -1) ? MWWorld::Ptr() : MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+        if (!creature.isEmpty())
+            MWBase::Environment::get().getWorld()->adjustPosition(creature, force);
     }
 
     std::string CreatureLevList::getName (const MWWorld::ConstPtr& ptr) const
@@ -52,7 +75,13 @@ namespace MWClass
         if (customData.mSpawn)
             return;
 
-        MWWorld::Ptr creature = (customData.mSpawnActorId == -1) ? MWWorld::Ptr() : MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+        MWWorld::Ptr creature;
+        if(customData.mSpawnActorId != -1)
+        {
+            creature = MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+            if(creature.isEmpty())
+                creature = ptr.getCell()->getMovedActor(customData.mSpawnActorId);
+        }
         if (!creature.isEmpty())
         {
             const MWMechanics::CreatureStats& creatureStats = creature.getClass().getCreatureStats(creature);
@@ -71,13 +100,6 @@ namespace MWClass
         }
         else
             customData.mSpawn = true;
-    }
-
-    void CreatureLevList::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new CreatureLevList);
-
-        registerClass (typeid (ESM::CreatureLevList).name(), instance);
     }
 
     void CreatureLevList::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
@@ -109,7 +131,8 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::CreatureLevList> *ref =
             ptr.get<ESM::CreatureLevList>();
 
-        std::string id = MWMechanics::getLevelledItem(ref->mBase, true);
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        std::string id = MWMechanics::getLevelledItem(ref->mBase, true, prng);
 
         if (!id.empty())
         {
@@ -138,11 +161,11 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<CreatureLevListCustomData> data (new CreatureLevListCustomData);
+            std::unique_ptr<CreatureLevListCustomData> data = std::make_unique<CreatureLevListCustomData>();
             data->mSpawnActorId = -1;
             data->mSpawn = true;
 
-            ptr.getRefData().setCustomData(data.release());
+            ptr.getRefData().setCustomData(std::move(data));
         }
     }
 

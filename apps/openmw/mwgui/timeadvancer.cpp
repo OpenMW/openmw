@@ -58,12 +58,12 @@ namespace MWGui
         }
     }
 
-    int TimeAdvancer::getHours()
+    int TimeAdvancer::getHours() const
     {
         return mHours;
     }
 
-    bool TimeAdvancer::isRunning()
+    bool TimeAdvancer::isRunning() const
     {
         return mRunning;
     }

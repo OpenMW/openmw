@@ -2,26 +2,29 @@
 
 #include <unordered_map>
 
-#include <osg/Version>
 #include <osg/LOD>
 #include <osg/Switch>
+#include <osg/Sequence>
 #include <osg/MatrixTransform>
 #include <osg/Material>
 #include <osgUtil/IncrementalCompileOperation>
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/optimizer.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/esm3/readerscache.hpp>
 
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystemUpdater>
 
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/settings/settings.hpp>
 #include <components/misc/rng.hpp>
@@ -31,6 +34,8 @@
 #include "apps/openmw/mwbase/world.hpp"
 
 #include "vismask.hpp"
+
+#include <condition_variable>
 
 namespace MWRender
 {
@@ -64,7 +69,7 @@ namespace MWRender
           case ESM::REC_CONT:
             return store.get<ESM::Container>().searchStatic(id)->mModel;
           default:
-            return std::string();
+            return {};
         }
     }
 
@@ -77,7 +82,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
         if (obj)
-            return obj->asNode();
+            return static_cast<osg::Node*>(obj.get());
         else
         {
             osg::ref_ptr<osg::Node> node = createChunk(size, center, activeGrid, viewPoint, compile);
@@ -105,6 +110,7 @@ namespace MWRender
         bool mOptimizeBillboards = true;
         float mSqrDistance = 0.f;
         osg::Vec3f mViewVector;
+        osg::Node::NodeMask mCopyMask = ~0u;
         mutable std::vector<const osg::Node*> mNodePath;
 
         void copy(const osg::Node* toCopy, osg::Group* attachTo)
@@ -121,6 +127,9 @@ namespace MWRender
 
         osg::Node* operator() (const osg::Node* node) const override
         {
+            if (!(node->getNodeMask() & mCopyMask))
+                return nullptr;
+
             if (const osg::Drawable* d = node->asDrawable())
                 return operator()(d);
 
@@ -144,6 +153,13 @@ namespace MWRender
                 for (unsigned int i=0; i<lod->getNumChildren(); ++i)
                     if (lod->getMinRange(i) * lod->getMinRange(i) <= mSqrDistance && mSqrDistance < lod->getMaxRange(i) * lod->getMaxRange(i))
                         n->addChild(operator()(lod->getChild(i)));
+                n->setDataVariance(osg::Object::STATIC);
+                return n;
+            }
+            if (const osg::Sequence* sq = dynamic_cast<const osg::Sequence*>(node))
+            {
+                osg::Group* n = new osg::Group;
+                n->addChild(operator()(sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0)));
                 n->setDataVariance(osg::Object::STATIC);
                 return n;
             }
@@ -224,9 +240,14 @@ namespace MWRender
         }
         osg::Drawable* operator() (const osg::Drawable* drawable) const override
         {
+            if (!(drawable->getNodeMask() & mCopyMask))
+                return nullptr;
+
             if (dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
                 return nullptr;
 
+            if (dynamic_cast<const SceneUtil::OsgaRigGeometry*>(drawable))
+                return nullptr;
             if (const SceneUtil::RigGeometry* rig = dynamic_cast<const SceneUtil::RigGeometry*>(drawable))
                 return operator()(rig->getSourceGeometry());
             if (const SceneUtil::MorphGeometry* morph = dynamic_cast<const SceneUtil::MorphGeometry*>(drawable))
@@ -249,15 +270,6 @@ namespace MWRender
         }
     };
 
-    class TemplateRef : public osg::Object
-    {
-    public:
-        TemplateRef() {}
-        TemplateRef(const TemplateRef& copy, const osg::CopyOp&) : mObjects(copy.mObjects) {}
-        META_Object(MWRender, TemplateRef)
-        std::vector<osg::ref_ptr<const Object>> mObjects;
-    };
-
     class RefnumSet : public osg::Object
     {
     public:
@@ -270,9 +282,11 @@ namespace MWRender
     class AnalyzeVisitor : public osg::NodeVisitor
     {
     public:
-        AnalyzeVisitor()
+        AnalyzeVisitor(osg::Node::NodeMask analyzeMask)
          : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-         , mCurrentStateSet(nullptr) {}
+         , mCurrentStateSet(nullptr)
+         , mCurrentDistance(0.f)
+        { setTraversalMask(analyzeMask); }
 
         typedef std::unordered_map<osg::StateSet*, unsigned int> StateSetCounter;
         struct Result
@@ -285,6 +299,27 @@ namespace MWRender
         {
             if (node.getStateSet())
                 mCurrentStateSet = node.getStateSet();
+
+            if (osg::Switch* sw = node.asSwitch())
+            {
+                for (unsigned int i=0; i<sw->getNumChildren(); ++i)
+                    if (sw->getValue(i))
+                        traverse(*sw->getChild(i));
+                return;
+            }
+            if (osg::LOD* lod = dynamic_cast<osg::LOD*>(&node))
+            {
+                for (unsigned int i=0; i<lod->getNumChildren(); ++i)
+                    if (lod->getMinRange(i) * lod->getMinRange(i) <= mCurrentDistance && mCurrentDistance < lod->getMaxRange(i) * lod->getMaxRange(i))
+                        traverse(*lod->getChild(i));
+                return;
+            }
+            if (osg::Sequence* sq = dynamic_cast<osg::Sequence*>(&node))
+            {
+                traverse(*sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0));
+                return;
+            }
+
             traverse(node);
         }
         void apply(osg::Geometry& geom) override
@@ -322,6 +357,7 @@ namespace MWRender
         Result mResult;
         osg::StateSet* mCurrentStateSet;
         StateSetCounter mGlobalStateSetCounter;
+        float mCurrentDistance;
     };
 
     class DebugVisitor : public osg::NodeVisitor
@@ -340,6 +376,8 @@ namespace MWRender
             osg::ref_ptr<osg::StateSet> stateset = node.getStateSet() ? osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY) : new osg::StateSet;
             stateset->setAttribute(m);
             stateset->addUniform(new osg::Uniform("colorMode", 0));
+            stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
+            stateset->addUniform(new osg::Uniform("specStrength", 1.f));
             node.setStateSet(stateset);
         }
     };
@@ -365,7 +403,7 @@ namespace MWRender
          , mRefTrackerLocked(false)
     {
         mActiveGrid = Settings::Manager::getBool("object paging active grid", "Terrain");
-        mDebugBatches = Settings::Manager::getBool("object paging debug batches", "Terrain");
+        mDebugBatches = Settings::Manager::getBool("debug chunks", "Terrain");
         mMergeFactor = Settings::Manager::getFloat("object paging merge factor", "Terrain");
         mMinSize = Settings::Manager::getFloat("object paging min size", "Terrain");
         mMinSizeMergeFactor = Settings::Manager::getFloat("object paging min size merge factor", "Terrain");
@@ -380,7 +418,7 @@ namespace MWRender
         osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
 
         std::map<ESM::RefNum, ESM::CellRef> refs;
-        std::vector<ESM::ESMReader> esm;
+        ESM::ReadersCache readers;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
@@ -393,37 +431,46 @@ namespace MWRender
                 {
                     try
                     {
-                        unsigned int index = cell->mContextList.at(i).index;
-                        if (esm.size()<=index)
-                            esm.resize(index+1);
-                        cell->restore(esm[index], i);
+                        const std::size_t index = static_cast<std::size_t>(cell->mContextList[i].index);
+                        const ESM::ReadersCache::BusyItem reader = readers.get(index);
+                        cell->restore(*reader, i);
                         ESM::CellRef ref;
-                        ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
+                        ref.mRefNum.unset();
+                        ESM::MovedCellRef cMRef;
+                        cMRef.mRefNum.mIndex = 0;
                         bool deleted = false;
-                        while(cell->getNextRef(esm[index], ref, deleted))
+                        bool moved = false;
+                        while (ESM::Cell::getNextRef(*reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                         {
+                            if (moved)
+                                continue;
+
+                            if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end())
+                                continue;
+
                             Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                            if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
                             int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
-                            refs[ref.mRefNum] = ref;
+                            refs[ref.mRefNum] = std::move(ref);
                         }
                     }
-                    catch (std::exception& e)
+                    catch (std::exception&)
                     {
                         continue;
                     }
                 }
-                for (ESM::CellRefTracker::const_iterator it = cell->mLeasedRefs.begin(); it != cell->mLeasedRefs.end(); ++it)
+                for (auto [ref, deleted] : cell->mLeasedRefs)
                 {
-                    ESM::CellRef ref = it->first;
+                    if (deleted)
+                    {
+                        refs.erase(ref.mRefNum);
+                        continue;
+                    }
                     Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                    bool deleted = it->second;
-                    if (deleted) { refs.erase(ref.mRefNum); continue; }
                     int type = store.findStatic(ref.mRefID);
                     if (!typeFilter(type,size>=2)) continue;
-                    refs[ref.mRefNum] = ref;
+                    refs[ref.mRefNum] = std::move(ref);
                 }
             }
         }
@@ -446,7 +493,15 @@ namespace MWRender
         typedef std::map<osg::ref_ptr<const osg::Node>, InstanceList> NodeMap;
         NodeMap nodes;
         osg::ref_ptr<RefnumSet> refnumSet = activeGrid ? new RefnumSet : nullptr;
-        AnalyzeVisitor analyzeVisitor;
+
+        // Mask_UpdateVisitor is used in such cases in NIF loader:
+        // 1. For collision nodes, which is not supposed to be rendered.
+        // 2. For nodes masked via Flag_Hidden (VisController can change this flag value at runtime).
+        // Since ObjectPaging does not handle VisController, we can just ignore both types of nodes.
+        constexpr auto copyMask = ~Mask_UpdateVisitor;
+
+        AnalyzeVisitor analyzeVisitor(copyMask);
+        analyzeVisitor.mCurrentDistance = (viewPoint - worldCenter).length2();
         float minSize = mMinSize;
         if (mMinSizeMergeFactor)
             minSize *= mMinSizeMergeFactor;
@@ -459,7 +514,7 @@ namespace MWRender
             {
                 osg::Vec3f cellPos = pos / ESM::Land::REAL_SIZE;
                 if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x()) || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y())
-                 || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (minBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
+                 || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (maxBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
                     continue;
             }
 
@@ -472,13 +527,13 @@ namespace MWRender
                     continue;
             }
 
-            if (ref.mRefID == "prisonmarker" || ref.mRefID == "divinemarker" || ref.mRefID == "templemarker" || ref.mRefID == "northmarker")
-                continue; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
+            if (Misc::ResourceHelpers::isHiddenMarker(ref.mRefID))
+                continue;
 
             int type = store.findStatic(ref.mRefID);
             std::string model = getModel(type, ref.mRefID, store);
             if (model.empty()) continue;
-            model = "meshes/" + model;
+            model = Misc::ResourceHelpers::correctMeshPath(model, mSceneManager->getVFS());
 
             if (activeGrid && type != ESM::REC_STAT)
             {
@@ -530,9 +585,10 @@ namespace MWRender
 
         osg::ref_ptr<osg::Group> group = new osg::Group;
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
-        osg::ref_ptr<TemplateRef> templateRefs = new TemplateRef;
+        osg::ref_ptr<Resource::TemplateMultiRef> templateRefs = new Resource::TemplateMultiRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
         CopyOp copyop;
+        copyop.mCopyMask = copyMask;
         for (const auto& pair : nodes)
         {
             const osg::Node* cnode = pair.first;
@@ -558,15 +614,36 @@ namespace MWRender
                 if (!activeGrid && minSizeMerged != minSize && cnode->getBound().radius2() * cref->mScale*cref->mScale < (viewPoint-pos).length2()*minSizeMerged*minSizeMerged)
                     continue;
 
-                osg::Matrixf matrix;
-                matrix.preMultTranslate(pos - worldCenter);
-                matrix.preMultRotate( osg::Quat(ref.mPos.rot[2], osg::Vec3f(0,0,-1)) *
+                osg::Vec3f nodePos = pos - worldCenter;
+                osg::Quat nodeAttitude = osg::Quat(ref.mPos.rot[2], osg::Vec3f(0,0,-1)) *
                                         osg::Quat(ref.mPos.rot[1], osg::Vec3f(0,-1,0)) *
-                                        osg::Quat(ref.mPos.rot[0], osg::Vec3f(-1,0,0)) );
-                matrix.preMultScale(osg::Vec3f(ref.mScale, ref.mScale, ref.mScale));
-                osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(matrix);
-                trans->setDataVariance(osg::Object::STATIC);
+                                        osg::Quat(ref.mPos.rot[0], osg::Vec3f(-1,0,0));
+                osg::Vec3f nodeScale = osg::Vec3f(ref.mScale, ref.mScale, ref.mScale);
 
+                osg::ref_ptr<osg::Group> trans;
+                if (merge)
+                {
+                    // Optimizer currently supports only MatrixTransforms.
+                    osg::Matrixf matrix;
+                    matrix.preMultTranslate(nodePos);
+                    matrix.preMultRotate(nodeAttitude);
+                    matrix.preMultScale(nodeScale);
+                    trans = new osg::MatrixTransform(matrix);
+                    trans->setDataVariance(osg::Object::STATIC);
+                }
+                else
+                {
+                    trans = new SceneUtil::PositionAttitudeTransform;
+                    SceneUtil::PositionAttitudeTransform* pat = static_cast<SceneUtil::PositionAttitudeTransform*>(trans.get());
+                    pat->setPosition(nodePos);
+                    pat->setScale(nodeScale);
+                    pat->setAttitude(nodeAttitude);
+                }
+
+                // DO NOT COPY AND PASTE THIS CODE. Cloning osg::Geometry without also cloning its contained Arrays is generally unsafe.
+                // In this specific case the operation is safe under the following two assumptions:
+                // - When Arrays are removed or replaced in the cloned geometry, the original Arrays in their place must outlive the cloned geometry regardless. (ensured by TemplateMultiRef)
+                // - Arrays that we add or replace in the cloned geometry must be explicitely forbidden from reusing BufferObjects of the original geometry. (ensured by needvbo() in optimizer.cpp)
                 copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES : osg::CopyOp::DEEP_COPY_NODES);
                 copyop.mOptimizeBillboards = (size > 1/4.f);
                 copyop.mNodePath.push_back(trans);
@@ -595,8 +672,9 @@ namespace MWRender
             }
             if (numinstances > 0)
             {
-                // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
-                templateRefs->mObjects.emplace_back(cnode);
+                // add a ref to the original template to help verify the safety of shallow cloning operations
+                // in addition, we hint to the cache that it's still being used and should be kept in cache
+                templateRefs->addRef(cnode);
 
                 if (pair.second.mNeedCompile)
                 {
@@ -619,6 +697,7 @@ namespace MWRender
             }
             optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
             unsigned int options = SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES|SceneUtil::Optimizer::MERGE_GEOMETRY;
+
             optimizer.optimize(mergeGroup, options);
 
             group->addChild(mergeGroup);
@@ -679,12 +758,8 @@ namespace MWRender
         }
         void clampToCell(osg::Vec3f& cellPos)
         {
-            osg::Vec2i min (mCell.x(), mCell.y());
-            osg::Vec2i max (mCell.x()+1, mCell.y()+1);
-            if (cellPos.x() < min.x()) cellPos.x() = min.x();
-            if (cellPos.x() > max.x()) cellPos.x() = max.x();
-            if (cellPos.y() < min.y()) cellPos.y() = min.y();
-            if (cellPos.y() > max.y()) cellPos.y() = max.y();
+            cellPos.x() = std::clamp<float>(cellPos.x(), mCell.x(), mCell.x() + 1);
+            cellPos.y() = std::clamp<float>(cellPos.y(), mCell.y(), mCell.y() + 1);
         }
         osg::Vec3f mPosition;
         osg::Vec2i mCell;
@@ -709,7 +784,7 @@ namespace MWRender
         ccf.mCell = cell;
         mCache->call(ccf);
         if (ccf.mToClear.empty()) return false;
-        for (auto chunk : ccf.mToClear)
+        for (const auto& chunk : ccf.mToClear)
             mCache->removeFromObjectCache(chunk);
         return true;
     }
@@ -731,7 +806,7 @@ namespace MWRender
         ccf.mActiveGridOnly = true;
         mCache->call(ccf);
         if (ccf.mToClear.empty()) return false;
-        for (auto chunk : ccf.mToClear)
+        for (const auto& chunk : ccf.mToClear)
             mCache->removeFromObjectCache(chunk);
         return true;
     }

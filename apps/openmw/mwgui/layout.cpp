@@ -8,33 +8,29 @@
 
 namespace MWGui
 {
-    void Layout::initialise(const std::string& _layout, MyGUI::Widget* _parent)
+    void Layout::initialise(std::string_view _layout)
     {
-        const std::string MAIN_WINDOW = "_Main";
+        const auto MAIN_WINDOW = "_Main";
         mLayoutName = _layout;
 
-        if (mLayoutName.empty())
-            mMainWidget = _parent;
-        else
-        {
-            mPrefix = MyGUI::utility::toString(this, "_");
-            mListWindowRoot = MyGUI::LayoutManager::getInstance().loadLayout(mLayoutName, mPrefix, _parent);
+        mPrefix = MyGUI::utility::toString(this, "_");
+        mListWindowRoot = MyGUI::LayoutManager::getInstance().loadLayout(mLayoutName, mPrefix);
 
-            const std::string main_name = mPrefix + MAIN_WINDOW;
-            for (MyGUI::Widget* widget : mListWindowRoot)
-            {
-                if (widget->getName() == main_name)
-                {
-                    mMainWidget = widget;
-                    break;
-                }
-            }
-            MYGUI_ASSERT(mMainWidget, "root widget name '" << MAIN_WINDOW << "' in layout '" << mLayoutName << "' not found.");
+        const std::string main_name = mPrefix + MAIN_WINDOW;
+        for (MyGUI::Widget* widget : mListWindowRoot)
+        {
+            if (widget->getName() == main_name)
+                mMainWidget = widget;
+
+            // Force the alignment to update immediately
+            widget->_setAlign(widget->getSize(), widget->getParentSize());
         }
+        MYGUI_ASSERT(mMainWidget, "root widget name '" << MAIN_WINDOW << "' in layout '" << mLayoutName << "' not found.");
     }
 
     void Layout::shutdown()
     {
+        setVisible(false);
         MyGUI::Gui::getInstance().destroyWidget(mMainWidget);
         mListWindowRoot.clear();
     }
@@ -49,7 +45,7 @@ namespace MWGui
         mMainWidget->setVisible(b);
     }
 
-    void Layout::setText(const std::string &name, const std::string &caption)
+    void Layout::setText(std::string_view name, const std::string &caption)
     {
         MyGUI::Widget* pt;
         getWidget(pt, name);
@@ -64,11 +60,13 @@ namespace MWGui
             window->setCaptionWithReplacing(title);
     }
 
-    MyGUI::Widget* Layout::getWidget(const std::string &_name)
+    MyGUI::Widget* Layout::getWidget(std::string_view _name)
     {
+        std::string target = mPrefix;
+        target += _name;
         for (MyGUI::Widget* widget : mListWindowRoot)
         {
-            MyGUI::Widget* find = widget->findWidget(mPrefix + _name);
+            MyGUI::Widget* find = widget->findWidget(target);
             if (nullptr != find)
             {
                 return find;

@@ -4,12 +4,19 @@
 #include <stdexcept>
 #include <string>
 
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4244)
+#endif
+
 extern "C"
 {
-    #include <libavcodec/avcodec.h>
-
     #include <libswresample/swresample.h>
 }
+
+#if defined(_MSC_VER)
+    #pragma warning (pop)
+#endif
 
 #include "videostate.hpp"
 
@@ -30,7 +37,7 @@ namespace Video
 struct AudioResampler
 {
     AudioResampler()
-        : mSwr(NULL)
+        : mSwr(nullptr)
     {
     }
 
@@ -51,8 +58,8 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     , mFramePos(0)
     , mFrameSize(0)
     , mAudioClock(0.0)
-    , mDataBuf(NULL)
-    , mFrameData(NULL)
+    , mDataBuf(nullptr)
+    , mFrameData(nullptr)
     , mDataBufLen(0)
     , mFrame(av_frame_alloc())
     , mGetNextPacket(true)
@@ -64,7 +71,7 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
 {
     mAudioResampler.reset(new AudioResampler());
 
-    AVCodec *codec = avcodec_find_decoder(mAVStream->codecpar->codec_id);
+    const AVCodec *codec = avcodec_find_decoder(mAVStream->codecpar->codec_id);
     if(!codec)
     {
         std::string ss = "No codec found for id " +
@@ -91,7 +98,7 @@ MovieAudioDecoder::~MovieAudioDecoder()
     if(mAudioContext)
         avcodec_free_context(&mAudioContext);
 
-    av_freep(&mFrame);
+    av_frame_free(&mFrame);
     av_freep(&mDataBuf);
 }
 
@@ -125,7 +132,7 @@ void MovieAudioDecoder::setupFormat()
                           inputSampleFormat,
                           inputSampleRate,
                           0,                             // logging level offset
-                          NULL);                         // log context
+                          nullptr);                      // log context
         if(!mAudioResampler->mSwr)
             fail(std::string("Couldn't allocate SwrContext"));
         if(swr_init(mAudioResampler->mSwr) < 0)
@@ -222,7 +229,7 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame, int &sample_skip)
             return result;
         }
 
-        av_packet_unref(&mPacket);
+        av_packet_unref(pkt);
         mGetNextPacket = true;
 
         /* next packet */
@@ -255,7 +262,7 @@ size_t MovieAudioDecoder::read(char *stream, size_t len)
         size_t sampleSize = av_get_bytes_per_sample(mOutputSampleFormat);
         char* data[1];
         data[0] = stream;
-        av_samples_set_silence((uint8_t**)data, 0, len/sampleSize, 1, mOutputSampleFormat);
+        av_samples_set_silence((uint8_t**)data, 0, static_cast<int>(len/sampleSize), 1, mOutputSampleFormat);
         return len;
     }
 
@@ -276,7 +283,7 @@ size_t MovieAudioDecoder::read(char *stream, size_t len)
 
             mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
             if(sample_skip > 0 || mFrameSize > -sample_skip)
-                sample_skip -= mFramePos;
+                sample_skip -= static_cast<int>(mFramePos);
             continue;
         }
 

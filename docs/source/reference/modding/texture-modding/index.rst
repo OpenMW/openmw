@@ -13,4 +13,3 @@ to texture modding in OpenMW.
 
 	texture-basics
 	convert-bump-mapped-mods
-	native-mesh-format

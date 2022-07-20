@@ -5,7 +5,6 @@
 
 #include <QObject>
 #include <QWidget>
-#include <QSignalMapper>
 
 class QLabel;
 class QProgressBar;
@@ -25,16 +24,18 @@ namespace CSVDoc
             Q_OBJECT
 
             CSMDoc::Document *mDocument;
-            QLabel *mFile;
-            QLabel *mRecords;
-            QProgressBar *mFileProgress;
+            QLabel *mTotalRecordsLabel;
+            QLabel *mRecordsLabel;
+            QProgressBar *mTotalProgress;
             QProgressBar *mRecordProgress;
             bool mAborted;
             QDialogButtonBox *mButtons;
             QLabel *mError;
             QListWidget *mMessages;
             QVBoxLayout *mLayout;
+            int mRecords;
             int mTotalRecords;
+            int mFilesLoaded;
 
         private:
 
@@ -75,7 +76,7 @@ namespace CSVDoc
 
             Loader();
 
-            virtual ~Loader();
+            ~Loader() override;
 
         signals:
 

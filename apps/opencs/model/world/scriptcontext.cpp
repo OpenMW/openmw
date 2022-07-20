@@ -1,6 +1,7 @@
 #include "scriptcontext.hpp"
 
 #include <algorithm>
+#include <sstream>
 
 #include <components/misc/stringops.hpp>
 
@@ -100,11 +101,6 @@ bool CSMWorld::ScriptContext::isId (const std::string& name) const
     }
 
     return std::binary_search (mIds.begin(), mIds.end(), Misc::StringUtils::lowerCase (name));
-}
-
-bool CSMWorld::ScriptContext::isJournalId (const std::string& name) const
-{
-    return mData.getJournals().searchId (name)!=-1;
 }
 
 void CSMWorld::ScriptContext::invalidateIds()

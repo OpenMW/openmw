@@ -2,12 +2,11 @@
 
 #include <map>
 
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../prefs/state.hpp"
 
-#include "../world/universalid.hpp"
 
 CSMTools::ClassCheckStage::ClassCheckStage (const CSMWorld::IdCollection<ESM::Class>& classes)
 : mClasses (classes)

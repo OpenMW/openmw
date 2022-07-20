@@ -23,7 +23,7 @@
 
 bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 {
-    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+    bool isCreature = (mActor.getType() != ESM::NPC::sRecordId);
 
     // actor id
     if (!info.mActor.empty())
@@ -160,7 +160,7 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
 
 bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert) const
 {
-    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+    bool isCreature = (mActor.getType() != ESM::NPC::sRecordId);
 
     if (isCreature)
         return true;
@@ -207,7 +207,7 @@ bool MWDialogue::Filter::testFunctionLocal(const MWDialogue::SelectWrapper& sele
 
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
-    if (select.isNpcOnly() && (mActor.getTypeName() != typeid (ESM::NPC).name()))
+    if (select.isNpcOnly() && (mActor.getType() != ESM::NPC::sRecordId))
         // If the actor is a creature, we pass all conditions only applicable to NPCs.
         return true;
 
@@ -257,11 +257,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
         case SelectWrapper::Function_PcHealthPercent:
         {
             MWWorld::Ptr player = MWMechanics::getPlayer();
-
-            float ratio = player.getClass().getCreatureStats (player).getHealth().getCurrent() /
-                player.getClass().getCreatureStats (player).getHealth().getModified();
-
-            return select.selectCompare (static_cast<int>(ratio*100));
+            return select.selectCompare(static_cast<int>(player.getClass().getCreatureStats(player).getHealth().getRatio() * 100));
         }
 
         case SelectWrapper::Function_PcDynamicStat:
@@ -276,10 +272,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
         case SelectWrapper::Function_HealthPercent:
         {
-            float ratio = mActor.getClass().getCreatureStats (mActor).getHealth().getCurrent() /
-                mActor.getClass().getCreatureStats (mActor).getHealth().getModified();
-
-            return select.selectCompare (static_cast<int>(ratio*100));
+            return select.selectCompare(static_cast<int>(mActor.getClass().getCreatureStats(mActor).getHealth().getRatio() * 100));
         }
 
         default:
@@ -316,7 +309,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         case SelectWrapper::Function_AiSetting:
 
             return mActor.getClass().getCreatureStats (mActor).getAiSetting (
-                        (MWMechanics::CreatureStats::AiSetting)select.getArgument()).getModified();
+                        (MWMechanics::AiSetting)select.getArgument()).getModified(false);
 
         case SelectWrapper::Function_PcAttribute:
 
@@ -452,7 +445,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
                 {
                     if (target.getClass().isNpc() && target.getClass().getNpcStats(target).isWerewolf())
                         return 2;
-                    if (target.getTypeName() == typeid(ESM::Creature).name())
+                    if (target.getType() == ESM::Creature::sRecordId)
                         return 1;
                 }
             }

@@ -1,0 +1,929 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Resource" version="1.1">
+    <!-- Defines a partially transparent background -->
+    <Resource type="ResourceSkin" name="BlackBG" size="8 8" texture="transparent">
+        <Property key="Colour" value="#{fontcolour=background}"/>
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+
+     <!-- Defines a non-transparent background -->
+    <Resource type="ResourceSkin" name="FullBlackBG" size="8 8" texture="black">
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Defines a non-transparent background -->
+     <Resource type="ResourceSkin" name="TransparentBG" size="8 8" texture="transparent">
+        <Property key="Colour" value="#{fontcolour=background}"/>
+    </Resource>
+
+    <!-- Define the borders for pin button (up) -->
+    <Resource type="AutoSizedResourceSkin" name="PU_B" texture="textures\menu_rightbuttonup_bottom.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_BR" texture="textures\menu_rightbuttonup_bottom_right.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_R" texture="textures\menu_rightbuttonup_right.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_TR" texture="textures\menu_rightbuttonup_top_right.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_T" texture="textures\menu_rightbuttonup_top.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_TL" texture="textures\menu_rightbuttonup_top_left.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_L" texture="textures\menu_rightbuttonup_left.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_BL" texture="textures\menu_rightbuttonup_bottom_left.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_С" texture="textures\menu_rightbuttonup_center.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Define the borders for pin button (down) -->
+    <Resource type="AutoSizedResourceSkin" name="PD_B" texture="textures\menu_rightbuttondown_bottom.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_BR" texture="textures\menu_rightbuttondown_bottom_right.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_R" texture="textures\menu_rightbuttondown_right.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_TR" texture="textures\menu_rightbuttondown_top_right.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_T" texture="textures\menu_rightbuttondown_top.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_TL" texture="textures\menu_rightbuttondown_top_left.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_L" texture="textures\menu_rightbuttondown_left.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_BL" texture="textures\menu_rightbuttondown_bottom_left.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_С" texture="textures\menu_rightbuttondown_center.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Define the pin button skin -->
+    <Resource type="ResourceSkin" name="PinUp" size="19 19">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+        <Child type="Widget" skin="PU_С" offset="2 2 15 15" align="Stretch"/>
+        <Child type="Widget" skin="PU_B" offset="2 17 15 2" align="Stretch"/>
+        <Child type="Widget" skin="PU_BR" offset="17 17 2 2" align="Stretch"/>
+        <Child type="Widget" skin="PU_R" offset="17 2 2 15" align="Stretch"/>
+        <Child type="Widget" skin="PU_TR" offset="17 0 2 2" align="Stretch"/>
+        <Child type="Widget" skin="PU_T" offset="2 0 15 2" align="Stretch"/>
+        <Child type="Widget" skin="PU_TL" offset="0 0 2 2" align="Stretch"/>
+        <Child type="Widget" skin="PU_L" offset="0 2 2 15" align="Stretch"/>
+        <Child type="Widget" skin="PU_BL" offset="0 17 2 2" align="Stretch"/>
+    </Resource>
+    <Resource type="ResourceSkin" name="PinDown" size="19 19">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+        <Child type="Widget" skin="PD_С" offset="2 2 15 15" align="Stretch"/>
+        <Child type="Widget" skin="PD_B" offset="2 17 15 2" align="Stretch"/>
+        <Child type="Widget" skin="PD_BR" offset="17 17 2 2" align="Stretch"/>
+        <Child type="Widget" skin="PD_R" offset="17 2 2 15" align="Stretch"/>
+        <Child type="Widget" skin="PD_TR" offset="17 0 2 2" align="Stretch"/>
+        <Child type="Widget" skin="PD_T" offset="2 0 15 2" align="Stretch"/>
+        <Child type="Widget" skin="PD_TL" offset="0 0 2 2" align="Stretch"/>
+        <Child type="Widget" skin="PD_L" offset="0 2 2 15" align="Stretch"/>
+        <Child type="Widget" skin="PD_BL" offset="0 17 2 2" align="Stretch"/>
+    </Resource>
+
+    <!-- Defines a pure black background -->
+    <Resource type="ResourceSkin" name="DialogBG" size="8 8" texture="white">
+        <Property key="Colour" value="#{fontcolour=background}"/>
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Defines a owned background -->
+    <Resource type="ResourceSkin" name="DialogBG_NoTransp_Owned" size="8 8" texture="white">
+        <Property key="Colour" value="#{setting=GUI,color background owned}"/>
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="DialogBG_Owned" size="8 8" texture="transparent">
+        <Property key="Colour" value="#{setting=GUI,color background owned}"/>
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- These define the dialog borders -->
+    <Resource type="AutoSizedResourceSkin" name="DB_B" texture="textures\menu_thick_border_bottom.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="DB_R" texture="textures\menu_thick_border_right.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="DB_T" texture="textures\menu_thick_border_top.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="DB_L" texture="textures\menu_thick_border_left.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Dialog border corners -->
+    <Resource type="AutoSizedResourceSkin" name="DB_BR" texture="textures\menu_thick_border_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="DB_BL" texture="textures\menu_thick_border_bottom_left_corner.dds">
+        <Property key="Pointer" value="dresize2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="DB_TR" texture="textures\menu_thick_border_top_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="DB_TL" texture="textures\menu_thick_border_top_left_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- These define the window borders -->
+    <Resource type="AutoSizedResourceSkin" name="TB_B" texture="textures\menu_thick_border_bottom.dds">
+        <Property key="Pointer" value="vresize"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_R" texture="textures\menu_thick_border_right.dds">
+        <Property key="Pointer" value="hresize"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_T" texture="textures\menu_thick_border_top.dds">
+        <Property key="Pointer" value="vresize"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_L" texture="textures\menu_thick_border_left.dds">
+        <Property key="Pointer" value="hresize"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Window border corners -->
+    <Resource type="AutoSizedResourceSkin" name="TB_BR" texture="textures\menu_thick_border_bottom_right_corner.dds">
+        <Property key="Pointer" value="dresize"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="TB_BL" texture="textures\menu_thick_border_bottom_left_corner.dds">
+        <Property key="Pointer" value="dresize2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="TB_TR" texture="textures\menu_thick_border_top_right_corner.dds">
+        <Property key="Pointer" value="dresize2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="TB_TL" texture="textures\menu_thick_border_top_left_corner.dds">
+        <Property key="Pointer" value="dresize"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Expanded border corners, to get larger diagonal corner pointer area -->
+    <Resource type="AutoSizedResourceSkin" name="TB_TL_T" texture="textures\menu_thick_border_top.dds">
+        <Property key="Pointer" value="dresize"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_TL_B" texture="textures\menu_thick_border_left.dds">
+        <Property key="Pointer" value="dresize"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_TR_T" texture="textures\menu_thick_border_top.dds">
+        <Property key="Pointer" value="dresize2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_TR_B" texture="textures\menu_thick_border_right.dds">
+        <Property key="Pointer" value="dresize2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_BL_T" texture="textures\menu_thick_border_left.dds">
+        <Property key="Pointer" value="dresize2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_BL_B" texture="textures\menu_thick_border_bottom.dds">
+        <Property key="Pointer" value="dresize2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_BR_T" texture="textures\menu_thick_border_right.dds">
+        <Property key="Pointer" value="dresize"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="TB_BR_B" texture="textures\menu_thick_border_bottom.dds">
+        <Property key="Pointer" value="dresize"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- These parts defines the 'blocks' to the left and right of the caption -->
+    <Resource type="AutoSizedResourceSkin" name="HB_MID" texture="textures\menu_head_block_middle.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="HB_TOP" texture="textures\menu_head_block_top.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="HB_BOTTOM" texture="textures\menu_head_block_bottom.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="HB_LEFT" texture="textures\menu_head_block_left.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="HB_RIGHT" texture="textures\menu_head_block_right.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="HB_TR" texture="textures\menu_head_block_top_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="HB_TL" texture="textures\menu_head_block_top_left_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="HB_BR" texture="textures\menu_head_block_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="HB_BL" texture="textures\menu_head_block_bottom_left_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="HB_ALL" size="260 20">
+        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="Top Left HStretch"/>
+        <Child type="Widget" skin="HB_TOP" offset="2 0 256 2" align="Top HStretch HStretch"/>
+        <Child type="Widget" skin="HB_BOTTOM" offset="2 18 256 2" align="Bottom HStretch"/>
+        <Child type="Widget" skin="HB_LEFT" offset="0 2 2 16" align="Top Left"/>
+        <Child type="Widget" skin="HB_RIGHT" offset="258 2 2 16" align="Top Right"/>
+        <Child type="Widget" skin="HB_TR" offset="258 0 2 2" align="Top Right"/>
+        <Child type="Widget" skin="HB_TL" offset="0 0 2 2" align="Top Left"/>
+        <Child type="Widget" skin="HB_BR" offset="258 18 2 2" align="Bottom Right"/>
+        <Child type="Widget" skin="HB_BL" offset="0 18 2 2" align="Bottom Left"/>
+    </Resource>
+
+    <!-- The actual caption. It contains the edges of the blocks on
+         its sides as well -->
+    <Resource type="ResourceSkin" name="MW_Caption" size="88 20">
+        <Property key="TextAlign" value="Center"/>
+
+        <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Default" name="Left"/>
+        <Child type="TextBox" skin="SandText" offset="30 0 28 20" align="Left VStretch" name="Client"/>
+        <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Right" name="Right"/>
+    </Resource>
+
+<!-- WINDOW DEFINITION -->
+
+    <Resource type="ResourceSkin" name="MW_Window" size="256 256">
+        <Property key="TextAlign" value="Center"/>
+        <Property key="Snap" value="true"/>
+        <Property key="MinSize" value="64 64"/>
+
+        <Child type="Widget" skin="BlackBG" offset="0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
+
+        <!-- Outer Borders -->
+        <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="0 14 4 228" align="Left VStretch" name="Action">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="252 14 4 228" align="Right VStretch" name="Action">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="14 252 228 4" align="Bottom HStretch" name="Action">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+
+        <!-- OB: Top Left -->
+        <Child type="Widget" skin="TB_TL_T" offset="4 0 10 4" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="0 0 4 4" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL_B" offset="0 4 4 10" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+
+        <!-- OB: Top Right -->
+        <Child type="Widget" skin="TB_TR_T" offset="242 0 10 4" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="252 0 4 4" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR_B" offset="252 4 4 10" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+
+        <!-- OB: Bottom Left -->
+        <Child type="Widget" skin="TB_BL_T" offset="0 242 4 10" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="0 252 4 4" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL_B" offset="4 252 10 4" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+
+        <!-- OB: Bottom Right -->
+        <Child type="Widget" skin="TB_BR_T" offset="252 242 4 10" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR" offset="252 252 4 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR_B" offset="242 252 10 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+
+        <!-- Inner Borders -->
+        <Child type="Widget" skin="TB_T" offset="18 24 220 4" align="Top HStretch" name="Action">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="4 38 4 200" align="Left VStretch" name="Action">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="248 38 4 200" align="Right VStretch" name="Action">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="18 248 220 4" align="Bottom HStretch" name="Action">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+
+        <!-- IB: Top Left -->
+        <Child type="Widget" skin="TB_TL_T" offset="8 24 10 4" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="4 24 4 4" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL_B" offset="4 28 4 10" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+
+        <!-- IB: Top Right -->
+        <Child type="Widget" skin="TB_TR_T" offset="238 24 10 4" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="248 24 4 4" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR_B" offset="248 28 4 10" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+
+        <!-- IB: Bottom Left -->
+        <Child type="Widget" skin="TB_BL_T" offset="4 238 4 10" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="4 248 4 4" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL_B" offset="8 248 10 4" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+
+        <!-- IB: Bottom Right -->
+        <Child type="Widget" skin="TB_BR_T" offset="248 238 4 10" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR" offset="248 248 4 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR_B" offset="238 248 10 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+
+        <Child type="WindowCaption" skin="MW_Caption" offset="4 4 248 20" align="HStretch Top" name="Caption">
+        </Child>
+
+        <!-- This invisible button makes it possible to move the
+             window by dragging the caption. -->
+        <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
+            <Property key="Scale" value="1 1 0 0"/>
+        </Child>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_Window_NoCaption" size="256 256">
+        <Property key="TextAlign" value="Center"/>
+        <Property key="Snap" value="true"/>
+        <Property key="MinSize" value="64 64"/>
+
+        <Child type="Widget" skin="BlackBG" offset=" 0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
+
+        <!-- Outer Borders -->
+        <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="0 14 4 228" align="Left VStretch" name="Action">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="252 14 4 228" align="Right VStretch" name="Action">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="14 252 228 4" align="Bottom HStretch" name="Action">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+
+        <!-- OB: Top Left -->
+        <Child type="Widget" skin="TB_TL_T" offset="4 0 10 4" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="0 0 4 4" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL_B" offset="0 4 4 10" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+
+        <!-- OB: Top Right -->
+        <Child type="Widget" skin="TB_TR_T" offset="242 0 10 4" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="252 0 4 4" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR_B" offset="252 4 4 10" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+
+        <!-- OB: Bottom Left -->
+        <Child type="Widget" skin="TB_BL_T" offset="0 242 4 10" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="0 252 4 4" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL_B" offset="4 252 10 4" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+
+        <!-- OB: Bottom Right -->
+        <Child type="Widget" skin="TB_BR_T" offset="252 242 4 10" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR" offset="252 252 4 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR_B" offset="242 252 10 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+
+        <!-- Inner Borders -->
+        <Child type="Widget" skin="TB_T" offset="18 24 220 4" align="Top HStretch" name="Action">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="4 38 4 200" align="Left VStretch" name="Action">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="248 38 4 200" align="Right VStretch" name="Action">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="18 248 220 4" align="Bottom HStretch" name="Action">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+
+        <!-- IB: Top Left -->
+        <Child type="Widget" skin="TB_TL_T" offset="8 24 10 4" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="4 24 4 4" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL_B" offset="4 28 4 10" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+
+        <!-- IB: Top Right -->
+        <Child type="Widget" skin="TB_TR_T" offset="238 24 10 4" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="248 24 4 4" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR_B" offset="248 28 4 10" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+
+        <!-- IB: Bottom Left -->
+        <Child type="Widget" skin="TB_BL_T" offset="4 238 4 10" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="4 248 4 4" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL_B" offset="8 248 10 4" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+
+        <!-- IB: Bottom Right -->
+        <Child type="Widget" skin="TB_BR_T" offset="248 238 4 10" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR" offset="248 248 4 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR_B" offset="238 248 10 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+
+        <!-- Caption -->
+        <Child type="Widget" skin="HB_ALL" offset="4 4 248 20" align="Top HStretch">
+            <Property key="Scale" value="1 1 0 0"/>
+        </Child>
+
+        <!-- This invisible button makes it possible to move the
+             window by dragging the caption. -->
+        <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
+            <Property key="Scale" value="1 1 0 0"/>
+        </Child>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_Window_Pinnable" size="256 256">
+        <Property key="TextAlign" value="Center"/>
+        <Property key="Snap" value="true"/>
+        <Property key="MinSize" value="64 64"/>
+
+        <Child type="Widget" skin="BlackBG" offset=" 0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
+
+        <!-- Outer Borders -->
+        <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="0 14 4 228" align="Left VStretch" name="Action">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="252 14 4 228" align="Right VStretch" name="Action">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="14 252 228 4" align="Bottom HStretch" name="Action">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+
+        <!-- OB: Top Left -->
+        <Child type="Widget" skin="TB_TL_T" offset="4 0 10 4" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="0 0 4 4" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL_B" offset="0 4 4 10" align="Left Top" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+
+        <!-- OB: Top Right -->
+        <Child type="Widget" skin="TB_TR_T" offset="242 0 10 4" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="252 0 4 4" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR_B" offset="252 4 4 10" align="Right Top" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+
+        <!-- OB: Bottom Left -->
+        <Child type="Widget" skin="TB_BL_T" offset="0 242 4 10" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="0 252 4 4" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL_B" offset="4 252 10 4" align="Left Bottom" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+
+        <!-- OB: Bottom Right -->
+        <Child type="Widget" skin="TB_BR_T" offset="252 242 4 10" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR" offset="252 252 4 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR_B" offset="242 252 10 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+
+        <!-- Inner Borders -->
+        <Child type="Widget" skin="TB_T" offset="18 24 220 4" align="Top HStretch" name="Action">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="4 38 4 200" align="Left VStretch" name="Action">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="248 38 4 200" align="Right VStretch" name="Action">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="18 248 220 4" align="Bottom HStretch" name="Action">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+
+        <!-- IB: Top Left -->
+        <Child type="Widget" skin="TB_TL_T" offset="8 24 10 4" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="4 24 4 4" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL_B" offset="4 28 4 10" align="Top Left" name="Action">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+
+        <!-- IB: Top Right -->
+        <Child type="Widget" skin="TB_TR_T" offset="238 24 10 4" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="248 24 4 4" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR_B" offset="248 28 4 10" align="Top Right" name="Action">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+
+        <!-- IB: Bottom Left -->
+        <Child type="Widget" skin="TB_BL_T" offset="4 238 4 10" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="4 248 4 4" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL_B" offset="8 248 10 4" align="Bottom Left" name="Action">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+
+        <!-- IB: Bottom Right -->
+        <Child type="Widget" skin="TB_BR_T" offset="248 238 4 10" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR" offset="248 248 4 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR_B" offset="238 248 10 4" align="Right Bottom" name="Action">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+
+        <!-- Caption -->
+        <Child type="WindowCaption" skin="MW_Caption_Pin" offset="4 4 248 20" align="HStretch Top" name="Caption">
+        </Child>
+
+        <!-- This invisible button makes it possible to move the
+             window by dragging the caption. -->
+        <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
+            <Property key="Scale" value="1 1 0 0"/>
+        </Child>
+
+        <Child type="Button" skin="PinUp" offset="232 4 19 19" align="Right Top" name="Button"/>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_Dialog" size="256 54">
+        <Child type="Widget" skin="BlackBG" offset="4 4 248 46" align="Stretch" name="Client"/>
+
+        <!-- Outer borders -->
+        <Child type="Widget" skin="DB_T" offset="4 0 248 4" align="Top HStretch" name="Border">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="DB_L" offset="0 4 4 46" align="Left VStretch" name="Border">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="DB_B" offset="4 50 248 4" align="Bottom HStretch" name="Border">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_R" offset="252 4 4 46" align="Right VStretch" name="Border">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+
+        <Child type="Widget" skin="DB_BR" offset="252 50 4 4" align="Right Bottom" name="Border">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_BL" offset="0 50 4 4" align="Left Bottom" name="Border">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_TR" offset="252 0 4 4" align="Right Top" name="Border">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="DB_TL" offset="0 0 4 4" align="Left Top" name="Border">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_DialogNoTransp" size="256 54">
+        <Child type="Widget" skin="FullBlackBG" offset="4 4 248 46" align="Stretch" name="Client"/>
+
+        <!-- Outer borders -->
+        <Child type="Widget" skin="DB_T" offset="4 0 248 4" align="Top HStretch" name="Border">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="DB_L" offset="0 4 4 46" align="Left VStretch" name="Border">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="DB_B" offset="4 50 248 4" align="Bottom HStretch" name="Border">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_R" offset="252 4 4 46" align="Right VStretch" name="Border">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+
+        <Child type="Widget" skin="DB_BR" offset="252 50 4 4" align="Right Bottom" name="Border">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_BL" offset="0 50 4 4" align="Left Bottom" name="Border">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_TR" offset="252 0 4 4" align="Right Top" name="Border">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="DB_TL" offset="0 0 4 4" align="Left Top" name="Border">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+    </Resource>
+</MyGUI>

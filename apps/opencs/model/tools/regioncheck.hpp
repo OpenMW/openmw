@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_REGIONCHECK_H
 #define CSM_TOOLS_REGIONCHECK_H
 
-#include <components/esm/loadregn.hpp>
+#include <components/esm3/loadregn.hpp>
 
 #include "../world/idcollection.hpp"
 

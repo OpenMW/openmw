@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Resource" version="1.1">
+
+    <!-- Horizontal Scrollbar -->
+
+    <Resource type="ResourceSkin" name="MW_HScroll" size="90 14">
+        <Property key="TrackRangeMargins" value="20 19"/>
+        <Property key="MinTrackSize" value="14"/>
+        <Property key="VerticalAlignment" value="false"/>
+        <Property key="MoveToClick" value="true"/>
+        <Property key="TrackFill" value="1"/>
+
+        <Property key="WheelPage" value="36"/>
+        <Property key="ViewPage" value="36"/>
+        <Property key="Page" value="36"/>
+
+        <!-- Tracker must be last to be on top and receive mouse events -->
+
+        <Child type="Button" skin="MW_Box" offset="18 0 54 14" align="Stretch" name="Background"/>
+
+        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
+
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="14 0 24 14" align="Top HStretch" name="FirstPart"/>
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="52 0 24 14" align="Top HStretch" name="SecondPart"/>
+
+        <!-- Arrows -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 15 14" align="Left VStretch"/>
+        <Child type="Button" skin="MW_ArrowLeft" offset="2 2 10 10" align="Left VStretch" name="Start"/>
+
+        <Child type="Widget" skin="MW_Box" offset="75 0 15 14" align="Right VStretch"/>
+        <Child type="Button" skin="MW_ArrowRight" offset="77 2 10 10" align="Right VStretch" name="End"/>
+
+        <Child type="Button" skin="MW_ScrollTrackH" offset="38 2 30 9" align="Left VStretch" name="Track"/>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="MW_ScrollTrackH" texture="textures\omw_menu_scroll_center_h.dds">
+        <Property key="MinTrackSize" value="14"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Vertical Scrollbar -->
+
+    <Resource type="ResourceSkin" name="MW_VScroll" size="14 90">
+        <Property key="TrackRangeMargins" value="20 19"/>
+        <Property key="MinTrackSize" value="14"/>
+        <Property key="MoveToClick" value="true"/>
+        <Property key="TrackFill" value="1"/>
+
+        <Property key="WheelPage" value="36"/>
+        <Property key="ViewPage" value="36"/>
+        <Property key="Page" value="36"/>
+
+        <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
+
+        <Child type="Button" skin="MW_Box" offset="0 18 14 55" align="Stretch" name="Background"/>
+
+        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
+
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 14 24 14" align="Left VStretch" name="FirstPart"/>
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 52 24 14" align="Left VStretch" name="SecondPart"/>
+
+        <!-- Arrows -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 14 15" align="Top HStretch"/>
+        <Child type="Button" skin="MW_ArrowUp" offset="2 2 10 10" align="Top HStretch" name="Start"/>
+
+        <Child type="Widget" skin="MW_Box" offset="0 76 14 15" align="Bottom HStretch"/>
+        <Child type="Button" skin="MW_ArrowDown" offset="2 78 10 10" align="Bottom HStretch" name="End"/>
+
+        <!-- Tracker must be last to be on top and receive mouse events -->
+
+        <Child type="Button" skin="MW_ScrollTrackV" offset="2 40 9 30" align="Top HStretch" name="Track"/>
+
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="MW_ScrollTrackV" texture="textures\omw_menu_scroll_center_v.dds">
+        <Property key="MinTrackSize" value="14"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Empty space in scrollbar -->
+
+    <Resource type="ResourceSkin" name="MW_ScrollEmptyPart" size="16 16" >
+    </Resource>
+
+    <!-- Header text -->
+
+    <Resource type="ResourceSkin" name="HeaderText" size="16 16">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+        <Property key="TextColour" value="#{fontcolour=header}"/>
+
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
+    </Resource>
+
+    <!-- list skin -->
+
+    <Resource type="ResourceSkin" name="MW_ListLine" size="5 5">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left VCenter"/>
+
+        <BasisSkin type="SimpleText" offset="2 0 1 5" align="Stretch">
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_List" size="516 516" align="Left Top">
+        <Property key="NeedKey" value="true"/>
+        <Property key="SkinLine" value="MW_ListLine"/>
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 4 14 508" align="Right VStretch" name="VScroll"/>
+
+        <Child type="Widget" skin="" offset="3 4 493 508" align="Stretch" name="Client"/>
+
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_PopupList" size="516 516" align="Left Top">
+        <Property key="NeedKey" value="true"/>
+        <Property key="SkinLine" value="MW_ListLine"/>
+        <Child type="Widget" skin="BlackBG" offset="0 0 516 516" align="Stretch"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
+
+        <Child type="Widget" skin="" offset="3 3 493 509" align="Stretch" name="Client"/>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_PopupListNoTransp" size="516 516" align="Left Top">
+        <Property key="NeedKey" value="true"/>
+        <Property key="SkinLine" value="MW_ListLine"/>
+
+        <Child type="Widget" skin="FullBlackBG" offset="0 0 516 516" align="Stretch"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
+
+        <Child type="Widget" skin="" offset="3 3 493 509" align="Stretch" name="Client"/>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_ItemView" size="516 516" align="Left Top">
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="ScrollView" skin="MW_ScrollViewH" offset="3 3 509 509" align="Stretch" name="ScrollView">
+            <Property key="CanvasAlign" value="Left Top"/>
+            <Property key="NeedMouse" value="true"/>
+        </Child>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_ItemChargeView" size="516 516" align="Left Top">
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="ScrollView" skin="MW_ScrollView" offset="3 3 509 509" align="Stretch" name="ScrollView">
+            <Property key="CanvasAlign" value="Left Top"/>
+            <Property key="NeedMouse" value="true"/>
+        </Child>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_SpellView" size="516 516" align="Left Top">
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="ScrollView" skin="MW_ScrollView" offset="3 3 509 509" align="Stretch" name="ScrollView">
+            <Property key="CanvasAlign" value="Left Top"/>
+            <Property key="NeedMouse" value="true"/>
+        </Child>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_SimpleList" size="516 516" align="Left Top">
+        <Property key="ListItemSkin" value="MW_ListLine"/>
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="Widget" skin="" offset="3 3 510 510" align="Top Left Stretch" name="Client"/>
+
+    </Resource>
+
+    <!-- Horizontal line -->
+
+    <Resource type="ResourceSkin" name="MW_HLine" size="512 10" texture="textures\menu_thin_border_top.dds">
+        <BasisSkin type="SubSkin" offset="0 0 512 2" align="Bottom HStretch">
+            <State name="normal" offset="0 0 512 2"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Vertical line -->
+
+    <Resource type="ResourceSkin" name="MW_VLine" size="10 512" texture="textures\menu_thin_border_left.dds">
+        <BasisSkin type="SubSkin" offset="0 0 2 512" align="Bottom VStretch">
+            <State name="normal" offset="0 0 2 512"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Arrows -->
+
+    <Resource type="AutoSizedResourceSkin" name="MW_ArrowLeft" texture="textures\omw_menu_scroll_left.dds">
+        <BasisSkin type="SubSkin" align="Stretch">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="MW_ArrowRight" texture="textures\omw_menu_scroll_right.dds">
+        <BasisSkin type="SubSkin" align="Stretch">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="MW_ArrowUp" texture="textures\omw_menu_scroll_up.dds">
+        <BasisSkin type="SubSkin" align="Stretch">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="AutoSizedResourceSkin" name="MW_ArrowDown" texture="textures\omw_menu_scroll_down.dds">
+        <BasisSkin type="SubSkin" align="Stretch">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+
+</MyGUI>

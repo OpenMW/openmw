@@ -141,7 +141,6 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
 
     std::unique_ptr<CSMWorld::UpdateCellCommand> modifyCell;
 
-    std::unique_ptr<CSMWorld::ModifyCommand> modifyDataRefNum;
 
     int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
 
@@ -170,29 +169,20 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
 
                 if (cellId.find ('#')!=std::string::npos)
                 {
-                    // Need to recalculate the cell and (if necessary) clear the instance's refNum
-                    modifyCell.reset (new UpdateCellCommand (model2, row));
-
-                    // Not sure which model this should be applied to
-                    int refNumColumn = model2.searchColumnIndex (Columns::ColumnId_RefNum);
-
-                    if (refNumColumn!=-1)
-                        modifyDataRefNum.reset (new ModifyCommand(*model, model->index(row, refNumColumn), 0));
+                    // Need to recalculate the cell
+                    modifyCell = std::make_unique<UpdateCellCommand>(model2, row);
                 }
             }
         }
     }
 
-    std::unique_ptr<CSMWorld::ModifyCommand> modifyData (
-        new CSMWorld::ModifyCommand (*model, index, new_));
+    auto modifyData = std::make_unique<CSMWorld::ModifyCommand>(*model, index, new_);
 
     if (modifyCell.get())
     {
         CommandMacro macro (mDocument.getUndoStack());
         macro.push (modifyData.release());
         macro.push (modifyCell.release());
-        if (modifyDataRefNum.get())
-            macro.push (modifyDataRefNum.release());
     }
     else
         mDocument.getUndoStack().push (modifyData.release());

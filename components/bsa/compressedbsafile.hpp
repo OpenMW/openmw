@@ -26,6 +26,8 @@
 #ifndef BSA_COMPRESSED_BSA_FILE_H
 #define BSA_COMPRESSED_BSA_FILE_H
 
+#include <map>
+
 #include <components/bsa/bsa_file.hpp>
 
 namespace Bsa
@@ -37,7 +39,7 @@ namespace Bsa
         BSAVER_COMPRESSED = 0x415342 //B, S, A
     };
 
-    class CompressedBSAFile : public BSAFile
+    class CompressedBSAFile : private BSAFile
     {
     private:
         //special marker for invalid records,
@@ -83,18 +85,22 @@ namespace Bsa
         static std::uint64_t generateHash(std::string stem, std::string extension) ;
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
     public:
+        using BSAFile::open;
+        using BSAFile::getList;
+        using BSAFile::getFilename;
+
         CompressedBSAFile();
         virtual ~CompressedBSAFile();
 
         //checks version of BSA from file header
-        static BsaVersion detectVersion(std::string filePath);
+        static BsaVersion detectVersion(const std::string& filePath);
 
         /// Read header information from the input source
         void readHeader() override;
        
-        Files::IStreamPtr getFile(const char* filePath) override;
-        Files::IStreamPtr getFile(const FileStruct* fileStruct) override;
-        
+        Files::IStreamPtr getFile(const char* filePath);
+        Files::IStreamPtr getFile(const FileStruct* fileStruct);
+        void addFile(const std::string& filename, std::istream& file);
     };
 }
 

@@ -2,11 +2,13 @@
 #define GAME_MWWORLD_REFDATA_H
 
 #include <components/esm/defs.hpp>
-#include <components/esm/animationstate.hpp>
+#include <components/esm3/animationstate.hpp>
 
 #include "../mwscript/locals.hpp"
+#include "../mwworld/customdata.hpp"
 
 #include <string>
+#include <memory>
 
 namespace SceneUtil
 {
@@ -20,6 +22,11 @@ namespace ESM
     struct ObjectState;
 }
 
+namespace MWLua
+{
+    class LocalScripts;
+}
+
 namespace MWWorld
 {
 
@@ -30,12 +37,16 @@ namespace MWWorld
             SceneUtil::PositionAttitudeTransform* mBaseNode;
 
             MWScript::Locals mLocals;
+            std::shared_ptr<MWLua::LocalScripts> mLuaScripts;
 
             /// separate delete flag used for deletion by a content file
             /// @note not stored in the save game file.
-            bool mDeletedByContentFile;
+            bool mDeletedByContentFile:1;
 
-            bool mEnabled;
+            bool mEnabled:1;
+        public:
+            bool mPhysicsPostponed:1;
+        private:
 
             /// 0: deleted
             int mCount;
@@ -44,7 +55,7 @@ namespace MWWorld
 
             ESM::AnimationState mAnimationState;
 
-            CustomData *mCustomData;
+            std::unique_ptr<CustomData> mCustomData;
 
             void copy (const RefData& refData);
 
@@ -55,7 +66,6 @@ namespace MWWorld
             unsigned int mFlags;
 
         public:
-
             RefData();
 
             /// @param cellRef Used to copy constant data such as position into this class where it can
@@ -68,6 +78,7 @@ namespace MWWorld
             /// perform these operations).
 
             RefData (const RefData& refData);
+            RefData (RefData&& other) noexcept;
 
             ~RefData();
 
@@ -76,6 +87,7 @@ namespace MWWorld
             /// perform this operations).
 
             RefData& operator= (const RefData& refData);
+            RefData& operator= (RefData&& other) noexcept;
 
             /// Return base node (can be a null pointer).
             SceneUtil::PositionAttitudeTransform* getBaseNode();
@@ -89,6 +101,9 @@ namespace MWWorld
             int getCount(bool absolute = true) const;
 
             void setLocals (const ESM::Script& script);
+
+            MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
+            void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
 
             void setCount (int count);
             ///< Set object count (an object pile is a simple object with a count >1).
@@ -117,7 +132,7 @@ namespace MWWorld
             void setPosition (const ESM::Position& pos);
             const ESM::Position& getPosition() const;
 
-            void setCustomData (CustomData *data);
+            void setCustomData(std::unique_ptr<CustomData>&& value) noexcept;
             ///< Set custom data (potentially replacing old custom data). The ownership of \a data is
             /// transferred to this.
 

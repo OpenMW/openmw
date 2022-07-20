@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include <QMetaType>
-
 #include "../world/universalid.hpp"
 
 namespace CSMDoc

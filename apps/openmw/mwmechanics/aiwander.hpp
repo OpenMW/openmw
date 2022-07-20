@@ -5,11 +5,10 @@
 
 #include <vector>
 
-#include "../mwworld/timestamp.hpp"
-
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
-#include "aistate.hpp"
+#include "aitemporarybase.hpp"
+#include "aitimer.hpp"
 
 namespace ESM
 {
@@ -25,7 +24,7 @@ namespace MWMechanics
     /// \brief This class holds the variables AiWander needs which are deleted if the package becomes inactive.
     struct AiWanderStorage : AiTemporaryBase
     {
-        float mReaction; // update some actions infrequently
+        AiReactionTimer mReaction;
 
         // AiWander states
         enum WanderState
@@ -56,19 +55,7 @@ namespace MWMechanics
         float mCheckIdlePositionTimer;
         int mStuckCount;
 
-        AiWanderStorage():
-            mReaction(0),
-            mState(Wander_ChooseAction),
-            mIsWanderingManually(false),
-            mCanWanderAlongPathGrid(true),
-            mIdleAnimation(0),
-            mBadIdles(),
-            mPopulateAvailableNodes(true),
-            mAllowedNodes(),
-            mTrimCurrentNode(false),
-            mCheckIdlePositionTimer(0),
-            mStuckCount(0)
-            {};
+        AiWanderStorage();
 
         void setState(const WanderState wanderState, const bool isManualWander = false)
         {
@@ -99,7 +86,6 @@ namespace MWMechanics
             {
                 AiPackage::Options options;
                 options.mUseVariableSpeed = true;
-                options.mRepeat = false;
                 return options;
             }
 
@@ -129,7 +115,6 @@ namespace MWMechanics
             short unsigned getRandomIdle();
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
             void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
-            void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
             void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);

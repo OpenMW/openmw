@@ -20,7 +20,6 @@ namespace osg
     class PositionAttitudeTransform;
     class Group;
     class Node;
-    class Geode;
 }
 
 namespace osgFX
@@ -54,7 +53,7 @@ namespace CSVRender
 
             Object* mObject;
 
-            QString getToolTip (bool hideBasics) const override;
+            QString getToolTip (bool hideBasics, const WorldspaceHitResult& hit) const override;
     };
 
     class ObjectMarkerTag : public ObjectTag

@@ -110,7 +110,7 @@ namespace CSVDoc
 
             ///< The ownership of \a document is not transferred to *this.
 
-            virtual ~View();
+            ~View() override;
 
             const CSMDoc::Document *getDocument() const;
 

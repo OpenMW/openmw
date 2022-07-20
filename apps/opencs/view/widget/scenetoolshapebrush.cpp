@@ -1,25 +1,20 @@
 #include "scenetoolshapebrush.hpp"
 
-#include <QFrame>
-#include <QIcon>
-#include <QTableWidget>
-#include <QHBoxLayout>
-
-#include <QWidget>
-#include <QComboBox>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QSlider>
-#include <QEvent>
-#include <QDropEvent>
 #include <QButtonGroup>
-#include <QVBoxLayout>
+#include <QComboBox>
 #include <QDragEnterEvent>
-#include <QDrag>
-#include <QTableWidget>
+#include <QDropEvent>
+#include <QFrame>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QHeaderView>
-#include <QApplication>
+#include <QIcon>
+#include <QLabel>
 #include <QSizePolicy>
+#include <QSlider>
+#include <QTableWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include "brushshapes.hpp"
 #include "scenetool.hpp"
@@ -27,11 +22,6 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
 #include "../../model/world/commands.hpp"
-#include "../../model/world/data.hpp"
-#include "../../model/world/idcollection.hpp"
-#include "../../model/world/idtable.hpp"
-#include "../../model/world/landtexture.hpp"
-#include "../../model/world/universalid.hpp"
 
 
 CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString &title, QWidget *parent)

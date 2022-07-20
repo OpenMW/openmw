@@ -10,6 +10,7 @@
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/esm3/loadinfo.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -24,14 +25,19 @@ namespace MWDialogue
 {
     class DialogueManager : public MWBase::DialogueManager
     {
+            struct ActorKnownTopicInfo
+            {
+                int mFlags;
+                const ESM::DialInfo* mInfo;
+            };
+
             std::set<std::string, Misc::StringUtils::CiComp> mKnownTopics;// Those are the topics the player knows.
 
             // Modified faction reactions. <Faction1, <Faction2, Difference> >
             typedef std::map<std::string, std::map<std::string, int> > ModFactionReactionMap;
             ModFactionReactionMap mChangedFactionReaction;
 
-            std::set<std::string, Misc::StringUtils::CiComp> mActorKnownTopics;
-            std::unordered_map<std::string, int> mActorKnownTopicsFlag;
+            std::map<std::string, ActorKnownTopicInfo, Misc::StringUtils::CiComp> mActorKnownTopics;
 
             Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;
@@ -47,10 +53,12 @@ namespace MWDialogue
 
             std::vector<std::pair<std::string, int> > mChoices;
 
-            float mTemporaryDispositionChange;
-            float mPermanentDispositionChange;
+            int mOriginalDisposition;
+            int mCurrentDisposition;
+            int mPermanentDispositionChange;
 
-            void parseText (const std::string& text);
+            std::vector<std::string> parseTopicIdsFromText (const std::string& text);
+            void addTopicsFromText (const std::string& text);
 
             void updateActorKnownTopics();
             void updateGlobals();
@@ -61,6 +69,8 @@ namespace MWDialogue
             void executeTopic (const std::string& topic, ResponseCallback* callback);
 
             const ESM::Dialogue* searchDialogue(const std::string& id);
+
+            void updateOriginalDisposition();
 
         public:
 
@@ -77,9 +87,9 @@ namespace MWDialogue
 
             bool inJournal (const std::string& topicId, const std::string& infoId) override;
 
-            void addTopic (const std::string& topic) override;
+            void addTopic(std::string_view topic) override;
 
-            void addChoice (const std::string& text,int choice) override;
+            void addChoice(std::string_view text,int choice) override;
             const std::vector<std::pair<std::string, int> >& getChoices() override;
 
             bool isGoodbye() override;
@@ -96,7 +106,6 @@ namespace MWDialogue
             void questionAnswered (int answer, ResponseCallback* callback) override;
 
             void persuade (int type, ResponseCallback* callback) override;
-            int getTemporaryDispositionChange () const override;
 
             /// @note Controlled by an option, gets discarded when dialogue ends by default
             void applyBarterDispositionChange (int delta) override;
@@ -108,12 +117,12 @@ namespace MWDialogue
             void readRecord (ESM::ESMReader& reader, uint32_t type) override;
 
             /// Changes faction1's opinion of faction2 by \a diff.
-            void modFactionReaction (const std::string& faction1, const std::string& faction2, int diff) override;
+            void modFactionReaction (std::string_view faction1, std::string_view faction2, int diff) override;
 
-            void setFactionReaction (const std::string& faction1, const std::string& faction2, int absolute) override;
+            void setFactionReaction (std::string_view faction1, std::string_view faction2, int absolute) override;
 
             /// @return faction1's opinion of faction2
-            int getFactionReaction (const std::string& faction1, const std::string& faction2) const override;
+            int getFactionReaction (std::string_view faction1, std::string_view faction2) const override;
 
             /// Removes the last added topic response for the given actor from the journal
             void clearInfoActor (const MWWorld::Ptr& actor) const override;

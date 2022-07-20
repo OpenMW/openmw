@@ -1,7 +1,7 @@
 #ifndef GAME_MWCLASS_CONTAINER_H
 #define GAME_MWCLASS_CONTAINER_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 
@@ -13,14 +13,12 @@ namespace ESM
 
 namespace MWClass
 {
-    class ContainerCustomData : public MWWorld::CustomData
+    class ContainerCustomData : public MWWorld::TypedCustomData<ContainerCustomData>
     {
         MWWorld::ContainerStore mStore;
     public:
         ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell);
         ContainerCustomData(const ESM::InventoryState& inventory);
-
-        MWWorld::CustomData *clone() const override;
 
         ContainerCustomData& asContainerCustomData() override;
         const ContainerCustomData& asContainerCustomData() const override;
@@ -28,23 +26,31 @@ namespace MWClass
         friend class Container;
     };
 
-    class Container : public MWWorld::Class
+    class Container : public MWWorld::RegisteredClass<Container>
     {
+            friend MWWorld::RegisteredClass<Container>;
+
+            const bool mHarvestEnabled;
+
+            Container();
+
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
-        public:
+            bool canBeHarvested(const MWWorld::ConstPtr& ptr) const;
 
+        public:
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
+            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
+            void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
 
             std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
@@ -76,8 +82,6 @@ namespace MWClass
 
             void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
-
-            static void registerSelf();
 
             void respawn (const MWWorld::Ptr& ptr) const override;
 

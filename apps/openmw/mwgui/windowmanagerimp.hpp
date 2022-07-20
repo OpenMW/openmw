@@ -8,6 +8,7 @@
 **/
 
 #include <stack>
+#include <vector>
 
 #include <osg/ref_ptr>
 
@@ -16,6 +17,7 @@
 #include <components/sdlutil/events.hpp>
 #include <components/settings/settings.hpp>
 #include <components/to_utf8/to_utf8.hpp>
+#include <components/misc/guarded.hpp>
 
 #include "mapwindow.hpp"
 #include "statswatcher.hpp"
@@ -114,7 +116,6 @@ namespace MWGui
   class TrainingWindow;
   class SpellIcons;
   class MerchantRepair;
-  class Repair;
   class SoulgemDialog;
   class Recharge;
   class CompanionWindow;
@@ -122,6 +123,7 @@ namespace MWGui
   class WindowModal;
   class ScreenFader;
   class DebugWindow;
+  class PostProcessorHud;
   class JailScreen;
   class KeyboardNavigation;
 
@@ -133,15 +135,14 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
 
     WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                  const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
-                  ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, const std::string& localPath);
+                  const std::string& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
+                  ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders);
     virtual ~WindowManager();
 
     /// Set the ESMStore to use for retrieving of GUI-related strings.
     void setStore (const MWWorld::ESMStore& store);
 
     void initUI();
-    void loadUserFonts() override;
 
     Loading::Listener* getLoadingScreen() override;
 
@@ -186,6 +187,8 @@ namespace MWGui
     MWGui::CountDialog* getCountDialog() override;
     MWGui::ConfirmationDialog* getConfirmationDialog() override;
     MWGui::TradeWindow* getTradeWindow() override;
+    const std::vector<MWGui::MessageBox*> getActiveMessageBoxes() override;
+    MWGui::PostProcessorHud* getPostProcessorHud() override;
 
     /// Make the player use an item, while updating GUI state accordingly
     void useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions=false) override;
@@ -193,6 +196,8 @@ namespace MWGui
     void updateSpellWindow() override;
 
     void setConsoleSelectedObject(const MWWorld::Ptr& object) override;
+    void printToConsole(const std::string& msg, std::string_view color) override;
+    void setConsoleMode(const std::string& mode) override;
 
     /// Set time left for the player to start drowning (update the drowning bar)
     /// @param time time left to start drowning
@@ -208,6 +213,8 @@ namespace MWGui
     void getMousePosition(float &x, float &y) override;
     void setDragDrop(bool dragDrop) override;
     bool getWorldMouseOver() override;
+
+    float getScalingFactor() const override;
 
     bool toggleFogOfWar() override;
     bool toggleFullHelp() override; ///< show extra info in item tooltips (owner, script)
@@ -263,6 +270,7 @@ namespace MWGui
     void exitCurrentGuiMode() override;
 
     void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
+    void scheduleMessageBox (std::string message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
     void staticMessageBox(const std::string& message) override;
     void removeStaticMessageBox() override;
     void interactiveMessageBox (const std::string& message,
@@ -270,7 +278,7 @@ namespace MWGui
 
     int readPressedButton () override; ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
-    void update (float duration) override;
+    void update (float duration);
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given
@@ -359,6 +367,7 @@ namespace MWGui
 
     void toggleConsole() override;
     void toggleDebugWindow() override;
+    void togglePostProcessorHud() override;
 
     /// Cycle to next or previous spell
     void cycleSpell(bool next) override;
@@ -366,12 +375,6 @@ namespace MWGui
     void cycleWeapon(bool next) override;
 
     void playSound(const std::string& soundId, float volume = 1.f, float pitch = 1.f) override;
-
-    // In WindowManager for now since there isn't a VFS singleton
-    std::string correctIconPath(const std::string& path) override;
-    std::string correctBookartPath(const std::string& path, int width, int height, bool* exists = nullptr) override;
-    std::string correctTexturePath(const std::string& path) override;
-    bool textureExists(const std::string& path) override;
 
     void addCell(MWWorld::CellStore* cell) override;
     void removeCell(MWWorld::CellStore* cell) override;
@@ -381,6 +384,13 @@ namespace MWGui
 
     bool injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat=false) override;
     bool injectKeyRelease(MyGUI::KeyCode key) override;
+
+    const std::string& getVersionDescription() const override;
+
+    void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
+    void forceLootMode(const MWWorld::Ptr& ptr) override;
+
+    void asyncPrepareSaveMap() override;
 
   private:
     unsigned int mOldUpdateMask; unsigned int mOldCullMask;
@@ -438,7 +448,9 @@ namespace MWGui
     ScreenFader* mHitFader;
     ScreenFader* mScreenFader;
     DebugWindow* mDebugWindow;
+    PostProcessorHud* mPostProcessorHud;
     JailScreen* mJailScreen;
+    ContainerWindow* mContainerWindow;
 
     std::vector<WindowBase*> mWindows;
 
@@ -519,6 +531,19 @@ namespace MWGui
 
     SDLUtil::VideoWrapper* mVideoWrapper;
 
+    float mScalingFactor;
+
+    struct ScheduledMessageBox
+    {
+        std::string mMessage;
+        MWGui::ShowInDialogueMode mShowInDialogueMode;
+
+        ScheduledMessageBox(std::string&& message, MWGui::ShowInDialogueMode showInDialogueMode)
+            : mMessage(std::move(message)), mShowInDialogueMode(showInDialogueMode) {}
+    };
+
+    Misc::ScopeGuarded<std::vector<ScheduledMessageBox>> mScheduledMessageBoxes;
+
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.
      * Supported syntax:
@@ -550,6 +575,13 @@ namespace MWGui
     void updatePinnedWindows();
 
     void enableScene(bool enable);
+
+    void handleScheduledMessageBoxes();
+
+    void pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg, bool force);
+
+    void setCullMask(uint32_t mask) override;
+    uint32_t getCullMask() override;
   };
 }
 

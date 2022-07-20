@@ -3,18 +3,15 @@
 
 #include <memory>
 
-#include <components/esm/defs.hpp>
 #include <components/detournavigator/areatype.hpp>
 
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
-#include "aistate.hpp"
 #include "aipackagetypeid.hpp"
+#include "aitimer.hpp"
+#include "aistatefwd.hpp"
 
-namespace MWWorld
-{
-    class Ptr;
-}
+#include "../mwworld/ptr.hpp"
 
 namespace ESM
 {
@@ -28,8 +25,6 @@ namespace ESM
 
 namespace MWMechanics
 {
-    const float AI_REACTION_TIME = 0.25f;
-
     class CharacterController;
     class PathgridGraph;
 
@@ -110,7 +105,7 @@ namespace MWMechanics
             /// Upon adding this Ai package, should the Ai Sequence attempt to cancel previous Ai packages (default true)?
             bool shouldCancelPreviousAi() const { return mOptions.mShouldCancelPreviousAi; }
 
-            /// Return true if this package should repeat. Currently only used for Wander packages.
+            /// Return true if this package should repeat.
             bool getRepeat() const { return mOptions.mRepeat; }
 
             virtual osg::Vec3f getDestination() const { return osg::Vec3f(0, 0, 0); }
@@ -124,10 +119,15 @@ namespace MWMechanics
             /// Return if actor's rotation speed is sufficient to rotate to the destination pathpoint on the run. Otherwise actor should rotate while standing.
             static bool isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const osg::Vec3f& dest);
 
+            osg::Vec3f getNextPathPoint(const osg::Vec3f& destination) const;
+
+            float getNextPathPointTolerance(float speed, float duration, const osg::Vec3f& halfExtents) const;
+
         protected:
             /// Handles path building and shortcutting with obstacles avoiding
             /** \return If the actor has arrived at his destination **/
-            bool pathTo(const MWWorld::Ptr& actor, const osg::Vec3f& dest, float duration, float destTolerance = 0.0f);
+            bool pathTo(const MWWorld::Ptr& actor, const osg::Vec3f& dest, float duration,
+                        float destTolerance = 0.0f, float endTolerance = 0.0f, PathType pathType = PathType::Full);
 
             /// Check if there aren't any obstacles along the path to make shortcut possible
             /// If a shortcut is possible then path will be cleared and filled with the destination point.
@@ -158,16 +158,18 @@ namespace MWMechanics
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
 
-            float mTimer;
+            AiReactionTimer mReaction;
 
             std::string mTargetActorRefId;
             mutable int mTargetActorId;
+            mutable MWWorld::Ptr mCachedTarget;
 
             short mRotateOnTheRunChecks; // attempts to check rotation to the pathpoint on the run possibility
 
             bool mIsShortcutting;   // if shortcutting at the moment
             bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt
             osg::Vec3f mShortcutFailPos; // position of last shortcut fail
+            float mLastDestinationTolerance = 0;
 
         private:
             bool isNearInactiveCell(osg::Vec3f position);

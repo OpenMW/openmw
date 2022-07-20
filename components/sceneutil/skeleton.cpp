@@ -1,10 +1,11 @@
 #include "skeleton.hpp"
 
-#include <osg/Transform>
 #include <osg/MatrixTransform>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
+
+#include <algorithm>
 
 namespace SceneUtil
 {
@@ -12,24 +13,24 @@ namespace SceneUtil
 class InitBoneCacheVisitor : public osg::NodeVisitor
 {
 public:
-    InitBoneCacheVisitor(std::map<std::string, std::pair<osg::NodePath, osg::MatrixTransform*> >& cache)
+    typedef std::vector<osg::MatrixTransform*> TransformPath;
+    InitBoneCacheVisitor(std::unordered_map<std::string, TransformPath>& cache)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mCache(cache)
     {
     }
 
-    void apply(osg::Transform &node) override
+    void apply(osg::MatrixTransform &node) override
     {
-        osg::MatrixTransform* bone = node.asMatrixTransform();
-        if (!bone)
-            return;
-
-        mCache[Misc::StringUtils::lowerCase(bone->getName())] = std::make_pair(getNodePath(), bone);
-
+        mPath.push_back(&node);
+        mCache[Misc::StringUtils::lowerCase(node.getName())] = mPath;
         traverse(node);
+        mPath.pop_back();
     }
+
 private:
-    std::map<std::string, std::pair<osg::NodePath, osg::MatrixTransform*> >& mCache;
+    TransformPath mPath;
+    std::unordered_map<std::string, TransformPath>& mCache;
 };
 
 Skeleton::Skeleton()
@@ -70,34 +71,22 @@ Bone* Skeleton::getBone(const std::string &name)
 
     if (!mRootBone.get())
     {
-        mRootBone.reset(new Bone);
+        mRootBone = std::make_unique<Bone>();
     }
 
-    const osg::NodePath& path = found->second.first;
     Bone* bone = mRootBone.get();
-    for (osg::NodePath::const_iterator it = path.begin(); it != path.end(); ++it)
+    for (osg::MatrixTransform* matrixTransform : found->second)
     {
-        osg::MatrixTransform* matrixTransform = dynamic_cast<osg::MatrixTransform*>(*it);
-        if (!matrixTransform)
-            continue;
+        const auto it = std::find_if(bone->mChildren.begin(), bone->mChildren.end(),
+                                     [&] (const auto& v) { return v->mNode == matrixTransform; });
 
-        Bone* child = nullptr;
-        for (unsigned int i=0; i<bone->mChildren.size(); ++i)
+        if (it == bone->mChildren.end())
         {
-            if (bone->mChildren[i]->mNode == *it)
-            {
-                child = bone->mChildren[i];
-                break;
-            }
-        }
-
-        if (!child)
-        {
-            child = new Bone;
-            bone->mChildren.push_back(child);
+            bone = bone->mChildren.emplace_back(std::make_unique<Bone>()).get();
             mNeedToUpdateBoneMatrices = true;
         }
-        bone = child;
+        else
+            bone = it->get();
 
         bone->mNode = matrixTransform;
     }
@@ -116,8 +105,8 @@ void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
     {
         if (mRootBone.get())
         {
-            for (unsigned int i=0; i<mRootBone->mChildren.size(); ++i)
-                mRootBone->mChildren[i]->update(nullptr);
+            for (const auto& child : mRootBone->mChildren)
+                child->update(nullptr);
         }
 
         mNeedToUpdateBoneMatrices = false;
@@ -171,13 +160,6 @@ Bone::Bone()
 {
 }
 
-Bone::~Bone()
-{
-    for (unsigned int i=0; i<mChildren.size(); ++i)
-        delete mChildren[i];
-    mChildren.clear();
-}
-
 void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
 {
     if (!mNode)
@@ -190,10 +172,8 @@ void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
     else
         mMatrixInSkeletonSpace = mNode->getMatrix();
 
-    for (unsigned int i=0; i<mChildren.size(); ++i)
-    {
-        mChildren[i]->update(&mMatrixInSkeletonSpace);
-    }
+    for (const auto& child : mChildren)
+        child->update(&mMatrixInSkeletonSpace);
 }
 
 }

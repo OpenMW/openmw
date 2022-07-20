@@ -3,7 +3,6 @@
 
 #include "../mwbase/journal.hpp"
 
-#include "journalentry.hpp"
 #include "quest.hpp"
 
 namespace MWDialogue

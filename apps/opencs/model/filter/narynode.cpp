@@ -9,7 +9,7 @@ CSMFilter::NAryNode::NAryNode (const std::vector<std::shared_ptr<Node> >& nodes,
 
 int CSMFilter::NAryNode::getSize() const
 {
-    return mNodes.size();
+    return static_cast<int>(mNodes.size());
 }
 
 const CSMFilter::Node& CSMFilter::NAryNode::operator[] (int index) const

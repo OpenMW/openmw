@@ -113,3 +113,53 @@ distant interior fog end
 :Default:	16384 (2 cells)
 
 This is the base fog end distance used for distant fog calculations in interior locations.
+
+radial fog
+----------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+By default, the fog becomes thicker proportionally to your distance from the clipping plane set at the clipping distance, which causes distortion at the edges of the screen.
+This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.
+Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
+
+exponential fog
+---------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Similar to "radial fog" but uses an exponential formula for the fog.
+Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
+
+sky blending
+------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Whether to use blending with the sky for everything that is close to the clipping plane.
+If enabled the clipping plane becomes invisible.
+Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
+
+sky blending start
+------------------
+
+:Type:		floating point
+:Range:		from 0.0 (including) to 1.0 (excluding)
+:Default:	0.8
+
+The fraction of the maximum distance at which blending with the sky starts.
+
+sky rtt resolution
+------------------
+
+:Type:		two positive integers
+:Default:	512 256
+
+The sky RTT texture size, used only for sky blending. Smaller values
+reduce quality of the sky blending, but can have slightly better performance.

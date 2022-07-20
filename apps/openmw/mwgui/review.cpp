@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
@@ -86,7 +87,7 @@ namespace MWGui
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
-            mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (0)));
+            mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (nullptr)));
         }
 
         MyGUI::Button* backButton;

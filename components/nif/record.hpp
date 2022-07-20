@@ -38,14 +38,14 @@ enum RecordType
   RC_NiNode,
   RC_NiSwitchNode,
   RC_NiLODNode,
+  RC_NiFltAnimationNode,
   RC_NiBillboardNode,
   RC_AvoidNode,
   RC_NiCollisionSwitch,
   RC_NiTriShape,
   RC_NiTriStrips,
   RC_NiLines,
-  RC_NiRotatingParticles,
-  RC_NiAutoNormalParticles,
+  RC_NiParticles,
   RC_NiBSParticleNode,
   RC_NiCamera,
   RC_NiTexturingProperty,
@@ -73,6 +73,7 @@ enum RecordType
   RC_NiBSAnimationNode,
   RC_NiLight,
   RC_NiTextureEffect,
+  RC_NiExtraData,
   RC_NiVertWeightsExtraData,
   RC_NiTextKeyExtraData,
   RC_NiStringExtraData,
@@ -94,7 +95,7 @@ enum RecordType
   RC_NiUVData,
   RC_NiPosData,
   RC_NiRotatingParticlesData,
-  RC_NiAutoNormalParticlesData,
+  RC_NiParticlesData,
   RC_NiSequenceStreamHelper,
   RC_NiSourceTexture,
   RC_NiSkinInstance,
@@ -120,13 +121,37 @@ enum RecordType
   RC_NiPoint3Interpolator,
   RC_NiBoolInterpolator,
   RC_NiTransformInterpolator,
+  RC_NiColorInterpolator,
+  RC_BSShaderTextureSet,
+  RC_BSLODTriShape,
+  RC_BSShaderProperty,
+  RC_BSShaderPPLightingProperty,
+  RC_BSShaderNoLightingProperty,
+  RC_BSFurnitureMarker,
+  RC_NiCollisionObject,
+  RC_bhkCollisionObject,
+  RC_BSDismemberSkinInstance,
+  RC_NiControllerManager,
+  RC_bhkMoppBvTreeShape,
+  RC_bhkNiTriStripsShape,
+  RC_bhkPackedNiTriStripsShape,
+  RC_hkPackedNiTriStripsData,
+  RC_bhkConvexVerticesShape,
+  RC_bhkBoxShape,
+  RC_bhkListShape,
+  RC_bhkRigidBody,
+  RC_bhkRigidBodyT,
+  RC_BSLightingShaderProperty,
+  RC_NiClusterAccumulator,
+  RC_NiAlphaAccumulator,
+  RC_NiSortAdjustNode
 };
 
 /// Base class for all records
 struct Record
 {
     // Record type and type name
-    int recType{RC_MISSING};
+    RecordType recType{RC_MISSING};
     std::string recName;
     unsigned int recIndex{~0u};
 

@@ -270,6 +270,15 @@ namespace Nif
         nif->getUInt(); // Zero
     }
 
+    void NiControllerManager::read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        mCumulative = nif->getBoolean();
+        unsigned int numSequences = nif->getUInt();
+        nif->skip(4 * numSequences); // Controller sequences
+        nif->skip(4); // Object palette
+    }
+
     void NiPoint3Interpolator::read(NIFStream *nif)
     {
         defaultVal = nif->getVector3();
@@ -321,6 +330,17 @@ namespace Nif
     }
 
     void NiTransformInterpolator::post(NIFFile *nif)
+    {
+        data.post(nif);
+    }
+
+    void NiColorInterpolator::read(NIFStream *nif)
+    {
+        defaultVal = nif->getVector4();
+        data.read(nif);
+    }
+
+    void NiColorInterpolator::post(NIFFile *nif)
     {
         data.post(nif);
     }

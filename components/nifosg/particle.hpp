@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_NIFOSG_PARTICLE_H
 #define OPENMW_COMPONENTS_NIFOSG_PARTICLE_H
 
+#include <optional>
+
 #include <osgParticle/Particle>
 #include <osgParticle/Shooter>
 #include <osgParticle/Operator>
@@ -8,16 +10,16 @@
 #include <osgParticle/Placer>
 #include <osgParticle/Counter>
 
-#include <osg/NodeCallback>
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "controller.hpp" // ValueInterpolator
 
 namespace Nif
 {
-    class NiGravity;
-    class NiPlanarCollider;
-    class NiSphericalCollider;
-    class NiColorData;
+    struct NiGravity;
+    struct NiPlanarCollider;
+    struct NiSphericalCollider;
+    struct NiColorData;
 }
 
 namespace NifOsg
@@ -57,20 +59,20 @@ namespace NifOsg
     // Node callback used to set the inverse of the parent's world matrix on the MatrixTransform
     // that the callback is attached to. Used for certain particle systems,
     // so that the particles do not move with the node they are attached to.
-    class InverseWorldMatrix : public osg::NodeCallback
+    class InverseWorldMatrix : public SceneUtil::NodeCallback<InverseWorldMatrix, osg::MatrixTransform*>
     {
     public:
         InverseWorldMatrix()
         {
         }
-        InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& op)
-            : osg::Object(), osg::NodeCallback()
+        InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& copyop)
+            : osg::Object(copy, copyop), SceneUtil::NodeCallback<InverseWorldMatrix, osg::MatrixTransform*>(copy, copyop)
         {
         }
 
         META_Object(NifOsg, InverseWorldMatrix)
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
+        void operator()(osg::MatrixTransform* node, osg::NodeVisitor* nv);
     };
 
     class ParticleShooter : public osgParticle::Shooter
@@ -102,7 +104,7 @@ namespace NifOsg
     {
     public:
         PlanarCollider(const Nif::NiPlanarCollider* collider);
-        PlanarCollider();
+        PlanarCollider() = default;
         PlanarCollider(const PlanarCollider& copy, const osg::CopyOp& copyop);
 
         META_Object(NifOsg, PlanarCollider)
@@ -111,9 +113,12 @@ namespace NifOsg
         void operate(osgParticle::Particle* particle, double dt) override;
 
     private:
-        float mBounceFactor;
-        osg::Plane mPlane;
-        osg::Plane mPlaneInParticleSpace;
+        float mBounceFactor{0.f};
+        osg::Vec2f mExtents;
+        osg::Vec3f mPosition, mPositionInParticleSpace;
+        osg::Vec3f mXVector, mXVectorInParticleSpace;
+        osg::Vec3f mYVector, mYVectorInParticleSpace;
+        osg::Plane mPlane, mPlaneInParticleSpace;
     };
 
     class SphericalCollider : public osgParticle::Operator
@@ -233,9 +238,11 @@ namespace NifOsg
 
         void emitParticles(double dt) override;
 
-        void setShooter(osgParticle::Shooter* shooter);
-        void setPlacer(osgParticle::Placer* placer);
-        void setCounter(osgParticle::Counter* counter);
+        void setShooter(osgParticle::Shooter* shooter) { mShooter = shooter; }
+        void setPlacer(osgParticle::Placer* placer) { mPlacer = placer; }
+        void setCounter(osgParticle::Counter* counter) { mCounter = counter;}
+        void setGeometryEmitterTarget(std::optional<int> recIndex) { mGeometryEmitterTarget = recIndex; }
+        void setFlags(int flags) { mFlags = flags; }
 
     private:
         // NIF Record indices
@@ -244,6 +251,11 @@ namespace NifOsg
         osg::ref_ptr<osgParticle::Placer> mPlacer;
         osg::ref_ptr<osgParticle::Shooter> mShooter;
         osg::ref_ptr<osgParticle::Counter> mCounter;
+
+        int mFlags;
+
+        std::optional<int> mGeometryEmitterTarget;
+        osg::observer_ptr<osg::Vec3Array> mCachedGeometryEmitter;
     };
 
 }

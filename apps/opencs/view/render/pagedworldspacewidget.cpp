@@ -4,21 +4,15 @@
 #include <sstream>
 #include <string>
 
-#include <QMouseEvent>
-#include <QApplication>
-
-#include <components/esm/loadland.hpp>
 
 #include <components/misc/constants.hpp>
 
 #include "../../model/prefs/shortcut.hpp"
 
-#include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolmode.hpp"
-#include "../widget/scenetooltoggle2.hpp"
 
 #include "editmode.hpp"
 #include "mask.hpp"
@@ -59,8 +53,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 {
                     modified = true;
 
-                    std::unique_ptr<Cell> cell (new Cell (mDocument.getData(), mRootNode,
-                        iter->first.getId (mWorldspace), deleted));
+                    auto cell = std::make_unique<Cell>(mDocument.getData(), mRootNode,
+                        iter->first.getId (mWorldspace), deleted);
 
                     delete iter->second;
                     iter->second = cell.release();
@@ -447,9 +441,7 @@ void CSVRender::PagedWorldspaceWidget::addCellToScene (
     bool deleted = index==-1 ||
         cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted;
 
-    std::unique_ptr<Cell> cell (
-        new Cell (mDocument.getData(), mRootNode, coordinates.getId (mWorldspace),
-        deleted));
+    auto cell = std::make_unique<Cell>(mDocument.getData(), mRootNode, coordinates.getId (mWorldspace), deleted);
     EditMode *editMode = getEditMode();
     cell->setSubMode (editMode->getSubMode(), editMode->getInteractionMask());
 
@@ -768,6 +760,22 @@ void CSVRender::PagedWorldspaceWidget::selectAllWithSameParentId (int elementMas
     flagAsModified();
 }
 
+void CSVRender::PagedWorldspaceWidget::selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode)
+{
+    for (auto& cell : mCells)
+    {
+        cell.second->selectInsideCube (pointA, pointB, dragMode);
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode)
+{
+    for (auto& cell : mCells)
+    {
+        cell.second->selectWithinDistance (point, distance, dragMode);
+    }
+}
+
 std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
 {
     CSMWorld::CellCoordinates cellCoordinates (
@@ -787,7 +795,7 @@ CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& poi
     if (searchResult != mCells.end())
         return searchResult->second;
     else
-        return 0;
+        return nullptr;
 }
 
 CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const CSMWorld::CellCoordinates& coords) const

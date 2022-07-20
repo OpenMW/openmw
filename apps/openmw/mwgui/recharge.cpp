@@ -1,7 +1,6 @@
 #include "recharge.hpp"
 
 #include <MyGUI_ScrollView.h>
-#include <MyGUI_Gui.h>
 
 #include <components/widgets/box.hpp>
 
@@ -15,10 +14,10 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/recharge.hpp"
 
+#include "itemselection.hpp"
 #include "itemwidget.hpp"
 #include "itemchargeview.hpp"
 #include "sortfilteritemmodel.hpp"

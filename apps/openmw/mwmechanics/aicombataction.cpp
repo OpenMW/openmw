@@ -1,7 +1,7 @@
 #include "aicombataction.hpp"
 
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -40,7 +40,7 @@ namespace MWMechanics
     void ActionSpell::prepare(const MWWorld::Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(mSpellId);
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Spell);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Spell);
         if (actor.getClass().hasInventoryStore(actor))
         {
             MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
@@ -64,7 +64,7 @@ namespace MWMechanics
     {
         actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(std::string());
         actor.getClass().getInventoryStore(actor).setSelectedEnchantItem(mItem);
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Spell);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Spell);
     }
 
     float ActionEnchantedItem::getCombatRange(bool& isRanged) const
@@ -85,8 +85,7 @@ namespace MWMechanics
 
     void ActionPotion::prepare(const MWWorld::Ptr &actor)
     {
-        actor.getClass().apply(actor, mPotion.getCellRef().getRefId(), actor);
-        actor.getClass().getContainerStore(actor).remove(mPotion, 1, actor);
+        actor.getClass().consume(mPotion, actor);
     }
 
     void ActionWeapon::prepare(const MWWorld::Ptr &actor)
@@ -107,7 +106,7 @@ namespace MWMechanics
                 equip.execute(actor);
             }
         }
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Weapon);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Weapon);
     }
 
     float ActionWeapon::getCombatRange(bool& isRanged) const
@@ -141,14 +140,14 @@ namespace MWMechanics
         return mWeapon.get<ESM::Weapon>()->mBase;
     }
 
-    std::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
+    std::unique_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
     {
         Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
 
         float bestActionRating = 0.f;
         float antiFleeRating = 0.f;
         // Default to hand-to-hand combat
-        std::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        std::unique_ptr<Action> bestAction = std::make_unique<ActionWeapon>(MWWorld::Ptr());
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             bestAction->prepare(actor);
@@ -165,7 +164,7 @@ namespace MWMechanics
                 if (rating > bestActionRating)
                 {
                     bestActionRating = rating;
-                    bestAction.reset(new ActionPotion(*it));
+                    bestAction = std::make_unique<ActionPotion>(*it);
                     antiFleeRating = std::numeric_limits<float>::max();
                 }
             }
@@ -176,7 +175,7 @@ namespace MWMechanics
                 if (rating > bestActionRating)
                 {
                     bestActionRating = rating;
-                    bestAction.reset(new ActionEnchantedItem(it));
+                    bestAction = std::make_unique<ActionEnchantedItem>(it);
                     antiFleeRating = std::numeric_limits<float>::max();
                 }
             }
@@ -202,25 +201,25 @@ namespace MWMechanics
                         ammo = bestBolt;
 
                     bestActionRating = rating;
-                    bestAction.reset(new ActionWeapon(*it, ammo));
+                    bestAction = std::make_unique<ActionWeapon>(*it, ammo);
                     antiFleeRating = vanillaRateWeaponAndAmmo(*it, ammo, actor, enemy);
                 }
             }
         }
 
-        for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+        for (const ESM::Spell* spell : spells)
         {
-            float rating = rateSpell(it->first, actor, enemy);
+            float rating = rateSpell(spell, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;
-                bestAction.reset(new ActionSpell(it->first->mId));
-                antiFleeRating = vanillaRateSpell(it->first, actor, enemy);
+                bestAction = std::make_unique<ActionSpell>(spell->mId);
+                antiFleeRating = vanillaRateSpell(spell, actor, enemy);
             }
         }
 
         if (makeFleeDecision(actor, enemy, antiFleeRating))
-            bestAction.reset(new ActionFlee());
+            bestAction = std::make_unique<ActionFlee>();
 
         if (bestAction.get())
             bestAction->prepare(actor);
@@ -266,9 +265,9 @@ namespace MWMechanics
             }
         }
 
-        for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+        for (const ESM::Spell* spell : spells)
         {
-            float rating = rateSpell(it->first, actor, enemy);
+            float rating = rateSpell(spell, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;
@@ -325,7 +324,7 @@ namespace MWMechanics
             static const float fHandToHandReach = gmst.find("fHandToHandReach")->mValue.getFloat();
             dist = fHandToHandReach;
         }
-        else if (stats.getDrawState() == MWMechanics::DrawState_Spell)
+        else if (stats.getDrawState() == MWMechanics::DrawState::Spell)
         {
             dist = 1.0f;
             if (!selectedSpellId.empty())
@@ -469,15 +468,14 @@ namespace MWMechanics
         const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        int flee = stats.getAiSetting(CreatureStats::AI_Flee).getModified();
+        const int flee = stats.getAiSetting(AiSetting::Flee).getModified();
         if (flee >= 100)
             return flee;
 
         static const float fAIFleeHealthMult = gmst.find("fAIFleeHealthMult")->mValue.getFloat();
         static const float fAIFleeFleeMult = gmst.find("fAIFleeFleeMult")->mValue.getFloat();
 
-        float healthPercentage = (stats.getHealth().getModified() == 0.0f)
-                                    ? 1.0f : stats.getHealth().getCurrent() / stats.getHealth().getModified();
+        float healthPercentage = stats.getHealth().getRatio(false);
         float rating = (1.0f - healthPercentage) * fAIFleeHealthMult + flee * fAIFleeFleeMult;
 
         static const int iWereWolfLevelToAttack = gmst.find("iWereWolfLevelToAttack")->mValue.getInteger();

@@ -5,9 +5,9 @@
 
 #include <QApplication>
 #include <QIcon>
-#include <QMetaType>
 
 #include <components/debug/debugging.hpp>
+#include <components/platform/platform.hpp>
 
 #include "model/doc/messages.hpp"
 #include "model/world/universalid.hpp"
@@ -43,6 +43,8 @@ class Application : public QApplication
 
 int runApplication(int argc, char *argv[])
 {
+    Platform::init();
+
 #ifdef Q_OS_MAC
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
@@ -63,6 +65,9 @@ int runApplication(int argc, char *argv[])
     application.setWindowIcon (QIcon (":./openmw-cs.png"));
 
     CS::Editor editor(argc, argv);
+#ifdef __linux__
+    setlocale(LC_NUMERIC,"C");
+#endif
 
     if(!editor.makeIPCServer())
     {
@@ -76,5 +81,5 @@ int runApplication(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
+    return wrapApplication(&runApplication, argc, argv, "OpenMW-CS", false);
 }

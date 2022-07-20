@@ -4,10 +4,12 @@
 #include <osg/ref_ptr>
 
 class dtNavMesh;
+struct dtMeshTile;
 
 namespace osg
 {
     class Group;
+    class StateSet;
 }
 
 namespace DetourNavigator
@@ -17,7 +19,19 @@ namespace DetourNavigator
 
 namespace SceneUtil
 {
-    osg::ref_ptr<osg::Group> createNavMeshGroup(const dtNavMesh& navMesh, const DetourNavigator::Settings& settings);
+    enum NavMeshTileDrawFlags : unsigned char
+    {
+        NavMeshTileDrawFlagsOffMeshConnections = 1,
+        NavMeshTileDrawFlagsClosedList = 1 << 1,
+        NavMeshTileDrawFlagsColorTiles = 1 << 2,
+        NavMeshTileDrawFlagsHeat = 1 << 3,
+    };
+
+    osg::ref_ptr<osg::StateSet> makeNavMeshTileStateSet();
+
+    osg::ref_ptr<osg::Group> createNavMeshTileGroup(const dtNavMesh& navMesh, const dtMeshTile& meshTile,
+        const DetourNavigator::Settings& settings, const osg::ref_ptr<osg::StateSet>& groupStateSet,
+        const osg::ref_ptr<osg::StateSet>& debugDrawStateSet, unsigned char flags, unsigned minSalt, unsigned maxSalt);
 }
 
 #endif

@@ -2,7 +2,6 @@
 #define MWGUI_SPELLWINDOW_H
 
 #include "windowpinnablebase.hpp"
-#include "../mwworld/ptr.hpp"
 
 #include "spellmodel.hpp"
 

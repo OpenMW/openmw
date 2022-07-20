@@ -34,7 +34,7 @@ namespace CSMWorld
         public:
 
             CommandDispatcher (CSMDoc::Document& document, const CSMWorld::UniversalId& id,
-                QObject *parent = 0);
+                QObject *parent = nullptr);
             ///< \param id ID of the table the commands should operate on primarily.
 
             void setEditLock (bool locked);

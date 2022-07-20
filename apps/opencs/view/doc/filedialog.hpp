@@ -42,10 +42,10 @@ namespace CSVDoc
 
     public:
 
-        explicit FileDialog(QWidget *parent = 0);
+        explicit FileDialog(QWidget *parent = nullptr);
         void showDialog (ContentAction action);
 
-        void addFiles (const QString &path);
+        void addFiles(const std::vector<boost::filesystem::path>& dataDirs);
         void setEncoding (const QString &encoding);
         void clearFiles ();
 

@@ -22,9 +22,9 @@ Pull Request Guidelines
 To facilitate the review process, your pull request description should include the following, if applicable:
 
 * A link back to the bug report or forum discussion that prompted the change. Note: when linking bugs, use the syntax ```[Bug #xyz](https://gitlab.com/OpenMW/openmw/issues/#xyz)``` to create a clickable link. Writing only 'Bug #xyz' will unfortunately create a link to the Github pull request with that number instead.
-* Summary of the changes made
-* Reasoning / motivation behind the change
-* What testing you have carried out to verify the change
+* Summary of the changes made.
+* Reasoning / motivation behind the change.
+* What testing you have carried out to verify the change.
 
 Furthermore, we advise to:
 
@@ -51,9 +51,9 @@ OpenMW, in its default configuration, is meant to be a faithful reimplementation
 
 That said, we may sometimes evaluate such issues on an individual basis. Common exceptions to the above would be:
 
-* Issues so glaring that they would severely limit the capabilities of the engine in the future (for example, the scripting engine not being allowed to access objects in remote cells)
-* Bugs where the intent is very obvious, and that have little to no balancing impact (e.g. the bug were being tired made it easier to repair items, instead of harder)
-* Bugs that were fixed in an official patch for Morrowind 
+* Issues so glaring that they would severely limit the capabilities of the engine in the future (for example, the scripting engine not being allowed to access objects in remote cells).
+* Bugs where the intent is very obvious, and that have little to no balancing impact (e.g. the bug were being tired made it easier to repair items, instead of harder).
+* Bugs that were fixed in an official patch for Morrowind.
 
 Feature additions policy
 =====================
@@ -99,7 +99,7 @@ Code Review
 Merging
 =======
 
-To be able to merge PRs, commit priviledges are required. If you do not have the priviledges, just ping someone that does have them with a short comment like "Looks good to me @user".
+To be able to merge PRs, commit privileges are required. If you do not have the privileges, just ping someone that does have them with a short comment like "Looks good to me @user".
 
 The person to merge the PR may either use github's Merge button or if using the command line, use the ```--no-ff``` flag (so a merge commit is created, just like with Github's merge button) and include the pull request number in the commit description.
 

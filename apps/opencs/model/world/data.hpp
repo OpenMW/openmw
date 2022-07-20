@@ -9,25 +9,25 @@
 #include <QObject>
 #include <QModelIndex>
 
-#include <components/esm/loadglob.hpp>
-#include <components/esm/loadgmst.hpp>
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loadfact.hpp>
-#include <components/esm/loadrace.hpp>
-#include <components/esm/loadsoun.hpp>
-#include <components/esm/loadscpt.hpp>
-#include <components/esm/loadregn.hpp>
-#include <components/esm/loadbsgn.hpp>
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loaddial.hpp>
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadbody.hpp>
-#include <components/esm/loadsndg.hpp>
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadsscr.hpp>
-#include <components/esm/debugprofile.hpp>
-#include <components/esm/filter.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadscpt.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadsndg.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadsscr.hpp>
+#include <components/esm3/debugprofile.hpp>
+#include <components/esm3/filter.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 
@@ -98,13 +98,13 @@ namespace CSMWorld
             NestedIdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
             IdCollection<ESM::MagicEffect> mMagicEffects;
-            SubCellCollection<Pathgrid> mPathgrids;
             IdCollection<ESM::DebugProfile> mDebugProfiles;
             IdCollection<ESM::SoundGenerator> mSoundGens;
             IdCollection<ESM::StartScript> mStartScripts;
             NestedInfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             NestedIdCollection<Cell> mCells;
+            SubCellCollection<Pathgrid> mPathgrids;
             IdCollection<LandTexture> mLandTextures;
             IdCollection<Land> mLand;
             RefIdCollection mReferenceables;
@@ -118,7 +118,7 @@ namespace CSMWorld
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
-            std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
+            std::map<std::string, std::map<unsigned int, unsigned int> > mRefLoadCache;
             int mReaderIndex;
 
             bool mFsStrict;
@@ -152,7 +152,7 @@ namespace CSMWorld
             Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
                 const std::vector<std::string>& archives, const boost::filesystem::path& resDir);
 
-            virtual ~Data();
+            ~Data() override;
 
             const VFS::Manager* getVFS() const;
 
@@ -291,6 +291,8 @@ namespace CSMWorld
 
             void merge();
             ///< Merge modified into base.
+
+            int getTotalRecords (const std::vector<boost::filesystem::path>& files); // for better loading bar
 
             int startLoading (const boost::filesystem::path& path, bool base, bool project);
             ///< Begin merging content of a file into base or modified.

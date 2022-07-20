@@ -9,10 +9,10 @@
 
 #include <components/misc/rng.hpp>
 
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadappa.hpp>
-#include <components/esm/loadgmst.hpp>
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -21,7 +21,6 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/manualref.hpp"
 
 #include "magiceffects.hpp"
 #include "creaturestats.hpp"
@@ -255,7 +254,7 @@ const ESM::Potion *MWMechanics::Alchemy::getRecord(const ESM::Potion& toFind) co
             return &(*iter);
     }
 
-    return 0;
+    return nullptr;
 }
 
 void MWMechanics::Alchemy::removeIngredients()
@@ -290,7 +289,8 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
 
     newRecord.mName = name;
 
-    int index = Misc::Rng::rollDice(6);
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    int index = Misc::Rng::rollDice(6, prng);
     assert (index>=0 && index<6);
 
     static const char *meshes[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };
@@ -528,8 +528,8 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::createSingle ()
         removeIngredients();
         return Result_RandomFailure;
     }
-
-    if (getAlchemyFactor() < Misc::Rng::roll0to99())
+    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+    if (getAlchemyFactor() < Misc::Rng::roll0to99(prng))
     {
         removeIngredients();
         return Result_RandomFailure;

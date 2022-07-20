@@ -1,11 +1,10 @@
-#ifndef OPENMW_COMPONENTS_ESMTERRAIN_LANDMANAGER_H
-#define OPENMW_COMPONENTS_ESMTERRAIN_LANDMANAGER_H
+#ifndef OPENMW_MWRENDER_LANDMANAGER_H
+#define OPENMW_MWRENDER_LANDMANAGER_H
 
 #include <osg/Object>
 
-#include <components/resource/objectcache.hpp>
 #include <components/resource/resourcemanager.hpp>
-#include <components/esmterrain/storage.hpp>
+#include <components/esm3terrain/storage.hpp>
 
 namespace ESM
 {

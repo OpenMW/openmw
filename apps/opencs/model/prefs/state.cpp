@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <components/settings/settings.hpp>
+
 #include "intsetting.hpp"
 #include "doublesetting.hpp"
 #include "boolsetting.hpp"
@@ -12,27 +14,7 @@
 #include "shortcutsetting.hpp"
 #include "modifiersetting.hpp"
 
-CSMPrefs::State *CSMPrefs::State::sThis = 0;
-
-void CSMPrefs::State::load()
-{
-    // default settings file
-    boost::filesystem::path local = mConfigurationManager.getLocalPath() / mConfigFile;
-    boost::filesystem::path global = mConfigurationManager.getGlobalPath() / mConfigFile;
-
-    if (boost::filesystem::exists (local))
-        mSettings.loadDefault (local.string());
-    else if (boost::filesystem::exists (global))
-        mSettings.loadDefault (global.string());
-    else
-        throw std::runtime_error ("No default settings file found! Make sure the file \"openmw-cs.cfg\" was properly installed.");
-
-    // user settings file
-    boost::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
-
-    if (boost::filesystem::exists (user))
-        mSettings.loadUser (user.string());
-}
+CSMPrefs::State *CSMPrefs::State::sThis = nullptr;
 
 void CSMPrefs::State::declare()
 {
@@ -108,6 +90,9 @@ void CSMPrefs::State::declare()
         "If this option is enabled, types of affected records are selected "
         "manually before a command execution.\nOtherwise, all associated "
         "records are deleted/reverted immediately.");
+    declareBool ("subview-new-window", "Open Record in new window", false)
+        .setTooltip("When editing a record, open the view in a new window,"
+        " rather than docked in the main view.");
 
     declareCategory ("ID Dialogues");
     declareBool ("toolbar", "Show toolbar", true);
@@ -210,6 +195,20 @@ void CSMPrefs::State::declare()
         setTooltip("Size of the orthographic frustum, greater value will allow the camera to see more of the world.").
         setRange(10, 10000);
     declareDouble ("object-marker-alpha", "Object Marker Transparency", 0.5).setPrecision(2).setRange(0,1);
+    declareBool("scene-use-gradient", "Use Gradient Background", true);
+    declareColour ("scene-day-background-colour", "Day Background Colour", QColor (110, 120, 128, 255));
+    declareColour ("scene-day-gradient-colour", "Day Gradient  Colour", QColor (47, 51, 51, 255)).
+        setTooltip("Sets the gradient color to use in conjunction with the day background color. Ignored if "
+                   "the gradient option is disabled.");
+    declareColour ("scene-bright-background-colour", "Scene Bright Background Colour", QColor (79, 87, 92, 255));
+    declareColour ("scene-bright-gradient-colour", "Scene Bright Gradient Colour", QColor (47, 51, 51, 255)).
+        setTooltip("Sets the gradient color to use in conjunction with the bright background color. Ignored if "
+            "the gradient option is disabled.");
+    declareColour ("scene-night-background-colour", "Scene Night Background Colour", QColor (64, 77, 79, 255));
+    declareColour ("scene-night-gradient-colour", "Scene Night Gradient Colour", QColor (47, 51, 51, 255)).
+        setTooltip("Sets the gradient color to use in conjunction with the night background color. Ignored if "
+            "the gradient option is disabled.");
+    declareBool("scene-day-night-switch-nodes", "Use Day/Night Switch Nodes", true);
 
     declareCategory ("Tooltips");
     declareBool ("scene", "Show Tooltips in 3D scenes", true);
@@ -234,7 +233,19 @@ void CSMPrefs::State::declare()
     EnumValues landeditOutsideVisibleCell;
     landeditOutsideVisibleCell.add (showAndLandEdit).add (dontLandEdit);
 
+    EnumValue SelectOnly ("Select only");
+    EnumValue SelectAdd ("Add to selection");
+    EnumValue SelectRemove ("Remove from selection");
+    EnumValue selectInvert ("Invert selection");
+    EnumValues primarySelectAction;
+    primarySelectAction.add (SelectOnly).add (SelectAdd).add (SelectRemove).add (selectInvert);
+    EnumValues secondarySelectAction;
+    secondarySelectAction.add (SelectOnly).add (SelectAdd).add (SelectRemove).add (selectInvert);
+
     declareCategory ("3D Scene Editing");
+    declareDouble("gridsnap-movement", "Grid snap size", 16);
+    declareDouble("gridsnap-rotation", "Angle snap size", 15);
+    declareDouble("gridsnap-scale", "Scale snap size", 0.25);
     declareInt ("distance", "Drop Distance", 50).
         setTooltip ("If an instance drop can not be placed against another object at the "
             "insert point, it will be placed by this distance from the insert point instead");
@@ -263,6 +274,12 @@ void CSMPrefs::State::declare()
     declareBool ("open-list-view", "Open displays list view", false).
         setTooltip ("When opening a reference from the scene view, it will open the"
         " instance list view instead of the individual instance record view.");
+    declareEnum ("primary-select-action", "Action for primary select", SelectOnly).
+        setTooltip("Selection can be chosen between select only, add to selection, remove from selection and invert selection.").
+        addValues (primarySelectAction);
+    declareEnum ("secondary-select-action", "Action for secondary select", SelectAdd).
+        setTooltip("Selection can be chosen between select only, add to selection, remove from selection and invert selection.").
+        addValues (secondarySelectAction);
 
     declareCategory ("Key Bindings");
 
@@ -393,6 +410,16 @@ void CSMPrefs::State::declare()
     declareSubcategory ("Script Editor");
     declareShortcut ("script-editor-comment", "Comment Selection", QKeySequence());
     declareShortcut ("script-editor-uncomment", "Uncomment Selection", QKeySequence());
+
+    declareCategory ("Models");
+    declareString ("baseanim", "base animations", "meshes/base_anim.nif").
+        setTooltip("3rd person base model with textkeys-data");
+    declareString ("baseanimkna", "base animations, kna", "meshes/base_animkna.nif").
+        setTooltip("3rd person beast race base model with textkeys-data");
+    declareString ("baseanimfemale", "base animations, female", "meshes/base_anim_female.nif").
+        setTooltip("3rd person female base model with textkeys-data");
+    declareString ("wolfskin", "base animations, wolf", "meshes/wolf/skin.nif").
+        setTooltip("3rd person werewolf skin");
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -418,10 +445,10 @@ CSMPrefs::IntSetting& CSMPrefs::State::declareInt (const std::string& key,
 
     setDefault(key, std::to_string(default_));
 
-    default_ = mSettings.getInt (key, mCurrentCategory->second.getKey());
+    default_ = Settings::Manager::getInt (key, mCurrentCategory->second.getKey());
 
     CSMPrefs::IntSetting *setting =
-        new CSMPrefs::IntSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        new CSMPrefs::IntSetting (&mCurrentCategory->second, &mMutex, key, label,
         default_);
 
     mCurrentCategory->second.addSetting (setting);
@@ -439,10 +466,10 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble (const std::string& key,
     stream << default_;
     setDefault(key, stream.str());
 
-    default_ = mSettings.getFloat (key, mCurrentCategory->second.getKey());
+    default_ = Settings::Manager::getFloat (key, mCurrentCategory->second.getKey());
 
     CSMPrefs::DoubleSetting *setting =
-        new CSMPrefs::DoubleSetting (&mCurrentCategory->second, &mSettings, &mMutex,
+        new CSMPrefs::DoubleSetting (&mCurrentCategory->second, &mMutex,
         key, label, default_);
 
     mCurrentCategory->second.addSetting (setting);
@@ -458,10 +485,10 @@ CSMPrefs::BoolSetting& CSMPrefs::State::declareBool (const std::string& key,
 
     setDefault (key, default_ ? "true" : "false");
 
-    default_ = mSettings.getBool (key, mCurrentCategory->second.getKey());
+    default_ = Settings::Manager::getBool (key, mCurrentCategory->second.getKey());
 
     CSMPrefs::BoolSetting *setting =
-        new CSMPrefs::BoolSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        new CSMPrefs::BoolSetting (&mCurrentCategory->second, &mMutex, key, label,
         default_);
 
     mCurrentCategory->second.addSetting (setting);
@@ -477,10 +504,10 @@ CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum (const std::string& key,
 
     setDefault (key, default_.mValue);
 
-    default_.mValue = mSettings.getString (key, mCurrentCategory->second.getKey());
+    default_.mValue = Settings::Manager::getString (key, mCurrentCategory->second.getKey());
 
     CSMPrefs::EnumSetting *setting =
-        new CSMPrefs::EnumSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        new CSMPrefs::EnumSetting (&mCurrentCategory->second, &mMutex, key, label,
         default_);
 
     mCurrentCategory->second.addSetting (setting);
@@ -496,10 +523,10 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
 
     setDefault (key, default_.name().toUtf8().data());
 
-    default_.setNamedColor (QString::fromUtf8 (mSettings.getString (key, mCurrentCategory->second.getKey()).c_str()));
+    default_.setNamedColor (QString::fromUtf8 (Settings::Manager::getString (key, mCurrentCategory->second.getKey()).c_str()));
 
     CSMPrefs::ColourSetting *setting =
-        new CSMPrefs::ColourSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        new CSMPrefs::ColourSetting (&mCurrentCategory->second, &mMutex, key, label,
         default_);
 
     mCurrentCategory->second.addSetting (setting);
@@ -519,11 +546,29 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& 
     // Setup with actual data
     QKeySequence sequence;
 
-    getShortcutManager().convertFromString(mSettings.getString(key, mCurrentCategory->second.getKey()), sequence);
+    getShortcutManager().convertFromString(Settings::Manager::getString(key, mCurrentCategory->second.getKey()), sequence);
     getShortcutManager().setSequence(key, sequence);
 
-    CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
+    CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mMutex,
         key, label);
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::StringSetting& CSMPrefs::State::declareString (const std::string& key, const std::string& label, std::string default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    setDefault (key, default_);
+
+    default_ = Settings::Manager::getString (key, mCurrentCategory->second.getKey());
+
+    CSMPrefs::StringSetting *setting =
+        new CSMPrefs::StringSetting (&mCurrentCategory->second, &mMutex, key, label,
+        default_);
+
     mCurrentCategory->second.addSetting (setting);
 
     return *setting;
@@ -541,10 +586,10 @@ CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& k
     // Setup with actual data
     int modifier;
 
-    getShortcutManager().convertFromString(mSettings.getString(key, mCurrentCategory->second.getKey()), modifier);
+    getShortcutManager().convertFromString(Settings::Manager::getString(key, mCurrentCategory->second.getKey()), modifier);
     getShortcutManager().setModifier(key, modifier);
 
-    CSMPrefs::ModifierSetting *setting = new CSMPrefs::ModifierSetting (&mCurrentCategory->second, &mSettings, &mMutex,
+    CSMPrefs::ModifierSetting *setting = new CSMPrefs::ModifierSetting (&mCurrentCategory->second, &mMutex,
         key, label);
     mCurrentCategory->second.addSetting (setting);
 
@@ -557,7 +602,7 @@ void CSMPrefs::State::declareSeparator()
         throw std::logic_error ("no category for setting");
 
     CSMPrefs::Setting *setting =
-        new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, &mMutex, "", "");
+        new CSMPrefs::Setting (&mCurrentCategory->second, &mMutex, "", "");
 
     mCurrentCategory->second.addSetting (setting);
 }
@@ -568,7 +613,7 @@ void CSMPrefs::State::declareSubcategory(const std::string& label)
         throw std::logic_error ("no category for setting");
 
     CSMPrefs::Setting *setting =
-        new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, &mMutex, "", label);
+        new CSMPrefs::Setting (&mCurrentCategory->second, &mMutex, "", label);
 
     mCurrentCategory->second.addSetting (setting);
 }
@@ -578,14 +623,14 @@ void CSMPrefs::State::setDefault (const std::string& key, const std::string& def
     Settings::CategorySetting fullKey (mCurrentCategory->second.getKey(), key);
 
     Settings::CategorySettingValueMap::iterator iter =
-        mSettings.mDefaultSettings.find (fullKey);
+        Settings::Manager::mDefaultSettings.find (fullKey);
 
-    if (iter==mSettings.mDefaultSettings.end())
-        mSettings.mDefaultSettings.insert (std::make_pair (fullKey, default_));
+    if (iter==Settings::Manager::mDefaultSettings.end())
+        Settings::Manager::mDefaultSettings.insert (std::make_pair (fullKey, default_));
 }
 
 CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
-: mConfigFile ("openmw-cs.cfg"), mConfigurationManager (configurationManager),
+: mConfigFile ("openmw-cs.cfg"), mDefaultConfigFile("defaults-cs.bin"), mConfigurationManager (configurationManager),
   mCurrentCategory (mCategories.end())
 {
     if (sThis)
@@ -593,19 +638,18 @@ CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
 
     sThis = this;
 
-    load();
     declare();
 }
 
 CSMPrefs::State::~State()
 {
-    sThis = 0;
+    sThis = nullptr;
 }
 
 void CSMPrefs::State::save()
 {
     boost::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
-    mSettings.saveUser (user.string());
+    Settings::Manager::saveUser (user.string());
 }
 
 CSMPrefs::State::Iterator CSMPrefs::State::begin()
@@ -648,16 +692,16 @@ CSMPrefs::State& CSMPrefs::State::get()
 
 void CSMPrefs::State::resetCategory(const std::string& category)
 {
-    for (Settings::CategorySettingValueMap::iterator i = mSettings.mUserSettings.begin();
-         i != mSettings.mUserSettings.end(); ++i)
+    for (Settings::CategorySettingValueMap::iterator i = Settings::Manager::mUserSettings.begin();
+         i != Settings::Manager::mUserSettings.end(); ++i)
     {
         // if the category matches
         if (i->first.first == category)
         {
             // mark the setting as changed
-            mSettings.mChangedSettings.insert(std::make_pair(i->first.first, i->first.second));
+            Settings::Manager::mChangedSettings.insert(std::make_pair(i->first.first, i->first.second));
             // reset the value to the default
-            i->second = mSettings.mDefaultSettings[i->first];
+            i->second = Settings::Manager::mDefaultSettings[i->first];
         }
     }
 

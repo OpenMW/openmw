@@ -1,12 +1,14 @@
 #include "refdata.hpp"
 
-#include <components/esm/objectstate.hpp>
+#include <components/esm3/objectstate.hpp>
 
 #include "customdata.hpp"
 #include "cellstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwlua/localscripts.hpp"
 
 namespace
 {
@@ -21,6 +23,12 @@ enum RefDataFlags
 namespace MWWorld
 {
 
+    void RefData::setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&& scripts)
+    {
+        mChanged = true;
+        mLuaScripts = std::move(scripts);
+    }
+
     void RefData::copy (const RefData& refData)
     {
         mBaseNode = refData.mBaseNode;
@@ -31,22 +39,23 @@ namespace MWWorld
         mChanged = refData.mChanged;
         mDeletedByContentFile = refData.mDeletedByContentFile;
         mFlags = refData.mFlags;
+        mPhysicsPostponed = refData.mPhysicsPostponed;
 
         mAnimationState = refData.mAnimationState;
 
-        mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
+        mCustomData = refData.mCustomData ? refData.mCustomData->clone() : nullptr;
+        mLuaScripts = refData.mLuaScripts;
     }
 
     void RefData::cleanup()
     {
-        mBaseNode = 0;
-
-        delete mCustomData;
-        mCustomData = 0;
+        mBaseNode = nullptr;
+        mCustomData = nullptr;
+        mLuaScripts = nullptr;
     }
 
     RefData::RefData()
-    : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false), mFlags(0)
+    : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true), mPhysicsPostponed(false), mCount (1), mCustomData (nullptr), mChanged(false), mFlags(0)
     {
         for (int i=0; i<3; ++i)
         {
@@ -56,20 +65,20 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::CellRef& cellRef)
-    : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true),
+    : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true), mPhysicsPostponed(false), 
       mCount (1), mPosition (cellRef.mPos),
-      mCustomData (0),
+      mCustomData (nullptr),
       mChanged(false), mFlags(0) // Loading from ESM/ESP files -> assume unchanged
     {
     }
 
     RefData::RefData (const ESM::ObjectState& objectState, bool deletedByContentFile)
-    : mBaseNode(0), mDeletedByContentFile(deletedByContentFile),
-      mEnabled (objectState.mEnabled != 0),
+    : mBaseNode(nullptr), mDeletedByContentFile(deletedByContentFile),
+      mEnabled (objectState.mEnabled != 0), mPhysicsPostponed(false),
       mCount (objectState.mCount),
       mPosition (objectState.mPosition),
       mAnimationState(objectState.mAnimationState),
-      mCustomData (0),
+      mCustomData (nullptr),
       mChanged(true), mFlags(objectState.mFlags) // Loading from a savegame -> assume changed
     {
         // "Note that the ActivationFlag_UseEnabled is saved to the reference,
@@ -79,7 +88,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const RefData& refData)
-    : mBaseNode(0), mCustomData (0)
+    : mBaseNode(nullptr), mCustomData (nullptr)
     {
         try
         {
@@ -130,6 +139,9 @@ namespace MWWorld
         catch (...)
         {}
     }
+
+    RefData::RefData(RefData&& other) noexcept = default;
+    RefData& RefData::operator=(RefData&& other) noexcept = default;
 
     void RefData::setBaseNode(SceneUtil::PositionAttitudeTransform *base)
     {
@@ -223,21 +235,20 @@ namespace MWWorld
         return mPosition;
     }
 
-    void RefData::setCustomData (CustomData *data)
+    void RefData::setCustomData(std::unique_ptr<CustomData>&& value) noexcept
     {
         mChanged = true; // We do not currently track CustomData, so assume anything with a CustomData is changed
-        delete mCustomData;
-        mCustomData = data;
+        mCustomData = std::move(value);
     }
 
     CustomData *RefData::getCustomData()
     {
-        return mCustomData;
+        return mCustomData.get();
     }
 
     const CustomData *RefData::getCustomData() const
     {
-        return mCustomData;
+        return mCustomData.get();
     }
 
     bool RefData::hasChanged() const

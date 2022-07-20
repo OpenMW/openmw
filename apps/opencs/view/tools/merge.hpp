@@ -1,5 +1,5 @@
-#ifndef CSV_TOOLS_REPORTTABLE_H
-#define CSV_TOOLS_REPORTTABLE_H
+#ifndef CSV_TOOLS_MERGE_H
+#define CSV_TOOLS_MERGE_H
 
 #include <QWidget>
 
@@ -39,7 +39,7 @@ namespace CSVTools
 
         public:
 
-            Merge (CSMDoc::DocumentManager& documentManager, QWidget *parent = 0);
+            Merge (CSMDoc::DocumentManager& documentManager, QWidget *parent = nullptr);
 
             /// Configure dialogue for a new merge
             void configure (CSMDoc::Document *document);

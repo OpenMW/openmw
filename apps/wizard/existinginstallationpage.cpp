@@ -1,6 +1,5 @@
 #include "existinginstallationpage.hpp"
 
-#include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -95,9 +94,9 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
 {
     QString selectedFile = QFileDialog::getOpenFileName(
                 this,
-                tr("Select master file"),
+                tr("Select Morrowind.esm (located in Data Files)"),
                 QDir::currentPath(),
-                QString(tr("Morrowind master file (*.esm)")),
+                QString(tr("Morrowind master file (Morrowind.esm)")),
                 nullptr,
                 QFileDialog::DontResolveSymlinks);
 
@@ -110,7 +109,23 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
         return;
 
     if (!mWizard->findFiles(QLatin1String("Morrowind"), info.absolutePath()))
-        return; // No valid Morrowind installation found
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error detecting Morrowind files"));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(QObject::tr(
+            "<b>Morrowind.bsa</b> is missing!<br>\
+            Make sure your Morrowind installation is complete."
+        ));
+        msgBox.exec();
+        return;
+    }
+
+    if (!versionIsOK(info.absolutePath()))
+    {
+        return;
+    }
 
     QString path(QDir::toNativeSeparators(info.absolutePath()));
     QList<QListWidgetItem*> items = installationsList->findItems(path, Qt::MatchExactly);
@@ -153,4 +168,37 @@ bool Wizard::ExistingInstallationPage::isComplete() const
 int Wizard::ExistingInstallationPage::nextId() const
 {
     return MainWizard::Page_LanguageSelection;
+}
+
+bool Wizard::ExistingInstallationPage::versionIsOK(QString directory_name)
+{
+    QDir directory = QDir(directory_name);
+    QFileInfoList infoList = directory.entryInfoList(QStringList(QString("Morrowind.bsa")));
+    if (infoList.size() == 1)
+    {
+        qint64 actualFileSize = infoList.at(0).size();
+        const qint64 expectedFileSize = 310459500; // Size of Morrowind.bsa in Steam and GOG editions.
+
+        if (actualFileSize == expectedFileSize)
+        {
+            return true;
+        }
+
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(QObject::tr("Most recent Morrowind not detected"));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        msgBox.setText(QObject::tr("<br><b>There may be a more recent version of Morrowind available.</b><br><br>\
+                              Do you wish to continue anyway?<br>"));
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Yes)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    return false;
 }

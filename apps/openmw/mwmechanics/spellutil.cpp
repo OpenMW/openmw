@@ -3,7 +3,6 @@
 #include <limits>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
@@ -24,7 +23,7 @@ namespace MWMechanics
         return schoolSkillArray.at(school);
     }
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect)
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const EffectCostMethod method)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (!magicEffect)
@@ -39,12 +38,41 @@ namespace MWMechanics
             duration = std::max(1, duration);
         static const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
 
+        int durationOffset = 0;
+        int minArea = 0;
+        if (method == EffectCostMethod::PlayerSpell) {
+            durationOffset = 1;
+            minArea = 1;
+        }
+
         float x = 0.5 * (std::max(1, minMagn) + std::max(1, maxMagn));
         x *= 0.1 * magicEffect->mData.mBaseCost;
-        x *= 1 + duration;
-        x += 0.05 * std::max(1, effect.mArea) * magicEffect->mData.mBaseCost;
+        x *= durationOffset + duration;
+        x += 0.05 * std::max(minArea, effect.mArea) * magicEffect->mData.mBaseCost;
 
         return x * fEffectCostMult;
+    }
+
+    int calcSpellCost (const ESM::Spell& spell)
+    {
+        if (!(spell.mData.mFlags & ESM::Spell::F_Autocalc))
+            return spell.mData.mCost;
+
+        float cost = 0;
+
+        for (const ESM::ENAMstruct& effect : spell.mEffects.mList)
+        {
+            float effectCost = std::max(0.f, MWMechanics::calcEffectCost(effect));
+
+            // This is applied to the whole spell cost for each effect when
+            // creating spells, but is only applied on the effect itself in TES:CS.
+            if (effect.mRange == ESM::RT_Target)
+                effectCost *= 1.5;
+
+            cost += effectCost;
+        }
+
+        return std::round(cost);
     }
 
     int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)
@@ -97,7 +125,7 @@ namespace MWMechanics
         float actorWillpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
         float actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
 
-        float castChance = (lowestSkill - spell->mData.mCost + 0.2f * actorWillpower + 0.1f * actorLuck);
+        float castChance = (lowestSkill - calcSpellCost(*spell) + 0.2f * actorWillpower + 0.1f * actorLuck);
 
         return castChance;
     }
@@ -123,7 +151,7 @@ namespace MWMechanics
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
 
-        if (checkMagicka && stats.getMagicka().getCurrent() < spell->mData.mCost)
+        if (checkMagicka && calcSpellCost(*spell) > 0 && stats.getMagicka().getCurrent() < calcSpellCost(*spell))
             return 0;
 
         if (spell->mData.mFlags & ESM::Spell::F_Always)
@@ -133,7 +161,10 @@ namespace MWMechanics
         float castChance = baseChance + castBonus;
         castChance *= stats.getFatigueTerm();
 
-        return std::max(0.f, cap ? std::min(100.f, castChance) : castChance);
+        if (cap)
+            return std::clamp(castChance, 0.f, 100.f);
+
+        return std::max(castChance, 0.f);
     }
 
     float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
@@ -166,49 +197,5 @@ namespace MWMechanics
     {
         const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
         return spell && spellIncreasesSkill(spell);
-    }
-
-    bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer)
-    {
-        switch (effectId)
-        {
-            case ESM::MagicEffect::Levitate:
-            {
-                if (!MWBase::Environment::get().getWorld()->isLevitationEnabled())
-                {
-                    if (castByPlayer)
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sLevitateDisabled}");
-                    return false;
-                }
-                break;
-            }
-            case ESM::MagicEffect::Soultrap:
-            {
-                if (!target.getClass().isNpc() // no messagebox for NPCs
-                     && (target.getTypeName() == typeid(ESM::Creature).name() && target.get<ESM::Creature>()->mBase->mData.mSoul == 0))
-                {
-                    if (castByPlayer)
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
-                    return true; // must still apply to get visual effect and have target regard it as attack
-                }
-                break;
-            }
-            case ESM::MagicEffect::WaterWalking:
-            {
-                if (target.getClass().isPureWaterCreature(target) && MWBase::Environment::get().getWorld()->isSwimming(target))
-                    return false;
-
-                MWBase::World *world = MWBase::Environment::get().getWorld();
-
-                if (!world->isWaterWalkingCastableOnTarget(target))
-                {
-                    if (castByPlayer && caster == target)
-                        MWBase::Environment::get().getWindowManager()->messageBox ("#{sMagicInvalidEffect}");
-                    return false;
-                }
-                break;
-            }
-        }
-        return true;
     }
 }

@@ -6,12 +6,10 @@
 #include <vector>
 
 #include <components/compiler/errorhandler.hpp>
-#include <components/compiler/lineparser.hpp>
-#include <components/compiler/scanner.hpp>
-#include <components/compiler/locals.hpp>
 #include <components/compiler/output.hpp>
 #include <components/compiler/extensions.hpp>
-#include <components/interpreter/interpreter.hpp>
+
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"
@@ -44,7 +42,7 @@ namespace MWGui
             void onResChange(int width, int height) override;
 
             // Print a message to the console, in specified color.
-            void print(const std::string &msg, const std::string& color = "#FFFFFF");
+            void print(const std::string &msg, std::string_view color = MWBase::WindowManager::sConsoleColor_Default);
 
             // These are pre-colored versions that you should use.
 
@@ -64,11 +62,18 @@ namespace MWGui
 
             void resetReference () override;
 
+            const std::string& getConsoleMode() const { return mConsoleMode; }
+            void setConsoleMode(std::string_view mode);
+
         protected:
 
             void onReferenceUnavailable() override;
 
         private:
+
+            std::string mConsoleMode;
+
+            void updateConsoleTitle();
 
             void keyPress(MyGUI::Widget* _sender,
                           MyGUI::KeyCode key,

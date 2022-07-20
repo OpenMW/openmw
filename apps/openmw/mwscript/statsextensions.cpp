@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -31,7 +31,7 @@
 
 namespace
 {
-    std::string getDialogueActorFaction(MWWorld::ConstPtr actor)
+    std::string getDialogueActorFaction(const MWWorld::ConstPtr& actor)
     {
         std::string factionId = actor.getClass().getPrimaryFaction(actor);
         if (factionId.empty())
@@ -39,6 +39,28 @@ namespace
                 "failed to determine dialogue actors faction (because actor is factionless)");
 
         return factionId;
+    }
+
+    void modStat(MWMechanics::AttributeValue& stat, float amount)
+    {
+        const float base = stat.getBase();
+        const float modifier = stat.getModifier() - stat.getDamage();
+        const float modified = base + modifier;
+        // Clamp to 100 unless base < 100 and we have a fortification going
+        if((modifier <= 0.f || base >= 100.f) && amount > 0.f)
+            amount = std::clamp(100.f - modified, 0.f, amount);
+        // Clamp the modified value in a way that doesn't properly account for negative numbers
+        float newModified = modified + amount;
+        if(newModified < 0.f)
+        {
+            if(modified >= 0.f)
+                newModified = 0.f;
+            else if(newModified < modified)
+                newModified = modified;
+        }
+        // Calculate damage/fortification based on the clamped base value
+        stat.setBase(std::clamp(base + amount, 0.f, 100.f), true);
+        stat.setModifier(newModified - stat.getBase());
     }
 }
 
@@ -122,7 +144,7 @@ namespace MWScript
                     runtime.pop();
 
                     MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
-                    attribute.setBase (value);
+                    attribute.setBase(value, true);
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
@@ -146,19 +168,7 @@ namespace MWScript
                     MWMechanics::AttributeValue attribute = ptr.getClass()
                         .getCreatureStats(ptr)
                         .getAttribute(mIndex);
-
-                    if (value == 0)
-                        return;
-
-                    if (((attribute.getBase() <= 0) && (value < 0))
-                        || ((attribute.getBase() >= 100) && (value > 0)))
-                        return;
-
-                    if (value < 0)
-                        attribute.setBase(std::max(0.f, attribute.getBase() + value));
-                    else
-                        attribute.setBase(std::min(100.f, attribute.getBase() + value));
-
+                    modStat(attribute, value);
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
@@ -187,6 +197,9 @@ namespace MWScript
                                 .getCreatureStats(ptr)
                                 .getDynamic(mIndex)
                                 .getCurrent();
+                        // GetMagicka shouldn't return negative values
+                        if(mIndex == 1 && value < 0)
+                            value = 0;
                     }
                     runtime.push (value);
                 }
@@ -211,8 +224,8 @@ namespace MWScript
                     MWMechanics::DynamicStat<float> stat (ptr.getClass().getCreatureStats (ptr)
                         .getDynamic (mIndex));
 
-                    stat.setModified (value, 0);
-                    stat.setCurrent(value);
+                    stat.setBase(value);
+                    stat.setCurrent(stat.getModified(false), true, true);
 
                     ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
@@ -252,19 +265,18 @@ namespace MWScript
                         }
                     }
 
-                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
+                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
+                    MWMechanics::DynamicStat<float> stat = stats.getDynamic(mIndex);
 
-                    MWMechanics::DynamicStat<float> stat (ptr.getClass().getCreatureStats (ptr)
-                        .getDynamic (mIndex));
+                    float current = stat.getCurrent();
+                    float base = diff + stat.getBase();
+                    if(mIndex != 2)
+                        base = std::max(base, 0.f);
+                    stat.setBase(base);
+                    stat.setCurrent(diff + current, true, true);
 
-                    stat.setModified (diff + stat.getModified(), 0);
-                    stat.setCurrentModified (diff + stat.getCurrentModified());
-
-                    stat.setCurrent (diff + current);
-
-                    ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
+                    stats.setDynamic (mIndex, stat);
                 }
         };
 
@@ -318,17 +330,9 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
-
-                    Interpreter::Type_Float value = 0;
-
-                    Interpreter::Type_Float max = stats.getDynamic(mIndex).getModified();
-
-                    if (max>0)
-                        value = stats.getDynamic(mIndex).getCurrent() / max;
-
-                    runtime.push (value);
+                    runtime.push(stats.getDynamic(mIndex).getRatio());
                 }
         };
 
@@ -369,7 +373,7 @@ namespace MWScript
 
                     MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats (ptr);
 
-                    stats.getSkill (mIndex).setBase (value);
+                    stats.getSkill(mIndex).setBase(value, true);
                 }
         };
 
@@ -392,18 +396,7 @@ namespace MWScript
                     MWMechanics::SkillValue &skill = ptr.getClass()
                         .getNpcStats(ptr)
                         .getSkill(mIndex);
-
-                    if (value == 0)
-                        return;
-
-                    if (((skill.getBase() <= 0.f) && (value < 0.f))
-                        || ((skill.getBase() >= 100.f) && (value > 0.f)))
-                        return;
-
-                    if (value < 0)
-                        skill.setBase(std::max(0.f, skill.getBase() + value));
-                    else
-                        skill.setBase(std::min(100.f, skill.getBase() + value));
+                    modStat(skill, value);
                 }
         };
 
@@ -460,16 +453,18 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
 
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
-                    creatureStats.getSpells().add(id);
+                    creatureStats.getSpells().add(spell);
                     ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
                     if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Power)
                     {
+                        // Add spell effect to *this actor's* queue immediately
+                        creatureStats.getActiveSpells().addSpell(spell, ptr);
                         // Apply looping particles immediately for constant effects
                         MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
                     }
@@ -485,21 +480,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
-                    // The spell may have an instant effect which must be handled before the spell's removal.
-                    for (const auto& effect : creatureStats.getSpells().getMagicEffects())
-                    {
-                        if (effect.second.getMagnitude() <= 0)
-                            continue;
-                        MWMechanics::CastSpell cast(ptr, ptr);
-                        if (cast.applyInstantEffect(ptr, ptr, effect.first, effect.second.getMagnitude()))
-                            creatureStats.getSpells().purgeEffect(effect.first.mId);
-                    }
-
-                    MWBase::Environment::get().getMechanicsManager()->restoreStatsAfterCorprus(ptr, id);
                     creatureStats.getSpells().remove (id);
 
                     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
@@ -521,11 +505,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string spellid = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view spellid = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    ptr.getClass().getCreatureStats (ptr).getActiveSpells().removeEffects(spellid);
-                    ptr.getClass().getCreatureStats (ptr).getSpells().removeEffects(spellid);
+                    ptr.getClass().getCreatureStats (ptr).getActiveSpells().removeEffects(ptr, spellid);
                 }
         };
 
@@ -541,7 +524,7 @@ namespace MWScript
                     Interpreter::Type_Integer effectId = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getCreatureStats (ptr).getActiveSpells().purgeEffect(effectId);
+                    ptr.getClass().getCreatureStats (ptr).getActiveSpells().purgeEffect(ptr, effectId);
                 }
         };
 
@@ -555,7 +538,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     Interpreter::Type_Integer value = 0;
@@ -576,7 +559,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
 
                     if(arg0==0)
                     {
@@ -608,7 +591,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
 
                     if(arg0==0)
                     {
@@ -647,7 +630,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
 
                     if(arg0==0)
                     {
@@ -679,7 +662,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
                     if(arg0 >0)
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -771,7 +754,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime[0].mInteger = MWBase::Environment::get().getMechanicsManager()->countDeaths (id);
                 }
         };
@@ -913,14 +896,12 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime);
 
-                    std::string race = runtime.getStringLiteral(runtime[0].mInteger);
-                    ::Misc::StringUtils::lowerCaseInPlace(race);
+                    std::string_view race = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
-                    ::Misc::StringUtils::lowerCaseInPlace(npcRace);
+                    const std::string& npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
 
-                    runtime.push (npcRace == race);
+                    runtime.push(::Misc::StringUtils::ciEqual(race, npcRace));
             }
         };
 
@@ -945,7 +926,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -977,7 +958,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -1004,7 +985,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID = "";
+                    std::string factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -1201,12 +1182,23 @@ namespace MWScript
                     {
                         bool wasEnabled = ptr.getRefData().isEnabled();
                         MWBase::Environment::get().getWorld()->undeleteObject(ptr);
-                        MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
-
+                        auto windowManager = MWBase::Environment::get().getWindowManager();
+                        bool wasOpen = windowManager->containsMode(MWGui::GM_Container);
+                        windowManager->onDeleteCustomData(ptr);
                         // HACK: disable/enable object to re-add it to the scene properly (need a new Animation).
                         MWBase::Environment::get().getWorld()->disable(ptr);
-                        // resets runtime state such as inventory, stats and AI. does not reset position in the world
-                        ptr.getRefData().setCustomData(nullptr);
+                        if (wasOpen && !windowManager->containsMode(MWGui::GM_Container))
+                        {
+                            // Reopen the loot GUI if it was closed because we resurrected the actor we were looting
+                            MWBase::Environment::get().getMechanicsManager()->resurrect(ptr);
+                            windowManager->forceLootMode(ptr);
+                        }
+                        else
+                        {
+                            MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
+                            // resets runtime state such as inventory, stats and AI. does not reset position in the world
+                            ptr.getRefData().setCustomData(nullptr);
+                        }
                         if (wasEnabled)
                             MWBase::Environment::get().getWorld()->enable(ptr);
                     }
@@ -1220,6 +1212,7 @@ namespace MWScript
             void execute (Interpreter::Runtime& runtime) override
             {
                 // dummy
+                runtime.pop();
                 runtime.push(0);
             }
         };
@@ -1328,146 +1321,132 @@ namespace MWScript
         {
             for (int i=0; i<Compiler::Stats::numberOfAttributes; ++i)
             {
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetAttribute+i, new OpGetAttribute<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetAttributeExplicit+i,
-                    new OpGetAttribute<ExplicitRef> (i));
+                interpreter.installSegment5<OpGetAttribute<ImplicitRef>>(Compiler::Stats::opcodeGetAttribute + i, i);
+                interpreter.installSegment5<OpGetAttribute<ExplicitRef>>(Compiler::Stats::opcodeGetAttributeExplicit + i, i);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeSetAttribute+i, new OpSetAttribute<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeSetAttributeExplicit+i,
-                    new OpSetAttribute<ExplicitRef> (i));
+                interpreter.installSegment5<OpSetAttribute<ImplicitRef>>(Compiler::Stats::opcodeSetAttribute + i, i);
+                interpreter.installSegment5<OpSetAttribute<ExplicitRef>>(Compiler::Stats::opcodeSetAttributeExplicit + i, i);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeModAttribute+i, new OpModAttribute<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeModAttributeExplicit+i,
-                    new OpModAttribute<ExplicitRef> (i));
+                interpreter.installSegment5<OpModAttribute<ImplicitRef>>(Compiler::Stats::opcodeModAttribute + i, i);
+                interpreter.installSegment5<OpModAttribute<ExplicitRef>>(Compiler::Stats::opcodeModAttributeExplicit + i, i);
             }
 
             for (int i=0; i<Compiler::Stats::numberOfDynamics; ++i)
             {
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamic+i, new OpGetDynamic<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicExplicit+i,
-                    new OpGetDynamic<ExplicitRef> (i));
+                interpreter.installSegment5<OpGetDynamic<ImplicitRef>>(Compiler::Stats::opcodeGetDynamic + i, i);
+                interpreter.installSegment5<OpGetDynamic<ExplicitRef>>(Compiler::Stats::opcodeGetDynamicExplicit + i, i);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeSetDynamic+i, new OpSetDynamic<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeSetDynamicExplicit+i,
-                    new OpSetDynamic<ExplicitRef> (i));
+                interpreter.installSegment5<OpSetDynamic<ImplicitRef>>(Compiler::Stats::opcodeSetDynamic + i, i);
+                interpreter.installSegment5<OpSetDynamic<ExplicitRef>>(Compiler::Stats::opcodeSetDynamicExplicit + i, i);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeModDynamic+i, new OpModDynamic<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeModDynamicExplicit+i,
-                    new OpModDynamic<ExplicitRef> (i));
+                interpreter.installSegment5<OpModDynamic<ImplicitRef>>(Compiler::Stats::opcodeModDynamic + i, i);
+                interpreter.installSegment5<OpModDynamic<ExplicitRef>>(Compiler::Stats::opcodeModDynamicExplicit + i, i);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeModCurrentDynamic+i,
-                    new OpModCurrentDynamic<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeModCurrentDynamicExplicit+i,
-                    new OpModCurrentDynamic<ExplicitRef> (i));
+                interpreter.installSegment5<OpModCurrentDynamic<ImplicitRef>>(Compiler::Stats::opcodeModCurrentDynamic + i, i);
+                interpreter.installSegment5<OpModCurrentDynamic<ExplicitRef>>(Compiler::Stats::opcodeModCurrentDynamicExplicit + i, i);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicGetRatio+i,
-                    new OpGetDynamicGetRatio<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicGetRatioExplicit+i,
-                    new OpGetDynamicGetRatio<ExplicitRef> (i));
+                interpreter.installSegment5<OpGetDynamicGetRatio<ImplicitRef>>(Compiler::Stats::opcodeGetDynamicGetRatio + i, i);
+                interpreter.installSegment5<OpGetDynamicGetRatio<ExplicitRef>>(Compiler::Stats::opcodeGetDynamicGetRatioExplicit + i, i);
             }
 
             for (int i=0; i<Compiler::Stats::numberOfSkills; ++i)
             {
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetSkill+i, new OpGetSkill<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetSkillExplicit+i, new OpGetSkill<ExplicitRef> (i));
+                interpreter.installSegment5<OpGetSkill<ImplicitRef>>(Compiler::Stats::opcodeGetSkill + i, i);
+                interpreter.installSegment5<OpGetSkill<ExplicitRef>>(Compiler::Stats::opcodeGetSkillExplicit + i, i);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeSetSkill+i, new OpSetSkill<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeSetSkillExplicit+i, new OpSetSkill<ExplicitRef> (i));
+                interpreter.installSegment5<OpSetSkill<ImplicitRef>>(Compiler::Stats::opcodeSetSkill + i, i);
+                interpreter.installSegment5<OpSetSkill<ExplicitRef>>(Compiler::Stats::opcodeSetSkillExplicit + i, i);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeModSkill+i, new OpModSkill<ImplicitRef> (i));
-                interpreter.installSegment5 (Compiler::Stats::opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
+                interpreter.installSegment5<OpModSkill<ImplicitRef>>(Compiler::Stats::opcodeModSkill + i, i);
+                interpreter.installSegment5<OpModSkill<ExplicitRef>>(Compiler::Stats::opcodeModSkillExplicit + i, i);
             }
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetPCCrimeLevel, new OpGetPCCrimeLevel);
-            interpreter.installSegment5 (Compiler::Stats::opcodeSetPCCrimeLevel, new OpSetPCCrimeLevel);
-            interpreter.installSegment5 (Compiler::Stats::opcodeModPCCrimeLevel, new OpModPCCrimeLevel);
+            interpreter.installSegment5<OpGetPCCrimeLevel>(Compiler::Stats::opcodeGetPCCrimeLevel);
+            interpreter.installSegment5<OpSetPCCrimeLevel>(Compiler::Stats::opcodeSetPCCrimeLevel);
+            interpreter.installSegment5<OpModPCCrimeLevel>(Compiler::Stats::opcodeModPCCrimeLevel);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeAddSpell, new OpAddSpell<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeAddSpellExplicit, new OpAddSpell<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellExplicit,
-                new OpRemoveSpell<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffects, new OpRemoveSpellEffects<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffectsExplicit,
-                new OpRemoveSpellEffects<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeResurrect, new OpResurrect<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeResurrectExplicit,
-                new OpResurrect<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveEffects, new OpRemoveEffects<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveEffectsExplicit,
-                new OpRemoveEffects<ExplicitRef>);
+            interpreter.installSegment5<OpAddSpell<ImplicitRef>>(Compiler::Stats::opcodeAddSpell);
+            interpreter.installSegment5<OpAddSpell<ExplicitRef>>(Compiler::Stats::opcodeAddSpellExplicit);
+            interpreter.installSegment5<OpRemoveSpell<ImplicitRef>>(Compiler::Stats::opcodeRemoveSpell);
+            interpreter.installSegment5<OpRemoveSpell<ExplicitRef>>(Compiler::Stats::opcodeRemoveSpellExplicit);
+            interpreter.installSegment5<OpRemoveSpellEffects<ImplicitRef>>(Compiler::Stats::opcodeRemoveSpellEffects);
+            interpreter.installSegment5<OpRemoveSpellEffects<ExplicitRef>>(Compiler::Stats::opcodeRemoveSpellEffectsExplicit);
+            interpreter.installSegment5<OpResurrect<ImplicitRef>>(Compiler::Stats::opcodeResurrect);
+            interpreter.installSegment5<OpResurrect<ExplicitRef>>(Compiler::Stats::opcodeResurrectExplicit);
+            interpreter.installSegment5<OpRemoveEffects<ImplicitRef>>(Compiler::Stats::opcodeRemoveEffects);
+            interpreter.installSegment5<OpRemoveEffects<ExplicitRef>>(Compiler::Stats::opcodeRemoveEffectsExplicit);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetSpell, new OpGetSpell<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);
+            interpreter.installSegment5<OpGetSpell<ImplicitRef>>(Compiler::Stats::opcodeGetSpell);
+            interpreter.installSegment5<OpGetSpell<ExplicitRef>>(Compiler::Stats::opcodeGetSpellExplicit);
 
-            interpreter.installSegment3(Compiler::Stats::opcodePCRaiseRank,new OpPCRaiseRank<ImplicitRef>);
-            interpreter.installSegment3(Compiler::Stats::opcodePCLowerRank,new OpPCLowerRank<ImplicitRef>);
-            interpreter.installSegment3(Compiler::Stats::opcodePCJoinFaction,new OpPCJoinFaction<ImplicitRef>);
-            interpreter.installSegment3(Compiler::Stats::opcodePCRaiseRankExplicit,new OpPCRaiseRank<ExplicitRef>);
-            interpreter.installSegment3(Compiler::Stats::opcodePCLowerRankExplicit,new OpPCLowerRank<ExplicitRef>);
-            interpreter.installSegment3(Compiler::Stats::opcodePCJoinFactionExplicit,new OpPCJoinFaction<ExplicitRef>);
-            interpreter.installSegment3(Compiler::Stats::opcodeGetPCRank,new OpGetPCRank<ImplicitRef>);
-            interpreter.installSegment3(Compiler::Stats::opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
+            interpreter.installSegment3<OpPCRaiseRank<ImplicitRef>>(Compiler::Stats::opcodePCRaiseRank);
+            interpreter.installSegment3<OpPCLowerRank<ImplicitRef>>(Compiler::Stats::opcodePCLowerRank);
+            interpreter.installSegment3<OpPCJoinFaction<ImplicitRef>>(Compiler::Stats::opcodePCJoinFaction);
+            interpreter.installSegment3<OpPCRaiseRank<ExplicitRef>>(Compiler::Stats::opcodePCRaiseRankExplicit);
+            interpreter.installSegment3<OpPCLowerRank<ExplicitRef>>(Compiler::Stats::opcodePCLowerRankExplicit);
+            interpreter.installSegment3<OpPCJoinFaction<ExplicitRef>>(Compiler::Stats::opcodePCJoinFactionExplicit);
+            interpreter.installSegment3<OpGetPCRank<ImplicitRef>>(Compiler::Stats::opcodeGetPCRank);
+            interpreter.installSegment3<OpGetPCRank<ExplicitRef>>(Compiler::Stats::opcodeGetPCRankExplicit);
 
-            interpreter.installSegment5(Compiler::Stats::opcodeModDisposition,new OpModDisposition<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Stats::opcodeModDispositionExplicit,new OpModDisposition<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Stats::opcodeSetDisposition,new OpSetDisposition<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Stats::opcodeSetDispositionExplicit,new OpSetDisposition<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Stats::opcodeGetDisposition,new OpGetDisposition<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Stats::opcodeGetDispositionExplicit,new OpGetDisposition<ExplicitRef>);
+            interpreter.installSegment5<OpModDisposition<ImplicitRef>>(Compiler::Stats::opcodeModDisposition);
+            interpreter.installSegment5<OpModDisposition<ExplicitRef>>(Compiler::Stats::opcodeModDispositionExplicit);
+            interpreter.installSegment5<OpSetDisposition<ImplicitRef>>(Compiler::Stats::opcodeSetDisposition);
+            interpreter.installSegment5<OpSetDisposition<ExplicitRef>>(Compiler::Stats::opcodeSetDispositionExplicit);
+            interpreter.installSegment5<OpGetDisposition<ImplicitRef>>(Compiler::Stats::opcodeGetDisposition);
+            interpreter.installSegment5<OpGetDisposition<ExplicitRef>>(Compiler::Stats::opcodeGetDispositionExplicit);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetLevel, new OpGetLevel<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetLevelExplicit, new OpGetLevel<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeSetLevel, new OpSetLevel<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeSetLevelExplicit, new OpSetLevel<ExplicitRef>);
+            interpreter.installSegment5<OpGetLevel<ImplicitRef>>(Compiler::Stats::opcodeGetLevel);
+            interpreter.installSegment5<OpGetLevel<ExplicitRef>>(Compiler::Stats::opcodeGetLevelExplicit);
+            interpreter.installSegment5<OpSetLevel<ImplicitRef>>(Compiler::Stats::opcodeSetLevel);
+            interpreter.installSegment5<OpSetLevel<ExplicitRef>>(Compiler::Stats::opcodeSetLevelExplicit);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetDeadCount, new OpGetDeadCount);
+            interpreter.installSegment5<OpGetDeadCount>(Compiler::Stats::opcodeGetDeadCount);
 
-            interpreter.installSegment3 (Compiler::Stats::opcodeGetPCFacRep, new OpGetPCFacRep<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodeGetPCFacRepExplicit, new OpGetPCFacRep<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodeSetPCFacRep, new OpSetPCFacRep<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodeSetPCFacRepExplicit, new OpSetPCFacRep<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodeModPCFacRep, new OpModPCFacRep<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodeModPCFacRepExplicit, new OpModPCFacRep<ExplicitRef>);
+            interpreter.installSegment3<OpGetPCFacRep<ImplicitRef>>(Compiler::Stats::opcodeGetPCFacRep);
+            interpreter.installSegment3<OpGetPCFacRep<ExplicitRef>>(Compiler::Stats::opcodeGetPCFacRepExplicit);
+            interpreter.installSegment3<OpSetPCFacRep<ImplicitRef>>(Compiler::Stats::opcodeSetPCFacRep);
+            interpreter.installSegment3<OpSetPCFacRep<ExplicitRef>>(Compiler::Stats::opcodeSetPCFacRepExplicit);
+            interpreter.installSegment3<OpModPCFacRep<ImplicitRef>>(Compiler::Stats::opcodeModPCFacRep);
+            interpreter.installSegment3<OpModPCFacRep<ExplicitRef>>(Compiler::Stats::opcodeModPCFacRepExplicit);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetCommonDisease, new OpGetCommonDisease<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetCommonDiseaseExplicit, new OpGetCommonDisease<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetBlightDisease, new OpGetBlightDisease<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetBlightDiseaseExplicit, new OpGetBlightDisease<ExplicitRef>);
+            interpreter.installSegment5<OpGetCommonDisease<ImplicitRef>>(Compiler::Stats::opcodeGetCommonDisease);
+            interpreter.installSegment5<OpGetCommonDisease<ExplicitRef>>(Compiler::Stats::opcodeGetCommonDiseaseExplicit);
+            interpreter.installSegment5<OpGetBlightDisease<ImplicitRef>>(Compiler::Stats::opcodeGetBlightDisease);
+            interpreter.installSegment5<OpGetBlightDisease<ExplicitRef>>(Compiler::Stats::opcodeGetBlightDiseaseExplicit);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetRace, new OpGetRace<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetRaceExplicit, new OpGetRace<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetWerewolfKills, new OpGetWerewolfKills);
+            interpreter.installSegment5<OpGetRace<ImplicitRef>>(Compiler::Stats::opcodeGetRace);
+            interpreter.installSegment5<OpGetRace<ExplicitRef>>(Compiler::Stats::opcodeGetRaceExplicit);
+            interpreter.installSegment5<OpGetWerewolfKills>(Compiler::Stats::opcodeGetWerewolfKills);
 
-            interpreter.installSegment3 (Compiler::Stats::opcodePcExpelled, new OpPcExpelled<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodePcExpelledExplicit, new OpPcExpelled<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodePcExpell, new OpPcExpell<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodePcExpellExplicit, new OpPcExpell<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodePcClearExpelled, new OpPcClearExpelled<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Stats::opcodePcClearExpelledExplicit, new OpPcClearExpelled<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeRaiseRank, new OpRaiseRank<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeRaiseRankExplicit, new OpRaiseRank<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeLowerRank, new OpLowerRank<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeLowerRankExplicit, new OpLowerRank<ExplicitRef>);
+            interpreter.installSegment3<OpPcExpelled<ImplicitRef>>(Compiler::Stats::opcodePcExpelled);
+            interpreter.installSegment3<OpPcExpelled<ExplicitRef>>(Compiler::Stats::opcodePcExpelledExplicit);
+            interpreter.installSegment3<OpPcExpell<ImplicitRef>>(Compiler::Stats::opcodePcExpell);
+            interpreter.installSegment3<OpPcExpell<ExplicitRef>>(Compiler::Stats::opcodePcExpellExplicit);
+            interpreter.installSegment3<OpPcClearExpelled<ImplicitRef>>(Compiler::Stats::opcodePcClearExpelled);
+            interpreter.installSegment3<OpPcClearExpelled<ExplicitRef>>(Compiler::Stats::opcodePcClearExpelledExplicit);
+            interpreter.installSegment5<OpRaiseRank<ImplicitRef>>(Compiler::Stats::opcodeRaiseRank);
+            interpreter.installSegment5<OpRaiseRank<ExplicitRef>>(Compiler::Stats::opcodeRaiseRankExplicit);
+            interpreter.installSegment5<OpLowerRank<ImplicitRef>>(Compiler::Stats::opcodeLowerRank);
+            interpreter.installSegment5<OpLowerRank<ExplicitRef>>(Compiler::Stats::opcodeLowerRankExplicit);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeOnDeath, new OpOnDeath<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeOnDeathExplicit, new OpOnDeath<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeOnMurder, new OpOnMurder<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeOnMurderExplicit, new OpOnMurder<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeOnKnockout, new OpOnKnockout<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeOnKnockoutExplicit, new OpOnKnockout<ExplicitRef>);
+            interpreter.installSegment5<OpOnDeath<ImplicitRef>>(Compiler::Stats::opcodeOnDeath);
+            interpreter.installSegment5<OpOnDeath<ExplicitRef>>(Compiler::Stats::opcodeOnDeathExplicit);
+            interpreter.installSegment5<OpOnMurder<ImplicitRef>>(Compiler::Stats::opcodeOnMurder);
+            interpreter.installSegment5<OpOnMurder<ExplicitRef>>(Compiler::Stats::opcodeOnMurderExplicit);
+            interpreter.installSegment5<OpOnKnockout<ImplicitRef>>(Compiler::Stats::opcodeOnKnockout);
+            interpreter.installSegment5<OpOnKnockout<ExplicitRef>>(Compiler::Stats::opcodeOnKnockoutExplicit);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
+            interpreter.installSegment5<OpIsWerewolf<ImplicitRef>>(Compiler::Stats::opcodeIsWerewolf);
+            interpreter.installSegment5<OpIsWerewolf<ExplicitRef>>(Compiler::Stats::opcodeIsWerewolfExplicit);
 
-            interpreter.installSegment5 (Compiler::Stats::opcodeBecomeWerewolf, new OpSetWerewolf<ImplicitRef, true>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeBecomeWerewolfExplicit, new OpSetWerewolf<ExplicitRef, true>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolf, new OpSetWerewolf<ImplicitRef, false>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolfExplicit, new OpSetWerewolf<ExplicitRef, false>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobatics, new OpSetWerewolfAcrobatics<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetStat, new OpGetStat<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeGetStatExplicit, new OpGetStat<ExplicitRef>);
+            interpreter.installSegment5<OpSetWerewolf<ImplicitRef, true>>(Compiler::Stats::opcodeBecomeWerewolf);
+            interpreter.installSegment5<OpSetWerewolf<ExplicitRef, true>>(Compiler::Stats::opcodeBecomeWerewolfExplicit);
+            interpreter.installSegment5<OpSetWerewolf<ImplicitRef, false>>(Compiler::Stats::opcodeUndoWerewolf);
+            interpreter.installSegment5<OpSetWerewolf<ExplicitRef, false>>(Compiler::Stats::opcodeUndoWerewolfExplicit);
+            interpreter.installSegment5<OpSetWerewolfAcrobatics<ImplicitRef>>(Compiler::Stats::opcodeSetWerewolfAcrobatics);
+            interpreter.installSegment5<OpSetWerewolfAcrobatics<ExplicitRef>>(Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit);
+            interpreter.installSegment5<OpGetStat<ImplicitRef>>(Compiler::Stats::opcodeGetStat);
+            interpreter.installSegment5<OpGetStat<ExplicitRef>>(Compiler::Stats::opcodeGetStatExplicit);
 
             static const MagicEffect sMagicEffects[] = {
                 { ESM::MagicEffect::ResistMagicka, ESM::MagicEffect::WeaknessToMagicka },
@@ -1501,14 +1480,14 @@ namespace MWScript
                 int positive = sMagicEffects[i].mPositiveEffect;
                 int negative = sMagicEffects[i].mNegativeEffect;
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetMagicEffect+i, new OpGetMagicEffect<ImplicitRef> (positive, negative));
-                interpreter.installSegment5 (Compiler::Stats::opcodeGetMagicEffectExplicit+i, new OpGetMagicEffect<ExplicitRef> (positive, negative));
+                interpreter.installSegment5<OpGetMagicEffect<ImplicitRef>>(Compiler::Stats::opcodeGetMagicEffect + i, positive, negative);
+                interpreter.installSegment5<OpGetMagicEffect<ExplicitRef>>(Compiler::Stats::opcodeGetMagicEffectExplicit + i, positive, negative);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeSetMagicEffect+i, new OpSetMagicEffect<ImplicitRef> (positive, negative));
-                interpreter.installSegment5 (Compiler::Stats::opcodeSetMagicEffectExplicit+i, new OpSetMagicEffect<ExplicitRef> (positive, negative));
+                interpreter.installSegment5<OpSetMagicEffect<ImplicitRef>>(Compiler::Stats::opcodeSetMagicEffect + i, positive, negative);
+                interpreter.installSegment5<OpSetMagicEffect<ExplicitRef>>(Compiler::Stats::opcodeSetMagicEffectExplicit + i, positive, negative);
 
-                interpreter.installSegment5 (Compiler::Stats::opcodeModMagicEffect+i, new OpModMagicEffect<ImplicitRef> (positive, negative));
-                interpreter.installSegment5 (Compiler::Stats::opcodeModMagicEffectExplicit+i, new OpModMagicEffect<ExplicitRef> (positive, negative));
+                interpreter.installSegment5<OpModMagicEffect<ImplicitRef>>(Compiler::Stats::opcodeModMagicEffect + i, positive, negative);
+                interpreter.installSegment5<OpModMagicEffect<ExplicitRef>>(Compiler::Stats::opcodeModMagicEffectExplicit + i, positive, negative);
             }
         }
     }

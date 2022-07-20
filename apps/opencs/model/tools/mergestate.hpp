@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_MERGESTATE_H
 #define CSM_TOOLS_MERGESTATE_H
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <memory>
 #include <map>

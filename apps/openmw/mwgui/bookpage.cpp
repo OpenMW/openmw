@@ -1,14 +1,15 @@
 #include "bookpage.hpp"
 
+#include <optional>
+
 #include "MyGUI_RenderItem.h"
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_TextureUtility.h"
 #include "MyGUI_FactoryManager.h"
 
 #include <components/misc/utf8stream.hpp>
+#include <components/sceneutil/depth.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {
@@ -105,7 +106,7 @@ struct TypesetBookImpl : TypesetBook
 
     virtual ~TypesetBookImpl () {}
 
-    Range addContent (BookTypesetter::Utf8Span text)
+    Range addContent (const BookTypesetter::Utf8Span &text)
     {
         Contents::iterator i = mContents.insert (mContents.end (), Content (text.first, text.second));
 
@@ -488,7 +489,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             {
                 add_partial_text();
                 stream.consume ();
-                mLine = nullptr, mRun = nullptr;
+                mLine = nullptr;
+                mRun = nullptr;
                 continue;
             }
 
@@ -548,7 +550,9 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
         if (left + space_width + word_width > mPageWidth)
         {
-            mLine = nullptr, mRun = nullptr, left = 0;
+            mLine = nullptr;
+            mRun = nullptr;
+            left = 0;
         }
         else
         {
@@ -744,9 +748,7 @@ namespace
             mVertexColourType = MyGUI::RenderManager::getInstance().getVertexFormat();
         }
 
-        ~GlyphStream ()
-        {
-        }
+        ~GlyphStream () = default;
 
         MyGUI::Vertex* end () const { return mVertices; }
 
@@ -894,6 +896,21 @@ protected:
        return mIsPageReset || (mPage != page);
     }
 
+    std::optional<MyGUI::IntPoint> getAdjustedPos(int left, int top, bool move = false)
+    {
+        if (!mBook)
+            return {};
+
+        if (mPage >= mBook->mPages.size())
+            return {};
+
+        MyGUI::IntPoint pos (left, top);
+        pos.left -= mCroppedParent->getAbsoluteLeft ();
+        pos.top  -= mCroppedParent->getAbsoluteTop  ();
+        pos.top += mViewTop;
+        return pos;
+    }
+
 public:
 
     typedef TypesetBookImpl::StyleImpl Style;
@@ -925,7 +942,7 @@ public:
 
     void dirtyFocusItem ()
     {
-        if (mFocusItem != 0)
+        if (mFocusItem != nullptr)
         {
             MyGUI::IFont* Font = mBook->affectedFont (mFocusItem);
 
@@ -946,22 +963,16 @@ public:
 
         dirtyFocusItem ();
 
-        mFocusItem = 0;
+        mFocusItem = nullptr;
         mItemActive = false;
     }
 
     void onMouseMove (int left, int top)
     {
-        if (!mBook)
-            return;
-
-        if (mPage >= mBook->mPages.size())
-            return;
-
-        left -= mCroppedParent->getAbsoluteLeft ();
-        top  -= mCroppedParent->getAbsoluteTop  ();
-
-        Style * hit = mBook->hitTestWithMargin (left, mViewTop + top);
+        Style * hit = nullptr;
+        if(auto pos = getAdjustedPos(left, top, true))
+            if(pos->top <= mViewBottom)
+                hit = mBook->hitTestWithMargin (pos->left, pos->top);
 
         if (mLastDown == MyGUI::MouseButton::None)
         {
@@ -976,7 +987,7 @@ public:
             }
         }
         else
-        if (mFocusItem != 0)
+        if (mFocusItem != nullptr)
         {
             bool newItemActive = hit == mFocusItem;
 
@@ -991,24 +1002,11 @@ public:
 
     void onMouseButtonPressed (int left, int top, MyGUI::MouseButton id)
     {
-        if (!mBook)
-            return;
+        auto pos = getAdjustedPos(left, top);
 
-        if (mPage >= mBook->mPages.size())
-            return;
-
-        // work around inconsistency in MyGUI where the mouse press coordinates aren't
-        // transformed by the current Layer (even though mouse *move* events are).
-        MyGUI::IntPoint pos (left, top);
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
-        pos = mNode->getLayer()->getPosition(left, top);
-#endif
-        pos.left -= mCroppedParent->getAbsoluteLeft ();
-        pos.top  -= mCroppedParent->getAbsoluteTop  ();
-
-        if (mLastDown == MyGUI::MouseButton::None)
+        if (pos && mLastDown == MyGUI::MouseButton::None)
         {
-            mFocusItem = mBook->hitTestWithMargin (pos.left, mViewTop + pos.top);
+            mFocusItem = pos->top <= mViewBottom ? mBook->hitTestWithMargin (pos->left, pos->top) : nullptr;
             mItemActive = true;
 
             dirtyFocusItem ();
@@ -1019,25 +1017,11 @@ public:
 
     void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id)
     {
-        if (!mBook)
-            return;
+        auto pos = getAdjustedPos(left, top);
 
-        if (mPage >= mBook->mPages.size())
-            return;
-
-        // work around inconsistency in MyGUI where the mouse release coordinates aren't
-        // transformed by the current Layer (even though mouse *move* events are).
-        MyGUI::IntPoint pos (left, top);
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
-        pos = mNode->getLayer()->getPosition(left, top);
-#endif
-
-        pos.left -= mCroppedParent->getAbsoluteLeft ();
-        pos.top  -= mCroppedParent->getAbsoluteTop  ();
-
-        if (mLastDown == id)
+        if (pos && mLastDown == id)
         {
-            Style * item = mBook->hitTestWithMargin (pos.left, mViewTop + pos.top);
+            Style * item = pos->top <= mViewBottom ? mBook->hitTestWithMargin (pos->left, pos->top) : nullptr;
 
             bool clicked = mFocusItem == item;
 
@@ -1063,7 +1047,7 @@ public:
 
             for (ActiveTextFormats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
             {
-                if (mNode != nullptr)
+                if (mNode != nullptr && i->second != nullptr)
                     i->second->destroyDrawItem (mNode);
                 i->second.reset();
             }
@@ -1132,7 +1116,7 @@ public:
 
             if (j == this_->mActiveTextFormats.end ())
             {
-                std::unique_ptr<TextFormat> textFormat(new TextFormat (Font, this_));
+                auto textFormat = std::make_unique<TextFormat>(Font, this_);
 
                 textFormat->mTexture = Font->getTextureFont ();
 
@@ -1229,8 +1213,10 @@ public:
 
         RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
+        float z = SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f;
+
         GlyphStream glyphStream(textFormat.mFont, static_cast<float>(mCoord.left), static_cast<float>(mCoord.top - mViewTop),
-                                  -1 /*mNode->getNodeDepth()*/, vertices, renderXform);
+                                  z /*mNode->getNodeDepth()*/, vertices, renderXform);
 
         int visit_top    = (std::max) (mViewTop,    mViewTop + int (renderXform.clipTop   ));
         int visit_bottom = (std::min) (mViewBottom, mViewTop + int (renderXform.clipBottom));

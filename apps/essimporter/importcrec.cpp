@@ -1,6 +1,6 @@
 #include "importcrec.hpp"
 
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 namespace ESSImport
 {

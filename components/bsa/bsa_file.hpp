@@ -27,12 +27,8 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <map>
 
-#include <components/misc/stringops.hpp>
-
-#include <components/files/constrainedfilestream.hpp>
-
+#include <components/files/istreamptr.hpp>
 
 namespace Bsa
 {
@@ -43,20 +39,42 @@ namespace Bsa
 class BSAFile
 {
 public:
+
+    #pragma pack(push)
+    #pragma pack(1)
+    struct Hash
+    {
+        uint32_t low, high;
+    };
+    #pragma pack(pop)
+
     /// Represents one file entry in the archive
     struct FileStruct
     {
+        void setNameInfos(size_t index,
+            std::vector<char>* stringBuf
+        ) {
+            namesOffset = static_cast<uint32_t>(index);
+            namesBuffer = stringBuf;
+        }
+
         // File size and offset in file. We store the offset from the
         // beginning of the file, not the offset into the data buffer
         // (which is what is stored in the archive.)
         uint32_t fileSize, offset;
+        Hash hash;
 
         // Zero-terminated file name
-        const char *name;
+        const char* name() const { return &(*namesBuffer)[namesOffset]; };
+
+        uint32_t namesOffset = 0;
+        std::vector<char>* namesBuffer = nullptr;
     };
     typedef std::vector<FileStruct> FileList;
 
 protected:
+    bool mHasChanged = false;
+
     /// Table of files in this archive
     FileList mFiles;
 
@@ -69,32 +87,12 @@ protected:
     /// Used for error messages
     std::string mFilename;
 
-    /// Case insensitive string comparison
-    struct iltstr
-    {
-        bool operator()(const char *s1, const char *s2) const
-        { return Misc::StringUtils::ciLess(s1, s2); }
-    };
-
-    /** A map used for fast file name lookup. The value is the index into
-        the files[] vector above. The iltstr ensures that file name
-        checks are case insensitive.
-    */
-    typedef std::map<const char*, int, iltstr> Lookup;
-    Lookup mLookup;
-
     /// Error handling
-    void fail(const std::string &msg);
+    [[noreturn]] void fail(const std::string &msg);
 
     /// Read header information from the input source
     virtual void readHeader();
-
-    /// Read header information from the input source
-
-
-    /// Get the index of a given file name, or -1 if not found
-    /// @note Thread safe.
-    int getIndex(const char *str) const;
+    virtual void writeHeader();
 
 public:
     /* -----------------------------------
@@ -106,35 +104,37 @@ public:
       : mIsLoaded(false)
     { }
 
-    virtual ~BSAFile() = default;
+    virtual ~BSAFile()
+    {
+        close();
+    }
 
     /// Open an archive file.
     void open(const std::string &file);
+
+    void close();
 
     /* -----------------------------------
      * Archive file routines
      * -----------------------------------
      */
 
-    /// Check if a file exists
-    virtual bool exists(const char *file) const
-    { return getIndex(file) != -1; }
-
-    /** Open a file contained in the archive. Throws an exception if the
-        file doesn't exist.
-     * @note Thread safe.
-    */
-    virtual Files::IStreamPtr getFile(const char *file);
-
     /** Open a file contained in the archive.
      * @note Thread safe.
     */
-    virtual Files::IStreamPtr getFile(const FileStruct* file);
+    Files::IStreamPtr getFile(const FileStruct *file);
+
+    void addFile(const std::string& filename, std::istream& file);
 
     /// Get a list of all files
     /// @note Thread safe.
     const FileList &getList() const
     { return mFiles; }
+
+    const std::string& getFilename() const
+    {
+        return mFilename;
+    }
 };
 
 }

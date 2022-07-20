@@ -5,20 +5,23 @@
 #include <MyGUI_Gui.h>
 
 #include <components/settings/settings.hpp>
+#include <components/esm3/loadgmst.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/actorutil.hpp"
-
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/actionteleport.hpp"
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/cellutils.hpp"
+#include "../mwworld/store.hpp"
+#include "../mwworld/esmstore.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 namespace MWGui
 {
@@ -44,7 +47,7 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
-    void TravelWindow::addDestination(const std::string& name, ESM::Position pos, bool interior)
+    void TravelWindow::addDestination(const std::string& name, const ESM::Position &pos, bool interior)
     {
         int price;
 
@@ -74,7 +77,7 @@ namespace MWGui
 
         // Add price for the travelling followers
         std::set<MWWorld::Ptr> followers;
-        MWWorld::ActionTeleport::getFollowers(player, followers);
+        MWWorld::ActionTeleport::getFollowers(player, followers, !interior);
 
         // Apply followers cost, unlike vanilla the first follower doesn't travel for free
         price *= 1 + static_cast<int>(followers.size());
@@ -115,19 +118,17 @@ namespace MWGui
         std::vector<ESM::Transport::Dest> transport;
         if (mPtr.getClass().isNpc())
             transport = mPtr.get<ESM::NPC>()->mBase->getTransport();
-        else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
+        else if (mPtr.getType() == ESM::Creature::sRecordId)
             transport = mPtr.get<ESM::Creature>()->mBase->getTransport();
 
         for(unsigned int i = 0;i<transport.size();i++)
         {
             std::string cellname = transport[i].mCellName;
             bool interior = true;
-            int x,y;
-            MWBase::Environment::get().getWorld()->positionToIndex(transport[i].mPos.pos[0],
-                                                                   transport[i].mPos.pos[1],x,y);
+            const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
             if (cellname == "")
             {
-                MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
+                MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
                 cellname = MWBase::Environment::get().getWorld()->getCellName(cell);
                 interior = false;
             }

@@ -1,9 +1,13 @@
 #include "itemlevlist.hpp"
 
-#include <components/esm/loadlevlist.hpp>
+#include <components/esm3/loadlevlist.hpp>
 
 namespace MWClass
 {
+    ItemLevList::ItemLevList()
+        : MWWorld::RegisteredClass<ItemLevList>(ESM::ItemLevList::sRecordId)
+    {
+    }
 
     std::string ItemLevList::getName (const MWWorld::ConstPtr& ptr) const
     {
@@ -13,12 +17,5 @@ namespace MWClass
     bool ItemLevList::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
         return false;
-    }
-
-    void ItemLevList::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new ItemLevList);
-
-        registerClass (typeid (ESM::ItemLevList).name(), instance);
     }
 }

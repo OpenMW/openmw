@@ -3,7 +3,7 @@
 
 #include <utility>
 
-#include <components/esm/cellref.hpp>
+#include <components/esm3/cellref.hpp>
 
 namespace CSMWorld
 {
@@ -14,6 +14,7 @@ namespace CSMWorld
         std::string mCell;
         std::string mOriginalCell;
         bool mNew; // new reference, not counted yet, ref num not assigned yet
+        unsigned int mIdNum;
 
         CellRef();
 

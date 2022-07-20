@@ -1,8 +1,6 @@
 #ifndef GAME_MWSCRIPT_REF_H
 #define GAME_MWSCRIPT_REF_H
 
-#include <string>
-
 #include "../mwworld/ptr.hpp"
 
 namespace Interpreter
@@ -14,7 +12,7 @@ namespace MWScript
 {
     struct ExplicitRef
     {
-        static const bool implicit = false;
+        static constexpr bool implicit = false;
 
         MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required = true,
             bool activeOnly = false) const;
@@ -22,7 +20,7 @@ namespace MWScript
 
     struct ImplicitRef
     {
-        static const bool implicit = true;
+        static constexpr bool implicit = true;
 
         MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required = true,
             bool activeOnly = false) const;

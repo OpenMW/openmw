@@ -1,0 +1,8 @@
+---
+Checks: "-*,
+         boost-*,
+         portability-*,
+"
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+FormatStyle: none

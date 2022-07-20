@@ -108,7 +108,7 @@ namespace CSMDoc
             state == CSMWorld::RecordBase::State_ModifiedOnly ||
             state == CSMWorld::RecordBase::State_Deleted)
         {
-            writer.startRecord (record.sRecordId);
+            writer.startRecord (record.sRecordId, record.mRecordFlags);
             record.save (writer, state == CSMWorld::RecordBase::State_Deleted);
             writer.endRecord (record.sRecordId);
         }
@@ -170,6 +170,8 @@ namespace CSMDoc
     {
             Document& mDocument;
             SavingState& mState;
+
+            void writeReferences (const std::deque<int>& references, bool interior, unsigned int& newRefNum);
 
         public:
 

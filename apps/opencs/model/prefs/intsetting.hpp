@@ -19,7 +19,7 @@ namespace CSMPrefs
 
         public:
 
-            IntSetting (Category *parent, Settings::Manager *values,
+            IntSetting (Category *parent,
                 QMutex *mutex, const std::string& key, const std::string& label, int default_);
 
             // defaults to [0, std::numeric_limits<int>::max()]

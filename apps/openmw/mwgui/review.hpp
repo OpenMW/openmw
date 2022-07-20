@@ -2,18 +2,13 @@
 #define MWGUI_REVIEW_H
 
 #include <components/esm/attr.hpp>
-#include <components/esm/loadclas.hpp>
+#include <components/esm3/loadclas.hpp>
 #include "windowbase.hpp"
 #include "widgets.hpp"
 
 namespace ESM
 {
     struct Spell;
-}
-
-namespace MWGui
-{
-    class WindowManager;
 }
 
 namespace MWGui

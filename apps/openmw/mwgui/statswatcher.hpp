@@ -4,7 +4,7 @@
 #include <set>
 
 #include <components/esm/attr.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../mwmechanics/stat.hpp"
 
@@ -63,6 +63,8 @@ namespace MWGui
 
         void watchActor(const MWWorld::Ptr& ptr);
         MWWorld::Ptr getWatchedActor() const { return mWatched; }
+
+        void forceUpdate() { mWatchedStatsEmpty = true; }
     };
 }
 

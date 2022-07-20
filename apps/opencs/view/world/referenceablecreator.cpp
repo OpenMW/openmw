@@ -22,7 +22,8 @@ CSVWorld::ReferenceableCreator::ReferenceableCreator (CSMWorld::Data& data, QUnd
     std::vector<CSMWorld::UniversalId::Type> types = CSMWorld::UniversalId::listReferenceableTypes();
 
     mType = new QComboBox (this);
-
+    mType->setMaxVisibleItems(20);
+    
     for (std::vector<CSMWorld::UniversalId::Type>::const_iterator iter (types.begin());
          iter!=types.end(); ++iter)
     {
@@ -31,14 +32,42 @@ CSVWorld::ReferenceableCreator::ReferenceableCreator (CSMWorld::Data& data, QUnd
         mType->addItem (QIcon (id2.getIcon().c_str()), id2.getTypeName().c_str(),
             static_cast<int> (id2.getType()));
     }
-
+    
+    mType->model()->sort(0);
+    
     insertBeforeButtons (mType, false);
+
+    connect (mType, SIGNAL (currentIndexChanged (int)), this, SLOT (setType (int)));
 }
 
 void CSVWorld::ReferenceableCreator::reset()
 {
     mType->setCurrentIndex (0);
     GenericCreator::reset();
+}
+
+void CSVWorld::ReferenceableCreator::setType (int index)
+{
+    // container items have name limit of 32 characters
+    std::string text = mType->currentText().toStdString();
+    if (text == "Potion" ||
+        text == "Apparatus" ||
+        text == "Armor" ||
+        text == "Book" ||
+        text == "Clothing" ||
+        text == "Ingredient" ||
+        text == "ItemLevelledList" ||
+        text == "Light" ||
+        text == "Lockpick" ||
+        text == "Miscellaneous" ||
+        text == "Probe" ||
+        text == "Repair" ||
+        text == "Weapon")
+    {
+        GenericCreator::setEditorMaxLength (32);
+    }
+    else
+        GenericCreator::setEditorMaxLength (32767);
 }
 
 void CSVWorld::ReferenceableCreator::cloneMode (const std::string& originId,

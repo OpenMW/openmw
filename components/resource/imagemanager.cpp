@@ -4,6 +4,7 @@
 #include <osgDB/Registry>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "objectcache.hpp"
@@ -48,6 +49,7 @@ namespace Resource
         : ResourceManager(vfs)
         , mWarningImage(createWarningImage())
         , mOptions(new osgDB::Options("dds_flip dds_dxt1_detect_rgba ignoreTga2Fields"))
+        , mOptionsNoFlip(new osgDB::Options("dds_dxt1_detect_rgba ignoreTga2Fields"))
     {
     }
 
@@ -81,10 +83,9 @@ namespace Resource
         return true;
     }
 
-    osg::ref_ptr<osg::Image> ImageManager::getImage(const std::string &filename)
+    osg::ref_ptr<osg::Image> ImageManager::getImage(const std::string &filename, bool disableFlip)
     {
-        std::string normalized = filename;
-        mVFS->normalizeFilename(normalized);
+        const std::string normalized = mVFS->normalizeFilename(filename);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
@@ -94,7 +95,7 @@ namespace Resource
             Files::IStreamPtr stream;
             try
             {
-                stream = mVFS->get(normalized.c_str());
+                stream = mVFS->get(normalized);
             }
             catch (std::exception& e)
             {
@@ -103,10 +104,7 @@ namespace Resource
                 return mWarningImage;
             }
 
-            size_t extPos = normalized.find_last_of('.');
-            std::string ext;
-            if (extPos != std::string::npos && extPos+1 < normalized.size())
-                ext = normalized.substr(extPos+1);
+            const std::string ext(Misc::getFileExtension(normalized));
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
             if (!reader)
             {
@@ -138,7 +136,7 @@ namespace Resource
                 stream->seekg(0);
             }
 
-            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, mOptions);
+            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, disableFlip ? mOptionsNoFlip : mOptions);
             if (!result.success())
             {
                 Log(Debug::Error) << "Error loading " << filename << ": " << result.message() << " code " << result.status();
@@ -151,7 +149,7 @@ namespace Resource
             image->setFileName(normalized);
             if (!checkSupported(image, filename))
             {
-                static bool uncompress = (getenv("OPENMW_DECOMPRESS_TEXTURES") != 0);
+                static bool uncompress = (getenv("OPENMW_DECOMPRESS_TEXTURES") != nullptr);
                 if (!uncompress)
                 {
                     Log(Debug::Error) << "Error loading " << filename << ": no S3TC texture compression support installed";

@@ -26,18 +26,28 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <filesystem>
+#include <fstream>
 
 #include <lz4frame.h>
 
-#include <boost/scoped_array.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
+
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4706)
+    #include <boost/iostreams/filter/zlib.hpp>
+    #pragma warning (pop)
+#else
+    #include <boost/iostreams/filter/zlib.hpp>
+#endif
+
 #include <boost/iostreams/device/array.hpp>
 #include <components/bsa/memorystream.hpp>
+#include <components/misc/stringops.hpp>
+#include <components/files/constrainedfilestream.hpp>
 
 namespace Bsa
 {
@@ -79,19 +89,19 @@ void CompressedBSAFile::getBZString(std::string& str, std::istream& filestream)
     char size = 0;
     filestream.read(&size, 1);
 
-    boost::scoped_array<char> buf(new char[size]);
-    filestream.read(buf.get(), size);
+    auto buf = std::vector<char>(size);
+    filestream.read(buf.data(), size);
 
     if (buf[size - 1] != 0)
     {
-        str.assign(buf.get(), size);
+        str.assign(buf.data(), size);
         if (str.size() != ((size_t)size)) {
             fail("getBZString string size mismatch");
         }
     }
     else
     {
-        str.assign(buf.get(), size - 1); // don't copy null terminator
+        str.assign(buf.data(), size - 1); // don't copy null terminator
         if (str.size() != ((size_t)size - 1)) {
             fail("getBZString string size mismatch (null terminator)");
         }
@@ -109,8 +119,7 @@ void CompressedBSAFile::readHeader()
 {
     assert(!mIsLoaded);
 
-    namespace bfs = boost::filesystem;
-    bfs::ifstream input(bfs::path(mFilename), std::ios_base::binary);
+    std::ifstream input(std::filesystem::path(mFilename), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -226,7 +235,6 @@ void CompressedBSAFile::readHeader()
             FileStruct fileStruct{};
             fileStruct.fileSize = file.getSizeWithoutCompressionFlag();
             fileStruct.offset = file.offset;
-            fileStruct.name = nullptr;
             mFiles.push_back(fileStruct);
 
             fullPaths.push_back(folder);
@@ -249,7 +257,7 @@ void CompressedBSAFile::readHeader()
         }
 
         //The vector guarantees that its elements occupy contiguous memory
-        mFiles[fileIndex].name = reinterpret_cast<char*>(mStringBuf.data() + mStringBuffOffset);
+        mFiles[fileIndex].setNameInfos(mStringBuffOffset, &mStringBuf);
 
         fullPaths.at(fileIndex) += "\\" + std::string(mStringBuf.data() + mStringBuffOffset);
 
@@ -276,9 +284,8 @@ void CompressedBSAFile::readHeader()
             fullPaths.at(fileIndex).c_str() + stringLength + 1u,
             mStringBuf.data() + mStringBuffOffset);
 
-        mFiles[fileIndex].name = reinterpret_cast<char*>(mStringBuf.data() + mStringBuffOffset);
+        mFiles[fileIndex].setNameInfos(mStringBuffOffset, &mStringBuf);
 
-        mLookup[reinterpret_cast<char*>(mStringBuf.data() + mStringBuffOffset)] = fileIndex;
         mStringBuffOffset += stringLength + 1u;
     }
 
@@ -298,12 +305,11 @@ CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string
     std::string path = str;
     std::replace(path.begin(), path.end(), '\\', '/');
 
-    boost::filesystem::path p(path);
+    std::filesystem::path p(path);
     std::string stem = p.stem().string();
     std::string ext = p.extension().string();
-    p.remove_filename();
-
-    std::string folder = p.string();
+    
+    std::string folder = p.parent_path().string();
     std::uint64_t folderHash = generateHash(folder, std::string());
 
     auto it = mFolders.find(folderHash);
@@ -320,11 +326,17 @@ CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string
 
 Files::IStreamPtr CompressedBSAFile::getFile(const FileStruct* file) 
 {
-    FileRecord fileRec = getFileRecord(file->name);
+    FileRecord fileRec = getFileRecord(file->name());
     if (!fileRec.isValid()) {
-        fail("File not found: " + std::string(file->name));
+        fail("File not found: " + std::string(file->name()));
     }
     return getFile(fileRec);
+}
+
+void CompressedBSAFile::addFile(const std::string& filename, std::istream& file)
+{
+    assert(false); //not implemented yet
+    fail("Add file is not implemented for compressed BSA: " + filename);
 }
 
 Files::IStreamPtr CompressedBSAFile::getFile(const char* file)
@@ -341,7 +353,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
     size_t size = fileRecord.getSizeWithoutCompressionFlag();
     size_t uncompressedSize = size;
     bool compressed = fileRecord.isCompressed(mCompressedByDefault);
-    Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilename.c_str(), fileRecord.offset, size);
+    Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilename, fileRecord.offset, size);
     std::istream* fileStream = streamPtr.get();
     if (mEmbeddedFileNames)
     {
@@ -356,7 +368,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
         fileStream->read(reinterpret_cast<char*>(&uncompressedSize), sizeof(uint32_t));
         size -= sizeof(uint32_t);
     }
-    std::shared_ptr<Bsa::MemoryInputStream> memoryStreamPtr = std::make_shared<MemoryInputStream>(uncompressedSize);
+    auto memoryStreamPtr = std::make_unique<MemoryInputStream>(uncompressedSize);
 
     if (compressed)
     {
@@ -371,13 +383,15 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
         }
         else // SSE: lz4
         {
-            boost::scoped_array<char> buffer(new char[size]);
-            fileStream->read(buffer.get(), size);
+            auto buffer = std::vector<char>(size);
+            fileStream->read(buffer.data(), size);
             LZ4F_decompressionContext_t context = nullptr;
             LZ4F_createDecompressionContext(&context, LZ4F_VERSION);
             LZ4F_decompressOptions_t options = {};
-            LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.get(), &size, &options);
-            LZ4F_errorCode_t errorCode = LZ4F_freeDecompressionContext(context);
+            LZ4F_errorCode_t errorCode = LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.data(), &size, &options);
+            if (LZ4F_isError(errorCode))
+                fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
+            errorCode = LZ4F_freeDecompressionContext(context);
             if (LZ4F_isError(errorCode))
                 fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
         }
@@ -387,13 +401,12 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
         fileStream->read(memoryStreamPtr->getRawData(), size);
     }
 
-    return std::shared_ptr<std::istream>(memoryStreamPtr, (std::istream*)memoryStreamPtr.get());
+    return std::make_unique<Files::StreamWithBuffer<MemoryInputStream>>(std::move(memoryStreamPtr));
 }
 
-BsaVersion CompressedBSAFile::detectVersion(std::string filePath)
+BsaVersion CompressedBSAFile::detectVersion(const std::string& filePath)
 {
-    namespace bfs = boost::filesystem;
-    bfs::ifstream input(bfs::path(filePath), std::ios_base::binary);
+    std::ifstream input(std::filesystem::path(filePath), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -430,10 +443,10 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
 {
     for (auto & mFile : mFiles)
     {
-        const FileRecord& fileRecord = getFileRecord(mFile.name);
+        const FileRecord& fileRecord = getFileRecord(mFile.name());
         if (!fileRecord.isValid())
         {
-            fail("Could not find file " + std::string(mFile.name) + " in BSA");
+            fail("Could not find file " + std::string(mFile.name()) + " in BSA");
         }
 
         if (!fileRecord.isCompressed(mCompressedByDefault))
@@ -442,7 +455,7 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
             continue;
         }
 
-        Files::IStreamPtr dataBegin = Files::openConstrainedFileStream(mFilename.c_str(), fileRecord.offset, fileRecord.getSizeWithoutCompressionFlag());
+        Files::IStreamPtr dataBegin = Files::openConstrainedFileStream(mFilename, fileRecord.offset, fileRecord.getSizeWithoutCompressionFlag());
 
         if (mEmbeddedFileNames)
         {

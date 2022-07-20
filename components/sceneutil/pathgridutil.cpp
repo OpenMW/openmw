@@ -1,8 +1,9 @@
 #include "pathgridutil.hpp"
 
 #include <osg/Geometry>
+#include <osg/Material>
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/loadpgrd.hpp>
 
 namespace SceneUtil
 {
@@ -142,7 +143,7 @@ namespace SceneUtil
                 osg::Vec3f dir = toPos - fromPos;
                 dir.normalize();
 
-                osg::Quat rot = osg::Quat(-osg::PI / 2, osg::Vec3(0, 0, 1));
+                osg::Quat rot(static_cast<float>(-osg::PI_2), osg::Vec3f(0, 0, 1));
                 dir = rot * dir;
 
                 unsigned short diamondIndex = 0;
@@ -174,6 +175,11 @@ namespace SceneUtil
                 gridGeometry->addPrimitiveSet(lineIndices);
             gridGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         }
+
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        gridGeometry->getOrCreateStateSet()->setAttribute(material);
+
         return gridGeometry;
     }
 

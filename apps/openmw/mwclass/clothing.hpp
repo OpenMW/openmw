@@ -1,12 +1,16 @@
 #ifndef GAME_MWCLASS_CLOTHING_H
 #define GAME_MWCLASS_CLOTHING_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Clothing : public MWWorld::Class
+    class Clothing : public MWWorld::RegisteredClass<Clothing>
     {
+            friend MWWorld::RegisteredClass<Clothing>;
+
+            Clothing();
+
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
         public:
@@ -14,12 +18,10 @@ namespace MWClass
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
-
             std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
@@ -40,8 +42,6 @@ namespace MWClass
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            static void registerSelf();
-
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id
 
@@ -61,7 +61,7 @@ namespace MWClass
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
             ///  Second item in the pair specifies the error message
 
-            std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
+            std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
             ///< Generate action for using via inventory menu
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;

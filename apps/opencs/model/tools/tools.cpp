@@ -1,7 +1,5 @@
 #include "tools.hpp"
 
-#include <QThreadPool>
-
 #include "../doc/state.hpp"
 #include "../doc/operation.hpp"
 #include "../doc/document.hpp"
@@ -43,7 +41,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
         case CSMDoc::State_Merging: return &mMerge;
     }
 
-    return 0;
+    return nullptr;
 }
 
 const CSMDoc::OperationHolder *CSMTools::Tools::get (int type) const
@@ -138,8 +136,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 }
 
 CSMTools::Tools::Tools (CSMDoc::Document& document, ToUTF8::FromType encoding)
-: mDocument (document), mData (document.getData()), mVerifierOperation (0),
-  mSearchOperation (0), mMergeOperation (0), mNextReportNumber (0), mEncoding (encoding)
+: mDocument (document), mData (document.getData()), mVerifierOperation (nullptr),
+  mSearchOperation (nullptr), mMergeOperation (nullptr), mNextReportNumber (0), mEncoding (encoding)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));

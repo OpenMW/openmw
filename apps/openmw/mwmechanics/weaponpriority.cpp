@@ -1,6 +1,6 @@
 #include "weaponpriority.hpp"
 
-#include <components/esm/loadench.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -9,7 +9,6 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-#include "npcstats.hpp"
 #include "combat.hpp"
 #include "aicombataction.hpp"
 #include "spellpriority.hpp"
@@ -21,7 +20,7 @@ namespace MWMechanics
     float rateWeapon (const MWWorld::Ptr &item, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, int type,
                       float arrowRating, float boltRating)
     {
-        if (enemy.isEmpty() || item.getTypeName() != typeid(ESM::Weapon).name())
+        if (enemy.isEmpty() || item.getType() != ESM::Weapon::sRecordId)
             return 0.f;
 
         if (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) == 0)
@@ -129,8 +128,7 @@ namespace MWMechanics
         }
 
         // Take hit chance in account, but do not allow rating become negative.
-        float chance = getHitChance(actor, enemy, value) / 100.f;
-        rating *= std::min(1.f, std::max(0.01f, chance));
+        rating *= std::clamp(getHitChance(actor, enemy, value) / 100.f, 0.01f, 1.f);
 
         if (weapclass != ESM::WeaponType::Ammo)
             rating *= weapon->mData.mSpeed;

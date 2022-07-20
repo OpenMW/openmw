@@ -479,5 +479,7 @@ op 0x200031c: GetDisabled, explicit
 op 0x200031d: StartScript, explicit
 op 0x200031e: GetDistance
 op 0x200031f: GetDistance, explicit
+op 0x2000320: Help
+op 0x2000321: ReloadLua
 
-opcodes 0x2000320-0x3ffffff unused
+opcodes 0x2000322-0x3ffffff unused

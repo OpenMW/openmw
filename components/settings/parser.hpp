@@ -10,7 +10,8 @@ namespace Settings
     class SettingsFileParser
     {
     public:
-        void loadSettingsFile(const std::string& file, CategorySettingValueMap& settings);
+        void loadSettingsFile(const std::string& file, CategorySettingValueMap& settings,
+                              bool base64encoded = false, bool overrideExisting = false);
 
         void saveSettingsFile(const std::string& file, const CategorySettingValueMap& settings);
 
@@ -20,7 +21,7 @@ namespace Settings
         /// @return false if we have reached the end of the string
         bool skipWhiteSpace(size_t& i, std::string& str);
 
-        void fail(const std::string& message);
+        [[noreturn]] void fail(const std::string& message);
 
         std::string mFile;
         int mLine = 0;

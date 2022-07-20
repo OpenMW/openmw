@@ -5,7 +5,7 @@
 #include <string>
 #include <iosfwd>
 #include <vector>
-#include <sstream>
+#include <istream>
 
 #include "tokenloc.hpp"
 
@@ -63,7 +63,7 @@ namespace Compiler
 
         bool isWhitespace()
         {
-            return (mData[0]==' ' || mData[0]=='\t') && mData[1]==0 && mData[2]==0 && mData[3]==0;
+            return (mData[0]==' ' || mData[0]=='\t' || mData[0]==',') && mData[1]==0 && mData[2]==0 && mData[3]==0;
         }
 
         bool isDigit()
@@ -103,7 +103,7 @@ namespace Compiler
         {
             blank();
 
-            char ch = in.peek();
+            char ch = static_cast<char>(in.peek());
 
             if (!in.good())
                 return false;
@@ -130,7 +130,7 @@ namespace Compiler
         {
             std::streampos p_orig = in.tellg();
 
-            char ch = in.peek();
+            char ch = static_cast<char>(in.peek());
 
             if (!in.good())
                 return false;
@@ -140,15 +140,12 @@ namespace Compiler
 
             for (int i = 0; i <= length; i++)
             {
-                if (length >= i)
-                {
-                    in.get (ch);
+                in.get (ch);
 
-                    if (!in.good())
-                        return false;
+                if (!in.good())
+                    return false;
 
-                    mData[i] = ch;
-                }
+                mData[i] = ch;
             }
 
             mLength = length;
@@ -159,7 +156,7 @@ namespace Compiler
 
         void blank()
         {
-            std::fill(mData, mData + sizeof(mData), 0);
+            std::fill(std::begin(mData), std::end(mData), '\0');
             mLength = -1;
         }
 
@@ -196,6 +193,7 @@ namespace Compiler
             bool mStrictKeywords;
             bool mTolerantNames;
             bool mIgnoreNewline;
+            bool mExpectName;
 
         public:
 
@@ -207,8 +205,7 @@ namespace Compiler
                 K_while, K_endwhile,
                 K_return,
                 K_messagebox,
-                K_set, K_to,
-                K_getsquareroot
+                K_set, K_to
             };
 
             enum special
@@ -217,7 +214,6 @@ namespace Compiler
                 S_open, S_close,
                 S_cmpEQ, S_cmpNE, S_cmpLT, S_cmpLE, S_cmpGT, S_cmpGE,
                 S_plus, S_minus, S_mult, S_div,
-                S_comma,
                 S_ref,
                 S_member
             };
@@ -239,7 +235,7 @@ namespace Compiler
 
             bool scanFloat (const std::string& intValue, Parser& parser, bool& cont);
 
-            bool scanName (MultiChar& c, Parser& parser, bool& cont);
+            bool scanName (MultiChar& c, Parser& parser, bool& cont, std::string name = {});
 
             /// \param name May contain the start of the name (one or more characters)
             bool scanName (std::string& name);
@@ -289,6 +285,11 @@ namespace Compiler
             ///
             /// \attention This mode lasts only until the next newline is reached.
             void enableTolerantNames();
+
+            /// Treat '.' and '-' as the start of a name.
+            ///
+            /// \attention This mode lasts only until the next newline is reached or the call to scan ends.
+            void enableExpectName();
     };
 }
 

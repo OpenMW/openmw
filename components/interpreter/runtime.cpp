@@ -6,7 +6,7 @@
 
 namespace Interpreter
 {
-    Runtime::Runtime() : mContext (0), mCode (0), mCodeSize(0), mPC (0) {}
+    Runtime::Runtime() : mContext (nullptr), mCode (nullptr), mCodeSize(0), mPC (0) {}
 
     int Runtime::getPC() const
     {
@@ -33,7 +33,7 @@ namespace Interpreter
         return *reinterpret_cast<const float *> (&literalBlock[index]);
     }
 
-    std::string Runtime::getStringLiteral (int index) const
+    std::string_view Runtime::getStringLiteral(int index) const
     {
         if (index < 0 || static_cast<int> (mCode[3]) <= 0)
             throw std::out_of_range("out of range");
@@ -41,12 +41,12 @@ namespace Interpreter
         const char *literalBlock =
             reinterpret_cast<const char *> (mCode + 4 + mCode[0] + mCode[1] + mCode[2]);
 
-        int offset = 0;
+        size_t offset = 0;
 
         for (; index; --index)
         {
-            offset += std::strlen (literalBlock+offset) + 1;
-            if (offset / 4 >= static_cast<int> (mCode[3]))
+            offset += std::strlen(literalBlock + offset) + 1;
+            if (offset / 4 >= mCode[3])
                 throw std::out_of_range("out of range");
         }
 
@@ -65,8 +65,8 @@ namespace Interpreter
 
     void Runtime::clear()
     {
-        mContext = 0;
-        mCode = 0;
+        mContext = nullptr;
+        mCode = nullptr;
         mCodeSize = 0;
         mStack.clear();
     }
@@ -100,7 +100,7 @@ namespace Interpreter
         if (mStack.empty())
             throw std::runtime_error ("stack underflow");
 
-        mStack.resize (mStack.size()-1);
+        mStack.pop_back();
     }
 
     Data& Runtime::operator[] (int Index)

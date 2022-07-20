@@ -21,7 +21,7 @@ namespace MWMechanics
     /// Call when \a actor has got in contact with \a carrier (e.g. hit by him, or loots him)
     /// @param actor The actor that will potentially catch diseases. Currently only the player can catch diseases.
     /// @param carrier The disease carrier.
-    inline void diseaseContact (MWWorld::Ptr actor, MWWorld::Ptr carrier)
+    inline void diseaseContact (const MWWorld::Ptr& actor, const MWWorld::Ptr& carrier)
     {
         if (!carrier.getClass().isActor() || actor != getPlayer())
             return;
@@ -30,12 +30,11 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "fDiseaseXferChance")->mValue.getFloat();
 
-        MagicEffects& actorEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
+        const MagicEffects& actorEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
 
         Spells& spells = carrier.getClass().getCreatureStats(carrier).getSpells();
-        for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+        for (const ESM::Spell* spell : spells)
         {
-            const ESM::Spell* spell = it->first;
             if (actor.getClass().getCreatureStats(actor).getSpells().hasSpell(spell->mId))
                 continue;
 
@@ -53,10 +52,11 @@ namespace MWMechanics
                 continue;
 
             int x = static_cast<int>(fDiseaseXferChance * 100 * resist);
-            if (Misc::Rng::rollDice(10000) < x)
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            if (Misc::Rng::rollDice(10000, prng) < x)
             {
                 // Contracted disease!
-                actor.getClass().getCreatureStats(actor).getSpells().add(it->first);
+                actor.getClass().getCreatureStats(actor).getSpells().add(spell);
                 MWBase::Environment::get().getWorld()->applyLoopingParticles(actor);
 
                 std::string msg = "sMagicContractDisease";

@@ -3,16 +3,15 @@
 #include <components/version/version.hpp>
 #include <components/misc/helpviewer.hpp>
 
-#include <QDate>
+#include <QTime>
+#include <QDir>
+#include <QDebug>
 #include <QMessageBox>
-#include <QPushButton>
-#include <QFontDatabase>
-#include <QInputDialog>
-#include <QFileDialog>
 #include <QCloseEvent>
 #include <QTextCodec>
 
-#include <QDebug>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
 
 #include "playpage.hpp"
 #include "graphicspage.hpp"
@@ -55,8 +54,8 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     iconWidget->setCurrentRow(0);
     iconWidget->setFlow(QListView::LeftToRight);
 
-    QPushButton *helpButton = new QPushButton(tr("Help"));
-    QPushButton *playButton = new QPushButton(tr("Play"));
+    auto *helpButton = new QPushButton(tr("Help"));
+    auto *playButton = new QPushButton(tr("Play"));
     buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
     buttonBox->addButton(helpButton, QDialogButtonBox::HelpRole);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
@@ -82,31 +81,31 @@ void Launcher::MainDialog::createIcons()
     if (!QIcon::hasThemeIcon("document-new"))
         QIcon::setThemeName("tango");
 
-    QListWidgetItem *playButton = new QListWidgetItem(iconWidget);
+    auto *playButton = new QListWidgetItem(iconWidget);
     playButton->setIcon(QIcon(":/images/openmw.png"));
     playButton->setText(tr("Play"));
     playButton->setTextAlignment(Qt::AlignCenter);
     playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *dataFilesButton = new QListWidgetItem(iconWidget);
+    auto *dataFilesButton = new QListWidgetItem(iconWidget);
     dataFilesButton->setIcon(QIcon(":/images/openmw-plugin.png"));
     dataFilesButton->setText(tr("Data Files"));
     dataFilesButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *graphicsButton = new QListWidgetItem(iconWidget);
+    auto *graphicsButton = new QListWidgetItem(iconWidget);
     graphicsButton->setIcon(QIcon(":/images/preferences-video.png"));
     graphicsButton->setText(tr("Graphics"));
     graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
     graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *settingsButton = new QListWidgetItem(iconWidget);
+    auto *settingsButton = new QListWidgetItem(iconWidget);
     settingsButton->setIcon(QIcon(":/images/preferences.png"));
     settingsButton->setText(tr("Settings"));
     settingsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     settingsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *advancedButton = new QListWidgetItem(iconWidget);
+    auto *advancedButton = new QListWidgetItem(iconWidget);
     advancedButton->setIcon(QIcon(":/images/preferences-advanced.png"));
     advancedButton->setText(tr("Advanced"));
     advancedButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
@@ -126,9 +125,9 @@ void Launcher::MainDialog::createPages()
 
     mPlayPage = new PlayPage(this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
-    mGraphicsPage = new GraphicsPage(mCfgMgr, mEngineSettings, this);
+    mGraphicsPage = new GraphicsPage(this);
     mSettingsPage = new SettingsPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
-    mAdvancedPage = new AdvancedPage(mCfgMgr, mGameSettings, mEngineSettings, this);
+    mAdvancedPage = new AdvancedPage(mGameSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
     mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
@@ -150,13 +149,26 @@ void Launcher::MainDialog::createPages()
     connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
     // Using Qt::QueuedConnection because signal is emitted in a subthread and slot is in the main thread
     connect(mDataFilesPage, SIGNAL(signalLoadedCellsChanged(QStringList)), mAdvancedPage, SLOT(slotLoadedCellsChanged(QStringList)), Qt::QueuedConnection);
-
 }
 
 Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
 {
     if (!setupLauncherSettings())
         return FirstRunDialogResultFailure;
+
+    // Dialog wizard and setup will fail if the config directory does not already exist
+    QDir userConfigDir = QDir(QString::fromStdString(mCfgMgr.getUserConfigPath().string()));
+    if ( ! userConfigDir.exists() ) {
+        if ( ! userConfigDir.mkpath(".") )
+        {
+            cfgError(tr("Error opening OpenMW configuration file"),
+                     tr("<br><b>Could not create directory %0</b><br><br> \
+                        Please make sure you have the right permissions \
+                        and try again.<br>").arg(userConfigDir.canonicalPath())
+            );
+            return FirstRunDialogResultFailure;
+        }
+    }
 
     if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
     {
@@ -322,54 +334,46 @@ bool Launcher::MainDialog::setupGameSettings()
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
     QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
-    // Load the user config file first, separately
-    // So we can write it properly, uncontaminated
-    QString path = userPath + QLatin1String("openmw.cfg");
-    QFile file(path);
+    QFile file;
 
-    qDebug() << "Loading config file:" << path.toUtf8().constData();
-
-    if (file.exists()) {
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            cfgError(tr("Error opening OpenMW configuration file"),
-                     tr("<br><b>Could not open %0 for reading</b><br><br> \
-                         Please make sure you have the right permissions \
-                         and try again.<br>").arg(file.fileName()));
-            return false;
-        }
-        QTextStream stream(&file);
-        stream.setCodec(QTextCodec::codecForName("UTF-8"));
-
-        mGameSettings.readUserFile(stream);
-        file.close();
-    }
-
-    // Now the rest - priority: user > local > global
-    QStringList paths;
-    paths.append(globalPath + QString("openmw.cfg"));
-    paths.append(localPath + QString("openmw.cfg"));
-    paths.append(userPath + QString("openmw.cfg"));
-
-    for (const QString &path2 : paths)
+    auto loadFile = [&] (const QString& path, bool(Config::GameSettings::*reader)(QTextStream&, bool), bool ignoreContent = false) -> std::optional<bool>
     {
-        qDebug() << "Loading config file:" << path2.toUtf8().constData();
-
-        file.setFileName(path2);
+        qDebug() << "Loading config file:" << path.toUtf8().constData();
+        file.setFileName(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 cfgError(tr("Error opening OpenMW configuration file"),
-                         tr("<br><b>Could not open %0 for reading</b><br><br> \
-                             Please make sure you have the right permissions \
-                             and try again.<br>").arg(file.fileName()));
-                return false;
+                        tr("<br><b>Could not open %0 for reading</b><br><br> \
+                            Please make sure you have the right permissions \
+                            and try again.<br>").arg(file.fileName()));
+                return {};
             }
             QTextStream stream(&file);
             stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-            mGameSettings.readFile(stream);
+            (mGameSettings.*reader)(stream, ignoreContent);
             file.close();
+            return true;
         }
+        return false;
+    };
+
+    // Load the user config file first, separately
+    // So we can write it properly, uncontaminated
+    if(!loadFile(userPath + QLatin1String("openmw.cfg"), &Config::GameSettings::readUserFile))
+        return false;
+
+    // Now the rest - priority: user > local > global
+    if(auto result = loadFile(localPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+    {
+        // Load global if local wasn't found
+        if(!*result && !loadFile(globalPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+            return false;
     }
+    else
+        return false;
+    if(!loadFile(userPath + QString("openmw.cfg"), &Config::GameSettings::readFile))
+        return false;
 
     return true;
 }
@@ -419,57 +423,23 @@ bool Launcher::MainDialog::setupGameData()
 
 bool Launcher::MainDialog::setupGraphicsSettings()
 {
-    // This method is almost a copy of OMW::Engine::loadSettings().  They should definitely
-    // remain consistent, and possibly be merged into a shared component.  At the very least
-    // the filenames should be in the CfgMgr component.
-
-    // Ensure to clear previous settings in case we had already loaded settings.
-    mEngineSettings.clear();
-
-    // Create the settings manager and load default settings file
-    const std::string localDefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
-    const std::string globalDefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
-    std::string defaultPath;
-
-    // Prefer the settings-default.cfg in the current directory.
-    if (boost::filesystem::exists(localDefault))
-        defaultPath = localDefault;
-    else if (boost::filesystem::exists(globalDefault))
-        defaultPath = globalDefault;
-    // Something's very wrong if we can't find the file at all.
-    else {
-        cfgError(tr("Error reading OpenMW configuration file"),
-                 tr("<br><b>Could not find settings-default.cfg</b><br><br> \
-                     The problem may be due to an incomplete installation of OpenMW.<br> \
-                     Reinstalling OpenMW may resolve the problem."));
+    Settings::Manager::clear();  // Ensure to clear previous settings in case we had already loaded settings.
+    try
+    {
+        boost::program_options::variables_map variables;
+        boost::program_options::options_description desc;
+        mCfgMgr.addCommonOptions(desc);
+        mCfgMgr.readConfiguration(variables, desc, true);
+        Settings::Manager::load(mCfgMgr);
+        return true;
+    }
+    catch (std::exception& e)
+    {
+        cfgError(tr("Error reading OpenMW configuration files"),
+                 tr("<br>The problem may be due to an incomplete installation of OpenMW.<br> \
+                     Reinstalling OpenMW may resolve the problem.<br>") + e.what());
         return false;
     }
-
-    // Load the default settings, report any parsing errors.
-    try {
-        mEngineSettings.loadDefault(defaultPath);
-    }
-    catch (std::exception& e) {
-        std::string msg = std::string("<br><b>Error reading settings-default.cfg</b><br><br>") + e.what();
-        cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
-        return false;
-    }
-
-    // Load user settings if they exist
-    const std::string userPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
-    // User settings are not required to exist, so if they don't we're done.
-    if (!boost::filesystem::exists(userPath)) return true;
-
-    try {
-        mEngineSettings.loadUser(userPath);
-    }
-    catch (std::exception& e) {
-        std::string msg = std::string("<br><b>Error reading settings.cfg</b><br><br>") + e.what();
-        cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
-        return false;
-    }
-
-    return true;
 }
 
 void Launcher::MainDialog::loadSettings()
@@ -543,7 +513,7 @@ bool Launcher::MainDialog::writeSettings()
     // Graphics settings
     const std::string settingsPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
     try {
-        mEngineSettings.saveUser(settingsPath);
+        Settings::Manager::saveUser(settingsPath);
     }
     catch (std::exception& e) {
         std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +
@@ -609,7 +579,7 @@ void Launcher::MainDialog::play()
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>You do not have a game file selected.</b><br><br> \
                           OpenMW will not start without a game file selected.<br>"));
-                          msgBox.exec();
+        msgBox.exec();
         return;
     }
 

@@ -1,18 +1,14 @@
 #ifndef CSV_WIDGET_SCENETOOLSHAPEBRUSH_H
 #define CSV_WIDGET_SCENETOOLSHAPEBRUSH_H
 
-#include <QIcon>
 #include <QFrame>
 #include <QModelIndex>
 
 #include <QWidget>
-#include <QLabel>
 #include <QComboBox>
 #include <QSpinBox>
 #include <QGroupBox>
 #include <QSlider>
-#include <QEvent>
-#include <QHBoxLayout>
 #include <QPushButton>
 
 #ifndef Q_MOC_RUN
@@ -54,7 +50,7 @@ namespace CSVWidget
 
         public:
 
-            ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent = 0);
+            ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent = nullptr);
             void configureButtonInitialSettings(QPushButton *button);
 
             const QString toolTipPoint = "Paint single point";

@@ -4,20 +4,20 @@
 #include <osg/Texture2D>
 #include <osg/Group>
 #include <osg/Geometry>
-#include <osg/Depth>
 #include <osg/TexEnvCombine>
 
 #include <osgDB/WriteFile>
 
-#include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
 #include <components/files/memorystream.hpp>
 
 #include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/nodecallback.hpp>
+#include <components/sceneutil/depth.hpp>
 
-#include <components/esm/globalmap.hpp>
+#include <components/esm3/globalmap.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -25,6 +25,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -61,7 +62,7 @@ namespace
     }
 
 
-    class CameraUpdateGlobalCallback : public osg::NodeCallback
+    class CameraUpdateGlobalCallback : public SceneUtil::NodeCallback<CameraUpdateGlobalCallback, osg::Camera*>
     {
     public:
         CameraUpdateGlobalCallback(MWRender::GlobalMap* parent)
@@ -70,14 +71,14 @@ namespace
         {
         }
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
+        void operator()(osg::Camera* node, osg::NodeVisitor* nv)
         {
             if (mRendered)
             {
-                if (mParent->copyResult(static_cast<osg::Camera*>(node), nv->getTraversalNumber()))
+                if (mParent->copyResult(node, nv->getTraversalNumber()))
                 {
                     node->setNodeMask(0);
-                    mParent->markForRemoval(static_cast<osg::Camera*>(node));
+                    mParent->markForRemoval(node);
                 }
                 return;
             }
@@ -92,6 +93,26 @@ namespace
         MWRender::GlobalMap* mParent;
     };
 
+    std::vector<char> writePng(const osg::Image& overlayImage)
+    {
+        std::ostringstream ostream;
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+        if (!readerwriter)
+        {
+            Log(Debug::Error) << "Error: Can't write map overlay: no png readerwriter found";
+            return std::vector<char>();
+        }
+
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(overlayImage, ostream);
+        if (!result.success())
+        {
+            Log(Debug::Warning) << "Error: Can't write map overlay: " << result.message() << " code " << result.status();
+            return std::vector<char>();
+        }
+
+        std::string data = ostream.str();
+        return std::vector<char>(data.begin(), data.end());
+    }
 }
 
 namespace MWRender
@@ -220,6 +241,20 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> mOverlayTexture;
     };
 
+    struct GlobalMap::WritePng final : public SceneUtil::WorkItem
+    {
+        osg::ref_ptr<const osg::Image> mOverlayImage;
+        std::vector<char> mImageData;
+
+        explicit WritePng(osg::ref_ptr<const osg::Image> overlayImage)
+            : mOverlayImage(std::move(overlayImage)) {}
+
+        void doWork() override
+        {
+            mImageData = writePng(*mOverlayImage);
+        }
+    };
+
     GlobalMap::GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue)
         : mRoot(root)
         , mWorkQueue(workQueue)
@@ -271,17 +306,9 @@ namespace MWRender
 
     void GlobalMap::worldPosToImageSpace(float x, float z, float& imageX, float& imageY)
     {
-        imageX = float(x / float(Constants::CellSizeInUnits) - mMinX) / (mMaxX - mMinX + 1);
+        imageX = (float(x / float(Constants::CellSizeInUnits) - mMinX) / (mMaxX - mMinX + 1)) * getWidth();
 
-        imageY = 1.f-float(z / float(Constants::CellSizeInUnits) - mMinY) / (mMaxY - mMinY + 1);
-    }
-
-    void GlobalMap::cellTopLeftCornerToImageSpace(int x, int y, float& imageX, float& imageY)
-    {
-        imageX = float(x - mMinX) / (mMaxX - mMinX + 1);
-
-        // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
-        imageY = 1.f-float(y - mMinY + 1) / (mMaxY - mMinY + 1);
+        imageY = (1.f-float(z / float(Constants::CellSizeInUnits) - mMinY) / (mMaxY - mMinY + 1)) * getHeight();
     }
 
     void GlobalMap::requestOverlayTextureUpdate(int x, int y, int width, int height, osg::ref_ptr<osg::Texture2D> texture, bool clear, bool cpuCopy,
@@ -332,8 +359,8 @@ namespace MWRender
         if (texture)
         {
             osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(srcLeft, srcTop, srcRight, srcBottom);
-            osg::ref_ptr<osg::Depth> depth = new osg::Depth;
-            depth->setWriteMask(0);
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
+            depth->setWriteMask(false);
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);
             stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
@@ -407,23 +434,15 @@ namespace MWRender
         map.mBounds.mMinY = mMinY;
         map.mBounds.mMaxY = mMaxY;
 
-        std::ostringstream ostream;
-        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
-        if (!readerwriter)
+        if (mWritePng != nullptr)
         {
-            Log(Debug::Error) << "Error: Can't write map overlay: no png readerwriter found";
+            mWritePng->waitTillDone();
+            map.mImageData = std::move(mWritePng->mImageData);
+            mWritePng = nullptr;
             return;
         }
 
-        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mOverlayImage, ostream);
-        if (!result.success())
-        {
-            Log(Debug::Warning) << "Error: Can't write map overlay: " << result.message() << " code " << result.status();
-            return;
-        }
-
-        std::string data = ostream.str();
-        map.mImageData = std::vector<char>(data.begin(), data.end());
+        map.mImageData = writePng(*mOverlayImage);
     }
 
     struct Box
@@ -434,7 +453,7 @@ namespace MWRender
             : mLeft(left), mTop(top), mRight(right), mBottom(bottom)
         {
         }
-        bool operator == (const Box& other)
+        bool operator == (const Box& other) const
         {
             return mLeft == other.mLeft && mTop == other.mTop && mRight == other.mRight && mBottom == other.mBottom;
         }
@@ -583,7 +602,7 @@ namespace MWRender
             }
 
             mOverlayImage->copySubImage(imageDest.mX, imageDest.mY, 0, imageDest.mImage);
-            it = mPendingImageDest.erase(it);
+            mPendingImageDest.erase(it);
             return true;
         }
     }
@@ -612,5 +631,14 @@ namespace MWRender
     {
         cam->removeChildren(0, cam->getNumChildren());
         mRoot->removeChild(cam);
+    }
+
+    void GlobalMap::asyncWritePng()
+    {
+        if (mOverlayImage == nullptr)
+            return;
+        // Use deep copy to avoid any sychronization
+        mWritePng = new WritePng(new osg::Image(*mOverlayImage, osg::CopyOp::DEEP_COPY_ALL));
+        mWorkQueue->addWorkItem(mWritePng, /*front=*/true);
     }
 }

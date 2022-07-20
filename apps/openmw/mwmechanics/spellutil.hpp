@@ -1,7 +1,7 @@
 #ifndef MWMECHANICS_SPELLUTIL_H
 #define MWMECHANICS_SPELLUTIL_H
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {
@@ -19,7 +19,13 @@ namespace MWMechanics
 {
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr);
+    enum class EffectCostMethod {
+        GameSpell,
+        PlayerSpell,
+    };
+
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr, const EffectCostMethod method = EffectCostMethod::GameSpell);
+    int calcSpellCost (const ESM::Spell& spell);
 
     int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
 
@@ -42,9 +48,6 @@ namespace MWMechanics
     /// Get whether or not the given spell contributes to skill progress.
     bool spellIncreasesSkill(const ESM::Spell* spell);
     bool spellIncreasesSkill(const std::string& spellId);
-
-    /// Check if the given effect can be applied to the target. If \a castByPlayer, emits a message box on failure.
-    bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer);
 }
 
 #endif

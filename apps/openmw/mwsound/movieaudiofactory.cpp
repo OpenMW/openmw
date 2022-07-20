@@ -38,8 +38,8 @@ namespace MWSound
     public:
         MovieAudioDecoder(Video::VideoState *videoState)
             : Video::MovieAudioDecoder(videoState), mAudioTrack(nullptr)
+            , mDecoderBridge(std::make_shared<MWSoundDecoderBridge>(this))
         {
-            mDecoderBridge.reset(new MWSoundDecoderBridge(this));
         }
 
         size_t getSampleOffset()
@@ -153,9 +153,9 @@ namespace MWSound
 
 
 
-    std::shared_ptr<Video::MovieAudioDecoder> MovieAudioFactory::createDecoder(Video::VideoState* videoState)
+    std::unique_ptr<Video::MovieAudioDecoder> MovieAudioFactory::createDecoder(Video::VideoState* videoState)
     {
-        std::shared_ptr<MWSound::MovieAudioDecoder> decoder(new MWSound::MovieAudioDecoder(videoState));
+        auto decoder = std::make_unique<MWSound::MovieAudioDecoder>(videoState);
         decoder->setupFormat();
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();

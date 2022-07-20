@@ -2,7 +2,6 @@
 #define OPENMW_BARRIER_H
 
 #include <condition_variable>
-#include <functional>
 #include <mutex>
 
 namespace Misc
@@ -11,25 +10,25 @@ namespace Misc
     class Barrier
     {
         public:
-            using BarrierCallback = std::function<void(void)>;
             /// @param count number of threads to wait on
-            /// @param func callable to be executed once after all threads have met
-            Barrier(int count, BarrierCallback&& func) : mThreadCount(count), mRendezvousCount(0), mGeneration(0)
-                                                       , mFunc(std::forward<BarrierCallback>(func))
-            {}
+            explicit Barrier(unsigned count) : mThreadCount(count), mRendezvousCount(0), mGeneration(0)
+            {
+            }
 
             /// @brief stop execution of threads until count distinct threads reach this point
-            void wait()
+            /// @param func callable to be executed once after all threads have met
+            template <class Callback>
+            void wait(Callback&& func)
             {
                 std::unique_lock lock(mMutex);
 
                 ++mRendezvousCount;
-                const int currentGeneration = mGeneration;
-                if (mRendezvousCount == mThreadCount)
+                const unsigned int currentGeneration = mGeneration;
+                if (mRendezvousCount == mThreadCount || mThreadCount == 0)
                 {
                     ++mGeneration;
                     mRendezvousCount = 0;
-                    mFunc();
+                    func();
                     mRendezvous.notify_all();
                 }
                 else
@@ -39,12 +38,11 @@ namespace Misc
             }
 
         private:
-            int mThreadCount;
-            int mRendezvousCount;
-            int mGeneration;
+            unsigned int mThreadCount;
+            unsigned int mRendezvousCount;
+            unsigned int mGeneration;
             mutable std::mutex mMutex;
             std::condition_variable mRendezvous;
-            BarrierCallback mFunc;
     };
 }
 

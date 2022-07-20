@@ -33,10 +33,10 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string file = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string file{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    std::string text = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string text{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->say (ptr, file);
@@ -65,7 +65,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string sound{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->streamMusic (sound);
@@ -78,7 +78,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->playSound(sound, 1.0, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
@@ -91,7 +91,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float volume = runtime[0].mFloat;
@@ -104,43 +104,35 @@ namespace MWScript
                 }
         };
 
-        template<class R>
+        template<class R, bool TLoop>
         class OpPlaySound3D : public Interpreter::Opcode0
         {
-                bool mLoop;
-
             public:
-
-                OpPlaySound3D (bool loop) : mLoop (loop) {}
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, 1.0, 1.0,
                                                                               MWSound::Type::Sfx,
-                                                                              mLoop ? MWSound::PlayMode::LoopRemoveAtDistance
+                                                                              TLoop ? MWSound::PlayMode::LoopRemoveAtDistance
                                                                                     : MWSound::PlayMode::Normal);
                 }
         };
 
-        template<class R>
+        template<class R, bool TLoop>
         class OpPlaySoundVP3D : public Interpreter::Opcode0
         {
-                bool mLoop;
-
             public:
-
-                OpPlaySoundVP3D (bool loop) : mLoop (loop) {}
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float volume = runtime[0].mFloat;
@@ -151,7 +143,7 @@ namespace MWScript
 
                     MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, volume, pitch,
                                                                               MWSound::Type::Sfx,
-                                                                              mLoop ? MWSound::PlayMode::LoopRemoveAtDistance
+                                                                              TLoop ? MWSound::PlayMode::LoopRemoveAtDistance
                                                                                     : MWSound::PlayMode::Normal);
 
                 }
@@ -166,7 +158,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->stopSound3D (ptr, sound);
@@ -205,34 +197,28 @@ namespace MWScript
         };
 
 
-        void installOpcodes (Interpreter::Interpreter& interpreter)
+        void installOpcodes(Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Sound::opcodeSay, new OpSay<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Sound::opcodeSayDone, new OpSayDone<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Sound::opcodeStreamMusic, new OpStreamMusic);
-            interpreter.installSegment5 (Compiler::Sound::opcodePlaySound, new OpPlaySound);
-            interpreter.installSegment5 (Compiler::Sound::opcodePlaySoundVP, new OpPlaySoundVP);
-            interpreter.installSegment5 (Compiler::Sound::opcodePlaySound3D, new OpPlaySound3D<ImplicitRef> (false));
-            interpreter.installSegment5 (Compiler::Sound::opcodePlaySound3DVP, new OpPlaySoundVP3D<ImplicitRef> (false));
-            interpreter.installSegment5 (Compiler::Sound::opcodePlayLoopSound3D, new OpPlaySound3D<ImplicitRef> (true));
-            interpreter.installSegment5 (Compiler::Sound::opcodePlayLoopSound3DVP,
-                new OpPlaySoundVP3D<ImplicitRef> (true));
-            interpreter.installSegment5 (Compiler::Sound::opcodeStopSound, new OpStopSound<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Sound::opcodeGetSoundPlaying, new OpGetSoundPlaying<ImplicitRef>);
+            interpreter.installSegment5<OpSay<ImplicitRef>>(Compiler::Sound::opcodeSay);
+            interpreter.installSegment5<OpSayDone<ImplicitRef>>(Compiler::Sound::opcodeSayDone);
+            interpreter.installSegment5<OpStreamMusic>(Compiler::Sound::opcodeStreamMusic);
+            interpreter.installSegment5<OpPlaySound>(Compiler::Sound::opcodePlaySound);
+            interpreter.installSegment5<OpPlaySoundVP>(Compiler::Sound::opcodePlaySoundVP);
+            interpreter.installSegment5<OpPlaySound3D<ImplicitRef, false>>(Compiler::Sound::opcodePlaySound3D);
+            interpreter.installSegment5<OpPlaySoundVP3D<ImplicitRef, false>>(Compiler::Sound::opcodePlaySound3DVP);
+            interpreter.installSegment5<OpPlaySound3D<ImplicitRef, true>>(Compiler::Sound::opcodePlayLoopSound3D);
+            interpreter.installSegment5<OpPlaySoundVP3D<ImplicitRef, true>>(Compiler::Sound::opcodePlayLoopSound3DVP);
+            interpreter.installSegment5<OpStopSound<ImplicitRef>>(Compiler::Sound::opcodeStopSound);
+            interpreter.installSegment5<OpGetSoundPlaying<ImplicitRef>>(Compiler::Sound::opcodeGetSoundPlaying);
 
-            interpreter.installSegment5 (Compiler::Sound::opcodeSayExplicit, new OpSay<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Sound::opcodeSayDoneExplicit, new OpSayDone<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Sound::opcodePlaySound3DExplicit,
-                new OpPlaySound3D<ExplicitRef> (false));
-            interpreter.installSegment5 (Compiler::Sound::opcodePlaySound3DVPExplicit,
-                new OpPlaySoundVP3D<ExplicitRef> (false));
-            interpreter.installSegment5 (Compiler::Sound::opcodePlayLoopSound3DExplicit,
-                new OpPlaySound3D<ExplicitRef> (true));
-            interpreter.installSegment5 (Compiler::Sound::opcodePlayLoopSound3DVPExplicit,
-                new OpPlaySoundVP3D<ExplicitRef> (true));
-            interpreter.installSegment5 (Compiler::Sound::opcodeStopSoundExplicit, new OpStopSound<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Sound::opcodeGetSoundPlayingExplicit,
-                new OpGetSoundPlaying<ExplicitRef>);
+            interpreter.installSegment5<OpSay<ExplicitRef>>(Compiler::Sound::opcodeSayExplicit);
+            interpreter.installSegment5<OpSayDone<ExplicitRef>>(Compiler::Sound::opcodeSayDoneExplicit);
+            interpreter.installSegment5<OpPlaySound3D<ExplicitRef, false>>(Compiler::Sound::opcodePlaySound3DExplicit);
+            interpreter.installSegment5<OpPlaySoundVP3D<ExplicitRef, false>>(Compiler::Sound::opcodePlaySound3DVPExplicit);
+            interpreter.installSegment5<OpPlaySound3D<ExplicitRef, true>>(Compiler::Sound::opcodePlayLoopSound3DExplicit);
+            interpreter.installSegment5<OpPlaySoundVP3D<ExplicitRef, true>>(Compiler::Sound::opcodePlayLoopSound3DVPExplicit);
+            interpreter.installSegment5<OpStopSound<ExplicitRef>>(Compiler::Sound::opcodeStopSoundExplicit);
+            interpreter.installSegment5<OpGetSoundPlaying<ExplicitRef>>(Compiler::Sound::opcodeGetSoundPlayingExplicit);
         }
     }
 }

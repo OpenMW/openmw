@@ -9,12 +9,12 @@
 #include "../mwmechanics/drawstate.hpp"
 #include "../mwmechanics/stat.hpp"
 
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 #include <components/esm/attr.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 namespace ESM
 {
-    struct NPC;
     class ESMWriter;
     class ESMReader;
 }
@@ -53,10 +53,9 @@ namespace MWWorld
         PreviousItems mPreviousItems;
 
         // Saved stats prior to becoming a werewolf
-        MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
-        MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
+        float mSaveSkills[ESM::Skill::Length];
+        float mSaveAttributes[ESM::Attribute::Length];
 
-        bool mAttackingOrSpell;
         bool mJumping;
 
     public:
@@ -87,8 +86,8 @@ namespace MWWorld
         void setBirthSign(const std::string &sign);
         const std::string &getBirthSign() const;
 
-        void setDrawState (MWMechanics::DrawState_ state);
-        MWMechanics::DrawState_ getDrawState(); /// \todo constness
+        void setDrawState (MWMechanics::DrawState state);
+        MWMechanics::DrawState getDrawState(); /// \todo constness
 
         /// Activate the object under the crosshair, if any
         void activate();
@@ -112,7 +111,6 @@ namespace MWWorld
         void setTeleported(bool teleported);
 
         void setAttackingOrSpell(bool attackingOrSpell);
-        bool getAttackingOrSpell() const;
 
         void setJumping(bool jumping);
         bool getJumping() const;
@@ -137,6 +135,8 @@ namespace MWWorld
         void erasePreviousItem(const std::string& boundItemId);
 
         void setSelectedSpell(const std::string& spellId);
+
+        void update();
     };
 }
 #endif

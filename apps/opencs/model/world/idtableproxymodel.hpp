@@ -35,7 +35,7 @@ namespace CSMWorld
 
         public:
 
-            IdTableProxyModel (QObject *parent = 0);
+            IdTableProxyModel (QObject *parent = nullptr);
 
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 

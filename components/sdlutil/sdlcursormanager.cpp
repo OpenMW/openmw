@@ -20,7 +20,7 @@
 
 #include "imagetosurface.hpp"
 
-#if defined(OSG_LIBRARY_STATIC) && !defined(ANDROID)
+#if defined(OSG_LIBRARY_STATIC) && (!defined(ANDROID) || OSG_VERSION_GREATER_THAN(3, 6, 5))
 // Sets the default windowing system interface according to the OS.
 // Necessary for OpenSceneGraph to do some things, like decompression.
 USE_GRAPHICSWINDOW()
@@ -50,7 +50,7 @@ namespace CursorDecompression
                 traits->alpha = 8;
                 traits->windowDecoration = false;
                 traits->doubleBuffer = false;
-                traits->sharedContext = 0;
+                traits->sharedContext = nullptr;
                 traits->pbuffer = true;
 
                 osg::GraphicsContext::ScreenIdentifier si;
@@ -267,7 +267,7 @@ namespace SDLUtil
         if (mCursorMap.find(name) != mCursorMap.end())
             return;
 
-        static bool forceSoftwareDecompression = (getenv("OPENMW_DECOMPRESS_TEXTURES") != 0);
+        static bool forceSoftwareDecompression = (getenv("OPENMW_DECOMPRESS_TEXTURES") != nullptr);
 
         SurfaceUniquePtr (*decompressionFunction)(osg::ref_ptr<osg::Image>, float);
         if (forceSoftwareDecompression || CursorDecompression::DXTCSupported) {

@@ -44,7 +44,7 @@ namespace MWScript
                     if (!ptr.getRefData().isEnabled())
                         return;
 
-                    std::string group = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view group = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer mode = 0;
@@ -58,7 +58,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max(), true);
+                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(ptr, std::string{group}, mode, std::numeric_limits<int>::max(), true);
                }
         };
 
@@ -74,7 +74,7 @@ namespace MWScript
                     if (!ptr.getRefData().isEnabled())
                         return;
 
-                    std::string group = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view group = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer loops = runtime[0].mInteger;
@@ -94,19 +94,19 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, loops + 1, true);
+                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(ptr, std::string{group}, mode, loops + 1, true);
                }
         };
         
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Animation::opcodeSkipAnim, new OpSkipAnim<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Animation::opcodeSkipAnimExplicit, new OpSkipAnim<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Animation::opcodePlayAnim, new OpPlayAnim<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Animation::opcodePlayAnimExplicit, new OpPlayAnim<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Animation::opcodeLoopAnim, new OpLoopAnim<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Animation::opcodeLoopAnimExplicit, new OpLoopAnim<ExplicitRef>);
+            interpreter.installSegment5<OpSkipAnim<ImplicitRef>>(Compiler::Animation::opcodeSkipAnim);
+            interpreter.installSegment5<OpSkipAnim<ExplicitRef>>(Compiler::Animation::opcodeSkipAnimExplicit);
+            interpreter.installSegment3<OpPlayAnim<ImplicitRef>>(Compiler::Animation::opcodePlayAnim);
+            interpreter.installSegment3<OpPlayAnim<ExplicitRef>>(Compiler::Animation::opcodePlayAnimExplicit);
+            interpreter.installSegment3<OpLoopAnim<ImplicitRef>>(Compiler::Animation::opcodeLoopAnim);
+            interpreter.installSegment3<OpLoopAnim<ExplicitRef>>(Compiler::Animation::opcodeLoopAnimExplicit);
         }
     }
 }

@@ -1,0 +1,20 @@
+Abovewater: "Над водой"
+Author: "Автор"
+Configuration: "Настройки"
+Description: "Описание"
+InExteriors: "Вне помещений"
+InInteriors: "В помещениях"
+KeyboardControls: |
+    Управление с помощью клавиатуры:
+
+    Shift+Right-Arrow > Включить шейдер
+    Shift+Left-Arrow > Выключить шейдер
+    Shift+Up-Arrow > Передвинуть шейдер выше
+    Shift+Down-Arrow > Передвинуть шейдер ниже
+PostProcessHUD: "Настройки постобработки"
+ResetShader: "Обнулить настройки этого шейдера"
+ShaderLocked: "Заблокирован"
+ShaderLockedDescription: "Не может быть выключен или перемещен, управляется внешним Lua-скриптом"
+ShaderResetUniform: "x"
+Underwater: "Под водой"
+Version: "Версия"

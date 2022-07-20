@@ -44,8 +44,12 @@ namespace SceneUtil
     class WorkQueue : public osg::Referenced
     {
     public:
-        WorkQueue(int numWorkerThreads=1);
+        WorkQueue(std::size_t workerThreads);
         ~WorkQueue();
+
+        void start(std::size_t workerThreads);
+
+        void stop();
 
         /// Add a new work item to the back of the queue.
         /// @par The work item's waitTillDone() method may be used by the caller to wait until the work is complete.

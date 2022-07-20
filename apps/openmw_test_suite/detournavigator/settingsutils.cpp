@@ -11,7 +11,7 @@ namespace
 
     struct DetourNavigatorGetTilePositionTest : Test
     {
-        Settings mSettings;
+        RecastSettings mSettings;
 
         DetourNavigatorGetTilePositionTest()
         {
@@ -47,7 +47,7 @@ namespace
 
     struct DetourNavigatorMakeTileBoundsTest : Test
     {
-        Settings mSettings;
+        RecastSettings mSettings;
 
         DetourNavigatorMakeTileBoundsTest()
         {

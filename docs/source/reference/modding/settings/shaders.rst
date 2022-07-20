@@ -26,6 +26,7 @@ Has no effect if the 'force shaders' option is false.
 Enabling per-pixel lighting results in visual differences to the original MW engine.
 It is not recommended to enable this option when using vanilla Morrowind files,
 because certain lights in Morrowind rely on vertex lighting to look as intended.
+Note that groundcover shaders ignore this setting.
 
 clamp lighting
 --------------
@@ -39,7 +40,7 @@ Only affects objects that render with shaders (see 'force shaders' option).
 Always affects terrain.
 
 Leaving this option at its default makes the lighting compatible with Morrowind's fixed-function method,
-but the lighting may appear dull and there might be colour shifts. 
+but the lighting may appear dull and there might be colour shifts.
 Setting this option to 'false' results in more dynamic lighting.
 
 auto use object normal maps
@@ -136,13 +137,140 @@ Normally environment map reflections aren't affected by lighting, which makes en
 Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
 Affected objects will use shaders.
 
-radial fog
+lighting method
+---------------
+
+:Type:		string
+:Range:		legacy|shaders compatibility|shaders
+:Default:	default
+
+Sets the internal handling of light sources.
+
+'legacy' is restricted to 8 lights per object and emulates fixed function
+pipeline compatible lighting.
+
+'shaders compatibility' removes the light limit controllable through :ref:`max
+lights` and follows a modifed attenuation formula which can drastically reduce
+light popping and seams. This mode also enables lighting on groundcover and a
+configurable light fade. It is recommended to use this with older hardware and a
+light limit closer to 8. Because of its wide range of compatibility it is set as
+the default.
+
+'shaders' carries all of the benefits that 'shaders compatibility' does, but
+uses a modern approach that allows for a higher :ref:`max lights` count with
+little to no performance penalties on modern hardware. It is recommended to use
+this mode when supported and where the GPU is not a bottleneck. On some weaker
+devices, using this mode along with :ref:`force per pixel lighting` can carry
+performance penalties.
+
+When enabled, groundcover lighting is forced to be vertex lighting, unless
+normal maps are provided. This is due to some groundcover mods using the Z-Up
+normals technique to avoid some common issues with shading. As a consequence,
+per pixel lighting would give undesirable results.
+
+Note that the rendering will act as if you have 'force shaders' option enabled
+when not set to 'legacy'. This means that shaders will be used to render all objects and
+the terrain.
+
+light bounds multiplier
+-----------------------
+
+:Type:		float
+:Range:		0.0-5.0
+:Default:	1.65
+
+Controls the bounding sphere radius of point lights, which is used to determine
+if an object should receive lighting from a particular light source. Note, this
+has no direct effect on the overall illumination of lights. Larger multipliers
+will allow for smoother transitions of light sources, but may require an
+increase in :ref:`max lights` and thus carries a performance penalty. This
+especially helps with abrupt light popping with handheld light sources such as
+torches and lanterns.
+
+This setting has no effect if :ref:`lighting method` is 'legacy'.
+
+maximum light distance
+----------------------
+
+:Type:		float
+:Range:		The whole range of 32-bit floating point
+:Default:	8192
+
+The maximum distance from the camera that lights will be illuminated, applies to
+both interiors and exteriors. A lower distance will improve performance. Set
+this to a non-positive value to disable fading.
+
+This setting has no effect if :ref:`lighting method` is 'legacy'.
+
+light fade start
+----------------
+
+:Type:		float
+:Range:		0.0-1.0
+:Default:	0.85
+
+The fraction of the maximum distance at which lights will begin to fade away.
+Tweaking it will make the transition proportionally more or less smooth.
+
+This setting has no effect if the :ref:`maximum light distance` is non-positive
+or :ref:`lighting method` is 'legacy'.
+
+max lights
 ----------
+
+:Type:		integer
+:Range:		2-64
+:Default:	8
+
+Sets the maximum number of lights that each object can receive lighting from.
+Increasing this too much can cause significant performance loss, especially if
+:ref:`lighting method` is not set to 'shaders' or :ref:`force per pixel
+lighting` is on.
+
+This setting has no effect if :ref:`lighting method` is 'legacy'.
+
+minimum interior brightness
+---------------------------
+
+:Type:		float
+:Range:		0.0-1.0
+:Default:	0.08
+
+Sets the minimum interior ambient brightness for interior cells when
+:ref:`lighting method` is not 'legacy'. A consequence of the new lighting system
+is that interiors will sometimes be darker since light sources now have sensible
+fall-offs. A couple solutions are to either add more lights or increase their
+radii to compensate, but these require content changes. For best results it is
+recommended to set this to 0.0 to retain the colors that level designers
+intended. If brighter interiors are wanted, however, this setting should be
+increased. Note, it is advised to keep this number small (< 0.1) to avoid the
+aforementioned changes in visuals.
+
+This setting has no effect if :ref:`lighting method` is 'legacy'.
+
+antialias alpha test
+--------------------
 
 :Type:		boolean
 :Range:		True/False
 :Default:	False
 
-By default, the fog becomes thicker proportionally to your distance from the clipping plane set at the clipping distance, which causes distortion at the edges of the screen.
-This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.
-Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
+Convert the alpha test (cutout/punchthrough alpha) to alpha-to-coverage when :ref:`antialiasing` is on.
+This allows MSAA to work with alpha-tested meshes, producing better-looking edges without pixelation.
+When MSAA is off, this setting will have no visible effect, but might have a performance cost.
+
+soft particles
+--------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enables soft particles for particle effects. This technique softens the
+intersection between individual particles and other opaque geometry by blending
+between them. Note, this relies on overriding specific properties of particle
+systems that potentially differ from the source content, this setting may change
+the look of some particle systems.
+
+Note that the rendering will act as if you have 'force shaders' option enabled.
+This means that shaders will be used to render all objects and the terrain.

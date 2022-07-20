@@ -1,7 +1,7 @@
 #ifndef CSV_WORLD_VARTYPEDELEGATE_H
 #define CSV_WORLD_VARTYPEDELEGATE_H
 
-#include <components/esm/variant.hpp>
+#include <components/esm3/variant.hpp>
 
 #include "enumdelegate.hpp"
 

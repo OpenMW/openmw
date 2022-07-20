@@ -1,5 +1,6 @@
 #include "trainingwindow.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 
 #include "../mwbase/windowmanager.hpp"

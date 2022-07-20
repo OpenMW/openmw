@@ -3,7 +3,7 @@
 
 #include "importscri.hpp"
 
-#include <components/esm/loadscpt.hpp>
+#include <components/esm3/loadscpt.hpp>
 
 namespace ESM
 {

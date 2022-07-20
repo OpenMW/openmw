@@ -2,13 +2,10 @@
 
 #include <algorithm>
 
-#include <QEvent>
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QMouseEvent>
-#include <QKeyEvent>
-#include <QApplication>
 #include <QToolTip>
 
 #include <osgUtil/LineSegmentIntersector>
@@ -17,7 +14,6 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../../model/prefs/shortcut.hpp"
-#include "../../model/prefs/shortcuteventhandler.hpp"
 #include "../../model/prefs/state.hpp"
 
 #include "../render/orbitcameramode.hpp"
@@ -34,11 +30,11 @@
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
     : SceneWidget (document.getData().getResourceSystem(), parent, Qt::WindowFlags(), false)
-    , mSceneElements(0)
-    , mRun(0)
+    , mSceneElements(nullptr)
+    , mRun(nullptr)
     , mDocument(document)
     , mInteractionMask (0)
-    , mEditMode (0)
+    , mEditMode (nullptr)
     , mLocked (false)
     , mDragMode(InteractionType_None)
     , mDragging (false)
@@ -163,7 +159,7 @@ void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 
 void CSVRender::WorldspaceWidget::centerOrbitCameraOnSelection()
 {
-    std::vector<osg::ref_ptr<TagBase> > selection = getSelection(~0);
+    std::vector<osg::ref_ptr<TagBase> > selection = getSelection(~0u);
 
     for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it!=selection.end(); ++it)
     {
@@ -435,7 +431,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
         }
 
         // Something untagged, probably terrain
-        WorldspaceHitResult hit = { true, 0, 0, 0, 0, intersection.getWorldIntersectPoint() };
+        WorldspaceHitResult hit = { true, nullptr, 0, 0, 0, intersection.getWorldIntersectPoint() };
         if (intersection.indexList.size() >= 3)
         {
             hit.index0 = intersection.indexList[0];
@@ -449,8 +445,13 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
     direction.normalize();
     direction *= CSMPrefs::get()["3D Scene Editing"]["distance"].toInt();
 
-    WorldspaceHitResult hit = { false, 0, 0, 0, 0, start + direction };
+    WorldspaceHitResult hit = { false, nullptr, 0, 0, 0, start + direction };
     return hit;
+}
+
+CSVRender::EditMode *CSVRender::WorldspaceWidget::getEditMode()
+{
+    return dynamic_cast<CSVRender::EditMode *> (mEditMode->getCurrent());
 }
 
 void CSVRender::WorldspaceWidget::abortDrag()
@@ -460,7 +461,6 @@ void CSVRender::WorldspaceWidget::abortDrag()
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
         editMode.dragAborted();
-        mDragging = false;
         mDragMode = InteractionType_None;
     }
 }
@@ -593,7 +593,7 @@ void CSVRender::WorldspaceWidget::showToolTip()
         if (hit.tag)
         {
             bool hideBasics = CSMPrefs::get()["Tooltips"]["scene-hide-basic"].isTrue();
-            QToolTip::showText (pos, hit.tag->getToolTip (hideBasics), this);
+            QToolTip::showText(pos, hit.tag->getToolTip(hideBasics, hit), this);
         }
     }
 }
@@ -696,11 +696,6 @@ void CSVRender::WorldspaceWidget::handleInteractionPress (const WorldspaceHitRes
         editMode.secondarySelectPressed (hit);
     else if (type == InteractionType_PrimaryOpen)
         editMode.primaryOpenPressed (hit);
-}
-
-CSVRender::EditMode *CSVRender::WorldspaceWidget::getEditMode()
-{
-    return dynamic_cast<CSVRender::EditMode *> (mEditMode->getCurrent());
 }
 
 void CSVRender::WorldspaceWidget::primaryOpen(bool activate)

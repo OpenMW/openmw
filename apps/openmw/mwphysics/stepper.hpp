@@ -20,12 +20,11 @@ namespace MWPhysics
         const btCollisionObject *mColObj;
 
         ActorTracer mTracer, mUpStepper, mDownStepper;
-        bool mHaveMoved;
 
     public:
         Stepper(const btCollisionWorld *colWorld, const btCollisionObject *colObj);
 
-        bool step(osg::Vec3f &position, const osg::Vec3f &toMove, float &remainingTime);
+        bool step(osg::Vec3f &position, osg::Vec3f &velocity, float &remainingTime, const bool & onGround, bool firstIteration);
     };
 }
 

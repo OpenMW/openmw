@@ -25,6 +25,12 @@
 //#include <osgUtil/Export>
 
 #include <set>
+#include <mutex>
+
+namespace osgDB
+{
+    class SharedStateManager;
+}
 
 //namespace osgUtil {
 namespace SceneUtil {
@@ -65,7 +71,7 @@ class Optimizer
 
     public:
 
-        Optimizer() : _mergeAlphaBlending(false) {}
+        Optimizer() : _mergeAlphaBlending(false), _sharedStateManager(nullptr), _sharedStateMutex(nullptr) {}
         virtual ~Optimizer() {}
 
         enum OptimizationOptions
@@ -120,6 +126,8 @@ class Optimizer
 
         void setMergeAlphaBlending(bool merge) { _mergeAlphaBlending = merge; }
         void setViewPoint(const osg::Vec3f& viewPoint) { _viewPoint = viewPoint; }
+
+        void setSharedStateManager(osgDB::SharedStateManager* sharedStateManager, std::mutex* sharedStateMutex) { _sharedStateMutex = sharedStateMutex; _sharedStateManager = sharedStateManager; }
 
         /** Reset internal data to initial state - the getPermissibleOptionsMap is cleared.*/
         void reset();
@@ -258,6 +266,9 @@ class Optimizer
         osg::Vec3f _viewPoint;
         bool _mergeAlphaBlending;
 
+        osgDB::SharedStateManager* _sharedStateManager;
+        mutable std::mutex* _sharedStateMutex;
+
     public:
 
         /** Flatten Static Transform nodes by applying their transform to the
@@ -273,10 +284,12 @@ class Optimizer
                 FlattenStaticTransformsVisitor(Optimizer* optimizer=0):
                     BaseOptimizerVisitor(optimizer, FLATTEN_STATIC_TRANSFORMS) {}
 
-                void apply(osg::Node& geode) override;
+                void apply(osg::Node& node) override;
+                void apply(osg::Geometry& geometry) override;
                 void apply(osg::Drawable& drawable) override;
-                void apply(osg::Billboard& geode) override;
-                void apply(osg::Transform& transform) override;
+                void apply(osg::Billboard& billboard) override;
+                void apply(osg::Transform& transform) override final;
+                void apply(osg::MatrixTransform& transform) override;
 
                 bool removeTransforms(osg::Node* nodeWeCannotRemove);
 
@@ -305,6 +318,7 @@ class Optimizer
                     BaseOptimizerVisitor(optimizer, FLATTEN_STATIC_TRANSFORMS) {}
 
                 void apply(osg::MatrixTransform& transform) override;
+                void apply(osg::Geometry&) override { }
 
                 bool removeTransforms(osg::Node* nodeWeCannotRemove);
 
@@ -327,6 +341,7 @@ class Optimizer
                     BaseOptimizerVisitor(optimizer, REMOVE_REDUNDANT_NODES) {}
 
                 void apply(osg::Group& group) override;
+                void apply(osg::Geometry&) override { }
 
                 void removeEmptyNodes();
 
@@ -347,6 +362,8 @@ class Optimizer
                 void apply(osg::Transform& transform) override;
                 void apply(osg::LOD& lod) override;
                 void apply(osg::Switch& switchNode) override;
+                void apply(osg::Sequence& sequenceNode) override;
+                void apply(osg::Geometry&) override { }
 
                 bool isOperationPermissible(osg::Node& node);
 
@@ -365,9 +382,11 @@ class Optimizer
 
             bool isOperationPermissible(osg::Group& node);
 
+            void apply(osg::Geometry&) override { }
             void apply(osg::Group& group) override;
             void apply(osg::LOD& lod) override;
             void apply(osg::Switch& switchNode) override;
+            void apply(osg::Sequence& sequenceNode) override;
         };
 
         class MergeGeometryVisitor : public BaseOptimizerVisitor
@@ -398,10 +417,10 @@ class Optimizer
                     return _targetMaximumNumberOfVertices;
                 }
 
-                void pushStateSet(osg::StateSet* stateSet);
+                bool pushStateSet(osg::StateSet* stateSet);
                 void popStateSet();
                 void checkAlphaBlendingActive();
-
+                void apply(osg::Geometry&) override { }
                 void apply(osg::Group& group) override;
                 void apply(osg::Billboard&) override { /* don't do anything*/ }
 

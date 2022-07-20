@@ -1,6 +1,8 @@
 #ifndef GAME_MWCLASS_NPC_H
 #define GAME_MWCLASS_NPC_H
 
+#include "../mwworld/registeredclass.hpp"
+
 #include "actor.hpp"
 
 namespace ESM
@@ -10,8 +12,12 @@ namespace ESM
 
 namespace MWClass
 {
-    class Npc : public Actor
+    class Npc : public MWWorld::RegisteredClass<Npc, Actor>
     {
+            friend MWWorld::RegisteredClass<Npc, Actor>;
+
+            Npc();
+
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
@@ -77,7 +83,7 @@ namespace MWClass
             void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
             ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
@@ -104,11 +110,7 @@ namespace MWClass
             float getArmorRating (const MWWorld::Ptr& ptr) const override;
             ///< @return combined armor rating of this actor
 
-            bool apply (const MWWorld::Ptr& ptr, const std::string& id,
-                const MWWorld::Ptr& actor) const override;
-            ///< Apply \a id on \a ptr.
-            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
-            /// \return Any effect?
+            bool consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const override;
 
             void adjustScale (const MWWorld::ConstPtr &ptr, osg::Vec3f &scale, bool rendering) const override;
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
@@ -124,8 +126,6 @@ namespace MWClass
             bool isPersistent (const MWWorld::ConstPtr& ptr) const override;
 
             std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const override;
-
-            static void registerSelf();
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 
@@ -162,7 +162,7 @@ namespace MWClass
             std::string getPrimaryFaction(const MWWorld::ConstPtr &ptr) const override;
             int getPrimaryFactionRank(const MWWorld::ConstPtr &ptr) const override;
 
-            void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const override;
+            void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const override;
 
             void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const override;
 

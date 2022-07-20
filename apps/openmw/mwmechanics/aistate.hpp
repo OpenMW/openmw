@@ -1,7 +1,10 @@
 #ifndef AISTATE_H
 #define AISTATE_H
 
-#include <typeinfo>
+#include "aistatefwd.hpp"
+#include "aitemporarybase.hpp"
+
+#include <memory>
 
 namespace MWMechanics
 {
@@ -13,28 +16,24 @@ namespace MWMechanics
      */
     template< class Base >
     class DerivedClassStorage
-    {              
+    {
     private:
-        Base* mStorage;
-        
-        //if needed you have to provide a clone member function
-        DerivedClassStorage( const DerivedClassStorage& other );
-        DerivedClassStorage& operator=( const DerivedClassStorage& );
-        
+        std::unique_ptr<Base> mStorage;
+
     public:
         /// \brief returns reference to stored object or deletes it and creates a fitting
         template< class Derived >
         Derived& get()
         {
-            Derived* result = dynamic_cast<Derived*>(mStorage);
-            
-            if(!result)
+            Derived* result = dynamic_cast<Derived*>(mStorage.get());
+
+            if (result == nullptr)
             {
-                if(mStorage)
-                    delete mStorage;
-                mStorage = result = new Derived();
+                auto storage = std::make_unique<Derived>();
+                result = storage.get();
+                mStorage = std::move(storage);
             }
-            
+
             //return a reference to the (new allocated) object 
             return *result;
         }
@@ -42,61 +41,24 @@ namespace MWMechanics
         template< class Derived >
         void copy(DerivedClassStorage& destination) const
         {
-            Derived* result = dynamic_cast<Derived*>(mStorage);
+            Derived* result = dynamic_cast<Derived*>(mStorage.get());
             if (result != nullptr)
                 destination.store<Derived>(*result);
         }
-        
+
         template< class Derived >
         void store( const Derived& payload )
         {
-            if(mStorage)
-                delete mStorage;
-            mStorage = new Derived(payload);
+            mStorage = std::make_unique<Derived>(payload);
         }
-        
+
         /// \brief takes ownership of the passed object
-        template< class Derived >
-        void moveIn( Derived* p )
+        template <class Derived>
+        void moveIn(std::unique_ptr<Derived>&& storage)
         {
-            if(mStorage)
-                delete mStorage;
-            mStorage = p;
-        }
-        
-        bool empty() const
-        {
-            return mStorage == nullptr;
-        }
-        
-        const std::type_info& getType() const
-        {
-            return typeid(mStorage);
-        }
-        
-        DerivedClassStorage():mStorage(nullptr){}
-        ~DerivedClassStorage()
-        {
-            if(mStorage)
-                delete mStorage;
+            mStorage = std::move(storage);
         }
     };
-
-
-    /// \brief base class for the temporary storage of AiPackages.
-    /**
-     * Each AI package with temporary values needs a AiPackageStorage class
-     * which is derived from AiTemporaryBase. The Actor holds a container
-     * AiState where one of these storages can be stored at a time.
-     * The execute(...) member function takes this container as an argument.
-     * */
-    struct AiTemporaryBase
-    {
-        virtual ~AiTemporaryBase(){}
-    };
-    
-    /// \brief Container for AI package status.
-    typedef DerivedClassStorage<AiTemporaryBase> AiState;
 }
 
 #endif // AISTATE_H

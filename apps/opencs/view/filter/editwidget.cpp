@@ -1,6 +1,7 @@
 #include "editwidget.hpp"
 
-#include <QAbstractItemModel>
+#include <sstream>
+
 #include <QAction>
 #include <QContextMenuEvent>
 #include <QMenu>
@@ -42,6 +43,8 @@ CSVFilter::EditWidget::EditWidget (CSMWorld::Data& data, QWidget *parent)
     addAction (mHelpAction);
     auto* openHelpShortcut = new CSMPrefs::Shortcut("help", this);
     openHelpShortcut->associateAction(mHelpAction);
+
+    setText("!string(\"ID\", \".*\")");
 }
 
 void CSVFilter::EditWidget::textChanged (const QString& text)

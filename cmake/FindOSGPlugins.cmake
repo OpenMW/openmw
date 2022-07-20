@@ -16,6 +16,17 @@ include(LibFindMacros)
 include(Findosg_functions)
 
 if (NOT OSGPlugins_LIB_DIR)
+    unset(OSGPlugins_LIB_DIR)
+    foreach(OSGDB_LIB ${OSGDB_LIBRARY})
+        # Skip library type names
+        if(EXISTS ${OSGDB_LIB} AND NOT IS_DIRECTORY ${OSGDB_LIB})
+            get_filename_component(OSG_LIB_DIR ${OSGDB_LIB} DIRECTORY)
+            list(APPEND OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
+        endif()
+    endforeach(OSGDB_LIB)
+endif()
+
+if (NOT OSGPlugins_LIB_DIR)
     set(_mode WARNING)
     if (OSGPlugins_FIND_REQUIRED)
         set(_mode FATAL_ERROR)
@@ -27,9 +38,12 @@ foreach(_library ${OSGPlugins_FIND_COMPONENTS})
     string(TOUPPER ${_library} _library_uc)
     set(_component OSGPlugins_${_library})
 
-    set(${_library_uc}_DIR ${OSGPlugins_LIB_DIR}) # to help function osg_find_library
+    # On some systems, notably Debian and Ubuntu, the OSG plugins do not have
+    # the usual "lib" prefix. We temporarily add the empty string to the list
+    # of prefixes CMake searches for (via osg_find_library) to support these systems.
     set(_saved_lib_prefix ${CMAKE_FIND_LIBRARY_PREFIXES}) # save CMAKE_FIND_LIBRARY_PREFIXES
-    set(CMAKE_FIND_LIBRARY_PREFIXES "") # search libraries with no prefix
+    list(APPEND CMAKE_FIND_LIBRARY_PREFIXES "") # search libraries with no prefix
+    set(${_library_uc}_DIR ${OSGPlugins_LIB_DIR}) # to help function osg_find_library
     osg_find_library(${_library_uc} ${_library}) # find it into ${_library_uc}_LIBRARIES
     set(CMAKE_FIND_LIBRARY_PREFIXES ${_saved_lib_prefix}) # restore prefix
 

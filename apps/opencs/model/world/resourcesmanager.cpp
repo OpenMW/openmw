@@ -17,7 +17,7 @@ void CSMWorld::ResourcesManager::addResources (const Resources& resources)
 const char * const * CSMWorld::ResourcesManager::getMeshExtensions()
 {
     // maybe we could go over the osgDB::Registry to list all supported node formats
-    static const char * const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", 0 };
+    static const char * const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae", 0 };
     return sMeshTypes;
 }
 

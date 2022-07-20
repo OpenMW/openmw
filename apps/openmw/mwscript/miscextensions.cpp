@@ -2,7 +2,10 @@
 
 #include <cstdlib>
 #include <iomanip>
+#include <chrono>
+#include <sstream>
 
+#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 #include <components/compiler/locals.hpp>
 
@@ -13,15 +16,22 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include <components/misc/rng.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadcrea.hpp>
+#include <components/resource/resourcesystem.hpp>
+
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadcrea.hpp>
+
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -43,7 +53,7 @@
 namespace
 {
 
-    void addToLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
+    void addToLevList(ESM::LevelledListBase* list, std::string_view itemId, int level)
     {
         for (auto& levelItem : list->mList)
         {
@@ -52,12 +62,12 @@ namespace
         }
 
         ESM::LevelledListBase::LevelItem item;
-        item.mId = itemId;
+        item.mId = std::string{itemId};
         item.mLevel = level;
         list->mList.push_back(item);
     }
 
-    void removeFromLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
+    void removeFromLevList(ESM::LevelledListBase* list, std::string_view itemId, int level)
     {
         // level of -1 removes all items with that itemId
         for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
@@ -103,7 +113,8 @@ namespace MWScript
                         throw std::runtime_error (
                             "random: argument out of range (Don't be so negative!)");
 
-                    runtime.push (static_cast<Interpreter::Type_Float>(::Misc::Rng::rollDice(limit))); // [o, limit)
+                    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+                    runtime.push (static_cast<Interpreter::Type_Float>(::Misc::Rng::rollDice(limit, prng))); // [o, limit)
                 }
         };
 
@@ -115,7 +126,7 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr target = R()(runtime, false);
-                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript (name, target);
                 }
@@ -127,7 +138,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     runtime.push(MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning (name));
                 }
@@ -139,7 +150,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript (name);
                 }
@@ -197,7 +208,7 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string name{runtime.getStringLiteral(runtime[0].mInteger)};
                 runtime.pop();
 
                 bool allowSkipping = runtime[0].mInteger != 0;
@@ -273,7 +284,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr.getRefData().activateByScript())
+                    if (ptr.getRefData().activateByScript() || ptr.getContainerStore())
                         context.executeActivation(ptr, MWMechanics::getPlayer());
                 }
         };
@@ -302,7 +313,7 @@ namespace MWScript
 
                     // Instantly reset door to closed state
                     // This is done when using Lock in scripts, but not when using Lock spells.
-                    if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
+                    if (ptr.getType() == ESM::Door::sRecordId && !ptr.getCellRef().getTeleport())
                     {
                         MWBase::Environment::get().getWorld()->activateDoor(ptr, MWWorld::DoorState::Idle);
                     }
@@ -539,7 +550,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string effect = runtime.getStringLiteral(runtime[0].mInteger);
+                    std::string_view effect = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     if (!ptr.getClass().isActor())
@@ -549,19 +560,13 @@ namespace MWScript
                     }
 
                     char *end;
-                    long key = strtol(effect.c_str(), &end, 10);
+                    long key = strtol(effect.data(), &end, 10);
                     if(key < 0 || key > 32767 || *end != '\0')
-                        key = ESM::MagicEffect::effectStringToId(effect);
+                        key = ESM::MagicEffect::effectStringToId({effect});
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                    MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
-                    effects += stats.getActiveSpells().getMagicEffects();
-                    if (ptr.getClass().hasInventoryStore(ptr) && !stats.isDeathAnimationFinished())
-                    {
-                        MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                        effects += store.getMagicEffects();
-                    }
+                    const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
 
                     for (const auto& activeEffect : effects)
                     {
@@ -584,10 +589,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string creature = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string creature{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    std::string gem = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view gem = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     if (!ptr.getClass().hasInventoryStore(ptr))
@@ -616,7 +621,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view soul = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     // throw away additional arguments
@@ -648,7 +653,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer amount = runtime[0].mInteger;
@@ -735,7 +740,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view soul = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     if (!ptr.getClass().hasInventoryStore(ptr))
@@ -778,7 +783,7 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     runtime.push((ptr.getClass().hasInventoryStore(ptr) || ptr.getClass().isBipedal(ptr)) &&
-                                ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
+                                ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState::Weapon);
                 }
         };
 
@@ -791,7 +796,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState_Spell);
+                    runtime.push(ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState::Spell);
                 }
         };
 
@@ -803,7 +808,7 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    std::string id = runtime.getStringLiteral(runtime[0].mInteger);
+                    std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     if (!ptr.getClass().isActor())
@@ -813,7 +818,7 @@ namespace MWScript
                     }
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                    runtime.push(stats.getActiveSpells().isSpellActive(id) || stats.getSpells().isSpellActive(id));
+                    runtime.push(stats.getActiveSpells().isSpellActive(id));
                 }
         };
 
@@ -855,6 +860,9 @@ namespace MWScript
                 {
                     float param = runtime[0].mFloat;
                     runtime.pop();
+
+                    if (param < 0)
+                        throw std::runtime_error("square root of negative number (we aren't that imaginary)");
 
                     runtime.push(std::sqrt (param));
                 }
@@ -967,13 +975,14 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view objectID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-                    runtime.push(::Misc::StringUtils::ciEqual(objectID, stats.getLastHitObject()));
-
-                    stats.setLastHitObject(std::string());
+                    bool hit = ::Misc::StringUtils::ciEqual(objectID, stats.getLastHitObject());
+                    runtime.push(hit);
+                    if(hit)
+                        stats.clearLastHitObject();
                 }
         };
 
@@ -986,13 +995,14 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view objectID = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-                    runtime.push(::Misc::StringUtils::ciEqual(objectID, stats.getLastHitAttemptObject()));
-
-                    stats.setLastHitAttemptObject(std::string());
+                    bool hit = ::Misc::StringUtils::ciEqual(objectID, stats.getLastHitAttemptObject());
+                    runtime.push(hit);
+                    if(hit)
+                        stats.clearLastHitAttemptObject();
                 }
         };
 
@@ -1028,7 +1038,7 @@ namespace MWScript
             void execute (Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime, false);
-                std::string var = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string_view var = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 std::stringstream output;
@@ -1205,10 +1215,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string spellId = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string spellId{runtime.getStringLiteral(runtime[0].mInteger)};
                 runtime.pop();
 
-                std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral (runtime[0].mInteger));
+                std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
@@ -1220,14 +1230,17 @@ namespace MWScript
 
                 if (ptr == MWMechanics::getPlayer())
                 {
-                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spellId);
+                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spell->mId);
                     return;
                 }
 
                 if (ptr.getClass().isActor())
                 {
-                    MWMechanics::AiCast castPackage(targetId, spellId, true);
-                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    if (!MWBase::Environment::get().getMechanicsManager()->isCastingSpell(ptr))
+                    {
+                        MWMechanics::AiCast castPackage(targetId, spell->mId, true);
+                        ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    }
                     return;
                 }
 
@@ -1251,7 +1264,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string spellId = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string spellId{runtime.getStringLiteral(runtime[0].mInteger)};
                 runtime.pop();
 
                 const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
@@ -1263,14 +1276,17 @@ namespace MWScript
 
                 if (ptr == MWMechanics::getPlayer())
                 {
-                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spellId);
+                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spell->mId);
                     return;
                 }
 
                 if (ptr.getClass().isActor())
                 {
-                    MWMechanics::AiCast castPackage(ptr.getCellRef().getRefId(), spellId, true);
-                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    if (!MWBase::Environment::get().getMechanicsManager()->isCastingSpell(ptr))
+                    {
+                        MWMechanics::AiCast castPackage(ptr.getCellRef().getRefId(), spell->mId, true);
+                        ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    }
                     return;
                 }
 
@@ -1349,17 +1365,18 @@ namespace MWScript
                 std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
                 msg << std::put_time(std::gmtime(&currentTime), "%Y.%m.%d %T UTC") << std::endl;
 
-                msg << "Content file: ";
+                msg << "Content file: " << ptr.getCellRef().getRefNum().mContentFile;
 
                 if (!ptr.getCellRef().hasContentFile())
-                    msg << "[None]" << std::endl;
+                    msg << " [None]" << std::endl;
                 else
                 {
                     std::vector<std::string> contentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
 
-                    msg << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << std::endl;
-                    msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
+                    msg << " [" << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << "]" << std::endl;
                 }
+
+                msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
 
                 if (ptr.getRefData().isDeletedByContentFile())
                     msg << "[Deleted by content file]" << std::endl;
@@ -1377,14 +1394,22 @@ namespace MWScript
                         msg << "Grid: " << cell->getCell()->getGridX() << " " << cell->getCell()->getGridY() << std::endl;
                     osg::Vec3f pos (ptr.getRefData().getPosition().asVec3());
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
-                    msg << "Model: " << ptr.getClass().getModel(ptr) << std::endl;
+                    auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+                    std::string model = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), vfs);
+                    msg << "Model: " << model << std::endl;
+                    if(!model.empty())
+                    {
+                        const std::string archive = vfs->getArchive(model);
+                        if(!archive.empty())
+                            msg << "(" << archive << ")" << std::endl;
+                    }
                     if (!ptr.getClass().getScript(ptr).empty())
                         msg << "Script: " << ptr.getClass().getScript(ptr) << std::endl;
                 }
 
                 while (arg0 > 0)
                 {
-                    std::string notes = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string_view notes = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
                     if (!notes.empty())
                         msg << "Notes: " << notes << std::endl;
@@ -1402,9 +1427,9 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime &runtime) override
             {
-                const std::string& levId = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string levId{runtime.getStringLiteral(runtime[0].mInteger)};
                 runtime.pop();
-                const std::string& creatureId = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string_view creatureId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
                 int level = runtime[0].mInteger;
                 runtime.pop();
@@ -1420,9 +1445,9 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime &runtime) override
             {
-                const std::string& levId = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string levId{runtime.getStringLiteral(runtime[0].mInteger)};
                 runtime.pop();
-                const std::string& creatureId = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string_view creatureId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
                 int level = runtime[0].mInteger;
                 runtime.pop();
@@ -1438,9 +1463,9 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime &runtime) override
             {
-                const std::string& levId = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string levId{runtime.getStringLiteral(runtime[0].mInteger)};
                 runtime.pop();
-                const std::string& itemId = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string_view itemId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
                 int level = runtime[0].mInteger;
                 runtime.pop();
@@ -1456,9 +1481,9 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime &runtime) override
             {
-                const std::string& levId = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string levId{runtime.getStringLiteral(runtime[0].mInteger)};
                 runtime.pop();
-                const std::string& itemId = runtime.getStringLiteral(runtime[0].mInteger);
+                std::string_view itemId = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
                 int level = runtime[0].mInteger;
                 runtime.pop();
@@ -1567,125 +1592,154 @@ namespace MWScript
                 }
         };
 
+        class OpHelp : public Interpreter::Opcode0
+        {
+            public:
+
+                void execute(Interpreter::Runtime& runtime) override
+                {
+                    std::stringstream message;
+                    message << MWBase::Environment::get().getWindowManager()->getVersionDescription() << "\n\n";
+                    std::vector<std::string> commands;
+                    MWBase::Environment::get().getScriptManager()->getExtensions().listKeywords(commands);
+                    for(const auto& command : commands)
+                        message << command << "\n";
+                    runtime.getContext().report(message.str());
+                }
+        };
+
+        class OpReloadLua : public Interpreter::Opcode0
+        {
+            public:
+
+                void execute (Interpreter::Runtime& runtime) override
+                {
+                    MWBase::Environment::get().getLuaManager()->reloadAllScripts();
+                    runtime.getContext().report("All Lua scripts are reloaded");
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Misc::opcodeMenuMode, new OpMenuMode);
-            interpreter.installSegment5 (Compiler::Misc::opcodeRandom, new OpRandom);
-            interpreter.installSegment5 (Compiler::Misc::opcodeScriptRunning, new OpScriptRunning);
-            interpreter.installSegment5 (Compiler::Misc::opcodeStartScript, new OpStartScript<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeStartScriptExplicit, new OpStartScript<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeStopScript, new OpStopScript);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetSecondsPassed, new OpGetSecondsPassed);
-            interpreter.installSegment5 (Compiler::Misc::opcodeEnable, new OpEnable<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeEnableExplicit, new OpEnable<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDisable, new OpDisable<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDisableExplicit, new OpDisable<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetDisabled, new OpGetDisabled<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetDisabledExplicit, new OpGetDisabled<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
-            interpreter.installSegment5 (Compiler::Misc::opcodeOnActivate, new OpOnActivate<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeOnActivateExplicit, new OpOnActivate<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeActivate, new OpActivate<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeActivateExplicit, new OpActivate<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Misc::opcodeLock, new OpLock<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Misc::opcodeLockExplicit, new OpLock<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeUnlock, new OpUnlock<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeUnlockExplicit, new OpUnlock<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleCollisionDebug, new OpToggleCollisionDebug);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleCollisionBoxes, new OpToggleCollisionBoxes);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleWireframe, new OpToggleWireframe);
-            interpreter.installSegment5 (Compiler::Misc::opcodeFadeIn, new OpFadeIn);
-            interpreter.installSegment5 (Compiler::Misc::opcodeFadeOut, new OpFadeOut);
-            interpreter.installSegment5 (Compiler::Misc::opcodeFadeTo, new OpFadeTo);
-            interpreter.installSegment5 (Compiler::Misc::opcodeTogglePathgrid, new OpTogglePathgrid);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleWater, new OpToggleWater);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleWorld, new OpToggleWorld);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDontSaveObject, new OpDontSaveObject);
-            interpreter.installSegment5 (Compiler::Misc::opcodePcForce1stPerson, new OpPcForce1stPerson);
-            interpreter.installSegment5 (Compiler::Misc::opcodePcForce3rdPerson, new OpPcForce3rdPerson);
-            interpreter.installSegment5 (Compiler::Misc::opcodePcGet3rdPerson, new OpPcGet3rdPerson);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleVanityMode, new OpToggleVanityMode);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcSleep, new OpGetPcSleep);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcJumping, new OpGetPcJumping);
-            interpreter.installSegment5 (Compiler::Misc::opcodeWakeUpPc, new OpWakeUpPc);
-            interpreter.installSegment5 (Compiler::Misc::opcodePlayBink, new OpPlayBink);
-            interpreter.installSegment5 (Compiler::Misc::opcodePayFine, new OpPayFine);
-            interpreter.installSegment5 (Compiler::Misc::opcodePayFineThief, new OpPayFineThief);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGoToJail, new OpGoToJail);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetLocked, new OpGetLocked<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetLockedExplicit, new OpGetLocked<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetEffect, new OpGetEffect<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetEffectExplicit, new OpGetEffect<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeAddSoulGem, new OpAddSoulGem<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeAddSoulGemExplicit, new OpAddSoulGem<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Misc::opcodeRemoveSoulGem, new OpRemoveSoulGem<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Misc::opcodeRemoveSoulGemExplicit, new OpRemoveSoulGem<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDrop, new OpDrop<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDropExplicit, new OpDrop<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDropSoulGem, new OpDropSoulGem<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDropSoulGemExplicit, new OpDropSoulGem<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetAttacked, new OpGetAttacked<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetAttackedExplicit, new OpGetAttacked<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetWeaponDrawn, new OpGetWeaponDrawn<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetWeaponDrawnExplicit, new OpGetWeaponDrawn<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellReadied, new OpGetSpellReadied<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellReadiedExplicit, new OpGetSpellReadied<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellEffects, new OpGetSpellEffects<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellEffectsExplicit, new OpGetSpellEffects<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetCurrentTime, new OpGetCurrentTime);
-            interpreter.installSegment5 (Compiler::Misc::opcodeSetDelete, new OpSetDelete<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeSetDeleteExplicit, new OpSetDelete<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetSquareRoot, new OpGetSquareRoot);
-            interpreter.installSegment5 (Compiler::Misc::opcodeFall, new OpFall<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeFallExplicit, new OpFall<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingPc, new OpGetStandingPc<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingPcExplicit, new OpGetStandingPc<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingActor, new OpGetStandingActor<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingActorExplicit, new OpGetStandingActor<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingPc, new OpGetCollidingPc<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingPcExplicit, new OpGetCollidingPc<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingActor, new OpGetCollidingActor<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingActorExplicit, new OpGetCollidingActor<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeHurtStandingActor, new OpHurtStandingActor<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeHurtStandingActorExplicit, new OpHurtStandingActor<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeHurtCollidingActor, new OpHurtCollidingActor<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeHurtCollidingActorExplicit, new OpHurtCollidingActor<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetWindSpeed, new OpGetWindSpeed);
-            interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMe, new OpHitOnMe<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMeExplicit, new OpHitOnMe<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeHitAttemptOnMe, new OpHitAttemptOnMe<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeHitAttemptOnMeExplicit, new OpHitAttemptOnMe<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDisableTeleporting, new OpEnableTeleporting<false>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeEnableTeleporting, new OpEnableTeleporting<true>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeShow, new OpShow<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeShowExplicit, new OpShow<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleScripts, new OpToggleScripts);
-            interpreter.installSegment5 (Compiler::Misc::opcodeDisableLevitation, new OpEnableLevitation<false>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeEnableLevitation, new OpEnableLevitation<true>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeCast, new OpCast<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeCastExplicit, new OpCast<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpell, new OpExplodeSpell<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpellExplicit, new OpExplodeSpell<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcInJail, new OpGetPcInJail);
-            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcTraveling, new OpGetPcTraveling);
-            interpreter.installSegment3 (Compiler::Misc::opcodeBetaComment, new OpBetaComment<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Misc::opcodeBetaCommentExplicit, new OpBetaComment<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeAddToLevCreature, new OpAddToLevCreature);
-            interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevCreature, new OpRemoveFromLevCreature);
-            interpreter.installSegment5 (Compiler::Misc::opcodeAddToLevItem, new OpAddToLevItem);
-            interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevItem, new OpRemoveFromLevItem);
-            interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraph, new OpShowSceneGraph<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraphExplicit, new OpShowSceneGraph<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleBorders, new OpToggleBorders);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleNavMesh, new OpToggleNavMesh);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleActorsPaths, new OpToggleActorsPaths);
-            interpreter.installSegment5 (Compiler::Misc::opcodeSetNavMeshNumberToRender, new OpSetNavMeshNumberToRender);
-            interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMe, new OpRepairedOnMe<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMeExplicit, new OpRepairedOnMe<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeToggleRecastMesh, new OpToggleRecastMesh);
+            interpreter.installSegment5<OpMenuMode>(Compiler::Misc::opcodeMenuMode);
+            interpreter.installSegment5<OpRandom>(Compiler::Misc::opcodeRandom);
+            interpreter.installSegment5<OpScriptRunning>(Compiler::Misc::opcodeScriptRunning);
+            interpreter.installSegment5<OpStartScript<ImplicitRef>>(Compiler::Misc::opcodeStartScript);
+            interpreter.installSegment5<OpStartScript<ExplicitRef>>(Compiler::Misc::opcodeStartScriptExplicit);
+            interpreter.installSegment5<OpStopScript>(Compiler::Misc::opcodeStopScript);
+            interpreter.installSegment5<OpGetSecondsPassed>(Compiler::Misc::opcodeGetSecondsPassed);
+            interpreter.installSegment5<OpEnable<ImplicitRef>>(Compiler::Misc::opcodeEnable);
+            interpreter.installSegment5<OpEnable<ExplicitRef>>(Compiler::Misc::opcodeEnableExplicit);
+            interpreter.installSegment5<OpDisable<ImplicitRef>>(Compiler::Misc::opcodeDisable);
+            interpreter.installSegment5<OpDisable<ExplicitRef>>(Compiler::Misc::opcodeDisableExplicit);
+            interpreter.installSegment5<OpGetDisabled<ImplicitRef>>(Compiler::Misc::opcodeGetDisabled);
+            interpreter.installSegment5<OpGetDisabled<ExplicitRef>>(Compiler::Misc::opcodeGetDisabledExplicit);
+            interpreter.installSegment5<OpXBox>(Compiler::Misc::opcodeXBox);
+            interpreter.installSegment5<OpOnActivate<ImplicitRef>>(Compiler::Misc::opcodeOnActivate);
+            interpreter.installSegment5<OpOnActivate<ExplicitRef>>(Compiler::Misc::opcodeOnActivateExplicit);
+            interpreter.installSegment5<OpActivate<ImplicitRef>>(Compiler::Misc::opcodeActivate);
+            interpreter.installSegment5<OpActivate<ExplicitRef>>(Compiler::Misc::opcodeActivateExplicit);
+            interpreter.installSegment3<OpLock<ImplicitRef>>(Compiler::Misc::opcodeLock);
+            interpreter.installSegment3<OpLock<ExplicitRef>>(Compiler::Misc::opcodeLockExplicit);
+            interpreter.installSegment5<OpUnlock<ImplicitRef>>(Compiler::Misc::opcodeUnlock);
+            interpreter.installSegment5<OpUnlock<ExplicitRef>>(Compiler::Misc::opcodeUnlockExplicit);
+            interpreter.installSegment5<OpToggleCollisionDebug>(Compiler::Misc::opcodeToggleCollisionDebug);
+            interpreter.installSegment5<OpToggleCollisionBoxes>(Compiler::Misc::opcodeToggleCollisionBoxes);
+            interpreter.installSegment5<OpToggleWireframe>(Compiler::Misc::opcodeToggleWireframe);
+            interpreter.installSegment5<OpFadeIn>(Compiler::Misc::opcodeFadeIn);
+            interpreter.installSegment5<OpFadeOut>(Compiler::Misc::opcodeFadeOut);
+            interpreter.installSegment5<OpFadeTo>(Compiler::Misc::opcodeFadeTo);
+            interpreter.installSegment5<OpTogglePathgrid>(Compiler::Misc::opcodeTogglePathgrid);
+            interpreter.installSegment5<OpToggleWater>(Compiler::Misc::opcodeToggleWater);
+            interpreter.installSegment5<OpToggleWorld>(Compiler::Misc::opcodeToggleWorld);
+            interpreter.installSegment5<OpDontSaveObject>(Compiler::Misc::opcodeDontSaveObject);
+            interpreter.installSegment5<OpPcForce1stPerson>(Compiler::Misc::opcodePcForce1stPerson);
+            interpreter.installSegment5<OpPcForce3rdPerson>(Compiler::Misc::opcodePcForce3rdPerson);
+            interpreter.installSegment5<OpPcGet3rdPerson>(Compiler::Misc::opcodePcGet3rdPerson);
+            interpreter.installSegment5<OpToggleVanityMode>(Compiler::Misc::opcodeToggleVanityMode);
+            interpreter.installSegment5<OpGetPcSleep>(Compiler::Misc::opcodeGetPcSleep);
+            interpreter.installSegment5<OpGetPcJumping>(Compiler::Misc::opcodeGetPcJumping);
+            interpreter.installSegment5<OpWakeUpPc>(Compiler::Misc::opcodeWakeUpPc);
+            interpreter.installSegment5<OpPlayBink>(Compiler::Misc::opcodePlayBink);
+            interpreter.installSegment5<OpPayFine>(Compiler::Misc::opcodePayFine);
+            interpreter.installSegment5<OpPayFineThief>(Compiler::Misc::opcodePayFineThief);
+            interpreter.installSegment5<OpGoToJail>(Compiler::Misc::opcodeGoToJail);
+            interpreter.installSegment5<OpGetLocked<ImplicitRef>>(Compiler::Misc::opcodeGetLocked);
+            interpreter.installSegment5<OpGetLocked<ExplicitRef>>(Compiler::Misc::opcodeGetLockedExplicit);
+            interpreter.installSegment5<OpGetEffect<ImplicitRef>>(Compiler::Misc::opcodeGetEffect);
+            interpreter.installSegment5<OpGetEffect<ExplicitRef>>(Compiler::Misc::opcodeGetEffectExplicit);
+            interpreter.installSegment5<OpAddSoulGem<ImplicitRef>>(Compiler::Misc::opcodeAddSoulGem);
+            interpreter.installSegment5<OpAddSoulGem<ExplicitRef>>(Compiler::Misc::opcodeAddSoulGemExplicit);
+            interpreter.installSegment3<OpRemoveSoulGem<ImplicitRef>>(Compiler::Misc::opcodeRemoveSoulGem);
+            interpreter.installSegment3<OpRemoveSoulGem<ExplicitRef>>(Compiler::Misc::opcodeRemoveSoulGemExplicit);
+            interpreter.installSegment5<OpDrop<ImplicitRef>>(Compiler::Misc::opcodeDrop);
+            interpreter.installSegment5<OpDrop<ExplicitRef>>(Compiler::Misc::opcodeDropExplicit);
+            interpreter.installSegment5<OpDropSoulGem<ImplicitRef>>(Compiler::Misc::opcodeDropSoulGem);
+            interpreter.installSegment5<OpDropSoulGem<ExplicitRef>>(Compiler::Misc::opcodeDropSoulGemExplicit);
+            interpreter.installSegment5<OpGetAttacked<ImplicitRef>>(Compiler::Misc::opcodeGetAttacked);
+            interpreter.installSegment5<OpGetAttacked<ExplicitRef>>(Compiler::Misc::opcodeGetAttackedExplicit);
+            interpreter.installSegment5<OpGetWeaponDrawn<ImplicitRef>>(Compiler::Misc::opcodeGetWeaponDrawn);
+            interpreter.installSegment5<OpGetWeaponDrawn<ExplicitRef>>(Compiler::Misc::opcodeGetWeaponDrawnExplicit);
+            interpreter.installSegment5<OpGetSpellReadied<ImplicitRef>>(Compiler::Misc::opcodeGetSpellReadied);
+            interpreter.installSegment5<OpGetSpellReadied<ExplicitRef>>(Compiler::Misc::opcodeGetSpellReadiedExplicit);
+            interpreter.installSegment5<OpGetSpellEffects<ImplicitRef>>(Compiler::Misc::opcodeGetSpellEffects);
+            interpreter.installSegment5<OpGetSpellEffects<ExplicitRef>>(Compiler::Misc::opcodeGetSpellEffectsExplicit);
+            interpreter.installSegment5<OpGetCurrentTime>(Compiler::Misc::opcodeGetCurrentTime);
+            interpreter.installSegment5<OpSetDelete<ImplicitRef>>(Compiler::Misc::opcodeSetDelete);
+            interpreter.installSegment5<OpSetDelete<ExplicitRef>>(Compiler::Misc::opcodeSetDeleteExplicit);
+            interpreter.installSegment5<OpGetSquareRoot>(Compiler::Misc::opcodeGetSquareRoot);
+            interpreter.installSegment5<OpFall<ImplicitRef>>(Compiler::Misc::opcodeFall);
+            interpreter.installSegment5<OpFall<ExplicitRef>>(Compiler::Misc::opcodeFallExplicit);
+            interpreter.installSegment5<OpGetStandingPc<ImplicitRef>>(Compiler::Misc::opcodeGetStandingPc);
+            interpreter.installSegment5<OpGetStandingPc<ExplicitRef>>(Compiler::Misc::opcodeGetStandingPcExplicit);
+            interpreter.installSegment5<OpGetStandingActor<ImplicitRef>>(Compiler::Misc::opcodeGetStandingActor);
+            interpreter.installSegment5<OpGetStandingActor<ExplicitRef>>(Compiler::Misc::opcodeGetStandingActorExplicit);
+            interpreter.installSegment5<OpGetCollidingPc<ImplicitRef>>(Compiler::Misc::opcodeGetCollidingPc);
+            interpreter.installSegment5<OpGetCollidingPc<ExplicitRef>>(Compiler::Misc::opcodeGetCollidingPcExplicit);
+            interpreter.installSegment5<OpGetCollidingActor<ImplicitRef>>(Compiler::Misc::opcodeGetCollidingActor);
+            interpreter.installSegment5<OpGetCollidingActor<ExplicitRef>>(Compiler::Misc::opcodeGetCollidingActorExplicit);
+            interpreter.installSegment5<OpHurtStandingActor<ImplicitRef>>(Compiler::Misc::opcodeHurtStandingActor);
+            interpreter.installSegment5<OpHurtStandingActor<ExplicitRef>>(Compiler::Misc::opcodeHurtStandingActorExplicit);
+            interpreter.installSegment5<OpHurtCollidingActor<ImplicitRef>>(Compiler::Misc::opcodeHurtCollidingActor);
+            interpreter.installSegment5<OpHurtCollidingActor<ExplicitRef>>(Compiler::Misc::opcodeHurtCollidingActorExplicit);
+            interpreter.installSegment5<OpGetWindSpeed>(Compiler::Misc::opcodeGetWindSpeed);
+            interpreter.installSegment5<OpHitOnMe<ImplicitRef>>(Compiler::Misc::opcodeHitOnMe);
+            interpreter.installSegment5<OpHitOnMe<ExplicitRef>>(Compiler::Misc::opcodeHitOnMeExplicit);
+            interpreter.installSegment5<OpHitAttemptOnMe<ImplicitRef>>(Compiler::Misc::opcodeHitAttemptOnMe);
+            interpreter.installSegment5<OpHitAttemptOnMe<ExplicitRef>>(Compiler::Misc::opcodeHitAttemptOnMeExplicit);
+            interpreter.installSegment5<OpEnableTeleporting<false>>(Compiler::Misc::opcodeDisableTeleporting);
+            interpreter.installSegment5<OpEnableTeleporting<true>>(Compiler::Misc::opcodeEnableTeleporting);
+            interpreter.installSegment5<OpShowVars<ImplicitRef>>(Compiler::Misc::opcodeShowVars);
+            interpreter.installSegment5<OpShowVars<ExplicitRef>>(Compiler::Misc::opcodeShowVarsExplicit);
+            interpreter.installSegment5<OpShow<ImplicitRef>>(Compiler::Misc::opcodeShow);
+            interpreter.installSegment5<OpShow<ExplicitRef>>(Compiler::Misc::opcodeShowExplicit);
+            interpreter.installSegment5<OpToggleGodMode>(Compiler::Misc::opcodeToggleGodMode);
+            interpreter.installSegment5<OpToggleScripts>(Compiler::Misc::opcodeToggleScripts);
+            interpreter.installSegment5<OpEnableLevitation<false>>(Compiler::Misc::opcodeDisableLevitation);
+            interpreter.installSegment5<OpEnableLevitation<true>>(Compiler::Misc::opcodeEnableLevitation);
+            interpreter.installSegment5<OpCast<ImplicitRef>>(Compiler::Misc::opcodeCast);
+            interpreter.installSegment5<OpCast<ExplicitRef>>(Compiler::Misc::opcodeCastExplicit);
+            interpreter.installSegment5<OpExplodeSpell<ImplicitRef>>(Compiler::Misc::opcodeExplodeSpell);
+            interpreter.installSegment5<OpExplodeSpell<ExplicitRef>>(Compiler::Misc::opcodeExplodeSpellExplicit);
+            interpreter.installSegment5<OpGetPcInJail>(Compiler::Misc::opcodeGetPcInJail);
+            interpreter.installSegment5<OpGetPcTraveling>(Compiler::Misc::opcodeGetPcTraveling);
+            interpreter.installSegment3<OpBetaComment<ImplicitRef>>(Compiler::Misc::opcodeBetaComment);
+            interpreter.installSegment3<OpBetaComment<ExplicitRef>>(Compiler::Misc::opcodeBetaCommentExplicit);
+            interpreter.installSegment5<OpAddToLevCreature>(Compiler::Misc::opcodeAddToLevCreature);
+            interpreter.installSegment5<OpRemoveFromLevCreature>(Compiler::Misc::opcodeRemoveFromLevCreature);
+            interpreter.installSegment5<OpAddToLevItem>(Compiler::Misc::opcodeAddToLevItem);
+            interpreter.installSegment5<OpRemoveFromLevItem>(Compiler::Misc::opcodeRemoveFromLevItem);
+            interpreter.installSegment3<OpShowSceneGraph<ImplicitRef>>(Compiler::Misc::opcodeShowSceneGraph);
+            interpreter.installSegment3<OpShowSceneGraph<ExplicitRef>>(Compiler::Misc::opcodeShowSceneGraphExplicit);
+            interpreter.installSegment5<OpToggleBorders>(Compiler::Misc::opcodeToggleBorders);
+            interpreter.installSegment5<OpToggleNavMesh>(Compiler::Misc::opcodeToggleNavMesh);
+            interpreter.installSegment5<OpToggleActorsPaths>(Compiler::Misc::opcodeToggleActorsPaths);
+            interpreter.installSegment5<OpSetNavMeshNumberToRender>(Compiler::Misc::opcodeSetNavMeshNumberToRender);
+            interpreter.installSegment5<OpRepairedOnMe<ImplicitRef>>(Compiler::Misc::opcodeRepairedOnMe);
+            interpreter.installSegment5<OpRepairedOnMe<ExplicitRef>>(Compiler::Misc::opcodeRepairedOnMeExplicit);
+            interpreter.installSegment5<OpToggleRecastMesh>(Compiler::Misc::opcodeToggleRecastMesh);
+            interpreter.installSegment5<OpHelp>(Compiler::Misc::opcodeHelp);
+            interpreter.installSegment5<OpReloadLua>(Compiler::Misc::opcodeReloadLua);
         }
     }
 }

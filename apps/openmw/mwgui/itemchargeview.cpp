@@ -7,7 +7,7 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_FactoryManager.h>
 
-#include <components/esm/loadench.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

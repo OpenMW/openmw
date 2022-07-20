@@ -104,11 +104,6 @@ namespace
         code.push_back (Compiler::Generator::segment5 (17));
     }
 
-    void opSquareRoot (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (19));
-    }
-
     void opReturn (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (20));
@@ -450,11 +445,6 @@ namespace Compiler::Generator
                 else
                     throw std::logic_error ("illegal type conversion");
             }
-        }
-
-        void squareRoot (CodeContainer& code)
-        {
-            opSquareRoot (code);
         }
 
         void exit (CodeContainer& code)

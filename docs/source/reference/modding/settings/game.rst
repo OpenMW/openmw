@@ -275,7 +275,7 @@ normalise race speed
 :Range:		True/False
 :Default:	False
 
-By default race weight is factored into horizontal movement speed like in Morrowind.
+By default race weight is factored into horizontal movement and magic projectile speed like in Morrowind.
 For example, an NPC which has 1.2 race weight is faster than an NPC with the exact same stats and weight 1.0 by a factor of 120%.
 If this setting is true, race weight is ignored in the calculations which allows for a movement behavior
 equivalent to the one introduced by the equivalent Morrowind Code Patch feature.
@@ -428,3 +428,49 @@ even if the fighting NPC is knocked out.
 This setting allows the player to steal items from fighting NPCs that were knocked out if enabled.
 
 This setting can be controlled in Advanced tab of the launcher.
+
+graphic herbalism
+-----------------
+
+:Type:      boolean
+:Range:		True/False
+:Default:	True
+
+Some mods add harvestable container models. When this setting is enabled, activating a container using a harvestable model will visually harvest from it instead of opening the menu.
+
+When this setting is turned off or when activating a regular container, the menu will open as usual.
+
+allow actors to follow over water surface
+-----------------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+If enabled actors will always find path over the water surface when following other actors. This makes OpenMW behaviour closer to the vanilla engine.
+
+If disabled actors without the ability to swim will not follow other actors to the water.
+
+.. note::
+    Has effect only when Navigator is enabled.
+
+This setting can be controlled in Advanced tab of the launcher.
+
+default actor pathfind half extents
+-----------------------------------
+
+:Type:		3D vector floating point
+:Range:		All components > 0
+:Default:	29.27999496459961 28.479997634887695 66.5
+
+Actor half extents used for exterior cells to generate navmesh.
+Changing the value will invalidate navmesh disk cache.
+
+day night switches
+------------------
+
+:Type:      boolean
+:Range:		True/False
+:Default:	True
+
+Some mods add models which change visuals based on time of day. When this setting is enabled, supporting models will automatically make use of Day/night state.

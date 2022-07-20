@@ -1,24 +1,19 @@
 #include "scenetooltexturebrush.hpp"
 
-#include <QFrame>
-#include <QIcon>
-#include <QTableWidget>
-#include <QHBoxLayout>
-
-#include <QWidget>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QSlider>
-#include <QEvent>
-#include <QDropEvent>
 #include <QButtonGroup>
-#include <QVBoxLayout>
 #include <QDragEnterEvent>
-#include <QDrag>
-#include <QTableWidget>
+#include <QDropEvent>
+#include <QFrame>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QHeaderView>
-#include <QApplication>
+#include <QIcon>
 #include <QSizePolicy>
+#include <QSlider>
+#include <QSpinBox>
+#include <QTableWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include "scenetool.hpp"
 
@@ -179,13 +174,13 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
         undoStack.endMacro();
     }
 
-    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+    if (index != -1 && !landtexturesCollection.getRecord(rowInNew).isDeleted())
     {
         mBrushTextureLabel = "Selected texture: " + newBrushTextureId + " ";
-        mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(index, landTextureFilename).value<QString>());
+        mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(rowInNew, landTextureFilename).value<QString>());
     } else
     {
-        newBrushTextureId = "";
+        newBrushTextureId.clear();
         mBrushTextureLabel = "No selected texture or invalid texture";
         mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
     }

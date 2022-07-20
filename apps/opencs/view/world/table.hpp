@@ -4,8 +4,6 @@
 #include <vector>
 #include <string>
 
-#include <QEvent>
-
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/universalid.hpp"
@@ -74,6 +72,7 @@ namespace CSVWorld
             std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
             bool mJumpToAddedRecord;
             bool mUnselectAfterJump;
+            bool mAutoJump;
 
         private:
 
@@ -141,6 +140,8 @@ namespace CSVWorld
 
             void moveDownRecord();
 
+            void moveRecords(QDropEvent *event);
+
             void viewRecord();
 
             void previewRecord();
@@ -162,6 +163,12 @@ namespace CSVWorld
             void recordFilterChanged (std::shared_ptr<CSMFilter::Node> filter);
 
             void rowAdded(const std::string &id);
+
+            void dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
+            void jumpAfterModChanged(int state);
+
+            void queuedScrollTo(int state);
     };
 }
 

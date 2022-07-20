@@ -1,26 +1,21 @@
 #version 120
-    
-varying vec3  screenCoordsPassthrough;
+
+#include "openmw_vertex.h.glsl"
+
 varying vec4  position;
 varying float linearDepth;
 
 #include "shadows_vertex.glsl"
+#include "depth.glsl"
 
 void main(void)
 {
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-
-    mat4 scalemat = mat4(0.5, 0.0, 0.0, 0.0,
-                         0.0, -0.5, 0.0, 0.0,
-                         0.0, 0.0, 0.5, 0.0,
-                         0.5, 0.5, 0.5, 1.0);
-
-    vec4 texcoordProj = ((scalemat) * ( gl_Position));
-    screenCoordsPassthrough = texcoordProj.xyw;
+    gl_Position = mw_modelToClip(gl_Vertex);
 
     position = gl_Vertex;
 
-    linearDepth = gl_Position.z;
+    vec4 viewPos = mw_modelToView(gl_Vertex);
+    linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
-    setupShadowCoords(gl_ModelViewMatrix * gl_Vertex, normalize((gl_NormalMatrix * gl_Normal).xyz));
+    setupShadowCoords(viewPos, normalize((gl_NormalMatrix * gl_Normal).xyz));
 }

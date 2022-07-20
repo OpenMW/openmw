@@ -10,6 +10,7 @@ namespace Interpreter
 
 namespace Compiler
 {
+    class Extensions;
     class Locals;
 }
 
@@ -52,6 +53,8 @@ namespace MWBase
             ///< Return locals for script \a name.
 
             virtual MWScript::GlobalScripts& getGlobalScripts() = 0;
+
+            virtual const Compiler::Extensions& getExtensions() const = 0;
    };
 }
 

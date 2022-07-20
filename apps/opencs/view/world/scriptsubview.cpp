@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include <QStatusBar>
-#include <QStackedLayout>
 #include <QSplitter>
 #include <QTimer>
 
@@ -12,7 +10,6 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/data.hpp"
-#include "../../model/world/columnbase.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/prefs/state.hpp"
@@ -88,7 +85,7 @@ void CSVWorld::ScriptSubView::adjustSplitter()
 }
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mButtons (0),
+: SubView (id), mDocument (document), mColumn (-1), mBottom(nullptr), mButtons (nullptr),
   mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType())),
   mErrorHeight (CSMPrefs::get()["Scripts"]["error-height"].toInt())
 {
@@ -110,7 +107,7 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     sizes << 1 << 0;
     mMain->setSizes (sizes);
 
-    QWidget *widget = new QWidget (this);;
+    QWidget *widget = new QWidget (this);
     widget->setLayout (&mLayout);
     setWidget (widget);
 
@@ -177,7 +174,7 @@ void CSVWorld::ScriptSubView::settingChanged (const CSMPrefs::Setting *setting)
         {
             mLayout.removeWidget (mButtons);
             delete mButtons;
-            mButtons = 0;
+            mButtons = nullptr;
         }
     }
     else if (*setting=="Scripts/compile-delay")

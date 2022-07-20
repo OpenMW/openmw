@@ -3,7 +3,6 @@
 
 #include <QLineEdit>
 #include <QPalette>
-#include <QtCore/qnamespace.h>
 
 #include "../../model/filter/parser.hpp"
 #include "../../model/filter/node.hpp"
@@ -30,7 +29,7 @@ namespace CSVFilter
 
         public:
 
-            EditWidget (CSMWorld::Data& data, QWidget *parent = 0);
+            EditWidget (CSMWorld::Data& data, QWidget *parent = nullptr);
 
             void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource,
                                      Qt::DropAction action);

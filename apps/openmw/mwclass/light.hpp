@@ -1,12 +1,16 @@
 #ifndef GAME_MWCLASS_LIGHT_H
 #define GAME_MWCLASS_LIGHT_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Light : public MWWorld::Class
+    class Light : public MWWorld::RegisteredClass<Light>
     {
+            friend MWWorld::RegisteredClass<Light>;
+
+            Light();
+
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
         public:
@@ -14,7 +18,8 @@ namespace MWClass
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
+            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
+            void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
 
             bool useAnim() const override;
 
@@ -29,7 +34,7 @@ namespace MWClass
 
             bool showsInInventory (const MWWorld::ConstPtr& ptr) const override;
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
@@ -43,8 +48,6 @@ namespace MWClass
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            static void registerSelf();
-
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id
 
@@ -54,7 +57,7 @@ namespace MWClass
             std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of inventory icon.
 
-            std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
+            std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
             ///< Generate action for using via inventory menu
 
             void setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const override;

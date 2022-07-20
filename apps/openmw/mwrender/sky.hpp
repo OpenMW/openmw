@@ -7,12 +7,8 @@
 
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
-#include <osg/Uniform>
 
-namespace osg
-{
-    class Camera;
-}
+#include "skyutil.hpp"
 
 namespace osg
 {
@@ -20,6 +16,7 @@ namespace osg
     class Node;
     class Material;
     class PositionAttitudeTransform;
+    class Camera;
 }
 
 namespace osgParticle
@@ -33,98 +30,19 @@ namespace Resource
     class SceneManager;
 }
 
+namespace SceneUtil
+{
+    class RTTNode;
+}
+
 namespace MWRender
 {
-    class AtmosphereUpdater;
-    class AtmosphereNightUpdater;
-    class CloudUpdater;
-    class Sun;
-    class Moon;
-    class RainCounter;
-    class RainShooter;
-    class RainFader;
-    class AlphaFader;
-    class UnderwaterSwitchCallback;
-
-    struct WeatherResult
-    {
-        std::string mCloudTexture;
-        std::string mNextCloudTexture;
-        float mCloudBlendFactor;
-
-        osg::Vec4f mFogColor;
-
-        osg::Vec4f mAmbientColor;
-
-        osg::Vec4f mSkyColor;
-
-        // sun light color
-        osg::Vec4f mSunColor;
-
-        // alpha is the sun transparency
-        osg::Vec4f mSunDiscColor;
-
-        float mFogDepth;
-
-        float mDLFogFactor;
-        float mDLFogOffset;
-
-        float mWindSpeed;
-        float mCurrentWindSpeed;
-        float mNextWindSpeed;
-
-        float mCloudSpeed;
-
-        float mGlareView;
-
-        bool mNight; // use night skybox
-        float mNightFade; // fading factor for night skybox
-
-        bool mIsStorm;
-
-        std::string mAmbientLoopSoundID;
-        float mAmbientSoundVolume;
-
-        std::string mParticleEffect;
-        std::string mRainEffect;
-        float mEffectFade;
-
-        float mRainDiameter;
-        float mRainMinHeight;
-        float mRainMaxHeight;
-        float mRainSpeed;
-        float mRainEntranceSpeed;
-        int mRainMaxRaindrops;
-    };
-
-    struct MoonState
-    {
-        enum class Phase
-        {
-            Full = 0,
-            WaningGibbous,
-            ThirdQuarter,
-            WaningCrescent,
-            New,
-            WaxingCrescent,
-            FirstQuarter,
-            WaxingGibbous,
-            Unspecified
-        };
-
-        float mRotationFromHorizon;
-        float mRotationFromNorth;
-        Phase mPhase;
-        float mShadowBlend;
-        float mMoonAlpha;
-    };
-
     ///@brief The SkyManager handles rendering of the sky domes, celestial bodies as well as other objects that need to be rendered
     /// relative to the camera (e.g. weather particle effects)
     class SkyManager
     {
     public:
-        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager);
+        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, bool enableSkyRTT);
         ~SkyManager();
 
         void update(float duration);
@@ -156,11 +74,13 @@ namespace MWRender
 
         bool isEnabled();
 
-        bool hasRain();
+        bool hasRain() const;
+
+        float getPrecipitationAlpha() const;
 
         void setRainSpeed(float speed);
 
-        void setStormDirection(const osg::Vec3f& direction);
+        void setStormParticleDirection(const osg::Vec3f& direction);
 
         void setSunDirection(const osg::Vec3f& direction);
 
@@ -179,7 +99,11 @@ namespace MWRender
 
         void setCamera(osg::Camera *camera);
 
-        void setRainIntensityUniform(osg::Uniform *uniform);
+        float getBaseWindSpeed() const;
+
+        void setSunglare(bool enabled);
+
+        SceneUtil::RTTNode* getSkyRTT() { return mSkyRTT.get(); }
 
     private:
         void create();
@@ -193,22 +117,20 @@ namespace MWRender
         Resource::SceneManager* mSceneManager;
 
         osg::Camera *mCamera;
-        osg::Uniform *mRainIntensityUniform;
 
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
         osg::ref_ptr<osg::Node> mParticleEffect;
-        std::vector<osg::ref_ptr<AlphaFader> > mParticleFaders;
         osg::ref_ptr<UnderwaterSwitchCallback> mUnderwaterSwitch;
 
-        osg::ref_ptr<osg::PositionAttitudeTransform> mCloudNode;
+        osg::ref_ptr<osg::Group> mCloudNode;
 
         osg::ref_ptr<CloudUpdater> mCloudUpdater;
-        osg::ref_ptr<CloudUpdater> mCloudUpdater2;
-        osg::ref_ptr<osg::Node> mCloudMesh;
-        osg::ref_ptr<osg::Node> mCloudMesh2;
+        osg::ref_ptr<CloudUpdater> mNextCloudUpdater;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mCloudMesh;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mNextCloudMesh;
 
         osg::ref_ptr<osg::Node> mAtmosphereDay;
 
@@ -227,7 +149,6 @@ namespace MWRender
         osg::ref_ptr<osgParticle::BoxPlacer> mPlacer;
         osg::ref_ptr<RainCounter> mCounter;
         osg::ref_ptr<RainShooter> mRainShooter;
-        osg::ref_ptr<RainFader> mRainFader;
 
         bool mCreated;
 
@@ -240,7 +161,10 @@ namespace MWRender
 
         float mRainTimer;
 
+        // particle system rotation is independent of cloud rotation internally
+        osg::Vec3f mStormParticleDirection;
         osg::Vec3f mStormDirection;
+        osg::Vec3f mNextStormDirection;
 
         // remember some settings so we don't have to apply them again if they didn't change
         std::string mClouds;
@@ -265,14 +189,19 @@ namespace MWRender
         float mRainEntranceSpeed;
         int mRainMaxRaindrops;
         float mWindSpeed;
+        float mBaseWindSpeed;
 
         bool mEnabled;
         bool mSunEnabled;
+        bool mSunglareEnabled;
 
-        float mWeatherAlpha;
+        float mPrecipitationAlpha;
+        bool mDirtyParticlesEffect;
 
         osg::Vec4f mMoonScriptColor;
+
+        osg::ref_ptr<SceneUtil::RTTNode> mSkyRTT;
     };
 }
 
-#endif // GAME_RENDER_SKY_H
+#endif

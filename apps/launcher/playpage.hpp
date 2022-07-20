@@ -1,8 +1,6 @@
 #ifndef PLAYPAGE_H
 #define PLAYPAGE_H
 
-#include <QWidget>
-
 #include "ui_playpage.h"
 
 class QComboBox;
@@ -16,7 +14,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        PlayPage(QWidget *parent = 0);
+        PlayPage(QWidget *parent = nullptr);
         void setProfilesModel(QAbstractItemModel *model);
 
     signals:

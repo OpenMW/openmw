@@ -62,7 +62,7 @@ namespace CSVTools
             /// 0 no refresh function exists. If the document current has the specified state
             /// the refresh function is disabled.
             ReportTable (CSMDoc::Document& document, const CSMWorld::UniversalId& id,
-                bool richTextDescription, int refreshState = 0, QWidget *parent = 0);
+                bool richTextDescription, int refreshState = 0, QWidget *parent = nullptr);
 
             std::vector<CSMWorld::UniversalId> getDraggedRecords() const override;
 

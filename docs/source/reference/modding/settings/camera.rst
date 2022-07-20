@@ -1,11 +1,14 @@
 Camera Settings
 ###############
 
+.. note::
+    Some camera settings are available only in the in-game settings menu. See the tab "Scripts/OpenMW Camera".
+
 near clip
 ---------
 
 :Type:		floating point
-:Range:		> 0
+:Range:		>= 0.005
 :Default:	1.0
 
 This setting controls the distance to the near clipping plane. The value must be greater than zero.
@@ -46,44 +49,33 @@ viewing distance
 
 :Type:		floating point
 :Range:		> 0
-:Default:	6656.0
+:Default:	7168.0
 
 This value controls the maximum visible distance (also called the far clipping plane).
 Larger values significantly improve rendering in exterior spaces,
 but also increase the amount of rendered geometry and significantly reduce the frame rate.
-Note that when cells are visible before loading (when not using a Distant Land), the geometry will "pop-in" suddenly,
-creating a jarring visual effect. To prevent this effect, this value must be less than::
+Note that when cells are visible before loading, the geometry will "pop-in" suddenly,
+creating a jarring visual effect. To prevent this effect, this value should not be greater than:
 
-	(CellSizeInUnits * CellGridRadius - 1024) * 0.93
+	CellSizeInUnits * CellGridRadius - 1024
 
 The CellSizeInUnits is the size of a game cell in units (8192 by default), CellGridRadius determines how many
 neighboring cells to current one to load (1 by default - 3x3 grid), and 1024 is the threshold distance for loading a new cell.
-Additionally, the field of view setting also interacts with this setting because the view frustum end is a plane,
+The field of view setting also interacts with this setting because the view frustum end is a plane,
 so you can see further at the edges of the screen than you should be able to.
 This can be observed in game by looking at distant objects
 and rotating the camera so the objects are near the edge of the screen.
-As a result, this setting should further be reduced by a factor that depends on the field of view setting.
-In the default configuration this reduction is 7%, hence the factor of 0.93 above.
-Using this factor, approximate values recommended for other CellGridRadius values are:
+As a result, this distance is recommended to further be reduced to avoid pop-in for wide fields of view
+and long viewing distances near the edges of the screen if distant terrain and object paging are not used.
 
-======= ========
-Cells	Viewing
-        Distance
-=======	========
-2		14285
-3		21903
-4		29522
-5		35924
-=======	========
-
-Reductions of up to 25% or more can be required to completely eliminate pop-in for wide fields of view
-and long viewing distances near the edges of the screen.
+Reductions of up to 25% or more can be required to completely eliminate this pop-in.
 Such situations are unusual and probably not worth the performance penalty introduced
 by loading geometry obscured by fog in the center of the screen.
 See RenderingManager::configureFog for the relevant source code.
 
-This setting can be adjusted in game from the ridiculously low value of 2048.0 to a maximum of 81920.0
-using the View Distance slider in the Detail tab of the Video panel of the Options menu.
+This setting can be adjusted in game from the ridiculously low value of 2500 units to a maximum of 7168 units
+using the View Distance slider in the Detail tab of the Video panel of the Options menu, unless distant terrain is enabled,
+in which case the maximum is increased to 81920 units.
 
 field of view
 -------------
@@ -114,135 +106,23 @@ while small values can result in the hands not being visible.
 
 This setting can only be configured by editing the settings configuration file.
 
-third person camera distance
-----------------------------
-
-:Type:		floating point
-:Range:		30-800
-:Default:	192.0
-
-Distance from the camera to the character in third person mode.
-
-This setting can be changed in game using "Zoom In" / "Zoom Out" controls.
-
-view over shoulder
-------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-This setting controls third person view mode.
-False: View is centered on the character's head. Crosshair is hidden.
-True: In non-combat mode camera is positioned behind the character's shoulder. Crosshair is visible in third person mode as well.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-view over shoulder offset
--------------------------
-
-:Type:		2D vector floating point
-:Range:		Any
-:Default:	30 -10
-
-This setting makes sense only if 'view over shoulder' is enabled. Controls horizontal (first number) and vertical (second number) offset of the camera in third person mode.
-Recommened values: 30 -10 for the right shoulder, -30 -10 for the left shoulder.
-
-This setting can only be configured by editing the settings configuration file.
-
-auto switch shoulder
---------------------
+reverse z
+---------
 
 :Type:		boolean
 :Range:		True/False
 :Default:	True
 
-This setting makes difference only in third person mode if 'view over shoulder' is enabled.
-When player is close to an obstacle, automatically switches camera to the shoulder that is farther away from the obstacle.
+Enables a reverse-z depth buffer in which the depth range is reversed. This
+allows for small :ref:`near clip` values and removes almost all z-fighting with
+terrain and even tightly coupled meshes at extreme view distances. For this to
+be useful, a floating point depth buffer is required. These features require
+driver and hardware support, but should work on any semi-modern desktop hardware
+through OpenGL extensions. The exception is macOS, which has since dropped
+development of OpenGL drivers. If unsupported, this setting has no effect.
 
-This setting can be controlled in Advanced tab of the launcher.
-
-zoom out when move coef
------------------------
-
-:Type:		floating point
-:Range:		Any
-:Default:	20
-
-This setting makes difference only in third person mode if 'view over shoulder' is enabled.
-Slightly pulls camera away (or closer in case of negative value) when the character moves. To disable set it to zero.
-
-This setting can only be configured by editing the settings configuration file.
-
-preview if stand still
-----------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Makes difference only in third person mode.
-If enabled then the character rotation is not synchonized with the camera rotation while the character doesn't move and not in combat mode.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-deferred preview rotation
--------------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	True
-
-Makes difference only in third person mode.
-If enabled then the character smoothly rotates to the view direction after exiting preview or vanity mode.
-If disabled then the camera rotates rather than the character.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-head bobbing
-------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Enables head bobbing when move in first person mode.
-
-This setting can be controlled in Advanced tab of the launcher.
-
-head bobbing step
------------------
-
-:Type:		floating point
-:Range:		>0
-:Default:	90.0
-
-Makes diffence only in first person mode if 'head bobbing' is enabled.
-Length of each step.
-
-This setting can only be configured by editing the settings configuration file.
-
-head bobbing height
--------------------
-
-:Type:		floating point
-:Range:		Any
-:Default:	3.0
-
-Makes diffence only in first person mode if 'head bobbing' is enabled.
-Amplitude of the head bobbing.
-
-This setting can only be configured by editing the settings configuration file.
-
-head bobbing roll
------------------
-
-:Type:		floating point
-:Range:		0-90
-:Default:	0.2
-
-Makes diffence only in first person mode if 'head bobbing' is enabled.
-Maximum roll angle in degrees.
+Note, this will force OpenMW to use shaders as if :ref:`force shaders` was enabled.
+The performance impact of this feature should be negligible.
 
 This setting can only be configured by editing the settings configuration file.
 

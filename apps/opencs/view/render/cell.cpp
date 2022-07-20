@@ -1,21 +1,14 @@
 #include "cell.hpp"
 
 #include <osg/PositionAttitudeTransform>
-#include <osg/Geode>
-#include <osg/Geometry>
 #include <osg/Group>
 
 #include <components/misc/stringops.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
-#include <components/sceneutil/pathgridutil.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/terrain/terraingrid.hpp>
 
 #include "../../model/world/idtable.hpp"
-#include "../../model/world/columns.hpp"
-#include "../../model/world/data.hpp"
-#include "../../model/world/refcollection.hpp"
-#include "../../model/world/cellcoordinates.hpp"
 
 #include "cellwater.hpp"
 #include "cellborder.hpp"
@@ -25,6 +18,7 @@
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
 #include "object.hpp"
+#include "instancedragmodes.hpp"
 
 namespace CSVRender
 {
@@ -90,7 +84,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
         {
             std::string id = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mId);
 
-            std::unique_ptr<Object> object (new Object (mData, mCellNode, id, false));
+            auto object = std::make_unique<Object>(mData, mCellNode, id, false);
 
             if (mSubModeElementMask & Mask_Reference)
                 object->setSubMode (mSubMode);
@@ -133,14 +127,14 @@ void CSVRender::Cell::updateLand()
             }
             else
             {
-                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode,
-                    mData.getResourceSystem().get(), mTerrainStorage, Mask_Terrain));
+                mTerrain = std::make_unique<Terrain::TerrainGrid>(mCellNode, mCellNode,
+                    mData.getResourceSystem().get(), mTerrainStorage, Mask_Terrain);
             }
 
             mTerrain->loadCell(esmLand.mX, esmLand.mY);
 
             if (!mCellBorder)
-                mCellBorder.reset(new CellBorder(mCellNode, mCoordinates));
+                mCellBorder = std::make_unique<CellBorder>(mCellNode, mCoordinates);
 
             mCellBorder->buildShape(esmLand);
 
@@ -191,8 +185,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
         updateLand();
 
-        mPathgrid.reset(new Pathgrid(mData, mCellNode, mId, mCoordinates));
-        mCellWater.reset(new CellWater(mData, mCellNode, mId, mCoordinates));
+        mPathgrid = std::make_unique<Pathgrid>(mData, mCellNode, mId, mCoordinates);
+        mCellWater = std::make_unique<CellWater>(mData, mCellNode, mId, mCoordinates);
     }
 }
 
@@ -496,6 +490,50 @@ void CSVRender::Cell::selectAllWithSameParentId (int elementMask)
     }
 }
 
+void CSVRender::Cell::handleSelectDrag(Object* object, DragMode dragMode)
+{
+    if (dragMode == DragMode_Select_Only || dragMode == DragMode_Select_Add)
+        object->setSelected(true);
+
+    else if (dragMode == DragMode_Select_Remove)
+        object->setSelected(false);
+
+    else if (dragMode == DragMode_Select_Invert)
+        object->setSelected (!object->getSelected());
+}
+
+void CSVRender::Cell::selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode)
+{
+    for (auto& object : mObjects)
+    {
+        if (dragMode == DragMode_Select_Only) object.second->setSelected (false);
+
+        if ( ( object.second->getPosition().pos[0] > pointA[0] && object.second->getPosition().pos[0] < pointB[0] ) ||
+             ( object.second->getPosition().pos[0] > pointB[0] && object.second->getPosition().pos[0] < pointA[0] ))
+        {
+            if ( ( object.second->getPosition().pos[1] > pointA[1] && object.second->getPosition().pos[1] < pointB[1] ) ||
+                 ( object.second->getPosition().pos[1] > pointB[1] && object.second->getPosition().pos[1] < pointA[1] ))
+            {
+                if ( ( object.second->getPosition().pos[2] > pointA[2] && object.second->getPosition().pos[2] < pointB[2] ) ||
+                     ( object.second->getPosition().pos[2] > pointB[2] && object.second->getPosition().pos[2] < pointA[2] ))
+                    handleSelectDrag(object.second, dragMode);
+            }
+
+        }
+    }
+}
+
+void CSVRender::Cell::selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode)
+{
+    for (auto& object : mObjects)
+    {
+        if (dragMode == DragMode_Select_Only) object.second->setSelected (false);
+
+        float distanceFromObject = (point - object.second->getPosition().asVec3()).length();
+        if (distanceFromObject < distance) handleSelectDrag(object.second, dragMode);
+    }
+}
+
 void CSVRender::Cell::setCellArrows (int mask)
 {
     for (int i=0; i<4; ++i)
@@ -504,12 +542,12 @@ void CSVRender::Cell::setCellArrows (int mask)
 
         bool enable = mask & direction;
 
-        if (enable!=(mCellArrows[i].get()!=0))
+        if (enable!=(mCellArrows[i].get()!=nullptr))
         {
             if (enable)
-                mCellArrows[i].reset (new CellArrow (mCellNode, direction, mCoordinates));
+                mCellArrows[i] = std::make_unique<CellArrow>(mCellNode, direction, mCoordinates);
             else
-                mCellArrows[i].reset (0);
+                mCellArrows[i].reset (nullptr);
         }
     }
 }
@@ -528,7 +566,7 @@ void CSVRender::Cell::setCellMarker()
     }
 
     if (!isInteriorCell) {
-        mCellMarker.reset(new CellMarker(mCellNode, mCoordinates, cellExists));
+        mCellMarker = std::make_unique<CellMarker>(mCellNode, mCoordinates, cellExists);
     }
 }
 

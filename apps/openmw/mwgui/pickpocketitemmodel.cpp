@@ -1,18 +1,18 @@
 #include "pickpocketitemmodel.hpp"
 
 #include <components/misc/rng.hpp>
-#include <components/esm/loadskil.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/pickpocket.hpp"
 
-#include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWGui
 {
@@ -25,13 +25,13 @@ namespace MWGui
         float chance = player.getClass().getSkill(player, ESM::Skill::Sneak);
 
         mSourceModel->update();
-
         // build list of items that player is unable to find when attempts to pickpocket.
         if (hideItems)
         {
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
             {
-                if (Misc::Rng::roll0to99() > chance)
+                if (Misc::Rng::roll0to99(prng) > chance)
                     mHiddenItems.push_back(mSourceModel->getItem(i));
             }
         }

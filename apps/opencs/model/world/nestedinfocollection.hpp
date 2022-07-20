@@ -22,7 +22,7 @@ namespace CSMWorld
         public:
 
             NestedInfoCollection ();
-            ~NestedInfoCollection();
+            ~NestedInfoCollection() override;
 
             void addNestedRow(int row, int column, int position) override;
 

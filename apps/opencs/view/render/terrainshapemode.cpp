@@ -2,41 +2,28 @@
 
 #include <algorithm>
 #include <string>
-#include <sstream>
 #include <memory>
 
 #include <QWidget>
 #include <QIcon>
 #include <QEvent>
 #include <QDropEvent>
-#include <QDragEnterEvent>
-#include <QDrag>
 
 #include <osg/Group>
 #include <osg/Vec3f>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/debug/debuglog.hpp>
 
-#include "../widget/brushshapes.hpp"
-#include "../widget/modebutton.hpp"
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolshapebrush.hpp"
 
-#include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
-#include "../../model/world/columnbase.hpp"
-#include "../../model/world/commandmacro.hpp"
-#include "../../model/world/commands.hpp"
-#include "../../model/world/data.hpp"
-#include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
-#include "../../model/world/land.hpp"
-#include "../../model/world/resourcetable.hpp"
 #include "../../model/world/tablemimedata.hpp"
-#include "../../model/world/universalid.hpp"
 
 #include "brushdraw.hpp"
+#include "commands.hpp"
 #include "editmode.hpp"
 #include "pagedworldspacewidget.hpp"
 #include "mask.hpp"
@@ -45,7 +32,7 @@
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, Mask_Terrain | Mask_Reference, "Terrain land editing", parent),
+: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, Mask_Terrain, "Terrain land editing", parent),
     mParentNode(parentNode)
 {
 }
@@ -54,7 +41,7 @@ void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
     if (!mTerrainShapeSelection)
     {
-        mTerrainShapeSelection.reset(new TerrainSelection(mParentNode, &getWorldspaceWidget(), TerrainSelectionType::Shape));
+        mTerrainShapeSelection = std::make_shared<TerrainSelection>(mParentNode, &getWorldspaceWidget(), TerrainSelectionType::Shape);
     }
 
     if(!mShapeBrushScenetool)
@@ -69,7 +56,7 @@ void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
     }
 
     if (!mBrushDraw)
-        mBrushDraw.reset(new BrushDraw(mParentNode));
+        mBrushDraw = std::make_unique<BrushDraw>(mParentNode);
 
     EditMode::activate(toolbar);
     toolbar->addTool (mShapeBrushScenetool);
@@ -99,7 +86,7 @@ void CSVRender::TerrainShapeMode::primaryOpenPressed (const WorldspaceHitResult&
 
 void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& hit)
 {
-    if (hit.hit && hit.tag == 0)
+    if (hit.hit && hit.tag == nullptr)
     {
         if (mShapeEditTool == ShapeEditTool_Flatten)
             setFlattenToolTargetHeight(hit);
@@ -108,33 +95,25 @@ void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& 
             editTerrainShapeGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
             applyTerrainEditChanges();
         }
-
-        if (mDragMode == InteractionType_PrimarySelect)
-        {
-            selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0, true);
-        }
-
-        if (mDragMode == InteractionType_SecondarySelect)
-        {
-            selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, true);
-        }
     }
     clearTransientEdits();
 }
 
 void CSVRender::TerrainShapeMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if(hit.hit && hit.tag == 0)
+    if(hit.hit && hit.tag == nullptr)
     {
-        selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0, false);
+        selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0);
+        mTerrainShapeSelection->clearTemporarySelection();
     }
 }
 
 void CSVRender::TerrainShapeMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if(hit.hit && hit.tag == 0)
+    if(hit.hit && hit.tag == nullptr)
     {
-        selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, false);
+        selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1);
+        mTerrainShapeSelection->clearTemporarySelection();
     }
 }
 
@@ -144,7 +123,7 @@ bool CSVRender::TerrainShapeMode::primaryEditStartDrag (const QPoint& pos)
 
     mDragMode = InteractionType_PrimaryEdit;
 
-    if (hit.hit && hit.tag == 0)
+    if (hit.hit && hit.tag == nullptr)
     {
         mEditingPos = hit.worldPos;
         mIsEditing = true;
@@ -164,26 +143,26 @@ bool CSVRender::TerrainShapeMode::primarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_PrimarySelect;
-    if (!hit.hit || hit.tag != 0)
+    if (!hit.hit || hit.tag != nullptr)
     {
         mDragMode = InteractionType_None;
         return false;
     }
-    selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0, true);
-    return false;
+    selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0);
+    return true;
 }
 
 bool CSVRender::TerrainShapeMode::secondarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_SecondarySelect;
-    if (!hit.hit || hit.tag != 0)
+    if (!hit.hit || hit.tag != nullptr)
     {
         mDragMode = InteractionType_None;
         return false;
     }
-    selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, true);
-    return false;
+    selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1);
+    return true;
 }
 
 void CSVRender::TerrainShapeMode::drag (const QPoint& pos, int diffX, int diffY, double speedFactor)
@@ -202,13 +181,13 @@ void CSVRender::TerrainShapeMode::drag (const QPoint& pos, int diffX, int diffY,
     if (mDragMode == InteractionType_PrimarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit && hit.tag == 0) selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0, true);
+        if (hit.hit && hit.tag == nullptr) selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0);
     }
 
     if (mDragMode == InteractionType_SecondarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit && hit.tag == 0) selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, true);
+        if (hit.hit && hit.tag == nullptr) selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1);
     }
 }
 
@@ -219,12 +198,17 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
         applyTerrainEditChanges();
         clearTransientEdits();
     }
+    if (mDragMode == InteractionType_PrimarySelect || mDragMode == InteractionType_SecondarySelect)
+    {
+        mTerrainShapeSelection->clearTemporarySelection();
+    }
 }
 
 
 void CSVRender::TerrainShapeMode::dragAborted()
 {
      clearTransientEdits();
+     mDragMode = InteractionType_None;
 }
 
 void CSVRender::TerrainShapeMode::dragWheel (int diff, double speedFactor)
@@ -287,6 +271,9 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
     sortAndLimitAlteredCells();
 
     undoStack.beginMacro ("Edit shape and normal records");
+
+    // One command at the beginning of the macro for redrawing the terrain-selection grid when undoing the changes.
+    undoStack.push(new DrawTerrainSelectionCommand(&getWorldspaceWidget()));
 
     for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
     {
@@ -356,6 +343,9 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         }
         pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
     }
+    // One command at the end of the macro for redrawing the terrain-selection grid when redoing the changes.
+    undoStack.push(new DrawTerrainSelectionCommand(&getWorldspaceWidget()));
+
     undoStack.endMacro();
     clearTransientEdits();
 }
@@ -433,7 +423,9 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                 float smoothedByDistance = 0.0f;
                 if (mShapeEditTool == ShapeEditTool_Drag) smoothedByDistance = calculateBumpShape(distance, r, mTotalDiffY);
                 if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower) smoothedByDistance = calculateBumpShape(distance, r, r + mShapeEditToolStrength);
-                if (distance <= r)
+
+                // Using floating-point radius here to prevent selecting too few vertices.
+                if (distance <= mBrushSize / 2.0f)
                 {
                     if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, smoothedByDistance);
                     if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower)
@@ -964,15 +956,15 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
 
                     // Check for height limits on x-axis
                     if (leftHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightXAxis.reset(new float(leftHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightXAxis = std::make_unique<float>(leftHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
                     else if (leftHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightXAxis.reset(new float(leftHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightXAxis = std::make_unique<float>(leftHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Check for height limits on y-axis
                     if (upHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightYAxis.reset(new float(upHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightYAxis = std::make_unique<float>(upHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
                     else if (upHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightYAxis.reset(new float(upHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightYAxis = std::make_unique<float>(upHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Limit altered height value based on x or y, whichever is the smallest
                     compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis.get(), limitedAlteredHeightYAxis.get(), &steepnessIsWithinLimits);
@@ -993,15 +985,15 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
 
                     // Check for height limits on x-axis
                     if (rightHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightXAxis.reset(new float(rightHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightXAxis = std::make_unique<float>(rightHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
                     else if (rightHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightXAxis.reset(new float(rightHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightXAxis = std::make_unique<float>(rightHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Check for height limits on y-axis
                     if (downHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightYAxis.reset(new float(downHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightYAxis = std::make_unique<float>(downHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
                     else if (downHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightYAxis.reset(new float(downHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
+                        limitedAlteredHeightYAxis = std::make_unique<float>(downHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Limit altered height value based on x or y, whichever is the smallest
                     compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis.get(), limitedAlteredHeightYAxis.get(), &steepnessIsWithinLimits);
@@ -1036,16 +1028,41 @@ void CSVRender::TerrainShapeMode::handleSelection(int globalSelectionX, int glob
             return;
         int selectionX = globalSelectionX;
         int selectionY = globalSelectionY;
-        if (xIsAtCellBorder)
+
+        /*
+            The northern and eastern edges don't belong to the current cell.
+            If the corresponding adjacent cell is not loaded, some special handling is necessary to select border vertices.
+        */
+        if (xIsAtCellBorder && yIsAtCellBorder)
+        {
+            /*
+                Handle the NW, NE, and SE corner vertices.
+                NW corner: (+1, -1) offset to reach current cell.
+                NE corner: (-1, -1) offset to reach current cell.
+                SE corner: (-1, +1) offset to reach current cell.
+            */
+            if (isInCellSelection(globalSelectionX - 1, globalSelectionY - 1)
+                || isInCellSelection(globalSelectionX + 1, globalSelectionY - 1)
+                || isInCellSelection(globalSelectionX - 1, globalSelectionY + 1))
+            {
+                selections->emplace_back(globalSelectionX, globalSelectionY);
+            }
+        }
+        else if (xIsAtCellBorder)
+        {
             selectionX--;
-        if (yIsAtCellBorder)
+        }
+        else if (yIsAtCellBorder)
+        {
             selectionY--;
+        }
+
         if (isInCellSelection(selectionX, selectionY))
             selections->emplace_back(globalSelectionX, globalSelectionY);
     }
 }
 
-void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation)
+void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>& vertexCoords, unsigned char selectMode)
 {
     int r = mBrushSize / 2;
     std::vector<std::pair<int, int>> selections;
@@ -1074,8 +1091,11 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
             {
                 int distanceX = abs(i - vertexCoords.first);
                 int distanceY = abs(j - vertexCoords.second);
-                int distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                if (distance <= r) handleSelection(i, j, &selections);
+                float distance = sqrt(pow(distanceX, 2)+pow(distanceY, 2));
+
+                // Using floating-point radius here to prevent selecting too few vertices.
+                if (distance <= mBrushSize / 2.0f)
+                    handleSelection(i, j, &selections);
             }
         }
     }
@@ -1092,9 +1112,21 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
         }
     }
 
-    if(selectMode == 0) mTerrainShapeSelection->onlySelect(selections);
-    if(selectMode == 1) mTerrainShapeSelection->toggleSelect(selections, dragOperation);
+    std::string selectAction;
 
+    if (selectMode == 0)
+        selectAction = CSMPrefs::get()["3D Scene Editing"]["primary-select-action"].toString();
+    else
+        selectAction = CSMPrefs::get()["3D Scene Editing"]["secondary-select-action"].toString();
+
+    if (selectAction == "Select only")
+        mTerrainShapeSelection->onlySelect(selections);
+    else if (selectAction == "Add to selection")
+        mTerrainShapeSelection->addSelect(selections);
+    else if (selectAction == "Remove from selection")
+        mTerrainShapeSelection->removeSelect(selections);
+    else if (selectAction == "Invert selection")
+        mTerrainShapeSelection->toggleSelect(selections);
 }
 
 void CSVRender::TerrainShapeMode::pushEditToCommand(const CSMWorld::LandHeightsColumn::DataType& newLandGrid, CSMDoc::Document& document,
@@ -1266,8 +1298,7 @@ bool CSVRender::TerrainShapeMode::allowLandShapeEditing(const std::string& cellI
 
         if (mode=="Create cell and land, then edit" && useTool)
         {
-            std::unique_ptr<CSMWorld::CreateCommand> createCommand (
-                new CSMWorld::CreateCommand (cellTable, cellId));
+            auto createCommand = std::make_unique<CSMWorld::CreateCommand>(cellTable, cellId);
             int parentIndex = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
             int index = cellTable.findNestedColumnIndex (parentIndex, CSMWorld::Columns::ColumnId_Interior);
             createCommand->addNestedValue (parentIndex, index, false);
@@ -1396,6 +1427,11 @@ void CSVRender::TerrainShapeMode::mouseMoveEvent (QMouseEvent *event)
         mBrushDraw->update(hit.worldPos, mBrushSize, mBrushShape);
     if (!hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing))
         mBrushDraw->hide();
+}
+
+std::shared_ptr<CSVRender::TerrainSelection> CSVRender::TerrainShapeMode::getTerrainSelection()
+{
+    return mTerrainShapeSelection;
 }
 
 void CSVRender::TerrainShapeMode::setBrushSize(int brushSize)

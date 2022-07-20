@@ -2,9 +2,7 @@
 #define OPENMW_MWPHYSICS_HASSPHERECOLLISIONCALLBACK_H
 
 #include <LinearMath/btVector3.h>
-#include <BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <algorithm>
 
@@ -15,35 +13,43 @@ namespace MWPhysics
         const btVector3& position, const btScalar radius)
     {
         const btVector3 nearest(
-            std::max(aabbMin.x(), std::min(aabbMax.x(), position.x())),
-            std::max(aabbMin.y(), std::min(aabbMax.y(), position.y())),
-            std::max(aabbMin.z(), std::min(aabbMax.z(), position.z()))
+            std::clamp(position.x(), aabbMin.x(), aabbMax.x()),
+            std::clamp(position.y(), aabbMin.y(), aabbMax.y()),
+            std::clamp(position.z(), aabbMin.z(), aabbMax.z())
         );
         return nearest.distance(position) < radius;
     }
 
+    template <class Ignore, class OnCollision>
     class HasSphereCollisionCallback final : public btBroadphaseAabbCallback
     {
     public:
-        HasSphereCollisionCallback(const btVector3& position, const btScalar radius, btCollisionObject* object,
-                const int mask, const int group)
+        HasSphereCollisionCallback(const btVector3& position, const btScalar radius, const int mask, const int group,
+                                   const Ignore& ignore, OnCollision* onCollision)
             : mPosition(position),
               mRadius(radius),
-              mCollisionObject(object),
+              mIgnore(ignore),
               mCollisionFilterMask(mask),
-              mCollisionFilterGroup(group)
+              mCollisionFilterGroup(group),
+              mOnCollision(onCollision)
         {
         }
 
         bool process(const btBroadphaseProxy* proxy) override
         {
-            if (mResult)
+            if (mResult && mOnCollision == nullptr)
                 return false;
             const auto collisionObject = static_cast<btCollisionObject*>(proxy->m_clientObject);
-            if (collisionObject == mCollisionObject)
+            if (mIgnore(collisionObject)
+                || !needsCollision(*proxy)
+                || !testAabbAgainstSphere(proxy->m_aabbMin, proxy->m_aabbMax, mPosition, mRadius))
                 return true;
-            if (needsCollision(*proxy))
-                mResult = testAabbAgainstSphere(proxy->m_aabbMin, proxy->m_aabbMax, mPosition, mRadius);
+            mResult = true;
+            if (mOnCollision != nullptr)
+            {
+                (*mOnCollision)(collisionObject);
+                return true;
+            }
             return !mResult;
         }
 
@@ -55,9 +61,10 @@ namespace MWPhysics
     private:
         btVector3 mPosition;
         btScalar mRadius;
-        btCollisionObject* mCollisionObject;
+        Ignore mIgnore;
         int mCollisionFilterMask;
         int mCollisionFilterGroup;
+        OnCollision* mOnCollision;
         bool mResult = false;
 
         bool needsCollision(const btBroadphaseProxy& proxy) const

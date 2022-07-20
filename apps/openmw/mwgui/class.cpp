@@ -13,6 +13,9 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "tooltips.hpp"
 
@@ -517,6 +520,7 @@ namespace MWGui
     std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
     {
         std::vector<ESM::Skill::SkillEnum> v;
+        v.reserve(5);
         for(int i = 0; i < 5; i++)
         {
             v.push_back(mMajorSkill[i]->getSkillId());
@@ -527,6 +531,7 @@ namespace MWGui
     std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
     {
         std::vector<ESM::Skill::SkillEnum> v;
+        v.reserve(5);
         for(int i=0; i < 5; i++)
         {
             v.push_back(mMinorSkill[i]->getSkillId());
@@ -550,16 +555,16 @@ namespace MWGui
     void CreateClassDialog::onDialogCancel()
     {
         MWBase::Environment::get().getWindowManager()->removeDialog(mSpecDialog);
-        mSpecDialog = 0;
+        mSpecDialog = nullptr;
 
         MWBase::Environment::get().getWindowManager()->removeDialog(mAttribDialog);
-        mAttribDialog = 0;
+        mAttribDialog = nullptr;
 
         MWBase::Environment::get().getWindowManager()->removeDialog(mSkillDialog);
-        mSkillDialog = 0;
+        mSkillDialog = nullptr;
 
         MWBase::Environment::get().getWindowManager()->removeDialog(mDescDialog);
-        mDescDialog = 0;
+        mDescDialog = nullptr;
     }
 
     void CreateClassDialog::onSpecializationClicked(MyGUI::Widget* _sender)
@@ -577,7 +582,7 @@ namespace MWGui
         setSpecialization(mSpecializationId);
 
         MWBase::Environment::get().getWindowManager()->removeDialog(mSpecDialog);
-        mSpecDialog = 0;
+        mSpecDialog = nullptr;
     }
 
     void CreateClassDialog::setSpecialization(int id)
@@ -618,7 +623,7 @@ namespace MWGui
         }
         mAffectedAttribute->setAttributeId(id);
         MWBase::Environment::get().getWindowManager()->removeDialog(mAttribDialog);
-        mAttribDialog = 0;
+        mAttribDialog = nullptr;
 
         update();
     }
@@ -651,7 +656,7 @@ namespace MWGui
 
         mAffectedSkill->setSkillId(mSkillDialog->getSkillId());
         MWBase::Environment::get().getWindowManager()->removeDialog(mSkillDialog);
-        mSkillDialog = 0;
+        mSkillDialog = nullptr;
         update();
     }
 
@@ -667,7 +672,7 @@ namespace MWGui
     {
         mDescription = mDescDialog->getTextInput();
         MWBase::Environment::get().getWindowManager()->removeDialog(mDescDialog);
-        mDescDialog = 0;
+        mDescDialog = nullptr;
     }
 
     void CreateClassDialog::onOkClicked(MyGUI::Widget* _sender)
@@ -918,8 +923,9 @@ namespace MWGui
 
     void setClassImage(MyGUI::ImageBox* imageBox, const std::string &classId)
     {
-        std::string classImage = std::string("textures\\levelup\\") + classId + ".dds";
-        if (!MWBase::Environment::get().getWindowManager()->textureExists(classImage))
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        std::string classImage = Misc::ResourceHelpers::correctTexturePath("textures\\levelup\\" + classId + ".dds", vfs);
+        if (!vfs->exists(classImage))
         {
             Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
             classImage = "textures\\levelup\\warrior.dds";

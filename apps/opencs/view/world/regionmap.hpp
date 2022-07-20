@@ -4,9 +4,6 @@
 #include <cstddef>
 #include <vector>
 
-#include <QObject>
-#include <QTableView>
-
 #include "./dragrecordtable.hpp"
 
 class QAction;
@@ -61,7 +58,7 @@ namespace CSVWorld
         public:
 
             RegionMap (const CSMWorld::UniversalId& universalId, CSMDoc::Document& document,
-                QWidget *parent = 0);
+                QWidget *parent = nullptr);
 
             std::vector<CSMWorld::UniversalId> getDraggedRecords() const override;
 

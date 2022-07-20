@@ -1,21 +1,20 @@
 #include "windowmanagerimp.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <filesystem>
 #include <thread>
 
 #include <osgViewer/Viewer>
 
 #include <MyGUI_UString.h>
-#include <MyGUI_IPointer.h>
-#include <MyGUI_TextureUtility.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_PointerManager.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ClipboardManager.h>
-#include <MyGUI_WidgetManager.h>
 
 // For BT_NO_PROFILE
 #include <LinearMath/btQuickprof.h>
@@ -28,13 +27,14 @@
 #include <components/sdlutil/sdlcursormanager.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 
 #include <components/fontloader/fontloader.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
 
@@ -50,8 +50,12 @@
 #include <components/widgets/tags.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/frameratelimiter.hpp>
+
+#include <components/lua_ui/util.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -63,11 +67,11 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwmechanics/stat.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwrender/localmap.hpp"
+#include "../mwrender/postprocessor.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
@@ -110,6 +114,7 @@
 #include "itemwidget.hpp"
 #include "screenfader.hpp"
 #include "debugwindow.hpp"
+#include "postprocessorhud.hpp"
 #include "spellview.hpp"
 #include "draganddrop.hpp"
 #include "container.hpp"
@@ -123,8 +128,8 @@ namespace MWGui
 {
     WindowManager::WindowManager(
             SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-            const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
-            ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, const std::string& userDataPath)
+            const std::string& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
+            ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders)
       : mOldUpdateMask(0)
       , mOldCullMask(0)
       , mStore(nullptr)
@@ -161,7 +166,9 @@ namespace MWGui
       , mHitFader(nullptr)
       , mScreenFader(nullptr)
       , mDebugWindow(nullptr)
+      , mPostProcessorHud(nullptr)
       , mJailScreen(nullptr)
+      , mContainerWindow(nullptr)
       , mTranslationDataStorage (translationDataStorage)
       , mCharGen(nullptr)
       , mInputBlocker(nullptr)
@@ -171,7 +178,7 @@ namespace MWGui
       , mWerewolfOverlayEnabled(Settings::Manager::getBool ("werewolf overlay", "GUI"))
       , mHudEnabled(true)
       , mCursorVisible(true)
-      , mCursorActive(false)
+      , mCursorActive(true)
       , mPlayerBounty(-1)
       , mGui(nullptr)
       , mGuiModes()
@@ -186,9 +193,9 @@ namespace MWGui
       , mVersionDescription(versionDescription)
       , mWindowVisible(true)
     {
-        float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), uiScale);
-        mGuiPlatform->initialise(resourcePath, logpath);
+        mScalingFactor = std::clamp(Settings::Manager::getFloat("scaling factor", "GUI"), 0.5f, 8.f);
+        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), resourceSystem->getVFS(), mScalingFactor);
+        mGuiPlatform->initialise("mygui", (std::filesystem::path(logpath) / "MyGUI.log").generic_string());
 
         mGui = new MyGUI::Gui;
         mGui->initialise("");
@@ -198,8 +205,8 @@ namespace MWGui
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
-        mFontLoader.reset(new Gui::FontLoader(encoding, resourceSystem->getVFS(), userDataPath));
-        mFontLoader->loadBitmapFonts(exportFonts);
+        mFontLoader = std::make_unique<Gui::FontLoader>(encoding, resourceSystem->getVFS(), mScalingFactor);
+        mFontLoader->loadBitmapFonts();
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
@@ -213,22 +220,24 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::AdditiveLayer>("Layer");
         MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::ScalingLayer>("Layer");
-        BookPage::registerMyGUIComponents ();
+        BookPage::registerMyGUIComponents();
+        PostProcessorHud::registerMyGUIComponents();
         ItemView::registerComponents();
         ItemChargeView::registerComponents();
         ItemWidget::registerComponents();
         SpellView::registerComponents();
         Gui::registerAllWidgets();
+        LuaUi::registerAllWidgets();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::FactoryManager::getInstance().registerFactory<AutoSizedResourceSkin>("Resource", "AutoSizedResourceSkin");
         MyGUI::ResourceManager::getInstance().load("core.xml");
-        WindowManager::loadUserFonts();
+        mFontLoader->loadTrueTypeFonts();
 
         bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
-        mKeyboardNavigation.reset(new KeyboardNavigation());
+        mKeyboardNavigation = std::make_unique<KeyboardNavigation>();
         mKeyboardNavigation->setEnabled(keyboardNav);
         Gui::ImageButton::setDefaultNeedKeyFocus(keyboardNav);
 
@@ -251,7 +260,7 @@ namespace MWGui
         MyGUI::PointerManager::getInstance().setVisible(false);
 
         mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
-            MyGUI::Align::Default, "InputBlocker");
+            MyGUI::Align::Default, "Video");
         mVideoBackground->setImageTexture("black");
         mVideoBackground->setVisible(false);
         mVideoBackground->setNeedMouseFocus(true);
@@ -275,12 +284,10 @@ namespace MWGui
         mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
                                         Settings::Manager::getFloat("contrast", "Video"));
 
-        mStatsWatcher.reset(new StatsWatcher());
-    }
+        if (useShaders)
+            mGuiPlatform->getRenderManagerPtr()->enableShaders(mResourceSystem->getSceneManager()->getShaderManager());
 
-    void WindowManager::loadUserFonts()
-    {
-        mFontLoader->loadTrueTypeFonts();
+        mStatsWatcher = std::make_unique<StatsWatcher>();
     }
 
     void WindowManager::initUI()
@@ -353,10 +360,10 @@ namespace MWGui
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
         mTradeWindow->eventTradeDone += MyGUI::newDelegate(mDialogueWindow, &DialogueWindow::onTradeComplete);
 
-        ContainerWindow* containerWindow = new ContainerWindow(mDragAndDrop);
-        mWindows.push_back(containerWindow);
-        trackWindow(containerWindow, "container");
-        mGuiModeStates[GM_Container] = GuiModeState({containerWindow, mInventoryWindow});
+        mContainerWindow = new ContainerWindow(mDragAndDrop);
+        mWindows.push_back(mContainerWindow);
+        trackWindow(mContainerWindow, "container");
+        mGuiModeStates[GM_Container] = GuiModeState({mContainerWindow, mInventoryWindow});
 
         mHud = new HUD(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         mWindows.push_back(mHud);
@@ -380,6 +387,7 @@ namespace MWGui
 
         mSettingsWindow = new SettingsWindow();
         mWindows.push_back(mSettingsWindow);
+        trackWindow(mSettingsWindow, "settings");
         mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 
         mConfirmationDialog = new ConfirmationDialog();
@@ -460,6 +468,10 @@ namespace MWGui
         mDebugWindow = new DebugWindow();
         mWindows.push_back(mDebugWindow);
 
+        mPostProcessorHud = new PostProcessorHud();
+        mWindows.push_back(mPostProcessorHud);
+        trackWindow(mPostProcessorHud, "postprocessor");
+
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"InputBlocker");
 
         mHud->setVisible(true);
@@ -494,15 +506,17 @@ namespace MWGui
         }
         else
             allow(GW_ALL);
+
+        mStatsWatcher->forceUpdate();
     }
 
     WindowManager::~WindowManager()
     {
         try
         {
-            mStatsWatcher.reset();
+            LuaUi::clearUserInterface();
 
-            mKeyboardNavigation.reset();
+            mStatsWatcher.reset();
 
             MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
             MyGUI::PointerManager::getInstance().eventChangeMousePointer.clear();
@@ -521,6 +535,8 @@ namespace MWGui
             delete mSoulgemDialog;
             delete mCursorManager;
             delete mToolTips;
+
+            mKeyboardNavigation.reset();
 
             cleanupGarbage();
 
@@ -560,17 +576,17 @@ namespace MWGui
     void WindowManager::enableScene(bool enable)
     {
         unsigned int disablemask = MWRender::Mask_GUI|MWRender::Mask_PreCompile;
-        if (!enable && mViewer->getCamera()->getCullMask() != disablemask)
+        if (!enable && getCullMask() != disablemask)
         {
             mOldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
-            mOldCullMask = mViewer->getCamera()->getCullMask();
+            mOldCullMask = getCullMask();
             mViewer->getUpdateVisitor()->setTraversalMask(disablemask);
-            mViewer->getCamera()->setCullMask(disablemask);
+            setCullMask(disablemask);
         }
-        else if (enable && mViewer->getCamera()->getCullMask() == disablemask)
+        else if (enable && getCullMask() == disablemask)
         {
             mViewer->getUpdateVisitor()->setTraversalMask(mOldUpdateMask);
-            mViewer->getCamera()->setCullMask(mOldCullMask);
+            setCullMask(mOldCullMask);
         }
     }
 
@@ -629,6 +645,7 @@ namespace MWGui
             mMap->setVisible(false);
             mStatsWindow->setVisible(false);
             mSpellWindow->setVisible(false);
+            mHud->setDrowningBarVisible(false);
             mInventoryWindow->setVisible(getMode() == GM_Container || getMode() == GM_Barter || getMode() == GM_Companion);
         }
 
@@ -710,12 +727,11 @@ namespace MWGui
 
         if (block)
         {
-            osg::Timer frameTimer;
+            Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(MWBase::Environment::get().getFrameRateLimit());
             while (mMessageBoxManager->readPressedButton(false) == -1
                    && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
             {
-                double dt = frameTimer.time_s();
-                frameTimer.setStartTick();
+                const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration()).count();
 
                 mKeyboardNavigation->onFrame();
                 mMessageBoxManager->onFrame(dt);
@@ -734,7 +750,7 @@ namespace MWGui
                 // refer to the advance() and frame() order in Engine::go()
                 mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
-                MWBase::Environment::get().limitFrameRate(frameTimer.time_s());
+                frameRateLimiter.limit();
             }
         }
     }
@@ -748,6 +764,11 @@ namespace MWGui
         }
     }
 
+    void WindowManager::scheduleMessageBox(std::string message, enum MWGui::ShowInDialogueMode showInDialogueMode)
+    {
+        mScheduledMessageBoxes.lock()->emplace_back(std::move(message), showInDialogueMode);
+    }
+
     void WindowManager::staticMessageBox(const std::string& message)
     {
         mMessageBoxManager->createMessageBox(message, true);
@@ -756,6 +777,11 @@ namespace MWGui
     void WindowManager::removeStaticMessageBox()
     {
         mMessageBoxManager->removeStaticMessageBox();
+    }
+
+    const std::vector<MWGui::MessageBox*> WindowManager::getActiveMessageBoxes()
+    {
+        return mMessageBoxManager->getActiveMessageBoxes();
     }
 
     int WindowManager::readPressedButton ()
@@ -802,6 +828,8 @@ namespace MWGui
 
     void WindowManager::update (float frameDuration)
     {
+        handleScheduledMessageBoxes();
+
         bool gameRunning = MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame;
 
@@ -851,6 +879,8 @@ namespace MWGui
         if (mLocalMapRender)
             mLocalMapRender->cleanupCameras();
 
+        mDebugWindow->onFrame(frameDuration);
+
         if (!gameRunning)
             return;
 
@@ -870,7 +900,7 @@ namespace MWGui
 
         mHud->onFrame(frameDuration);
 
-        mDebugWindow->onFrame(frameDuration);
+        mPostProcessorHud->onFrame(frameDuration);
 
         if (mCharGen)
             mCharGen->onFrame(frameDuration);
@@ -1014,8 +1044,9 @@ namespace MWGui
         if(tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
         {
             tag = tag.substr(MyGuiPrefixLength, tag.length());
-            std::string settingSection = tag.substr(0, tag.find(","));
-            std::string settingTag = tag.substr(tag.find(",")+1, tag.length());
+            size_t comma_pos = tag.find(',');
+            std::string settingSection = tag.substr(0, comma_pos);
+            std::string settingTag = tag.substr(comma_pos+1, tag.length());
             
             _result = Settings::Manager::getString(settingTag, settingSection);            
         }
@@ -1030,12 +1061,27 @@ namespace MWGui
         }
         else
         {
+            std::vector<std::string> split;
+            Misc::StringUtils::split(tag, split, ":");
+
+            // TODO: LocalizationManager should not be a part of lua
+            const auto& luaManager = MWBase::Environment::get().getLuaManager();
+
+            // If a key has a "Context:KeyName" format, use YAML to translate data
+            if (split.size() == 2 && luaManager != nullptr)
+            {
+                _result = luaManager->translate(split[0], split[1]);
+                return;
+            }
+
+            // If not, treat is as GMST name from legacy localization
             if (!mStore)
             {
                 Log(Debug::Error) << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'";
+                _result = tag;
                 return;
             }
-            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
+            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().search(tag);
 
             if (setting && setting->mValue.getType()==ESM::VT_String)
                 _result = setting->mValue.getString();
@@ -1060,7 +1106,7 @@ namespace MWGui
             else if (setting.first == "Video" && (
                     setting.second == "resolution x"
                     || setting.second == "resolution y"
-                    || setting.second == "fullscreen"
+                    || setting.second == "window mode"
                     || setting.second == "window border"))
                 changeRes = true;
 
@@ -1075,19 +1121,28 @@ namespace MWGui
         {
             mVideoWrapper->setVideoMode(Settings::Manager::getInt("resolution x", "Video"),
                                         Settings::Manager::getInt("resolution y", "Video"),
-                                        Settings::Manager::getBool("fullscreen", "Video"),
+                                        static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video")),
                                         Settings::Manager::getBool("window border", "Video"));
         }
     }
 
     void WindowManager::windowResized(int x, int y)
     {
-        // Note: this is a side effect of resolution change or window resize.
-        // There is no need to track these changes.
         Settings::Manager::setInt("resolution x", "Video", x);
         Settings::Manager::setInt("resolution y", "Video", y);
-        Settings::Manager::resetPendingChange("resolution x", "Video");
-        Settings::Manager::resetPendingChange("resolution y", "Video");
+
+        // We only want to process changes to window-size related settings.
+        Settings::CategorySettingVector filter = {{"Video", "resolution x"},
+                                                  {"Video", "resolution y"}};
+
+        // If the HUD has not been initialised, the World singleton will not be available.
+        if (mHud)
+        {
+            MWBase::Environment::get().getWorld()->processChangedSettings(
+                    Settings::Manager::getPendingChanges(filter));
+        }
+
+        Settings::Manager::resetPendingChanges(filter);
 
         mGuiPlatform->getRenderManagerPtr()->setViewSize(x, y);
 
@@ -1119,7 +1174,7 @@ namespace MWGui
             window->onResChange(x, y);
 
         // We should reload TrueType fonts to fit new resolution
-        loadUserFonts();
+        mFontLoader->loadTrueTypeFonts();
 
         // TODO: check if any windows are now off-screen and move them back if so
     }
@@ -1151,6 +1206,16 @@ namespace MWGui
 
     void WindowManager::pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg)
     {
+        pushGuiMode(mode, arg, false);
+    }
+
+    void WindowManager::forceLootMode(const MWWorld::Ptr& ptr)
+    {
+        pushGuiMode(MWGui::GM_Container, ptr, true);
+    }
+
+    void WindowManager::pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg, bool force)
+    {
         if (mode==GM_Inventory && mAllowed==GW_None)
             return;
 
@@ -1172,12 +1237,29 @@ namespace MWGui
             mGuiModeStates[mode].update(true);
             playSound(mGuiModeStates[mode].mOpenSound);
         }
+        if(force)
+            mContainerWindow->treatNextOpenAsLoot();
         for (WindowBase* window : mGuiModeStates[mode].mWindows)
             window->setPtr(arg);
 
         mKeyboardNavigation->restoreFocus(mode);
 
         updateVisible();
+    }
+
+    void WindowManager::setCullMask(uint32_t mask)
+    {
+        mViewer->getCamera()->setCullMask(mask);
+
+        // We could check whether stereo is enabled here, but these methods are 
+        // trivial and have no effect in mono or multiview so just call them regardless.
+        mViewer->getCamera()->setCullMaskLeft(mask);
+        mViewer->getCamera()->setCullMaskRight(mask);
+    }
+
+    uint32_t WindowManager::getCullMask()
+    {
+        return mViewer->getCamera()->getCullMask();
     }
 
     void WindowManager::popGuiMode(bool noSound)
@@ -1251,7 +1333,7 @@ namespace MWGui
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
         mSelectedEnchantItem = item;
-        mSelectedSpell = "";
+        mSelectedSpell.clear();
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
@@ -1284,13 +1366,13 @@ namespace MWGui
 
     void WindowManager::unsetSelectedSpell()
     {
-        mSelectedSpell = "";
+        mSelectedSpell.clear();
         mSelectedEnchantItem = MWWorld::Ptr();
         mHud->unsetSelectedSpell();
 
         MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
-        if (player->getDrawState() == MWMechanics::DrawState_Spell)
-            player->setDrawState(MWMechanics::DrawState_Nothing);
+        if (player->getDrawState() == MWMechanics::DrawState::Spell)
+            player->setDrawState(MWMechanics::DrawState::Nothing);
 
         mSpellWindow->setTitle("#{sNone}");
     }
@@ -1324,6 +1406,11 @@ namespace MWGui
         return mHud->getWorldMouseOver();
     }
 
+    float WindowManager::getScalingFactor() const
+    {
+        return mScalingFactor;
+    }
+
     void WindowManager::executeInConsole (const std::string& path)
     {
         mConsole->executeFile (path);
@@ -1333,6 +1420,7 @@ namespace MWGui
     MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
     MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
+    MWGui::PostProcessorHud* WindowManager::getPostProcessorHud() { return mPostProcessorHud; }
 
     void WindowManager::useItem(const MWWorld::Ptr &item, bool bypassBeastRestrictions)
     {
@@ -1421,6 +1509,7 @@ namespace MWGui
         return
             !mGuiModes.empty() ||
             isConsoleMode() ||
+            (mPostProcessorHud && mPostProcessorHud->isVisible()) ||
             (mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox());
     }
 
@@ -1485,6 +1574,7 @@ namespace MWGui
     {
         mHudEnabled = !mHudEnabled;
         updateVisible();
+        mMessageBoxManager->setVisible(mHudEnabled);
         return mHudEnabled;
     }
 
@@ -1750,11 +1840,10 @@ namespace MWGui
                 ~MWSound::Type::Movie & MWSound::Type::Mask
             );
 
-        osg::Timer frameTimer;
+        Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(MWBase::Environment::get().getFrameRateLimit());
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            double dt = frameTimer.time_s();
-            frameTimer.setStartTick();
+            const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration()).count();
 
             MWBase::Environment::get().getInputManager()->update(dt, true, false);
 
@@ -1777,7 +1866,7 @@ namespace MWGui
             // refer to the advance() and frame() order in Engine::go()
             mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
-            MWBase::Environment::get().limitFrameRate(frameTimer.time_s());
+            frameRateLimiter.limit();
         }
         mVideoWidget->stop();
 
@@ -1957,7 +2046,7 @@ namespace MWGui
     {
         if (_type != "Text")
             return;
-        char* text=0;
+        char* text=nullptr;
         text = SDL_GetClipboardText();
         if (text)
             _data = MyGUI::TextIterator::toTagsString(text);
@@ -1982,9 +2071,25 @@ namespace MWGui
 
     void WindowManager::toggleDebugWindow()
     {
-#ifndef BT_NO_PROFILE
         mDebugWindow->setVisible(!mDebugWindow->isVisible());
-#endif
+    }
+
+    void WindowManager::togglePostProcessorHud()
+    {
+        if (!MWBase::Environment::get().getWorld()->getPostProcessor()->isEnabled())
+            return;
+
+        bool visible = mPostProcessorHud->isVisible();
+
+        if (!visible && !mGuiModes.empty())
+            mKeyboardNavigation->saveFocus(mGuiModes.back());
+
+        mPostProcessorHud->setVisible(!visible);
+
+        if (visible && !mGuiModes.empty())
+            mKeyboardNavigation->restoreFocus(mGuiModes.back());
+
+        updateVisible();
     }
 
     void WindowManager::cycleSpell(bool next)
@@ -2004,7 +2109,7 @@ namespace MWGui
         if (soundId.empty())
             return;
 
-        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
+        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnvNoScaling);
     }
 
     void WindowManager::updateSpellWindow()
@@ -2018,28 +2123,14 @@ namespace MWGui
         mConsole->setSelectedObject(object);
     }
 
-    std::string WindowManager::correctIconPath(const std::string& path)
+    void WindowManager::printToConsole(const std::string& msg, std::string_view color)
     {
-        return Misc::ResourceHelpers::correctIconPath(path, mResourceSystem->getVFS());
+        mConsole->print(msg, color);
     }
 
-    std::string WindowManager::correctBookartPath(const std::string& path, int width, int height, bool* exists)
+    void WindowManager::setConsoleMode(const std::string& mode)
     {
-        std::string corrected = Misc::ResourceHelpers::correctBookartPath(path, width, height, mResourceSystem->getVFS());
-        if (exists)
-            *exists = mResourceSystem->getVFS()->exists(corrected);
-        return corrected;
-    }
-
-    std::string WindowManager::correctTexturePath(const std::string& path)
-    {
-        return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
-    }
-
-    bool WindowManager::textureExists(const std::string &path)
-    {
-        std::string corrected = Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
-        return mResourceSystem->getVFS()->exists(corrected);
+        mConsole->setConsoleMode(mode);
     }
 
     void WindowManager::createCursors()
@@ -2192,5 +2283,29 @@ namespace MWGui
     MWWorld::Ptr WindowManager::getWatchedActor() const
     {
         return mStatsWatcher->getWatchedActor();
+    }
+
+    const std::string& WindowManager::getVersionDescription() const
+    {
+        return mVersionDescription;
+    }
+
+    void WindowManager::handleScheduledMessageBoxes()
+    {
+        const auto scheduledMessageBoxes = mScheduledMessageBoxes.lock();
+        for (const ScheduledMessageBox& v : *scheduledMessageBoxes)
+            messageBox(v.mMessage, v.mShowInDialogueMode);
+        scheduledMessageBoxes->clear();
+    }
+
+    void WindowManager::onDeleteCustomData(const MWWorld::Ptr& ptr)
+    {
+        for(auto* window : mWindows)
+            window->onDeleteCustomData(ptr);
+    }
+
+    void WindowManager::asyncPrepareSaveMap()
+    {
+        mMap->asyncPrepareSaveMap();
     }
 }

@@ -3,6 +3,8 @@
 
 #include "archive.hpp"
 
+#include <string>
+
 namespace VFS
 {
 
@@ -12,6 +14,8 @@ namespace VFS
         FileSystemArchiveFile(const std::string& path);
 
         Files::IStreamPtr open() override;
+
+        std::string getPath() override { return mPath; }
 
     private:
         std::string mPath;
@@ -25,6 +29,9 @@ namespace VFS
 
         void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
 
+        bool contains(const std::string& file, char (*normalize_function) (char)) const override;
+
+        std::string getDescription() const override;
 
     private:
         typedef std::map <std::string, FileSystemArchiveFile> index;

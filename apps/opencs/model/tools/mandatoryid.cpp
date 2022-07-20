@@ -11,7 +11,7 @@ CSMTools::MandatoryIdStage::MandatoryIdStage (const CSMWorld::CollectionBase& id
 
 int CSMTools::MandatoryIdStage::setup()
 {
-    return mIds.size();
+    return static_cast<int>(mIds.size());
 }
 
 void CSMTools::MandatoryIdStage::perform (int stage, CSMDoc::Messages& messages)

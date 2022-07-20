@@ -1,19 +1,20 @@
 #ifndef OPENMW_MWPHYSICS_ACTOR_H
 #define OPENMW_MWPHYSICS_ACTOR_H
 
-#include <atomic>
 #include <memory>
 #include <mutex>
 
 #include "ptrholder.hpp"
 
+#include <components/detournavigator/collisionshapetype.hpp>
+
 #include <LinearMath/btTransform.h>
 #include <osg/Vec3f>
 #include <osg/Quat>
-#include <osg/ref_ptr>
 
 class btCollisionShape;
 class btCollisionObject;
+class btCollisionWorld;
 class btConvexShape;
 
 namespace Resource
@@ -28,7 +29,7 @@ namespace MWPhysics
     class Actor final : public PtrHolder
     {
     public:
-        Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler);
+        Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler, bool canWaterWalk);
         ~Actor() override;
 
         /**
@@ -38,7 +39,7 @@ namespace MWPhysics
 
         bool getCollisionMode() const
         {
-            return mInternalCollisionMode.load(std::memory_order_acquire);
+            return mInternalCollisionMode;
         }
 
         btConvexShape* getConvexShape() const { return mConvexShape; }
@@ -49,7 +50,7 @@ namespace MWPhysics
         void enableCollisionBody(bool collision);
 
         void updateScale();
-        void updateRotation();
+        void setRotation(osg::Quat quat);
 
         /**
          * Return true if the collision shape looks the same no matter how its Z rotated.
@@ -57,13 +58,12 @@ namespace MWPhysics
         bool isRotationallyInvariant() const;
 
         /**
-         * Set mPosition and mPreviousPosition to the position in the Ptr's RefData. This should be used
-         * when an object is "instantly" moved/teleported as opposed to being moved by the physics simulation.
-         */
-        void updatePosition();
+        * Used by the physics simulation to store the simulation result. Used in conjunction with mWorldPosition
+        * to account for e.g. scripted movements
+        */
+        void setSimulationPosition(const osg::Vec3f& position);
 
         void updateCollisionObjectPosition();
-        void commitPositionChange();
 
         /**
          * Returns the half extents of the collision body (scaled according to collision scale)
@@ -83,13 +83,18 @@ namespace MWPhysics
 
         /**
           * Store the current position into mPreviousPosition, then move to this position.
-          * Optionally, inform the physics engine about the change of position.
+          * Returns true if the new position is different.
           */
-        void setPosition(const osg::Vec3f& position, bool updateCollisionObject=true);
+        bool setPosition(const osg::Vec3f& position);
 
-        osg::Vec3f getPosition() const;
+        // force set actor position to be as in Ptr::RefData
+        void updatePosition();
 
-        osg::Vec3f getPreviousPosition() const;
+        // register a position offset that will be applied during simulation.
+        void adjustPosition(const osg::Vec3f& offset);
+
+        // apply position offset. Can't be called during simulation
+        void applyOffsetChange();
 
         /**
          * Returns the half extents of the collision body (scaled according to rendering scale)
@@ -113,22 +118,11 @@ namespace MWPhysics
 
         void setOnGround(bool grounded);
 
-        bool getOnGround() const
-        {
-            return mInternalCollisionMode.load(std::memory_order_acquire) && mOnGround.load(std::memory_order_acquire);
-        }
+        bool getOnGround() const { return mOnGround; }
 
         void setOnSlope(bool slope);
 
-        bool getOnSlope() const
-        {
-            return mInternalCollisionMode.load(std::memory_order_acquire) && mOnSlope.load(std::memory_order_acquire);
-        }
-
-        btCollisionObject* getCollisionObject() const
-        {
-            return mCollisionObject.get();
-        }
+        bool getOnSlope() const { return mOnSlope; }
 
         /// Sets whether this actor should be able to collide with the water surface
         void setCanWaterWalk(bool waterWalk);
@@ -137,40 +131,76 @@ namespace MWPhysics
         void setWalkingOnWater(bool walkingOnWater);
         bool isWalkingOnWater() const;
 
+        MWWorld::Ptr getStandingOnPtr() const;
+        void setStandingOnPtr(const MWWorld::Ptr& ptr);
+
+        unsigned int getStuckFrames() const
+        {
+            return mStuckFrames;
+        }
+        void setStuckFrames(unsigned int frames)
+        {
+            mStuckFrames = frames;
+        }
+
+        const osg::Vec3f &getLastStuckPosition() const
+        {
+            return mLastStuckPosition;
+        }
+        void setLastStuckPosition(osg::Vec3f position)
+        {
+            mLastStuckPosition = position;
+        }
+
+        bool canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const;
+
+        bool isActive() const { return mActive; }
+
+        void setActive(bool value) { mActive = value; }
+
+        DetourNavigator::CollisionShapeType getCollisionShapeType() const { return mCollisionShapeType; }
+
     private:
+        MWWorld::Ptr mStandingOnPtr;
         /// Removes then re-adds the collision object to the dynamics world
         void updateCollisionMask();
         void addCollisionMask(int collisionMask);
         int getCollisionMask() const;
 
+        /// Returns the mesh translation, scaled and rotated as necessary
+        osg::Vec3f getScaledMeshTranslation() const;
+
         bool mCanWaterWalk;
-        std::atomic<bool> mWalkingOnWater;
+        bool mWalkingOnWater;
 
         bool mRotationallyInvariant;
+
+        DetourNavigator::CollisionShapeType mCollisionShapeType;
 
         std::unique_ptr<btCollisionShape> mShape;
         btConvexShape* mConvexShape;
 
-        std::unique_ptr<btCollisionObject> mCollisionObject;
-
         osg::Vec3f mMeshTranslation;
+        osg::Vec3f mOriginalHalfExtents;
         osg::Vec3f mHalfExtents;
+        osg::Vec3f mRenderingHalfExtents;
         osg::Quat mRotation;
 
         osg::Vec3f mScale;
-        osg::Vec3f mRenderingScale;
-        osg::Vec3f mPosition;
-        osg::Vec3f mPreviousPosition;
-        btTransform mLocalTransform;
-        bool mScaleUpdatePending;
-        bool mTransformUpdatePending;
+        osg::Vec3f mPositionOffset;
+        bool mWorldPositionChanged;
+        bool mSkipSimulation;
         mutable std::mutex mPositionMutex;
 
+        unsigned int mStuckFrames;
+        osg::Vec3f mLastStuckPosition;
+
         osg::Vec3f mForce;
-        std::atomic<bool> mOnGround;
-        std::atomic<bool> mOnSlope;
-        std::atomic<bool> mInternalCollisionMode;
+        bool mOnGround;
+        bool mOnSlope;
+        bool mInternalCollisionMode;
         bool mExternalCollisionMode;
+        bool mActive;
 
         PhysicsTaskScheduler* mTaskScheduler;
 

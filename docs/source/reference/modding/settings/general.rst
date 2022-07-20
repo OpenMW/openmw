@@ -59,3 +59,44 @@ texture mipmap
 Set the texture mipmap type to control the method mipmaps are created.
 Mipmapping is a way of reducing the processing power needed during minification
 by pregenerating a series of smaller textures.
+
+notify on saved screenshot
+--------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Show message box when screenshot is saved to a file.
+
+preferred locales
+-----------------
+
+:Type:		string
+:Default:	en
+
+List of the preferred locales separated by comma.
+For example "de,en" means German as the first prority and English as a fallback.
+
+Each locale must consist of a two-letter language code (e.g. "de" or "en") and
+can also optionally include a two-letter country code (e.g. "en_US", "fr_CA").
+Locales with country codes can match locales without one (e.g. specifying "en_US"
+will match "en"), so is recommended that you include the country codes where possible,
+since if the country code isn't specified the generic language-code only locale might
+refer to any of the country-specific variants.
+
+This setting can only be configured by editing the settings configuration file.
+
+log buffer size
+---------------
+
+:Type:		integer
+:Range:		>= 0
+:Default:	65536
+
+Buffer size for the in-game log viewer (press F10 to toggle the log viewer).
+When the log doesn't fit into the buffer, only the end of the log is visible in the log viewer.
+Zero disables the log viewer.
+
+This setting can only be configured by editing the settings configuration file.
+

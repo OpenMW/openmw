@@ -1,6 +1,9 @@
 #include "aitravel.hpp"
 
-#include <components/esm/aisequence.hpp>
+#include <algorithm>
+
+#include <components/esm3/aisequence.hpp>
+#include <components/detournavigator/agentbounds.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -15,6 +18,8 @@
 namespace
 {
 
+    constexpr float TRAVEL_FINISH_TIME = 2.f;
+
 bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
 {
     // Maximum travel distance for vanilla compatibility.
@@ -27,23 +32,24 @@ bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
 
 namespace MWMechanics
 {
-    AiTravel::AiTravel(float x, float y, float z, AiTravel*)
-        : mX(x), mY(y), mZ(z), mHidden(false)
+    AiTravel::AiTravel(float x, float y, float z, bool repeat, AiTravel*)
+        : TypedAiPackage<AiTravel>(repeat), mX(x), mY(y), mZ(z), mHidden(false), mDestinationTimer(TRAVEL_FINISH_TIME)
     {
     }
 
     AiTravel::AiTravel(float x, float y, float z, AiInternalTravel* derived)
-        : TypedAiPackage<AiTravel>(derived), mX(x), mY(y), mZ(z), mHidden(true)
+        : TypedAiPackage<AiTravel>(derived), mX(x), mY(y), mZ(z), mHidden(true), mDestinationTimer(TRAVEL_FINISH_TIME)
     {
     }
 
-    AiTravel::AiTravel(float x, float y, float z)
-        : AiTravel(x, y, z, this)
+    AiTravel::AiTravel(float x, float y, float z, bool repeat)
+        : AiTravel(x, y, z, repeat, this)
     {
     }
 
     AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
-        : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
+        : TypedAiPackage<AiTravel>(travel->mRepeat), mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
+        , mDestinationTimer(TRAVEL_FINISH_TIME)
     {
         // Hidden ESM::AiSequence::AiTravel package should be converted into MWMechanics::AiInternalTravel type
         assert(!travel->mHidden);
@@ -52,67 +58,77 @@ namespace MWMechanics
     bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
+        auto& stats = actor.getClass().getCreatureStats(actor);
 
-        if (mechMgr->isTurningToPlayer(actor) || mechMgr->getGreetingState(actor) == Greet_InProgress)
+        if (!stats.getMovementFlag(CreatureStats::Flag_ForceJump) && !stats.getMovementFlag(CreatureStats::Flag_ForceSneak)
+                && (mechMgr->isTurningToPlayer(actor) || mechMgr->getGreetingState(actor) == Greet_InProgress))
             return false;
 
         const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         const osg::Vec3f targetPos(mX, mY, mZ);
 
-        auto& stats = actor.getClass().getCreatureStats(actor);
         stats.setMovementFlag(CreatureStats::Flag_Run, false);
-        stats.setDrawState(DrawState_Nothing);
+        stats.setDrawState(DrawState::Nothing);
 
         // Note: we should cancel internal "return after combat" package, if original location is too far away
         if (!isWithinMaxRange(targetPos, actorPos))
             return mHidden;
-
-        // Unfortunately, with vanilla assets destination is sometimes blocked by other actor.
-        // If we got close to target, check for actors nearby. If they are, finish AI package.
-        int destinationTolerance = 64;
-        if (distance(actorPos, targetPos) <= destinationTolerance)
-        {
-            std::vector<MWWorld::Ptr> targetActors;
-            std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(actor, destinationTolerance, targetActors);
-
-            if (!result.first.isEmpty())
-            {
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-                return true;
-            }
-        }
 
         if (pathTo(actor, targetPos, duration))
         {
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
             return true;
         }
-        return false;
+
+        // If we've been close enough to the destination for some time give up like Morrowind.
+        // The end condition should be pretty much accurate.
+        // FIXME: But the timing isn't. Right now we're being very generous,
+        // but Morrowind might stop the actor prematurely under unclear conditions.
+
+        // Note Morrowind uses the halved eye level, but this is close enough.
+        float dist = distanceIgnoreZ(actorPos, targetPos) - MWBase::Environment::get().getWorld()->getHalfExtents(actor).z();
+        const float endTolerance = std::max(64.f, actor.getClass().getCurrentSpeed(actor) * duration);
+
+        // Even if we have entered the threshold, we might have been pushed away. Reset the timer if we're currently too far.
+        if (dist > endTolerance)
+        {
+            mDestinationTimer = TRAVEL_FINISH_TIME;
+            return false;
+        }
+
+        mDestinationTimer -= duration;
+        if (mDestinationTimer > 0)
+            return false;
+
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        return true;
     }
 
     void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
     {
-        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), actor.getRefData().getPosition().asVec3()))
+        osg::Vec3f pos(mX, mY, mZ);
+        if (!isWithinMaxRange(pos, actor.getRefData().getPosition().asVec3()))
             return;
         // does not do any validation on the travel target (whether it's in air, inside collision geometry, etc),
         // that is the user's responsibility
-        MWBase::Environment::get().getWorld()->moveObject(actor, mX, mY, mZ);
+        MWBase::Environment::get().getWorld()->moveObject(actor, pos);
         actor.getClass().adjustPosition(actor, false);
         reset();
     }
 
     void AiTravel::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiTravel> travel(new ESM::AiSequence::AiTravel());
+        auto travel = std::make_unique<ESM::AiSequence::AiTravel>();
         travel->mData.mX = mX;
         travel->mData.mY = mY;
         travel->mData.mZ = mZ;
         travel->mHidden = mHidden;
+        travel->mRepeat = getRepeat();
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Travel;
-        package.mPackage = travel.release();
-        sequence.mPackages.push_back(package);
+        package.mPackage = std::move(travel);
+        sequence.mPackages.push_back(std::move(package));
     }
 
     AiInternalTravel::AiInternalTravel(float x, float y, float z)

@@ -1,12 +1,16 @@
 #ifndef GAME_MWCLASS_MISC_H
 #define GAME_MWCLASS_MISC_H
 
-#include "../mwworld/class.hpp"
+#include "../mwworld/registeredclass.hpp"
 
 namespace MWClass
 {
-    class Miscellaneous : public MWWorld::Class
+    class Miscellaneous : public MWWorld::RegisteredClass<Miscellaneous>
     {
+            friend MWWorld::RegisteredClass<Miscellaneous>;
+
+            Miscellaneous();
+
         public:
 
             MWWorld::Ptr copyToCell(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell, int count) const override;
@@ -14,12 +18,10 @@ namespace MWClass
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
-
             std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
@@ -32,8 +34,6 @@ namespace MWClass
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            static void registerSelf();
-
             std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id
 
@@ -45,7 +45,7 @@ namespace MWClass
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 
-            std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
+            std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
             ///< Generate action for using via inventory menu
 
             float getWeight (const MWWorld::ConstPtr& ptr) const override;

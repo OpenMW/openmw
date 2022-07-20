@@ -5,6 +5,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/disease.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWWorld
 {

@@ -23,8 +23,6 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-#include "../mwstate/charactermanager.hpp"
-
 namespace MWGui
 {
 
@@ -100,12 +98,22 @@ namespace MWGui
 
     bool WaitDialog::exit()
     {
-        return (!mTimeAdvancer.isRunning()); //Only exit if not currently waiting
+        bool canExit = !mTimeAdvancer.isRunning(); // Only exit if not currently waiting
+        if (canExit)
+        {
+            clear();
+            stopWaiting();
+        }
+        return canExit;
     }
 
     void WaitDialog::clear()
     {
         mSleeping = false;
+        mHours = 1;
+        mManualHours = 1;
+        mFadeTimeRemaining = 0;
+        mInterruptAt = -1;
         mTimeAdvancer.stop();
     }
 
@@ -151,9 +159,9 @@ namespace MWGui
         if (hour == 0) hour = 12;
 
         ESM::EpochTimeStamp currentDate = MWBase::Environment::get().getWorld()->getEpochTimeStamp();
-        int daysPassed = MWBase::Environment::get().getWorld()->getTimeStamp().getDay();
-        std::string formattedHour = pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}";
-        std::string dateTimeText = Misc::StringUtils::format("%i %s (#{sDay} %i) %i %s", currentDate.mDay, month, daysPassed, hour, formattedHour);
+        std::string daysPassed = Misc::StringUtils::format("(#{sDay} %i)", MWBase::Environment::get().getWorld()->getTimeStamp().getDay());
+        std::string formattedHour(pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
+        std::string dateTimeText = Misc::StringUtils::format("%i %s %s %i %s", currentDate.mDay, month, daysPassed, hour, formattedHour);
         mDateTimeText->setCaptionWithReplacing (dateTimeText);
     }
 
@@ -193,7 +201,7 @@ namespace MWGui
                 if (!region->mSleepList.empty())
                 {
                     // figure out if player will be woken while sleeping
-                    int x = Misc::Rng::rollDice(hoursToWait);
+                    int x = Misc::Rng::rollDice(hoursToWait, world->getPrng());
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->mValue.getFloat();
                     if (x < fSleepRandMod * hoursToWait)
                     {

@@ -6,7 +6,6 @@
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QIcon>
-#include <QPainter>
 
 #include "scenetoolbar.hpp"
 #include "pushbutton.hpp"
@@ -57,7 +56,7 @@ CSVWidget::SceneToolToggle2::SceneToolToggle2 (SceneToolbar *parent, const QStri
     const std::string& compositeIcon, const std::string& singleIcon)
 : SceneTool (parent), mCompositeIcon (compositeIcon), mSingleIcon (singleIcon),
   mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize()), mToolTip (toolTip),
-  mFirst (0)
+  mFirst (nullptr)
 {
     mPanel = new QFrame (this, Qt::Popup);
 
@@ -99,7 +98,7 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
     desc.mButtonId = id;
     desc.mMask = mask;
     desc.mName = name;
-    desc.mIndex = mButtons.size();
+    desc.mIndex = static_cast<int>(mButtons.size());
 
     mButtons.insert (std::make_pair (button, desc));
 

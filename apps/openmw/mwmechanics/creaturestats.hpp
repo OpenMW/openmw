@@ -1,6 +1,7 @@
 #ifndef GAME_MWMECHANICS_CREATURESTATS_H
 #define GAME_MWMECHANICS_CREATURESTATS_H
 
+#include <map>
 #include <set>
 #include <string>
 #include <stdexcept>
@@ -11,9 +12,10 @@
 #include "activespells.hpp"
 #include "aisequence.hpp"
 #include "drawstate.hpp"
+#include "aisetting.hpp"
 
 #include <components/esm/attr.hpp>
-#include <components/esm/magiceffects.hpp>
+#include <components/esm3/magiceffects.hpp>
 
 namespace ESM
 {
@@ -24,7 +26,7 @@ namespace MWMechanics
 {
     struct CorprusStats
     {
-        static const int sWorseningPeriod = 24;
+        static constexpr int sWorseningPeriod = 24;
 
         int mWorsenings[ESM::Attribute::Length];
         MWWorld::TimeStamp mNextWorsening;
@@ -36,7 +38,7 @@ namespace MWMechanics
     class CreatureStats
     {
         static int sActorId;
-        DrawState_ mDrawState;
+        DrawState mDrawState;
         AttributeValue mAttributes[ESM::Attribute::Length];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         Spells mSpells;
@@ -64,8 +66,6 @@ namespace MWMechanics
         std::string mLastHitObject; // The last object to hit this actor
         std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
 
-        bool mRecalcMagicka;
-
         // For merchants: the last time items were restocked and gold pool refilled.
         MWWorld::TimeStamp mLastRestock;
 
@@ -85,25 +85,23 @@ namespace MWMechanics
         float mSideMovementAngle;
 
     private:
-        std::map<ESM::SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
+        std::multimap<int, int> mSummonedCreatures; // <Effect, ActorId>
 
         // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
         // This may be necessary when the creature is in an inactive cell.
         std::vector<int> mSummonGraveyard;
 
-        std::map<std::string, CorprusStats> mCorprusSpells;
-
     protected:
         int mLevel;
+        bool mAttackingOrSpell;
 
     public:
         CreatureStats();
 
-        DrawState_ getDrawState() const;
-        void setDrawState(DrawState_ state);
+        DrawState getDrawState() const;
+        void setDrawState(DrawState state);
 
-        bool needToRecalcDynamicStats();
-        void setNeedRecalcDynamicStats(bool val);
+        void recalculateMagicka();
 
         float getFallHeight() const;
         void addToFallHeight(float height);
@@ -128,7 +126,7 @@ namespace MWMechanics
 
         const MagicEffects & getMagicEffects() const;
 
-        bool getAttackingOrSpell() const;
+        bool getAttackingOrSpell() const { return mAttackingOrSpell; }
 
         int getLevel() const;
 
@@ -153,17 +151,10 @@ namespace MWMechanics
         /// Set Modifier for each magic effect according to \a effects. Does not touch Base values.
         void modifyMagicEffects(const MagicEffects &effects);
 
-        void setAttackingOrSpell(bool attackingOrSpell);
+        void setAttackingOrSpell(bool attackingOrSpell) { mAttackingOrSpell = attackingOrSpell; }
 
         void setLevel(int level);
 
-        enum AiSetting
-        {
-            AI_Hello = 0,
-            AI_Fight = 1,
-            AI_Flee = 2,
-            AI_Alarm = 3
-        };
         void setAiSetting (AiSetting index, Stat<int> value);
         void setAiSetting (AiSetting index, int base);
         Stat<int> getAiSetting (AiSetting index) const;
@@ -234,7 +225,7 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::map<ESM::SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
+        std::multimap<int, int>& getSummonedCreatureMap(); // <Effect, ActorId of summoned creature>
         std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
 
         enum Flag
@@ -258,15 +249,13 @@ namespace MWMechanics
         bool getStance (Stance flag) const;
 
         void setLastHitObject(const std::string &objectid);
+        void clearLastHitObject();
         const std::string &getLastHitObject() const;
         void setLastHitAttemptObject(const std::string &objectid);
+        void clearLastHitAttemptObject();
         const std::string &getLastHitAttemptObject() const;
         void setHitAttemptActorId(const int actorId);
         int getHitAttemptActorId() const;
-
-        // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
-        // TODO: Put it somewhere else?
-        std::set<int> mBoundItems;
 
         void writeState (ESM::CreatureStats& state) const;
 
@@ -294,12 +283,6 @@ namespace MWMechanics
         /// assigned this function will return false).
 
         static void cleanup();
-
-        std::map<std::string, CorprusStats> & getCorprusSpells();
-
-        void addCorprusSpell(const std::string& sourceId, CorprusStats& stats);
-
-        void removeCorprusSpell(const std::string& sourceId);
 
         float getSideMovementAngle() const { return mSideMovementAngle; }
         void setSideMovementAngle(float angle) { mSideMovementAngle = angle; }

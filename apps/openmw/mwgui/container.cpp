@@ -12,7 +12,9 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwmechanics/aipackage.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/summoning.hpp"
 
 #include "../mwscript/interpretercontext.hpp"
 
@@ -36,6 +38,7 @@ namespace MWGui
         , mSortModel(nullptr)
         , mModel(nullptr)
         , mSelectedItem(-1)
+        , mTreatNextOpenAsLoot(false)
     {
         getWidget(mDisposeCorpseButton, "DisposeCorpseButton");
         getWidget(mTakeButton, "TakeButton");
@@ -119,13 +122,15 @@ namespace MWGui
 
     void ContainerWindow::setPtr(const MWWorld::Ptr& container)
     {
+        bool lootAnyway = mTreatNextOpenAsLoot;
+        mTreatNextOpenAsLoot = false;
         mPtr = container;
 
         bool loot = mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead();
 
         if (mPtr.getClass().hasInventoryStore(mPtr))
         {
-            if (mPtr.getClass().isNpc() && !loot)
+            if (mPtr.getClass().isNpc() && !loot && !lootAnyway)
             {
                 // we are stealing stuff
                 mModel = new PickpocketItemModel(mPtr, new InventoryItemModel(container),
@@ -260,10 +265,28 @@ namespace MWGui
                     }
 
                     // Clean up summoned creatures as well
-                    std::map<ESM::SummonKey, int>& creatureMap = creatureStats.getSummonedCreatureMap();
+                    auto& creatureMap = creatureStats.getSummonedCreatureMap();
                     for (const auto& creature : creatureMap)
                         MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(ptr, creature.second);
                     creatureMap.clear();
+
+                    // Check if we are a summon and inform our master we've bit the dust
+                    for(const auto& package : creatureStats.getAiSequence())
+                    {
+                        if(package->followTargetThroughDoors() && !package->getTarget().isEmpty())
+                        {
+                            const auto& summoner = package->getTarget();
+                            auto& summons = summoner.getClass().getCreatureStats(summoner).getSummonedCreatureMap();
+                            auto it = std::find_if(summons.begin(), summons.end(), [&] (const auto& entry) { return entry.second == creatureStats.getActorId(); });
+                            if(it != summons.end())
+                            {
+                                auto summon = *it;
+                                summons.erase(it);
+                                MWMechanics::purgeSummonEffect(summoner, summon);
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 MWBase::Environment::get().getWorld()->deleteObject(ptr);
@@ -283,4 +306,9 @@ namespace MWGui
         return mModel->onTakeItem(item.mBase, count);
     }
 
+    void ContainerWindow::onDeleteCustomData(const MWWorld::Ptr& ptr)
+    {
+        if(mModel && mModel->usesContainer(ptr))
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
+    }
 }

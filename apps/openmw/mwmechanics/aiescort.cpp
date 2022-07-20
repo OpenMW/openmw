@@ -1,7 +1,7 @@
 #include "aiescort.hpp"
 
-#include <components/esm/aisequence.hpp>
-#include <components/esm/loadcell.hpp>
+#include <components/esm3/aisequence.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -20,28 +20,25 @@
 
 namespace MWMechanics
 {
-    AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
-    : mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
+    AiEscort::AiEscort(std::string_view actorId, int duration, float x, float y, float z, bool repeat)
+    : TypedAiPackage<AiEscort>(repeat), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
-        mTargetActorRefId = actorId;
+        mTargetActorRefId = std::string(actorId);
     }
 
-    AiEscort::AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z)
-    : mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
+    AiEscort::AiEscort(std::string_view actorId, std::string_view cellId, int duration, float x, float y, float z, bool repeat)
+    : TypedAiPackage<AiEscort>(repeat), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
-        mTargetActorRefId = actorId;
+        mTargetActorRefId = std::string(actorId);
     }
 
     AiEscort::AiEscort(const ESM::AiSequence::AiEscort *escort)
-        : mCellId(escort->mCellId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
-        // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
-        // The exact value of mDuration only matters for repeating packages.
-        // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
-        , mDuration(escort->mRemainingDuration > 0)
+        : TypedAiPackage<AiEscort>(escort->mRepeat), mCellId(escort->mCellId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
+        , mDuration(escort->mData.mDuration)
         , mRemainingDuration(escort->mRemainingDuration)
         , mCellX(std::numeric_limits<int>::max())
         , mCellY(std::numeric_limits<int>::max())
@@ -67,29 +64,31 @@ namespace MWMechanics
         if (!mCellId.empty() && mCellId != actor.getCell()->getCell()->getCellId().mWorldspace)
             return false; // Not in the correct cell, pause and rely on the player to go back through a teleport door
 
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
 
         const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mTargetActorRefId, false);
         const osg::Vec3f leaderPos = actor.getRefData().getPosition().asVec3();
         const osg::Vec3f followerPos = follower.getRefData().getPosition().asVec3();
+        const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+        const float maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
 
         if ((leaderPos - followerPos).length2() <= mMaxDist * mMaxDist)
         {
             const osg::Vec3f dest(mX, mY, mZ);
-            if (pathTo(actor, dest, duration)) //Returns true on path complete
+            if (pathTo(actor, dest, duration, maxHalfExtent)) //Returns true on path complete
             {
                 mRemainingDuration = mDuration;
                 return true;
             }
-            mMaxDist = 450;
+            mMaxDist = maxHalfExtent + 450.0f;
         }
         else
         {
             // Stop moving if the player is too far away
             MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-            mMaxDist = 250;
+            mMaxDist = maxHalfExtent + 250.0f;
         }
 
         return false;
@@ -97,19 +96,21 @@ namespace MWMechanics
 
     void AiEscort::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::unique_ptr<ESM::AiSequence::AiEscort> escort(new ESM::AiSequence::AiEscort());
+        auto escort = std::make_unique<ESM::AiSequence::AiEscort>();
         escort->mData.mX = mX;
         escort->mData.mY = mY;
         escort->mData.mZ = mZ;
+        escort->mData.mDuration = mDuration;
         escort->mTargetId = mTargetActorRefId;
         escort->mTargetActorId = mTargetActorId;
         escort->mRemainingDuration = mRemainingDuration;
         escort->mCellId = mCellId;
+        escort->mRepeat = getRepeat();
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Escort;
-        package.mPackage = escort.release();
-        sequence.mPackages.push_back(package);
+        package.mPackage = std::move(escort);
+        sequence.mPackages.push_back(std::move(package));
     }
 
     void AiEscort::fastForward(const MWWorld::Ptr& actor, AiState &state)

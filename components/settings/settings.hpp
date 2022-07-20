@@ -6,11 +6,25 @@
 #include <set>
 #include <map>
 #include <string>
+#include <string_view>
+
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
+namespace Files
+{
+    struct ConfigurationManager;
+}
+
 namespace Settings
 {
+    enum class WindowMode
+    {
+        Fullscreen = 0,
+        WindowedFullscreen,
+        Windowed
+    };
+
     ///
     /// \brief Settings management (can change during runtime)
     ///
@@ -23,40 +37,46 @@ namespace Settings
         static CategorySettingVector mChangedSettings;
         ///< tracks all the settings that were changed since the last apply() call
 
-        void clear();
+        static void clear();
         ///< clears all settings and default settings
 
-        void loadDefault (const std::string& file);
-        ///< load file as the default settings (can be overridden by user settings)
+        static std::string load(const Files::ConfigurationManager& cfgMgr, bool loadEditorSettings = false);
+        ///< load settings from all active config dirs. Returns the path of the last loaded file.
 
-        void loadUser (const std::string& file);
-        ///< load file as user settings
-
-        void saveUser (const std::string& file);
+        static void saveUser (const std::string& file);
         ///< save user settings to file
 
-        static void resetPendingChange(const std::string &setting, const std::string &category);
-
         static void resetPendingChanges();
+        ///< resets the list of all pending changes
 
-        static const CategorySettingVector getPendingChanges();
-        ///< returns the list of changed settings and then clears it
+        static void resetPendingChanges(const CategorySettingVector& filter);
+        ///< resets only the pending changes listed in the filter
 
-        static int getInt (const std::string& setting, const std::string& category);
-        static float getFloat (const std::string& setting, const std::string& category);
-        static std::string getString (const std::string& setting, const std::string& category);
-        static bool getBool (const std::string& setting, const std::string& category);
-        static osg::Vec2f getVector2 (const std::string& setting, const std::string& category);
-        static osg::Vec3f getVector3 (const std::string& setting, const std::string& category);
+        static CategorySettingVector getPendingChanges();
+        ///< returns the list of changed settings
 
-        static void setInt (const std::string& setting, const std::string& category, const int value);
-        static void setFloat (const std::string& setting, const std::string& category, const float value);
-        static void setString (const std::string& setting, const std::string& category, const std::string& value);
-        static void setBool (const std::string& setting, const std::string& category, const bool value);
-        static void setVector2 (const std::string& setting, const std::string& category, const osg::Vec2f value);
-        static void setVector3 (const std::string& setting, const std::string& category, const osg::Vec3f value);
+        static CategorySettingVector getPendingChanges(const CategorySettingVector& filter);
+        ///< returns the list of changed settings intersecting with the filter
+
+        static int getInt(std::string_view setting, std::string_view category);
+        static std::int64_t getInt64(std::string_view setting, std::string_view category);
+        static float getFloat(std::string_view setting, std::string_view category);
+        static double getDouble(std::string_view setting, std::string_view category);
+        static std::string getString(std::string_view setting, std::string_view category);
+        static bool getBool(std::string_view setting, std::string_view category);
+        static osg::Vec2f getVector2(std::string_view setting, std::string_view category);
+        static osg::Vec3f getVector3(std::string_view setting, std::string_view category);
+
+        static void setInt(std::string_view setting, std::string_view category, int value);
+        static void setInt64(std::string_view setting, std::string_view category, std::int64_t value);
+        static void setFloat(std::string_view setting, std::string_view category, float value);
+        static void setDouble(std::string_view setting, std::string_view category, double value);
+        static void setString(std::string_view setting, std::string_view category, const std::string& value);
+        static void setBool(std::string_view setting, std::string_view category, bool value);
+        static void setVector2(std::string_view setting, std::string_view category, osg::Vec2f value);
+        static void setVector3(std::string_view setting, std::string_view category, osg::Vec3f value);
     };
 
 }
 
-#endif // _COMPONENTS_SETTINGS_H
+#endif // COMPONENTS_SETTINGS_H

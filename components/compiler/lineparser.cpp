@@ -12,7 +12,6 @@
 #include "generator.hpp"
 #include "extensions.hpp"
 #include "declarationparser.hpp"
-#include "exception.hpp"
 
 namespace Compiler
 {
@@ -66,6 +65,11 @@ namespace Compiler
             scanner.putbackInt (value, loc);
             parseExpression (scanner, loc);
             return true;
+        }
+        else if (mState == SetState)
+        {
+            // Allow ints to be used as variable names
+            return parseName(loc.mLiteral, loc, scanner);
         }
 
         return Parser::parseInt (value, loc, scanner);
@@ -131,7 +135,7 @@ namespace Compiler
             return false;
         }
 
-        if (mState==MessageState || mState==MessageCommaState)
+        if (mState==MessageState)
         {
             GetArgumentsFromMessageFormat processor;
             processor.process(name);
@@ -140,7 +144,7 @@ namespace Compiler
             if (!arguments.empty())
             {
                 mExprParser.reset();
-                mExprParser.parseArguments (arguments, scanner, mCode);
+                mExprParser.parseArguments (arguments, scanner, mCode, -1, true);
             }
 
             mName = name;
@@ -150,7 +154,7 @@ namespace Compiler
             return true;
         }
 
-        if (mState==MessageButtonState || mState==MessageButtonCommaState)
+        if (mState==MessageButtonState)
         {
             Generator::pushString (mCode, mLiterals, name);
             mState = MessageButtonState;
@@ -193,7 +197,7 @@ namespace Compiler
 
     bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==MessageState || mState==MessageCommaState)
+        if (mState==MessageState)
         {
             if (const Extensions *extensions = getContext().getExtensions())
             {
@@ -254,33 +258,11 @@ namespace Compiler
                         mExplicit.clear();
                     }
 
-                    try
-                    {
-                        // workaround for broken positioncell instructions.
-                        /// \todo add option to disable this
-                        std::unique_ptr<ErrorDowngrade> errorDowngrade (nullptr);
-                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
-                            errorDowngrade = std::make_unique<ErrorDowngrade> (getErrorHandler());
-
-                        std::vector<Interpreter::Type_Code> code;
-                        int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
-                        mCode.insert (mCode.end(), code.begin(), code.end());
-                        extensions->generateInstructionCode (keyword, mCode, mLiterals,
-                            mExplicit, optionals);
-                    }
-                    catch (const SourceException&)
-                    {
-                        // Ignore argument exceptions for positioncell.
-                        /// \todo add option to disable this
-                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
-                        {
-                            SkipParser skip (getErrorHandler(), getContext());
-                            scanner.scan (skip);
-                            return false;
-                        }
-
-                        throw;
-                    }
+                    std::vector<Interpreter::Type_Code> code;
+                    int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
+                    mCode.insert (mCode.end(), code.begin(), code.end());
+                    extensions->generateInstructionCode (keyword, mCode, mLiterals,
+                        mExplicit, optionals);
 
                     mState = EndState;
                     return true;
@@ -441,12 +423,6 @@ namespace Compiler
         if (code==Scanner::S_newline && (mState==EndState || mState==BeginState))
             return false;
 
-        if (code==Scanner::S_comma && mState==MessageState)
-        {
-            mState = MessageCommaState;
-            return true;
-        }
-
         if (code==Scanner::S_ref && mState==SetPotentialMemberVarState)
         {
             getErrorHandler().warning ("Stray explicit reference", loc);
@@ -472,12 +448,6 @@ namespace Compiler
         {
             Generator::message (mCode, mLiterals, mName, mButtons);
             return false;
-        }
-
-        if (code==Scanner::S_comma && mState==MessageButtonState)
-        {
-            mState = MessageButtonCommaState;
-            return true;
         }
 
         if (code==Scanner::S_member && mState==SetPotentialMemberVarState)

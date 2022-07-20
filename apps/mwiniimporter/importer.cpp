@@ -1,13 +1,12 @@
 #include "importer.hpp"
 
 #include <iostream>
-#include <sstream>
 #include <components/misc/stringops.hpp>
-#include <components/esm/esmreader.hpp>
+#include <components/esm3/esmreader.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/version.hpp>
+
 
 namespace bfs = boost::filesystem;
 
@@ -664,49 +663,51 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::p
     std::string line;
     while (std::getline(file, line)) {
 
-        line = encoder.getUtf8(line);
+        std::string_view utf8 = encoder.getUtf8(line);
 
         // unify Unix-style and Windows file ending
-        if (!(line.empty()) && (line[line.length()-1]) == '\r') {
-            line = line.substr(0, line.length()-1);
+        if (!(utf8.empty()) && (utf8[utf8.length()-1]) == '\r') {
+            utf8 = utf8.substr(0, utf8.length()-1);
         }
 
-        if(line.empty()) {
+        if(utf8.empty()) {
             continue;
         }
 
-        if(line[0] == '[') {
-            int pos = line.find(']');
+        if(utf8[0] == '[') {
+            int pos = static_cast<int>(utf8.find(']'));
             if(pos < 2) {
-                std::cout << "Warning: ini file wrongly formatted (" << line << "). Line ignored." << std::endl;
+                std::cout << "Warning: ini file wrongly formatted (" << utf8 << "). Line ignored." << std::endl;
                 continue;
             }
 
-            section = line.substr(1, line.find(']')-1);
+            section = utf8.substr(1, utf8.find(']')-1);
             continue;
         }
 
-        int comment_pos = line.find(";");
+        int comment_pos = static_cast<int>(utf8.find(';'));
         if(comment_pos > 0) {
-            line = line.substr(0,comment_pos);
+            utf8 = utf8.substr(0,comment_pos);
         }
 
-        int pos = line.find("=");
+        int pos = static_cast<int>(utf8.find('='));
         if(pos < 1) {
             continue;
         }
 
-        std::string key(section + ":" + line.substr(0,pos));
-        std::string value(line.substr(pos+1));
+        std::string key(section + ":" + std::string(utf8.substr(0, pos)));
+        const std::string_view value(utf8.substr(pos+1));
         if(value.empty()) {
             std::cout << "Warning: ignored empty value for key '" << key << "'." << std::endl;
             continue;
         }
 
-        if(map.find(key) == map.end()) {
-            map.insert( std::make_pair (key, std::vector<std::string>() ) );
-        }
-        map[key].push_back(value);
+        auto it = map.find(key);
+
+        if (it == map.end())
+            it = map.emplace_hint(it, std::move(key), std::vector<std::string>());
+
+        it->second.push_back(std::string(value));
     }
 
     return map;
@@ -722,7 +723,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::p
     while (std::getline(file, line)) {
 
         // we cant say comment by only looking at first char anymore
-        int comment_pos = line.find("#");
+        int comment_pos = static_cast<int>(line.find('#'));
         if(comment_pos > 0) {
             line = line.substr(0,comment_pos);
         }
@@ -731,7 +732,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::p
             continue;
         }
 
-        int pos = line.find("=");
+        int pos = static_cast<int>(line.find('='));
         if(pos < 1) {
             continue;
         }
@@ -778,7 +779,7 @@ void MwIniImporter::mergeFallback(multistrmap &cfg, const multistrmap &ini) cons
 }
 
 void MwIniImporter::insertMultistrmap(multistrmap &cfg, const std::string& key, const std::string& value) {
-    const multistrmap::const_iterator it = cfg.find(key);
+    const auto it = cfg.find(key);
     if(it == cfg.end()) {
         cfg.insert(std::make_pair (key, std::vector<std::string>() ));
     }
@@ -791,7 +792,7 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     std::string archive;
 
     // Search archives listed in ini file
-    multistrmap::const_iterator it = ini.begin();
+    auto it = ini.begin();
     for(int i=0; it != ini.end(); i++) {
         archive = baseArchive;
         archive.append(std::to_string(i));
@@ -813,7 +814,7 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     // does not appears in the ini file
     cfg["fallback-archive"].push_back("Morrowind.bsa");
 
-    for(std::vector<std::string>::const_iterator iter=archives.begin(); iter!=archives.end(); ++iter) {
+    for(auto iter=archives.begin(); iter!=archives.end(); ++iter) {
         cfg["fallback-archive"].push_back(*iter);
     }
 }
@@ -886,7 +887,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 
     dataPaths.push_back(iniFilename.parent_path() /= "Data Files");
 
-    multistrmap::const_iterator it = ini.begin();
+    auto it = ini.begin();
     for (int i=0; it != ini.end(); i++)
     {
         std::string gameFile = baseGameFile;
@@ -969,7 +970,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 void MwIniImporter::writeToFile(std::ostream &out, const multistrmap &cfg) {
 
     for(multistrmap::const_iterator it=cfg.begin(); it != cfg.end(); ++it) {
-        for(std::vector<std::string>::const_iterator entry=it->second.begin(); entry != it->second.end(); ++entry) {
+        for(auto entry=it->second.begin(); entry != it->second.end(); ++entry) {
             out << (it->first) << "=" << (*entry) << std::endl;
         }
     }

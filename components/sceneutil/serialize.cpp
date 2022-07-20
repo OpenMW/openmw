@@ -8,6 +8,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/riggeometry.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
 namespace SceneUtil
@@ -49,6 +50,24 @@ public:
     }
 };
 
+class RigGeometryHolderSerializer : public osgDB::ObjectWrapper
+{
+public:
+    RigGeometryHolderSerializer()
+        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::RigGeometryHolder>, "SceneUtil::RigGeometryHolder", "osg::Object osg::Node osg::Drawable SceneUtil::RigGeometryHolder")
+    {
+    }
+};
+
+class OsgaRigGeometrySerializer : public osgDB::ObjectWrapper
+{
+public:
+    OsgaRigGeometrySerializer()
+        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::OsgaRigGeometry>, "SceneUtil::OsgaRigGeometry", "osg::Object osg::Node osg::Geometry osgAnimation::RigGeometry SceneUtil::OsgaRigGeometry")
+    {
+    }
+};
+
 class MorphGeometrySerializer : public osgDB::ObjectWrapper
 {
 public:
@@ -80,7 +99,7 @@ class MatrixTransformSerializer : public osgDB::ObjectWrapper
 {
 public:
     MatrixTransformSerializer()
-        : osgDB::ObjectWrapper(createInstanceFunc<NifOsg::MatrixTransform>, "NifOsg::MatrixTransform", "osg::Object osg::Node osg::Transform osg::MatrixTransform NifOsg::MatrixTransform")
+        : osgDB::ObjectWrapper(createInstanceFunc<NifOsg::MatrixTransform>, "NifOsg::MatrixTransform", "osg::Object osg::Node osg::Group osg::Transform osg::MatrixTransform NifOsg::MatrixTransform")
     {
     }
 };
@@ -108,6 +127,8 @@ void registerSerializers()
         mgr->addWrapper(new PositionAttitudeTransformSerializer);
         mgr->addWrapper(new SkeletonSerializer);
         mgr->addWrapper(new RigGeometrySerializer);
+        mgr->addWrapper(new RigGeometryHolderSerializer);
+        mgr->addWrapper(new OsgaRigGeometrySerializer);
         mgr->addWrapper(new MorphGeometrySerializer);
         mgr->addWrapper(new LightManagerSerializer);
         mgr->addWrapper(new CameraRelativeTransformSerializer);
@@ -121,18 +142,22 @@ void registerSerializers()
         const char* ignore[] = {
             "MWRender::PtrHolder",
             "Resource::TemplateRef",
+            "Resource::TemplateMultiRef",
             "SceneUtil::CompositeStateSetUpdater",
+            "SceneUtil::UBOManager",
             "SceneUtil::LightListCallback",
             "SceneUtil::LightManagerUpdateCallback",
+            "SceneUtil::FFPLightStateAttribute",
             "SceneUtil::UpdateRigBounds",
             "SceneUtil::UpdateRigGeometry",
             "SceneUtil::LightSource",
-            "SceneUtil::StateSetUpdater",
             "SceneUtil::DisableLight",
             "SceneUtil::MWShadowTechnique",
+            "SceneUtil::TextKeyMapHolder",
+            "Shader::AddedState",
+            "Shader::RemovedAlphaFunc",
             "NifOsg::FlipController",
             "NifOsg::KeyframeController",
-            "NifOsg::TextKeyMapHolder",
             "NifOsg::Emitter",
             "NifOsg::ParticleColorAffector",
             "NifOsg::ParticleSystem",
@@ -146,6 +171,7 @@ void registerSerializers()
             "NifOsg::VisController",
             "osgMyGUI::Drawable",
             "osg::DrawCallback",
+            "osg::UniformBufferObject",
             "osgOQ::ClearQueriesCallback",
             "osgOQ::RetrieveQueriesCallback",
             "osg::DummyObject"

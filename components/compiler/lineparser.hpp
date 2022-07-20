@@ -24,7 +24,7 @@ namespace Compiler
                 BeginState,
                 SetState, SetLocalVarState, SetGlobalVarState, SetPotentialMemberVarState,
                 SetMemberVarState, SetMemberVarState2,
-                MessageState, MessageCommaState, MessageButtonState, MessageButtonCommaState,
+                MessageState, MessageButtonState,
                 EndState, PotentialExplicitState, ExplicitState, MemberState
             };
 
@@ -86,7 +86,7 @@ namespace Compiler
             void visitedCharacter(char c) override {}
 
         public:
-            void process(const std::string& message) override
+            void process(std::string_view message) override
             {
                 mArguments.clear();
                 ::Misc::MessageFormatParser::process(message);

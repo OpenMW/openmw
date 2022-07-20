@@ -12,17 +12,37 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/terrain/world.hpp>
-#include <components/sceneutil/unrefqueue.hpp>
-#include <components/esm/loadcell.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
+#include <components/terrain/view.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/loadinglistener/reporter.hpp>
 
 #include "../mwrender/landmanager.hpp"
 
 #include "cellstore.hpp"
-#include "manualref.hpp"
 #include "class.hpp"
+
+namespace
+{
+    template <class Contained>
+    bool contains(const std::vector<MWWorld::CellPreloader::PositionCellGrid>& container,
+           const Contained& contained, float tolerance)
+    {
+        for (const auto& pos : contained)
+        {
+            bool found = false;
+            for (const auto& pos2 : container)
+            {
+                if ((pos.first-pos2.first).length2() < tolerance*tolerance && pos.second == pos2.second)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return false;
+        }
+        return true;
+    }
+}
 
 namespace MWWorld
 {
@@ -84,7 +104,7 @@ namespace MWWorld
                     mTerrain->cacheCell(mTerrainView.get(), mX, mY);
                     mPreloadedObjects.insert(mLandManager->getLand(mX, mY));
                 }
-                catch(std::exception& e)
+                catch(std::exception&)
                 {
                 }
             }
@@ -98,7 +118,6 @@ namespace MWWorld
                 {
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
 
-                    bool animated = false;
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size()-1)
                     {
@@ -110,24 +129,18 @@ namespace MWWorld
                             {
                                 kfname.replace(kfname.size()-4, 4, ".kf");
                                 if (mSceneManager->getVFS()->exists(kfname))
-                                {
                                     mPreloadedObjects.insert(mKeyframeManager->get(kfname));
-                                    animated = true;
-                                }
                             }
                         }
                     }
-                    if (mPreloadInstances && animated)
-                        mPreloadedObjects.insert(mSceneManager->cacheInstance(mesh));
-                    else
-                        mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
+                    mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
                     if (mPreloadInstances)
                         mPreloadedObjects.insert(mBulletShapeManager->cacheInstance(mesh));
                     else
                         mPreloadedObjects.insert(mBulletShapeManager->getShape(mesh));
 
                 }
-                catch (std::exception& e)
+                catch (std::exception&)
                 {
                     // ignore error for now, would spam the log too much
                     // error will be shown when visiting the cell
@@ -161,20 +174,10 @@ namespace MWWorld
     public:
         TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View> >& views, Terrain::World* world, const std::vector<CellPreloader::PositionCellGrid>& preloadPositions)
             : mAbort(false)
-            , mProgress(views.size())
-            , mProgressRange(0)
             , mTerrainViews(views)
             , mWorld(world)
             , mPreloadPositions(preloadPositions)
         {
-        }
-
-        bool storeViews(double referenceTime)
-        {
-            for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size(); ++i)
-                if (!mWorld->storeView(mTerrainViews[i], referenceTime))
-                    return false;
-            return true;
         }
 
         void doWork() override
@@ -182,8 +185,9 @@ namespace MWWorld
             for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
             {
                 mTerrainViews[i]->reset();
-                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].first, mPreloadPositions[i].second, mAbort, mProgress[i], mProgressRange);
+                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].first, mPreloadPositions[i].second, mAbort, mLoadingReporter);
             }
+            mLoadingReporter.complete();
         }
 
         void abort() override
@@ -191,16 +195,17 @@ namespace MWWorld
             mAbort = true;
         }
 
-        int getProgress() const { return !mProgress.empty() ? mProgress[0].load() : 0; }
-        int getProgressRange() const { return !mProgress.empty() && mProgress[0].load() ? mProgressRange : 0; }
+        void wait(Loading::Listener& listener) const
+        {
+            mLoadingReporter.wait(listener);
+        }
 
     private:
         std::atomic<bool> mAbort;
-        std::vector<std::atomic<int>> mProgress;
-        int mProgressRange;
         std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         Terrain::World* mWorld;
         std::vector<CellPreloader::PositionCellGrid> mPreloadPositions;
+        Loading::Reporter mLoadingReporter;
     };
 
     /// Worker thread item: update the resource system's cache, effectively deleting unused entries.
@@ -233,7 +238,7 @@ namespace MWWorld
         , mMaxCacheSize(0)
         , mPreloadInstances(true)
         , mLastResourceCacheUpdate(0.0)
-        , mStoreViewsFailCount(0)
+        , mLoadedTerrainTimestamp(0.0)
     {
     }
 
@@ -317,11 +322,10 @@ namespace MWWorld
         PreloadMap::iterator found = mPreloadCells.find(cell);
         if (found != mPreloadCells.end())
         {
-            // do the deletion in the background thread
             if (found->second.mWorkItem)
             {
                 found->second.mWorkItem->abort();
-                mUnrefQueue->push(mPreloadCells[cell].mWorkItem);
+                found->second.mWorkItem = nullptr;
             }
 
             mPreloadCells.erase(found);
@@ -335,7 +339,7 @@ namespace MWWorld
             if (it->second.mWorkItem)
             {
                 it->second.mWorkItem->abort();
-                mUnrefQueue->push(it->second.mWorkItem);
+                it->second.mWorkItem = nullptr;
             }
 
             mPreloadCells.erase(it++);
@@ -351,7 +355,7 @@ namespace MWWorld
                 if (it->second.mWorkItem)
                 {
                     it->second.mWorkItem->abort();
-                    mUnrefQueue->push(it->second.mWorkItem);
+                    it->second.mWorkItem = nullptr;
                 }
                 mPreloadCells.erase(it++);
             }
@@ -369,18 +373,8 @@ namespace MWWorld
 
         if (mTerrainPreloadItem && mTerrainPreloadItem->isDone())
         {
-            if (!mTerrainPreloadItem->storeViews(timestamp))
-            {
-                if (++mStoreViewsFailCount > 100)
-                {
-                    OSG_ALWAYS << "paging views are rebuilt every frame, please check for faulty enable/disable scripts." << std::endl;
-                    mStoreViewsFailCount = 0;
-                }
-                setTerrainPreloadPositions(std::vector<PositionCellGrid>());
-            }
-            else
-                mStoreViewsFailCount = 0;
-            mTerrainPreloadItem = nullptr;
+            mLoadedTerrainPositions = mTerrainPreloadPositions;
+            mLoadedTerrainTimestamp = timestamp;
         }
     }
 
@@ -414,43 +408,25 @@ namespace MWWorld
         mWorkQueue = workQueue;
     }
 
-    void CellPreloader::setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue)
-    {
-        mUnrefQueue = unrefQueue;
-    }
-
-    bool CellPreloader::syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, int& progress, int& progressRange, double timestamp)
+    bool CellPreloader::syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, double timestamp, Loading::Listener& listener)
     {
         if (!mTerrainPreloadItem)
             return true;
         else if (mTerrainPreloadItem->isDone())
         {
-            if (mTerrainPreloadItem->storeViews(timestamp))
-            {
-                mTerrainPreloadItem = nullptr;
-                return true;
-            }
-            else
-            {
-                setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
-                setTerrainPreloadPositions(positions);
-                return false;
-            }
+            return true;
         }
         else
         {
-            progress = mTerrainPreloadItem->getProgress();
-            progressRange = mTerrainPreloadItem->getProgressRange();
-            return false;
+            mTerrainPreloadItem->wait(listener);
+            return true;
         }
     }
 
     void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid *exceptPos)
     {
-        const float resetThreshold = ESM::Land::REAL_SIZE;
-        for (auto pos : mTerrainPreloadPositions)
-            if (exceptPos && (pos.first-exceptPos->first).length2() < resetThreshold*resetThreshold && pos.second == exceptPos->second)
-                return;
+        if (exceptPos && contains(mTerrainPreloadPositions, std::array {*exceptPos}, ESM::Land::REAL_SIZE))
+            return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
         {
             mTerrainPreloadItem->abort();
@@ -459,40 +435,21 @@ namespace MWWorld
         setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
     }
 
-    bool contains(const std::vector<CellPreloader::PositionCellGrid>& container, const std::vector<CellPreloader::PositionCellGrid>& contained)
-    {
-        for (auto pos : contained)
-        {
-            bool found = false;
-            for (auto pos2 : container)
-            {
-                if ((pos.first-pos2.first).length2() < 1 && pos.second == pos2.second)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) return false;
-        }
-        return true;
-    }
-
     void CellPreloader::setTerrainPreloadPositions(const std::vector<CellPreloader::PositionCellGrid> &positions)
     {
         if (positions.empty())
+        {
             mTerrainPreloadPositions.clear();
-        else if (contains(mTerrainPreloadPositions, positions))
+            mLoadedTerrainPositions.clear();
+        }
+        else if (contains(mTerrainPreloadPositions, positions, 128.f))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
             return;
         else
         {
             if (mTerrainViews.size() > positions.size())
-            {
-                for (unsigned int i=positions.size(); i<mTerrainViews.size(); ++i)
-                    mUnrefQueue->push(mTerrainViews[i]);
                 mTerrainViews.resize(positions.size());
-            }
             else if (mTerrainViews.size() < positions.size())
             {
                 for (unsigned int i=mTerrainViews.size(); i<positions.size(); ++i)
@@ -506,6 +463,11 @@ namespace MWWorld
                 mWorkQueue->addWorkItem(mTerrainPreloadItem);
             }
         }
+    }
+    
+    bool CellPreloader::isTerrainLoaded(const CellPreloader::PositionCellGrid &position, double referenceTime) const
+    {
+        return mLoadedTerrainTimestamp + mResourceSystem->getSceneManager()->getExpiryDelay() > referenceTime && contains(mLoadedTerrainPositions, std::array {position}, ESM::Land::REAL_SIZE);
     }
 
 }

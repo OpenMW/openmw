@@ -2,47 +2,56 @@
 #include "debug.hpp"
 #include "settingsutils.hpp"
 
-#include <components/esm/loadpgrd.hpp>
+#include <components/debug/debuglog.hpp>
+#include <components/esm3/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
-
-#include <Recast.h>
+#include <components/misc/convert.hpp>
 
 namespace DetourNavigator
 {
-    NavigatorImpl::NavigatorImpl(const Settings& settings)
+    NavigatorImpl::NavigatorImpl(const Settings& settings, std::unique_ptr<NavMeshDb>&& db)
         : mSettings(settings)
-        , mNavMeshManager(mSettings)
+        , mNavMeshManager(mSettings, std::move(db))
         , mUpdatesEnabled(true)
     {
     }
 
-    void NavigatorImpl::addAgent(const osg::Vec3f& agentHalfExtents)
+    void NavigatorImpl::addAgent(const AgentBounds& agentBounds)
     {
-        ++mAgents[agentHalfExtents];
-        mNavMeshManager.addAgent(agentHalfExtents);
+        if(agentBounds.mHalfExtents.length2() <= 0)
+            return;
+        ++mAgents[agentBounds];
+        mNavMeshManager.addAgent(agentBounds);
     }
 
-    void NavigatorImpl::removeAgent(const osg::Vec3f& agentHalfExtents)
+    void NavigatorImpl::removeAgent(const AgentBounds& agentBounds)
     {
-        const auto it = mAgents.find(agentHalfExtents);
+        const auto it = mAgents.find(agentBounds);
         if (it == mAgents.end())
             return;
         if (it->second > 0)
             --it->second;
     }
 
-    bool NavigatorImpl::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
+    void NavigatorImpl::setWorldspace(std::string_view worldspace)
     {
-        return mNavMeshManager.addObject(id, shape, transform, AreaType_ground);
+        mNavMeshManager.setWorldspace(worldspace);
+    }
+
+    void NavigatorImpl::updateBounds(const osg::Vec3f& playerPosition)
+    {
+        mNavMeshManager.updateBounds(playerPosition);
     }
 
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        bool result = addObject(id, shapes.mShape, transform);
-        if (shapes.mAvoid)
+        const CollisionShape collisionShape(shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
+        bool result = mNavMeshManager.addObject(id, collisionShape, transform, AreaType_ground);
+        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
-            const ObjectId avoidId(shapes.mAvoid);
-            if (mNavMeshManager.addObject(avoidId, *shapes.mAvoid, transform, AreaType_null))
+            const ObjectId avoidId(avoidShape);
+            const CollisionShape avoidCollisionShape(shapes.mShapeInstance, *avoidShape, shapes.mTransform);
+            if (mNavMeshManager.addObject(avoidId, avoidCollisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;
@@ -55,29 +64,24 @@ namespace DetourNavigator
     {
         if (addObject(id, static_cast<const ObjectShapes&>(shapes), transform))
         {
-            mNavMeshManager.addOffMeshConnection(
-                id,
-                toNavMeshCoordinates(mSettings, shapes.mConnectionStart),
-                toNavMeshCoordinates(mSettings, shapes.mConnectionEnd),
-                AreaType_door
-            );
+            const osg::Vec3f start = toNavMeshCoordinates(mSettings.mRecast, shapes.mConnectionStart);
+            const osg::Vec3f end = toNavMeshCoordinates(mSettings.mRecast, shapes.mConnectionEnd);
+            mNavMeshManager.addOffMeshConnection(id, start, end, AreaType_door);
+            mNavMeshManager.addOffMeshConnection(id, end, start, AreaType_door);
             return true;
         }
         return false;
     }
 
-    bool NavigatorImpl::updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
-    {
-        return mNavMeshManager.updateObject(id, shape, transform, AreaType_ground);
-    }
-
     bool NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
-        bool result = updateObject(id, shapes.mShape, transform);
-        if (shapes.mAvoid)
+        const CollisionShape collisionShape(shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
+        bool result = mNavMeshManager.updateObject(id, collisionShape, transform, AreaType_ground);
+        if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
-            const ObjectId avoidId(shapes.mAvoid);
-            if (mNavMeshManager.updateObject(avoidId, *shapes.mAvoid, transform, AreaType_null))
+            const ObjectId avoidId(avoidShape);
+            const CollisionShape avoidCollisionShape(shapes.mShapeInstance, *avoidShape, shapes.mTransform);
+            if (mNavMeshManager.updateObject(avoidId, avoidCollisionShape, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;
@@ -104,16 +108,24 @@ namespace DetourNavigator
         return result;
     }
 
-    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
-        const btTransform& transform)
+    bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
     {
-        return mNavMeshManager.addWater(cellPosition, cellSize,
-            btTransform(transform.getBasis(), btVector3(transform.getOrigin().x(), transform.getOrigin().y(), level)));
+        return mNavMeshManager.addWater(cellPosition, cellSize, level);
     }
 
     bool NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)
     {
         return mNavMeshManager.removeWater(cellPosition);
+    }
+
+    bool NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape)
+    {
+        return mNavMeshManager.addHeightfield(cellPosition, cellSize, shape);
+    }
+
+    bool NavigatorImpl::removeHeightfield(const osg::Vec2i& cellPosition)
+    {
+        return mNavMeshManager.removeHeightfield(cellPosition);
     }
 
     void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)
@@ -125,8 +137,8 @@ namespace DetourNavigator
             const auto dst = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV1]));
             mNavMeshManager.addOffMeshConnection(
                 ObjectId(&pathgrid),
-                toNavMeshCoordinates(mSettings, src),
-                toNavMeshCoordinates(mSettings, dst),
+                toNavMeshCoordinates(mSettings.mRecast, src),
+                toNavMeshCoordinates(mSettings.mRecast, dst),
                 AreaType_pathgrid
             );
         }
@@ -146,22 +158,32 @@ namespace DetourNavigator
             mNavMeshManager.update(playerPosition, v.first);
     }
 
+    void NavigatorImpl::updatePlayerPosition(const osg::Vec3f& playerPosition)
+    {
+        const TilePosition tilePosition = getTilePosition(mSettings.mRecast, toNavMeshCoordinates(mSettings.mRecast, playerPosition));
+        if (mLastPlayerPosition.has_value() && *mLastPlayerPosition == tilePosition)
+            return;
+        mNavMeshManager.updateBounds(playerPosition);
+        update(playerPosition);
+        mLastPlayerPosition = tilePosition;
+    }
+
     void NavigatorImpl::setUpdatesEnabled(bool enabled)
     {
         mUpdatesEnabled = enabled;
     }
 
-    void NavigatorImpl::wait()
+    void NavigatorImpl::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
     {
-        mNavMeshManager.wait();
+        mNavMeshManager.wait(listener, waitConditionType);
     }
 
-    SharedNavMeshCacheItem NavigatorImpl::getNavMesh(const osg::Vec3f& agentHalfExtents) const
+    SharedNavMeshCacheItem NavigatorImpl::getNavMesh(const AgentBounds& agentBounds) const
     {
-        return mNavMeshManager.getNavMesh(agentHalfExtents);
+        return mNavMeshManager.getNavMesh(agentBounds);
     }
 
-    std::map<osg::Vec3f, SharedNavMeshCacheItem> NavigatorImpl::getNavMeshes() const
+    std::map<AgentBounds, SharedNavMeshCacheItem> NavigatorImpl::getNavMeshes() const
     {
         return mNavMeshManager.getNavMeshes();
     }
@@ -176,7 +198,7 @@ namespace DetourNavigator
         mNavMeshManager.reportStats(frameNumber, stats);
     }
 
-    RecastMeshTiles NavigatorImpl::getRecastMeshTiles()
+    RecastMeshTiles NavigatorImpl::getRecastMeshTiles() const
     {
         return mNavMeshManager.getRecastMeshTiles();
     }
@@ -210,5 +232,11 @@ namespace DetourNavigator
             else
                 ++it;
         }
+    }
+
+    float NavigatorImpl::getMaxNavmeshAreaRealRadius() const
+    {
+        const auto& settings = getSettings();
+        return getRealTileSize(settings.mRecast) * getMaxNavmeshAreaRadius(settings);
     }
 }

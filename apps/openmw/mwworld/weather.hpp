@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_WEATHER_H
 #define GAME_MWWORLD_WEATHER_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <map>
 
@@ -115,6 +115,8 @@ namespace MWWorld
     class Weather
     {
     public:
+        static osg::Vec3f defaultDirection();
+
         Weather(const std::string& name,
                 float stormWindSpeed,
                 float rainSpeed,
@@ -188,6 +190,8 @@ namespace MWWorld
         std::string mParticleEffect;
 
         std::string mRainEffect;
+
+        osg::Vec3f mStormDirection;
 
         // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
         // is broken in the vanilla game and was disabled.
@@ -303,7 +307,11 @@ namespace MWWorld
 
         void advanceTime(double hours, bool incremental);
 
-        unsigned int getWeatherID() const;
+        int getWeatherID() const { return mCurrentWeather; }
+
+        int getNextWeatherID() const { return mNextWeather; }
+
+        float getTransitionFactor() const { return mTransitionFactor; }
 
         bool useTorches(float hour) const;
 

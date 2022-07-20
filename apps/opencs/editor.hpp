@@ -3,6 +3,7 @@
 
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/program_options/variables_map.hpp>
 
 #include <QObject>
 #include <QString>
@@ -40,6 +41,7 @@ namespace CS
             Q_OBJECT
 
             Files::ConfigurationManager mCfgMgr;
+            boost::program_options::variables_map mConfigVariables;
             CSMPrefs::State mSettingsState;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::StartupDialogue mStartup;
@@ -58,6 +60,8 @@ namespace CS
             Files::PathContainer mDataDirs;
             std::string mEncodingName;
 
+            boost::program_options::variables_map readConfiguration();
+            ///< Calls mCfgMgr.readConfiguration; should be used before initialization of mSettingsState as it depends on the configuration.
             std::pair<Files::PathContainer, std::vector<std::string> > readConfig(bool quiet=false);
             ///< \return data paths
 

@@ -4,11 +4,9 @@
 
 #include <osg/Group>
 #include <osg/Geometry>
-#include <osg/PositionAttitudeTransform>
 
-#include <components/esm/loadland.hpp>
+#include <components/esm3/loadland.hpp>
 
-#include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/columnimp.hpp"
 #include "../../model/world/idtable.hpp"
 
@@ -16,11 +14,13 @@
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget, TerrainSelectionType type):
-mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget), mDraggedOperationFlag(false), mSelectionType(type)
+mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget), mSelectionType(type)
 {
     mGeometry = new osg::Geometry();
 
     mSelectionNode = new osg::Group();
+    mSelectionNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+    mSelectionNode->getOrCreateStateSet()->setRenderBinDetails(11, "RenderBin");
     mSelectionNode->addChild(mGeometry);
 
     activate();
@@ -39,64 +39,28 @@ std::vector<std::pair<int, int>> CSVRender::TerrainSelection::getTerrainSelectio
 void CSVRender::TerrainSelection::onlySelect(const std::vector<std::pair<int, int>> &localPositions)
 {
     mSelection = localPositions;
+
     update();
 }
 
-void CSVRender::TerrainSelection::addSelect(const std::pair<int, int> &localPos)
+void CSVRender::TerrainSelection::addSelect(const std::vector<std::pair<int, int>>& localPositions)
 {
-    if (std::find(mSelection.begin(), mSelection.end(), localPos) == mSelection.end())
-    {
-        mSelection.emplace_back(localPos);
-        update();
-    }
+    handleSelection(localPositions, SelectionMethod::AddSelect);
 }
 
-void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool toggleInProgress)
+void CSVRender::TerrainSelection::removeSelect(const std::vector<std::pair<int, int>>& localPositions)
 {
-    if (toggleInProgress)
-    {
-        for(auto const& localPos: localPositions)
-        {
-            auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
-            mDraggedOperationFlag = true;
+    handleSelection(localPositions, SelectionMethod::RemoveSelect);
+}
 
-            if (iterTemp == mTemporarySelection.end())
-            {
-                auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
-                if (iter != mSelection.end())
-                {
-                    mSelection.erase(iter);
-                }
-                else
-                {
-                    mSelection.emplace_back(localPos);
-                }
-            }
+void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>>& localPositions)
+{
+    handleSelection(localPositions, SelectionMethod::ToggleSelect);
+}
 
-            mTemporarySelection.push_back(localPos);
-        }
-    }
-    else if (mDraggedOperationFlag == false)
-    {
-        for(auto const& localPos: localPositions)
-        {
-            const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
-            if (iter != mSelection.end())
-            {
-                mSelection.erase(iter);
-            }
-            else
-            {
-                mSelection.emplace_back(localPos);
-            }
-        }
-    }
-    else
-    {
-        mDraggedOperationFlag = false;
-        mTemporarySelection.clear();
-    }
-    update();
+void CSVRender::TerrainSelection::clearTemporarySelection()
+{
+    mTemporarySelection.clear();
 }
 
 void CSVRender::TerrainSelection::activate()
@@ -143,26 +107,16 @@ void CSVRender::TerrainSelection::drawShapeSelection(const osg::ref_ptr<osg::Vec
             float xWorldCoord(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(x));
             float yWorldCoord(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(y));
 
-            osg::Vec3f pointXY(xWorldCoord, yWorldCoord, calculateLandHeight(x, y) + 2);
+            osg::Vec3f pointXY(xWorldCoord, yWorldCoord, calculateLandHeight(x, y));
 
             vertices->push_back(pointXY);
-            vertices->push_back(osg::Vec3f(xWorldCoord, CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(y - 1), calculateLandHeight(x, y - 1) + 2));
+            vertices->push_back(osg::Vec3f(xWorldCoord, CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(y - 1), calculateLandHeight(x, y - 1)));
             vertices->push_back(pointXY);
-            vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(x - 1), yWorldCoord, calculateLandHeight(x - 1, y) + 2));
-
-            const auto north = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y + 1));
-            if (north == mSelection.end())
-            {
-                vertices->push_back(pointXY);
-                vertices->push_back(osg::Vec3f(xWorldCoord, CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(y + 1), calculateLandHeight(x, y + 1) + 2));
-            }
-
-            const auto east = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x + 1, y));
-            if (east == mSelection.end())
-            {
-                vertices->push_back(pointXY);
-                vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(x + 1), yWorldCoord, calculateLandHeight(x + 1, y) + 2));
-            }
+            vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(x - 1), yWorldCoord, calculateLandHeight(x - 1, y)));
+            vertices->push_back(pointXY);
+            vertices->push_back(osg::Vec3f(xWorldCoord, CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(y + 1), calculateLandHeight(x, y + 1)));
+            vertices->push_back(pointXY);
+            vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(x + 1), yWorldCoord, calculateLandHeight(x + 1, y)));
         }
     }
 }
@@ -195,8 +149,8 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
                 {
                     float drawPreviousX = CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x) + (i - 1) * (ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1));
                     float drawCurrentX = CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x) + i * (ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1));
-                    vertices->push_back(osg::Vec3f(drawPreviousX, CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y + 1), calculateLandHeight(x1+(i-1), y2)+2));
-                    vertices->push_back(osg::Vec3f(drawCurrentX, CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y + 1), calculateLandHeight(x1+i, y2)+2));
+                    vertices->push_back(osg::Vec3f(drawPreviousX, CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y + 1), calculateLandHeight(x1+(i-1), y2)));
+                    vertices->push_back(osg::Vec3f(drawCurrentX, CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y + 1), calculateLandHeight(x1+i, y2)));
                 }
             }
 
@@ -207,8 +161,8 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
                 {
                     float drawPreviousX = CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x) + (i - 1) *(ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1));
                     float drawCurrentX = CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x) + i * (ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1));
-                    vertices->push_back(osg::Vec3f(drawPreviousX, CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y), calculateLandHeight(x1+(i-1), y1)+2));
-                    vertices->push_back(osg::Vec3f(drawCurrentX, CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y), calculateLandHeight(x1+i, y1)+2));
+                    vertices->push_back(osg::Vec3f(drawPreviousX, CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y), calculateLandHeight(x1+(i-1), y1)));
+                    vertices->push_back(osg::Vec3f(drawCurrentX, CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y), calculateLandHeight(x1+i, y1)));
                 }
             }
 
@@ -219,8 +173,8 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
                 {
                     float drawPreviousY = CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y) + (i - 1) * (ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1));
                     float drawCurrentY = CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y) + i * (ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1));
-                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x + 1), drawPreviousY, calculateLandHeight(x2, y1+(i-1))+2));
-                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x + 1), drawCurrentY, calculateLandHeight(x2, y1+i)+2));
+                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x + 1), drawPreviousY, calculateLandHeight(x2, y1+(i-1))));
+                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x + 1), drawCurrentY, calculateLandHeight(x2, y1+i)));
                 }
             }
 
@@ -231,12 +185,63 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
                 {
                     float drawPreviousY = CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y) + (i - 1) * (ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1));
                     float drawCurrentY = CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(y) + i * (ESM::Land::REAL_SIZE / (ESM::Land::LAND_SIZE - 1));
-                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x), drawPreviousY, calculateLandHeight(x1, y1+(i-1))+2));
-                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x), drawCurrentY, calculateLandHeight(x1, y1+i)+2));
+                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x), drawPreviousY, calculateLandHeight(x1, y1+(i-1))));
+                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(x), drawCurrentY, calculateLandHeight(x1, y1+i)));
                 }
             }
         }
     }
+}
+
+void CSVRender::TerrainSelection::handleSelection(const std::vector<std::pair<int, int>>& localPositions, SelectionMethod selectionMethod)
+{
+    for (auto const& localPos : localPositions)
+    {
+        const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
+
+        switch (selectionMethod)
+        {
+            case SelectionMethod::OnlySelect:
+                break;
+
+            case SelectionMethod::AddSelect:
+                if (iter == mSelection.end())
+                {
+                    mSelection.emplace_back(localPos);
+                }
+                break;
+
+            case SelectionMethod::RemoveSelect:
+                if (iter != mSelection.end())
+                {
+                    mSelection.erase(iter);
+                }
+                break;
+
+            case SelectionMethod::ToggleSelect:
+            {
+                const auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
+                if (iterTemp == mTemporarySelection.end())
+                {
+                    if (iter == mSelection.end())
+                    {
+                        mSelection.emplace_back(localPos);
+                    }
+                    else
+                    {
+                        mSelection.erase(iter);
+                    }
+                }
+                mTemporarySelection.emplace_back(localPos);
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    update();
 }
 
 bool CSVRender::TerrainSelection::noCell(const std::string& cellId)
@@ -283,11 +288,9 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
     else if (isLandLoaded(CSMWorld::CellCoordinates::generateId(cellX, cellY)))
     {
         CSMDoc::Document& document = mWorldspaceWidget->getDocument();
-        CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> ( *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
         std::string cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
-        int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
-        const CSMWorld::LandHeightsColumn::DataType mPointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-        return mPointer[localY*ESM::Land::LAND_SIZE + localX];
+        const ESM::Land::LandData* landData = document.getData().getLand().getRecord(cellId).get().getLandData(ESM::Land::DATA_VHGT);
+        return landData->mHeights[localY*ESM::Land::LAND_SIZE + localX];
     }
 
     return landHeight;

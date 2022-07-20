@@ -1,0 +1,71 @@
+Camera: "OpenMW Kamera"
+settingsPageDescription: "OpenMW Kamerainställningar"
+
+thirdPersonSettings: "Tredjepersonsvy"
+
+viewOverShoulder: "Över-axeln-vy"
+viewOverShoulderDescription: |
+    Styr tredjepersonsvyn.
+      Nej: Kameran är centrerad på spelfigurens huvud. Siktet är gömt.
+      Ja: När vapnet är inaktiverat positioneras kameran bakom spelfigurens axel. Siktet är synligt.
+
+shoulderOffsetX: "Över-axeln-vy horisontell placering"
+shoulderOffsetXDescription: >
+    Horisontell placering för kamera över-axeln-vyn.
+    Använd ett negativt värde för vänster axel.
+
+shoulderOffsetY: "Över-axeln-vy vertikal placering"
+shoulderOffsetYDescription: >
+    Vertikal placering för kamera över-axeln-vyn.
+
+autoSwitchShoulder: "Byt axel automatiskt"
+autoSwitchShoulderDescription: >
+    När det finns hinder som gör att kameran knuffas närmare spelfiguren,
+    gör denna inställning att kameran automatiskt flyttas till axeln längst bort från hindret.
+
+zoomOutWhenMoveCoef: "Zooma ut vid förflyttning, koefficient"
+zoomOutWhenMoveCoefDescription: >
+    Flytta kameran bort från (positivt värde) eller mot (negativt värde) spelfiguren när spelfiguren förflyttar sig.
+    Fungerar endast om "Kamera över-axeln-vy" är aktiverat. Ställ på noll för att avaktivera (förvalt är 20.0).
+
+previewIfStandStill: "Omloppskamera vid stillastående"
+previewIfStandStillDescription: >
+    Gör att spelfiguren inte vänder sig mot kameravinkeln när spelfiguren är inaktiv och har vapnet inaktiverat.
+
+deferredPreviewRotation: "Fördröjd omloppskamerarotation"
+deferredPreviewRotationDescription: |
+    Om aktiverat kommer spelfiguren rotera mjukt mot kameravikeln när omloppskameran avaktiveras.
+    Om inaktiverat kommer kameran rotera istället för spelfiguren.
+
+ignoreNC: "Ignorera 'No Collision'-flaggor"
+ignoreNCDescription: >
+    Hindrar kameran från att tränga igenom objekt som har NC-flaggan (No Collision, ingen kollision) aktiverad i NIF-modellen.
+
+move360: "Kameraoberoende förflyttning"
+move360Description: >
+    Gör rörelseriktningen oberoende av kameravinkeln när spelfigurens vapen är inaktiverat. Till exempel kommer spelfiguren vara vänd mot kameran när spelaren springer bakåt.
+
+move360TurnSpeed: "Kameraoberoende förflyttning, svänghastighet"
+move360TurnSpeedDescription: "Svänghastighet multiplikator (förvalt är 5.0)."
+
+slowViewChange: "Mjukt byte mellan kameravyer"
+slowViewChangeDescription: "Gör övergången från första- till tredjepersonsvy icke-omedelbar."
+
+povAutoSwitch: "Automatiskt byte till förstapersonsvy"
+povAutoSwitchDescription: "Automatiskt byte till förstapersonsvy om det finns ett hinder precis bakom spelfiguren."
+
+
+headBobbingSettings: "Huvudguppande i förstapersonsvy"
+
+headBobbing_enabled: "Aktiverad"
+headBobbing_enabledDescription: "Om aktiverad kommer kameran i förstapersonsvyn att guppa vid rörelser"
+
+headBobbing_step: "Steglängd"
+headBobbing_stepDescription: "Längden på varje steg (förvalt: 90.0)."
+
+headBobbing_height: "Steghöjd"
+headBobbing_heightDescription: "Huvudguppandets amplitud (förvalt: 3.0)."
+
+headBobbing_roll: "Maximal gungvinkel"
+headBobbing_rollDescription: "Maximala vinkeln som kameran gungar, i grader (förvalt: 0.2)."
+

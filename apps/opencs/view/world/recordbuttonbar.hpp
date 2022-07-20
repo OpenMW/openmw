@@ -58,8 +58,8 @@ namespace CSVWorld
         public:
 
             RecordButtonBar (const CSMWorld::UniversalId& id,
-                CSMWorld::IdTable& table, TableBottomBox *bottomBox = 0,
-                CSMWorld::CommandDispatcher *commandDispatcher = 0, QWidget *parent = 0);
+                CSMWorld::IdTable& table, TableBottomBox *bottomBox = nullptr,
+                CSMWorld::CommandDispatcher *commandDispatcher = nullptr, QWidget *parent = nullptr);
 
             void setEditLock (bool locked);
 

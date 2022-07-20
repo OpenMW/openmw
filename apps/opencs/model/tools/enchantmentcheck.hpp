@@ -1,7 +1,7 @@
 #ifndef CSM_TOOLS_ENCHANTMENTCHECK_H
 #define CSM_TOOLS_ENCHANTMENTCHECK_H
 
-#include <components/esm/loadench.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../world/idcollection.hpp"
 

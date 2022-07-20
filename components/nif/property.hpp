@@ -29,11 +29,10 @@
 namespace Nif
 {
 
-class Property : public Named { };
+struct Property : public Named { };
 
-class NiTexturingProperty : public Property
+struct NiTexturingProperty : public Property
 {
-public:
     unsigned short flags{0u};
 
     // A sub-texture
@@ -53,6 +52,9 @@ public:
 
         void read(NIFStream *nif);
         void post(NIFFile *nif);
+
+        bool wrapT() const { return clamp & 1; }
+        bool wrapS() const { return (clamp >> 1) & 1; }
     };
 
     /* Apply mode:
@@ -62,7 +64,7 @@ public:
         3 - hilight  // These two are for PS2 only?
         4 - hilight2
     */
-    unsigned int apply;
+    unsigned int apply{0};
 
     /*
      * The textures in this list are as follows:
@@ -96,9 +98,8 @@ public:
     void post(NIFFile *nif) override;
 };
 
-class NiFogProperty : public Property
+struct NiFogProperty : public Property
 {
-public:
     unsigned short mFlags;
     float mFogDepth;
     osg::Vec3f mColour;
@@ -116,6 +117,101 @@ struct NiShadeProperty : public Property
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
             flags = nif->getUShort();
     }
+};
+
+
+enum class BSShaderType : unsigned int
+{
+    ShaderType_TallGrass = 0,
+    ShaderType_Default = 1,
+    ShaderType_Sky = 10,
+    ShaderType_Skin = 14,
+    ShaderType_Water = 17,
+    ShaderType_Lighting30 = 29,
+    ShaderType_Tile = 32,
+    ShaderType_NoLighting = 33
+};
+
+struct BSShaderProperty : public NiShadeProperty
+{
+    unsigned int type{0u}, flags1{0u}, flags2{0u};
+    float envMapIntensity{0.f};
+    void read(NIFStream *nif) override;
+};
+
+struct BSShaderLightingProperty : public BSShaderProperty
+{
+    unsigned int clamp{0u};
+    void read(NIFStream *nif) override;
+
+    bool wrapT() const { return clamp & 1; }
+    bool wrapS() const { return (clamp >> 1) & 1; }
+};
+
+struct BSShaderPPLightingProperty : public BSShaderLightingProperty
+{
+    BSShaderTextureSetPtr textureSet;
+    struct RefractionSettings
+    {
+        float strength{0.f};
+        int period{0};
+    };
+    struct ParallaxSettings
+    {
+        float passes{0.f};
+        float scale{0.f};
+    };
+    RefractionSettings refraction;
+    ParallaxSettings parallax;
+
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct BSShaderNoLightingProperty : public BSShaderLightingProperty
+{
+    std::string filename;
+    osg::Vec4f falloffParams;
+
+    void read(NIFStream *nif) override;
+};
+
+enum class BSLightingShaderType : unsigned int
+{
+    ShaderType_Default = 0,
+    ShaderType_EnvMap = 1,
+    ShaderType_Glow = 2,
+    ShaderType_Parallax = 3,
+    ShaderType_FaceTint = 4,
+    ShaderType_SkinTint = 5,
+    ShaderType_HairTint = 6,
+    ShaderType_ParallaxOcc = 7,
+    ShaderType_MultitexLand = 8,
+    ShaderType_LODLand = 9,
+    ShaderType_Snow = 10,
+    ShaderType_MultiLayerParallax = 11,
+    ShaderType_TreeAnim = 12,
+    ShaderType_LODObjects = 13,
+    ShaderType_SparkleSnow = 14,
+    ShaderType_LODObjectsHD = 15,
+    ShaderType_EyeEnvmap = 16,
+    ShaderType_Cloud = 17,
+    ShaderType_LODNoise = 18,
+    ShaderType_MultitexLandLODBlend = 19,
+    ShaderType_Dismemberment = 20
+};
+
+struct BSLightingShaderProperty : public BSShaderProperty
+{
+    BSShaderTextureSetPtr mTextureSet;
+    unsigned int mClamp{0u};
+    float mAlpha;
+    float mGlossiness;
+    osg::Vec3f mEmissive, mSpecular;
+    float mEmissiveMult, mSpecStrength;
+
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 struct NiDitherProperty : public Property
@@ -140,6 +236,10 @@ struct NiZBufferProperty : public Property
         if (nif->getVersion() >= NIFStream::generateVersion(4,1,0,12) && nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
             testFunction = nif->getUInt();
     }
+
+    bool depthTest() const { return flags & 1; }
+
+    bool depthWrite() const { return (flags >> 1) & 1; }
 };
 
 struct NiSpecularProperty : public Property
@@ -150,6 +250,8 @@ struct NiSpecularProperty : public Property
         Property::read(nif);
         flags = nif->getUShort();
     }
+
+    bool isEnabled() const { return flags & 1; }
 };
 
 struct NiWireframeProperty : public Property
@@ -160,6 +262,8 @@ struct NiWireframeProperty : public Property
         Property::read(nif);
         flags = nif->getUShort();
     }
+
+    bool isEnabled() const { return flags & 1; }
 };
 
 // The rest are all struct-based
@@ -182,7 +286,7 @@ struct S_MaterialProperty
     // The vector components are R,G,B
     osg::Vec3f ambient{1.f,1.f,1.f}, diffuse{1.f,1.f,1.f};
     osg::Vec3f specular, emissive;
-    float glossiness, alpha;
+    float glossiness{0.f}, alpha{0.f}, emissiveMult{1.f};
 
     void read(NIFStream *nif);
 };
@@ -206,16 +310,7 @@ struct S_VertexColorProperty
 struct S_AlphaProperty
 {
     /*
-        In NiAlphaProperty, the flags have the following meaning:
-
-        Bit 0 : alpha blending enable
-        Bits 1-4 : source blend mode
-        Bits 5-8 : destination blend mode
-        Bit 9 : alpha test enable
-        Bit 10-12 : alpha test mode
-        Bit 13 : no sorter flag ( disables triangle sorting )
-
-        blend modes (glBlendFunc):
+        NiAlphaProperty blend modes (glBlendFunc):
         0000 GL_ONE
         0001 GL_ZERO
         0010 GL_SRC_COLOR
@@ -294,8 +389,18 @@ struct S_StencilProperty
     void read(NIFStream *nif);
 };
 
-class NiAlphaProperty : public StructPropT<S_AlphaProperty> { };
-class NiVertexColorProperty : public StructPropT<S_VertexColorProperty> { };
+struct NiAlphaProperty : public StructPropT<S_AlphaProperty>
+{
+    bool useAlphaBlending() const { return flags & 1; }
+    int sourceBlendMode() const { return (flags >> 1) & 0xF; }
+    int destinationBlendMode() const { return (flags >> 5) & 0xF; }
+    bool noSorter() const { return (flags >> 13) & 1; }
+
+    bool useAlphaTesting() const { return (flags >> 9) & 1; }
+    int alphaTestMode() const { return (flags >> 10) & 0x7; }
+};
+
+struct NiVertexColorProperty : public StructPropT<S_VertexColorProperty> { };
 struct NiStencilProperty : public Property
 {
     S_StencilProperty data;

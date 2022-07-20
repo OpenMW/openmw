@@ -1,11 +1,12 @@
 #include "npcstats.hpp"
 
 #include <iomanip>
+#include <sstream>
 
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loadgmst.hpp>
-#include <components/esm/loadfact.hpp>
-#include <components/esm/npcstats.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/npcstats.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -371,7 +372,7 @@ int MWMechanics::NpcStats::getReputation() const
 void MWMechanics::NpcStats::setReputation(int reputation)
 {
     // Reputation is capped in original engine
-    mReputation = std::min(255, std::max(0, reputation));
+    mReputation = std::clamp(reputation, 0, 255);
 }
 
 int MWMechanics::NpcStats::getCrimeId() const

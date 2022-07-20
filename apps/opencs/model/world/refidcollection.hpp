@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <deque>
+#include <string_view>
 
 #include "columnbase.hpp"
 #include "collectionbase.hpp"
@@ -58,7 +59,7 @@ namespace CSMWorld
 
             RefIdCollection();
 
-            virtual ~RefIdCollection();
+            ~RefIdCollection() override;
 
             int getSize() const override;
 
@@ -85,16 +86,16 @@ namespace CSMWorld
             void appendBlankRecord (const std::string& id, UniversalId::Type type) override;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            int searchId (const std::string& id) const override;
+            int searchId(std::string_view id) const override;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
 
-            void replace (int index, const RecordBase& record) override;
+            void replace (int index, std::unique_ptr<RecordBase> record) override;
             ///< If the record type does not match, an exception is thrown.
             ///
             /// \attention \a record must not change the ID.
 
-            void appendRecord (const RecordBase& record, UniversalId::Type type) override;
+            void appendRecord (std::unique_ptr<RecordBase> record, UniversalId::Type type) override;
             ///< If the record type does not match, an exception is thrown.
             ///
             ///< \param type Will be ignored, unless the collection supports multiple record types

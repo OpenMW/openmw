@@ -26,6 +26,7 @@ namespace Terrain
     class CompositeMapRenderer;
     class Storage;
     class CompositeMap;
+    class TerrainDrawable;
 
     typedef std::tuple<osg::Vec2f, unsigned char, unsigned int> ChunkId; // Center, Lod, Lod Flags
 
@@ -35,7 +36,7 @@ namespace Terrain
     public:
         ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager, CompositeMapRenderer* renderer);
 
-        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile) override;
+        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
 
         void setCompositeMapSize(unsigned int size) { mCompositeMapSize = size; }
         void setCompositeMapLevel(float level) { mCompositeMapLevel = level; }
@@ -51,7 +52,7 @@ namespace Terrain
         void releaseGLObjects(osg::State* state) override;
 
     private:
-        osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool compile);
+        osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool compile, TerrainDrawable* templateGeometry);
 
         osg::ref_ptr<osg::Texture2D> createCompositeMapRTT();
 

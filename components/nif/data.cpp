@@ -34,6 +34,13 @@ void NiSkinInstance::post(NIFFile *nif)
     }
 }
 
+void BSDismemberSkinInstance::read(NIFStream *nif)
+{
+    NiSkinInstance::read(nif);
+    unsigned int numPartitions = nif->getUInt();
+    nif->skip(4 * numPartitions); // Body part information
+}
+
 void NiGeometryData::read(NIFStream *nif)
 {
     if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,114))
@@ -184,7 +191,7 @@ void NiLinesData::read(NIFStream *nif)
     }
 }
 
-void NiAutoNormalParticlesData::read(NIFStream *nif)
+void NiParticlesData::read(NIFStream *nif)
 {
     NiGeometryData::read(nif);
 
@@ -216,7 +223,7 @@ void NiAutoNormalParticlesData::read(NIFStream *nif)
 
 void NiRotatingParticlesData::read(NIFStream *nif)
 {
-    NiAutoNormalParticlesData::read(nif);
+    NiParticlesData::read(nif);
 
     if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0) && nif->getBoolean())
         nif->getQuaternions(rotations, vertices.size());
@@ -363,11 +370,11 @@ void NiSkinPartition::read(NIFStream *nif)
 
 void NiSkinPartition::Partition::read(NIFStream *nif)
 {
-    unsigned short numVertices = nif->getUShort();
-    unsigned short numTriangles = nif->getUShort();
-    unsigned short numBones = nif->getUShort();
-    unsigned short numStrips = nif->getUShort();
-    unsigned short bonesPerVertex = nif->getUShort();
+    size_t numVertices = nif->getUShort();
+    size_t numTriangles = nif->getUShort();
+    size_t numBones = nif->getUShort();
+    size_t numStrips = nif->getUShort();
+    size_t bonesPerVertex = nif->getUShort();
     if (numBones)
         nif->getUShorts(bones, numBones);
 
@@ -395,7 +402,7 @@ void NiSkinPartition::Partition::read(NIFStream *nif)
         if (numStrips)
         {
             strips.resize(numStrips);
-            for (unsigned short i = 0; i < numStrips; i++)
+            for (size_t i = 0; i < numStrips; i++)
                 nif->getUShorts(strips[i], stripLengths[i]);
         }
         else if (numTriangles)
@@ -421,7 +428,7 @@ void NiMorphData::read(NIFStream *nif)
     for(int i = 0;i < morphCount;i++)
     {
         mMorphs[i].mKeyFrames = std::make_shared<FloatKeyMap>();
-        mMorphs[i].mKeyFrames->read(nif, true, /*morph*/true);
+        mMorphs[i].mKeyFrames->read(nif, /*morph*/true);
         nif->getVector3s(mMorphs[i].mVertices, vertCount);
     }
 }
@@ -432,15 +439,14 @@ void NiKeyframeData::read(NIFStream *nif)
     mRotations->read(nif);
     if(mRotations->mInterpolationType == InterpolationType_XYZ)
     {
-        //Chomp unused float
         if (nif->getVersion() <= NIFStream::generateVersion(10,1,0,0))
-            nif->getFloat();
+            mAxisOrder = static_cast<AxisOrder>(nif->getInt());
         mXRotations = std::make_shared<FloatKeyMap>();
         mYRotations = std::make_shared<FloatKeyMap>();
         mZRotations = std::make_shared<FloatKeyMap>();
-        mXRotations->read(nif, true);
-        mYRotations->read(nif, true);
-        mZRotations->read(nif, true);
+        mXRotations->read(nif);
+        mYRotations->read(nif);
+        mZRotations->read(nif);
     }
     mTranslations = std::make_shared<Vector3KeyMap>();
     mTranslations->read(nif);
@@ -460,21 +466,9 @@ void NiPalette::read(NIFStream *nif)
 
 void NiStringPalette::read(NIFStream *nif)
 {
-    unsigned int size = nif->getUInt();
-    if (!size)
-        return;
-    std::vector<char> source;
-    nif->getChars(source, size);
-    if (nif->getUInt() != size)
+    palette = nif->getString();
+    if (nif->getUInt() != palette.size())
         nif->file->warn("Failed size check in NiStringPalette");
-    if (source[source.size()-1] != '\0')
-        source.emplace_back('\0');
-    const char* buffer = source.data();
-    while (static_cast<size_t>(buffer - source.data()) < source.size())
-    {
-        palette.emplace_back(buffer);
-        buffer += palette.back().size() + 1;
-    }
 }
 
 void NiBoolData::read(NIFStream *nif)

@@ -2,8 +2,6 @@
 #define UNSHIELDWORKER_HPP
 
 #include <QObject>
-#include <QThread>
-#include <QMutex>
 #include <QWaitCondition>
 #include <QReadWriteLock>
 #include <QStringList>
@@ -12,6 +10,7 @@
 
 #include "../inisettings.hpp"
 
+#include <components/config/gamesettings.hpp>
 
 namespace Wizard
 {
@@ -26,8 +25,8 @@ namespace Wizard
         Q_OBJECT
 
     public:
-        UnshieldWorker(QObject *parent = 0);
-        ~UnshieldWorker();
+        UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject *parent = nullptr);
+        ~UnshieldWorker() override;
 
         void stopWorker();
 
@@ -38,6 +37,8 @@ namespace Wizard
         void setPath(const QString &path);
         void setIniPath(const QString &path);
 
+        void wakeAll();
+
         QString getPath();
         QString getIniPath();
 
@@ -45,8 +46,9 @@ namespace Wizard
 
         bool setupSettings();
 
-    private:
+        size_t getMorrowindBsaFileSize(const QString &cabFile);
 
+    private:
         bool writeSettings();
 
         bool getInstallComponent(Component component);
@@ -95,6 +97,8 @@ namespace Wizard
 
         bool mStopped;
 
+        qint64 mExpectedMorrowindBsaSize;
+
         QString mPath;
         QString mIniPath;
         QString mDiskPath;
@@ -113,6 +117,7 @@ namespace Wizard
     signals:
         void finished();
         void requestFileDialog(Wizard::Component component);
+        void requestOldVersionDialog();
 
         void textChanged(const QString &text);
 

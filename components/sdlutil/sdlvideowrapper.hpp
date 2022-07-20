@@ -12,6 +12,11 @@ namespace osgViewer
     class Viewer;
 }
 
+namespace Settings
+{
+    enum class WindowMode;
+}
+
 namespace SDLUtil
 {
 
@@ -25,7 +30,7 @@ namespace SDLUtil
 
         void setGammaContrast(float gamma, float contrast);
 
-        void setVideoMode(int width, int height, bool fullscreen, bool windowBorder);
+        void setVideoMode(int width, int height, Settings::WindowMode windowMode, bool windowBorder);
 
         void centerWindow();
 

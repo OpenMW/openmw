@@ -1,9 +1,6 @@
 #ifndef SETTINGSPAGE_HPP
 #define SETTINGSPAGE_HPP
 
-#include <QWidget>
-#include <QProcess>
-
 #include <components/process/processinvoker.hpp>
 
 #include "ui_settingspage.h"
@@ -24,8 +21,8 @@ namespace Launcher
 
     public:
         SettingsPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
-                      Config::LauncherSettings &launcherSettings, MainDialog *parent = 0);
-        ~SettingsPage();
+                      Config::LauncherSettings &launcherSettings, MainDialog *parent = nullptr);
+        ~SettingsPage() override;
 
         void saveSettings();
         bool loadSettings();

@@ -4,12 +4,11 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 #include <osg/Vec3f>
-#include <osg/NodeCallback>
 
-#include <atomic>
-#include <limits>
 #include <memory>
 #include <set>
+
+#include <components/sceneutil/nodecallback.hpp>
 
 #include "defs.hpp"
 #include "cellborder.hpp"
@@ -18,8 +17,6 @@ namespace osg
 {
     class Group;
     class Stats;
-    class Node;
-    class Object;
 }
 
 namespace Resource
@@ -27,9 +24,9 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace SceneUtil
+namespace Loading
 {
-    class WorkQueue;
+    class Reporter;
 }
 
 namespace Terrain
@@ -39,61 +36,9 @@ namespace Terrain
     class TextureManager;
     class ChunkManager;
     class CompositeMapRenderer;
-
-    class HeightCullCallback : public osg::NodeCallback
-    {
-    public:
-        void setLowZ(float z)
-        {
-            mLowZ = z;
-        }
-        float getLowZ() const
-        {
-            return mLowZ;
-        }
-
-        void setHighZ(float highZ)
-        {
-            mHighZ = highZ;
-        }
-        float getHighZ() const
-        {
-            return mHighZ;
-        }
-
-        void setCullMask(unsigned int mask)
-        {
-            mMask = mask;
-        }
-        unsigned int getCullMask() const
-        {
-            return mMask;
-        }
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
-        {
-            if (mLowZ <= mHighZ)
-                traverse(node, nv);
-        }
-    private:
-        float mLowZ{-std::numeric_limits<float>::max()};
-        float mHighZ{std::numeric_limits<float>::max()};
-        unsigned int mMask{~0u};
-    };
-
-    /**
-     * @brief A View is a collection of rendering objects that are visible from a given camera/intersection.
-     * The base View class is part of the interface for usage in conjunction with preload feature.
-     */
-    class View : public osg::Referenced
-    {
-    public:
-        virtual ~View() {}
-
-        /// Reset internal structure so that the next addition to the view will override the previous frame's contents.
-        virtual void reset() = 0;
-    };
-
+    class View;
+    class HeightCullCallback;
+    
     /**
      * @brief The basic interface for a terrain world. How the terrain chunks are paged and displayed
      *  is up to the implementation.
@@ -105,11 +50,9 @@ namespace Terrain
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param nodeMask mask for the terrain root
         /// @param preCompileMask mask for pre compiling textures
-        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask);
+        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask);
+        World(osg::Group* parent, Storage* storage, unsigned int nodeMask);
         virtual ~World();
-
-        /// Set a WorkQueue to delete objects in the background thread.
-        void setWorkQueue(SceneUtil::WorkQueue* workQueue);
 
         /// See CompositeMapRenderer::setTargetFrameRate
         void setTargetFrameRate(float rate);
@@ -147,11 +90,7 @@ namespace Terrain
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
 
-        virtual void preload(View* view, const osg::Vec3f& viewPoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, std::atomic<int>& progress, int& progressRange) {}
-
-        /// Store a preloaded view into the cache with the intent that the next rendering traversal can use it.
-        /// @note Not thread safe.
-        virtual bool storeView(const View* view, double referenceTime) {return true;}
+        virtual void preload(View* view, const osg::Vec3f& viewPoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, Loading::Reporter& reporter) {}
 
         virtual void rebuildViews() {}
 

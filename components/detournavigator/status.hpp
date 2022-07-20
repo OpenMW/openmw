@@ -6,6 +6,7 @@ namespace DetourNavigator
     enum class Status
     {
         Success,
+        PartialPath,
         NavMeshNotFound,
         StartPolygonNotFound,
         EndPolygonNotFound,
@@ -21,6 +22,8 @@ namespace DetourNavigator
         {
             case Status::Success:
                 return "success";
+            case Status::PartialPath:
+                return "partial path is found";
             case Status::NavMeshNotFound:
                 return "navmesh is not found";
             case Status::StartPolygonNotFound:

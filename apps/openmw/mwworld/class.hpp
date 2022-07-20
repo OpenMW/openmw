@@ -6,11 +6,13 @@
 #include <string>
 #include <vector>
 
+#include <osg/Quat>
 #include <osg/Vec4f>
 
 #include "ptr.hpp"
 #include "doorstate.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+
+#include "../mwmechanics/aisetting.hpp"
 
 namespace ESM
 {
@@ -31,6 +33,7 @@ namespace MWMechanics
 {
     class NpcStats;
     struct Movement;
+    class CreatureStats;
 }
 
 namespace MWGui
@@ -53,34 +56,33 @@ namespace MWWorld
     /// \brief Base class for referenceable esm records
     class Class
     {
-            static std::map<std::string, std::shared_ptr<Class> > sClasses;
+            const unsigned mType;
 
-            std::string mTypeName;
-
-            // not implemented
-            Class (const Class&);
-            Class& operator= (const Class&);
+            static std::map<unsigned, Class*>& getClasses();
 
         protected:
 
-            Class();
+            explicit Class(unsigned type) : mType(type) {}
 
-            std::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
+            std::unique_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
             ///< Generate default action for activating inventory items
 
             virtual Ptr copyToCellImpl(const ConstPtr &ptr, CellStore &cell) const;
 
         public:
 
-            virtual ~Class();
+            virtual ~Class() = default;
+            Class (const Class&) = delete;
+            Class& operator= (const Class&) = delete;
 
-            const std::string& getTypeName() const {
-                return mTypeName;
+            unsigned int getType() const {
+                return mType;
             }
 
             virtual void insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const;
-            virtual void insertObject(const Ptr& ptr, const std::string& mesh, MWPhysics::PhysicsSystem& physics) const;
+            virtual void insertObject(const Ptr& ptr, const std::string& mesh, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
+            virtual void insertObjectPhysics(const Ptr& ptr, const std::string& mesh, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const;
 
             virtual std::string getName (const ConstPtr& ptr) const = 0;
             ///< \return name or ID; can return an empty string.
@@ -139,10 +141,10 @@ namespace MWWorld
             ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
             /// (default implementation: throw an exception)
 
-            virtual std::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
+            virtual std::unique_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 
-            virtual std::shared_ptr<Action> use (const Ptr& ptr, bool force=false)
+            virtual std::unique_ptr<Action> use (const Ptr& ptr, bool force=false)
                 const;
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
@@ -220,13 +222,8 @@ namespace MWWorld
             virtual float getNormalizedEncumbrance (const MWWorld::Ptr& ptr) const;
             ///< Returns encumbrance re-scaled to capacity
 
-            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
-                const MWWorld::Ptr& actor) const;
-            ///< Apply \a id on \a ptr.
-            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
-            /// \return Any effect?
-            ///
-            /// (default implementation: ignore and return false)
+            virtual bool consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const;
+            ///< Consume an item, e. g. a potion.
 
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
@@ -338,10 +335,10 @@ namespace MWWorld
                 const;
             ///< Write additional state from \a ptr into \a state.
 
-            static const Class& get (const std::string& key);
+            static const Class& get (unsigned int key);
             ///< If there is no class for this \a key, an exception is thrown.
 
-            static void registerClass (const std::string& key,  std::shared_ptr<Class> instance);
+            static void registerClass(Class& instance);
 
             virtual int getBaseGold(const MWWorld::ConstPtr& ptr) const;
 
@@ -366,7 +363,7 @@ namespace MWWorld
 
             virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 
-            virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
+            virtual void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const;
 
             virtual void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const;
     };

@@ -1,7 +1,6 @@
 #include "operations.hpp"
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 
 #include "operation.hpp"
 
@@ -30,7 +29,7 @@ void CSVDoc::Operations::setProgress (int current, int max, int type, int thread
             return;
         }
 
-    int oldCount = mOperations.size();
+    int oldCount = static_cast<int>(mOperations.size());
     int newCount = oldCount + 1;
 
     Operation *operation = new Operation (type, this);
@@ -51,7 +50,7 @@ void CSVDoc::Operations::quitOperation (int type)
     for (std::vector<Operation *>::iterator iter (mOperations.begin()); iter!=mOperations.end(); ++iter)
         if ((*iter)->getType()==type)
         {
-            int oldCount = mOperations.size();
+            int oldCount = static_cast<int>(mOperations.size());
             int newCount = oldCount - 1;
 
             mLayout->removeItem ((*iter)->getLayout());

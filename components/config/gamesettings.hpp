@@ -21,7 +21,6 @@ namespace Config
     {
     public:
         GameSettings(Files::ConfigurationManager &cfg);
-        ~GameSettings();
 
         inline QString value(const QString &key, const QString &defaultValue = QString())
         {
@@ -54,24 +53,26 @@ namespace Config
             mUserSettings.remove(key);
         }
 
-        inline QStringList getDataDirs() { return mDataDirs; }
+        QStringList getDataDirs() const;
+        std::string getGlobalDataDir() const;
 
         inline void removeDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.removeAll(dir); }
         inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
-        inline QString getDataLocal() {return mDataLocal; }
+        inline QString getDataLocal() const {return mDataLocal; }
 
         bool hasMaster();
 
         QStringList values(const QString &key, const QStringList &defaultValues = QStringList()) const;
 
-        bool readFile(QTextStream &stream);
-        bool readFile(QTextStream &stream, QMultiMap<QString, QString> &settings);
-        bool readUserFile(QTextStream &stream);
+        bool readFile(QTextStream &stream, bool ignoreContent = false);
+        bool readFile(QTextStream &stream, QMultiMap<QString, QString> &settings, bool ignoreContent = false);
+        bool readUserFile(QTextStream &stream, bool ignoreContent = false);
 
         bool writeFile(QTextStream &stream);
         bool writeFileWithComments(QFile &file);
 
-        void setContentList(const QStringList& fileNames);
+        QStringList getArchiveList() const;
+        void setContentList(const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames);
         QStringList getContentList() const;
 
         void clear();
@@ -86,7 +87,9 @@ namespace Config
         QStringList mDataDirs;
         QString mDataLocal;
 
+        static const char sArchiveKey[];
         static const char sContentKey[];
+        static const char sDirectoryKey[];
 
         static bool isOrderedLine(const QString& line) ;
     };

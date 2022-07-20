@@ -13,7 +13,7 @@ namespace MWMechanics
 
         /// Steal some items
         /// @return Was the thief detected?
-        bool pick (MWWorld::Ptr item, int count);
+        bool pick (const MWWorld::Ptr& item, int count);
         /// End the pickpocketing process
         /// @return Was the thief detected?
         bool finish ();

@@ -1,7 +1,7 @@
 #ifndef MWGUI_TIMEADVANCER_H
 #define MWGUI_TIMEADVANCER_H
 
-#include <MyGUI_Widget.h>
+#include <MyGUI_Delegate.h>
 
 namespace MWGui
 {
@@ -14,8 +14,8 @@ namespace MWGui
             void stop();
             void onFrame(float dt);
 
-            int getHours();
-            bool isRunning();
+            int getHours() const;
+            bool isRunning() const;
 
             // signals
             typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

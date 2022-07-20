@@ -2,7 +2,6 @@
 #define CSM_WOLRD_UNIVERSALID_H
 
 #include <string>
-#include <iosfwd>
 #include <vector>
 
 #include <QMetaType>
@@ -199,8 +198,6 @@ namespace CSMWorld
     bool operator!= (const UniversalId& left, const UniversalId& right);
 
     bool operator< (const UniversalId& left, const UniversalId& right);
-
-    std::ostream& operator< (std::ostream& stream, const UniversalId& universalId);
 }
 
 Q_DECLARE_METATYPE (CSMWorld::UniversalId)

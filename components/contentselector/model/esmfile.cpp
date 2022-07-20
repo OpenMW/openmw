@@ -1,6 +1,5 @@
 #include "esmfile.hpp"
 
-#include <QMimeData>
 #include <QDataStream>
 
 int ContentSelectorModel::EsmFile::sPropertyCount = 7;
@@ -66,7 +65,7 @@ QByteArray ContentSelectorModel::EsmFile::encodedData() const
 bool ContentSelectorModel::EsmFile::isGameFile() const
 { 
     return (mGameFiles.size() == 0) &&
-        (mFileName.endsWith(QLatin1String(".esm"), Qt::CaseInsensitive) || 
+        (mFileName.endsWith(QLatin1String(".esm"), Qt::CaseInsensitive) ||
         mFileName.endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive));
 }
 

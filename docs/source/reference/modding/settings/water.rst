@@ -59,10 +59,10 @@ This setting has no effect if the shader setting is false.
 This setting can be toggled with the 'Refraction' button in the Water tab of the Video panel of the Options menu.
 
 reflection detail
---------------
+-----------------
 
 :Type:		integer
-:Range:		0, 1, 2, 3, 4
+:Range:		0, 1, 2, 3, 4, 5
 :Default:	2
 
 Controls what kinds of things are rendered in water reflections.
@@ -72,9 +72,25 @@ Controls what kinds of things are rendered in water reflections.
 2: statics, activators, and doors are also reflected
 3: items, containers, and particles are also reflected
 4: actors are also reflected
+5: groundcover objects are also reflected
 
 In interiors the lowest level is 2.
 This setting can be changed ingame with the "Reflection shader detail" dropdown under the Water tab of the Video panel in the Options menu.
+
+rain ripple detail
+-----------------
+
+:Type:		integer
+:Range:		0, 1, 2
+:Default:	1
+
+Controls how detailed the raindrop ripples on water are.
+
+0: single, non-normal-mapped ring per raindrop
+1: normal-mapped raindrops, with multiple rings
+2: same as 1, but with a greater number of raindrops
+
+This setting can be changed ingame with the "Rain ripple detail/density" dropdown under the Water tab of the Video panel in the Options menu.
 
 small feature culling pixel size
 --------------------------------
@@ -111,3 +127,6 @@ This setting only applies if water shader is on and refractions are enabled. Not
 setting if off, there will still be small refractions caused by the water waves, which however do not cause such significant
 distortion.
 
+.. warning::
+    The `refraction scale` is currently mutually exclusive to underwater shadows. Setting this to any value except 1.0
+    will cause underwater shadows to be disabled. This will be addressed in issue https://gitlab.com/OpenMW/openmw/-/issues/5709

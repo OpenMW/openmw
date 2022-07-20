@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <memory>
+#include <string_view>
 
 CSMWorld::RefIdDataContainerBase::~RefIdDataContainerBase() {}
 
@@ -74,8 +75,7 @@ int CSMWorld::RefIdData::localToGlobalIndex (const LocalIndex& index)
     return globalIndex;
 }
 
-CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId (
-    const std::string& id) const
+CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId(std::string_view id) const
 {
     std::string id2 = Misc::StringUtils::lowerCase (id);
 
@@ -85,6 +85,39 @@ CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId (
         return std::make_pair (-1, CSMWorld::UniversalId::Type_None);
 
     return iter->second;
+}
+
+unsigned int CSMWorld::RefIdData::getRecordFlags (const std::string& id) const
+{
+    LocalIndex localIndex = searchId (id);
+
+    switch (localIndex.second)
+    {
+        case UniversalId::Type_Activator: return mActivators.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Potion:    return mPotions.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Apparatus: return mApparati.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Armor:     return mArmors.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Book:      return mBooks.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Clothing:  return mClothing.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Container: return mContainers.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Creature:  return mCreatures.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Door:      return mDoors.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Ingredient: return mIngredients.getRecordFlags(localIndex.first);
+        case UniversalId::Type_CreatureLevelledList: return mCreatureLevelledLists.getRecordFlags(localIndex.first);
+        case UniversalId::Type_ItemLevelledList: return mItemLevelledLists.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Light:     return mLights.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Lockpick:  return mLockpicks.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Miscellaneous: return mMiscellaneous.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Npc:       return mNpcs.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Probe:     return mProbes.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Repair:    return mRepairs.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Static:    return mStatics.getRecordFlags(localIndex.first);
+        case UniversalId::Type_Weapon:    return mWeapons.getRecordFlags(localIndex.first);
+        default:
+            break;
+    }
+
+    return 0;
 }
 
 void CSMWorld::RefIdData::erase (int index, int count)
@@ -367,7 +400,7 @@ const CSMWorld::RefIdDataContainer< ESM::Static >& CSMWorld::RefIdData::getStati
     return mStatics;
 }
 
-void CSMWorld::RefIdData::insertRecord (CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id)
+void CSMWorld::RefIdData::insertRecord (std::unique_ptr<CSMWorld::RecordBase> record, CSMWorld::UniversalId::Type type, const std::string& id)
 {
   std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
         mRecordContainers.find (type);
@@ -375,7 +408,7 @@ void CSMWorld::RefIdData::insertRecord (CSMWorld::RecordBase& record, CSMWorld::
     if (iter==mRecordContainers.end())
         throw std::logic_error ("invalid local index type");
 
-    iter->second->insertRecord(record);
+    iter->second->insertRecord(std::move(record));
 
     mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id),
         LocalIndex (iter->second->getSize()-1, type)));
@@ -387,9 +420,7 @@ void CSMWorld::RefIdData::copyTo (int index, RefIdData& target) const
 
     RefIdDataContainerBase *source = mRecordContainers.find (localIndex.second)->second;
 
-    std::string id = source->getId (localIndex.first);
-
-    std::unique_ptr<CSMWorld::RecordBase> newRecord (source->getRecord (localIndex.first).modifiedCopy());
-
-    target.insertRecord (*newRecord, localIndex.second, id);
+    target.insertRecord(source->getRecord(localIndex.first).modifiedCopy(),
+                        localIndex.second,
+                        source->getId(localIndex.first));
 }

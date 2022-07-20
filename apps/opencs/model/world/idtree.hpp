@@ -42,7 +42,7 @@ namespace CSMWorld
             IdTree (NestedCollection *nestedCollection, CollectionBase *idCollection, unsigned int features = 0);
             ///< The ownerships of \a nestedCollecton and \a idCollection are not transferred.
 
-            virtual ~IdTree();
+            ~IdTree() override;
 
             int rowCount (const QModelIndex & parent = QModelIndex()) const override;
 

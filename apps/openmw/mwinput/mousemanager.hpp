@@ -38,6 +38,9 @@ namespace MWInput
         void setMouseLookEnabled(bool enabled) { mMouseLookEnabled = enabled; }
         void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }
 
+        int getMouseMoveX() const { return mMouseMoveX; }
+        int getMouseMoveY() const { return mMouseMoveY; }
+
     private:
         bool mInvertX;
         bool mInvertY;
@@ -47,13 +50,15 @@ namespace MWInput
 
         BindingsManager* mBindingsManager;
         SDLUtil::InputWrapper* mInputWrapper;
-        float mInvUiScalingFactor;
 
         float mGuiCursorX;
         float mGuiCursorY;
         int mMouseWheel;
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+
+        int mMouseMoveX;
+        int mMouseMoveY;
     };
 }
 #endif

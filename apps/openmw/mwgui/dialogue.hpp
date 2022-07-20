@@ -17,11 +17,6 @@ namespace Gui
 
 namespace MWGui
 {
-    class WindowManager;
-}
-
-namespace MWGui
-{
     class ResponseCallback;
 
     class PersuasionDialog : public WindowModal
@@ -122,7 +117,8 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& actor) override;
 
-        void setKeywords(std::list<std::string> keyWord);
+        /// @return true if stale keywords were updated successfully
+        bool setKeywords(const std::list<std::string>& keyWord);
 
         void addResponse (const std::string& title, const std::string& text, bool needMargin = true);
 

@@ -3,6 +3,11 @@
 
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/magiceffects.hpp"
+
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
+
 namespace ESM
 {
     struct GameSetting;
@@ -15,16 +20,25 @@ namespace MWClass
     {
     protected:
 
-        Actor();
+        explicit Actor(unsigned type) : Class(type) {}
+
+        template <class GMST>
+        float getSwimSpeedImpl(const MWWorld::Ptr& ptr, const GMST& gmst, const MWMechanics::MagicEffects& mageffects, float baseSpeed) const
+        {
+            return baseSpeed
+                * (1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude())
+                * (gmst.fSwimRunBase->mValue.getFloat()
+                   + 0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fSwimRunAthleticsMult->mValue.getFloat());
+        }
 
     public:
-        virtual ~Actor();
+         ~Actor() override = default;
 
         void adjustPosition(const MWWorld::Ptr& ptr, bool force) const override;
         ///< Adjust position to stand on ground. Must be called post model load
         /// @param force do this even if the ptr is flying
 
-        void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
+        void insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
 
         bool useAnim() const override;
 
@@ -46,8 +60,8 @@ namespace MWClass
         float getCurrentSpeed(const MWWorld::Ptr& ptr) const override;
         
         // not implemented
-        Actor(const Actor&);
-        Actor& operator= (const Actor&);
+        Actor(const Actor&) = delete;
+        Actor& operator= (const Actor&) = delete;
     };
 }
 

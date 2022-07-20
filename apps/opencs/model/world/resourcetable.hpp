@@ -16,7 +16,7 @@ namespace CSMWorld
             /// \note The feature Feature_Constant will be added implicitly.
             ResourceTable (const Resources *resources, unsigned int features = 0);
 
-            virtual ~ResourceTable();
+            ~ResourceTable() override;
 
             int rowCount (const QModelIndex & parent = QModelIndex()) const override;
 

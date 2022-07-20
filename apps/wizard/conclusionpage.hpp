@@ -1,8 +1,6 @@
 #ifndef CONCLUSIONPAGE_HPP
 #define CONCLUSIONPAGE_HPP
 
-#include <QWizardPage>
-
 #include "ui_conclusionpage.h"
 
 namespace Wizard

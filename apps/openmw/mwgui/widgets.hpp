@@ -3,12 +3,12 @@
 
 #include "../mwmechanics/stat.hpp"
 
-#include <components/esm/effectlist.hpp>
-#include <components/esm/loadskil.hpp>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Widget.h>
 
-#include <MyGUI_Button.h>
-#include <MyGUI_EditBox.h>
-#include <MyGUI_ScrollBar.h>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace MyGUI
 {
@@ -181,8 +181,6 @@ namespace MWGui
         public:
             MWSpell();
 
-            typedef MWMechanics::Stat<int> SpellValue;
-
             void setSpellId(const std::string &id);
 
             /**
@@ -214,8 +212,6 @@ namespace MWGui
             MYGUI_RTTI_DERIVED( MWEffectList )
         public:
             MWEffectList();
-
-            typedef MWMechanics::Stat<int> EnchantmentValue;
 
             enum EffectFlags
             {
@@ -268,7 +264,7 @@ namespace MWGui
             void initialiseOverride() override;
 
         private:
-            static const int sIconOffset = 24;
+            static constexpr int sIconOffset = 24;
             
             void updateWidgets();
 

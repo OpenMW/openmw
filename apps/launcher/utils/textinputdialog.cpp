@@ -16,16 +16,16 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
     mButtonBox->addButton(QDialogButtonBox::Cancel);
     mButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
 
-    QLabel *label = new QLabel(this);
+    auto *label = new QLabel(this);
     label->setText(text);
 
     // Line edit
     QValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
     mLineEdit = new LineEdit(this);
     mLineEdit->setValidator(validator);
-    mLineEdit->setCompleter(0);
+    mLineEdit->setCompleter(nullptr);
 
-    QVBoxLayout *dialogLayout = new QVBoxLayout(this);
+    auto *dialogLayout = new QVBoxLayout(this);
     dialogLayout->addWidget(label);
     dialogLayout->addWidget(mLineEdit);
     dialogLayout->addWidget(mButtonBox);

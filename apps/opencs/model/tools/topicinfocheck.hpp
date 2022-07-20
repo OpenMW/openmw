@@ -3,13 +3,13 @@
 
 #include <set>
 
-#include <components/esm/loadclas.hpp>
-#include <components/esm/loaddial.hpp>
-#include <components/esm/loadfact.hpp>
-#include <components/esm/loadglob.hpp>
-#include <components/esm/loadgmst.hpp>
-#include <components/esm/loadrace.hpp>
-#include <components/esm/loadregn.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadregn.hpp>
 
 #include "../world/cell.hpp"
 #include "../world/idcollection.hpp"

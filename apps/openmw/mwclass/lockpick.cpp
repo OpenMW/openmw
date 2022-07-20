@@ -1,6 +1,8 @@
 #include "lockpick.hpp"
 
-#include <components/esm/loadlock.hpp>
+#include <MyGUI_TextIterator.h>
+
+#include <components/esm3/loadlock.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -18,8 +20,14 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
+    Lockpick::Lockpick()
+        : MWWorld::RegisteredClass<Lockpick>(ESM::Lockpick::sRecordId)
+    {
+    }
 
     void Lockpick::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -28,20 +36,9 @@ namespace MWClass
         }
     }
 
-    void Lockpick::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
-    {
-        // TODO: add option somewhere to enable collision for placeable objects
-    }
-
     std::string Lockpick::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return "meshes\\" + model;
-        }
-        return "";
+        return getClassModel<ESM::Lockpick>(ptr);
     }
 
     std::string Lockpick::getName (const MWWorld::ConstPtr& ptr) const
@@ -52,7 +49,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Lockpick::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Lockpick::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -79,13 +76,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Lockpick::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Lockpick);
-
-        registerClass (typeid (ESM::Lockpick).name(), instance);
     }
 
     std::string Lockpick::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -132,9 +122,9 @@ namespace MWClass
         return info;
     }
 
-    std::shared_ptr<MWWorld::Action> Lockpick::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Lockpick::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEquip>(ptr, force);
 
         action->setSound(getUpSoundId(ptr));
 

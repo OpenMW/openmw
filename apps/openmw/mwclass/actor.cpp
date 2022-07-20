@@ -1,6 +1,6 @@
 #include "actor.hpp"
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -17,23 +17,16 @@
 
 namespace MWClass
 {
-    Actor::Actor() {}
-
-    Actor::~Actor() {}
-
     void Actor::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
         MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
-    void Actor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
+    void Actor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
     {
-        if (!model.empty())
-        {
-            physics.addActor(ptr, model);
-            if (getCreatureStats(ptr).isDead() && getCreatureStats(ptr).isDeathAnimationFinished())
-                MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
-        }
+        physics.addActor(ptr, model);
+        if (getCreatureStats(ptr).isDead() && getCreatureStats(ptr).isDeathAnimationFinished())
+            MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
     }
 
     bool Actor::useAnim() const

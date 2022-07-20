@@ -1,14 +1,38 @@
 #ifndef OPENMW_MWRENDER_NAVMESH_H
 #define OPENMW_MWRENDER_NAVMESH_H
 
-#include <components/detournavigator/navigator.hpp>
+#include "navmeshmode.hpp"
+
+#include <components/detournavigator/version.hpp>
+#include <components/detournavigator/tileposition.hpp>
+#include <components/misc/guarded.hpp>
 
 #include <osg/ref_ptr>
+
+#include <cstddef>
+#include <map>
+#include <memory>
+#include <vector>
+#include <string_view>
+
+class dtNavMesh;
 
 namespace osg
 {
     class Group;
     class Geometry;
+    class StateSet;
+}
+
+namespace DetourNavigator
+{
+    class NavMeshCacheItem;
+    struct Settings;
+}
+
+namespace SceneUtil
+{
+    class WorkQueue;
 }
 
 namespace MWRender
@@ -16,13 +40,14 @@ namespace MWRender
     class NavMesh
     {
     public:
-        NavMesh(const osg::ref_ptr<osg::Group>& root, bool enabled);
+        explicit NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue,
+                         bool enabled, NavMeshMode mode);
         ~NavMesh();
 
         bool toggle();
 
-        void update(const dtNavMesh& navMesh, const std::size_t number, const std::size_t generation,
-                    const std::size_t revision, const DetourNavigator::Settings& settings);
+        void update(const std::shared_ptr<Misc::ScopeGuarded<DetourNavigator::NavMeshCacheItem>>& navMesh,
+            std::size_t id, const DetourNavigator::Settings& settings);
 
         void reset();
 
@@ -35,13 +60,29 @@ namespace MWRender
             return mEnabled;
         }
 
+        void setMode(NavMeshMode value);
+
     private:
+        struct Tile
+        {
+            DetourNavigator::Version mVersion;
+            osg::ref_ptr<osg::Group> mGroup;
+        };
+
+        struct LessByTilePosition;
+        struct CreateNavMeshTileGroups;
+        struct DeallocateCreateNavMeshTileGroups;
+
         osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        osg::ref_ptr<osg::StateSet> mGroupStateSet;
+        osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
         bool mEnabled;
-        std::size_t mId = std::numeric_limits<std::size_t>::max();
-        std::size_t mGeneration;
-        std::size_t mRevision;
-        osg::ref_ptr<osg::Group> mGroup;
+        NavMeshMode mMode;
+        std::size_t mId;
+        DetourNavigator::Version mVersion;
+        std::map<DetourNavigator::TilePosition, Tile> mTiles;
+        std::vector<osg::ref_ptr<CreateNavMeshTileGroups>> mWorkItems;
     };
 }
 

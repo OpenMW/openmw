@@ -1,20 +1,34 @@
-#include "findrandompointaroundcircle.hpp"
 #include "navigator.hpp"
+#include "navigatorimpl.hpp"
+#include "navigatorstub.hpp"
+#include "recastglobalallocator.hpp"
+
+#include <components/debug/debuglog.hpp>
 
 namespace DetourNavigator
 {
-    std::optional<osg::Vec3f> Navigator::findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
-        const osg::Vec3f& start, const float maxRadius, const Flags includeFlags) const
+    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::string& userDataPath)
     {
-        const auto navMesh = getNavMesh(agentHalfExtents);
-        if (!navMesh)
-            return std::optional<osg::Vec3f>();
-        const auto settings = getSettings();
-        const auto result = DetourNavigator::findRandomPointAroundCircle(navMesh->lockConst()->getImpl(),
-            toNavMeshCoordinates(settings, agentHalfExtents), toNavMeshCoordinates(settings, start),
-            toNavMeshCoordinates(settings, maxRadius), includeFlags, settings);
-        if (!result)
-            return std::optional<osg::Vec3f>();
-        return std::optional<osg::Vec3f>(fromNavMeshCoordinates(settings, *result));
+        DetourNavigator::RecastGlobalAllocator::init();
+
+        std::unique_ptr<NavMeshDb> db;
+        if (settings.mEnableNavMeshDiskCache)
+        {
+            try
+            {
+                db = std::make_unique<NavMeshDb>(userDataPath + "/navmesh.db", settings.mMaxDbFileSize);
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Error) << e.what() << ", navigation mesh disk cache will be disabled";
+            }
+        }
+
+        return std::make_unique<NavigatorImpl>(settings, std::move(db));
+    }
+
+    std::unique_ptr<Navigator> makeNavigatorStub()
+    {
+        return std::make_unique<NavigatorStub>();
     }
 }

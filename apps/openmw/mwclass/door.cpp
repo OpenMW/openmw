@@ -1,7 +1,9 @@
 #include "door.hpp"
 
-#include <components/esm/loaddoor.hpp>
-#include <components/esm/doorstate.hpp>
+#include <MyGUI_TextIterator.h>
+
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/doorstate.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -19,6 +21,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/cellutils.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -29,14 +32,14 @@
 
 #include "../mwmechanics/actorutil.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
-    class DoorCustomData : public MWWorld::CustomData
+    class DoorCustomData : public MWWorld::TypedCustomData<DoorCustomData>
     {
     public:
         MWWorld::DoorState mDoorState = MWWorld::DoorState::Idle;
-
-        MWWorld::CustomData *clone() const override;
 
         DoorCustomData& asDoorCustomData() override
         {
@@ -48,9 +51,9 @@ namespace MWClass
         }
     };
 
-    MWWorld::CustomData *DoorCustomData::clone() const
+    Door::Door()
+        : MWWorld::RegisteredClass<Door>(ESM::Door::sRecordId)
     {
-        return new DoorCustomData (*this);
     }
 
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
@@ -62,10 +65,9 @@ namespace MWClass
         }
     }
 
-    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
+    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
     {
-        if(!model.empty())
-            physics.addObject(ptr, model, MWPhysics::CollisionType_Door);
+        insertObjectPhysics(ptr, model, rotation, physics);
 
         // Resume the door's opening/closing animation if it wasn't finished
         if (ptr.getRefData().getCustomData())
@@ -76,6 +78,11 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState);
             }
         }
+    }
+
+    void Door::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
+    {
+        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_Door);
     }
 
     bool Door::isDoor() const
@@ -90,13 +97,7 @@ namespace MWClass
 
     std::string Door::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return "meshes\\" + model;
-        }
-        return "";
+        return getClassModel<ESM::Door>(ptr);
     }
 
     std::string Door::getName (const MWWorld::ConstPtr& ptr) const
@@ -107,7 +108,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
@@ -128,7 +129,7 @@ namespace MWClass
         // Make such activation a no-op for now, like how it is in the vanilla game.
         if (actor != MWMechanics::getPlayer() && ptr.getCellRef().getTeleport())
         {
-            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string(), ptr);
             action->setSound(lockedSound);
             return action;
         }
@@ -139,12 +140,14 @@ namespace MWClass
             MWBase::Environment::get().getWorld()->getMaxActivationDistance())
         {
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+            if(animation)
+            {
+                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
+                const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-            int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
-            const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
-
-            animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
+                animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
+            }
         }
 
         const std::string keyId = ptr.getCellRef().getKey();
@@ -177,7 +180,7 @@ namespace MWClass
             if(isTrapped)
             {
                 // Trap activation
-                std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(ptr.getCellRef().getTrap(), ptr));
+                std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionTrap>(ptr.getCellRef().getTrap(), ptr);
                 action->setSound(trapActivationSound);
                 return action;
             }
@@ -187,12 +190,11 @@ namespace MWClass
                 if (actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getDistanceToFacedObject() > MWBase::Environment::get().getWorld()->getMaxActivationDistance())
                 {
                     // player activated teleport door with telekinesis
-                    std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
-                    return action;
+                    return std::make_unique<MWWorld::FailedAction>();
                 }
                 else
                 {
-                    std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest(), true));
+                    std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionTeleport>(ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest(), true);
                     action->setSound(openSound);
                     return action;
                 }
@@ -200,7 +202,7 @@ namespace MWClass
             else
             {
                 // animated door
-                std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
+                std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionDoor>(ptr);
                 const auto doorState = getDoorState(ptr);
                 bool opening = true;
                 float doorRot = ptr.getRefData().getPosition().rot[2] - ptr.getCellRef().getPosition().rot[2];
@@ -234,7 +236,7 @@ namespace MWClass
         else
         {
             // locked, and we can't open.
-            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string(), ptr);
             action->setSound(lockedSound);
             return action;
         }
@@ -258,13 +260,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         return ref->mBase->mScript;
-    }
-
-    void Door::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Door);
-
-        registerClass (typeid (ESM::Door).name(), instance);
     }
 
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
@@ -302,30 +297,15 @@ namespace MWClass
 
     std::string Door::getDestination (const MWWorld::LiveCellRef<ESM::Door>& door)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
-        std::string dest;
-        if (door.mRef.getDestCell() != "")
-        {
-            // door leads to an interior, use interior name as tooltip
-            dest = door.mRef.getDestCell();
-        }
-        else
+        std::string dest = door.mRef.getDestCell();
+        if (dest.empty())
         {
             // door leads to exterior, use cell name (if any), otherwise translated region name
-            int x,y;
-            MWBase::Environment::get().getWorld()->positionToIndex (door.mRef.getDoorDest().pos[0], door.mRef.getDoorDest().pos[1], x, y);
-            const ESM::Cell* cell = store.get<ESM::Cell>().find(x,y);
-            if (cell->mName != "")
-                dest = cell->mName;
-            else
-            {
-                const ESM::Region* region =
-                    store.get<ESM::Region>().find(cell->mRegion);
-
-                //name as is, not a token
-                return MyGUI::TextIterator::toTagsString(region->mName);
-            }
+            auto world = MWBase::Environment::get().getWorld();
+            const osg::Vec2i index = MWWorld::positionToCellIndex(door.mRef.getDoorDest().pos[0],
+                door.mRef.getDoorDest().pos[1]);
+            const ESM::Cell* cell = world->getStore().get<ESM::Cell>().search(index.x(), index.y());
+            dest = world->getCellName(cell);
         }
 
         return "#{sCell=" + dest + "}";
@@ -342,8 +322,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<DoorCustomData> data(new DoorCustomData);
-            ptr.getRefData().setCustomData(data.release());
+            ptr.getRefData().setCustomData(std::make_unique<DoorCustomData>());
         }
     }
 

@@ -5,9 +5,11 @@
 
 #include <stdexcept>
 #include <vector>
+#include <atomic>
+#include <limits>
 
 #include <components/debug/debuglog.hpp>
-#include <components/files/constrainedfilestream.hpp>
+#include <components/files/istreamptr.hpp>
 
 #include "record.hpp"
 
@@ -34,6 +36,8 @@ struct File
 
     virtual std::string getFilename() const = 0;
 
+    virtual std::string getHash() const = 0;
+
     virtual unsigned int getVersion() const = 0;
 
     virtual unsigned int getUserVersion() const = 0;
@@ -50,9 +54,10 @@ class NIFFile final : public File
 
     /// File name, used for error messages and opening the file
     std::string filename;
+    std::string hash;
 
     /// Record list
-    std::vector<Record*> records;
+    std::vector<std::unique_ptr<Record>> records;
 
     /// Root list.  This is a select portion of the pointers from records
     std::vector<Record*> roots;
@@ -62,10 +67,10 @@ class NIFFile final : public File
 
     bool mUseSkinning = false;
 
-    static bool sLoadUnsupportedFiles;
+    static std::atomic_bool sLoadUnsupportedFiles;
 
     /// Parse the file
-    void parse(Files::IStreamPtr stream);
+    void parse(Files::IStreamPtr&& stream);
 
     /// Get the file's version in a human readable form
     ///\returns A string containing a human readable NIF version number
@@ -92,11 +97,9 @@ public:
     };
 
     /// Used if file parsing fails
-    void fail(const std::string &msg) const
+    [[noreturn]] void fail(const std::string &msg) const
     {
-        std::string err = " NIFFile Error: " + msg;
-        err += "\nFile: " + filename;
-        throw std::runtime_error(err);
+        throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + filename);
     }
     /// Used when something goes wrong, but not catastrophically so
     void warn(const std::string &msg) const
@@ -105,14 +108,12 @@ public:
     }
 
     /// Open a NIF stream. The name is used for error messages.
-    NIFFile(Files::IStreamPtr stream, const std::string &name);
-    ~NIFFile();
+    NIFFile(Files::IStreamPtr&& stream, const std::string &name);
 
     /// Get a given record
     Record *getRecord(size_t index) const override
     {
-        Record *res = records.at(index);
-        return res;
+        return records.at(index).get();
     }
     /// Number of records
     size_t numRecords() const override { return records.size(); }
@@ -142,6 +143,8 @@ public:
 
     /// Get the name of the file
     std::string getFilename() const override { return filename; }
+
+    std::string getHash() const override { return hash; }
 
     /// Get the version of the NIF format used
     unsigned int getVersion() const override { return ver; }

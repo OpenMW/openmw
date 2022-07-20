@@ -1,9 +1,7 @@
 #ifndef MAINWIZARD_HPP
 #define MAINWIZARD_HPP
 
-#include <QProcess>
 #include <QWizard>
-#include <QMap>
 
 #include <components/process/processinvoker.hpp>
 
@@ -41,8 +39,8 @@ namespace Wizard
             Page_Conclusion
         };
 
-        MainWizard(QWidget *parent = 0);
-        ~MainWizard();
+        MainWizard(QWidget *parent = nullptr);
+        ~MainWizard() override;
 
         bool findFiles(const QString &name, const QString &path);
         void addInstallation(const QString &path);

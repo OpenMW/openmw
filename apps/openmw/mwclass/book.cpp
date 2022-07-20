@@ -1,6 +1,8 @@
 #include "book.hpp"
 
-#include <components/esm/loadbook.hpp>
+#include <MyGUI_TextIterator.h>
+
+#include <components/esm3/loadbook.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -21,8 +23,14 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
+    Book::Book()
+        : MWWorld::RegisteredClass<Book>(ESM::Book::sRecordId)
+    {
+    }
 
     void Book::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -31,20 +39,9 @@ namespace MWClass
         }
     }
 
-    void Book::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
-    {
-        // TODO: add option somewhere to enable collision for placeable objects
-    }
-
     std::string Book::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return "meshes\\" + model;
-        }
-        return "";
+        return getClassModel<ESM::Book>(ptr);
     }
 
     std::string Book::getName (const MWWorld::ConstPtr& ptr) const
@@ -55,21 +52,22 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem");
+            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
 
-            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+        return std::make_unique<MWWorld::ActionRead>(ptr);
     }
 
     std::string Book::getScript (const MWWorld::ConstPtr& ptr) const
@@ -84,13 +82,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Book::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Book);
-
-        registerClass (typeid (ESM::Book).name(), instance);
     }
 
     std::string Book::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -147,7 +138,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         ESM::Book newItem = *ref->mBase;
-        newItem.mId="";
+        newItem.mId.clear();
         newItem.mName=newName;
         newItem.mData.mIsScroll = 1;
         newItem.mData.mEnchant=enchCharge;
@@ -156,9 +147,9 @@ namespace MWClass
         return record->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+        return std::make_unique<MWWorld::ActionRead>(ptr);
     }
 
     MWWorld::Ptr Book::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

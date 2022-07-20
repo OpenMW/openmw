@@ -1,7 +1,6 @@
 #include "columnimp.hpp"
 
 #include <stdexcept>
-#include <QVector>
 
 namespace CSMWorld
 {
@@ -52,7 +51,7 @@ namespace CSMWorld
 
     QVariant LandPluginIndexColumn::get(const Record<Land>& record) const
     {
-        return record.get().mPlugin;
+        return record.get().getPlugin();
     }
 
     bool LandPluginIndexColumn::isEditable() const

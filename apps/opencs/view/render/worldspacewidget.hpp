@@ -7,6 +7,7 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+#include "instancedragmodes.hpp"
 #include "scenewidget.hpp"
 #include "mask.hpp"
 
@@ -96,7 +97,7 @@ namespace CSVRender
                 InteractionType_None
             };
 
-            WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = 0);
+            WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = nullptr);
             ~WorldspaceWidget ();
 
             CSVWidget::SceneToolMode *makeNavigationSelector (CSVWidget::SceneToolbar *parent);
@@ -160,6 +161,10 @@ namespace CSVRender
             /// \param elementMask Elements to be affected by the select operation
             virtual void selectAllWithSameParentId (int elementMask) = 0;
 
+            virtual void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode) = 0;
+
+            virtual void selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode) = 0;
+
             /// Return the next intersection with scene elements matched by
             /// \a interactionMask based on \a localPos and the camera vector.
             /// If there is no such intersection, instead a point "in front" of \a localPos will be
@@ -183,6 +188,8 @@ namespace CSVRender
 
             /// Erase all overrides and restore the visual representation to its true state.
             virtual void reset (unsigned int elementMask) = 0;
+
+            EditMode *getEditMode();
 
         protected:
 
@@ -209,8 +216,6 @@ namespace CSVRender
             virtual void handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type);
 
             void settingChanged (const CSMPrefs::Setting *setting) override;
-
-            EditMode *getEditMode();
 
             bool getSpeedMode();
 

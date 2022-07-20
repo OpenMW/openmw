@@ -1,8 +1,10 @@
 #include <components/settings/parser.hpp>
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
 #include <gtest/gtest.h>
+
+#include "../testing_util.hpp"
 
 namespace
 {
@@ -17,11 +19,11 @@ namespace
         template <typename F>
         void withSettingsFile( const std::string& content, F&& f)
         {
-            const auto path = std::string(UnitTest::GetInstance()->current_test_info()->name()) + ".cfg";
+            std::string path = TestingOpenMW::outputFilePath(
+                std::string(UnitTest::GetInstance()->current_test_info()->name()) + ".cfg");
 
             {
-                boost::filesystem::ofstream stream;
-                stream.open(path);
+                std::ofstream stream(path);
                 stream << content;
                 stream.close();
             }

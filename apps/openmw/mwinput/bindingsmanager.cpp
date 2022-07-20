@@ -5,6 +5,8 @@
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>
 
+#include <components/sdlutil/sdlmappings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -13,7 +15,6 @@
 #include "../mwworld/player.hpp"
 
 #include "actions.hpp"
-#include "sdlmappings.hpp"
 
 namespace MWInput
 {
@@ -171,16 +172,16 @@ namespace MWInput
         , mDragDrop(false)
     {
         std::string file = userFileExists ? userFile : "";
-        mInputBinder = new InputControlSystem(file);
-        mListener = new BindingsListener(mInputBinder, this);
-        mInputBinder->setDetectingBindingListener(mListener);
+        mInputBinder = std::make_unique<InputControlSystem>(file);
+        mListener = std::make_unique<BindingsListener>(mInputBinder.get(), this);
+        mInputBinder->setDetectingBindingListener(mListener.get());
 
         loadKeyDefaults();
         loadControllerDefaults();
 
         for (int i = 0; i < A_Last; ++i)
         {
-            mInputBinder->getChannel(i)->addListener(mListener);
+            mInputBinder->getChannel(i)->addListener(mListener.get());
         }
     }
 
@@ -192,7 +193,6 @@ namespace MWInput
     BindingsManager::~BindingsManager()
     {
         mInputBinder->save(mUserFile);
-        delete mInputBinder;
     }
 
     void BindingsManager::update(float dt)
@@ -286,6 +286,7 @@ namespace MWInput
         defaultKeyBindings[A_AlwaysRun] = SDL_SCANCODE_CAPSLOCK;
         defaultKeyBindings[A_QuickSave] = SDL_SCANCODE_F5;
         defaultKeyBindings[A_QuickLoad] = SDL_SCANCODE_F9;
+        defaultKeyBindings[A_TogglePostProcessorHUD] = SDL_SCANCODE_F2;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = SDL_BUTTON_RIGHT;
@@ -315,7 +316,7 @@ namespace MWInput
                       && mInputBinder->getMouseButtonBinding(control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
                       && mInputBinder->getMouseWheelBinding(control, ICS::Control::INCREASE) == ICS::InputControlSystem::MouseWheelClick::UNASSIGNED))
             {
-                clearAllKeyBindings(mInputBinder, control);
+                clearAllKeyBindings(mInputBinder.get(), control);
 
                 if (defaultKeyBindings.find(i) != defaultKeyBindings.end()
                         && (force || !mInputBinder->isKeyBound(defaultKeyBindings[i])))
@@ -402,7 +403,7 @@ namespace MWInput
             if (!controlExists || force || (mInputBinder->getJoystickAxisBinding(control, sFakeDeviceId, ICS::Control::INCREASE) == ICS::InputControlSystem::UNASSIGNED &&
                 mInputBinder->getJoystickButtonBinding(control, sFakeDeviceId, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS))
             {
-                clearAllControllerBindings(mInputBinder, control);
+                clearAllControllerBindings(mInputBinder.get(), control);
 
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end()
                         && (force || !mInputBinder->isJoystickButtonBound(sFakeDeviceId, defaultButtonBindings[i])))
@@ -425,13 +426,13 @@ namespace MWInput
         switch (action)
         {
             case A_Screenshot:
-                return "Screenshot";
+                return "#{SettingsMenu:Screenshot}";
             case A_ZoomIn:
-                return "Zoom In";
+                return "#{SettingsMenu:CameraZoomIn}";
             case A_ZoomOut:
-                return "Zoom Out";
+                return "#{SettingsMenu:CameraZoomOut}";
             case A_ToggleHUD:
-                return "Toggle HUD";
+                return "#{SettingsMenu:ToggleHUD}";
             case A_Use:
                 return "#{sUse}";
             case A_Activate:
@@ -502,6 +503,8 @@ namespace MWInput
                 return "#{sQuickSaveCmd}";
             case A_QuickLoad:
                 return "#{sQuickLoadCmd}";
+            case A_TogglePostProcessorHUD:
+                return "#{SettingsMenu:TogglePostProcessorHUD}";
             default:
                 return std::string(); // not configurable
         }
@@ -547,9 +550,9 @@ namespace MWInput
         ICS::Control* c = mInputBinder->getChannel(action)->getAttachedControls().front().control;
 
         if (mInputBinder->getJoystickAxisBinding(c, sFakeDeviceId, ICS::Control::INCREASE) != ICS::InputControlSystem::UNASSIGNED)
-            return sdlControllerAxisToString(mInputBinder->getJoystickAxisBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
+            return SDLUtil::sdlControllerAxisToString(mInputBinder->getJoystickAxisBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
         else if (mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
-            return sdlControllerButtonToString(mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
+            return SDLUtil::sdlControllerButtonToString(mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
         else
             return "#{sNone}";
     }
@@ -563,7 +566,8 @@ namespace MWInput
             A_CycleSpellLeft, A_CycleSpellRight, A_CycleWeaponLeft, A_CycleWeaponRight, A_AutoMove,
             A_Jump, A_Inventory, A_Journal, A_Rest, A_Console, A_QuickSave, A_QuickLoad,
             A_ToggleHUD, A_Screenshot, A_QuickKeysMenu, A_QuickKey1, A_QuickKey2, A_QuickKey3,
-            A_QuickKey4, A_QuickKey5, A_QuickKey6, A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10
+            A_QuickKey4, A_QuickKey5, A_QuickKey6, A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
+            A_TogglePostProcessorHUD
         };
 
         return actions;
@@ -654,6 +658,15 @@ namespace MWInput
         return mInputBinder->getKeyBinding(mInputBinder->getControl(actionId), ICS::Control::INCREASE);
     }
 
+    SDL_GameController* BindingsManager::getControllerOrNull() const
+    {
+        const auto& controllers = mInputBinder->getJoystickInstanceMap();
+        if (controllers.empty())
+            return nullptr;
+        else
+            return controllers.begin()->second;
+    }
+
     void BindingsManager::actionValueChanged(int action, float currentValue, float previousValue)
     {
         MWBase::Environment::get().getInputManager()->resetIdleTime();
@@ -696,8 +709,8 @@ namespace MWInput
                 else
                 {
                     MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-                    MWMechanics::DrawState_ state = player.getDrawState();
-                    player.setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState_Nothing);
+                    MWMechanics::DrawState state = player.getDrawState();
+                    player.setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState::Nothing);
                 }
             }
             else if (action == A_Jump)

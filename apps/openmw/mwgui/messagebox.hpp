@@ -3,8 +3,6 @@
 
 #include "windowbase.hpp"
 
-#undef MessageBox
-
 namespace MyGUI
 {
     class Widget;
@@ -47,12 +45,17 @@ namespace MWGui
 
             void onButtonPressed(int button) { eventButtonPressed(button); eventButtonPressed.clear(); }
 
+            void setVisible(bool value);
+
+            const std::vector<MessageBox*> getActiveMessageBoxes();
+
         private:
             std::vector<MessageBox*> mMessageBoxes;
             InteractiveMessageBox* mInterMessageBoxe;
             MessageBox* mStaticMessageBox;
             float mMessageBoxSpeed;
             int mLastButtonPressed;
+            bool mVisible = true;
     };
 
     class MessageBox : public Layout
@@ -60,15 +63,17 @@ namespace MWGui
         public:
             MessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message);
             void setMessage (const std::string& message);
+            const std::string& getMessage() { return mMessage; };
             int getHeight ();
             void update (int height);
+            void setVisible(bool value);
 
             float mCurrentTime;
             float mMaxTime;
 
         protected:
             MessageBoxManager& mMessageBoxManager;
-            const std::string& mMessage;
+            std::string mMessage;
             MyGUI::EditBox* mMessageWidget;
             int mBottomPadding;
             int mNextBoxPadding;

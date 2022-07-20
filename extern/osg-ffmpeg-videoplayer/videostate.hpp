@@ -1,8 +1,9 @@
 #ifndef VIDEOPLAYER_VIDEOSTATE_H
 #define VIDEOPLAYER_VIDEOSTATE_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <atomic>
+#include <array>
 #include <vector>
 #include <memory>
 #include <string>
@@ -14,6 +15,11 @@ namespace osg
 {
     class Texture2D;
 }
+
+#if defined(_MSC_VER)
+    #pragma warning (push)
+    #pragma warning (disable : 4244)
+#endif
 
 extern "C"
 {
@@ -28,16 +34,17 @@ extern "C"
 #include <libswresample/swresample.h>
 }
 
+#if defined(_MSC_VER)
+    #pragma warning (pop)
+#endif
+
 #include "videodefs.hpp"
 
 #define VIDEO_PICTURE_QUEUE_SIZE 50
-// allocate one extra to make sure we do not overwrite the osg::Image currently set on the texture
-#define VIDEO_PICTURE_ARRAY_SIZE (VIDEO_PICTURE_QUEUE_SIZE+1)
 
 extern "C"
 {
     struct SwsContext;
-    struct AVPacketList;
     struct AVPacket;
     struct AVFormatContext;
     struct AVStream;
@@ -69,14 +76,21 @@ struct ExternalClock
     void set(uint64_t time);
 };
 
+class PacketList
+{
+public:
+    AVPacket* pkt = nullptr;
+    PacketList *next = nullptr;
+};
+
 struct PacketQueue {
     PacketQueue()
-      : first_pkt(NULL), last_pkt(NULL), flushing(false), nb_packets(0), size(0)
+      : first_pkt(nullptr), last_pkt(nullptr), flushing(false), nb_packets(0), size(0)
     { }
     ~PacketQueue()
     { clear(); }
 
-    AVPacketList *first_pkt, *last_pkt;
+    PacketList *first_pkt, *last_pkt;
     std::atomic<bool> flushing;
     std::atomic<int> nb_packets;
     std::atomic<int> size;
@@ -95,7 +109,16 @@ struct VideoPicture {
     VideoPicture() : pts(0.0)
     { }
 
-    std::vector<uint8_t> data;
+    struct AVFrameDeleter {
+        void operator()(AVFrame* frame) const;
+    };
+
+    // Sets frame dimensions.
+    // Must be called before writing to `rgbaFrame`.
+    // Return -1 on error.
+    int set_dimensions(int w, int h);
+
+    std::unique_ptr<AVFrame, AVFrameDeleter> rgbaFrame;
     double pts;
 };
 
@@ -105,13 +128,13 @@ struct VideoState {
 
     void setAudioFactory(MovieAudioFactory* factory);
 
-    void init(std::shared_ptr<std::istream> inputstream, const std::string& name);
+    void init(std::unique_ptr<std::istream>&& inputstream, const std::string& name);
     void deinit();
 
     void setPaused(bool isPaused);
     void seekTo(double time);
 
-    double getDuration();
+    double getDuration() const;
 
     int stream_open(int stream_index, AVFormatContext *pFormatCtx);
 
@@ -123,11 +146,11 @@ struct VideoState {
     void video_display(VideoPicture* vp);
     void video_refresh();
 
-    int queue_picture(AVFrame *pFrame, double pts);
-    double synchronize_video(AVFrame *src_frame, double pts);
+    int queue_picture(const AVFrame &pFrame, double pts);
+    double synchronize_video(const AVFrame &src_frame, double pts);
 
     double get_audio_clock();
-    double get_video_clock();
+    double get_video_clock() const;
     double get_external_clock();
     double get_master_clock();
 
@@ -138,11 +161,11 @@ struct VideoState {
     osg::ref_ptr<osg::Texture2D> mTexture;
 
     MovieAudioFactory* mAudioFactory;
-    std::shared_ptr<MovieAudioDecoder> mAudioDecoder;
+    std::unique_ptr<MovieAudioDecoder> mAudioDecoder;
 
     ExternalClock mExternalClock;
 
-    std::shared_ptr<std::istream> stream;
+    std::unique_ptr<std::istream> stream;
     AVFormatContext* format_ctx;
     AVCodecContext* video_ctx;
     AVCodecContext* audio_ctx;
@@ -159,9 +182,10 @@ struct VideoState {
     double      video_clock; ///<pts of last decoded frame / predicted pts of next decoded frame
     PacketQueue videoq;
     SwsContext*  sws_context;
-    VideoPicture pictq[VIDEO_PICTURE_ARRAY_SIZE];
-    AVFrame*     rgbaFrame; // used as buffer for the frame converted from its native format to RGBA
-    int          pictq_size, pictq_rindex, pictq_windex;
+    int sws_context_w, sws_context_h;
+    std::array<VideoPicture, VIDEO_PICTURE_QUEUE_SIZE+1> pictq;  // allocate one extra to make sure we do not overwrite the osg::Image currently set on the texture
+    int pictq_size;
+    unsigned long pictq_rindex, pictq_windex;
     std::mutex pictq_mutex;
     std::condition_variable pictq_cond;
 

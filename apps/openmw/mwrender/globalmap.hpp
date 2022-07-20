@@ -41,11 +41,7 @@ namespace MWRender
         int getWidth() const { return mWidth; }
         int getHeight() const { return mHeight; }
 
-        int getCellSize() const { return mCellSize; }
-
         void worldPosToImageSpace(float x, float z, float& imageX, float& imageY);
-
-        void cellTopLeftCornerToImageSpace(int x, int y, float& imageX, float& imageY);
 
         void exploreCell (int cellX, int cellY, osg::ref_ptr<osg::Texture2D> localMapTexture);
 
@@ -76,7 +72,11 @@ namespace MWRender
 
         void ensureLoaded();
 
+        void asyncWritePng();
+
     private:
+        struct WritePng;
+
         /**
          * Request rendering a 2d quad onto mOverlayTexture.
          * x, y, width and height are the destination coordinates (top-left coordinate origin)
@@ -125,6 +125,7 @@ namespace MWRender
 
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
         osg::ref_ptr<CreateMapWorkItem> mWorkItem;
+        osg::ref_ptr<WritePng> mWritePng;
 
         int mWidth;
         int mHeight;

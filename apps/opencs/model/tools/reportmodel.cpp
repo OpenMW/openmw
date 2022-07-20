@@ -24,7 +24,7 @@ int CSMTools::ReportModel::rowCount (const QModelIndex & parent) const
     if (parent.isValid())
         return 0;
 
-    return mRows.size();
+    return static_cast<int>(mRows.size());
 }
 
 int CSMTools::ReportModel::columnCount (const QModelIndex & parent) const
@@ -140,7 +140,7 @@ bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& p
 
 void CSMTools::ReportModel::add (const CSMDoc::Message& message)
 {
-    beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
+    beginInsertRows (QModelIndex(), static_cast<int>(mRows.size()), static_cast<int>(mRows.size()));
 
     mRows.push_back (message);
 
@@ -176,7 +176,7 @@ void CSMTools::ReportModel::clear()
 {
     if (!mRows.empty())
     {
-        beginRemoveRows (QModelIndex(), 0, mRows.size()-1);
+        beginRemoveRows (QModelIndex(), 0, static_cast<int>(mRows.size())-1);
         mRows.clear();
         endRemoveRows();
     }

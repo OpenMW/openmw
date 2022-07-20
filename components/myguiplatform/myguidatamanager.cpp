@@ -1,11 +1,29 @@
 #include "myguidatamanager.hpp"
 
+#include <memory>
+#include <string>
+
 #include <MyGUI_DataFileStream.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 #include <components/debug/debuglog.hpp>
+
+namespace
+{
+    class DataStream final : public MyGUI::DataStream
+    {
+    public:
+        explicit DataStream(std::unique_ptr<std::istream>&& stream)
+            : MyGUI::DataStream(stream.get())
+            , mOwnedStream(std::move(stream))
+        {}
+
+    private:
+        std::unique_ptr<std::istream> mOwnedStream;
+    };
+}
 
 namespace osgMyGUI
 {
@@ -15,18 +33,14 @@ void DataManager::setResourcePath(const std::string &path)
     mResourcePath = path;
 }
 
-MyGUI::IDataStream *DataManager::getData(const std::string &name)
+DataManager::DataManager(const VFS::Manager* vfs)
+    : mVfs(vfs)
 {
-    std::string fullpath = getDataPath(name);
-    std::unique_ptr<boost::filesystem::ifstream> stream;
-    stream.reset(new boost::filesystem::ifstream);
-    stream->open(fullpath, std::ios::binary);
-    if (stream->fail())
-    {
-        Log(Debug::Error) << "DataManager::getData: Failed to open '" << name << "'";
-        return nullptr;
-    }
-    return new MyGUI::DataFileStream(stream.release());
+}
+
+MyGUI::IDataStream *DataManager::getData(const std::string &name) const
+{
+    return new DataStream(mVfs->get(mResourcePath + "/" + name));
 }
 
 void DataManager::freeData(MyGUI::IDataStream *data)
@@ -34,29 +48,27 @@ void DataManager::freeData(MyGUI::IDataStream *data)
     delete data;
 }
 
-bool DataManager::isDataExist(const std::string &name)
+bool DataManager::isDataExist(const std::string &name) const
 {
-    std::string fullpath = mResourcePath + "/" + name;
-    return boost::filesystem::exists(fullpath);
+    return mVfs->exists(mResourcePath + "/" + name);
 }
 
-const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern)
+const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern) const
 {
-    // TODO: pattern matching (unused?)
-    static MyGUI::VectorString strings;
-    strings.clear();
-    strings.push_back(getDataPath(pattern));
-    return strings;
+    throw std::runtime_error("DataManager::getDataListNames is not implemented - VFS is used");
 }
 
-const std::string &DataManager::getDataPath(const std::string &name)
+const std::string &DataManager::getDataPath(const std::string &name) const
 {
     static std::string result;
     result.clear();
+
+    if (name.empty())
+        return mResourcePath;
+
     if (!isDataExist(name))
-    {
         return result;
-    }
+
     result = mResourcePath + "/" + name;
     return result;
 }

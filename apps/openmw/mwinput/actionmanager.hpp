@@ -48,18 +48,15 @@ namespace MWInput
         void showQuickKeysMenu();
 
         void resetIdleTime();
+        float getIdleTime() const { return mTimeIdle; }
 
         bool isAlwaysRunActive() const { return mAlwaysRunActive; };
         bool isSneaking() const { return mSneaking; };
 
         void setAttemptJump(bool enabled) { mAttemptJump = enabled; }
 
-        bool isPreviewModeEnabled();
-
     private:
         void handleGuiArrowKey(int action);
-
-        void updateIdleTime(float dt);
 
         BindingsManager* mBindingsManager;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
@@ -70,8 +67,6 @@ namespace MWInput
         bool mSneaking;
         bool mAttemptJump;
 
-        float mOverencumberedMessageDelay;
-        float mPreviewPOVDelay;
         float mTimeIdle;
     };
 }

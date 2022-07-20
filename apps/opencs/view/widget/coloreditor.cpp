@@ -1,8 +1,6 @@
 #include "coloreditor.hpp"
 
-#include <QApplication>
-#include <QColorDialog>
-#include <QDesktopWidget>
+#include <QGuiApplication>
 #include <QPainter>
 #include <QShowEvent>
 #include <QScreen>

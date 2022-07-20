@@ -30,7 +30,7 @@ namespace CSVPrefs
 
             Dialogue();
 
-            virtual ~Dialogue();
+            ~Dialogue() override;
 
         protected:
 

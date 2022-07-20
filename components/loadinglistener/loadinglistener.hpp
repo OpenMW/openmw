@@ -14,7 +14,7 @@ namespace Loading
         /// @note "non-important" labels may not show on screen if the loading process went so fast
         /// that the implementation decided not to show a loading screen at all. "important" labels
         /// will show in a separate message-box if the loading screen was not shown.
-        virtual void setLabel (const std::string& label, bool important=false, bool center=false) {}
+        virtual void setLabel (const std::string& label, bool important=false) {}
 
         /// Start a loading sequence. Must call loadingOff() when done.
         /// @note To get the loading screen to actually update, you must call setProgress / increaseProgress periodically.

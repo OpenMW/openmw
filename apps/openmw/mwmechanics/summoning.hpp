@@ -5,36 +5,21 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include <components/esm/magiceffects.hpp>
+#include <components/esm3/magiceffects.hpp>
 
 #include "magiceffects.hpp"
 
 namespace MWMechanics
 {
-    class CreatureStats;
-
     bool isSummoningEffect(int effectId);
 
     std::string getSummonedCreature(int effectId);
 
-    struct UpdateSummonedCreatures : public EffectSourceVisitor
-    {
-        UpdateSummonedCreatures(const MWWorld::Ptr& actor);
-        virtual ~UpdateSummonedCreatures() = default;
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<int, int>& summon);
 
-        void visit (MWMechanics::EffectKey key, int effectIndex,
-                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1) override;
+    int summonCreature(int effectId, const MWWorld::Ptr& summoner);
 
-        /// To call after all effect sources have been visited
-        void process(bool cleanup);
-
-    private:
-        MWWorld::Ptr mActor;
-
-        std::set<ESM::SummonKey> mActiveEffects;
-    };
-
+    void updateSummons(const MWWorld::Ptr& summoner, bool cleanup);
 }
 
 #endif

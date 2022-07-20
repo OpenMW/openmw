@@ -51,7 +51,8 @@ namespace MWMechanics
         if (castChance > 0)
             x *= 50 / castChance;
 
-        float roll = Misc::Rng::rollClosedProbability() * 100;
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        float roll = Misc::Rng::rollClosedProbability(prng) * 100;
         if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
             roll -= resistance;
 

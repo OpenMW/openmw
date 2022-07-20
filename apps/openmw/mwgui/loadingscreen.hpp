@@ -28,6 +28,7 @@ namespace Resource
 namespace MWGui
 {
     class BackgroundImage;
+    class CopyFramebufferToTextureCallback;
 
     class LoadingScreen : public WindowBase, public Loading::Listener
     {
@@ -36,7 +37,7 @@ namespace MWGui
         virtual ~LoadingScreen();
 
         /// Overridden from Loading::Listener, see the Loading::Listener documentation for usage details
-        void setLabel (const std::string& label, bool important, bool center) override;
+        void setLabel (const std::string& label, bool important) override;
         void loadingOn(bool visible=true) override;
         void loadingOff() override;
         void setProgressRange (size_t range) override;
@@ -78,12 +79,13 @@ namespace MWGui
 
         MyGUI::TextBox* mLoadingText;
         MyGUI::ScrollBar* mProgressBar;
-        BackgroundImage* mBackgroundImage;
+        BackgroundImage* mSplashImage;
         BackgroundImage* mSceneImage;
 
         std::vector<std::string> mSplashScreens;
 
         osg::ref_ptr<osg::Texture2D> mTexture;
+        osg::ref_ptr<CopyFramebufferToTextureCallback> mCopyFramebufferToTextureCallback;
         std::unique_ptr<MyGUI::ITexture> mGuiTexture;
 
         void changeWallpaper();

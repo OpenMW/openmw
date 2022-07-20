@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <set>
 
 #include "../mwworld/ptr.hpp"
@@ -42,6 +43,8 @@ namespace MWSound
                                   * much. */
         NoPlayerLocal = 1<<3, /* (3D only) Don't play the sound local to the listener even if the
                                * player is making it. */
+        NoScaling = 1<<4, /* Don't scale audio with simulation time */
+        NoEnvNoScaling = NoEnv | NoScaling,
         LoopNoEnv = Loop | NoEnv,
         LoopRemoveAtDistance = Loop | RemoveAtDistance
     };
@@ -70,6 +73,8 @@ namespace MWBase
         protected:
             using PlayMode = MWSound::PlayMode;
             using Type = MWSound::Type;
+
+            float mSimulationTimeScale = 1.0;
 
         public:
             SoundManager() {}
@@ -128,19 +133,19 @@ namespace MWBase
             /// returned by \ref playTrack). Only intended to be called by the track
             /// decoder's read method.
 
-            virtual Sound *playSound(const std::string& soundId, float volume, float pitch,
+            virtual Sound *playSound(std::string_view soundId, float volume, float pitch,
                                      Type type=Type::Sfx, PlayMode mode=PlayMode::Normal,
                                      float offset=0) = 0;
             ///< Play a sound, independently of 3D-position
             ///< @param offset Number of seconds into the sound to start playback.
 
-            virtual Sound *playSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId,
+            virtual Sound *playSound3D(const MWWorld::ConstPtr &reference, std::string_view soundId,
                                        float volume, float pitch, Type type=Type::Sfx,
                                        PlayMode mode=PlayMode::Normal, float offset=0) = 0;
             ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
             ///< @param offset Number of seconds into the sound to start playback.
 
-            virtual Sound *playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
+            virtual Sound *playSound3D(const osg::Vec3f& initialPos, std::string_view soundId,
                                        float volume, float pitch, Type type=Type::Sfx,
                                        PlayMode mode=PlayMode::Normal, float offset=0) = 0;
             ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using Sound::setPosition.
@@ -148,7 +153,7 @@ namespace MWBase
             virtual void stopSound(Sound *sound) = 0;
             ///< Stop the given sound from playing
 
-            virtual void stopSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId) = 0;
+            virtual void stopSound3D(const MWWorld::ConstPtr &reference, std::string_view soundId) = 0;
             ///< Stop the given object from playing the given sound,
 
             virtual void stopSound3D(const MWWorld::ConstPtr &reference) = 0;
@@ -157,13 +162,13 @@ namespace MWBase
             virtual void stopSound(const MWWorld::CellStore *cell) = 0;
             ///< Stop all sounds for the given cell.
 
-            virtual void fadeOutSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId, float duration) = 0;
+            virtual void fadeOutSound3D(const MWWorld::ConstPtr &reference, std::string_view soundId, float duration) = 0;
             ///< Fade out given sound (that is already playing) of given object
             ///< @param reference Reference to object, whose sound is faded out
             ///< @param soundId ID of the sound to fade out.
             ///< @param duration Time until volume reaches 0.
 
-            virtual bool getSoundPlaying(const MWWorld::ConstPtr &reference, const std::string& soundId) const = 0;
+            virtual bool getSoundPlaying(const MWWorld::ConstPtr &reference, std::string_view soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
             ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
@@ -176,11 +181,12 @@ namespace MWBase
             virtual void pausePlayback() = 0;
             virtual void resumePlayback() = 0;
 
-            virtual void update(float duration) = 0;
-
             virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater) = 0;
 
             virtual void updatePtr(const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated) = 0;
+
+            void setSimulationTimeScale(float scale) { mSimulationTimeScale = scale; }
+            float getSimulationTimeScale() const { return mSimulationTimeScale; }
 
             virtual void clear() = 0;
     };

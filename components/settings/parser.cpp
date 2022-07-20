@@ -5,21 +5,40 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
+#include <filesystem>
 
-void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings)
+#include <Base64.h>
+
+void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings,
+                                                    bool base64Encoded, bool overrideExisting)
 {
     mFile = file;
-    boost::filesystem::ifstream stream;
-    stream.open(boost::filesystem::path(file));
+    std::ifstream fstream;
+    fstream.open(std::filesystem::path(file));
+    auto stream = std::ref<std::istream>(fstream);
+
+    std::istringstream decodedStream;
+    if (base64Encoded)
+    {
+        std::string base64String(std::istreambuf_iterator<char>(fstream), {});
+        std::string decodedString;
+        auto result = Base64::Base64::Decode(base64String, decodedString);
+        if (!result.empty())
+            fail("Could not decode Base64 file: " + result);
+        // Move won't do anything until C++20, but won't hurt to do it anyway.
+        decodedStream.str(std::move(decodedString));
+        stream = std::ref<std::istream>(decodedStream);
+    }
+
     Log(Debug::Info) << "Loading settings file: " << file;
     std::string currentCategory;
     mLine = 0;
-    while (!stream.eof() && !stream.fail())
+    while (!stream.get().eof() && !stream.get().fail())
     {
         ++mLine;
         std::string line;
-        std::getline( stream, line );
+        std::getline( stream.get(), line );
 
         size_t i = 0;
         if (!skipWhiteSpace(i, line))
@@ -56,7 +75,9 @@ void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, Cat
         std::string value = line.substr(valueBegin);
         Misc::StringUtils::trim(value);
 
-        if (settings.insert(std::make_pair(std::make_pair(currentCategory, setting), value)).second == false)
+        if (overrideExisting)
+            settings[std::make_pair(currentCategory, setting)] = value;
+        else if (settings.insert(std::make_pair(std::make_pair(currentCategory, setting), value)).second == false)
             fail(std::string("duplicate setting: [" + currentCategory + "] " + setting));
     }
 }
@@ -86,8 +107,8 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
     // Open the existing settings.cfg file to copy comments.  This might not be the same file
     // as the output file if we're copying the setting from the default settings.cfg for the
     // first time.  A minor change in API to pass the source file might be in order here.
-    boost::filesystem::ifstream istream;
-    boost::filesystem::path ipath(file);
+    std::ifstream istream;
+    std::filesystem::path ipath(file);
     istream.open(ipath);
 
     // Create a new string stream to write the current settings to.  It's likely that the
@@ -255,7 +276,7 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
         ostream << "# This is the OpenMW user 'settings.cfg' file.  This file only contains" << std::endl;
         ostream << "# explicitly changed settings.  If you would like to revert a setting" << std::endl;
         ostream << "# to its default, simply remove it from this file.  For available" << std::endl;
-        ostream << "# settings, see the file 'settings-default.cfg' or the documentation at:" << std::endl;
+        ostream << "# settings, see the file 'files/settings-default.cfg' in our source repo or the documentation at:" << std::endl;
         ostream << "#" << std::endl;
         ostream << "#   https://openmw.readthedocs.io/en/master/reference/modding/settings/index.html" << std::endl;
     }
@@ -285,7 +306,7 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
     // Now install the newly written file in the requested place.
     if (changed) {
         Log(Debug::Info) << "Updating settings file: " << ipath;
-        boost::filesystem::ofstream ofstream;
+        std::ofstream ofstream;
         ofstream.open(ipath);
         ofstream << ostream.rdbuf();
         ofstream.close();
@@ -301,7 +322,7 @@ bool Settings::SettingsFileParser::skipWhiteSpace(size_t& i, std::string& str)
     return i < str.size();
 }
 
-void Settings::SettingsFileParser::fail(const std::string& message)
+[[noreturn]] void Settings::SettingsFileParser::fail(const std::string& message)
 {
     std::stringstream error;
     error << "Error on line " << mLine << " in " << mFile << ":\n" << message;

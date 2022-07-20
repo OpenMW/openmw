@@ -1,6 +1,8 @@
 #include "probe.hpp"
 
-#include <components/esm/loadprob.hpp>
+#include <MyGUI_TextIterator.h>
+
+#include <components/esm3/loadprob.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -18,8 +20,14 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
+    Probe::Probe()
+        : MWWorld::RegisteredClass<Probe>(ESM::Probe::sRecordId)
+    {
+    }
 
     void Probe::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -28,20 +36,9 @@ namespace MWClass
         }
     }
 
-    void Probe::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
-    {
-        // TODO: add option somewhere to enable collision for placeable objects
-    }
-
     std::string Probe::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return "meshes\\" + model;
-        }
-        return "";
+        return getClassModel<ESM::Probe>(ptr);
     }
 
     std::string Probe::getName (const MWWorld::ConstPtr& ptr) const
@@ -51,7 +48,7 @@ namespace MWClass
 
         return !name.empty() ? name : ref->mBase->mId;
     }
-    std::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -79,13 +76,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Probe::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Probe);
-
-        registerClass (typeid (ESM::Probe).name(), instance);
     }
 
     std::string Probe::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -132,9 +122,9 @@ namespace MWClass
         return info;
     }
 
-    std::shared_ptr<MWWorld::Action> Probe::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Probe::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEquip>(ptr, force);
 
         action->setSound(getUpSoundId(ptr));
 

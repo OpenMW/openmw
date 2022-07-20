@@ -3,11 +3,6 @@
 
 #include "layout.hpp"
 
-namespace MWBase
-{
-    class WindowManager;
-}
-
 namespace MWWorld
 {
     class Ptr;
@@ -15,13 +10,12 @@ namespace MWWorld
 
 namespace MWGui
 {
-    class WindowManager;
     class DragAndDrop;
 
     class WindowBase: public Layout
     {
     public:
-        WindowBase(const std::string& parLayout);
+        WindowBase(std::string_view parLayout);
 
         virtual MyGUI::Widget* getDefaultKeyFocus() { return nullptr; }
 
@@ -52,6 +46,8 @@ namespace MWGui
 
         /// Called when GUI viewport changes size
         virtual void onResChange(int width, int height) {}
+
+        virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) {}
 
     protected:
         virtual void onTitleDoubleClicked();
@@ -92,10 +88,10 @@ namespace MWGui
     class BookWindowBase : public WindowBase
     {
     public:
-        BookWindowBase(const std::string& parLayout);
+        BookWindowBase(std::string_view parLayout);
 
     protected:
-        float adjustButton (char const * name);
+        float adjustButton(std::string_view name);
     };
 }
 

@@ -2,6 +2,7 @@
 #define OPENMW_ESMTOOL_RECORD_H
 
 #include <string>
+#include <memory>
 
 #include <components/esm/records.hpp>
 
@@ -54,7 +55,7 @@ namespace EsmTool
         virtual void save(ESM::ESMWriter &esm) = 0;
         virtual void print() = 0;
 
-        static RecordBase *create(ESM::NAME type);
+        static std::unique_ptr<RecordBase> create(ESM::NAME type);
 
         // just make it a bit shorter
         template <class T>

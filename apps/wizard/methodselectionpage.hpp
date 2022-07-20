@@ -1,8 +1,6 @@
 #ifndef METHODSELECTIONPAGE_HPP
 #define METHODSELECTIONPAGE_HPP
 
-#include <QWizardPage>
-
 #include "ui_methodselectionpage.h"
 
 namespace Wizard
@@ -17,6 +15,9 @@ namespace Wizard
 
         int nextId() const override;
 
+    private slots:
+        void handleBuyButton();
+        
     private:
         MainWizard *mWizard;
 

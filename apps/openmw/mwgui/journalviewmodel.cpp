@@ -1,7 +1,6 @@
 #include "journalviewmodel.hpp"
 
 #include <map>
-#include <sstream>
 
 #include <MyGUI_LanguageManager.h>
 
@@ -129,7 +128,7 @@ struct JournalViewModelImpl : JournalViewModel
 
                         utf8text.replace(pos_begin, pos_end+1-pos_begin, displayName);
 
-                        intptr_t value;
+                        intptr_t value = 0;
                         if (mModel->mKeywordSearch.containsKeyword(topicName, value))
                             mHyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = value;
                     }
@@ -313,9 +312,9 @@ struct JournalViewModelImpl : JournalViewModel
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
             Utf8Stream stream (i->first.c_str());
-            Utf8Stream::UnicodeChar first = Misc::StringUtils::toLowerUtf8(stream.peek());
+            Utf8Stream::UnicodeChar first = Utf8Stream::toLowerUtf8(stream.peek());
 
-            if (first != Misc::StringUtils::toLowerUtf8(character))
+            if (first != Utf8Stream::toLowerUtf8(character))
                 continue;
 
             visitor (i->second.getName());

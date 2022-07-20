@@ -37,7 +37,7 @@ namespace osgMyGUI
             mTarget->doRender(_buffer, _texture, _count);
         }
 
-        const MyGUI::RenderTargetInfo& getInfo() override
+        const MyGUI::RenderTargetInfo& getInfo() const override
         {
             mInfo = mTarget->getInfo();
             mInfo.hOffset = mHOffset;
@@ -51,7 +51,7 @@ namespace osgMyGUI
         MyGUI::IRenderTarget* mTarget;
         MyGUI::IntSize mViewSize;
         float mHOffset, mVOffset;
-        MyGUI::RenderTargetInfo mInfo;
+        mutable MyGUI::RenderTargetInfo mInfo;
     };
 
     MyGUI::ILayerItem *ScalingLayer::getLayerItemByPoint(int _left, int _top) const
@@ -72,8 +72,8 @@ namespace osgMyGUI
         _left -= globalViewSize.width/2;
         _top -= globalViewSize.height/2;
 
-        _left /= scale;
-        _top /= scale;
+        _left = static_cast<int>(_left/scale);
+        _top = static_cast<int>(_top/scale);
 
         _left += mViewSize.width/2;
         _top += mViewSize.height/2;
@@ -82,8 +82,8 @@ namespace osgMyGUI
     float ScalingLayer::getScaleFactor() const
     {
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        float w = viewSize.width;
-        float h = viewSize.height;
+        float w = static_cast<float>(viewSize.width);
+        float h = static_cast<float>(viewSize.height);
 
         float heightScale = (h / mViewSize.height);
         float widthScale = (w / mViewSize.width);
@@ -101,8 +101,8 @@ namespace osgMyGUI
         MyGUI::IntSize globalViewSize = MyGUI::RenderManager::getInstance().getViewSize();
         MyGUI::IntSize viewSize = globalViewSize;
         float scale = getScaleFactor();
-        viewSize.width /= scale;
-        viewSize.height /= scale;
+        viewSize.width = static_cast<int>(viewSize.width / scale);
+        viewSize.height = static_cast<int>(viewSize.height / scale);
 
         float hoffset = (globalViewSize.width - mViewSize.width*getScaleFactor())/2.f / static_cast<float>(globalViewSize.width);
         float voffset = (globalViewSize.height - mViewSize.height*getScaleFactor())/2.f / static_cast<float>(globalViewSize.height);

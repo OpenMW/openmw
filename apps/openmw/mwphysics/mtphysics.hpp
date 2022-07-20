@@ -6,15 +6,25 @@
 #include <optional>
 #include <shared_mutex>
 #include <thread>
+#include <unordered_set>
+#include <variant>
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
+#include <osg/Timer>
+
 #include "physicssystem.hpp"
 #include "ptrholder.hpp"
+#include "components/misc/budgetmeasurement.hpp"
 
 namespace Misc
 {
     class Barrier;
+}
+
+namespace MWRender
+{
+    class DebugDrawer;
 }
 
 namespace MWPhysics
@@ -22,7 +32,7 @@ namespace MWPhysics
     class PhysicsTaskScheduler
     {
         public:
-            PhysicsTaskScheduler(float physicsDt, std::shared_ptr<btCollisionWorld> collisionWorld);
+            PhysicsTaskScheduler(float physicsDt, btCollisionWorld* collisionWorld, MWRender::DebugDrawer* debugDrawer);
             ~PhysicsTaskScheduler();
 
             /// @brief move actors taking into account desired movements and collisions
@@ -30,7 +40,9 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            const PtrPositionList& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, CollisionMap& standingCollisions, bool skip);
+            void applyQueuedMovements(float & timeAccum, std::vector<Simulation>&& simulations, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+
+            void resetSimulation(const ActorMap& actors);
 
             // Thread safe wrappers
             void rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const;
@@ -42,26 +54,36 @@ namespace MWPhysics
             void setCollisionFilterMask(btCollisionObject* collisionObject, int collisionFilterMask);
             void addCollisionObject(btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask);
             void removeCollisionObject(btCollisionObject* collisionObject);
-            void updateSingleAabb(std::weak_ptr<PtrHolder> ptr);
-            bool getLineOfSight(const std::weak_ptr<Actor>& actor1, const std::weak_ptr<Actor>& actor2);
+            void updateSingleAabb(const std::shared_ptr<PtrHolder>& ptr, bool immediate=false);
+            bool getLineOfSight(const std::shared_ptr<Actor>& actor1, const std::shared_ptr<Actor>& actor2);
+            void debugDraw();
+            void* getUserPointer(const btCollisionObject* object) const;
+            void releaseSharedStates(); // destroy all objects whose destructor can't be safely called from ~PhysicsTaskScheduler()
 
         private:
-            void syncComputation();
+            void doSimulation();
             void worker();
             void updateActorsPositions();
-            void udpateActorsAabbs();
             bool hasLineOfSight(const Actor* actor1, const Actor* actor2);
             void refreshLOSCache();
             void updateAabbs();
-            void updatePtrAabb(const std::weak_ptr<PtrHolder>& ptr);
+            void updatePtrAabb(const std::shared_ptr<PtrHolder>& ptr);
+            void updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            std::tuple<int, float> calculateStepConfig(float timeAccum) const;
+            void afterPreStep();
+            void afterPostStep();
+            void afterPostSim();
+            void syncWithMainThread();
+            void waitForWorkers();
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
-            std::vector<ActorFrameData> mActorsFrameData;
-            PtrPositionList mMovementResults;
-            PtrPositionList mPreviousMovementResults;
-            const float mPhysicsDt;
+            std::vector<Simulation> mSimulations;
+            std::unordered_set<const btCollisionObject*> mCollisionObjects;
+            float mDefaultPhysicsDt;
+            float mPhysicsDt;
             float mTimeAccum;
-            std::shared_ptr<btCollisionWorld> mCollisionWorld;
+            btCollisionWorld* mCollisionWorld;
+            MWRender::DebugDrawer* mDebugDrawer;
             std::vector<LOSRequest> mLOSCache;
             std::set<std::weak_ptr<PtrHolder>, std::owner_less<std::weak_ptr<PtrHolder>>> mUpdateAabb;
 
@@ -70,24 +92,38 @@ namespace MWPhysics
             std::unique_ptr<Misc::Barrier> mPostStepBarrier;
             std::unique_ptr<Misc::Barrier> mPostSimBarrier;
 
-            int mNumThreads;
+            unsigned mNumThreads;
             int mNumJobs;
             int mRemainingSteps;
             int mLOSCacheExpiry;
-            bool mDeferAabbUpdate;
-            bool mNewFrame;
+            std::size_t mFrameCounter;
             bool mAdvanceSimulation;
-            bool mThreadSafeBullet;
             bool mQuit;
             std::atomic<int> mNextJob;
             std::atomic<int> mNextLOS;
             std::vector<std::thread> mThreads;
+
+            std::size_t mWorkersFrameCounter = 0;
+            std::condition_variable mWorkersDone;
+            std::mutex mWorkersDoneMutex;
 
             mutable std::shared_mutex mSimulationMutex;
             mutable std::shared_mutex mCollisionWorldMutex;
             mutable std::shared_mutex mLOSCacheMutex;
             mutable std::mutex mUpdateAabbMutex;
             std::condition_variable_any mHasJob;
+
+            unsigned int mFrameNumber;
+            const osg::Timer* mTimer;
+
+            int mPrevStepCount;
+            Misc::BudgetMeasurement mBudget;
+            Misc::BudgetMeasurement mAsyncBudget;
+            unsigned int mBudgetCursor;
+            osg::Timer_t mAsyncStartTime;
+            osg::Timer_t mTimeBegin;
+            osg::Timer_t mTimeEnd;
+            osg::Timer_t mFrameStart;
     };
 
 }

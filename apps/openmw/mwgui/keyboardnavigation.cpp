@@ -2,7 +2,6 @@
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_WidgetManager.h>
-#include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_Window.h>
 
@@ -67,7 +66,7 @@ void KeyboardNavigation::saveFocus(int mode)
     {
         mKeyFocus[mode] = focus;
     }
-    else
+    else if(shouldAcceptKeyFocus(mCurrentFocus))
     {
         mKeyFocus[mode] = mCurrentFocus;
     }
@@ -79,7 +78,7 @@ void KeyboardNavigation::restoreFocus(int mode)
     if (found != mKeyFocus.end())
     {
         MyGUI::Widget* w = found->second;
-        if (w && w->getVisible() && w->getEnabled())
+        if (w && w->getVisible() && w->getEnabled() && w->getInheritedVisible() && w->getInheritedEnabled())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(found->second);
     }
 }
@@ -91,17 +90,6 @@ void KeyboardNavigation::_unlinkWidget(MyGUI::Widget *widget)
             w.second = nullptr;
     if (widget == mCurrentFocus)
         mCurrentFocus = nullptr;
-}
-
-void styleFocusedButton(MyGUI::Widget* w)
-{
-    if (w)
-    {
-        if (MyGUI::Button* b = w->castType<MyGUI::Button>(false))
-        {
-            b->_setWidgetState("highlighted");
-        }
-    }
 }
 
 bool isRootParent(MyGUI::Widget* widget, MyGUI::Widget* root)
@@ -126,7 +114,6 @@ void KeyboardNavigation::onFrame()
 
     if (focus == mCurrentFocus)
     {
-        styleFocusedButton(mCurrentFocus);
         return;
     }
 
@@ -137,19 +124,10 @@ void KeyboardNavigation::onFrame()
         focus = mCurrentFocus;
     }
 
-    // style highlighted button (won't be needed for MyGUI 3.2.3)
     if (focus != mCurrentFocus)
     {
-        if (mCurrentFocus)
-        {
-            if (MyGUI::Button* b = mCurrentFocus->castType<MyGUI::Button>(false))
-                b->_setWidgetState("normal");
-        }
-
         mCurrentFocus = focus;
     }
-
-    styleFocusedButton(mCurrentFocus);
 }
 
 void KeyboardNavigation::setDefaultFocus(MyGUI::Widget *window, MyGUI::Widget *defaultFocus)
@@ -267,7 +245,7 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
     if (wrap)
         index = (index + keyFocusList.size())%keyFocusList.size();
     else
-        index = std::min(std::max(0, index), static_cast<int>(keyFocusList.size())-1);
+        index = std::clamp<int>(index, 0, keyFocusList.size() - 1);
 
     MyGUI::Widget* next = keyFocusList[index];
     int vertdiff = next->getTop() - focus->getTop();

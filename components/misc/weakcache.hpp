@@ -22,8 +22,8 @@ namespace Misc
         public:
             iterator(WeakCache* cache, typename Map::iterator current, typename Map::iterator end);
             iterator& operator++();
-            bool operator==(const iterator& other);
-            bool operator!=(const iterator& other);
+            bool operator==(const iterator& other) const;
+            bool operator!=(const iterator& other) const;
             StrongPtr operator*();
         private:
             WeakCache* mCache;
@@ -74,13 +74,13 @@ namespace Misc
     }
 
     template <typename Key, typename T>
-    bool WeakCache<Key, T>::iterator::operator==(const iterator& other)
+    bool WeakCache<Key, T>::iterator::operator==(const iterator& other) const
     {
         return mCurrent == other.mCurrent;
     }
 
     template <typename Key, typename T>
-    bool WeakCache<Key, T>::iterator::operator!=(const iterator& other)
+    bool WeakCache<Key, T>::iterator::operator!=(const iterator& other) const
     {
         return !(*this == other);
     }

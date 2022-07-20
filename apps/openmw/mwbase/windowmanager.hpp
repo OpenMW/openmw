@@ -1,7 +1,7 @@
 #ifndef GAME_MWBASE_WINDOWMANAGER_H
 #define GAME_MWBASE_WINDOWMANAGER_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <map>
@@ -32,7 +32,6 @@ namespace MyGUI
 
 namespace ESM
 {
-    struct Class;
     class ESMReader;
     class ESMWriter;
     struct CellId;
@@ -70,6 +69,8 @@ namespace MWGui
     class DialogueWindow;
     class WindowModal;
     class JailScreen;
+    class MessageBox;
+    class PostProcessorHud;
 
     enum ShowInDialogueMode {
         ShowInDialogueMode_IfPossible,
@@ -146,6 +147,8 @@ namespace MWBase
             virtual MWGui::CountDialog* getCountDialog() = 0;
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
+            virtual const std::vector<MWGui::MessageBox*> getActiveMessageBoxes() = 0;
+            virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
 
             /// Make the player use an item, while updating GUI state accordingly
             virtual void useItem(const MWWorld::Ptr& item, bool force=false) = 0;
@@ -153,6 +156,13 @@ namespace MWBase
             virtual void updateSpellWindow() = 0;
 
             virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
+            virtual void setConsoleMode(const std::string& mode) = 0;
+
+            static constexpr std::string_view sConsoleColor_Default = "#FFFFFF";
+            static constexpr std::string_view sConsoleColor_Error = "#FF2222";
+            static constexpr std::string_view sConsoleColor_Success = "#FF00FF";
+            static constexpr std::string_view sConsoleColor_Info = "#AAAAAA";
+            virtual void printToConsole(const std::string& msg, std::string_view color) = 0;
 
             /// Set time left for the player to start drowning (update the drowning bar)
             /// @param time time left to start drowning
@@ -171,6 +181,8 @@ namespace MWBase
             virtual void getMousePosition(float &x, float &y) = 0;
             virtual void setDragDrop(bool dragDrop) = 0;
             virtual bool getWorldMouseOver() = 0;
+
+            virtual float getScalingFactor() const = 0;
 
             virtual bool toggleFogOfWar() = 0;
 
@@ -227,6 +239,8 @@ namespace MWBase
             virtual void exitCurrentGuiMode() = 0;
 
             virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
+            /// Puts message into a queue to show on the next update. Thread safe alternative for messageBox.
+            virtual void scheduleMessageBox(std::string message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
             virtual void interactiveMessageBox (const std::string& message,
@@ -234,8 +248,6 @@ namespace MWBase
 
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
-
-            virtual void update (float duration) = 0;
 
             virtual void updateConsoleObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr) = 0;
 
@@ -271,8 +283,6 @@ namespace MWBase
 
             /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
             virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
-
-            virtual void loadUserFonts() = 0;
 
             virtual Loading::Listener* getLoadingScreen() = 0;
 
@@ -318,6 +328,7 @@ namespace MWBase
 
             virtual void toggleConsole() = 0;
             virtual void toggleDebugWindow() = 0;
+            virtual void togglePostProcessorHud() = 0;
 
             /// Cycle to next or previous spell
             virtual void cycleSpell(bool next) = 0;
@@ -325,12 +336,6 @@ namespace MWBase
             virtual void cycleWeapon(bool next) = 0;
 
             virtual void playSound(const std::string& soundId, float volume = 1.f, float pitch = 1.f) = 0;
-
-            // In WindowManager for now since there isn't a VFS singleton
-            virtual std::string correctIconPath(const std::string& path) = 0;
-            virtual std::string correctBookartPath(const std::string& path, int width, int height, bool* exists = nullptr) = 0;
-            virtual std::string correctTexturePath(const std::string& path) = 0;
-            virtual bool textureExists(const std::string& path) = 0;
 
             virtual void addCell(MWWorld::CellStore* cell) = 0;
             virtual void removeCell(MWWorld::CellStore* cell) = 0;
@@ -348,6 +353,19 @@ namespace MWBase
 
             virtual void watchActor(const MWWorld::Ptr& ptr) = 0;
             virtual MWWorld::Ptr getWatchedActor() const = 0;
+
+            virtual const std::string& getVersionDescription() const = 0;
+
+            virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) = 0;
+            virtual void forceLootMode(const MWWorld::Ptr& ptr) = 0;
+
+            virtual void asyncPrepareSaveMap() = 0;
+
+            /// Sets the cull masks for all applicable views
+            virtual void setCullMask(uint32_t mask) = 0;
+
+            /// Same as viewer->getCamera()->getCullMask(), provided for consistency.
+            virtual uint32_t getCullMask() = 0;
     };
 }
 

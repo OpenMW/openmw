@@ -97,7 +97,7 @@ namespace Interpreter
             {
             }
 
-            void process(const std::string& message) override
+            void process(std::string_view message) override
             {
                 mFormattedMessage.clear();
                 MessageFormatParser::process(message);
@@ -109,7 +109,7 @@ namespace Interpreter
             }
     };
 
-    inline std::string formatMessage (const std::string& message, Runtime& runtime)
+    inline std::string formatMessage (std::string_view message, Runtime& runtime)
     {
         RuntimeMessageFormatter formatter(runtime);
         formatter.process(message);
@@ -128,7 +128,7 @@ namespace Interpreter
                 // message
                 int index = runtime[0].mInteger;
                 runtime.pop();
-                std::string message = runtime.getStringLiteral (index);
+                std::string_view message = runtime.getStringLiteral (index);
 
                 // buttons
                 std::vector<std::string> buttons;
@@ -137,7 +137,7 @@ namespace Interpreter
                 {
                     index = runtime[0].mInteger;
                     runtime.pop();
-                    buttons.push_back (runtime.getStringLiteral (index));
+                    buttons.emplace_back(runtime.getStringLiteral(index));
                 }
 
                 std::reverse (buttons.begin(), buttons.end());
@@ -158,7 +158,7 @@ namespace Interpreter
                 // message
                 int index = runtime[0].mInteger;
                 runtime.pop();
-                std::string message = runtime.getStringLiteral (index);
+                std::string_view message = runtime.getStringLiteral (index);
 
                 // handle additional parameters
                 std::string formattedMessage = formatMessage (message, runtime);

@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_MISC_MESSAGEFORMATPARSER_H
 #define OPENMW_COMPONENTS_MISC_MESSAGEFORMATPARSER_H
 
-#include <string>
+#include <string_view>
 
 namespace Misc
 {
@@ -28,7 +28,7 @@ namespace Misc
         public:
             virtual ~MessageFormatParser();
 
-            virtual void process(const std::string& message);
+            virtual void process(std::string_view message);
     };
 }
 

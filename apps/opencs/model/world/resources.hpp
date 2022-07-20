@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <string_view>
 
 #include "universalid.hpp"
 
@@ -25,9 +26,9 @@ namespace CSMWorld
 
             /// \param type Type of resources in this table.
             Resources (const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type,
-                const char * const *extensions = 0);
+                const char * const *extensions = nullptr);
 
-            void recreate(const VFS::Manager* vfs, const char * const *extensions = 0);
+            void recreate(const VFS::Manager* vfs, const char * const *extensions = nullptr);
 
             int getSize() const;
 
@@ -35,7 +36,7 @@ namespace CSMWorld
 
             int getIndex (const std::string& id) const;
 
-            int searchId (const std::string& id) const;
+            int searchId(std::string_view id) const;
 
             UniversalId::Type getType() const;
     };

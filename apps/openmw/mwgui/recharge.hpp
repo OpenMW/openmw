@@ -3,8 +3,6 @@
 
 #include "windowbase.hpp"
 
-#include "itemselection.hpp"
-
 namespace MWWorld
 {
     class Ptr;

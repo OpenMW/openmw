@@ -159,7 +159,7 @@ namespace MWWorld
         return setting->mValue.getString();
     }
 
-    bool DateTimeManager::updateGlobalFloat(const std::string& name, float value)
+    bool DateTimeManager::updateGlobalFloat(std::string_view name, float value)
     {
         if (name=="gamehour")
         {
@@ -192,7 +192,7 @@ namespace MWWorld
         return false;
     }
 
-    bool DateTimeManager::updateGlobalInt(const std::string& name, int value)
+    bool DateTimeManager::updateGlobalInt(std::string_view name, int value)
     {
         if (name=="gamehour")
         {

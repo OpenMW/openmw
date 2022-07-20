@@ -4,8 +4,10 @@
 #include <string>
 #include <cstring>
 #include <vector>
-
-#include <stdint.h>
+#include <string_view>
+#include <cstdint>
+#include <cassert>
+#include <limits>
 
 namespace ESM
 {
@@ -15,119 +17,159 @@ enum Version
     VER_13 = 0x3fa66666
   };
 
+enum RecordFlag
+  {
+    // This flag exists, but is not used to determine if a record has been deleted while loading
+    FLAG_Deleted    = 0x00000020,
+    FLAG_Persistent = 0x00000400,
+    FLAG_Ignored    = 0x00001000,
+    FLAG_Blocked    = 0x00002000
+  };
 
-// CRTP for FIXED_STRING class, a structure used for holding fixed-length strings
-template< template<size_t> class DERIVED, size_t SIZE>
-class FIXED_STRING_BASE
+template <std::size_t capacity>
+struct FixedString
 {
-    /* The following methods must be implemented in derived classes:
-     *   char const* ro_data() const; // return pointer to ro buffer
-     *   char*       rw_data();       // return pointer to rw buffer
-     */
-public:
-    enum { size = SIZE };
+    static_assert(capacity > 0);
 
-    template<size_t OTHER_SIZE>
-    bool operator==(char const (&str)[OTHER_SIZE]) const
-    {
-        size_t other_len = strnlen(str, OTHER_SIZE);
-        if (other_len != this->length())
-            return false;
-        return std::strncmp(self()->ro_data(), str, size) == 0;
-    }
+    static constexpr std::size_t sCapacity = capacity;
 
-    //this operator will not be used for char[N], only for char*
-    template<typename T, typename = typename std::enable_if<std::is_same<T, char>::value>::type>
-    bool operator==(const T* const& str) const
+    char mData[capacity];
+
+    FixedString() = default;
+
+    template <std::size_t size>
+    constexpr FixedString(const char (&value)[size]) noexcept
+        : mData()
     {
-        char const* const data = self()->ro_data();
-        for(size_t i = 0; i < size; ++i)
+        if constexpr (capacity == sizeof(std::uint32_t))
         {
-            if(data[i] != str[i]) return false;
-            else if(data[i] == '\0') return true;
+            static_assert(capacity == size || capacity + 1 == size);
+            if constexpr (capacity + 1 == size)
+                assert(value[capacity] == '\0');
+            for (std::size_t i = 0; i < capacity; ++i)
+                mData[i] = value[i];
         }
-        return str[size] == '\0';
-    }
-    bool operator!=(const char* const str) const { return !( (*this) == str ); }
-
-    bool operator==(const std::string& str) const
-    {
-        return (*this) == str.c_str();
-    }
-    bool operator!=(const std::string& str) const { return !( (*this) == str ); }
-
-    static size_t data_size() { return size; }
-    size_t length() const { return strnlen(self()->ro_data(), size); }
-    std::string toString() const { return std::string(self()->ro_data(), this->length()); }
-
-    void assign(const std::string& value)
-    {
-        std::strncpy(self()->rw_data(), value.c_str(), size-1);
-        self()->rw_data()[size-1] = '\0';
+        else
+        {
+            const std::size_t length = std::min(capacity, size);
+            for (std::size_t i = 0; i < length; ++i)
+                mData[i] = value[i];
+            mData[std::min(capacity - 1, length)] = '\0';
+        }
     }
 
-    void clear() { this->assign(""); }
-private:
-    DERIVED<size> const* self() const
+    constexpr explicit FixedString(std::uint32_t value) noexcept
+        : mData()
     {
-        return static_cast<DERIVED<size> const*>(this);
+        static_assert(capacity == sizeof(std::uint32_t));
+        for (std::size_t i = 0; i < capacity; ++i)
+            mData[i] = static_cast<char>((value >> (i * std::numeric_limits<std::uint8_t>::digits)) & std::numeric_limits<std::uint8_t>::max());
     }
 
-    // write the non-const version in terms of the const version
-    // Effective C++ 3rd ed., Item 3 (p. 24-25)
-    DERIVED<size>* self()
+    template <class T>
+    constexpr explicit FixedString(T value) noexcept
+        : FixedString(static_cast<std::uint32_t>(value)) {}
+
+    std::string_view toStringView() const noexcept
     {
-        return const_cast<DERIVED<size>*>(static_cast<FIXED_STRING_BASE const*>(this)->self());
+        return std::string_view(mData, strnlen(mData, capacity));
+    }
+
+    std::string toString() const
+    {
+        return std::string(toStringView());
+    }
+
+    std::uint32_t toInt() const noexcept
+    {
+        static_assert(capacity == sizeof(std::uint32_t));
+        std::uint32_t value;
+        std::memcpy(&value, mData, capacity);
+        return value;
+    }
+
+    void clear() noexcept
+    {
+        std::memset(mData, 0, capacity);
+    }
+
+    void assign(std::string_view value) noexcept
+    {
+        if (value.empty())
+        {
+            clear();
+            return;
+        }
+
+        if (value.size() < capacity)
+        {
+            if constexpr (capacity == sizeof(std::uint32_t))
+                std::memset(mData, 0, capacity);
+            std::memcpy(mData, value.data(), value.size());
+            if constexpr (capacity != sizeof(std::uint32_t))
+                mData[value.size()] = '\0';
+            return;
+        }
+
+        std::memcpy(mData, value.data(), capacity);
+
+        if constexpr (capacity != sizeof(std::uint32_t))
+            mData[capacity - 1] = '\0';
+    }
+
+    FixedString& operator=(std::uint32_t value) noexcept
+    {
+        static_assert(capacity == sizeof(value));
+        std::memcpy(&mData, &value, capacity);
+        return *this;
     }
 };
 
-// Generic implementation
-template <size_t SIZE>
-struct FIXED_STRING : public FIXED_STRING_BASE<FIXED_STRING, SIZE>
+template <std::size_t capacity, class T, typename = std::enable_if_t<std::is_same_v<T, char>>>
+inline bool operator==(const FixedString<capacity>& lhs, const T* const& rhs) noexcept
 {
-    char data[SIZE];
-
-    char const* ro_data() const { return data; }
-    char*       rw_data() { return data; }
-};
-
-// In the case of SIZE=4, it can be more efficient to match the string
-// as a 32 bit number, therefore the struct is implemented as a union with an int.
-template <>
-struct FIXED_STRING<4> : public FIXED_STRING_BASE<FIXED_STRING, 4>
-{
-    union {
-        char data[4];
-        uint32_t intval;
-    };
-
-    using FIXED_STRING_BASE::operator==;
-    using FIXED_STRING_BASE::operator!=;
-
-    bool operator==(uint32_t v) const { return v == intval; }
-    bool operator!=(uint32_t v) const { return v != intval; }
-
-    void assign(const std::string& value)
+    for (std::size_t i = 0; i < capacity; ++i)
     {
-        intval = 0;
-        size_t length = value.size();
-        if (length == 0) return;
-        data[0] = value[0];
-        if (length == 1) return;
-        data[1] = value[1];
-        if (length == 2) return;
-        data[2] = value[2];
-        if (length == 3) return;
-        data[3] = value[3];
+        if (lhs.mData[i] != rhs[i])
+            return false;
+        if (lhs.mData[i] == '\0')
+            return true;
     }
+    return rhs[capacity] == '\0';
+}
 
-    char const* ro_data() const { return data; }
-    char*       rw_data() { return data; }
-};
+template <std::size_t capacity>
+inline bool operator==(const FixedString<capacity>& lhs, const std::string& rhs) noexcept
+{
+    return lhs == rhs.c_str();
+}
 
-typedef FIXED_STRING<4> NAME;
-typedef FIXED_STRING<32> NAME32;
-typedef FIXED_STRING<64> NAME64;
+template <std::size_t capacity, std::size_t rhsSize>
+inline bool operator==(const FixedString<capacity>& lhs, const char (&rhs)[rhsSize]) noexcept
+{
+    return strnlen(rhs, rhsSize) == strnlen(lhs.mData, capacity)
+        && std::strncmp(lhs.mData, rhs, capacity) == 0;
+}
+
+inline bool operator==(const FixedString<4>& lhs, std::uint32_t rhs) noexcept
+{
+    return lhs.toInt() == rhs;
+}
+
+inline bool operator==(const FixedString<4>& lhs, const FixedString<4>& rhs) noexcept
+{
+    return lhs.toInt() == rhs.toInt();
+}
+
+template <std::size_t capacity, class Rhs>
+inline bool operator!=(const FixedString<capacity>& lhs, const Rhs& rhs) noexcept
+{
+    return !(lhs == rhs);
+}
+
+using NAME = FixedString<4>;
+using NAME32 = FixedString<32>;
+using NAME64 = FixedString<64>;
 
 /* This struct defines a file 'context' which can be saved and later
    restored by an ESMReader instance. It will save the position within

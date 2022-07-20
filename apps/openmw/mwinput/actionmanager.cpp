@@ -9,6 +9,7 @@
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -21,12 +22,13 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "../mwgui/messagebox.hpp"
+
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
 
 namespace MWInput
 {
-    const float ZOOM_SCALE = 10.f; /// Used for scrolling camera in and out
 
     ActionManager::ActionManager(BindingsManager* bindingsManager,
             osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
@@ -39,8 +41,6 @@ namespace MWInput
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mSneaking(false)
         , mAttemptJump(false)
-        , mOverencumberedMessageDelay(0.f)
-        , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
     {
     }
@@ -89,43 +89,26 @@ namespace MWInput
             {
                 player.setUpDown(1);
                 triedToMove = true;
-                mOverencumberedMessageDelay = 0.f;
             }
 
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
             {
                 MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                mOverencumberedMessageDelay -= dt;
                 if (playerPtr.getClass().getEncumbrance(playerPtr) > playerPtr.getClass().getCapacity(playerPtr))
                 {
                     player.setAutoMove (false);
-                    if (mOverencumberedMessageDelay <= 0)
+                    std::vector<MWGui::MessageBox*> msgboxs = MWBase::Environment::get().getWindowManager()->getActiveMessageBoxes();
+                    const std::vector<MWGui::MessageBox*>::iterator it = std::find_if(msgboxs.begin(), msgboxs.end(), [](MWGui::MessageBox*& msgbox)
                     {
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage59}");
-                        mOverencumberedMessageDelay = 1.0;
-                    }
-                }
-            }
+                        return (msgbox->getMessage() == "#{sNotifyMessage59}");
+                    });
 
-            if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch"))
-            {
-                const float switchLimit = 0.25;
-                MWBase::World* world = MWBase::Environment::get().getWorld();
-                if (mBindingsManager->actionIsActive(A_TogglePOV))
-                {
-                    if (world->isFirstPerson() ? mPreviewPOVDelay > switchLimit : mPreviewPOVDelay == 0)
-                        world->togglePreviewMode(true);
-                    mPreviewPOVDelay += dt;
-                }
-                else
-                {
-                    //disable preview mode
-                    if (mPreviewPOVDelay > 0)
-                        world->togglePreviewMode(false);
-                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= switchLimit)
-                        world->togglePOV();
-                    mPreviewPOVDelay = 0.f;
+                    // if an overencumbered messagebox is already present, reset its expiry timer, otherwise create new one.
+                    if (it != msgboxs.end())
+                        (*it)->mCurrentTime = 0;
+                    else
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage59}");
                 }
             }
 
@@ -161,42 +144,21 @@ namespace MWInput
             resetIdleTime();
         }
         else
-        {
-            updateIdleTime(dt);
-        }
+            mTimeIdle += dt;
 
         mAttemptJump = false;
-    }
-    
-    bool ActionManager::isPreviewModeEnabled()
-    {
-        return MWBase::Environment::get().getWorld()->isPreviewModeEnabled();
     }
 
     void ActionManager::resetIdleTime()
     {
-        if (mTimeIdle < 0)
-            MWBase::Environment::get().getWorld()->toggleVanityMode(false);
         mTimeIdle = 0.f;
-    }
-
-    void ActionManager::updateIdleTime(float dt)
-    {
-        static const float vanityDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fVanityDelay")->mValue.getFloat();
-        if (mTimeIdle >= 0.f)
-            mTimeIdle += dt;
-        if (mTimeIdle > vanityDelay)
-        {
-            MWBase::Environment::get().getWorld()->toggleVanityMode(true);
-            mTimeIdle = -1.f;
-        }
     }
 
     void ActionManager::executeAction(int action)
     {
-        auto* inputManager = MWBase::Environment::get().getInputManager();
-        auto* windowManager = MWBase::Environment::get().getWindowManager();
+        MWBase::Environment::get().getLuaManager()->inputEvent({MWBase::LuaManager::InputEvent::Action, action});
+        const auto inputManager = MWBase::Environment::get().getInputManager();
+        const auto windowManager = MWBase::Environment::get().getWindowManager();
         // trigger action activated
         switch (action)
         {
@@ -279,13 +241,8 @@ namespace MWInput
         case A_ToggleDebug:
             windowManager->toggleDebugWindow();
             break;
-        case A_ZoomIn:
-            if (inputManager->getControlSwitch("playerviewswitch") && inputManager->getControlSwitch("playercontrols") && !windowManager->isGuiMode())
-                MWBase::Environment::get().getWorld()->adjustCameraDistance(-ZOOM_SCALE);
-            break;
-        case A_ZoomOut:
-            if (inputManager->getControlSwitch("playerviewswitch") && inputManager->getControlSwitch("playercontrols") && !windowManager->isGuiMode())
-                MWBase::Environment::get().getWorld()->adjustCameraDistance(ZOOM_SCALE);
+        case A_TogglePostProcessorHUD:
+            windowManager->togglePostProcessorHud();
             break;
         case A_QuickSave:
             quickSave();
@@ -333,12 +290,8 @@ namespace MWInput
 
     void ActionManager::screenshot()
     {
-        bool regularScreenshot = true;
-
-        std::string settingStr;
-
-        settingStr = Settings::Manager::getString("screenshot type","Video");
-        regularScreenshot = settingStr.size() == 0 || settingStr.compare("regular") == 0;
+        const std::string& settingStr = Settings::Manager::getString("screenshot type", "Video");
+        bool regularScreenshot = settingStr.size() == 0 || settingStr.compare("regular") == 0;
 
         if (regularScreenshot)
         {
@@ -349,7 +302,7 @@ namespace MWInput
         {
             osg::ref_ptr<osg::Image> screenshot (new osg::Image);
 
-            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(), settingStr))
+            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get()))
             {
                 (*mScreenCaptureOperation) (*(screenshot.get()), 0);
                 // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
@@ -402,11 +355,11 @@ namespace MWInput
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player.getPlayer()))
             return;
 
-        MWMechanics::DrawState_ state = player.getDrawState();
-        if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
-            player.setDrawState(MWMechanics::DrawState_Spell);
+        MWMechanics::DrawState state = player.getDrawState();
+        if (state == MWMechanics::DrawState::Weapon || state == MWMechanics::DrawState::Nothing)
+            player.setDrawState(MWMechanics::DrawState::Spell);
         else
-            player.setDrawState(MWMechanics::DrawState_Nothing);
+            player.setDrawState(MWMechanics::DrawState::Nothing);
     }
 
     void ActionManager::quickLoad()
@@ -437,11 +390,11 @@ namespace MWInput
         else if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player.getPlayer()))
             return;
 
-        MWMechanics::DrawState_ state = player.getDrawState();
-        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-            player.setDrawState(MWMechanics::DrawState_Weapon);
+        MWMechanics::DrawState state = player.getDrawState();
+        if (state == MWMechanics::DrawState::Spell || state == MWMechanics::DrawState::Nothing)
+            player.setDrawState(MWMechanics::DrawState::Weapon);
         else
-            player.setDrawState(MWMechanics::DrawState_Nothing);
+            player.setDrawState(MWMechanics::DrawState::Nothing);
     }
 
     void ActionManager::rest()
@@ -494,16 +447,17 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
-                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
-                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
-                && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
+        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+        if (windowManager->getMode() != MWGui::GM_Journal
+                && windowManager->getMode() != MWGui::GM_MainMenu
+                && windowManager->getMode() != MWGui::GM_Settings
+                && windowManager->getJournalAllowed())
         {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
+            windowManager->pushGuiMode(MWGui::GM_Journal);
         }
-        else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
+        else if (windowManager->containsMode(MWGui::GM_Journal))
         {
-            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
+            windowManager->removeGuiMode(MWGui::GM_Journal);
         }
     }
 

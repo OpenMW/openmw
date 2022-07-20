@@ -3,6 +3,8 @@
 
 #include "recasttempallocator.hpp"
 
+#include <cstdlib>
+
 namespace DetourNavigator
 {
     class RecastGlobalAllocator
@@ -32,7 +34,7 @@ namespace DetourNavigator
             else
             {
                 assert(BufferType_perm == getDataPtrBufferType(ptr));
-                ::free(getPermDataPtrHeapPtr(ptr));
+                std::free(getPermDataPtrHeapPtr(ptr));
             }
         }
 
@@ -56,7 +58,7 @@ namespace DetourNavigator
 
         static void* allocPerm(size_t size)
         {
-            const auto ptr = ::malloc(size + sizeof(std::size_t));
+            const auto ptr = std::malloc(size + sizeof(std::size_t));
             if (rcUnlikely(!ptr))
                 return ptr;
             setPermPtrBufferType(ptr, BufferType_perm);

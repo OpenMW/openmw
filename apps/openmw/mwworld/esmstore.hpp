@@ -2,9 +2,10 @@
 #define OPENMW_MWWORLD_ESMSTORE_H
 
 #include <memory>
-#include <sstream>
 #include <stdexcept>
+#include <unordered_map>
 
+#include <components/esm/luascripts.hpp>
 #include <components/esm/records.hpp>
 #include "store.hpp"
 
@@ -16,6 +17,11 @@ namespace Loading
 namespace MWMechanics
 {
     class SpellList;
+}
+
+namespace ESM
+{
+    class ReadersCache;
 }
 
 namespace MWWorld
@@ -73,24 +79,35 @@ namespace MWWorld
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
-        std::map<std::string, int> mIds;
-        std::map<std::string, int> mStaticIds;
+        using IDMap = std::unordered_map<std::string, int, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
+        IDMap mIds;
+        std::unordered_map<std::string, int> mStaticIds;
 
-        std::map<std::string, int> mRefCount;
+        std::unordered_map<std::string, int> mRefCount;
 
         std::map<int, StoreBase *> mStores;
 
-        ESM::NPC mPlayerTemplate;
-
         unsigned int mDynamicCount;
 
-        mutable std::map<std::string, std::weak_ptr<MWMechanics::SpellList> > mSpellListCache;
+        mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
 
         /// Validate entries in store after setup
         void validate();
 
-        void countRecords();
+        void countAllCellRefs(ESM::ReadersCache& readers);
+
+        template<class T>
+        void removeMissingObjects(Store<T>& store);
+
+        using LuaContent = std::variant<
+            ESM::LuaScriptsCfg,  // data from an omwaddon
+            std::string>;  // path to an omwscripts file
+        std::vector<LuaContent> mLuaContent;
+
     public:
+        void addOMWScripts(std::string filePath) { mLuaContent.push_back(std::move(filePath)); }
+        ESM::LuaScriptsCfg getLuaScriptsCfg() const;
+
         /// \todo replace with SharedIterator<StoreBase>
         typedef std::map<int, StoreBase *>::const_iterator iterator;
 
@@ -103,10 +120,9 @@ namespace MWWorld
         }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
-        /// \note id must be in lower case.
         int find(const std::string &id) const
         {
-            std::map<std::string, int>::const_iterator it = mIds.find(id);
+            IDMap::const_iterator it = mIds.find(id);
             if (it == mIds.end()) {
                 return 0;
             }
@@ -114,7 +130,7 @@ namespace MWWorld
         }
         int findStatic(const std::string &id) const
         {
-            std::map<std::string, int>::const_iterator it = mStaticIds.find(id);
+            IDMap::const_iterator it = mStaticIds.find(id);
             if (it == mStaticIds.end()) {
                 return 0;
             }
@@ -172,17 +188,19 @@ namespace MWWorld
             for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
                 it->second->clearDynamic();
 
-            mNpcs.insert(mPlayerTemplate);
+            movePlayerRecord();
         }
 
         void movePlayerRecord ()
         {
-            mPlayerTemplate = *mNpcs.find("player");
-            mNpcs.eraseStatic(mPlayerTemplate.mId);
-            mNpcs.insert(mPlayerTemplate);
+            auto player = mNpcs.find("player");
+            mNpcs.insert(*player);
         }
 
-        void load(ESM::ESMReader &esm, Loading::Listener* listener);
+        /// Validate entries in store after loading a save
+        void validateDynamic();
+
+        void load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
 
         template <class T>
         const Store<T> &get() const {
@@ -196,7 +214,7 @@ namespace MWWorld
             const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
 
             Store<T> &store = const_cast<Store<T> &>(get<T>());
-            if (store.search(id) != 0)
+            if (store.search(id) != nullptr)
             {
                 const std::string msg = "Try to override existing record '" + id + "'";
                 throw std::runtime_error(msg);
@@ -234,7 +252,7 @@ namespace MWWorld
             const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
 
             Store<T> &store = const_cast<Store<T> &>(get<T>());
-            if (store.search(id) != 0)
+            if (store.search(id) != nullptr)
             {
                 const std::string msg = "Try to override existing record '" + id + "'";
                 throw std::runtime_error(msg);
@@ -252,7 +270,8 @@ namespace MWWorld
 
         // This method must be called once, after loading all master/plugin files. This can only be done
         //  from the outside, so it must be public.
-        void setUp(bool validateRecords = false);
+        void setUp();
+        void validateRecords(ESM::ReadersCache& readers);
 
         int countSavedGameRecords() const;
 
@@ -286,7 +305,7 @@ namespace MWWorld
         {
             return mNpcs.insert(npc);
         }
-        else if (mNpcs.search(id) != 0)
+        else if (mNpcs.search(id) != nullptr)
         {
             const std::string msg = "Try to override existing record '" + id + "'";
             throw std::runtime_error(msg);

@@ -10,7 +10,7 @@ namespace Video
 class MovieAudioFactory
 {
 public:
-    virtual std::shared_ptr<MovieAudioDecoder> createDecoder(VideoState* videoState) = 0;
+    virtual std::unique_ptr<MovieAudioDecoder> createDecoder(VideoState* videoState) = 0;
     virtual ~MovieAudioFactory() {}
 };
 

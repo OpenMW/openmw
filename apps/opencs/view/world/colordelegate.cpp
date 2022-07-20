@@ -1,9 +1,6 @@
 #include "colordelegate.hpp"
 
 #include <QPainter>
-#include <QPushButton>
-
-#include "../widget/coloreditor.hpp"
 
 CSVWorld::ColorDelegate::ColorDelegate(CSMWorld::CommandDispatcher *dispatcher,
                                        CSMDoc::Document& document,

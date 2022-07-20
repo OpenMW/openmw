@@ -1,6 +1,10 @@
 #ifndef GAME_MWCLASS_CREATURE_H
 #define GAME_MWCLASS_CREATURE_H
 
+#include <MyGUI_TextIterator.h>
+
+#include "../mwworld/registeredclass.hpp"
+
 #include "actor.hpp"
 
 namespace ESM
@@ -10,8 +14,12 @@ namespace ESM
 
 namespace MWClass
 {
-    class Creature : public Actor
+    class Creature : public MWWorld::RegisteredClass<Creature, Actor>
     {
+            friend MWWorld::RegisteredClass<Creature, Actor>;
+
+            Creature();
+
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
@@ -59,7 +67,7 @@ namespace MWClass
 
             void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const override;
 
-            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
@@ -96,8 +104,6 @@ namespace MWClass
 
             float getMaxSpeed (const MWWorld::Ptr& ptr) const override;
 
-            static void registerSelf();
-
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 
             void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
@@ -128,7 +134,7 @@ namespace MWClass
             void adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const override;
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
-            void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const override;
+            void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const override;
 
             void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const override;
 

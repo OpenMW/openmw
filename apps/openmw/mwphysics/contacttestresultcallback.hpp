@@ -5,8 +5,6 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
-#include "../mwworld/ptr.hpp"
-
 #include "physicssystem.hpp"
 
 class btCollisionObject;

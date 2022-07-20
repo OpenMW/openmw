@@ -1,13 +1,14 @@
 #include "fontloader.hpp"
 
 #include <stdexcept>
+#include <string_view>
+#include <array>
 
 #include <osg/Image>
 
 #include <osgDB/WriteFile>
 
 #include <MyGUI_ResourceManager.h>
-#include <MyGUI_FontManager.h>
 #include <MyGUI_ResourceManualFont.h>
 #include <MyGUI_XmlDocument.h>
 #include <MyGUI_FactoryManager.h>
@@ -15,8 +16,11 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/fallback/fallback.hpp>
+
 #include <components/vfs/manager.hpp>
 
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/stringops.hpp>
 
 #include <components/myguiplatform/myguitexture.hpp>
@@ -25,8 +29,10 @@
 
 namespace
 {
-    unsigned long utf8ToUnicode(const std::string& utf8)
+    unsigned long utf8ToUnicode(std::string_view utf8)
     {
+        if (utf8.empty())
+            return 0;
         size_t i = 0;
         unsigned long unicode;
         size_t numbytes;
@@ -75,69 +81,69 @@ namespace
         return unicode;
     }
 
-    // getUtf8, aka the worst function ever written.
-    // This includes various hacks for dealing with Morrowind's .fnt files that are *mostly*
-    // in the expected win12XX encoding, but also have randomly swapped characters sometimes.
-    // Looks like the Morrowind developers found standard encodings too boring and threw in some twists for fun.
-    std::string getUtf8 (unsigned char c, ToUTF8::Utf8Encoder& encoder, ToUTF8::FromType encoding)
-    {
-        if (encoding == ToUTF8::WINDOWS_1250)
-        {
-            // Hacks for polish font
-            unsigned char win1250;
-            std::map<unsigned char, unsigned char> conv;
-            conv[0x80] = 0xc6;
-            conv[0x81] = 0x9c;
-            conv[0x82] = 0xe6;
-            conv[0x83] = 0xb3;
-            conv[0x84] = 0xf1;
-            conv[0x85] = 0xb9;
-            conv[0x86] = 0xbf;
-            conv[0x87] = 0x9f;
-            conv[0x88] = 0xea;
-            conv[0x89] = 0xea;
-            conv[0x8a] = 0x0; // not contained in win1250
-            conv[0x8b] = 0x0; // not contained in win1250
-            conv[0x8c] = 0x8f;
-            conv[0x8d] = 0xaf;
-            conv[0x8e] = 0xa5;
-            conv[0x8f] = 0x8c;
-            conv[0x90] = 0xca;
-            conv[0x93] = 0xa3;
-            conv[0x94] = 0xf6;
-            conv[0x95] = 0xf3;
-            conv[0x96] = 0xaf;
-            conv[0x97] = 0x8f;
-            conv[0x99] = 0xd3;
-            conv[0x9a] = 0xd1;
-            conv[0x9c] = 0x0; // not contained in win1250
-            conv[0xa0] = 0xb9;
-            conv[0xa1] = 0xaf;
-            conv[0xa2] = 0xf3;
-            conv[0xa3] = 0xbf;
-            conv[0xa4] = 0x0; // not contained in win1250
-            conv[0xe1] = 0x8c;
-            // Can't remember if this was supposed to read 0xe2, or is it just an extraneous copypaste?
-            //conv[0xe1] = 0x8c;
-            conv[0xe3] = 0x0; // not contained in win1250
-            conv[0xf5] = 0x0; // not contained in win1250
-
-            if (conv.find(c) != conv.end())
-                win1250 = conv[c];
-            else
-                win1250 = c;
-            return encoder.getUtf8(std::string(1, win1250));
+    /// This is a hack for Polish font
+    unsigned char mapUtf8Char(unsigned char c) {
+        switch(c){
+            case 0x80: return 0xc6;
+            case 0x81: return 0x9c;
+            case 0x82: return 0xe6;
+            case 0x83: return 0xb3;
+            case 0x84: return 0xf1;
+            case 0x85: return 0xb9;
+            case 0x86: return 0xbf;
+            case 0x87: return 0x9f;
+            case 0x88: return 0xea;
+            case 0x89: return 0xea;
+            case 0x8a: return 0x00; // not contained in win1250
+            case 0x8b: return 0x00; // not contained in win1250
+            case 0x8c: return 0x8f;
+            case 0x8d: return 0xaf;
+            case 0x8e: return 0xa5;
+            case 0x8f: return 0x8c;
+            case 0x90: return 0xca;
+            case 0x93: return 0xa3;
+            case 0x94: return 0xf6;
+            case 0x95: return 0xf3;
+            case 0x96: return 0xaf;
+            case 0x97: return 0x8f;
+            case 0x99: return 0xd3;
+            case 0x9a: return 0xd1;
+            case 0x9c: return 0x00; // not contained in win1250
+            case 0xa0: return 0xb9;
+            case 0xa1: return 0xaf;
+            case 0xa2: return 0xf3;
+            case 0xa3: return 0xbf;
+            case 0xa4: return 0x00; // not contained in win1250
+            case 0xe1: return 0x8c;
+            case 0xe3: return 0x00; // not contained in win1250
+            case 0xf5: return 0x00; // not contained in win1250
+            default: return c;
         }
-        else
-            return encoder.getUtf8(std::string(1, c));
     }
 
-    void fail (Files::IStreamPtr file, const std::string& fileName, const std::string& message)
+    // getUnicode includes various hacks for dealing with Morrowind's .fnt files that are *mostly*
+    // in the expected win12XX encoding, but also have randomly swapped characters sometimes.
+    // Looks like the Morrowind developers found standard encodings too boring and threw in some twists for fun.
+    unsigned long getUnicode(unsigned char c, ToUTF8::Utf8Encoder& encoder, ToUTF8::FromType encoding)
+    {
+        if (encoding == ToUTF8::WINDOWS_1250) // Hack for polish font
+        {
+            const std::array<char, 2> str {static_cast<char>(mapUtf8Char(c)), '\0'};
+            return utf8ToUnicode(encoder.getUtf8(std::string_view(str.data(), 1)));
+        }
+        else
+        {
+            const std::array<char, 2> str {static_cast<char>(c), '\0'};
+            return utf8ToUnicode(encoder.getUtf8(std::string_view(str.data(), 1)));
+        }
+    }
+
+    [[noreturn]] void fail(std::istream& stream, const std::string& fileName, const std::string& message)
     {
         std::stringstream error;
         error << "Font loading error: " << message;
         error << "\n  File: " << fileName;
-        error << "\n  Offset: 0x" << std::hex << file->tellg();
+        error << "\n  Offset: 0x" << std::hex << stream.tellg();
         throw std::runtime_error(error.str());
     }
 
@@ -146,18 +152,15 @@ namespace
 namespace Gui
 {
 
-    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath)
+    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor)
         : mVFS(vfs)
-        , mUserDataPath(userDataPath)
-        , mFontHeight(16)
+        , mFontHeight(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 20))
+        , mScalingFactor(scalingFactor)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
         else
             mEncoding = encoding;
-
-        int fontSize = Settings::Manager::getInt("font size", "GUI");
-        mFontHeight = std::min(std::max(12, fontSize), 20);
 
         MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
         MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = MyGUI::newDelegate(this, &FontLoader::loadFontFromXml);
@@ -193,26 +196,12 @@ namespace Gui
         mFonts.clear();
     }
 
-    void FontLoader::loadBitmapFonts(bool exportToFile)
+    void FontLoader::loadBitmapFonts()
     {
-        const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
-
-        std::string pattern = "Fonts/";
-        mVFS->normalizeFilename(pattern);
-
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
-        while (found != index.end())
+        for (const auto& path : mVFS->getRecursiveDirectoryIterator("Fonts/"))
         {
-            const std::string& name = found->first;
-            if (name.size() >= pattern.size() && name.substr(0, pattern.size()) == pattern)
-            {
-                size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".fnt") == 0)
-                    loadBitmapFont(name, exportToFile);
-            }
-            else
-                break;
-            ++found;
+            if (Misc::getFileExtension(path) == "fnt")
+                loadBitmapFont(path);
         }
     }
 
@@ -225,16 +214,17 @@ namespace Gui
             return;
         }
 
-        const std::string cfg = dataManager->getDataPath("");
-        const std::string fontFile = mUserDataPath + "/" + "Fonts" + "/" + "openmw_font.xml";
-        if (!boost::filesystem::exists(fontFile))
-            return;
+        std::string oldDataPath = dataManager->getDataPath("");
+        dataManager->setResourcePath("fonts");
 
-        dataManager->setResourcePath(mUserDataPath + "/" + "Fonts");
-        MyGUI::ResourceManager::getInstance().load("openmw_font.xml");
-        dataManager->setResourcePath(cfg);
+        for (const auto& path : mVFS->getRecursiveDirectoryIterator("Fonts/"))
+        {
+            if (Misc::getFileExtension(path) == "omwfont")
+                MyGUI::ResourceManager::getInstance().load(std::string(Misc::getFileName(path)));
+        }
+
+        dataManager->setResourcePath(oldDataPath);
     }
-
 
     typedef struct
     {
@@ -256,40 +246,40 @@ namespace Gui
         float ascent;
     } GlyphInfo;
 
-    void FontLoader::loadBitmapFont(const std::string &fileName, bool exportToFile)
+    void FontLoader::loadBitmapFont(const std::string &fileName)
     {
         Files::IStreamPtr file = mVFS->get(fileName);
 
         float fontSize;
         file->read((char*)&fontSize, sizeof(fontSize));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
 
         int one;
         file->read((char*)&one, sizeof(one));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
 
         if (one != 1)
-            fail(file, fileName, "Unexpected value");
+            fail(*file, fileName, "Unexpected value");
 
         file->read((char*)&one, sizeof(one));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
 
         if (one != 1)
-            fail(file, fileName, "Unexpected value");
+            fail(*file, fileName, "Unexpected value");
 
         char name_[284];
         file->read(name_, sizeof(name_));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
         std::string name(name_);
 
         GlyphInfo data[256];
         file->read((char*)data, sizeof(data));
         if (!file->good())
-            fail(file, fileName, "File too small to be a valid font");
+            fail(*file, fileName, "File too small to be a valid font");
 
         file.reset();
 
@@ -303,36 +293,19 @@ namespace Gui
         bitmapFile->read((char*)&height, sizeof(int));
 
         if (!bitmapFile->good())
-            fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+            fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
 
         if (width <= 0 || height <= 0)
-            fail(bitmapFile, bitmapFilename, "Width and height must be positive");
+            fail(*bitmapFile, bitmapFilename, "Width and height must be positive");
 
         std::vector<char> textureData;
         textureData.resize(width*height*4);
         bitmapFile->read(&textureData[0], width*height*4);
         if (!bitmapFile->good())
-            fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+            fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
         bitmapFile.reset();
 
-        std::string resourceName;
-        if (name.size() >= 5 && Misc::StringUtils::ciEqual(name.substr(0, 5), "magic"))
-            resourceName = "Magic Cards";
-        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "century"))
-            resourceName = "Century Gothic";
-        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "daedric"))
-            resourceName = "Daedric";
-
-        if (exportToFile)
-        {
-            osg::ref_ptr<osg::Image> image = new osg::Image;
-            image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-            assert (image->isDataContiguous());
-            memcpy(image->data(), &textureData[0], textureData.size());
-
-            Log(Debug::Info) << "Writing " << resourceName + ".png";
-            osgDB::writeImageFile(*image, resourceName + ".png");
-        }
+        std::string resourceName = name;
 
         // Register the font with MyGUI
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
@@ -357,7 +330,9 @@ namespace Gui
         // We need to emulate loading from XML because the data members are private as of mygui 3.2.0
         MyGUI::xml::Document xmlDocument;
         MyGUI::xml::ElementPtr root = xmlDocument.createRoot("ResourceManualFont");
-        root->addAttribute("name", resourceName);
+
+        std::string baseName(Misc::stemFile(fileName));
+        root->addAttribute("name", getInternalFontName(baseName));
 
         MyGUI::xml::ElementPtr defaultHeight = root->createChild("Property");
         defaultHeight->addAttribute("key", "DefaultHeight");
@@ -375,7 +350,7 @@ namespace Gui
             float h  = data[i].bottom_left.y*height - y1;
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
-            unsigned long unicodeVal = utf8ToUnicode(getUtf8(i, encoder, mEncoding));
+            unsigned long unicodeVal = getUnicode(i, encoder, mEncoding);
 
             MyGUI::xml::ElementPtr code = codes->createChild("Code");
             code->addAttribute("index", unicodeVal);
@@ -508,21 +483,13 @@ namespace Gui
             cursorCode->addAttribute("size", "0 0");
         }
 
-        if (exportToFile)
-        {
-            Log(Debug::Info) << "Writing " << resourceName + ".xml";
-            xmlDocument.createDeclaration();
-            xmlDocument.save(resourceName + ".xml");
-        }
-
         font->deserialization(root, MyGUI::Version(3,2,0));
 
-        // Setup "book" version of font as fallback if we will not use TrueType fonts
         MyGUI::ResourceManualFont* bookFont = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
         mFonts.push_back(bookFont);
         bookFont->deserialization(root, MyGUI::Version(3,2,0));
-        bookFont->setResourceName("Journalbook " + resourceName);
+        bookFont->setResourceName("Journalbook " + getInternalFontName(baseName));
 
         // Remove automatically registered fonts
         for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end();)
@@ -566,10 +533,7 @@ namespace Gui
                 // to allow to configure font size via config file, without need to edit XML files.
                 // Also we should take UI scaling factor in account.
                 int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                resolution = std::min(960, std::max(48, resolution));
-
-                float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-                resolution *= uiScale;
+                resolution = std::clamp(resolution, 48, 960) * mScalingFactor;
 
                 MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
                 resolutionNode->addAttribute("key", "Resolution");
@@ -578,6 +542,8 @@ namespace Gui
                 MyGUI::xml::ElementPtr sizeNode = resourceNode->createChild("Property");
                 sizeNode->addAttribute("key", "Size");
                 sizeNode->addAttribute("value", std::to_string(mFontHeight));
+
+                resourceNode->setAttribute("name", getInternalFontName(name));
             }
             else if (Misc::StringUtils::ciEqual(type, "ResourceSkin") ||
                      Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
@@ -593,7 +559,7 @@ namespace Gui
 
         if (createCopy)
         {
-            MyGUI::xml::ElementPtr copy = _node->createCopy();
+            std::unique_ptr<MyGUI::xml::Element> copy{_node->createCopy()};
 
             MyGUI::xml::ElementEnumerator copyFont = copy->getElementEnumerator();
             while (copyFont.next("Resource"))
@@ -611,7 +577,7 @@ namespace Gui
                     // setup separate fonts with different Resolution to fit these windows.
                     // These fonts have an internal prefix.
                     int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                    resolution = std::min(960, std::max(48, resolution));
+                    resolution = std::clamp(resolution, 48, 960);
 
                     float currentX = Settings::Manager::getInt("resolution x", "Video");
                     float currentY = Settings::Manager::getInt("resolution y", "Video");
@@ -625,16 +591,48 @@ namespace Gui
                     resolutionNode->addAttribute("key", "Resolution");
                     resolutionNode->addAttribute("value", std::to_string(resolution));
 
-                    copyFont->setAttribute("name", "Journalbook " + name);
+                    copyFont->setAttribute("name", "Journalbook " + getInternalFontName(name));
                 }
             }
 
-            MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy, _file, _version);
+            MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy.get(), _file, _version);
         }
     }
 
     int FontLoader::getFontHeight()
     {
         return mFontHeight;
+    }
+
+    std::string FontLoader::getInternalFontName(const std::string& name)
+    {
+        const std::string lowerName = Misc::StringUtils::lowerCase(name);
+
+        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_0")))
+            return "DefaultFont";
+        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_2")))
+            return "ScrollFont";
+        if (lowerName == "dejavusansmono")
+            return "MonoFont"; // We need to use a TrueType monospace font to display debug texts properly.
+
+        // Use our TrueType fonts as a fallback.
+        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && name == "pelagiad")
+            return "DefaultFont";
+        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && name == "ayembedt")
+            return "ScrollFont";
+
+        return name;
+    }
+
+    std::string FontLoader::getFontForFace(const std::string& face)
+    {
+        const std::string lowerFace = Misc::StringUtils::lowerCase(face);
+
+        if (lowerFace == "magic cards")
+            return "DefaultFont";
+        if (lowerFace == "daedric")
+            return "ScrollFont";
+
+        return face;
     }
 }

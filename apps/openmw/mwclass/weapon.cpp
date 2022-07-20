@@ -1,6 +1,8 @@
 #include "weapon.hpp"
 
-#include <components/esm/loadweap.hpp>
+#include <MyGUI_TextIterator.h>
+
+#include <components/esm3/loadweap.hpp>
 #include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>
 
@@ -24,8 +26,14 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "classmodel.hpp"
+
 namespace MWClass
 {
+    Weapon::Weapon()
+        : MWWorld::RegisteredClass<Weapon>(ESM::Weapon::sRecordId)
+    {
+    }
 
     void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -34,20 +42,9 @@ namespace MWClass
         }
     }
 
-    void Weapon::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
-    {
-        // TODO: add option somewhere to enable collision for placeable objects
-    }
-
     std::string Weapon::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
-
-        const std::string &model = ref->mBase->mModel;
-        if (!model.empty()) {
-            return "meshes\\" + model;
-        }
-        return "";
+        return getClassModel<ESM::Weapon>(ptr);
     }
 
     std::string Weapon::getName (const MWWorld::ConstPtr& ptr) const
@@ -58,7 +55,7 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
+    std::unique_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -124,13 +121,6 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         return ref->mBase->mData.mValue;
-    }
-
-    void Weapon::registerSelf()
-    {
-        std::shared_ptr<Class> instance (new Weapon);
-
-        registerClass (typeid (ESM::Weapon).name(), instance);
     }
 
     std::string Weapon::getUpSoundId (const MWWorld::ConstPtr& ptr) const
@@ -274,7 +264,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         ESM::Weapon newItem = *ref->mBase;
-        newItem.mId="";
+        newItem.mId.clear();
         newItem.mName=newName;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
@@ -307,9 +297,9 @@ namespace MWClass
         return std::make_pair(1, "");
     }
 
-    std::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
+        std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEquip>(ptr, force);
 
         action->setSound(getUpSoundId(ptr));
 

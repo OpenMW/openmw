@@ -2,23 +2,29 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 
 #include "offmeshconnectionsmanager.hpp"
-#include "settings.hpp"
 #include "navmeshcacheitem.hpp"
 #include "tileposition.hpp"
-#include "tilebounds.hpp"
 #include "sharednavmesh.hpp"
 #include "navmeshtilescache.hpp"
+#include "offmeshconnection.hpp"
+#include "navmeshdb.hpp"
+
+#include <components/misc/guarded.hpp>
 
 #include <osg/Vec3f>
 
 #include <memory>
+#include <vector>
 
 class dtNavMesh;
+struct rcConfig;
 
 namespace DetourNavigator
 {
     class RecastMesh;
     struct Settings;
+    struct PreparedNavMeshData;
+    struct NavMeshData;
 
     inline float getLength(const osg::Vec2i& value)
     {
@@ -36,12 +42,22 @@ namespace DetourNavigator
         return expectedTilesCount <= maxTiles;
     }
 
-    NavMeshPtr makeEmptyNavMesh(const Settings& settings);
+    inline bool isEmpty(const RecastMesh& recastMesh)
+    {
+        return recastMesh.getMesh().getIndices().empty()
+                && recastMesh.getWater().empty()
+                && recastMesh.getHeightfields().empty()
+                && recastMesh.getFlatHeightfields().empty();
+    }
 
-    UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
-        const TilePosition& changedTile, const TilePosition& playerTile,
-        const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
-        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache);
+    std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
+        const TilePosition& tilePosition, const AgentBounds& agentBounds, const RecastSettings& settings);
+
+    NavMeshData makeNavMeshTileData(const PreparedNavMeshData& data,
+        const std::vector<OffMeshConnection>& offMeshConnections, const AgentBounds& agentBounds,
+        const TilePosition& tile, const RecastSettings& settings);
+
+    NavMeshPtr makeEmptyNavMesh(const Settings& settings);
 }
 
 #endif

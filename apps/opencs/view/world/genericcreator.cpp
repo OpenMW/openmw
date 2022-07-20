@@ -148,8 +148,8 @@ void CSVWorld::GenericCreator::addScope (const QString& name, CSMWorld::Scope sc
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, bool relaxedIdRules)
 : mData (data), mUndoStack (undoStack), mListId (id), mLocked (false),
-  mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (0),
-  mScopeLabel (0), mCloneMode (false)
+  mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (nullptr),
+  mScopeLabel (nullptr), mCloneMode (false)
 {
     // If the collection ID has a parent type, use it instead.
     // It will change IDs with Record/SubRecord class (used for creators in Dialogue subviews)
@@ -182,6 +182,11 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     connect (mId, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
 
     connect (&mData, SIGNAL (idListChanged()), this, SLOT (dataIdListChanged()));
+}
+
+void CSVWorld::GenericCreator::setEditorMaxLength (int length)
+{
+    mId->setMaxLength (length);
 }
 
 void CSVWorld::GenericCreator::setEditLock (bool locked)
@@ -233,13 +238,13 @@ void CSVWorld::GenericCreator::create()
 
         if (mCloneMode)
         {
-            command.reset (new CSMWorld::CloneCommand (
-                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType));
+            command = std::make_unique<CSMWorld::CloneCommand>(
+                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType);
         }
         else
         {
-            command.reset (new CSMWorld::CreateCommand (
-                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
+            command = std::make_unique<CSMWorld::CreateCommand>(
+                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id);
 
         }
 
@@ -322,10 +327,10 @@ void CSVWorld::GenericCreator::setScope (unsigned int scope)
     else
     {
         delete mScope;
-        mScope = 0;
+        mScope = nullptr;
 
         delete mScopeLabel;
-        mScopeLabel = 0;
+        mScopeLabel = nullptr;
     }
 
     updateNamespace();

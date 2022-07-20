@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_AICOMBAT_H
 
 #include "typedaipackage.hpp"
+#include "aitemporarybase.hpp"
 
 #include "../mwworld/cellstore.hpp" // for Doors
 
@@ -9,7 +10,7 @@
 
 #include "pathfinding.hpp"
 #include "movement.hpp"
-#include "obstacle.hpp"
+#include "aitimer.hpp"
 
 namespace ESM
 {
@@ -27,15 +28,16 @@ namespace MWMechanics
     struct AiCombatStorage : AiTemporaryBase
     {
         float mAttackCooldown;
-        float mTimerReact;
+        AiReactionTimer mReaction;
         float mTimerCombatMove;
         bool mReadyToAttack;
         bool mAttack;
         float mAttackRange;
         bool mCombatMove;
+        bool mRotateMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
-        std::shared_ptr<Action> mCurrentAction;
+        std::unique_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
         bool mForceNoShortcut;
@@ -55,34 +57,17 @@ namespace MWMechanics
         float mFleeBlindRunTimer;
         ESM::Pathgrid::Point mFleeDest;
 
-        AiCombatStorage():
-        mAttackCooldown(0.0f),
-        mTimerReact(AI_REACTION_TIME),
-        mTimerCombatMove(0.0f),
-        mReadyToAttack(false),
-        mAttack(false),
-        mAttackRange(0.0f),
-        mCombatMove(false),
-        mLastTargetPos(0,0,0),
-        mCell(nullptr),
-        mCurrentAction(),
-        mActionCooldown(0.0f),
-        mStrength(),
-        mForceNoShortcut(false),
-        mShortcutFailPos(),
-        mMovement(),
-        mFleeState(FleeState_None),
-        mLOS(false),
-        mUpdateLOSTimer(0.0f),
-        mFleeBlindRunTimer(0.0f)
-        {}
+        bool mUseCustomDestination;
+        osg::Vec3f mCustomDestination;
+
+        AiCombatStorage();
 
         void startCombatMove(bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
         void updateCombatMove(float duration);
         void stopCombatMove();
         void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController,
             const ESM::Weapon* weapon, bool distantCombat);
-        void updateAttack(CharacterController& characterController);
+        void updateAttack(const MWWorld::Ptr& actor, CharacterController& characterController);
         void stopAttack();
 
         void startFleeing();

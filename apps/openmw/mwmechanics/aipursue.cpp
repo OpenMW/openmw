@@ -1,6 +1,6 @@
 #include "aipursue.hpp"
 
-#include <components/esm/aisequence.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/action.hpp"
 
 #include "movement.hpp"
 #include "creaturestats.hpp"
@@ -45,7 +44,7 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if (target.getClass().getCreatureStats(target).isDead())
         return true;
 
-    actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+    actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
 
     //Set the target destination
     const osg::Vec3f dest = target.getRefData().getPosition().asVec3();
@@ -53,9 +52,14 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
 
     const float pathTolerance = 100.f;
 
-    if (pathTo(actor, dest, duration, pathTolerance) &&
-        std::abs(dest.z() - actorPos.z()) < pathTolerance) // check the true distance in case the target is far away in Z-direction
+    // check the true distance in case the target is far away in Z-direction
+    bool reached = pathTo(actor, dest, duration, pathTolerance, (actorPos - dest).length(), PathType::Partial) &&
+                   std::abs(dest.z() - actorPos.z()) < pathTolerance;
+
+    if (reached)
     {
+        if (!MWBase::Environment::get().getWorld()->getLOS(target, actor))
+            return false;
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue, actor); //Arrest player when reached
         return true;
     }
@@ -67,18 +71,26 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
 
 MWWorld::Ptr AiPursue::getTarget() const
 {
-    return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+    if (!mCachedTarget.isEmpty())
+    {
+        if (mCachedTarget.getRefData().isDeleted() || !mCachedTarget.getRefData().isEnabled())
+            mCachedTarget = MWWorld::Ptr();
+        else
+            return mCachedTarget;
+    }
+    mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+    return mCachedTarget;
 }
 
 void AiPursue::writeState(ESM::AiSequence::AiSequence &sequence) const
 {
-    std::unique_ptr<ESM::AiSequence::AiPursue> pursue(new ESM::AiSequence::AiPursue());
+    auto pursue = std::make_unique<ESM::AiSequence::AiPursue>();
     pursue->mTargetActorId = mTargetActorId;
 
     ESM::AiSequence::AiPackageContainer package;
     package.mType = ESM::AiSequence::Ai_Pursue;
-    package.mPackage = pursue.release();
-    sequence.mPackages.push_back(package);
+    package.mPackage = std::move(pursue);
+    sequence.mPackages.push_back(std::move(package));
 }
 
 } // namespace MWMechanics

@@ -13,7 +13,7 @@
 namespace Compiler
 {
     StringParser::StringParser (ErrorHandler& errorHandler, const Context& context, Literals& literals)
-    : Parser (errorHandler, context), mLiterals (literals), mState (StartState), mSmashCase (false), mDiscard (false)
+    : Parser (errorHandler, context), mLiterals (literals), mSmashCase (false), mDiscard (false)
     {
 
     }
@@ -21,23 +21,18 @@ namespace Compiler
     bool StringParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        if (mState==StartState || mState==CommaState)
+        start();
+        mTokenLoc = loc;
+
+        if (!mDiscard)
         {
-            start();
-            mTokenLoc = loc;
-
-            if (!mDiscard)
-            {
-                if (mSmashCase)
-                    Generator::pushString (mCode, mLiterals, Misc::StringUtils::lowerCase (name));
-                else
-                    Generator::pushString (mCode, mLiterals, name);
-            }
-
-            return false;
+            if (mSmashCase)
+                Generator::pushString (mCode, mLiterals, Misc::StringUtils::lowerCase (name));
+            else
+                Generator::pushString (mCode, mLiterals, name);
         }
 
-        return Parser::parseName (name, loc, scanner);
+        return false;
     }
 
     bool StringParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
@@ -63,23 +58,22 @@ namespace Compiler
             keyword==Scanner::K_elseif || keyword==Scanner::K_while ||
             keyword==Scanner::K_endwhile || keyword==Scanner::K_return ||
             keyword==Scanner::K_messagebox || keyword==Scanner::K_set ||
-            keyword==Scanner::K_to || keyword==Scanner::K_getsquareroot)
+            keyword==Scanner::K_to)
         {
-            return parseName (loc.mLiteral, loc, scanner);
+            // pretend this is not a keyword
+            std::string name = loc.mLiteral;
+            if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
+                name = name.substr (1, name.size()-2);
+            return parseName (name, loc, scanner);
         }
 
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
-    bool StringParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
+    bool StringParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
-        if (code==Scanner::S_comma && mState==StartState)
-        {
-            mState = CommaState;
-            return true;
-        }
-
-        return Parser::parseSpecial (code, loc, scanner);
+        reportWarning("Treating integer argument as a string", loc);
+        return parseName(loc.mLiteral, loc, scanner);
     }
 
     void StringParser::append (std::vector<Interpreter::Type_Code>& code)
@@ -89,7 +83,6 @@ namespace Compiler
 
     void StringParser::reset()
     {
-        mState = StartState;
         mCode.clear();
         mSmashCase = false;
         mTokenLoc = TokenLoc();

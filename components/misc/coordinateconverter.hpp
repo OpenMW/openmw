@@ -2,9 +2,9 @@
 #define OPENMW_COMPONENTS_MISC_COORDINATECONVERTER_H
 
 #include <components/esm/defs.hpp>
-#include <components/esm/loadcell.hpp>
-#include <components/esm/loadland.hpp>
-#include <components/esm/loadpgrd.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadpgrd.hpp>
 
 namespace Misc
 {

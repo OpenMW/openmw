@@ -1,13 +1,14 @@
 #ifndef GAME_MWMECHANICS_AISEQUENCE_H
 #define GAME_MWMECHANICS_AISEQUENCE_H
 
-#include <list>
 #include <memory>
+#include <vector>
+#include <algorithm>
 
 #include "aistate.hpp"
 #include "aipackagetypeid.hpp"
 
-#include <components/esm/loadnpc.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 namespace MWWorld
 {
@@ -22,29 +23,25 @@ namespace ESM
     }
 }
 
-
-
 namespace MWMechanics
 {
     class AiPackage;
     class CharacterController;
-    
-    template< class Base > class DerivedClassStorage;
-    struct AiTemporaryBase;
-    typedef DerivedClassStorage<AiTemporaryBase> AiState;
+
+    using AiPackages = std::vector<std::shared_ptr<AiPackage>>;
 
     /// \brief Sequence of AI-packages for a single actor
     /** The top-most AI package is run each frame. When completed, it is removed from the stack. **/
     class AiSequence
     {
             ///AiPackages to run though
-            std::list<std::unique_ptr<AiPackage>> mPackages;
+            AiPackages mPackages;
 
             ///Finished with top AIPackage, set for one frame
-            bool mDone;
+            bool mDone{};
 
-            ///Does this AI sequence repeat (repeating of Wander packages handled separately)
-            bool mRepeat;
+            int mNumCombatPackages{};
+            int mNumPursuitPackages{};
 
             ///Copy AiSequence
             void copy (const AiSequence& sequence);
@@ -52,6 +49,11 @@ namespace MWMechanics
             /// The type of AI package that ran last
             AiPackageTypeId mLastAiPackage;
             AiState mAiState;
+
+            void onPackageAdded(const AiPackage& package);
+            void onPackageRemoved(const AiPackage& package);
+
+            AiPackages::iterator erase(AiPackages::iterator package);
 
         public:
             ///Default constructor
@@ -66,10 +68,31 @@ namespace MWMechanics
             virtual ~AiSequence();
 
             /// Iterator may be invalidated by any function calls other than begin() or end().
-            std::list<std::unique_ptr<AiPackage>>::const_iterator begin() const;
-            std::list<std::unique_ptr<AiPackage>>::const_iterator end() const;
+            AiPackages::const_iterator begin() const { return mPackages.begin(); }
+            AiPackages::const_iterator end() const { return mPackages.end(); }
 
-            void erase(std::list<std::unique_ptr<AiPackage>>::const_iterator package);
+            /// Removes all packages controlled by the predicate.
+            template<typename F>
+            void erasePackagesIf(const F&& pred)
+            {
+                mPackages.erase(std::remove_if(mPackages.begin(), mPackages.end(), [&](auto& entry)
+                {
+                    const bool doRemove = pred(entry);
+                    if (doRemove)
+                        onPackageRemoved(*entry);
+                    return doRemove;
+                }), mPackages.end());
+            }
+
+            /// Removes a single package controlled by the predicate.
+            template<typename F>
+            void erasePackageIf(const F&& pred)
+            {
+                auto it = std::find_if(mPackages.begin(), mPackages.end(), pred);
+                if (it == mPackages.end())
+                    return;
+                erase(it);
+            }
 
             /// Returns currently executing AiPackage type
             /** \see enum class AiPackageTypeId **/
@@ -90,6 +113,12 @@ namespace MWMechanics
             /// Is there any combat package?
             bool isInCombat () const;
 
+            /// Is there any pursuit package.
+            bool isInPursuit() const;
+
+            /// Removes all packages using the specified id.
+            void removePackagesById(AiPackageTypeId id);
+
             /// Are we in combat with any other actor, who's also engaging us?
             bool isEngagedWithActor () const;
 
@@ -104,6 +133,9 @@ namespace MWMechanics
 
             /// Removes all combat packages until first non-combat or stack empty.
             void stopCombat();
+
+            /// Removes all combat packages with the given targets
+            void stopCombat(const std::vector<MWWorld::Ptr>& targets);
 
             /// Has a package been completed during the last update?
             bool isPackageDone() const;
@@ -127,7 +159,7 @@ namespace MWMechanics
 
             /// Return the current active package.
             /** If there is no active package, it will throw an exception **/
-            const AiPackage& getActivePackage();
+            const AiPackage& getActivePackage() const;
 
             /// Fills the AiSequence with packages
             /** Typically used for loading from the ESM

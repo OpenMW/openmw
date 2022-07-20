@@ -119,7 +119,7 @@ class GenericObjectCache : public osg::Referenced
             typename ObjectCacheMap::iterator itr = _objectCache.find(key);
             if (itr!=_objectCache.end())
                 return itr->second.first;
-            else return 0;
+            else return nullptr;
         }
 
         /** Check if an object is in the cache, and if it is, update its usage time stamp. */

@@ -9,6 +9,7 @@ namespace osg
 {
     class Image;
     class Texture2D;
+    class StateSet;
 }
 
 namespace Resource
@@ -25,6 +26,7 @@ namespace osgMyGUI
 
         osg::ref_ptr<osg::Image> mLockedImage;
         osg::ref_ptr<osg::Texture2D> mTexture;
+        osg::ref_ptr<osg::StateSet> mInjectState;
         MyGUI::PixelFormat mFormat;
         MyGUI::TextureUsage mUsage;
         size_t mNumElemBytes;
@@ -34,8 +36,10 @@ namespace osgMyGUI
 
     public:
         OSGTexture(const std::string &name, Resource::ImageManager* imageManager);
-        OSGTexture(osg::Texture2D* texture);
+        OSGTexture(osg::Texture2D* texture, osg::StateSet* injectState = nullptr);
         virtual ~OSGTexture();
+
+        osg::StateSet* getInjectState() { return mInjectState; }
 
         const std::string& getName() const override { return mName; }
 
@@ -47,16 +51,18 @@ namespace osgMyGUI
 
         void* lock(MyGUI::TextureUsage access) override;
         void unlock() override;
-        bool isLocked() override;
+        bool isLocked() const override { return mLockedImage.valid(); }
 
-        int getWidth() override;
-        int getHeight() override;
+        int getWidth() const override { return mWidth; }
+        int getHeight() const override { return mHeight; }
 
-        MyGUI::PixelFormat getFormat() override { return mFormat; }
-        MyGUI::TextureUsage getUsage() override { return mUsage; }
-        size_t getNumElemBytes() override { return mNumElemBytes; }
+        MyGUI::PixelFormat getFormat() const override { return mFormat; }
+        MyGUI::TextureUsage getUsage() const override { return mUsage; }
+        size_t getNumElemBytes() const override { return mNumElemBytes; }
 
         MyGUI::IRenderTarget *getRenderTarget() override;
+
+        void setShader(const std::string& _shaderName) override;
 
     /*internal:*/
         osg::Texture2D *getTexture() const { return mTexture.get(); }
