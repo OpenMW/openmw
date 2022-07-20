@@ -24,7 +24,7 @@ namespace DetourNavigator
     template <class OutputIterator>
     inline Status findPath(const Navigator& navigator, const AgentBounds& agentBounds, const float stepSize,
         const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts,
-        float endTolerance, OutputIterator& out)
+        float endTolerance, OutputIterator out)
     {
         static_assert(
             std::is_same<
@@ -45,7 +45,7 @@ namespace DetourNavigator
     /**
      * @brief findRandomPointAroundCircle returns random location on navmesh within the reach of specified location.
      * @param agentBounds allows to find navmesh for given actor.
-     * @param start path from given point.
+     * @param start is a position where the search starts.
      * @param maxRadius limit maximum distance from start.
      * @param includeFlags setup allowed surfaces for actor to walk.
      * @return not empty optional with position if point is found and empty optional if point is not found.

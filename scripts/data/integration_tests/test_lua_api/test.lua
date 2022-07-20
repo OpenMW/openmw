@@ -70,6 +70,18 @@ tests = {
         initPlayer()
         testing.runLocalTest(player, 'playerDiagonalWalking')
     end},
+    {'findPath', function()
+        initPlayer()
+        testing.runLocalTest(player, 'findPath')
+    end},
+    {'findRandomPointAroundCircle', function()
+        initPlayer()
+        testing.runLocalTest(player, 'findRandomPointAroundCircle')
+    end},
+    {'castNavigationRay', function()
+        initPlayer()
+        testing.runLocalTest(player, 'castNavigationRay')
+    end},
     {'teleport', testTeleport},
 }
 
@@ -80,4 +92,3 @@ return {
     },
     eventHandlers = testing.eventHandlers,
 }
-

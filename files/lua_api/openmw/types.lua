@@ -10,6 +10,12 @@
 -- @type Actor
 
 ---
+-- Agent bounds to be used for pathfinding functions.
+-- @function [parent=#Actor] getPathfindingAgentBounds
+-- @param openmw.core#GameObject actor
+-- @return #table with `shapeType` and `halfExtents`
+
+---
 -- Whether the object is an actor.
 -- @function [parent=#Actor] objectIsInstance
 -- @param openmw.core#GameObject object
