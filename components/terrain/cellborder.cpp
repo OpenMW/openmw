@@ -65,10 +65,10 @@ osg::ref_ptr<osg::Group> CellBorder::createBorderGeometry(float x, float y, floa
 
     border->addPrimitiveSet(new osg::DrawArrays(GL_LINE_STRIP,0,vertices->size()));
 
-    osg::ref_ptr<osg::Group> borderGeode = new osg::Group;
-    borderGeode->addChild(border.get());
+    osg::ref_ptr<osg::Group> borderGroup = new osg::Group;
+    borderGroup->addChild(border.get());
 
-    osg::StateSet *stateSet = borderGeode->getOrCreateStateSet();
+    osg::StateSet *stateSet = borderGroup->getOrCreateStateSet();
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
     stateSet->setAttribute(material);
@@ -77,18 +77,18 @@ osg::ref_ptr<osg::Group> CellBorder::createBorderGeometry(float x, float y, floa
     polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     stateSet->setAttributeAndModes(polygonmode,osg::StateAttribute::ON);
 
-    sceneManager->recreateShaders(borderGeode, "debug");
-    borderGeode->setNodeMask(mask);
+    sceneManager->recreateShaders(borderGroup, "debug");
+    borderGroup->setNodeMask(mask);
 
-    return borderGeode;
+    return borderGroup;
 }
 
 void CellBorder::createCellBorderGeometry(int x, int y)
 {
-    auto borderGeode = createBorderGeometry(x, y, 1.f, mWorld->getStorage(), mSceneManager, mBorderMask);
-    mRoot->addChild(borderGeode);
+    auto borderGroup = createBorderGeometry(x, y, 1.f, mWorld->getStorage(), mSceneManager, mBorderMask);
+    mRoot->addChild(borderGroup);
 
-    mCellBorderNodes[std::make_pair(x,y)] = borderGeode;
+    mCellBorderNodes[std::make_pair(x,y)] = borderGroup;
 }
 
 void CellBorder::destroyCellBorderGeometry(int x, int y)

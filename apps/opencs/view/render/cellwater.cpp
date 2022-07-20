@@ -1,6 +1,5 @@
 #include "cellwater.hpp"
 
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
@@ -28,7 +27,7 @@ namespace CSVRender
         , mId(id)
         , mParentNode(cellNode)
         , mWaterTransform(nullptr)
-        , mWaterNode(nullptr)
+        , mWaterGroup(nullptr)
         , mWaterGeometry(nullptr)
         , mDeleted(false)
         , mExterior(false)
@@ -41,8 +40,8 @@ namespace CSVRender
         mWaterTransform->setNodeMask(Mask_Water);
         mParentNode->addChild(mWaterTransform);
 
-        mWaterNode = new osg::Geode();
-        mWaterTransform->addChild(mWaterNode);
+        mWaterGroup = new osg::Group();
+        mWaterTransform->addChild(mWaterGroup);
 
         int cellIndex = mData.getCells().searchId(mId);
         if (cellIndex > -1)
@@ -136,7 +135,7 @@ namespace CSVRender
 
         if (mWaterGeometry)
         {
-            mWaterNode->removeDrawable(mWaterGeometry);
+            mWaterGroup->removeChild(mWaterGeometry);
             mWaterGeometry = nullptr;
         }
 
@@ -177,6 +176,6 @@ namespace CSVRender
         mWaterGeometry->getStateSet()->setTextureAttributeAndModes(0, waterTexture, osg::StateAttribute::ON);
 
 
-        mWaterNode->addDrawable(mWaterGeometry);
+        mWaterGroup->addChild(mWaterGeometry);
     }
 }

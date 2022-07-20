@@ -18,7 +18,6 @@ namespace osg
 {
     class Group;
     class Geometry;
-    class Geode;
 }
 
 namespace CSMWorld
