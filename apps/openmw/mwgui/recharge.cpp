@@ -28,7 +28,6 @@ namespace MWGui
 
 Recharge::Recharge()
     : WindowBase("openmw_recharge_dialog.layout")
-    , mItemSelectionDialog(nullptr)
 {
     getWidget(mBox, "Box");
     getWidget(mGemBox, "GemBox");
@@ -101,8 +100,7 @@ void Recharge::onCancel(MyGUI::Widget *sender)
 
 void Recharge::onSelectItem(MyGUI::Widget *sender)
 {
-    delete mItemSelectionDialog;
-    mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}");
+    mItemSelectionDialog = std::make_unique<ItemSelectionDialog>("#{sSoulGemsWithSouls}");
     mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &Recharge::onItemSelected);
     mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &Recharge::onItemCancel);
     mItemSelectionDialog->setVisible(true);

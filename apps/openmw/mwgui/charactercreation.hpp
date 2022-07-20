@@ -5,6 +5,7 @@
 
 #include <map>
 #include <vector>
+#include <memory>
 
 #include "statswatcher.hpp"
 
@@ -61,15 +62,15 @@ namespace MWGui
     std::map<int, MWMechanics::SkillValue> mPlayerSkillValues;
 
     //Dialogs
-    TextInputDialog* mNameDialog;
-    RaceDialog* mRaceDialog;
-    ClassChoiceDialog* mClassChoiceDialog;
-    InfoBoxDialog* mGenerateClassQuestionDialog;
-    GenerateClassResultDialog* mGenerateClassResultDialog;
-    PickClassDialog* mPickClassDialog;
-    CreateClassDialog* mCreateClassDialog;
-    BirthDialog* mBirthSignDialog;
-    ReviewDialog* mReviewDialog;
+    std::unique_ptr<TextInputDialog> mNameDialog;
+    std::unique_ptr<RaceDialog> mRaceDialog;
+    std::unique_ptr<ClassChoiceDialog> mClassChoiceDialog;
+    std::unique_ptr<InfoBoxDialog> mGenerateClassQuestionDialog;
+    std::unique_ptr<GenerateClassResultDialog> mGenerateClassResultDialog;
+    std::unique_ptr<PickClassDialog> mPickClassDialog;
+    std::unique_ptr<CreateClassDialog> mCreateClassDialog;
+    std::unique_ptr<BirthDialog> mBirthSignDialog;
+    std::unique_ptr<ReviewDialog> mReviewDialog;
 
     //Player data
     std::string mPlayerName;

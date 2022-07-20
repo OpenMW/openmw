@@ -1,6 +1,8 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
+#include <memory>
+
 #include <MyGUI_EditBox.h>
 
 #include <components/esm/attr.hpp>
@@ -322,10 +324,10 @@ namespace MWGui
         std::vector<Widgets::MWSkillPtr> mSkills;
         std::string                      mDescription;
 
-        SelectSpecializationDialog       *mSpecDialog;
-        SelectAttributeDialog            *mAttribDialog;
-        SelectSkillDialog                *mSkillDialog;
-        DescriptionDialog                *mDescDialog;
+        std::unique_ptr<SelectSpecializationDialog> mSpecDialog;
+        std::unique_ptr<SelectAttributeDialog> mAttribDialog;
+        std::unique_ptr<SelectSkillDialog> mSkillDialog;
+        std::unique_ptr<DescriptionDialog> mDescDialog;
 
         ESM::Class::Specialization       mSpecializationId;
 
