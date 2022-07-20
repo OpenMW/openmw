@@ -29,7 +29,6 @@ namespace MWWorld
     template<typename T> struct SRecordType
     {
         static const int sRecordId;
-        static int getId() { return sRecordId; };
     };
 
     class ESMStore
