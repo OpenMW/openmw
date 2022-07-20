@@ -192,7 +192,8 @@ namespace MWWorld
         Store<ESM::Skill> mSkills;
         Store<ESM::Attribute> mAttributes;
 
-        std::map<int, int>      mESM3RecordToRecordId;
+        std::map<ESM::RecNameInts, StoreBase*>      mESM3RecordToStore;
+        std::unordered_map<const StoreBase*, ESM::RecNameInts>   mStoreToEsm3Record;
 
 
         template<typename T> 
@@ -211,11 +212,11 @@ namespace MWWorld
             record.mId = id;
 
             T *ptr = store.insert(record);
-            auto esm3RecordType_find = stores.mStoreImp->mESM3RecordToRecordId.find(SRecordType<T>::sRecordId);
+            auto esm3RecordType_find = stores.mStoreImp->mStoreToEsm3Record.find(&stores.get<T>());
 
-            if (esm3RecordType_find != stores.mStoreImp->mESM3RecordToRecordId.end())
+            if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
             {
-                stores.mIds[ptr->mId] = esm3RecordType_find->first;
+                stores.mIds[ptr->mId] = esm3RecordType_find->second;
             }
             return ptr;
         }
@@ -225,10 +226,10 @@ namespace MWWorld
             Store<T> &store = stores.getWritable<T>();
 
             T *ptr = store.insert(x);
-            auto esm3RecordType_find = stores.mStoreImp->mESM3RecordToRecordId.find(SRecordType<T>::sRecordId);
-            if (esm3RecordType_find != stores.mStoreImp->mESM3RecordToRecordId.end())
+            auto esm3RecordType_find = stores.mStoreImp->mStoreToEsm3Record.find(&stores.get<T>());
+            if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
             {
-                stores.mIds[ptr->mId] = esm3RecordType_find->first;
+                stores.mIds[ptr->mId] = esm3RecordType_find->second;
             }
             return ptr;
         }
@@ -247,55 +248,61 @@ namespace MWWorld
             T record = x;
 
             T *ptr = store.insertStatic(record);
-            auto esm3RecordType_find = stores.mStoreImp->mESM3RecordToRecordId.find(SRecordType<T>::sRecordId);
-            if (esm3RecordType_find != stores.mStoreImp->mESM3RecordToRecordId.end())
+            auto esm3RecordType_find = stores.mStoreImp->mStoreToEsm3Record.find(&stores.get<T>());
+            if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
             {
-                stores.mIds[ptr->mId] = esm3RecordType_find->first;
+                stores.mIds[ptr->mId] = esm3RecordType_find->second;
             }
             return ptr;
         }
 
-        ESMStoreImp()
+        ESMStoreImp(ESMStore& store)
         {
-            mESM3RecordToRecordId[ESM::REC_ACTI] = SRecordType<ESM::Activator>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_ALCH] = SRecordType<ESM::Potion>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_APPA] = SRecordType<ESM::Apparatus>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_ARMO] = SRecordType<ESM::Armor>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_BODY] = SRecordType<ESM::BodyPart>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_BOOK] = SRecordType<ESM::Book>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_BSGN] = SRecordType<ESM::BirthSign>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_CELL] = SRecordType<ESM::Cell>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_CLAS] = SRecordType<ESM::Class>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_CLOT] = SRecordType<ESM::Clothing>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_CONT] = SRecordType<ESM::Container>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_CREA] = SRecordType<ESM::Creature>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_DIAL] = SRecordType<ESM::Dialogue>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_DOOR] = SRecordType<ESM::Door>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_ENCH] = SRecordType<ESM::Enchantment>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_FACT] = SRecordType<ESM::Faction>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_GLOB] = SRecordType<ESM::Global>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_GMST] = SRecordType<ESM::GameSetting>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_INGR] = SRecordType<ESM::Ingredient>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_LAND] = SRecordType<ESM::Land>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_LEVC] = SRecordType<ESM::CreatureLevList>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_LEVI] = SRecordType<ESM::ItemLevList>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_LIGH] = SRecordType<ESM::Light>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_LOCK] = SRecordType<ESM::Lockpick>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_LTEX] = SRecordType<ESM::LandTexture>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_MISC] = SRecordType<ESM::Miscellaneous>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_NPC_] = SRecordType<ESM::NPC>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_PGRD] = SRecordType<ESM::Pathgrid>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_PROB] = SRecordType<ESM::Probe>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_RACE] = SRecordType<ESM::Race>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_REGN] = SRecordType<ESM::Region>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_REPA] = SRecordType<ESM::Repair>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_SCPT] = SRecordType<ESM::Script>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_SNDG] = SRecordType<ESM::SoundGenerator>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_SOUN] = SRecordType<ESM::Sound>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_SPEL] = SRecordType<ESM::Spell>::sRecordId; 
-            mESM3RecordToRecordId[ESM::REC_SSCR] = SRecordType<ESM::StartScript>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_STAT] = SRecordType<ESM::Static>::sRecordId;
-            mESM3RecordToRecordId[ESM::REC_WEAP] = SRecordType<ESM::Weapon>::sRecordId;
+            mESM3RecordToStore[ESM::REC_ACTI] = &store.getWritable<ESM::Activator>();
+            mESM3RecordToStore[ESM::REC_ALCH] = &store.getWritable<ESM::Potion>();
+            mESM3RecordToStore[ESM::REC_APPA] = &store.getWritable<ESM::Apparatus>();
+            mESM3RecordToStore[ESM::REC_ARMO] = &store.getWritable<ESM::Armor>();
+            mESM3RecordToStore[ESM::REC_BODY] = &store.getWritable<ESM::BodyPart>();
+            mESM3RecordToStore[ESM::REC_BOOK] = &store.getWritable<ESM::Book>();
+            mESM3RecordToStore[ESM::REC_BSGN] = &store.getWritable<ESM::BirthSign>();
+            mESM3RecordToStore[ESM::REC_CELL] = &store.getWritable<ESM::Cell>();
+            mESM3RecordToStore[ESM::REC_CLAS] = &store.getWritable<ESM::Class>();
+            mESM3RecordToStore[ESM::REC_CLOT] = &store.getWritable<ESM::Clothing>();
+            mESM3RecordToStore[ESM::REC_CONT] = &store.getWritable<ESM::Container>();
+            mESM3RecordToStore[ESM::REC_CREA] = &store.getWritable<ESM::Creature>();
+            mESM3RecordToStore[ESM::REC_DIAL] = &store.getWritable<ESM::Dialogue>();
+            mESM3RecordToStore[ESM::REC_DOOR] = &store.getWritable<ESM::Door>();
+            mESM3RecordToStore[ESM::REC_ENCH] = &store.getWritable<ESM::Enchantment>();
+            mESM3RecordToStore[ESM::REC_FACT] = &store.getWritable<ESM::Faction>();
+            mESM3RecordToStore[ESM::REC_GLOB] = &store.getWritable<ESM::Global>();
+            mESM3RecordToStore[ESM::REC_GMST] = &store.getWritable<ESM::GameSetting>();
+            mESM3RecordToStore[ESM::REC_INGR] = &store.getWritable<ESM::Ingredient>();
+            mESM3RecordToStore[ESM::REC_LAND] = &store.getWritable<ESM::Land>();
+            mESM3RecordToStore[ESM::REC_LEVC] = &store.getWritable<ESM::CreatureLevList>();
+            mESM3RecordToStore[ESM::REC_LEVI] = &store.getWritable<ESM::ItemLevList>();
+            mESM3RecordToStore[ESM::REC_LIGH] = &store.getWritable<ESM::Light>();
+            mESM3RecordToStore[ESM::REC_LOCK] = &store.getWritable<ESM::Lockpick>();
+            mESM3RecordToStore[ESM::REC_LTEX] = &store.getWritable<ESM::LandTexture>();
+            mESM3RecordToStore[ESM::REC_MISC] = &store.getWritable<ESM::Miscellaneous>();
+            mESM3RecordToStore[ESM::REC_NPC_] = &store.getWritable<ESM::NPC>();
+            mESM3RecordToStore[ESM::REC_PGRD] = &store.getWritable<ESM::Pathgrid>();
+            mESM3RecordToStore[ESM::REC_PROB] = &store.getWritable<ESM::Probe>();
+            mESM3RecordToStore[ESM::REC_RACE] = &store.getWritable<ESM::Race>();
+            mESM3RecordToStore[ESM::REC_REGN] = &store.getWritable<ESM::Region>();
+            mESM3RecordToStore[ESM::REC_REPA] = &store.getWritable<ESM::Repair>();
+            mESM3RecordToStore[ESM::REC_SCPT] = &store.getWritable<ESM::Script>();
+            mESM3RecordToStore[ESM::REC_SNDG] = &store.getWritable<ESM::SoundGenerator>();
+            mESM3RecordToStore[ESM::REC_SOUN] = &store.getWritable<ESM::Sound>();
+            mESM3RecordToStore[ESM::REC_SPEL] = &store.getWritable<ESM::Spell>(); 
+            mESM3RecordToStore[ESM::REC_SSCR] = &store.getWritable<ESM::StartScript>();
+            mESM3RecordToStore[ESM::REC_STAT] = &store.getWritable<ESM::Static>();
+            mESM3RecordToStore[ESM::REC_WEAP] = &store.getWritable<ESM::Weapon>();
+
+            for (const auto& recordStorePair : mESM3RecordToStore)
+            {
+                const StoreBase* storePtr = recordStorePair.second;
+                mStoreToEsm3Record[storePtr] = recordStorePair.first;
+            }
         }
 
         template<typename T>
@@ -350,7 +357,7 @@ namespace MWWorld
         ESMStoreImp::createStore<ESM::LandTexture>(*this);
         ESMStoreImp::createStore<ESM::Pathgrid>(*this);
 
-        mStoreImp = std::make_unique<ESMStoreImp>();
+        mStoreImp = std::make_unique<ESMStoreImp>(*this);
         mDynamicCount = 0;
 
         getWritable<ESM::Pathgrid>().setCells(getWritable<ESM::Cell>());
@@ -404,10 +411,11 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
         }
 
         // Look up the record type.
-        std::map<int, int>::iterator it = mStoreImp->mESM3RecordToRecordId.find(n.toInt());
+        ESM::RecNameInts recName = static_cast<ESM::RecNameInts>(n.toInt());
+        const auto& it = mStoreImp->mESM3RecordToStore.find(recName);
 
-        if (it == mStoreImp->mESM3RecordToRecordId.end()) {
-            if (n.toInt() == ESM::REC_INFO) {
+        if (it == mStoreImp->mESM3RecordToStore.end()) {
+            if (recName == ESM::REC_INFO) {
                 if (dialogue)
                 {
                     dialogue->readInfo(esm, esm.getIndex() != 0);
@@ -438,10 +446,10 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
                 throw std::runtime_error("Unknown record: " + n.toString());
             }
         } else {
-            RecordId id = mStores[ it->second]->load(esm);
+            RecordId id = it->second->load(esm);
             if (id.mIsDeleted)
             {
-                mStores[ it->second]->eraseStatic(id.mId);
+                it->second->eraseStatic(id.mId);
                 continue;
             }
 
@@ -486,14 +494,14 @@ void ESMStore::setUp()
 {
     mIds.clear();
 
-    std::map<int, int>::iterator storeIt = mStoreImp->mESM3RecordToRecordId.begin();
-    for (; storeIt != mStoreImp->mESM3RecordToRecordId.end(); ++storeIt) {
-        mStores[storeIt->second]->setUp();
+    std::map<ESM::RecNameInts, StoreBase*>::iterator storeIt = mStoreImp->mESM3RecordToStore.begin();
+    for (; storeIt != mStoreImp->mESM3RecordToStore.end(); ++storeIt) {
+        storeIt->second->setUp();
 
         if (isCacheableRecord(storeIt->first))
         {
             std::vector<std::string> identifiers;
-            mStores[storeIt->second]->listIdentifier(identifiers);
+            storeIt->second->listIdentifier(identifiers);
 
             for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end(); ++record)
                 mIds[*record] = storeIt->first;
@@ -716,8 +724,9 @@ void ESMStore::removeMissingObjects(Store<T>& store)
         get<ESM::Container>().write (writer, progress);
     }
 
-    bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type)
+    bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type_id)
     {
+        ESM::RecNameInts type = (ESM::RecNameInts)type_id;
         switch (type)
         {
             case ESM::REC_ALCH:
@@ -730,12 +739,12 @@ void ESMStore::removeMissingObjects(Store<T>& store)
             case ESM::REC_WEAP:
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
-                mStores[mStoreImp->mESM3RecordToRecordId[type] ]->read (reader);
+                mStoreImp->mESM3RecordToStore[type]->read (reader);
                 return true;
             case ESM::REC_NPC_:
             case ESM::REC_CREA:
             case ESM::REC_CONT:
-                mStores[mStoreImp->mESM3RecordToRecordId[type]]->read (reader, true);
+                mStoreImp->mESM3RecordToStore[type]->read (reader, true);
                 return true;
 
             case ESM::REC_DYNA:
