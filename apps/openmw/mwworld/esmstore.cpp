@@ -808,32 +808,32 @@ void ESMStore::removeMissingObjects(Store<T>& store)
     }
 
 #define OPENMW_ESM3_INSERT(__Type) template<> const __Type* ESMStore::insert<__Type>(const __Type &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);   }
-    OPENMW_ESM3_INSERT(ESM::Book);
-    OPENMW_ESM3_INSERT(ESM::Armor);
-    OPENMW_ESM3_INSERT(ESM::Class);
-    OPENMW_ESM3_INSERT(ESM::Enchantment);
-    OPENMW_ESM3_INSERT(ESM::Potion);
-    OPENMW_ESM3_INSERT(ESM::Weapon);
-    OPENMW_ESM3_INSERT(ESM::Clothing);
-    OPENMW_ESM3_INSERT(ESM::Spell);
+    OPENMW_ESM3_INSERT(ESM::Book)
+    OPENMW_ESM3_INSERT(ESM::Armor)
+    OPENMW_ESM3_INSERT(ESM::Class)
+    OPENMW_ESM3_INSERT(ESM::Enchantment)
+    OPENMW_ESM3_INSERT(ESM::Potion)
+    OPENMW_ESM3_INSERT(ESM::Weapon)
+    OPENMW_ESM3_INSERT(ESM::Clothing)
+    OPENMW_ESM3_INSERT(ESM::Spell)
 #undef OPENMW_ESM3_INSERT
 
 #define OPENMW_ESM3_INSERT_STATIC(__Type) template<> const __Type* ESMStore::insertStatic<__Type>(const __Type &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
-    OPENMW_ESM3_INSERT_STATIC(ESM::GameSetting);
-    OPENMW_ESM3_INSERT_STATIC(ESM::Static);
-    OPENMW_ESM3_INSERT_STATIC(ESM::Door);
-    OPENMW_ESM3_INSERT_STATIC(ESM::Global);
-    OPENMW_ESM3_INSERT_STATIC(ESM::NPC);
+    OPENMW_ESM3_INSERT_STATIC(ESM::GameSetting)
+    OPENMW_ESM3_INSERT_STATIC(ESM::Static)
+    OPENMW_ESM3_INSERT_STATIC(ESM::Door)
+    OPENMW_ESM3_INSERT_STATIC(ESM::Global)
+    OPENMW_ESM3_INSERT_STATIC(ESM::NPC)
 #undef OPENMW_ESM3_INSERT_STATIC
 
 
 #define OPENMW_ESM3_OVERRIDE_RECORD(__Type) template<> const __Type* ESMStore::overrideRecord<__Type>(const __Type &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Container);
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Creature);
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::CreatureLevList);
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Door);
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::ItemLevList);
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::NPC);
+    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Container)
+    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Creature)
+    OPENMW_ESM3_OVERRIDE_RECORD(ESM::CreatureLevList)
+    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Door)
+    OPENMW_ESM3_OVERRIDE_RECORD(ESM::ItemLevList)
+    OPENMW_ESM3_OVERRIDE_RECORD(ESM::NPC)
 #undef OPENMW_ESM3_OVERRIDE_RECORD
 
     template <> const Store<ESM::MagicEffect>& ESMStore::get<ESM::MagicEffect>() const { return mStoreImp->mMagicEffect; }
