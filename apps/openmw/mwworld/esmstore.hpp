@@ -28,19 +28,13 @@ namespace MWWorld
     struct ESMStoreImp;
     template<typename T> struct SRecordType
     {
-        static const int sRecordId;
+        static const int sStoreIndex;
     };
 
     class ESMStore
     {
         friend struct ESMStoreImp; //This allows StoreImp to extend esmstore without beeing included everywhere
         std::unique_ptr<ESMStoreImp> mStoreImp;
-
-        // Lookup of all IDs. Makes looking up references faster. Just
-        // maps the id name to the record type.
-        using IDMap = std::unordered_map<std::string, int, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
-        IDMap mIds;
-        std::unordered_map<std::string, int> mStaticIds;
 
         std::unordered_map<std::string, int> mRefCount;
 
@@ -51,7 +45,7 @@ namespace MWWorld
         mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
 
         template <class T>
-        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[SRecordType<T>::sRecordId]);}
+        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[SRecordType<T>::sStoreIndex]);}
 
         /// Validate entries in store after setup
         void validate();
@@ -82,22 +76,10 @@ namespace MWWorld
         }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
-        int find(std::string_view id) const
-        {
-            IDMap::const_iterator it = mIds.find(id);
-            if (it == mIds.end()) {
-                return 0;
-            }
-            return it->second;
-        }
-        int findStatic(const std::string &id) const
-        {
-            IDMap::const_iterator it = mStaticIds.find(id);
-            if (it == mStaticIds.end()) {
-                return 0;
-            }
-            return it->second;
-        }
+        int find(const std::string& id) const;
+
+        int findStatic(const std::string& id) const;
+
 
         ESMStore();
         ~ESMStore();
@@ -112,7 +94,7 @@ namespace MWWorld
         void load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
 
         template <class T>
-        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[SRecordType<T>::sRecordId]);}
+        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[SRecordType<T>::sStoreIndex]);}
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>

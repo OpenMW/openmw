@@ -129,7 +129,7 @@ namespace
 
 static int sRecordTypeCounter = 0;
 
-#define OPENMW_ESM_ADD_STORE_TYPE(__Type)template<> const int MWWorld::SRecordType<__Type>::sRecordId = sRecordTypeCounter++
+#define OPENMW_ESM_ADD_STORE_TYPE(__Type)template<> const int MWWorld::SRecordType<__Type>::sStoreIndex = sRecordTypeCounter++
 
 OPENMW_ESM_ADD_STORE_TYPE(ESM::Activator);
 OPENMW_ESM_ADD_STORE_TYPE(ESM::Potion);
@@ -185,6 +185,9 @@ static const int sRecordTypeCount = sRecordTypeCounter;
 
 namespace MWWorld
 {
+    using IDMap = std::unordered_map<std::string, int, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
+
+
     struct ESMStoreImp
     {
         //These 3 don't inherit from store base
@@ -192,8 +195,13 @@ namespace MWWorld
         Store<ESM::Skill> mSkills;
         Store<ESM::Attribute> mAttributes;
 
-        std::map<ESM::RecNameInts, StoreBase*>      mESM3RecordToStore;
+        std::map<ESM::RecNameInts, StoreBase*>                   mESM3RecordToStore;
         std::unordered_map<const StoreBase*, ESM::RecNameInts>   mStoreToEsm3Record;
+
+        // Lookup of all IDs. Makes looking up references faster. Just
+        // maps the id name to the record type.
+        IDMap mIds;
+        IDMap mStaticIds;
 
 
         template<typename T> 
@@ -216,7 +224,7 @@ namespace MWWorld
 
             if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
             {
-                stores.mIds[ptr->mId] = esm3RecordType_find->second;
+                stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
             }
             return ptr;
         }
@@ -229,7 +237,7 @@ namespace MWWorld
             auto esm3RecordType_find = stores.mStoreImp->mStoreToEsm3Record.find(&stores.get<T>());
             if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
             {
-                stores.mIds[ptr->mId] = esm3RecordType_find->second;
+                stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
             }
             return ptr;
         }
@@ -251,7 +259,7 @@ namespace MWWorld
             auto esm3RecordType_find = stores.mStoreImp->mStoreToEsm3Record.find(&stores.get<T>());
             if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
             {
-                stores.mIds[ptr->mId] = esm3RecordType_find->second;
+                stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
             }
             return ptr;
         }
@@ -308,10 +316,30 @@ namespace MWWorld
         template<typename T>
         static void createStore(ESMStore& stores)
         {
-            stores.mStores[SRecordType<T>::sRecordId] = std::make_unique<Store<T>>();
+            stores.mStores[SRecordType<T>::sStoreIndex] = std::make_unique<Store<T>>();
         }
     };
 
+
+    int ESMStore::find(const std::string& id) const
+    {
+        
+        IDMap::const_iterator it = mStoreImp->mIds.find(id);
+        if (it == mStoreImp->mIds.end()) {
+            return 0;
+        }
+        return it->second;
+        
+    }
+
+    int ESMStore::findStatic(const std::string& id) const
+    {
+        IDMap::const_iterator it = mStoreImp-> mStaticIds.find(id);
+        if (it == mStoreImp->mStaticIds.end()) {
+            return 0;
+        }
+        return it->second;
+    }
 
     ESMStore::ESMStore()
     {
@@ -492,7 +520,7 @@ ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
 
 void ESMStore::setUp()
 {
-    mIds.clear();
+    mStoreImp->mIds.clear();
 
     std::map<ESM::RecNameInts, StoreBase*>::iterator storeIt = mStoreImp->mESM3RecordToStore.begin();
     for (; storeIt != mStoreImp->mESM3RecordToStore.end(); ++storeIt) {
@@ -504,13 +532,13 @@ void ESMStore::setUp()
             storeIt->second->listIdentifier(identifiers);
 
             for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end(); ++record)
-                mIds[*record] = storeIt->first;
+                mStoreImp->mIds[*record] = storeIt->first;
         }
     }
 
-    if (mStaticIds.empty())
-        for (const auto& [k, v] : mIds)
-            mStaticIds.emplace(Misc::StringUtils::lowerCase(k), v);
+    if (mStoreImp->mStaticIds.empty())
+        for (const auto& [k, v] : mStoreImp->mIds)
+            mStoreImp->mStaticIds.emplace(Misc::StringUtils::lowerCase(k), v);
 
     getWritable<ESM::Skill>().setUp();
     getWritable<ESM::MagicEffect>().setUp();;
@@ -812,7 +840,7 @@ void ESMStore::removeMissingObjects(Store<T>& store)
         record.mId = id;
 
         ESM::NPC *ptr = npcs.insert(record);
-        mIds[ptr->mId] = ESM::REC_NPC_;
+        mStoreImp->mIds[ptr->mId] = ESM::REC_NPC_;
         return ptr;
     }
 
