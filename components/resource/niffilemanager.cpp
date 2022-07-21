@@ -1,5 +1,7 @@
 #include "niffilemanager.hpp"
 
+#include <iostream>
+
 #include <osg/Object>
 #include <osg/Stats>
 

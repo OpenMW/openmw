@@ -7,7 +7,6 @@
 #include <stdint.h>
 #include <stdexcept>
 #include <vector>
-#include <typeinfo>
 #include <type_traits>
 #include <istream>
 

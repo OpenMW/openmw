@@ -3,10 +3,9 @@
 #ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 #define OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 
-#include "nifstream.hpp"
-
 #include <map>
 
+#include "nifstream.hpp"
 #include "niffile.hpp"
 
 namespace Nif
