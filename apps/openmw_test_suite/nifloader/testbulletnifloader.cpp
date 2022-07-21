@@ -1,5 +1,7 @@
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/bullethelpers/processtrianglecallback.hpp>
+#include <components/nif/data.hpp>
+#include <components/nif/extra.hpp>
 #include <components/nif/node.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>

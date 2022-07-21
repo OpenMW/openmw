@@ -1,4 +1,6 @@
 #include "physics.hpp"
+
+#include "data.hpp"
 #include "node.hpp"
 
 namespace Nif

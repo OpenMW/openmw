@@ -3,12 +3,9 @@
 #ifndef OPENMW_COMPONENTS_NIF_NIFFILE_HPP
 #define OPENMW_COMPONENTS_NIF_NIFFILE_HPP
 
-#include <stdexcept>
 #include <vector>
 #include <atomic>
-#include <limits>
 
-#include <components/debug/debuglog.hpp>
 #include <components/files/istreamptr.hpp>
 
 #include "record.hpp"
@@ -97,15 +94,10 @@ public:
     };
 
     /// Used if file parsing fails
-    [[noreturn]] void fail(const std::string &msg) const
-    {
-        throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + filename);
-    }
+    [[noreturn]] void fail(const std::string &msg) const;
+
     /// Used when something goes wrong, but not catastrophically so
-    void warn(const std::string &msg) const
-    {
-        Log(Debug::Warning) << " NIFFile Warning: " << msg << "\nFile: " << filename;
-    }
+    void warn(const std::string &msg) const;
 
     /// Open a NIF stream. The name is used for error messages.
     NIFFile(Files::IStreamPtr&& stream, const std::string &name);
@@ -128,12 +120,7 @@ public:
     size_t numRoots() const override { return roots.size(); }
 
     /// Get a given string from the file's string table
-    std::string getString(uint32_t index) const override
-    {
-        if (index == std::numeric_limits<uint32_t>::max())
-            return std::string();
-        return strings.at(index);
-    }
+    std::string getString(uint32_t index) const override;
 
     /// Set whether there is skinning contained in this NIF file.
     /// @note This is just a hint for users of the NIF file and has no effect on the loading procedure.

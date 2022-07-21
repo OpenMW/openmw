@@ -1,4 +1,5 @@
 #include "data.hpp"
+#include "nifkey.hpp"
 #include "node.hpp"
 
 namespace Nif

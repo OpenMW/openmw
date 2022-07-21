@@ -1,7 +1,9 @@
 #include "controller.hpp"
 
-#include "node.hpp"
+#include "controlled.hpp"
 #include "data.hpp"
+#include "node.hpp"
+#include "recordptr.hpp"
 
 namespace Nif
 {

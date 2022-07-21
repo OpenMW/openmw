@@ -7,6 +7,7 @@
 #include <osgAnimation/BasicAnimationManager>
 #include <osgAnimation/Channel>
 
+#include <components/debug/debuglog.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/osgacontroller.hpp>

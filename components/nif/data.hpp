@@ -26,6 +26,7 @@
 
 #include "base.hpp"
 
+#include "nifkey.hpp"
 #include "niftypes.hpp" // Transformation
 
 namespace Nif

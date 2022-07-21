@@ -2,14 +2,14 @@
 #ifndef OPENMW_COMPONENTS_NIF_BASE_HPP
 #define OPENMW_COMPONENTS_NIF_BASE_HPP
 
-#include "record.hpp"
-#include "niffile.hpp"
 #include "recordptr.hpp"
-#include "nifstream.hpp"
-#include "nifkey.hpp"
 
 namespace Nif
 {
+struct File;
+struct Record;
+struct Stream;
+
 // An extra data record. All the extra data connected to an object form a linked list.
 struct Extra : public Record
 {
@@ -17,17 +17,7 @@ struct Extra : public Record
     ExtraPtr next; // Next extra data record in the list
     unsigned int recordSize{0u};
 
-    void read(NIFStream *nif) override
-    {
-        if (nif->getVersion() >= NIFStream::generateVersion(10,0,1,0))
-            name = nif->getString();
-        else if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0))
-        {
-            next.read(nif);
-            recordSize = nif->getUInt();
-        }
-    }
-
+    void read(NIFStream *nif) override;
     void post(NIFFile *nif) override { next.post(nif); }
 };
 
@@ -66,22 +56,8 @@ struct Named : public Record
     ExtraList extralist;
     ControllerPtr controller;
 
-    void read(NIFStream *nif) override
-    {
-        name = nif->getString();
-        if (nif->getVersion() < NIFStream::generateVersion(10,0,1,0))
-            extra.read(nif);
-        else
-            extralist.read(nif);
-        controller.read(nif);
-    }
-
-    void post(NIFFile *nif) override
-    {
-        extra.post(nif);
-        extralist.post(nif);
-        controller.post(nif);
-    }
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 using NiSequenceStreamHelper = Named;
 

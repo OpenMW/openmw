@@ -1,12 +1,22 @@
 #include "niffile.hpp"
-#include "effect.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/files/hash.hpp>
 
+#include <algorithm>
 #include <array>
+#include <limits>
 #include <map>
 #include <sstream>
-#include <algorithm>
+#include <stdexcept>
+
+#include "controlled.hpp"
+#include "controller.hpp"
+#include "data.hpp"
+#include "effect.hpp"
+#include "extra.hpp"
+#include "physics.hpp"
+#include "property.hpp"
 
 namespace Nif
 {
@@ -351,6 +361,23 @@ std::atomic_bool NIFFile::sLoadUnsupportedFiles = false;
 void NIFFile::setLoadUnsupportedFiles(bool load)
 {
     sLoadUnsupportedFiles = load;
+}
+
+void NIFFile::warn(const std::string &msg) const
+{
+    Log(Debug::Warning) << " NIFFile Warning: " << msg << "\nFile: " << filename;
+}
+
+[[noreturn]] void NIFFile::fail(const std::string &msg) const
+{
+    throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + filename);
+}
+
+std::string NIFFile::getString(uint32_t index) const
+{
+    if (index == std::numeric_limits<uint32_t>::max())
+        return std::string();
+    return strings.at(index);
 }
 
 }
