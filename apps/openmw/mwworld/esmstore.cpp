@@ -11,6 +11,7 @@
 #include <components/misc/algorithm.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esmloader/load.hpp>
+#include <components/esm4/common.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
 
