@@ -147,9 +147,11 @@ Controls whether the objects in the active cells use the mentioned paging algori
 Active grid paging significantly improves the framerate when your setup is CPU-limited.
 
 .. note::
-	Given that only 8 light sources may affect an object at a time at the moment,
-	lighting issues arising due to merged objects being considered a single object
-	may disrupt your gameplay experience.
+	There is a limit of light sources which may affect a rendering shape at the moment.
+	If this limit is too small, lighting issues arising due to merged objects
+	being considered a single object, and they may disrupt your gameplay experience.
+	Consider increasing the 'max lights' setting value in the 'Shaders' section to avoid this issue.
+	With the Legacy lighting mode this limit can not be increased (only 8 sources can be used).
 
 object paging merge factor
 --------------------------
