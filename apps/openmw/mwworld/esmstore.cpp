@@ -127,12 +127,14 @@ namespace
         }
     }
 
-    template <int storeIndex> 
-    struct StoreIndexToRecordType {
-        
-        typedef void recordType;
-    };
+
 }
+
+template <int storeIndex> 
+struct StoreIndexToRecordType {
+
+    typedef void recordType;
+};
 
 static int sRecordTypeCounter = 0;
 
@@ -368,7 +370,7 @@ namespace MWWorld
         assert(sRecordTypeCounter == sRecordIndexCount); //Otherwise something wen wrong with assigning index to stores
         constexpr_for<0, sRecordIndexCount,1> ([this](auto storeIndex)
             {
-                ESMStoreImp::createStore<StoreIndexToRecordType<storeIndex>::recordType>(*this);
+                ESMStoreImp::createStore<typename StoreIndexToRecordType<storeIndex>::recordType>(*this);
             });
 
         mStoreImp = std::make_unique<ESMStoreImp>(*this);
