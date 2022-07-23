@@ -126,62 +126,79 @@ namespace
             }
         }
     }
+
+    template <int storeIndex> 
+    struct StoreIndexToRecordType {
+        
+        typedef void recordType;
+    };
 }
 
 static int sRecordTypeCounter = 0;
 
-#define OPENMW_ESM_ADD_STORE_TYPE(__Type)template<> const int MWWorld::SRecordType<__Type>::sStoreIndex = sRecordTypeCounter++
+#define OPENMW_ESM_ADD_STORE_TYPE(__Type, __ID_NUM) template<> const int MWWorld::SRecordType<__Type>::sStoreIndex = sRecordTypeCounter ++;  \
+template<> struct StoreIndexToRecordType<__ID_NUM > {typedef __Type recordType;}
 
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Activator);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Potion);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Apparatus);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Armor);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::BodyPart);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Book);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::BirthSign);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Class);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Clothing);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Container);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Creature);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Dialogue);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Door);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Enchantment);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Faction);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Global);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Ingredient);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::CreatureLevList);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::ItemLevList);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Light);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Lockpick);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Miscellaneous);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::NPC);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Probe);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Race);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Region);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Repair);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::SoundGenerator);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Sound);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Spell);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::StartScript);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Static);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Weapon);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::GameSetting);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Script);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Activator,0);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Potion,1);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Apparatus,2);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Armor,3);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::BodyPart,4);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Book,5);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::BirthSign,6);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Class,7);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Clothing,8);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Container,9);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Creature,10);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Dialogue,11);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Door,12);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Enchantment,13);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Faction,14);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Global,15);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Ingredient,16);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::CreatureLevList,17);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::ItemLevList,18);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Light,19);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Lockpick,20);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Miscellaneous,21);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::NPC,22);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Probe,23);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Race,24);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Region,25);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Repair,26);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::SoundGenerator,27);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Sound,28);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Spell,29);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::StartScript,30);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Static,31);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Weapon,32);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::GameSetting,33);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Script,34);
 
 // Lists that need special rules
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Cell);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Land);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::LandTexture);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Pathgrid);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Cell,35);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Land,36);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::LandTexture,37);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Pathgrid,38);
 
-OPENMW_ESM_ADD_STORE_TYPE(ESM::MagicEffect);
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Skill);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::MagicEffect,39);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Skill,40);
 
 // Special entry which is hardcoded and not loaded from an ESM
-OPENMW_ESM_ADD_STORE_TYPE(ESM::Attribute);
+OPENMW_ESM_ADD_STORE_TYPE(ESM::Attribute,41);
 
 static const int sRecordTypeCount = sRecordTypeCounter;
+constexpr int sRecordIndexCount = 42;
 
+template <auto Start, auto End, auto Inc, class F>
+constexpr void constexpr_for(F&& f)
+{
+    if constexpr (Start < End)
+    {
+        f(std::integral_constant<decltype(Start), Start>());
+        constexpr_for<Start + Inc, End, Inc>(f);
+    }
+}
 
 
 namespace MWWorld
@@ -317,7 +334,10 @@ namespace MWWorld
         template<typename T>
         static void createStore(ESMStore& stores)
         {
-            stores.mStores[SRecordType<T>::sStoreIndex] = std::make_unique<Store<T>>();
+            if constexpr (std::is_convertible<Store<T>*, StoreBase*>::value)
+            {
+                stores.mStores[SRecordType<T>::sStoreIndex] = std::make_unique<Store<T>>();
+            }
         }
     };
 
@@ -345,46 +365,11 @@ namespace MWWorld
     ESMStore::ESMStore()
     {
         mStores.resize(sRecordTypeCount);
-
-        ESMStoreImp::createStore<ESM::Activator>(*this);
-        ESMStoreImp::createStore<ESM::Potion>(*this);
-        ESMStoreImp::createStore<ESM::Apparatus>(*this);
-        ESMStoreImp::createStore<ESM::Armor>(*this);
-        ESMStoreImp::createStore<ESM::BodyPart>(*this);
-        ESMStoreImp::createStore<ESM::Book>(*this);
-        ESMStoreImp::createStore<ESM::BirthSign>(*this);
-        ESMStoreImp::createStore<ESM::Class>(*this);
-        ESMStoreImp::createStore<ESM::Clothing>(*this);
-        ESMStoreImp::createStore<ESM::Container>(*this);
-        ESMStoreImp::createStore<ESM::Creature>(*this);
-        ESMStoreImp::createStore<ESM::Dialogue>(*this);
-        ESMStoreImp::createStore<ESM::Door>(*this);
-        ESMStoreImp::createStore<ESM::Enchantment>(*this);
-        ESMStoreImp::createStore<ESM::Faction>(*this);
-        ESMStoreImp::createStore<ESM::Global>(*this);
-        ESMStoreImp::createStore<ESM::Ingredient>(*this);
-        ESMStoreImp::createStore<ESM::CreatureLevList>(*this);
-        ESMStoreImp::createStore<ESM::ItemLevList>(*this);
-        ESMStoreImp::createStore<ESM::Light>(*this);
-        ESMStoreImp::createStore<ESM::Lockpick>(*this);
-        ESMStoreImp::createStore<ESM::Miscellaneous>(*this);
-        ESMStoreImp::createStore<ESM::NPC>(*this);
-        ESMStoreImp::createStore<ESM::Probe>(*this);
-        ESMStoreImp::createStore<ESM::Race>(*this);
-        ESMStoreImp::createStore<ESM::Region>(*this);
-        ESMStoreImp::createStore<ESM::Repair>(*this);
-        ESMStoreImp::createStore<ESM::SoundGenerator>(*this);
-        ESMStoreImp::createStore<ESM::Sound>(*this);
-        ESMStoreImp::createStore<ESM::Spell>(*this);
-        ESMStoreImp::createStore<ESM::StartScript>(*this);
-        ESMStoreImp::createStore<ESM::Static>(*this);
-        ESMStoreImp::createStore<ESM::Weapon>(*this);
-        ESMStoreImp::createStore<ESM::GameSetting>(*this);
-        ESMStoreImp::createStore<ESM::Script>(*this);
-        ESMStoreImp::createStore<ESM::Cell>(*this);
-        ESMStoreImp::createStore<ESM::Land>(*this);
-        ESMStoreImp::createStore<ESM::LandTexture>(*this);
-        ESMStoreImp::createStore<ESM::Pathgrid>(*this);
+        assert(sRecordTypeCounter == sRecordIndexCount); //Otherwise something wen wrong with assigning index to stores
+        constexpr_for<0, sRecordIndexCount,1> ([this](auto storeIndex)
+            {
+                ESMStoreImp::createStore<StoreIndexToRecordType<storeIndex>::recordType>(*this);
+            });
 
         mStoreImp = std::make_unique<ESMStoreImp>(*this);
         mDynamicCount = 0;
