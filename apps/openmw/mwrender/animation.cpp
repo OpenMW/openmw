@@ -527,13 +527,7 @@ namespace MWRender
         mLightListCallback = new SceneUtil::LightListCallback;
     }
 
-    Animation::~Animation()
-    {
-        Animation::setLightEffect(0.f);
-
-        if (mObjectRoot)
-            mInsert->removeChild(mObjectRoot);
-    }
+    Animation::~Animation() = default;
 
     void Animation::setActive(int active)
     {
@@ -1767,6 +1761,15 @@ namespace MWRender
     float Animation::getHeadYaw() const
     {
         return mHeadYawRadians;
+    }
+
+    void Animation::removeFromScene()
+    {
+        if (mGlowLight != nullptr)
+            mInsert->removeChild(mGlowLight);
+
+        if (mObjectRoot != nullptr)
+            mInsert->removeChild(mObjectRoot);
     }
 
     // ------------------------------------------------------

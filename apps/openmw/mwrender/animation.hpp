@@ -497,6 +497,8 @@ public:
     virtual void setAccurateAiming(bool enabled) {}
     virtual bool canBeHarvested() const { return false; }
 
+    virtual void removeFromScene();
+
 private:
     Animation(const Animation&);
     void operator=(Animation&);

@@ -115,6 +115,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
     const auto iter = mObjects.find(ptr.mRef);
     if(iter != mObjects.end())
     {
+        iter->second->removeFromScene();
         mObjects.erase(iter);
 
         if (ptr.getClass().isActor())
@@ -148,7 +149,8 @@ void Objects::removeCell(const MWWorld::CellStore* store)
                 ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
             }
 
-            mObjects.erase(iter++);
+            iter->second->removeFromScene();
+            iter = mObjects.erase(iter);
         }
         else
             ++iter;
