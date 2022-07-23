@@ -535,16 +535,6 @@ namespace MWRender
             mInsert->removeChild(mObjectRoot);
     }
 
-    MWWorld::ConstPtr Animation::getPtr() const
-    {
-        return mPtr;
-    }
-
-    MWWorld::Ptr Animation::getPtr()
-    {
-        return mPtr;
-    }
-
     void Animation::setActive(int active)
     {
         if (mSkeleton)
