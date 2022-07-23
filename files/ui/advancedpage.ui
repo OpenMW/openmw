@@ -695,7 +695,7 @@
                             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls how much eye adaptation can change from frame to frame. Smaller values makes for slower transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
                           <property name="text">
-                            <string>HDR exposure time</string>
+                            <string>Auto exposure speed</string>
                           </property>
                         </widget>
                       </item>
@@ -708,10 +708,10 @@
                             <number>3</number>
                           </property>
                           <property name="minimum">
-                            <double>0.000000000000000</double>
+                            <double>0.010000000000000</double>
                           </property>
                           <property name="maximum">
-                            <double>1.000000000000000</double>
+                            <double>10.000000000000000</double>
                           </property>
                           <property name="singleStep">
                             <double>0.001000000000000</double>

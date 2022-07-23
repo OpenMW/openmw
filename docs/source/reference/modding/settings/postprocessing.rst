@@ -34,12 +34,12 @@ Automatically reloads a shader if the file has been changed. This is useful for 
 .. warning::
     This should be disabled for normal gameplay
 
-hdr exposure time
------------------
+auto exposure speed
+-------------------
 
 :Type:      float
-:Range:     0.0 to 1.0
-:Default:   0.05
+:Range:     Any number > 0.0001
+:Default:   0.9
 
 Use for eye adaptation to control speed at which average scene luminance can change from one frame to the next.
 Average scene luminance is used in some shader effects for features such as dynamic eye adaptation.

@@ -27,8 +27,8 @@ namespace MWRender
 
         addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, 3));
 
-        mHDRDriver = HDRDriver(shaderManager);
-        mHDRDriver.disable();
+        mLuminanceCalculator = LuminanceCalculator(shaderManager);
+        mLuminanceCalculator.disable();
 
         Shader::ShaderManager::DefineMap defines;
         Stereo::Manager::instance().shaderStereoDefines(defines);
@@ -158,7 +158,7 @@ namespace MWRender
                 mMultiviewResolveStateSet->setTextureAttribute(PostProcessor::Unit_LastShader, (osg::Texture*)mMultiviewResolveFramebuffer->getAttachment(osg::Camera::COLOR_BUFFER0).getTexture());
             }
 
-            mHDRDriver.dirty(bufferData.sceneTex->getTextureWidth(), bufferData.sceneTex->getTextureHeight());
+            mLuminanceCalculator.dirty(bufferData.sceneTex->getTextureWidth(), bufferData.sceneTex->getTextureHeight());
 
             if (Stereo::getStereo())
                 mRenderViewport = new osg::Viewport(0, 0, bufferData.sceneTex->getTextureWidth(), bufferData.sceneTex->getTextureHeight());
@@ -174,10 +174,10 @@ namespace MWRender
             {GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT}
         }};
 
-        (bufferData.hdr) ? mHDRDriver.enable() : mHDRDriver.disable();
+        (bufferData.hdr) ? mLuminanceCalculator.enable() : mLuminanceCalculator.disable();
 
         // A histogram based approach is superior way to calculate scene luminance. Using mipmaps is more broadly supported, so that's what we use for now.
-        mHDRDriver.draw(*this, renderInfo, state, ext, frameId);
+        mLuminanceCalculator.draw(*this, renderInfo, state, ext, frameId);
 
         auto buffer = buffers[0];
 
@@ -217,7 +217,7 @@ namespace MWRender
             node.mRootStateSet->setTextureAttribute(PostProcessor::Unit_Depth, bufferData.depthTex);
 
             if (bufferData.hdr)
-                node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_EyeAdaptation, mHDRDriver.getLuminanceTexture(frameId));
+                node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_EyeAdaptation, mLuminanceCalculator.getLuminanceTexture(frameId));
 
             if (bufferData.normalsTex)
                 node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_Normals, bufferData.normalsTex);
