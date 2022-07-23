@@ -64,9 +64,6 @@ ActorAnimation::~ActorAnimation()
     {
         mInsert->removeChild(iter->second);
     }
-
-    mScabbard.reset();
-    mHolsteredShield.reset();
 }
 
 PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor)
