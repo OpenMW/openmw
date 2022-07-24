@@ -201,30 +201,14 @@ namespace MWClass
         return newPtr;
     }
 
-    std::pair<int, std::string> Miscellaneous::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
-    {
-        // Special checks for soul gems.
-        
-        if (::Misc::StringUtils::ciEqualPrefix("misc_soulgem", ptr.getCellRef().getRefId()))
-        {
-            if (npc != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                return std::make_pair(0, "Only the player can use soul gems.");
-
-            if (ptr.getCellRef().getSoul().empty())
-                return std::make_pair(0, "#{sNotifyMessage32}");
-
-            if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ptr.getCellRef().getSoul()))
-                return std::make_pair(0, "Unknown soul creature id.");
-        }
-
-        return std::make_pair(1, "");
-    }
-
     std::unique_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        if (ptr.getCellRef().getSoul().empty() || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ptr.getCellRef().getSoul()))
-            return std::make_unique<MWWorld::NullAction>();
-        return std::make_unique<MWWorld::ActionSoulgem>(ptr);
+        const char soulgem_prefix[] = "misc_soulgem";
+
+        if (::Misc::StringUtils::ciCompareLen(ptr.getCellRef().getRefId(), soulgem_prefix, sizeof(soulgem_prefix) - 1) == 0)
+            return std::make_unique<MWWorld::ActionSoulgem>(ptr);
+
+        return std::make_unique<MWWorld::NullAction>();
     }
 
     bool Miscellaneous::canSell (const MWWorld::ConstPtr& item, int npcServices) const

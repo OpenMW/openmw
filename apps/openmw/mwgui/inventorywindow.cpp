@@ -549,19 +549,6 @@ namespace MWGui
             }
         }
 
-        // Separate check for the soul gems.
-        else if (::Misc::StringUtils::ciEqualPrefix("misc_soulgem", ptr.getCellRef().getRefId()))
-        {
-            std::pair<int, std::string> canEquip = ptr.getClass().canBeEquipped(ptr, player);
-
-            if (canEquip.first == 0)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
-                updateItemView();
-                return;
-            }
-        }
-
         // If the item has a script, set OnPCEquip or PCSkipEquip to 1
         if (!script.empty())
         {

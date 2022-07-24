@@ -97,34 +97,6 @@ public:
         return ciEqual(x, std::string_view(y, n - 1));
     }
 
-    template <class X, class Y>
-    static bool ciEqualPrefix(const X& x, const Y& y)
-    {
-        return std::equal(std::begin(x), std::end(x), std::begin(y),
-                          [] (char l, char r) { return toLower(l) == toLower(r); });
-    }
-
-    template <std::size_t n>
-    static auto ciEqualPrefix(const char(& x)[n], const char(& y)[n])
-    {
-        static_assert(n > 0);
-        return ciEqualPrefix(std::string_view(x, n - 1), std::string_view(y, n - 1));
-    }
-
-    template <std::size_t n, class T>
-    static auto ciEqualPrefix(const char(& x)[n], const T& y)
-    {
-        static_assert(n > 0);
-        return ciEqualPrefix(std::string_view(x, n - 1), y);
-    }
-
-    template <std::size_t n, class T>
-    static auto ciEqualPrefix(const T& x, const char(& y)[n])
-    {
-        static_assert(n > 0);
-        return ciEqualPrefix(x, std::string_view(y, n - 1));
-    }
-
     static int ciCompareLen(std::string_view x, std::string_view y, std::size_t len)
     {
         std::string_view::const_iterator xit = x.begin();

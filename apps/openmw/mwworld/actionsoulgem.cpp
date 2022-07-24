@@ -1,9 +1,14 @@
 #include "actionsoulgem.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+
+#include "../mwworld/esmstore.hpp"
 
 namespace MWWorld
 {
@@ -23,7 +28,25 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage5}");
             return;
         }
-        MWBase::Environment::get().getWindowManager()->showSoulgemDialog(getTarget());
+
+        const auto& target = getTarget();
+        const auto& targetSoul = target.getCellRef().getSoul();
+
+        if (targetSoul.empty())
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage32}");
+            return;
+        }
+
+        if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(targetSoul))
+        {
+            const auto& message = "Unknown soul creature id \"" + targetSoul + "\".";
+            Log(Debug::Warning) << message;
+            MWBase::Environment::get().getWindowManager()->messageBox(message);
+            return;
+        }
+
+        MWBase::Environment::get().getWindowManager()->showSoulgemDialog(target);
     }
 
 
