@@ -20,6 +20,8 @@ set(BUILTIN_DATA_FILES
     fonts/Pelagiad.omwfont
     fonts/PelagiadFontLicense.txt
 
+    l10n/BuiltInShaders/en.yaml
+    l10n/BuiltInShaders/ru.yaml
     l10n/Calendar/en.yaml
     l10n/Calendar/ru.yaml
     l10n/Calendar/sv.yaml

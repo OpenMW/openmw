@@ -3,6 +3,8 @@ uniform_float uFactor {
     min = 0.01;
     max = 20.0;
     default = 1.0;
+    display_name = "#{BuiltInShaders:DisplayDepthFactorName}";
+    description = "#{BuiltInShaders:DisplayDepthFactorDescription}";
 }
 
 fragment main {
@@ -20,7 +22,7 @@ fragment main {
 
 technique {
     passes = main;
-    description = "Visualizes the depth buffer.";
+    description = "#{BuiltInShaders:DisplayDepthDescription}";
     author = "OpenMW";
     version = "1.0";
 }

@@ -1,0 +1,3 @@
+DisplayDepthDescription: "Visualizes the depth buffer."
+DisplayDepthFactorDescription: "Determines correlation between pixel depth value and its output color. High values lead to brighter image."
+DisplayDepthFactorName: "Color factor"
