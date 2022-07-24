@@ -30,7 +30,7 @@ namespace MWWorld
         }
 
         const auto& target = getTarget();
-        const auto& targetSoul = target.getCellRef().getSoul();
+        const std::string targetSoul = target.getCellRef().getSoul();
 
         if (targetSoul.empty())
         {
@@ -40,9 +40,7 @@ namespace MWWorld
 
         if (!MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(targetSoul))
         {
-            const auto& message = "Unknown soul creature id \"" + targetSoul + "\".";
-            Log(Debug::Warning) << message;
-            MWBase::Environment::get().getWindowManager()->messageBox(message);
+            Log(Debug::Warning) << "Soul '" << targetSoul << "' not found (item: '" << target.getCellRef().getRefId() << "')";
             return;
         }
 

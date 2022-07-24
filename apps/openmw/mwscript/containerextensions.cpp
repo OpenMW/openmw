@@ -307,9 +307,9 @@ namespace MWScript
 
                     // With soul gems we prefer filled ones.
 
-                    const char soulgem_prefix[] = "misc_soulgem";
+                    const std::string soulgemPrefix = "misc_soulgem";
 
-                    if (::Misc::StringUtils::ciCompareLen(item, soulgem_prefix, sizeof(soulgem_prefix) - 1) == 0)
+                    if (::Misc::StringUtils::ciCompareLen(item, soulgemPrefix, soulgemPrefix.length()) == 0)
                     {
                         it = invStore.end();
 

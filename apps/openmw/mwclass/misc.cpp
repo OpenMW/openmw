@@ -203,9 +203,9 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        const char soulgem_prefix[] = "misc_soulgem";
+        const std::string soulgemPrefix = "misc_soulgem";
 
-        if (::Misc::StringUtils::ciCompareLen(ptr.getCellRef().getRefId(), soulgem_prefix, sizeof(soulgem_prefix) - 1) == 0)
+        if (::Misc::StringUtils::ciCompareLen(ptr.getCellRef().getRefId(), soulgemPrefix, soulgemPrefix.length()) == 0)
             return std::make_unique<MWWorld::ActionSoulgem>(ptr);
 
         return std::make_unique<MWWorld::NullAction>();
