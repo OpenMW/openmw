@@ -1,0 +1,3 @@
+DisplayDepthDescription: "Визуализирует буфер глубины."
+DisplayDepthFactorDescription: "Определяет соотношение между значением глубины пикселя и его цветом. Чем выше значение, тем ярче будет изображение."
+DisplayDepthFactorName: "Соотношение цвета"

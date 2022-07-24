@@ -80,7 +80,10 @@ namespace fx
 
         void UniformBase::init(const std::shared_ptr<fx::Types::UniformBase>& uniform)
         {
-            mLabel->setCaption(uniform->mDisplayName.empty() ? uniform->mName : uniform->mDisplayName);
+            if (uniform->mDisplayName.empty())
+                mLabel->setCaption(uniform->mName);
+            else
+                mLabel->setCaptionWithReplacing(uniform->mDisplayName);
 
             if (uniform->mDescription.empty())
             {

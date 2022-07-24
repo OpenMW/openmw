@@ -1,7 +1,11 @@
 Abovewater: "Над водой"
 Author: "Автор"
 Configuration: "Настройки"
+ContrastLevelDescription: "Контрастность изображения"
+ContrastLevelName: "Контрастность"
 Description: "Описание"
+GammaLevelDescription: "Яркость изображения"
+GammaLevelName: "Яркость"
 InExteriors: "Вне помещений"
 InInteriors: "В помещениях"
 KeyboardControls: |
@@ -11,10 +15,11 @@ KeyboardControls: |
     Shift+Left-Arrow > Выключить шейдер
     Shift+Up-Arrow > Передвинуть шейдер выше
     Shift+Down-Arrow > Передвинуть шейдер ниже
+MainPassDescription: "Передает данные сцены в шейдеры постобработки. Не может быть выключен или передвинут."
 PostProcessHUD: "Настройки постобработки"
 ResetShader: "Обнулить настройки этого шейдера"
 ShaderLocked: "Заблокирован"
-ShaderLockedDescription: "Не может быть выключен или перемещен, управляется внешним Lua-скриптом"
+ShaderLockedDescription: "Не может быть выключен или передвинут, управляется внешним Lua-скриптом"
 ShaderResetUniform: "x"
 Underwater: "Под водой"
 Version: "Версия"

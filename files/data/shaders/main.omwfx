@@ -11,7 +11,8 @@ uniform_float uGamma {
     step = 0.01;
     min = 0.0;
     max = 5.0;
-    description = "gamma level";
+    display_name = "#{PostProcessing:GammaLevelName}";
+    description = "#{PostProcessing:GammaLevelDescription}";
 }
 
 uniform_float uContrast {
@@ -19,7 +20,8 @@ uniform_float uContrast {
     step = 0.01;
     min = 0.0;
     max = 5.0;
-    description = "constrast level";
+    display_name = "#{PostProcessing:ContrastLevelName}";
+    description = "#{PostProcessing:ContrastLevelDescription}";
 }
 
 fragment main {
@@ -37,7 +39,7 @@ fragment main {
 }
 
 technique {
-    description = "Main pass.";
+    description = "#{PostProcessing:MainPassDescription}";
     version = "1.0";
     author = "OpenMW";
     passes = main;

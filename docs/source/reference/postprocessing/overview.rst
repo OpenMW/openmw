@@ -34,12 +34,19 @@ of two ways:
    key by default. This is the recommended method as manual editing can be error
    prone.
 
+Localization
+============
+
+Output text (e.g. shader description) can use the ``#{ContextName:Key}`` tags.
+In this case OpenMW replaces it for value of ``Key`` key from the
+``Data Files\L10n\ContextName\used_language.yaml`` file.
+
 Hot Reloading
-==============
+=============
 
 It is possible to modify a shader without restarting OpenMW, :ref:`live reload`
 must be enabled in ``settings.cfg``. Whenever a file is modified and saved, the
 shader will automatically reload in game. This allows shaders to be written in a
-text editor you are comfortable with. The only restriction is that new shaders
-cannot be added, as the VFS will not be rebuilt and OpenMW will not be aware of
-the new file.
+text editor you are comfortable with. The only restriction is that the VFS is not
+aware of new files or changes in non-shader files, so new shaders and localization
+strings can not be used.
