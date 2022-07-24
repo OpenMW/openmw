@@ -1792,6 +1792,7 @@ void CharacterController::updateAnimQueue()
 void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
     const MWWorld::Class &cls = mPtr.getClass();
     osg::Vec3f movement(0.f, 0.f, 0.f);
     float speed = 0.f;
@@ -2063,8 +2064,13 @@ void CharacterController::update(float duration)
                     // inflict fall damages
                     if (!godmode)
                     {
-                        float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
-                        cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
+                        DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
+                        float realHealthLost = healthLost * (1.0f - 0.25f * fatigueTerm);
+                        health.setCurrent(health.getCurrent() - realHealthLost);
+                        cls.getCreatureStats(mPtr).setHealth(health);
+                        sndMgr->playSound3D(mPtr, "Health Damage", 1.0f, 1.0f);
+                        if (isPlayer)
+                            MWBase::Environment::get().getWindowManager()->activateHitOverlay();
                     }
 
                     const float acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
@@ -2136,7 +2142,6 @@ void CharacterController::update(float duration)
 
         if (playLandingSound)
         {
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             std::string sound;
             osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
             if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
