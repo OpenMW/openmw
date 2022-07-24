@@ -33,6 +33,7 @@ namespace MWGui
         void onAssignMagic (const std::string& spellId);
         void onAssignMagicCancel ();
         void onOpen() override;
+        void onClose() override;
 
         void activateQuickKey(int index);
         void updateActivatedQuickKey();

@@ -479,12 +479,6 @@ namespace MWInput
     {
         if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
         {
-            //Handle any open Modal windows
-            while (MyGUI::InputManager::getInstance().isModalAny())
-            {
-                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
-            }
-            //And handle the actual main window
             MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
             return;
         }
