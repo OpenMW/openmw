@@ -367,8 +367,9 @@ namespace MWRender
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-                                       Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                                       const std::string& resourcePath, DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore)
+        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::string& resourcePath,
+        DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
+        SceneUtil::UnrefQueue& unrefQueue)
         : mSkyBlending(Settings::Manager::getBool("sky blending", "Fog"))
         , mViewer(viewer)
         , mRootNode(rootNode)
@@ -479,7 +480,7 @@ namespace MWRender
         mRecastMesh = std::make_unique<RecastMesh>(mRootNode, Settings::Manager::getBool("enable recast mesh render", "Navigator"));
         mPathgrid = std::make_unique<Pathgrid>(mRootNode);
 
-        mObjects = std::make_unique<Objects>(mResourceSystem, sceneRoot);
+        mObjects = std::make_unique<Objects>(mResourceSystem, sceneRoot, unrefQueue);
 
         if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
         {

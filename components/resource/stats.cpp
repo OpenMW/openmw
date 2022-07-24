@@ -417,6 +417,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "Compiling",
             "WorkQueue",
             "WorkThread",
+            "UnrefQueue",
             "",
             "Texture",
             "StateSet",

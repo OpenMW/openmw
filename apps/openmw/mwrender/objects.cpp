@@ -4,6 +4,7 @@
 #include <osg/UserDataContainer>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
@@ -17,9 +18,11 @@
 namespace MWRender
 {
 
-Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode)
+Objects::Objects(Resource::ResourceSystem* resourceSystem, const osg::ref_ptr<osg::Group>& rootNode,
+    SceneUtil::UnrefQueue& unrefQueue)
     : mRootNode(rootNode)
     , mResourceSystem(resourceSystem)
+    , mUnrefQueue(unrefQueue)
 {
 }
 
@@ -116,6 +119,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
     if(iter != mObjects.end())
     {
         iter->second->removeFromScene();
+        mUnrefQueue.push(std::move(iter->second));
         mObjects.erase(iter);
 
         if (ptr.getClass().isActor())
@@ -150,6 +154,7 @@ void Objects::removeCell(const MWWorld::CellStore* store)
             }
 
             iter->second->removeFromScene();
+            mUnrefQueue.push(std::move(iter->second));
             iter = mObjects.erase(iter);
         }
         else
