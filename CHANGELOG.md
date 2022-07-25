@@ -106,6 +106,7 @@
     Bug #6417: OpenMW doesn't always use the right node to accumulate movement
     Bug #6429: Wyrmhaven: Can't add AI packages to player
     Bug #6433: Items bound to Quick Keys sometimes do not appear until the Quick Key menu is opened
+    Bug #6435: Add support for MSVC 2022
     Bug #6451: Weapon summoned from Cast When Used item will have the name "None"
     Bug #6473: Strings from NIF should be parsed only to first null terminator
     Bug #6493: Unlocking owned but not locked or unlocked containers is considered a crime
