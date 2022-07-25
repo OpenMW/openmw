@@ -40,6 +40,9 @@ namespace MWGui
             MyGUI::ComboBox* mLightingMethodButton;
             MyGUI::Button* mLightsResetButton;
 
+            MyGUI::ComboBox* mPrimaryLanguage;
+            MyGUI::ComboBox* mSecondaryLanguage;
+
             // controls
             MyGUI::ScrollView* mControlsBox;
             MyGUI::Button* mResetControlsButton;
@@ -71,6 +74,10 @@ namespace MWGui
             void onLightingMethodButtonChanged(MyGUI::ComboBox* _sender, size_t pos);
             void onLightsResetButtonClicked(MyGUI::Widget* _sender);
             void onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos);
+
+            void onPrimaryLanguageChanged(MyGUI::ComboBox* _sender, size_t pos) { onLanguageChanged(0, _sender, pos); }
+            void onSecondaryLanguageChanged(MyGUI::ComboBox* _sender, size_t pos) { onLanguageChanged(1, _sender, pos); }
+            void onLanguageChanged(size_t langPriority, MyGUI::ComboBox* _sender, size_t pos);
 
             void onWindowModeChanged(MyGUI::ComboBox* _sender, size_t pos);
 
