@@ -571,7 +571,10 @@ namespace MWRender
         if (enabled && !mCreated)
             create();
 
-        mRootNode->setNodeMask(enabled ? Mask_Sky : 0u);
+        const osg::Node::NodeMask mask = enabled ? Mask_Sky : 0u;
+
+        mEarlyRenderBinRoot->setNodeMask(mask);
+        mRootNode->setNodeMask(mask);
 
         if (!enabled && mParticleNode && mParticleEffect)
         {
