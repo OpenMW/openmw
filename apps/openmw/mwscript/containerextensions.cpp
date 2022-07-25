@@ -304,11 +304,40 @@ namespace MWScript
 
                     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ContainerStoreIterator it = invStore.begin();
-                    for (; it != invStore.end(); ++it)
+
+                    // With soul gems we prefer filled ones.
+
+                    const std::string soulgemPrefix = "misc_soulgem";
+
+                    if (::Misc::StringUtils::ciCompareLen(item, soulgemPrefix, soulgemPrefix.length()) == 0)
                     {
-                        if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
-                            break;
+                        it = invStore.end();
+
+                        for (auto it_any = invStore.begin(); it_any != invStore.end(); ++it_any)
+                        {
+                            if (::Misc::StringUtils::ciEqual(it_any->getCellRef().getRefId(), item))
+                            {
+                                if (!it_any->getCellRef().getSoul().empty() &&
+                                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(it_any->getCellRef().getSoul()))
+                                {
+                                    it = it_any;
+                                    break;
+                                }
+                                else if (it == invStore.end())
+                                    it = it_any;
+                            }
+                        }
                     }
+
+                    else
+                    {
+                        for (; it != invStore.end(); ++it)
+                        {
+                            if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
+                                break;
+                        }
+                    }
+
                     if (it == invStore.end())
                     {
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), item, 1);

@@ -133,6 +133,7 @@
     Bug #6799: Game crashes if an NPC has no Class attached
     Bug #6849: ImageButton texture is not scaled properly
     Bug #6895: Removing a negative number of items from a script, makes the script terminate with an error
+    Bug #6901: Morrowind.exe soul gem usage discrepancy
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
