@@ -28,7 +28,6 @@
     Bug #5207: Loose summons can be present in scene
     Bug #5279: Ingame console stops auto-scrolling after clicking output
     Bug #5318: Aiescort behaves differently from vanilla
-    Bug #5371: 'Dead' slaughterfish added by mod are animated/alive
     Bug #5377: Console does not appear after using menutest in inventory
     Bug #5379: Wandering NPCs falling through cantons
     Bug #5394: Windows snapping no longer works
