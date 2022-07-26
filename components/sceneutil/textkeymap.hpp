@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 
 namespace SceneUtil
 {
@@ -57,12 +58,12 @@ namespace SceneUtil
             return mTextKeyByTime.empty();
         }
 
-        auto findGroupStart(const std::string &groupName) const
+        auto findGroupStart(std::string_view groupName) const
         {
             return std::find_if(mTextKeyByTime.begin(), mTextKeyByTime.end(), IsGroupStart{groupName});
         }
 
-        bool hasGroupStart(const std::string &groupName) const
+        bool hasGroupStart(std::string_view groupName) const
         {
             return mGroups.count(groupName) > 0;
         }
@@ -70,7 +71,7 @@ namespace SceneUtil
     private:
         struct IsGroupStart
         {
-            const std::string &mGroupName;
+            std::string_view mGroupName;
 
             bool operator ()(const std::multimap<float, std::string>::value_type& value) const
             {
@@ -79,7 +80,7 @@ namespace SceneUtil
             }
         };
 
-        std::set<std::string> mGroups;
+        std::set<std::string, std::less<>> mGroups;
         std::multimap<float, std::string> mTextKeyByTime;
     };
 }

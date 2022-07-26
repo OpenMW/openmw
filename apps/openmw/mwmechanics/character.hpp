@@ -183,7 +183,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     bool mIsMovingBackward{false};
     osg::Vec2f mSmoothedSpeed;
 
-    std::string getMovementBasedAttackType() const;
+    std::string_view getMovementBasedAttackType() const;
 
     void clearStateAnimation(std::string &anim) const;
     void resetCurrentJumpState();
@@ -227,8 +227,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     std::string fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask = nullptr) const;
 
-    std::string getWeaponAnimation(int weaponType) const;
-    std::string getWeaponShortGroup(int weaponType) const;
+    std::string_view getWeaponAnimation(int weaponType) const;
+    std::string_view getWeaponShortGroup(int weaponType) const;
 
     bool getAttackingOrSpell() const;
     void setAttackingOrSpell(bool attackingOrSpell) const;
@@ -289,8 +289,8 @@ public:
 
     void setVisibility(float visibility) const;
     void castSpell(const std::string& spellId, bool manualSpell=false);
-    void setAIAttackType(const std::string& attackType);
-    static std::string getRandomAttackType();
+    void setAIAttackType(std::string_view attackType);
+    static std::string_view getRandomAttackType();
 
     bool readyToPrepareAttack() const;
     bool readyToStartAttack() const;

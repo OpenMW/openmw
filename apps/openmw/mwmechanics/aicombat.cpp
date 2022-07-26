@@ -31,7 +31,7 @@ namespace
 {
 
     //chooses an attack depending on probability to avoid uniformity
-    std::string chooseBestAttack(const ESM::Weapon* weapon);
+    std::string_view chooseBestAttack(const ESM::Weapon* weapon);
 
     osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
         float duration, int weapType, float strength);
@@ -682,10 +682,8 @@ namespace MWMechanics
 namespace
 {
 
-std::string chooseBestAttack(const ESM::Weapon* weapon)
+std::string_view chooseBestAttack(const ESM::Weapon* weapon)
 {
-    std::string attackType;
-
     if (weapon != nullptr)
     {
         //the more damage attackType deals the more probability it has
@@ -696,16 +694,13 @@ std::string chooseBestAttack(const ESM::Weapon* weapon)
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         float roll = Misc::Rng::rollClosedProbability(prng) * (slash + chop + thrust);
         if(roll <= slash)
-            attackType = "slash";
+            return "slash";
         else if(roll <= (slash + thrust))
-            attackType = "thrust";
+            return "thrust";
         else
-            attackType = "chop";
+            return "chop";
     }
-    else
-        attackType = MWMechanics::CharacterController::getRandomAttackType();
-
-    return attackType;
+    return MWMechanics::CharacterController::getRandomAttackType();
 }
 
 osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,

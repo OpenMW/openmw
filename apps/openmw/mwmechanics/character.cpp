@@ -428,8 +428,9 @@ void CharacterController::refreshJumpAnims(JumpingState jump, bool force)
         return;
     }
 
-    std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
-    std::string jumpAnimName = "jump" + weapShortGroup;
+    std::string_view weapShortGroup = getWeaponShortGroup(mWeaponType);
+    std::string jumpAnimName = "jump";
+    jumpAnimName += weapShortGroup;
     MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
     if (!weapShortGroup.empty() && !mAnimation->hasAnimation(jumpAnimName))
         jumpAnimName = fallbackShortWeaponGroup("jump", &jumpmask);
@@ -490,13 +491,13 @@ void CharacterController::onClose() const
     }
 }
 
-std::string CharacterController::getWeaponAnimation(int weaponType) const
+std::string_view CharacterController::getWeaponAnimation(int weaponType) const
 {
-    std::string weaponGroup = getWeaponType(weaponType)->mLongGroup;
+    std::string_view weaponGroup = getWeaponType(weaponType)->mLongGroup;
     if (isRealWeapon(weaponType) && !mAnimation->hasAnimation(weaponGroup))
     {
-        static const std::string oneHandFallback = getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
-        static const std::string twoHandFallback = getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
+        static const std::string_view oneHandFallback = getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
+        static const std::string_view twoHandFallback = getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
 
         const ESM::WeaponType* weapInfo = getWeaponType(weaponType);
 
@@ -512,7 +513,7 @@ std::string CharacterController::getWeaponAnimation(int weaponType) const
     return weaponGroup;
 }
 
-std::string CharacterController::getWeaponShortGroup(int weaponType) const
+std::string_view CharacterController::getWeaponShortGroup(int weaponType) const
 {
     if (weaponType == ESM::Weapon::HandToHand && !mPtr.getClass().isBipedal(mPtr))
         return {};
@@ -529,8 +530,8 @@ std::string CharacterController::fallbackShortWeaponGroup(const std::string& bas
         return baseGroupName;
     }
 
-    static const std::string oneHandFallback = getWeaponShortGroup(ESM::Weapon::LongBladeOneHand);
-    static const std::string twoHandFallback = getWeaponShortGroup(ESM::Weapon::LongBladeTwoHand);
+    static const std::string_view oneHandFallback = getWeaponShortGroup(ESM::Weapon::LongBladeOneHand);
+    static const std::string_view twoHandFallback = getWeaponShortGroup(ESM::Weapon::LongBladeTwoHand);
 
     std::string groupName = baseGroupName;
     const ESM::WeaponType* weapInfo = getWeaponType(mWeaponType);
@@ -583,20 +584,26 @@ void CharacterController::refreshMovementAnims(CharacterState movement, bool for
 
     MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
 
-    std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
+    std::string_view weapShortGroup = getWeaponShortGroup(mWeaponType);
 
     // Non-biped creatures don't use spellcasting-specific movement animations.
     if(!isRealWeapon(mWeaponType) && !mPtr.getClass().isBipedal(mPtr))
-        weapShortGroup.clear();
+        weapShortGroup = {};
 
     if (swimpos == std::string::npos && !weapShortGroup.empty())
     {
         std::string weapMovementAnimName;
         // Spellcasting stance turning is a special case
         if (mWeaponType == ESM::Weapon::Spell && isTurning())
-            weapMovementAnimName = weapShortGroup + movementAnimName;
+        {
+            weapMovementAnimName = weapShortGroup;
+            weapMovementAnimName += movementAnimName;
+        }
         else
-            weapMovementAnimName = movementAnimName + weapShortGroup;
+        {
+            weapMovementAnimName = movementAnimName;
+            weapMovementAnimName += weapShortGroup;
+        }
 
         if (!mAnimation->hasAnimation(weapMovementAnimName))
             weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
@@ -705,10 +712,11 @@ void CharacterController::refreshIdleAnims(CharacterState idle, bool force)
 
     if (fallback || mIdleState == CharState_Idle || mIdleState == CharState_SpecialIdle)
     {
-        std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
+        std::string_view weapShortGroup = getWeaponShortGroup(mWeaponType);
         if (!weapShortGroup.empty())
         {
-            std::string weapIdleGroup = idleGroup + weapShortGroup;
+            std::string weapIdleGroup = idleGroup;
+            weapIdleGroup += weapShortGroup;
             if (!mAnimation->hasAnimation(weapIdleGroup))
                 weapIdleGroup = fallbackShortWeaponGroup(idleGroup);
             idleGroup = weapIdleGroup;
@@ -2631,7 +2639,7 @@ void CharacterController::setVisibility(float visibility) const
     mAnimation->setAlpha(visibility);
 }
 
-std::string CharacterController::getMovementBasedAttackType() const
+std::string_view CharacterController::getMovementBasedAttackType() const
 {
     float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
     if (std::abs(move[1]) > std::abs(move[0]) + 0.2f) // forward-backward
@@ -2730,12 +2738,12 @@ void CharacterController::castSpell(const std::string& spellId, bool manualSpell
     action.prepare(mPtr);
 }
 
-void CharacterController::setAIAttackType(const std::string& attackType)
+void CharacterController::setAIAttackType(std::string_view attackType)
 {
     mAttackType = attackType;
 }
 
-std::string CharacterController::getRandomAttackType()
+std::string_view CharacterController::getRandomAttackType()
 {
     MWBase::World* world = MWBase::Environment::get().getWorld();
     float random = Misc::Rng::rollProbability(world->getPrng());

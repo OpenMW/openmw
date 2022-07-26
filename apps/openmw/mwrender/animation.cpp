@@ -692,7 +692,7 @@ namespace MWRender
         mAnimVelocities.clear();
     }
 
-    bool Animation::hasAnimation(const std::string &anim) const
+    bool Animation::hasAnimation(std::string_view anim) const
     {
         AnimSourceList::const_iterator iter(mAnimSources.begin());
         for(;iter != mAnimSources.end();++iter)
