@@ -1,0 +1,3 @@
+DisplayDepthDescription: "Visualiserar djupbufferten."
+DisplayDepthFactorDescription: "Avgör korrelation mellan djupvärdet på pixeln och dess producerade färg. Högre värden ger ljusare bild."
+DisplayDepthFactorName: "Färgfaktor"
