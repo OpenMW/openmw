@@ -104,7 +104,7 @@ namespace
             return Constants::CellGridRadius;
         const int maxLocalViewingDistance = std::max(Settings::Manager::getInt("max local viewing distance", "Map"), Constants::CellGridRadius);
         const int viewingDistanceInCells = Settings::Manager::getFloat("viewing distance", "Camera") / Constants::CellSizeInUnits;
-        return std::min(maxLocalViewingDistance, viewingDistanceInCells);
+        return std::clamp(viewingDistanceInCells, Constants::CellGridRadius, maxLocalViewingDistance);
     }
 }
 
