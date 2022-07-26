@@ -584,6 +584,11 @@ void CharacterController::refreshMovementAnims(CharacterState movement, bool for
     MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
 
     std::string weapShortGroup = getWeaponShortGroup(mWeaponType);
+
+    // Non-biped creatures don't use spellcasting-specific movement animations.
+    if(!isRealWeapon(mWeaponType) && !mPtr.getClass().isBipedal(mPtr))
+        weapShortGroup.clear();
+
     if (swimpos == std::string::npos && !weapShortGroup.empty())
     {
         std::string weapMovementAnimName;
