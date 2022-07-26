@@ -2,8 +2,7 @@
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIPLATFORM_H
 
 #include <string>
-
-#include <components/vfs/manager.hpp>
+#include <memory>
 
 namespace osgViewer
 {
@@ -21,6 +20,10 @@ namespace MyGUI
 {
     class LogManager;
 }
+namespace VFS
+{
+    class Manager;
+}
 
 namespace osgMyGUI
 {
@@ -32,11 +35,11 @@ namespace osgMyGUI
     class Platform
     {
     public:
-        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager, const VFS::Manager* vfs, float uiScalingFactor);
+        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager,
+            const VFS::Manager* vfs, float uiScalingFactor, const std::string& resourcePath,
+            const std::string& logName = "MyGUI.log");
 
         ~Platform();
-
-        void initialise(const std::string& resourcePath, const std::string& _logName = "MyGUI.log");
 
         void shutdown();
 
@@ -45,13 +48,10 @@ namespace osgMyGUI
         DataManager* getDataManagerPtr();
 
     private:
-        RenderManager* mRenderManager;
-        DataManager* mDataManager;
-        MyGUI::LogManager* mLogManager;
-        LogFacility* mLogFacility;
-
-        void operator=(const Platform&);
-        Platform(const Platform&);
+        std::unique_ptr<LogFacility> mLogFacility;
+        std::unique_ptr<MyGUI::LogManager> mLogManager;
+        std::unique_ptr<DataManager> mDataManager;
+        std::unique_ptr<RenderManager> mRenderManager;
     };
 
 }

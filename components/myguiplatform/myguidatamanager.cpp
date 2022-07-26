@@ -2,13 +2,11 @@
 
 #include <memory>
 #include <string>
+#include <stdexcept>
 
 #include <MyGUI_DataFileStream.h>
 
-#include <filesystem>
-#include <fstream>
-
-#include <components/debug/debuglog.hpp>
+#include <components/vfs/manager.hpp>
 
 namespace
 {
@@ -33,8 +31,9 @@ void DataManager::setResourcePath(const std::string &path)
     mResourcePath = path;
 }
 
-DataManager::DataManager(const VFS::Manager* vfs)
-    : mVfs(vfs)
+DataManager::DataManager(const std::string& resourcePath, const VFS::Manager* vfs)
+    : mResourcePath(resourcePath)
+    , mVfs(vfs)
 {
 }
 

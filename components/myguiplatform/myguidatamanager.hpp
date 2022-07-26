@@ -5,7 +5,10 @@
 
 #include <string>
 
-#include <components/vfs/manager.hpp>
+namespace VFS
+{
+    class Manager;
+}
 
 namespace osgMyGUI
 {
@@ -13,10 +16,7 @@ namespace osgMyGUI
 class DataManager : public MyGUI::DataManager
 {
 public:
-    void initialise() {}
-    void shutdown() {}
-
-    DataManager(const VFS::Manager* vfs);
+    explicit DataManager(const std::string& path, const VFS::Manager* vfs);
 
     void setResourcePath(const std::string& path);
 

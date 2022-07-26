@@ -20,7 +20,8 @@ namespace Resource
 namespace osgMyGUI
 {
 
-    class OSGTexture : public MyGUI::ITexture {
+    class OSGTexture final : public MyGUI::ITexture
+    {
         std::string mName;
         Resource::ImageManager* mImageManager;
 
@@ -37,7 +38,7 @@ namespace osgMyGUI
     public:
         OSGTexture(const std::string &name, Resource::ImageManager* imageManager);
         OSGTexture(osg::Texture2D* texture, osg::StateSet* injectState = nullptr);
-        virtual ~OSGTexture();
+        ~OSGTexture() override;
 
         osg::StateSet* getInjectState() { return mInjectState; }
 

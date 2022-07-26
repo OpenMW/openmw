@@ -177,10 +177,6 @@ namespace Gui
             Log(Debug::Error) << "Error in the FontLoader destructor: " << e.what();
         }
 
-        for (std::vector<MyGUI::ITexture*>::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
-            delete *it;
-        mTextures.clear();
-
         for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end(); ++it)
         {
             try
@@ -317,15 +313,6 @@ namespace Gui
         unsigned char* texData = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
         memcpy(texData, &textureData[0], textureData.size());
         tex->unlock();
-
-        // Using ResourceManualFont::setTexture, enable for MyGUI 3.2.3
-        /*
-        osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
-        texture->setImage(image);
-        osgMyGUI::OSGTexture* myguiTex = new osgMyGUI::OSGTexture(texture);
-        mTextures.push_back(myguiTex);
-        font->setTexture(myguiTex);
-        */
 
         // We need to emulate loading from XML because the data members are private as of mygui 3.2.0
         MyGUI::xml::Document xmlDocument;
