@@ -60,6 +60,7 @@ namespace SceneUtil
     class ShadowManager;
     class WorkQueue;
     class LightManager;
+    class UnrefQueue;
 }
 
 namespace DetourNavigator
@@ -100,9 +101,10 @@ namespace MWRender
     class RenderingManager : public MWRender::RenderingInterface
     {
     public:
-        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, 
-                         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                         const std::string& resourcePath, DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore);
+        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
+            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::string& resourcePath,
+            DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
+            SceneUtil::UnrefQueue& unrefQueue);
         ~RenderingManager();
 
         osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();

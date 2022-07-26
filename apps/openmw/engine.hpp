@@ -22,6 +22,7 @@ namespace SceneUtil
 {
     class WorkQueue;
     class AsyncScreenCaptureOperation;
+    class UnrefQueue;
 }
 
 namespace VFS
@@ -120,6 +121,7 @@ namespace OMW
             std::unique_ptr<VFS::Manager> mVFS;
             std::unique_ptr<Resource::ResourceSystem> mResourceSystem;
             osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+            std::unique_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
             std::unique_ptr<MWWorld::World> mWorld;
             std::unique_ptr<MWSound::SoundManager> mSoundManager;
             std::unique_ptr<MWScript::ScriptManager> mScriptManager;

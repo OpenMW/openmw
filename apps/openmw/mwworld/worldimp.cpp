@@ -28,6 +28,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/workqueue.hpp>
 
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/settings.hpp>
@@ -139,6 +140,7 @@ namespace MWWorld
         osgViewer::Viewer* viewer,
         osg::ref_ptr<osg::Group> rootNode,
         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+        SceneUtil::UnrefQueue& unrefQueue,
         const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles,
         const std::vector<std::string>& groundcoverFiles,
@@ -187,7 +189,8 @@ namespace MWWorld
             mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
-        mRendering = std::make_unique<MWRender::RenderingManager>(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator, mGroundcoverStore);
+        mRendering = std::make_unique<MWRender::RenderingManager>(viewer, rootNode, resourceSystem, workQueue,
+            resourcePath, *mNavigator, mGroundcoverStore, unrefQueue);
         mProjectileManager = std::make_unique<ProjectileManager>(mRendering->getLightRoot()->asGroup(), resourceSystem, mRendering.get(), mPhysics.get());
         mRendering->preloadCommonAssets();
 

@@ -46,6 +46,7 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/color.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/settings/shadermanager.hpp>
 
@@ -419,7 +420,14 @@ bool OMW::Engine::frame(float frametime)
             mWindowManager->update(frametime);
         }
 
-        if (stats->collectStats("resource"))
+        const bool reportResource = stats->collectStats("resource");
+
+        if (reportResource)
+            stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getSize());
+
+        mUnrefQueue->flush(*mWorkQueue);
+
+        if (reportResource)
         {
             stats->setAttribute(frameNumber, "FrameNumber", frameNumber);
 
@@ -492,6 +500,7 @@ OMW::Engine::~Engine()
 
     mScriptContext = nullptr;
 
+    mUnrefQueue = nullptr;
     mWorkQueue = nullptr;
 
     mViewer = nullptr;
@@ -751,6 +760,7 @@ void OMW::Engine::prepareEngine()
     if (numThreads <= 0)
         throw std::runtime_error("Invalid setting: 'preload num threads' must be >0");
     mWorkQueue = new SceneUtil::WorkQueue(numThreads);
+    mUnrefQueue = std::make_unique<SceneUtil::UnrefQueue>();
 
     mScreenCaptureOperation = new SceneUtil::AsyncScreenCaptureOperation(
         mWorkQueue,
@@ -842,7 +852,7 @@ void OMW::Engine::prepareEngine()
     }
 
     // Create the world
-    mWorld = std::make_unique<MWWorld::World>(mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
+    mWorld = std::make_unique<MWWorld::World>(mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(), *mUnrefQueue,
         mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder.get(), mActivationDistanceOverride, mCellName,
         mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string());
     mWorld->setupPlayer();

@@ -58,16 +58,7 @@ ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group>
     removeEffects();
 }
 
-ActorAnimation::~ActorAnimation()
-{
-    for (ItemLightMap::iterator iter = mItemLights.begin(); iter != mItemLights.end(); ++iter)
-    {
-        mInsert->removeChild(iter->second);
-    }
-
-    mScabbard.reset();
-    mHolsteredShield.reset();
-}
+ActorAnimation::~ActorAnimation() = default;
 
 PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor)
 {
@@ -595,6 +586,13 @@ void ActorAnimation::removeHiddenItemLight(const MWWorld::ConstPtr& item)
 
     mInsert->removeChild(iter->second);
     mItemLights.erase(iter);
+}
+
+void ActorAnimation::removeFromScene()
+{
+    for (const auto& [k, v] : mItemLights)
+        mInsert->removeChild(v);
+    Animation::removeFromScene();
 }
 
 }

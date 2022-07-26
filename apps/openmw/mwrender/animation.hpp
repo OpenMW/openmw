@@ -351,9 +351,9 @@ public:
     /// Must be thread safe
     virtual ~Animation();
 
-    MWWorld::ConstPtr getPtr() const;
+    MWWorld::ConstPtr getPtr() const { return mPtr; }
 
-    MWWorld::Ptr getPtr();
+    MWWorld::Ptr getPtr() { return mPtr; }
 
     /// Set active flag on the object skeleton, if one exists.
     /// @see SceneUtil::Skeleton::setActive
@@ -496,6 +496,8 @@ public:
 
     virtual void setAccurateAiming(bool enabled) {}
     virtual bool canBeHarvested() const { return false; }
+
+    virtual void removeFromScene();
 
 private:
     Animation(const Animation&);

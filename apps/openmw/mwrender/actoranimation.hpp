@@ -40,6 +40,8 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
         bool useShieldAnimations() const override;
         bool updateCarriedLeftVisible(const int weaptype) const override;
 
+        void removeFromScene() override;
+
     protected:
         osg::Group* getBoneByName(const std::string& boneName) const;
         virtual void updateHolsteredWeapon(bool showHolsteredWeapons);

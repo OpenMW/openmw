@@ -38,6 +38,7 @@ namespace Resource
 namespace SceneUtil
 {
     class WorkQueue;
+    class UnrefQueue;
 }
 
 namespace ESM
@@ -192,6 +193,7 @@ namespace MWWorld
                 osgViewer::Viewer* viewer,
                 osg::ref_ptr<osg::Group> rootNode,
                 Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+                SceneUtil::UnrefQueue& unrefQueue,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
                 const std::vector<std::string>& groundcoverFiles,
