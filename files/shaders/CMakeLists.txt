@@ -50,7 +50,7 @@ set(SHADER_FILES
     sky_fragment.glsl
     skypasses.glsl
     softparticles.glsl
-    hdr_fragment.glsl
+    hdr_resolve_fragment.glsl
     hdr_luminance_fragment.glsl
     fullscreen_tri_vertex.glsl
     fullscreen_tri_fragment.glsl

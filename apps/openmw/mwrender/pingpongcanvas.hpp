@@ -11,7 +11,7 @@
 #include <components/fx/technique.hpp>
 
 #include "postprocessor.hpp"
-#include "hdr.hpp"
+#include "luminancecalculator.hpp"
 
 namespace Shader
 {
@@ -55,7 +55,7 @@ namespace MWRender
     private:
         void copyNewFrameData(size_t frameId) const;
 
-        mutable HDRDriver mHDRDriver;
+        mutable LuminanceCalculator mLuminanceCalculator;
 
         osg::ref_ptr<osg::Program> mFallbackProgram;
         osg::ref_ptr<osg::Program> mMultiviewResolveProgram;

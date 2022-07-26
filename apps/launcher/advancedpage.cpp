@@ -149,7 +149,7 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
         loadSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
         loadSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
-        postprocessHDRTimeComboBox->setValue(Settings::Manager::getDouble("hdr exposure time", "Post Processing"));
+        postprocessHDRTimeComboBox->setValue(Settings::Manager::getDouble("auto exposure speed", "Post Processing"));
 
         connect(skyBlendingCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotSkyBlendingToggled(bool)));
         loadSettingBool(radialFogCheckBox, "radial fog", "Fog");
@@ -305,8 +305,8 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
         saveSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
         double hdrExposureTime = postprocessHDRTimeComboBox->value();
-        if (hdrExposureTime != Settings::Manager::getDouble("hdr exposure time", "Post Processing"))
-            Settings::Manager::setDouble("hdr exposure time", "Post Processing", hdrExposureTime);
+        if (hdrExposureTime != Settings::Manager::getDouble("auto exposure speed", "Post Processing"))
+            Settings::Manager::setDouble("auto exposure speed", "Post Processing", hdrExposureTime);
 
         saveSettingBool(radialFogCheckBox, "radial fog", "Fog");
         saveSettingBool(exponentialFogCheckBox, "exponential fog", "Fog");
