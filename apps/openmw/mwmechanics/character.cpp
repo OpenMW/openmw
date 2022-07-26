@@ -1792,6 +1792,7 @@ void CharacterController::updateAnimQueue()
 void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
     const MWWorld::Class &cls = mPtr.getClass();
     osg::Vec3f movement(0.f, 0.f, 0.f);
     float speed = 0.f;
@@ -2047,48 +2048,51 @@ void CharacterController::update(float duration)
                 }
             }
         }
-        else if(mJumpState == JumpState_InAir && !inwater && !flying && solid)
-        {
-            jumpstate = JumpState_Landing;
-            vec.z() = 0.0f;
-
-            float height = cls.getCreatureStats(mPtr).land(isPlayer);
-            float healthLost = getFallDamage(mPtr, height);
-
-            if (healthLost > 0.0f)
-            {
-                const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
-
-                // inflict fall damages
-                if (!godmode)
-                {
-                    float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
-                    cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
-                }
-
-                const float acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
-                if (healthLost > (acrobaticsSkill * fatigueTerm))
-                {
-                    if (!godmode)
-                        cls.getCreatureStats(mPtr).setKnockedDown(true);
-                }
-                else
-                {
-                    // report acrobatics progression
-                    if (isPlayer)
-                        cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
-                }
-            }
-
-            if (mPtr.getClass().isNpc())
-                playLandingSound = true;
-        }
         else
         {
-            if(mPtr.getClass().isNpc() && mJumpState == JumpState_InAir && !flying && solid)
-                playLandingSound = true;
+            if (mJumpState == JumpState_InAir && !flying && solid)
+            {
+                float height = cls.getCreatureStats(mPtr).land(isPlayer);
+                float healthLost = 0.f;
+                if (!inwater)
+                    healthLost = getFallDamage(mPtr, height);
 
-            jumpstate = mAnimation->isPlaying(mCurrentJump) ? JumpState_Landing : JumpState_None;
+                if (healthLost > 0.0f)
+                {
+                    const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
+
+                    // inflict fall damages
+                    if (!godmode)
+                    {
+                        DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
+                        float realHealthLost = healthLost * (1.0f - 0.25f * fatigueTerm);
+                        health.setCurrent(health.getCurrent() - realHealthLost);
+                        cls.getCreatureStats(mPtr).setHealth(health);
+                        sndMgr->playSound3D(mPtr, "Health Damage", 1.0f, 1.0f);
+                        if (isPlayer)
+                            MWBase::Environment::get().getWindowManager()->activateHitOverlay();
+                    }
+
+                    const float acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
+                    if (healthLost > (acrobaticsSkill * fatigueTerm))
+                    {
+                        if (!godmode)
+                            cls.getCreatureStats(mPtr).setKnockedDown(true);
+                    }
+                    else
+                    {
+                        // report acrobatics progression
+                        if (isPlayer)
+                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
+                    }
+                }
+
+                if (mPtr.getClass().isNpc())
+                    playLandingSound = true;
+            }
+
+            if (mAnimation->isPlaying(mCurrentJump))
+                jumpstate = JumpState_Landing;
 
             vec.x() *= scale;
             vec.y() *= scale;
@@ -2126,7 +2130,7 @@ void CharacterController::update(float duration)
 
                 // It seems only bipedal actors use turning animations.
                 // Also do not use turning animations in the first-person view and when sneaking.
-                if (!sneak && jumpstate == JumpState_None && !isFirstPersonPlayer && mPtr.getClass().isBipedal(mPtr))
+                if (!sneak && !isFirstPersonPlayer && mPtr.getClass().isBipedal(mPtr))
                 {
                     if(effectiveRotation > rotationThreshold)
                         movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
@@ -2138,7 +2142,6 @@ void CharacterController::update(float duration)
 
         if (playLandingSound)
         {
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             std::string sound;
             osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
             if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
