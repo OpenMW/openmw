@@ -26,7 +26,6 @@ namespace Gui
     {
     public:
         FontLoader (ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor);
-        ~FontLoader();
 
         void loadBitmapFonts ();
         void loadTrueTypeFonts ();
