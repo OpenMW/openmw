@@ -385,7 +385,7 @@ public:
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 
-    bool hasAnimation(const std::string &anim) const;
+    bool hasAnimation(std::string_view anim) const;
 
     // Specifies the axis' to accumulate on. Non-accumulated axis will just
     // move visually, but not affect the actual movement. Each x/y/z value
