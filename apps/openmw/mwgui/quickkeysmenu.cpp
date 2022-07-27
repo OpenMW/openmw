@@ -123,6 +123,18 @@ namespace MWGui
         }
     }
 
+    void QuickKeysMenu::onClose()
+    {
+        WindowBase::onClose();
+
+        if (mAssignDialog)
+            mAssignDialog->setVisible(false);
+        if (mItemSelectionDialog)
+            mItemSelectionDialog->setVisible(false);
+        if (mMagicSelectionDialog)
+            mMagicSelectionDialog->setVisible(false);
+    }
+
     void QuickKeysMenu::unassign(keyData* key)
     {
         key->button->clearUserStrings();

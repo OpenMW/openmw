@@ -477,22 +477,19 @@ namespace MWInput
 
     void ActionManager::showQuickKeysMenu()
     {
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
-                && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
+        if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
         {
-            if (!checkAllowedToUseItems())
-                return;
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+            return;
+        }
 
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
-        }
-        else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
-        {
-            while (MyGUI::InputManager::getInstance().isModalAny())
-            { //Handle any open Modal windows
-                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
-            }
-            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode(); //And handle the actual main window
-        }
+        if (MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate") != -1)
+            return;
+
+        if (!checkAllowedToUseItems())
+            return;
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
     }
 
     void ActionManager::activate()
