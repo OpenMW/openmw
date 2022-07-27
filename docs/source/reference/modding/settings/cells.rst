@@ -29,10 +29,7 @@ preload num threads
 :Default:	1
 
 Controls the number of worker threads used for preloading operations.
-In addition to the preloading threads, OpenMW uses a main thread, a sound streaming thread, and a graphics thread.
-Therefore, the default setting of one preloading thread will result in a total of 4 threads used,
-which should work well with quad-core CPUs. If you have additional cores to spare,
-consider increasing the number of preloading threads to 2 or 3 for a boost in preloading performance.
+If you have additional CPU cores to spare, consider increasing the number of preloading threads to 2 or 3 for a boost in preloading performance.
 Faster preloading will reduce the chance that a cell could not be completely loaded before the player moves into it,
 and hence reduce the chance of seeing loading screens or frame drops.
 This may be especially relevant when the player moves at high speed
