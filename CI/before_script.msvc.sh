@@ -106,6 +106,7 @@ while [ $# -gt 0 ]; do
 
 			C )
 				USE_CCACHE=true ;;
+
 			k )
 				KEEP=true ;;
 
@@ -176,7 +177,7 @@ Options:
 		Build unit tests / Google test
 	-u
 		Configure for unity builds.
-	-v <2017/2019>
+	-v <2019/2022>
 		Choose the Visual Studio version to use.
 	-n
 		Produce NMake makefiles instead of a Visual Studio solution. Cannot be used with -N.
@@ -361,34 +362,49 @@ if [ -z $PLATFORM ]; then
 fi
 
 if [ -z $VS_VERSION ]; then
-	VS_VERSION="2017"
+	VS_VERSION="2019"
 fi
 
 case $VS_VERSION in
+	17|17.0|2022 )
+		GENERATOR="Visual Studio 17 2022"
+		TOOLSET="vc143"
+		MSVC_REAL_VER="17"
+		MSVC_VER="14.3"
+		MSVC_DISPLAY_YEAR="2022"
+
+		OSG_MSVC_YEAR="2019"
+		MYGUI_MSVC_YEAR="2019"
+		LUA_MSVC_YEAR="2019"
+		QT_MSVC_YEAR="2019"
+		BULLET_MSVC_YEAR="2015"
+
+		BOOST_VER="1.79.0"
+		BOOST_VER_URL="1_79_0"
+		BOOST_VER_SDK="107900"
+		;;
+
 	16|16.0|2019 )
 		GENERATOR="Visual Studio 16 2019"
 		TOOLSET="vc142"
 		MSVC_REAL_VER="16"
 		MSVC_VER="14.2"
-		MSVC_YEAR="2015"
-		MSVC_REAL_YEAR="2019"
 		MSVC_DISPLAY_YEAR="2019"
+
+		OSG_MSVC_YEAR="2019"
+		MYGUI_MSVC_YEAR="2019"
+		LUA_MSVC_YEAR="2019"
+		QT_MSVC_YEAR="2019"
+		BULLET_MSVC_YEAR="2015"
+
 		BOOST_VER="1.79.0"
 		BOOST_VER_URL="1_79_0"
 		BOOST_VER_SDK="107900"
 		;;
 
 	15|15.0|2017 )
-		GENERATOR="Visual Studio 15 2017"
-		TOOLSET="vc141"
-		MSVC_REAL_VER="15"
-		MSVC_VER="14.1"
-		MSVC_YEAR="2015"
-		MSVC_REAL_YEAR="2017"
-		MSVC_DISPLAY_YEAR="2017"
-		BOOST_VER="1.67.0"
-		BOOST_VER_URL="1_67_0"
-		BOOST_VER_SDK="106700"
+		echo "Visual Studio 2017 is no longer supported"
+		wrappedExit 1
 		;;
 
 	14|14.0|2015 )
@@ -420,10 +436,6 @@ case $PLATFORM in
 		wrappedExit 1
 		;;
 esac
-
-if [ $BITS -eq 64 ] && [ $MSVC_REAL_VER -lt 16 ]; then
-	GENERATOR="${GENERATOR} Win64"
-fi
 
 if [ -n "$NMAKE" ]; then
 	GENERATOR="NMake Makefiles"
@@ -508,7 +520,7 @@ for i in ${!CONFIGURATIONS[@]}; do
 	esac
 done
 
-if [ $MSVC_REAL_VER -ge 16 ] && [ -z "$NMAKE" ] && [ -z "$NINJA" ]; then
+if [ -z "$NMAKE" ] && [ -z "$NINJA" ]; then
 	if [ $BITS -eq 64 ]; then
 		add_cmake_opts "-G\"$GENERATOR\" -A x64"
 	else
@@ -544,11 +556,11 @@ fi
 ICU_VER="70_1"
 
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
-OSG_ARCHIVE="OSGoS-3.6.5-b02abe2-msvc${MSVC_REAL_YEAR}-win${BITS}"
+OSG_ARCHIVE="OSGoS-3.6.5-b02abe2-msvc${OSG_MSVC_YEAR}-win${BITS}"
 OSG_ARCHIVE_REPO_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main"
 if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
     OSG_ARCHIVE_NAME="OSG-3.6-multiview"
-    OSG_ARCHIVE="OSG-3.6-multiview-ee297dce0-msvc${MSVC_REAL_YEAR}-win${BITS}"
+    OSG_ARCHIVE="OSG-3.6-multiview-ee297dce0-msvc${OSG_MSVC_YEAR}-win${BITS}"
     OSG_ARCHIVE_REPO_URL="https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview"
 fi
 
@@ -578,8 +590,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# Bullet
 	download "Bullet 2.89" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}-double.7z" \
-		"Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}-double.7z"
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-2.89-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z" \
+		"Bullet-2.89-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z"
 
 	# FFmpeg
 	download "FFmpeg 4.2.2" \
@@ -590,13 +602,13 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# MyGUI
 	download "MyGUI 3.4.1" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
-		"MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z" \
+		"MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z"
 
 	if [ -n "$PDBS" ]; then
 		download "MyGUI symbols" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
-			"MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z" \
+			"MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z"
 	fi
 
 	# OpenAL
@@ -604,7 +616,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-1.20.1.zip" \
 		"OpenAL-Soft-1.20.1.zip"
 
-	# OSGoS https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview/windows/OSG-3.6-multiview-ee297dce0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z
+	# OSGoS
 	download "${OSG_ARCHIVE_NAME}" \
 		"${OSG_ARCHIVE_REPO_URL}/windows/${OSG_ARCHIVE}.7z" \
 		"${OSG_ARCHIVE}.7z"
@@ -627,8 +639,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# LuaJIT
 	download "LuaJIT 2.1.0-beta3" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/LuaJIT-2.1.0-beta3-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
-		"LuaJIT-2.1.0-beta3-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/LuaJIT-2.1.0-beta3-msvc${LUA_MSVC_YEAR}-win${BITS}.7z" \
+		"LuaJIT-2.1.0-beta3-msvc${LUA_MSVC_YEAR}-win${BITS}.7z"
 
 	# Google test and mock
 	if [ -n "$TEST_FRAMEWORK" ]; then
@@ -736,8 +748,8 @@ printf "Bullet 2.89... "
 		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}-double.7z" $STRIP
-		mv "Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}-double" Bullet
+		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z" $STRIP
+		mv "Bullet-2.89-msvc${BULLET_MSVC_YEAR}-win${BITS}-double" Bullet
 	fi
 	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
@@ -781,9 +793,9 @@ printf "MyGUI 3.4.1... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf MyGUI
-		eval 7z x -y "${DEPS}/MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
-		mv "MyGUI-3.4.1-msvc${MSVC_REAL_YEAR}-win${BITS}" MyGUI
+		eval 7z x -y "${DEPS}/MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z" $STRIP
+		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z" $STRIP
+		mv "MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}" MyGUI
 	fi
 	export MYGUI_HOME="$(real_pwd)/MyGUI"
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
@@ -870,7 +882,7 @@ printf "Qt 5.15.2... "
 
 	qt_version="5.15.2"
 
-	QT_SDK="$(real_pwd)/Qt/${qt_version}/msvc${MSVC_REAL_YEAR}${SUFFIX}"
+	QT_SDK="$(real_pwd)/Qt/${qt_version}/msvc${QT_MSVC_YEAR}${SUFFIX}"
 
 	if [ -d "Qt/${qt_version}" ]; then
 		printf "Exists. "
@@ -907,7 +919,7 @@ printf "Qt 5.15.2... "
 		mkdir Qt
 		cd Qt
 
-		run_cmd "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install $qt_version windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}${SUFFIX}"
+		run_cmd "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install $qt_version windows desktop "win${BITS}_msvc${QT_MSVC_YEAR}${SUFFIX}"
 
 		printf "  Cleaning up extraneous data... "
 		rm -rf Qt/{aqtinstall.log,Tools}
@@ -981,7 +993,7 @@ printf "LuaJIT 2.1.0-beta3... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf LuaJIT
-		eval 7z x -y LuaJIT-2.1.0-beta3-msvc${MSVC_REAL_YEAR}-win${BITS}.7z -o$(real_pwd)/LuaJIT $STRIP
+		eval 7z x -y LuaJIT-2.1.0-beta3-msvc${LUA_MSVC_YEAR}-win${BITS}.7z -o$(real_pwd)/LuaJIT $STRIP
 	fi
 	export LUAJIT_DIR="$(real_pwd)/LuaJIT"
 	add_cmake_opts -DLuaJit_INCLUDE_DIR="${LUAJIT_DIR}/include" \
@@ -998,9 +1010,9 @@ if [ -n "$TEST_FRAMEWORK" ]; then
 	printf "Google test 1.11.0 ..."
 
 	cd googletest
-	mkdir -p build${MSVC_REAL_YEAR}
+	mkdir -p build${MSVC_DISPLAY_YEAR}
 
-	cd build${MSVC_REAL_YEAR}
+	cd build${MSVC_DISPLAY_YEAR}
 
 	GOOGLE_INSTALL_ROOT="${DEPS_INSTALL}/GoogleTest"
 	
@@ -1015,7 +1027,7 @@ if [ -n "$TEST_FRAMEWORK" ]; then
 
 		if [ ! -f "$GOOGLE_INSTALL_ROOT/lib/gtest${DEBUG_SUFFIX}.lib" ]; then
 			# Always use MSBuild solution files as they don't need the environment activating
-			cmake .. -DCMAKE_USE_WIN32_THREADS_INIT=1 -G "Visual Studio $MSVC_REAL_VER $MSVC_REAL_YEAR$([ $BITS -eq 64 ] && [ $MSVC_REAL_VER -lt 16 ] && echo " Win64")" $([ $MSVC_REAL_VER -ge 16 ] && echo "-A $([ $BITS -eq 64 ] && echo "x64" || echo "Win32")") -DBUILD_SHARED_LIBS=1
+			cmake .. -DCMAKE_USE_WIN32_THREADS_INIT=1 -G "Visual Studio $MSVC_REAL_VER $MSVC_DISPLAY_YEAR" "-A $([ $BITS -eq 64 ] && echo "x64" || echo "Win32")" -DBUILD_SHARED_LIBS=1
 			cmake --build . --config "${GTEST_CONFIG}"
 			cmake --install . --config "${GTEST_CONFIG}" --prefix "${GOOGLE_INSTALL_ROOT}"
 		fi
