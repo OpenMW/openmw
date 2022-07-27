@@ -166,32 +166,6 @@ namespace Gui
         MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = MyGUI::newDelegate(this, &FontLoader::loadFontFromXml);
     }
 
-    FontLoader::~FontLoader()
-    {
-        try
-        {
-            MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
-        }
-        catch(const MyGUI::Exception& e)
-        {
-            Log(Debug::Error) << "Error in the FontLoader destructor: " << e.what();
-        }
-
-        for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end(); ++it)
-        {
-            try
-            {
-                MyGUI::ResourceManager::getInstance().removeByName((*it)->getResourceName());
-            }
-            catch(const MyGUI::Exception& e)
-            {
-                Log(Debug::Error) << "Error in the destructor: " << e.what();
-            }
-        }
-
-        mFonts.clear();
-    }
-
     void FontLoader::loadBitmapFonts()
     {
         for (const auto& path : mVFS->getRecursiveDirectoryIterator("Fonts/"))
@@ -300,13 +274,6 @@ namespace Gui
         if (!bitmapFile->good())
             fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
         bitmapFile.reset();
-
-        std::string resourceName = name;
-
-        // Register the font with MyGUI
-        MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
-                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
-        mFonts.push_back(font);
 
         MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture(bitmapFilename);
         tex->createManual(width, height, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
@@ -470,6 +437,9 @@ namespace Gui
             cursorCode->addAttribute("size", "0 0");
         }
 
+        // Register the font with MyGUI
+        MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
+                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
         font->deserialization(root, MyGUI::Version(3,2,0));
 
         MyGUI::ResourceManualFont* bookFont = static_cast<MyGUI::ResourceManualFont*>(
@@ -477,23 +447,6 @@ namespace Gui
         mFonts.push_back(bookFont);
         bookFont->deserialization(root, MyGUI::Version(3,2,0));
         bookFont->setResourceName("Journalbook " + getInternalFontName(baseName));
-
-        // Remove automatically registered fonts
-        for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end();)
-        {
-            if ((*it)->getResourceName() == font->getResourceName())
-            {
-                MyGUI::ResourceManager::getInstance().removeByName(font->getResourceName());
-                it = mFonts.erase(it);
-            }
-            else if ((*it)->getResourceName() == bookFont->getResourceName())
-            {
-                MyGUI::ResourceManager::getInstance().removeByName(bookFont->getResourceName());
-                it = mFonts.erase(it);
-            }
-            else
-                ++it;
-        }
 
         MyGUI::ResourceManager::getInstance().addResource(font);
         MyGUI::ResourceManager::getInstance().addResource(bookFont);
