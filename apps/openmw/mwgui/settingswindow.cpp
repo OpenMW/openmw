@@ -505,6 +505,8 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE)
             return;
 
+        _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
+
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{SettingsMenu:ChangeRequiresRestart}", {"#{sOK}"}, true);
 
         const auto settingsNames = _sender->getUserData<std::vector<std::string>>();
@@ -516,6 +518,8 @@ namespace MWGui
     {
         if (pos == MyGUI::ITEM_NONE)
             return;
+
+        _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{SettingsMenu:ChangeRequiresRestart}", {"#{sOK}"}, true);
         const auto languageNames = _sender->getUserData<std::vector<std::string>>();
