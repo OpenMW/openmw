@@ -384,9 +384,13 @@ namespace MWGui
         icu::Locale primaryLocale(currentLocales[0].c_str());
 
         mPrimaryLanguage->removeAllItems();
-        mSecondaryLanguage->removeAllItems();
+        mPrimaryLanguage->setIndexSelected(MyGUI::ITEM_NONE);
 
-        size_t i = 0, primaryLocaleIndex = MyGUI::ITEM_NONE, secondaryLocaleIndex = MyGUI::ITEM_NONE;
+        mSecondaryLanguage->removeAllItems();
+        mSecondaryLanguage->addItem(MyGUI::LanguageManager::getInstance().replaceTags("#{sNone}"), std::string());
+        mSecondaryLanguage->setIndexSelected(0);
+
+        size_t i = 0;
         for (const auto& language : availableLanguages)
         {
             icu::Locale locale(language.c_str());
@@ -395,22 +399,17 @@ namespace MWGui
             locale.getDisplayName(primaryLocale, str);
             std::string localeString;
             str.toUTF8String(localeString);
-            mPrimaryLanguage->addItem(localeString);
-            mSecondaryLanguage->addItem(localeString);
+
+            mPrimaryLanguage->addItem(localeString, language);
+            mSecondaryLanguage->addItem(localeString, language);
 
             if (language == currentLocales[0])
-                primaryLocaleIndex = i;
+                mPrimaryLanguage->setIndexSelected(i);
             if (currentLocales.size() > 1 && language == currentLocales[1])
-                secondaryLocaleIndex = i;
+                mSecondaryLanguage->setIndexSelected(i + 1);
 
             i++;
         }
-
-        mPrimaryLanguage->setUserData(availableLanguages);
-        mSecondaryLanguage->setUserData(availableLanguages);
-
-        mPrimaryLanguage->setIndexSelected(primaryLocaleIndex);
-        mSecondaryLanguage->setIndexSelected(secondaryLocaleIndex);
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
@@ -522,12 +521,16 @@ namespace MWGui
         _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{SettingsMenu:ChangeRequiresRestart}", {"#{sOK}"}, true);
-        const auto languageNames = _sender->getUserData<std::vector<std::string>>();
 
         std::vector<std::string> currentLocales = Settings::Manager::getStringArray("preferred locales", "General");
         if (currentLocales.size() <= langPriority)
             currentLocales.resize(langPriority + 1, "en");
-        currentLocales[langPriority] = languageNames->at(pos);
+
+        const auto& languageCode = *_sender->getItemDataAt<std::string>(pos);
+        if (!languageCode.empty())
+            currentLocales[langPriority] = *_sender->getItemDataAt<std::string>(pos);
+        else
+            currentLocales.resize(1);
 
         Settings::Manager::setStringArray("preferred locales", "General", currentLocales);
     }
