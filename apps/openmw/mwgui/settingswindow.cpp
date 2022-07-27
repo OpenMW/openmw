@@ -508,8 +508,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{SettingsMenu:ChangeRequiresRestart}", {"#{sOK}"}, true);
 
-        const auto settingsNames = _sender->getUserData<std::vector<std::string>>();
-        Settings::Manager::setString("lighting method", "Shaders", settingsNames->at(pos));
+        Settings::Manager::setString("lighting method", "Shaders", *_sender->getItemDataAt<std::string>(pos));
         apply();
     }
 
@@ -528,7 +527,7 @@ namespace MWGui
 
         const auto& languageCode = *_sender->getItemDataAt<std::string>(pos);
         if (!languageCode.empty())
-            currentLocales[langPriority] = *_sender->getItemDataAt<std::string>(pos);
+            currentLocales[langPriority] = languageCode;
         else
             currentLocales.resize(1);
 
@@ -749,17 +748,13 @@ namespace MWGui
             SceneUtil::LightingMethod::SingleUBO,
         };
 
-        std::vector<std::string> userData;
         for (const auto& method : methods)
         {
             if (!MWBase::Environment::get().getResourceSystem()->getSceneManager()->isSupportedLightingMethod(method))
                 continue;
 
-            mLightingMethodButton->addItem(lightingMethodToStr(method));
-            userData.emplace_back(SceneUtil::LightManager::getLightingMethodString(method));
+            mLightingMethodButton->addItem(lightingMethodToStr(method), SceneUtil::LightManager::getLightingMethodString(method));
         }
-
-        mLightingMethodButton->setUserData(userData);
         mLightingMethodButton->setIndexSelected(mLightingMethodButton->findItemIndexWith(lightingMethodStr));
     }
 
