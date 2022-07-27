@@ -530,13 +530,8 @@ bool RenderManager::isFormatSupported(MyGUI::PixelFormat /*format*/, MyGUI::Text
 
 MyGUI::ITexture* RenderManager::createTexture(const std::string &name)
 {
-    auto item = mTextures.find(name);
-    if (item != mTextures.end())
-        mTextures.erase(item);
-
-    item = mTextures.emplace_hint(item, name, OSGTexture(name, mImageManager));
-
-    return &item->second;
+    const auto it = mTextures.insert_or_assign(name, OSGTexture(name, mImageManager)).first;
+    return &it->second;
 }
 
 void RenderManager::destroyTexture(MyGUI::ITexture *texture)
