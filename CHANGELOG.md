@@ -132,6 +132,7 @@
     Bug #6794: Light sources are attached to mesh bounds centers instead of mesh origins when AttachLight NiNode is missing
     Bug #6799: Game crashes if an NPC has no Class attached
     Bug #6849: ImageButton texture is not scaled properly
+    Bug #6869: Hits queue stagger during swing animation
     Bug #6895: Removing a negative number of items from a script, makes the script terminate with an error
     Bug #6898: Accessing the Quick Inventory menu does not work while in menu mode
     Bug #6901: Morrowind.exe soul gem usage discrepancy
