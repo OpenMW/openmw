@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_RESOURCE_ARCHIVE_H
 
 #include <map>
+#include <filesystem>
 
 #include <components/files/istreamptr.hpp>
 

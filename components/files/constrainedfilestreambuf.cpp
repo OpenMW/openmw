@@ -11,7 +11,7 @@ namespace Files
     ConstrainedFileStreamBuf::ConstrainedFileStreamBuf(const std::filesystem::path& fname, std::size_t start, std::size_t length)
         : mOrigin(start)
     {
-        mFile = File::open(fname.c_str());
+        mFile = File::open(fname);
         mSize  = length != std::numeric_limits<std::size_t>::max() ? length : File::size(mFile) - start;
 
         if (start != 0)

@@ -1,9 +1,10 @@
 #ifndef OPENMW_CONSTRAINEDFILESTREAMBUF_H
 #define OPENMW_CONSTRAINEDFILESTREAMBUF_H
 
-#include <components/platform/file.hpp>
-
 #include <streambuf>
+#include <filesystem>
+
+#include <components/platform/file.hpp>
 
 namespace Files
 {

@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <atomic>
+#include <filesystem>
 
 #include <components/files/istreamptr.hpp>
 

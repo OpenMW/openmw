@@ -260,7 +260,7 @@ void Bsa::BSAFile::close()
 
 Files::IStreamPtr Bsa::BSAFile::getFile(const FileStruct *file)
 {
-    return Files::openConstrainedFileStream(mFilename, file->offset, file->fileSize);
+    return Files::openConstrainedFileStream(mFilepath, file->offset, file->fileSize);
 }
 
 void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)

@@ -2,6 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/hash.hpp>
+#include <components/files/conversion.hpp>
 
 #include <algorithm>
 #include <array>
@@ -373,7 +374,7 @@ void NIFFile::warn(const std::string &msg) const
 
 [[noreturn]] void NIFFile::fail(const std::string &msg) const
 {
-    throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + filename);
+    throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + Files::pathToUnicodeString(filename));
 }
 
 std::string NIFFile::getString(uint32_t index) const
