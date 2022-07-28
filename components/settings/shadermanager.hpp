@@ -124,7 +124,8 @@ namespace Settings
 
             try
             {
-                mData = YAML::LoadFile(Files::pathToUnicodeString(mPath));
+                std::ifstream file{mPath};
+                mData = YAML::Load(file);
                 mData.SetStyle(YAML::EmitterStyle::Block);
 
                 if (!mData["config"])
