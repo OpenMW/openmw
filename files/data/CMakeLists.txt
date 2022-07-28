@@ -22,6 +22,7 @@ set(BUILTIN_DATA_FILES
 
     l10n/BuiltInShaders/en.yaml
     l10n/BuiltInShaders/ru.yaml
+    l10n/BuiltInShaders/sv.yaml
     l10n/Calendar/en.yaml
     l10n/Calendar/ru.yaml
     l10n/Calendar/sv.yaml
