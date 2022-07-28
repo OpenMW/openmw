@@ -1,0 +1,39 @@
+# source: https://en.uesp.net/wiki/Lore:Calendar
+
+month1: "Morgenstern"
+month2: "Morgenröte"
+month3: "Erstsaat"
+month4: "Regenhand"
+month5: "Zweitsaat"
+month6: "Mittjahr"
+month7: "Sonnenhöhe"
+month8: "Herbstsaat"
+month9: "Herdfeuer"
+month10: "Eisherbst"
+month11: "Abenddämmerung"
+month12: "Abendstern"
+
+# The variant of month names in the context "day X of month Y".
+# In English it is the same, but some languages require a different form.
+monthInGenitive1: "Morgenstern"
+monthInGenitive2: "Morgenröte"
+monthInGenitive3: "Erstsaat"
+monthInGenitive4: "Regenhand"
+monthInGenitive5: "Zweitsaat"
+monthInGenitive6: "Mittjahr"
+monthInGenitive7: "Sonnenhöhe"
+monthInGenitive8: "Herbstsaat"
+monthInGenitive9: "Herdfeuer"
+monthInGenitive10: "Eisherbst"
+monthInGenitive11: "Abenddämmerung"
+monthInGenitive12: "Abendstern"
+
+dateFormat: "tag {day} im {monthInGenitive} {year}"
+
+weekday1: "Sundas"
+weekday2: "Morndas"
+weekday3: "Tirdas"
+weekday4: "Middas"
+weekday5: "Turdas"
+weekday6: "Fredas"
+weekday7: "Loredas"
