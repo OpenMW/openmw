@@ -58,9 +58,7 @@ namespace MWLua
     void LuaManager::initL10n()
     {
         mL10n.init();
-        std::vector<std::string> preferredLocales;
-        Misc::StringUtils::split(Settings::Manager::getString("preferred locales", "General"), preferredLocales, ", ");
-        mL10n.setPreferredLocales(preferredLocales);
+        mL10n.setPreferredLocales(Settings::Manager::getStringArray("preferred locales", "General"));
     }
 
     void LuaManager::init()

@@ -23,7 +23,7 @@ namespace
     {
         auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
 
-        std::ostringstream chain;
+        std::vector<std::string> chain;
 
         for (size_t i = 1; i < processor->getTechniques().size(); ++i)
         {
@@ -32,13 +32,10 @@ namespace
             if (!technique || technique->getDynamic())
                 continue;
 
-            chain << technique->getName();
-
-            if (i < processor-> getTechniques().size() - 1)
-                chain << ",";
+            chain.push_back(technique->getName());
         }
 
-        Settings::Manager::setString("chain", "Post Processing", chain.str());
+        Settings::Manager::setStringArray("chain", "Post Processing", chain);
     }
 }
 

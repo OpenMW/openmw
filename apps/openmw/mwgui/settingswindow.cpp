@@ -5,6 +5,8 @@
 #include <numeric>
 #include <array>
 
+#include <unicode/locid.h>
+
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ComboBox.h>
@@ -18,12 +20,14 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/lua_ui/scriptsettings.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -254,6 +258,8 @@ namespace MWGui
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
         getWidget(mWaterRainRippleDetail, "WaterRainRippleDetail");
+        getWidget(mPrimaryLanguage, "PrimaryLanguage");
+        getWidget(mSecondaryLanguage, "SecondaryLanguage");
         getWidget(mLightingMethodButton, "LightingMethodButton");
         getWidget(mLightsResetButton, "LightsResetButton");
         getWidget(mMaxLights, "MaxLights");
@@ -296,6 +302,9 @@ namespace MWGui
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
+
+        mPrimaryLanguage->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onPrimaryLanguageChanged);
+        mSecondaryLanguage->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSecondaryLanguageChanged);
 
         computeMinimumWindowSize();
 
@@ -353,6 +362,54 @@ namespace MWGui
 
         mScriptFilter->eventEditTextChange += MyGUI::newDelegate(this, &SettingsWindow::onScriptFilterChange);
         mScriptList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SettingsWindow::onScriptListSelection);
+
+        std::vector<std::string> availableLanguages;
+        const VFS::Manager* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        for (const auto& path : vfs->getRecursiveDirectoryIterator("l10n/"))
+        {
+            if (Misc::getFileExtension(path) == "yaml")
+            {
+                std::string localeName(Misc::stemFile(path));
+                if (std::find(availableLanguages.begin(), availableLanguages.end(), localeName) == availableLanguages.end())
+                     availableLanguages.push_back(localeName);
+            }
+        }
+
+        std::sort (availableLanguages.begin(), availableLanguages.end());
+
+        std::vector<std::string> currentLocales = Settings::Manager::getStringArray("preferred locales", "General");
+        if (currentLocales.empty())
+            currentLocales.push_back("en");
+
+        icu::Locale primaryLocale(currentLocales[0].c_str());
+
+        mPrimaryLanguage->removeAllItems();
+        mPrimaryLanguage->setIndexSelected(MyGUI::ITEM_NONE);
+
+        mSecondaryLanguage->removeAllItems();
+        mSecondaryLanguage->addItem(MyGUI::LanguageManager::getInstance().replaceTags("#{sNone}"), std::string());
+        mSecondaryLanguage->setIndexSelected(0);
+
+        size_t i = 0;
+        for (const auto& language : availableLanguages)
+        {
+            icu::Locale locale(language.c_str());
+
+            icu::UnicodeString str(language.c_str());
+            locale.getDisplayName(primaryLocale, str);
+            std::string localeString;
+            str.toUTF8String(localeString);
+
+            mPrimaryLanguage->addItem(localeString, language);
+            mSecondaryLanguage->addItem(localeString, language);
+
+            if (language == currentLocales[0])
+                mPrimaryLanguage->setIndexSelected(i);
+            if (currentLocales.size() > 1 && language == currentLocales[1])
+                mSecondaryLanguage->setIndexSelected(i + 1);
+
+            i++;
+        }
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
@@ -447,11 +504,34 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE)
             return;
 
+        _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
+
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{SettingsMenu:ChangeRequiresRestart}", {"#{sOK}"}, true);
 
-        const auto settingsNames = _sender->getUserData<std::vector<std::string>>();
-        Settings::Manager::setString("lighting method", "Shaders", settingsNames->at(pos));
+        Settings::Manager::setString("lighting method", "Shaders", *_sender->getItemDataAt<std::string>(pos));
         apply();
+    }
+
+    void SettingsWindow::onLanguageChanged(size_t langPriority, MyGUI::ComboBox* _sender, size_t pos)
+    {
+        if (pos == MyGUI::ITEM_NONE)
+            return;
+
+        _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
+
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{SettingsMenu:ChangeRequiresRestart}", {"#{sOK}"}, true);
+
+        std::vector<std::string> currentLocales = Settings::Manager::getStringArray("preferred locales", "General");
+        if (currentLocales.size() <= langPriority)
+            currentLocales.resize(langPriority + 1, "en");
+
+        const auto& languageCode = *_sender->getItemDataAt<std::string>(pos);
+        if (!languageCode.empty())
+            currentLocales[langPriority] = languageCode;
+        else
+            currentLocales.resize(1);
+
+        Settings::Manager::setStringArray("preferred locales", "General", currentLocales);
     }
 
     void SettingsWindow::onWindowModeChanged(MyGUI::ComboBox* _sender, size_t pos)
@@ -668,17 +748,13 @@ namespace MWGui
             SceneUtil::LightingMethod::SingleUBO,
         };
 
-        std::vector<std::string> userData;
         for (const auto& method : methods)
         {
             if (!MWBase::Environment::get().getResourceSystem()->getSceneManager()->isSupportedLightingMethod(method))
                 continue;
 
-            mLightingMethodButton->addItem(lightingMethodToStr(method));
-            userData.emplace_back(SceneUtil::LightManager::getLightingMethodString(method));
+            mLightingMethodButton->addItem(lightingMethodToStr(method), SceneUtil::LightManager::getLightingMethodString(method));
         }
-
-        mLightingMethodButton->setUserData(userData);
         mLightingMethodButton->setIndexSelected(mLightingMethodButton->findItemIndexWith(lightingMethodStr));
     }
 

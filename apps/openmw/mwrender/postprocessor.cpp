@@ -830,8 +830,7 @@ namespace MWRender
 
         mTechniques.clear();
 
-        std::vector<std::string> techniqueStrings;
-        Misc::StringUtils::split(Settings::Manager::getString("chain", "Post Processing"), techniqueStrings, ",");
+        std::vector<std::string> techniqueStrings = Settings::Manager::getStringArray("chain", "Post Processing");
 
         const std::string mainIdentifier = "main";
 
@@ -844,8 +843,6 @@ namespace MWRender
 
         for (auto& techniqueName : techniqueStrings)
         {
-            Misc::StringUtils::trim(techniqueName);
-
             if (techniqueName.empty() || Misc::StringUtils::ciEqual(techniqueName, mainIdentifier))
                 continue;
 

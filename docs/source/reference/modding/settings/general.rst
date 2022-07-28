@@ -85,7 +85,7 @@ will match "en"), so is recommended that you include the country codes where pos
 since if the country code isn't specified the generic language-code only locale might
 refer to any of the country-specific variants.
 
-This setting can only be configured by editing the settings configuration file.
+Two highest priority locales may be assigned via the Localization tab of the in-game options.
 
 log buffer size
 ---------------

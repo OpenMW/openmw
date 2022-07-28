@@ -88,6 +88,22 @@ std::string Manager::getString(std::string_view setting, std::string_view catego
     throw std::runtime_error(error);
 }
 
+std::vector<std::string> Manager::getStringArray(std::string_view setting, std::string_view category)
+{
+    // TODO: it is unclear how to handle empty value -
+    // there is no difference between empty serialized array
+    // and a serialized array which has one empty value
+    std::vector<std::string> values;
+    const std::string& value = getString(setting, category);
+    if (value.empty())
+        return values;
+
+    Misc::StringUtils::split(value, values, ",");
+    for (auto& item : values)
+        Misc::StringUtils::trim(item);
+    return values;
+}
+
 float Manager::getFloat(std::string_view setting, std::string_view category)
 {
     const std::string& value = getString(setting, category);
@@ -166,6 +182,24 @@ void Manager::setString(std::string_view setting, std::string_view category, con
     mUserSettings[key] = value;
 
     mChangedSettings.insert(std::move(key));
+}
+
+void Manager::setStringArray(std::string_view setting, std::string_view category, const std::vector<std::string> &value)
+{
+    std::stringstream stream;
+
+    // TODO: escape delimeters, new line characters, etc.
+    for (size_t i = 0; i < value.size(); ++i)
+    {
+        std::string item = value[i];
+        Misc::StringUtils::trim(item);
+        stream << item;
+
+        if (i < value.size() - 1)
+            stream << ",";
+    }
+
+    setString(setting, category, stream.str());
 }
 
 void Manager::setInt(std::string_view setting, std::string_view category, const int value)

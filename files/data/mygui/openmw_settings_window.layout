@@ -670,6 +670,28 @@
                 </Widget>
 
             </Widget>
+            <Widget type="TabItem">
+                <Property key="Caption" value="  #{SettingsMenu:Language}  "/>
+                <Widget type="AutoSizedTextBox" skin="SandText" position="4 4 300 32" align="Left Top">
+                    <Property key="Caption" value="#{SettingsMenu:LanguageNote}"/>
+                </Widget>
+                <!-- Primary Language -->
+                <Widget type="TextBox" skin="NormalText" position="4 28 250 18" align="Left Top">
+                    <Property key="Caption" value="#{SettingsMenu:PrimaryLanguage}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextToolTip"/>
+                    <UserString key="Caption_Text" value="#{SettingsMenu:PrimaryLanguageTooltip}"/>
+                </Widget>
+                <Widget type="ComboBox" skin="MW_ComboBox" position="4 52 250 24" align="Left Top" name="PrimaryLanguage" />
+                <!-- Secondary Language -->
+                <Widget type="TextBox" skin="NormalText" position="262 28 250 18" align="Left Top">
+                    <Property key="Caption" value="#{SettingsMenu:SecondaryLanguage}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextToolTip"/>
+                    <UserString key="Caption_Text" value="#{SettingsMenu:SecondaryLanguageTooltip}"/>
+                </Widget>
+                <Widget type="ComboBox" skin="MW_ComboBox" position="262 52 250 24" align="Left Top" name="SecondaryLanguage" />
+            </Widget>
         </Widget>
         <Widget type="AutoSizedButton" skin="MW_Button" position="320 420 56 24" align="Right Bottom" name="OkButton">
             <Property key="ExpandDirection" value="Left"/>

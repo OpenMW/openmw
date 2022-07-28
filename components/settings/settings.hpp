@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <osg/Vec2f>
 #include <osg/Vec3f>
@@ -63,6 +64,7 @@ namespace Settings
         static float getFloat(std::string_view setting, std::string_view category);
         static double getDouble(std::string_view setting, std::string_view category);
         static std::string getString(std::string_view setting, std::string_view category);
+        static std::vector<std::string> getStringArray(std::string_view setting, std::string_view category);
         static bool getBool(std::string_view setting, std::string_view category);
         static osg::Vec2f getVector2(std::string_view setting, std::string_view category);
         static osg::Vec3f getVector3(std::string_view setting, std::string_view category);
@@ -72,6 +74,7 @@ namespace Settings
         static void setFloat(std::string_view setting, std::string_view category, float value);
         static void setDouble(std::string_view setting, std::string_view category, double value);
         static void setString(std::string_view setting, std::string_view category, const std::string& value);
+        static void setStringArray(std::string_view setting, std::string_view category, const std::vector<std::string> &value);
         static void setBool(std::string_view setting, std::string_view category, bool value);
         static void setVector2(std::string_view setting, std::string_view category, osg::Vec2f value);
         static void setVector3(std::string_view setting, std::string_view category, osg::Vec3f value);
