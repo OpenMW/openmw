@@ -1400,6 +1400,7 @@ bool CharacterController::updateState(CharacterState idle)
                     // Enchanted items by default do not use casting animations
                     world->castSpell(mPtr);
                     resetIdle = false;
+                    mUpperBodyState = UpperCharState_CastingSpell;
                 }
                 else if(!spellid.empty() && canCast)
                 {
@@ -1565,7 +1566,8 @@ bool CharacterController::updateState(CharacterState idle)
             resetCurrentIdleState();
         }
 
-        animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
+        // Spellcasting animation needs to "play" for at least one frame to reset the aiming factor
+        animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete) || mUpperBodyState == UpperCharState_CastingSpell;
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
             mAttackStrength = complete;
     }
