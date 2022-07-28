@@ -1,0 +1,3 @@
+DisplayDepthDescription: "Visualisiert den Tiefenpuffer."
+DisplayDepthFactorDescription: "Bestimmt die Korrelation zwischen dem Pixeltiefenwert und seiner Ausgabefarbe. Hohe Werte führen zu einem helleren Bild."
+DisplayDepthFactorName: "Farbfaktor"
