@@ -178,6 +178,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     std::string mAttackType; // slash, chop or thrust
 
+    bool mCanCast{false};
+
     bool mCastingManualSpell{false};
 
     bool mIsMovingBackward{false};

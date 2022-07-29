@@ -2969,12 +2969,12 @@ namespace MWWorld
         mGroundcoverStore.init(mStore.get<ESM::Static>(), fileCollections, groundcoverFiles, encoder, listener);
     }
 
-    bool World::startSpellCast(const Ptr &actor)
+    MWWorld::SpellCastState World::startSpellCast(const Ptr &actor)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
         std::string message;
-        bool fail = false;
+        MWWorld::SpellCastState result = MWWorld::SpellCastState::Success;
         bool isPlayer = (actor == getPlayerPtr());
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
@@ -2990,28 +2990,38 @@ namespace MWWorld
             if (spellCost > 0 && magicka.getCurrent() < spellCost && !godmode)
             {
                 message = "#{sMagicInsufficientSP}";
-                fail = true;
+                result = MWWorld::SpellCastState::InsufficientMagicka;
             }
 
             // If this is a power, check if it was already used in the last 24h
-            if (!fail && spell->mData.mType == ESM::Spell::ST_Power && !stats.getSpells().canUsePower(spell))
+            if (result == MWWorld::SpellCastState::Success && spell->mData.mType == ESM::Spell::ST_Power && !stats.getSpells().canUsePower(spell))
             {
                 message = "#{sPowerAlreadyUsed}";
-                fail = true;
+                result = MWWorld::SpellCastState::PowerAlreadyUsed;
             }
 
-            // Reduce mana
-            if (!fail && !godmode)
+            if (result ==  MWWorld::SpellCastState::Success && !godmode)
             {
+                // Reduce mana
                 magicka.setCurrent(magicka.getCurrent() - spellCost);
                 stats.setMagicka(magicka);
+
+                // Reduce fatigue (note that in the vanilla game, both GMSTs are 0, and there's no fatigue loss)
+                static const float fFatigueSpellBase = mStore.get<ESM::GameSetting>().find("fFatigueSpellBase")->mValue.getFloat();
+                static const float fFatigueSpellMult = mStore.get<ESM::GameSetting>().find("fFatigueSpellMult")->mValue.getFloat();
+                MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
+                const float normalizedEncumbrance = actor.getClass().getNormalizedEncumbrance(actor);
+
+                float fatigueLoss = spellCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
+                fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
+                stats.setFatigue(fatigue);
             }
         }
 
-        if (isPlayer && fail)
+        if (isPlayer && result != MWWorld::SpellCastState::Success)
             MWBase::Environment::get().getWindowManager()->messageBox(message);
 
-        return !fail;
+        return result;
     }
 
     void World::castSpell(const Ptr &actor, bool manualSpell)

@@ -42,6 +42,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/spellcaststate.hpp"
 
 #include "aicombataction.hpp"
 #include "movement.hpp"
@@ -1052,8 +1053,10 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
     // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
     else if (groupname == "spellcast" && action == mAttackType + " release")
     {
-        MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell);
+        if (mCanCast)
+            MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell);
         mCastingManualSpell = false;
+        mCanCast = false;
     }
     else if (groupname == "shield" && action == "block hit")
         charClass.block(mPtr);
@@ -1377,7 +1380,13 @@ bool CharacterController::updateState(CharacterState idle)
                 }
                 std::string spellid = stats.getSpells().getSelectedSpell();
                 bool isMagicItem = false;
-                bool canCast = mCastingManualSpell || world->startSpellCast(mPtr);
+
+                // Play hand VFX and allow castSpell use (assuming an animation is going to be played) if spellcasting is successful.
+                // Manual spellcasting bypasses restrictions.
+                MWWorld::SpellCastState spellCastResult = MWWorld::SpellCastState::Success;
+                if (!mCastingManualSpell)
+                    spellCastResult = world->startSpellCast(mPtr);
+                mCanCast = spellCastResult == MWWorld::SpellCastState::Success;
 
                 if (spellid.empty())
                 {
@@ -1402,7 +1411,9 @@ bool CharacterController::updateState(CharacterState idle)
                     resetIdle = false;
                     mUpperBodyState = UpperCharState_CastingSpell;
                 }
-                else if(!spellid.empty() && canCast)
+                // Play the spellcasting animation/VFX if the spellcasting was successful or failed due to insufficient magicka.
+                // Used up powers are exempt from this from some reason.
+                else if (!spellid.empty() && spellCastResult != MWWorld::SpellCastState::PowerAlreadyUsed)
                 {
                     world->breakInvisibility(mPtr);
                     MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
@@ -1420,24 +1431,26 @@ bool CharacterController::updateState(CharacterState idle)
                         const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
                         effects = spell->mEffects.mList;
                     }
-
-                    const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(effects.back().mEffectID); // use last effect of list for color of VFX_Hands
-
-                    const ESM::Static* castStatic = world->getStore().get<ESM::Static>().find ("VFX_Hands");
-
-                    const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
-                    for (size_t iter = 0; iter < effects.size(); ++iter) // play hands vfx for each effect
+                    if (mCanCast)
                     {
-                        if (mAnimation->getNode("Bip01 L Hand"))
-                            mAnimation->addEffect(
-                                Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
-                                -1, false, "Bip01 L Hand", effect->mParticle);
+                        const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(effects.back().mEffectID); // use last effect of list for color of VFX_Hands
 
-                        if (mAnimation->getNode("Bip01 R Hand"))
-                            mAnimation->addEffect(
-                                Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
-                                -1, false, "Bip01 R Hand", effect->mParticle);
+                        const ESM::Static* castStatic = world->getStore().get<ESM::Static>().find ("VFX_Hands");
+
+                        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
+                        for (size_t iter = 0; iter < effects.size(); ++iter) // play hands vfx for each effect
+                        {
+                            if (mAnimation->getNode("Bip01 L Hand"))
+                                mAnimation->addEffect(
+                                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
+                                    -1, false, "Bip01 L Hand", effect->mParticle);
+
+                            if (mAnimation->getNode("Bip01 R Hand"))
+                                mAnimation->addEffect(
+                                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
+                                    -1, false, "Bip01 R Hand", effect->mParticle);
+                        }
                     }
 
                     const ESM::ENAMstruct &firstEffect = effects.at(0); // first effect used for casting animation
@@ -1448,8 +1461,10 @@ bool CharacterController::updateState(CharacterState idle)
                     {
                         startKey = "start";
                         stopKey = "stop";
-                        world->castSpell(mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
+                        if (mCanCast)
+                            world->castSpell(mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
                         mCastingManualSpell = false;
+                        mCanCast = false;
                     }
                     else
                     {
@@ -2547,6 +2562,7 @@ void CharacterController::forceStateUpdate()
 
     // Make sure we canceled the current attack or spellcasting,
     // because we disabled attack animations anyway.
+    mCanCast = false;
     mCastingManualSpell = false;
     setAttackingOrSpell(false);
     if (mUpperBodyState != UpperCharState_Nothing)

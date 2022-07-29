@@ -14,6 +14,7 @@
     Bug #3867: All followers attack player when one follower enters combat with player
     Bug #3905: Great House Dagoth issues
     Bug #4203: Resurrecting an actor doesn't close the loot GUI
+    Bug #4227: Spellcasting restrictions are checked before spellcasting animations are played
     Bug #4376: Moved actors don't respawn in their original cells
     Bug #4389: NPC's lips do not move if his head model has the NiBSAnimationNode root node
     Bug #4602: Robert's Bodies: crash inside createInstance()
