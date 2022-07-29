@@ -459,14 +459,6 @@ namespace MWWorld
         else
             mPhysics->disableWater();
 
-        const auto player = mWorld.getPlayerPtr();
-
-        // The player is loaded before the scene and by default it is grounded, with the scene fully loaded, we validate and correct this.
-        if (player.mCell == cell) // Only run once, during initial cell load.
-        {
-            mPhysics->traceDown(player, player.getRefData().getPosition().asVec3(), 10.f);
-        }
-
         mNavigator.update(position);
 
         if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
@@ -745,6 +737,11 @@ namespace MWWorld
 
         MWWorld::Ptr player = mWorld.getPlayerPtr();
         mRendering.updatePlayerPtr(player);
+
+        // The player is loaded before the scene and by default it is grounded, with the scene fully loaded,
+        // we validate and correct this. Only run once, during initial cell load.
+        if (old.mCell == cell)
+            mPhysics->traceDown(player, player.getRefData().getPosition().asVec3(), 10.f);
 
         if (adjustPlayerPos)
         {
