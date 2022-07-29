@@ -1352,7 +1352,6 @@ bool CharacterController::updateState(CharacterState idle)
         bool resetIdle = ammunition;
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
-            world->breakInvisibility(mPtr);
             mAttackStrength = 0;
 
             // Randomize attacks for non-bipedal creatures
@@ -1397,6 +1396,7 @@ bool CharacterController::updateState(CharacterState idle)
                 static const bool useCastingAnimations = Settings::Manager::getBool("use magic item animations", "Game");
                 if (isMagicItem && !useCastingAnimations)
                 {
+                    world->breakInvisibility(mPtr);
                     // Enchanted items by default do not use casting animations
                     world->castSpell(mPtr);
                     resetIdle = false;
@@ -1404,6 +1404,7 @@ bool CharacterController::updateState(CharacterState idle)
                 }
                 else if(!spellid.empty() && canCast)
                 {
+                    world->breakInvisibility(mPtr);
                     MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
                     cast.playSpellCastingEffects(spellid, isMagicItem);
 
@@ -1476,6 +1477,7 @@ bool CharacterController::updateState(CharacterState idle)
             }
             else if(mWeaponType == ESM::Weapon::PickProbe)
             {
+                world->breakInvisibility(mPtr);
                 MWWorld::ContainerStoreIterator weapon = cls.getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 MWWorld::Ptr item = *weapon;
                 // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use lockpicks/probes.
@@ -1576,6 +1578,7 @@ bool CharacterController::updateState(CharacterState idle)
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
         {
+            world->breakInvisibility(mPtr);
             float attackStrength = complete;
             float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
             float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"max attack");
@@ -1703,6 +1706,7 @@ bool CharacterController::updateState(CharacterState idle)
                         break;
                     }
 
+                    world->breakInvisibility(mPtr);
                     if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
                         playSwishSound(0.0f);
                 }

@@ -46,6 +46,7 @@
     Bug #5863: GetEffect should return true after the player has teleported
     Bug #5913: Failed assertion during Ritual of Trees quest
     Bug #5937: Lights always need to be rotated by 90 degrees
+    Bug #5976: Invisibility is broken when the attack starts instead of when it ends
     Bug #5978: NPCs and Creatures talk to and headtrack a player character with a 75% chameleon effect or more
     Bug #5989: Simple water isn't affected by texture filter settings
     Bug #6037: Launcher: Morrowind content language cannot be set to English
