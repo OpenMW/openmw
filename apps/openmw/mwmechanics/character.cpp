@@ -1663,6 +1663,11 @@ bool CharacterController::updateState(CharacterState idle)
             if (ammunition && mWeaponType == ESM::Weapon::MarksmanCrossbow)
                 mAnimation->attachArrow();
 
+            // Cancel stagger animation at the end of an attack to avoid abrupt transitions
+            // in favor of a different abrupt transition, like Morrowind
+            if (mUpperBodyState != UpperCharState_EquipingWeap && isRecovery())
+                mAnimation->disable(mCurrentHit);
+
             mUpperBodyState = UpperCharState_WeapEquiped;
         }
         else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
