@@ -363,11 +363,11 @@ namespace MWGui
         bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
         bool isReturnNeeded = (!godmode && playerStats.isParalyzed()) || playerStats.isDead();
 
-        if (isReturnNeeded && key->type != Type_Item)
+        if (isReturnNeeded)
         {
             return;
         }
-        else if (isDelayNeeded && key->type != Type_Item)
+        else if (isDelayNeeded)
         {
             mActivated = key;
             return;
@@ -407,21 +407,6 @@ namespace MWGui
 
             if (key->type == Type_Item)
             {
-                bool isWeapon = item.getType() == ESM::Weapon::sRecordId;
-                bool isTool = item.getType() == ESM::Probe::sRecordId ||
-                    item.getType() == ESM::Lockpick::sRecordId;
-
-                // delay weapon switching if player is busy
-                if (isDelayNeeded && (isWeapon || isTool))
-                {
-                    mActivated = key;
-                    return;
-                }
-                else if (isReturnNeeded && (isWeapon || isTool))
-                {
-                    return;
-                }
-
                 if (!store.isEquipped(item))
                     MWBase::Environment::get().getWindowManager()->useItem(item);
                 MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
