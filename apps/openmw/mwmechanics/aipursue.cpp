@@ -11,7 +11,7 @@
 
 #include "movement.hpp"
 #include "creaturestats.hpp"
-#include "combat.hpp"
+#include "actorutil.hpp"
 
 namespace MWMechanics
 {

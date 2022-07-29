@@ -46,6 +46,7 @@
     Bug #5863: GetEffect should return true after the player has teleported
     Bug #5913: Failed assertion during Ritual of Trees quest
     Bug #5937: Lights always need to be rotated by 90 degrees
+    Bug #5978: NPCs and Creatures talk to and headtrack a player character with a 75% chameleon effect or more
     Bug #5989: Simple water isn't affected by texture filter settings
     Bug #6037: Launcher: Morrowind content language cannot be set to English
     Bug #6051: NaN water height in ESM file is not handled gracefully

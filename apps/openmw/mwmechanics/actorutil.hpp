@@ -12,6 +12,7 @@ namespace MWMechanics
     bool isPlayerInCombat();
     bool canActorMoveByZAxis(const MWWorld::Ptr& actor);
     bool hasWaterWalking(const MWWorld::Ptr& actor);
+    bool isTargetMagicallyHidden(const MWWorld::Ptr& actor);
 }
 
 #endif

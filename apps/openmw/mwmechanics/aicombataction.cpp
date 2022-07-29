@@ -13,6 +13,7 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "actorutil.hpp"
 #include "npcstats.hpp"
 #include "combat.hpp"
 #include "weaponpriority.hpp"

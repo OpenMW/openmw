@@ -253,6 +253,9 @@ namespace MWMechanics
             if (targetActor.getClass().getCreatureStats(targetActor).isDead())
                 return;
 
+            if (isTargetMagicallyHidden(targetActor))
+                return;
+
             static const float fMaxHeadTrackDistance = MWBase::Environment::get().getWorld()->getStore()
                 .get<ESM::GameSetting>().find("fMaxHeadTrackDistance")->mValue.getFloat();
             static const float fInteriorHeadTrackMult = MWBase::Environment::get().getWorld()->getStore()
@@ -471,7 +474,7 @@ namespace MWMechanics
         if (greetingState == Greet_None)
         {
             if ((playerPos - actorPos).length2() <= helloDistance * helloDistance &&
-                !playerStats.isDead() && !actorStats.isParalyzed()
+                !playerStats.isDead() && !actorStats.isParalyzed() && !isTargetMagicallyHidden(player)
                 && MWBase::Environment::get().getWorld()->getLOS(player, actor)
                 && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
                 greetingTimer++;
