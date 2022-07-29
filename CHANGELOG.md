@@ -49,6 +49,7 @@
     Bug #5989: Simple water isn't affected by texture filter settings
     Bug #6037: Launcher: Morrowind content language cannot be set to English
     Bug #6051: NaN water height in ESM file is not handled gracefully
+    Bug #6054: Hotkey items can be equipped while in ready to attack stance
     Bug #6066: Addtopic "return" does not work from within script. No errors thrown
     Bug #6067: ESP loader fails for certain subrecord orders
     Bug #6087: Bound items added directly to the inventory disappear if their corresponding spell effect ends
