@@ -189,6 +189,7 @@
     Feature #6706: Save the size of the Options window
     Feature #6721: [OpenMW-CS] Add option to open records in new window
     Feature #6867: Add a way to localize hardcoded strings in GUI
+    Feature #6888: Add switch for armor degradation fix.
     Task #6078: First person should not clear depth buffer
     Task #6161: Refactor Sky to use shaders and be GLES/GL3 friendly
     Task #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly

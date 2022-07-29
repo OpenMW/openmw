@@ -108,6 +108,7 @@ bool Launcher::AdvancedPage::loadSettings()
         if (numPhysicsThreads >= 0)
             physicsThreadsSpinBox->setValue(numPhysicsThreads);
         loadSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
+        loadSettingBool(unarmedCreatureAttacksDamageArmorCheckBox, "unarmed creature attacks damage armor", "Game");
     }
 
     // Visuals
@@ -262,6 +263,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
         saveSettingInt(physicsThreadsSpinBox, "async num threads", "Physics");
         saveSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
+        saveSettingBool(unarmedCreatureAttacksDamageArmorCheckBox, "unarmed creature attacks damage armor", "Game");
     }
 
     // Visuals

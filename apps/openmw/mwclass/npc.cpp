@@ -805,7 +805,12 @@ namespace MWClass
                 }
                 if (hasArmor)
                 {
-                    if (!object.isEmpty() || attacker.isEmpty() || attacker.getClass().isNpc()) // Unarmed creature attacks don't affect armor condition
+                    static const bool creatureDamage = Settings::Manager::getBool("unarmed creature attacks damage armor", "Game");
+
+                    if (!object.isEmpty() ||
+                        attacker.isEmpty() ||
+                        attacker.getClass().isNpc() ||
+                        creatureDamage) // Unarmed creature attacks don't affect armor condition unless it was explicitly requested.
                     {
                         int armorhealth = armor.getClass().getItemHealth(armor);
                         armorhealth -= std::min(damageDiff, armorhealth);
