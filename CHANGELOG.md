@@ -65,6 +65,7 @@
     Bug #6133: Cannot reliably sneak or steal in the sight of the NPCs siding with player
     Bug #6142: Groundcover plugins change cells flags
     Bug #6143: Capturing a screenshot renders the engine temporarily unresponsive
+    Bug #6154: Levitating player character is floating rather than on the floor when teleported back from Magas Volar
     Bug #6165: Paralyzed player character can pickup items when the inventory is open
     Bug #6168: Weather particles flicker for a frame at start of storms
     Bug #6172: Some creatures can't open doors
