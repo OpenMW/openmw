@@ -506,13 +506,6 @@ namespace MWMechanics
         return (iFightDistanceBase - fFightDistanceMultiplier * d);
     }
 
-    bool isTargetMagicallyHidden(const MWWorld::Ptr& target)
-    {
-        const MagicEffects& magicEffects = target.getClass().getCreatureStats(target).getMagicEffects();
-        return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
-            || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
-    }
-
     float getAggroDistance(const MWWorld::Ptr& actor, const osg::Vec3f& lhs, const osg::Vec3f& rhs)
     {
         if (canActorMoveByZAxis(actor))
