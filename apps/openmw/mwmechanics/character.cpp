@@ -1110,7 +1110,7 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
     return mAnimation->updateCarriedLeftVisible(weaptype);
 }
 
-bool CharacterController::updateState(CharacterState idle)
+bool CharacterController::updateWeaponState(CharacterState idle)
 {
     const auto world = MWBase::Environment::get().getWorld();
     auto& prng = world->getPrng();
@@ -2253,7 +2253,7 @@ void CharacterController::update(float duration)
 
         if (!mSkipAnim)
         {
-            refreshCurrentAnims(idlestate, movestate, jumpstate, updateState(idlestate));
+            refreshCurrentAnims(idlestate, movestate, jumpstate, updateWeaponState(idlestate));
             updateIdleStormState(inwater);
         }
 
