@@ -176,6 +176,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="unarmedCreatureAttacksDamageArmorCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes unarmed creature attacks able to reduce armor condition, just as attacks from NPCs and armed creatures.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Unarmed creature attacks damage armor</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalUnarmedStrengthLayout">
          <item>
           <widget class="QLabel" name="unarmedFactorsStrengthLabel">
