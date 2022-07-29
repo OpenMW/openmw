@@ -138,6 +138,7 @@
     Bug #6898: Accessing the Quick Inventory menu does not work while in menu mode
     Bug #6901: Morrowind.exe soul gem usage discrepancy
     Bug #6909: Using enchanted items has no animation
+    Bug #6910: Torches should not be extinguished when not being held
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"

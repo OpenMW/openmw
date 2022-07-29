@@ -991,30 +991,26 @@ namespace MWMechanics
         heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
         //If holding a light...
-        if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
+        const auto world = MWBase::Environment::get().getWorld();
+        MWRender::Animation *anim = world->getAnimation(ptr);
+        if (heldIter.getType() == MWWorld::ContainerStore::Type_Light && anim && anim->getCarriedLeftShown())
         {
-            const auto world = MWBase::Environment::get().getWorld();
             // Use time from the player's light
             if(isPlayer)
             {
-                // But avoid using it up if the light source is hidden
-                MWRender::Animation *anim = world->getAnimation(ptr);
-                if (anim && anim->getCarriedLeftShown())
+                float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
+
+                // -1 is infinite light source. Other negative values are treated as 0.
+                if (timeRemaining != -1.0f)
                 {
-                    float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
-
-                    // -1 is infinite light source. Other negative values are treated as 0.
-                    if (timeRemaining != -1.0f)
+                    timeRemaining -= duration;
+                    if (timeRemaining <= 0.f)
                     {
-                        timeRemaining -= duration;
-                        if (timeRemaining <= 0.f)
-                        {
-                            inventoryStore.remove(*heldIter, 1, ptr); // remove it
-                            return;
-                        }
-
-                        heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
+                        inventoryStore.remove(*heldIter, 1, ptr); // remove it
+                        return;
                     }
+
+                    heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
                 }
             }
 
