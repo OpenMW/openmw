@@ -366,6 +366,9 @@ namespace MWWorld
 
         MWBase::Environment::get().getSoundManager()->stopSound (cell);
         mActiveCells.erase(cell);
+        // Clean up any effects that may have been spawned while unloading all cells
+        if(mActiveCells.empty())
+            mRendering.notifyWorldSpaceChanged();
     }
 
     void Scene::loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position)
