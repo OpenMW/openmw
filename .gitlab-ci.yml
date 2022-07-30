@@ -19,7 +19,7 @@ variables:
   tags:
     - docker
     - linux
-  image: ubuntu:focal
+  image: ubuntu:22.04
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
 
@@ -90,7 +90,7 @@ Coverity:
 Ubuntu_GCC:
   extends: .Ubuntu
   cache:
-    key: Ubuntu_GCC.v3
+    key: Ubuntu_GCC.ubuntu_22.04.v1
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
@@ -103,7 +103,7 @@ Ubuntu_GCC:
 .Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests.v3
+    key: Ubuntu_GCC_tests.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -117,7 +117,7 @@ Ubuntu_GCC:
 .Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_Debug.v2
+    key: Ubuntu_GCC_tests_Debug.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -133,7 +133,7 @@ Ubuntu_GCC:
 .Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_asan.v1
+    key: Ubuntu_GCC_asan.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -151,7 +151,7 @@ Ubuntu_GCC:
 .Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_ubsan.v1
+    key: Ubuntu_GCC_ubsan.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -168,7 +168,7 @@ Ubuntu_GCC:
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tsan.v1
+    key: Ubuntu_GCC_tsan.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -186,7 +186,7 @@ Ubuntu_GCC:
 .Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
   cache:
-    key: Ubuntu_GCC_tests_coverage.v1
+    key: Ubuntu_GCC_tests_coverage.ubuntu_22.04.v1
   variables:
     BUILD_WITH_CODE_COVERAGE: 1
   before_script:
@@ -212,7 +212,7 @@ Ubuntu_GCC:
         - "CI/**/*"
         - ".gitlab-ci.yml"
   cache:
-    key: Ubuntu_Static_Deps.V1
+    key: Ubuntu_Static_Deps.ubuntu_22.04.v1
     paths:
       - apt-cache/
       - ccache/
@@ -229,7 +229,7 @@ Ubuntu_GCC:
 .Ubuntu_Static_Deps_tests:
   extends: .Ubuntu_Static_Deps
   cache:
-    key: Ubuntu_Static_Deps_tests.V1
+    key: Ubuntu_Static_Deps_tests.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -248,19 +248,19 @@ Ubuntu_Clang:
   before_script:
     - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
   cache:
-    key: Ubuntu_Clang.v2
+    key: Ubuntu_Clang.ubuntu_22.04.v1
   variables:
     CC: clang
     CXX: clang++
     CI_CLANG_TIDY: 1
     CCACHE_SIZE: 2G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
-  timeout: 2h
+  timeout: 3h
 
 .Ubuntu_Clang_tests:
   extends: Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_tests.v3
+    key: Ubuntu_Clang_tests.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -274,7 +274,7 @@ Ubuntu_Clang:
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_tests_Debug.v1
+    key: Ubuntu_Clang_tests_Debug.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -294,7 +294,7 @@ Ubuntu_Clang_integration_tests:
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   cache:
-    key: Ubuntu_Clang_integration_tests.v1
+    key: Ubuntu_Clang_integration_tests.ubuntu_22.04.v1
     paths:
       - .cache/pip
       - apt-cache/

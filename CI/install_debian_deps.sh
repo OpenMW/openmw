@@ -50,13 +50,13 @@ declare -rA GROUPED_DEPS=(
     libavcodec58
     libavformat58
     libavutil56
-    libboost-filesystem1.71.0
-    libboost-iostreams1.71.0
-    libboost-program-options1.71.0
-    libboost-system1.71.0
-    libbullet2.88
-    libcollada-dom2.4-dp0
-    libicu66
+    libboost-filesystem1.74.0
+    libboost-iostreams1.74.0
+    libboost-program-options1.74.0
+    libboost-system1.74.0
+    libbullet3.06
+    libcollada-dom2.5-dp0
+    libicu70
     libjpeg8
     libluajit-5.1-2
     liblz4-1
@@ -71,7 +71,7 @@ declare -rA GROUPED_DEPS=(
     libswresample3
     libswscale5
     libtinyxml2.6.2v5
-    libyaml-cpp0.6
+    libyaml-cpp0.7
     python3-pip
     xvfb
   "
@@ -95,6 +95,6 @@ export APT_CACHE_DIR="${PWD}/apt-cache"
 set -x
 mkdir -pv "$APT_CACHE_DIR"
 apt-get update -yqq
-apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends software-properties-common >/dev/null
+apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends software-properties-common gnupg >/dev/null
 add-apt-repository -y ppa:openmw/openmw
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}" >/dev/null
