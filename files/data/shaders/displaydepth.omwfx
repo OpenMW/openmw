@@ -13,10 +13,7 @@ fragment main {
 
     void main()
     {
-        float depth = omw_GetDepth(omw_TexCoord);
-        float zNear = omw.near;
-        float zFar = omw.far;
-        omw_FragColor = vec4(vec3((2.0 * zNear) / (zFar + zNear - depth * (zFar - zNear))) * uFactor, 1.0);
+        omw_FragColor = vec4(vec3(omw_GetLinearDepth(omw_TexCoord) / omw.far * uFactor), 1.0);
     }
 }
 

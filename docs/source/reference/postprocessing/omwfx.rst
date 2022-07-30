@@ -120,39 +120,45 @@ Builtin Uniforms
 Builtin Macros
 ##############
 
-+------------------+----------------+---------------------------------------------------------------------------+
-| Macro            | Definition     | Description                                                               |
-+==================+================+===========================================================================+
-|``OMW_REVERSE_Z`` | ``0`` or ``1`` | Whether a reversed depth buffer is in use.                                |
-|                  |                |                                                                           |
-|                  |                | ``0``  Depth sampler will be in range [1, 0]                              |
-|                  |                |                                                                           |
-|                  |                | ``1``  Depth sampler will be in range [0, 1]                              |
-+------------------+----------------+---------------------------------------------------------------------------+
-|``OMW_RADIAL_FOG``| ``0`` or ``1`` | Whether radial fog is in use.                                             |
-|                  |                |                                                                           |
-|                  |                | ``0``  Fog is linear                                                      |
-|                  |                |                                                                           |
-|                  |                | ``1``  Fog is radial                                                      |
-+------------------+----------------+---------------------------------------------------------------------------+
-| ``OMW_HDR``      | ``0`` or ``1`` | Whether average scene luminance is computed every frame.                  |
-|                  |                |                                                                           |
-|                  |                | ``0``  Average scene luminance is not computed                            |
-|                  |                |                                                                           |
-|                  |                | ``1``  Average scene luminance is computed                                |
-+------------------+----------------+---------------------------------------------------------------------------+
-|  ``OMW_NORMALS`` | ``0`` or ``1`` | Whether normals are available as a sampler in the technique.              |
-|                  |                |                                                                           |
-|                  |                | ``0``  Normals are not available                                          |
-|                  |                |                                                                           |
-|                  |                | ``1``  Normals are available.                                             |
-+------------------+----------------+---------------------------------------------------------------------------+
-| ``OMW_MULTIVIEW``| ``0`` or ``1`` | Whether multiview rendering is in use.                                    |
-|                  |                |                                                                           |
-|                  |                | ``0``  Multiview not in use                                               |
-|                  |                |                                                                           |
-|                  |                | ``1``  Multiview in use.                                                  |
-+------------------+----------------+---------------------------------------------------------------------------+
++-----------------------+----------------+----------------------------------------------------------------------+
+| Macro                 | Definition     | Description                                                          |
++=======================+================+======================================================================+
+|``OMW_REVERSE_Z``      | ``0`` or ``1`` | Whether a reversed depth buffer is in use.                           |
+|                       |                |                                                                      |
+|                       |                | ``0``  Depth sampler will be in range [1, 0]                         |
+|                       |                |                                                                      |
+|                       |                | ``1``  Depth sampler will be in range [0, 1]                         |
++-----------------------+----------------+----------------------------------------------------------------------+
+|``OMW_RADIAL_FOG``     | ``0`` or ``1`` | Whether radial fog is in use.                                        |
+|                       |                |                                                                      |
+|                       |                | ``0``  Fog is linear                                                 |
+|                       |                |                                                                      |
+|                       |                | ``1``  Fog is radial                                                 |
++-----------------------+----------------+----------------------------------------------------------------------+
+|``OMW_EXPONENTIAL_FOG``| ``0`` or ``1`` | Whether exponential fog is in use.                                   |
+|                       |                |                                                                      |
+|                       |                | ``0``  Fog is linear                                                 |
+|                       |                |                                                                      |
+|                       |                | ``1``  Fog is exponential                                            |
++-----------------------+----------------+----------------------------------------------------------------------+
+| ``OMW_HDR``           | ``0`` or ``1`` | Whether average scene luminance is computed every frame.             |
+|                       |                |                                                                      |
+|                       |                | ``0``  Average scene luminance is not computed                       |
+|                       |                |                                                                      |
+|                       |                | ``1``  Average scene luminance is computed                           |
++-----------------------+----------------+----------------------------------------------------------------------+
+|  ``OMW_NORMALS``      | ``0`` or ``1`` | Whether normals are available as a sampler in the technique.         |
+|                       |                |                                                                      |
+|                       |                | ``0``  Normals are not available                                     |
+|                       |                |                                                                      |
+|                       |                | ``1``  Normals are available.                                        |
++-----------------------+----------------+----------------------------------------------------------------------+
+| ``OMW_MULTIVIEW``     | ``0`` or ``1`` | Whether multiview rendering is in use.                               |
+|                       |                |                                                                      |
+|                       |                | ``0``  Multiview not in use                                          |
+|                       |                |                                                                      |
+|                       |                | ``1``  Multiview in use.                                             |
++-----------------------+----------------+----------------------------------------------------------------------+
 
 
 Builtin Functions
@@ -160,27 +166,35 @@ Builtin Functions
 
 The following functions can be accessed in any fragment or vertex shader.
 
-+----------------------------------------+-------------------------------------------------------------------------------+
-| Function                               | Description                                                                   |
-+========================================+===============================================================================+
-| ``float omw_GetDepth(vec2)``           |  Returns the depth value from a sampler given a uv coordinate.                |
-|                                        |                                                                               |
-|                                        |  Reverses sampled value when ``OMW_REVERSE_Z`` is set.                        |
-+----------------------------------------+-------------------------------------------------------------------------------+
-| ``float omw_GetEyeAdaptation()``       |  Returns the average scene luminance in range [0, 1].                         |
-|                                        |                                                                               |
-|                                        |  If HDR is not in use, this returns `1.0`                                     |
-|                                        |                                                                               |
-|                                        |  Scene luminance is always calculated on original scene texture.              |
-+----------------------------------------+-------------------------------------------------------------------------------+
-| ``vec4 omw_GetLastShader(vec2 uv)``    | Returns RGBA color output of the last shader                                  |
-+----------------------------------------+-------------------------------------------------------------------------------+
-| ``vec4 omw_GetLastPass(vec2 uv)``      | Returns RGBA color output of the last pass                                    |
-+----------------------------------------+-------------------------------------------------------------------------------+
-| ``vec3 omw_GetNormals(vec2 uv)``       | Returns normalized worldspace normals [-1, 1]                                 |
-|                                        |                                                                               |
-|                                        | The values in sampler are in [0, 1] but are transformed to [-1, 1]            |
-+----------------------------------------+-----------------------+-------------------------------------------------------+
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| Function                                         | Description                                                                   |
++==================================================+===============================================================================+
+| ``float omw_GetDepth(vec2)``                     | Returns the depth value from a sampler given a uv coordinate.                 |
+|                                                  |                                                                               |
+|                                                  | Reverses sampled value when ``OMW_REVERSE_Z`` is set.                         |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``float omw_GetEyeAdaptation()``                 | Returns the average scene luminance in range [0, 1].                          |
+|                                                  |                                                                               |
+|                                                  | If HDR is not in use, this returns `1.0`                                      |
+|                                                  |                                                                               |
+|                                                  | Scene luminance is always calculated on original scene texture.               |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec4 omw_GetLastShader(vec2 uv)``              | Returns RGBA color output of the last shader                                  |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec4 omw_GetLastPass(vec2 uv)``                | Returns RGBA color output of the last pass                                    |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec3 omw_GetNormals(vec2 uv)``                 | Returns normalized worldspace normals [-1, 1]                                 |
+|                                                  |                                                                               |
+|                                                  | The values in sampler are in [0, 1] but are transformed to [-1, 1]            |
++--------------------------------------------------+-----------------------+-------------------------------------------------------+
+| ``vec3 omw_GetWorldPosFromUV(vec2 uv)``          | Returns world position for given uv coordinate.                               |
++--------------------------------------------------+-----------------------+-------------------------------------------------------+
+| ``float omw_GetLinearDepth(vec2 uv)``            | Returns the depth in game units for given uv coordinate.                      |
++--------------------------------------------------+-----------------------+-------------------------------------------------------+
+| ``float omw_EstimateFogCoverageFromUV(vec2 uv)`` | Returns a fog coverage in the range from 0.0 (no fog) and 1.0 (full fog)      |
+|                                                  |                                                                               |
+|                                                  | Calculates an estimated fog coverage for given uv coordinate.                 |
++--------------------------------------------------+-----------------------+-------------------------------------------------------+
 
 
 Special Attributes
