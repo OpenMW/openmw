@@ -53,6 +53,7 @@ namespace MWGui
             MyGUI::EditBox* mScriptFilter;
             MyGUI::ListBox* mScriptList;
             MyGUI::Widget* mScriptBox;
+            MyGUI::Widget* mScriptDisabled;
             MyGUI::ScrollView* mScriptView;
             LuaUi::LuaAdapter* mScriptAdapter;
             int mCurrentPage;

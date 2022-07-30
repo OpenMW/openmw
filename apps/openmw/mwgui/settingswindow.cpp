@@ -268,6 +268,7 @@ namespace MWGui
         getWidget(mScriptBox, "ScriptBox");
         getWidget(mScriptView, "ScriptView");
         getWidget(mScriptAdapter, "ScriptAdapter");
+        getWidget(mScriptDisabled, "ScriptDisabled");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -899,11 +900,12 @@ namespace MWGui
         for (const WeightedPage& weightedPage : weightedPages)
             mScriptList->addItem(weightedPage.mName, weightedPage.mIndex);
 
-        // Hide script settings tab when the game world isn't loaded and scripts couldn't add their settings
+        // Hide script settings when the game world isn't loaded
         bool disabled = LuaUi::scriptSettingsPageCount() == 0;
         mScriptFilter->setVisible(!disabled);
         mScriptList->setVisible(!disabled);
         mScriptBox->setVisible(!disabled);
+        mScriptDisabled->setVisible(disabled);
 
         LuaUi::attachPageAt(mCurrentPage, mScriptAdapter);
         mScriptView->setCanvasSize(mScriptAdapter->getSize());
