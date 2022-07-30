@@ -639,10 +639,17 @@
             <Widget type="TabItem">
                 <Property key="Caption" value="  #{SettingsMenu:Scripts}  "/>
 
+                <Widget name="ScriptDisabled" type="EditBox" skin="SandText" position_real="0 0 1 1" align="HStretch Top">
+                    <Property key="Caption" value="#{SettingsMenu:ScriptsDisabled}"/>
+                    <Property key="TextAlign" value="Center"/>
+                    <Property key="MultiLine" value="true"/>
+                    <Property key="WordWrap" value="true"/>
+                    <Property key="Static" value="true"/>
+                </Widget>
+
                 <Widget type="HBox" position_real="0 0 1 0.99" align="Stretch">
                     <Property key="Padding" value="0"/>
                     <Property key="Spacing" value="0"/>
-
                     <Widget type="VBox" align="Left VStretch">
                         <UserString key="VStretch" value="true"/>
 
