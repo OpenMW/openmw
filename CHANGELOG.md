@@ -129,6 +129,7 @@
     Bug #6680: object.cpp handles nodetree unsafely, memory access with dangling pointer
     Bug #6682: HitOnMe doesn't fire as intended
     Bug #6697: Shaders vertex lighting incorrectly clamped
+    Bug #6705: OpenMW CS: A typo in the Creature levelled list
     Bug #6711: Log time differs from real time
     Bug #6717: Broken script causes interpreter stack corruption
     Bug #6718: Throwable weapons cause arrow enchantment effect to be applied to the whole body

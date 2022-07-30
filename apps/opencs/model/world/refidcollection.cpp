@@ -617,27 +617,39 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
         new RefIdColumn (Columns::ColumnId_PartRefFemale, CSMWorld::ColumnBase::Display_BodyPart));
 
-    LevListColumns levListColumns (baseColumns);
+    LevListColumns creatureLevListColumns (baseColumns);
+    LevListColumns itemLevListColumns (baseColumns);
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> creatureLevListMap, itemLevListMap;
+    creatureLevListMap.insert(std::make_pair(UniversalId::Type_CreatureLevelledList,
+        new NestedLevListRefIdAdapter<ESM::CreatureLevList> (UniversalId::Type_CreatureLevelledList)));
+    itemLevListMap.insert(std::make_pair(UniversalId::Type_ItemLevelledList,
+        new NestedLevListRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList)));
 
-    // Nested table
+    // Levelled creature nested table
     mColumns.emplace_back(Columns::ColumnId_LevelledList,
         ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue);
-    levListColumns.mLevList = &mColumns.back();
-    std::map<UniversalId::Type, NestedRefIdAdapterBase*> levListMap;
-    levListMap.insert(std::make_pair(UniversalId::Type_CreatureLevelledList,
-        new NestedLevListRefIdAdapter<ESM::CreatureLevList> (UniversalId::Type_CreatureLevelledList)));
-    levListMap.insert(std::make_pair(UniversalId::Type_ItemLevelledList,
-        new NestedLevListRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList)));
-    mNestedAdapters.emplace_back(&mColumns.back(), levListMap);
+    creatureLevListColumns.mLevList = &mColumns.back();
+    mNestedAdapters.emplace_back(&mColumns.back(), creatureLevListMap);
+    mColumns.back().addColumn(
+        new RefIdColumn (Columns::ColumnId_LevelledCreatureId, CSMWorld::ColumnBase::Display_Referenceable));
+    mColumns.back().addColumn(
+        new RefIdColumn (Columns::ColumnId_LevelledItemLevel, CSMWorld::ColumnBase::Display_Integer));
+
+    // Levelled item nested table
+    mColumns.emplace_back(Columns::ColumnId_LevelledList,
+        ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue);
+    itemLevListColumns.mLevList = &mColumns.back();
+    mNestedAdapters.emplace_back(&mColumns.back(), itemLevListMap);
     mColumns.back().addColumn(
         new RefIdColumn (Columns::ColumnId_LevelledItemId, CSMWorld::ColumnBase::Display_Referenceable));
     mColumns.back().addColumn(
         new RefIdColumn (Columns::ColumnId_LevelledItemLevel, CSMWorld::ColumnBase::Display_Integer));
 
-    // Nested list
+    // Shared levelled list nested list
     mColumns.emplace_back(Columns::ColumnId_LevelledList,
         ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_List);
-    levListColumns.mNestedListLevList = &mColumns.back();
+    creatureLevListColumns.mNestedListLevList = &mColumns.back();
+    itemLevListColumns.mNestedListLevList = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> nestedListLevListMap;
     nestedListLevListMap.insert(std::make_pair(UniversalId::Type_CreatureLevelledList,
         new NestedListLevListRefIdAdapter<ESM::CreatureLevList> (UniversalId::Type_CreatureLevelledList)));
@@ -673,9 +685,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
         new IngredientRefIdAdapter (ingredientColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_CreatureLevelledList,
         new LevelledListRefIdAdapter<ESM::CreatureLevList> (
-        UniversalId::Type_CreatureLevelledList, levListColumns)));
+        UniversalId::Type_CreatureLevelledList, creatureLevListColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_ItemLevelledList,
-        new LevelledListRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList, levListColumns)));
+        new LevelledListRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList, itemLevListColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Light,
         new LightRefIdAdapter (lightColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Lockpick,
