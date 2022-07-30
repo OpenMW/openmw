@@ -430,7 +430,7 @@ namespace MWScript
                         rot.z() = osg::DegreesToRadians(zRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,rot);
 
-                        ptr.getClass().adjustPosition(ptr, false);
+                        ptr.getClass().adjustPosition(ptr, true);
                     }
                 }
         };
@@ -484,7 +484,7 @@ namespace MWScript
                         zRot = zRot/60.0f;
                     rot.z() = osg::DegreesToRadians(zRot);
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,rot);
-                    ptr.getClass().adjustPosition(ptr, false);
+                    ptr.getClass().adjustPosition(ptr, true);
                 }
         };
 
