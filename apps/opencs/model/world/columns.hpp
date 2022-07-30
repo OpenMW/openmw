@@ -346,6 +346,8 @@ namespace CSMWorld
             ColumnId_Persistent = 313,
             ColumnId_Blocked = 314,
 
+            ColumnId_LevelledCreatureId = 315,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
