@@ -1524,10 +1524,6 @@ namespace MWMechanics
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-        float invisibility = stats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude();
-        if (invisibility > 0)
-            return false;
-
         float sneakTerm = 0;
         if (isSneaking(ptr))
         {
@@ -1555,7 +1551,10 @@ namespace MWMechanics
         float distTerm = fSneakDistBase + fSneakDistMult * (pos1 - pos2).length();
 
         float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
-        float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon + invisibility;
+        float invisibility = stats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude();
+        float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon;
+        if (invisibility > 0.f)
+            x += 100.f;
 
         CreatureStats& observerStats = observer.getClass().getCreatureStats(observer);
         float obsAgility = observerStats.getAttribute(ESM::Attribute::Agility).getModified();
