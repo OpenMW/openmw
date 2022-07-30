@@ -51,6 +51,22 @@
 
 namespace
 {
+    class MarkDrawablesVisitor : public osg::NodeVisitor
+    {
+    public:
+        MarkDrawablesVisitor(osg::Node::NodeMask mask)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mMask(mask)
+        { }
+
+        void apply(osg::Drawable& drawable) override
+        {
+            drawable.setNodeMask(mMask);
+        }
+
+    private:
+        osg::Node::NodeMask mMask = 0;
+    };
 
     /// Removes all particle systems and related nodes in a subgraph.
     class RemoveParticlesVisitor : public osg::NodeVisitor
@@ -1554,6 +1570,9 @@ namespace MWRender
         node->accept(findMaxLengthVisitor);
 
         node->setNodeMask(Mask_Effect);
+
+        MarkDrawablesVisitor markVisitor(Mask_Effect);
+        node->accept(markVisitor);
 
         params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();
         params.mLoop = loop;
