@@ -313,8 +313,6 @@ namespace MWMechanics
         mSourceName = spell->mName;
         mId = spell->mId;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         int school = 0;
 
         bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
@@ -327,16 +325,6 @@ namespace MWMechanics
 
             if (!godmode)
             {
-                // Reduce fatigue (note that in the vanilla game, both GMSTs are 0, and there's no fatigue loss)
-                static const float fFatigueSpellBase = store.get<ESM::GameSetting>().find("fFatigueSpellBase")->mValue.getFloat();
-                static const float fFatigueSpellMult = store.get<ESM::GameSetting>().find("fFatigueSpellMult")->mValue.getFloat();
-                DynamicStat<float> fatigue = stats.getFatigue();
-                const float normalizedEncumbrance = mCaster.getClass().getNormalizedEncumbrance(mCaster);
-
-                float fatigueLoss = MWMechanics::calcSpellCost(*spell) * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
-                fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); 
-                stats.setFatigue(fatigue);
-
                 bool fail = false;
 
                 // Check success

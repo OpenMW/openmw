@@ -17,6 +17,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/doorstate.hpp"
+#include "../mwworld/spellcaststate.hpp"
 
 #include "../mwrender/rendermode.hpp"
 
@@ -541,9 +542,9 @@ namespace MWBase
             /**
              * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
              * @param actor
-             * @return true if the spell can be casted (i.e. the animation should start)
+             * @return Success or the failure condition.
              */
-            virtual bool startSpellCast (const MWWorld::Ptr& actor) = 0;
+            virtual MWWorld::SpellCastState startSpellCast (const MWWorld::Ptr& actor) = 0;
 
             virtual void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) = 0;
 

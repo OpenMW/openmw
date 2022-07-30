@@ -639,9 +639,9 @@ namespace MWWorld
             /**
              * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
              * @param actor
-             * @return true if the spell can be casted (i.e. the animation should start)
+             * @return Success or the failure condition.
              */
-            bool startSpellCast (const MWWorld::Ptr& actor) override;
+            MWWorld::SpellCastState startSpellCast (const MWWorld::Ptr& actor) override;
 
             /**
              * @brief Cast the actual spell, should be called mid-animation
