@@ -2,6 +2,9 @@
 #define GAME_MWBASE_LUAMANAGER_H
 
 #include <variant>
+#include <string>
+#include <map>
+
 #include <SDL_events.h>
 
 #include <components/sdlutil/events.hpp>

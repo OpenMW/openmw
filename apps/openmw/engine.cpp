@@ -60,7 +60,6 @@
 #include "mwsound/soundmanagerimp.hpp"
 
 #include "mwworld/class.hpp"
-#include "mwworld/player.hpp"
 #include "mwworld/worldimp.hpp"
 
 #include "mwrender/vismask.hpp"

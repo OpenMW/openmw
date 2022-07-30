@@ -5,8 +5,6 @@
 
 #include <components/settings/settings.hpp>
 
-#include "sdlinit.hpp"
-
 namespace Files { struct ConfigurationManager; }
 
 namespace Launcher

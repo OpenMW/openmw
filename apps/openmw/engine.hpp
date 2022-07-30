@@ -11,8 +11,6 @@
 
 #include "mwbase/environment.hpp"
 
-#include "mwworld/ptr.hpp"
-
 namespace Resource
 {
     class ResourceSystem;
