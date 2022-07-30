@@ -18,18 +18,6 @@ namespace ESM
 namespace ESSImport
 {
 
-/// Player-agnostic player data
-struct REFR
-{
-    ActorData mActorData;
-
-    std::string mRefID;
-    ESM::Position mPos;
-    ESM::RefNum mRefNum;
-
-    void load(ESM::ESMReader& esm);
-};
-
 /// Other player data
 struct PCDT
 {

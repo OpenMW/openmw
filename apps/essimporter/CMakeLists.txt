@@ -5,7 +5,6 @@ set(ESSIMPORTER_FILES
     importnpcc.cpp
     importcrec.cpp
     importcellref.cpp
-    importacdt.cpp
     importinventory.cpp
     importklst.cpp
     importcntc.cpp

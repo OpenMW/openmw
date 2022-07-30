@@ -35,11 +35,11 @@ namespace
         objstate.mRef.mRefNum = cellref.mRefNum;
         if (cellref.mDeleted)
             objstate.mCount = 0;
-        convertSCRI(cellref.mSCRI, objstate.mLocals);
+        convertSCRI(cellref.mActorData.mSCRI, objstate.mLocals);
         objstate.mHasLocals = !objstate.mLocals.mVariables.empty();
 
-        if (cellref.mHasANIS)
-            convertANIS(cellref.mANIS, objstate.mAnimationState);
+        if (cellref.mActorData.mHasANIS)
+            convertANIS(cellref.mActorData.mANIS, objstate.mAnimationState);
     }
 
     bool isIndexedRefId(const std::string& indexedRefId)
@@ -268,7 +268,7 @@ namespace ESSImport
         }
 
         std::vector<CellRef> cellrefs;
-        while (esm.hasMoreSubs() && esm.isNextSub("FRMR"))
+        while (esm.hasMoreSubs() && esm.peekNextSub("FRMR"))
         {
             CellRef ref;
             ref.load (esm);
@@ -369,13 +369,13 @@ namespace ESSImport
                     objstate.mRef.mRefID = idLower;
                     // TODO: need more micromanagement here so we don't overwrite values
                     // from the ESM with default values
-                    if (cellref.mHasACDT)
-                        convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    if (cellref.mActorData.mHasACDT)
+                        convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
                     else
                         objstate.mCreatureStats.mMissingACDT = true;
-                    if (cellref.mHasACSC)
-                        convertACSC(cellref.mACSC, objstate.mCreatureStats);
-                    convertNpcData(cellref, objstate.mNpcStats);
+                    if (cellref.mActorData.mHasACSC)
+                        convertACSC(cellref.mActorData.mACSC, objstate.mCreatureStats);
+                    convertNpcData(cellref.mActorData, objstate.mNpcStats);
                     convertNPCC(npccIt->second, objstate);
                     convertCellRef(cellref, objstate);
 
@@ -412,12 +412,12 @@ namespace ESSImport
                     objstate.mRef.mRefID = idLower;
                     // TODO: need more micromanagement here so we don't overwrite values
                     // from the ESM with default values
-                    if (cellref.mHasACDT)
-                        convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    if (cellref.mActorData.mHasACDT)
+                        convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
                     else
                         objstate.mCreatureStats.mMissingACDT = true;
-                    if (cellref.mHasACSC)
-                        convertACSC(cellref.mACSC, objstate.mCreatureStats);
+                    if (cellref.mActorData.mHasACSC)
+                        convertACSC(cellref.mActorData.mACSC, objstate.mCreatureStats);
                     convertCREC(crecIt->second, objstate);
                     convertCellRef(cellref, objstate);
 

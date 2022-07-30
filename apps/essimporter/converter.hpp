@@ -235,9 +235,9 @@ class ConvertREFR : public Converter
 public:
     void read(ESM::ESMReader &esm) override
     {
-        REFR refr;
+        CellRef refr;
         refr.load(esm);
-        assert(refr.mRefID == "PlayerSaveGame");
+        assert(refr.mIndexedRefID == "PlayerSaveGame");
         mContext->mPlayer.mObject.mPosition = refr.mPos;
 
         ESM::CreatureStats& cStats = mContext->mPlayer.mObject.mCreatureStats;
