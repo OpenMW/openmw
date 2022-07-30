@@ -78,6 +78,11 @@ struct PCDT
             int mCellX, mCellY; // grid coordinates; for interior cells this is always (0, 0)
         };
 
+        struct Rotation
+        {
+            float mData[3][3];
+        };
+
         int mPlayerFlags; // controls, camera and draw state
         unsigned int mLevelProgress;
         float mSkillProgress[27]; // skill progress, non-uniform scaled
@@ -88,7 +93,8 @@ struct PCDT
         int mDetectEnchantmentMagnitude; // seems redundant
         int mDetectAnimalMagnitude; // seems redundant
         MarkLocation mMarkLocation;
-        unsigned char mUnknown3[40];
+        unsigned char mUnknown3[4];
+        Rotation mVerticalRotation;
         unsigned char mSpecIncreases[3]; // number of skill increases for each specialization
         unsigned char mUnknown4;
     };

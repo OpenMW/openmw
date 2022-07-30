@@ -1,5 +1,7 @@
 #include "convertplayer.hpp"
 
+#include <cmath>
+
 #include <components/misc/constants.hpp>
 #include <components/misc/stringops.hpp>
 
@@ -8,6 +10,8 @@ namespace ESSImport
 
     void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam, bool& teleportingEnabled, bool& levitationEnabled, ESM::ControlsState& controls)
     {
+        out.mObject.mPosition.rot[0] = -atan2(pcdt.mPNAM.mVerticalRotation.mData[2][1], pcdt.mPNAM.mVerticalRotation.mData[2][2]);
+
         out.mBirthsign = pcdt.mBirthsign;
         out.mObject.mNpcStats.mBounty = pcdt.mBounty;
         for (const auto & essFaction : pcdt.mFactions)
