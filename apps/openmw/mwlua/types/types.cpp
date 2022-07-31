@@ -159,7 +159,7 @@ namespace MWLua
 
         addType(ObjectTypeName::Armor, {ESM::REC_ARMO}, ObjectTypeName::Item);
         addType(ObjectTypeName::Clothing, {ESM::REC_CLOT}, ObjectTypeName::Item);
-        addType(ObjectTypeName::Ingredient, {ESM::REC_INGR}, ObjectTypeName::Item);
+        addIngredientBindings(addType(ObjectTypeName::Ingredient, { ESM::REC_INGR }, ObjectTypeName::Item), context);
         addType(ObjectTypeName::Light, {ESM::REC_LIGH}, ObjectTypeName::Item);
         addMiscellaneousBindings(addType(ObjectTypeName::MiscItem, {ESM::REC_MISC}, ObjectTypeName::Item), context);
         addPotionBindings(addType(ObjectTypeName::Potion, {ESM::REC_ALCH}, ObjectTypeName::Item), context);
