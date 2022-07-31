@@ -1348,7 +1348,7 @@ bool CharacterController::updateWeaponState(CharacterState idle)
         return forcestateupdate;
 
     float complete;
-    bool animPlaying;
+    bool animPlaying = false;
     ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
     if(getAttackingOrSpell())
     {
@@ -1409,6 +1409,8 @@ bool CharacterController::updateWeaponState(CharacterState idle)
                     // Enchanted items by default do not use casting animations
                     world->castSpell(mPtr);
                     resetIdle = false;
+                    // Spellcasting animation needs to "play" for at least one frame to reset the aiming factor
+                    animPlaying = true;
                     mUpperBodyState = UpperCharState_CastingSpell;
                 }
                 // Play the spellcasting animation/VFX if the spellcasting was successful or failed due to insufficient magicka.
@@ -1583,8 +1585,8 @@ bool CharacterController::updateWeaponState(CharacterState idle)
             resetCurrentIdleState();
         }
 
-        // Spellcasting animation needs to "play" for at least one frame to reset the aiming factor
-        animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete) || mUpperBodyState == UpperCharState_CastingSpell;
+        if (!animPlaying)
+            animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
             mAttackStrength = complete;
     }
