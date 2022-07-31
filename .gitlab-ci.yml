@@ -100,6 +100,21 @@ Ubuntu_GCC:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
+Ubuntu_GCC_Debug:
+  extends: .Ubuntu
+  cache:
+    key: Ubuntu_GCC_Debug.ubuntu_22.04.v1
+  before_script:
+    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+  variables:
+    CC: gcc
+    CXX: g++
+    CCACHE_SIZE: 4G
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -O0
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 2h
+
 Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
