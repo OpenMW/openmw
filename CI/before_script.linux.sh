@@ -41,9 +41,9 @@ if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then
 fi
 
 if [[ $CI_CLANG_TIDY ]]; then
-	CMAKE_CONF_OPTS+=(
-	      -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
-	)
+    CMAKE_CONF_OPTS+=(
+          -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
+    )
 fi
 
 

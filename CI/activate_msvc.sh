@@ -23,11 +23,11 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 fi
 
 command -v unixPathAsWindows >/dev/null 2>&1 || function unixPathAsWindows {
-	if command -v cygpath >/dev/null 2>&1; then
-		cygpath -w $1
-	else
-		echo "$1" | sed "s,^/\([^/]\)/,\\1:/," | sed "s,/,\\\\,g"
-	fi
+    if command -v cygpath >/dev/null 2>&1; then
+        cygpath -w $1
+    else
+        echo "$1" | sed "s,^/\([^/]\)/,\\1:/," | sed "s,/,\\\\,g"
+    fi
 }
 
 
