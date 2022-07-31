@@ -1113,6 +1113,19 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
     return mAnimation->updateCarriedLeftVisible(weaptype);
 }
 
+float CharacterController::calculateWindUp() const
+{
+    if (mCurrentWeapon.empty() || mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon))
+        return -1.f;
+
+    float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min attack");
+    float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " max attack");
+    if (minAttackTime == -1.f || minAttackTime >= maxAttackTime)
+        return -1.f;
+
+    return std::clamp((mAnimation->getCurrentTime(mCurrentWeapon) - minAttackTime) / (maxAttackTime - minAttackTime), 0.f, 1.f);
+}
+
 bool CharacterController::updateWeaponState()
 {
     const auto world = MWBase::Environment::get().getWorld();
@@ -1167,7 +1180,7 @@ bool CharacterController::updateWeaponState()
             // Cancel attack if we no longer have ammunition
             if (!ammunition)
             {
-                if (mUpperBodyState == UpperBodyState::AttackPreWindUp || mUpperBodyState == UpperBodyState::AttackWindUp)
+                if (mUpperBodyState == UpperBodyState::AttackWindUp)
                 {
                     mAnimation->disable(mCurrentWeapon);
                     mUpperBodyState = UpperBodyState::WeaponEquipped;
@@ -1497,32 +1510,8 @@ bool CharacterController::updateWeaponState()
             {
                 std::string startKey = "start";
                 std::string stopKey = "stop";
-                bool autodisable = false;
 
-                if (mWeaponType == ESM::Weapon::PickProbe)
-                {
-                    autodisable = true;
-                    mUpperBodyState = UpperBodyState::AttackEnd;
-
-                    world->breakInvisibility(mPtr);
-                    // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use lockpicks/probes.
-                    MWWorld::Ptr target = world->getFacedObject();
-                    std::string resultMessage, resultSound;
-
-                    if(!target.isEmpty())
-                    {
-                        if (mWeapon.getType() == ESM::Lockpick::sRecordId)
-                            Security(mPtr).pickLock(target, mWeapon, resultMessage, resultSound);
-                        else if (mWeapon.getType() == ESM::Probe::sRecordId)
-                            Security(mPtr).probeTrap(target, mWeapon, resultMessage, resultSound);
-                    }
-
-                    if (!resultMessage.empty())
-                        MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
-                    if (!resultSound.empty())
-                        sndMgr->playSound3D(target, resultSound, 1.0f, 1.0f);
-                }
-                else if (!isRandomAttackAnimation(mCurrentWeapon))
+                if (mWeaponType != ESM::Weapon::PickProbe && !isRandomAttackAnimation(mCurrentWeapon))
                 {
                     if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
                         mAttackType = "shoot";
@@ -1547,23 +1536,14 @@ bool CharacterController::updateWeaponState()
                     }
                     // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
                     startKey = mAttackType + ' ' + startKey;
-                    stopKey = mAttackType + " min attack";
+                    stopKey = mAttackType + " max attack";
                 }
 
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, autodisable,
+                                 MWRender::Animation::BlendMask_All, false,
                                  weapSpeed, startKey, stopKey,
                                  0.0f, 0);
-                if (mWeaponType != ESM::Weapon::PickProbe && mAnimation->getCurrentTime(mCurrentWeapon) != -1.f)
-                {
-                    mUpperBodyState = UpperBodyState::AttackPreWindUp;
-                    if (isRandomAttackAnimation(mCurrentWeapon))
-                    {
-                        world->breakInvisibility(mPtr);
-                        mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
-                        playSwishSound(mAttackStrength);
-                    }
-                }
+                mUpperBodyState = UpperBodyState::AttackWindUp;
             }
         }
 
@@ -1574,41 +1554,97 @@ bool CharacterController::updateWeaponState()
         }
     }
 
-    if (!animPlaying)
-        animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-
-    if (mUpperBodyState == UpperBodyState::AttackWindUp)
+    // Random attack and pick/probe animations never have wind up and are played to their end.
+    // Other animations must be released when the attack state is unset.
+    if (mUpperBodyState == UpperBodyState::AttackWindUp && (mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon) || !getAttackingOrSpell()))
     {
-        mAttackStrength = complete;
-
-        if (!getAttackingOrSpell())
+        mUpperBodyState = UpperBodyState::AttackRelease;
+        world->breakInvisibility(mPtr);
+        if (mWeaponType == ESM::Weapon::PickProbe)
         {
-            world->breakInvisibility(mPtr);
-            float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
-            float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"max attack");
-            if (minAttackTime == maxAttackTime)
+            // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use lockpicks/probes.
+            MWWorld::Ptr target = world->getFacedObject();
+
+            if (!target.isEmpty())
             {
-                // most creatures don't actually have an attack wind-up animation, so use a uniform random value
-                // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
-                // Note: vanilla MW uses a random value for *all* non-player actors, but we probably don't need to go that far.
+                std::string resultMessage, resultSound;
+                if (mWeapon.getType() == ESM::Lockpick::sRecordId)
+                    Security(mPtr).pickLock(target, mWeapon, resultMessage, resultSound);
+                else if (mWeapon.getType() == ESM::Probe::sRecordId)
+                    Security(mPtr).probeTrap(target, mWeapon, resultMessage, resultSound);
+                if (!resultMessage.empty())
+                    MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
+                if (!resultSound.empty())
+                    sndMgr->playSound3D(target, resultSound, 1.0f, 1.0f);
+            }
+        }
+        else
+        {
+            mAttackStrength = calculateWindUp();
+            if (mAttackStrength == -1.f)
                 mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
+            playSwishSound();
+        }
+
+        if (mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon))
+            mUpperBodyState = UpperBodyState::AttackEnd;
+    }
+
+    if (mUpperBodyState == UpperBodyState::AttackRelease)
+    {
+        // The release state might have been reached before reaching the wind-up section. We'll play the new section only when the wind-up section is reached.
+        float currentTime = mAnimation->getCurrentTime(mCurrentWeapon);
+        float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min attack");
+        float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " max attack");
+        if (minAttackTime <= currentTime && currentTime <= maxAttackTime)
+        {
+            std::string hit = mAttackType != "shoot" ? "hit" : "release";
+
+            float startPoint = 0.f;
+
+            // Skip a bit of the pre-hit section based on the attack strength
+            if (minAttackTime != -1.f && minAttackTime < maxAttackTime)
+            {
+                startPoint = 1.f - mAttackStrength;
+                float minHitTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min hit");
+                float hitTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + ' ' + hit);
+                if (maxAttackTime <= minHitTime && minHitTime < hitTime)
+                    startPoint *= (minHitTime - maxAttackTime) / (hitTime - maxAttackTime);
             }
 
-            playSwishSound(mAttackStrength);
+            mAnimation->disable(mCurrentWeapon);
+            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false, weapSpeed,
+                             mAttackType + " max attack", mAttackType + ' ' + hit, startPoint, 0);
+        }
+
+        animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
+
+        // Try playing the "follow" section if the attack animation ended naturally or didn't play at all.
+        if (!animPlaying || (currentTime >= maxAttackTime && complete >= 1.f))
+        {
+            std::string start = "follow start";
+            std::string stop = "follow stop";
+
+            if (mAttackType != "shoot")
+            {
+                std::string strength = mAttackStrength < 0.5f ? "small" : mAttackStrength < 1.f ? "medium" : "large";
+                start = strength + ' ' + start;
+                stop = strength + ' ' + stop;
+            }
 
             if (animPlaying)
                 mAnimation->disable(mCurrentWeapon);
-            mAnimation->play(mCurrentWeapon, priorityWeapon,
-                             MWRender::Animation::BlendMask_All, false,
-                             weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
-                             1.0f-complete, 0);
+            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false, weapSpeed, mAttackType + ' ' + start, mAttackType + ' ' + stop, 0.0f, 0);
+            mUpperBodyState = UpperBodyState::AttackEnd;
 
-            complete = 0.f;
-            mUpperBodyState = UpperBodyState::AttackRelease;
+            animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         }
     }
 
-    if(!animPlaying || complete >= 1.f)
+    if (!animPlaying)
+        animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
+
+    if (!animPlaying || complete >= 1.f)
     {
         if (mUpperBodyState == UpperBodyState::Equipping ||
             mUpperBodyState == UpperBodyState::AttackEnd ||
@@ -1628,81 +1664,12 @@ bool CharacterController::updateWeaponState()
             mUpperBodyState = UpperBodyState::WeaponEquipped;
         }
         else if (mUpperBodyState == UpperBodyState::Unequipping)
+        {
+            if (animPlaying)
+                mAnimation->disable(mCurrentWeapon);
             mUpperBodyState = UpperBodyState::None;
-    }
-
-    if (complete >= 1.0f && !isRandomAttackAnimation(mCurrentWeapon))
-    {
-        std::string start, stop;
-        switch(mUpperBodyState)
-        {
-            case UpperBodyState::AttackWindUp:
-                //hack to avoid body pos desync when jumping/sneaking in 'max attack' state
-                if(!mAnimation->isPlaying(mCurrentWeapon))
-                    mAnimation->play(mCurrentWeapon, priorityWeapon,
-                        MWRender::Animation::BlendMask_All, false,
-                        0, mAttackType+" min attack", mAttackType+" max attack", 0.999f, 0);
-                break;
-            case UpperBodyState::AttackPreWindUp:
-            case UpperBodyState::AttackRelease:
-            {
-                if (mUpperBodyState == UpperBodyState::AttackPreWindUp)
-                {
-                    // If actor is already stopped preparing attack, do not play the "min attack -> max attack" part.
-                    // Happens if the player did not hold the attack button.
-                    // Note: if the "min attack"->"max attack" is a stub, "play" it anyway. Attack strength will be random.
-                    float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
-                    float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"max attack");
-                    if (getAttackingOrSpell() || minAttackTime == maxAttackTime)
-                    {
-                        start = mAttackType+" min attack";
-                        stop = mAttackType+" max attack";
-                        mUpperBodyState = UpperBodyState::AttackWindUp;
-                        break;
-                    }
-
-                    world->breakInvisibility(mPtr);
-                    playSwishSound(0.0f);
-                }
-
-                std::string hit = mAttackType == "shoot" ? "release" : "hit";
-                start = mAttackType + " min hit";
-                stop = mAttackType + ' ' + hit;
-                mUpperBodyState = UpperBodyState::AttackHit;
-                break;
-            }
-            case UpperBodyState::AttackHit:
-                start = "follow start";
-                stop = "follow stop";
-                if (mAttackType != "shoot")
-                {
-                    std::string strength = mAttackStrength < 0.5f ? "small" : mAttackStrength < 1.f ? "medium" : "large";
-                    start = strength + ' ' + start;
-                    stop = strength + ' ' + stop;
-                }
-                start = mAttackType + ' ' + start;
-                stop = mAttackType + ' ' + stop;
-                mUpperBodyState = UpperBodyState::AttackEnd;
-                break;
-            default:
-                break;
-        }
-
-        if(!start.empty())
-        {
-            mAnimation->disable(mCurrentWeapon);
-            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false, weapSpeed, start, stop, 0.0f, 0);
         }
     }
-    else if(complete >= 1.0f && isRandomAttackAnimation(mCurrentWeapon))
-    {
-        clearStateAnimation(mCurrentWeapon);
-        if (isRecovery())
-            mAnimation->disable(mCurrentHit);
-        mUpperBodyState = UpperBodyState::WeaponEquipped;
-    }
-
-    mAnimation->getInfo(mCurrentWeapon, &complete);
 
     mAnimation->setPitchFactor(0.f);
     if (mUpperBodyState > UpperBodyState::WeaponEquipped && (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown))
@@ -1710,8 +1677,14 @@ bool CharacterController::updateWeaponState()
         mAnimation->setPitchFactor(1.f);
 
         // A smooth transition can be provided if a pre-wind-up section is defined. Random attack animations never have one.
-        if (mUpperBodyState == UpperBodyState::AttackPreWindUp && !isRandomAttackAnimation(mCurrentWeapon))
-            mAnimation->setPitchFactor(complete);
+        if (mUpperBodyState == UpperBodyState::AttackWindUp && !isRandomAttackAnimation(mCurrentWeapon))
+        {
+            float currentTime = mAnimation->getCurrentTime(mCurrentWeapon);
+            float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min attack");
+            float startTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " start");
+            if (startTime <= currentTime && currentTime < minAttackTime)
+                mAnimation->setPitchFactor((currentTime - startTime) / (minAttackTime - startTime));
+        }
         else if (mUpperBodyState == UpperBodyState::AttackEnd)
         {
             // technically we do not need a pitch for crossbow reload animation,
@@ -2603,8 +2576,7 @@ bool CharacterController::isRandomAttackAnimation(std::string_view group)
 
 bool CharacterController::isAttackPreparing() const
 {
-    return mUpperBodyState == UpperBodyState::AttackPreWindUp ||
-            mUpperBodyState == UpperBodyState::AttackWindUp;
+    return mUpperBodyState == UpperBodyState::AttackWindUp;
 }
 
 bool CharacterController::isCastingSpell() const
@@ -2732,7 +2704,7 @@ void CharacterController::setHeadTrackTarget(const MWWorld::ConstPtr &target)
     mHeadTrackTarget = target;
 }
 
-void CharacterController::playSwishSound(float attackStrength) const
+void CharacterController::playSwishSound() const
 {
     ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
     if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
@@ -2753,9 +2725,9 @@ void CharacterController::playSwishSound(float attackStrength) const
     else
     {
         soundId = "Weapon Swish";
-        if (attackStrength < 0.5f)
+        if (mAttackStrength < 0.5f)
             pitch = 0.8f; // Weak attack
-        else if (attackStrength >= 1.f)
+        else if (mAttackStrength >= 1.f)
             pitch = 1.2f; // Strong attack
     }
 

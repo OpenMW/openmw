@@ -109,10 +109,8 @@ enum class UpperBodyState
     Equipping,
     Unequipping,
     WeaponEquipped,
-    AttackPreWindUp,
     AttackWindUp,
     AttackRelease,
-    AttackHit,
     AttackEnd,
     Casting
 };
@@ -298,6 +296,8 @@ public:
     bool readyToPrepareAttack() const;
     bool readyToStartAttack() const;
 
+    float calculateWindUp() const;
+
     float getAttackStrength() const;
 
     /// @see Animation::setActive
@@ -306,7 +306,7 @@ public:
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
     void setHeadTrackTarget(const MWWorld::ConstPtr& target);
 
-    void playSwishSound(float attackStrength) const;
+    void playSwishSound() const;
 };
 }
 

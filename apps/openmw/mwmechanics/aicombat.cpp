@@ -641,9 +641,10 @@ namespace MWMechanics
 
     void AiCombatStorage::updateAttack(const MWWorld::Ptr& actor, CharacterController& characterController)
     {
-        if (mAttack && (characterController.getAttackStrength() >= mStrength || characterController.readyToPrepareAttack()))
+        if (mAttack)
         {
-            mAttack = false;
+            float attackStrength = characterController.calculateWindUp();
+            mAttack = !characterController.readyToPrepareAttack() && attackStrength < mStrength && attackStrength != -1.f;
         }
         actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mAttack);
     }
