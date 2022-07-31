@@ -24,14 +24,14 @@ namespace ESSImport
         {
             int writeIndex = translateDynamicIndex(i);
             cStats.mDynamic[writeIndex].mBase = acdt.mDynamic[i][1];
-            cStats.mDynamic[writeIndex].mMod = acdt.mDynamic[i][1];
+            cStats.mDynamic[writeIndex].mMod = 0.f;
             cStats.mDynamic[writeIndex].mCurrent = acdt.mDynamic[i][0];
         }
         for (int i=0; i<8; ++i)
         {
-            cStats.mAttributes[i].mBase = static_cast<int>(acdt.mAttributes[i][1]);
-            cStats.mAttributes[i].mMod = static_cast<int>(acdt.mAttributes[i][0]);
-            cStats.mAttributes[i].mCurrent = static_cast<int>(acdt.mAttributes[i][0]);
+            cStats.mAttributes[i].mBase = acdt.mAttributes[i][1];
+            cStats.mAttributes[i].mMod = 0.f;
+            cStats.mAttributes[i].mCurrent = acdt.mAttributes[i][0];
         }
         cStats.mGoldPool = acdt.mGoldPool;
         cStats.mTalkedTo = (acdt.mFlags & TalkedToPlayer) != 0;
@@ -47,7 +47,7 @@ namespace ESSImport
     {
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            npcStats.mSkills[i].mMod = actorData.mSkills[i][1];
+            npcStats.mSkills[i].mMod = 0.f;
             npcStats.mSkills[i].mCurrent = actorData.mSkills[i][1];
             npcStats.mSkills[i].mBase = actorData.mSkills[i][0];
         }
