@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <components/esm3/cellref.hpp>
-
 #include "importscri.hpp"
 
 namespace ESM
@@ -63,7 +61,7 @@ namespace ESSImport
     };
 #pragma pack(pop)
 
-    struct ActorData : public ESM::CellRef
+    struct ActorData
     {
         bool mHasACDT;
         ACDT mACDT;
@@ -85,10 +83,6 @@ namespace ESSImport
 
         bool mHasANIS;
         ANIS mANIS; // scripted animation state
-
-        virtual void load(ESM::ESMReader& esm);
-
-        virtual ~ActorData() = default;
     };
 
 }

@@ -15,7 +15,7 @@ namespace ESM
 namespace ESSImport
 {
 
-    struct CellRef : public ActorData
+    struct CellRef : public ESM::CellRef
     {
         std::string mIndexedRefId;
 
@@ -25,9 +25,11 @@ namespace ESSImport
 
         bool mDeleted;
 
-        void load(ESM::ESMReader& esm) override;
+        ActorData mActorData;
 
-        ~CellRef() override = default;
+        void load(ESM::ESMReader& esm);
+
+        ~CellRef() = default;
     };
 
 }
