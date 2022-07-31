@@ -71,6 +71,7 @@ namespace fx
 
 #define OMW_REVERSE_Z @reverseZ
 #define OMW_RADIAL_FOG @radialFog
+#define OMW_EXPONENTIAL_FOG @exponentialFog
 #define OMW_HDR @hdr
 #define OMW_NORMALS @normals
 #define OMW_USE_BINDINGS @useBindings
@@ -190,6 +191,49 @@ mat4 omw_InvProjectionMatrix()
 #endif
     }
 
+    vec3 omw_GetWorldPosFromUV(vec2 uv)
+    {
+        float depth = omw_GetDepth(uv);
+#if (OMW_REVERSE_Z == 1)
+        float flippedDepth = 1.0 - depth;
+#else
+        float flippedDepth = omw_Texture2D(omw_SamplerDepth, uv).r * 2.0 - 1.0;
+#endif
+        vec4 clip_space = vec4(uv * 2.0 - 1.0, flippedDepth, 1.0);
+        vec4 world_space = omw.invViewMatrix * (omw.invProjectionMatrix * clip_space);
+        return world_space.xyz / world_space.w;
+    }
+
+    float omw_GetLinearDepth(vec2 uv)
+    {
+#if (OMW_REVERSE_Z == 1)
+        float depth = omw_GetDepth(uv);
+        float dist = omw.near * omw.far / (omw.far + depth * (omw.near - omw.far));
+#else
+        float depth = omw_GetDepth(uv) * 2.0 - 1.0;
+        float dist = 2.0 * omw.near * omw.far / (omw.far + omw.near - depth * (omw.far - omw.near));
+#endif
+
+        return dist;
+    }
+
+float omw_EstimateFogCoverageFromUV(vec2 uv)
+    {
+#if OMW_RADIAL_FOG
+        vec3 uvPos = omw_GetWorldPosFromUV(uv);
+        float dist = length(uvPos - omw.eyePos.xyz);
+#else
+        float dist = omw_GetLinearDepth(uv);
+#endif
+#if OMW_EXPONENTIAL_FOG
+        float fogValue = 1.0 - exp(-2.0 * max(0.0, dist - omw.fogNear/2.0) / (omw.fogFar - omw.fogNear/2.0));
+#else
+        float fogValue = clamp((dist - omw.fogNear) / (omw.fogFar - omw.fogNear), 0.0, 1.0);
+#endif
+
+        return fogValue;
+    }
+
 #if OMW_HDR
     uniform sampler2D omw_EyeAdaptation;
 #endif
@@ -220,6 +264,7 @@ mat4 omw_InvProjectionMatrix()
             {"@normals", technique.getNormals() ? "1" : "0"},
             {"@reverseZ", SceneUtil::AutoDepth::isReversed() ? "1" : "0"},
             {"@radialFog", Settings::Manager::getBool("radial fog", "Fog") ? "1" : "0"},
+            {"@exponentialFog", Settings::Manager::getBool("exponential fog", "Fog") ? "1" : "0"},
             {"@hdr", technique.getHDR() ? "1" : "0"},
             {"@in", mLegacyGLSL ? "varying" : "in"},
             {"@out", mLegacyGLSL ? "varying" : "out"},
