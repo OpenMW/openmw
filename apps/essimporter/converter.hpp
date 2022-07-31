@@ -237,7 +237,7 @@ public:
     {
         CellRef refr;
         refr.load(esm);
-        assert(refr.mIndexedRefID == "PlayerSaveGame");
+        assert(refr.mIndexedRefId == "PlayerSaveGame");
         mContext->mPlayer.mObject.mPosition = refr.mPos;
 
         ESM::CreatureStats& cStats = mContext->mPlayer.mObject.mCreatureStats;
