@@ -8,10 +8,10 @@
 #include <set>
 #include <string_view>
 #include <deque>
+#include <span>
 
 #include <components/esm3/cellid.hpp>
 #include <components/misc/rng.hpp>
-#include <components/misc/span.hpp>
 
 #include <osg/Timer>
 
@@ -661,7 +661,7 @@ namespace MWBase
             virtual bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
 
             virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-                const Misc::Span<const MWWorld::ConstPtr>& ignore, std::vector<MWWorld::Ptr>* occupyingActors = nullptr) const = 0;
+                std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors = nullptr) const = 0;
 
             virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 
