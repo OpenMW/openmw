@@ -219,6 +219,9 @@ namespace MWMechanics
                         return params.mSlot == slotIndex && params.mType == ESM::ActiveSpells::Type_Enchantment && params.mId == slot->getCellRef().getRefId();
                     }) != mSpells.end())
                         continue;
+                    // world->breakInvisibility leads to a stack overflow as it calls this method so just break invisibility manually
+                    purgeEffect(ptr, ESM::MagicEffect::Invisibility);
+                    applyPurges(ptr);
                     const ActiveSpellParams& params = mSpells.emplace_back(ActiveSpellParams{*slot, enchantment, slotIndex, ptr});
                     for(const auto& effect : params.mEffects)
                         MWMechanics::playEffects(ptr, *world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId), playNonLooping);
