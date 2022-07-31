@@ -903,7 +903,7 @@ namespace MWPhysics
     }
 
     bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-        const Misc::Span<const MWWorld::ConstPtr>& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
+        std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
     {
         std::vector<const btCollisionObject*> ignoredObjects;
         ignoredObjects.reserve(ignore.size());
