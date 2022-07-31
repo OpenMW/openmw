@@ -81,6 +81,8 @@ namespace fx
 
         void setWaterHeight(float height) { mData.get<WaterHeight>() = height; }
 
+        void setIsWaterEnabled(bool enabled) { mData.get<IsWaterEnabled>() = enabled; }
+
         void setSimulationTime(float time) { mData.get<SimulationTime>() = time; }
 
         void setDeltaSimulationTime(float time) { mData.get<DeltaSimulationTime>() = time; }
@@ -145,6 +147,8 @@ namespace fx
 
         struct WaterHeight : std140::Float { static constexpr std::string_view sName = "waterHeight"; };
 
+        struct IsWaterEnabled : std140::Bool { static constexpr std::string_view sName = "isWaterEnabled"; };
+
         struct SimulationTime : std140::Float { static constexpr std::string_view sName = "simulationTime"; };
 
         struct DeltaSimulationTime : std140::Float { static constexpr std::string_view sName = "deltaSimulationTime"; };
@@ -182,6 +186,7 @@ namespace fx
             GameHour,
             SunVis,
             WaterHeight,
+            IsWaterEnabled,
             SimulationTime,
             DeltaSimulationTime,
             WindSpeed,

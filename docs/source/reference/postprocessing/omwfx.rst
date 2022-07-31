@@ -95,7 +95,9 @@ Builtin Uniforms
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.waterHeight``          | The water height of current cell                 |
 |             |                              |                                                  |
-|             |                              | Exterior water level is always zero              |
+|             |                              | Exterior water level is always rendered at -1.0  |
++-------------+------------------------------+--------------------------------------------------+
+| bool        | ``omw.isWaterEnabled``       | True if water is enabled for current cell        |
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.simulationTime``       | The time in milliseconds since simulation began  |
 +-------------+------------------------------+--------------------------------------------------+
