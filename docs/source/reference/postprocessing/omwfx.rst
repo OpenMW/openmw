@@ -97,6 +97,8 @@ Builtin Uniforms
 |             |                              |                                                  |
 |             |                              | Exterior water level is always zero              |
 +-------------+------------------------------+--------------------------------------------------+
+| bool        | ``omw.isWaterEnabled``       | True if water is enabled for current cell        |
++-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.simulationTime``       | The time in milliseconds since simulation began  |
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.deltaSimulationTime``  | The change in `omw.simulationTime`               |

@@ -1005,6 +1005,8 @@ namespace MWRender
     {
         mWater->setEnabled(enabled);
         mSky->setWaterEnabled(enabled);
+
+        mPostProcessor->getStateUpdater()->setIsWaterEnabled(enabled);
     }
 
     void RenderingManager::setWaterHeight(float height)
