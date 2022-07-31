@@ -1347,7 +1347,7 @@ bool CharacterController::updateWeaponState(CharacterState idle)
     if (isPersistentAnimPlaying())
         return forcestateupdate;
 
-    float complete;
+    float complete = 0.f;
     bool animPlaying = false;
     ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
     if(getAttackingOrSpell())
