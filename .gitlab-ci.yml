@@ -100,7 +100,7 @@ Ubuntu_GCC:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-.Ubuntu_GCC_tests:
+Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_tests.ubuntu_22.04.v1
@@ -130,7 +130,7 @@ Ubuntu_GCC:
     reports:
       junit: build/tests.xml
 
-.Ubuntu_GCC_tests_asan:
+Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_asan.ubuntu_22.04.v1
@@ -148,7 +148,7 @@ Ubuntu_GCC:
     reports:
       junit: build/tests.xml
 
-.Ubuntu_GCC_tests_ubsan:
+Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_ubsan.ubuntu_22.04.v1
@@ -183,7 +183,7 @@ Ubuntu_GCC:
     reports:
       junit: build/tests.xml
 
-.Ubuntu_GCC_tests_coverage:
+Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
   cache:
     key: Ubuntu_GCC_tests_coverage.ubuntu_22.04.v1

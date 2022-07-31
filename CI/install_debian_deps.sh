@@ -92,6 +92,7 @@ for group in "$@"; do
 done
 
 export APT_CACHE_DIR="${PWD}/apt-cache"
+export DEBIAN_FRONTEND=noninteractive
 set -x
 mkdir -pv "$APT_CACHE_DIR"
 apt-get update -yqq
