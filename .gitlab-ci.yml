@@ -589,7 +589,7 @@ Ubuntu_AndroidNDK_arm64-v8a:
       - ccache/
       - build/extern/fetched/
   before_script:
-    - CI/install_debian_deps.sh gcc
+    - CI/install_debian_deps.sh android
   stage: build
   script:
     - df -h

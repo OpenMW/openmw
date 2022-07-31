@@ -28,6 +28,7 @@ declare -a CMAKE_CONF_OPTS=(
     -DUSE_SYSTEM_TINYXML=ON
     -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
     -DOPENMW_CXX_FLAGS="-Werror -Werror=implicit-fallthrough"  # flags specific to OpenMW project
+    -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold"
 )
 
 if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then
@@ -60,12 +61,6 @@ fi
 if [[ "${CMAKE_CXX_FLAGS_DEBUG}" ]]; then
     CMAKE_CONF_OPTS+=(
         -DCMAKE_CXX_FLAGS_DEBUG="${CMAKE_CXX_FLAGS_DEBUG}"
-    )
-fi
-
-if [[ "${CMAKE_EXE_LINKER_FLAGS}" ]]; then
-    CMAKE_CONF_OPTS+=(
-        -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}"
     )
 fi
 
