@@ -261,14 +261,26 @@ Ubuntu_GCC_tests_coverage:
 Ubuntu_Clang:
   extends: .Ubuntu
   before_script:
-    - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
+    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
   cache:
-    key: Ubuntu_Clang.ubuntu_22.04.v1
+    key: Ubuntu_Clang.ubuntu_22.04.v2
   variables:
     CC: clang
     CXX: clang++
-    CI_CLANG_TIDY: 1
     CCACHE_SIZE: 2G
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 3h
+
+Ubuntu_Clang_Tidy:
+  extends: Ubuntu_Clang
+  before_script:
+    - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
+  cache:
+    key: Ubuntu_Clang_Tidy.ubuntu_22.04.v1
+  variables:
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -O0
+    CI_CLANG_TIDY: 1
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 3h
 
