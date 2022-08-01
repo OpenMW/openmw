@@ -3,12 +3,16 @@
 #include <osg/BlendFunc>
 #include <osg/Texture2D>
 #include <osg/Texture2DArray>
+#include <osg/Material>
+#include <osg/AlphaFunc>
 
 #include <osgUtil/RenderStage>
 
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
+
+#include "vismask.hpp"
 
 namespace MWRender
 {
@@ -34,6 +38,7 @@ namespace MWRender
 
             mStateSet->setAttributeAndModes(new osg::BlendFunc, modeOff);
             mStateSet->setAttributeAndModes(shaderManager.getProgram(vertex, fragment), modeOn);
+            mStateSet->setAttributeAndModes(new SceneUtil::AutoDepth, modeOn);
 
             for (unsigned int unit = 1; unit < 8; ++unit)
                 mStateSet->setTextureMode(unit, GL_TEXTURE_2D, modeOff);
@@ -88,11 +93,35 @@ namespace MWRender
 
             opaqueFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
 
-            osg::ref_ptr<osg::StateSet> restore = bin->getStateSet();
-            bin->setStateSet(mStateSet);
-            // draws transparent post-pass to populate a postprocess friendly depth texture with alpha-clipped geometry
-            bin->drawImplementation(renderInfo, previous);
-            bin->setStateSet(restore);
+            // draw transparent post-pass to populate a postprocess friendly depth texture with alpha-clipped geometry
+
+            unsigned int numToPop = previous ? osgUtil::StateGraph::numToPop(previous->_parent) : 0;
+            if (numToPop > 1)
+                 numToPop--;
+            unsigned int insertStateSetPosition = state.getStateSetStackSize() - numToPop;
+
+            state.insertStateSet(insertStateSetPosition, mStateSet);
+            for(auto rit = bin->getRenderLeafList().begin(); rit != bin->getRenderLeafList().end(); rit++)
+            {
+                osgUtil::RenderLeaf* rl = *rit;
+                const osg::StateSet* ss = rl->_parent->getStateSet();
+
+                if (rl->_drawable->getNodeMask() == Mask_ParticleSystem || rl->_drawable->getNodeMask() == Mask_Effect)
+                    continue;
+
+                if (ss->getAttribute(osg::StateAttribute::ALPHAFUNC))
+                    continue;
+
+                if (ss->getAttribute(osg::StateAttribute::MATERIAL)) {
+                    const osg::Material* mat = static_cast<const osg::Material*>(ss->getAttribute(osg::StateAttribute::MATERIAL));
+                    if (mat->getDiffuse(osg::Material::FRONT).a() < 0.5)
+                        continue;
+                }
+
+                rl->render(renderInfo,previous);
+                previous = rl;
+            }
+            state.removeStateSet(insertStateSetPosition);
 
             msaaFbo ? msaaFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER) : fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
             state.checkGLErrors("after TransparentDepthBinCallback::drawImplementation");

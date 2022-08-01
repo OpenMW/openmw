@@ -9,7 +9,7 @@ void main()
 {
     float alpha = texture2D(diffuseMap, diffuseMapUV).a * alphaPassthrough;
 
-    const float alphaRef = 0.5;
+    const float alphaRef = 0.499;
 
     if (alpha < alphaRef)
         discard;
