@@ -926,7 +926,11 @@ namespace MWWorld
     void Scene::removeObjectFromScene (const Ptr& ptr, bool keepActive)
     {
         MWBase::Environment::get().getMechanicsManager()->remove (ptr, keepActive);
-        MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
+        // You'd expect the sounds attached to the object to be stopped here
+        // because the object is nowhere to be heard, but in Morrowind, they're not.
+        // They're still stopped when the cell is unloaded
+        // or if the player moves away far from the object's position.
+        // Todd Howard, Who art in Bethesda, hallowed be Thy name.
         MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
         if (const auto object = mPhysics->getObject(ptr))
         {

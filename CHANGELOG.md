@@ -145,6 +145,7 @@
     Bug #6849: ImageButton texture is not scaled properly
     Bug #6869: Hits queue stagger during swing animation
     Bug #6895: Removing a negative number of items from a script, makes the script terminate with an error
+    Bug #6896: Sounds played using PlaySound3D are cut off as the emitter leaves the cell
     Bug #6898: Accessing the Quick Inventory menu does not work while in menu mode
     Bug #6901: Morrowind.exe soul gem usage discrepancy
     Bug #6909: Using enchanted items has no animation
