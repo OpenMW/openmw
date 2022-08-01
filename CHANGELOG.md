@@ -140,6 +140,7 @@
     Bug #6818: ess-importer doesn't exactly reproduce camera
     Bug #6849: ImageButton texture is not scaled properly
     Bug #6869: Hits queue stagger during swing animation
+    Bug #6890: SDL_PeepEvents errors are not handled
     Bug #6895: Removing a negative number of items from a script, makes the script terminate with an error
     Bug #6898: Accessing the Quick Inventory menu does not work while in menu mode
     Bug #6901: Morrowind.exe soul gem usage discrepancy
