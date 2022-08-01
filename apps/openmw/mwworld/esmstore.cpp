@@ -222,7 +222,7 @@ namespace MWWorld
         Store<ESM::Skill> mSkills;
         Store<ESM::Attribute> mAttributes;
 
-        std::map<ESM::RecNameInts, StoreBase*>                   mESM3RecordToStore;
+        std::map<ESM::RecNameInts, StoreBase*>                   mEsm3RecordToStore;
         std::unordered_map<const StoreBase*, ESM::RecNameInts>   mStoreToEsm3Record;
 
         // Lookup of all IDs. Makes looking up references faster. Just
@@ -305,14 +305,14 @@ namespace MWWorld
                 constexpr ESM::RecNameInts recName = RecordTypeToRecName<T>::sRecName;
                 if constexpr (recName != ESM::REC_INTERNAL_PLAYER)
                 {
-                    stores.mStoreImp->mESM3RecordToStore[recName] = stores.mStores[storeIndex].get();
+                    stores.mStoreImp->mEsm3RecordToStore[recName] = stores.mStores[storeIndex].get();
                 }
             }
         }
 
         void SetupAfterStoresCreation(ESMStore& store)
         {
-            for (const auto& recordStorePair : mESM3RecordToStore)
+            for (const auto& recordStorePair : mEsm3RecordToStore)
             {
                 const StoreBase* storePtr = recordStorePair.second;
                 mStoreToEsm3Record[storePtr] = recordStorePair.first;
@@ -406,9 +406,9 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
 
         // Look up the record type.
         ESM::RecNameInts recName = static_cast<ESM::RecNameInts>(n.toInt());
-        const auto& it = mStoreImp->mESM3RecordToStore.find(recName);
+        const auto& it = mStoreImp->mEsm3RecordToStore.find(recName);
 
-        if (it == mStoreImp->mESM3RecordToStore.end()) {
+        if (it == mStoreImp->mEsm3RecordToStore.end()) {
             if (recName == ESM::REC_INFO) {
                 if (dialogue)
                 {
@@ -488,8 +488,8 @@ void ESMStore::setUp()
 {
     mStoreImp->mIds.clear();
 
-    std::map<ESM::RecNameInts, StoreBase*>::iterator storeIt = mStoreImp->mESM3RecordToStore.begin();
-    for (; storeIt != mStoreImp->mESM3RecordToStore.end(); ++storeIt) {
+    std::map<ESM::RecNameInts, StoreBase*>::iterator storeIt = mStoreImp->mEsm3RecordToStore.begin();
+    for (; storeIt != mStoreImp->mEsm3RecordToStore.end(); ++storeIt) {
         storeIt->second->setUp();
 
         if (isCacheableRecord(storeIt->first))
@@ -733,12 +733,12 @@ void ESMStore::removeMissingObjects(Store<T>& store)
             case ESM::REC_WEAP:
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
-                mStoreImp->mESM3RecordToStore[type]->read (reader);
+                mStoreImp->mEsm3RecordToStore[type]->read (reader);
                 return true;
             case ESM::REC_NPC_:
             case ESM::REC_CREA:
             case ESM::REC_CONT:
-                mStoreImp->mESM3RecordToStore[type]->read (reader, true);
+                mStoreImp->mEsm3RecordToStore[type]->read (reader, true);
                 return true;
 
             case ESM::REC_DYNA:
@@ -810,34 +810,30 @@ void ESMStore::removeMissingObjects(Store<T>& store)
         return ptr;
     }
 
-#define OPENMW_ESM3_INSERT(__Type) template<> const __Type* ESMStore::insert<__Type>(const __Type &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);   }
-    OPENMW_ESM3_INSERT(ESM::Book)
-    OPENMW_ESM3_INSERT(ESM::Armor)
-    OPENMW_ESM3_INSERT(ESM::Class)
-    OPENMW_ESM3_INSERT(ESM::Enchantment)
-    OPENMW_ESM3_INSERT(ESM::Potion)
-    OPENMW_ESM3_INSERT(ESM::Weapon)
-    OPENMW_ESM3_INSERT(ESM::Clothing)
-    OPENMW_ESM3_INSERT(ESM::Spell)
-#undef OPENMW_ESM3_INSERT
 
-#define OPENMW_ESM3_INSERT_STATIC(__Type) template<> const __Type* ESMStore::insertStatic<__Type>(const __Type &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
-    OPENMW_ESM3_INSERT_STATIC(ESM::GameSetting)
-    OPENMW_ESM3_INSERT_STATIC(ESM::Static)
-    OPENMW_ESM3_INSERT_STATIC(ESM::Door)
-    OPENMW_ESM3_INSERT_STATIC(ESM::Global)
-    OPENMW_ESM3_INSERT_STATIC(ESM::NPC)
-#undef OPENMW_ESM3_INSERT_STATIC
+    template<> const ESM::Book* ESMStore::insert<ESM::Book>(const ESM::Book &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
+    template<> const ESM::Armor* ESMStore::insert<ESM::Armor>(const ESM::Armor &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
+    template<> const ESM::Class* ESMStore::insert<ESM::Class>(const ESM::Class &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
+    template<> const ESM::Enchantment* ESMStore::insert<ESM::Enchantment>(const ESM::Enchantment &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
+    template<> const ESM::Potion* ESMStore::insert<ESM::Potion>(const ESM::Potion &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
+    template<> const ESM::Weapon* ESMStore::insert<ESM::Weapon>(const ESM::Weapon &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
+    template<> const ESM::Clothing* ESMStore::insert<ESM::Clothing>(const ESM::Clothing &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
+    template<> const ESM::Spell* ESMStore::insert<ESM::Spell>(const ESM::Spell &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
 
 
-#define OPENMW_ESM3_OVERRIDE_RECORD(__Type) template<> const __Type* ESMStore::overrideRecord<__Type>(const __Type &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Container)
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Creature)
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::CreatureLevList)
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::Door)
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::ItemLevList)
-    OPENMW_ESM3_OVERRIDE_RECORD(ESM::NPC)
-#undef OPENMW_ESM3_OVERRIDE_RECORD
+    template<> const ESM::GameSetting* ESMStore::insertStatic<ESM::GameSetting>(const ESM::GameSetting &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
+    template<> const ESM::Static* ESMStore::insertStatic<ESM::Static>(const ESM::Static &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
+    template<> const ESM::Door* ESMStore::insertStatic<ESM::Door>(const ESM::Door &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
+    template<> const ESM::Global* ESMStore::insertStatic<ESM::Global>(const ESM::Global &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
+    template<> const ESM::NPC* ESMStore::insertStatic<ESM::NPC>(const ESM::NPC &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
+
+
+    template<> const ESM::Container* ESMStore::overrideRecord<ESM::Container>(const ESM::Container &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
+    template<> const ESM::Creature* ESMStore::overrideRecord<ESM::Creature>(const ESM::Creature &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
+    template<> const ESM::CreatureLevList* ESMStore::overrideRecord<ESM::CreatureLevList>(const ESM::CreatureLevList &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
+    template<> const ESM::Door* ESMStore::overrideRecord<ESM::Door>(const ESM::Door &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
+    template<> const ESM::ItemLevList* ESMStore::overrideRecord<ESM::ItemLevList>(const ESM::ItemLevList &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
+    template<> const ESM::NPC* ESMStore::overrideRecord<ESM::NPC>(const ESM::NPC &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
 
     template <> const Store<ESM::MagicEffect>& ESMStore::get<ESM::MagicEffect>() const { return mStoreImp->mMagicEffect; }
     template <> Store<ESM::MagicEffect>& ESMStore::getWritable<ESM::MagicEffect>() { return mStoreImp->mMagicEffect; }
