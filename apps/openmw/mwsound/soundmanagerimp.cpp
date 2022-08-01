@@ -983,7 +983,7 @@ namespace MWSound
         }
 
         TrackList::iterator trkiter = mActiveTracks.begin();
-        for(;trkiter != mActiveTracks.end();++trkiter)
+        while (trkiter != mActiveTracks.end())
         {
             Stream *sound = trkiter->get();
             if(!mOutput->isStreamPlaying(sound))

@@ -51,6 +51,7 @@
     Bug #5978: NPCs and Creatures talk to and headtrack a player character with a 75% chameleon effect or more
     Bug #5989: Simple water isn't affected by texture filter settings
     Bug #6037: Launcher: Morrowind content language cannot be set to English
+    Bug #6049: Main Theme on OpenMW should begin on the second video like Vanilla.
     Bug #6051: NaN water height in ESM file is not handled gracefully
     Bug #6054: Hotkey items can be equipped while in ready to attack stance
     Bug #6066: Addtopic "return" does not work from within script. No errors thrown
@@ -58,6 +59,7 @@
     Bug #6087: Bound items added directly to the inventory disappear if their corresponding spell effect ends
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
     Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
+    Bug #6109: Crash when playing a custom made menu_background file
     Bug #6115: Showmap overzealous matching
     Bug #6118: Creature landing sound counts as a footstep
     Bug #6123: NPC with broken script freezes the game on hello
