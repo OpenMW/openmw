@@ -494,7 +494,7 @@ namespace MWGui
             int flag = info.isPotion ? Widgets::MWEffectList::EF_NoTarget : 0;
             flag |= info.isIngredient ? Widgets::MWEffectList::EF_NoMagnitude : 0;
             flag |= info.isIngredient ? Widgets::MWEffectList::EF_Constant : 0;
-            effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, flag);
+            effectsWidget->createEffectWidgets(effectItems, effectArea, coord, info.isPotion || info.isIngredient, flag);
             totalSize.height += coord.top-6;
             totalSize.width = std::max(totalSize.width, coord.width);
         }
@@ -513,7 +513,7 @@ namespace MWGui
 
             std::vector<MyGUI::Widget*> enchantEffectItems;
             int flag = (enchant->mData.mType == ESM::Enchantment::ConstantEffect) ? Widgets::MWEffectList::EF_Constant : 0;
-            enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, true, flag);
+            enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, false, flag);
             totalSize.height += coord.top-6;
             totalSize.width = std::max(totalSize.width, coord.width);
 
