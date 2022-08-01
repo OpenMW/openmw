@@ -16,6 +16,6 @@
 
     </Widget>
 
-    <Widget name="Scene" layer="LoadingScreenBackground" type="BackgroundImage" skin="ImageBox" position="0 0 300 300" align="Stretch" />
+    <Widget name="Scene" layer="Scene" type="BackgroundImage" skin="ImageBox" position="0 0 300 300" align="Stretch" />
     <Widget name="Splash" layer="LoadingScreenBackground" type="BackgroundImage" skin="ImageBox" position="0 0 300 300" align="Stretch" />
 </MyGUI>
