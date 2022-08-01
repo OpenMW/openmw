@@ -100,7 +100,22 @@ Ubuntu_GCC:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-.Ubuntu_GCC_tests:
+Ubuntu_GCC_Debug:
+  extends: .Ubuntu
+  cache:
+    key: Ubuntu_GCC_Debug.ubuntu_22.04.v1
+  before_script:
+    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+  variables:
+    CC: gcc
+    CXX: g++
+    CCACHE_SIZE: 4G
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -O0
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 2h
+
+Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_tests.ubuntu_22.04.v1
@@ -130,7 +145,7 @@ Ubuntu_GCC:
     reports:
       junit: build/tests.xml
 
-.Ubuntu_GCC_tests_asan:
+Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_asan.ubuntu_22.04.v1
@@ -148,7 +163,7 @@ Ubuntu_GCC:
     reports:
       junit: build/tests.xml
 
-.Ubuntu_GCC_tests_ubsan:
+Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
   cache:
     key: Ubuntu_GCC_ubsan.ubuntu_22.04.v1
@@ -183,7 +198,7 @@ Ubuntu_GCC:
     reports:
       junit: build/tests.xml
 
-.Ubuntu_GCC_tests_coverage:
+Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
   cache:
     key: Ubuntu_GCC_tests_coverage.ubuntu_22.04.v1
@@ -246,14 +261,26 @@ Ubuntu_GCC:
 Ubuntu_Clang:
   extends: .Ubuntu
   before_script:
-    - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
+    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
   cache:
-    key: Ubuntu_Clang.ubuntu_22.04.v1
+    key: Ubuntu_Clang.ubuntu_22.04.v2
   variables:
     CC: clang
     CXX: clang++
-    CI_CLANG_TIDY: 1
     CCACHE_SIZE: 2G
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 3h
+
+Ubuntu_Clang_Tidy:
+  extends: Ubuntu_Clang
+  before_script:
+    - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
+  cache:
+    key: Ubuntu_Clang_Tidy.ubuntu_22.04.v1
+  variables:
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -O0
+    CI_CLANG_TIDY: 1
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 3h
 
@@ -562,7 +589,7 @@ Ubuntu_AndroidNDK_arm64-v8a:
       - ccache/
       - build/extern/fetched/
   before_script:
-    - CI/install_debian_deps.sh gcc
+    - CI/install_debian_deps.sh android
   stage: build
   script:
     - df -h

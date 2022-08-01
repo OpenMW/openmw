@@ -9,8 +9,8 @@ print_help() {
 }
 
 declare -rA GROUPED_DEPS=(
-  [gcc]="binutils gcc build-essential cmake ccache curl unzip git pkg-config"
-  [clang]="binutils clang make cmake ccache curl unzip git pkg-config"
+  [gcc]="binutils gcc build-essential cmake ccache curl unzip git pkg-config mold"
+  [clang]="binutils clang make cmake ccache curl unzip git pkg-config mold"
 
   # Common dependencies for building OpenMW.
   [openmw-deps]="
@@ -75,6 +75,8 @@ declare -rA GROUPED_DEPS=(
     python3-pip
     xvfb
   "
+
+  [android]="binutils build-essential cmake ccache curl unzip git pkg-config"
 )
 
 if [[ $# -eq 0 ]]; then
@@ -92,6 +94,7 @@ for group in "$@"; do
 done
 
 export APT_CACHE_DIR="${PWD}/apt-cache"
+export DEBIAN_FRONTEND=noninteractive
 set -x
 mkdir -pv "$APT_CACHE_DIR"
 apt-get update -yqq

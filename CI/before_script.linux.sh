@@ -24,11 +24,11 @@ declare -a CMAKE_CONF_OPTS=(
     -DCMAKE_C_COMPILER_LAUNCHER=ccache
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
     -DCMAKE_INSTALL_PREFIX=install
-    -DCMAKE_BUILD_TYPE=RelWithDebInfo
     -DBUILD_SHARED_LIBS=OFF
     -DUSE_SYSTEM_TINYXML=ON
     -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
     -DOPENMW_CXX_FLAGS="-Werror -Werror=implicit-fallthrough"  # flags specific to OpenMW project
+    -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold"
 )
 
 if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then
@@ -42,9 +42,9 @@ if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then
 fi
 
 if [[ $CI_CLANG_TIDY ]]; then
-	CMAKE_CONF_OPTS+=(
-	      -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
-	)
+    CMAKE_CONF_OPTS+=(
+          -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
+    )
 fi
 
 
@@ -52,17 +52,15 @@ if [[ "${CMAKE_BUILD_TYPE}" ]]; then
     CMAKE_CONF_OPTS+=(
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     )
+else
+    CMAKE_CONF_OPTS+=(
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo
+    )
 fi
 
 if [[ "${CMAKE_CXX_FLAGS_DEBUG}" ]]; then
     CMAKE_CONF_OPTS+=(
         -DCMAKE_CXX_FLAGS_DEBUG="${CMAKE_CXX_FLAGS_DEBUG}"
-    )
-fi
-
-if [[ "${CMAKE_EXE_LINKER_FLAGS}" ]]; then
-    CMAKE_CONF_OPTS+=(
-        -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}"
     )
 fi
 
@@ -97,6 +95,8 @@ if [[ "${BUILD_TESTS_ONLY}" ]]; then
         -DBUILD_OPENCS=OFF \
         -DBUILD_WIZARD=OFF \
         -DBUILD_NAVMESHTOOL=OFF \
+        -DBUILD_BULLETOBJECTTOOL=OFF \
+        -DBUILD_NIFTEST=OFF \
         -DBUILD_UNITTESTS=${BUILD_UNITTESTS} \
         -DBUILD_BENCHMARKS=${BUILD_BENCHMARKS} \
         -DGTEST_ROOT="${GOOGLETEST_DIR}" \
