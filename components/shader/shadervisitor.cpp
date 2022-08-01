@@ -12,7 +12,7 @@
 #include <osg/Multisample>
 #include <osg/Texture>
 #include <osg/ValueObject>
-#include <osg/Capability>
+#include <osg/ColorMaski>
 
 #include <osgParticle/ParticleSystem>
 
@@ -636,8 +636,7 @@ namespace Shader
         {
             if (reqs.mSoftParticles)
                 defineMap["disableNormals"] = "1";
-            else
-                writableStateSet->setAttribute(new osg::Disablei(GL_BLEND, 1));
+            writableStateSet->setAttribute(new osg::ColorMaski(1, false, false, false, false));
         }
 
         if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT && !previousAddedState->hasMode(GL_ALPHA_TEST))
