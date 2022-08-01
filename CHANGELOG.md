@@ -118,6 +118,7 @@
     Bug #6519: Effects tooltips for ingredients work incorrectly
     Bug #6523: Disintegrate Weapon is resisted by Resist Magicka instead of Sanctuary
     Bug #6544: Far from world origin objects jitter when camera is still
+    Bug #6545: Player character momentum is preserved when going to a different cell
     Bug #6559: Weapon condition inconsistency between melee and ranged critical / sneak / KO attacks
     Bug #6579: OpenMW compilation error when using OSG doubles for BoundingSphere
     Bug #6606: Quests with multiple IDs cannot always be restarted

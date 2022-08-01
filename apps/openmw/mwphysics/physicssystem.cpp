@@ -699,7 +699,10 @@ namespace MWPhysics
     void PhysicsSystem::clearQueuedMovement()
     {
         for (const auto& [_, actor] : mActors)
+        {
             actor->setVelocity(osg::Vec3f());
+            actor->setInertialForce(osg::Vec3f());
+        }
     }
 
     std::vector<Simulation> PhysicsSystem::prepareSimulation(bool willSimulate)
