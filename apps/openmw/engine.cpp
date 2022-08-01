@@ -1032,10 +1032,8 @@ void OMW::Engine::go()
     mViewer = new osgViewer::Viewer;
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,5,5)
     // Do not try to outsmart the OS thread scheduler (see bug #4785).
     mViewer->setUseConfigureAffinity(false);
-#endif
 
     mEnvironment.setFrameRateLimit(Settings::Manager::getFloat("framerate limit", "Video"));
 

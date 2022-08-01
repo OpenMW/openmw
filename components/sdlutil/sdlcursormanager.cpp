@@ -1,6 +1,5 @@
 #include "sdlcursormanager.hpp"
 
-#include <cassert>
 #include <stdexcept>
 #include <cstdlib>
 
@@ -13,14 +12,13 @@
 #include <osg/Geometry>
 #include <osg/Texture2D>
 #include <osg/TexMat>
-#include <osg/Version>
 #include <osgViewer/GraphicsWindow>
 
 #include <components/debug/debuglog.hpp>
 
 #include "imagetosurface.hpp"
 
-#if defined(OSG_LIBRARY_STATIC) && (!defined(ANDROID) || OSG_VERSION_GREATER_THAN(3, 6, 5))
+#if defined(OSG_LIBRARY_STATIC) && !defined(ANDROID)
 // Sets the default windowing system interface according to the OS.
 // Necessary for OpenSceneGraph to do some things, like decompression.
 USE_GRAPHICSWINDOW()
@@ -28,12 +26,7 @@ USE_GRAPHICSWINDOW()
 
 namespace CursorDecompression
 {
-    // macOS builds use the OSG fork that includes DXTC commit
-    #if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 8) || defined(__APPLE__)
     static const bool DXTCSupported = true;
-    #else
-    static const bool DXTCSupported = false;
-    #endif
 
     class MyGraphicsContext {
         public:
