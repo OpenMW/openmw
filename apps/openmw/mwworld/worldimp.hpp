@@ -6,6 +6,7 @@
 #include <components/settings/settings.hpp>
 #include <components/misc/rng.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/detournavigator/collisionshapetype.hpp>
 
 #include "../mwbase/world.hpp"
 
@@ -111,6 +112,7 @@ namespace MWWorld
             std::string mUserDataPath;
 
             osg::Vec3f mDefaultHalfExtents;
+            DetourNavigator::CollisionShapeType mDefaultActorCollisionShapeType;
             bool mShouldUpdateNavigator;
 
             int mActivationDistanceOverride;

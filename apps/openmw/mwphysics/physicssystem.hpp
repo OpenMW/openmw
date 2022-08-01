@@ -17,6 +17,7 @@
 #include <osg/Timer>
 
 #include <components/misc/span.hpp>
+#include <components/detournavigator/collisionshapetype.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -329,6 +330,8 @@ namespace MWPhysics
             osg::ref_ptr<osg::Group> mParentNode;
 
             float mPhysicsDt;
+
+            DetourNavigator::CollisionShapeType mActorCollisionShapeType;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

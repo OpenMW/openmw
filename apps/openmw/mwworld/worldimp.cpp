@@ -152,6 +152,7 @@ namespace MWWorld
       mGodMode(false), mScriptsEnabled(true), mDiscardMovements(true), mContentFiles (contentFiles),
       mUserDataPath(userDataPath),
       mDefaultHalfExtents(Settings::Manager::getVector3("default actor pathfind half extents", "Game")),
+      mDefaultActorCollisionShapeType(DetourNavigator::toCollisionShapeType(Settings::Manager::getInt("actor collision shape type", "Game"))),
       mShouldUpdateNavigator(false),
       mActivationDistanceOverride (activationDistanceOverride),
       mStartCell(startCell), mDistanceToFacedObject(-1.f), mTeleportEnabled(true),
@@ -3945,7 +3946,7 @@ namespace MWWorld
     {
         const MWPhysics::Actor* physicsActor = mPhysics->getActor(actor);
         if (physicsActor == nullptr || !actor.isInCell() || actor.getCell()->isExterior())
-            return DetourNavigator::AgentBounds {DetourNavigator::defaultCollisionShapeType, mDefaultHalfExtents};
+            return DetourNavigator::AgentBounds {mDefaultActorCollisionShapeType, mDefaultHalfExtents};
         else
             return DetourNavigator::AgentBounds {physicsActor->getCollisionShapeType(), physicsActor->getHalfExtents()};
     }

@@ -24,6 +24,8 @@ namespace DetourNavigator
                 return std::max(agentBounds.mHalfExtents.x(), agentBounds.mHalfExtents.y()) * std::sqrt(2);
             case CollisionShapeType::RotatingBox:
                 return agentBounds.mHalfExtents.x();
+            case CollisionShapeType::Cylinder:
+                return std::max(agentBounds.mHalfExtents.x(), agentBounds.mHalfExtents.y());
         }
         assert(false && "Unsupported agent shape type");
         return 0;

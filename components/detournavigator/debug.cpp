@@ -79,6 +79,7 @@ namespace DetourNavigator
         {
             case CollisionShapeType::Aabb: return s << "AgentShapeType::Aabb";
             case CollisionShapeType::RotatingBox: return s << "AgentShapeType::RotatingBox";
+            case CollisionShapeType::Cylinder: return s << "AgentShapeType::Cylinder";
         }
         return s << "AgentShapeType::" << static_cast<std::underlying_type_t<CollisionShapeType>>(v);
     }

@@ -43,7 +43,7 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
+         <item row="5" column="1">
           <widget class="QCheckBox" name="avoidCollisionsCheckBox">
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled NPCs apply evasion maneuver to avoid collisions with others.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -143,27 +143,27 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
-          <widget class="QCheckBox" name="stealingFromKnockedOutCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make stealing items from NPCs that were knocked down possible during combat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Always allow stealing from knocked out actors</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QCheckBox" name="allowNPCToFollowOverWaterSurfaceCheckBox">
-           <property name="toolTip">
-            <string>Give NPC an ability to swim over the water surface when they follow other actor independently from their ability to swim. Has effect only when nav mesh building is enabled.</string>
-           </property>
-           <property name="text">
-            <string>Always allow NPC to follow over water surface</string>
-           </property>
-          </widget>
-         </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="stealingFromKnockedOutCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make stealing items from NPCs that were knocked down possible during combat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Always allow stealing from knocked out actors</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="allowNPCToFollowOverWaterSurfaceCheckBox">
+         <property name="toolTip">
+          <string>Give NPC an ability to swim over the water surface when they follow other actor independently from their ability to swim. Has effect only when nav mesh building is enabled.</string>
+         </property>
+         <property name="text">
+          <string>Always allow NPC to follow over water surface</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="requireAppropriateAmmunitionCheckBox">
@@ -186,15 +186,15 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalUnarmedStrengthLayout">
-         <item>
+        <layout class="QGridLayout" name="gridLayoutGameMechanics2">
+         <item row="0" column="0">
           <widget class="QLabel" name="unarmedFactorsStrengthLabel">
            <property name="text">
             <string>Factor strength into hand-to-hand combat:</string>
            </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="1">
           <widget class="QComboBox" name="unarmedFactorsStrengthComboBox">
            <property name="currentIndex">
             <number>0</number>
@@ -216,53 +216,55 @@
            </item>
           </widget>
          </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalPhysicsThreadsLayout">
-         <item>
+         <item row="1" column="0">
           <widget class="QLabel" name="physicsThreadsLabel">
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many threads will be spawned to compute physics update in the background. A value of 0 means that the update will be performed in the main thread.&lt;/p&gt;&lt;p&gt;A value greater than 1 requires the Bullet library be compiled with multithreading support.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
-            <string>Background physics threads</string>
+            <string>Background physics threads:</string>
            </property>
           </widget>
          </item>
-         <item>
+         <item row="1" column="1">
           <widget class="QSpinBox" name="physicsThreadsSpinBox"/>
          </item>
-         <item>
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+         <item row="2" column="0">
+          <widget class="QLabel" name="labelActorCollisionShapeType">
+           <property name="text">
+            <string>Actor collision shape type:</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="actorCollisonShapeTypeComboBox">
+           <property name="toolTip">
+            <string>Collision is used for both physics simulation and navigation mesh generation for pathfinding. Cylinder gives the best consistency bewtween available navigation paths and ability to move by them. Changing this value affects navigation mesh generation therefore navigation mesh disk cache generated for one value will not be useful with another.</string>
            </property>
-          </spacer>
+           <property name="currentText">
+            <string>Axis-aligned bounding box</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Axis-aligned bounding box</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Rotating box</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Cylinder</string>
+            </property>
+           </item>
+          </widget>
          </item>
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
+        <spacer name="verticalSpacerGameMechanics">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
