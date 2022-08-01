@@ -1811,7 +1811,7 @@ namespace MWGui
                 && (!isGuiMode() || (mGuiModes.size() == 1 && (getMode() == GM_MainMenu || getMode() == GM_Rest)));
     }
 
-    void WindowManager::playVideo(const std::string &name, bool allowSkipping)
+    void WindowManager::playVideo(const std::string &name, bool allowSkipping, bool overrideSounds)
     {
         mVideoWidget->playVideo("video\\" + name);
 
@@ -1836,7 +1836,7 @@ namespace MWGui
         bool cursorWasVisible = mCursorVisible;
         setCursorVisible(false);
 
-        if (mVideoWidget->hasAudioStream())
+        if (overrideSounds && mVideoWidget->hasAudioStream())
             MWBase::Environment::get().getSoundManager()->pauseSounds(MWSound::VideoPlayback,
                 ~MWSound::Type::Movie & MWSound::Type::Mask
             );

@@ -1069,7 +1069,7 @@ void OMW::Engine::go()
         mSoundManager->playTitleMusic();
         const std::string& logo = Fallback::Map::getString("Movies_Morrowind_Logo");
         if (!logo.empty())
-            mWindowManager->playVideo(logo, true);
+            mWindowManager->playVideo(logo, /*allowSkipping*/true, /*overrideSounds*/false);
     }
     else
     {
