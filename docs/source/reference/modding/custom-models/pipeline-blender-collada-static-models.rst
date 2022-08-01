@@ -69,11 +69,74 @@ armature and animation data.
 Materials
 *********
 
-OpenMW uses the classic, specular material setup and currently doesn't 
-support the more mainstream `PBR <https://en.wikipedia.org/wiki/Physically_based_rendering>`_
-way. In Blender, the mesh needs a default material with a diffuse texture
-connected to the ``Base Color`` socket. This is enough for the material to be
-included in the exported COLLADA file.
+OpenMW uses the classic, specular material setup and currently doesn't support
+the more mainstream `PBR <https://en.wikipedia.org/wiki/Physically_based_rendering>`_ way.
+The COLLADA exporter takes values from ``Specular BSDF`` node of the material 
+assigned to the mesh. In case no node or material is assigned, a default white 
+material is exported. The following list presents material values in the 
+exported COLLADA file and what value in Blender affect them.
+
+Diffuse
+=======
+
+Diffuse value is taken from ``Base Color`` of the Specular BSDF node. To get 
+visually matching results between Blender and OpenMW, set Blender's Color 
+Management ``Display Device`` to ``None``.
+   
+Specular
+========
+
+Specular value is taken from ``Specular`` of the Specular BSDF node.
+
+Ambient
+=======
+
+Ambient value is taken from the ``World Background Color`` of Blender's 
+currently active world. The value is found in the ``World Properties`` tab, 
+``Surface panel``, when the world is not using nodes. 
+
+Emission
+========
+
+Emission value is taken from ``Emissive Color`` of the Specular BSDF node.
+
+Double-sided
+============
+
+This is controlled by the ``Backface Culling`` toggle found under material 
+options. When Backface culling is enabled, the material will be exported as 
+single-sided.
+
+Shininess
+=========
+
+Shininess value is taken from ``Roughness`` of the Specular BSDF node. Shininess 
+and Roughness refer to the same material property but use an opposite scale. The 
+higher the roughness, the lower the shininess.
+   
+Transparency (alpha blend)
+==========================
+
+Blend transparency is used when ``Blend Mode`` of the material in Blender is set 
+to ``Alpha Blend``. The setting is found under material options. Amount of 
+transparency is then controlled by ``Transparency`` of the Specular BSDF node.
+
+Transparency (alpha clip)
+=========================
+
+Alpha clip transparency is used when ``Blend Mode`` of the material in Blender 
+is set to ``Alpha Clip``. In OpenMW, transparency values are taken from the 
+alpha channel of the diffuse texture. When previewing diffuse texture's alpha 
+channel, be mindful that Blender uses an inverted scale for transparency 
+compared to OpenMW.
+
+
+Textures
+********
+
+For textures, a diffuse texture needs to be connected to the ``Base Color`` 
+socket of the Specular BSDF node. This is enough for the material to be included 
+in the exported COLLADA file.
 
 .. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/barrel-prop-in-blender-material.webp
     :align: center
@@ -88,6 +151,15 @@ case of the barrel, the textures are named:
 * ``the_barrel.dds`` - diffuse texture
 * ``the_barrel_n.dds`` - normal map
 * ``the_barrel_spec.dds`` - specular map
+
+Texture Paths
+=============
+
+Textures will show properly in OpenMW when the path in the exported COLLADA file 
+is as follows ``textures/the_barrel.dds``. The exporter detects the 
+``data/textures`` part of the texture's path in Blender and truncates the rest. 
+The texture path can also be set manually in the exported COLALDA file.
+
 
 Collision Shapes
 ****************
