@@ -1349,13 +1349,13 @@ namespace MWClass
             return;
         }
 
-        if (ptr.getRefData().getCount() <= 0)
+        const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
+        if (ptr.getRefData().getCount() <= 0 && (!(ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn) || !customData.mNpcStats.isDead()))
         {
             state.mHasCustomState = false;
             return;
         }
 
-        const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
         ESM::NpcState& npcState = state.asNpcState();
         customData.mInventoryStore.writeState (npcState.mInventory);
         customData.mNpcStats.writeState (npcState.mNpcStats);

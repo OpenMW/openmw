@@ -348,6 +348,7 @@
     Bug #6047: Mouse bindings can be triggered during save loading
     Bug #6136: Game freezes when NPCs try to open doors that are about to be closed
     Bug #6294: Game crashes with empty pathgrid
+    Bug #6923: Dispose of corpse prevents respawning after load
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
