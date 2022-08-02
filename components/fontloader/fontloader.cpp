@@ -21,7 +21,7 @@
 #include <components/vfs/manager.hpp>
 
 #include <components/misc/pathhelpers.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include <components/myguiplatform/myguitexture.hpp>
 

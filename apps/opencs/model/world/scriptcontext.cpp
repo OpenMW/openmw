@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include <components/compiler/quickfileparser.hpp>
 #include <components/compiler/nullerrorhandler.hpp>

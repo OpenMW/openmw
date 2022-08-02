@@ -4,7 +4,7 @@
 
 #include <MyGUI_LanguageManager.h>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

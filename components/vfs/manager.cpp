@@ -2,8 +2,9 @@
 
 #include <stdexcept>
 #include <istream>
+#include <algorithm>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "archive.hpp"
 

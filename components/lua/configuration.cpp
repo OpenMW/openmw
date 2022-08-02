@@ -5,7 +5,9 @@
 #include <cassert>
 #include <sstream>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/format.hpp>
+#include <components/misc/strings/lower.hpp>
 
 namespace LuaUtil
 {

@@ -9,7 +9,7 @@
 #include <cmath>
 #include <exception>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include <components/debug/debuglog.hpp>
 

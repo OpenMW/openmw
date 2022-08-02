@@ -7,7 +7,7 @@
 #include <boost/program_options.hpp>
 
 #include <components/bsa/compressedbsafile.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #define BSATOOL_VERSION 1.1
 

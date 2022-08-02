@@ -4,7 +4,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

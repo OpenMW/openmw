@@ -3,8 +3,8 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
 
-#include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"

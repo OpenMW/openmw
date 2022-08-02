@@ -16,7 +16,6 @@
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/visitor.hpp>
 
-#include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/settings/settings.hpp>

@@ -17,7 +17,6 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/misc/hash.hpp>
-#include <components/misc/stringops.hpp>
 #include <components/misc/constants.hpp>
 
 #include <components/debug/debuglog.hpp>

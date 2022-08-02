@@ -7,6 +7,7 @@
 #include <MyGUI_EditBox.h>
 
 #include <components/widgets/list.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"

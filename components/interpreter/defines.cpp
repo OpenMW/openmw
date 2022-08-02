@@ -3,9 +3,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 namespace Interpreter{
 

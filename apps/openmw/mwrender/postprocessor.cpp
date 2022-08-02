@@ -16,7 +16,8 @@
 #include <components/sceneutil/util.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/shader/shadermanager.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>

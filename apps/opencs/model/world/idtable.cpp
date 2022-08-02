@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 #include <components/esm3/cellid.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"

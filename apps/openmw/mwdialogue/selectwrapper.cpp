@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iterator>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 namespace
 {

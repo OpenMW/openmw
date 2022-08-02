@@ -27,9 +27,6 @@
 
 #include <components/settings/settings.hpp>
 
-#include <components/stereo/multiview.hpp>
-
-#include <components/misc/stringops.hpp>
 #include "frustum.hpp"
 
 namespace Stereo

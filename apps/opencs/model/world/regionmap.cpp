@@ -6,7 +6,7 @@
 
 #include <QBrush>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "data.hpp"
 #include "universalid.hpp"

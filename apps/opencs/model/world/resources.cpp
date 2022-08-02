@@ -7,7 +7,7 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 CSMWorld::Resources::Resources (const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type,
     const char * const *extensions)

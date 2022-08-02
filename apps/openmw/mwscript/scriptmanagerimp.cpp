@@ -9,7 +9,7 @@
 
 #include <components/esm3/loadscpt.hpp>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>

@@ -7,7 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace ESMTerrain

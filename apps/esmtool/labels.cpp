@@ -13,7 +13,7 @@
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadweap.hpp>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 
 std::string bodyPartLabel(int idx)
 {

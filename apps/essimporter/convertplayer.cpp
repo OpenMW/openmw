@@ -3,7 +3,7 @@
 #include <cmath>
 
 #include <components/misc/constants.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 namespace ESSImport
 {

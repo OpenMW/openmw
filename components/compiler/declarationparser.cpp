@@ -1,6 +1,6 @@
 #include "declarationparser.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "scanner.hpp"
 #include "errorhandler.hpp"

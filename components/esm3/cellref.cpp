@@ -1,5 +1,7 @@
 #include "cellref.hpp"
 
+#include <algorithm>
+
 #include <components/debug/debuglog.hpp>
 
 #include "esmreader.hpp"

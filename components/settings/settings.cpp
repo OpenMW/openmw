@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 namespace Settings
 {

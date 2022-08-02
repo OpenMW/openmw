@@ -3,7 +3,7 @@
 #include <iostream>
 #include <filesystem>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/nif/niffile.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/vfs/manager.hpp>

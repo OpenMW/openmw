@@ -18,7 +18,8 @@
 #include <SDL_video.h>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/widgets/sharedstatebutton.hpp>

@@ -2,8 +2,10 @@
 
 #include <sstream>
 #include <string_view>
+#include <algorithm>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include <components/vfs/manager.hpp>
 

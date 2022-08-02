@@ -1,6 +1,6 @@
 #include "tradeitemmodel.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/class.hpp"

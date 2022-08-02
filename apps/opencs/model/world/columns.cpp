@@ -1,7 +1,7 @@
 #include "columns.hpp"
 
 #include <components/fallback/fallback.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "universalid.hpp"
 #include "infoselectwrapper.hpp"

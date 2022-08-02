@@ -12,7 +12,7 @@
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/osgacontroller.hpp>
 #include <components/misc/pathhelpers.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "animation.hpp"
 #include "objectcache.hpp"

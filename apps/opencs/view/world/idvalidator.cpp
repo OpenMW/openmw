@@ -1,6 +1,6 @@
 #include "idvalidator.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 bool CSVWorld::IdValidator::isValid (const QChar& c, bool first) const
 {

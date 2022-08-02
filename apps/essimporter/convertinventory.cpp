@@ -1,6 +1,7 @@
 #include "convertinventory.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
+
 #include <cstdlib>
 
 namespace ESSImport

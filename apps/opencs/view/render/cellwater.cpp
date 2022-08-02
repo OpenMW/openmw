@@ -6,7 +6,7 @@
 
 #include <components/esm3/loadland.hpp>
 #include <components/fallback/fallback.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/waterutil.hpp>

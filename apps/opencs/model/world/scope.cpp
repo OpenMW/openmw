@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 CSMWorld::Scope CSMWorld::getScopeFromId (const std::string& id)
 {

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <memory>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/misc/constants.hpp>
 
 #include "../doc/document.hpp"

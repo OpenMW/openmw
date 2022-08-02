@@ -10,7 +10,7 @@
 #include <osgAnimation/UpdateMatrixTransform>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/resource/animation.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/keyframe.hpp>

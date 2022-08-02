@@ -4,7 +4,7 @@
 #include <components/misc/compression.hpp>
 #include <components/sqlite3/db.hpp>
 #include <components/sqlite3/request.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include <DetourAlloc.h>
 

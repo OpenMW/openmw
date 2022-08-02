@@ -46,7 +46,7 @@
 
 #include <boost/iostreams/device/array.hpp>
 #include <components/bsa/memorystream.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/files/constrainedfilestream.hpp>
 
 namespace Bsa

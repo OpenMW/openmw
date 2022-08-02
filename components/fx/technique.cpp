@@ -12,7 +12,7 @@
 
 #include <components/vfs/manager.hpp>
 #include <components/stereo/multiview.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/debug/debuglog.hpp>

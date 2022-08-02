@@ -28,8 +28,6 @@
 
 #include <components/settings/settings.hpp>
 
-#include <components/misc/stringops.hpp>
-
 namespace Stereo
 {
     // Update stereo view/projection during update

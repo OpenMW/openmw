@@ -12,7 +12,8 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/misc/convert.hpp>
-#include <components/misc/stringops.hpp>
+
+#include <components/misc/strings/algorithm.hpp>
 
 #include <components/nif/node.hpp>
 #include <components/nif/data.hpp>

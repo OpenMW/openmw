@@ -1,6 +1,6 @@
 #include "adjusterwidget.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include <boost/filesystem.hpp>
 

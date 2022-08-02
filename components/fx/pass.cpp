@@ -11,7 +11,6 @@
 #include <osg/BindImageTexture>
 #include <osg/FrameBufferObject>
 
-#include <components/misc/stringops.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/clearcolor.hpp>

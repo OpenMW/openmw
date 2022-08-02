@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "scanner.hpp"
 #include "generator.hpp"

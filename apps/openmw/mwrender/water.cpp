@@ -32,7 +32,6 @@
 #include <components/sceneutil/lightmanager.hpp>
 
 #include <components/misc/constants.hpp>
-#include <components/misc/stringops.hpp>
 #include <components/stereo/stereomanager.hpp>
 
 #include <components/nifosg/controller.hpp>

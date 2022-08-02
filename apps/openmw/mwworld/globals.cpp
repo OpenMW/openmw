@@ -4,7 +4,7 @@
 
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/esmreader.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "esmstore.hpp"
 

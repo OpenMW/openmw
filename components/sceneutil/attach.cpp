@@ -10,7 +10,7 @@
 #include <osg/MatrixTransform>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include <components/sceneutil/skeleton.hpp>
 #include <components/resource/scenemanager.hpp>

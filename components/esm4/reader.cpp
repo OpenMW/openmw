@@ -48,7 +48,7 @@
 #include <boost/iostreams/copy.hpp>
 
 #include <components/bsa/memorystream.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/files/constrainedfilestream.hpp>
 
 #include "formid.hpp"

@@ -4,7 +4,6 @@
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/spellstate.hpp>
 #include <components/misc/rng.hpp>
-#include <components/misc/stringops.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
-#include "components/misc/stringops.hpp"
-#include "components/misc/algorithm.hpp"
+
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/format.hpp>
+#include <components/misc/strings/lower.hpp>
+
+#include <components/misc/algorithm.hpp>
 
 #include <string>
 #include <string_view>
@@ -55,7 +59,7 @@ TEST_F (PartialBinarySearchTest, ci_test)
 
 namespace
 {
-    using ::Misc::StringUtils;
+    using namespace ::Misc::StringUtils;
     using namespace ::testing;
 
     template <class T>
@@ -65,7 +69,9 @@ namespace
 
     TYPED_TEST_P(MiscStringUtilsCiEqualEmptyTest, empty_strings_should_be_equal)
     {
-        EXPECT_TRUE(StringUtils::ciEqual(typename TypeParam::first_type {}, typename TypeParam::second_type {}));
+        const typename TypeParam::first_type a {};
+        const typename TypeParam::second_type b {};
+        EXPECT_TRUE(ciEqual(a, b));
     }
 
     REGISTER_TYPED_TEST_SUITE_P(MiscStringUtilsCiEqualEmptyTest,
@@ -104,21 +110,21 @@ namespace
     {
         const Value<typename TypeParam::first_type> a {foo};
         const Value<typename TypeParam::second_type> b {foo};
-        EXPECT_TRUE(StringUtils::ciEqual(a, b)) << a << "\n" << b;
+        EXPECT_TRUE(ciEqual(a, b)) << a << "\n" << b;
     }
 
     TYPED_TEST_P(MiscStringUtilsCiEqualNotEmptyTest, same_strings_with_different_case_sensetivity_should_be_equal)
     {
         const Value<typename TypeParam::first_type> a {foo};
         const Value<typename TypeParam::second_type> b {fooUpper};
-        EXPECT_TRUE(StringUtils::ciEqual(a, b)) << a << "\n" << b;
+        EXPECT_TRUE(ciEqual(a, b)) << a << "\n" << b;
     }
 
     TYPED_TEST_P(MiscStringUtilsCiEqualNotEmptyTest, different_strings_content_should_not_be_equal)
     {
         const Value<typename TypeParam::first_type> a {foo};
         const Value<typename TypeParam::second_type> b {bar};
-        EXPECT_FALSE(StringUtils::ciEqual(a, b)) << a << "\n" << b;
+        EXPECT_FALSE(ciEqual(a, b)) << a << "\n" << b;
     }
 
     REGISTER_TYPED_TEST_SUITE_P(MiscStringUtilsCiEqualNotEmptyTest,
@@ -143,6 +149,6 @@ namespace
 
     TEST(MiscStringUtilsCiEqualTest, string_with_different_length_should_not_be_equal)
     {
-        EXPECT_FALSE(StringUtils::ciEqual(std::string("a"), std::string("aa")));
+        EXPECT_FALSE(ciEqual(std::string("a"), std::string("aa")));
     }
 }

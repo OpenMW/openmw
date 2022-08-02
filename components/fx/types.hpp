@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_FX_TYPES_H
 
 #include <optional>
+#include <variant>
 
 #include <osg/Camera>
 #include <osg/Uniform>
@@ -14,7 +15,7 @@
 
 #include <components/sceneutil/depth.hpp>
 #include <components/settings/shadermanager.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/debug/debuglog.hpp>
 
 #include "pass.hpp"

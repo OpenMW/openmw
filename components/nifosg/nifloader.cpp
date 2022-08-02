@@ -15,8 +15,9 @@
 // resource
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>
-#include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/misc/osguservalues.hpp>
 #include <components/nif/parent.hpp>

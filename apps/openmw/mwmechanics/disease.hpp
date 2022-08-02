@@ -2,6 +2,7 @@
 #define OPENMW_MECHANICS_DISEASE_H
 
 #include <components/misc/rng.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"

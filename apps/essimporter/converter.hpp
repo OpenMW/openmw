@@ -24,6 +24,8 @@
 #include <components/esm3/stolenitems.hpp>
 #include <components/esm3/projectilestate.hpp>
 
+#include <components/misc/strings/algorithm.hpp>
+
 #include "importcrec.hpp"
 #include "importcntc.hpp"
 

@@ -6,8 +6,6 @@
 #include <istream>
 #include <memory>
 
-#include <components/misc/stringops.hpp>
-
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "components/esm/esmcommon.hpp"

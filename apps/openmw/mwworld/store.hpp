@@ -9,7 +9,7 @@
 #include <set>
 
 #include <components/esm/records.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/rng.hpp>
 
 #include "../mwdialogue/keywordsearch.hpp"

@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include <fstream>
 #include <filesystem>

@@ -9,7 +9,7 @@
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/esm3/loadinfo.hpp>
 
 #include "../mwworld/ptr.hpp"

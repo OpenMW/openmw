@@ -4,7 +4,7 @@
 #include "exception.hpp"
 #include "scanner.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 namespace Compiler
 {

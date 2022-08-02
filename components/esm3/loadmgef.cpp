@@ -6,6 +6,8 @@
 #include "esmwriter.hpp"
 #include "components/esm/defs.hpp"
 
+#include <components/misc/strings/algorithm.hpp>
+
 namespace ESM
 {
 namespace

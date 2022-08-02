@@ -5,7 +5,7 @@
 #include <QLabel>
 #include <QUuid>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../../model/doc/document.hpp"
 

@@ -17,7 +17,7 @@
 #include <components/files/collections.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
