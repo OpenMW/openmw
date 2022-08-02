@@ -1,7 +1,6 @@
 #include "sdlcursormanager.hpp"
 
 #include <stdexcept>
-#include <cstdlib>
 
 #include <SDL_mouse.h>
 #include <SDL_endian.h>
@@ -12,13 +11,14 @@
 #include <osg/Geometry>
 #include <osg/Texture2D>
 #include <osg/TexMat>
+#include <osg/Version>
 #include <osgViewer/GraphicsWindow>
 
 #include <components/debug/debuglog.hpp>
 
 #include "imagetosurface.hpp"
 
-#if defined(OSG_LIBRARY_STATIC) && !defined(ANDROID)
+#if defined(OSG_LIBRARY_STATIC) && (!defined(ANDROID) || OSG_VERSION_GREATER_THAN(3, 6, 5))
 // Sets the default windowing system interface according to the OS.
 // Necessary for OpenSceneGraph to do some things, like decompression.
 USE_GRAPHICSWINDOW()
@@ -26,7 +26,11 @@ USE_GRAPHICSWINDOW()
 
 namespace CursorDecompression
 {
-    static const bool DXTCSupported = true;
+#if defined(__APPLE__)  // Workaround macOS not supporting hardware DXTC decompression
+    constexpr bool softwareDecompression = true;
+#else
+    constexpr bool softwareDecompression = false;
+#endif
 
     class MyGraphicsContext {
         public:
@@ -263,7 +267,7 @@ namespace SDLUtil
         static bool forceSoftwareDecompression = (getenv("OPENMW_DECOMPRESS_TEXTURES") != nullptr);
 
         SurfaceUniquePtr (*decompressionFunction)(osg::ref_ptr<osg::Image>, float);
-        if (forceSoftwareDecompression || CursorDecompression::DXTCSupported) {
+        if (forceSoftwareDecompression || CursorDecompression::softwareDecompression) {
             decompressionFunction = CursorDecompression::softwareDecompress;
         } else {
             decompressionFunction = CursorDecompression::hardwareDecompress;
