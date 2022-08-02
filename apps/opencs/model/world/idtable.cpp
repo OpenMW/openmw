@@ -354,9 +354,8 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
     for (int i = 0; i < idCollection()->getSize(); ++i)
     {
         auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(i));
-        std::string texture = Misc::StringUtils::lowerCase(record.get().mTexture);
         if (record.isModified())
-            reverseLookupMap.emplace(texture, idCollection()->getId(i));
+            reverseLookupMap.emplace(Misc::StringUtils::lowerCase(record.get().mTexture), idCollection()->getId(i));
     }
 
     for (const std::string& id : ids)
