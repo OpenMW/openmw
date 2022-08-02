@@ -293,5 +293,5 @@ bool MWDialogue::SelectWrapper::selectCompare (bool value) const
 
 std::string MWDialogue::SelectWrapper::getName() const
 {
-    return Misc::StringUtils::lowerCase (mSelect.mSelectRule.substr (5));
+    return Misc::StringUtils::lowerCase(std::string_view(mSelect.mSelectRule).substr(5));
 }
