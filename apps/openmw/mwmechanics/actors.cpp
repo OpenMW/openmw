@@ -631,6 +631,9 @@ namespace MWMechanics
             }
         }
 
+        if (creatureStats2.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+            return;
+
         // Stop here if target is unreachable
         if (!canFight(actor1, actor2))
             return;
