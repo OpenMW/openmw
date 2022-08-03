@@ -6,6 +6,7 @@
 #include <mutex>
 #include <vector>
 #include <array>
+#include <memory>
 
 #include <osg/ref_ptr>
 
