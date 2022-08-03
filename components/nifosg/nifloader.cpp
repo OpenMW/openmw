@@ -1050,9 +1050,8 @@ namespace NifOsg
                 const osg::Vec3f& position = particledata->vertices[particle.vertex];
                 created->setPosition(position);
 
-                osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
-                if (particle.vertex < particledata->colors.size())
-                    partcolor = particledata->colors[particle.vertex];
+                created->setColorRange(osgParticle::rangev4(partctrl->color, partctrl->color));
+                created->setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
                 float size = partctrl->size;
                 if (particle.vertex < particledata->sizes.size())
@@ -1171,7 +1170,7 @@ namespace NifOsg
             handleParticleInitialState(nifNode, partsys, partctrl);
 
             partsys->getDefaultParticleTemplate().setSizeRange(osgParticle::rangef(partctrl->size, partctrl->size));
-            partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(osg::Vec4f(1.f,1.f,1.f,1.f), osg::Vec4f(1.f,1.f,1.f,1.f)));
+            partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(partctrl->color, partctrl->color));
             partsys->getDefaultParticleTemplate().setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
             if (!partctrl->emitter.empty())

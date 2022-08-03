@@ -40,7 +40,7 @@ namespace Nif
         horizontalDir = nif->getFloat();
         horizontalAngle = nif->getFloat();
         /*normal?*/ nif->getVector3();
-        /*color?*/ nif->getVector4();
+        color = nif->getVector4();
         size = nif->getFloat();
         startTime = nif->getFloat();
         stopTime = nif->getFloat();
