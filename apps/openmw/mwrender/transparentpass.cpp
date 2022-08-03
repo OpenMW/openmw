@@ -109,9 +109,6 @@ namespace MWRender
                 if (rl->_drawable->getNodeMask() == Mask_ParticleSystem || rl->_drawable->getNodeMask() == Mask_Effect)
                     continue;
 
-                if (ss->getAttribute(osg::StateAttribute::ALPHAFUNC))
-                    continue;
-
                 if (ss->getAttribute(osg::StateAttribute::MATERIAL)) {
                     const osg::Material* mat = static_cast<const osg::Material*>(ss->getAttribute(osg::StateAttribute::MATERIAL));
                     if (mat->getDiffuse(osg::Material::FRONT).a() < 0.5)
