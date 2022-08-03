@@ -52,12 +52,18 @@ namespace MWLua
 
         api["triggerShaderReload"] = [context]()
         {
-            MWBase::Environment::get().getWorld()->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().triggerShaderReload();
+            context.mLuaManager->addAction([]
+                {
+                    MWBase::Environment::get().getWorld()->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().triggerShaderReload();
+                });
         };
 
-        api["togggleShaderHotReload"] = [context](bool value)
+        api["setShaderHotReloadEnabled"] = [context](bool value)
         {
-            MWBase::Environment::get().getWorld()->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().setHotReloadEnabled(value);
+            context.mLuaManager->addAction([value]
+                {
+                    MWBase::Environment::get().getWorld()->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().setHotReloadEnabled(value);
+                });
         };
 
         return LuaUtil::makeReadOnly(api);
