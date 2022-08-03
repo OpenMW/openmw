@@ -309,7 +309,7 @@ namespace MWScript
 
                     const std::string soulgemPrefix = "misc_soulgem";
 
-                    if (::Misc::StringUtils::ciCompareLen(item, soulgemPrefix, soulgemPrefix.length()) == 0)
+                    if (Misc::StringUtils::ciStartsWith(item, soulgemPrefix))
                     {
                         it = invStore.end();
 

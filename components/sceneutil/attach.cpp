@@ -72,10 +72,11 @@ namespace SceneUtil
 
         bool filterMatches(std::string_view name) const
         {
-            if (Misc::StringUtils::ciCompareLen(name, mFilter, mFilter.size()) == 0)
+            if (Misc::StringUtils::ciStartsWith(name, mFilter))
                 return true;
-            if (Misc::StringUtils::ciCompareLen(name, "tri ", 4) == 0)
-                return Misc::StringUtils::ciCompareLen(name.substr(4), mFilter, mFilter.size()) == 0;
+            constexpr std::string_view prefix = "tri ";
+            if (Misc::StringUtils::ciStartsWith(name, prefix))
+                return Misc::StringUtils::ciStartsWith(name.substr(prefix.size()), mFilter);
             return false;
         }
 

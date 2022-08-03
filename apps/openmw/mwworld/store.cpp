@@ -147,10 +147,7 @@ namespace MWWorld
     {
         std::vector<const T*> results;
         std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
-                [&id](const T* item)
-                {
-                    return Misc::StringUtils::ciCompareLen(id, item->mId, id.size()) == 0;
-                });
+                [&id](const T* item) { return Misc::StringUtils::ciStartsWith(item->mId, id); });
         if(!results.empty())
             return results[Misc::Rng::rollDice(results.size(), prng)];
         return nullptr;
