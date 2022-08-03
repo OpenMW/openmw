@@ -6,6 +6,10 @@
 #include "../mwbase/world.hpp"
 #include "../mwrender/renderingmanager.hpp"
 
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/shader/shadermanager.hpp>
+
 #include <components/lua/luastate.hpp>
 
 namespace MWLua
@@ -44,6 +48,16 @@ namespace MWLua
             {
                 MWBase::Environment::get().getWorld()->getRenderingManager()->setNavMeshMode(value);
             });
+        };
+
+        api["triggerShaderReload"] = [context]()
+        {
+            MWBase::Environment::get().getWorld()->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().triggerShaderReload();
+        };
+
+        api["togggleShaderHotReload"] = [context](bool value)
+        {
+            MWBase::Environment::get().getWorld()->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().setHotReloadEnabled(value);
         };
 
         return LuaUtil::makeReadOnly(api);

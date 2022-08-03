@@ -367,8 +367,10 @@ namespace Shader
         std::filesystem::file_time_type mLastAutoRecompileTime;
         using KeysHolder = std::set<ShaderManager::MapKey>;
         std::unordered_map<std::string, KeysHolder> mShaderFiles;
+        bool mHotReloadEnabled;
         HotReloadManager()
         {
+            mHotReloadEnabled = false;
             mLastAutoRecompileTime = std::chrono::file_clock::now();
         }
 
@@ -392,6 +394,12 @@ namespace Shader
         }
 
         void update(ShaderManager& Manager)
+        {
+            if (mHotReloadEnabled)
+                reloadTouchedShaders(Manager);
+        }
+
+        void reloadTouchedShaders(ShaderManager& Manager)
         {
             for (auto& shader : mShaderFiles)
             {
@@ -633,6 +641,16 @@ namespace Shader
     void ShaderManager::update()
     {
         mHotReloadManager->update(*this);
+    }
+
+    void ShaderManager::setHotReloadEnabled(bool value)
+    {
+        mHotReloadManager->mHotReloadEnabled = value;
+    }
+
+    void ShaderManager::triggerShaderReload()
+    {
+        mHotReloadManager->reloadTouchedShaders(*this);
     }
 
 }

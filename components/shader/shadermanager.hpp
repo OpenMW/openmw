@@ -69,6 +69,8 @@ namespace Shader
         int reserveGlobalTextureUnits(Slot slot);
 
         void update();
+        void setHotReloadEnabled(bool value);
+        void triggerShaderReload();
     private:
         void getLinkedShaders(osg::ref_ptr<osg::Shader> shader, const std::vector<std::string>& linkedShaderNames, const DefineMap& defines);
         void addLinkedShaders(osg::ref_ptr<osg::Shader> shader, osg::ref_ptr<osg::Program> program);
