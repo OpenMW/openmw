@@ -5,7 +5,8 @@
 #include <sstream>
 #include <regex>
 #include <filesystem>
-#include <unordered_set>
+#include <set>
+#include <unordered_map>
 #include <osg/Program>
 
 #include <components/debug/debuglog.hpp>
@@ -406,7 +407,6 @@ namespace Shader
                 std::filesystem::path pathShaderToTest = (shader.first);
 
                 std::filesystem::file_time_type write_time = std::filesystem::last_write_time(pathShaderToTest);
-                //Log(Debug::Info) << std::format("{} write time is {} compared to {} ", shader.first, write_time, mLastAutoRecompileTime);
                 if (write_time.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
                 {
                     for (const ShaderManager:: MapKey& descriptor : shader.second)
@@ -416,38 +416,35 @@ namespace Shader
 
                         ShaderManager::TemplateMap::iterator templateIt = Manager.mShaderTemplates.find(templateName); //Can't be Null, if we're here it means the template was added
                         std::set<std::filesystem::path> insertedPaths;
+                        std::filesystem::path path = (std::filesystem::path(Manager.mPath) / templateName);
+                        std::ifstream stream;
+                        stream.open(path);
+                        if (stream.fail())
                         {
-                            std::filesystem::path path = (std::filesystem::path(Manager.mPath) / templateName);
-                            std::ifstream stream;
-                            stream.open(path);
-                            if (stream.fail())
-                            {
-                                Log(Debug::Error) << "Failed to open " << path.string();
-                            }
-                            std::stringstream buffer;
-                            buffer << stream.rdbuf();
-
-                            // parse includes
-                            int fileNumber = 1;
-                            std::string source = buffer.str();
-                            if (!addLineDirectivesAfterConditionalBlocks(source)
-                                || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber, insertedPaths))
-                            {
-                                break;
-                            }
-                            templateIt->second = source;
-
-                            //if (shaderIt == Manager.mShaders.end())
-                            {
-                                std::string shaderSource = templateIt->second;
-                                std::vector<std::string> linkedShaderNames;
-                                if (!Manager.createSourceFromTemplate(shaderSource, linkedShaderNames, templateName, descriptor.second))
-                                {
-                                    break;
-                                }
-                                shaderIt->second->setShaderSource(shaderSource);
-                            }
+                            Log(Debug::Error) << "Failed to open " << path.string();
                         }
+                        std::stringstream buffer;
+                        buffer << stream.rdbuf();
+
+                        // parse includes
+                        int fileNumber = 1;
+                        std::string source = buffer.str();
+                        if (!addLineDirectivesAfterConditionalBlocks(source)
+                            || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber, insertedPaths))
+                        {
+                            break;
+                        }
+                        templateIt->second = source;
+
+
+                        std::string shaderSource = templateIt->second;
+                        std::vector<std::string> linkedShaderNames;
+                        if (!Manager.createSourceFromTemplate(shaderSource, linkedShaderNames, templateName, descriptor.second))
+                        {
+                            break;
+                        }
+                        shaderIt->second->setShaderSource(shaderSource);
+                            
                     }
                 }
             }
