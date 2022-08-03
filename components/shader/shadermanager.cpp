@@ -425,6 +425,7 @@ namespace Shader
                             if (!addLineDirectivesAfterConditionalBlocks(source)
                                 || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber, insertedPaths))
                             {
+                                break;
                             }
                             templateIt->second = source;
 
@@ -434,7 +435,7 @@ namespace Shader
                                 std::vector<std::string> linkedShaderNames;
                                 if (!Manager.createSourceFromTemplate(shaderSource, linkedShaderNames, templateName, descriptor.second))
                                 {
-
+                                    break;
                                 }
                                 shaderIt->second->setShaderSource(shaderSource);
                             }
