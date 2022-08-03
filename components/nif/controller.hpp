@@ -52,6 +52,7 @@ struct NiParticleSystemController : public Controller
     float horizontalDir;
     float horizontalAngle;
 
+    osg::Vec4f color;
     float size;
     float startTime;
     float stopTime;
