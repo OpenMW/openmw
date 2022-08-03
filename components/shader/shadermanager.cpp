@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <set>
 #include <unordered_map>
+#include <chrono>
 #include <osg/Program>
 
 #include <components/debug/debuglog.hpp>
