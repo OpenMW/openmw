@@ -1,6 +1,8 @@
 #include "postprocessor.hpp"
 
 #include <algorithm>
+#include <chrono>
+#include <thread>
 #include <SDL_opengl_glext.h>
 
 #include <osg/Texture1D>
@@ -384,6 +386,10 @@ namespace MWRender
 
             if (!isDirty)
                 continue;
+
+            // TODO: Temporary workaround to avoid conflicts with external programs saving the file, especially problematic on Windows.
+            //       If we move to a file watcher using native APIs this should be removed.
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
             if (technique->compile())
                 Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()].string();
