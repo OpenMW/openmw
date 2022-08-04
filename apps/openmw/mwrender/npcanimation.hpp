@@ -137,6 +137,7 @@ public:
 
     void showWeapons(bool showWeapon) override;
 
+    bool updateCarriedLeftVisible(const int weaptype) const override;
     bool getCarriedLeftShown() const override { return mShowCarriedLeft; }
     void showCarriedLeft(bool show) override;
 
