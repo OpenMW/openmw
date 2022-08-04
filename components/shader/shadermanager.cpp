@@ -381,18 +381,7 @@ namespace Shader
         {
             for (const std::filesystem::path& file : shaderFiles)
             {
-                KeysHolder* shaderSet_ptr;
-                auto found = mShaderFiles.find(file.string());
-                if (found != mShaderFiles.end()) //Apparently there is an issue that prevents me from using operator[]
-                {
-                    shaderSet_ptr = &found->second;
-                }
-                else
-                {
-                    shaderSet_ptr = &mShaderFiles.insert(std::make_pair<>(file.string(), KeysHolder())).first->second;
-                }
-                auto& shaderSet = *shaderSet_ptr;
-                shaderSet.insert(std::make_pair( templateName, defines ));
+                mShaderFiles[file.string()].insert(std::make_pair(templateName, defines));
             }
         }
 
