@@ -366,6 +366,7 @@ namespace Shader
         using KeysHolder = std::set<ShaderManager::MapKey>;
 
         std::unordered_map<std::string, KeysHolder> mShaderFiles;
+        std::unordered_map<std::string, std::set<std::filesystem::path>> templateIncludedFiles;
         std::filesystem::file_time_type mLastAutoRecompileTime;
         bool mHotReloadEnabled;
 
@@ -375,8 +376,9 @@ namespace Shader
             mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
         }
 
-        void addShaderFiles(std::set<std::filesystem::path>& shaderFiles,const osg::ref_ptr<osg::Shader>& shader,const std::string& templateName,const ShaderManager::DefineMap& defines )
+        void addShaderFiles(const std::string& templateName,const ShaderManager::DefineMap& defines )
         {
+            const std::set<std::filesystem::path>& shaderFiles = templateIncludedFiles[templateName];
             for (const std::filesystem::path& file : shaderFiles)
             {
                 mShaderFiles[file.string()].insert(std::make_pair(templateName, defines));
@@ -468,7 +470,7 @@ namespace Shader
             if (!addLineDirectivesAfterConditionalBlocks(source)
                 || !parseIncludes(std::filesystem::path(mPath), source, templateName, fileNumber, {}, insertedPaths))
                 return nullptr;
-
+            mHotReloadManager->templateIncludedFiles[templateName] = insertedPaths;
             templateIt = mShaderTemplates.insert(std::make_pair(templateName, source)).first;
         }
 
@@ -491,13 +493,7 @@ namespace Shader
             static unsigned int counter = 0;
             shader->setName(Misc::StringUtils::format("%u %s", counter++, templateName));
 
-            if (insertedPaths.size() == 0)
-            {
-                int fileNumber = 1;
-                parseIncludes(std::filesystem::path(mPath), shaderSource, templateName, fileNumber, {}, insertedPaths);
-            }
-
-            mHotReloadManager->addShaderFiles(insertedPaths, shader, templateName, defines);
+            mHotReloadManager->addShaderFiles(templateName, defines);
 
             lock.unlock();
             getLinkedShaders(shader, linkedShaderNames, defines);
