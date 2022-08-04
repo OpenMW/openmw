@@ -22,9 +22,7 @@ namespace Shader
         mHotReloadManager = std::make_unique<HotReloadManager>();
     }
 
-    ShaderManager::~ShaderManager()
-    {
-    }
+    ShaderManager::~ShaderManager() = default;
 
     void ShaderManager::setShaderPath(const std::string &path)
     {
