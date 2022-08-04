@@ -112,7 +112,7 @@ namespace MWMechanics
             /// @return Success or error
             bool playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
-            short unsigned getRandomIdle();
+            int getRandomIdle() const;
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
             void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
