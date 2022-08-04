@@ -1,11 +1,15 @@
 #include "resourcesmanager.hpp"
 
+#include "resources.hpp"
+
 #include <stdexcept>
 
 CSMWorld::ResourcesManager::ResourcesManager()
     : mVFS(nullptr)
 {
 }
+
+CSMWorld::ResourcesManager::~ResourcesManager() = default;
 
 void CSMWorld::ResourcesManager::addResources (const Resources& resources)
 {

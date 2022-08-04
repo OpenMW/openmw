@@ -1,13 +1,15 @@
 #ifndef OPENMW_MECHANICS_SUMMONING_H
 #define OPENMW_MECHANICS_SUMMONING_H
 
-#include <set>
-
-#include "../mwworld/ptr.hpp"
+#include <string>
+#include <utility>
 
 #include <components/esm3/magiceffects.hpp>
 
-#include "magiceffects.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWMechanics
 {
