@@ -74,11 +74,12 @@ namespace Shader
 
     // Recursively replaces include statements with the actual source of the included files.
     // Adjusts #line statements accordingly and detects cyclic includes.
-    // includingFiles is the set of files that include this file directly or indirectly, and is intentionally not a reference to allow automatic cleanup.
-    static bool parseIncludes(const std::filesystem::path& shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<std::filesystem::path>& includingFiles)
+    // cycleIncludeChecker is the set of files that include this file directly or indirectly, and is intentionally not a reference to allow automatic cleanup.
+    static bool parseIncludes(const std::filesystem::path& shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<std::filesystem::path> cycleIncludeChecker,std::set<std::filesystem::path>& includedFiles)
     {
+        includedFiles.insert(shaderPath / fileName);
         // An include is cyclic if it is being included by itself
-        if (includingFiles.insert(shaderPath/fileName).second == false)
+        if (cycleIncludeChecker.insert(shaderPath/fileName).second == false)
         {
             Log(Debug::Error) << "Shader " << fileName << " error: Detected cyclic #includes";
             return false;
@@ -135,7 +136,7 @@ namespace Shader
             buffer << includeFstream.rdbuf();
             std::string stringRepresentation = buffer.str();
             if (!addLineDirectivesAfterConditionalBlocks(stringRepresentation)
-                || !parseIncludes(shaderPath, stringRepresentation, includeFilename, fileNumber, includingFiles))
+                || !parseIncludes(shaderPath, stringRepresentation, includeFilename, fileNumber, cycleIncludeChecker, includedFiles))
             {
                 Log(Debug::Error) << "In file included from " << fileName << "." << lineNumber;
                 return false;
@@ -431,7 +432,7 @@ namespace Shader
                         int fileNumber = 1;
                         std::string source = buffer.str();
                         if (!addLineDirectivesAfterConditionalBlocks(source)
-                            || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber, insertedPaths))
+                            || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber, {}, insertedPaths))
                         {
                             break;
                         }
@@ -478,7 +479,7 @@ namespace Shader
             int fileNumber = 1;
             std::string source = buffer.str();
             if (!addLineDirectivesAfterConditionalBlocks(source)
-                || !parseIncludes(std::filesystem::path(mPath), source, templateName, fileNumber, insertedPaths))
+                || !parseIncludes(std::filesystem::path(mPath), source, templateName, fileNumber, {}, insertedPaths))
                 return nullptr;
 
             templateIt = mShaderTemplates.insert(std::make_pair(templateName, source)).first;
