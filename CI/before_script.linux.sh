@@ -11,8 +11,6 @@ BUILD_UNITTESTS=OFF
 BUILD_BENCHMARKS=OFF
 
 if [[ "${BUILD_TESTS_ONLY}" ]]; then
-    export GOOGLETEST_DIR="${PWD}/googletest/build/install"
-    env GENERATOR='Unix Makefiles' CONFIGURATION=Release CI/build_googletest.sh
     BUILD_UNITTESTS=ON
     BUILD_BENCHMARKS=ON
 fi
@@ -99,8 +97,6 @@ if [[ "${BUILD_TESTS_ONLY}" ]]; then
         -DBUILD_NIFTEST=OFF \
         -DBUILD_UNITTESTS=${BUILD_UNITTESTS} \
         -DBUILD_BENCHMARKS=${BUILD_BENCHMARKS} \
-        -DGTEST_ROOT="${GOOGLETEST_DIR}" \
-        -DGMOCK_ROOT="${GOOGLETEST_DIR}" \
         ..
 else
     ${ANALYZE} cmake \
