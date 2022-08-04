@@ -76,9 +76,9 @@ namespace SceneUtil
     namespace
     {
         const std::unordered_map<std::string, LightingMethod> lightingMethodSettingMap = {
-                {"legacy", LightingMethod::FFP},
-                {"shaders compatibility", LightingMethod::PerObjectUniform},
-                {"shaders", LightingMethod::SingleUBO},
+            {"legacy", LightingMethod::FFP},
+            {"shaders compatibility", LightingMethod::PerObjectUniform},
+            {"shaders", LightingMethod::SingleUBO},
         };
     }
 
@@ -100,10 +100,10 @@ namespace SceneUtil
         };
 
         LightBuffer(int count)
-                : mData(new osg::FloatArray(3*4*count))
-                , mEndian(osg::getCpuByteOrder())
-                , mCount(count)
-                , mCachedSunPos(osg::Vec4())
+            : mData(new osg::FloatArray(3*4*count))
+            , mEndian(osg::getCpuByteOrder())
+            , mCount(count)
+            , mCachedSunPos(osg::Vec4())
         {
         }
 
@@ -198,40 +198,40 @@ namespace SceneUtil
     private:
         class Offsets
         {
-        public:
-            Offsets()
+            public:
+                Offsets()
                     : mStride(12)
-            {
-                mValues[Diffuse] = 0;
-                mValues[Ambient] = 1;
-                mValues[Specular] = 2;
-                mValues[DiffuseSign] = 3;
-                mValues[Position] = 4;
-                mValues[AttenuationRadius] = 8;
-            }
+                {
+                    mValues[Diffuse] = 0;
+                    mValues[Ambient] = 1;
+                    mValues[Specular] = 2;
+                    mValues[DiffuseSign] = 3;
+                    mValues[Position] = 4;
+                    mValues[AttenuationRadius] = 8;
+                }
 
-            Offsets(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int stride)
+                Offsets(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int stride)
                     : mStride((offsetAttenuationRadius + sizeof(GLfloat) * osg::Vec4::num_components + stride) / 4)
-            {
-                constexpr auto sizeofFloat = sizeof(GLfloat);
-                const auto diffuseOffset = offsetColors / sizeofFloat;
+                {
+                    constexpr auto sizeofFloat = sizeof(GLfloat);
+                    const auto diffuseOffset = offsetColors / sizeofFloat;
 
-                mValues[Diffuse] = diffuseOffset;
-                mValues[Ambient] = diffuseOffset + 1;
-                mValues[Specular] = diffuseOffset + 2;
-                mValues[DiffuseSign] = diffuseOffset + 3;
-                mValues[Position] = offsetPosition / sizeofFloat;
-                mValues[AttenuationRadius] = offsetAttenuationRadius / sizeofFloat;
-            }
+                    mValues[Diffuse] = diffuseOffset;
+                    mValues[Ambient] = diffuseOffset + 1;
+                    mValues[Specular] = diffuseOffset + 2;
+                    mValues[DiffuseSign] = diffuseOffset + 3;
+                    mValues[Position] = offsetPosition / sizeofFloat;
+                    mValues[AttenuationRadius] = offsetAttenuationRadius / sizeofFloat;
+                }
 
-            int get(int index, LayoutOffset slot) const
-            {
-                return mStride * index + mValues[slot];
-            }
+                int get(int index, LayoutOffset slot) const
+                {
+                    return mStride * index + mValues[slot];
+                }
 
-        private:
-            int mStride;
-            std::array<int, 6> mValues;
+            private:
+                int mStride;
+                std::array<int, 6> mValues;
         };
 
         void configureLayout(const Offsets& offsets, int size)
@@ -275,11 +275,11 @@ namespace SceneUtil
         auto method = lightManager->getLightingMethod();
         switch (method)
         {
-            case LightingMethod::FFP:
+        case LightingMethod::FFP:
             {
                 break;
             }
-            case LightingMethod::PerObjectUniform:
+        case LightingMethod::PerObjectUniform:
             {
                 osg::Matrixf lightMat;
                 configurePosition(lightMat, light->getPosition());
@@ -290,7 +290,7 @@ namespace SceneUtil
                 stateset->addUniform(lightManager->generateLightBufferUniform(lightMat), mode);
                 break;
             }
-            case LightingMethod::SingleUBO:
+        case LightingMethod::SingleUBO:
             {
                 osg::ref_ptr<LightBuffer> buffer = new LightBuffer(lightManager->getMaxLightsInScene());
 
@@ -316,7 +316,7 @@ namespace SceneUtil
         DisableLight(int index) : mIndex(index) {}
 
         DisableLight(const DisableLight& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
-                : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex) {}
+            : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex) {}
 
         META_StateAttribute(SceneUtil, DisableLight, osg::StateAttribute::LIGHT)
 
@@ -359,7 +359,7 @@ namespace SceneUtil
         FFPLightStateAttribute(size_t index, const std::vector<osg::ref_ptr<osg::Light>>& lights) : mIndex(index), mLights(lights) {}
 
         FFPLightStateAttribute(const FFPLightStateAttribute& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
-                : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex), mLights(copy.mLights) {}
+            : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex), mLights(copy.mLights) {}
 
         unsigned int getMember() const override
         {
@@ -557,11 +557,11 @@ namespace SceneUtil
     {
     public:
         CollectLightCallback()
-                : mLightManager(nullptr) { }
+            : mLightManager(nullptr) { }
 
         CollectLightCallback(const CollectLightCallback& copy, const osg::CopyOp& copyop)
-                : NodeCallback<CollectLightCallback>(copy, copyop)
-                , mLightManager(nullptr) { }
+            : NodeCallback<CollectLightCallback>(copy, copyop)
+            , mLightManager(nullptr) { }
 
         META_Object(SceneUtil, CollectLightCallback)
 
@@ -658,10 +658,10 @@ namespace SceneUtil
     };
 
     UBOManager::UBOManager(int lightCount)
-            : mDummyProgram(new osg::Program)
-            , mInitLayout(false)
-            , mDirty({ true, true })
-            , mTemplate(new LightBuffer(lightCount))
+        : mDummyProgram(new osg::Program)
+        , mInitLayout(false)
+        , mDirty({ true, true })
+        , mTemplate(new LightBuffer(lightCount))
     {
         static const std::string dummyVertSource = generateDummyShader(lightCount);
 
@@ -759,9 +759,9 @@ namespace SceneUtil
         ext->glGetActiveUniformsiv(handle, index.size(), index.data(), GL_UNIFORM_ARRAY_STRIDE, &stride);
 
         std::array<const char*, 3> names = {
-                "LightBuffer[0].packedColors",
-                "LightBuffer[0].position",
-                "LightBuffer[0].attenuation",
+            "LightBuffer[0].packedColors",
+            "LightBuffer[0].position",
+            "LightBuffer[0].attenuation",
         };
         std::vector<unsigned int> indices(names.size());
         std::vector<int> offsets(names.size());
@@ -792,12 +792,12 @@ namespace SceneUtil
     }
 
     LightManager::LightManager(bool ffp)
-            : mStartLight(0)
-            , mLightingMask(~0u)
-            , mSun(nullptr)
-            , mPointLightRadiusMultiplier(1.f)
-            , mPointLightFadeEnd(0.f)
-            , mPointLightFadeStart(0.f)
+        : mStartLight(0)
+        , mLightingMask(~0u)
+        , mSun(nullptr)
+        , mPointLightRadiusMultiplier(1.f)
+        , mPointLightFadeEnd(0.f)
+        , mPointLightFadeStart(0.f)
     {
         osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
         bool supportsUBO = exts && exts->isUniformBufferObjectSupported;
@@ -845,16 +845,16 @@ namespace SceneUtil
     }
 
     LightManager::LightManager(const LightManager &copy, const osg::CopyOp &copyop)
-            : osg::Group(copy, copyop)
-            , mStartLight(copy.mStartLight)
-            , mLightingMask(copy.mLightingMask)
-            , mSun(copy.mSun)
-            , mLightingMethod(copy.mLightingMethod)
-            , mPointLightRadiusMultiplier(copy.mPointLightRadiusMultiplier)
-            , mPointLightFadeEnd(copy.mPointLightFadeEnd)
-            , mPointLightFadeStart(copy.mPointLightFadeStart)
-            , mMaxLights(copy.mMaxLights)
-            , mPPLightBuffer(copy.mPPLightBuffer)
+        : osg::Group(copy, copyop)
+        , mStartLight(copy.mStartLight)
+        , mLightingMask(copy.mLightingMask)
+        , mSun(copy.mSun)
+        , mLightingMethod(copy.mLightingMethod)
+        , mPointLightRadiusMultiplier(copy.mPointLightRadiusMultiplier)
+        , mPointLightFadeEnd(copy.mPointLightFadeEnd)
+        , mPointLightFadeStart(copy.mPointLightFadeStart)
+        , mMaxLights(copy.mMaxLights)
+        , mPPLightBuffer(copy.mPPLightBuffer)
     {
     }
 
@@ -971,15 +971,15 @@ namespace SceneUtil
         mLightingMethod = method;
         switch (method)
         {
-            case LightingMethod::FFP:
-                mStateSetGenerator = std::make_unique<StateSetGeneratorFFP>();
-                break;
-            case LightingMethod::SingleUBO:
-                mStateSetGenerator = std::make_unique<StateSetGeneratorSingleUBO>();
-                break;
-            case LightingMethod::PerObjectUniform:
-                mStateSetGenerator = std::make_unique<StateSetGeneratorPerObjectUniform>();
-                break;
+        case LightingMethod::FFP:
+            mStateSetGenerator = std::make_unique<StateSetGeneratorFFP>();
+            break;
+        case LightingMethod::SingleUBO:
+            mStateSetGenerator = std::make_unique<StateSetGeneratorSingleUBO>();
+            break;
+        case LightingMethod::PerObjectUniform:
+            mStateSetGenerator = std::make_unique<StateSetGeneratorPerObjectUniform>();
+            break;
         }
         mStateSetGenerator->mLightManager = this;
     }
@@ -1210,19 +1210,19 @@ namespace SceneUtil
     }
 
     LightSource::LightSource()
-            : mRadius(0.f)
-            , mActorFade(1.f)
-            , mLastAppliedFrame(0)
+        : mRadius(0.f)
+        , mActorFade(1.f)
+        , mLastAppliedFrame(0)
     {
         setUpdateCallback(new CollectLightCallback);
         mId = sLightId++;
     }
 
     LightSource::LightSource(const LightSource &copy, const osg::CopyOp &copyop)
-            : osg::Node(copy, copyop)
-            , mRadius(copy.mRadius)
-            , mActorFade(copy.mActorFade)
-            , mLastAppliedFrame(copy.mLastAppliedFrame)
+        : osg::Node(copy, copyop)
+        , mRadius(copy.mRadius)
+        , mActorFade(copy.mActorFade)
+        , mLastAppliedFrame(copy.mLastAppliedFrame)
     {
         mId = sLightId++;
 

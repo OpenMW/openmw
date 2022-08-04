@@ -7,8 +7,6 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-#include <osg/Version>
-
 #include <osgViewer/ViewerEventHandlers>
 #include <osgDB/WriteFile>
 
