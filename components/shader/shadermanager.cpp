@@ -490,6 +490,13 @@ namespace Shader
             // Append shader source filename for debugging.
             static unsigned int counter = 0;
             shader->setName(Misc::StringUtils::format("%u %s", counter++, templateName));
+
+            if (insertedPaths.size() == 0)
+            {
+                int fileNumber = 1;
+                parseIncludes(std::filesystem::path(mPath), shaderSource, templateName, fileNumber, {}, insertedPaths);
+            }
+
             mHotReloadManager->addShaderFiles(insertedPaths, shader, templateName, defines);
 
             lock.unlock();
