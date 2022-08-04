@@ -365,12 +365,12 @@ namespace Shader
 
     struct HotReloadManager
     {
-
-
-        std::filesystem::file_time_type mLastAutoRecompileTime;
         using KeysHolder = std::set<ShaderManager::MapKey>;
+
         std::unordered_map<std::string, KeysHolder> mShaderFiles;
+        std::filesystem::file_time_type mLastAutoRecompileTime;
         bool mHotReloadEnabled;
+
         HotReloadManager()
         {
             mHotReloadEnabled = false;
