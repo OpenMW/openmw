@@ -387,7 +387,8 @@ namespace Shader
 
         void update(ShaderManager& Manager)
         {
-            if (mHotReloadEnabled)
+            auto timeSinceLastCheckMillis = std::chrono::duration_cast<std::chrono::milliseconds>(std::filesystem::file_time_type::clock::now() - mLastAutoRecompileTime);
+            if (mHotReloadEnabled && timeSinceLastCheckMillis.count() > 200)
                 reloadTouchedShaders(Manager);
         }
 
