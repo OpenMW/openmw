@@ -372,7 +372,7 @@ namespace Shader
         HotReloadManager()
         {
             mHotReloadEnabled = false;
-            mLastAutoRecompileTime = std::chrono::file_clock::now();
+            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
         }
 
         void addShaderFiles(std::set<std::filesystem::path>& shaderFiles,const osg::ref_ptr<osg::Shader>& shader,const std::string& templateName,const ShaderManager::DefineMap& defines )
@@ -437,7 +437,7 @@ namespace Shader
                     }
                 }
             }
-            mLastAutoRecompileTime = std::chrono::file_clock::now();
+            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
         }
     };
 
