@@ -112,7 +112,7 @@ namespace
         World,
         Gui,
         Lua,
-
+        LuaSyncUpdate,
         Number,
     };
 
@@ -151,6 +151,10 @@ namespace
 
     template <>
     const UserStats UserStatsValue<UserStatsType::Lua>::sValue {"Lua", "lua"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::LuaSyncUpdate>::sValue{ " -Sync", "luasyncupdate" };
+
 
     template <UserStatsType type>
     struct ForEachUserStatsValue
@@ -336,10 +340,13 @@ bool OMW::Engine::frame(float frametime)
 
         // Main menu opened? Then scripts are also paused.
         bool paused = mWindowManager->containsMode(MWGui::GM_MainMenu);
-
-        // Should be called after input manager update and before any change to the game world.
-        // It applies to the game world queued changes from the previous frame.
-        mLuaManager->synchronizedUpdate();
+        
+        {
+            ScopedProfile<UserStatsType::LuaSyncUpdate> profile(frameStart, frameNumber, *timer, *stats);
+            // Should be called after input manager update and before any change to the game world.
+            // It applies to the game world queued changes from the previous frame.
+            mLuaManager->synchronizedUpdate();
+        }
 
         // update game state
         {
