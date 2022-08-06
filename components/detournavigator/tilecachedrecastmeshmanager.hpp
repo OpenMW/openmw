@@ -165,7 +165,7 @@ namespace DetourNavigator
         bool addTile(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                 const AreaType areaType, const TilePosition& tilePosition, TilesMap& tiles);
 
-        bool updateTile(const ObjectId id, const btTransform& transform, const AreaType areaType,
+        static bool updateTile(const ObjectId id, const btTransform& transform, const AreaType areaType,
                 const TilePosition& tilePosition, TilesMap& tiles);
 
         std::optional<RemovedRecastMeshObject> removeTile(const ObjectId id, const TilePosition& tilePosition,
