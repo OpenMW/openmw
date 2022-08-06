@@ -66,6 +66,7 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
+        void onPreviewScroll(MyGUI::Widget* _sender, int _delta);
         void onHeadRotate(MyGUI::ScrollBar* _sender, size_t _position);
 
         void onSelectPreviousGender(MyGUI::Widget* _sender);
