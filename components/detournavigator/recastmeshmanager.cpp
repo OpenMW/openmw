@@ -170,7 +170,6 @@ namespace DetourNavigator
 
     Version RecastMeshManager::getVersion() const
     {
-        const std::lock_guard lock(mMutex);
         return Version {mGeneration, mRevision};
     }
 }
