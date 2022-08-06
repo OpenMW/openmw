@@ -5,6 +5,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/postprocessor.hpp"
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -54,7 +55,10 @@ namespace MWLua
         {
             context.mLuaManager->addAction([]
                 {
-                    MWBase::Environment::get().getWorld()->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().triggerShaderReload();
+                    auto world = MWBase::Environment::get().getWorld();
+
+                    world->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().triggerShaderReload();
+                    world->getPostProcessor()->triggerShaderReload();
                 });
         };
 
@@ -62,7 +66,9 @@ namespace MWLua
         {
             context.mLuaManager->addAction([value]
                 {
-                    MWBase::Environment::get().getWorld()->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().setHotReloadEnabled(value);
+                    auto world = MWBase::Environment::get().getWorld();
+                    world->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().setHotReloadEnabled(value);
+                    world->getPostProcessor()->mEnableLiveReload = value;
                 });
         };
 

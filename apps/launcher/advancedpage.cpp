@@ -152,7 +152,6 @@ bool Launcher::AdvancedPage::loadSettings()
 
         connect(postprocessEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotPostProcessToggled(bool)));
         loadSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
-        loadSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
         loadSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
         postprocessHDRTimeComboBox->setValue(Settings::Manager::getDouble("auto exposure speed", "Post Processing"));
 
@@ -309,7 +308,6 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
 
         saveSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
-        saveSettingBool(postprocessLiveReloadCheckBox, "live reload", "Post Processing");
         saveSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
         double hdrExposureTime = postprocessHDRTimeComboBox->value();
         if (hdrExposureTime != Settings::Manager::getDouble("auto exposure speed", "Post Processing"))
@@ -466,7 +464,6 @@ void Launcher::AdvancedPage::slotAnimSourcesToggled(bool checked)
 
 void Launcher::AdvancedPage::slotPostProcessToggled(bool checked)
 {
-    postprocessLiveReloadCheckBox->setEnabled(checked);
     postprocessTransparentPostpassCheckBox->setEnabled(checked);
     postprocessHDRTimeComboBox->setEnabled(checked);
     postprocessHDRTimeLabel->setEnabled(checked);

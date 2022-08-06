@@ -180,6 +180,10 @@ namespace MWRender
         int renderWidth() const;
         int renderHeight() const;
 
+        void triggerShaderReload();
+
+        bool mEnableLiveReload;
+
     private:
 
         void populateTechniqueFiles();
@@ -225,6 +229,7 @@ namespace MWRender
         osgViewer::Viewer* mViewer;
         const VFS::Manager* mVFS;
 
+        bool mTriggerShaderReload;
         bool mReload;
         bool mEnabled;
         bool mUsePostProcessing;
