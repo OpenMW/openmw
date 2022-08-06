@@ -97,7 +97,7 @@ int wmain(int argc, wchar_t *wargv[]) {
         std::filesystem::path cfgFile(vm["cfg"].as<Files::MaybeQuotedPath>());
 
         // if no output is given, write back to cfg file
-        std::string outputFile(vm["output"].as<Files::MaybeQuotedPath>());
+        auto outputFile = vm["output"].as<Files::MaybeQuotedPath>();
         if(vm["output"].defaulted()) {
             outputFile = vm["cfg"].as<Files::MaybeQuotedPath>();
         }
@@ -138,7 +138,7 @@ int wmain(int argc, wchar_t *wargv[]) {
         }
 
         std::cout << "write to: " << outputFile << std::endl;
-        std::ofstream file((sfs::path(outputFile)));
+        std::ofstream file(outputFile);
         importer.writeToFile(file, cfg);
     }
     catch (std::exception& e)
