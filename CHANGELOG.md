@@ -20,7 +20,7 @@
     Bug #4376: Moved actors don't respawn in their original cells
     Bug #4389: NPC's lips do not move if his head model has the NiBSAnimationNode root node
     Bug #4602: Robert's Bodies: crash inside createInstance()
-    Bug #4700: Editor: Incorrect command implementation
+    Bug #4700: OpenMW-CS: Incorrect command implementation
     Bug #4744: Invisible particles aren't always processed
     Bug #4949: Incorrect particle lighting
     Bug #5054: Non-biped creatures don't use spellcast equip/unequip animations
@@ -87,7 +87,7 @@
     Bug #6276: Deleted groundcover instances are not deleted in game
     Bug #6282: Laura craft doesn't follow the player character
     Bug #6283: Avis Dorsey follows you after her death
-    Bug #6285: Brush template drawing and terrain selection drawing performance is very bad
+    Bug #6285: OpenMW-CS: Brush template drawing and terrain selection drawing performance is very bad
     Bug #6289: Keyword search in dialogues expected the text to be all ASCII characters
     Bug #6291: Can't pickup the dead mage's journal from the mysterious hunter mod
     Bug #6302: Teleporting disabled actor breaks its disabled state
@@ -114,7 +114,6 @@
     Bug #6417: OpenMW doesn't always use the right node to accumulate movement
     Bug #6429: Wyrmhaven: Can't add AI packages to player
     Bug #6433: Items bound to Quick Keys sometimes do not appear until the Quick Key menu is opened
-    Bug #6435: Add support for MSVC 2022
     Bug #6451: Weapon summoned from Cast When Used item will have the name "None"
     Bug #6473: Strings from NIF should be parsed only to first null terminator
     Bug #6493: Unlocking owned but not locked or unlocked containers is considered a crime
@@ -130,7 +129,6 @@
     Bug #6655: Constant effect absorb attribute causes the game to break
     Bug #6667: Pressing the Esc key while resting or waiting causes black screen.
     Bug #6670: Dialogue order is incorrect
-    Bug #6672: Garbage object refs in groundcover plugins like Vurt's grass plugins
     Bug #6680: object.cpp handles nodetree unsafely, memory access with dangling pointer
     Bug #6682: HitOnMe doesn't fire as intended
     Bug #6697: Shaders vertex lighting incorrectly clamped
@@ -142,7 +140,6 @@
     Bug #6753: Info records without a DATA subrecords are loaded incorrectly
     Bug #6794: Light sources are attached to mesh bounds centers instead of mesh origins when AttachLight NiNode is missing
     Bug #6799: Game crashes if an NPC has no Class attached
-    Bug #6818: ess-importer doesn't exactly reproduce camera
     Bug #6849: ImageButton texture is not scaled properly
     Bug #6869: Hits queue stagger during swing animation
     Bug #6890: SDL_PeepEvents errors are not handled
@@ -178,6 +175,7 @@
     Feature #6017: Separate persistent and temporary cell references when saving
     Feature #6019: Add antialias alpha test to the launcher or enable by default if possible
     Feature #6032: Reverse-z depth buffer
+    Feature #6078: Do not clear depth buffer for first-person meshes
     Feature #6128: Soft Particles
     Feature #6171: In-game log viewer
     Feature #6189: Navigation mesh disk cache
@@ -196,24 +194,19 @@
     Feature #6557: Add support for controller gyroscope
     Feature #6592: Support for NiTriShape particle emitters
     Feature #6600: Support NiSortAdjustNode
+    Feature #6631: Support FFMPEG 5
     Feature #6684: Support NiFltAnimationNode
     Feature #6699: Support Ignored flag
     Feature #6700: Support windowed fullscreen
     Feature #6706: Save the size of the Options window
-    Feature #6721: [OpenMW-CS] Add option to open records in new window
+    Feature #6721: OpenMW-CS: Add option to open records in new window
     Feature #6867: Add a way to localize hardcoded strings in GUI
-    Feature #6888: Add switch for armor degradation fix.
+    Feature #6888: Add switch for armor degradation fix
     Feature #6925: Allow to use a mouse wheel to rotate a head in the race selection menu
-    Task #6078: First person should not clear depth buffer
     Task #6161: Refactor Sky to use shaders and be GLES/GL3 friendly
     Task #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
-    Task #6201: Remove the "Note: No relevant classes found. No output generated" warnings
-    Task #6264: Remove the old classes in animation.cpp
-    Task #6553: Simplify interpreter instruction registration
+    Task #6435: Add support for MSVC 2022
     Task #6564: Remove predefined data paths `data="?global?data"`, `data=./data`
-    Task #6631: Fix ffmpeg avio API usage causing hangs in ffmpeg version 5
-    Task #6709: Move KeyframeController transformation magic to NifOsg::MatrixTransform
-    Task #6763: gcc 12.1 multiple compiler warnings
 
 0.47.0
 ------
