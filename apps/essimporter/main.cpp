@@ -18,8 +18,8 @@ int main(int argc, char** argv)
         bpo::positional_options_description p_desc;
         desc.add_options()
             ("help,h", "produce help message")
-            ("mwsave,m", bpo::value<std::string>(), "morrowind .ess save file")
-            ("output,o", bpo::value<std::string>(), "output file (.omwsave)")
+            ("mwsave,m", bpo::value<Files::MaybeQuotedPath>(), "morrowind .ess save file")
+            ("output,o", bpo::value<Files::MaybeQuotedPath>(), "output file (.omwsave)")
             ("compare,c", "compare two .ess files")
             ("encoding", boost::program_options::value<std::string>()->default_value("win1252"), "encoding of the save file")
         ;
@@ -45,8 +45,8 @@ int main(int argc, char** argv)
         Files::ConfigurationManager cfgManager(true);
         cfgManager.readConfiguration(variables, desc);
 
-        std::string essFile = variables["mwsave"].as<std::string>();
-        std::string outputFile = variables["output"].as<std::string>();
+        const auto essFile = variables["mwsave"].as<Files::MaybeQuotedPath>();
+        const auto outputFile = variables["output"].as<Files::MaybeQuotedPath>();
         std::string encoding = variables["encoding"].as<std::string>();
 
         ESSImport::Importer importer(essFile, outputFile, encoding);
@@ -55,9 +55,10 @@ int main(int argc, char** argv)
             importer.compare();
         else
         {
-            const std::string& ext = ".omwsave";
-            if (std::filesystem::exists(std::filesystem::path(outputFile))
-                    && (outputFile.size() < ext.size() || outputFile.substr(outputFile.size()-ext.size()) != ext))
+            static constexpr std::u8string_view ext{u8".omwsave"};
+            const auto length = outputFile.native().size();
+            if (std::filesystem::exists(outputFile)
+                    && (length < ext.size() || outputFile.u8string().substr(length-ext.size()) != ext))
             {
                 throw std::runtime_error("Output file already exists and does not end in .omwsave. Did you mean to use --compare?");
             }

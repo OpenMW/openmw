@@ -6,6 +6,8 @@
 
 #include <boost/program_options.hpp>
 
+#include <components/files/configurationmanager.hpp>
+
 namespace bpo = boost::program_options;
 namespace sfs = std::filesystem;
 
@@ -61,9 +63,9 @@ int wmain(int argc, wchar_t *wargv[]) {
         desc.add_options()
             ("help,h", "produce help message")
             ("verbose,v", "verbose output")
-            ("ini,i", bpo::value<std::string>(), "morrowind.ini file")
-            ("cfg,c", bpo::value<std::string>(), "openmw.cfg file")
-            ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
+            ("ini,i", bpo::value<Files::MaybeQuotedPath>(), "morrowind.ini file")
+            ("cfg,c", bpo::value<Files::MaybeQuotedPath>(), "openmw.cfg file")
+            ("output,o", bpo::value<Files::MaybeQuotedPath>()->default_value({}), "openmw.cfg file")
             ("game-files,g", "import esm and esp files")
             ("fonts,f", "import bitmap fonts")
             ("no-archives,A", "disable bsa archives import")
@@ -91,13 +93,13 @@ int wmain(int argc, wchar_t *wargv[]) {
 
         bpo::notify(vm);
 
-        std::filesystem::path iniFile(vm["ini"].as<std::string>());
-        std::filesystem::path cfgFile(vm["cfg"].as<std::string>());
+        std::filesystem::path iniFile(vm["ini"].as<Files::MaybeQuotedPath>());
+        std::filesystem::path cfgFile(vm["cfg"].as<Files::MaybeQuotedPath>());
 
         // if no output is given, write back to cfg file
-        std::string outputFile(vm["output"].as<std::string>());
+        std::string outputFile(vm["output"].as<Files::MaybeQuotedPath>());
         if(vm["output"].defaulted()) {
-            outputFile = vm["cfg"].as<std::string>();
+            outputFile = vm["cfg"].as<Files::MaybeQuotedPath>();
         }
 
         if(!std::filesystem::exists(iniFile)) {

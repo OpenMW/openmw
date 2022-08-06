@@ -85,7 +85,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
     hidden.add_options()
         ( "mode,m", bpo::value<std::string>(), "esmtool mode")
-        ( "input-file,i", bpo::value< std::vector<std::string> >(), "input file")
+        ( "input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file")
         ;
 
     bpo::positional_options_description p;
@@ -156,7 +156,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
       return false;
       }*/
 
-    const auto inputFiles = variables["input-file"].as< std::vector<Files::MaybeQuotedPath> >();
+    const auto inputFiles = variables["input-file"].as< Files::MaybeQuotedPathContainer >();
     info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     if (inputFiles.size() > 1)
         info.outname = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.

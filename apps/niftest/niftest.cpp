@@ -77,7 +77,7 @@ bool parseOptions (int argc, char** argv, std::vector<Files::MaybeQuotedPath> &f
         "Allowed options");
     desc.add_options()
         ("help,h", "print help message.")
-        ("input-file", bpo::value< std::vector<Files::MaybeQuotedPath> >(), "input file")
+        ("input-file", bpo::value< Files::MaybeQuotedPathContainer >(), "input file")
         ;
 
     //Default option if none provided
@@ -98,7 +98,7 @@ bool parseOptions (int argc, char** argv, std::vector<Files::MaybeQuotedPath> &f
         }
         if (variables.count("input-file"))
         {
-            files = variables["input-file"].as< std::vector<Files::MaybeQuotedPath> >();
+            files = variables["input-file"].as< Files::MaybeQuotedPathContainer >();
             return true;
         }
     }
