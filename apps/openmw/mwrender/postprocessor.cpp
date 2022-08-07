@@ -124,7 +124,6 @@ namespace MWRender
         , mNormalsSupported(false)
         , mPassLights(false)
         , mPrevPassLights(false)
-        , mMainTemplate(new osg::Texture2D)
     {
         mSoftParticles = Settings::Manager::getBool("soft particles", "Shaders");
         mUsePostProcessing = Settings::Manager::getBool("enabled", "Post Processing");
@@ -246,14 +245,6 @@ namespace MWRender
         {
             populateTechniqueFiles();
         }
-
-        mMainTemplate->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-        mMainTemplate->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        mMainTemplate->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-        mMainTemplate->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        mMainTemplate->setInternalFormat(GL_RGBA);
-        mMainTemplate->setSourceType(GL_UNSIGNED_BYTE);
-        mMainTemplate->setSourceFormat(GL_RGBA);
 
         createTexturesAndCamera(frame() % 2);
 
@@ -399,13 +390,8 @@ namespace MWRender
 
         mReload = false;
 
-        if (!mTechniques.empty())
-            reloadMainPass(*mTechniques[0]);
-
-        reloadTechniques();
-
-        if (!mUsePostProcessing)
-            resize();
+        loadChain();
+        resize();
     }
 
     void PostProcessor::update(size_t frameId)
@@ -483,9 +469,6 @@ namespace MWRender
         auto fpDepthRb = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
         fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(fpDepthRb));
 
-        // When MSAA is enabled we must first render to a render buffer, then
-        // blit the result to the FBO which is either passed to the main frame
-        // buffer for display or used as the entry point for a post process chain.
         if (mSamples > 1)
         {
             fbos[FBO_Multisample] = new osg::FrameBufferObject;
@@ -494,7 +477,6 @@ namespace MWRender
             {
                 auto normalRB = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Normal], mSamples);
                 fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
-                fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
             }
             auto depthRB = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
             fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, colorRB);
@@ -667,7 +649,7 @@ namespace MWRender
             return Status_Error;
         }
 
-        if (!technique || technique->getLocked() || (location.has_value() && location.value() <= 0))
+        if (!technique || technique->getLocked() || (location.has_value() && location.value() < 0))
             return Status_Error;
 
         disableTechnique(technique, false);
@@ -733,17 +715,6 @@ namespace MWRender
 
         textures[Tex_Normal]->setSourceFormat(GL_RGB);
         textures[Tex_Normal]->setInternalFormat(GL_RGB);
-
-        if (mMainTemplate)
-        {
-            textures[Tex_Scene]->setSourceFormat(mMainTemplate->getSourceFormat());
-            textures[Tex_Scene]->setSourceType(mMainTemplate->getSourceType());
-            textures[Tex_Scene]->setInternalFormat(mMainTemplate->getInternalFormat());
-            textures[Tex_Scene]->setFilter(osg::Texture2D::MIN_FILTER, mMainTemplate->getFilter(osg::Texture2D::MIN_FILTER));
-            textures[Tex_Scene]->setFilter(osg::Texture2D::MAG_FILTER, mMainTemplate->getFilter(osg::Texture2D::MAG_FILTER));
-            textures[Tex_Scene]->setWrap(osg::Texture::WRAP_S, mMainTemplate->getWrap(osg::Texture2D::WRAP_S));
-            textures[Tex_Scene]->setWrap(osg::Texture::WRAP_T, mMainTemplate->getWrap(osg::Texture2D::WRAP_T));
-        }
 
         auto setupDepth = [] (osg::Texture* tex) {
             tex->setSourceFormat(GL_DEPTH_STENCIL_EXT);
@@ -816,14 +787,12 @@ namespace MWRender
             return technique;
         }
 
-        reloadMainPass(*technique);
-
         mTemplates.push_back(std::move(technique));
 
         return mTemplates.back();
     }
 
-    void PostProcessor::reloadTechniques()
+    void PostProcessor::loadChain()
     {
         if (!isEnabled())
             return;
@@ -832,18 +801,9 @@ namespace MWRender
 
         std::vector<std::string> techniqueStrings = Settings::Manager::getStringArray("chain", "Post Processing");
 
-        const std::string mainIdentifier = "main";
-
-        auto main = loadTechnique(mainIdentifier);
-
-        if (main)
-            main->setLocked(true);
-
-        mTechniques.push_back(std::move(main));
-
         for (auto& techniqueName : techniqueStrings)
         {
-            if (techniqueName.empty() || Misc::StringUtils::ciEqual(techniqueName, mainIdentifier))
+            if (techniqueName.empty())
                 continue;
 
             mTechniques.push_back(loadTechnique(techniqueName));
@@ -852,14 +812,17 @@ namespace MWRender
         dirtyTechniques();
     }
 
-    void PostProcessor::reloadMainPass(fx::Technique& technique)
+    void PostProcessor::saveChain()
     {
-        if (!technique.getMainTemplate())
-            return;
+        std::vector<std::string> chain;
 
-        mMainTemplate = technique.getMainTemplate();
+        for (const auto& technique : mTechniques) {
+            if (!technique || technique->getDynamic())
+                continue;
+            chain.push_back(technique->getName());
+        }
 
-        resize();
+        Settings::Manager::setStringArray("chain", "Post Processing", chain);
     }
 
     void PostProcessor::toggleMode()

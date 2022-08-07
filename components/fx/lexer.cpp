@@ -230,7 +230,6 @@ namespace fx
 
             if (value == "shared") return Shared{};
             if (value == "technique") return Technique{};
-            if (value == "main_pass") return Main_Pass{};
             if (value == "render_target") return Render_Target{};
             if (value == "vertex") return Vertex{};
             if (value == "fragment") return Fragment{};

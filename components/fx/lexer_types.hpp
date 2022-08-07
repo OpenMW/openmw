@@ -18,7 +18,6 @@ namespace fx
         struct Fragment         { inline static constexpr std::string_view repr = "fragment"; };
         struct Compute          { inline static constexpr std::string_view repr = "compute"; };
         struct Technique        { inline static constexpr std::string_view repr = "technique"; };
-        struct Main_Pass        { inline static constexpr std::string_view repr = "main_pass"; };
         struct Render_Target    { inline static constexpr std::string_view repr = "render_target"; };
         struct Sampler_1D       { inline static constexpr std::string_view repr = "sampler_1d"; };
         struct Sampler_2D       { inline static constexpr std::string_view repr = "sampler_2d"; };
@@ -49,7 +48,7 @@ namespace fx
         using Token = std::variant<Float, Integer, Boolean, String, Literal, Equal, Open_bracket, Close_bracket, Open_Parenthesis,
             Close_Parenthesis, Quote, SemiColon, Comma, VBar, Colon, Shared, Technique, Render_Target, Vertex, Fragment,
             Compute, Sampler_1D, Sampler_2D, Sampler_3D, Uniform_Bool, Uniform_Float, Uniform_Int, Uniform_Vec2, Uniform_Vec3, Uniform_Vec4,
-            True, False, Vec2, Vec3, Vec4, Main_Pass, Eof>;
+            True, False, Vec2, Vec3, Vec4, Eof>;
     }
 }
 

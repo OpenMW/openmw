@@ -1,3 +1,7 @@
-DisplayDepthDescription: "Visualiserar djupbufferten."
+DisplayDepthName: "Visualiserar djupbufferten."
 DisplayDepthFactorDescription: "Avgör korrelation mellan djupvärdet på pixeln och dess producerade färg. Högre värden ger ljusare bild."
 DisplayDepthFactorName: "Färgfaktor"
+ContrastLevelDescription: "Kontrastnivå"
+ContrastLevelName: "Kontrast"
+GammaLevelDescription: "Gammanivå"
+# GammaLevelName: "Gamma" samma som en

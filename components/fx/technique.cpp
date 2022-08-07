@@ -65,7 +65,6 @@ namespace fx
         mPassKeys.clear();
         mDefinedUniforms.clear();
         mRenderTargets.clear();
-        mMainTemplate = nullptr;
         mLastAppliedType = Pass::Type::None;
         mFlags = 0;
         mShared.clear();
@@ -260,47 +259,6 @@ namespace fx
 
         if (mPassKeys.empty())
             error("pass list in 'technique' block cannot be empty.");
-    }
-
-    template<>
-    void Technique::parseBlockImp<Lexer::Main_Pass>()
-    {
-        if (mMainTemplate)
-            error("duplicate 'main_pass' block");
-
-        if (mName != "main")
-            error("'main_pass' block can only be defined in the 'main.omwfx' technique file");
-
-        mMainTemplate = new osg::Texture2D;
-
-        mMainTemplate->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-        mMainTemplate->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-
-        while (!isNext<Lexer::Close_bracket>() && !isNext<Lexer::Eof>())
-        {
-            expect<Lexer::Literal>();
-
-            auto key = std::get<Lexer::Literal>(mToken).value;
-
-            expect<Lexer::Equal>();
-
-            if (key == "wrap_s")
-                mMainTemplate->setWrap(osg::Texture::WRAP_S, parseWrapMode());
-            else if (key == "wrap_t")
-                mMainTemplate->setWrap(osg::Texture::WRAP_T, parseWrapMode());
-            // Skip depth attachments for main scene, as some engine settings rely on specific depth formats.
-            // Allowing this to be overriden will cause confusion.
-            else if (key == "internal_format")
-                mMainTemplate->setInternalFormat(parseInternalFormat());
-            else if (key == "source_type")
-                mMainTemplate->setSourceType(parseSourceType());
-            else if (key == "source_format")
-                mMainTemplate->setSourceFormat(parseSourceFormat());
-            else
-                error(Misc::StringUtils::format("unexpected key '%s'", std::string(key)));
-
-            expect<Lexer::SemiColon>();
-        }
     }
 
     template<>
@@ -738,8 +696,6 @@ namespace fx
                     parseBlock<Lexer::Shared>(false);
                 else if constexpr (std::is_same_v<Lexer::Technique, T>)
                     parseBlock<Lexer::Technique>(false);
-                else if constexpr (std::is_same_v<Lexer::Main_Pass, T>)
-                    parseBlock<Lexer::Main_Pass>(false);
                 else if constexpr (std::is_same_v<Lexer::Render_Target, T>)
                     parseBlock<Lexer::Render_Target>();
                 else if constexpr (std::is_same_v<Lexer::Vertex, T>)

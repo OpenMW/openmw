@@ -86,6 +86,13 @@ namespace MWRender
             Unit_NextFree
         };
 
+        enum Status
+        {
+            Status_Error,
+            Status_Toggled,
+            Status_Unchanged
+        };
+
         PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode, const VFS::Manager* vfs);
 
         ~PostProcessor();
@@ -109,13 +116,6 @@ namespace MWRender
         const auto& getTechniqueMap() const { return mTechniqueFileMap; }
 
         void resize();
-
-        enum Status
-        {
-            Status_Error,
-            Status_Toggled,
-            Status_Unchanged
-        };
 
         Status enableTechnique(std::shared_ptr<fx::Technique> technique, std::optional<int> location = std::nullopt);
 
@@ -180,6 +180,9 @@ namespace MWRender
         int renderWidth() const;
         int renderHeight() const;
 
+        void loadChain();
+        void saveChain();
+
     private:
 
         void populateTechniqueFiles();
@@ -189,8 +192,6 @@ namespace MWRender
         void createObjectsForFrame(size_t frameId);
 
         void createTexturesAndCamera(size_t frameId);
-
-        void reloadTechniques();
 
         void reloadMainPass(fx::Technique& technique);
 
@@ -244,8 +245,6 @@ namespace MWRender
         bool mPrevPassLights;
         bool mUBO;
         int mGLSLVersion;
-
-        osg::ref_ptr<osg::Texture> mMainTemplate;
 
         osg::ref_ptr<fx::StateUpdater> mStateUpdater;
         osg::ref_ptr<PingPongCull> mPingPongCull;

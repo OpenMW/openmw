@@ -83,8 +83,6 @@ namespace MWRender
         mutable std::array<BufferData, 2> mBufferData;
         mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
         mutable osg::ref_ptr<osg::Viewport> mRenderViewport;
-
-        mutable bool mLoggedLastError = false;
     };
 }
 
