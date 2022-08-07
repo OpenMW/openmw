@@ -30,6 +30,8 @@ variables:
     - apt-cache/
     - ccache/
   stage: build
+  variables:
+    CMAKE_EXE_LINKER_FLAGS: -fuse-ld=mold
   script:
     - df -h
     - export CCACHE_BASEDIR="`pwd`"
@@ -61,28 +63,45 @@ variables:
       - build/install/
 
 Coverity:
-  extends: .Ubuntu_Image
+  tags:
+    - docker
+    - linux
+  image: ubuntu:20.04
   stage: build
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
+  cache:
+    key: Coverity.ubuntu_20.04.v1
+    paths:
+    - apt-cache/
+    - ccache/
+  variables:
+    CCACHE_SIZE: 2G
+    CC: clang
+    CXX: clang++
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:
-    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
-    - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64 --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
+    - CI/install_debian_deps.sh clang_ubuntu_20_04 openmw-deps openmw-deps-dynamic
+    - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64
+      --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - tar xfz /tmp/cov-analysis-linux64.tgz
   script:
+    - export CCACHE_BASEDIR="$(pwd)"
+    - export CCACHE_DIR="$(pwd)/ccache"
+    - mkdir -pv "${CCACHE_DIR}"
+    - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
+    - cov-analysis-linux64-*/bin/cov-configure --template --comptype prefix --compiler ccache
     # Remove the specific targets and build everything once we can do it under 3h
-    - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc) openmw esmtool bsatool niftest openmw-wizard openmw-launcher openmw-iniimporter openmw-essimporter openmw-navmeshtool openmw-cs
+    - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
+    - ccache -s
   after_script:
     - tar cfz cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
       --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
       --form file=@cov-int.tar.gz --form version="$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA"
       --form description="CI_COMMIT_SHORT_SHA / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
-  variables:
-    CC: clang
-    CXX: clang++
-    CXXFLAGS: -O0
   artifacts:
     paths:
       - /builds/OpenMW/openmw/cov-int/build-log.txt
@@ -154,7 +173,7 @@ Ubuntu_GCC_tests_asan:
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
-    CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
+    CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1
   artifacts:
     paths: []
@@ -189,7 +208,7 @@ Ubuntu_GCC_tests_ubsan:
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -g -O2 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=thread -fPIE
-    CMAKE_EXE_LINKER_FLAGS: -pthread -pie -fsanitize=thread
+    CMAKE_EXE_LINKER_FLAGS: -pthread -pie -fsanitize=thread -fuse-ld=mold
     TSAN_OPTIONS: second_deadlock_stack=1:halt_on_error=1
   artifacts:
     paths: []
