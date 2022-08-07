@@ -1,6 +1,7 @@
 #include "objectpaging.hpp"
 
 #include <unordered_map>
+#include <vector>
 
 #include <osg/LOD>
 #include <osg/Switch>
@@ -276,7 +277,7 @@ namespace MWRender
         RefnumSet(){}
         RefnumSet(const RefnumSet& copy, const osg::CopyOp&) : mRefnums(copy.mRefnums) {}
         META_Object(MWRender, RefnumSet)
-        std::set<ESM::RefNum> mRefnums;
+        std::vector<ESM::RefNum> mRefnums;
     };
 
     class AnalyzeVisitor : public osg::NodeVisitor
@@ -554,7 +555,7 @@ namespace MWRender
                 if (cnode->getNumChildrenRequiringUpdateTraversal() > 0 || SceneUtil::hasUserDescription(cnode, Constants::NightDayLabel) || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel))
                     continue;
                 else
-                    refnumSet->mRefnums.insert(pair.first);
+                    refnumSet->mRefnums.push_back(pair.first);
             }
 
             {
@@ -727,6 +728,8 @@ namespace MWRender
         osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
         if (activeGrid)
         {
+            std::sort(refnumSet->mRefnums.begin(), refnumSet->mRefnums.end());
+            refnumSet->mRefnums.erase(std::unique(refnumSet->mRefnums.begin(), refnumSet->mRefnums.end()), refnumSet->mRefnums.end());
             udc->addUserObject(refnumSet);
             group->addCullCallback(new SceneUtil::LightListCallback);
         }
@@ -837,7 +840,7 @@ namespace MWRender
 
     struct GetRefnumsFunctor
     {
-        GetRefnumsFunctor(std::set<ESM::RefNum>& output) : mOutput(output) {}
+        GetRefnumsFunctor(std::vector<ESM::RefNum>& output) : mOutput(output) {}
         void operator()(MWRender::ChunkId chunkId, osg::Object* obj)
         {
             if (!std::get<2>(chunkId)) return;
@@ -850,18 +853,20 @@ namespace MWRender
             {
                 RefnumSet* refnums = dynamic_cast<RefnumSet*>(udc->getUserObject(0));
                 if (!refnums) return;
-                mOutput.insert(refnums->mRefnums.begin(), refnums->mRefnums.end());
+                mOutput.insert(mOutput.end(), refnums->mRefnums.begin(), refnums->mRefnums.end());
             }
         }
         osg::Vec4i mActiveGrid;
-        std::set<ESM::RefNum>& mOutput;
+        std::vector<ESM::RefNum>& mOutput;
     };
 
-    void ObjectPaging::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
+    void ObjectPaging::getPagedRefnums(const osg::Vec4i &activeGrid, std::vector<ESM::RefNum>& out)
     {
         GetRefnumsFunctor grf(out);
         grf.mActiveGrid = activeGrid;
         mCache->call(grf);
+        std::sort(out.begin(), out.end());
+        out.erase(std::unique(out.begin(), out.end()), out.end());
     }
 
     void ObjectPaging::reportStats(unsigned int frameNumber, osg::Stats *stats) const
