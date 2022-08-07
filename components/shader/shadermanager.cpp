@@ -394,19 +394,18 @@ namespace Shader
 
         void reloadTouchedShaders(ShaderManager& Manager)
         {
-            for (auto& shader : mShaderFiles)
+            for (auto& [pathShaderToTest,  shaderKeys]: mShaderFiles)
             {
-                std::filesystem::path pathShaderToTest = (shader.first);
 
                 std::filesystem::file_time_type write_time = std::filesystem::last_write_time(pathShaderToTest);
                 if (write_time.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
                 {
-                    for (const ShaderManager:: MapKey& descriptor : shader.second)
+                    for (const auto& [templateName, shaderDefines]: shaderKeys)
                     {
-                        const std::string& templateName = descriptor.first;
-                        ShaderManager::ShaderMap::iterator shaderIt = Manager.mShaders.find(std::make_pair(templateName, descriptor.second));
+                        ShaderManager::ShaderMap::iterator shaderIt = Manager.mShaders.find(std::make_pair(templateName, shaderDefines));
 
                         ShaderManager::TemplateMap::iterator templateIt = Manager.mShaderTemplates.find(templateName); //Can't be Null, if we're here it means the template was added
+                        std::string& shaderSource = templateIt->second;
                         std::set<std::filesystem::path> insertedPaths;
                         std::filesystem::path path = (std::filesystem::path(Manager.mPath) / templateName);
                         std::ifstream stream;
@@ -426,12 +425,10 @@ namespace Shader
                         {
                             break;
                         }
-                        templateIt->second = source;
+                        shaderSource = source;
 
-
-                        std::string shaderSource = templateIt->second;
                         std::vector<std::string> linkedShaderNames;
-                        if (!Manager.createSourceFromTemplate(shaderSource, linkedShaderNames, templateName, descriptor.second))
+                        if (!Manager.createSourceFromTemplate(shaderSource, linkedShaderNames, templateName, shaderDefines))
                         {
                             break;
                         }
