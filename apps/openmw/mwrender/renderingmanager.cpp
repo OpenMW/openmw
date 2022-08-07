@@ -637,7 +637,6 @@ namespace MWRender
         updateProjectionMatrix();
 
         mViewer->getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        mViewer->getUpdateVisitor()->setTraversalMode(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN);
     }
 
     RenderingManager::~RenderingManager()
