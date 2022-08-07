@@ -159,8 +159,6 @@ namespace fx
 
         const std::unordered_set<std::string>& getGLSLExtensions() const { return mGLSLExtensions; }
 
-        osg::ref_ptr<osg::Texture2D> getMainTemplate() const { return mMainTemplate; }
-
         FlagsType getFlags() const { return mFlags; }
 
         bool getHidden() const { return mFlags & Flag_Hidden; }
@@ -273,7 +271,6 @@ namespace fx
         int mWidth;
         int mHeight;
 
-        osg::ref_ptr<osg::Texture2D> mMainTemplate;
         RenderTargetMap mRenderTargets;
 
         TexList mTextures;
@@ -301,7 +298,6 @@ namespace fx
 
     template<> void Technique::parseBlockImp<Lexer::Shared>();
     template<> void Technique::parseBlockImp<Lexer::Technique>();
-    template<> void Technique::parseBlockImp<Lexer::Main_Pass>();
     template<> void Technique::parseBlockImp<Lexer::Render_Target>();
     template<> void Technique::parseBlockImp<Lexer::Vertex>();
     template<> void Technique::parseBlockImp<Lexer::Fragment>();

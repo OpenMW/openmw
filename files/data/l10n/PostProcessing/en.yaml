@@ -1,11 +1,7 @@
 Abovewater: "Abovewater"
 Author: "Author"
 Configuration: "Configuration"
-ContrastLevelDescription: "Constrast level"
-ContrastLevelName: "Constrast"
 Description: "Description"
-GammaLevelDescription: "Gamma level"
-GammaLevelName: "Gamma"
 InExteriors: "Exteriors"
 InInteriors: "Interiors"
 KeyboardControls: |
@@ -15,7 +11,6 @@ KeyboardControls: |
     Shift+Left-Arrow > Deactive shader
     Shift+Up-Arrow > Move shader up
     Shift+Down-Arrow > Move shader down
-MainPassDescription: "Passes scene data to post processing shaders. Can not be toggled or moved."
 PostProcessHUD: "Postprocess HUD"
 ResetShader: "Reset shader to default state"
 ShaderLocked: "Locked"

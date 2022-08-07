@@ -23,7 +23,6 @@ namespace
 
     TEST_F(LexerSingleTokenTest, single_token_shared) { test<Shared>(); }
     TEST_F(LexerSingleTokenTest, single_token_technique) { test<Technique>(); }
-    TEST_F(LexerSingleTokenTest, single_token_main_pass) { test<Main_Pass>(); }
     TEST_F(LexerSingleTokenTest, single_token_render_target) { test<Render_Target>(); }
     TEST_F(LexerSingleTokenTest, single_token_vertex) { test<Vertex>(); }
     TEST_F(LexerSingleTokenTest, single_token_fragment) { test<Fragment>(); }
