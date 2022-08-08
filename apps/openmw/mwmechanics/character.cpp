@@ -1314,7 +1314,6 @@ bool CharacterController::updateWeaponState()
             sndMgr->stopSound3D(mPtr, "WolfRun");
     }
 
-    // Cancel attack if we no longer have ammunition
     bool ammunition = true;
     float weapSpeed = 1.f;
     if (cls.hasInventoryStore(mPtr))
@@ -1329,11 +1328,15 @@ bool CharacterController::updateWeaponState()
                 ammunition = ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype;
         }
 
-        if (!ammunition && mUpperBodyState > UpperBodyState::WeaponEquipped)
+        // Cancel attack if we no longer have ammunition
+        if (!ammunition)
         {
-            if (!mCurrentWeapon.empty())
+            if (mUpperBodyState == UpperBodyState::AttackPreWindUp || mUpperBodyState == UpperBodyState::AttackWindUp)
+            {
                 mAnimation->disable(mCurrentWeapon);
-            mUpperBodyState = UpperBodyState::WeaponEquipped;
+                mUpperBodyState = UpperBodyState::WeaponEquipped;
+            }
+            setAttackingOrSpell(false);
         }
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
@@ -1360,7 +1363,7 @@ bool CharacterController::updateWeaponState()
     ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
     if(getAttackingOrSpell())
     {
-        bool resetIdle = ammunition;
+        bool resetIdle = true;
         if (mUpperBodyState == UpperBodyState::WeaponEquipped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             mAttackStrength = 0;
@@ -1522,7 +1525,7 @@ bool CharacterController::updateWeaponState()
                 if(!resultSound.empty())
                     sndMgr->playSound3D(target, resultSound, 1.0f, 1.0f);
             }
-            else if (ammunition)
+            else
             {
                 std::string startKey;
                 std::string stopKey;
