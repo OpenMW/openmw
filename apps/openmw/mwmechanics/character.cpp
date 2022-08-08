@@ -1579,19 +1579,30 @@ bool CharacterController::updateWeaponState()
         {
             resetCurrentIdleState();
         }
-
-        if (!animPlaying)
-            animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-        if (mUpperBodyState == UpperBodyState::AttackWindUp && !isKnockedDown())
-            mAttackStrength = complete;
     }
-    else
-    {
+
+    if (!animPlaying)
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-        if (mUpperBodyState == UpperBodyState::AttackWindUp && !isKnockedDown())
+
+    if (isKnockedDown())
+    {
+        if (mUpperBodyState > UpperBodyState::WeaponEquipped)
+        {
+            mUpperBodyState = UpperBodyState::WeaponEquipped;
+            if (mWeaponType > ESM::Weapon::None)
+                mAnimation->showWeapons(true);
+        }
+        if (!mCurrentWeapon.empty())
+            mAnimation->disable(mCurrentWeapon);
+    }
+
+    if (mUpperBodyState == UpperBodyState::AttackWindUp)
+    {
+        mAttackStrength = complete;
+
+        if (!getAttackingOrSpell())
         {
             world->breakInvisibility(mPtr);
-            float attackStrength = complete;
             float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
             float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"max attack");
             if (minAttackTime == maxAttackTime)
@@ -1599,12 +1610,12 @@ bool CharacterController::updateWeaponState()
                 // most creatures don't actually have an attack wind-up animation, so use a uniform random value
                 // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
                 // Note: vanilla MW uses a random value for *all* non-player actors, but we probably don't need to go that far.
-                attackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
+                mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
             }
 
             if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
             {
-                if(isWerewolf)
+                if (isWerewolf)
                 {
                     const MWWorld::ESMStore &store = world->getStore();
                     const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfSwing", prng);
@@ -1613,12 +1624,12 @@ bool CharacterController::updateWeaponState()
                 }
                 else
                 {
-                    playSwishSound(attackStrength);
+                    playSwishSound(mAttackStrength);
                 }
             }
-            mAttackStrength = attackStrength;
 
-            mAnimation->disable(mCurrentWeapon);
+            if (animPlaying)
+                mAnimation->disable(mCurrentWeapon);
             mAnimation->play(mCurrentWeapon, priorityWeapon,
                              MWRender::Animation::BlendMask_All, false,
                              weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
@@ -1626,17 +1637,6 @@ bool CharacterController::updateWeaponState()
 
             complete = 0.f;
             mUpperBodyState = UpperBodyState::AttackRelease;
-        }
-        else if (isKnockedDown())
-        {
-            if (mUpperBodyState > UpperBodyState::WeaponEquipped)
-            {
-                mUpperBodyState = UpperBodyState::WeaponEquipped;
-                if (mWeaponType > ESM::Weapon::None)
-                    mAnimation->showWeapons(true);
-            }
-            if (!mCurrentWeapon.empty())
-                mAnimation->disable(mCurrentWeapon);
         }
     }
 
