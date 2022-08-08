@@ -1501,49 +1501,40 @@ bool CharacterController::updateWeaponState()
                     resetIdle = false;
                 }
             }
-            else if(mWeaponType == ESM::Weapon::PickProbe)
-            {
-                world->breakInvisibility(mPtr);
-                // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use lockpicks/probes.
-                MWWorld::Ptr target = world->getFacedObject();
-                std::string resultMessage, resultSound;
-
-                if(!target.isEmpty())
-                {
-                    if (mWeapon.getType() == ESM::Lockpick::sRecordId)
-                        Security(mPtr).pickLock(target, mWeapon, resultMessage, resultSound);
-                    else if (mWeapon.getType() == ESM::Probe::sRecordId)
-                        Security(mPtr).probeTrap(target, mWeapon, resultMessage, resultSound);
-                }
-                mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, true,
-                                 1.0f, "start", "stop", 0.0, 0);
-                mUpperBodyState = UpperBodyState::AttackEnd;
-
-                if(!resultMessage.empty())
-                    MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
-                if(!resultSound.empty())
-                    sndMgr->playSound3D(target, resultSound, 1.0f, 1.0f);
-            }
             else
             {
-                std::string startKey;
-                std::string stopKey;
+                std::string startKey = "start";
+                std::string stopKey = "stop";
+                bool autodisable = false;
 
-                if(weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
+                if (mWeaponType == ESM::Weapon::PickProbe)
                 {
-                    mAttackType = "shoot";
-                    startKey = mAttackType+" start";
-                    stopKey = mAttackType+" min attack";
+                    autodisable = true;
+                    mUpperBodyState = UpperBodyState::AttackEnd;
+
+                    world->breakInvisibility(mPtr);
+                    // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use lockpicks/probes.
+                    MWWorld::Ptr target = world->getFacedObject();
+                    std::string resultMessage, resultSound;
+
+                    if(!target.isEmpty())
+                    {
+                        if (mWeapon.getType() == ESM::Lockpick::sRecordId)
+                            Security(mPtr).pickLock(target, mWeapon, resultMessage, resultSound);
+                        else if (mWeapon.getType() == ESM::Probe::sRecordId)
+                            Security(mPtr).probeTrap(target, mWeapon, resultMessage, resultSound);
+                    }
+
+                    if (!resultMessage.empty())
+                        MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
+                    if (!resultSound.empty())
+                        sndMgr->playSound3D(target, resultSound, 1.0f, 1.0f);
                 }
-                else if (isRandomAttackAnimation(mCurrentWeapon))
+                else if (!isRandomAttackAnimation(mCurrentWeapon))
                 {
-                    startKey = "start";
-                    stopKey = "stop";
-                }
-                else
-                {
-                    if(mPtr == getPlayer())
+                    if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
+                        mAttackType = "shoot";
+                    else if (mPtr == getPlayer())
                     {
                         if (Settings::Manager::getBool("best attack", "Game"))
                         {
@@ -1568,10 +1559,10 @@ bool CharacterController::updateWeaponState()
                 }
 
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, false,
+                                 MWRender::Animation::BlendMask_All, autodisable,
                                  weapSpeed, startKey, stopKey,
                                  0.0f, 0);
-                if(mAnimation->getCurrentTime(mCurrentWeapon) != -1.f)
+                if (mWeaponType != ESM::Weapon::PickProbe && mAnimation->getCurrentTime(mCurrentWeapon) != -1.f)
                 {
                     mUpperBodyState = UpperBodyState::AttackPreWindUp;
                     if (isRandomAttackAnimation(mCurrentWeapon))
