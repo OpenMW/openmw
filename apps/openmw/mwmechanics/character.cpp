@@ -1113,7 +1113,7 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
     return mAnimation->updateCarriedLeftVisible(weaptype);
 }
 
-bool CharacterController::updateWeaponState(CharacterState idle)
+bool CharacterController::updateWeaponState()
 {
     const auto world = MWBase::Environment::get().getWorld();
     auto& prng = world->getPrng();
@@ -1166,8 +1166,7 @@ bool CharacterController::updateWeaponState(CharacterState idle)
     bool forcestateupdate = false;
 
     // We should not play equipping animation and sound during weapon->weapon transition
-    const bool isStillWeapon = weaptype != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::Spell && weaptype != ESM::Weapon::None &&
-                            mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None;
+    const bool isStillWeapon = isRealWeapon(mWeaponType) && isRealWeapon(weaptype);
 
     // If the current weapon type was changed in the middle of attack (e.g. by Equip console command or when bound spell expires),
     // we should force actor to the "weapon equipped" state, interrupt attack and update animations.
@@ -1179,7 +1178,6 @@ bool CharacterController::updateWeaponState(CharacterState idle)
         mUpperBodyState = UpperBodyState::WeaponEquipped;
         setAttackingOrSpell(false);
         mAnimation->showWeapons(true);
-        stats.setAttackingOrSpell(false);
     }
 
     if(!isKnockedOut() && !isKnockedDown() && !isRecovery())
@@ -1247,7 +1245,8 @@ bool CharacterController::updateWeaponState(CharacterState idle)
 
                 if (!isStillWeapon)
                 {
-                    clearStateAnimation(mCurrentWeapon);
+                    if (animPlaying)
+                        mAnimation->disable(mCurrentWeapon);
                     if (weaptype != ESM::Weapon::None)
                     {
                         mAnimation->showWeapons(false);
@@ -1265,11 +1264,14 @@ bool CharacterController::updateWeaponState(CharacterState idle)
                         mUpperBodyState = UpperBodyState::Equipping;
 
                         // If we do not have the "equip attach" key, show weapon manually.
-                        if (weaptype != ESM::Weapon::Spell)
+                        if (weaptype != ESM::Weapon::Spell && mAnimation->getTextKeyTime(weapgroup+": equip attach") < 0)
                         {
-                            if (mAnimation->getTextKeyTime(weapgroup+": equip attach") < 0)
-                                mAnimation->showWeapons(true);
+                            mAnimation->showWeapons(true);
                         }
+                    }
+                    if (!upSoundId.empty())
+                    {
+                        sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
                     }
                 }
 
@@ -1286,10 +1288,6 @@ bool CharacterController::updateWeaponState(CharacterState idle)
                 mWeaponType = weaptype;
                 mCurrentWeapon = weapgroup;
 
-                if(!upSoundId.empty() && !isStillWeapon)
-                {
-                    sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
-                }
             }
 
             // Make sure that we disabled unequipping animation
@@ -1297,7 +1295,6 @@ bool CharacterController::updateWeaponState(CharacterState idle)
             {
                 resetCurrentWeaponState();
                 mWeaponType = ESM::Weapon::None;
-                mCurrentWeapon = getWeaponAnimation(mWeaponType);
             }
         }
     }
@@ -1319,20 +1316,17 @@ bool CharacterController::updateWeaponState(CharacterState idle)
 
     // Cancel attack if we no longer have ammunition
     bool ammunition = true;
-    bool isWeapon = false;
     float weapSpeed = 1.f;
     if (cls.hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-        MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(mPtr, &weaptype);
-        isWeapon = (weapon != inv.end() && weapon->getType() == ESM::Weapon::sRecordId);
-        if (isWeapon)
+        if (stats.getDrawState() == DrawState::Weapon && !mWeapon.isEmpty() && mWeapon.getType() == ESM::Weapon::sRecordId)
         {
-            weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
+            weapSpeed = mWeapon.get<ESM::Weapon>()->mBase->mData.mSpeed;
             MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-            int ammotype = getWeaponType(weapon->get<ESM::Weapon>()->mBase->mData.mType)->mAmmoType;
-            if (ammotype != ESM::Weapon::None && (ammo == inv.end() || ammo->get<ESM::Weapon>()->mBase->mData.mType != ammotype))
-                ammunition = false;
+            int ammotype = getWeaponType(mWeapon.get<ESM::Weapon>()->mBase->mData.mType)->mAmmoType;
+            if (ammotype != ESM::Weapon::None)
+                ammunition = ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype;
         }
 
         if (!ammunition && mUpperBodyState > UpperBodyState::WeaponEquipped)
@@ -1340,6 +1334,20 @@ bool CharacterController::updateWeaponState(CharacterState idle)
             if (!mCurrentWeapon.empty())
                 mAnimation->disable(mCurrentWeapon);
             mUpperBodyState = UpperBodyState::WeaponEquipped;
+        }
+
+        MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        if (torch != inv.end() && torch->getType() == ESM::Light::sRecordId && updateCarriedLeftVisible(mWeaponType))
+        {
+            if (mAnimation->isPlaying("shield"))
+                mAnimation->disable("shield");
+
+            mAnimation->play("torch", Priority_Torch, MWRender::Animation::BlendMask_LeftArm,
+                false, 1.0f, "start", "stop", 0.0f, std::numeric_limits<size_t>::max(), true);
+        }
+        else if (mAnimation->isPlaying("torch"))
+        {
+            mAnimation->disable("torch");
         }
     }
 
@@ -1358,9 +1366,7 @@ bool CharacterController::updateWeaponState(CharacterState idle)
             mAttackStrength = 0;
 
             // Randomize attacks for non-bipedal creatures
-            if (cls.getType() == ESM::Creature::sRecordId &&
-                !cls.isBipedal(mPtr) &&
-                (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
+            if (!cls.isBipedal(mPtr) && (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
             {
                 mCurrentWeapon = chooseRandomAttackAnimation();
             }
@@ -1495,18 +1501,16 @@ bool CharacterController::updateWeaponState(CharacterState idle)
             else if(mWeaponType == ESM::Weapon::PickProbe)
             {
                 world->breakInvisibility(mPtr);
-                MWWorld::ContainerStoreIterator weapon = cls.getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                MWWorld::Ptr item = *weapon;
                 // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use lockpicks/probes.
                 MWWorld::Ptr target = world->getFacedObject();
                 std::string resultMessage, resultSound;
 
                 if(!target.isEmpty())
                 {
-                    if(item.getType() == ESM::Lockpick::sRecordId)
-                        Security(mPtr).pickLock(target, item, resultMessage, resultSound);
-                    else if(item.getType() == ESM::Probe::sRecordId)
-                        Security(mPtr).probeTrap(target, item, resultMessage, resultSound);
+                    if (mWeapon.getType() == ESM::Lockpick::sRecordId)
+                        Security(mPtr).pickLock(target, mWeapon, resultMessage, resultSound);
+                    else if (mWeapon.getType() == ESM::Probe::sRecordId)
+                        Security(mPtr).probeTrap(target, mWeapon, resultMessage, resultSound);
                 }
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
                                  MWRender::Animation::BlendMask_All, true,
@@ -1540,10 +1544,9 @@ bool CharacterController::updateWeaponState(CharacterState idle)
                     {
                         if (Settings::Manager::getBool("best attack", "Game"))
                         {
-                            if (isWeapon)
+                            if (!mWeapon.isEmpty() && mWeapon.getType() == ESM::Weapon::sRecordId)
                             {
-                                MWWorld::ConstContainerStoreIterator weapon = cls.getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                                mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                                mAttackType = getBestAttack(mWeapon.get<ESM::Weapon>()->mBase);
                             }
                             else
                             {
@@ -1578,9 +1581,7 @@ bool CharacterController::updateWeaponState(CharacterState idle)
         }
 
         // We should not break swim and sneak animations
-        if (resetIdle &&
-            idle != CharState_IdleSneak && idle != CharState_IdleSwim &&
-            mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+        if (resetIdle && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
         {
             resetCurrentIdleState();
         }
@@ -1786,25 +1787,6 @@ bool CharacterController::updateWeaponState(CharacterState idle)
     {
         clearStateAnimation(mCurrentWeapon);
         mUpperBodyState = UpperBodyState::WeaponEquipped;
-    }
-
-    if (cls.hasInventoryStore(mPtr))
-    {
-        const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
-        MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if(torch != inv.end() && torch->getType() == ESM::Light::sRecordId
-                && updateCarriedLeftVisible(mWeaponType))
-        {
-            if (mAnimation->isPlaying("shield"))
-                mAnimation->disable("shield");
-
-            mAnimation->play("torch", Priority_Torch, MWRender::Animation::BlendMask_LeftArm,
-                false, 1.0f, "start", "stop", 0.0f, (~(size_t)0), true);
-        }
-        else if (mAnimation->isPlaying("torch"))
-        {
-            mAnimation->disable("torch");
-        }
     }
 
     mAnimation->setAccurateAiming(mUpperBodyState > UpperBodyState::WeaponEquipped);
@@ -2270,7 +2252,7 @@ void CharacterController::update(float duration)
 
         if (!mSkipAnim)
         {
-            refreshCurrentAnims(idlestate, movestate, jumpstate, updateWeaponState(idlestate));
+            refreshCurrentAnims(idlestate, movestate, jumpstate, updateWeaponState());
             updateIdleStormState(inwater);
         }
 
