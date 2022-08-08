@@ -68,8 +68,8 @@ Coverity:
     - linux
   image: ubuntu:20.04
   stage: build
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+#  rules:
+#    - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
     key: Coverity.ubuntu_20.04.v1
     paths:
