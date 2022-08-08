@@ -1764,23 +1764,11 @@ bool CharacterController::updateWeaponState()
                 break;
         }
 
-        // Note: apply crossbow reload animation only for upper body
-        // since blending with movement animations can give weird result.
         if(!start.empty())
         {
-            int mask = MWRender::Animation::BlendMask_All;
-            if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
-                mask = MWRender::Animation::BlendMask_UpperBody;
-
+            bool autodisable = mUpperBodyState == UpperBodyState::AttackEnd;
             mAnimation->disable(mCurrentWeapon);
-            if (mUpperBodyState == UpperBodyState::AttackEnd)
-                mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 mask, true,
-                                 weapSpeed, start, stop, 0.0f, 0);
-            else
-                mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 mask, false,
-                                 weapSpeed, start, stop, 0.0f, 0);
+            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, autodisable, weapSpeed, start, stop, 0.0f, 0);
         }
     }
     else if(complete >= 1.0f && isRandomAttackAnimation(mCurrentWeapon))
