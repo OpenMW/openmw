@@ -1613,20 +1613,7 @@ bool CharacterController::updateWeaponState()
                 mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
             }
 
-            if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
-            {
-                if (isWerewolf)
-                {
-                    const MWWorld::ESMStore &store = world->getStore();
-                    const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfSwing", prng);
-                    if(sound)
-                        sndMgr->playSound3D(mPtr, sound->mId, 1.0f, 1.0f);
-                }
-                else
-                {
-                    playSwishSound(mAttackStrength);
-                }
-            }
+            playSwishSound(mAttackStrength);
 
             if (animPlaying)
                 mAnimation->disable(mCurrentWeapon);
@@ -1719,8 +1706,7 @@ bool CharacterController::updateWeaponState()
                     }
 
                     world->breakInvisibility(mPtr);
-                    if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
-                        playSwishSound(0.0f);
+                    playSwishSound(0.0f);
                 }
 
                 if(mAttackType == "shoot")
@@ -2782,15 +2768,33 @@ void CharacterController::setHeadTrackTarget(const MWWorld::ConstPtr &target)
 
 void CharacterController::playSwishSound(float attackStrength) const
 {
-    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+    ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
+    if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
+        return;
 
-    std::string sound = "Weapon Swish";
-    if(attackStrength < 0.5f)
-        sndMgr->playSound3D(mPtr, sound, 1.0f, 0.8f); //Weak attack
-    else if(attackStrength < 1.0f)
-        sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f); //Medium attack
+    std::string soundId;
+    float pitch = 1.f;
+
+    const MWWorld::Class &cls = mPtr.getClass();
+    if (cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf())
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::ESMStore &store = world->getStore();
+        const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfSwing", world->getPrng());
+        if (sound)
+            soundId = sound->mId;
+    }
     else
-        sndMgr->playSound3D(mPtr, sound, 1.0f, 1.2f); //Strong attack
+    {
+        soundId = "Weapon Swish";
+        if (attackStrength < 0.5f)
+            pitch = 0.8f; // Weak attack
+        else if (attackStrength >= 1.f)
+            pitch = 1.2f; // Strong attack
+    }
+
+    if (!soundId.empty())
+        MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, soundId, 1.0f, pitch);
 }
 
 void CharacterController::updateHeadTracking(float duration)
