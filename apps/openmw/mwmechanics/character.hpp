@@ -103,17 +103,18 @@ enum CharacterState {
     CharState_Block
 };
 
-enum UpperBodyCharacterState {
-    UpperCharState_Nothing,
-    UpperCharState_EquipingWeap,
-    UpperCharState_UnEquipingWeap,
-    UpperCharState_WeapEquiped,
-    UpperCharState_StartToMinAttack,
-    UpperCharState_MinAttackToMaxAttack,
-    UpperCharState_MaxAttackToMinHit,
-    UpperCharState_MinHitToHit,
-    UpperCharState_FollowStartToFollowStop,
-    UpperCharState_CastingSpell
+enum class UpperBodyState
+{
+    None,
+    Equipping,
+    Unequipping,
+    WeaponEquipped,
+    AttackPreWindUp,
+    AttackWindUp,
+    AttackRelease,
+    AttackHit,
+    AttackEnd,
+    Casting
 };
 
 enum JumpingState {
@@ -156,7 +157,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     CharacterState mHitState{CharState_None};
     std::string mCurrentHit;
 
-    UpperBodyCharacterState mUpperBodyState{UpperCharState_Nothing};
+    UpperBodyState mUpperBodyState{UpperBodyState::None};
 
     JumpingState mJumpState{JumpState_None};
     std::string mCurrentJump;
@@ -203,7 +204,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void clearAnimQueue(bool clearPersistAnims = false);
 
-    bool updateWeaponState(CharacterState idle);
+    bool updateWeaponState();
     void updateIdleStormState(bool inwater) const;
 
     std::string chooseRandomAttackAnimation() const;
