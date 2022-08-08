@@ -608,6 +608,9 @@ namespace SceneUtil
     public:
         LightManagerCullCallback(LightManager* lightManager)
         {
+            if (!lightManager->getUBOManager())
+                return;
+
             for (size_t i = 0; i < mStateSet.size(); ++i)
             {
                 auto& buffer = lightManager->getUBOManager()->getLightBuffer(i);
