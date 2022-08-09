@@ -1129,9 +1129,10 @@ bool CharacterController::updateWeaponState()
 
     const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
 
-    std::string upSoundId;
     std::string downSoundId;
     bool weaponChanged = false;
+    bool ammunition = true;
+    float weapSpeed = 1.f;
     if (cls.hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
@@ -1139,22 +1140,54 @@ bool CharacterController::updateWeaponState()
         if(stats.getDrawState() == DrawState::Spell)
             weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
-        if(weapon != inv.end() && mWeaponType != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::Spell && weaptype != ESM::Weapon::None)
-            upSoundId = weapon->getClass().getUpSoundId(*weapon);
-
-        if(weapon != inv.end() && mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None)
-            downSoundId = weapon->getClass().getDownSoundId(*weapon);
-
+        MWWorld::Ptr newWeapon;
+        if (weapon != inv.end())
+        {
+            newWeapon = *weapon;
+            if (isRealWeapon(mWeaponType))
+                downSoundId = newWeapon.getClass().getDownSoundId(newWeapon);
+        }
         // weapon->HtH switch: weapon is empty already, so we need to take sound from previous weapon
-        if(weapon == inv.end() && !mWeapon.isEmpty() && weaptype == ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell)
+        else if (!mWeapon.isEmpty() && weaptype == ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell)
             downSoundId = mWeapon.getClass().getDownSoundId(mWeapon);
-
-        MWWorld::Ptr newWeapon = weapon != inv.end() ? *weapon : MWWorld::Ptr();
 
         if (mWeapon != newWeapon)
         {
             mWeapon = newWeapon;
             weaponChanged = true;
+        }
+
+        if (stats.getDrawState() == DrawState::Weapon && !mWeapon.isEmpty() && mWeapon.getType() == ESM::Weapon::sRecordId)
+        {
+            weapSpeed = mWeapon.get<ESM::Weapon>()->mBase->mData.mSpeed;
+            MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+            int ammotype = getWeaponType(mWeapon.get<ESM::Weapon>()->mBase->mData.mType)->mAmmoType;
+            if (ammotype != ESM::Weapon::None)
+                ammunition = ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype;
+            // Cancel attack if we no longer have ammunition
+            if (!ammunition)
+            {
+                if (mUpperBodyState == UpperBodyState::AttackPreWindUp || mUpperBodyState == UpperBodyState::AttackWindUp)
+                {
+                    mAnimation->disable(mCurrentWeapon);
+                    mUpperBodyState = UpperBodyState::WeaponEquipped;
+                }
+                setAttackingOrSpell(false);
+            }
+        }
+
+        MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        if (torch != inv.end() && torch->getType() == ESM::Light::sRecordId && updateCarriedLeftVisible(mWeaponType))
+        {
+            if (mAnimation->isPlaying("shield"))
+                mAnimation->disable("shield");
+
+            mAnimation->play("torch", Priority_Torch, MWRender::Animation::BlendMask_LeftArm,
+                false, 1.0f, "start", "stop", 0.0f, std::numeric_limits<size_t>::max(), true);
+        }
+        else if (mAnimation->isPlaying("torch"))
+        {
+            mAnimation->disable("torch");
         }
     }
 
@@ -1268,10 +1301,13 @@ bool CharacterController::updateWeaponState()
                         {
                             mAnimation->showWeapons(true);
                         }
-                    }
-                    if (!upSoundId.empty())
-                    {
-                        sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
+
+                        if (!mWeapon.isEmpty() && mWeaponType != ESM::Weapon::HandToHand && isRealWeapon(weaptype))
+                        {
+                            std::string upSoundId = mWeapon.getClass().getUpSoundId(mWeapon);
+                            if (!upSoundId.empty())
+                                sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
+                        }
                     }
                 }
 
@@ -1287,7 +1323,6 @@ bool CharacterController::updateWeaponState()
 
                 mWeaponType = weaptype;
                 mCurrentWeapon = weapgroup;
-
             }
 
             // Make sure that we disabled unequipping animation
@@ -1312,46 +1347,6 @@ bool CharacterController::updateWeaponState()
         }
         else
             sndMgr->stopSound3D(mPtr, "WolfRun");
-    }
-
-    bool ammunition = true;
-    float weapSpeed = 1.f;
-    if (cls.hasInventoryStore(mPtr))
-    {
-        MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-        if (stats.getDrawState() == DrawState::Weapon && !mWeapon.isEmpty() && mWeapon.getType() == ESM::Weapon::sRecordId)
-        {
-            weapSpeed = mWeapon.get<ESM::Weapon>()->mBase->mData.mSpeed;
-            MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-            int ammotype = getWeaponType(mWeapon.get<ESM::Weapon>()->mBase->mData.mType)->mAmmoType;
-            if (ammotype != ESM::Weapon::None)
-                ammunition = ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype;
-        }
-
-        // Cancel attack if we no longer have ammunition
-        if (!ammunition)
-        {
-            if (mUpperBodyState == UpperBodyState::AttackPreWindUp || mUpperBodyState == UpperBodyState::AttackWindUp)
-            {
-                mAnimation->disable(mCurrentWeapon);
-                mUpperBodyState = UpperBodyState::WeaponEquipped;
-            }
-            setAttackingOrSpell(false);
-        }
-
-        MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if (torch != inv.end() && torch->getType() == ESM::Light::sRecordId && updateCarriedLeftVisible(mWeaponType))
-        {
-            if (mAnimation->isPlaying("shield"))
-                mAnimation->disable("shield");
-
-            mAnimation->play("torch", Priority_Torch, MWRender::Animation::BlendMask_LeftArm,
-                false, 1.0f, "start", "stop", 0.0f, std::numeric_limits<size_t>::max(), true);
-        }
-        else if (mAnimation->isPlaying("torch"))
-        {
-            mAnimation->disable("torch");
-        }
     }
 
     // Combat for actors with persistent animations obviously will be buggy
@@ -1397,17 +1392,14 @@ bool CharacterController::updateWeaponState()
                     spellCastResult = world->startSpellCast(mPtr);
                 mCanCast = spellCastResult == MWWorld::SpellCastState::Success;
 
-                if (spellid.empty())
+                if (spellid.empty() && cls.hasInventoryStore(mPtr))
                 {
-                    if (cls.hasInventoryStore(mPtr))
+                    MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
+                    if (inv.getSelectedEnchantItem() != inv.end())
                     {
-                        MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
-                        if (inv.getSelectedEnchantItem() != inv.end())
-                        {
-                            const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
-                            spellid = enchantItem.getClass().getEnchantment(enchantItem);
-                            isMagicItem = true;
-                        }
+                        const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
+                        spellid = enchantItem.getClass().getEnchantment(enchantItem);
+                        isMagicItem = true;
                     }
                 }
 
@@ -1554,8 +1546,8 @@ bool CharacterController::updateWeaponState()
                         }
                     }
                     // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
-                    startKey = mAttackType+" start";
-                    stopKey = mAttackType+" min attack";
+                    startKey = mAttackType + ' ' + startKey;
+                    stopKey = mAttackType + " min attack";
                 }
 
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
@@ -1583,18 +1575,6 @@ bool CharacterController::updateWeaponState()
 
     if (!animPlaying)
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-
-    if (isKnockedDown())
-    {
-        if (mUpperBodyState > UpperBodyState::WeaponEquipped)
-        {
-            mUpperBodyState = UpperBodyState::WeaponEquipped;
-            if (mWeaponType > ESM::Weapon::None)
-                mAnimation->showWeapons(true);
-        }
-        if (!mCurrentWeapon.empty())
-            mAnimation->disable(mCurrentWeapon);
-    }
 
     if (mUpperBodyState == UpperBodyState::AttackWindUp)
     {
@@ -1624,35 +1604,6 @@ bool CharacterController::updateWeaponState()
 
             complete = 0.f;
             mUpperBodyState = UpperBodyState::AttackRelease;
-        }
-    }
-
-    mAnimation->setPitchFactor(0.f);
-    if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
-    {
-        switch (mUpperBodyState)
-        {
-        case UpperBodyState::AttackPreWindUp:
-            mAnimation->setPitchFactor(complete);
-            break;
-        case UpperBodyState::AttackWindUp:
-        case UpperBodyState::AttackRelease:
-        case UpperBodyState::AttackHit:
-            mAnimation->setPitchFactor(1.f);
-            break;
-        case UpperBodyState::AttackEnd:
-            if (animPlaying)
-            {
-                // technically we do not need a pitch for crossbow reload animation,
-                // but we should avoid abrupt repositioning
-                if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
-                    mAnimation->setPitchFactor(std::max(0.f, 1.f-complete*10.f));
-                else
-                    mAnimation->setPitchFactor(1.f-complete);
-            }
-            break;
-        default:
-            break;
         }
     }
 
@@ -1709,35 +1660,23 @@ bool CharacterController::updateWeaponState()
                     playSwishSound(0.0f);
                 }
 
-                if(mAttackType == "shoot")
-                {
-                    start = mAttackType+" min hit";
-                    stop = mAttackType+" release";
-                }
-                else
-                {
-                    start = mAttackType+" min hit";
-                    stop = mAttackType+" hit";
-                }
+                std::string hit = mAttackType == "shoot" ? "release" : "hit";
+                start = mAttackType + " min hit";
+                stop = mAttackType + ' ' + hit;
                 mUpperBodyState = UpperBodyState::AttackHit;
                 break;
             }
             case UpperBodyState::AttackHit:
-                if(mAttackType == "shoot")
+                start = "follow start";
+                stop = "follow stop";
+                if (mAttackType != "shoot")
                 {
-                    start = mAttackType+" follow start";
-                    stop = mAttackType+" follow stop";
+                    std::string strength = mAttackStrength < 0.5f ? "small" : mAttackStrength < 1.f ? "medium" : "large";
+                    start = strength + ' ' + start;
+                    stop = strength + ' ' + stop;
                 }
-                else
-                {
-                    float str = mAttackStrength;
-                    start = mAttackType+((str < 0.5f) ? " small follow start"
-                                                                  : (str < 1.0f) ? " medium follow start"
-                                                                                 : " large follow start");
-                    stop = mAttackType+((str < 0.5f) ? " small follow stop"
-                                                                 : (str < 1.0f) ? " medium follow stop"
-                                                                                : " large follow stop");
-                }
+                start = mAttackType + ' ' + start;
+                stop = mAttackType + ' ' + stop;
                 mUpperBodyState = UpperBodyState::AttackEnd;
                 break;
             default:
@@ -1755,6 +1694,27 @@ bool CharacterController::updateWeaponState()
     {
         clearStateAnimation(mCurrentWeapon);
         mUpperBodyState = UpperBodyState::WeaponEquipped;
+    }
+
+    mAnimation->getInfo(mCurrentWeapon, &complete);
+
+    mAnimation->setPitchFactor(0.f);
+    if (mUpperBodyState > UpperBodyState::WeaponEquipped && (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown))
+    {
+        mAnimation->setPitchFactor(1.f);
+
+        // A smooth transition can be provided if a pre-wind-up section is defined. Random attack animations never have one.
+        if (mUpperBodyState == UpperBodyState::AttackPreWindUp && !isRandomAttackAnimation(mCurrentWeapon))
+            mAnimation->setPitchFactor(complete);
+        else if (mUpperBodyState == UpperBodyState::AttackEnd)
+        {
+            // technically we do not need a pitch for crossbow reload animation,
+            // but we should avoid abrupt repositioning
+            if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
+                mAnimation->setPitchFactor(std::max(0.f, 1.f-complete*10.f));
+            else
+                mAnimation->setPitchFactor(1.f-complete);
+        }
     }
 
     mAnimation->setAccurateAiming(mUpperBodyState > UpperBodyState::WeaponEquipped);
