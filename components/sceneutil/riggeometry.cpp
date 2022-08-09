@@ -1,7 +1,5 @@
 #include "riggeometry.hpp"
 
-#include <osg/Version>
-
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <osg/MatrixTransform>
@@ -260,9 +258,7 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
     if (tangentDst)
         tangentDst->dirty();
 
-#if OSG_MIN_VERSION_REQUIRED(3, 5, 10)
     geom.osg::Drawable::dirtyGLObjects();
-#endif
 
     nv->pushOntoNodePath(&geom);
     nv->apply(geom);

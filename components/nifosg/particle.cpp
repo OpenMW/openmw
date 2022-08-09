@@ -3,7 +3,6 @@
 #include <limits>
 #include <optional>
 
-#include <osg/Version>
 #include <osg/MatrixTransform>
 #include <osg/Geometry>
 #include <osg/ValueObject>
@@ -138,7 +137,6 @@ osgParticle::Particle* ParticleSystem::createParticle(const osgParticle::Particl
 void ParticleSystem::drawImplementation(osg::RenderInfo& renderInfo) const
 {
     osg::State & state = *renderInfo.getState();
-#if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
     if(state.useVertexArrayObject(getUseVertexArrayObject()))
     {
         state.getCurrentVertexArrayState()->assignNormalArrayDispatcher();
@@ -148,9 +146,6 @@ void ParticleSystem::drawImplementation(osg::RenderInfo& renderInfo) const
     {
         state.getAttributeDispatchers().activateNormalArray(mNormalArray);
     }
-#else
-     state.Normal(0.3, 0.3, 0.3);
-#endif
      osgParticle::ParticleSystem::drawImplementation(renderInfo);
 }
 

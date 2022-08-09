@@ -157,6 +157,7 @@
     Feature #2766: Warn user if their version of Morrowind is not the latest.
     Feature #2780: A way to see current OpenMW version in the console
     Feature #2858: Add a tab to the launcher for handling datafolders
+    Feature #3180: Support uncompressed colour-mapped TGA files
     Feature #3245: Grid and angle snapping for the OpenMW-CS
     Feature #3616: Allow Zoom levels on the World Map
     Feature #4067: Post Processing
@@ -203,6 +204,7 @@
     Feature #6867: Add a way to localize hardcoded strings in GUI
     Feature #6888: Add switch for armor degradation fix
     Feature #6925: Allow to use a mouse wheel to rotate a head in the race selection menu
+    Task #5534: Remove support for OSG 3.4
     Task #6161: Refactor Sky to use shaders and be GLES/GL3 friendly
     Task #6162: Refactor GUI to use shaders and to be GLES and GL3+ friendly
     Task #6435: Add support for MSVC 2022
