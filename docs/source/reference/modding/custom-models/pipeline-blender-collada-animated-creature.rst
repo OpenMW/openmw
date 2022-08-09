@@ -184,17 +184,21 @@ The textkeys file is placed in the same folder as the model and matches the mode
 * ``meshes/land_racer.dae``
 * ``meshes/land_racer.txt``
 
-While it's possible to write it by hand, OpenMW's Collada Exporter offers a 
-convenient option to export a textkeys file based on Blender's timeline markers 
-(not to be confused with pose markers which are contained per action). What you 
-need to do is create properly named timeline markers for each animation and 
-enable the ``Export Textkeys`` option in the exporter.
+While it's possible to write textkeys by hand, OpenMW's COLLADA Exporter offers 
+a convenient option to export them based on Blender's pose markers. **Pose markers 
+are stored per action** and shouldn't be be confused with timeline markers which 
+are global to the Blender file. When actions are present in the NLA Editor as 
+strips, their containing pose markers will be used to write the textkeys. Any 
+frame offset and scaling of the strips is taken into account and affects the 
+final textkey values. Be sure to have ``Export Textkeys`` option enabled in
+the exporter.
+
 
 .. image:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/modding/custom-models/_static/landracer-textkey-markers.jpg
     :align: center
 
-In the example of ``walkforward`` the timeline markers should be named 
-``walkforward: start`` and ``walkforward: stop``.
+In the example of ``attack1`` action, it needs to contain pose markers named 
+``attack1: start`` at **frame 1** and ``attack1: stop`` at **frame 30**.
 
 
 Exporter Settings
