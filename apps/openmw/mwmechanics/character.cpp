@@ -1323,7 +1323,6 @@ bool CharacterController::updateWeaponState()
 
                 mWeaponType = weaptype;
                 mCurrentWeapon = weapgroup;
-
             }
 
             // Make sure that we disabled unequipping animation
@@ -1393,17 +1392,14 @@ bool CharacterController::updateWeaponState()
                     spellCastResult = world->startSpellCast(mPtr);
                 mCanCast = spellCastResult == MWWorld::SpellCastState::Success;
 
-                if (spellid.empty())
+                if (spellid.empty() && cls.hasInventoryStore(mPtr))
                 {
-                    if (cls.hasInventoryStore(mPtr))
+                    MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
+                    if (inv.getSelectedEnchantItem() != inv.end())
                     {
-                        MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
-                        if (inv.getSelectedEnchantItem() != inv.end())
-                        {
-                            const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
-                            spellid = enchantItem.getClass().getEnchantment(enchantItem);
-                            isMagicItem = true;
-                        }
+                        const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
+                        spellid = enchantItem.getClass().getEnchantment(enchantItem);
+                        isMagicItem = true;
                     }
                 }
 
@@ -1550,8 +1546,8 @@ bool CharacterController::updateWeaponState()
                         }
                     }
                     // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
-                    startKey = mAttackType+" start";
-                    stopKey = mAttackType+" min attack";
+                    startKey = mAttackType + ' ' + startKey;
+                    stopKey = mAttackType + " min attack";
                 }
 
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
@@ -1579,18 +1575,6 @@ bool CharacterController::updateWeaponState()
 
     if (!animPlaying)
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-
-    if (isKnockedDown())
-    {
-        if (mUpperBodyState > UpperBodyState::WeaponEquipped)
-        {
-            mUpperBodyState = UpperBodyState::WeaponEquipped;
-            if (mWeaponType > ESM::Weapon::None)
-                mAnimation->showWeapons(true);
-        }
-        if (!mCurrentWeapon.empty())
-            mAnimation->disable(mCurrentWeapon);
-    }
 
     if (mUpperBodyState == UpperBodyState::AttackWindUp)
     {
