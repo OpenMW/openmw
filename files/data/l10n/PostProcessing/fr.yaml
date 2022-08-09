@@ -1,0 +1,20 @@
+Abovewater: "Hors de l'eau"
+Author: "Auteur(e)"
+Configuration: "Configuration"
+Description: "Description"
+InExteriors: "À l'extérieur"
+InInteriors: "En intérieur"
+KeyboardControls: |
+    Raccourcis clavier:
+
+    Majuscule+Flèche droite > Active le shader
+    Majuscule+Flèche gauche > Désactive le shader
+    Majuscule+Flèche haut > Monte le shader dans la liste
+    Majuscule+Flèche bas > Descend le shader dans la liste
+MainPassDescription: "Transmet les données de la scène aux shaders de post-traitement. Ne peut être déplacé ou supprimé."
+PostProcessHUD: "HUD de post-traitement"
+ResetShader: "Restaure le shader dans sa configuration par défaut"
+ShaderLocked: "Verrouillé"
+ShaderResetUniform: "r"
+Underwater: "Sous l'eau"
+Version: "Version"

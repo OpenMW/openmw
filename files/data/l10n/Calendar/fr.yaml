@@ -1,0 +1,42 @@
+
+# source: https://en.uesp.net/wiki/Lore:Calendar
+
+month1: "Primétoile"
+month2: "Clairciel"
+month3: "Semailles"
+month4: "Ondepluie"
+month5: "Plantaisons"
+month6: "Mi-l'An"
+month7: "Hautzénith"
+month8: "Vifazur"
+month9: "Âtrefeu"
+month10: "Soufflegivre"
+month11: "Sombreciel"
+month12: "Soirétoile"
+
+# EN: The variant of month names in the context "day X of month Y".
+# In English it is the same, but some languages require a different form.
+# FR: Variante pour les noms de mois utilisés dans le contexte "jour X du mois Y".
+# La formulation francophone est identique, mais peut varier dans d'autres langues.
+monthInGenitive1: "Primétoile"
+monthInGenitive2: "Clairciel"
+monthInGenitive3: "Semailles"
+monthInGenitive4: "Ondepluie"
+monthInGenitive5: "Plantaisons"
+monthInGenitive6: "Mi-l'An"
+monthInGenitive7: "Hautzénith"
+monthInGenitive8: "Vifazur"
+monthInGenitive9: "Âtrefeu"
+monthInGenitive10: "Soufflegivre"
+monthInGenitive11: "Sombreciel"
+monthInGenitive12: "Soirétoile"
+
+dateFormat: "Le {day} du {monthInGenitive} {year}"
+
+weekday1: "Sundas"
+weekday2: "Morndas"
+weekday3: "Tirdas"
+weekday4: "Middas"
+weekday5: "Turdas"
+weekday6: "Fredas"
+weekday7: "Loredas"
