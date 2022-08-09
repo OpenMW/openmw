@@ -1689,35 +1689,23 @@ bool CharacterController::updateWeaponState()
                     playSwishSound(0.0f);
                 }
 
-                if(mAttackType == "shoot")
-                {
-                    start = mAttackType+" min hit";
-                    stop = mAttackType+" release";
-                }
-                else
-                {
-                    start = mAttackType+" min hit";
-                    stop = mAttackType+" hit";
-                }
+                std::string hit = mAttackType == "shoot" ? "release" : "hit";
+                start = mAttackType + " min hit";
+                stop = mAttackType + ' ' + hit;
                 mUpperBodyState = UpperBodyState::AttackHit;
                 break;
             }
             case UpperBodyState::AttackHit:
-                if(mAttackType == "shoot")
+                start = "follow start";
+                stop = "follow stop";
+                if (mAttackType != "shoot")
                 {
-                    start = mAttackType+" follow start";
-                    stop = mAttackType+" follow stop";
+                    std::string strength = mAttackStrength < 0.5f ? "small" : mAttackStrength < 1.f ? "medium" : "large";
+                    start = strength + ' ' + start;
+                    stop = strength + ' ' + stop;
                 }
-                else
-                {
-                    float str = mAttackStrength;
-                    start = mAttackType+((str < 0.5f) ? " small follow start"
-                                                                  : (str < 1.0f) ? " medium follow start"
-                                                                                 : " large follow start");
-                    stop = mAttackType+((str < 0.5f) ? " small follow stop"
-                                                                 : (str < 1.0f) ? " medium follow stop"
-                                                                                : " large follow stop");
-                }
+                start = mAttackType + ' ' + start;
+                stop = mAttackType + ' ' + stop;
                 mUpperBodyState = UpperBodyState::AttackEnd;
                 break;
             default:
