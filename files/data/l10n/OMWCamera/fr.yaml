@@ -1,0 +1,73 @@
+Camera: "Caméra d’OpenMW"
+settingsPageDescription: "Configuration de la caméra d’OpenMW"
+
+thirdPersonSettings: "Vue à la troisième personne"
+
+viewOverShoulder: "Vue par-dessus l’épaule"
+viewOverShoulderDescription: |
+    Modifie la vue à la troisième personne.
+      Non: La caméra est centrée sur le personnage du joueur. Le viseur est masqué.
+      Oui: Lorsque les armes sont rengainées, la caméra est située derrière l’épaule du personnage du joueur. Cette option maintient le viseur visible.
+
+shoulderOffsetX: "Vue par-dessus l'épaule : Décalage horizontal"
+shoulderOffsetXDescription: >
+    Décalage horizontal de la caméra pour la "Vue par-dessus l’épaule".
+    Une valeur négative indique une caméra placée au-dessus de l'épaule gauche.
+
+shoulderOffsetY: "Vue par-dessus l'épaule : Décalage vertical"
+shoulderOffsetYDescription: >
+    Décalage vertical de la caméra pour la "Vue par-dessus l’épaule".
+
+autoSwitchShoulder: "Changement automatique d'épaule"
+autoSwitchShoulderDescription: >
+    Lorsqu'un obstacle rapproche la caméra du personnage du joueur,
+    ce paramètre permet à la caméra de choisir l'épaule la plus éloignée de l'obstacle.
+
+zoomOutWhenMoveCoef: "Coefficient de zoom lié au mouvement"
+zoomOutWhenMoveCoefDescription: >
+    Éloigne (valeur positive) ou rapproche (valeur négative) la caméra lorsque le personnage du joueur est en mouvement.
+    Fonctionne uniquement lorsque la "Vue par-dessus l’épaule" est activée (valeur par défaut: 20.0).
+
+previewIfStandStill: "Mode Aperçu si le personnage du joueur est immobile"
+previewIfStandStillDescription: >
+    Empêche de maintenir le personnage du joueur orienté dans la même direction que la caméra lorsqu'il est inactif avec son arme rengainée.
+
+deferredPreviewRotation: "Maintenir l'orientation du mode Aperçu"
+deferredPreviewRotationDescription: |
+    Si l'option est activée, le personnage du joueur s'oriente progressivement dans la même direction que la caméra, une fois sorti du mode Aperçu.
+    Si l'option est désactivée, c'est la caméra qui s'oriente suivant l'orientation du personnage du joueur.
+
+ignoreNC: "Ignorer la propriété 'No Collision'"
+ignoreNCDescription: >
+    Empêche la caméra de passer au travers des modèles 3D 'NIF' ayant la propriété NC (No Collision - Pas de collision) activée.
+
+move360: "Déplacement à 360°"
+move360Description: >
+    Définis la direction des mouvements du personnage du joueur indépendamment de l'orientation de la caméra, lorsque l'arme est rengainée.
+    Par exemple, il est possible de courir en arrière en regardant la caméra.
+
+move360TurnSpeed: "Déplacement à 360° : Vitesse de rotation"
+move360TurnSpeedDescription: "Facteur de multiplication de la vitesse de rotation (valeur par défaut: 5.0)."
+
+slowViewChange: "Changement progressif de point de vue"
+slowViewChangeDescription: "Réalise une transition non instantanée entre la vue à la première et la troisième personne."
+
+povAutoSwitch: "Transition automatique en vue à la première personne"
+povAutoSwitchDescription: "Transition automatique en vue à la première personne s'il y a un obstacle juste derrière le personnage du joueur."
+
+
+headBobbingSettings: "Balancement de la tête en vue à la première personne"
+
+headBobbing_enabled: "Activé"
+headBobbing_enabledDescription: ""
+
+headBobbing_step: "Longueur des pas"
+headBobbing_stepDescription: "La longueur de chaque pas (valeur par défaut: 90.0)."
+
+headBobbing_height: "Hauteur des pas"
+headBobbing_heightDescription: "L'amplitude verticale du balancement de la tête (valeur par défaut: 3.0)."
+
+headBobbing_roll: "Angle de rotation maximal"
+headBobbing_rollDescription: "L'angle de rotation maximal de la tête, en degrés (valeur par défaut: 0.2)."
+
+
