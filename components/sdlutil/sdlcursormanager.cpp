@@ -26,12 +26,6 @@ USE_GRAPHICSWINDOW()
 
 namespace CursorDecompression
 {
-#if defined(__APPLE__)  // Workaround macOS not supporting hardware DXTC decompression
-    constexpr bool softwareDecompression = true;
-#else
-    constexpr bool softwareDecompression = false;
-#endif
-
     class MyGraphicsContext {
         public:
             MyGraphicsContext(int w, int h)
@@ -86,69 +80,6 @@ namespace CursorDecompression
         private:
             osg::ref_ptr<osg::GraphicsContext> _gc;
     };
-
-    SDLUtil::SurfaceUniquePtr hardwareDecompress (osg::ref_ptr<osg::Image> source, float rotDegrees)
-    {
-        int width = source->s();
-        int height = source->t();
-
-        MyGraphicsContext context(width, height);
-
-        osg::ref_ptr<osg::State> state = context.getContext()->getState();
-
-        osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
-        texture->setImage(source);
-        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_BORDER);
-        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_BORDER);
-        texture->setBorderColor(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-
-        osg::ref_ptr<osg::TexMat> texmat = new osg::TexMat;
-        osg::Matrix texRot (osg::Matrix::identity());
-        float theta ( osg::DegreesToRadians(-rotDegrees) );
-        float cosTheta = std::cos(theta);
-        float sinTheta = std::sin(theta);
-
-        texRot(0,0) = cosTheta;
-        texRot(1,0) = -sinTheta;
-        texRot(0,1) = sinTheta;
-        texRot(1,1) = cosTheta;
-        // Offset center of rotation to center of texture
-        texRot(3,0) = 0.5f + ( (-0.5f * cosTheta) - (-0.5f * sinTheta) );
-        texRot(3,1) = 0.5f + ( (-0.5f * sinTheta) + (-0.5f * cosTheta) );
-
-        texmat->setMatrix(texRot);
-
-        state->applyTextureAttribute(0, texmat);
-
-        osg::ref_ptr<osg::RefMatrix> identity (new osg::RefMatrix(osg::Matrix::identity()));
-        state->applyModelViewMatrix(identity);
-        state->applyProjectionMatrix(identity);
-
-        state->applyMode(GL_TEXTURE_2D, true);
-        state->applyTextureAttribute(0, texture);
-
-        osg::ref_ptr<osg::Image> resultImage = new osg::Image;
-        resultImage->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-
-        osg::RenderInfo renderInfo;
-        renderInfo.setState(state);
-
-        glViewport(0, 0, width, height);
-
-        osg::ref_ptr<osg::Geometry> geom;
-
-        geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
-
-        geom->drawImplementation(renderInfo);
-
-        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, resultImage->data());
-
-        geom->releaseGLObjects();
-        source->releaseGLObjects();
-        texture->releaseGLObjects();
-
-        return SDLUtil::imageToSurface(resultImage, true);
-    }
 
     SDLUtil::SurfaceUniquePtr softwareDecompress (osg::ref_ptr<osg::Image> source, float rotDegrees)
     {
@@ -264,17 +195,8 @@ namespace SDLUtil
         if (mCursorMap.find(name) != mCursorMap.end())
             return;
 
-        static bool forceSoftwareDecompression = (getenv("OPENMW_DECOMPRESS_TEXTURES") != nullptr);
-
-        SurfaceUniquePtr (*decompressionFunction)(osg::ref_ptr<osg::Image>, float);
-        if (forceSoftwareDecompression || CursorDecompression::softwareDecompression) {
-            decompressionFunction = CursorDecompression::softwareDecompress;
-        } else {
-            decompressionFunction = CursorDecompression::hardwareDecompress;
-        }
-
         try {
-            auto surface = decompressionFunction(image, static_cast<float>(rotDegrees));
+            auto surface = CursorDecompression::softwareDecompress(image, static_cast<float>(rotDegrees));
 
             //set the cursor and store it for later
             SDL_Cursor* curs = SDL_CreateColorCursor(surface.get(), hotspot_x, hotspot_y);
