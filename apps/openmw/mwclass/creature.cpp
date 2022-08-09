@@ -796,13 +796,13 @@ namespace MWClass
             return;
         }
 
-        if (ptr.getRefData().getCount() <= 0)
+        const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
+        if (ptr.getRefData().getCount() <= 0 && (!isFlagBitSet(ptr, ESM::Creature::Respawn) || !customData.mCreatureStats.isDead()))
         {
             state.mHasCustomState = false;
             return;
         }
 
-        const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
         ESM::CreatureState& creatureState = state.asCreatureState();
         customData.mContainerStore->writeState (creatureState.mInventory);
         customData.mCreatureStats.writeState (creatureState.mCreatureStats);

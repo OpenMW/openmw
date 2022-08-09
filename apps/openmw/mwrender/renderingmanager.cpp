@@ -637,7 +637,6 @@ namespace MWRender
         updateProjectionMatrix();
 
         mViewer->getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        mViewer->getUpdateVisitor()->setTraversalMode(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN);
     }
 
     RenderingManager::~RenderingManager()
@@ -1616,7 +1615,7 @@ namespace MWRender
         }
         return false;
     }
-    void RenderingManager::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
+    void RenderingManager::getPagedRefnums(const osg::Vec4i &activeGrid, std::vector<ESM::RefNum>& out)
     {
         if (mObjectPaging)
             mObjectPaging->getPagedRefnums(activeGrid, out);

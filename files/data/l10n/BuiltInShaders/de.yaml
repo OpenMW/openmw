@@ -1,3 +1,7 @@
-DisplayDepthDescription: "Visualisiert den Tiefenpuffer."
+DisplayDepthName: "Visualisiert den Tiefenpuffer."
 DisplayDepthFactorDescription: "Bestimmt die Korrelation zwischen dem Pixeltiefenwert und seiner Ausgabefarbe. Hohe Werte führen zu einem helleren Bild."
 DisplayDepthFactorName: "Farbfaktor"
+ContrastLevelDescription: "Kontraststufe"
+ContrastLevelName: "Kontrast"
+GammaLevelDescription: "Gamma-Level"
+GammaLevelName: "Gamma"

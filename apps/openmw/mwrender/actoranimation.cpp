@@ -158,33 +158,16 @@ bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
     {
         const MWWorld::Class &cls = mPtr.getClass();
         MWMechanics::CreatureStats &stats = cls.getCreatureStats(mPtr);
-        if (cls.hasInventoryStore(mPtr) && weaptype != ESM::Weapon::Spell)
+        if (cls.hasInventoryStore(mPtr) && stats.getDrawState() == MWMechanics::DrawState::Nothing)
         {
             SceneUtil::FindByNameVisitor findVisitor ("Bip01 AttachShield");
             mObjectRoot->accept(findVisitor);
-            if (findVisitor.mFoundNode || (mPtr == MWMechanics::getPlayer() && mPtr.isInCell() && MWBase::Environment::get().getWorld()->isFirstPerson()))
+            if (findVisitor.mFoundNode)
             {
                 const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
-                const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
                 if (shield != inv.end() && shield->getType() == ESM::Armor::sRecordId && !getSheathedShieldMesh(*shield).empty())
-                {
-                    if(stats.getDrawState() != MWMechanics::DrawState::Weapon)
-                        return false;
-
-                    if (weapon != inv.end())
-                    {
-                        auto type = weapon->getType();
-                        if(type == ESM::Weapon::sRecordId)
-                        {
-                            const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
-                            ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
-                            return !(MWMechanics::getWeaponType(weaponType)->mFlags & ESM::WeaponType::TwoHanded);
-                        }
-                        else if (type == ESM::Lockpick::sRecordId || type == ESM::Probe::sRecordId)
-                            return true;
-                    }
-                }
+                    return false;
             }
         }
     }

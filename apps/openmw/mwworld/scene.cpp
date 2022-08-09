@@ -99,8 +99,8 @@ namespace
         return model;
     }
 
-    void addObject(const MWWorld::Ptr& ptr, const MWWorld::World& world, MWPhysics::PhysicsSystem& physics,
-                   MWRender::RenderingManager& rendering, std::set<ESM::RefNum>& pagedRefs)
+    void addObject(const MWWorld::Ptr& ptr, const MWWorld::World& world, const std::vector<ESM::RefNum>& pagedRefs,
+        MWPhysics::PhysicsSystem& physics, MWRender::RenderingManager& rendering)
     {
         if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
         {
@@ -112,7 +112,7 @@ namespace
         const auto rotation = makeDirectNodeRotation(ptr);
 
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
-        if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
+        if (!refnum.hasContentFile() || !std::binary_search(pagedRefs.begin(), pagedRefs.end(), refnum))
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
         else
             ptr.getRefData().setBaseNode(new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend on basenode
@@ -255,6 +255,15 @@ namespace
         }
         return false;
     }
+
+    bool removeFromSorted(const ESM::RefNum& refNum, std::vector<ESM::RefNum>& pagedRefs)
+    {
+        const auto it = std::lower_bound(pagedRefs.begin(), pagedRefs.end(), refNum);
+        if (it == pagedRefs.end() || *it != refNum)
+            return false;
+        pagedRefs.erase(it);
+        return true;
+    }
 }
 
 
@@ -264,7 +273,7 @@ namespace MWWorld
     void Scene::removeFromPagedRefs(const Ptr &ptr)
     {
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
-        if (refnum.hasContentFile() && mPagedRefs.erase(refnum))
+        if (refnum.hasContentFile() && removeFromSorted(refnum, mPagedRefs))
         {
             if (!ptr.getRefData().getBaseNode()) return;
             ptr.getClass().insertObjectRendering(ptr, getModel(ptr, mRendering.getResourceSystem()->getVFS()), mRendering);
@@ -900,7 +909,7 @@ namespace MWWorld
     {
         InsertVisitor insertVisitor(cell, loadingListener);
         cell.forEach (insertVisitor);
-        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, mWorld, *mPhysics, mRendering, mPagedRefs); });
+        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, mWorld, mPagedRefs, *mPhysics, mRendering); });
         insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, mWorld, *mPhysics, mNavigator); });
     }
 
@@ -908,7 +917,7 @@ namespace MWWorld
     {
         try
         {
-            addObject(ptr, mWorld, *mPhysics, mRendering, mPagedRefs);
+            addObject(ptr, mWorld, mPagedRefs, *mPhysics, mRendering);
             addObject(ptr, mWorld, *mPhysics, mNavigator);
             mWorld.scaleObject(ptr, ptr.getCellRef().getScale());
             if (mCurrentCell != nullptr)

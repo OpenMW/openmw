@@ -11,8 +11,6 @@ BUILD_UNITTESTS=OFF
 BUILD_BENCHMARKS=OFF
 
 if [[ "${BUILD_TESTS_ONLY}" ]]; then
-    export GOOGLETEST_DIR="${PWD}/googletest/build/install"
-    env GENERATOR='Unix Makefiles' CONFIGURATION=Release CI/build_googletest.sh
     BUILD_UNITTESTS=ON
     BUILD_BENCHMARKS=ON
 fi
@@ -28,8 +26,13 @@ declare -a CMAKE_CONF_OPTS=(
     -DUSE_SYSTEM_TINYXML=ON
     -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
     -DOPENMW_CXX_FLAGS="-Werror -Werror=implicit-fallthrough"  # flags specific to OpenMW project
-    -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold"
 )
+
+if [[ "${CMAKE_EXE_LINKER_FLAGS}" ]]; then
+    CMAKE_CONF_OPTS+=(
+        -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}"
+    )
+fi
 
 if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then
     CMAKE_CONF_OPTS+=(
@@ -99,8 +102,6 @@ if [[ "${BUILD_TESTS_ONLY}" ]]; then
         -DBUILD_NIFTEST=OFF \
         -DBUILD_UNITTESTS=${BUILD_UNITTESTS} \
         -DBUILD_BENCHMARKS=${BUILD_BENCHMARKS} \
-        -DGTEST_ROOT="${GOOGLETEST_DIR}" \
-        -DGMOCK_ROOT="${GOOGLETEST_DIR}" \
         ..
 else
     ${ANALYZE} cmake \

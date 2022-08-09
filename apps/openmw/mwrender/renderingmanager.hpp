@@ -250,7 +250,7 @@ namespace MWRender
         bool pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled);
         void pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr);
         bool pagingUnlockCache();
-        void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
+        void getPagedRefnums(const osg::Vec4i &activeGrid, std::vector<ESM::RefNum>& out);
 
         void updateProjectionMatrix();
 

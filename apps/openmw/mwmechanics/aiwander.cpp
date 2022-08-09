@@ -670,25 +670,26 @@ namespace MWMechanics
         }
     }
 
-    short unsigned AiWander::getRandomIdle()
+    int AiWander::getRandomIdle() const
     {
-        unsigned short idleRoll = 0;
-        short unsigned selectedAnimation = 0;
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        static const float fIdleChanceMultiplier = world->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->mValue.getFloat();
+        if (Misc::Rng::rollClosedProbability(world->getPrng()) > fIdleChanceMultiplier)
+            return 0;
 
-        for(unsigned int counter = 0; counter < mIdle.size(); counter++)
+        int newIdle = 0;
+        float maxRoll = 0.f;
+        for (size_t i = 0; i < mIdle.size(); i++)
         {
-            MWBase::World* world = MWBase::Environment::get().getWorld();
-            static float fIdleChanceMultiplier = world->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->mValue.getFloat();
-
-            unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);
-            unsigned short randSelect = (int)(Misc::Rng::rollProbability(world->getPrng()) * int(100 / fIdleChanceMultiplier));
-            if(randSelect < idleChance && randSelect > idleRoll)
+            float roll = Misc::Rng::rollClosedProbability(world->getPrng()) * 100.f;
+            if (roll <= mIdle[i] && roll > maxRoll)
             {
-                selectedAnimation = counter + GroupIndex_MinIdle;
-                idleRoll = randSelect;
+                newIdle = GroupIndex_MinIdle + i;
+                maxRoll = roll;
             }
         }
-        return selectedAnimation;
+
+        return newIdle;
     }
 
     void AiWander::fastForward(const MWWorld::Ptr& actor, AiState &state)

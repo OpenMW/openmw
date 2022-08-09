@@ -100,21 +100,10 @@ namespace MWRender
 
         if (filtered.empty() || !bufferData.postprocessing)
         {
-            if (bufferData.postprocessing)
-            {
-                if (!mLoggedLastError)
-                {
-                    Log(Debug::Error) << "Critical error, postprocess shaders failed to compile. Using default shader.";
-                    mLoggedLastError = true;
-                }
-            }
-            else
-                mLoggedLastError = false;
-
             state.pushStateSet(mFallbackStateSet);
             state.apply();
 
-            if (Stereo::getMultiview() && mMultiviewResolveProgram)
+            if (Stereo::getMultiview())
             {
                 state.pushStateSet(mMultiviewResolveStateSet);
                 state.apply();
@@ -126,7 +115,7 @@ namespace MWRender
             drawGeometry(renderInfo);
             state.popStateSet();
 
-            if (Stereo::getMultiview() && mMultiviewResolveProgram)
+            if (Stereo::getMultiview())
             {
                 state.popStateSet();
             }
@@ -298,7 +287,7 @@ namespace MWRender
             state.popStateSet();
         }
 
-        if (Stereo::getMultiview() && mMultiviewResolveProgram)
+        if (Stereo::getMultiview())
         {
             ext->glBindFramebuffer(GL_DRAW_FRAMEBUFFER_EXT, 0);
             lastApplied = 0;

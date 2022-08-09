@@ -17,28 +17,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-namespace
-{
-    void saveChain()
-    {
-        auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
-
-        std::vector<std::string> chain;
-
-        for (size_t i = 1; i < processor->getTechniques().size(); ++i)
-        {
-            auto technique = processor->getTechniques()[i];
-
-            if (!technique || technique->getDynamic())
-                continue;
-
-            chain.push_back(technique->getName());
-        }
-
-        Settings::Manager::setStringArray("chain", "Post Processing", chain);
-    }
-}
-
 namespace MWGui
 {
     void PostProcessorHud::ListWrapper::onKeyButtonPressed(MyGUI::KeyCode key, MyGUI::Char ch)
@@ -145,7 +123,7 @@ namespace MWGui
                 processor->enableTechnique(technique);
             else
                 processor->disableTechnique(technique);
-            saveChain();
+            processor->saveChain();
         }
     }
 
@@ -178,7 +156,7 @@ namespace MWGui
                 return;
 
             if (processor->enableTechnique(technique, index) != MWRender::PostProcessor::Status_Error)
-                saveChain();
+                processor->saveChain();
         }
     }
 
@@ -377,7 +355,7 @@ namespace MWGui
                 {
                     Gui::AutoSizedTextBox* divider = mConfigArea->createWidget<Gui::AutoSizedTextBox>("MW_UniformGroup", {0,0,0,34}, MyGUI::Align::Default);
                     divider->setNeedMouseFocus(false);
-                    divider->setCaption(uniform->mHeader);
+                    divider->setCaptionWithReplacing(uniform->mHeader);
                 }
 
                 fx::Widgets::UniformBase* uwidget = mConfigArea->createWidget<fx::Widgets::UniformBase>("MW_UniformEdit", {0,0,0,22}, MyGUI::Align::Default);

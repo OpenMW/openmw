@@ -295,13 +295,23 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     assert(viewMode != VM_HeadOnly);
     if(mViewMode == viewMode)
         return;
-
+    // FIXME: sheathing state must be consistent if the third person skeleton doesn't have the necessary node, but
+    // third person skeleton is unavailable in first person view. This is a hack to avoid cosmetic issues.
+    bool viewChange = mViewMode == VM_FirstPerson || viewMode == VM_FirstPerson;
     mViewMode = viewMode;
     MWBase::Environment::get().getWorld()->scaleObject(mPtr, mPtr.getCellRef().getScale(), true); // apply race height after view change
 
     mAmmunition.reset();
     rebuild();
     setRenderBin();
+
+    static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
+    if (viewChange && shieldSheathing)
+    {
+        int weaptype = ESM::Weapon::None;
+        MWMechanics::getActiveWeapon(mPtr, &weaptype);
+        showCarriedLeft(updateCarriedLeftVisible(weaptype));
+    }
 }
 
 /// @brief A RenderBin callback to clear the depth buffer before rendering.
@@ -981,6 +991,30 @@ void NpcAnimation::showWeapons(bool showWeapon)
 
     updateHolsteredWeapon(!mShowWeapons);
     updateQuiver();
+}
+
+bool NpcAnimation::updateCarriedLeftVisible(const int weaptype) const
+{
+    static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
+    if (shieldSheathing)
+    {
+        const MWWorld::Class &cls = mPtr.getClass();
+        MWMechanics::CreatureStats &stats = cls.getCreatureStats(mPtr);
+        if (stats.getDrawState() == MWMechanics::DrawState::Nothing)
+        {
+            SceneUtil::FindByNameVisitor findVisitor ("Bip01 AttachShield");
+            mObjectRoot->accept(findVisitor);
+            if (findVisitor.mFoundNode || mViewMode == VM_FirstPerson)
+            {
+                const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
+                const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+                if (shield != inv.end() && shield->getType() == ESM::Armor::sRecordId && !getSheathedShieldMesh(*shield).empty())
+                    return false;
+            }
+        }
+    }
+
+    return !(MWMechanics::getWeaponType(weaptype)->mFlags & ESM::WeaponType::TwoHanded);
 }
 
 void NpcAnimation::showCarriedLeft(bool show)

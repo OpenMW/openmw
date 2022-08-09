@@ -1,11 +1,7 @@
 Abovewater: "Ovan vatten"
 Author: "Skapare" # Author = Författare, but författare sounds very book-author-ish. Skapare, meaning "creator", sounds better in Swedish in this case. Ok?
 Configuration: "Konfiguration"
-ContrastLevelDescription: "Kontrastnivå"
-ContrastLevelName: "Kontrast"
 Description: "Beskrivning"
-GammaLevelDescription: "Gammanivå"
-# GammaLevelName: "Gamma" samma som en
 InExteriors: "Exteriörer"
 InInteriors: "Interiörer"
 KeyboardControls: |
@@ -15,7 +11,6 @@ KeyboardControls: |
     Shift+Vänsterpil > Avaktivera shader
     Shift+Pil upp > Flytta shader upp
     Shift+Pil ner > Flytta shader ner
-MainPassDescription: "Flyttar scendata till postprocess-shaders. Kan ej slås på/av eller flyttas."
 PostProcessHUD: "Postprocess HUD"
 ResetShader: "Återställ shader to ursprungligt läge"
 ShaderLocked: "Låst"

@@ -87,8 +87,8 @@ set(BUILTIN_DATA_FILES
     scripts/omw/mwui/space.lua
     scripts/omw/mwui/init.lua
 
-    shaders/main.omwfx
-    shaders/displaydepth.omwfx
+    shaders/adjustments.omwfx
+    shaders/debug.omwfx
 
     mygui/core.skin
     mygui/core.xml

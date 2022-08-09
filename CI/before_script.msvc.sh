@@ -642,16 +642,6 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/LuaJIT-2.1.0-beta3-msvc${LUA_MSVC_YEAR}-win${BITS}.7z" \
 		"LuaJIT-2.1.0-beta3-msvc${LUA_MSVC_YEAR}-win${BITS}.7z"
 
-	# Google test and mock
-	if [ -n "$TEST_FRAMEWORK" ]; then
-		echo "Google test 1.11.0..."
-		if [ -d googletest ]; then
-			printf "  Google test exists, skipping."
-		else
-			git clone -b release-1.11.0 https://github.com/google/googletest.git
-		fi
-	fi
-
     # ICU
     download "ICU ${ICU_VER/_/.}"\
         "https://github.com/unicode-org/icu/releases/download/release-${ICU_VER/_/-}/icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip" \
@@ -1003,61 +993,6 @@ printf "LuaJIT 2.1.0-beta3... "
 	done
 	echo Done.
 }
-cd $DEPS
-echo
-# Google Test and Google Mock
-if [ -n "$TEST_FRAMEWORK" ]; then
-	printf "Google test 1.11.0 ..."
-
-	cd googletest
-	mkdir -p build${MSVC_DISPLAY_YEAR}
-
-	cd build${MSVC_DISPLAY_YEAR}
-
-	GOOGLE_INSTALL_ROOT="${DEPS_INSTALL}/GoogleTest"
-	
-	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
-		# FindGMock.cmake mentions Release explicitly, but not RelWithDebInfo. Only one optimised library config can be used, so go for the safer one.
-		GTEST_CONFIG=$([ $CONFIGURATION == "RelWithDebInfo" ] && echo "Release" || echo "$CONFIGURATION" )
-		if [ $GTEST_CONFIG == "Debug" ]; then
-			DEBUG_SUFFIX="d"
-		else
-			DEBUG_SUFFIX=""
-		fi
-
-		if [ ! -f "$GOOGLE_INSTALL_ROOT/lib/gtest${DEBUG_SUFFIX}.lib" ]; then
-			# Always use MSBuild solution files as they don't need the environment activating
-			cmake .. -DCMAKE_USE_WIN32_THREADS_INIT=1 -G "Visual Studio $MSVC_REAL_VER $MSVC_DISPLAY_YEAR" "-A $([ $BITS -eq 64 ] && echo "x64" || echo "Win32")" -DBUILD_SHARED_LIBS=1
-			cmake --build . --config "${GTEST_CONFIG}"
-			cmake --install . --config "${GTEST_CONFIG}" --prefix "${GOOGLE_INSTALL_ROOT}"
-		fi
-
-		add_runtime_dlls $CONFIGURATION "${GOOGLE_INSTALL_ROOT}\bin\gtest_main${DEBUG_SUFFIX}.dll"
-		add_runtime_dlls $CONFIGURATION "${GOOGLE_INSTALL_ROOT}\bin\gtest${DEBUG_SUFFIX}.dll"
-		add_runtime_dlls $CONFIGURATION "${GOOGLE_INSTALL_ROOT}\bin\gmock_main${DEBUG_SUFFIX}.dll"
-		add_runtime_dlls $CONFIGURATION "${GOOGLE_INSTALL_ROOT}\bin\gmock${DEBUG_SUFFIX}.dll"
-	done
-
-	add_cmake_opts -DBUILD_UNITTESTS=yes
-	# FindGTest and FindGMock do not work perfectly on Windows
-	# but we can help them by telling them everything we know about installation
-	add_cmake_opts -DGMOCK_ROOT="$GOOGLE_INSTALL_ROOT"
-	add_cmake_opts -DGTEST_ROOT="$GOOGLE_INSTALL_ROOT"
-	add_cmake_opts -DGTEST_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gtest.lib"
-	add_cmake_opts -DGTEST_MAIN_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gtest_main.lib"
-	add_cmake_opts -DGMOCK_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gmock.lib"
-	add_cmake_opts -DGMOCK_MAIN_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gmock_main.lib"
-	add_cmake_opts -DGTEST_LIBRARY_DEBUG="$GOOGLE_INSTALL_ROOT/lib/gtestd.lib"
-	add_cmake_opts -DGTEST_MAIN_LIBRARY_DEBUG="$GOOGLE_INSTALL_ROOT/lib/gtest_maind.lib"
-	add_cmake_opts -DGMOCK_LIBRARY_DEBUG="$GOOGLE_INSTALL_ROOT/lib/gmockd.lib"
-	add_cmake_opts -DGMOCK_MAIN_LIBRARY_DEBUG="$GOOGLE_INSTALL_ROOT/lib/gmock_maind.lib"
-	add_cmake_opts -DGTEST_LINKED_AS_SHARED_LIBRARY=True
-	add_cmake_opts -DGTEST_LIBRARY_TYPE=SHARED
-	add_cmake_opts -DGTEST_MAIN_LIBRARY_TYPE=SHARED
-
-	echo Done.
-
-fi
 
 cd $DEPS
 echo
@@ -1174,6 +1109,10 @@ fi
 
 if [ "${BUILD_BENCHMARKS}" ]; then
 	add_cmake_opts -DBUILD_BENCHMARKS=ON
+fi
+
+if [ -n "${TEST_FRAMEWORK}" ]; then
+	add_cmake_opts -DBUILD_UNITTESTS=ON
 fi
 
 if [ -n "$ACTIVATE_MSVC" ]; then

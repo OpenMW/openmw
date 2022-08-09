@@ -301,3 +301,21 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
     endforeach()
     set(ICU_LIBRARIES ICU::i18n ICU::uc ICU::data PARENT_SCOPE)
 endif()
+
+if (BUILD_UNITTESTS AND NOT OPENMW_USE_SYSTEM_GOOGLETEST)
+    cmake_minimum_required(VERSION 3.11)
+
+    include(FetchContent)
+    FetchContent_Declare(googletest
+        URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
+        URL_HASH SHA512=1479ea2f3172c622c0ca305f5b2bc45a42941221ec0ac7865e6d6d020ec4d008d952fc64e01a4c5138d7bed4148cf75596f25bb9e9044a98bbbf5662053ea11c
+        SOURCE_DIR fetched/googletest
+    )
+    if (MSVC)
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    endif()
+    FetchContent_MakeAvailableExcludeFromAll(googletest)
+
+    add_library(GTest::GTest ALIAS gtest)
+    add_library(GMock::GMock ALIAS gmock)
+endif()

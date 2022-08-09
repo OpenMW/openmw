@@ -104,7 +104,7 @@ namespace MWWorld
 
             osg::Vec3f mLastPlayerPos;
 
-            std::set<ESM::RefNum> mPagedRefs;
+            std::vector<ESM::RefNum> mPagedRefs;
 
             std::vector<osg::ref_ptr<SceneUtil::WorkItem>> mWorkItems;
 
