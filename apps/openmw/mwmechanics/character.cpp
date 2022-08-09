@@ -1607,35 +1607,6 @@ bool CharacterController::updateWeaponState()
         }
     }
 
-    mAnimation->setPitchFactor(0.f);
-    if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
-    {
-        switch (mUpperBodyState)
-        {
-        case UpperBodyState::AttackPreWindUp:
-            mAnimation->setPitchFactor(complete);
-            break;
-        case UpperBodyState::AttackWindUp:
-        case UpperBodyState::AttackRelease:
-        case UpperBodyState::AttackHit:
-            mAnimation->setPitchFactor(1.f);
-            break;
-        case UpperBodyState::AttackEnd:
-            if (animPlaying)
-            {
-                // technically we do not need a pitch for crossbow reload animation,
-                // but we should avoid abrupt repositioning
-                if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
-                    mAnimation->setPitchFactor(std::max(0.f, 1.f-complete*10.f));
-                else
-                    mAnimation->setPitchFactor(1.f-complete);
-            }
-            break;
-        default:
-            break;
-        }
-    }
-
     if(!animPlaying)
     {
         if (mUpperBodyState == UpperBodyState::Equipping ||
@@ -1723,6 +1694,27 @@ bool CharacterController::updateWeaponState()
     {
         clearStateAnimation(mCurrentWeapon);
         mUpperBodyState = UpperBodyState::WeaponEquipped;
+    }
+
+    mAnimation->getInfo(mCurrentWeapon, &complete);
+
+    mAnimation->setPitchFactor(0.f);
+    if (mUpperBodyState > UpperBodyState::WeaponEquipped && (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown))
+    {
+        mAnimation->setPitchFactor(1.f);
+
+        // A smooth transition can be provided if a pre-wind-up section is defined. Random attack animations never have one.
+        if (mUpperBodyState == UpperBodyState::AttackPreWindUp && !isRandomAttackAnimation(mCurrentWeapon))
+            mAnimation->setPitchFactor(complete);
+        else if (mUpperBodyState == UpperBodyState::AttackEnd)
+        {
+            // technically we do not need a pitch for crossbow reload animation,
+            // but we should avoid abrupt repositioning
+            if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
+                mAnimation->setPitchFactor(std::max(0.f, 1.f-complete*10.f));
+            else
+                mAnimation->setPitchFactor(1.f-complete);
+        }
     }
 
     mAnimation->setAccurateAiming(mUpperBodyState > UpperBodyState::WeaponEquipped);
