@@ -9,7 +9,8 @@
 #include <osg/Program>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 
 namespace Shader

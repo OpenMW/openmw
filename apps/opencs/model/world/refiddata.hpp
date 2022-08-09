@@ -28,7 +28,7 @@
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/esmwriter.hpp>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "record.hpp"
 #include "universalid.hpp"

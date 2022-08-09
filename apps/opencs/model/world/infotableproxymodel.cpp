@@ -1,6 +1,6 @@
 #include "infotableproxymodel.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "idtablebase.hpp"
 #include "columns.hpp"

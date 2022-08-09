@@ -11,7 +11,7 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadlevlist.hpp>

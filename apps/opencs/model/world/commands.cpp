@@ -4,8 +4,6 @@
 #include <sstream>
 #include <unordered_set>
 
-#include <components/misc/stringops.hpp>
-
 #include <QAbstractItemModel>
 #include <QAbstractProxyModel>
 

@@ -3,7 +3,7 @@
 #include <osgShadow/ShadowedScene>
 #include <osgShadow/ShadowSettings>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/settings/settings.hpp>
 #include <components/stereo/stereomanager.hpp>
 

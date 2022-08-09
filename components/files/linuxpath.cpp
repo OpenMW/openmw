@@ -7,8 +7,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
-
+#include <components/misc/strings/lower.hpp>
 
 namespace
 {

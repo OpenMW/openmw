@@ -1,7 +1,6 @@
 #include "resources.hpp"
 
 #include <components/vfs/manager.hpp>
-#include <components/misc/stringops.hpp>
 
 namespace LuaUi
 {

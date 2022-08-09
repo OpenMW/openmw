@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 namespace
 {

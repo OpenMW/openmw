@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <utility>
+#include <algorithm>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"

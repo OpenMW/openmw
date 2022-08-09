@@ -3,6 +3,7 @@
 #include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"

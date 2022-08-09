@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 
 namespace
 {

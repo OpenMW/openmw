@@ -8,7 +8,7 @@
 #include <osg/Texture2D>
 #include <osg/TextureCubeMap>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/shader/shadermanager.hpp>

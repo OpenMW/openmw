@@ -7,7 +7,8 @@
 #include <vector>
 #include <algorithm>    // std::reverse
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
 
 namespace MWDialogue
 {

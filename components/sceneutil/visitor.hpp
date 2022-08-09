@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 // Commonly used scene graph visitors
 namespace SceneUtil

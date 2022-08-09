@@ -24,7 +24,7 @@
 #include <components/nif/niffile.hpp>
 
 #include <components/misc/pathhelpers.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/algorithm.hpp>
 #include <components/misc/errorMarker.hpp>
 #include <components/misc/osguservalues.hpp>

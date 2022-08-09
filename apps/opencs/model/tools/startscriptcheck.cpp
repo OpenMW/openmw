@@ -2,7 +2,7 @@
 
 #include "../prefs/state.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 CSMTools::StartScriptCheckStage::StartScriptCheckStage (
     const CSMWorld::IdCollection<ESM::StartScript>& startScripts,

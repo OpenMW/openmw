@@ -6,7 +6,7 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/esm3/loadcont.hpp>
 
 #include <algorithm>

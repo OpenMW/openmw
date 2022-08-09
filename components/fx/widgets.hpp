@@ -9,7 +9,7 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "technique.hpp"
 #include "types.hpp"

@@ -2,7 +2,7 @@
 
 #include <components/esmloader/load.hpp>
 #include <components/esmloader/esmdata.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>

@@ -14,7 +14,7 @@
 #include <components/esmloader/lessbyid.hpp>
 #include <components/esmloader/record.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>

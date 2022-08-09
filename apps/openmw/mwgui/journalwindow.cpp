@@ -9,7 +9,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
 

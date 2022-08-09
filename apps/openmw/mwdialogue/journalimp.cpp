@@ -7,7 +7,7 @@
 #include <components/esm3/queststate.hpp>
 #include <components/esm3/journalentry.hpp>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"

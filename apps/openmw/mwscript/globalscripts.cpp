@@ -1,7 +1,7 @@
 #include "globalscripts.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/globalscript.hpp>
 

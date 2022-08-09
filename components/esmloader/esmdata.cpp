@@ -10,7 +10,7 @@
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/variant.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include <algorithm>
 #include <stdexcept>

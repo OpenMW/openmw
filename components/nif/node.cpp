@@ -1,6 +1,6 @@
 #include "node.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include "data.hpp"
 #include "physics.hpp"

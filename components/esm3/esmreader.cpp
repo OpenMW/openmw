@@ -2,7 +2,7 @@
 
 #include "readerscache.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/files/openfile.hpp>
 
 #include <stdexcept>
@@ -12,8 +12,6 @@
 
 namespace ESM
 {
-
-using namespace Misc;
 
 ESM_Context ESMReader::getContext()
 {

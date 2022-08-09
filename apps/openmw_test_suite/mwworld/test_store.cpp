@@ -9,7 +9,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwmechanics/spelllist.hpp"

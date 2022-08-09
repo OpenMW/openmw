@@ -3,7 +3,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Group>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/terrain/terraingrid.hpp>

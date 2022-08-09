@@ -17,6 +17,7 @@
 #include <components/esm/records.hpp>
 #include <components/esm/format.hpp>
 #include <components/files/openfile.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "record.hpp"
 #include "labels.hpp"

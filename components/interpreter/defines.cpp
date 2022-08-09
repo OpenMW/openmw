@@ -3,9 +3,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 namespace Interpreter{
 
@@ -36,8 +37,8 @@ namespace Interpreter{
             if(eschar == '%' || eschar == '^')
             {
                 retval << text.substr(start, i - start);
-                std::string temp = Misc::StringUtils::lowerCase(text.substr(i+1, 100));
-                
+                std::string temp = Misc::StringUtils::lowerCase(std::string_view(text).substr(i + 1, 100));
+
                 bool found = false;
                 try
                 {
@@ -170,10 +171,10 @@ namespace Interpreter{
                             sort(globals.begin(), globals.end(), longerStr);
                         }
 
-                        for(unsigned int j = 0; j < globals.size(); j++){
-                            if(globals[j].length() > temp.length()){ // Just in case there's a global with a huuuge name
-                                temp = Misc::StringUtils::lowerCase(text.substr(i+1, globals[j].length()));
-                            }
+                        for(unsigned int j = 0; j < globals.size(); j++)
+                        {
+                            if (globals[j].length() > temp.length()) // Just in case there's a global with a huuuge name
+                                temp = Misc::StringUtils::lowerCase(std::string_view(text).substr(i + 1, globals[j].length()));
 
                             found = check(temp, globals[j], &i, &start);
                             if(found){

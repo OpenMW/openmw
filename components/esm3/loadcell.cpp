@@ -5,7 +5,7 @@
 #include <list>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"

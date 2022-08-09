@@ -4,7 +4,7 @@
 #include <iterator>
 #include <type_traits>
 
-#include "stringops.hpp"
+#include <components/misc/strings/algorithm.hpp>
 
 namespace Misc
 {

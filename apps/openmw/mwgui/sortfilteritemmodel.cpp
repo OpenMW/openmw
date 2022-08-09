@@ -1,6 +1,5 @@
 #include "sortfilteritemmodel.hpp"
 
-#include <components/misc/stringops.hpp>
 #include <components/misc/utf8stream.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadalch.hpp>

@@ -1,6 +1,7 @@
 #include <MyGUI_ScrollBar.h>
 
 #include <components/misc/rng.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

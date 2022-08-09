@@ -8,6 +8,8 @@
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/npcstats.hpp>
 
+#include <components/misc/strings/format.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"

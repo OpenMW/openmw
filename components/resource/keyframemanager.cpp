@@ -12,7 +12,7 @@
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/osgacontroller.hpp>
 #include <components/misc/pathhelpers.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "animation.hpp"
 #include "objectcache.hpp"
@@ -27,7 +27,8 @@ namespace Resource
 
     void RetrieveAnimationsVisitor::apply(osg::Node& node)
     {
-        if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone") && Misc::StringUtils::lowerCase(node.getName()) == std::string("bip01"))
+        if (node.libraryName() == std::string_view("osgAnimation") && node.className() == std::string_view("Bone")
+                && Misc::StringUtils::lowerCase(node.getName()) == std::string_view("bip01"))
             {
                 osg::ref_ptr<SceneUtil::OsgAnimationController> callback = new SceneUtil::OsgAnimationController();
 

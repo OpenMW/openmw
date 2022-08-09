@@ -13,7 +13,7 @@
 
 #include <QVariant>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "columnbase.hpp"
 #include "collectionbase.hpp"

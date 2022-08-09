@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 CSMWorld::Scope CSMWorld::getScopeFromId (const std::string& id)
 {
@@ -12,7 +12,7 @@ CSMWorld::Scope CSMWorld::getScopeFromId (const std::string& id)
     std::string::size_type i = id.find ("::");
 
     if (i!=std::string::npos)
-        namespace_ = Misc::StringUtils::lowerCase (id.substr (0, i));
+        namespace_ = Misc::StringUtils::lowerCase(std::string_view(id).substr(0, i));
 
     if (namespace_=="project")
         return Scope_Project;

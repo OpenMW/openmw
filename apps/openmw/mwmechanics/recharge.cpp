@@ -1,6 +1,7 @@
 #include "recharge.hpp"
 
 #include <components/misc/rng.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

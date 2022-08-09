@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 bool CSMDoc::Blacklist::isBlacklisted (const CSMWorld::UniversalId& id) const
 {

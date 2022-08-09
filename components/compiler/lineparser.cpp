@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "scanner.hpp"
 #include "context.hpp"

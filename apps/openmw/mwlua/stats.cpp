@@ -7,7 +7,6 @@
 #include <variant>
 
 #include <components/lua/luastate.hpp>
-#include <components/misc/stringops.hpp>
 
 #include "localscripts.hpp"
 #include "luamanagerimp.hpp"

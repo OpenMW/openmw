@@ -9,7 +9,7 @@
 #include <components/interpreter/defines.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/vfs/manager.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/fontloader/fontloader.hpp>
 

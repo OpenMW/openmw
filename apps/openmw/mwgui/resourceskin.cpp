@@ -2,7 +2,7 @@
 
 #include <MyGUI_RenderManager.h>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 namespace MWGui
 {

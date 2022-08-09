@@ -1,5 +1,7 @@
 #include "refiddata.hpp"
 
+#include <components/misc/strings/lower.hpp>
+
 #include <cassert>
 #include <memory>
 #include <string_view>

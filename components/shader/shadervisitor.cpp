@@ -19,7 +19,7 @@
 #include <osgUtil/TangentSpaceGenerator>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/osguservalues.hpp>
 #include <components/stereo/stereomanager.hpp>
 #include <components/resource/imagemanager.hpp>

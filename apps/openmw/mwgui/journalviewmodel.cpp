@@ -5,7 +5,7 @@
 #include <MyGUI_LanguageManager.h>
 
 #include <components/translation/translation.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"

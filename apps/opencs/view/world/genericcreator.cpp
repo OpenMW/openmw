@@ -9,7 +9,7 @@
 #include <QLabel>
 #include <QComboBox>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/data.hpp"

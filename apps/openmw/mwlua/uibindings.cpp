@@ -7,7 +7,7 @@
 #include <components/lua_ui/resources.hpp>
 
 #include <components/settings/settings.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "context.hpp"
 #include "luamanagerimp.hpp"

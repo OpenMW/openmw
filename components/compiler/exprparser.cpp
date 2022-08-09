@@ -7,7 +7,7 @@
 #include <iterator>
 #include <sstream>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "generator.hpp"
 #include "scanner.hpp"

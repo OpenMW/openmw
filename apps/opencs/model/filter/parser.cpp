@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../world/columns.hpp"
 #include "../world/data.hpp"

@@ -1,6 +1,7 @@
 #include "loadscpt.hpp"
 
 #include <sstream>
+#include <algorithm>
 
 #include <components/debug/debuglog.hpp>
 

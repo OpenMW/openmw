@@ -23,7 +23,7 @@
 
 #include <components/misc/mathutil.hpp>
 #include <components/misc/rng.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/settings/settings.hpp>

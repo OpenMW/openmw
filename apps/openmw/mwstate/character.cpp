@@ -10,6 +10,8 @@
 
 #include <components/misc/utf8stream.hpp>
 
+#include <components/misc/strings/algorithm.hpp>
+
 bool MWState::operator< (const Slot& left, const Slot& right)
 {
     return left.mTimeStamp<right.mTimeStamp;

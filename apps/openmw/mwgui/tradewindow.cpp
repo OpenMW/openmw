@@ -6,6 +6,7 @@
 #include <MyGUI_ControllerRepeatClick.h>
 
 #include <components/widgets/numericeditbox.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
