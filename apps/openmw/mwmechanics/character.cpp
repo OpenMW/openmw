@@ -1129,7 +1129,6 @@ bool CharacterController::updateWeaponState()
 
     const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
 
-    std::string upSoundId;
     std::string downSoundId;
     bool weaponChanged = false;
     bool ammunition = true;
@@ -1145,8 +1144,6 @@ bool CharacterController::updateWeaponState()
         if (weapon != inv.end())
         {
             newWeapon = *weapon;
-            if (mWeaponType != ESM::Weapon::HandToHand && isRealWeapon(weaptype))
-                upSoundId = newWeapon.getClass().getUpSoundId(newWeapon);
             if (isRealWeapon(mWeaponType))
                 downSoundId = newWeapon.getClass().getDownSoundId(newWeapon);
         }
@@ -1304,10 +1301,13 @@ bool CharacterController::updateWeaponState()
                         {
                             mAnimation->showWeapons(true);
                         }
-                    }
-                    if (!upSoundId.empty())
-                    {
-                        sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
+
+                        if (!mWeapon.isEmpty() && mWeaponType != ESM::Weapon::HandToHand && isRealWeapon(weaptype))
+                        {
+                            std::string upSoundId = mWeapon.getClass().getUpSoundId(mWeapon);
+                            if (!upSoundId.empty())
+                                sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
+                        }
                     }
                 }
 
