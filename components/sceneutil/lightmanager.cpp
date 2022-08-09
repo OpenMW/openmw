@@ -8,7 +8,6 @@
 #include <osg/BufferObject>
 #include <osg/BufferIndexBinding>
 #include <osg/Endian>
-#include <osg/Version>
 #include <osg/ValueObject>
 
 #include <osgUtil/CullVisitor>
@@ -302,11 +301,7 @@ namespace SceneUtil
 
                 osg::ref_ptr<osg::UniformBufferObject> ubo = new osg::UniformBufferObject;
                 buffer->getData()->setBufferObject(ubo);
-#if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
                 osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
-#else
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), ubo, 0, buffer->getData()->getTotalDataSize());
-#endif
                 stateset->setAttributeAndModes(ubb, mode);
 
                 break;
@@ -614,11 +609,7 @@ namespace SceneUtil
             for (size_t i = 0; i < mStateSet.size(); ++i)
             {
                 auto& buffer = lightManager->getUBOManager()->getLightBuffer(i);
-#if OSG_VERSION_GREATER_OR_EQUAL(3,5,7)
                 osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
-#else
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), buffer->getData()->getBufferObject(), 0, buffer->getData()->getTotalDataSize());
-#endif
                 mStateSet[i]->setAttributeAndModes(ubb, osg::StateAttribute::ON);
             }
         }

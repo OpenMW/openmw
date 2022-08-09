@@ -1,12 +1,10 @@
 #include "loadingscreen.hpp"
 
 #include <array>
-#include <condition_variable>
 
 #include <osgViewer/Viewer>
 
 #include <osg/Texture2D>
-#include <osg/Version>
 
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Gui.h>
@@ -305,12 +303,8 @@ namespace MWGui
             mCopyFramebufferToTextureCallback = new CopyFramebufferToTextureCallback(mTexture);
         }
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 10)
         mViewer->getCamera()->removeInitialDrawCallback(mCopyFramebufferToTextureCallback);
         mViewer->getCamera()->addInitialDrawCallback(mCopyFramebufferToTextureCallback);
-#else
-        mViewer->getCamera()->setInitialDrawCallback(mCopyFramebufferToTextureCallback);
-#endif
         mCopyFramebufferToTextureCallback->reset();
 
         mSplashImage->setBackgroundImage("");

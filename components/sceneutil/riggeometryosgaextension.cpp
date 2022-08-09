@@ -4,7 +4,6 @@
 
 #include <osg/Drawable>
 #include <osg/NodeVisitor>
-#include <osg/Version>
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
