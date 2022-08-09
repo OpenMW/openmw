@@ -12,7 +12,6 @@
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
 #include <osg/Material>
-#include <osg/Version>
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -97,14 +96,6 @@ RenderWidget::~RenderWidget()
     try
     {
         CompositeViewer::get().removeView(mView);
-
-#if OSG_VERSION_LESS_THAN(3,6,5)
-        // before OSG 3.6.4, the default font was a static object, and if it wasn't attached to the scene when a graphics context was destroyed, it's program wouldn't be released.
-        // 3.6.4 moved it into the object cache, which meant it usually got released, but not here.
-        // 3.6.5 improved cleanup with osgViewer::CompositeViewer::removeView so it more reliably released associated state for objects in the object cache.
-        osg::ref_ptr<osg::GraphicsContext> graphicsContext = mView->getCamera()->getGraphicsContext();
-        osgText::Font::getDefaultFont()->releaseGLObjects(graphicsContext->getState());
-#endif
     }
     catch(const std::exception& e)
     {
@@ -146,9 +137,7 @@ CompositeViewer::CompositeViewer()
     // https://gitlab.com/OpenMW/openmw/-/issues/5481
     setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,5,5)
     setUseConfigureAffinity(false);
-#endif
 
     // disable the default setting of viewer.done() by pressing Escape.
     setKeyEventSetsDone(0);

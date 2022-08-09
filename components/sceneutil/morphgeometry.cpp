@@ -3,8 +3,6 @@
 #include <cassert>
 #include <components/resource/scenemanager.hpp>
 
-#include <osg/Version>
-
 namespace SceneUtil
 {
 
@@ -189,9 +187,7 @@ void MorphGeometry::cull(osg::NodeVisitor *nv)
 
     positionDst->dirty();
 
-#if OSG_MIN_VERSION_REQUIRED(3, 5, 10)
     geom.osg::Drawable::dirtyGLObjects();
-#endif
 
     nv->pushOntoNodePath(&geom);
     nv->apply(geom);
