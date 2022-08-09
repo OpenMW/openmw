@@ -1141,17 +1141,18 @@ bool CharacterController::updateWeaponState()
         if(stats.getDrawState() == DrawState::Spell)
             weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
-        if(weapon != inv.end() && mWeaponType != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::HandToHand && weaptype != ESM::Weapon::Spell && weaptype != ESM::Weapon::None)
-            upSoundId = weapon->getClass().getUpSoundId(*weapon);
-
-        if(weapon != inv.end() && mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None)
-            downSoundId = weapon->getClass().getDownSoundId(*weapon);
-
+        MWWorld::Ptr newWeapon;
+        if (weapon != inv.end())
+        {
+            newWeapon = *weapon;
+            if (mWeaponType != ESM::Weapon::HandToHand && isRealWeapon(weaptype))
+                upSoundId = newWeapon.getClass().getUpSoundId(newWeapon);
+            if (isRealWeapon(mWeaponType))
+                downSoundId = newWeapon.getClass().getDownSoundId(newWeapon);
+        }
         // weapon->HtH switch: weapon is empty already, so we need to take sound from previous weapon
-        if(weapon == inv.end() && !mWeapon.isEmpty() && weaptype == ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell)
+        else if (!mWeapon.isEmpty() && weaptype == ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell)
             downSoundId = mWeapon.getClass().getDownSoundId(mWeapon);
-
-        MWWorld::Ptr newWeapon = weapon != inv.end() ? *weapon : MWWorld::Ptr();
 
         if (mWeapon != newWeapon)
         {
@@ -1166,17 +1167,16 @@ bool CharacterController::updateWeaponState()
             int ammotype = getWeaponType(mWeapon.get<ESM::Weapon>()->mBase->mData.mType)->mAmmoType;
             if (ammotype != ESM::Weapon::None)
                 ammunition = ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype;
-        }
-
-        // Cancel attack if we no longer have ammunition
-        if (!ammunition)
-        {
-            if (mUpperBodyState == UpperBodyState::AttackPreWindUp || mUpperBodyState == UpperBodyState::AttackWindUp)
+            // Cancel attack if we no longer have ammunition
+            if (!ammunition)
             {
-                mAnimation->disable(mCurrentWeapon);
-                mUpperBodyState = UpperBodyState::WeaponEquipped;
+                if (mUpperBodyState == UpperBodyState::AttackPreWindUp || mUpperBodyState == UpperBodyState::AttackWindUp)
+                {
+                    mAnimation->disable(mCurrentWeapon);
+                    mUpperBodyState = UpperBodyState::WeaponEquipped;
+                }
+                setAttackingOrSpell(false);
             }
-            setAttackingOrSpell(false);
         }
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
