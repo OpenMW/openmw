@@ -1570,8 +1570,9 @@ bool CharacterController::updateWeaponState(CharacterState idle)
                     mUpperBodyState = UpperCharState_StartToMinAttack;
                     if (isRandomAttackAnimation(mCurrentWeapon))
                     {
+                        world->breakInvisibility(mPtr);
                         mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
-                        playSwishSound(0.0f);
+                        playSwishSound(mAttackStrength);
                     }
                 }
             }
