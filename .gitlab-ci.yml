@@ -593,7 +593,7 @@ Windows_MSBuild_RelWithDebInfo:
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
 
-Ubuntu_AndroidNDK_arm64-v8a:
+.Ubuntu_AndroidNDK_arm64-v8a:
   tags:
     - linux
   image: psi29a/android-ndk:focal-ndk22
