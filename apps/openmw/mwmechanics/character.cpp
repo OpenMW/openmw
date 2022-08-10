@@ -1697,6 +1697,8 @@ bool CharacterController::updateWeaponState()
     else if(complete >= 1.0f && isRandomAttackAnimation(mCurrentWeapon))
     {
         clearStateAnimation(mCurrentWeapon);
+        if (isRecovery())
+            mAnimation->disable(mCurrentHit);
         mUpperBodyState = UpperBodyState::WeaponEquipped;
     }
 
