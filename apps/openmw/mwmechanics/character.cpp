@@ -1483,7 +1483,7 @@ bool CharacterController::updateWeaponState()
                     }
 
                     mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                     MWRender::Animation::BlendMask_All, true,
+                                     MWRender::Animation::BlendMask_All, false,
                                      1, startKey, stopKey,
                                      0.0f, 0);
                     mUpperBodyState = UpperBodyState::Casting;
@@ -1608,7 +1608,7 @@ bool CharacterController::updateWeaponState()
         }
     }
 
-    if(!animPlaying)
+    if(!animPlaying || complete >= 1.f)
     {
         if (mUpperBodyState == UpperBodyState::Equipping ||
             mUpperBodyState == UpperBodyState::AttackEnd ||
@@ -1622,12 +1622,16 @@ bool CharacterController::updateWeaponState()
             if (mUpperBodyState != UpperBodyState::Equipping && isRecovery())
                 mAnimation->disable(mCurrentHit);
 
+            if (animPlaying)
+                mAnimation->disable(mCurrentWeapon);
+
             mUpperBodyState = UpperBodyState::WeaponEquipped;
         }
         else if (mUpperBodyState == UpperBodyState::Unequipping)
             mUpperBodyState = UpperBodyState::None;
     }
-    else if(complete >= 1.0f && !isRandomAttackAnimation(mCurrentWeapon))
+
+    if (complete >= 1.0f && !isRandomAttackAnimation(mCurrentWeapon))
     {
         std::string start, stop;
         switch(mUpperBodyState)
@@ -1686,9 +1690,8 @@ bool CharacterController::updateWeaponState()
 
         if(!start.empty())
         {
-            bool autodisable = mUpperBodyState == UpperBodyState::AttackEnd;
             mAnimation->disable(mCurrentWeapon);
-            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, autodisable, weapSpeed, start, stop, 0.0f, 0);
+            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false, weapSpeed, start, stop, 0.0f, 0);
         }
     }
     else if(complete >= 1.0f && isRandomAttackAnimation(mCurrentWeapon))
