@@ -19,6 +19,7 @@
     Bug #4374: Player rotation reset when nearing area that hasn't been loaded yet
     Bug #4376: Moved actors don't respawn in their original cells
     Bug #4389: NPC's lips do not move if his head model has the NiBSAnimationNode root node
+    Bug #4526: Crash when additional maps are applied over a model with out of bounds UV
     Bug #4602: Robert's Bodies: crash inside createInstance()
     Bug #4700: OpenMW-CS: Incorrect command implementation
     Bug #4744: Invisible particles aren't always processed
@@ -150,6 +151,7 @@
     Bug #6909: Using enchanted items has no animation
     Bug #6910: Torches should not be extinguished when not being held
     Bug #6913: Constant effect enchanted items don't break invisibility
+    Bug #6923: Dispose of corpse prevents respawning after load
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
@@ -158,8 +160,9 @@
     Feature #2780: A way to see current OpenMW version in the console
     Feature #2858: Add a tab to the launcher for handling datafolders
     Feature #3180: Support uncompressed colour-mapped TGA files
-    Feature #3245: Grid and angle snapping for the OpenMW-CS
+    Feature #3245: OpenMW-CS: Instance editing grid
     Feature #3616: Allow Zoom levels on the World Map
+    Feature #3668: Support palettized DDS files
     Feature #4067: Post Processing
     Feature #4297: Implement APPLIED_ONCE flag for magic effects
     Feature #4414: Handle duration of EXTRA SPELL magic effect
@@ -170,7 +173,7 @@
     Feature #5454: Clear active spells from actor when he disappears from scene
     Feature #5489: MCP: Telekinesis fix for activators
     Feature #5701: Convert osgAnimation::RigGeometry to double-buffered custom version
-    Feature #5737: Handle instance move from one cell to another
+    Feature #5737: OpenMW-CS: Handle instance move from one cell to another
     Feature #5928: Allow Glow in the Dahrk to be disabled
     Feature #5996: Support Lua scripts in OpenMW
     Feature #6017: Separate persistent and temporary cell references when saving
@@ -184,7 +187,7 @@
     Feature #6248: Embedded error marker mesh
     Feature #6249: Alpha testing support for Collada
     Feature #6251: OpenMW-CS: Set instance movement based on camera zoom
-    Feature #6288: Preserve the "blocked" record flag for referenceable objects.
+    Feature #6288: OpenMW-CS: Preserve "blocked" record flags when saving
     Feature #6360: More realistic raindrop ripples
     Feature #6380: Treat commas as whitespace in scripts
     Feature #6419: Don't grey out topics if they can produce another topic reference
@@ -344,7 +347,6 @@
     Bug #6047: Mouse bindings can be triggered during save loading
     Bug #6136: Game freezes when NPCs try to open doors that are about to be closed
     Bug #6294: Game crashes with empty pathgrid
-    Bug #6923: Dispose of corpse prevents respawning after load
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
