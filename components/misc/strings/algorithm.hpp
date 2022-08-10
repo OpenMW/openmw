@@ -57,6 +57,8 @@ namespace Misc::StringUtils
 
     struct CiEqual
     {
+        using is_transparent = void;
+
         bool operator()(std::string_view left, std::string_view right) const
         {
             return ciEqual(left, right);
@@ -65,10 +67,12 @@ namespace Misc::StringUtils
 
     struct CiHash
     {
-        std::size_t operator()(std::string str) const
+        using is_transparent = void;
+
+        std::size_t operator()(std::string_view str) const
         {
-            lowerCaseInPlace(str);
-            return std::hash<std::string>{}(str);
+            // TODO avoid string copy
+            return std::hash<std::string>{}(lowerCase(str));
         }
     };
 

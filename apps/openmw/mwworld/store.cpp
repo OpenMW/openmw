@@ -12,6 +12,22 @@
 #include <stdexcept>
 #include <sstream>
 
+namespace
+{
+    // TODO: Switch to C++23 to get a working version of std::unordered_map::erase
+    template<class T>
+    bool eraseFromMap(T& map, std::string_view value)
+    {
+        auto it = map.find(value);
+        if(it != map.end())
+        {
+            map.erase(it);
+            return true;
+        }
+        return false;
+    }
+}
+
 namespace MWWorld
 {
     RecordId::RecordId(const std::string &id, bool isDeleted)
@@ -97,7 +113,7 @@ namespace MWWorld
     }
 
     template<typename T>
-    const T *Store<T>::search(const std::string &id) const
+    const T* Store<T>::search(std::string_view id) const
     {
         typename Dynamic::const_iterator dit = mDynamic.find(id);
         if (dit != mDynamic.end())
@@ -110,7 +126,7 @@ namespace MWWorld
         return nullptr;
     }
     template<typename T>
-    const T *Store<T>::searchStatic(const std::string &id) const
+    const T* Store<T>::searchStatic(std::string_view id) const
     {
         typename Static::const_iterator it = mStatic.find(id);
         if (it != mStatic.end())
@@ -120,13 +136,13 @@ namespace MWWorld
     }
 
     template<typename T>
-    bool Store<T>::isDynamic(const std::string &id) const
+    bool Store<T>::isDynamic(std::string_view id) const
     {
         typename Dynamic::const_iterator dit = mDynamic.find(id);
         return (dit != mDynamic.end());
     }
     template<typename T>
-    const T *Store<T>::searchRandom(const std::string &id, Misc::Rng::Generator& prng) const
+    const T* Store<T>::searchRandom(std::string_view id, Misc::Rng::Generator& prng) const
     {
         std::vector<const T*> results;
         std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
@@ -139,7 +155,7 @@ namespace MWWorld
         return nullptr;
     }
     template<typename T>
-    const T *Store<T>::find(const std::string &id) const
+    const T* Store<T>::find(std::string_view id) const
     {
         const T *ptr = search(id);
         if (ptr == nullptr)
@@ -226,7 +242,7 @@ namespace MWWorld
         return ptr;
     }
     template<typename T>
-    bool Store<T>::eraseStatic(const std::string &id)
+    bool Store<T>::eraseStatic(std::string_view id)
     {
         typename Static::iterator it = mStatic.find(id);
 
@@ -249,9 +265,9 @@ namespace MWWorld
     }
 
     template<typename T>
-    bool Store<T>::erase(const std::string &id)
+    bool Store<T>::erase(std::string_view id)
     {
-        if (!mDynamic.erase(id))
+        if (!eraseFromMap(mDynamic, id))
             return false;
 
         // have to reinit the whole shared part
@@ -475,7 +491,7 @@ namespace MWWorld
 
         esm.restoreContext(ctx);
     }
-    const ESM::Cell *Store<ESM::Cell>::search(const std::string &id) const
+    const ESM::Cell* Store<ESM::Cell>::search(std::string_view id) const
     {
         DynamicInt::const_iterator it = mInt.find(id);
         if (it != mInt.end()) {
@@ -534,12 +550,12 @@ namespace MWWorld
 
         return &mExt.insert(std::make_pair(key, newCell)).first->second;
     }
-    const ESM::Cell *Store<ESM::Cell>::find(const std::string &id) const
+    const ESM::Cell* Store<ESM::Cell>::find(std::string_view id) const
     {
         const ESM::Cell *ptr = search(id);
         if (ptr == nullptr)
         {
-            const std::string msg = "Cell '" + id + "' not found";
+            const std::string msg = "Cell '" + std::string(id) + "' not found";
             throw std::runtime_error(msg);
         }
         return ptr;
@@ -677,7 +693,7 @@ namespace MWWorld
     {
         return iterator(mSharedExt.end());
     }
-    const ESM::Cell *Store<ESM::Cell>::searchExtByName(const std::string &id) const
+    const ESM::Cell* Store<ESM::Cell>::searchExtByName(std::string_view id) const
     {
         const ESM::Cell *cell = nullptr;
         for (const ESM::Cell *sharedCell : mSharedExt)
@@ -694,7 +710,7 @@ namespace MWWorld
         }
         return cell;
     }
-    const ESM::Cell *Store<ESM::Cell>::searchExtByRegion(const std::string &id) const
+    const ESM::Cell* Store<ESM::Cell>::searchExtByRegion(std::string_view id) const
     {
         const ESM::Cell *cell = nullptr;
         for (const ESM::Cell *sharedCell : mSharedExt)
@@ -760,7 +776,7 @@ namespace MWWorld
         }
         return erase(cell.mName);
     }
-    bool Store<ESM::Cell>::erase(const std::string &id)
+    bool Store<ESM::Cell>::erase(std::string_view id)
     {
         DynamicInt::iterator it = mDynamicInt.find(id);
 
@@ -877,7 +893,7 @@ namespace MWWorld
             return &(it->second);
         return nullptr;
     }
-    const ESM::Pathgrid *Store<ESM::Pathgrid>::search(const std::string& name) const
+    const ESM::Pathgrid* Store<ESM::Pathgrid>::search(std::string_view name) const
     {
         Interior::const_iterator it = mInt.find(name);
         if (it != mInt.end())
@@ -894,12 +910,12 @@ namespace MWWorld
         }
         return pathgrid;
     }
-    const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const std::string& name) const
+    const ESM::Pathgrid* Store<ESM::Pathgrid>::find(std::string_view name) const
     {
         const ESM::Pathgrid* pathgrid = search(name);
         if (!pathgrid)
         {
-            const std::string msg = "Pathgrid in cell '" + name + "' not found";
+            const std::string msg = "Pathgrid in cell '" + std::string(name) + "' not found";
             throw std::runtime_error(msg);
         }
         return pathgrid;
@@ -1012,7 +1028,7 @@ namespace MWWorld
         mKeywordSearchModFlag = true;
     }
 
-    const ESM::Dialogue *Store<ESM::Dialogue>::search(const std::string &id) const
+    const ESM::Dialogue* Store<ESM::Dialogue>::search(std::string_view id) const
     {
         typename Static::const_iterator it = mStatic.find(id);
         if (it != mStatic.end())
@@ -1021,7 +1037,7 @@ namespace MWWorld
         return nullptr;
     }
 
-    const ESM::Dialogue *Store<ESM::Dialogue>::find(const std::string &id) const
+    const ESM::Dialogue* Store<ESM::Dialogue>::find(std::string_view id) const
     {
         const ESM::Dialogue *ptr = search(id);
         if (ptr == nullptr)
@@ -1072,9 +1088,9 @@ namespace MWWorld
         return RecordId(dialogue.mId, isDeleted);
     }
 
-    bool Store<ESM::Dialogue>::eraseStatic(const std::string &id)
+    bool Store<ESM::Dialogue>::eraseStatic(std::string_view id)
     {
-        if (mStatic.erase(id))
+        if (eraseFromMap(mStatic, id))
             mKeywordSearchModFlag = true;
 
         return true;

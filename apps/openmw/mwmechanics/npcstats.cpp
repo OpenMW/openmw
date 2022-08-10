@@ -69,7 +69,7 @@ const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
     return mFactionRank;
 }
 
-int MWMechanics::NpcStats::getFactionRank(const std::string &faction) const
+int MWMechanics::NpcStats::getFactionRank(std::string_view faction) const
 {
     const std::string lower = Misc::StringUtils::lowerCase(faction);
     std::map<std::string, int>::const_iterator it = mFactionRank.find(lower);
@@ -79,7 +79,7 @@ int MWMechanics::NpcStats::getFactionRank(const std::string &faction) const
     return -1;
 }
 
-void MWMechanics::NpcStats::raiseRank(const std::string &faction)
+void MWMechanics::NpcStats::raiseRank(std::string_view faction)
 {
     const std::string lower = Misc::StringUtils::lowerCase(faction);
     std::map<std::string, int>::iterator it = mFactionRank.find(lower);
@@ -92,7 +92,7 @@ void MWMechanics::NpcStats::raiseRank(const std::string &faction)
     }
 }
 
-void MWMechanics::NpcStats::lowerRank(const std::string &faction)
+void MWMechanics::NpcStats::lowerRank(std::string_view faction)
 {
     const std::string lower = Misc::StringUtils::lowerCase(faction);
     std::map<std::string, int>::iterator it = mFactionRank.find(lower);
@@ -107,7 +107,7 @@ void MWMechanics::NpcStats::lowerRank(const std::string &faction)
     }
 }
 
-void MWMechanics::NpcStats::joinFaction(const std::string& faction)
+void MWMechanics::NpcStats::joinFaction(std::string_view faction)
 {
     const std::string lower = Misc::StringUtils::lowerCase(faction);
     std::map<std::string, int>::iterator it = mFactionRank.find(lower);
@@ -115,12 +115,12 @@ void MWMechanics::NpcStats::joinFaction(const std::string& faction)
         mFactionRank[lower] = 0;
 }
 
-bool MWMechanics::NpcStats::getExpelled(const std::string& factionID) const
+bool MWMechanics::NpcStats::getExpelled(std::string_view factionID) const
 {
     return mExpelled.find(Misc::StringUtils::lowerCase(factionID)) != mExpelled.end();
 }
 
-void MWMechanics::NpcStats::expell(const std::string& factionID)
+void MWMechanics::NpcStats::expell(std::string_view factionID)
 {
     std::string lower = Misc::StringUtils::lowerCase(factionID);
     if (mExpelled.find(lower) == mExpelled.end())
@@ -132,17 +132,17 @@ void MWMechanics::NpcStats::expell(const std::string& factionID)
     }
 }
 
-void MWMechanics::NpcStats::clearExpelled(const std::string& factionID)
+void MWMechanics::NpcStats::clearExpelled(std::string_view factionID)
 {
     mExpelled.erase(Misc::StringUtils::lowerCase(factionID));
 }
 
-bool MWMechanics::NpcStats::isInFaction (const std::string& faction) const
+bool MWMechanics::NpcStats::isInFaction(std::string_view faction) const
 {
     return (mFactionRank.find(Misc::StringUtils::lowerCase(faction)) != mFactionRank.end());
 }
 
-int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const
+int MWMechanics::NpcStats::getFactionReputation(std::string_view faction) const
 {
     std::map<std::string, int>::const_iterator iter = mFactionReputation.find (Misc::StringUtils::lowerCase(faction));
 
@@ -152,7 +152,7 @@ int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) con
     return iter->second;
 }
 
-void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, int value)
+void MWMechanics::NpcStats::setFactionReputation(std::string_view faction, int value)
 {
     mFactionReputation[Misc::StringUtils::lowerCase(faction)] = value;
 }
@@ -387,7 +387,7 @@ void MWMechanics::NpcStats::setCrimeId(int id)
     mCrimeId = id;
 }
 
-bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int rank) const
+bool MWMechanics::NpcStats::hasSkillsForRank(std::string_view factionId, int rank) const
 {
     if (rank<0 || rank>=10)
         throw std::runtime_error ("rank index out of range");

@@ -2,6 +2,7 @@
 #define GAME_MWDIALOGUE_JOURNALENTRY_H
 
 #include <string>
+#include <string_view>
 
 namespace ESM
 {
@@ -25,7 +26,7 @@ namespace MWDialogue
         Entry() = default;
 
         /// actor is optional
-        Entry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor);
+        Entry(std::string_view topic, std::string_view infoId, const MWWorld::Ptr& actor);
 
         Entry (const ESM::JournalEntry& record);
 
@@ -43,15 +44,15 @@ namespace MWDialogue
 
         JournalEntry() = default;
 
-        JournalEntry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor);
+        JournalEntry(std::string_view topic, std::string_view infoId, const MWWorld::Ptr& actor);
 
         JournalEntry (const ESM::JournalEntry& record);
 
         void write (ESM::JournalEntry& entry) const;
 
-        static JournalEntry makeFromQuest (const std::string& topic, int index);
+        static JournalEntry makeFromQuest(std::string_view topic, int index);
 
-        static std::string idFromIndex (const std::string& topic, int index);
+        static std::string_view idFromIndex(std::string_view topic, int index);
     };
 
     /// \brief A quest entry with a timestamp.
@@ -63,14 +64,14 @@ namespace MWDialogue
 
         StampedJournalEntry();
 
-        StampedJournalEntry (const std::string& topic, const std::string& infoId,
+        StampedJournalEntry(std::string_view topic, std::string_view infoId,
             int day, int month, int dayOfMonth, const MWWorld::Ptr& actor);
 
         StampedJournalEntry (const ESM::JournalEntry& record);
 
         void write (ESM::JournalEntry& entry) const;
 
-        static StampedJournalEntry makeFromQuest (const std::string& topic, int index, const MWWorld::Ptr& actor);
+        static StampedJournalEntry makeFromQuest(std::string_view topic, int index, const MWWorld::Ptr& actor);
     };
 }
 

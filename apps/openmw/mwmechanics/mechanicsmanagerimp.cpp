@@ -518,9 +518,7 @@ namespace MWMechanics
 
         float reaction = 0;
         int rank = 0;
-        std::string npcFaction = ptr.getClass().getPrimaryFaction(ptr);
-
-        Misc::StringUtils::lowerCaseInPlace(npcFaction);
+        std::string npcFaction = Misc::StringUtils::lowerCase(ptr.getClass().getPrimaryFaction(ptr));
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
@@ -985,7 +983,7 @@ namespace MWMechanics
         if (ownerFound != owners.end())
             return true;
 
-        const std::string factionid = ptr.getClass().getPrimaryFaction(ptr);
+        const std::string_view factionid = ptr.getClass().getPrimaryFaction(ptr);
         if (!factionid.empty())
         {
             OwnerMap::const_iterator factionOwnerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
@@ -1010,7 +1008,7 @@ namespace MWMechanics
         owner.first = victim.getCellRef().getRefId();
         owner.second = false;
 
-        const std::string victimFaction = victim.getClass().getPrimaryFaction(victim);
+        const std::string_view victimFaction = victim.getClass().getPrimaryFaction(victim);
         if (!victimFaction.empty() && Misc::StringUtils::ciEqual(item.getCellRef().getFaction(), victimFaction)) // Is the item faction-owned?
         {
             owner.first = victimFaction;
@@ -1375,7 +1373,7 @@ namespace MWMechanics
             // If committing a crime against a faction member, expell from the faction
             if (!victim.isEmpty() && victim.getClass().isNpc())
             {
-                std::string factionID = victim.getClass().getPrimaryFaction(victim);
+                std::string_view factionID = victim.getClass().getPrimaryFaction(victim);
 
                 const std::map<std::string, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
                 if (playerRanks.find(Misc::StringUtils::lowerCase(factionID)) != playerRanks.end())

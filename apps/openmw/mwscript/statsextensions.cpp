@@ -31,9 +31,9 @@
 
 namespace
 {
-    std::string getDialogueActorFaction(const MWWorld::ConstPtr& actor)
+    std::string_view getDialogueActorFaction(const MWWorld::ConstPtr& actor)
     {
-        std::string factionId = actor.getClass().getPrimaryFaction(actor);
+        std::string_view factionId = actor.getClass().getPrimaryFaction(actor);
         if (factionId.empty())
             throw std::runtime_error (
                 "failed to determine dialogue actors faction (because actor is factionless)");
@@ -453,7 +453,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
@@ -480,7 +480,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
@@ -538,7 +538,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer value = 0;
@@ -559,7 +559,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID;
+                    std::string_view factionID;
 
                     if(arg0==0)
                     {
@@ -570,11 +570,10 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
-                    if(factionID != "")
+                    if(!factionID.empty())
                     {
                         MWWorld::Ptr player = MWMechanics::getPlayer();
                         player.getClass().getNpcStats(player).joinFaction(factionID);
@@ -591,7 +590,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID;
+                    std::string_view factionID;
 
                     if(arg0==0)
                     {
@@ -602,14 +601,13 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
-                    if(factionID != "")
+                    if(!factionID.empty())
                     {
                         MWWorld::Ptr player = MWMechanics::getPlayer();
-                        if(player.getClass().getNpcStats(player).getFactionRanks().find(factionID) == player.getClass().getNpcStats(player).getFactionRanks().end())
+                        if(!player.getClass().getNpcStats(player).isInFaction(factionID))
                         {
                             player.getClass().getNpcStats(player).joinFaction(factionID);
                         }
@@ -630,7 +628,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr actor = R()(runtime, false);
 
-                    std::string factionID;
+                    std::string_view factionID;
 
                     if(arg0==0)
                     {
@@ -641,11 +639,10 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
-                    if(factionID != "")
+                    if(!factionID.empty())
                     {
                         MWWorld::Ptr player = MWMechanics::getPlayer();
                         player.getClass().getNpcStats(player).lowerRank(factionID);
@@ -662,7 +659,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID;
+                    std::string_view factionID;
                     if(arg0 >0)
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -672,21 +669,13 @@ namespace MWScript
                     {
                         factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
-                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
-                    MWWorld::Ptr player = MWMechanics::getPlayer();
-                    if(factionID!="")
+                    if(!factionID.empty())
                     {
-                        if(player.getClass().getNpcStats(player).getFactionRanks().find(factionID) != player.getClass().getNpcStats(player).getFactionRanks().end())
-                        {
-                            runtime.push(player.getClass().getNpcStats(player).getFactionRanks().at(factionID));
-                        }
-                        else
-                        {
-                            runtime.push(-1);
-                        }
+                        MWWorld::Ptr player = MWMechanics::getPlayer();
+                        runtime.push(player.getClass().getNpcStats(player).getFactionRank(factionID));
                     }
                     else
                     {
@@ -783,8 +772,6 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
-
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     runtime.push (
                         player.getClass().getNpcStats (player).getFactionReputation (factionId));
@@ -818,8 +805,6 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
-
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     player.getClass().getNpcStats (player).setFactionReputation (factionId, value);
                 }
@@ -851,8 +836,6 @@ namespace MWScript
 
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
-
-                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     player.getClass().getNpcStats (player).setFactionReputation (factionId,
@@ -926,7 +909,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID;
+                    std::string_view factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -936,9 +919,8 @@ namespace MWScript
                     {
                         factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
-                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     MWWorld::Ptr player = MWMechanics::getPlayer();
-                    if(factionID!="")
+                    if(!factionID.empty())
                     {
                         runtime.push(player.getClass().getNpcStats(player).getExpelled(factionID));
                     }
@@ -958,7 +940,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID;
+                    std::string_view factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -969,7 +951,7 @@ namespace MWScript
                         factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
                     MWWorld::Ptr player = MWMechanics::getPlayer();
-                    if(factionID!="")
+                    if(!factionID.empty())
                     {
                         player.getClass().getNpcStats(player).expell(factionID);
                     }
@@ -985,7 +967,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionID;
+                    std::string_view factionID;
                     if(arg0 >0 )
                     {
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -996,7 +978,7 @@ namespace MWScript
                         factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
                     MWWorld::Ptr player = MWMechanics::getPlayer();
-                    if(factionID!="")
+                    if(!factionID.empty())
                         player.getClass().getNpcStats(player).clearExpelled(factionID);
                 }
         };
@@ -1010,7 +992,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string factionID = ptr.getClass().getPrimaryFaction(ptr);
+                    std::string_view factionID = ptr.getClass().getPrimaryFaction(ptr);
                     if(factionID.empty())
                         return;
 
@@ -1045,7 +1027,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string factionID = ptr.getClass().getPrimaryFaction(ptr);
+                    std::string_view factionID = ptr.getClass().getPrimaryFaction(ptr);
                     if(factionID.empty())
                         return;
 

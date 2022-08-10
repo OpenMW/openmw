@@ -80,7 +80,7 @@ namespace MWDialogue
     void Journal::addEntry (const std::string& id, int index, const MWWorld::Ptr& actor)
     {
         // bail out if we already have heard this...
-        std::string infoId = JournalEntry::idFromIndex (id, index);
+        std::string_view infoId = JournalEntry::idFromIndex(id, index);
         for (TEntryIter i = mJournal.begin (); i != mJournal.end (); ++i)
             if (i->mTopic == id && i->mInfoId == infoId)
             {

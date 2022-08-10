@@ -547,7 +547,7 @@ namespace MWWorld
         mRandomSeed = seed;
     }
 
-    const ESM::Cell* World::getExterior(const std::string& cellName) const
+    const ESM::Cell* World::getExterior(std::string_view cellName) const
     {
         // first try named cells
         const ESM::Cell *cell = mStore.get<ESM::Cell>().searchExtByName (cellName);
@@ -579,7 +579,7 @@ namespace MWWorld
         return mCells.getExterior (x, y);
     }
 
-    CellStore *World::getInterior (const std::string& name)
+    CellStore *World::getInterior(std::string_view name)
     {
         return mCells.getInterior (name);
     }
@@ -2040,12 +2040,12 @@ namespace MWWorld
         return mWeatherManager->getNightDayMode();
     }
 
-    void World::changeWeather(const std::string& region, const unsigned int id)
+    void World::changeWeather(std::string_view region, const unsigned int id)
     {
         mWeatherManager->changeWeather(region, id);
     }
 
-    void World::modRegion(const std::string &regionid, const std::vector<char> &chances)
+    void World::modRegion(std::string_view regionid, const std::vector<char>& chances)
     {
         mWeatherManager->modRegion(regionid, chances);
     }
@@ -2767,7 +2767,7 @@ namespace MWWorld
             physicActor->enableCollisionBody(enable);
     }
 
-    bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
+    bool World::findInteriorPosition(std::string_view name, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
@@ -3686,7 +3686,7 @@ namespace MWWorld
         return file;
     }
 
-    void World::spawnRandomCreature(const std::string &creatureList)
+    void World::spawnRandomCreature(std::string_view creatureList)
     {
         const ESM::CreatureLevList* list = mStore.get<ESM::CreatureLevList>().find(creatureList);
 
@@ -3883,7 +3883,7 @@ namespace MWWorld
         return mPhysics->getHitDistance(weaponPos, target) - halfExtents.y();
     }
 
-    void preload(MWWorld::Scene* scene, const ESMStore& store, const std::string& obj)
+    void preload(MWWorld::Scene* scene, const ESMStore& store, std::string_view obj)
     {
         if (obj.empty())
             return;

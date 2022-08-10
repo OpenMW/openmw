@@ -69,16 +69,16 @@ namespace MWMechanics
 
             std::vector<const ESM::Spell*>::const_iterator end() const;
 
-            bool hasSpell(const std::string& spell) const;
+            bool hasSpell(std::string_view spell) const;
             bool hasSpell(const ESM::Spell* spell) const;
 
-            void add (const std::string& spell);
+            void add(std::string_view spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 
             void add (const ESM::Spell* spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 
-            void remove (const std::string& spell);
+            void remove(std::string_view spell);
             ///< If the spell to be removed is the selected spell, the selected spell will be changed to
             /// no spell (empty string).
 

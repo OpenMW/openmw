@@ -284,8 +284,8 @@ namespace MWWorld
          * @param region that should be changed
          * @param ID of the weather setting to shift to
          */
-        void changeWeather(const std::string& regionID, const unsigned int weatherID);
-        void modRegion(const std::string& regionID, const std::vector<char>& chances);
+        void changeWeather(std::string_view regionID, const unsigned int weatherID);
+        void modRegion(std::string_view regionID, const std::vector<char>& chances);
         void playerTeleported(const std::string& playerRegion, bool isExterior);
 
         /**

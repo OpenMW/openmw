@@ -222,7 +222,7 @@ namespace MWWorld
 
             CellStore *getExterior (int x, int y) override;
 
-            CellStore *getInterior (const std::string& name) override;
+            CellStore* getInterior(std::string_view name) override;
 
             CellStore *getCell (const ESM::CellId& id) override;
 
@@ -333,7 +333,7 @@ namespace MWWorld
             bool toggleSky() override;
             ///< \return Resulting mode
 
-            void changeWeather (const std::string& region, const unsigned int id) override;
+            void changeWeather(std::string_view region, const unsigned int id) override;
 
             int getCurrentWeather() const override;
 
@@ -349,7 +349,7 @@ namespace MWWorld
 
             void setMoonColour (bool red) override;
 
-            void modRegion(const std::string &regionid, const std::vector<char> &chances) override;
+            void modRegion(std::string_view regionid, const std::vector<char> &chances) override;
 
             float getTimeScaleFactor() const override;
 
@@ -368,7 +368,7 @@ namespace MWWorld
             void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) override;
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            const ESM::Cell *getExterior (const std::string& cellName) const override;
+            const ESM::Cell* getExterior(std::string_view cellName) const override;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
             void markCellAsUnchanged() override;
@@ -617,7 +617,7 @@ namespace MWWorld
 
             /// Find position in interior cell near door entrance
             /// \return false if interior with given name not exists, true otherwise
-            bool findInteriorPosition(const std::string &name, ESM::Position &pos) override;
+            bool findInteriorPosition(std::string_view name, ESM::Position &pos) override;
 
             /// Enables or disables use of teleport spell effects (recall, intervention, etc).
             void enableTeleporting(bool enable) override;
@@ -687,7 +687,7 @@ namespace MWWorld
             void goToJail () override;
 
             /// Spawn a random creature from a levelled list next to the player
-            void spawnRandomCreature(const std::string& creatureList) override;
+            void spawnRandomCreature(std::string_view creatureList) override;
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
             void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;

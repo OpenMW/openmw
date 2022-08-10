@@ -159,7 +159,7 @@ namespace MWClass
 
             int getBaseFightRating (const MWWorld::ConstPtr& ptr) const override;
 
-            std::string getPrimaryFaction(const MWWorld::ConstPtr &ptr) const override;
+            std::string_view getPrimaryFaction(const MWWorld::ConstPtr &ptr) const override;
             int getPrimaryFactionRank(const MWWorld::ConstPtr &ptr) const override;
 
             void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const override;

@@ -43,13 +43,11 @@ namespace MWDialogue
 
             bool getSelectStructBoolean (const SelectWrapper& select) const;
 
-            int getFactionRank (const MWWorld::Ptr& actor, const std::string& factionId) const;
+            int getFactionRank(const MWWorld::Ptr& actor, std::string_view factionId) const;
 
-            bool hasFactionRankSkillRequirements (const MWWorld::Ptr& actor, const std::string& factionId,
-                int rank) const;
+            bool hasFactionRankSkillRequirements(const MWWorld::Ptr& actor, std::string_view factionId, int rank) const;
 
-            bool hasFactionRankReputationRequirements (const MWWorld::Ptr& actor, const std::string& factionId,
-                int rank) const;
+            bool hasFactionRankReputationRequirements(const MWWorld::Ptr& actor, std::string_view factionId, int rank) const;
 
         public:
 

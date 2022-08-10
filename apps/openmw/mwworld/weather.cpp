@@ -626,7 +626,7 @@ namespace
         stopSounds();
     }
 
-    void WeatherManager::changeWeather(const std::string& regionID, const unsigned int weatherID)
+    void WeatherManager::changeWeather(std::string_view regionID, const unsigned int weatherID)
     {
         // In Morrowind, this seems to have the following behavior, when applied to the current region:
         // - When there is no transition in progress, start transitioning to the new weather.
@@ -648,7 +648,7 @@ namespace
         }
     }
 
-    void WeatherManager::modRegion(const std::string& regionID, const std::vector<char>& chances)
+    void WeatherManager::modRegion(std::string_view regionID, const std::vector<char>& chances)
     {
         // Sets the region's probability for various weather patterns. Note that this appears to be saved permanently.
         // In Morrowind, this seems to have the following behavior when applied to the current region:

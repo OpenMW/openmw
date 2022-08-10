@@ -56,7 +56,7 @@ namespace MWWorld
 
             CellStore *getExterior (int x, int y);
 
-            CellStore *getInterior (const std::string& name);
+            CellStore* getInterior(std::string_view name);
 
             CellStore *getCell (const ESM::CellId& id);
 

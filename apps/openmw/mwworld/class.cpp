@@ -483,9 +483,9 @@ namespace MWWorld
         throw std::runtime_error("class does not support fight rating");
     }
 
-    std::string Class::getPrimaryFaction (const MWWorld::ConstPtr& ptr) const
+    std::string_view Class::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string();
+        return {};
     }
     int Class::getPrimaryFactionRank (const MWWorld::ConstPtr& ptr) const
     {

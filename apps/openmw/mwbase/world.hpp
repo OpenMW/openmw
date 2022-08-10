@@ -137,7 +137,7 @@ namespace MWBase
 
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 
-            virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
+            virtual MWWorld::CellStore* getInterior(std::string_view name) = 0;
 
             virtual MWWorld::CellStore *getCell (const ESM::CellId& id) = 0;
 
@@ -236,7 +236,7 @@ namespace MWBase
             virtual bool toggleSky() = 0;
             ///< \return Resulting mode
 
-            virtual void changeWeather(const std::string& region, const unsigned int id) = 0;
+            virtual void changeWeather(std::string_view region, const unsigned int id) = 0;
 
             virtual int getCurrentWeather() const = 0;
 
@@ -252,7 +252,7 @@ namespace MWBase
 
             virtual void setMoonColour (bool red) = 0;
 
-            virtual void modRegion(const std::string &regionid, const std::vector<char> &chances) = 0;
+            virtual void modRegion(std::string_view regionid, const std::vector<char> &chances) = 0;
 
             virtual float getTimeScaleFactor() const = 0;
 
@@ -271,7 +271,7 @@ namespace MWBase
             virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) = 0;
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual const ESM::Cell *getExterior (const std::string& cellName) const = 0;
+            virtual const ESM::Cell* getExterior(std::string_view cellName) const = 0;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
             virtual void markCellAsUnchanged() = 0;
@@ -518,7 +518,7 @@ namespace MWBase
 
             /// Find default position inside interior cell specified by name
             /// \return false if interior with given name not exists, true otherwise
-            virtual bool findInteriorPosition(const std::string &name, ESM::Position &pos) = 0;
+            virtual bool findInteriorPosition(std::string_view name, ESM::Position &pos) = 0;
 
             /// Enables or disables use of teleport spell effects (recall, intervention, etc).
             virtual void enableTeleporting(bool enable) = 0;
@@ -591,7 +591,7 @@ namespace MWBase
             virtual void goToJail () = 0;
 
             /// Spawn a random creature from a levelled list next to the player
-            virtual void spawnRandomCreature(const std::string& creatureList) = 0;
+            virtual void spawnRandomCreature(std::string_view creatureList) = 0;
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
