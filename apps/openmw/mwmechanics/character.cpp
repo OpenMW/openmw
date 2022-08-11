@@ -2710,8 +2710,9 @@ void CharacterController::playSwishSound() const
     if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
         return;
 
-    std::string soundId;
-    float pitch = 1.f;
+    std::string soundId = "Weapon Swish";
+    float volume = 0.98f + mAttackStrength * 0.02f;
+    float pitch = 0.75f + mAttackStrength * 0.4f;
 
     const MWWorld::Class &cls = mPtr.getClass();
     if (cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf())
@@ -2722,17 +2723,9 @@ void CharacterController::playSwishSound() const
         if (sound)
             soundId = sound->mId;
     }
-    else
-    {
-        soundId = "Weapon Swish";
-        if (mAttackStrength < 0.5f)
-            pitch = 0.8f; // Weak attack
-        else if (mAttackStrength >= 1.f)
-            pitch = 1.2f; // Strong attack
-    }
 
     if (!soundId.empty())
-        MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, soundId, 1.0f, pitch);
+        MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, soundId, volume, pitch);
 }
 
 void CharacterController::updateHeadTracking(float duration)
