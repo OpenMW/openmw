@@ -512,7 +512,7 @@ namespace MWGui
 
     void InventoryWindow::useItem(const MWWorld::Ptr &ptr, bool force)
     {
-        const std::string& script = ptr.getClass().getScript(ptr);
+        std::string_view script = ptr.getClass().getScript(ptr);
         if (!script.empty())
         {
             // Don't try to equip the item if PCSkipEquip is set to 1

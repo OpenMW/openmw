@@ -82,7 +82,7 @@ namespace MWWorld
 
             ~RefData();
 
-            void write (ESM::ObjectState& objectState, const std::string& scriptId = "") const;
+            void write(ESM::ObjectState& objectState, std::string_view scriptId = {}) const;
             ///< Ignores custom data (not enough context available here to
             /// perform this operations).
 

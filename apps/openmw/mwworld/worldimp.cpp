@@ -816,8 +816,8 @@ namespace MWWorld
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                std::string script = it->getClass().getScript(*it);
-                if(script != "")
+                std::string_view script = it->getClass().getScript(*it);
+                if(!script.empty())
                 {
                     MWWorld::Ptr item = *it;
                     item.mCell = cell;
@@ -859,8 +859,8 @@ namespace MWWorld
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                std::string script = it->getClass().getScript(*it);
-                if(script != "")
+                std::string_view script = it->getClass().getScript(*it);
+                if(!script.empty())
                 {
                     MWWorld::Ptr item = *it;
                     mLocalScripts.remove (item);
@@ -1140,7 +1140,7 @@ namespace MWWorld
                     && ptr.getRefData().isEnabled())
             {
                 mWorldScene->addObjectToScene(ptr);
-                std::string script = ptr.getClass().getScript(ptr);
+                std::string_view script = ptr.getClass().getScript(ptr);
                 if (!script.empty())
                     mLocalScripts.add(script, ptr);
                 addContainerScripts(ptr, ptr.getCell());
@@ -1196,7 +1196,7 @@ namespace MWWorld
                     if(newPtr.getRefData().isEnabled())
                         mWorldScene->addObjectToScene(newPtr);
 
-                    std::string script = newPtr.getClass().getScript(newPtr);
+                    std::string_view script = newPtr.getClass().getScript(newPtr);
                     if (!script.empty())
                     {
                         mLocalScripts.add(script, newPtr);
@@ -1226,8 +1226,7 @@ namespace MWWorld
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, newPtr);
 
-                    std::string script =
-                        ptr.getClass().getScript(ptr);
+                    std::string_view script = ptr.getClass().getScript(ptr);
                     if (!script.empty())
                     {
                         mLocalScripts.remove(ptr);
@@ -2135,10 +2134,10 @@ namespace MWWorld
 
     void World::PCDropped (const Ptr& item)
     {
-        std::string script = item.getClass().getScript(item);
+        std::string_view script = item.getClass().getScript(item);
 
         // Set OnPCDrop Variable on item's script, if it has a script with that variable declared
-        if(script != "")
+        if(!script.empty())
             item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
@@ -2209,7 +2208,7 @@ namespace MWWorld
             if (dropped.getRefData().isEnabled()) {
                 mWorldScene->addObjectToScene(dropped);
             }
-            std::string script = dropped.getClass().getScript(dropped);
+            std::string_view script = dropped.getClass().getScript(dropped);
             if (!script.empty()) {
                 mLocalScripts.add(script, dropped);
             }

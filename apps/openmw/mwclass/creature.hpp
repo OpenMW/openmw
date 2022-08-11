@@ -80,7 +80,7 @@ namespace MWClass
 
             bool hasInventoryStore (const MWWorld::Ptr &ptr) const override;
 
-            std::string getScript (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
 
             float getCapacity (const MWWorld::Ptr& ptr) const override;

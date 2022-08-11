@@ -1045,7 +1045,7 @@ namespace MWScript
 
                 if (!ptr.isEmpty())
                 {
-                    const std::string& script = ptr.getClass().getScript(ptr);
+                    std::string_view script = ptr.getClass().getScript(ptr);
                     if (!script.empty())
                     {
                         const Compiler::Locals& locals =
@@ -1097,7 +1097,7 @@ namespace MWScript
             {
                 std::stringstream str;
 
-                const std::string script = ptr.getClass().getScript(ptr);
+                std::string_view script = ptr.getClass().getScript(ptr);
                 if(script.empty())
                     str<< ptr.getCellRef().getRefId()<<" does not have a script.";
                 else

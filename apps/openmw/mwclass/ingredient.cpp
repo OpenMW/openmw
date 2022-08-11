@@ -55,7 +55,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Ingredient::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Ingredient::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 

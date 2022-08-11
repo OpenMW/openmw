@@ -165,7 +165,7 @@ namespace MWScript
         return std::make_pair (count, success);
     }
 
-    const Compiler::Locals& ScriptManager::getLocals (const std::string& name)
+    const Compiler::Locals& ScriptManager::getLocals(std::string_view name)
     {
         std::string name2 = Misc::StringUtils::lowerCase (name);
 
@@ -212,7 +212,7 @@ namespace MWScript
             return iter->second;
         }
 
-        throw std::logic_error ("script " + name + " does not exist");
+        throw std::logic_error("script " + name2 + " does not exist");
     }
 
     GlobalScripts& ScriptManager::getGlobalScripts()

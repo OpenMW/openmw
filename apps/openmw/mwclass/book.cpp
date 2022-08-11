@@ -70,7 +70,7 @@ namespace MWClass
         return std::make_unique<MWWorld::ActionRead>(ptr);
     }
 
-    std::string Book::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Book::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 

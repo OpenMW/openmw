@@ -32,7 +32,7 @@ namespace MWClass
             MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const override;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            std::string getScript (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
 
             std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;

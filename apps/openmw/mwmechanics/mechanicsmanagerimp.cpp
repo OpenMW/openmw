@@ -1447,7 +1447,7 @@ namespace MWMechanics
                 // If an actor has OnPCHitMe declared in his script, his Fight = 0 and the attacker is player,
                 // he will attack the player only if we will force him (e.g. via StartCombat console command)
                 bool peaceful = false;
-                std::string script = target.getClass().getScript(target);
+                std::string_view script = target.getClass().getScript(target);
                 if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == player)
                 {
                     const int fight = target.getClass().getCreatureStats(target).getAiSetting(AiSetting::Fight).getModified();

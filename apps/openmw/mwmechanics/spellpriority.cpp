@@ -125,7 +125,7 @@ namespace MWMechanics
         // Don't make use of racial bonus spells, like MW. Can be made optional later
         if (actor.getClass().isNpc())
         {
-            std::string raceid = actor.get<ESM::NPC>()->mBase->mRace;
+            const std::string& raceid = actor.get<ESM::NPC>()->mBase->mRace;
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
             if (race->mPowers.exists(spell->mId))
                 return 0.f;
@@ -367,7 +367,7 @@ namespace MWMechanics
             if (actor.getClass().isNpc())
             {
                 // Beast races can't wear helmets or boots
-                std::string raceid = actor.get<ESM::NPC>()->mBase->mRace;
+                const std::string& raceid = actor.get<ESM::NPC>()->mBase->mRace;
                 const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
                 if (race->mData.mFlags & ESM::Race::Beast)
                     return 0.f;

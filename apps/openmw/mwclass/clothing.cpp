@@ -56,7 +56,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Clothing::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Clothing::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 

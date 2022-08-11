@@ -15,7 +15,7 @@
 
 namespace MWScript
 {
-    void Locals::ensure (const std::string& scriptName)
+    void Locals::ensure(std::string_view scriptName)
     {
         if (!mInitialised)
         {
@@ -62,7 +62,7 @@ namespace MWScript
         return (mShorts.empty() && mLongs.empty() && mFloats.empty());
     }
 
-    bool Locals::hasVar(const std::string &script, std::string_view var)
+    bool Locals::hasVar(std::string_view script, std::string_view var)
     {
         ensure (script);
 
@@ -72,7 +72,7 @@ namespace MWScript
         return (index != -1);
     }
 
-    int Locals::getIntVar(const std::string &script, std::string_view var)
+    int Locals::getIntVar(std::string_view script, std::string_view var)
     {
         ensure (script);
 
@@ -98,7 +98,7 @@ namespace MWScript
         return 0;
     }
 
-    float Locals::getFloatVar(const std::string &script, std::string_view var)
+    float Locals::getFloatVar(std::string_view script, std::string_view var)
     {
         ensure (script);
 
@@ -124,7 +124,7 @@ namespace MWScript
         return 0;
     }
 
-    bool Locals::setVarByInt(const std::string& script, std::string_view var, int val)
+    bool Locals::setVarByInt(std::string_view script, std::string_view var, int val)
     {
         ensure (script);
 
@@ -149,7 +149,7 @@ namespace MWScript
         return false;
     }
 
-    bool Locals::write (ESM::Locals& locals, const std::string& script) const
+    bool Locals::write(ESM::Locals& locals, std::string_view script) const
     {
         if (!mInitialised)
             return false;
@@ -188,7 +188,7 @@ namespace MWScript
         return true;
     }
 
-    void Locals::read (const ESM::Locals& locals, const std::string& script)
+    void Locals::read(const ESM::Locals& locals, std::string_view script)
     {
         ensure (script);
 

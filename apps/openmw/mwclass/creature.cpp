@@ -488,7 +488,7 @@ namespace MWClass
         return isFlagBitSet(ptr, ESM::Creature::Weapon);
     }
 
-    std::string Creature::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Creature::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
@@ -836,7 +836,7 @@ namespace MWClass
                 if (ptr.getRefData().getCount() == 0)
                 {
                     ptr.getRefData().setCount(1);
-                    const std::string& script = getScript(ptr);
+                    std::string_view script = getScript(ptr);
                     if(!script.empty())
                         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);
                 }

@@ -257,11 +257,11 @@ namespace MWGui
                     creatureStats.setDeathAnimationFinished(true);
                     MWBase::Environment::get().getMechanicsManager()->notifyDied(ptr);
 
-                    const std::string script = ptr.getClass().getScript(ptr);
+                    std::string_view script = ptr.getClass().getScript(ptr);
                     if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
                     {
                         MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
-                        MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+                        MWBase::Environment::get().getScriptManager()->run(std::string{script}, interpreterContext);
                     }
 
                     // Clean up summoned creatures as well
