@@ -554,21 +554,20 @@ namespace MWClass
     }
 
 
-    void Npc::hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const
+    bool Npc::evaluateHit(const MWWorld::Ptr& ptr, MWWorld::Ptr& victim, osg::Vec3f& hitPosition) const
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-
-        const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+        victim = MWWorld::Ptr();
+        hitPosition = osg::Vec3f();
 
         // Get the weapon used (if hand-to-hand, weapon = inv.end())
         MWWorld::InventoryStore &inv = getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
-        if(!weapon.isEmpty() && weapon.getType() != ESM::Weapon::sRecordId)
-            weapon = MWWorld::Ptr();
+        MWWorld::Ptr weapon;
+        if (weaponslot != inv.end() && weaponslot->getType() == ESM::Weapon::sRecordId)
+            weapon = *weaponslot;
 
-        MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
-
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
         const float fCombatDistance = store.find("fCombatDistance")->mValue.getFloat();
         float dist = fCombatDistance * (!weapon.isEmpty() ?
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
@@ -581,28 +580,53 @@ namespace MWClass
 
         // TODO: Use second to work out the hit angle
         std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist, targetActors);
-        MWWorld::Ptr victim = result.first;
-        osg::Vec3f hitPosition (result.second);
+        if (result.first.isEmpty()) // Didn't hit anything
+            return true;
+
+        const MWWorld::Class &othercls = result.first.getClass();
+        if (!othercls.isActor()) // Can't hit non-actors
+            return true;
+
+        MWMechanics::CreatureStats &otherstats = othercls.getCreatureStats(result.first);
+        if (otherstats.isDead()) // Can't hit dead actors
+            return true;
+
+        // Note that earlier we returned true in spite of an apparent failure to hit anything alive.
+        // This is because hitting nothing is not a "miss" and should be handled as such character controller-side.
+        victim = result.first;
+        hitPosition = result.second;
+
+        int weapskill = ESM::Skill::HandToHand;
+        if (!weapon.isEmpty())
+            weapskill = weapon.getClass().getEquipmentSkill(weapon);
+
+        float hitchance = MWMechanics::getHitChance(ptr, victim, getSkill(ptr, weapskill));
+
+        return Misc::Rng::roll0to99(world->getPrng()) < hitchance;
+    }
+
+    void Npc::hit(const MWWorld::Ptr& ptr, float attackStrength, int type, const MWWorld::Ptr& victim, const osg::Vec3f& hitPosition, bool success) const
+    {
+        MWWorld::InventoryStore &inv = getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        MWWorld::Ptr weapon;
+        if (weaponslot != inv.end() && weaponslot->getType() == ESM::Weapon::sRecordId)
+            weapon = *weaponslot;
+
+        MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
+
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
         const MWWorld::Class &othercls = victim.getClass();
-        if(!othercls.isActor()) // Can't hit non-actors
-            return;
         MWMechanics::CreatureStats &otherstats = othercls.getCreatureStats(victim);
-        if(otherstats.isDead()) // Can't hit dead actors
+        if (otherstats.isDead()) // Can't hit dead actors
             return;
 
         if(ptr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
-        int weapskill = ESM::Skill::HandToHand;
-        if(!weapon.isEmpty())
-            weapskill = weapon.getClass().getEquipmentSkill(weapon);
-
-        float hitchance = MWMechanics::getHitChance(ptr, victim, getSkill(ptr, weapskill));
-
-        if (Misc::Rng::roll0to99(world->getPrng()) >= hitchance)
+        if (!success)
         {
             othercls.onHit(victim, 0.0f, false, weapon, ptr, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -634,8 +658,15 @@ namespace MWClass
         {
             MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg, attackStrength);
         }
+
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+
         if(ptr == MWMechanics::getPlayer())
         {
+            int weapskill = ESM::Skill::HandToHand;
+            if(!weapon.isEmpty())
+                weapskill = weapon.getClass().getEquipmentSkill(weapon);
             skillUsageSucceeded(ptr, weapskill, 0);
 
             const MWMechanics::AiSequence& seq = victim.getClass().getCreatureStats(victim).getAiSequence();

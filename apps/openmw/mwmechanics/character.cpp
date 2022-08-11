@@ -998,21 +998,21 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
             mAnimation->showWeapons(false);
     }
     else if (action == "chop hit")
-        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop, mAttackVictim, mAttackHitPos, mAttackSuccess);
     else if (action == "slash hit")
-        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash, mAttackVictim, mAttackHitPos, mAttackSuccess);
     else if (action == "thrust hit")
-        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+        charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
     else if (action == "hit")
     {
         if (groupname == "attack1" || groupname == "swimattack1")
-            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop, mAttackVictim, mAttackHitPos, mAttackSuccess);
         else if (groupname == "attack2" || groupname == "swimattack2")
-            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash, mAttackVictim, mAttackHitPos, mAttackSuccess);
         else if (groupname == "attack3" || groupname == "swimattack3")
-            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
         else
-            charClass.hit(mPtr, mAttackStrength);
+            charClass.hit(mPtr, mAttackStrength, -1, mAttackVictim, mAttackHitPos, mAttackSuccess);
     }
     else if (isRandomAttackAnimation(groupname) && action == "start")
     {
@@ -1036,11 +1036,11 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
         if (!hasHitKey)
         {
             if (groupname == "attack1" || groupname == "swimattack1")
-                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop, mAttackVictim, mAttackHitPos, mAttackSuccess);
             else if (groupname == "attack2" || groupname == "swimattack2")
-                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash, mAttackVictim, mAttackHitPos, mAttackSuccess);
             else if (groupname == "attack3" || groupname == "swimattack3")
-                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+                charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
         }
     }
     else if (action == "shoot attach")
@@ -1544,6 +1544,13 @@ bool CharacterController::updateWeaponState()
                                  weapSpeed, startKey, stopKey,
                                  0.0f, 0);
                 mUpperBodyState = UpperBodyState::AttackWindUp;
+
+                // Reset the attack results when the attack starts.
+                // Strictly speaking this should probably be done when the attack ends,
+                // but the attack animation might be cancelled in a myriad different ways.
+                mAttackSuccess = false;
+                mAttackVictim = MWWorld::Ptr();
+                mAttackHitPos = osg::Vec3f();
             }
         }
 
@@ -1583,7 +1590,13 @@ bool CharacterController::updateWeaponState()
             mAttackStrength = calculateWindUp();
             if (mAttackStrength == -1.f)
                 mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
-            playSwishSound();
+            if (weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
+            {
+                mAttackSuccess = cls.evaluateHit(mPtr, mAttackVictim, mAttackHitPos);
+                if (!mAttackSuccess)
+                    mAttackStrength = 0.f;
+                playSwishSound();
+            }
         }
 
         if (mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon))
@@ -2706,10 +2719,6 @@ void CharacterController::setHeadTrackTarget(const MWWorld::ConstPtr &target)
 
 void CharacterController::playSwishSound() const
 {
-    ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
-    if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
-        return;
-
     std::string soundId = "Weapon Swish";
     float volume = 0.98f + mAttackStrength * 0.02f;
     float pitch = 0.75f + mAttackStrength * 0.4f;
