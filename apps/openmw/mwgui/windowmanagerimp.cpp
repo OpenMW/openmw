@@ -2128,9 +2128,6 @@ namespace MWGui
 
     void WindowManager::createCursors()
     {
-        // FIXME: currently we do not scale cursor since it is not a MyGUI widget.
-        // In theory, we can do it manually (rescale the cursor image via osg::Imag::scaleImage() and scale the hotspot position).
-        // Unfortunately, this apploach can lead to driver crashes on some setups (e.g. on laptops with nvidia-prime on Linux).
         MyGUI::ResourceManager::EnumeratorPtr enumerator = MyGUI::ResourceManager::getInstance().getEnumerator();
         while (enumerator.next())
         {
@@ -2148,8 +2145,9 @@ namespace MWGui
                 Uint8 hotspot_x = imgSetPointer->getHotSpot().left;
                 Uint8 hotspot_y = imgSetPointer->getHotSpot().top;
                 int rotation = imgSetPointer->getRotation();
+                MyGUI::IntSize pointerSize = imgSetPointer->getSize();
 
-                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspot_x, hotspot_y);
+                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspot_x, hotspot_y, pointerSize.width, pointerSize.height);
             }
         }
     }

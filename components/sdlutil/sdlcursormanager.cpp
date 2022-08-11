@@ -79,14 +79,14 @@ namespace SDLUtil
             SDL_SetCursor(it->second);
     }
 
-    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y)
+    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y, int cursorWidth, int cursorHeight)
     {
 #ifndef ANDROID
-        _createCursorFromResource(name, rotDegrees, image, hotspot_x, hotspot_y);
+        _createCursorFromResource(name, rotDegrees, image, hotspot_x, hotspot_y, cursorWidth, cursorHeight);
 #endif
     }
 
-    SDLUtil::SurfaceUniquePtr decompress(osg::ref_ptr<osg::Image> source, float rotDegrees)
+    SDLUtil::SurfaceUniquePtr decompress(osg::ref_ptr<osg::Image> source, float rotDegrees, int cursorWidth, int cursorHeight)
     {
         int width = source->s();
         int height = source->t();
@@ -114,7 +114,7 @@ namespace SDLUtil
                                                               blueMask,
                                                               alphaMask);
 
-        SDL_Surface *targetSurface = SDL_CreateRGBSurface(0, width, height, 32, redMask, greenMask, blueMask, alphaMask);
+        SDL_Surface *targetSurface = SDL_CreateRGBSurface(0, cursorWidth, cursorHeight, 32, redMask, greenMask, blueMask, alphaMask);
         SDL_Renderer *renderer = SDL_CreateSoftwareRenderer(targetSurface);
 
         SDL_RenderClear(renderer);
@@ -131,13 +131,13 @@ namespace SDLUtil
         return SDLUtil::SurfaceUniquePtr(targetSurface, SDL_FreeSurface);
     }
 
-    void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y)
+    void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y, int cursorWidth, int cursorHeight)
     {
         if (mCursorMap.find(name) != mCursorMap.end())
             return;
 
         try {
-            auto surface = decompress(image, static_cast<float>(rotDegrees));
+            auto surface = decompress(image, static_cast<float>(rotDegrees), cursorWidth, cursorHeight);
 
             //set the cursor and store it for later
             SDL_Cursor* curs = SDL_CreateColorCursor(surface.get(), hotspot_x, hotspot_y);
