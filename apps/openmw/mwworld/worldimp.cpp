@@ -32,6 +32,7 @@
 
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/settings.hpp>
+#include <components/detournavigator/agentbounds.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 

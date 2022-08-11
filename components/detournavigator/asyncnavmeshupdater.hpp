@@ -10,6 +10,8 @@
 #include "navmeshdb.hpp"
 #include "changetype.hpp"
 #include "agentbounds.hpp"
+#include "guardednavmeshcacheitem.hpp"
+#include "sharednavmeshcacheitem.hpp"
 
 #include <osg/Vec3f>
 

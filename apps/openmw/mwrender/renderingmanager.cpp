@@ -51,6 +51,7 @@
 #include <components/esm3/loadcell.hpp>
 
 #include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navmeshcacheitem.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"

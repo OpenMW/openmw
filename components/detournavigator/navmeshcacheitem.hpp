@@ -7,8 +7,6 @@
 #include "navmeshdata.hpp"
 #include "version.hpp"
 
-#include <components/misc/guarded.hpp>
-
 #include <map>
 #include <iosfwd>
 #include <set>
@@ -148,9 +146,6 @@ namespace DetourNavigator
         std::map<TilePosition, Tile> mUsedTiles;
         std::set<TilePosition> mEmptyTiles;
     };
-
-    using GuardedNavMeshCacheItem = Misc::ScopeGuarded<NavMeshCacheItem>;
-    using SharedNavMeshCacheItem = std::shared_ptr<GuardedNavMeshCacheItem>;
 }
 
 #endif

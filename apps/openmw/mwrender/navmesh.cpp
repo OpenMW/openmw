@@ -8,16 +8,17 @@
 #include <components/sceneutil/detourdebugdraw.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/detournavigator/settings.hpp>
+#include <components/detournavigator/guardednavmeshcacheitem.hpp>
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
 
 #include <DetourNavMesh.h>
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
 #include <limits>
+#include <algorithm>
 
 namespace MWRender
 {

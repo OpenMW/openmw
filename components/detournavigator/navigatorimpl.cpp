@@ -1,5 +1,4 @@
 #include "navigatorimpl.hpp"
-#include "debug.hpp"
 #include "settingsutils.hpp"
 
 #include <components/debug/debuglog.hpp>

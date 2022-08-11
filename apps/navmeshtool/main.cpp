@@ -4,6 +4,7 @@
 #include <components/debug/debugging.hpp>
 #include <components/detournavigator/navmeshdb.hpp>
 #include <components/detournavigator/recastglobalallocator.hpp>
+#include <components/detournavigator/settings.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/variant.hpp>
 #include <components/esmloader/esmdata.hpp>

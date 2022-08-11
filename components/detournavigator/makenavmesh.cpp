@@ -11,10 +11,8 @@
 #include "navmeshdata.hpp"
 #include "recastmeshbuilder.hpp"
 #include "navmeshdb.hpp"
-#include "serialization.hpp"
-#include "dbrefgeometryobject.hpp"
-#include "navmeshdbutils.hpp"
 #include "recastparams.hpp"
+#include "offmeshconnection.hpp"
 
 #include <components/misc/convert.hpp>
 #include <components/bullethelpers/processtrianglecallback.hpp>

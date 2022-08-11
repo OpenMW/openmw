@@ -5,6 +5,9 @@
 #include "flags.hpp"
 #include "settings.hpp"
 #include "navigator.hpp"
+#include "navmeshcacheitem.hpp"
+
+#include <components/misc/guarded.hpp>
 
 #include <optional>
 

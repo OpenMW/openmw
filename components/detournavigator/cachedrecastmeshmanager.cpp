@@ -1,5 +1,4 @@
 #include "cachedrecastmeshmanager.hpp"
-#include "debug.hpp"
 
 namespace DetourNavigator
 {

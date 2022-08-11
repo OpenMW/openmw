@@ -2,8 +2,6 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESH_H
 
 #include "areatype.hpp"
-#include "bounds.hpp"
-#include "tilebounds.hpp"
 #include "objecttransform.hpp"
 
 #include <components/bullethelpers/operators.hpp>

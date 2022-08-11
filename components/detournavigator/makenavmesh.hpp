@@ -1,17 +1,9 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 
-#include "offmeshconnectionsmanager.hpp"
-#include "navmeshcacheitem.hpp"
 #include "tileposition.hpp"
 #include "sharednavmesh.hpp"
-#include "navmeshtilescache.hpp"
-#include "offmeshconnection.hpp"
-#include "navmeshdb.hpp"
-
-#include <components/misc/guarded.hpp>
-
-#include <osg/Vec3f>
+#include "recastmesh.hpp"
 
 #include <memory>
 #include <vector>
@@ -21,10 +13,12 @@ struct rcConfig;
 
 namespace DetourNavigator
 {
-    class RecastMesh;
     struct Settings;
     struct PreparedNavMeshData;
     struct NavMeshData;
+    struct OffMeshConnection;
+    struct AgentBounds;
+    struct RecastSettings;
 
     inline float getLength(const osg::Vec2i& value)
     {

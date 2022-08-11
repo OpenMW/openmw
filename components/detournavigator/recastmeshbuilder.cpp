@@ -1,5 +1,4 @@
 #include "recastmeshbuilder.hpp"
-#include "debug.hpp"
 #include "exceptions.hpp"
 
 #include <components/bullethelpers/transformboundingbox.hpp>

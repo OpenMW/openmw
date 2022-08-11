@@ -22,6 +22,8 @@ namespace DetourNavigator
 
         ~PreparedNavMeshData() noexcept;
 
+        PreparedNavMeshData& operator=(const PreparedNavMeshData& other) = delete;
+
         friend bool operator==(const PreparedNavMeshData& lhs, const PreparedNavMeshData& rhs) noexcept;
     };
 
