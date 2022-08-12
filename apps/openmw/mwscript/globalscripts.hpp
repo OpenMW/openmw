@@ -2,6 +2,7 @@
 #define GAME_SCRIPT_GLOBALSCRIPTS_H
 
 #include <string>
+#include <string_view>
 #include <map>
 #include <memory>
 #include <utility>
@@ -44,7 +45,7 @@ namespace MWScript
 
         MWWorld::Ptr getPtr(); // Resolves mTarget to a Ptr and caches the (potentially empty) result
 
-        std::string getId() const; // Returns the target's ID -- if any
+        std::string_view getId() const; // Returns the target's ID -- if any
     };
 
     class GlobalScripts

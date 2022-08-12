@@ -95,14 +95,14 @@ namespace
 
     struct IdGettingVisitor
     {
-        std::string operator()(const MWWorld::Ptr& ptr) const
+        std::string_view operator()(const MWWorld::Ptr& ptr) const
         {
             if(ptr.isEmpty())
                 return {};
             return ptr.mRef->mRef.getRefId();
         }
 
-        std::string operator()(const std::pair<ESM::RefNum, std::string>& pair) const
+        std::string_view operator()(const std::pair<ESM::RefNum, std::string>& pair) const
         {
             return pair.second;
         }
@@ -125,7 +125,7 @@ namespace MWScript
         return ptr;
     }
 
-    std::string GlobalScriptDesc::getId() const
+    std::string_view GlobalScriptDesc::getId() const
     {
         return std::visit(IdGettingVisitor {}, mTarget);
     }

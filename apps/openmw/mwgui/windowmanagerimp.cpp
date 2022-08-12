@@ -917,7 +917,7 @@ namespace MWGui
     {
         mMap->requestMapRender(cell);
 
-        std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
+        std::string name{MWBase::Environment::get().getWorld()->getCellName(cell)};
 
         mMap->setCellName( name );
         mHud->setCellName( name );

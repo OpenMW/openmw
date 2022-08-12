@@ -670,14 +670,14 @@ namespace MWWorld
         return mCurrentDate->getMonthName(month);
     }
 
-    std::string World::getCellName (const MWWorld::CellStore *cell) const
+    std::string_view World::getCellName(const MWWorld::CellStore* cell) const
     {
         if (!cell)
             cell = mWorldScene->getCurrentCell();
         return getCellName(cell->getCell());
     }
 
-    std::string World::getCellName(const ESM::Cell* cell) const
+    std::string_view World::getCellName(const ESM::Cell* cell) const
     {
         if (cell)
         {

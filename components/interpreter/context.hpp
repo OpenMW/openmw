@@ -13,7 +13,7 @@ namespace Interpreter
 
             virtual ~Context() {}
 
-            virtual std::string getTarget() const = 0;
+            virtual std::string_view getTarget() const = 0;
 
             virtual int getLocalShort (int index) const = 0;
 
@@ -56,29 +56,29 @@ namespace Interpreter
 
             virtual std::string getActionBinding(std::string_view action) const = 0;
 
-            virtual std::string getActorName() const = 0;
+            virtual std::string_view getActorName() const = 0;
 
-            virtual std::string getNPCRace() const = 0;
+            virtual std::string_view getNPCRace() const = 0;
 
-            virtual std::string getNPCClass() const = 0;
+            virtual std::string_view getNPCClass() const = 0;
 
-            virtual std::string getNPCFaction() const = 0;
+            virtual std::string_view getNPCFaction() const = 0;
 
-            virtual std::string getNPCRank() const = 0;
+            virtual std::string_view getNPCRank() const = 0;
 
-            virtual std::string getPCName() const = 0;
+            virtual std::string_view getPCName() const = 0;
 
-            virtual std::string getPCRace() const = 0;
+            virtual std::string_view getPCRace() const = 0;
 
-            virtual std::string getPCClass() const = 0;
+            virtual std::string_view getPCClass() const = 0;
 
-            virtual std::string getPCRank() const = 0;
+            virtual std::string_view getPCRank() const = 0;
 
-            virtual std::string getPCNextRank() const = 0;
+            virtual std::string_view getPCNextRank() const = 0;
 
             virtual int getPCBounty() const = 0;
 
-            virtual std::string getCurrentCellName() const = 0;
+            virtual std::string_view getCurrentCellName() const = 0;
 
             virtual int getMemberShort(std::string_view id, std::string_view name, bool global) const = 0;
 
