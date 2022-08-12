@@ -1,6 +1,7 @@
 0.49.0
 ------
 
+    Bug #4127: Weapon animation looks choppy
 
 0.48.0
 ------
