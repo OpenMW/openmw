@@ -421,7 +421,7 @@ namespace MWInput
         }
     }
 
-    std::string BindingsManager::getActionDescription(int action)
+    std::string_view BindingsManager::getActionDescription(int action)
     {
         switch (action)
         {
@@ -506,7 +506,7 @@ namespace MWInput
             case A_TogglePostProcessorHUD:
                 return "#{SettingsMenu:TogglePostProcessorHUD}";
             default:
-                return std::string(); // not configurable
+                return {}; // not configurable
         }
     }
 
@@ -557,9 +557,9 @@ namespace MWInput
             return "#{sNone}";
     }
 
-    std::vector<int> BindingsManager::getActionKeySorting()
+    const std::initializer_list<int>& BindingsManager::getActionKeySorting()
     {
-        static const std::vector<int> actions
+        static const std::initializer_list<int> actions
         {
             A_MoveForward, A_MoveBackward, A_MoveLeft, A_MoveRight, A_TogglePOV, A_ZoomIn, A_ZoomOut,
             A_Run, A_AlwaysRun, A_Sneak, A_Activate, A_Use, A_ToggleWeapon, A_ToggleSpell,
@@ -572,9 +572,9 @@ namespace MWInput
 
         return actions;
     }
-    std::vector<int> BindingsManager::getActionControllerSorting()
+    const std::initializer_list<int>& BindingsManager::getActionControllerSorting()
     {
-        static const std::vector<int> actions
+        static const std::initializer_list<int> actions
         {
             A_TogglePOV, A_ZoomIn, A_ZoomOut, A_Sneak, A_Activate, A_Use, A_ToggleWeapon, A_ToggleSpell,
             A_AutoMove, A_Jump, A_Inventory, A_Journal, A_Rest, A_QuickSave, A_QuickLoad, A_ToggleHUD,

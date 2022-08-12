@@ -254,11 +254,11 @@ namespace MWScript
     std::string InterpreterContext::getActionBinding(std::string_view targetAction) const
     {
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
-        std::vector<int> actions = input->getActionKeySorting ();
+        const auto& actions = input->getActionKeySorting();
         for (const int action : actions)
         {
-            std::string desc = input->getActionDescription (action);
-            if(desc == "")
+            std::string_view desc = input->getActionDescription(action);
+            if(desc.empty())
                 continue;
 
             if(desc == targetAction)
@@ -334,14 +334,14 @@ namespace MWScript
     std::string InterpreterContext::getPCRace() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        std::string race = world->getPlayerPtr().get<ESM::NPC>()->mBase->mRace;
+        const std::string& race = world->getPlayerPtr().get<ESM::NPC>()->mBase->mRace;
         return world->getStore().get<ESM::Race>().find(race)->mName;
     }
 
     std::string InterpreterContext::getPCClass() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        std::string class_ = world->getPlayerPtr().get<ESM::NPC>()->mBase->mClass;
+        const std::string& class_ = world->getPlayerPtr().get<ESM::NPC>()->mBase->mClass;
         return world->getStore().get<ESM::Class>().find(class_)->mName;
     }
 
@@ -369,7 +369,7 @@ namespace MWScript
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
         if(rank < 0 || rank > 9) // there are only 10 ranks
-            return "";
+            return {};
 
         return faction->mRanks[rank];
     }
@@ -399,7 +399,7 @@ namespace MWScript
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
         if(rank < 0)
-            return "";
+            return {};
 
         return faction->mRanks[rank];
     }
@@ -487,7 +487,7 @@ namespace MWScript
 
     MWWorld::Ptr InterpreterContext::getReference(bool required) const
     {
-        return getReferenceImp ("", true, required);
+        return getReferenceImp({}, true, required);
     }
 
     void InterpreterContext::updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated)

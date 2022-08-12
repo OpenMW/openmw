@@ -19,11 +19,11 @@ namespace MWInput
 
         virtual ~BindingsManager();
 
-        std::string getActionDescription (int action);
+        std::string_view getActionDescription(int action);
         std::string getActionKeyBindingName (int action);
         std::string getActionControllerBindingName (int action);
-        std::vector<int> getActionKeySorting();
-        std::vector<int> getActionControllerSorting();
+        const std::initializer_list<int>& getActionKeySorting();
+        const std::initializer_list<int>& getActionControllerSorting();
 
         void enableDetectingBindingMode (int action, bool keyboard);
         bool isDetectingBindingState() const;

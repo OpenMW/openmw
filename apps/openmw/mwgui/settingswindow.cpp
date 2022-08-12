@@ -700,23 +700,20 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
 
         MWBase::Environment::get().getWindowManager()->removeStaticMessageBox();
-        std::vector<int> actions;
-        if(mKeyboardMode)
-            actions = MWBase::Environment::get().getInputManager()->getActionKeySorting();
-        else
-            actions = MWBase::Environment::get().getInputManager()->getActionControllerSorting();
+        const auto inputManager = MWBase::Environment::get().getInputManager();
+        const auto& actions = mKeyboardMode ? inputManager->getActionKeySorting() : inputManager->getActionControllerSorting();
 
         for (const int& action : actions)
         {
-            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (action);
-            if (desc == "")
+            std::string desc{inputManager->getActionDescription(action)};
+            if (desc.empty())
                 continue;
 
             std::string binding;
             if(mKeyboardMode)
-                binding = MWBase::Environment::get().getInputManager()->getActionKeyBindingName(action);
+                binding = inputManager->getActionKeyBindingName(action);
             else
-                binding = MWBase::Environment::get().getInputManager()->getActionControllerBindingName(action);
+                binding = inputManager->getActionControllerBindingName(action);
 
             Gui::SharedStateButton* leftText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(), MyGUI::Align::Default);
             leftText->setCaptionWithReplacing(desc);
