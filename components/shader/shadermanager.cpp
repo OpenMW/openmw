@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <chrono>
 #include <osg/Program>
-
+#include <osgViewer/Viewer>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
