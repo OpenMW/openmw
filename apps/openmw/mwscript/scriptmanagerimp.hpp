@@ -79,7 +79,7 @@ namespace MWScript
             ///< Compile all scripts
             /// \return count, success
 
-            const Compiler::Locals& getLocals (const std::string& name) override;
+            const Compiler::Locals& getLocals(std::string_view name) override;
             ///< Return locals for script \a name.
 
             GlobalScripts& getGlobalScripts() override;

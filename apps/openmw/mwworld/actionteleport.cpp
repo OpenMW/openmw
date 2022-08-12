@@ -71,7 +71,7 @@ namespace MWWorld
         {
             MWWorld::Ptr follower = *it;
 
-            std::string script = follower.getClass().getScript(follower);
+            std::string_view script = follower.getClass().getScript(follower);
 
             if (!includeHostiles && follower.getClass().getCreatureStats(follower).getAiSequence().isInCombat(actor))
                 continue;

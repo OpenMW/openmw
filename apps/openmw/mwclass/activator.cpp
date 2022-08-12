@@ -77,7 +77,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    std::string Activator::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Activator::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();

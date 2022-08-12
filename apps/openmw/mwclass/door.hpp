@@ -47,7 +47,7 @@ namespace MWClass
             bool allowTelekinesis(const MWWorld::ConstPtr &ptr) const override;
             ///< Return whether this class of object can be activated with telekinesis
 
-            std::string getScript (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;

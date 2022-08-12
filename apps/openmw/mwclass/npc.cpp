@@ -707,7 +707,7 @@ namespace MWClass
 
         if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
-            const std::string &script = getScript(ptr);
+            std::string_view script = getScript(ptr);
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
             if(!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
@@ -951,7 +951,7 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
     }
 
-    std::string Npc::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Npc::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -1406,7 +1406,7 @@ namespace MWClass
                 if (ptr.getRefData().getCount() == 0)
                 {
                     ptr.getRefData().setCount(1);
-                    const std::string& script = getScript(ptr);
+                    std::string_view script = getScript(ptr);
                     if (!script.empty())
                         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);
                 }

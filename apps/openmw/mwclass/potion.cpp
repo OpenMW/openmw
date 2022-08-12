@@ -57,7 +57,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Potion::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Potion::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();

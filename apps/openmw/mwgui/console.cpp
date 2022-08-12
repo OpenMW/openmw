@@ -194,7 +194,7 @@ namespace MWGui
         Compiler::Locals locals;
         if (!mPtr.isEmpty())
         {
-            std::string script = mPtr.getClass().getScript(mPtr);
+            std::string_view script = mPtr.getClass().getScript(mPtr);
             if (!script.empty())
                 locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         }

@@ -34,7 +34,7 @@ namespace MWClass
             int getItemMaxHealth (const MWWorld::ConstPtr& ptr) const override;
             ///< Return item max health or throw an exception, if class does not have item health
 
-            std::string getScript (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
 
             std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::ConstPtr& ptr) const override;

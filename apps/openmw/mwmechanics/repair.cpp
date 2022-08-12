@@ -61,8 +61,8 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         MWWorld::ContainerStoreIterator stacked = player.getClass().getContainerStore(player).restack(itemToRepair);
 
         // set the OnPCRepair variable on the item's script
-        std::string script = stacked->getClass().getScript(itemToRepair);
-        if(script != "")
+        std::string_view script = stacked->getClass().getScript(itemToRepair);
+        if(!script.empty())
             stacked->getRefData().getLocals().setVarByInt(script, "onpcrepair", 1);
 
         // increase skill

@@ -30,7 +30,7 @@ namespace MWWorld
             ///< Get next local script
             /// @return Did we get a script?
 
-            void add (const std::string& scriptName, const Ptr& ptr);
+            void add(std::string_view scriptName, const Ptr& ptr);
             ///< Add script to collection of active local scripts.
 
             void addCell (CellStore *cell);

@@ -226,7 +226,7 @@ namespace MWClass
         return data.mStore;
     }
 
-    std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Container::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 

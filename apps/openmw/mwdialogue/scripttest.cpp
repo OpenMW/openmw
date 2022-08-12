@@ -55,7 +55,7 @@ void test(const MWWorld::Ptr& actor, int &compiled, int &total, const Compiler::
 
                     Compiler::Locals locals;
 
-                    std::string actorScript = actor.getClass().getScript(actor);
+                    std::string_view actorScript = actor.getClass().getScript(actor);
 
                     if (!actorScript.empty())
                     {

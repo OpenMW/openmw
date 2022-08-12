@@ -155,9 +155,9 @@ namespace MWWorld
         return -1;
     }
 
-    std::string Class::getScript (const ConstPtr& ptr) const
+    std::string_view Class::getScript(const ConstPtr& ptr) const
     {
-        return "";
+        return {};
     }
 
     float Class::getMaxSpeed (const Ptr& ptr) const
@@ -291,7 +291,7 @@ namespace MWWorld
 
     std::string Class::getEnchantment (const ConstPtr& ptr) const
     {
-        return "";
+        return {};
     }
 
     void Class::adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const
@@ -300,7 +300,7 @@ namespace MWWorld
 
     std::string Class::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        return "";
+        return {};
     }
 
     bool Class::useAnim() const

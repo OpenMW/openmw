@@ -655,8 +655,8 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             if (actor == MWMechanics::getPlayer())
             {
                 // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
-                const std::string& script = it->getClass().getScript(*it);
-                if (script != "")
+                std::string_view script = it->getClass().getScript(*it);
+                if (!script.empty())
                     (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
             }
 

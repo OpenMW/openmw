@@ -30,7 +30,7 @@ namespace
         auto& scripts = MWBase::Environment::get().getWorld()->getLocalScripts();
         for(const auto&& ptr : store)
         {
-            const std::string& script = ptr.getClass().getScript(ptr);
+            std::string_view script = ptr.getClass().getScript(ptr);
             if(!script.empty())
             {
                 MWWorld::Ptr item = ptr;
@@ -208,7 +208,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr,
     if (ptr.getRefData().getCount() <= count)
         return end();
     MWWorld::ContainerStoreIterator it = addNewStack(ptr, subtractItems(ptr.getRefData().getCount(false), count));
-    const std::string script = it->getClass().getScript(*it);
+    std::string_view script = it->getClass().getScript(*it);
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
 
@@ -317,7 +317,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     // maybe we should do this in the copy constructor instead?
     item.getCellRef().unsetRefNum(); // destroy link to content file
 
-    std::string script = item.getClass().getScript(item);
+    std::string_view script = item.getClass().getScript(item);
     if (!script.empty())
     {
         if (actorPtr == player)

@@ -96,7 +96,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Light::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Light::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 

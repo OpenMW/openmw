@@ -173,7 +173,7 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert
 
 bool MWDialogue::Filter::testFunctionLocal(const MWDialogue::SelectWrapper& select) const
 {
-    std::string scriptName = mActor.getClass().getScript (mActor);
+    std::string_view scriptName = mActor.getClass().getScript(mActor);
 
     if (scriptName.empty())
         return false; // no script

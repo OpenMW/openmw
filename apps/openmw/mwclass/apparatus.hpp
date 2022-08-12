@@ -27,7 +27,7 @@ namespace MWClass
                 const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
-            std::string getScript (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
 
             int getValue (const MWWorld::ConstPtr& ptr) const override;

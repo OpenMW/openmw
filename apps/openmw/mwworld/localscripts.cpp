@@ -23,7 +23,7 @@ namespace
             if (ptr.getRefData().isDeleted())
                 return true;
 
-            std::string script = ptr.getClass().getScript(ptr);
+            std::string_view script = ptr.getClass().getScript(ptr);
 
             if (!script.empty())
                 mScripts.add(script, ptr);
@@ -48,12 +48,12 @@ namespace
                 return true;
 
             MWWorld::ContainerStore& container = containerPtr.getClass().getContainerStore(containerPtr);
-            for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
+            for(const auto& ptr : container)
             {
-                std::string script = it->getClass().getScript(*it);
-                if(script != "")
+                std::string_view script = ptr.getClass().getScript(ptr);
+                if(!script.empty())
                 {
-                    MWWorld::Ptr item = *it;
+                    MWWorld::Ptr item = ptr;
                     item.mCell = containerPtr.getCell();
                     mScripts.add (script, item);
                 }
@@ -85,7 +85,7 @@ bool MWWorld::LocalScripts::getNext(std::pair<std::string, Ptr>& script)
     return false;
 }
 
-void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
+void MWWorld::LocalScripts::add(std::string_view scriptName, const Ptr& ptr)
 {
     if (const ESM::Script *script = mStore.get<ESM::Script>().search (scriptName))
     {

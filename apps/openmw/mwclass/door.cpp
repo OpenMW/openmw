@@ -255,7 +255,7 @@ namespace MWClass
             return true;
     }
 
-    std::string Door::getScript (const MWWorld::ConstPtr& ptr) const
+    std::string_view Door::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 

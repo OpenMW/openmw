@@ -27,7 +27,7 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
 
     if (state.mHasLocals)
     {
-        std::string scriptId = mClass->getScript (ptr);
+        std::string_view scriptId = mClass->getScript(ptr);
         // Make sure we still have a script. It could have been coming from a content file that is no longer active.
         if (!scriptId.empty())
         {

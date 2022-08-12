@@ -33,7 +33,7 @@ namespace MWScript
     std::pair<char, bool> CompilerContext::getMemberType (const std::string& name,
         const std::string& id) const
     {
-        std::string script;
+        std::string_view script;
         bool reference = false;
 
         if (const ESM::Script *scriptRecord =
