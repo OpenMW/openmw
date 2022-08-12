@@ -13,6 +13,10 @@
 #include <osg/Shader>
 #include <osg/Program>
 
+namespace osgViewer {
+    class Viewer;
+}
+
 namespace Shader
 {
     struct HotReloadManager;
