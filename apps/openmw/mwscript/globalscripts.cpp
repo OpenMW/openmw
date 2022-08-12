@@ -309,17 +309,16 @@ namespace MWScript
 
     Locals& GlobalScripts::getLocals(std::string_view name)
     {
-        std::string name2 = ::Misc::StringUtils::lowerCase (name);
-        auto iter = mScripts.find (name2);
+        auto iter = mScripts.find(name);
 
         if (iter==mScripts.end())
         {
-            const ESM::Script *script = mStore.get<ESM::Script>().find(name2);
+            const ESM::Script *script = mStore.get<ESM::Script>().find(name);
 
             auto desc = std::make_shared<GlobalScriptDesc>();
             desc->mLocals.configure (*script);
 
-            iter = mScripts.insert (std::make_pair (name2, desc)).first;
+            iter = mScripts.emplace(name, desc).first;
         }
 
         return iter->second->mLocals;
@@ -327,8 +326,7 @@ namespace MWScript
 
     const Locals* GlobalScripts::getLocalsIfPresent(std::string_view name) const
     {
-        std::string name2 = ::Misc::StringUtils::lowerCase (name);
-        auto iter = mScripts.find (name2);
+        auto iter = mScripts.find(name);
         if (iter==mScripts.end())
             return nullptr;
         return &iter->second->mLocals;

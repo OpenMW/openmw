@@ -3,12 +3,13 @@
 
 #include <string>
 #include <string_view>
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <utility>
 #include <variant>
-
 #include <cstdint>
+
+#include <components/misc/algorithm.hpp>
 
 #include "locals.hpp"
 
@@ -51,7 +52,7 @@ namespace MWScript
     class GlobalScripts
     {
             const MWWorld::ESMStore& mStore;
-            std::map<std::string, std::shared_ptr<GlobalScriptDesc> > mScripts;
+            std::unordered_map<std::string, std::shared_ptr<GlobalScriptDesc>, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual> mScripts;
 
         public:
 

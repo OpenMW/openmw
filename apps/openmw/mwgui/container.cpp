@@ -261,7 +261,7 @@ namespace MWGui
                     if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
                     {
                         MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
-                        MWBase::Environment::get().getScriptManager()->run(std::string{script}, interpreterContext);
+                        MWBase::Environment::get().getScriptManager()->run(script, interpreterContext);
                     }
 
                     // Clean up summoned creatures as well

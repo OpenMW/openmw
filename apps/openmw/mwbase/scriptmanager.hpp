@@ -1,7 +1,7 @@
 #ifndef GAME_MWBASE_SCRIPTMANAGER_H
 #define GAME_MWBASE_SCRIPTMANAGER_H
 
-#include <string>
+#include <string_view>
 
 namespace Interpreter
 {
@@ -38,10 +38,10 @@ namespace MWBase
 
             virtual void clear() = 0;
 
-            virtual bool run (const std::string& name, Interpreter::Context& interpreterContext) = 0;
+            virtual bool run(std::string_view name, Interpreter::Context& interpreterContext) = 0;
             ///< Run the script with the given name (compile first, if not compiled yet)
 
-            virtual bool compile (const std::string& name) = 0;
+            virtual bool compile(std::string_view name) = 0;
             ///< Compile script with the given namen
             /// \return Success?
 

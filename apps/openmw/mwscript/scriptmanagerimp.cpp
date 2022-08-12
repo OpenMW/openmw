@@ -39,14 +39,14 @@ namespace MWScript
         std::sort (mScriptBlacklist.begin(), mScriptBlacklist.end());
     }
 
-    bool ScriptManager::compile (const std::string& name)
+    bool ScriptManager::compile(std::string_view name)
     {
         mParser.reset();
         mErrorHandler.reset();
 
         if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
         {
-            mErrorHandler.setContext(name);
+            mErrorHandler.setContext(script->mId);
 
             bool Success = true;
             try
@@ -89,10 +89,10 @@ namespace MWScript
         return false;
     }
 
-    bool ScriptManager::run (const std::string& name, Interpreter::Context& interpreterContext)
+    bool ScriptManager::run(std::string_view name, Interpreter::Context& interpreterContext)
     {
         // compile script
-        ScriptCollection::iterator iter = mScripts.find (name);
+        auto iter = mScripts.find(name);
 
         if (iter==mScripts.end())
         {
@@ -167,27 +167,25 @@ namespace MWScript
 
     const Compiler::Locals& ScriptManager::getLocals(std::string_view name)
     {
-        std::string name2 = Misc::StringUtils::lowerCase (name);
-
         {
-            auto iter = mScripts.find (name2);
+            auto iter = mScripts.find(name);
 
             if (iter!=mScripts.end())
                 return iter->second.mLocals;
         }
 
         {
-            auto iter = mOtherLocals.find (name2);
+            auto iter = mOtherLocals.find(name);
 
             if (iter!=mOtherLocals.end())
                 return iter->second;
         }
 
-        if (const ESM::Script *script = mStore.get<ESM::Script>().search (name2))
+        if (const ESM::Script* script = mStore.get<ESM::Script>().search(name))
         {
             Compiler::Locals locals;
 
-            const Compiler::ContextOverride override(mErrorHandler, name2 + "[local variables]");
+            const Compiler::ContextOverride override(mErrorHandler, std::string{name} + "[local variables]");
 
             std::istringstream stream (script->mScriptText);
             Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);
@@ -207,12 +205,12 @@ namespace MWScript
                 locals.clear();
             }
 
-            auto iter = mOtherLocals.emplace(name2, locals).first;
+            auto iter = mOtherLocals.emplace(name, locals).first;
 
             return iter->second;
         }
 
-        throw std::logic_error("script " + name2 + " does not exist");
+        throw std::logic_error("script " + std::string{name} + " does not exist");
     }
 
     GlobalScripts& ScriptManager::getGlobalScripts()
