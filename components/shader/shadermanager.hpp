@@ -69,7 +69,7 @@ namespace Shader
 
         int reserveGlobalTextureUnits(Slot slot);
 
-        void update();
+        void update(osgViewer::Viewer& viewer);
         void setHotReloadEnabled(bool value);
         void triggerShaderReload();
     private:

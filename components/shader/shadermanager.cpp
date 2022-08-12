@@ -369,9 +369,11 @@ namespace Shader
         std::unordered_map<std::string, std::set<std::filesystem::path>> templateIncludedFiles;
         std::filesystem::file_time_type mLastAutoRecompileTime;
         bool mHotReloadEnabled;
+        bool mTriggerReload;
 
         HotReloadManager()
         {
+            mTriggerReload = false;
             mHotReloadEnabled = false;
             mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
         }
@@ -385,21 +387,29 @@ namespace Shader
             }
         }
 
-        void update(ShaderManager& Manager)
+        void update(ShaderManager& Manager,osgViewer::Viewer& viewer)
         {
             auto timeSinceLastCheckMillis = std::chrono::duration_cast<std::chrono::milliseconds>(std::filesystem::file_time_type::clock::now() - mLastAutoRecompileTime);
-            if (mHotReloadEnabled && timeSinceLastCheckMillis.count() > 200)
-                reloadTouchedShaders(Manager);
+            if ((mHotReloadEnabled && timeSinceLastCheckMillis.count() > 200) || mTriggerReload == true)
+            {
+                reloadTouchedShaders(Manager, viewer);
+            }
+            mTriggerReload = false;
         }
 
-        void reloadTouchedShaders(ShaderManager& Manager)
+        void reloadTouchedShaders(ShaderManager& Manager, osgViewer::Viewer& viewer)
         {
+            bool threadsRunningTostop = false;
             for (auto& [pathShaderToTest,  shaderKeys]: mShaderFiles)
             {
 
                 std::filesystem::file_time_type write_time = std::filesystem::last_write_time(pathShaderToTest);
                 if (write_time.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
                 {
+                    threadsRunningTostop = viewer.areThreadsRunning();
+                    if (threadsRunningTostop)
+                        viewer.stopThreading();
+
                     for (const auto& [templateName, shaderDefines]: shaderKeys)
                     {
                         ShaderManager::ShaderMap::iterator shaderIt = Manager.mShaders.find(std::make_pair(templateName, shaderDefines));
@@ -437,6 +447,8 @@ namespace Shader
                     }
                 }
             }
+            if (threadsRunningTostop)
+                viewer.startThreading();
             mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
         }
     };
@@ -625,9 +637,9 @@ namespace Shader
         return unit;
     }
 
-    void ShaderManager::update()
+    void ShaderManager::update(osgViewer::Viewer& viewer)
     {
-        mHotReloadManager->update(*this);
+        mHotReloadManager->update(*this, viewer);
     }
 
     void ShaderManager::setHotReloadEnabled(bool value)
@@ -637,7 +649,7 @@ namespace Shader
 
     void ShaderManager::triggerShaderReload()
     {
-        mHotReloadManager->reloadTouchedShaders(*this);
+        mHotReloadManager->mTriggerReload = true;
     }
 
 }

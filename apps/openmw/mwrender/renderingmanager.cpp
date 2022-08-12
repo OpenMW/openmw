@@ -901,7 +901,9 @@ namespace MWRender
     void RenderingManager::update(float dt, bool paused)
     {
         reportStats();
-        mResourceSystem->getSceneManager()->getShaderManager().update();
+
+        mResourceSystem->getSceneManager()->getShaderManager().update(*mViewer);
+
         float rainIntensity = mSky->getPrecipitationAlpha();
         mWater->setRainIntensity(rainIntensity);
 
