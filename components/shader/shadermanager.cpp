@@ -406,9 +406,12 @@ namespace Shader
                 std::filesystem::file_time_type write_time = std::filesystem::last_write_time(pathShaderToTest);
                 if (write_time.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
                 {
-                    threadsRunningTostop = viewer.areThreadsRunning();
-                    if (threadsRunningTostop)
-                        viewer.stopThreading();
+                    if (!threadsRunningTostop)
+                    {
+                        threadsRunningTostop = viewer.areThreadsRunning();
+                        if (threadsRunningTostop)
+                            viewer.stopThreading();
+                    }
 
                     for (const auto& [templateName, shaderDefines]: shaderKeys)
                     {
