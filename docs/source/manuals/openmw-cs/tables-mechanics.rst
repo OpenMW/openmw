@@ -92,7 +92,8 @@ Each enchantment can hold multiple magic effects along with other properties.
 Entries can be freely added or removed through the editor.
 
 Enchantment Type
-    The way to use this enchantment.
+    The way this enchantment is triggered.
+
     * Cast once - the enchantment is cast like a regular spell and afterwards the item is gone. Used to make scrolls. 
     * Constant effect - the effects of the enchantment will always apply as long as the enchanted item is equiped.
     * When Strikes - the effect will apply to whatever is hit by the weapon with the enchantment.
