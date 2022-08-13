@@ -235,8 +235,12 @@ Pathgrids
 Pathgrids allow NPCs to navigate and move along complicated paths in their surroundings.
 A pathgrid contains a list of *points* connected by *edges*. NPCs will
 find their way from one point to another as long as there is a path of 
-connecting edges between them. One pathgrid is used per cell. When recast 
-navigation is enabled, the pathgrids are not used.
+connecting edges between them. One pathgrid is used per cell.
+
+When recast navigation is enabled pathgrids are still used and complement 
+navigation meshes. Pathgrids help where original Morrowind content is not 
+suitable for navigation mesh generation. In addition, the off-mesh connections 
+generated from pathgrids are important for NPC AiWander package.
 
 
 Regions

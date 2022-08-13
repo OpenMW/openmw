@@ -41,7 +41,7 @@ Description
 Classes
 *******
 
-All characters in OpenMW need to be of a certain class. This table list existing
+All characters in OpenMW need to be of a certain class. This table lists existing
 classes and allows you to create, delete or modify them.
 
 Name
@@ -126,9 +126,11 @@ Playable
     the NPCs can belong to it.
 
 Beast Race
-    Use models and animations for humanoids of different proportions and
-    movement styles. In addition, beast races can't wear closed helmets
-    or boots.
+    When enabled, characters of this race will use alternative animations to
+    depict humanoids of different proportions and movement styles. This is done
+    by using a different animation file compared to the main one and thus a new
+    set of animations needs to be created for this to work properly.
+    In addition, beast races can't wear closed helmets or boots  
 
 Male Weight
     Scaling factor of the default body type. Values above 1.0 will make members
@@ -167,15 +169,15 @@ Description
     
 Powers
     A list of spells that are given to the player. When spells are added by a
-    birthsign, they cannot be removed in-game by the player.
+    birthsign, they cannot be removed from the spell list in-game by the player.
 
     
 Body Parts
 **********
 
 Characters are made from separate parts. Together they form the whole body.
-Allows customization of the outer look. Includes heads, arms, legs, torso, hand,
-armor, pauldrons, chestpiece, helmets, wearables, etc.
+Allows customization of the character appearance. Includes heads, arms, legs,
+torso, hand, armor, pauldrons, chestpiece, helmets, wearables, etc.
 
 
 Topics
@@ -193,10 +195,10 @@ Greeting 0 to 9
 Persuasion
     Persuasion entries produce a dialogue response when using persuasion actions on NPCs. Hardcoded.
 
-    * Admire, Bribe, Intimidate Taunt Fail - Conversation text that appears when the player fails a persuasion action.
-    * Admire, Bribe, Intimidate Taunt Succeed - Conversation text that appears when the player succeeds a persuasion action.
-    * Info Refusal - Conversation text that appears when the player wishes to talk about a certain topic and the conditions are not met. For example, NPC disposition is too low, the player is not a faction member, etc.
-    * Service Refusal - Conversation text that appears when the player wishes a service from the NPC but the conditions are not met.
+    * Admire, Bribe, Intimidate Taunt Fail - Text in the dialogue window that the NPC says when the player fails a persuasion action.
+    * Admire, Bribe, Intimidate Taunt Succeed - Text in the dialogue window that the NPC says when the player succeeds a persuasion action.
+    * Info Refusal - Text in the dialogue window that the NPC says when the player wishes to talk about a certain topic and the conditions are not met. For example, NPC disposition is too low, the player is not a faction member, etc.
+    * Service Refusal - Text in the dialogue window that the NPC says when the player wishes a service from the NPC but the conditions are not met.
     
 Topic
     A keyword in the dialogue window that leads to further dialogue text, 
