@@ -16,7 +16,7 @@ Activator
    object is in is active the script will be run once per frame.
 
 Apparatus
-   This is a tool to make potions. Again there’s an icon for your inventory as
+   This is a tool to make potions. It takes an icon record for the inventory as
    well as a weight and a coin value. It also has a *Quality* value attached to
    it: the higher the number, the better the effect on your potions will be.
    The *Apparatus Type* describes if the item is a *Calcinator*, *Retort*,
@@ -24,7 +24,7 @@ Apparatus
 
 Armor
    This type of item adds *Enchantment Points* to the mix. Every piece of
-   clothing or armor has a "pool" of potential *Magicka* that gets unlocked
+   clothing or armor has a pool of potential *Magicka* that gets unlocked
    when the player enchants it. Strong enchantments consume more magicka from
    this pool: the stronger the enchantment, the more *Enchantment Points* each
    cast will take up. *Health* means the amount of hit points this piece of
@@ -34,7 +34,7 @@ Armor
 
 Book
    This includes scrolls and notes. For the game to make the distinction
-   between books and scrolls, an extra property, *Scroll*, has been added.
+   between books and scrolls, *Book Type* property is used.
    Under the *Skill* column a scroll or book can have an in-game skill listed.
    Reading this item will raise the player’s level in that specific skill.
 
@@ -43,14 +43,14 @@ Clothing
    Rather than *Armor Type*, these items have a *Clothing Type*.
 
 Container
-   This is all the stuff that stores items, from chests to sacks to plants. Its
-   *Capacity* shows how much stuff you can put in the container. You can
+   This is all the stuff that stores items, from chests to sacks to plants.
+   Its *Capacity* shows how much stuff you can put in the container. You can
    compare it to the maximum allowed load a player character can carry. A
    container, however, will just refuse to take the item in question when it
-   gets "over-encumbered". Organic Containers are containers such as plants.
-   Containers that respawn are not safe to store stuff in. After a certain
-   amount of time, they will reset to their default contents, meaning that
-   everything in them is gone forever.
+   gets "over-encumbered". *Organic Container* are containers such as plants
+   and carry alchemical ingredients. Containers that respawn are not safe to
+   store your stuff in. After a certain amount of time, they will reset to
+   their default contents, meaning that everything in them is gone forever.
 
 Creature
    These can be monsters, animals and the like.
@@ -75,7 +75,9 @@ Door
 
 Ingredient
    Objects required to create potions in an apparatus. Each ingredient can hold
-   up to four alchemical effects.
+   up to four alchemical effects. In the wild, containers with *Organic Container*
+   enabled are used to represent plants from which the ingredient can be gathered
+   and will periodically respawn.
 
 Item Levelled List   
    A list of items that can spawn in a container when the player opens it.

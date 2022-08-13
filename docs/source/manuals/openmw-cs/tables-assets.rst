@@ -33,11 +33,11 @@ This textkeys file defines the extents of each animation, and relevant in this
 case, events and triggers occuring at particular animation frames.
 
 For example, a typical textkey entry intended for a Sound Generator would be
-named `SoundGen: Left` and be hand placed by an animator whenever the left leg
+named ``SoundGen: Left`` and be hand placed by an animator whenever the left leg
 of the creature touches the ground. In OpenMW-CS, the appropriate Sound
 Generator of an appropriate type would then be connected to the animated creature.
 In this case the type would be `Left Foot`. Once in-game, OpenMW will play the
-sound whenever its textkeys occurs in the currently playing animation.
+sound whenever its textkey occurs in the currently playing animation.
 
 Creature
     Which creature uses this effect.
