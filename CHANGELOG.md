@@ -2,6 +2,7 @@
 ------
 
     Bug #4127: Weapon animation looks choppy
+    Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
 
 0.48.0
 ------

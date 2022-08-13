@@ -226,16 +226,10 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asCreatureCustomData().mCreatureStats;
     }
 
-
-    void Creature::hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const
+    bool Creature::evaluateHit(const MWWorld::Ptr& ptr, MWWorld::Ptr& victim, osg::Vec3f& hitPosition) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
-
-        if (stats.getDrawState() != MWMechanics::DrawState::Weapon)
-            return;
+        victim = MWWorld::Ptr();
+        hitPosition = osg::Vec3f();
 
         // Get the weapon used (if hand-to-hand, weapon = inv.end())
         MWWorld::Ptr weapon;
@@ -247,36 +241,71 @@ namespace MWClass
                 weapon = *weaponslot;
         }
 
-        MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
-
-        float dist = gmst.find("fCombatDistance")->mValue.getFloat();
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+        float dist = store.find("fCombatDistance")->mValue.getFloat();
         if (!weapon.isEmpty())
             dist *= weapon.get<ESM::Weapon>()->mBase->mData.mReach;
 
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
-        stats.getAiSequence().getCombatTargets(targetActors);
+        getCreatureStats(ptr).getAiSequence().getCombatTargets(targetActors);
 
         std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist, targetActors);
-        if (result.first.isEmpty())
+        if (result.first.isEmpty()) // Didn't hit anything
+            return true;
+
+        const MWWorld::Class &othercls = result.first.getClass();
+        if (!othercls.isActor()) // Can't hit non-actors
+            return true;
+
+        MWMechanics::CreatureStats &otherstats = othercls.getCreatureStats(result.first);
+        if (otherstats.isDead()) // Can't hit dead actors
+            return true;
+
+        // Note that earlier we returned true in spite of an apparent failure to hit anything alive.
+        // This is because hitting nothing is not a "miss" and should be handled as such character controller-side.
+        victim = result.first;
+        hitPosition = result.second;
+
+        float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.get<ESM::Creature>()->mBase->mData.mCombat);
+        return Misc::Rng::roll0to99(world->getPrng()) < hitchance;
+    }
+
+    void Creature::hit(const MWWorld::Ptr& ptr, float attackStrength, int type, const MWWorld::Ptr& victim, const osg::Vec3f& hitPosition, bool success) const
+    {
+        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
+
+        if (stats.getDrawState() != MWMechanics::DrawState::Weapon)
+            return;
+
+        MWWorld::Ptr weapon;
+        if (hasInventoryStore(ptr))
+        {
+            MWWorld::InventoryStore &inv = getInventoryStore(ptr);
+            MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weaponslot != inv.end() && weaponslot->getType() == ESM::Weapon::sRecordId)
+                weapon = *weaponslot;
+        }
+
+        MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
+
+        if (victim.isEmpty())
             return; // Didn't hit anything
 
-        MWWorld::Ptr victim = result.first;
+        const MWWorld::Class &othercls = victim.getClass();
+        MWMechanics::CreatureStats &otherstats = othercls.getCreatureStats(victim);
+        if (otherstats.isDead()) // Can't hit dead actors
+            return;
 
-        if (!victim.getClass().isActor())
-            return; // Can't hit non-actors
-
-        osg::Vec3f hitPosition (result.second);
-
-        float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
-        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        if(Misc::Rng::roll0to99(prng) >= hitchance)
+        if (!success)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
 
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         int min,max;
         switch (type)
         {

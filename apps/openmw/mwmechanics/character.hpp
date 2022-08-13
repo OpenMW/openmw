@@ -164,6 +164,9 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     std::string mCurrentWeapon;
 
     float mAttackStrength{0.f};
+    MWWorld::Ptr mAttackVictim;
+    osg::Vec3f mAttackHitPos;
+    bool mAttackSuccess{false};
 
     bool mSkipAnim{false};
 
