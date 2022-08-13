@@ -129,6 +129,9 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     if (addonsCheckBox->isChecked())
         arguments.append(QString("--game-files"));
 
+    if (fontsCheckBox->isChecked())
+        arguments.append(QString("--fonts"));
+
     arguments.append(QString("--encoding"));
     arguments.append(mGameSettings.value(QString("encoding"), QString("win1252")));
     arguments.append(QString("--ini"));
