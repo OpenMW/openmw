@@ -103,13 +103,20 @@ struct WeaponType
     //std::string mDisplayName; // TODO: will be needed later for editor
     std::string mShortGroup;
     std::string mLongGroup;
-    std::string mSoundId;
+    std::string mSoundIdDown;
+    std::string mSoundIdUp;
     std::string mAttachBone;
     std::string mSheathingBone;
     Skill::SkillEnum mSkill;
     Class mWeaponClass;
     int mAmmoType;
     int mFlags;
+
+    WeaponType(std::string shortGroup, std::string longGroup, const std::string& soundId, std::string attachBone,
+        std::string sheathingBone, Skill::SkillEnum skill, Class weaponClass, int ammoType, int flags) :
+        mShortGroup(std::move(shortGroup)), mLongGroup(std::move(longGroup)), mSoundIdDown(soundId + " Down"),
+        mSoundIdUp(soundId + " Up"), mAttachBone(std::move(attachBone)), mSheathingBone(std::move(sheathingBone)),
+        mSkill(skill), mWeaponClass(weaponClass), mAmmoType(ammoType), mFlags(flags) {};
 };
 
 }

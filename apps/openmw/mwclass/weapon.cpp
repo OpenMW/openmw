@@ -123,20 +123,18 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Weapon::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Weapon::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
         int type = ref->mBase->mData.mType;
-        std::string soundId = MWMechanics::getWeaponType(type)->mSoundId;
-        return soundId + " Up";
+        return MWMechanics::getWeaponType(type)->mSoundIdUp;
     }
 
-    std::string Weapon::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Weapon::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
         int type = ref->mBase->mData.mType;
-        std::string soundId = MWMechanics::getWeaponType(type)->mSoundId;
-        return soundId + " Down";
+        return MWMechanics::getWeaponType(type)->mSoundIdDown;
     }
 
     std::string Weapon::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

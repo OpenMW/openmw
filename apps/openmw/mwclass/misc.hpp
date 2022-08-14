@@ -34,10 +34,10 @@ namespace MWClass
             int getValue (const MWWorld::ConstPtr& ptr) const override;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id
 
-            std::string getDownSoundId (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
             ///< Return the put down sound Id
 
             std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const override;

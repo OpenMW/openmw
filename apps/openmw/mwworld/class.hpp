@@ -235,15 +235,15 @@ namespace MWWorld
             ///
             /// (default implementation: return false)
 
-            virtual std::string getUpSoundId (const ConstPtr& ptr) const;
+            virtual std::string_view getUpSoundId(const ConstPtr& ptr) const;
             ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
-            virtual std::string getDownSoundId (const ConstPtr& ptr) const;
+            virtual std::string_view getDownSoundId(const ConstPtr& ptr) const;
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
-            virtual std::string getSoundIdFromSndGen(const Ptr &ptr, const std::string &type) const;
+            virtual std::string_view getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const;
             ///< Returns the sound ID for \a ptr of the given soundgen \a type.
 
             virtual float getArmorRating (const MWWorld::Ptr& ptr) const;

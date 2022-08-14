@@ -24,7 +24,7 @@ namespace MWClass
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
-            static int getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name);
+            static int getSndGenTypeFromName(const MWWorld::Ptr& ptr, std::string_view name);
 
             // cached GMSTs
             struct GMST
@@ -97,7 +97,7 @@ namespace MWClass
 
             bool isPersistent (const MWWorld::ConstPtr& ptr) const override;
 
-            std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const override;
+            std::string_view getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
 
             MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const override;
             ///< Return desired movement.

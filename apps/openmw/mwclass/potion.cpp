@@ -72,14 +72,14 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Potion::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Potion::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Potion Up");
+        return "Item Potion Up";
     }
 
-    std::string Potion::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Potion::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Potion Down");
+        return "Item Potion Down";
     }
 
     std::string Potion::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

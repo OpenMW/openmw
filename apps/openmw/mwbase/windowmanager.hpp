@@ -335,7 +335,7 @@ namespace MWBase
             /// Cycle to next or previous weapon
             virtual void cycleWeapon(bool next) = 0;
 
-            virtual void playSound(const std::string& soundId, float volume = 1.f, float pitch = 1.f) = 0;
+            virtual void playSound(std::string_view soundId, float volume = 1.f, float pitch = 1.f) = 0;
 
             virtual void addCell(MWWorld::CellStore* cell) = 0;
             virtual void removeCell(MWWorld::CellStore* cell) = 0;

@@ -67,14 +67,14 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Repair::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Repair::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Repair Up");
+        return "Item Repair Up";
     }
 
-    std::string Repair::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Repair::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Repair Down");
+        return "Item Repair Down";
     }
 
     std::string Repair::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

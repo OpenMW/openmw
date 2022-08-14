@@ -219,7 +219,7 @@ namespace MWGui
             {
                 // play the sound of the first object
                 MWWorld::Ptr item = mModel->getItem(i).mBase;
-                std::string sound = item.getClass().getUpSoundId(item);
+                std::string_view sound = item.getClass().getUpSoundId(item);
                 MWBase::Environment::get().getWindowManager()->playSound(sound);
             }
 

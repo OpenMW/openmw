@@ -936,13 +936,13 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
     auto& charClass = mPtr.getClass();
     if (evt.substr(0, 10) == "soundgen: ")
     {
-        std::string soundgen = std::string(evt.substr(10));
+        std::string_view soundgen = evt.substr(10);
 
         // The event can optionally contain volume and pitch modifiers
         float volume=1.f, pitch=1.f;
         if (soundgen.find(' ') != std::string::npos)
         {
-            std::vector<std::string> tokens;
+            std::vector<std::string_view> tokens;
             Misc::StringUtils::split(soundgen, tokens);
             soundgen = tokens[0];
             if (tokens.size() >= 2)
@@ -959,7 +959,7 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
             }
         }
 
-        std::string sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
+        std::string_view sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
         if(!sound.empty())
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -1129,7 +1129,7 @@ bool CharacterController::updateWeaponState()
 
     const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
 
-    std::string downSoundId;
+    std::string_view downSoundId;
     bool weaponChanged = false;
     bool ammunition = true;
     float weapSpeed = 1.f;
@@ -1304,7 +1304,7 @@ bool CharacterController::updateWeaponState()
 
                         if (!mWeapon.isEmpty() && mWeaponType != ESM::Weapon::HandToHand && isRealWeapon(weaptype))
                         {
-                            std::string upSoundId = mWeapon.getClass().getUpSoundId(mWeapon);
+                            std::string_view upSoundId = mWeapon.getClass().getUpSoundId(mWeapon);
                             if (!upSoundId.empty())
                                 sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
                         }

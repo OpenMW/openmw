@@ -37,10 +37,10 @@ namespace MWClass
             std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
             ///< Generate action for using via inventory menu
 
-            std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id
 
-            std::string getDownSoundId (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
             ///< Return the put down sound Id
 
             std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const override;

@@ -79,14 +79,14 @@ namespace MWClass
         return action;
     }
 
-    std::string Ingredient::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Ingredient::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Ingredient Up");
+        return "Item Ingredient Up";
     }
 
-    std::string Ingredient::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Ingredient::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Ingredient Down");
+        return "Item Ingredient Down";
     }
 
     std::string Ingredient::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

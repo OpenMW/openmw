@@ -290,7 +290,7 @@ namespace MWGui
         {
             update();
 
-            std::string sound = item.getClass().getUpSoundId(item);
+            std::string_view sound = item.getClass().getUpSoundId(item);
             MWBase::Environment::get().getWindowManager()->playSound(sound);
         }
     }

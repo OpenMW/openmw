@@ -2105,7 +2105,7 @@ namespace MWGui
             mInventoryWindow->cycle(next);
     }
 
-    void WindowManager::playSound(const std::string& soundId, float volume, float pitch)
+    void WindowManager::playSound(std::string_view soundId, float volume, float pitch)
     {
         if (soundId.empty())
             return;

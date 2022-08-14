@@ -78,14 +78,14 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Probe::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Probe::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Probe Up");
+        return "Item Probe Up";
     }
 
-    std::string Probe::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Probe::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Probe Down");
+        return "Item Probe Down";
     }
 
     std::string Probe::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

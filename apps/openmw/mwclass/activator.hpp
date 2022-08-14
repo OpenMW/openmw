@@ -13,7 +13,7 @@ namespace MWClass
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
-            static int getSndGenTypeFromName(const std::string &name);
+            static int getSndGenTypeFromName(std::string_view name);
 
         public:
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
@@ -45,7 +45,7 @@ namespace MWClass
 
             bool isActivator() const override;
 
-            std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const override;
+            std::string_view getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
     };
 }
 

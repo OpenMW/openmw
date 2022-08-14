@@ -84,14 +84,14 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Book::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Book::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Book Up");
+        return "Item Book Up";
     }
 
-    std::string Book::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Book::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Book Down");
+        return "Item Book Down";
     }
 
     std::string Book::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
