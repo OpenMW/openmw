@@ -1764,10 +1764,11 @@ namespace CSMWorld
                         return content.mWander.mDistance;
                     else
                         return QVariant();
-                case 2: // wander dur
-                    if (content.mType == ESM::AI_Wander ||
-                            content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                case 2: // wander/follow dur
+                    if (content.mType == ESM::AI_Wander)
                         return content.mWander.mDuration;
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        return content.mTarget.mDuration;
                     else
                         return QVariant();
                 case 3: // wander ToD
@@ -1874,9 +1875,10 @@ namespace CSMWorld
 
                     break; // always save
                 case 2:
-                    if (content.mType == ESM::AI_Wander ||
-                            content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    if (content.mType == ESM::AI_Wander)
                         content.mWander.mDuration = static_cast<short>(value.toInt());
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mTarget.mDuration = static_cast<short>(value.toInt());
                     else
                         return; // return without saving
                     break;
