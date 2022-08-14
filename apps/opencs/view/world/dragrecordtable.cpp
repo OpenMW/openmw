@@ -96,3 +96,12 @@ CSMWorld::ColumnBase::Display CSVWorld::DragRecordTable::getIndexDisplayType(con
     }
     return CSMWorld::ColumnBase::Display_None;
 }
+
+int CSVWorld::DragRecordTable::sizeHintForColumn(int column) const
+{
+    // Prevent the column width from getting too long or too short
+    constexpr int minWidth = 100;
+    constexpr int maxWidth = 300;
+    int width = QTableView::sizeHintForColumn(column);
+    return std::clamp(width, minWidth, maxWidth);
+}

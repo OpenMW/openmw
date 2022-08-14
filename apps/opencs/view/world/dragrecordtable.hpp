@@ -44,6 +44,8 @@ namespace CSVWorld
 
             void dropEvent(QDropEvent *event) override;
 
+            int sizeHintForColumn(int column) const override;
+
         private:
             CSMWorld::ColumnBase::Display getIndexDisplayType(const QModelIndex &index) const;
 

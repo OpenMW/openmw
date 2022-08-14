@@ -263,6 +263,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 
     setModel (mProxyModel);
     horizontalHeader()->setSectionResizeMode (QHeaderView::Interactive);
+    // The number is arbitrary but autoresize would be way too slow otherwise.
+    constexpr int autoResizePrecision = 500;
+    horizontalHeader()->setResizeContentsPrecision(autoResizePrecision);
+    resizeColumnsToContents();
     verticalHeader()->hide();
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
