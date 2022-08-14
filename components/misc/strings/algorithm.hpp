@@ -69,7 +69,7 @@ namespace Misc::StringUtils
     {
         using is_transparent = void;
 
-        std::size_t operator()(std::string_view str) const
+        constexpr std::size_t operator()(std::string_view str) const
         {
             // FNV-1a
             std::size_t hash{0xcbf29ce484222325ull};
