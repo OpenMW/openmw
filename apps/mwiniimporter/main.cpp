@@ -93,13 +93,13 @@ int wmain(int argc, wchar_t *wargv[]) {
 
         bpo::notify(vm);
 
-        std::filesystem::path iniFile(vm["ini"].as<Files::MaybeQuotedPath>());
-        std::filesystem::path cfgFile(vm["cfg"].as<Files::MaybeQuotedPath>());
+        std::filesystem::path iniFile(vm["ini"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+        std::filesystem::path cfgFile(vm["cfg"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
         // if no output is given, write back to cfg file
-        auto outputFile = vm["output"].as<Files::MaybeQuotedPath>();
+        std::filesystem::path outputFile = vm["output"].as<Files::MaybeQuotedPath>().u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
         if(vm["output"].defaulted()) {
-            outputFile = vm["cfg"].as<Files::MaybeQuotedPath>();
+            outputFile = vm["cfg"].as<Files::MaybeQuotedPath>().u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
         }
 
         if(!std::filesystem::exists(iniFile)) {
