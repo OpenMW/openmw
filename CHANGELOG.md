@@ -4,6 +4,7 @@
     Bug #4127: Weapon animation looks choppy
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5129: Stuttering animation on Centurion Archer
+    Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
 
 0.48.0
 ------
