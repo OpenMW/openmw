@@ -556,7 +556,7 @@ fi
 ICU_VER="70_1"
 
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
-OSG_ARCHIVE="OSGoS-3.6.5-b02abe2-msvc${OSG_MSVC_YEAR}-win${BITS}"
+OSG_ARCHIVE="OSGoS-3.6.5-dd803bc-msvc${OSG_MSVC_YEAR}-win${BITS}"
 OSG_ARCHIVE_REPO_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main"
 if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
     OSG_ARCHIVE_NAME="OSG-3.6-multiview"
@@ -830,7 +830,7 @@ printf "${OSG_ARCHIVE_NAME}... "
 		grep "OPENSCENEGRAPH_MINOR_VERSION    6" OSG/include/osg/Version > /dev/null && \
 		grep "OPENSCENEGRAPH_PATCH_VERSION    5" OSG/include/osg/Version > /dev/null
 	then
-		printf "Exists. "
+	printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf OSG
 		eval 7z x -y "${DEPS}/${OSG_ARCHIVE}.7z" $STRIP
@@ -845,14 +845,20 @@ printf "${OSG_ARCHIVE_NAME}... "
 		else
 			SUFFIX=""
 		fi
-        if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
-            add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{ot21-OpenThreads,zlib,libpng16}${SUFFIX}.dll \
-                "$(pwd)/OSG/bin/osg162-osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
-        else
-            add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng}${SUFFIX}.dll \
-                "$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
-        fi
-		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
+
+		if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
+			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{ot21-OpenThreads,zlib,libpng16}${SUFFIX}.dll \
+				"$(pwd)/OSG/bin/osg162-osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
+		else
+			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,collada-dom2.4-dp-vc141-mt,icudt58,icuuc58,libpng16,libxml2,zlib}${SUFFIX}.dll \
+				"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
+			if [ $CONFIGURATION == "Debug" ]; then
+				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-gd-1_63,boost_system-vc141-mt-gd-1_63}.dll
+			else
+				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-1_63,boost_system-vc141-mt-1_63}.dll
+			fi
+		fi
+		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dae,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
 		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
 	done
 	echo Done.
