@@ -187,7 +187,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
             QString string = i.value();
 
             stream << delim;
-            for (auto it : string)
+            for (auto& it : string)
             {
                 if (it == delim || it == escape)
                     stream << escape;
@@ -407,7 +407,7 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
             QString string = it.value();
 
             settingLine += delim;
-            for (auto iter : string)
+            for (auto& iter : string)
             {
                 if (iter == delim || iter == escape)
                     settingLine += escape;

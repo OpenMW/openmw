@@ -131,7 +131,7 @@ namespace DetourNavigator
     void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)
     {
         Misc::CoordinateConverter converter(&cell);
-        for (auto edge : pathgrid.mEdges)
+        for (auto& edge : pathgrid.mEdges)
         {
             const auto src = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV0]));
             const auto dst = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV1]));

@@ -219,7 +219,7 @@ namespace SDLUtil
         std::map<MyGUI::KeyCode, SDL_Keycode> reverseKeyMap(const std::map<SDL_Keycode, MyGUI::KeyCode>& map)
         {
             std::map<MyGUI::KeyCode, SDL_Keycode> result;
-            for (auto [sdl, mygui] : map)
+            for (auto& [sdl, mygui] : map)
                 result[mygui] = sdl;
             return result;
         }
