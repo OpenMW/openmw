@@ -69,10 +69,17 @@ namespace Misc::StringUtils
     {
         using is_transparent = void;
 
-        std::size_t operator()(std::string_view str) const
+        constexpr std::size_t operator()(std::string_view str) const
         {
-            // TODO avoid string copy
-            return std::hash<std::string>{}(lowerCase(str));
+            // FNV-1a
+            std::size_t hash{0xcbf29ce484222325ull};
+            constexpr std::size_t prime{0x00000100000001B3ull};
+            for(char c : str)
+            {
+                hash ^= static_cast<std::size_t>(toLower(c));
+                hash *= prime;
+            }
+            return hash;
         }
     };
 
