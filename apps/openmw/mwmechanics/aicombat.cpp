@@ -515,13 +515,35 @@ namespace MWMechanics
 
         bool targetUsesRanged = false;
         float rangeAttackOfTarget = ActionWeapon(targetWeapon).getCombatRange(targetUsesRanged);
-        
-        if (mMovement.mPosition[0] || mMovement.mPosition[1])
+
+        if (mMovement.mPosition[0])
         {
             mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability(prng);
             mCombatMove = true;
         }
-        else if (isDistantCombat)
+        // dodge movements (for NPCs and bipedal creatures)
+        // Note: do not use for ranged combat yet since in couple with back up behaviour can move actor out of cliff
+        else if (actor.getClass().isBipedal(actor) && !isDistantCombat)
+        {
+            float moveDuration = 0;
+            float angleToTarget = Misc::normalizeAngle(mMovement.mRotation[2] - actor.getRefData().getPosition().rot[2]);
+            // Apply a big side step if enemy tries to get around and come from behind.
+            // Otherwise apply a random side step (kind of dodging) with some probability
+            // if actor is within range of target's weapon.
+            if (std::abs(angleToTarget) > osg::PI / 4)
+                moveDuration = 0.2f;
+            else if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability(prng) < 0.25)
+                moveDuration = 0.1f + 0.1f * Misc::Rng::rollClosedProbability(prng);
+            if (moveDuration > 0)
+            {
+                mMovement.mPosition[0] = Misc::Rng::rollProbability(prng) < 0.5 ? 1.0f : -1.0f; // to the left/right
+                mTimerCombatMove = moveDuration;
+                mCombatMove = true;
+            }
+        }
+
+        mMovement.mPosition[1] = 0;
+        if (isDistantCombat)
         {
             // Backing up behaviour
             // Actor backs up slightly further away than opponent's weapon range
@@ -561,26 +583,6 @@ namespace MWMechanics
 
             mMovement.mPosition[1] = -1;
         }
-        // dodge movements (for NPCs and bipedal creatures)
-        // Note: do not use for ranged combat yet since in couple with back up behaviour can move actor out of cliff
-        else if (actor.getClass().isBipedal(actor))
-        {
-            float moveDuration = 0;
-            float angleToTarget = Misc::normalizeAngle(mMovement.mRotation[2] - actor.getRefData().getPosition().rot[2]);
-            // Apply a big side step if enemy tries to get around and come from behind.
-            // Otherwise apply a random side step (kind of dodging) with some probability
-            // if actor is within range of target's weapon.
-            if (std::abs(angleToTarget) > osg::PI / 4)
-                moveDuration = 0.2f;
-            else if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability(prng) < 0.25)
-                moveDuration = 0.1f + 0.1f * Misc::Rng::rollClosedProbability(prng);
-            if (moveDuration > 0)
-            {
-                mMovement.mPosition[0] = Misc::Rng::rollProbability(prng) < 0.5 ? 1.0f : -1.0f; // to the left/right
-                mTimerCombatMove = moveDuration;
-                mCombatMove = true;
-            }
-        }
     }
 
     void AiCombatStorage::updateCombatMove(float duration)
@@ -598,7 +600,7 @@ namespace MWMechanics
     void AiCombatStorage::stopCombatMove()
     {
         mTimerCombatMove = 0;
-        mMovement.mPosition[1] = mMovement.mPosition[0] = 0;
+        mMovement.mPosition[0] = 0;
         mCombatMove = false;
     }
 
