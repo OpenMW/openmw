@@ -1647,7 +1647,11 @@ bool CharacterController::updateWeaponState()
 
             if (animPlaying)
                 mAnimation->disable(mCurrentWeapon);
-            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false, weapSpeed, mAttackType + ' ' + start, mAttackType + ' ' + stop, 0.0f, 0);
+            MWRender::Animation::AnimPriority priorityFollow(priorityWeapon);
+            // Follow animations have lower priority than movement for non-biped creatures, logic be damned
+            if (!cls.isBipedal(mPtr))
+                priorityFollow = Priority_Default;
+            mAnimation->play(mCurrentWeapon, priorityFollow, MWRender::Animation::BlendMask_All, false, weapSpeed, mAttackType + ' ' + start, mAttackType + ' ' + stop, 0.0f, 0);
             mUpperBodyState = UpperBodyState::AttackEnd;
 
             animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
