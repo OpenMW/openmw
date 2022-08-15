@@ -1640,7 +1640,7 @@ bool CharacterController::updateWeaponState()
 
             if (mAttackType != "shoot")
             {
-                std::string strength = mAttackStrength < 0.5f ? "small" : mAttackStrength < 1.f ? "medium" : "large";
+                std::string strength = mAttackStrength < 0.33f ? "small" : mAttackStrength < 0.66f ? "medium" : "large";
                 start = strength + ' ' + start;
                 stop = strength + ' ' + stop;
             }
