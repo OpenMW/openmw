@@ -24,7 +24,7 @@ namespace
                 esm.writeHNT ("TIME", params.mNextWorsening);
             }
 
-            for (auto effect : params.mEffects)
+            for (auto& effect : params.mEffects)
             {
                 esm.writeHNT ("MGEF", effect.mEffectId);
                 if (effect.mArg != -1)

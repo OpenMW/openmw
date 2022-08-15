@@ -57,7 +57,6 @@ namespace LuaUtil
     {
         std::vector<icu::Formattable> args;
         std::vector<icu::UnicodeString> argNames;
-           for (auto elem : table)
         for (auto& [key, value] : table)
         {
             // Argument values

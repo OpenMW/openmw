@@ -434,7 +434,7 @@ namespace Shader
     osg::ref_ptr<osg::Program> ShaderManager::cloneProgram(const osg::Program* src)
     {
         osg::ref_ptr<osg::Program> program = static_cast<osg::Program*>(src->clone(osg::CopyOp::SHALLOW_COPY));
-        for (auto [name, idx] : src->getUniformBlockBindingList())
+        for (auto& [name, idx] : src->getUniformBlockBindingList())
             program->addBindUniformBlock(name, idx);
         return program;
     }
