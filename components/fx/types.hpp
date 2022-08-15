@@ -18,8 +18,6 @@
 #include <components/misc/strings/format.hpp>
 #include <components/debug/debuglog.hpp>
 
-#include "pass.hpp"
-
 namespace fx
 {
     namespace Types

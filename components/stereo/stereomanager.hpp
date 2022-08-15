@@ -10,8 +10,9 @@
 #include <memory>
 #include <array>
 
-#include <components/stereo/types.hpp>
 #include <components/shader/shadermanager.hpp>
+
+#include "types.hpp"
 
 namespace osg
 {

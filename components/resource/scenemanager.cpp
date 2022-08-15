@@ -21,6 +21,8 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/nifosg/nifloader.hpp>
+#include <components/nifosg/controller.hpp>
+
 #include <components/nif/niffile.hpp>
 
 #include <components/misc/pathhelpers.hpp>

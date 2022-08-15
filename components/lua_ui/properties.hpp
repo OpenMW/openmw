@@ -3,6 +3,7 @@
 
 #include <sol/sol.hpp>
 #include <MyGUI_Types.h>
+#include <MyGUI_Colour.h>
 #include <osg/Vec2>
 
 #include <components/lua/luastate.hpp>
