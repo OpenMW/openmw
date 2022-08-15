@@ -19,7 +19,7 @@ void printAIPackage(const ESM::AIPackage& p)
         std::cout << "    Duration: " << p.mWander.mDuration << std::endl;
         std::cout << "    Time of Day: " << (int)p.mWander.mTimeOfDay << std::endl;
         if (p.mWander.mShouldRepeat != 1)
-            std::cout << "    Should repeat: " << (bool)(p.mWander.mShouldRepeat != 0) << std::endl;
+            std::cout << "    Should repeat: " << static_cast<bool>(p.mWander.mShouldRepeat != 0) << std::endl;
 
         std::cout << "    Idle: ";
         for (int i = 0; i != 8; i++)
@@ -30,7 +30,7 @@ void printAIPackage(const ESM::AIPackage& p)
     {
         std::cout << "    Travel Coordinates: (" << p.mTravel.mX << ","
                   << p.mTravel.mY << "," << p.mTravel.mZ << ")" << std::endl;
-        std::cout << "    Should repeat: " << p.mTravel.mShouldRepeat << std::endl;
+        std::cout << "    Should repeat: " << static_cast<bool>(p.mTravel.mShouldRepeat != 0) << std::endl;
     }
     else if (p.mType == ESM::AI_Follow || p.mType == ESM::AI_Escort)
     {
@@ -38,12 +38,12 @@ void printAIPackage(const ESM::AIPackage& p)
                   << p.mTarget.mY << "," << p.mTarget.mZ << ")" << std::endl;
         std::cout << "    Duration: " << p.mTarget.mDuration << std::endl;
         std::cout << "    Target ID: " << p.mTarget.mId.toString() << std::endl;
-        std::cout << "    Should repeat: " << p.mTarget.mShouldRepeat << std::endl;
+        std::cout << "    Should repeat: " << static_cast<bool>(p.mTarget.mShouldRepeat != 0) << std::endl;
     }
     else if (p.mType == ESM::AI_Activate)
     {
         std::cout << "    Name: " << p.mActivate.mName.toString() << std::endl;
-        std::cout << "    Should repeat: " << p.mActivate.mShouldRepeat << std::endl;
+        std::cout << "    Should repeat: " << static_cast<bool>(p.mActivate.mShouldRepeat != 0) << std::endl;
     }
     else {
         std::cout << "    BadPackage: " << Misc::StringUtils::format("0x%08X", p.mType) << std::endl;
