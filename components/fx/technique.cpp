@@ -117,7 +117,7 @@ namespace fx
 
             int swaps = 0;
 
-            for (auto name : mPassKeys)
+            for (auto& name : mPassKeys)
             {
                 auto it = mPassMap.find(name);
 
