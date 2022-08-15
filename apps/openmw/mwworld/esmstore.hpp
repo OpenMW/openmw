@@ -296,13 +296,13 @@ namespace MWWorld
     template <>
     inline const ESM::NPC *ESMStore::insert<ESM::NPC>(const ESM::NPC &npc)
     {
-        const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
-
         if (Misc::StringUtils::ciEqual(npc.mId, "player"))
         {
             return mNpcs.insert(npc);
         }
-        else if (mNpcs.search(id) != nullptr)
+        
+        const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
+        if (mNpcs.search(id) != nullptr)
         {
             const std::string msg = "Try to override existing record '" + id + "'";
             throw std::runtime_error(msg);
