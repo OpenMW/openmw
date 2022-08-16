@@ -2,6 +2,7 @@
 #define GAME_MWWORLD_ACTION_H
 
 #include <string>
+#include <string_view>
 
 #include "ptr.hpp"
 
@@ -39,7 +40,7 @@ namespace MWWorld
 
             void execute (const Ptr& actor, bool noSound = false);
 
-            void setSound (const std::string& id);
+            void setSound(std::string_view id);
             void setSoundOffset(float offset);
     };
 }

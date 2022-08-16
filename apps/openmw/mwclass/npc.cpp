@@ -1260,13 +1260,13 @@ namespace MWClass
     }
 
 
-    std::string Npc::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    std::string_view Npc::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         if(name == "left" || name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             if(world->isFlying(ptr))
-                return std::string();
+                return {};
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isSwimming(ptr))
                 return (name == "left") ? "Swim Left" : "Swim Right";
@@ -1280,7 +1280,7 @@ namespace MWClass
                     int weaponType = ESM::Weapon::None;
                     MWMechanics::getActiveWeapon(ptr, &weaponType);
                     if (weaponType == ESM::Weapon::None)
-                        return std::string();
+                        return {};
                 }
 
                 const MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
@@ -1298,12 +1298,12 @@ namespace MWClass
                         return (name == "left") ? "FootHeavyLeft" : "FootHeavyRight";
                 }
             }
-            return std::string();
+            return {};
         }
 
         // Morrowind ignores land soundgen for NPCs
         if(name == "land")
-            return std::string();
+            return {};
         if(name == "swimleft")
             return "Swim Left";
         if(name == "swimright")
@@ -1313,13 +1313,13 @@ namespace MWClass
         // only for biped creatures?
 
         if(name == "moan")
-            return std::string();
+            return {};
         if(name == "roar")
-            return std::string();
+            return {};
         if(name == "scream")
-            return std::string();
+            return {};
 
-        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
+        throw std::runtime_error("Unexpected soundgen type: " + std::string(name));
     }
 
     MWWorld::Ptr Npc::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

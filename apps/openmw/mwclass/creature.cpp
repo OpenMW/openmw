@@ -622,11 +622,11 @@ namespace MWClass
         return (ref->mBase->mRecordFlags & ESM::FLAG_Persistent) != 0;
     }
 
-    std::string Creature::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    std::string_view Creature::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         int type = getSndGenTypeFromName(ptr, name);
         if (type < 0)
-            return std::string();
+            return {};
 
         std::vector<const ESM::SoundGenerator*> sounds;
         std::vector<const ESM::SoundGenerator*> fallbacksounds;
@@ -679,7 +679,7 @@ namespace MWClass
         if (!fallbacksounds.empty())
             return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
 
-        return std::string();
+        return {};
     }
 
     MWWorld::Ptr Creature::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
@@ -709,7 +709,7 @@ namespace MWClass
         return isFlagBitSet(ptr, static_cast<ESM::Creature::Flags>(ESM::Creature::Walks | ESM::Creature::Bipedal));
     }
 
-    int Creature::getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name)
+    int Creature::getSndGenTypeFromName(const MWWorld::Ptr& ptr, std::string_view name)
     {
         if(name == "left")
         {
@@ -748,7 +748,7 @@ namespace MWClass
         if(name == "land")
             return ESM::SoundGenerator::Land;
 
-        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
+        throw std::runtime_error("Unexpected soundgen type: " + std::string(name));
     }
 
     float Creature::getSkill(const MWWorld::Ptr &ptr, int skill) const

@@ -36,10 +36,10 @@ namespace MWClass
             MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const override;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
             ///< Return the pick up sound Id
 
-            std::string getDownSoundId (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
             ///< Return the put down sound Id
 
             std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const override;

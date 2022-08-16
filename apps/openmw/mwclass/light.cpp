@@ -122,14 +122,14 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Light::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Light::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Misc Up");
+        return "Item Misc Up";
     }
 
-    std::string Light::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Light::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Misc Down");
+        return "Item Misc Down";
     }
 
 

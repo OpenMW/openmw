@@ -256,17 +256,17 @@ namespace MWWorld
         getClasses().emplace(instance.getType(), &instance);
     }
 
-    std::string Class::getUpSoundId (const ConstPtr& ptr) const
+    std::string_view Class::getUpSoundId (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have an up sound");
     }
 
-    std::string Class::getDownSoundId (const ConstPtr& ptr) const
+    std::string_view Class::getDownSoundId (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have an down sound");
     }
 
-    std::string Class::getSoundIdFromSndGen(const Ptr &ptr, const std::string &type) const
+    std::string_view Class::getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const
     {
         throw std::runtime_error("class does not support soundgen look up");
     }

@@ -140,7 +140,7 @@ namespace
         LocalVariables mLocals;
         std::map<std::string, GlobalVariables, std::less<>> mMembers;
     public:
-        std::string getTarget() const override { return {}; };
+        std::string_view getTarget() const override { return {}; };
 
         int getLocalShort(int index) const override { return mLocals.getShort(index); };
 
@@ -176,29 +176,29 @@ namespace
 
         std::string getActionBinding(std::string_view action) const override { return {}; };
 
-        std::string getActorName() const override { return {}; };
+        std::string_view getActorName() const override { return {}; };
 
-        std::string getNPCRace() const override { return {}; };
+        std::string_view getNPCRace() const override { return {}; };
 
-        std::string getNPCClass() const override { return {}; };
+        std::string_view getNPCClass() const override { return {}; };
 
-        std::string getNPCFaction() const override { return {}; };
+        std::string_view getNPCFaction() const override { return {}; };
 
-        std::string getNPCRank() const override { return {}; };
+        std::string_view getNPCRank() const override { return {}; };
 
-        std::string getPCName() const override { return {}; };
+        std::string_view getPCName() const override { return {}; };
 
-        std::string getPCRace() const override { return {}; };
+        std::string_view getPCRace() const override { return {}; };
 
-        std::string getPCClass() const override { return {}; };
+        std::string_view getPCClass() const override { return {}; };
 
-        std::string getPCRank() const override { return {}; };
+        std::string_view getPCRank() const override { return {}; };
 
-        std::string getPCNextRank() const override { return {}; };
+        std::string_view getPCNextRank() const override { return {}; };
 
         int getPCBounty() const override { return {}; };
 
-        std::string getCurrentCellName() const override { return {}; };
+        std::string_view getCurrentCellName() const override { return {}; };
 
         int getMemberShort(std::string_view id, std::string_view name, bool global) const override
         {

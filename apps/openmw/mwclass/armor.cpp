@@ -161,26 +161,26 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Armor::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Armor::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
         if (es == ESM::Skill::LightArmor)
-            return std::string("Item Armor Light Up");
+            return "Item Armor Light Up";
         else if (es == ESM::Skill::MediumArmor)
-            return std::string("Item Armor Medium Up");
+            return "Item Armor Medium Up";
         else
-            return std::string("Item Armor Heavy Up");
+            return "Item Armor Heavy Up";
     }
 
-    std::string Armor::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Armor::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
         if (es == ESM::Skill::LightArmor)
-            return std::string("Item Armor Light Down");
+            return "Item Armor Light Down";
         else if (es == ESM::Skill::MediumArmor)
-            return std::string("Item Armor Medium Down");
+            return "Item Armor Medium Down";
         else
-            return std::string("Item Armor Heavy Down");
+            return "Item Armor Heavy Down";
     }
 
     std::string Armor::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

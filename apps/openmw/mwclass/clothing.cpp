@@ -119,26 +119,26 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Clothing::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Clothing::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         if (ref->mBase->mData.mType == 8)
         {
-            return std::string("Item Ring Up");
+            return "Item Ring Up";
         }
-        return std::string("Item Clothes Up");
+        return "Item Clothes Up";
     }
 
-    std::string Clothing::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Clothing::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         if (ref->mBase->mData.mType == 8)
         {
-            return std::string("Item Ring Down");
+            return "Item Ring Down";
         }
-        return std::string("Item Clothes Down");
+        return "Item Clothes Down";
     }
 
     std::string Clothing::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

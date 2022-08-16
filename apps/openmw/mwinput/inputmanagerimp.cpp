@@ -146,7 +146,7 @@ namespace MWInput
         return mActionManager->getIdleTime() > 0.5;
     }
 
-    std::string InputManager::getActionDescription(int action) const
+    std::string_view InputManager::getActionDescription(int action) const
     {
         return mBindingsManager->getActionDescription(action);
     }
@@ -191,12 +191,12 @@ namespace MWInput
         return mMouseManager->getMouseMoveY();
     }
 
-    std::vector<int> InputManager::getActionKeySorting()
+    const std::initializer_list<int>& InputManager::getActionKeySorting()
     {
         return mBindingsManager->getActionKeySorting();
     }
 
-    std::vector<int> InputManager::getActionControllerSorting()
+    const std::initializer_list<int>& InputManager::getActionControllerSorting()
     {
         return mBindingsManager->getActionControllerSorting();
     }

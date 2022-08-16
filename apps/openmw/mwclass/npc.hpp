@@ -127,7 +127,7 @@ namespace MWClass
 
             bool isPersistent (const MWWorld::ConstPtr& ptr) const override;
 
-            std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const override;
+            std::string_view getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 

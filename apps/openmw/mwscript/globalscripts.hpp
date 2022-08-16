@@ -2,12 +2,15 @@
 #define GAME_SCRIPT_GLOBALSCRIPTS_H
 
 #include <string>
+#include <string_view>
 #include <map>
 #include <memory>
+#include <unordered_map>
 #include <utility>
 #include <variant>
-
 #include <cstdint>
+
+#include <components/misc/algorithm.hpp>
 
 #include "locals.hpp"
 
@@ -44,13 +47,13 @@ namespace MWScript
 
         MWWorld::Ptr getPtr(); // Resolves mTarget to a Ptr and caches the (potentially empty) result
 
-        std::string getId() const; // Returns the target's ID -- if any
+        std::string_view getId() const; // Returns the target's ID -- if any
     };
 
     class GlobalScripts
     {
             const MWWorld::ESMStore& mStore;
-            std::map<std::string, std::shared_ptr<GlobalScriptDesc> > mScripts;
+            std::unordered_map<std::string, std::shared_ptr<GlobalScriptDesc>, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual> mScripts;
 
         public:
 

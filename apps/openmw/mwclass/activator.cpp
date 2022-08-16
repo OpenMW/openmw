@@ -132,11 +132,11 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    std::string Activator::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    std::string_view Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         const std::string model = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore(); 
-        std::string creatureId;
+        std::string_view creatureId;
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         for (const ESM::Creature &iter : store.get<ESM::Creature>())
@@ -180,10 +180,10 @@ namespace MWClass
                 return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
         }
 
-        return std::string();
+        return {};
     }
 
-    int Activator::getSndGenTypeFromName(const std::string &name)
+    int Activator::getSndGenTypeFromName(std::string_view name)
     {
         if (name == "left")
             return ESM::SoundGenerator::LeftFoot;
@@ -202,6 +202,6 @@ namespace MWClass
         if (name == "land")
             return ESM::SoundGenerator::Land;
 
-        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
+        throw std::runtime_error("Unexpected soundgen type: " + std::string(name));
     }
 }

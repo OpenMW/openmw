@@ -170,11 +170,8 @@ namespace MWScript
                     }
                     const MWWorld::CellStore *cell = MWMechanics::getPlayer().getCell();
 
-                    std::string current = MWBase::Environment::get().getWorld()->getCellName(cell);
-                    Misc::StringUtils::lowerCaseInPlace(current);
-
-                    bool match = current.length()>=name.length() &&
-                        current.substr (0, name.length())==name;
+                    std::string_view current = MWBase::Environment::get().getWorld()->getCellName(cell);
+                    bool match = Misc::StringUtils::ciCompareLen(name, current, name.length()) == 0;
 
                     runtime.push (match ? 1 : 0);
                 }

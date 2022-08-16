@@ -76,7 +76,7 @@ namespace MWInput
         void toggleControlSwitch(std::string_view sw, bool value) override;
         bool getControlSwitch(std::string_view sw) override;
 
-        std::string getActionDescription (int action) const override;
+        std::string_view getActionDescription(int action) const override;
         std::string getActionKeyBindingName (int action) const override;
         std::string getActionControllerBindingName (int action) const override;
         bool actionIsActive(int action) const override;
@@ -88,8 +88,8 @@ namespace MWInput
         int getMouseMoveY() const override;
 
         int getNumActions() override { return A_Last; }
-        std::vector<int> getActionKeySorting() override;
-        std::vector<int> getActionControllerSorting() override;
+        const std::initializer_list<int>& getActionKeySorting() override;
+        const std::initializer_list<int>& getActionControllerSorting() override;
         void enableDetectingBindingMode (int action, bool keyboard) override;
         void resetToDefaultKeyBindings() override;
         void resetToDefaultControllerBindings() override;

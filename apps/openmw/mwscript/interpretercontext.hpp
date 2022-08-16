@@ -28,18 +28,16 @@ namespace MWScript
 
             /// If \a id is empty, a reference the script is run from is returned or in case
             /// of a non-local script the reference derived from the target ID.
-            const MWWorld::Ptr getReferenceImp (const std::string& id = "",
-                bool activeOnly = false, bool doThrow=true) const;
+            const MWWorld::Ptr getReferenceImp(std::string_view id = {}, bool activeOnly = false, bool doThrow = true) const;
 
-            const Locals& getMemberLocals (std::string& id, bool global) const;
+            const Locals& getMemberLocals(std::string_view& id, bool global) const;
             ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
 
-            Locals& getMemberLocals (std::string& id, bool global);
+            Locals& getMemberLocals(std::string_view& id, bool global);
             ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
 
             /// Throws an exception if local variable can't be found.
-            int findLocalVariableIndex (const std::string& scriptId, std::string_view name,
-                char type) const;
+            int findLocalVariableIndex(std::string_view scriptId, std::string_view name, char type) const;
 
         public:
             InterpreterContext (std::shared_ptr<GlobalScriptDesc> globalScriptDesc);
@@ -47,7 +45,7 @@ namespace MWScript
             InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
-            std::string getTarget() const override;
+            std::string_view getTarget() const override;
 
             int getLocalShort (int index) const override;
 
@@ -87,29 +85,29 @@ namespace MWScript
 
             std::string getActionBinding(std::string_view action) const override;
 
-            std::string getActorName() const override;
+            std::string_view getActorName() const override;
 
-            std::string getNPCRace() const override;
+            std::string_view getNPCRace() const override;
 
-            std::string getNPCClass() const override;
+            std::string_view getNPCClass() const override;
 
-            std::string getNPCFaction() const override;
+            std::string_view getNPCFaction() const override;
 
-            std::string getNPCRank() const override;
+            std::string_view getNPCRank() const override;
 
-            std::string getPCName() const override;
+            std::string_view getPCName() const override;
 
-            std::string getPCRace() const override;
+            std::string_view getPCRace() const override;
 
-            std::string getPCClass() const override;
+            std::string_view getPCClass() const override;
 
-            std::string getPCRank() const override;
+            std::string_view getPCRank() const override;
 
-            std::string getPCNextRank() const override;
+            std::string_view getPCNextRank() const override;
 
             int getPCBounty() const override;
 
-            std::string getCurrentCellName() const override;
+            std::string_view getCurrentCellName() const override;
 
             void executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor);
             ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.

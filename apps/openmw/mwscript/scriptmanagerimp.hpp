@@ -53,11 +53,9 @@ namespace MWScript
                 {}
             };
 
-            typedef std::map<std::string, CompiledScript> ScriptCollection;
-
-            ScriptCollection mScripts;
+            std::unordered_map<std::string, CompiledScript, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual> mScripts;
             GlobalScripts mGlobalScripts;
-            std::map<std::string, Compiler::Locals> mOtherLocals;
+            std::unordered_map<std::string, Compiler::Locals, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual> mOtherLocals;
             std::vector<std::string> mScriptBlacklist;
 
         public:
@@ -68,10 +66,10 @@ namespace MWScript
 
             void clear() override;
 
-            bool run (const std::string& name, Interpreter::Context& interpreterContext) override;
+            bool run(std::string_view name, Interpreter::Context& interpreterContext) override;
             ///< Run the script with the given name (compile first, if not compiled yet)
 
-            bool compile (const std::string& name) override;
+            bool compile(std::string_view name) override;
             ///< Compile script with the given namen
             /// \return Success?
 

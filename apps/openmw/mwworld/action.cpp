@@ -58,7 +58,7 @@ void MWWorld::Action::execute (const Ptr& actor, bool noSound)
     executeImp (actor);
 }
 
-void MWWorld::Action::setSound (const std::string& id)
+void MWWorld::Action::setSound(std::string_view id)
 {
     mSoundId = id;
 }

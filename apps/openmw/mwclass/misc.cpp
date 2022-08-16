@@ -105,18 +105,18 @@ namespace MWClass
         return value;
     }
 
-    std::string Miscellaneous::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Miscellaneous::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         if (isGold(ptr))
-            return std::string("Item Gold Up");
-        return std::string("Item Misc Up");
+            return "Item Gold Up";
+        return "Item Misc Up";
     }
 
-    std::string Miscellaneous::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Miscellaneous::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         if (isGold(ptr))
-            return std::string("Item Gold Down");
-        return std::string("Item Misc Down");
+            return "Item Gold Down";
+        return "Item Misc Down";
     }
 
     std::string Miscellaneous::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

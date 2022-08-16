@@ -374,7 +374,7 @@ namespace MWGui
     /// Cycle to next or previous weapon
     void cycleWeapon(bool next) override;
 
-    void playSound(const std::string& soundId, float volume = 1.f, float pitch = 1.f) override;
+    void playSound(std::string_view soundId, float volume = 1.f, float pitch = 1.f) override;
 
     void addCell(MWWorld::CellStore* cell) override;
     void removeCell(MWWorld::CellStore* cell) override;

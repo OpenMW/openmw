@@ -78,14 +78,14 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Lockpick::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Lockpick::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Lockpick Up");
+        return "Item Lockpick Up";
     }
 
-    std::string Lockpick::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Lockpick::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Lockpick Down");
+        return "Item Lockpick Down";
     }
 
     std::string Lockpick::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

@@ -67,14 +67,14 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string Apparatus::getUpSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Apparatus::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Apparatus Up");
+        return "Item Apparatus Up";
     }
 
-    std::string Apparatus::getDownSoundId (const MWWorld::ConstPtr& ptr) const
+    std::string_view Apparatus::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return std::string("Item Apparatus Down");
+        return "Item Apparatus Down";
     }
 
     std::string Apparatus::getInventoryIcon (const MWWorld::ConstPtr& ptr) const

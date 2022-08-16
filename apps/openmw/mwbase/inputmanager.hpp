@@ -52,7 +52,7 @@ namespace MWBase
             virtual void toggleControlSwitch(std::string_view sw, bool value) = 0;
             virtual bool getControlSwitch(std::string_view sw) = 0;
 
-            virtual std::string getActionDescription (int action) const = 0;
+            virtual std::string_view getActionDescription(int action) const = 0;
             virtual std::string getActionKeyBindingName (int action) const = 0;
             virtual std::string getActionControllerBindingName (int action) const = 0;
             virtual bool actionIsActive(int action) const = 0;
@@ -64,9 +64,9 @@ namespace MWBase
             virtual int getMouseMoveY() const = 0;
 
             ///Actions available for binding to keyboard buttons
-            virtual std::vector<int> getActionKeySorting() = 0;
+            virtual const std::initializer_list<int>& getActionKeySorting() = 0;
             ///Actions available for binding to controller buttons
-            virtual std::vector<int> getActionControllerSorting() = 0;
+            virtual const std::initializer_list<int>& getActionControllerSorting() = 0;
             virtual int getNumActions() = 0;
             ///If keyboard is true, only pay attention to keyboard events. If false, only pay attention to controller events (excluding esc)
             virtual void enableDetectingBindingMode (int action, bool keyboard) = 0;

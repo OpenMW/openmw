@@ -190,12 +190,12 @@ namespace MWBase
             virtual char getGlobalVariableType(std::string_view name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
 
-            virtual std::string getCellName (const MWWorld::CellStore *cell = nullptr) const = 0;
+            virtual std::string_view getCellName(const MWWorld::CellStore* cell = nullptr) const = 0;
             ///< Return name of the cell.
             ///
             /// \note If cell==0, the cell the player is currently in will be used instead to
             /// generate a name.
-            virtual std::string getCellName(const ESM::Cell* cell) const = 0;
+            virtual std::string_view getCellName(const ESM::Cell* cell) const = 0;
 
             virtual void removeRefScript (MWWorld::RefData *ref) = 0;
             //< Remove the script attached to ref from mLocalScripts

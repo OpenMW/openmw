@@ -62,7 +62,7 @@ void DragAndDrop::startDrag (int index, SortFilterItemModel* sortModel, ItemMode
         mSourceSortModel = playerFilterModel;
     }
 
-    std::string sound = mItem.mBase.getClass().getUpSoundId(mItem.mBase);
+    std::string_view sound = mItem.mBase.getClass().getUpSoundId(mItem.mBase);
     MWBase::Environment::get().getWindowManager()->playSound (sound);
 
     if (mSourceSortModel)
@@ -92,7 +92,7 @@ void DragAndDrop::startDrag (int index, SortFilterItemModel* sortModel, ItemMode
 
 void DragAndDrop::drop(ItemModel *targetModel, ItemView *targetView)
 {
-    std::string sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
+    std::string_view sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
     MWBase::Environment::get().getWindowManager()->playSound(sound);
 
     // We can't drop a conjured item to the ground; the target container should always be the source container
