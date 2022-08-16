@@ -19,7 +19,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <MyGUI_Macros.h>
-#include <components/esm/records.hpp>
 
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"

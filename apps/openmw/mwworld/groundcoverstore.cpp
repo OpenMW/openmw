@@ -6,6 +6,8 @@
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadcell.hpp>
 
 #include <apps/openmw/mwbase/environment.hpp>
 
