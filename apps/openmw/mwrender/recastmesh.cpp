@@ -1,5 +1,7 @@
 #include "recastmesh.hpp"
 
+#include <algorithm>
+
 #include <components/sceneutil/recastmesh.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -12,6 +14,7 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
 namespace MWRender
 {
     RecastMesh::RecastMesh(const osg::ref_ptr<osg::Group>& root, bool enabled)
