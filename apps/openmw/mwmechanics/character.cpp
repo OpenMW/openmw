@@ -764,16 +764,6 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
 {
     mDeathState = death;
     mCurrentDeath = deathStateToAnimGroup(mDeathState);
-
-    // Make sure the character was swimming upon death for forward-compatibility
-    if (!MWBase::Environment::get().getWorld()->isSwimming(mPtr))
-    {
-        if (mDeathState == CharState_SwimDeathKnockDown)
-            mCurrentDeath = "deathknockdown";
-        else if (mDeathState == CharState_SwimDeathKnockOut)
-            mCurrentDeath = "deathknockout";
-    }
-
     mPtr.getClass().getCreatureStats(mPtr).setDeathAnimation(mDeathState - CharState_Death1);
 
     // For dead actors, refreshCurrentAnims is no longer called, so we need to disable the movement state manually.
