@@ -4,7 +4,6 @@
 #include "tileposition.hpp"
 #include "recastmesh.hpp"
 #include "tilecachedrecastmeshmanager.hpp"
-#include "version.hpp"
 
 #include <functional>
 #include <memory>

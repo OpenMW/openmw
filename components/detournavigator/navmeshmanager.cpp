@@ -6,6 +6,7 @@
 #include "navmeshcacheitem.hpp"
 #include "settings.hpp"
 #include "waitconditiontype.hpp"
+#include "settingsutils.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/bullethelpers/heightfield.hpp>

@@ -1,7 +1,6 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_FINDSMOOTHPATH_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_FINDSMOOTHPATH_H
 
-#include "exceptions.hpp"
 #include "flags.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"

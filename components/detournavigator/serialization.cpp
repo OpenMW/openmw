@@ -6,6 +6,7 @@
 #include "recastmesh.hpp"
 #include "settings.hpp"
 #include "agentbounds.hpp"
+#include "tilebounds.hpp"
 
 #include <components/serialization/binaryreader.hpp>
 #include <components/serialization/binarywriter.hpp>

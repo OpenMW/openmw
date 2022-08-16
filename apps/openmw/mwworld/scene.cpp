@@ -14,6 +14,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/agentbounds.hpp>
 #include <components/misc/convert.hpp>
 #include <components/detournavigator/heightfieldshape.hpp>
 

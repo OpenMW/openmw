@@ -3,7 +3,6 @@
 
 #include "cachedrecastmeshmanager.hpp"
 #include "tileposition.hpp"
-#include "settingsutils.hpp"
 #include "gettilespositions.hpp"
 #include "version.hpp"
 #include "heightfieldshape.hpp"

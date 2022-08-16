@@ -11,6 +11,7 @@
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/recastmeshprovider.hpp>
 #include <components/detournavigator/serialization.hpp>
+#include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/tileposition.hpp>
 #include <components/misc/progressreporter.hpp>
 #include <components/sceneutil/workqueue.hpp>

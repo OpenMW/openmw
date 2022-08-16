@@ -6,6 +6,7 @@
 #include <components/detournavigator/objectid.hpp>
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
+#include <components/detournavigator/settings.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>

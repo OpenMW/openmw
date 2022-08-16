@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVMESHMANAGER_H
 
 #include "asyncnavmeshupdater.hpp"
-#include "cachedrecastmeshmanager.hpp"
 #include "offmeshconnectionsmanager.hpp"
 #include "recastmeshtiles.hpp"
 #include "waitconditiontype.hpp"

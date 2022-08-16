@@ -2,7 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 
 #include "objectid.hpp"
-#include "navmeshcacheitem.hpp"
+#include "sharednavmeshcacheitem.hpp"
 #include "recastmeshtiles.hpp"
 #include "waitconditiontype.hpp"
 #include "heightfieldshape.hpp"
@@ -21,6 +21,11 @@ namespace ESM
 namespace Loading
 {
     class Listener;
+}
+
+namespace osg
+{
+    class Stats;
 }
 
 namespace DetourNavigator

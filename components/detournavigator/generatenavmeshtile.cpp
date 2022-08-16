@@ -2,11 +2,9 @@
 
 #include "dbrefgeometryobject.hpp"
 #include "makenavmesh.hpp"
-#include "offmeshconnectionsmanager.hpp"
 #include "preparednavmeshdata.hpp"
 #include "serialization.hpp"
 #include "settings.hpp"
-#include "tilecachedrecastmeshmanager.hpp"
 
 #include <components/debug/debuglog.hpp>
 

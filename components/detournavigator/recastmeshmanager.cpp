@@ -1,6 +1,5 @@
 #include "recastmeshmanager.hpp"
 #include "recastmeshbuilder.hpp"
-#include "settings.hpp"
 #include "heightfieldshape.hpp"
 
 #include <components/debug/debuglog.hpp>
