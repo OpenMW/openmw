@@ -52,12 +52,13 @@ namespace MWGui
         static_cast<MyGUI::TextBox*>(pt)->setCaption(caption);
     }
 
-    void Layout::setTitle(const std::string& title)
+    void Layout::setTitle(std::string_view title)
     {
         MyGUI::Window* window = static_cast<MyGUI::Window*>(mMainWidget);
+        MyGUI::UString uTitle{title.data(), title.size()};
 
-        if (window->getCaption() != title)
-            window->setCaptionWithReplacing(title);
+        if (window->getCaption() != uTitle)
+            window->setCaptionWithReplacing(uTitle);
     }
 
     MyGUI::Widget* Layout::getWidget(std::string_view _name)

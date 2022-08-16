@@ -211,7 +211,7 @@ namespace MWClass
         }
     }
 
-    std::string Creature::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Creature::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         const std::string& name = ref->mBase->mName;
@@ -589,7 +589,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()});
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

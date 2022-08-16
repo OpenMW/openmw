@@ -51,7 +51,7 @@ namespace MWClass
              void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            std::string getName (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
             bool hasToolTip(const MWWorld::ConstPtr& ptr) const override;

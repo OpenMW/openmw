@@ -47,7 +47,7 @@ namespace MWClass
         return getClassModel<ESM::Armor>(ptr);
     }
 
-    std::string Armor::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Armor::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
         const std::string& name = ref->mBase->mName;
@@ -195,13 +195,14 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
 
         // get armor type string (light/medium/heavy)
-        std::string typeText;
+        std::string_view typeText;
         if (ref->mBase->mData.mWeight == 0)
         {
             // no type
@@ -224,12 +225,17 @@ namespace MWClass
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
                 + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
 
-        if (typeText != "")
-            text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight) + " (" + typeText + ")";
+        if (!typeText.empty())
+        {
+            text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight) + " (";
+            text += typeText;
+            text += ')';
+        }
 
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
-        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+        {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }

@@ -83,7 +83,8 @@ namespace MWGui
         if (count > 1 && !shift)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-            std::string name = object.getClass().getName(object) + MWGui::ToolTips::getSoulString(object.getCellRef());
+            std::string name{object.getClass().getName(object)};
+            name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, "#{sTake}", count);
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);

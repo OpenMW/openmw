@@ -64,7 +64,7 @@ namespace MWGui
     void setText(std::string_view name, const std::string& caption);
 
     // NOTE: this assume that mMainWidget is of type Window.
-    void setTitle(const std::string& title);
+    void setTitle(std::string_view title);
 
     MyGUI::Widget* mMainWidget;
 

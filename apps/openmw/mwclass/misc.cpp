@@ -51,7 +51,7 @@ namespace MWClass
         return getClassModel<ESM::Miscellaneous>(ptr);
     }
 
-    std::string Miscellaneous::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Miscellaneous::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
         const std::string& name = ref->mBase->mName;
@@ -80,7 +80,7 @@ namespace MWClass
         if (ptr.getCellRef().getGoldValue() > 1 && ptr.getRefData().getCount() == 1)
             value = ptr.getCellRef().getGoldValue();
 
-        if (ptr.getCellRef().getSoul() != "")
+        if (!ptr.getCellRef().getSoul().empty())
         {
             const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
             if (creature)
@@ -142,7 +142,8 @@ namespace MWClass
         else // gold displays its count also if it's 1.
             countString = " (" + std::to_string(count) + ")";
 
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + countString + MWGui::ToolTips::getSoulString(ptr.getCellRef());
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -171,7 +172,7 @@ namespace MWClass
         if (isGold(ptr)) {
             int goldAmount = getValue(ptr) * count;
 
-            std::string base = "Gold_001";
+            std::string_view base = "Gold_001";
             if (goldAmount >= 100)
                 base = "Gold_100";
             else if (goldAmount >= 25)
@@ -203,7 +204,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        const std::string soulgemPrefix = "misc_soulgem";
+        const std::string_view soulgemPrefix = "misc_soulgem";
 
         if (::Misc::StringUtils::ciCompareLen(ptr.getCellRef().getRefId(), soulgemPrefix, soulgemPrefix.length()) == 0)
             return std::make_unique<MWWorld::ActionSoulgem>(ptr);

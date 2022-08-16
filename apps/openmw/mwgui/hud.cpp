@@ -422,7 +422,7 @@ namespace MWGui
 
     void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
     {
-        std::string itemName = item.getClass().getName(item);
+        std::string_view itemName = item.getClass().getName(item);
         if (itemName != mSpellName && mSpellVisible)
         {
             mWeaponSpellTimer = 5.0f;
@@ -442,7 +442,7 @@ namespace MWGui
 
     void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
     {
-        std::string itemName = item.getClass().getName(item);
+        std::string_view itemName = item.getClass().getName(item);
         if (itemName != mWeaponName && mWeaponVisible)
         {
             mWeaponSpellTimer = 5.0f;

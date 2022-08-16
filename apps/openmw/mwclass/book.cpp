@@ -44,7 +44,7 @@ namespace MWClass
         return getClassModel<ESM::Book>(ptr);
     }
 
-    std::string Book::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Book::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
         const std::string& name = ref->mBase->mName;
@@ -106,7 +106,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -114,7 +115,8 @@ namespace MWClass
         text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
-        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+        {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }

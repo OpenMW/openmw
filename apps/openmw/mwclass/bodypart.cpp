@@ -28,9 +28,9 @@ namespace MWClass
         }
     }
 
-    std::string BodyPart::getName(const MWWorld::ConstPtr &ptr) const
+    std::string_view BodyPart::getName(const MWWorld::ConstPtr &ptr) const
     {
-        return std::string();
+        return {};
     }
 
     bool BodyPart::hasToolTip(const MWWorld::ConstPtr& ptr) const

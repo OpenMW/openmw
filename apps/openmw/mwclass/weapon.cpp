@@ -47,7 +47,7 @@ namespace MWClass
         return getClassModel<ESM::Weapon>(ptr);
     }
 
-    std::string Weapon::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Weapon::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
         const std::string& name = ref->mBase->mName;
@@ -150,7 +150,8 @@ namespace MWClass
         const ESM::WeaponType* weaponType = MWMechanics::getWeaponType(ref->mBase->mData.mType);
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -164,7 +165,7 @@ namespace MWClass
 
             int skill = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mSkill;
             const std::string type = ESM::Skill::sSkillNameIds[skill];
-            std::string oneOrTwoHanded;
+            std::string_view oneOrTwoHanded;
             if (weaponType->mWeaponClass == ESM::WeaponType::Melee)
             {
                 if (weaponType->mFlags & ESM::WeaponType::TwoHanded)
@@ -173,8 +174,9 @@ namespace MWClass
                     oneOrTwoHanded = "sOneHanded";
             }
 
-            text += store.get<ESM::GameSetting>().find(type)->mValue.getString() +
-                ((oneOrTwoHanded != "") ? ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->mValue.getString() : "");
+            text += store.get<ESM::GameSetting>().find(type)->mValue.getString();
+            if (!oneOrTwoHanded.empty())
+                text += ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->mValue.getString();
 
             // weapon damage
             if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)

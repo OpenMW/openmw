@@ -210,7 +210,7 @@ namespace MWClass
         }
     }
 
-    std::string Container::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Container::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
         const std::string& name = ref->mBase->mName;
@@ -245,7 +245,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()});
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();

@@ -67,8 +67,8 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
-            std::string name = iter->getClass().getName(*iter)
-                    + " - " + MyGUI::utility::toString(price)
+            std::string name{iter->getClass().getName(*iter)};
+            name += " - " + MyGUI::utility::toString(price)
                     + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("sgp")->mValue.getString();
 

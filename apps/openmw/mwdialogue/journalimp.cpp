@@ -130,7 +130,7 @@ namespace MWDialogue
         topic.addEntry (entry);
     }
 
-    void Journal::removeLastAddedTopicResponse(const std::string &topicId, const std::string &actorName)
+    void Journal::removeLastAddedTopicResponse(const std::string &topicId, std::string_view actorName)
     {
         Topic& topic = getTopic (topicId);
 

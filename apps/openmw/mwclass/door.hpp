@@ -29,7 +29,7 @@ namespace MWClass
 
             bool useAnim() const override;
 
-            std::string getName (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
             std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,

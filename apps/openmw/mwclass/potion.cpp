@@ -43,7 +43,7 @@ namespace MWClass
         return getClassModel<ESM::Potion>(ptr);
     }
 
-    std::string Potion::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Potion::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
         const std::string& name = ref->mBase->mName;
@@ -94,7 +94,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
