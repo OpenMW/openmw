@@ -6,7 +6,8 @@ Default UI font and font used in magic scrolls are defined in ``openmw.cfg``:
 			fallback=Fonts_Font_0,pelagiad
 			fallback=Fonts_Font_2,ayembedt
 
-By default, built-in TrueType fonts are used. Font used by console and another debug windows is not configurable (so ``Fonts_Font_1`` is unused).
+When there are no ``Fonts_Font_*`` lines in user's ``openmw.cfg``, built-in TrueType fonts are used.
+Font used by console and another debug windows is not configurable (so ``Fonts_Font_1`` is unused).
 
 Morrowind .fnt fonts
 --------------------
