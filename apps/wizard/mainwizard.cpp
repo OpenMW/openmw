@@ -270,6 +270,10 @@ void Wizard::MainWizard::runSettingsImporter()
         arguments.append(QLatin1String("win1252"));
     }
 
+    // Import fonts
+    if (field(QLatin1String("installation.import-fonts")).toBool() == true)
+        arguments.append(QLatin1String("--fonts"));
+
     // Now the paths
     arguments.append(QLatin1String("--ini"));
 

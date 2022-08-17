@@ -113,6 +113,21 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="fontsCheckBox">
+        <property name="text">
+         <string>Import bitmap fonts setup</string>
+        </property>
+        <property name="toolTip">
+         <string>Fonts shipped with the original engine are blurry with UI scaling and support only a small amount of characters,
+so OpenMW provides another set of fonts to avoid these issues. These fonts use TrueType technology and are quite similar
+to default Morrowind fonts. Check this box if you still prefer original fonts over OpenMW ones or if you use custom bitmap fonts.</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
         <item row="2" column="1">
          <spacer name="horizontalSpacer_3">

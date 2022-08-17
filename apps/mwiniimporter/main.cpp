@@ -66,6 +66,7 @@ int wmain(int argc, wchar_t *wargv[]) {
             ("cfg,c", bpo::value<std::string>(), "openmw.cfg file")
             ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
             ("game-files,g", "import esm and esp files")
+            ("fonts,f", "import bitmap fonts")
             ("no-archives,A", "disable bsa archives import")
             ("encoding,e", bpo::value<std::string>()-> default_value("win1252"),
                 "Character encoding used in OpenMW game messages:\n"
@@ -116,6 +117,13 @@ int wmain(int argc, wchar_t *wargv[]) {
 
         MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
         MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
+
+        if (!vm.count("fonts"))
+        {
+            ini.erase("Fonts:Font 0");
+            ini.erase("Fonts:Font 1");
+            ini.erase("Fonts:Font 2");
+        }
 
         importer.merge(cfg, ini);
         importer.mergeFallback(cfg, ini);
