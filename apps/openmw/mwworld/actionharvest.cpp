@@ -43,7 +43,8 @@ namespace MWWorld
             MWBase::Environment::get().getMechanicsManager()->itemTaken(actor, *it, target, itemCount);
             actorStore.add(*it, itemCount, actor);
             store.remove(*it, itemCount, getTarget());
-            takenMap[it->getClass().getName(*it)]+=itemCount;
+            std::string name{it->getClass().getName(*it)};
+            takenMap[name]+=itemCount;
         }
 
         // Spawn a messagebox (only for items added to player's inventory)

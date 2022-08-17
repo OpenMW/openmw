@@ -122,14 +122,14 @@ public:
         return ch;
     }
 
-    static std::string lowerCaseUtf8(const std::string& str)
+    static std::string lowerCaseUtf8(std::string_view str)
     {
         if (str.empty())
-            return str;
+            return std::string{str};
 
         // Decode string as utf8 characters, convert to lower case and pack them to string
         std::string out;
-        Utf8Stream stream (str.c_str());
+        Utf8Stream stream (str);
         while (!stream.eof ())
         {
             UnicodeChar character = toLowerUtf8(stream.peek());

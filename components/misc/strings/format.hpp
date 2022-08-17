@@ -16,8 +16,13 @@ namespace Misc::StringUtils
         template <typename T>
         T argument(T value) noexcept
         {
-            static_assert(!std::is_same_v<T, std::string_view>, "std::string_view is not supported");
             return value;
+        }
+
+        template <typename T>
+        T const * argument(std::basic_string_view<T> const & value) noexcept
+        {
+            return value.data();
         }
 
         template <typename T>

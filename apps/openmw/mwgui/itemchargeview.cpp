@@ -169,7 +169,8 @@ namespace MWGui
 
     void ItemChargeView::updateLine(const ItemChargeView::Line& line)
     {
-        line.mText->setCaption(line.mItemPtr.getClass().getName(line.mItemPtr));
+        std::string_view name = line.mItemPtr.getClass().getName(line.mItemPtr);
+        line.mText->setCaption({name.data(), name.size()});
 
         line.mCharge->setVisible(false);
         switch (mDisplayMode)

@@ -160,7 +160,7 @@ namespace MWScript
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
                         std::string msgBox;
-                        std::string itemName = itemPtr.getClass().getName(itemPtr);
+                        std::string_view itemName = itemPtr.getClass().getName(itemPtr);
                         if (count == 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage60}");
@@ -256,7 +256,7 @@ namespace MWScript
                     }
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
-                    std::string itemName;
+                    std::string_view itemName;
                     for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)
                     {
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item))

@@ -2,6 +2,7 @@
 #define GAME_MWDIALOG_TOPIC_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "journalentry.hpp"
@@ -48,7 +49,7 @@ namespace MWDialogue
 
             virtual std::string getName() const;
 
-            void removeLastAddedResponse (const std::string& actorName);
+            void removeLastAddedResponse(std::string_view actorName);
 
             TEntryIter begin() const;
             ///< Iterator pointing to the begin of the journal for this topic.

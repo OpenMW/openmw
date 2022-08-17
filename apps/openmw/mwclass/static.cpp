@@ -44,9 +44,9 @@ namespace MWClass
         return getClassModel<ESM::Static>(ptr);
     }
 
-    std::string Static::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Static::getName(const MWWorld::ConstPtr& ptr) const
     {
-        return "";
+        return {};
     }
 
     bool Static::hasToolTip(const MWWorld::ConstPtr& ptr) const

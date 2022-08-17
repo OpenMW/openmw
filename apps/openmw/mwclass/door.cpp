@@ -100,7 +100,7 @@ namespace MWClass
         return getClassModel<ESM::Door>(ptr);
     }
 
-    std::string Door::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Door::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
         const std::string& name = ref->mBase->mName;
@@ -115,8 +115,8 @@ namespace MWClass
 
         const std::string &openSound = ref->mBase->mOpenSound;
         const std::string &closeSound = ref->mBase->mCloseSound;
-        const std::string lockedSound = "LockedDoor";
-        const std::string trapActivationSound = "Disarm Trap Fail";
+        const std::string_view lockedSound = "LockedDoor";
+        const std::string_view trapActivationSound = "Disarm Trap Fail";
 
         MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
 
@@ -267,7 +267,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()});
 
         std::string text;
 
@@ -282,7 +283,7 @@ namespace MWClass
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
         else if (ptr.getCellRef().getLockLevel() < 0)
             text += "\n#{sUnlocked}";
-        if (ptr.getCellRef().getTrap() != "")
+        if (!ptr.getCellRef().getTrap().empty())
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

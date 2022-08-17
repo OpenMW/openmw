@@ -72,12 +72,12 @@ namespace MWClass
         return getClassModel<ESM::Light>(ptr);
     }
 
-    std::string Light::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Light::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         if (ref->mBase->mModel.empty())
-            return std::string();
+            return {};
 
         const std::string& name = ref->mBase->mName;
         return !name.empty() ? name : ref->mBase->mId;
@@ -150,7 +150,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;

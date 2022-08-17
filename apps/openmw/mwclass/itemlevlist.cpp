@@ -9,9 +9,9 @@ namespace MWClass
     {
     }
 
-    std::string ItemLevList::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view ItemLevList::getName(const MWWorld::ConstPtr& ptr) const
     {
-        return "";
+        return {};
     }
 
     bool ItemLevList::hasToolTip(const MWWorld::ConstPtr& ptr) const

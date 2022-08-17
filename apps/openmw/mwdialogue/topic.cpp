@@ -59,7 +59,7 @@ namespace MWDialogue
         return mEntries.end();
     }
 
-    void Topic::removeLastAddedResponse (const std::string& actorName)
+    void Topic::removeLastAddedResponse(std::string_view actorName)
     {
         for (std::vector<MWDialogue::Entry>::reverse_iterator it = mEntries.rbegin();
              it != mEntries.rend(); ++it)

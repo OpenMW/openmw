@@ -197,7 +197,7 @@ namespace MWGui
             if (item.getType() != ESM::Ingredient::sRecordId)
                 continue;
 
-            itemNames.insert(item.getClass().getName(item));
+            itemNames.emplace(item.getClass().getName(item));
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
             auto const alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);

@@ -41,7 +41,7 @@ namespace MWClass
         return getClassModel<ESM::Ingredient>(ptr);
     }
 
-    std::string Ingredient::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view Ingredient::getName(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
         const std::string& name = ref->mBase->mName;
@@ -101,7 +101,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
+        std::string_view name = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;

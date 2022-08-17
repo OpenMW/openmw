@@ -57,9 +57,9 @@ namespace MWClass
             MWBase::Environment::get().getWorld()->adjustPosition(creature, force);
     }
 
-    std::string CreatureLevList::getName (const MWWorld::ConstPtr& ptr) const
+    std::string_view CreatureLevList::getName(const MWWorld::ConstPtr& ptr) const
     {
-        return "";
+        return {};
     }
 
     bool CreatureLevList::hasToolTip(const MWWorld::ConstPtr& ptr) const

@@ -99,7 +99,8 @@ namespace MWGui
         }
         else
         {
-            mName->setCaption(item.getClass().getName(item));
+            std::string_view name = item.getClass().getName(item);
+            mName->setCaption({name.data(), name.size()});
             mItemBox->setItem(item);
             mItemBox->setUserString ("ToolTipType", "ItemPtr");
             mItemBox->setUserData(MWWorld::Ptr(item));
