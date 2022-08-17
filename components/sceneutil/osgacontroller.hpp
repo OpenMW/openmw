@@ -6,9 +6,9 @@
 #include <osg/ref_ptr>
 #include <osgAnimation/UpdateMatrixTransform>
 
-#include <components/sceneutil/controller.hpp>
-#include <components/sceneutil/nodecallback.hpp>
-#include <components/sceneutil/keyframe.hpp>
+#include "nodecallback.hpp"
+#include "keyframe.hpp"
+
 #include <components/resource/animation.hpp>
 
 namespace SceneUtil

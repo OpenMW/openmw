@@ -24,10 +24,9 @@
 #ifndef OPENMW_COMPONENTS_NIF_DATA_HPP
 #define OPENMW_COMPONENTS_NIF_DATA_HPP
 
-#include "base.hpp"
-
 #include "nifkey.hpp"
 #include "niftypes.hpp" // Transformation
+#include "recordptr.hpp"
 
 namespace Nif
 {

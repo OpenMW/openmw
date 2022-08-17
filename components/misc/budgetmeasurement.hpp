@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_MISC_BUDGETMEASUREMENT_H
 #define OPENMW_COMPONENTS_MISC_BUDGETMEASUREMENT_H
 
+#include <array>
+#include <cstddef>
 
 namespace Misc
 {

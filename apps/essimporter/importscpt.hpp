@@ -4,6 +4,7 @@
 #include "importscri.hpp"
 
 #include <components/esm3/loadscpt.hpp>
+#include <components/esm/esmcommon.hpp>
 
 namespace ESM
 {

@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "components/esm/esmcommon.hpp"
 #include "components/esm/defs.hpp"
 
 namespace ESM

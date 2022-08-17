@@ -3,7 +3,6 @@
 
 #include "cellref.hpp"
 #include "components/esm/defs.hpp"
-#include "effectlist.hpp"
 
 #include <string>
 #include <vector>

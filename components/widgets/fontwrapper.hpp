@@ -1,9 +1,9 @@
 #ifndef OPENMW_WIDGETS_WRAPPER_H
 #define OPENMW_WIDGETS_WRAPPER_H
 
-#include "widgets.hpp"
-
 #include <components/settings/settings.hpp>
+
+#include <algorithm>
 
 namespace Gui
 {
