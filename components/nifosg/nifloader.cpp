@@ -1480,16 +1480,38 @@ namespace NifOsg
         {
             osg::ref_ptr<osg::Image> image (new osg::Image);
 
+            // Pixel row alignment, defining it to be consistent with OSG DDS plugin
+            int packing = 1;
             GLenum pixelformat = 0;
             switch (pixelData->fmt)
             {
             case Nif::NiPixelData::NIPXFMT_RGB8:
-            case Nif::NiPixelData::NIPXFMT_PAL8:
                 pixelformat = GL_RGB;
                 break;
             case Nif::NiPixelData::NIPXFMT_RGBA8:
-            case Nif::NiPixelData::NIPXFMT_PALA8:
                 pixelformat = GL_RGBA;
+                break;
+            case Nif::NiPixelData::NIPXFMT_PAL8:
+            case Nif::NiPixelData::NIPXFMT_PALA8:
+                pixelformat = GL_RED; // Each color is defined by a byte.
+                break;
+            case Nif::NiPixelData::NIPXFMT_BGR8:
+                pixelformat = GL_BGR;
+                break;
+            case Nif::NiPixelData::NIPXFMT_BGRA8:
+                pixelformat = GL_BGRA;
+                break;
+            case Nif::NiPixelData::NIPXFMT_DXT1:
+                pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+                packing = 2;
+                break;
+            case Nif::NiPixelData::NIPXFMT_DXT3:
+                pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+                packing = 4;
+                break;
+            case Nif::NiPixelData::NIPXFMT_DXT5:
+                pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                packing = 4;
                 break;
             default:
                 Log(Debug::Info) << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename;
@@ -1507,7 +1529,7 @@ namespace NifOsg
             {
                 const Nif::NiPixelData::Mipmap& mip = pixelData->mipmaps[i];
 
-                size_t mipSize = mip.height * mip.width * pixelData->bpp / 8;
+                size_t mipSize = osg::Image::computeImageSizeInBytes(mip.width, mip.height, 1, pixelformat, GL_UNSIGNED_BYTE, packing);
                 if (mipSize + mip.dataOffset > pixelData->data.size())
                 {
                     Log(Debug::Info) << "Internal texture's mipmap data out of bounds, ignoring texture";
@@ -1534,10 +1556,15 @@ namespace NifOsg
             {
             case Nif::NiPixelData::NIPXFMT_RGB8:
             case Nif::NiPixelData::NIPXFMT_RGBA8:
+            case Nif::NiPixelData::NIPXFMT_BGR8:
+            case Nif::NiPixelData::NIPXFMT_BGRA8:
+            case Nif::NiPixelData::NIPXFMT_DXT1:
+            case Nif::NiPixelData::NIPXFMT_DXT3:
+            case Nif::NiPixelData::NIPXFMT_DXT5:
             {
                 unsigned char* data = new unsigned char[pixels.size()];
                 memcpy(data, pixels.data(), pixels.size());
-                image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
+                image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE, packing);
                 break;
             }
             case Nif::NiPixelData::NIPXFMT_PAL8:
@@ -1548,6 +1575,7 @@ namespace NifOsg
                     Log(Debug::Info) << "Palettized texture in " << mFilename << " is invalid, ignoring";
                     return nullptr;
                 }
+                pixelformat = pixelData->fmt == Nif::NiPixelData::NIPXFMT_PAL8 ? GL_RGB : GL_RGBA;
                 // We're going to convert the indices that pixel data contains
                 // into real colors using the palette.
                 const auto& palette = pixelData->palette->colors;
@@ -1559,7 +1587,9 @@ namespace NifOsg
                     memcpy(pixel, &palette[index], sizeof(unsigned char) * numChannels);
                     pixel += numChannels;
                 }
-                image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
+                for (unsigned int& offset : mipmapVector)
+                    offset *= numChannels;
+                image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE, packing);
                 break;
             }
             default:
