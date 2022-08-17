@@ -8,8 +8,6 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 
-#include "controller.hpp"
-
 namespace osg
 {
     class Node;

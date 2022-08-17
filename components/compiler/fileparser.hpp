@@ -4,7 +4,6 @@
 #include "parser.hpp"
 #include "scriptparser.hpp"
 #include "locals.hpp"
-#include "literals.hpp"
 
 namespace Compiler
 {

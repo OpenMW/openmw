@@ -652,7 +652,7 @@ Windows_MSBuild_RelWithDebInfo:
   script:
     - scripts/find_missing_merge_requests.py --project_id=$CI_PROJECT_ID --ignored_mrs_path=$CI_PROJECT_DIR/.resubmitted_merge_requests.txt
 
-flatpak:
+.flatpak:
     image: 'docker.io/bilelmoussaoui/flatpak-github-actions'
     stage: build
     script:

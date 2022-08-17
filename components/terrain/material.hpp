@@ -3,8 +3,6 @@
 
 #include <osg/StateSet>
 
-#include "defs.hpp"
-
 namespace osg
 {
     class Texture2D;

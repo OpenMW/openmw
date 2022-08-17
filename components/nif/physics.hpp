@@ -1,12 +1,23 @@
 #ifndef OPENMW_COMPONENTS_NIF_PHYSICS_HPP
 #define OPENMW_COMPONENTS_NIF_PHYSICS_HPP
 
-#include "base.hpp"
+#include "record.hpp"
+#include "recordptr.hpp"
+
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+#include <osg/Quat>
+
+#include <cstdint>
+#include <vector>
 
 // This header contains certain record definitions
 // specific to Bethesda implementation of Havok physics
 namespace Nif
 {
+
+class NIFStream;
+class NIFFile;
 
 /// Non-record data types
 

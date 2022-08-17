@@ -3,6 +3,7 @@
 
 #include <LinearMath/btTransform.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <BulletCollision/Gimpact/btBoxCollision.h>
 
 inline bool operator==(const btAABB& lhs, const btAABB& rhs)
 {

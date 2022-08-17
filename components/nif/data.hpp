@@ -24,10 +24,9 @@
 #ifndef OPENMW_COMPONENTS_NIF_DATA_HPP
 #define OPENMW_COMPONENTS_NIF_DATA_HPP
 
-#include "base.hpp"
-
 #include "nifkey.hpp"
 #include "niftypes.hpp" // Transformation
+#include "recordptr.hpp"
 
 namespace Nif
 {
@@ -115,10 +114,11 @@ struct NiPixelData : public Record
         NIPXFMT_RGBA8,
         NIPXFMT_PAL8,
         NIPXFMT_PALA8,
+        NIPXFMT_BGR8,
+        NIPXFMT_BGRA8,
         NIPXFMT_DXT1,
         NIPXFMT_DXT3,
-        NIPXFMT_DXT5,
-        NIPXFMT_DXT5_ALT
+        NIPXFMT_DXT5
     };
     Format fmt{NIPXFMT_RGB8};
 

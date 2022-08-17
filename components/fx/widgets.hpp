@@ -11,7 +11,6 @@
 
 #include <components/misc/strings/format.hpp>
 
-#include "technique.hpp"
 #include "types.hpp"
 
 namespace Gui

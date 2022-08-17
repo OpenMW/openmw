@@ -1,9 +1,7 @@
 #ifndef COMPONENTS_TERRAIN_VIEW_H
 #define COMPONENTS_TERRAIN_VIEW_H
 
-#include <osg/ref_ptr>
 #include <osg/Referenced>
-#include <osg/Vec3f>
 
 namespace Terrain
 {

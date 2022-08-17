@@ -48,6 +48,7 @@
 #include <components/vfs/manager.hpp>
 
 #include <components/widgets/tags.hpp>
+#include <components/widgets/widgets.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/frameratelimiter.hpp>

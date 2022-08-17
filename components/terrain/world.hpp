@@ -10,7 +10,6 @@
 
 #include <components/sceneutil/nodecallback.hpp>
 
-#include "defs.hpp"
 #include "cellborder.hpp"
 
 namespace osg
