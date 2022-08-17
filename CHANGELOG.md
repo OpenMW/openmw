@@ -13,6 +13,7 @@
     Bug #3855: AI sometimes spams defensive spells
     Bug #3867: All followers attack player when one follower enters combat with player
     Bug #3905: Great House Dagoth issues
+    Bug #4175: Objects "vibrate" when extremely far from (0,0)
     Bug #4203: Resurrecting an actor doesn't close the loot GUI
     Bug #4227: Spellcasting restrictions are checked before spellcasting animations are played
     Bug #4310: Spell description is centered
