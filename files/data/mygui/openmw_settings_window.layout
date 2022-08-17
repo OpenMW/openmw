@@ -275,18 +275,18 @@
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem">
                         <Property key="Caption" value="  #{sVideo}  "/>
-                        <Widget type="ListBox" skin="MW_List" position="0 4 170 215" align="Left Top" name="ResolutionList"/>
-                        <Widget type="TextBox" skin="NormalText" position="182 4 170 18" align="Left Top">
+                        <Widget type="ListBox" skin="MW_List" position="0 4 185 215" align="Left Top" name="ResolutionList"/>
+                        <Widget type="TextBox" skin="NormalText" position="197 4 185 18" align="Left Top">
                             <Property key="Caption" value="#{SettingsMenu:WindowMode}"/>
                         </Widget>
-                        <Widget type="HBox" position="182 28 400 24">
+                        <Widget type="HBox" position="197 28 400 24">
                             <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" align="Left Top" name="WindowModeList">
                                 <Property key="AddItem" value="#{SettingsMenu:WindowModeFullscreen}"/>
                                 <Property key="AddItem" value="#{SettingsMenu:WindowModeWindowedFullscreen}"/>
                                 <Property key="AddItem" value="#{SettingsMenu:WindowModeWindowed}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="182 64 400 24">
+                        <Widget type="HBox" position="197 64 400 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="VSyncButton">
                                 <UserString key="SettingCategory" value="Video"/>
                                 <UserString key="SettingName" value="vsync"/>
@@ -296,7 +296,7 @@
                                 <Property key="Caption" value="#{SettingsMenu:VSync}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="182 94 300 24">
+                        <Widget type="HBox" position="197 94 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
                                 <UserString key="SettingCategory" value="Video"/>
                                 <UserString key="SettingName" value="window border"/>
@@ -306,7 +306,7 @@
                                 <Property key="Caption" value="#{SettingsMenu:WindowBorder}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="182 124 300 24">
+                        <Widget type="HBox" position="197 124 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
                                 <UserString key="SettingCategory" value="Post Processing"/>
                                 <UserString key="SettingName" value="enabled"/>
@@ -320,7 +320,7 @@
                             </Widget>
                         </Widget>
 
-                        <Widget type="AutoSizedTextBox" skin="SandText" position="182 154 300 32" align="Left Top">
+                        <Widget type="AutoSizedTextBox" skin="SandText" position="197 154 300 32" align="Left Top">
                             <Property key="Caption" value="#{SettingsMenu:FrameRateHint}"/>
                         </Widget>
 

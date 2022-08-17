@@ -400,7 +400,7 @@ namespace MWGui
             return;
 
         Widgets::MWSkillPtr skillWidget;
-        const int lineHeight = 18;
+        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
         MyGUI::IntCoord coord1(0, 0, mSkillList->getWidth(), 18);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -436,8 +436,8 @@ namespace MWGui
         if (mCurrentRaceId.empty())
             return;
 
-        const int lineHeight = 18;
-        MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), 18);
+        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), lineHeight);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
