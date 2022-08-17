@@ -11,6 +11,7 @@
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include "vismask.hpp"
 

@@ -13,6 +13,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"

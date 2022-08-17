@@ -3,6 +3,7 @@
 
 #include <LinearMath/btVector3.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
 
 #include <algorithm>
 

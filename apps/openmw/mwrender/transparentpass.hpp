@@ -2,13 +2,12 @@
 #define OPENMW_MWRENDER_TRANSPARENTPASS_H
 
 #include <array>
+#include <memory>
 
 #include <osg/FrameBufferObject>
 #include <osg/StateSet>
 
 #include <osgUtil/RenderBin>
-
-#include "postprocessor.hpp"
 
 namespace Shader
 {

@@ -11,7 +11,7 @@
 
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwrender/sky.hpp"
+#include "../mwrender/skyutil.hpp"
 
 namespace ESM
 {

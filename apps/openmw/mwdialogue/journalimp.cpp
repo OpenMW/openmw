@@ -16,8 +16,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwgui/messagebox.hpp"
-
 namespace MWDialogue
 {
     Quest& Journal::getQuest (const std::string& id)

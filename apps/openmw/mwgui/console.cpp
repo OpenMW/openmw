@@ -15,6 +15,7 @@
 #include <components/interpreter/interpreter.hpp>
 
 #include "../mwscript/extensions.hpp"
+#include "../mwscript/interpretercontext.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"

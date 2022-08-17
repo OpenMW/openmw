@@ -28,6 +28,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/weapontype.hpp"
 #include "../mwmechanics/drawstate.hpp"

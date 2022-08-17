@@ -1,7 +1,6 @@
 #include "action.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"

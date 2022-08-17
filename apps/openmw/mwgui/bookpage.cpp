@@ -6,6 +6,7 @@
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_TextureUtility.h"
 #include "MyGUI_FactoryManager.h"
+#include "MyGUI_FontManager.h"
 
 #include <components/misc/utf8stream.hpp>
 #include <components/sceneutil/depth.hpp>

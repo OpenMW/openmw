@@ -12,7 +12,6 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwscript/compilercontext.hpp"
-#include "../mwscript/interpretercontext.hpp"
 
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"

@@ -11,8 +11,6 @@
 
 #include "../mwbase/inputmanager.hpp"
 
-#include "../mwgui/mode.hpp"
-
 #include "actions.hpp"
 
 namespace MWWorld
