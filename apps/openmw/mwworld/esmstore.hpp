@@ -249,17 +249,14 @@ namespace MWWorld
         template <class T>
         const T *insertStatic(const T &x)
         {
-            const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
-
             Store<T> &store = const_cast<Store<T> &>(get<T>());
-            if (store.search(id) != nullptr)
+            if (store.search(x.mId) != nullptr)
             {
-                const std::string msg = "Try to override existing record '" + id + "'";
+                const std::string msg = "Try to override existing record '" + x.mId + "'";
                 throw std::runtime_error(msg);
             }
-            T record = x;
 
-            T *ptr = store.insertStatic(record);
+            T *ptr = store.insertStatic(x);
             for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
                 if (it->second == &store) {
                     mIds[ptr->mId] = it->first;
@@ -299,13 +296,13 @@ namespace MWWorld
     template <>
     inline const ESM::NPC *ESMStore::insert<ESM::NPC>(const ESM::NPC &npc)
     {
-        const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
-
         if (Misc::StringUtils::ciEqual(npc.mId, "player"))
         {
             return mNpcs.insert(npc);
         }
-        else if (mNpcs.search(id) != nullptr)
+        
+        const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
+        if (mNpcs.search(id) != nullptr)
         {
             const std::string msg = "Try to override existing record '" + id + "'";
             throw std::runtime_error(msg);
