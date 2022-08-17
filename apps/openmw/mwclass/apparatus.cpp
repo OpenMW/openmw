@@ -10,8 +10,6 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actionalchemy.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwphysics/physicssystem.hpp"
-#include "../mwworld/nullaction.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"

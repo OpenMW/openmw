@@ -3,10 +3,6 @@
 
 #include "typedaipackage.hpp"
 
-#include "../mwworld/class.hpp"
-
-#include "pathfinding.hpp"
-
 namespace MWMechanics
 {
     /// \brief AiPackage to have an actor avoid an opening door

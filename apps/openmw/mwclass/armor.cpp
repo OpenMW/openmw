@@ -15,8 +15,6 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwphysics/physicssystem.hpp"
-#include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwrender/objects.hpp"

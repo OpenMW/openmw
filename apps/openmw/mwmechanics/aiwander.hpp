@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "pathfinding.hpp"
-#include "obstacle.hpp"
 #include "aitemporarybase.hpp"
 #include "aitimer.hpp"
 

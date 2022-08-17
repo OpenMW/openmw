@@ -13,7 +13,6 @@
 #include "../mwworld/timestamp.hpp"
 #include "../mwworld/ptr.hpp"
 
-#include "magiceffects.hpp"
 #include "spellcasting.hpp"
 
 namespace ESM
