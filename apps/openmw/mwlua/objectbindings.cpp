@@ -6,7 +6,6 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"

@@ -17,9 +17,8 @@
 #include "object.hpp"
 #include "eventqueue.hpp"
 #include "globalscripts.hpp"
-#include "localscripts.hpp"
-#include "playerscripts.hpp"
 #include "worldview.hpp"
+#include "localscripts.hpp"
 
 namespace MWLua
 {

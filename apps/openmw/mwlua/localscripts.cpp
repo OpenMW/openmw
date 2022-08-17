@@ -14,7 +14,8 @@
 #include "../mwmechanics/aipackage.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
-#include "luamanagerimp.hpp"
+#include "context.hpp"
+#include "worldview.hpp"
 
 namespace sol
 {

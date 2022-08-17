@@ -7,6 +7,7 @@
 #include <apps/openmw/mwworld/esmstore.hpp>
 
 #include "../luabindings.hpp"
+#include "../worldview.hpp"
 
 namespace sol
 {

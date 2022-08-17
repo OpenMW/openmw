@@ -1,13 +1,13 @@
 #include "types.hpp"
 
 #include <components/esm3/loadcrea.hpp>
-
-#include <apps/openmw/mwworld/esmstore.hpp>
+#include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include "../stats.hpp"
-#include "../luabindings.hpp"
+#include <apps/openmw/mwworld/esmstore.hpp>
+#include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/world.hpp>
 
 namespace sol
 {

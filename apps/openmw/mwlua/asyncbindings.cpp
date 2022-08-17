@@ -1,6 +1,6 @@
 #include "luabindings.hpp"
 
-#include "luamanagerimp.hpp"
+#include "worldview.hpp"
 
 namespace sol
 {

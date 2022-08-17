@@ -26,6 +26,7 @@
 #include "userdataserializer.hpp"
 #include "types/types.hpp"
 #include "debugbindings.hpp"
+#include "playerscripts.hpp"
 
 namespace MWLua
 {

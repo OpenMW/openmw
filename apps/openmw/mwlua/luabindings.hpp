@@ -7,9 +7,6 @@
 #include <components/lua/storage.hpp>
 
 #include "context.hpp"
-#include "eventqueue.hpp"
-#include "object.hpp"
-#include "worldview.hpp"
 
 namespace MWWorld
 {

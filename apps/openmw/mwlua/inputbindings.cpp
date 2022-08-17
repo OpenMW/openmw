@@ -6,6 +6,7 @@
 
 #include <components/sdlutil/events.hpp>
 
+#include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwinput/actions.hpp"
 

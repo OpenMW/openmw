@@ -3,7 +3,9 @@
 #include <components/esm3/loadcell.hpp>
 
 #include "../mwworld/cellstore.hpp"
+
 #include "types/types.hpp"
+#include "worldview.hpp"
 
 namespace sol
 {
