@@ -6,7 +6,6 @@
 #include <osg/ref_ptr>
 
 #include "ptr.hpp"
-#include "globals.hpp"
 
 #include <set>
 #include <memory>

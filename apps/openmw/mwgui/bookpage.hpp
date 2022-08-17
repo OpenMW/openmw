@@ -3,7 +3,7 @@
 
 #include "MyGUI_Colour.h"
 #include "MyGUI_Widget.h"
-#include "MyGUI_FontManager.h"
+#include "MyGUI_IFont.h"
 
 #include <functional>
 #include <memory>

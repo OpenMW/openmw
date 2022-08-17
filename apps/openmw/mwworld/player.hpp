@@ -3,11 +3,9 @@
 
 #include <map>
 
-#include "../mwworld/refdata.hpp"
 #include "../mwworld/livecellref.hpp"
 
 #include "../mwmechanics/drawstate.hpp"
-#include "../mwmechanics/stat.hpp"
 
 #include <components/esm3/loadskil.hpp>
 #include <components/esm/attr.hpp>

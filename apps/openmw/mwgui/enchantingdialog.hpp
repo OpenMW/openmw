@@ -3,8 +3,6 @@
 
 #include "spellcreationdialog.hpp"
 
-#include "../mwbase/windowmanager.hpp"
-
 #include "../mwmechanics/enchanting.hpp"
 
 namespace MWGui

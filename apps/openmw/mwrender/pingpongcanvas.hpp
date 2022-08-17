@@ -10,7 +10,6 @@
 
 #include <components/fx/technique.hpp>
 
-#include "postprocessor.hpp"
 #include "luminancecalculator.hpp"
 
 namespace Shader

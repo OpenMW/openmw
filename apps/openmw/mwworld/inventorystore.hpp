@@ -3,8 +3,6 @@
 
 #include "containerstore.hpp"
 
-#include "../mwmechanics/magiceffects.hpp"
-
 namespace ESM
 {
     struct MagicEffect;

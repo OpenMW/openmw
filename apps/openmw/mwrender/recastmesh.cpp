@@ -12,7 +12,6 @@
 
 #include "vismask.hpp"
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
 namespace MWRender
