@@ -221,12 +221,12 @@ if(APPLE)
     target_link_libraries(openmw ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 
     if (FFmpeg_FOUND)
-        find_library(COREVIDEO_FRAMEWORK CoreVideo)
-        find_library(VDA_FRAMEWORK VideoDecodeAcceleration)
-        target_link_libraries(openmw z ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK}
-                                     "-framework VideoToolbox"
-                                     "-framework AudioToolbox"
-                                     "-framework CoreMedia")
+        target_link_libraries(openmw z)
+        target_link_options(openmw PRIVATE "LINKER:SHELL:-framework CoreVideo"
+                                           "LINKER:SHELL:-framework CoreMedia"
+                                           "LINKER:SHELL:-framework VideoToolbox"
+                                           "LINKER:SHELL:-framework AudioToolbox"
+                                           "LINKER:SHELL:-framework VideoDecodeAcceleration")
     endif()
 endif(APPLE)
 
