@@ -135,6 +135,7 @@ public:
     /// to indicate the facing orientation of the character.
     void setPitchFactor(float factor) override { mPitchFactor = factor; }
 
+    bool getWeaponsShown() const override { return mShowWeapons; }
     void showWeapons(bool showWeapon) override;
 
     bool updateCarriedLeftVisible(const int weaptype) const override;

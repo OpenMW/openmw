@@ -2,6 +2,7 @@
 ------
 
     Bug #4127: Weapon animation looks choppy
+    Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
