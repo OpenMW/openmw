@@ -47,6 +47,8 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "../mwrender/animation.hpp"
+
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
@@ -781,9 +783,21 @@ namespace MWScript
                 void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    auto& cls = ptr.getClass();
+                    if (!cls.hasInventoryStore(ptr) && !cls.isBipedal(ptr))
+                    {
+                        runtime.push(0);
+                        return;
+                    }
 
-                    runtime.push((ptr.getClass().hasInventoryStore(ptr) || ptr.getClass().isBipedal(ptr)) &&
-                                ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState::Weapon);
+                    if (cls.getCreatureStats(ptr).getDrawState () != MWMechanics::DrawState::Weapon)
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
+                    MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+                    runtime.push(anim && anim->getWeaponsShown());
                 }
         };
 

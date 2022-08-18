@@ -30,6 +30,7 @@ namespace MWRender
 
         void equipmentChanged() override { updateParts(); }
 
+        bool getWeaponsShown() const override { return mShowWeapons; }
         void showWeapons(bool showWeapon) override;
 
         bool getCarriedLeftShown() const override { return mShowCarriedLeft; }
