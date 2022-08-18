@@ -20,6 +20,8 @@ namespace
 {
     std::string getCountString(int count)
     {
+        static const int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
+
         if (count == 1)
             return "";
 
@@ -28,6 +30,8 @@ namespace
         else if (count > 999999)
             return MyGUI::utility::toString(count/1000000) + "m";
         else if (count > 9999)
+            return MyGUI::utility::toString(count/1000) + "k";
+        else if (fontHeight >= 18 && count > 999)
             return MyGUI::utility::toString(count/1000) + "k";
         else
             return MyGUI::utility::toString(count);

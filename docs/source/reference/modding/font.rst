@@ -45,9 +45,9 @@ It is also possible to adjust the font size and resolution via ``settings.cfg`` 
 
 			[GUI]
 			font size = 16
-			ttf resolution = 96
+			ttf resolution = 75
 
-The ``font size`` setting accepts clamped values in range from 12 to 20 while ``ttf resolution`` setting accepts values from 48 to 960.
+The ``font size`` setting accepts clamped values in range from 12 to 20 while ``ttf resolution`` setting accepts values from 50 to 125.
 
 Any Resolution or Size properties in the ``.omwfont`` file have no effect because the engine settings override them.
 
