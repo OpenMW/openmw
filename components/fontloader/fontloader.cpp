@@ -473,7 +473,7 @@ namespace Gui
                 // to allow to configure font size via config file, without need to edit XML files.
                 // Also we should take UI scaling factor in account.
                 int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                resolution = std::clamp(resolution, 48, 960) * mScalingFactor;
+                resolution = std::clamp(resolution, 50, 125) * mScalingFactor;
 
                 MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
                 resolutionNode->addAttribute("key", "Resolution");
@@ -517,7 +517,7 @@ namespace Gui
                     // setup separate fonts with different Resolution to fit these windows.
                     // These fonts have an internal prefix.
                     int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                    resolution = std::clamp(resolution, 48, 960);
+                    resolution = std::clamp(resolution, 50, 125);
 
                     float currentX = Settings::Manager::getInt("resolution x", "Video");
                     float currentY = Settings::Manager::getInt("resolution y", "Video");
