@@ -5,6 +5,9 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/widgets/box.hpp>
 
@@ -84,7 +87,7 @@ namespace MWGui
 
         int curType = -1;
 
-        const int spellHeight = 18;
+        const int spellHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
 
         mLines.clear();
 

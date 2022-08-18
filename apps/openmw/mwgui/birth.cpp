@@ -184,8 +184,8 @@ namespace MWGui
             return;
 
         Widgets::MWSpellPtr spellWidget;
-        const int lineHeight = 18;
-        MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), 18);
+        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), lineHeight);
 
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
