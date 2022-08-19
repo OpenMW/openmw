@@ -7,6 +7,9 @@
 #include <QTextStream>
 #include <QCoreApplication>
 
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
+
 #include "operationholder.hpp"
 
 CSMDoc::Runner::Runner (std::filesystem::path  projectPath)
@@ -80,22 +83,21 @@ void CSMDoc::Runner::start (bool delayed)
         else
             arguments << "--new-game=1";
 
-        arguments << ("--script-run="+mStartup->fileName());
+        arguments << ("--script-run=" + mStartup->fileName());
 
-        arguments <<
-            QString::fromStdU32String (U"--data=\""+mProjectPath.parent_path().u32string()+U"\"");
+        arguments << "--data=\"" + Files::pathToQString(mProjectPath.parent_path()) + "\"";
 
         arguments << "--replace=content";
 
-        for (const auto & mContentFile : mContentFiles)
+        for (const auto& mContentFile : mContentFiles)
         {
-            arguments << QString::fromStdU32String (U"--content="+mContentFile.u32string());
+            arguments << "--content=" + Files::pathToQString(mContentFile);
         }
 
         arguments
-            << QString::fromStdU32String (U"--content="+mProjectPath.filename().u32string());
+            << "--content=" + Files::pathToQString(mProjectPath.filename());
 
-        mProcess.start (path, arguments);
+        mProcess.start(path, arguments);
     }
 
     mRunning = true;

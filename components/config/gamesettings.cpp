@@ -4,9 +4,11 @@
 #include <QTextCodec>
 #include <QDir>
 #include <QRegExp>
-#include <QDebug>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 const char Config::GameSettings::sArchiveKey[] = "fallback-archive";
 const char Config::GameSettings::sContentKey[] = "content";
@@ -24,19 +26,16 @@ void Config::GameSettings::validatePaths()
 
     for (const QString &path : paths)
     {
-        dataDirs.emplace_back(path.toStdU32String());
+        dataDirs.emplace_back(Files::pathFromQString(path));
     }
 
     // Parse the data dirs to convert the tokenized paths
     mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
     mDataDirs.clear();
 
-    for (auto & dataDir : dataDirs) {
-        QString path = QString::fromStdU32String(dataDir.u32string());
-
-        QDir dir(path);
-        if (dir.exists())
-            mDataDirs.append(path);
+    for (const auto & dataDir : dataDirs) {
+        if (is_directory(dataDir))
+            mDataDirs.append(Files::pathToQString(dataDir));
     }
 
     // Do the same for data-local
@@ -51,16 +50,14 @@ void Config::GameSettings::validatePaths()
         return;
 
     dataDirs.clear();
-    dataDirs.emplace_back(local.toStdU32String());
+    dataDirs.emplace_back(Files::pathFromQString(local));
 
     mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
 
     if (!dataDirs.empty()) {
-        QString path = QString::fromStdU32String(dataDirs.front().u32string());
-
-        QDir dir(path);
-        if (dir.exists())
-            mDataLocal = path;
+        const auto& path = dataDirs.front();
+        if (is_directory(path))
+            mDataLocal = Files::pathToQString(path);
     }
 }
 

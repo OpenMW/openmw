@@ -58,9 +58,6 @@ namespace Wizard
         void addLogText(const QString &text);
 
     private:
-        /// convert std::filesystem::path to QString
-        QString toQString(const std::filesystem::path& path);
-
         void setupLog();
         void setupGameSettings();
         void setupLauncherSettings();

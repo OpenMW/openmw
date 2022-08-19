@@ -8,6 +8,9 @@
 #include <QCloseEvent>
 #include <QListWidget>
 
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
+
 #include "../../model/doc/document.hpp"
 
 void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
@@ -19,7 +22,7 @@ void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 : mDocument (document), mTotalRecordsLabel (0), mRecordsLabel (0), mAborted (false), mMessages (nullptr), mRecords(0)
 {
-    setWindowTitle (QString::fromStdU32String(U"Opening " + document->getSavePath().filename().u32string()));
+    setWindowTitle ("Opening " + Files::pathToQString(document->getSavePath().filename()));
 
     setMinimumWidth (400);
 
@@ -89,16 +92,16 @@ void CSVDoc::LoadingDocument::nextStage (const std::string& name, int fileRecord
     mRecords = fileRecords;
 }
 
-void CSVDoc::LoadingDocument::nextRecord (int records)
+void CSVDoc::LoadingDocument::nextRecord(int records)
 {
     if (records <= mRecords)
     {
-        mTotalProgress->setValue (mTotalRecords+records);
+        mTotalProgress->setValue(mTotalRecords + records);
 
         mRecordProgress->setValue(records);
 
-        mRecordsLabel->setText(QString::fromStdString(
-                    "Records: "+std::to_string(records)+" of "+std::to_string(mRecords)));
+        mRecordsLabel->setText(
+            "Records: " + QString::number(records) + " of " + QString::number(mRecords));
     }
 }
 

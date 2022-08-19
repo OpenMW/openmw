@@ -1,19 +1,22 @@
 #include "mainwizard.hpp"
 
-#include <QDebug>
 #include <QDateTime>
+#include <QDebug>
+#include <QDir>
 #include <QMessageBox>
 #include <QTextCodec>
-#include <QDir>
 
-#include "intropage.hpp"
-#include "methodselectionpage.hpp"
-#include "languageselectionpage.hpp"
-#include "existinginstallationpage.hpp"
-#include "installationtargetpage.hpp"
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
+
 #include "componentselectionpage.hpp"
-#include "importpage.hpp"
 #include "conclusionpage.hpp"
+#include "existinginstallationpage.hpp"
+#include "importpage.hpp"
+#include "installationtargetpage.hpp"
+#include "intropage.hpp"
+#include "languageselectionpage.hpp"
+#include "methodselectionpage.hpp"
 
 #ifdef OPENMW_USE_UNSHIELD
 #include "installationpage.hpp"
@@ -67,7 +70,7 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     if (!installationPath.empty())
     {
         const std::filesystem::path& dataPath = installationPath / "Data Files";
-        addInstallation(toQString(dataPath));
+        addInstallation(Files::pathToQString(dataPath));
     }
 }
 
@@ -78,7 +81,7 @@ Wizard::MainWizard::~MainWizard()
 
 void Wizard::MainWizard::setupLog()
 {
-    QString logPath(toQString(mCfgMgr.getLogPath()));
+    QString logPath(Files::pathToQString(mCfgMgr.getLogPath()));
     logPath.append(QLatin1String("wizard.log"));
 
     QFile file(logPath);
@@ -101,7 +104,7 @@ void Wizard::MainWizard::setupLog()
 
 void Wizard::MainWizard::addLogText(const QString &text)
 {
-    QString logPath(toQString(mCfgMgr.getLogPath()));
+    QString logPath(Files::pathToQString(mCfgMgr.getLogPath()));
     logPath.append(QLatin1String("wizard.log"));
 
     QFile file(logPath);
@@ -131,8 +134,8 @@ void Wizard::MainWizard::addLogText(const QString &text)
 
 void Wizard::MainWizard::setupGameSettings()
 {
-    QString userPath(toQString(mCfgMgr.getUserConfigPath()));
-    QString globalPath(toQString(mCfgMgr.getGlobalPath()));
+    QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
+    QString globalPath(Files::pathToQString(mCfgMgr.getGlobalPath()));
     QString message(tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
                     <p>Please make sure you have the right permissions \
                     and try again.</p></body></html>"));
@@ -196,7 +199,7 @@ void Wizard::MainWizard::setupGameSettings()
 
 void Wizard::MainWizard::setupLauncherSettings()
 {
-    QString path(toQString(mCfgMgr.getUserConfigPath()));
+    QString path(Files::pathToQString(mCfgMgr.getUserConfigPath()));
     path.append(QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
     QString message(tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
@@ -246,7 +249,7 @@ void Wizard::MainWizard::runSettingsImporter()
 
     QString path(field(QLatin1String("installation.path")).toString());
 
-    QString userPath(toQString(mCfgMgr.getUserConfigPath()));
+    QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
     QFile file(userPath + QLatin1String("openmw.cfg"));
 
     // Construct the arguments to run the importer
@@ -392,7 +395,7 @@ void Wizard::MainWizard::writeSettings()
     mGameSettings.removeDataDir(path);
     mGameSettings.addDataDir(path);
 
-    QString userPath(toQString(mCfgMgr.getUserConfigPath()));
+    QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
     QDir dir(userPath);
 
     if (!dir.exists()) {
@@ -467,9 +470,4 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
     // TODO: add MIME handling to make sure the files are real
     return (dir.entryList().contains(name + QLatin1String(".esm"), Qt::CaseInsensitive)
             && dir.entryList().contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive));
-}
-
-QString Wizard::MainWizard::toQString(const std::filesystem::path& path)
-{
-    return QString::fromStdU32String(path.u32string());
 }

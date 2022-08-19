@@ -13,12 +13,13 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 
-#include "playpage.hpp"
-#include "graphicspage.hpp"
-#include "datafilespage.hpp"
-#include "settingspage.hpp"
 #include "advancedpage.hpp"
+#include "datafilespage.hpp"
+#include "graphicspage.hpp"
+#include "playpage.hpp"
+#include "settingspage.hpp"
 
 using namespace Process;
 
@@ -163,7 +164,7 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
             cfgError(tr("Error opening OpenMW configuration file"),
                      tr("<br><b>Could not create directory %0</b><br><br> \
                         Please make sure you have the right permissions \
-                        and try again.<br>").arg(QString::fromStdU32String(canonical(userConfigDir).u32string()))
+                        and try again.<br>").arg(Files::pathToQString(canonical(userConfigDir)))
             );
             return FirstRunDialogResultFailure;
         }
@@ -296,7 +297,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromStdU32String(mCfgMgr.getUserConfigPath().u32string());
+    const auto userPath = Files::pathToQString(mCfgMgr.getUserConfigPath());
 
     QStringList paths;
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
@@ -329,9 +330,9 @@ bool Launcher::MainDialog::setupGameSettings()
 {
     mGameSettings.clear();
 
-    QString localPath = QString::fromStdU32String(mCfgMgr.getLocalPath().u32string());
-    QString userPath = QString::fromStdU32String(mCfgMgr.getUserConfigPath().u32string());
-    QString globalPath = QString::fromStdU32String(mCfgMgr.getGlobalPath().u32string());
+    const auto localPath = Files::pathToQString(mCfgMgr.getLocalPath());
+    const auto userPath = Files::pathToQString(mCfgMgr.getUserConfigPath());
+    const auto globalPath = Files::pathToQString(mCfgMgr.getGlobalPath());
 
     QFile file;
 
@@ -487,13 +488,17 @@ bool Launcher::MainDialog::writeSettings()
             cfgError(tr("Error creating OpenMW configuration directory"),
                      tr("<br><b>Could not create %0</b><br><br> \
                          Please make sure you have the right permissions \
-                         and try again.<br>").arg(QString::fromStdU32String(userPath.u32string())));
+                         and try again.<br>").arg(Files::pathToQString(userPath)));
             return false;
         }
     }
 
     // Game settings
-    QFile file(QString::fromStdU32String((userPath / "openmw.cfg").u32string()));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QFile file(userPath / "openmw.cfg");
+#else
+    QFile file(Files::pathToQString(userPath / "openmw.cfg"));
+#endif
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
@@ -521,7 +526,7 @@ bool Launcher::MainDialog::writeSettings()
     }
 
     // Launcher settings
-    file.setFileName(QString::fromStdU32String((userPath / Config::LauncherSettings::sLauncherConfigFileName).u32string()));
+    file.setFileName(Files::pathToQString(userPath / Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created

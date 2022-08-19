@@ -8,6 +8,8 @@
 #include <QDebug>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 
 const char Config::LauncherSettings::sCurrentContentListKey[] = "Profiles/currentprofile";
 const char Config::LauncherSettings::sLauncherConfigFileName[] = "launcher.cfg";
@@ -119,7 +121,7 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     }
 
     // global and local data directories are not part of any profile
-    const auto globalDataDir = QString::fromStdU32String(gameSettings.getGlobalDataDir().u32string());
+    const auto globalDataDir = Files::pathToQString(gameSettings.getGlobalDataDir());
     const auto dataLocal = gameSettings.getDataLocal();
     dirs.removeAll(globalDataDir);
     dirs.removeAll(dataLocal);

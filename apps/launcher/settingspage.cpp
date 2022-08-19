@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QDir>
 
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
+
 #include "utils/textinputdialog.hpp"
 #include "datafilespage.hpp"
 
@@ -104,7 +107,11 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     // Create the file if it doesn't already exist, else the importer will fail
     auto path = mCfgMgr.getUserConfigPath();
     path /= "openmw.cfg";
-    QFile file(QString::fromStdU32String(path.u32string()));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QFile file(path);
+#else
+    QFile file(Files::pathToQString(path));
+#endif
 
     if (!file.exists()) {
         if (!file.open(QIODevice::ReadWrite)) {
@@ -137,7 +144,7 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     arguments.append(QString("--ini"));
     arguments.append(settingsComboBox->currentText());
     arguments.append(QString("--cfg"));
-    arguments.append(QString::fromStdU32String(path.u32string()));
+    arguments.append(Files::pathToQString(path));
 
     qDebug() << "arguments " << arguments;
 

@@ -19,13 +19,15 @@
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
-#include <components/settings/settings.hpp>
 #include <components/bsa/compressedbsafile.hpp>
+#include <components/files/qtconversion.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/navmeshtool/protocol.hpp>
+#include <components/settings/settings.hpp>
 #include <components/vfs/bsaarchive.hpp>
 
-#include "utils/textinputdialog.hpp"
 #include "utils/profilescombobox.hpp"
+#include "utils/textinputdialog.hpp"
 
 #include "ui_directorypicker.h"
 
@@ -232,7 +234,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     const auto& globalDataDir = mGameSettings.getGlobalDataDir();
     if (!globalDataDir.empty())
-        directories.insert(0, QString::fromStdU32String(globalDataDir.u32string()));
+        directories.insert(0, Files::pathToQString(globalDataDir));
 
     // normalize user supplied directories: resolve symlink, convert to native separator, make absolute
     for (auto& currentDir : directories)
@@ -264,7 +266,8 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         }
 
         // deactivate data-local and global data directory: they are always included
-        if (currentDir == mDataLocal || std::filesystem::path(currentDir.toStdU32String()) == globalDataDir)
+        const auto tmp = currentDir.toUtf8();
+        if (currentDir == mDataLocal || std::filesystem::path(Misc::StringUtils::stringToU8String(tmp)) == globalDataDir)
         {
             auto flags = item->flags();
             item->setFlags(flags & ~(Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled|Qt::ItemIsEnabled));

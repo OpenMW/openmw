@@ -10,7 +10,10 @@
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/settings/settings.hpp>
 
@@ -230,8 +233,9 @@ void CS::Editor::openFiles (const std::filesystem::path &savePath, const std::ve
 
     if(discoveredFiles.empty())
     {
-        for (const QString &path : mFileDialog.selectedFilePaths())
-            files.emplace_back(path.toStdU32String());
+        for (const QString &path : mFileDialog.selectedFilePaths()) {
+            files.emplace_back(Files::pathFromQString(path));
+        }
     }
     else
     {
@@ -248,7 +252,7 @@ void CS::Editor::createNewFile (const std::filesystem::path &savePath)
     std::vector<std::filesystem::path> files;
 
     for (const QString &path : mFileDialog.selectedFilePaths()) {
-        files.emplace_back(path.toStdU32String());
+        files.emplace_back(Files::pathFromQString(path));
     }
 
     files.push_back (savePath);
@@ -320,12 +324,13 @@ bool CS::Editor::makeIPCServer()
             mServer->close();
             fullPath.remove(QRegExp("dummy$"));
             fullPath += mIpcServerName;
-            if(std::filesystem::exists(fullPath.toUtf8().constData()))
+            const auto path = Files::pathFromQString(fullPath);
+            if(exists(path))
             {
                 // TODO: compare pid of the current process with that in the file
                 Log(Debug::Info) << "Detected unclean shutdown.";
                 // delete the stale file
-                if(remove(fullPath.toUtf8().constData()))
+                if(remove(path))
                     Log(Debug::Error) << "Error: can not remove stale connection file.";
             }
         }
@@ -390,7 +395,7 @@ int CS::Editor::run()
         }
         discoveredFiles.push_back(mFileToLoad);
 
-        QString extension = QString::fromStdU32String(mFileToLoad.extension().u32string()).toLower();
+        const auto extension = Files::pathToQString(mFileToLoad.extension()).toLower();
         if (extension == ".esm")
         {
             mFileToLoad.replace_extension(".omwgame");

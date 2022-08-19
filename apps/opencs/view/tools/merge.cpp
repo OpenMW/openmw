@@ -1,13 +1,16 @@
 
 #include "merge.hpp"
 
-#include <QVBoxLayout>
 #include <QDialogButtonBox>
-#include <QSplitter>
-#include <QPushButton>
-#include <QListWidget>
-#include <QLabel>
 #include <QKeyEvent>
+#include <QLabel>
+#include <QListWidget>
+#include <QPushButton>
+#include <QSplitter>
+#include <QVBoxLayout>
+
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/doc/documentmanager.hpp"
@@ -102,7 +105,7 @@ void CSVTools::Merge::configure (CSMDoc::Document *document)
 
     for (std::vector<std::filesystem::path>::const_iterator iter (files.begin());
         iter!=files.end(); ++iter)
-        mFiles->addItem (QString::fromStdU32String(iter->filename().u32string()));
+        mFiles->addItem (Files::pathToQString(iter->filename()));
 }
 
 void CSVTools::Merge::setLocalData (const std::filesystem::path& localData)
