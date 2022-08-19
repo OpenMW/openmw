@@ -157,7 +157,7 @@ def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
         for key in keys:
             ax.plot(x, frames[key], label=f'{key}:{name}')
         if add_sum:
-            ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label=f'sum:{name}')
+            ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('timeseries')
@@ -170,7 +170,8 @@ def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
         for key in keys:
             ax.plot(x, numpy.cumsum(frames[key]), label=f'{key}:{name}')
         if add_sum:
-            ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}')
+            ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}',
+                    linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('commulative_timeseries')
