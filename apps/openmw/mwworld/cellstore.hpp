@@ -370,6 +370,8 @@ namespace MWWorld
 
             bool isExterior() const;
 
+            bool isQuasiExterior() const;
+
             Ptr searchInContainer (const std::string& id);
 
             void loadState (const ESM::CellState& state);
