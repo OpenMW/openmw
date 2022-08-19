@@ -7,6 +7,7 @@
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6939: OpenMW-CS: ID columns are too short
+    Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
 
 0.48.0

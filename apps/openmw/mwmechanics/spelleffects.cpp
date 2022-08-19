@@ -645,7 +645,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
         case ESM::MagicEffect::SunDamage:
             {
                 // isInCell shouldn't be needed, but updateActor called during game start
-                if (!target.isInCell() || !target.getCell()->isExterior() || godmode)
+                if (!target.isInCell() || !(target.getCell()->isExterior() || target.getCell()->isQuasiExterior()) || godmode)
                     break;
                 float time = world->getTimeStamp().getHour();
                 float timeDiff = std::clamp(std::abs(time - 13.f), 0.f, 7.f);

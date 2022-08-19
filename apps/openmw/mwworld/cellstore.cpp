@@ -671,6 +671,11 @@ namespace MWWorld
         return mCell->isExterior();
     }
 
+    bool CellStore::isQuasiExterior() const
+    {
+        return (mCell->mData.mFlags & ESM::Cell::QuasiEx) != 0;
+    }
+
     Ptr CellStore::searchInContainer (const std::string& id)
     {
         bool oldState = mHasState;
