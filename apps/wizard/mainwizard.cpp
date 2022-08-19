@@ -44,11 +44,11 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 
     mImporterInvoker = new ProcessInvoker();
 
-    connect(mImporterInvoker->getProcess(), SIGNAL(started()),
-            this, SLOT(importerStarted()));
+    connect(mImporterInvoker->getProcess(), &QProcess::started,
+            this, &MainWizard::importerStarted);
 
-    connect(mImporterInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(importerFinished(int,QProcess::ExitStatus)));
+    connect(mImporterInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
+            this, &MainWizard::importerFinished);
 
     mLogError = tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
                    <p>Please make sure you have the right permissions \

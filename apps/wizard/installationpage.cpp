@@ -21,36 +21,35 @@ Wizard::InstallationPage::InstallationPage(QWidget *parent, Config::GameSettings
     mUnshield = std::make_unique<UnshieldWorker>(mGameSettings.value("morrowind-bsa-filesize").toLongLong());
     mUnshield->moveToThread(mThread.get());
 
-    connect(mThread.get(), SIGNAL(started()),
-            mUnshield.get(), SLOT(extract()));
+    connect(mThread.get(), &QThread::started,
+            mUnshield.get(), &UnshieldWorker::extract);
 
-    connect(mUnshield.get(), SIGNAL(finished()),
-            mThread.get(), SLOT(quit()));
+    connect(mUnshield.get(), &UnshieldWorker::finished,
+            mThread.get(), &QThread::quit);
 
-    connect(mUnshield.get(), SIGNAL(finished()),
-            this, SLOT(installationFinished()), Qt::QueuedConnection);
+    connect(mUnshield.get(), &UnshieldWorker::finished,
+            this, &InstallationPage::installationFinished, Qt::QueuedConnection);
 
-    connect(mUnshield.get(), SIGNAL(error(QString, QString)),
-            this, SLOT(installationError(QString, QString)), Qt::QueuedConnection);
+    connect(mUnshield.get(), &UnshieldWorker::error,
+            this, &InstallationPage::installationError, Qt::QueuedConnection);
 
-    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
-            installProgressLabel, SLOT(setText(QString)), Qt::QueuedConnection);
+    connect(mUnshield.get(), &UnshieldWorker::textChanged,
+            installProgressLabel, &QLabel::setText, Qt::QueuedConnection);
 
-    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
-            logTextEdit, SLOT(appendPlainText(QString)),  Qt::QueuedConnection);
+    connect(mUnshield.get(), &UnshieldWorker::textChanged,
+            logTextEdit, &QPlainTextEdit::appendPlainText,  Qt::QueuedConnection);
 
-    connect(mUnshield.get(), SIGNAL(textChanged(QString)),
-            mWizard, SLOT(addLogText(QString)),  Qt::QueuedConnection);
+    connect(mUnshield.get(), &UnshieldWorker::textChanged,
+            mWizard, &MainWizard::addLogText,  Qt::QueuedConnection);
 
-    connect(mUnshield.get(), SIGNAL(progressChanged(int)),
-            installProgressBar, SLOT(setValue(int)),  Qt::QueuedConnection);
+    connect(mUnshield.get(), &UnshieldWorker::progressChanged,
+            installProgressBar, &QProgressBar::setValue,  Qt::QueuedConnection);
 
-    connect(mUnshield.get(), SIGNAL(requestFileDialog(Wizard::Component)),
-            this, SLOT(showFileDialog(Wizard::Component)), Qt::QueuedConnection);
+    connect(mUnshield.get(), &UnshieldWorker::requestFileDialog,
+            this, &InstallationPage::showFileDialog, Qt::QueuedConnection);
 
-    connect(mUnshield.get(), SIGNAL(requestOldVersionDialog()),
-            this, SLOT(showOldVersionDialog())
-            , Qt::QueuedConnection);
+    connect(mUnshield.get(), &UnshieldWorker::requestOldVersionDialog,
+                this, &InstallationPage::showOldVersionDialog, Qt::QueuedConnection);
 }
 
 Wizard::InstallationPage::~InstallationPage()

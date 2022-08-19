@@ -7,11 +7,11 @@ ComponentListWidget::ComponentListWidget(QWidget *parent) :
 {
     mCheckedItems = QStringList();
 
-    connect(this, SIGNAL(itemChanged(QListWidgetItem *)),
-            this, SLOT(updateCheckedItems(QListWidgetItem *)));
+    connect(this, &ComponentListWidget::itemChanged,
+            this, qOverload<QListWidgetItem*>(&ComponentListWidget::updateCheckedItems));
 
-    connect(model(), SIGNAL(rowsInserted(QModelIndex, int, int)),
-            this, SLOT(updateCheckedItems(QModelIndex, int, int)));
+    connect(model(), &QAbstractItemModel::rowsInserted,
+            this,  qOverload<const QModelIndex &, int, int>(&ComponentListWidget::updateCheckedItems));
 }
 
 QStringList ComponentListWidget::checkedItems()

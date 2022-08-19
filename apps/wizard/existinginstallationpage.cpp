@@ -39,11 +39,11 @@ void Wizard::ExistingInstallationPage::initializePage()
         }
     }
 
-    connect(installationsList, SIGNAL(currentTextChanged(QString)),
-            this, SLOT(textChanged(QString)));
+    connect(installationsList, &QListWidget::currentTextChanged,
+            this, &ExistingInstallationPage::textChanged);
 
-    connect(installationsList,SIGNAL(itemSelectionChanged()),
-            this, SIGNAL(completeChanged()));
+    connect(installationsList, &QListWidget::itemSelectionChanged,
+            this, &ExistingInstallationPage::completeChanged);
 }
 
 bool Wizard::ExistingInstallationPage::validatePage()
