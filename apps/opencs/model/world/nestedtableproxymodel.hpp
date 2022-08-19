@@ -5,8 +5,6 @@
 
 #include <QAbstractProxyModel>
 
-#include "universalid.hpp"
-#include "columns.hpp"
 #include "columnbase.hpp"
 
 /*! \brief

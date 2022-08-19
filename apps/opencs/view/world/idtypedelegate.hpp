@@ -1,9 +1,7 @@
 #ifndef IDTYPEDELEGATE_HPP
 #define IDTYPEDELEGATE_HPP
 
-#include "enumdelegate.hpp"
 #include "util.hpp"
-#include "../../model/world/universalid.hpp"
 #include "datadisplaydelegate.hpp"
 
 namespace CSVWorld

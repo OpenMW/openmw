@@ -2,6 +2,9 @@
 
 #include "reporttable.hpp"
 
+#include "../../model/doc/state.hpp"
+#include "../../model/doc/document.hpp"
+
 CSVTools::ReportSubView::ReportSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : CSVDoc::SubView (id), mDocument (document), mRefreshState (0)
 {

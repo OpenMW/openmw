@@ -1,9 +1,16 @@
 #ifndef CSM_TOOLS_SOUNDGENCHECK_HPP
 #define CSM_TOOLS_SOUNDGENCHECK_HPP
 
-#include "../world/data.hpp"
+#include "../world/idcollection.hpp"
+#include "../world/refidcollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace ESM
+{
+    struct SoundGenerator;
+    struct Sound;
+}
 
 namespace CSMTools
 {

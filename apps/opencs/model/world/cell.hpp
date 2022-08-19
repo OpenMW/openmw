@@ -1,7 +1,6 @@
 #ifndef CSM_WOLRD_CELL_H
 #define CSM_WOLRD_CELL_H
 
-#include <vector>
 #include <string>
 
 #include <components/esm3/loadcell.hpp>

@@ -4,7 +4,6 @@
 #include "util.hpp"
 
 #include "datadisplaydelegate.hpp"
-#include "../../model/world/record.hpp"
 
 class QIcon;
 class QFont;

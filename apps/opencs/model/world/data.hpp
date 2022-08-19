@@ -34,8 +34,6 @@
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
-#include "../doc/stage.hpp"
-
 #include "actoradapter.hpp"
 #include "idcollection.hpp"
 #include "nestedidcollection.hpp"

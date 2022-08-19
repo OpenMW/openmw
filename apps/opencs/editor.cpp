@@ -15,7 +15,6 @@
 #include <components/settings/settings.hpp>
 
 #include "model/doc/document.hpp"
-#include "model/world/data.hpp"
 
 #ifdef _WIN32
 #include <components/windows.hpp>

@@ -10,13 +10,9 @@
 #include <QEvent>
 
 #ifndef Q_MOC_RUN
-#include "../../model/world/data.hpp"
-#include "../../model/world/land.hpp"
-
 #include "../../model/doc/document.hpp"
-#include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
-#include "../../model/world/landtexture.hpp"
+#include "../../model/world/columnimp.hpp"
 #include "../widget/brushshapes.hpp"
 #include "brushdraw.hpp"
 #endif

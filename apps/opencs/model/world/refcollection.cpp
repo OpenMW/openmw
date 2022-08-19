@@ -7,6 +7,8 @@
 #include "universalid.hpp"
 #include "record.hpp"
 
+#include "../doc/messages.hpp"
+
 #include <string_view>
 
 namespace CSMWorld

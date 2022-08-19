@@ -1,5 +1,7 @@
 #include "runlogsubview.hpp"
 
+#include "../../model/doc/document.hpp"
+
 #include <QTextEdit>
 
 CSVDoc::RunLogSubView::RunLogSubView (const CSMWorld::UniversalId& id,

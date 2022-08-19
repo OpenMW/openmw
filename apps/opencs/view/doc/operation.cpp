@@ -6,7 +6,7 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 
-#include "../../model/doc/document.hpp"
+#include "../../model/doc/state.hpp"
 
 void CSVDoc::Operation::updateLabel (int threads)
 {

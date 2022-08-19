@@ -4,8 +4,6 @@
 #include <vector>
 #include <string>
 
-#include "../world/universalid.hpp"
-
 #include "messages.hpp"
 
 class QString;

@@ -9,6 +9,8 @@
 
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
+#include "../../model/doc/state.hpp"
+
 #include "../../model/world/columns.hpp"
 #include "../../model/world/idcompletionmanager.hpp"
 

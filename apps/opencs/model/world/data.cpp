@@ -15,6 +15,8 @@
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
 
+#include "../doc/messages.hpp"
+
 #include "idtable.hpp"
 #include "idtree.hpp"
 #include "columnimp.hpp"

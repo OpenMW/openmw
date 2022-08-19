@@ -3,9 +3,11 @@
 
 #include <map>
 #include <stdexcept>
+#include <memory>
 
 #include "nestedcollection.hpp"
-#include "nestedcoladapterimp.hpp"
+#include "collection.hpp"
+#include "nestedcolumnadapter.hpp"
 
 namespace ESM
 {
@@ -16,9 +18,16 @@ namespace CSMWorld
 {
     struct NestedTableWrapperBase;
     struct Cell;
+    struct ColumnBase;
 
-    template<typename T, typename AT>
+    template <typename ESXRecordT>
+    struct IdAccessor;
+
+    template <typename ESXRecordT, typename IdAccessorT>
     class IdCollection;
+
+    template <typename ESXRecordT>
+    class NestedColumnAdapter;
 
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class NestedIdCollection : public IdCollection<ESXRecordT, IdAccessorT>, public NestedCollection

@@ -5,11 +5,9 @@
 #include <osg/Vec3>
 
 #include "../../model/doc/document.hpp"
-#include "../../model/world/tablemimedata.hpp"
 
 #include "instancedragmodes.hpp"
 #include "scenewidget.hpp"
-#include "mask.hpp"
 
 namespace CSMPrefs
 {

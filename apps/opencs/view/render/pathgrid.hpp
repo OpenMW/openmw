@@ -8,7 +8,6 @@
 #include <osg/Vec3d>
 
 #include "../../model/world/cellcoordinates.hpp"
-#include "../../model/world/idcollection.hpp"
 #include "../../model/world/subcellcollection.hpp"
 
 #include "tagbase.hpp"

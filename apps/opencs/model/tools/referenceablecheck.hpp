@@ -1,11 +1,17 @@
 #ifndef REFERENCEABLECHECKSTAGE_H
 #define REFERENCEABLECHECKSTAGE_H
 
-#include "../world/universalid.hpp"
 #include "../doc/stage.hpp"
-#include "../world/data.hpp"
+
 #include "../world/refiddata.hpp"
 #include "../world/resources.hpp"
+#include "../world/idcollection.hpp"
+
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadscpt.hpp>
 
 namespace CSMTools
 {

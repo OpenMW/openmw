@@ -1,5 +1,7 @@
 #include "nestedcollection.hpp"
 
+#include "columnbase.hpp"
+
 CSMWorld::NestedCollection::NestedCollection()
 {}
 

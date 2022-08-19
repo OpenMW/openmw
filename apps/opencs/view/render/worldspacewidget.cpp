@@ -12,6 +12,7 @@
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
 #include "../../model/prefs/shortcut.hpp"
 #include "../../model/prefs/state.hpp"

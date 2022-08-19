@@ -11,6 +11,7 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/doc/documentmanager.hpp"
+#include "../../model/doc/state.hpp"
 
 #include "../doc/filewidget.hpp"
 #include "../doc/adjusterwidget.hpp"
