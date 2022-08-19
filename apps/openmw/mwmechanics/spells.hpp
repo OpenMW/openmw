@@ -8,7 +8,6 @@
 
 #include "../mwworld/timestamp.hpp"
 
-#include "magiceffects.hpp"
 #include "spelllist.hpp"
 
 namespace ESM

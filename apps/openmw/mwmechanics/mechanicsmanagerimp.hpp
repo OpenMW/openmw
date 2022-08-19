@@ -7,7 +7,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "creaturestats.hpp"
 #include "npcstats.hpp"
 #include "objects.hpp"
 #include "actors.hpp"

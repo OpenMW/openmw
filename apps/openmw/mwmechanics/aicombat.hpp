@@ -6,9 +6,6 @@
 
 #include "../mwworld/cellstore.hpp" // for Doors
 
-#include "../mwbase/world.hpp"
-
-#include "pathfinding.hpp"
 #include "movement.hpp"
 #include "aitimer.hpp"
 

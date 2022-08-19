@@ -3,12 +3,11 @@
 
 #include <deque>
 
+#include <components/esm3/loadweap.hpp>
+
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/containerstore.hpp"
 
 #include "../mwrender/animation.hpp"
-
-#include "weapontype.hpp"
 
 namespace MWWorld
 {

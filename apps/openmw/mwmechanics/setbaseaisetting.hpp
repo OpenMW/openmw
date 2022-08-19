@@ -9,7 +9,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "aisetting.hpp"
-#include "creaturestats.hpp"
 
 namespace MWMechanics
 {

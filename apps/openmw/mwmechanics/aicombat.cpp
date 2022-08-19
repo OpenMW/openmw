@@ -18,6 +18,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
@@ -26,6 +27,7 @@
 #include "character.hpp"
 #include "aicombataction.hpp"
 #include "actorutil.hpp"
+#include "weapontype.hpp"
 
 namespace
 {

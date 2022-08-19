@@ -9,7 +9,6 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/actionrepair.hpp"
 
 #include "../mwgui/tooltips.hpp"

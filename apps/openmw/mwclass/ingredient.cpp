@@ -11,9 +11,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/actioneat.hpp"
-#include "../mwworld/nullaction.hpp"
 
 #include "../mwgui/tooltips.hpp"
 

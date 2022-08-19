@@ -6,8 +6,6 @@
 #include <string>
 #include <string_view>
 
-#include "pathfinding.hpp"
-
 namespace ESM
 {
 namespace AiSequence

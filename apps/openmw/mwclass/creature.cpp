@@ -10,7 +10,6 @@
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/disease.hpp"
-#include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/combat.hpp"

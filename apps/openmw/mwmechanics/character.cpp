@@ -51,6 +51,7 @@
 #include "security.hpp"
 #include "actorutil.hpp"
 #include "spellcasting.hpp"
+#include "weapontype.hpp"
 
 namespace
 {

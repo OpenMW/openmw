@@ -18,10 +18,10 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwphysics/physicssystem.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellutils.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
