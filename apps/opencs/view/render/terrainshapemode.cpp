@@ -20,7 +20,7 @@
 
 #include "../../model/prefs/state.hpp"
 #include "../../model/world/idtree.hpp"
-#include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/commands.hpp"
 
 #include "brushdraw.hpp"
 #include "commands.hpp"

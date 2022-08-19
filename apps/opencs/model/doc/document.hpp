@@ -16,7 +16,6 @@
 
 #include "../tools/tools.hpp"
 
-#include "state.hpp"
 #include "saving.hpp"
 #include "blacklist.hpp"
 #include "runner.hpp"

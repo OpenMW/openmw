@@ -11,20 +11,17 @@ namespace ESM
 namespace CSMWorld
 {
     struct Cell;
-    template<typename T, typename AT>
-    class IdCollection;
 
     /// \brief Single type collection of top level records that are associated with cells
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class SubCellCollection : public NestedIdCollection<ESXRecordT, IdAccessorT>
     {
-            const IdCollection<Cell>& mCells;
+            const IdCollection<Cell, IdAccessor<Cell>>& mCells;
 
             void loadRecord (ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted) override;
 
         public:
-
-            SubCellCollection (const IdCollection<Cell>& cells);
+            SubCellCollection(const IdCollection<Cell, IdAccessor<Cell>>& cells);
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -37,7 +34,7 @@ namespace CSMWorld
 
     template<typename ESXRecordT, typename IdAccessorT>
     SubCellCollection<ESXRecordT, IdAccessorT>::SubCellCollection (
-        const IdCollection<Cell>& cells)
+        const IdCollection<Cell, IdAccessor<Cell>>& cells)
     : mCells (cells)
     {}
 }

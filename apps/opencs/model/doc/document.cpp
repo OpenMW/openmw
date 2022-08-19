@@ -1,5 +1,7 @@
 #include "document.hpp"
 
+#include "state.hpp"
+
 #include <cassert>
 #include <memory>
 

@@ -5,6 +5,9 @@
 #include "../world/refiddata.hpp"
 #include "../world/universalid.hpp"
 
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadsndg.hpp>
+
 CSMTools::SoundGenCheckStage::SoundGenCheckStage(const CSMWorld::IdCollection<ESM::SoundGenerator> &soundGens,
                                                  const CSMWorld::IdCollection<ESM::Sound> &sounds,
                                                  const CSMWorld::RefIdCollection &objects)

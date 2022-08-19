@@ -12,6 +12,9 @@ namespace CSMWorld
     template<typename T, typename AT>
     class IdCollection;
 
+    template<typename ESXRecordT>
+    struct IdAccessor;
+
     /// \brief Wrapper for Pathgrid record
     ///
     /// \attention The mData.mX and mData.mY fields of the ESM::Pathgrid struct are not used.

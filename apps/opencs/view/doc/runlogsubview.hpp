@@ -3,6 +3,11 @@
 
 #include "subview.hpp"
 
+namespace CSMDoc
+{
+    class Document;
+}
+
 namespace CSVDoc
 {
     class RunLogSubView : public SubView

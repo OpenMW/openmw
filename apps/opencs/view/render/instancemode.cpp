@@ -16,6 +16,7 @@
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/commandmacro.hpp"
+#include "../../model/world/tablemimedata.hpp"
 #include "../../model/prefs/shortcut.hpp"
 
 #include "../widget/scenetoolbar.hpp"

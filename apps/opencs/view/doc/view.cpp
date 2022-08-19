@@ -13,6 +13,8 @@
 #include <QScreen>
 
 #include "../../model/doc/document.hpp"
+#include "../../model/doc/state.hpp"
+
 #include "../../model/prefs/state.hpp"
 #include "../../model/prefs/shortcut.hpp"
 

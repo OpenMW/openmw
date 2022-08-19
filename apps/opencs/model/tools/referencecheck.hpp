@@ -1,8 +1,17 @@
 #ifndef CSM_TOOLS_REFERENCECHECK_H
 #define CSM_TOOLS_REFERENCECHECK_H
 
-#include "../doc/state.hpp"
-#include "../doc/document.hpp"
+#include "../world/idcollection.hpp"
+#include "../world/refiddata.hpp"
+#include "../world/refidcollection.hpp"
+#include "../world/refcollection.hpp"
+
+#include "../doc/stage.hpp"
+
+namespace ESM
+{
+    struct Faction;
+}
 
 namespace CSMTools
 {

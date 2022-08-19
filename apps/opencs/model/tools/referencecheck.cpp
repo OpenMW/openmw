@@ -2,6 +2,10 @@
 
 #include "../prefs/state.hpp"
 
+#include "../../model/world/cell.hpp"
+
+#include <components/esm3/loadfact.hpp>
+
 CSMTools::ReferenceCheckStage::ReferenceCheckStage(
     const CSMWorld::RefCollection& references,
     const CSMWorld::RefIdCollection& referencables,

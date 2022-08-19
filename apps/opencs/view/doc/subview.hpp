@@ -1,11 +1,7 @@
 #ifndef CSV_DOC_SUBVIEW_H
 #define CSV_DOC_SUBVIEW_H
 
-#include "../../model/doc/document.hpp"
-
 #include "../../model/world/universalid.hpp"
-
-#include "subviewfactory.hpp"
 
 #include <QDockWidget>
 

@@ -7,6 +7,8 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 
+#include "../../model/doc/document.hpp"
+
 CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id), mTitle (id.toString().c_str())
 {

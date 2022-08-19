@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "idtablebase.hpp"
+#include "columnbase.hpp"
 
 namespace
 {

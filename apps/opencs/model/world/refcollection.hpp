@@ -4,11 +4,14 @@
 #include <map>
 #include <string_view>
 
-#include "../doc/stage.hpp"
-
 #include "collection.hpp"
 #include "ref.hpp"
 #include "record.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
 
 namespace CSMWorld
 {

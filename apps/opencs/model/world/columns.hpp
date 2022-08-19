@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "columnbase.hpp"
-
 namespace CSMWorld
 {
     namespace Columns

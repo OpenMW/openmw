@@ -2,7 +2,6 @@
 #define CSM_WOLRD_IDTREE_H
 
 #include "idtable.hpp"
-#include "universalid.hpp"
 #include "columns.hpp"
 
 /*! \brief
