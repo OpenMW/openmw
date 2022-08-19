@@ -83,17 +83,17 @@ void CSMDoc::Runner::start (bool delayed)
         arguments << ("--script-run="+mStartup->fileName());
 
         arguments <<
-            QString::fromStdWString (L"--data=\""+mProjectPath.parent_path().wstring()+L"\"");
+            QString::fromStdU32String (U"--data=\""+mProjectPath.parent_path().u32string()+U"\"");
 
         arguments << "--replace=content";
 
         for (const auto & mContentFile : mContentFiles)
         {
-            arguments << QString::fromStdWString (L"--content="+mContentFile.wstring());
+            arguments << QString::fromStdU32String (U"--content="+mContentFile.u32string());
         }
 
         arguments
-            << QString::fromStdWString (L"--content="+mProjectPath.filename().wstring());
+            << QString::fromStdU32String (U"--content="+mProjectPath.filename().u32string());
 
         mProcess.start (path, arguments);
     }

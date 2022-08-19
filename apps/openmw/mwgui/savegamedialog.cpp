@@ -440,7 +440,7 @@ namespace MWGui
         const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
         if (!data.size())
         {
-            Log(Debug::Warning) << "Selected save file '" << mCurrentSlot->mPath.filename().string() << "' has no savegame screenshot";
+            Log(Debug::Warning) << "Selected save file '" << Files::pathToUnicodeString(mCurrentSlot->mPath.filename()) << "' has no savegame screenshot";
             return;
         }
 

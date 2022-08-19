@@ -231,7 +231,7 @@ void CS::Editor::openFiles (const std::filesystem::path &savePath, const std::ve
     if(discoveredFiles.empty())
     {
         for (const QString &path : mFileDialog.selectedFilePaths())
-            files.emplace_back(path.toUtf8().constData());
+            files.emplace_back(path.toStdU32String());
     }
     else
     {
@@ -248,7 +248,7 @@ void CS::Editor::createNewFile (const std::filesystem::path &savePath)
     std::vector<std::filesystem::path> files;
 
     for (const QString &path : mFileDialog.selectedFilePaths()) {
-        files.emplace_back(path.toUtf8().constData());
+        files.emplace_back(path.toStdU32String());
     }
 
     files.push_back (savePath);
@@ -377,23 +377,20 @@ int CS::Editor::run()
 
         std::vector<std::filesystem::path> discoveredFiles;
 
-        for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
-            itemIter != fileReader.getGameFiles().end(); ++itemIter)
+        for (const auto& item : fileReader.getGameFiles())
         {
-            for (Files::PathContainer::const_iterator pathIter = mDataDirs.begin();
-                pathIter != mDataDirs.end(); ++pathIter)
+            for (const auto& path : mDataDirs)
             {
-                const std::filesystem::path masterPath = *pathIter / itemIter->name;
-                if (std::filesystem::exists(masterPath))
+                if (auto masterPath = path / item.name; std::filesystem::exists(masterPath))
                 {
-                    discoveredFiles.push_back(masterPath);
+                    discoveredFiles.emplace_back(std::move(masterPath));
                     break;
                 }
             }
         }
         discoveredFiles.push_back(mFileToLoad);
 
-        QString extension = QString::fromStdWString(mFileToLoad.extension().wstring()).toLower();
+        QString extension = QString::fromStdU32String(mFileToLoad.extension().u32string()).toLower();
         if (extension == ".esm")
         {
             mFileToLoad.replace_extension(".omwgame");

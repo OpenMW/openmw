@@ -104,7 +104,7 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     // Create the file if it doesn't already exist, else the importer will fail
     auto path = mCfgMgr.getUserConfigPath();
     path /= "openmw.cfg";
-    QFile file(QString::fromStdWString(path.wstring()));
+    QFile file(QString::fromStdU32String(path.u32string()));
 
     if (!file.exists()) {
         if (!file.open(QIODevice::ReadWrite)) {
@@ -137,7 +137,7 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     arguments.append(QString("--ini"));
     arguments.append(settingsComboBox->currentText());
     arguments.append(QString("--cfg"));
-    arguments.append(QString::fromStdWString(path.wstring()));
+    arguments.append(QString::fromStdU32String(path.u32string()));
 
     qDebug() << "arguments " << arguments;
 

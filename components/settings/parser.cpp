@@ -4,6 +4,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/files/conversion.hpp>
 
 #include <fstream>
 #include <filesystem>
@@ -324,6 +325,6 @@ bool Settings::SettingsFileParser::skipWhiteSpace(size_t& i, std::string& str)
 [[noreturn]] void Settings::SettingsFileParser::fail(const std::string& message)
 {
     std::stringstream error;
-    error << "Error on line " << mLine << " in " << mFile << ":\n" << message;
+    error << "Error on line " << mLine << " in " << Files::pathToUnicodeString(mFile) << ":\n" << message;
     throw std::runtime_error(error.str());
 }

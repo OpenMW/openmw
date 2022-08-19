@@ -14,6 +14,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
+#include <components/files/conversion.hpp>
 
 namespace Shader
 {
@@ -384,7 +385,7 @@ namespace Shader
             const std::set<std::filesystem::path>& shaderFiles = templateIncludedFiles[templateName];
             for (const std::filesystem::path& file : shaderFiles)
             {
-                mShaderFiles[file.string()].insert(std::make_pair(templateName, defines));
+                mShaderFiles[Files::pathToUnicodeString(file)].insert(std::make_pair(templateName, defines));
             }
         }
 
@@ -426,7 +427,7 @@ namespace Shader
                         stream.open(path);
                         if (stream.fail())
                         {
-                            Log(Debug::Error) << "Failed to open " << path.string();
+                            Log(Debug::Error) << "Failed to open " << Files::pathToUnicodeString(path);
                         }
                         std::stringstream buffer;
                         buffer << stream.rdbuf();

@@ -7,6 +7,7 @@
 #include <boost/program_options.hpp>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 
 namespace bpo = boost::program_options;
 namespace sfs = std::filesystem;
@@ -137,7 +138,7 @@ int wmain(int argc, wchar_t *wargv[]) {
             importer.importArchives(cfg, ini);
         }
 
-        std::cout << "write to: " << outputFile << std::endl;
+        std::cout << "write to: " << Files::pathToUnicodeString(outputFile) << std::endl;
         std::ofstream file(outputFile);
         importer.writeToFile(file, cfg);
     }

@@ -289,7 +289,7 @@ void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMDa
 
 void printRawTes3(const std::filesystem::path &path)
 {
-    std::cout << "TES3 RAW file listing: " << path << '\n';
+    std::cout << "TES3 RAW file listing: " << Files::pathToUnicodeString(path) << '\n';
     ESM::ESMReader esm;
     esm.openRaw(path);
     while(esm.hasMoreRecs())

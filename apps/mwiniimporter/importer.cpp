@@ -658,7 +658,7 @@ void MwIniImporter::setVerbose(bool verbose) {
 }
 
 MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::filesystem::path&  filename) const {
-    std::cout << "load ini file: " << filename << std::endl;
+    std::cout << "load ini file: " << Files::pathToUnicodeString(filename) << std::endl;
 
     std::string section("");
     MwIniImporter::multistrmap map;
@@ -719,7 +719,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::filesystem::pat
 }
 
 MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::filesystem::path& filename) {
-    std::cout << "load cfg file: " << filename << std::endl;
+    std::cout << "load cfg file: " << Files::pathToUnicodeString(filename) << std::endl;
 
     MwIniImporter::multistrmap map;
     std::ifstream file(filename);
@@ -872,7 +872,7 @@ void MwIniImporter::addPaths(std::vector<std::filesystem::path>& output, std::ve
             // Drop first and last characters - quotation marks
             path = path.substr(1, path.size() - 2);
         }
-        output.emplace_back(path);
+        output.emplace_back(Files::pathFromUnicodeString(path));
     }
 }
 

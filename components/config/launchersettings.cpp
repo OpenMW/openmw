@@ -119,7 +119,7 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     }
 
     // global and local data directories are not part of any profile
-    const auto globalDataDir = QString::fromStdWString(gameSettings.getGlobalDataDir().wstring());
+    const auto globalDataDir = QString::fromStdU32String(gameSettings.getGlobalDataDir().u32string());
     const auto dataLocal = gameSettings.getDataLocal();
     dirs.removeAll(globalDataDir);
     dirs.removeAll(dataLocal);

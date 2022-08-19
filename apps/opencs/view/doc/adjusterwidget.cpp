@@ -68,7 +68,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     }
     else
     {
-        std::filesystem::path path (name.toStdWString());
+        std::filesystem::path path (name.toStdU32String());
 
         const auto extension = Misc::StringUtils::lowerCase(path.extension().u8string());
 
@@ -85,7 +85,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
         if (!isFilePathChanged && !isLegacyPath)
         {
             // path already points to the local data directory
-            message = QString::fromStdWString (L"Will be saved as: " + path.wstring());
+            message = QString::fromStdU32String (U"Will be saved as: " + path.u32string());
             mResultPath = path;
         }
         //in all other cases, ensure the path points to data-local and do an existing file check
@@ -95,7 +95,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
             if (isFilePathChanged)
                 path = mLocalData / path.filename();
 
-            message = QString::fromStdWString (L"Will be saved as: " + path.wstring());
+            message = QString::fromStdU32String (U"Will be saved as: " + path.u32string());
             mResultPath = path;
 
             if (std::filesystem::exists (path))

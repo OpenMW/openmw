@@ -102,7 +102,7 @@ void CSVTools::Merge::configure (CSMDoc::Document *document)
 
     for (std::vector<std::filesystem::path>::const_iterator iter (files.begin());
         iter!=files.end(); ++iter)
-        mFiles->addItem (QString::fromStdWString(iter->filename().wstring()));
+        mFiles->addItem (QString::fromStdU32String(iter->filename().u32string()));
 }
 
 void CSVTools::Merge::setLocalData (const std::filesystem::path& localData)

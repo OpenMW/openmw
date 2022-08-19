@@ -99,7 +99,7 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
 
     while (!extraConfigDirs.empty())
     {
-        std::filesystem::path path = extraConfigDirs.top();
+        auto path = extraConfigDirs.top();
         extraConfigDirs.pop();
         if (alreadyParsedPaths.count(path) > 0)
         {
@@ -116,7 +116,7 @@ void ConfigurationManager::readConfiguration(bpo::variables_map& variables,
             Log(Debug::Info) << "Skipping previous configs except " << (mActiveConfigPaths.front() / "openmw.cfg") <<
                 " due to replace=config in " << (path / "openmw.cfg");
         }
-        mActiveConfigPaths.push_back(path);
+        mActiveConfigPaths.emplace_back(std::move(path));
         if (config)
         {
             addExtraConfigDirs(extraConfigDirs, *config);

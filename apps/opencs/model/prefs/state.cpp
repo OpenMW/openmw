@@ -648,8 +648,7 @@ CSMPrefs::State::~State()
 
 void CSMPrefs::State::save()
 {
-    std::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
-    Settings::Manager::saveUser (user);
+    Settings::Manager::saveUser (mConfigurationManager.getUserConfigPath() / mConfigFile);
 }
 
 CSMPrefs::State::Iterator CSMPrefs::State::begin()

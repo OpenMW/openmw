@@ -471,5 +471,5 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
 
 QString Wizard::MainWizard::toQString(const std::filesystem::path& path)
 {
-    return QString::fromStdWString(path.wstring());
+    return QString::fromStdU32String(path.u32string());
 }

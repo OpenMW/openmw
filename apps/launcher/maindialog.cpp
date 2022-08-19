@@ -163,7 +163,7 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
             cfgError(tr("Error opening OpenMW configuration file"),
                      tr("<br><b>Could not create directory %0</b><br><br> \
                         Please make sure you have the right permissions \
-                        and try again.<br>").arg(QString::fromStdWString(canonical(userConfigDir).wstring()))
+                        and try again.<br>").arg(QString::fromStdU32String(canonical(userConfigDir).u32string()))
             );
             return FirstRunDialogResultFailure;
         }
@@ -296,7 +296,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromStdWString(mCfgMgr.getUserConfigPath().wstring());
+    QString userPath = QString::fromStdU32String(mCfgMgr.getUserConfigPath().u32string());
 
     QStringList paths;
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
@@ -329,9 +329,9 @@ bool Launcher::MainDialog::setupGameSettings()
 {
     mGameSettings.clear();
 
-    QString localPath = QString::fromStdWString(mCfgMgr.getLocalPath().wstring());
-    QString userPath = QString::fromStdWString(mCfgMgr.getUserConfigPath().wstring());
-    QString globalPath = QString::fromStdWString(mCfgMgr.getGlobalPath().wstring());
+    QString localPath = QString::fromStdU32String(mCfgMgr.getLocalPath().u32string());
+    QString userPath = QString::fromStdU32String(mCfgMgr.getUserConfigPath().u32string());
+    QString globalPath = QString::fromStdU32String(mCfgMgr.getGlobalPath().u32string());
 
     QFile file;
 
@@ -487,13 +487,13 @@ bool Launcher::MainDialog::writeSettings()
             cfgError(tr("Error creating OpenMW configuration directory"),
                      tr("<br><b>Could not create %0</b><br><br> \
                          Please make sure you have the right permissions \
-                         and try again.<br>").arg(QString::fromStdWString(userPath.wstring())));
+                         and try again.<br>").arg(QString::fromStdU32String(userPath.u32string())));
             return false;
         }
     }
 
     // Game settings
-    QFile file(QString::fromStdWString((userPath / "openmw.cfg").wstring()));
+    QFile file(QString::fromStdU32String((userPath / "openmw.cfg").u32string()));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
@@ -521,7 +521,7 @@ bool Launcher::MainDialog::writeSettings()
     }
 
     // Launcher settings
-    file.setFileName(QString::fromStdWString((userPath / Config::LauncherSettings::sLauncherConfigFileName).wstring()));
+    file.setFileName(QString::fromStdU32String((userPath / Config::LauncherSettings::sLauncherConfigFileName).u32string()));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created

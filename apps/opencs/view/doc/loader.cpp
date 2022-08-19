@@ -19,7 +19,7 @@ void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 : mDocument (document), mTotalRecordsLabel (0), mRecordsLabel (0), mAborted (false), mMessages (nullptr), mRecords(0)
 {
-    setWindowTitle (QString::fromStdWString(L"Opening " + document->getSavePath().filename().wstring()));
+    setWindowTitle (QString::fromStdU32String(U"Opening " + document->getSavePath().filename().u32string()));
 
     setMinimumWidth (400);
 

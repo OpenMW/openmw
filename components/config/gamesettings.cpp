@@ -4,6 +4,7 @@
 #include <QTextCodec>
 #include <QDir>
 #include <QRegExp>
+#include <QDebug>
 
 #include <components/files/configurationmanager.hpp>
 
@@ -23,8 +24,7 @@ void Config::GameSettings::validatePaths()
 
     for (const QString &path : paths)
     {
-        QByteArray bytes = path.toUtf8();
-        dataDirs.push_back(Files::PathContainer::value_type(std::string(bytes.constData(), bytes.length())));
+        dataDirs.emplace_back(path.toStdU32String());
     }
 
     // Parse the data dirs to convert the tokenized paths
@@ -32,7 +32,7 @@ void Config::GameSettings::validatePaths()
     mDataDirs.clear();
 
     for (auto & dataDir : dataDirs) {
-        QString path = QString::fromStdWString(dataDir.wstring());
+        QString path = QString::fromStdU32String(dataDir.u32string());
 
         QDir dir(path);
         if (dir.exists())
@@ -51,13 +51,12 @@ void Config::GameSettings::validatePaths()
         return;
 
     dataDirs.clear();
-    QByteArray bytes = local.toUtf8();
-    dataDirs.push_back(Files::PathContainer::value_type(std::string(bytes.constData(), bytes.length())));
+    dataDirs.emplace_back(local.toStdU32String());
 
     mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
 
     if (!dataDirs.empty()) {
-        QString path = QString::fromStdWString(dataDirs.front().wstring());
+        QString path = QString::fromStdU32String(dataDirs.front().u32string());
 
         QDir dir(path);
         if (dir.exists())
@@ -68,8 +67,9 @@ void Config::GameSettings::validatePaths()
 std::filesystem::path Config::GameSettings::getGlobalDataDir() const
 {
     // global data dir may not exists if OpenMW is not installed (ie if run from build directory)
-    if (std::filesystem::exists(mCfgMgr.getGlobalDataPath()))
-        return std::filesystem::canonical(mCfgMgr.getGlobalDataPath());
+    const auto& path = mCfgMgr.getGlobalDataPath();
+    if (std::filesystem::exists(path))
+        return std::filesystem::canonical(path);
     return {};
 }
 

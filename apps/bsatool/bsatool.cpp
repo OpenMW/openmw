@@ -244,7 +244,7 @@ int extractAll(std::unique_ptr<File>& bsa, Arguments& info)
 
         // Get the target path (the path the file will be extracted to)
         auto target = info.outdir;
-        target /= extractPath;
+        target /= Misc::StringUtils::stringToU8String(extractPath);
 
         // Create the directory hierarchy
         std::filesystem::create_directories(target.parent_path());
@@ -261,7 +261,7 @@ int extractAll(std::unique_ptr<File>& bsa, Arguments& info)
         std::ofstream out(target, std::ios::binary);
 
         // Write the file to disk
-        std::cout << "Extracting " << target << std::endl;
+        std::cout << "Extracting " << Files::pathToUnicodeString(target) << std::endl;
         out << data->rdbuf();
         out.close();
     }
