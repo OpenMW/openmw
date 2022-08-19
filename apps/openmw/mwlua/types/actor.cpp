@@ -8,7 +8,6 @@
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <apps/openmw/mwworld/class.hpp>
 
-#include "../luabindings.hpp"
 #include "../localscripts.hpp"
 #include "../luamanagerimp.hpp"
 #include "../stats.hpp"

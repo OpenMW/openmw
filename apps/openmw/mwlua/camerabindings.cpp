@@ -5,6 +5,8 @@
 
 #include "../mwrender/camera.hpp"
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWLua
 {

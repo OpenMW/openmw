@@ -8,13 +8,11 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/store.hpp"
 
 #include "eventqueue.hpp"
 #include "worldview.hpp"
 #include "luamanagerimp.hpp"
-#include "types/types.hpp"
 
 namespace MWLua
 {

@@ -11,10 +11,10 @@
 #include "../mwbase/luamanager.hpp"
 
 #include "object.hpp"
-#include "luabindings.hpp"
 
 namespace MWLua
 {
+    struct Context;
 
     class LocalScripts : public LuaUtil::ScriptsContainer
     {

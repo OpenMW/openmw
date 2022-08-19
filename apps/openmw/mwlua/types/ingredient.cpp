@@ -2,9 +2,12 @@
 
 #include <components/esm3/loadingr.hpp>
 
+#include <components/lua/luastate.hpp>
+
 #include <apps/openmw/mwworld/esmstore.hpp>
 
-#include "../luabindings.hpp"
+#include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/world.hpp>
 
 namespace sol
 {
