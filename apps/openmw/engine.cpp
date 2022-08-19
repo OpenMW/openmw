@@ -1031,12 +1031,18 @@ void OMW::Engine::go()
 
     prepareEngine();
 
-    std::ofstream stats;
 #ifdef _WIN32
-    if (const auto path = std::filesystem::path{_wgetenv(L"OPENMW_OSG_STATS_FILE")}; !path.empty())
+    const auto* stats_file = _wgetenv(L"OPENMW_OSG_STATS_FILE");
 #else
-    if (const auto path = std::filesystem::path{std::getenv("OPENMW_OSG_STATS_FILE")}; !path.empty())
+    const auto* stats_file = std::getenv("OPENMW_OSG_STATS_FILE");
 #endif
+
+    std::filesystem::path path;
+    if (stats_file != nullptr)
+        path = stats_file;
+
+    std::ofstream stats;
+    if (!path.empty())
     {
         stats.open(path, std::ios_base::out);
         if (stats.is_open())
