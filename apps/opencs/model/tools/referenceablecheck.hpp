@@ -54,31 +54,29 @@ namespace CSMTools
             //Convenience functions
             void inventoryListCheck(const std::vector<ESM::ContItem>& itemList, CSMDoc::Messages& messages, const std::string& id);
 
-            template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
-                                                            CSMDoc::Messages& messages,
-                                                            const std::string& someID,
-                                                            bool enchantable); //for all enchantable items.
+            /// for all enchantable items.
+            template <typename Item>
+            inline void inventoryItemCheck(const Item& someItem, CSMDoc::Messages& messages, const std::string& someID,
+                bool enchantable);
 
-            template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
-                                                            CSMDoc::Messages& messages,
-                                                            const std::string& someID); //for non-enchantable items.
+            /// for non-enchantable items.
+            template <typename Item>
+            inline void inventoryItemCheck(const Item& someItem, CSMDoc::Messages& messages, const std::string& someID);
 
-            template<typename TOOL> void toolCheck(const TOOL& someTool,
-                                                   CSMDoc::Messages& messages,
-                                                   const std::string& someID,
-                                                   bool canbebroken); //for tools with uses.
+            /// for tools with uses.
+            template <typename Tool>
+            inline void toolCheck(const Tool& someTool, CSMDoc::Messages& messages, const std::string& someID,
+                bool canbebroken);
 
-            template<typename TOOL> void toolCheck(const TOOL& someTool,
-                                                   CSMDoc::Messages& messages,
-                                                   const std::string& someID); //for tools without uses.
+            /// for tools without uses.
+            template <typename Tool>
+            inline void toolCheck(const Tool& someTool, CSMDoc::Messages& messages, const std::string& someID);
 
-            template<typename LIST> void listCheck(const LIST& someList,
-                                                   CSMDoc::Messages& messages,
-                                                   const std::string& someID);
+            template <typename List>
+            inline void listCheck(const List& someList, CSMDoc::Messages& messages, const std::string& someID);
 
-            template<typename TOOL> void scriptCheck(const TOOL& someTool,
-                                                   CSMDoc::Messages& messages,
-                                                   const std::string& someID);
+            template <typename Tool>
+            inline void scriptCheck(const Tool& someTool, CSMDoc::Messages& messages, const std::string& someID);
 
             const CSMWorld::RefIdData& mReferencables;
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
