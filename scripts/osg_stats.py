@@ -313,6 +313,7 @@ def make_stats(source, key, values, precision):
         number=len(values),
         min=fixed_float(min(values), precision),
         max=fixed_float(max(values), precision),
+        sum=fixed_float(sum(values), precision),
         mean=fixed_float(statistics.mean(values), precision),
         median=fixed_float(statistics.median(values), precision),
         stdev=fixed_float(statistics.stdev(values), precision),
