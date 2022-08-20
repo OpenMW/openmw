@@ -17,6 +17,8 @@ namespace
     VFSTestFile incorrectScript("return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
     VFSTestFile emptyScript("");
     
+    VFSTestFile printScript(R"X(return { print = print, })X");
+
     VFSTestFile testScript(R"X(
 return {
     engineHandlers = {
@@ -119,6 +121,7 @@ return {
             {"invalid.lua", &invalidScript},
             {"incorrect.lua", &incorrectScript},
             {"empty.lua", &emptyScript},
+            {"print.lua", &printScript },
             {"test1.lua", &testScript},
             {"test2.lua", &testScript},
             {"stopEvent.lua", &stopEventScript},
@@ -450,22 +453,23 @@ CUSTOM, PLAYER: useInterface.lua
 
     TEST_F(LuaScriptsContainerTest, CallbackWrapper)
     {
-        LuaUtil::Callback callback{mLua.sol()["print"], mLua.newTable()};
-        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptDebugNameKey] = "some_script.lua";
+        sol::table script = mLua.runInNewSandbox("print.lua");
+        LuaUtil::Callback callback{ script["print"], mLua.newTable() };
+        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptDebugNameKey] = "use_print.lua";
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptsContainer::ScriptId{nullptr, 0};
 
         testing::internal::CaptureStdout();
         callback.call(1.5);
-        EXPECT_EQ(internal::GetCapturedStdout(), "1.5\n");
+        EXPECT_EQ(internal::GetCapturedStdout(), "[print.lua]:\t1.5\n");
 
         testing::internal::CaptureStdout();
         callback.call(1.5, 2.5);
-        EXPECT_EQ(internal::GetCapturedStdout(), "1.5\t2.5\n");
+        EXPECT_EQ(internal::GetCapturedStdout(), "[print.lua]:\t1.5\t2.5\n");
 
         testing::internal::CaptureStdout();
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = sol::nil;
         callback.call(1.5, 2.5);
-        EXPECT_EQ(internal::GetCapturedStdout(), "Ignored callback to the removed script some_script.lua\n");
+        EXPECT_EQ(internal::GetCapturedStdout(), "Ignored callback to the removed script use_print.lua\n");
     }
 
 }
