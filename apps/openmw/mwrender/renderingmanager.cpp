@@ -1275,6 +1275,11 @@ namespace MWRender
 
     void RenderingManager::updateProjectionMatrix()
     {
+        if (mNearClip < 0.0f)
+            throw std::runtime_error("Near clip is less than zero");
+        if (mViewDistance < mNearClip)
+            throw std::runtime_error("Viewing distance is less than near clip");
+
         double width = Settings::Manager::getInt("resolution x", "Video");
         double height = Settings::Manager::getInt("resolution y", "Video");
 
