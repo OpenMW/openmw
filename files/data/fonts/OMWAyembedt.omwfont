@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Resource" version="1.1">
-    <Resource type="ResourceTrueTypeFont" name="ayembedt">
+    <Resource type="ResourceTrueTypeFont">
         <Property key="Source" value="OMWAyembedt.ttf"/>
         <Property key="Antialias" value="false"/>
         <Property key="TabWidth" value="8"/>
