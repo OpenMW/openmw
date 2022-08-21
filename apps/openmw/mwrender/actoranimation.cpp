@@ -60,7 +60,7 @@ ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group>
 
 ActorAnimation::~ActorAnimation() = default;
 
-PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor)
+PartHolderPtr ActorAnimation::attachMesh(const std::string& model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     osg::Group* parent = getBoneByName(bonename);
     if (!parent)
@@ -71,22 +71,22 @@ PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::st
     const NodeMap& nodeMap = getNodeMap();
     NodeMap::const_iterator found = nodeMap.find(bonename);
     if (found == nodeMap.end())
-        return PartHolderPtr();
+        return {};
 
     if (enchantedGlow)
         mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
 
-    return PartHolderPtr(new PartHolder(instance));
+    return std::make_unique<PartHolder>(instance);
 }
 
-osg::ref_ptr<osg::Node> ActorAnimation::attach(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool isLight)
+osg::ref_ptr<osg::Node> ActorAnimation::attach(const std::string& model, std::string_view bonename, std::string_view bonefilter, bool isLight)
 {
     osg::ref_ptr<const osg::Node> templateNode = mResourceSystem->getSceneManager()->getTemplate(model);
 
     const NodeMap& nodeMap = getNodeMap();
     auto found = nodeMap.find(bonename);
     if (found == nodeMap.end())
-        throw std::runtime_error("Can't find attachment node " + bonename);
+        throw std::runtime_error("Can't find attachment node " + std::string{bonename});
     if(isLight)
     {
         osg::Quat rotation(osg::DegreesToRadians(-90.f), osg::Vec3f(1,0,0));
@@ -109,7 +109,7 @@ std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool 
             if (part.mPart != ESM::PRT_Shield)
                 continue;
 
-            std::string bodypartName;
+            std::string_view bodypartName;
             if (female && !part.mFemale.empty())
                 bodypartName = part.mFemale;
             else if (!part.mMale.empty())
@@ -212,7 +212,7 @@ void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
     if (mesh.empty())
         return;
 
-    std::string boneName = "Bip01 AttachShield";
+    std::string_view boneName = "Bip01 AttachShield";
     osg::Vec4f glowColor = shield->getClass().getEnchantmentColor(*shield);
     std::string holsteredName = mesh;
     holsteredName = holsteredName.replace(holsteredName.size()-4, 4, "_sh.nif");
@@ -275,22 +275,21 @@ bool ActorAnimation::useShieldAnimations() const
     return false;
 }
 
-osg::Group* ActorAnimation::getBoneByName(const std::string& boneName) const
+osg::Group* ActorAnimation::getBoneByName(std::string_view boneName) const
 {
     if (!mObjectRoot)
         return nullptr;
 
-    SceneUtil::FindByNameVisitor findVisitor (boneName);
+    SceneUtil::FindByNameVisitor findVisitor(boneName);
     mObjectRoot->accept(findVisitor);
 
     return findVisitor.mFoundNode;
 }
 
-std::string ActorAnimation::getHolsteredWeaponBoneName(const MWWorld::ConstPtr& weapon)
+std::string_view ActorAnimation::getHolsteredWeaponBoneName(const MWWorld::ConstPtr& weapon)
 {
-    std::string boneName;
     if(weapon.isEmpty())
-        return boneName;
+        return {};
 
     auto type = weapon.getClass().getType();
     if(type == ESM::Weapon::sRecordId)
@@ -300,7 +299,7 @@ std::string ActorAnimation::getHolsteredWeaponBoneName(const MWWorld::ConstPtr& 
         return MWMechanics::getWeaponType(weaponType)->mSheathingBone;
     }
 
-    return boneName;
+    return {};
 }
 
 void ActorAnimation::resetControllers(osg::Node* node)
@@ -336,7 +335,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     std::string mesh = weapon->getClass().getModel(*weapon);
     std::string scabbardName = mesh;
 
-    std::string boneName = getHolsteredWeaponBoneName(*weapon);
+    std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
     if (mesh.empty() || boneName.empty())
         return;
 
@@ -405,7 +404,7 @@ void ActorAnimation::updateQuiver()
         return;
 
     std::string mesh = weapon->getClass().getModel(*weapon);
-    std::string boneName = getHolsteredWeaponBoneName(*weapon);
+    std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
     if (mesh.empty() || boneName.empty())
         return;
 

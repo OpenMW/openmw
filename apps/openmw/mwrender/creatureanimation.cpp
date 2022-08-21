@@ -114,7 +114,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     }
     MWWorld::ConstPtr item = *it;
 
-    std::string bonename;
+    std::string_view bonename;
     std::string itemModel = item.getClass().getModel(item);
     if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
     {

@@ -689,7 +689,7 @@ namespace MWRender
                 SetupVisitor alphaFaderSetupVisitor(mPrecipitationAlpha);
                 mParticleEffect->accept(alphaFaderSetupVisitor);
 
-                SceneUtil::FindByClassVisitor findPSVisitor(std::string("ParticleSystem"));
+                SceneUtil::FindByClassVisitor findPSVisitor("ParticleSystem");
                 mParticleEffect->accept(findPSVisitor);
 
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)

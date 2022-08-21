@@ -26,7 +26,7 @@ namespace SceneUtil
 
     void FindByClassVisitor::apply(osg::Node &node)
     {
-        if (Misc::StringUtils::ciEqual(std::string_view(node.className()), mNameToFind))
+        if (Misc::StringUtils::ciEqual(node.className(), mNameToFind))
             mFoundNodes.push_back(&node);
 
         traverse(node);
@@ -52,7 +52,7 @@ namespace SceneUtil
     {
         // Choose first found node in file
 
-        if (trans.libraryName() == std::string("osgAnimation"))
+        if (trans.libraryName() == std::string_view("osgAnimation"))
         {
             std::string nodeName = trans.getName();
             // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses whitespace-separated names)
@@ -144,7 +144,7 @@ namespace SceneUtil
 
     void RemoveTriBipVisitor::applyImpl(osg::Node& node)
     {
-        const std::string toFind = "tri bip";
+        const std::string_view toFind = "tri bip";
         if (Misc::StringUtils::ciCompareLen(node.getName(), toFind, toFind.size()) == 0)
         {
             osg::Group* parent = static_cast<osg::Group*>(*(getNodePath().end()-2));

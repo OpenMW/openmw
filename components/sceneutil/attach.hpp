@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_ATTACH_H
 #define OPENMW_COMPONENTS_SCENEUTIL_ATTACH_H
 
-#include <string>
+#include <string_view>
 
 #include <osg/ref_ptr>
 
@@ -24,7 +24,7 @@ namespace SceneUtil
     /// Otherwise, just attach all of the toAttach scenegraph to the attachment node on the master scenegraph, with no filtering.
     /// @note The master scene graph is expected to include a skeleton.
     /// @return A newly created node that is directly attached to the master scene graph
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node* master, const std::string& filter, osg::Group* attachNode, Resource::SceneManager *sceneManager, const osg::Quat* attitude = nullptr);
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node* master, std::string_view filter, osg::Group* attachNode, Resource::SceneManager* sceneManager, const osg::Quat* attitude = nullptr);
 
 }
 
