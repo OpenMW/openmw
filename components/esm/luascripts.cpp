@@ -104,7 +104,7 @@ void ESM::LuaScriptsCfg::adjustRefNums(const ESMReader& esm)
             throw std::runtime_error("Incorrect contentFile index");
     };
 
-    lua_State* L = lua_open();
+    lua_State* L = luaL_newstate();
     LuaUtil::BasicSerializer serializer(adjustRefNumFn);
 
     auto adjustLuaData = [&](std::string& data)
