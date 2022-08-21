@@ -27,10 +27,9 @@ namespace Gui
     public:
         FontLoader (ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor);
 
-        void loadBitmapFonts ();
-        void loadTrueTypeFonts ();
+        void loadFonts();
 
-        void loadFontFromXml(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
+        void overrideLineHeight(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
 
         int getFontHeight();
 
@@ -42,11 +41,10 @@ namespace Gui
         int mFontHeight;
         float mScalingFactor;
 
-        std::vector<MyGUI::ResourceManualFont*> mFonts;
+        void loadFont(const std::string& fontName, const std::string& fontId);
 
-        std::string getInternalFontName(const std::string& name);
-
-        void loadBitmapFont (const std::string& fileName);
+        void loadBitmapFont (const std::string& fileName, const std::string& fontId);
+        void loadTrueTypeFont(const std::string& fileName, const std::string& fontId);
 
         FontLoader(const FontLoader&);
         void operator=(const FontLoader&);

@@ -3,8 +3,8 @@ Fonts
 
 Default UI font and font used in magic scrolls are defined in ``openmw.cfg``:
 
-			fallback=Fonts_Font_0,pelagiad
-			fallback=Fonts_Font_2,ayembedt
+			fallback=Fonts_Font_0,Pelagiad
+			fallback=Fonts_Font_2,OMWAyembedt
 
 When there are no ``Fonts_Font_*`` lines in user's ``openmw.cfg``, built-in TrueType fonts are used.
 Font used by console and another debug windows is not configurable (so ``Fonts_Font_1`` is unused).
@@ -33,13 +33,11 @@ Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. Th
 OpenMW has build-in TrueType fonts: Pelagiad, OMWAyembedt and DejaVuLGCSansMono, which are used by default.
 TrueType fonts are configured via ``openmw.cfg`` too:
 
-			fallback=Fonts_Font_0,pelagiad
-			fallback=Fonts_Font_2,ayembedt
+			fallback=Fonts_Font_0,Pelagiad
+			fallback=Fonts_Font_2,OMWAyembedt
 
 In this example, OpenMW will scan ``Fonts`` folder in data directories for ``.omwfont`` files.
-These files are XML files wich schema used by MyGUI. OpenMW uses files which ``name`` tag matches ``openmw.cfg`` entries:
-
-			<Resource type="ResourceTrueTypeFont" name="pelagiad">
+These files are XML files with schema provided by MyGUI. OpenMW uses ``.omwfont`` files which name (without extension) matches ``openmw.cfg`` entries.
 
 It is also possible to adjust the font size and resolution via ``settings.cfg`` file::
 

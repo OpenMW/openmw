@@ -10,6 +10,7 @@
 
 #include <MyGUI_ResourceManager.h>
 #include <MyGUI_ResourceManualFont.h>
+#include <MyGUI_ResourceTrueTypeFont.h>
 #include <MyGUI_XmlDocument.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_RenderManager.h>
@@ -163,37 +164,109 @@ namespace Gui
             mEncoding = encoding;
 
         MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
-        MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = MyGUI::newDelegate(this, &FontLoader::loadFontFromXml);
+        MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = MyGUI::newDelegate(this, &FontLoader::overrideLineHeight);
     }
 
-    void FontLoader::loadBitmapFonts()
+    void FontLoader::loadFonts()
     {
-        for (const auto& path : mVFS->getRecursiveDirectoryIterator("Fonts/"))
-        {
-            if (Misc::getFileExtension(path) == "fnt")
-                loadBitmapFont(path);
-        }
+        std::string defaultFont = Fallback::Map::getString("Fonts_Font_0");
+        std::string scrollFont = Fallback::Map::getString("Fonts_Font_2");
+        loadFont(defaultFont, "DefaultFont");
+        loadFont(scrollFont, "ScrollFont");
+        loadFont("DejaVuLGCSansMono", "MonoFont"); // We need to use a TrueType monospace font to display debug texts properly.
+
+        // Use our TrueType fonts as a fallback.
+        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && !Misc::StringUtils::ciEqual(defaultFont, "Pelagiad"))
+            loadFont("Pelagiad", "DefaultFont");
+        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && !Misc::StringUtils::ciEqual(scrollFont, "OMWAyembedt"))
+            loadFont("OMWAyembedt", "ScrollFont");
     }
 
-    void FontLoader::loadTrueTypeFonts()
+    void FontLoader::loadFont(const std::string& fileName, const std::string& fontId)
     {
+        if (mVFS->exists("fonts/" + fileName + ".fnt"))
+            loadBitmapFont(fileName + ".fnt", fontId);
+        else if (mVFS->exists("fonts/" + fileName + ".omwfont"))
+            loadTrueTypeFont(fileName + ".omwfont", fontId);
+        else
+            Log(Debug::Error) << "Font '" << fileName << "' is not found.";
+    }
+
+    void FontLoader::loadTrueTypeFont(const std::string& fileName, const std::string& fontId)
+    {
+        Log(Debug::Info) << "Loading font file " << fileName;
+
         osgMyGUI::DataManager* dataManager = dynamic_cast<osgMyGUI::DataManager*>(&osgMyGUI::DataManager::getInstance());
         if (!dataManager)
         {
-            Log(Debug::Error) << "Can not load TrueType fonts: osgMyGUI::DataManager is not available.";
+            Log(Debug::Error) << "Can not load TrueType font " << fontId << ": osgMyGUI::DataManager is not available.";
             return;
         }
 
         std::string oldDataPath = dataManager->getDataPath("");
         dataManager->setResourcePath("fonts");
+        std::unique_ptr<MyGUI::IDataStream> dataStream(dataManager->getData(fileName));
 
-        for (const auto& path : mVFS->getRecursiveDirectoryIterator("Fonts/"))
+        MyGUI::xml::Document xmlDocument;
+        xmlDocument.open(dataStream.get());
+        MyGUI::xml::ElementPtr root = xmlDocument.getRoot();
+
+        MyGUI::xml::ElementEnumerator resourceNode = root->getElementEnumerator();
+        bool valid = false;
+        if (resourceNode.next("Resource"))
         {
-            if (Misc::getFileExtension(path) == "omwfont")
-                MyGUI::ResourceManager::getInstance().load(std::string(Misc::getFileName(path)));
+            std::string type = resourceNode->findAttribute("type");
+            valid = (type == "ResourceTrueTypeFont");
         }
 
+        if (valid == false)
+        {
+            dataManager->setResourcePath(oldDataPath);
+            Log(Debug::Error) << "Can not load TrueType font " << fontId << ": " << fileName << " is invalid.";
+            return;
+        }
+
+        // For TrueType fonts we should override Size and Resolution properties
+        // to allow to configure font size via config file, without need to edit XML files.
+        // Also we should take UI scaling factor in account.
+        int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
+        resolution = std::clamp(resolution, 50, 125) * mScalingFactor;
+
+        MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
+        resolutionNode->addAttribute("key", "Resolution");
+        resolutionNode->addAttribute("value", std::to_string(resolution));
+
+        MyGUI::xml::ElementPtr sizeNode = resourceNode->createChild("Property");
+        sizeNode->addAttribute("key", "Size");
+        sizeNode->addAttribute("value", std::to_string(mFontHeight));
+
+        MyGUI::ResourceTrueTypeFont* font = static_cast<MyGUI::ResourceTrueTypeFont*>(
+                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceTrueTypeFont"));
+        font->deserialization(resourceNode.current(), MyGUI::Version(3,2,0));
+        font->setResourceName(fontId);
+        MyGUI::ResourceManager::getInstance().addResource(font);
+
+        float currentX = Settings::Manager::getInt("resolution x", "Video");
+        float currentY = Settings::Manager::getInt("resolution y", "Video");
+        // TODO: read size from openmw_layout.xml somehow
+        // TODO: it may be worth to take in account resolution change, but it is not safe to replace used assets
+        float heightScale = (currentY / 520);
+        float widthScale = (currentX / 600);
+        float uiScale = std::min(widthScale, heightScale);
+        resolution = Settings::Manager::getInt("ttf resolution", "GUI");
+        resolution = std::clamp(resolution, 50, 125) * uiScale;
+        resolutionNode->setAttribute("value", std::to_string(resolution));
+
+        MyGUI::ResourceTrueTypeFont* bookFont = static_cast<MyGUI::ResourceTrueTypeFont*>(
+                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceTrueTypeFont"));
+        bookFont->deserialization(resourceNode.current(), MyGUI::Version(3,2,0));
+        bookFont->setResourceName("Journalbook " + fontId);
+        MyGUI::ResourceManager::getInstance().addResource(bookFont);
+
         dataManager->setResourcePath(oldDataPath);
+
+        if (resourceNode.next("Resource"))
+            Log(Debug::Warning) << "Font file " << fileName << " contains multiple Resource entries, only first one will be used.";
     }
 
     typedef struct
@@ -216,9 +289,11 @@ namespace Gui
         float ascent;
     } GlyphInfo;
 
-    void FontLoader::loadBitmapFont(const std::string &fileName)
+    void FontLoader::loadBitmapFont(const std::string &fileName, const std::string& fontId)
     {
-        Files::IStreamPtr file = mVFS->get(fileName);
+        Log(Debug::Info) << "Loading font file " << fileName;
+
+        Files::IStreamPtr file = mVFS->get("fonts/" + fileName);
 
         float fontSize;
         file->read((char*)&fontSize, sizeof(fontSize));
@@ -254,7 +329,7 @@ namespace Gui
         file.reset();
 
         // Create the font texture
-        std::string bitmapFilename = "Fonts/" + std::string(name) + ".tex";
+        std::string bitmapFilename = "fonts/" + std::string(name) + ".tex";
 
         Files::IStreamPtr bitmapFile = mVFS->get(bitmapFilename);
 
@@ -285,8 +360,7 @@ namespace Gui
         MyGUI::xml::Document xmlDocument;
         MyGUI::xml::ElementPtr root = xmlDocument.createRoot("ResourceManualFont");
 
-        std::string baseName(Misc::stemFile(fileName));
-        root->addAttribute("name", getInternalFontName(baseName));
+        root->addAttribute("name", fontId);
 
         MyGUI::xml::ElementPtr defaultHeight = root->createChild("Property");
         defaultHeight->addAttribute("key", "DefaultHeight");
@@ -444,48 +518,21 @@ namespace Gui
 
         MyGUI::ResourceManualFont* bookFont = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
-        mFonts.push_back(bookFont);
         bookFont->deserialization(root, MyGUI::Version(3,2,0));
-        bookFont->setResourceName("Journalbook " + getInternalFontName(baseName));
+        bookFont->setResourceName("Journalbook " + fontId);
 
         MyGUI::ResourceManager::getInstance().addResource(font);
         MyGUI::ResourceManager::getInstance().addResource(bookFont);
     }
 
-    void FontLoader::loadFontFromXml(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version)
+    void FontLoader::overrideLineHeight(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version)
     {
         MyGUI::xml::ElementEnumerator resourceNode = _node->getElementEnumerator();
-        bool createCopy = false;
         while (resourceNode.next("Resource"))
         {
-            std::string type, name;
-            resourceNode->findAttribute("type", type);
-            resourceNode->findAttribute("name", name);
+            std::string type = resourceNode->findAttribute("type");
 
-            if (name.empty())
-                continue;
-
-            if (Misc::StringUtils::ciEqual(type, "ResourceTrueTypeFont"))
-            {
-                createCopy = true;
-
-                // For TrueType fonts we should override Size and Resolution properties
-                // to allow to configure font size via config file, without need to edit XML files.
-                // Also we should take UI scaling factor in account.
-                int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                resolution = std::clamp(resolution, 50, 125) * mScalingFactor;
-
-                MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
-                resolutionNode->addAttribute("key", "Resolution");
-                resolutionNode->addAttribute("value", std::to_string(resolution));
-
-                MyGUI::xml::ElementPtr sizeNode = resourceNode->createChild("Property");
-                sizeNode->addAttribute("key", "Size");
-                sizeNode->addAttribute("value", std::to_string(mFontHeight));
-
-                resourceNode->setAttribute("name", getInternalFontName(name));
-            }
-            else if (Misc::StringUtils::ciEqual(type, "ResourceSkin") ||
+            if (Misc::StringUtils::ciEqual(type, "ResourceSkin") ||
                      Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
             {
                 // We should adjust line height for MyGUI widgets depending on font size
@@ -496,72 +543,11 @@ namespace Gui
         }
 
         MyGUI::ResourceManager::getInstance().loadFromXmlNode(_node, _file, _version);
-
-        if (createCopy)
-        {
-            std::unique_ptr<MyGUI::xml::Element> copy{_node->createCopy()};
-
-            MyGUI::xml::ElementEnumerator copyFont = copy->getElementEnumerator();
-            while (copyFont.next("Resource"))
-            {
-                std::string type, name;
-                copyFont->findAttribute("type", type);
-                copyFont->findAttribute("name", name);
-
-                if (name.empty())
-                    continue;
-
-                if (Misc::StringUtils::ciEqual(type, "ResourceTrueTypeFont"))
-                {
-                    // Since the journal and books use the custom scaling factor depending on resolution,
-                    // setup separate fonts with different Resolution to fit these windows.
-                    // These fonts have an internal prefix.
-                    int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                    resolution = std::clamp(resolution, 50, 125);
-
-                    float currentX = Settings::Manager::getInt("resolution x", "Video");
-                    float currentY = Settings::Manager::getInt("resolution y", "Video");
-                    // TODO: read size from openmw_layout.xml somehow
-                    float heightScale = (currentY / 520);
-                    float widthScale = (currentX / 600);
-                    float uiScale = std::min(widthScale, heightScale);
-                    resolution *= uiScale;
-
-                    MyGUI::xml::ElementPtr resolutionNode = copyFont->createChild("Property");
-                    resolutionNode->addAttribute("key", "Resolution");
-                    resolutionNode->addAttribute("value", std::to_string(resolution));
-
-                    copyFont->setAttribute("name", "Journalbook " + getInternalFontName(name));
-                }
-            }
-
-            MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy.get(), _file, _version);
-        }
     }
 
     int FontLoader::getFontHeight()
     {
         return mFontHeight;
-    }
-
-    std::string FontLoader::getInternalFontName(const std::string& name)
-    {
-        const std::string lowerName = Misc::StringUtils::lowerCase(name);
-
-        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_0")))
-            return "DefaultFont";
-        if (lowerName == Misc::StringUtils::lowerCase(Fallback::Map::getString("Fonts_Font_2")))
-            return "ScrollFont";
-        if (lowerName == "dejavusansmono")
-            return "MonoFont"; // We need to use a TrueType monospace font to display debug texts properly.
-
-        // Use our TrueType fonts as a fallback.
-        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && name == "pelagiad")
-            return "DefaultFont";
-        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && name == "ayembedt")
-            return "ScrollFont";
-
-        return name;
     }
 
     std::string FontLoader::getFontForFace(const std::string& face)
