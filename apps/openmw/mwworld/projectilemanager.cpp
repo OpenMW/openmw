@@ -539,6 +539,7 @@ namespace MWWorld
             MWMechanics::projectileHit(caster, target, bow, projectileRef.getPtr(), pos, projectileState.mAttackStrength);
             projectileState.mToDelete = true;
         }
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         for (auto& magicBoltState : mMagicBolts)
         {
             if (magicBoltState.mToDelete)
@@ -563,9 +564,14 @@ namespace MWWorld
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
             cast.mSlot = magicBoltState.mSlot;
-            cast.inflict(target, caster, magicBoltState.mEffects, ESM::RT_Target, true);
+            // Grab original effect list so the indices are correct
+            const ESM::EffectList* effects;
+            if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(magicBoltState.mSpellId))
+                effects = &spell->mEffects;
+            else
+                effects = &esmStore.get<ESM::Enchantment>().find(magicBoltState.mSpellId)->mEffects;
+            cast.inflict(target, caster, *effects, ESM::RT_Target);
 
-            MWBase::Environment::get().getWorld()->explodeSpell(pos, magicBoltState.mEffects, caster, target, ESM::RT_Target, magicBoltState.mSpellId, magicBoltState.mSourceName, false, magicBoltState.mSlot);
             magicBoltState.mToDelete = true;
         }
 
