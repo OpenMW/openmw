@@ -218,7 +218,6 @@ fragment final(rt1=RT_Vertical) {
         vec3 base_color = powv(omw_GetLastShader(omw_TexCoord).rgb, uGamma);
         vec3 add_color = base_color + color * uStrength * 0.5;
         omw_FragColor = vec4(powv(add_color, 1.0/uGamma), 1.0);
-        //omw_FragColor = vec4(powv(color, 1.0/uGamma), 1.0);
     }
 }
 
