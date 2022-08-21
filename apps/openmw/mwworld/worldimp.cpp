@@ -972,7 +972,7 @@ namespace MWWorld
         mPhysics->clearQueuedMovement();
         mDiscardMovements = true;
 
-        if (changeEvent && mCurrentWorldSpace != cellName)
+        if (changeEvent && !Misc::StringUtils::ciEqual(mCurrentWorldSpace, cellName))
         {
             // changed worldspace
             mProjectileManager->clear();

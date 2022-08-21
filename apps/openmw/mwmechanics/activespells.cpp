@@ -497,4 +497,13 @@ namespace MWMechanics
         for(const ESM::ActiveSpells::ActiveSpellParams& spell : state.mQueue)
             mQueue.emplace_back(ActiveSpellParams{spell});
     }
+
+    void ActiveSpells::unloadActor(const MWWorld::Ptr& ptr)
+    {
+        purge([] (const auto& spell)
+        {
+            return spell.getType() == ESM::ActiveSpells::Type_Consumable || spell.getType() == ESM::ActiveSpells::Type_Temporary;
+        }, ptr);
+        mQueue.clear();
+    }
 }
