@@ -14,10 +14,7 @@
 #include "importnpcc.hpp"
 #include "importcrec.hpp"
 #include "importcntc.hpp"
-#include "importplayer.hpp"
 #include "importsplm.h"
-
-
 
 namespace ESSImport
 {

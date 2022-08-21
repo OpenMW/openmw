@@ -14,7 +14,6 @@
 #include <components/esm3/loadbody.hpp>
 #include <components/misc/weakcache.hpp>
 
-#include "refidcollection.hpp"
 #include "idcollection.hpp"
 
 namespace ESM
@@ -25,6 +24,7 @@ namespace ESM
 namespace CSMWorld
 {
     class Data;
+    class RefIdCollection;
 
     /// Adapts multiple collections to provide the data needed to render
     /// an npc or creature.

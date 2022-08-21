@@ -1,5 +1,7 @@
 #include "graphicspage.hpp"
 
+#include "sdlinit.hpp"
+
 #include <QMessageBox>
 #include <QScreen>
 

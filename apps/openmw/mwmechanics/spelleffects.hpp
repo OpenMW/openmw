@@ -3,10 +3,13 @@
 
 #include "activespells.hpp"
 
-#include "../mwworld/ptr.hpp"
-
 // These functions should probably be split up into separate Lua functions for each magic effect when magic is dehardcoded.
 // That way ESM::MGEF could point to two Lua scripts for each effect. Needs discussion.
+
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWMechanics
 {

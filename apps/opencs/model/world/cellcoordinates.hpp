@@ -7,7 +7,10 @@
 
 #include <QMetaType>
 
-#include <osg/Vec3d>
+namespace osg
+{
+    class Vec3d;
+}
 
 namespace CSMWorld
 {

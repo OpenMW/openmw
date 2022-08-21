@@ -4,6 +4,7 @@
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm/records.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
@@ -330,6 +331,9 @@ namespace MWWorld
         }
         return ptr;
     }
+
+    void Store<ESM::LandTexture>::resize(std::size_t num) { mStatic.resize(num); }
+
     size_t Store<ESM::LandTexture>::getSize() const
     {
         return mStatic.size();

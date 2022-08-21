@@ -5,15 +5,7 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include "world.hpp"
-#include "scriptmanager.hpp"
-#include "dialoguemanager.hpp"
-#include "journal.hpp"
-#include "soundmanager.hpp"
 #include "mechanicsmanager.hpp"
-#include "inputmanager.hpp"
-#include "windowmanager.hpp"
-#include "statemanager.hpp"
-#include "luamanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = nullptr;
 

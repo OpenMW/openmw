@@ -1,7 +1,10 @@
 #ifndef OPENMW_WEAPON_PRIORITY_H
 #define OPENMW_WEAPON_PRIORITY_H
 
-#include "../mwworld/ptr.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWMechanics
 {

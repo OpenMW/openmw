@@ -4,7 +4,6 @@
 #include <map>
 
 #include "universalid.hpp"
-#include "resources.hpp"
 
 namespace VFS
 {
@@ -13,6 +12,8 @@ namespace VFS
 
 namespace CSMWorld
 {
+    class Resources;
+
     class ResourcesManager
     {
             std::map<UniversalId::Type, Resources> mResources;
@@ -27,6 +28,7 @@ namespace CSMWorld
         public:
 
             ResourcesManager();
+            ~ResourcesManager();
 
             const VFS::Manager* getVFS() const;
 

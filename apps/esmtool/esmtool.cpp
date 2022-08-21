@@ -14,7 +14,6 @@
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/esm/records.hpp>
 #include <components/esm/format.hpp>
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>

@@ -5,6 +5,8 @@
 #include <ostream>
 #include <sstream>
 
+#include <osg/Vec3d>
+
 #include <components/esm3/loadland.hpp>
 #include <components/misc/constants.hpp>
 

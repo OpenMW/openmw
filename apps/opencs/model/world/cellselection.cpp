@@ -1,5 +1,7 @@
 #include "cellselection.hpp"
 
+#include "cellcoordinates.hpp"
+
 #include <cmath>
 #include <stdexcept>
 #include <limits>

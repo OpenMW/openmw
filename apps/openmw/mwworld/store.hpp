@@ -8,7 +8,10 @@
 #include <unordered_map>
 #include <set>
 
-#include <components/esm/records.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadpgrd.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/rng.hpp>
 
@@ -16,7 +19,13 @@
 
 namespace ESM
 {
-    struct Land;
+    struct Attribute;
+    struct LandTexture;
+    struct MagicEffect;
+    struct Skill;
+    struct WeaponType;
+    class ESMReader;
+    class ESMWriter;
 }
 
 namespace Loading
@@ -227,7 +236,7 @@ namespace MWWorld
         const ESM::LandTexture *search(size_t index, size_t plugin) const;
         const ESM::LandTexture *find(size_t index, size_t plugin) const;
 
-        void resize(size_t num) { mStatic.resize(num); }
+        void resize(std::size_t num);
 
         size_t getSize() const override;
         size_t getSize(size_t plugin) const;

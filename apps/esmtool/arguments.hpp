@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <optional>
+#include <string>
 
 #include <components/esm/format.hpp>
 

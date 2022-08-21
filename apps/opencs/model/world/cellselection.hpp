@@ -5,10 +5,10 @@
 
 #include <QMetaType>
 
-#include "cellcoordinates.hpp"
-
 namespace CSMWorld
 {
+    class CellCoordinates;
+
     /// \brief Selection of cells in a paged worldspace
     ///
     /// \note The CellSelection does not specify the worldspace it applies to.

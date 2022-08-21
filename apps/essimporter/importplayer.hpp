@@ -8,8 +8,6 @@
 #include <components/esm3/cellref.hpp>
 #include <components/esm/esmcommon.hpp>
 
-#include "importacdt.hpp"
-
 namespace ESM
 {
     class ESMReader;
