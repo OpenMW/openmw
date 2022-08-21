@@ -2074,7 +2074,10 @@ namespace MWGui
     void WindowManager::togglePostProcessorHud()
     {
         if (!MWBase::Environment::get().getWorld()->getPostProcessor()->isEnabled())
+        {
+            messageBox("Postprocessor is not enabled.");
             return;
+        }
 
         bool visible = mPostProcessorHud->isVisible();
 
