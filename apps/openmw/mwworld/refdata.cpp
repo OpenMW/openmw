@@ -1,6 +1,7 @@
 #include "refdata.hpp"
 
 #include <components/esm3/objectstate.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "customdata.hpp"
 #include "cellstore.hpp"
@@ -140,12 +141,12 @@ namespace MWWorld
         {}
     }
 
-    RefData::RefData(RefData&& other) noexcept = default;
-    RefData& RefData::operator=(RefData&& other) noexcept = default;
+    RefData::RefData(RefData&& other) = default;
+    RefData& RefData::operator=(RefData&& other) = default;
 
-    void RefData::setBaseNode(SceneUtil::PositionAttitudeTransform *base)
+    void RefData::setBaseNode(osg::ref_ptr<SceneUtil::PositionAttitudeTransform> base)
     {
-        mBaseNode = base;
+        mBaseNode = std::move(base);
     }
 
     SceneUtil::PositionAttitudeTransform* RefData::getBaseNode()

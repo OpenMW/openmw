@@ -7,6 +7,7 @@
 #include <components/esm3/inventorystate.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

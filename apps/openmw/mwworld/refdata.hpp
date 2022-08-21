@@ -7,6 +7,8 @@
 #include "../mwscript/locals.hpp"
 #include "../mwworld/customdata.hpp"
 
+#include <osg/ref_ptr>
+
 #include <string>
 #include <memory>
 
@@ -34,7 +36,7 @@ namespace MWWorld
 
     class RefData
     {
-            SceneUtil::PositionAttitudeTransform* mBaseNode;
+            osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mBaseNode;
 
             MWScript::Locals mLocals;
             std::shared_ptr<MWLua::LocalScripts> mLuaScripts;
@@ -78,7 +80,7 @@ namespace MWWorld
             /// perform these operations).
 
             RefData (const RefData& refData);
-            RefData (RefData&& other) noexcept;
+            RefData (RefData&& other);
 
             ~RefData();
 
@@ -87,7 +89,7 @@ namespace MWWorld
             /// perform this operations).
 
             RefData& operator= (const RefData& refData);
-            RefData& operator= (RefData&& other) noexcept;
+            RefData& operator= (RefData&& other);
 
             /// Return base node (can be a null pointer).
             SceneUtil::PositionAttitudeTransform* getBaseNode();
@@ -96,7 +98,7 @@ namespace MWWorld
             const SceneUtil::PositionAttitudeTransform* getBaseNode() const;
 
             /// Set base node (can be a null pointer).
-            void setBaseNode (SceneUtil::PositionAttitudeTransform* base);
+            void setBaseNode(osg::ref_ptr<SceneUtil::PositionAttitudeTransform> base);
 
             int getCount(bool absolute = true) const;
 
