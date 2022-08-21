@@ -5,6 +5,11 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/postprocessor.hpp"
+
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/shader/shadermanager.hpp>
 
 #include <components/lua/luastate.hpp>
 
@@ -44,6 +49,27 @@ namespace MWLua
             {
                 MWBase::Environment::get().getWorld()->getRenderingManager()->setNavMeshMode(value);
             });
+        };
+
+        api["triggerShaderReload"] = [context]()
+        {
+            context.mLuaManager->addAction([]
+                {
+                    auto world = MWBase::Environment::get().getWorld();
+
+                    world->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().triggerShaderReload();
+                    world->getPostProcessor()->triggerShaderReload();
+                });
+        };
+
+        api["setShaderHotReloadEnabled"] = [context](bool value)
+        {
+            context.mLuaManager->addAction([value]
+                {
+                    auto world = MWBase::Environment::get().getWorld();
+                    world->getRenderingManager()->getResourceSystem()->getSceneManager()->getShaderManager().setHotReloadEnabled(value);
+                    world->getPostProcessor()->mEnableLiveReload = value;
+                });
         };
 
         return LuaUtil::makeReadOnly(api);

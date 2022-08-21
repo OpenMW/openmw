@@ -671,19 +671,6 @@
                     <number>20</number>
                   </property>
                   <item>
-                    <widget class="QCheckBox" name="postprocessLiveReloadCheckBox">
-                      <property name="enabled">
-                        <bool>false</bool>
-                      </property>
-                      <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Debug Mode. Automatically reload active shaders when they are modified on filesystem.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                      </property>
-                      <property name="text">
-                        <string>Live reload</string>
-                      </property>
-                    </widget>
-                  </item>
-                  <item>
                     <widget class="QCheckBox" name="postprocessTransparentPostpassCheckBox">
                       <property name="enabled">
                         <bool>false</bool>

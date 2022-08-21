@@ -6,22 +6,28 @@
 #include <mutex>
 #include <vector>
 #include <array>
+#include <memory>
 
 #include <osg/ref_ptr>
 
 #include <osg/Shader>
 #include <osg/Program>
 
+namespace osgViewer {
+    class Viewer;
+}
+
 namespace Shader
 {
-
+    struct HotReloadManager;
     /// @brief Reads shader template files and turns them into a concrete shader, based on a list of define's.
     /// @par Shader templates can get the value of a define with the syntax @define.
     class ShaderManager
     {
     public:
-
+        friend HotReloadManager;
         ShaderManager();
+        ~ShaderManager();
 
         void setShaderPath(const std::string& path);
 
@@ -67,6 +73,9 @@ namespace Shader
 
         int reserveGlobalTextureUnits(Slot slot);
 
+        void update(osgViewer::Viewer& viewer);
+        void setHotReloadEnabled(bool value);
+        void triggerShaderReload();
     private:
         void getLinkedShaders(osg::ref_ptr<osg::Shader> shader, const std::vector<std::string>& linkedShaderNames, const DefineMap& defines);
         void addLinkedShaders(osg::ref_ptr<osg::Shader> shader, osg::ref_ptr<osg::Program> program);
@@ -96,7 +105,7 @@ namespace Shader
 
         int mMaxTextureUnits = 0;
         int mReservedTextureUnits = 0;
-
+        std::unique_ptr<HotReloadManager> mHotReloadManager;
         std::array<int, 2> mReservedTextureUnitsBySlot = {-1, -1};
     };
 

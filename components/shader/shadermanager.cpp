@@ -5,9 +5,11 @@
 #include <sstream>
 #include <regex>
 #include <filesystem>
-
+#include <set>
+#include <unordered_map>
+#include <chrono>
 #include <osg/Program>
-
+#include <osgViewer/Viewer>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
@@ -18,7 +20,10 @@ namespace Shader
 
     ShaderManager::ShaderManager()
     {
+        mHotReloadManager = std::make_unique<HotReloadManager>();
     }
+
+    ShaderManager::~ShaderManager() = default;
 
     void ShaderManager::setShaderPath(const std::string &path)
     {
@@ -68,11 +73,12 @@ namespace Shader
 
     // Recursively replaces include statements with the actual source of the included files.
     // Adjusts #line statements accordingly and detects cyclic includes.
-    // includingFiles is the set of files that include this file directly or indirectly, and is intentionally not a reference to allow automatic cleanup.
-    static bool parseIncludes(const std::filesystem::path& shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<std::filesystem::path> includingFiles)
+    // cycleIncludeChecker is the set of files that include this file directly or indirectly, and is intentionally not a reference to allow automatic cleanup.
+    static bool parseIncludes(const std::filesystem::path& shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<std::filesystem::path> cycleIncludeChecker,std::set<std::filesystem::path>& includedFiles)
     {
+        includedFiles.insert(shaderPath / fileName);
         // An include is cyclic if it is being included by itself
-        if (includingFiles.insert(shaderPath/fileName).second == false)
+        if (cycleIncludeChecker.insert(shaderPath/fileName).second == false)
         {
             Log(Debug::Error) << "Shader " << fileName << " error: Detected cyclic #includes";
             return false;
@@ -129,7 +135,7 @@ namespace Shader
             buffer << includeFstream.rdbuf();
             std::string stringRepresentation = buffer.str();
             if (!addLineDirectivesAfterConditionalBlocks(stringRepresentation)
-                || !parseIncludes(shaderPath, stringRepresentation, includeFilename, fileNumber, includingFiles))
+                || !parseIncludes(shaderPath, stringRepresentation, includeFilename, fileNumber, cycleIncludeChecker, includedFiles))
             {
                 Log(Debug::Error) << "In file included from " << fileName << "." << lineNumber;
                 return false;
@@ -356,12 +362,109 @@ namespace Shader
         return true;
     }
 
+    struct HotReloadManager
+    {
+        using KeysHolder = std::set<ShaderManager::MapKey>;
+
+        std::unordered_map<std::string, KeysHolder> mShaderFiles;
+        std::unordered_map<std::string, std::set<std::filesystem::path>> templateIncludedFiles;
+        std::filesystem::file_time_type mLastAutoRecompileTime;
+        bool mHotReloadEnabled;
+        bool mTriggerReload;
+
+        HotReloadManager()
+        {
+            mTriggerReload = false;
+            mHotReloadEnabled = false;
+            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
+        }
+
+        void addShaderFiles(const std::string& templateName,const ShaderManager::DefineMap& defines )
+        {
+            const std::set<std::filesystem::path>& shaderFiles = templateIncludedFiles[templateName];
+            for (const std::filesystem::path& file : shaderFiles)
+            {
+                mShaderFiles[file.string()].insert(std::make_pair(templateName, defines));
+            }
+        }
+
+        void update(ShaderManager& Manager,osgViewer::Viewer& viewer)
+        {
+            auto timeSinceLastCheckMillis = std::chrono::duration_cast<std::chrono::milliseconds>(std::filesystem::file_time_type::clock::now() - mLastAutoRecompileTime);
+            if ((mHotReloadEnabled && timeSinceLastCheckMillis.count() > 200) || mTriggerReload == true)
+            {
+                reloadTouchedShaders(Manager, viewer);
+            }
+            mTriggerReload = false;
+        }
+
+        void reloadTouchedShaders(ShaderManager& Manager, osgViewer::Viewer& viewer)
+        {
+            bool threadsRunningToStop = false;
+            for (auto& [pathShaderToTest,  shaderKeys]: mShaderFiles)
+            {
+
+                std::filesystem::file_time_type write_time = std::filesystem::last_write_time(pathShaderToTest);
+                if (write_time.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
+                {
+                    if (!threadsRunningToStop)
+                    {
+                        threadsRunningToStop = viewer.areThreadsRunning();
+                        if (threadsRunningToStop)
+                            viewer.stopThreading();
+                    }
+
+                    for (const auto& [templateName, shaderDefines]: shaderKeys)
+                    {
+                        ShaderManager::ShaderMap::iterator shaderIt = Manager.mShaders.find(std::make_pair(templateName, shaderDefines));
+
+                        ShaderManager::TemplateMap::iterator templateIt = Manager.mShaderTemplates.find(templateName); //Can't be Null, if we're here it means the template was added
+                        std::string& shaderSource = templateIt->second;
+                        std::set<std::filesystem::path> insertedPaths;
+                        std::filesystem::path path = (std::filesystem::path(Manager.mPath) / templateName);
+                        std::ifstream stream;
+                        stream.open(path);
+                        if (stream.fail())
+                        {
+                            Log(Debug::Error) << "Failed to open " << path.string();
+                        }
+                        std::stringstream buffer;
+                        buffer << stream.rdbuf();
+
+                        // parse includes
+                        int fileNumber = 1;
+                        std::string source = buffer.str();
+                        if (!addLineDirectivesAfterConditionalBlocks(source)
+                            || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber, {}, insertedPaths))
+                        {
+                            break;
+                        }
+                        shaderSource = source;
+
+                        std::vector<std::string> linkedShaderNames;
+                        if (!Manager.createSourceFromTemplate(shaderSource, linkedShaderNames, templateName, shaderDefines))
+                        {
+                            break;
+                        }
+                        shaderIt->second->setShaderSource(shaderSource);
+                            
+                    }
+                }
+            }
+            if (threadsRunningToStop)
+                viewer.startThreading();
+            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
+        }
+    };
+
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &templateName, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
     {
         std::unique_lock<std::mutex> lock(mMutex);
 
         // read the template if we haven't already
         TemplateMap::iterator templateIt = mShaderTemplates.find(templateName);
+        std::set<std::filesystem::path> insertedPaths;
+
         if (templateIt == mShaderTemplates.end())
         {
             std::filesystem::path path = (std::filesystem::path(mPath) / templateName);
@@ -379,9 +482,9 @@ namespace Shader
             int fileNumber = 1;
             std::string source = buffer.str();
             if (!addLineDirectivesAfterConditionalBlocks(source)
-                || !parseIncludes(std::filesystem::path(mPath), source, templateName, fileNumber, {}))
+                || !parseIncludes(std::filesystem::path(mPath), source, templateName, fileNumber, {}, insertedPaths))
                 return nullptr;
-
+            mHotReloadManager->templateIncludedFiles[templateName] = insertedPaths;
             templateIt = mShaderTemplates.insert(std::make_pair(templateName, source)).first;
         }
 
@@ -403,6 +506,8 @@ namespace Shader
             // Append shader source filename for debugging.
             static unsigned int counter = 0;
             shader->setName(Misc::StringUtils::format("%u %s", counter++, templateName));
+
+            mHotReloadManager->addShaderFiles(templateName, defines);
 
             lock.unlock();
             getLinkedShaders(shader, linkedShaderNames, defines);
@@ -534,6 +639,21 @@ namespace Shader
         mReservedTextureUnitsBySlot[static_cast<int>(slot)] = unit;
 
         return unit;
+    }
+
+    void ShaderManager::update(osgViewer::Viewer& viewer)
+    {
+        mHotReloadManager->update(*this, viewer);
+    }
+
+    void ShaderManager::setHotReloadEnabled(bool value)
+    {
+        mHotReloadManager->mHotReloadEnabled = value;
+    }
+
+    void ShaderManager::triggerShaderReload()
+    {
+        mHotReloadManager->mTriggerReload = true;
     }
 
 }
