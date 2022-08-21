@@ -144,6 +144,8 @@ namespace MWMechanics
             ///< case insensitive
 
             void skipWorsenings(double hours);
+
+            void unloadActor(const MWWorld::Ptr& ptr);
     };
 }
 
