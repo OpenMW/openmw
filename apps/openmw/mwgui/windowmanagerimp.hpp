@@ -170,6 +170,8 @@ namespace MWGui
 
     bool isConsoleMode() const override;
 
+    bool isPostProcessorHudVisible() const override;
+
     void toggleVisible(GuiWindow wnd) override;
 
     void forceHide(MWGui::GuiWindow wnd) override;
