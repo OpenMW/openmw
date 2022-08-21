@@ -902,6 +902,8 @@ namespace MWRender
     {
         reportStats();
 
+        mResourceSystem->getSceneManager()->getShaderManager().update(*mViewer);
+
         float rainIntensity = mSky->getPrecipitationAlpha();
         mWater->setRainIntensity(rainIntensity);
 

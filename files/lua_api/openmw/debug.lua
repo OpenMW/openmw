@@ -41,4 +41,12 @@
 -- @function [parent=#debug] setNavMeshRenderMode
 -- @param #NAV_MESH_RENDER_MODE value
 
+---
+-- Enable/disable automatic reload of modified shaders
+-- @function [parent=#debug] setShaderHotReloadEnabled
+-- @param #bool value
+
+---
+-- To reload modified shaders
+-- @function [parent=#debug] triggerShaderReload
 return nil

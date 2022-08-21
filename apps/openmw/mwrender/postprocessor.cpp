@@ -104,6 +104,7 @@ namespace MWRender
 {
     PostProcessor::PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode, const VFS::Manager* vfs)
         : osg::Group()
+        , mEnableLiveReload(false)
         , mRootNode(rootNode)
         , mSamples(Settings::Manager::getInt("antialiasing", "Video"))
         , mDirty(false)
@@ -111,6 +112,7 @@ namespace MWRender
         , mRendering(rendering)
         , mViewer(viewer)
         , mVFS(vfs)
+        , mTriggerShaderReload(false)
         , mReload(false)
         , mEnabled(false)
         , mUsePostProcessing(false)
@@ -363,9 +365,10 @@ namespace MWRender
 
     void PostProcessor::updateLiveReload()
     {
-        static const bool liveReload = Settings::Manager::getBool("live reload", "Post Processing");
-        if (!liveReload)
+        if (!mEnableLiveReload && !mTriggerShaderReload)
             return;
+
+        mTriggerShaderReload = false;//Done only once
 
         for (auto& technique : mTechniques)
         {
@@ -858,6 +861,11 @@ namespace MWRender
         if (Stereo::getStereo())
             return Stereo::Manager::instance().eyeResolution().y();
         return mHeight;
+    }
+
+    void PostProcessor::triggerShaderReload()
+    {
+        mTriggerShaderReload = true;
     }
 }
 
