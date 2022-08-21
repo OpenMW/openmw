@@ -399,17 +399,17 @@ namespace Shader
 
         void reloadTouchedShaders(ShaderManager& Manager, osgViewer::Viewer& viewer)
         {
-            bool threadsRunningTostop = false;
+            bool threadsRunningToStop = false;
             for (auto& [pathShaderToTest,  shaderKeys]: mShaderFiles)
             {
 
                 std::filesystem::file_time_type write_time = std::filesystem::last_write_time(pathShaderToTest);
                 if (write_time.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
                 {
-                    if (!threadsRunningTostop)
+                    if (!threadsRunningToStop)
                     {
-                        threadsRunningTostop = viewer.areThreadsRunning();
-                        if (threadsRunningTostop)
+                        threadsRunningToStop = viewer.areThreadsRunning();
+                        if (threadsRunningToStop)
                             viewer.stopThreading();
                     }
 
@@ -450,7 +450,7 @@ namespace Shader
                     }
                 }
             }
-            if (threadsRunningTostop)
+            if (threadsRunningToStop)
                 viewer.startThreading();
             mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
         }
