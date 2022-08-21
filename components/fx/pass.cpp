@@ -197,7 +197,7 @@ mat4 omw_InvProjectionMatrix()
 #if (OMW_REVERSE_Z == 1)
         float flippedDepth = 1.0 - depth;
 #else
-        float flippedDepth = omw_Texture2D(omw_SamplerDepth, uv).r * 2.0 - 1.0;
+        float flippedDepth = depth * 2.0 - 1.0;
 #endif
         vec4 clip_space = vec4(uv * 2.0 - 1.0, flippedDepth, 1.0);
         vec4 world_space = omw.invViewMatrix * (omw.invProjectionMatrix * clip_space);
