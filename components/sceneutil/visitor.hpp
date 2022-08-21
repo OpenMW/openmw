@@ -20,7 +20,7 @@ namespace SceneUtil
     public:
         FindByNameVisitor(std::string_view nameToFind)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mNameToFind(std::move(nameToFind))
+            , mNameToFind(nameToFind)
             , mFoundNode(nullptr)
         {
         }
@@ -40,7 +40,7 @@ namespace SceneUtil
     public:
         FindByClassVisitor(std::string_view nameToFind)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mNameToFind(std::move(nameToFind))
+            , mNameToFind(nameToFind)
         {
         }
 
