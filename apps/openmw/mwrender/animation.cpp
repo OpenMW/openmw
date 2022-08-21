@@ -1734,7 +1734,7 @@ namespace MWRender
         mRootController = addRotateController("bip01");
     }
 
-    RotateController* Animation::addRotateController(const std::string &bone)
+    osg::ref_ptr<RotateController> Animation::addRotateController(const std::string &bone)
     {
         auto iter = getNodeMap().find(bone);
         if (iter == getNodeMap().end())
@@ -1757,7 +1757,7 @@ namespace MWRender
         if (!foundKeyframeCtrl)
             return nullptr;
 
-        RotateController* controller = new RotateController(mObjectRoot.get());
+        osg::ref_ptr<RotateController> controller(new RotateController(mObjectRoot.get()));
         node->addUpdateCallback(controller);
         mActiveControllers.emplace_back(node, controller);
         return controller;
