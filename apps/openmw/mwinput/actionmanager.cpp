@@ -324,6 +324,12 @@ namespace MWInput
             return;
         }
 
+        if (MWBase::Environment::get().getWindowManager()->isPostProcessorHudVisible())
+        {
+            MWBase::Environment::get().getWindowManager()->togglePostProcessorHud();
+            return;
+        }
+
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
