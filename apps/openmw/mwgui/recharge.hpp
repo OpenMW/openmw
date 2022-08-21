@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWGUI_RECHARGE_H
 #define OPENMW_MWGUI_RECHARGE_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 
 namespace MWWorld
@@ -31,7 +33,7 @@ protected:
 
     ItemWidget* mGemIcon;
 
-    ItemSelectionDialog* mItemSelectionDialog;
+    std::unique_ptr<ItemSelectionDialog> mItemSelectionDialog;
 
     MyGUI::TextBox* mChargeLabel;
 

@@ -399,10 +399,6 @@ namespace MWGui
 
     CreateClassDialog::CreateClassDialog()
       : WindowModal("openmw_chargen_create_class.layout")
-      , mSpecDialog(nullptr)
-      , mAttribDialog(nullptr)
-      , mSkillDialog(nullptr)
-      , mDescDialog(nullptr)
       , mAffectedAttribute(nullptr)
       , mAffectedSkill(nullptr)
     {
@@ -474,13 +470,7 @@ namespace MWGui
         update();
     }
 
-    CreateClassDialog::~CreateClassDialog()
-    {
-        delete mSpecDialog;
-        delete mAttribDialog;
-        delete mSkillDialog;
-        delete mDescDialog;
-    }
+    CreateClassDialog::~CreateClassDialog() = default;
 
     void CreateClassDialog::update()
     {
@@ -554,23 +544,15 @@ namespace MWGui
 
     void CreateClassDialog::onDialogCancel()
     {
-        MWBase::Environment::get().getWindowManager()->removeDialog(mSpecDialog);
-        mSpecDialog = nullptr;
-
-        MWBase::Environment::get().getWindowManager()->removeDialog(mAttribDialog);
-        mAttribDialog = nullptr;
-
-        MWBase::Environment::get().getWindowManager()->removeDialog(mSkillDialog);
-        mSkillDialog = nullptr;
-
-        MWBase::Environment::get().getWindowManager()->removeDialog(mDescDialog);
-        mDescDialog = nullptr;
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mSpecDialog));
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mAttribDialog));
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mSkillDialog));
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mDescDialog));
     }
 
     void CreateClassDialog::onSpecializationClicked(MyGUI::Widget* _sender)
     {
-        delete mSpecDialog;
-        mSpecDialog = new SelectSpecializationDialog();
+        mSpecDialog = std::make_unique<SelectSpecializationDialog>();
         mSpecDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
         mSpecDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationSelected);
         mSpecDialog->setVisible(true);
@@ -581,8 +563,7 @@ namespace MWGui
         mSpecializationId = mSpecDialog->getSpecializationId();
         setSpecialization(mSpecializationId);
 
-        MWBase::Environment::get().getWindowManager()->removeDialog(mSpecDialog);
-        mSpecDialog = nullptr;
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mSpecDialog));
     }
 
     void CreateClassDialog::setSpecialization(int id)
@@ -600,8 +581,7 @@ namespace MWGui
 
     void CreateClassDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
     {
-        delete mAttribDialog;
-        mAttribDialog = new SelectAttributeDialog();
+        mAttribDialog = std::make_unique<SelectAttributeDialog>();
         mAffectedAttribute = _sender;
         mAttribDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
         mAttribDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeSelected);
@@ -622,16 +602,14 @@ namespace MWGui
                 mFavoriteAttribute0->setAttributeId(mFavoriteAttribute1->getAttributeId());
         }
         mAffectedAttribute->setAttributeId(id);
-        MWBase::Environment::get().getWindowManager()->removeDialog(mAttribDialog);
-        mAttribDialog = nullptr;
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mAttribDialog));
 
         update();
     }
 
     void CreateClassDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
     {
-        delete mSkillDialog;
-        mSkillDialog = new SelectSkillDialog();
+        mSkillDialog = std::make_unique<SelectSkillDialog>();
         mAffectedSkill = _sender;
         mSkillDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
         mSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSkillSelected);
@@ -655,14 +633,13 @@ namespace MWGui
         }
 
         mAffectedSkill->setSkillId(mSkillDialog->getSkillId());
-        MWBase::Environment::get().getWindowManager()->removeDialog(mSkillDialog);
-        mSkillDialog = nullptr;
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mSkillDialog));
         update();
     }
 
     void CreateClassDialog::onDescriptionClicked(MyGUI::Widget* _sender)
     {
-        mDescDialog = new DescriptionDialog();
+        mDescDialog = std::make_unique<DescriptionDialog>();
         mDescDialog->setTextInput(mDescription);
         mDescDialog->eventDone += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionEntered);
         mDescDialog->setVisible(true);
@@ -671,8 +648,7 @@ namespace MWGui
     void CreateClassDialog::onDescriptionEntered(WindowBase* parWindow)
     {
         mDescription = mDescDialog->getTextInput();
-        MWBase::Environment::get().getWindowManager()->removeDialog(mDescDialog);
-        mDescDialog = nullptr;
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mDescDialog));
     }
 
     void CreateClassDialog::onOkClicked(MyGUI::Widget* _sender)

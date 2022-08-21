@@ -493,8 +493,6 @@ namespace MWGui
         : mAvailableEffectsList(nullptr)
         , mUsedEffectsView(nullptr)
         , mAddEffectDialog()
-        , mSelectAttributeDialog(nullptr)
-        , mSelectSkillDialog(nullptr)
         , mSelectedEffect(0)
         , mSelectedKnownEffectId(0)
         , mConstantEffect(false)
@@ -584,8 +582,7 @@ namespace MWGui
 
         mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setAttribute (mSelectAttributeDialog->getAttributeId());
-        MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
-        mSelectAttributeDialog = nullptr;
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mSelectAttributeDialog));
     }
 
     void EffectEditorBase::onSelectSkill ()
@@ -595,19 +592,15 @@ namespace MWGui
 
         mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId());
-        MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
-        mSelectSkillDialog = nullptr;
+        MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mSelectSkillDialog));
     }
 
     void EffectEditorBase::onAttributeOrSkillCancel ()
     {
-        if (mSelectSkillDialog)
-            MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
-        if (mSelectAttributeDialog)
-            MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
-
-        mSelectSkillDialog = nullptr;
-        mSelectAttributeDialog = nullptr;
+        if (mSelectSkillDialog != nullptr)
+            MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mSelectSkillDialog));
+        if (mSelectAttributeDialog != nullptr)
+            MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mSelectAttributeDialog));
     }
 
     void EffectEditorBase::onAvailableEffectClicked (MyGUI::Widget* sender)
@@ -633,16 +626,14 @@ namespace MWGui
 
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
-            delete mSelectSkillDialog;
-            mSelectSkillDialog = new SelectSkillDialog();
+            mSelectSkillDialog = std::make_unique<SelectSkillDialog>();
             mSelectSkillDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectSkill);
             mSelectSkillDialog->setVisible (true);
         }
         else if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
         {
-            delete mSelectAttributeDialog;
-            mSelectAttributeDialog = new SelectAttributeDialog();
+            mSelectAttributeDialog = std::make_unique<SelectAttributeDialog>();
             mSelectAttributeDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectAttributeDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectAttribute);
             mSelectAttributeDialog->setVisible (true);

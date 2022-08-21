@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <memory>
 
 #include <MyGUI_KeyCode.h>
 
@@ -232,7 +233,7 @@ namespace MWBase
             virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
 
             /// Hides dialog and schedules dialog to be deleted.
-            virtual void removeDialog(MWGui::Layout* dialog) = 0;
+            virtual void removeDialog(std::unique_ptr<MWGui::Layout>&& dialog) = 0;
 
             ///Gracefully attempts to exit the topmost GUI mode
             /** No guarantee of actually closing the window **/

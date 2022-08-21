@@ -565,14 +565,7 @@ namespace MWGui
     void WindowManager::cleanupGarbage()
     {
         // Delete any dialogs which are no longer in use
-        if (!mGarbageDialogs.empty())
-        {
-            for (Layout* widget : mGarbageDialogs)
-            {
-                delete widget;
-            }
-            mGarbageDialogs.clear();
-        }
+        mGarbageDialogs.clear();
     }
 
     void WindowManager::enableScene(bool enable)
@@ -691,12 +684,12 @@ namespace MWGui
         mHud->setDrowningTimeLeft(time, maxTime);
     }
 
-    void WindowManager::removeDialog(Layout*dialog)
+    void WindowManager::removeDialog(std::unique_ptr<Layout>&& dialog)
     {
         if (!dialog)
             return;
         dialog->setVisible(false);
-        mGarbageDialogs.push_back(dialog);
+        mGarbageDialogs.push_back(std::move(dialog));
     }
 
     void WindowManager::exitCurrentGuiMode()

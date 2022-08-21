@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWGUI_REPAIR_H
 #define OPENMW_MWGUI_REPAIR_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 
 #include "../mwmechanics/repair.hpp"
@@ -28,7 +30,7 @@ protected:
 
     ItemWidget* mToolIcon;
 
-    ItemSelectionDialog* mItemSelectionDialog;
+    std::unique_ptr<ItemSelectionDialog> mItemSelectionDialog;
 
     MyGUI::TextBox* mUsesLabel;
     MyGUI::TextBox* mQualityLabel;

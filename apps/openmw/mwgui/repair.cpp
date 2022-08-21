@@ -26,7 +26,6 @@ namespace MWGui
 
 Repair::Repair()
     : WindowBase("openmw_repair.layout")
-    , mItemSelectionDialog(nullptr)
 {
     getWidget(mRepairBox, "RepairBox");
     getWidget(mToolBox, "ToolBox");
@@ -107,8 +106,7 @@ void Repair::updateRepairView()
 
 void Repair::onSelectItem(MyGUI::Widget *sender)
 {
-    delete mItemSelectionDialog;
-    mItemSelectionDialog = new ItemSelectionDialog("#{sRepair}");
+    mItemSelectionDialog = std::make_unique<ItemSelectionDialog>("#{sRepair}");
     mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &Repair::onItemSelected);
     mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &Repair::onItemCancel);
     mItemSelectionDialog->setVisible(true);

@@ -9,6 +9,7 @@
 
 #include <stack>
 #include <vector>
+#include <memory>
 
 #include <osg/ref_ptr>
 
@@ -264,7 +265,7 @@ namespace MWGui
     void addVisitedLocation(const std::string& name, int x, int y) override;
 
     ///Hides dialog and schedules dialog to be deleted.
-    void removeDialog(Layout* dialog) override;
+    void removeDialog(std::unique_ptr<Layout>&& dialog) override;
 
     ///Gracefully attempts to exit the topmost GUI mode
     void exitCurrentGuiMode() override;
@@ -498,7 +499,7 @@ namespace MWGui
 
     SDLUtil::SDLCursorManager* mCursorManager;
 
-    std::vector<Layout*> mGarbageDialogs;
+    std::vector<std::unique_ptr<Layout>> mGarbageDialogs;
     void cleanupGarbage();
 
     GuiWindow mShown; // Currently shown windows in inventory mode
