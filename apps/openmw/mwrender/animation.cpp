@@ -612,10 +612,9 @@ namespace MWRender
         }
     }
 
-    void Animation::addAnimSource(const std::string &model, const std::string& baseModel)
+    void Animation::addAnimSource(std::string_view model, const std::string& baseModel)
     {
-        std::string kfname = model;
-        Misc::StringUtils::lowerCaseInPlace(kfname);
+        std::string kfname = Misc::StringUtils::lowerCase(model);
 
         if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
             kfname.replace(kfname.size()-4, 4, ".kf");
@@ -670,20 +669,20 @@ namespace MWRender
         if (!mAccumRoot)
         {
             // Priority matters! bip01 is preferred.
-            static const std::array<std::string, 2> accumRootNames =
+            static const std::initializer_list<std::string_view> accumRootNames =
             {
                 "bip01",
                 "root bone"
             };
             NodeMap::const_iterator found = nodeMap.end();
-            for (const std::string& name : accumRootNames)
+            for (const std::string_view& name : accumRootNames)
             {
                 found = nodeMap.find(name);
                 if (found == nodeMap.end())
                     continue;
                 for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = controllerMap.begin(); it != controllerMap.end(); ++it)
                 {
-                    if (Misc::StringUtils::lowerCase(it->first) == name)
+                    if (Misc::StringUtils::ciEqual(it->first, name))
                     {
                         mAccumRoot = found->second;
                         break;

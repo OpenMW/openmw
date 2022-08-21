@@ -4,6 +4,7 @@
 #include <osg/MatrixTransform>
 #include <osg/NodeVisitor>
 
+#include <string_view>
 #include <unordered_map>
 
 #include <components/misc/strings/algorithm.hpp>
@@ -17,7 +18,7 @@ namespace SceneUtil
     class FindByNameVisitor : public osg::NodeVisitor
     {
     public:
-        FindByNameVisitor(const std::string& nameToFind)
+        FindByNameVisitor(std::string_view nameToFind)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mNameToFind(nameToFind)
             , mFoundNode(nullptr)
@@ -30,14 +31,14 @@ namespace SceneUtil
 
         bool checkGroup(osg::Group& group);
 
-        std::string mNameToFind;
+        std::string_view mNameToFind;
         osg::Group* mFoundNode;
     };
 
     class FindByClassVisitor : public osg::NodeVisitor
     {
     public:
-        FindByClassVisitor(const std::string& nameToFind)
+        FindByClassVisitor(std::string_view nameToFind)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mNameToFind(nameToFind)
         {
@@ -45,7 +46,7 @@ namespace SceneUtil
 
         void apply(osg::Node &node) override;
 
-        std::string mNameToFind;
+        std::string_view mNameToFind;
         std::vector<osg::Node *> mFoundNodes;
     };
 

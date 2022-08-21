@@ -23,12 +23,11 @@ namespace SceneUtil
     class CopyRigVisitor : public osg::NodeVisitor
     {
     public:
-        CopyRigVisitor(osg::ref_ptr<osg::Group> parent, const std::string& filter)
+        CopyRigVisitor(osg::ref_ptr<osg::Group> parent, std::string_view filter)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mParent(parent)
-            , mFilter(Misc::StringUtils::lowerCase(filter))
+            , mFilter(filter)
         {
-            mFilter2 = "tri " + mFilter;
         }
 
         void apply(osg::MatrixTransform& node) override
@@ -71,19 +70,20 @@ namespace SceneUtil
 
     private:
 
-        bool filterMatches(const std::string& name) const
+        bool filterMatches(std::string_view name) const
         {
-            std::string lowerName = Misc::StringUtils::lowerCase(name);
-            return (lowerName.size() >= mFilter.size() && lowerName.compare(0, mFilter.size(), mFilter) == 0)
-                || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0);
+            if (Misc::StringUtils::ciCompareLen(name, mFilter, mFilter.size()) == 0)
+                return true;
+            if (Misc::StringUtils::ciCompareLen(name, "tri ", 4) == 0)
+                return Misc::StringUtils::ciCompareLen(name.substr(4), mFilter, mFilter.size()) == 0;
+            return false;
         }
 
         using NodeSet = std::set<osg::ref_ptr<const osg::Node>>;
         NodeSet mToCopy;
 
         osg::ref_ptr<osg::Group> mParent;
-        std::string mFilter;
-        std::string mFilter2;
+        std::string_view mFilter;
     };
 
     void mergeUserData(const osg::UserDataContainer* source, osg::Object* target)
@@ -100,7 +100,7 @@ namespace SceneUtil
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode, Resource::SceneManager* sceneManager, const osg::Quat* attitude)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node* master, std::string_view filter, osg::Group* attachNode, Resource::SceneManager* sceneManager, const osg::Quat* attitude)
     {
         if (dynamic_cast<const SceneUtil::Skeleton*>(toAttach.get()))
         {

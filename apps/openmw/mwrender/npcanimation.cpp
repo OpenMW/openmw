@@ -472,8 +472,8 @@ void NpcAnimation::updateNpcBase()
     mHeadModel.clear();
     mHairModel.clear();
 
-    std::string headName = isWerewolf ? "WerewolfHead" : mNpc->mHead;
-    std::string hairName = isWerewolf ? "WerewolfHair" : mNpc->mHair;
+    std::string_view headName = isWerewolf ? std::string_view{"WerewolfHead"} : mNpc->mHead;
+    std::string_view hairName = isWerewolf ? std::string_view{"WerewolfHair"} : mNpc->mHair;
 
     if (!headName.empty())
     {
@@ -701,13 +701,13 @@ void NpcAnimation::updateParts()
 
 
 
-PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
+PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, std::string_view bonename, std::string_view bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
 {
     osg::ref_ptr<osg::Node> attached = attach(model, bonename, bonefilter, isLight);
     if (enchantedGlow)
         mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
-    return PartHolderPtr(new PartHolder(attached));
+    return std::make_unique<PartHolder>(attached);
 }
 
 osg::Vec3f NpcAnimation::runAnimation(float timepassed)
@@ -786,7 +786,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     mPartPriorities[type] = priority;
     try
     {
-        std::string bonename = sPartList.at(type);
+        std::string_view bonename = sPartList.at(type);
         if (type == ESM::PRT_Weapon)
         {
             const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
@@ -794,7 +794,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             if(weapon != inv.end() && weapon->getType() == ESM::Weapon::sRecordId)
             {
                 int weaponType = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-                const std::string weaponBonename = MWMechanics::getWeaponType(weaponType)->mAttachBone;
+                const std::string& weaponBonename = MWMechanics::getWeaponType(weaponType)->mAttachBone;
 
                 if (weaponBonename != bonename)
                 {
@@ -807,7 +807,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         }
 
         // PRT_Hair seems to be the only type that breaks consistency and uses a filter that's different from the attachment bone
-        const std::string bonefilter = (type == ESM::PRT_Hair) ? "hair" : bonename;
+        const std::string_view bonefilter = (type == ESM::PRT_Hair) ? std::string_view{"hair"} : bonename;
         mObjectParts[type] = insertBoundedPart(mesh, bonename, bonefilter, enchantedGlow, glowColor, isLight);
     }
     catch (std::exception& e)

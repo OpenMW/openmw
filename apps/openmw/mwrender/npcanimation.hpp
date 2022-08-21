@@ -82,8 +82,8 @@ private:
 
     NpcType getNpcType() const;
 
-    PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
-                                        const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight);
+    PartHolderPtr insertBoundedPart(const std::string &model, std::string_view bonename,
+                                        std::string_view bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight);
 
     void removeIndividualPart(ESM::PartReferenceType type);
     void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
