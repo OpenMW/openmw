@@ -85,6 +85,7 @@ namespace MWWorld
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
+            bool mCellLoaded = false;
             MWWorld::World& mWorld;
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
@@ -151,6 +152,10 @@ namespace MWWorld
 
             bool hasCellChanged() const;
             ///< Has the set of active cells changed, since the last frame?
+
+            bool hasCellLoaded() const { return mCellLoaded; }
+
+            void resetCellLoaded() { mCellLoaded = false; }
 
             void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true);
             ///< Move to interior cell.

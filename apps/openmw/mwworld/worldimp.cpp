@@ -154,7 +154,6 @@ namespace MWWorld
       mUserDataPath(userDataPath),
       mDefaultHalfExtents(Settings::Manager::getVector3("default actor pathfind half extents", "Game")),
       mDefaultActorCollisionShapeType(DetourNavigator::toCollisionShapeType(Settings::Manager::getInt("actor collision shape type", "Game"))),
-      mShouldUpdateNavigator(false),
       mActivationDistanceOverride (activationDistanceOverride),
       mStartCell(startCell), mDistanceToFacedObject(-1.f), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
@@ -1536,12 +1535,7 @@ namespace MWWorld
             if (const auto object = mPhysics->getObject(door.first))
                 updateNavigatorObject(*object);
 
-        auto player = getPlayerPtr();
-        if (mShouldUpdateNavigator && player.getCell() != nullptr)
-        {
-            mNavigator->update(player.getRefData().getPosition().asVec3());
-            mShouldUpdateNavigator = false;
-        }
+        mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
     }
 
     void World::updateNavigatorObject(const MWPhysics::Object& object)
@@ -1549,8 +1543,7 @@ namespace MWWorld
         const MWWorld::Ptr ptr = object.getPtr();
         const DetourNavigator::ObjectShapes shapes(object.getShapeInstance(),
             DetourNavigator::ObjectTransform {ptr.getRefData().getPosition(), ptr.getCellRef().getScale()});
-        mShouldUpdateNavigator = mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform())
-            || mShouldUpdateNavigator;
+        mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform());
     }
 
     const MWPhysics::RayCastingInterface* World::getRayCasting() const
@@ -1821,10 +1814,7 @@ namespace MWWorld
 
         updateWeather(duration, paused);
 
-        if (!paused)
-        {
-            updateNavigator();
-        }
+        updateNavigator();
 
         mPlayer->update();
 
@@ -1841,6 +1831,13 @@ namespace MWWorld
         {
             mSpellPreloadTimer = 0.1f;
             preloadSpells();
+        }
+
+        if (mWorldScene->hasCellLoaded())
+        {
+            mNavigator->wait(*MWBase::Environment::get().getWindowManager()->getLoadingScreen(),
+                             DetourNavigator::WaitConditionType::requiredTilesPresent);
+            mWorldScene->resetCellLoaded();
         }
     }
 

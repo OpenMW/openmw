@@ -223,9 +223,9 @@ namespace DetourNavigator
 
         void cleanupLastUpdates();
 
-        int waitUntilJobsDoneForNotPresentTiles(const std::size_t initialJobsLeft, std::size_t& maxJobsLeft, Loading::Listener& listener);
+        inline void waitUntilJobsDoneForNotPresentTiles(Loading::Listener& listener);
 
-        void waitUntilAllJobsDone();
+        inline void waitUntilAllJobsDone();
     };
 
     void reportStats(const AsyncNavMeshUpdater::Stats& stats, unsigned int frameNumber, osg::Stats& out);

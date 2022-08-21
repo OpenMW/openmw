@@ -149,15 +149,15 @@ namespace DetourNavigator
         else
         {
             const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
+            const auto worldspaceTiles = mWorldspaceTiles.lock();
             getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
                 [&] (const TilePosition& tilePosition)
                 {
-                    const auto locked = mWorldspaceTiles.lock();
-                    auto tile = locked->mTiles.find(tilePosition);
-                    if (tile == locked->mTiles.end())
+                    auto tile = worldspaceTiles->mTiles.find(tilePosition);
+                    if (tile == worldspaceTiles->mTiles.end())
                     {
                         const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
-                        tile = locked->mTiles.emplace_hint(tile, tilePosition,
+                        tile = worldspaceTiles->mTiles.emplace_hint(tile, tilePosition,
                                 std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration));
                     }
                     if (tile->second->addWater(cellPosition, cellSize, level))
@@ -180,20 +180,22 @@ namespace DetourNavigator
         if (object == mWaterTilesPositions.end())
             return std::nullopt;
         std::optional<Water> result;
-        for (const auto& tilePosition : object->second)
         {
-            const auto locked = mWorldspaceTiles.lock();
-            const auto tile = locked->mTiles.find(tilePosition);
-            if (tile == locked->mTiles.end())
-                continue;
-            const auto tileResult = tile->second->removeWater(cellPosition);
-            if (tile->second->isEmpty())
+            const auto worldspaceTiles = mWorldspaceTiles.lock();
+            for (const auto& tilePosition : object->second)
             {
-                locked->mTiles.erase(tile);
-                ++mTilesGeneration;
+                const auto tile = worldspaceTiles->mTiles.find(tilePosition);
+                if (tile == worldspaceTiles->mTiles.end())
+                    continue;
+                const auto tileResult = tile->second->removeWater(cellPosition);
+                if (tile->second->isEmpty())
+                {
+                    worldspaceTiles->mTiles.erase(tile);
+                    ++mTilesGeneration;
+                }
+                if (tileResult && !result)
+                    result = tileResult;
             }
-            if (tileResult && !result)
-                result = tileResult;
         }
         mWaterTilesPositions.erase(object);
         if (result)
@@ -214,23 +216,25 @@ namespace DetourNavigator
 
         bool result = false;
 
-        getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
-            [&] (const TilePosition& tilePosition)
-            {
-                const auto locked = mWorldspaceTiles.lock();
-                auto tile = locked->mTiles.find(tilePosition);
-                if (tile == locked->mTiles.end())
+        {
+            const auto worldspaceTiles = mWorldspaceTiles.lock();
+            getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
+                [&] (const TilePosition& tilePosition)
                 {
-                    const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
-                    tile = locked->mTiles.emplace_hint(tile, tilePosition,
-                            std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration));
-                }
-                if (tile->second->addHeightfield(cellPosition, cellSize, shape))
-                {
-                    tilesPositions.push_back(tilePosition);
-                    result = true;
-                }
-            });
+                    auto tile = worldspaceTiles->mTiles.find(tilePosition);
+                    if (tile == worldspaceTiles->mTiles.end())
+                    {
+                        const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
+                        tile = worldspaceTiles->mTiles.emplace_hint(tile, tilePosition,
+                                std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration));
+                    }
+                    if (tile->second->addHeightfield(cellPosition, cellSize, shape))
+                    {
+                        tilesPositions.push_back(tilePosition);
+                        result = true;
+                    }
+                });
+        }
 
         if (result)
             ++mRevision;
@@ -244,20 +248,22 @@ namespace DetourNavigator
         if (object == mHeightfieldTilesPositions.end())
             return std::nullopt;
         std::optional<SizedHeightfieldShape> result;
-        for (const auto& tilePosition : object->second)
         {
-            const auto locked = mWorldspaceTiles.lock();
-            const auto tile = locked->mTiles.find(tilePosition);
-            if (tile == locked->mTiles.end())
-                continue;
-            const auto tileResult = tile->second->removeHeightfield(cellPosition);
-            if (tile->second->isEmpty())
+            const auto worldspaceTiles = mWorldspaceTiles.lock();
+            for (const auto& tilePosition : object->second)
             {
-                locked->mTiles.erase(tile);
-                ++mTilesGeneration;
+                const auto tile = worldspaceTiles->mTiles.find(tilePosition);
+                if (tile == worldspaceTiles->mTiles.end())
+                    continue;
+                const auto tileResult = tile->second->removeHeightfield(cellPosition);
+                if (tile->second->isEmpty())
+                {
+                    worldspaceTiles->mTiles.erase(tile);
+                    ++mTilesGeneration;
+                }
+                if (tileResult && !result)
+                    result = tileResult;
             }
-            if (tileResult && !result)
-                result = tileResult;
         }
         mHeightfieldTilesPositions.erase(object);
         if (result)

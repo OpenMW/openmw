@@ -32,17 +32,17 @@ namespace DetourNavigator
         bool updateObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                           const AreaType areaType);
 
-        bool removeObject(const ObjectId id);
+        void removeObject(const ObjectId id);
 
         void addAgent(const AgentBounds& agentBounds);
 
-        bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
+        void addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
-        bool removeWater(const osg::Vec2i& cellPosition);
+        void removeWater(const osg::Vec2i& cellPosition);
 
-        bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
+        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
 
-        bool removeHeightfield(const osg::Vec2i& cellPosition);
+        void removeHeightfield(const osg::Vec2i& cellPosition);
 
         bool reset(const AgentBounds& agentBounds);
 

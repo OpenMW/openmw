@@ -2,6 +2,7 @@
 #define COMPONENTS_LOADINGLISTENER_H
 
 #include <string>
+#include <memory>
 
 namespace Loading
 {
@@ -33,12 +34,26 @@ namespace Loading
         virtual ~Listener() = default;
     };
 
+    struct LoadingOff
+    {
+        void operator()(Listener* listener) const
+        {
+            if (listener != nullptr)
+                listener->loadingOff();
+        }
+    };
+
     /// @brief Used for stopping a loading sequence when the object goes out of scope
     struct ScopedLoad
     {
-        ScopedLoad(Listener* l) : mListener(l) { mListener->loadingOn(); }
-        ~ScopedLoad() { mListener->loadingOff(); }
-        Listener* mListener;
+        std::unique_ptr<Listener, LoadingOff> mListener;
+
+        explicit ScopedLoad(Listener* listener)
+            : mListener(listener)
+        {
+            if (mListener != nullptr)
+                mListener->loadingOn();
+        }
     };
 }
 

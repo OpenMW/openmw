@@ -22,50 +22,24 @@ namespace DetourNavigator
 
         void setWorldspace(std::string_view /*worldspace*/) override {}
 
-        bool addObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/) override
-        {
-            return false;
-        }
+        void addObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/) override {}
 
-        bool addObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/) override
-        {
-            return false;
-        }
+        void addObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/) override {}
 
-        bool updateObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/) override
-        {
-            return false;
-        }
+        void updateObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/) override {}
 
-        bool updateObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/) override
-        {
-            return false;
-        }
+        void updateObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/) override {}
 
-        bool removeObject(const ObjectId /*id*/) override
-        {
-            return false;
-        }
+        void removeObject(const ObjectId /*id*/) override {}
 
-        bool addWater(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, float /*level*/) override
-        {
-            return false;
-        }
+        void addWater(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, float /*level*/) override {}
 
-        bool removeWater(const osg::Vec2i& /*cellPosition*/) override
-        {
-            return false;
-        }
+        void removeWater(const osg::Vec2i& /*cellPosition*/) override {}
 
-        bool addHeightfield(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const HeightfieldShape& /*height*/) override
-        {
-            return false;
-        }
+        void addHeightfield(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const HeightfieldShape& /*height*/)
+            override {}
 
-        bool removeHeightfield(const osg::Vec2i& /*cellPosition*/) override
-        {
-            return false;
-        }
+        void removeHeightfield(const osg::Vec2i& /*cellPosition*/) override {}
 
         void addPathgrid(const ESM::Cell& /*cell*/, const ESM::Pathgrid& /*pathgrid*/) override {}
 
@@ -74,10 +48,6 @@ namespace DetourNavigator
         void update(const osg::Vec3f& /*playerPosition*/) override {}
 
         void updateBounds(const osg::Vec3f& /*playerPosition*/) override {}
-
-        void updatePlayerPosition(const osg::Vec3f& /*playerPosition*/) override {};
-
-        void setUpdatesEnabled(bool /*enabled*/) override {}
 
         void wait(Loading::Listener& /*listener*/, WaitConditionType /*waitConditionType*/) override {}
 
