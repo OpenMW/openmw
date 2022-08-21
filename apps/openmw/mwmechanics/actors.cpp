@@ -220,10 +220,7 @@ void soulTrap(const MWWorld::Ptr& creature)
 
 void removeTemporaryEffects(const MWWorld::Ptr& ptr)
 {
-    ptr.getClass().getCreatureStats(ptr).getActiveSpells().purge([] (const auto& spell)
-    {
-        return spell.getType() == ESM::ActiveSpells::Type_Consumable || spell.getType() == ESM::ActiveSpells::Type_Temporary;
-    }, ptr);
+    ptr.getClass().getCreatureStats(ptr).getActiveSpells().unloadActor(ptr);
 }
 
 }
