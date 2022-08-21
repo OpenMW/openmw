@@ -97,6 +97,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/mwui/init.lua
 
     shaders/adjustments.omwfx
+    shaders/bloomlinear.omwfx
     shaders/debug.omwfx
 
     mygui/core.skin
