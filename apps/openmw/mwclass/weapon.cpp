@@ -135,7 +135,7 @@ namespace MWClass
         return MWMechanics::getWeaponType(type)->mSoundIdDown;
     }
 
-    std::string Weapon::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Weapon::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
@@ -250,14 +250,14 @@ namespace MWClass
         return info;
     }
 
-    std::string Weapon::getEnchantment (const MWWorld::ConstPtr& ptr) const
+    std::string_view Weapon::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         return ref->mBase->mEnchant;
     }
 
-    std::string Weapon::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const std::string& Weapon::applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 

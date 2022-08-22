@@ -87,7 +87,7 @@ namespace MWClass
         return "Item Ingredient Down";
     }
 
-    std::string Ingredient::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Ingredient::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 

@@ -127,7 +127,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
             MWWorld::Ptr item = *it;
-            const std::string enchantId = item.getClass().getEnchantment(item);
+            const std::string_view enchantId = item.getClass().getEnchantment(item);
             if (enchantId.empty())
                 continue;
             const ESM::Enchantment* enchant = esmStore.get<ESM::Enchantment>().search(enchantId);

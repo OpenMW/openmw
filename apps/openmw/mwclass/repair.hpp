@@ -40,7 +40,7 @@ namespace MWClass
             std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
             ///< Return the put down sound Id
 
-            std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const override;
+            const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of inventory icon.
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;

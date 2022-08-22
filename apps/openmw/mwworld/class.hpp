@@ -252,10 +252,10 @@ namespace MWWorld
             virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
             ///< @return combined armor rating of this actor
 
-            virtual std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const;
+            virtual const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const;
             ///< Return name of inventory icon.
 
-            virtual std::string getEnchantment (const MWWorld::ConstPtr& ptr) const;
+            virtual std::string_view getEnchantment(const MWWorld::ConstPtr& ptr) const;
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
             /// (default implementation: return empty string)
 
@@ -278,7 +278,7 @@ namespace MWWorld
             virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
             ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
 
-            virtual std::string applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+            virtual const std::string& applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
             ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
             virtual std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const;

@@ -54,7 +54,7 @@ bool rechargeItem(const MWWorld::Ptr &item, const MWWorld::Ptr &gem)
     int roll = Misc::Rng::roll0to99(prng);
     if (roll < x)
     {
-        std::string soul = gem.getCellRef().getSoul();
+        const std::string& soul = gem.getCellRef().getSoul();
         const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
         float restored = creature->mData.mSoul * (roll / x);

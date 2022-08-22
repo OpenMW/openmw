@@ -1868,7 +1868,7 @@ namespace MWWorld
         const MWWorld::Ptr& selectedEnchantItem = MWBase::Environment::get().getWindowManager()->getSelectedEnchantItem();
         if (!selectedEnchantItem.isEmpty())
         {
-            std::string enchantId = selectedEnchantItem.getClass().getEnchantment(selectedEnchantItem);
+            std::string_view enchantId = selectedEnchantItem.getClass().getEnchantment(selectedEnchantItem);
             if (!enchantId.empty())
             {
                 const ESM::Enchantment* ench = mStore.get<ESM::Enchantment>().search(enchantId);
@@ -1879,7 +1879,7 @@ namespace MWWorld
         const MWWorld::Ptr& selectedWeapon = MWBase::Environment::get().getWindowManager()->getSelectedWeapon();
         if (!selectedWeapon.isEmpty())
         {
-            std::string enchantId = selectedWeapon.getClass().getEnchantment(selectedWeapon);
+            std::string_view enchantId = selectedWeapon.getClass().getEnchantment(selectedWeapon);
             if (!enchantId.empty())
             {
                 const ESM::Enchantment* ench = mStore.get<ESM::Enchantment>().search(enchantId);

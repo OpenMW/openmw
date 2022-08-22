@@ -444,7 +444,7 @@ void MWWorld::ContainerStore::updateRechargingItems()
     mRechargingItems.clear();
     for (ContainerStoreIterator it = begin(); it != end(); ++it)
     {
-        const std::string& enchantmentId = it->getClass().getEnchantment(*it);
+        std::string_view enchantmentId = it->getClass().getEnchantment(*it);
         if (!enchantmentId.empty())
         {
             const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentId);

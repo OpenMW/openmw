@@ -79,7 +79,7 @@ namespace MWClass
         return "Item Potion Down";
     }
 
-    std::string Potion::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Potion::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 

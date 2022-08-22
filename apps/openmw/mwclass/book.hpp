@@ -40,13 +40,13 @@ namespace MWClass
             std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
             ///< Return the put down sound Id
 
-            std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const override;
+            const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of inventory icon.
 
-            std::string getEnchantment (const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getEnchantment(const MWWorld::ConstPtr& ptr) const override;
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
 
-            std::string applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const override;
+            const std::string& applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const override;
             ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
             std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;

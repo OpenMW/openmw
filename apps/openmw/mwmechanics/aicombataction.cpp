@@ -344,7 +344,7 @@ namespace MWMechanics
             }
             else if (!selectedEnchItem.isEmpty())
             {
-                std::string enchId = selectedEnchItem.getClass().getEnchantment(selectedEnchItem);
+                std::string_view enchId = selectedEnchItem.getClass().getEnchantment(selectedEnchItem);
                 if (!enchId.empty())
                 {
                     const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchId);
