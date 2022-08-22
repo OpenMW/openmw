@@ -570,7 +570,11 @@ namespace MWWorld
             if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(magicBoltState.mSpellId))
                 effects = &spell->mEffects;
             else
-                effects = &esmStore.get<ESM::Enchantment>().find(magicBoltState.mSpellId)->mEffects;
+            {
+                MWWorld::ManualRef ref(esmStore, magicBoltState.mSpellId);
+                const MWWorld::Ptr& ptr = ref.getPtr();
+                effects = &esmStore.get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr))->mEffects;
+            }
             cast.inflict(target, caster, *effects, ESM::RT_Target);
 
             magicBoltState.mToDelete = true;
