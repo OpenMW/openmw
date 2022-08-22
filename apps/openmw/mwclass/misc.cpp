@@ -205,7 +205,7 @@ namespace MWClass
     {
         const std::string_view soulgemPrefix = "misc_soulgem";
 
-        if (::Misc::StringUtils::ciCompareLen(ptr.getCellRef().getRefId(), soulgemPrefix, soulgemPrefix.length()) == 0)
+        if (Misc::StringUtils::ciStartsWith(ptr.getCellRef().getRefId(), soulgemPrefix))
             return std::make_unique<MWWorld::ActionSoulgem>(ptr);
 
         return std::make_unique<MWWorld::NullAction>();

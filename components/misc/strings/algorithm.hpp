@@ -28,6 +28,11 @@ namespace Misc::StringUtils
                           [] (char l, char r) { return toLower(l) == toLower(r); });
     }
 
+    inline bool ciStartsWith(std::string_view value, std::string_view prefix)
+    {
+        return ciEqual(value.substr(0, prefix.size()), prefix);
+    }
+
     inline int ciCompareLen(std::string_view x, std::string_view y, std::size_t len)
     {
         std::string_view::const_iterator xit = x.begin();

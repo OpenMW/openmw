@@ -144,8 +144,7 @@ namespace SceneUtil
 
     void RemoveTriBipVisitor::applyImpl(osg::Node& node)
     {
-        const std::string_view toFind = "tri bip";
-        if (Misc::StringUtils::ciCompareLen(node.getName(), toFind, toFind.size()) == 0)
+        if (Misc::StringUtils::ciStartsWith(node.getName(), "tri bip"))
         {
             osg::Group* parent = static_cast<osg::Group*>(*(getNodePath().end()-2));
             // Not safe to remove in apply(), since the visitor is still iterating the child list

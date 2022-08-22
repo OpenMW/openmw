@@ -373,7 +373,7 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node& n
             // affecting the entire subtree of this node
             Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e.getPtr();
 
-            if (Misc::StringUtils::ciCompareLen(sd->string, "NC", 2) == 0)
+            if (Misc::StringUtils::ciStartsWith(sd->string, "NC"))
             {
                 // NCC flag in vanilla is partly case sensitive: prefix NC is case insensitive but second C needs be uppercase
                 if (sd->string.length() > 2 && sd->string[2] == 'C')

@@ -151,4 +151,35 @@ namespace
     {
         EXPECT_FALSE(ciEqual(std::string("a"), std::string("aa")));
     }
+
+    TEST(MiscStringsCiStartsWith, empty_string_should_start_with_empty_prefix)
+    {
+        EXPECT_TRUE(ciStartsWith(std::string_view(), std::string_view()));
+    }
+
+    TEST(MiscStringsCiStartsWith, string_should_start_with_empty_prefix)
+    {
+        EXPECT_TRUE(ciStartsWith("foo", std::string_view()));
+    }
+
+    TEST(MiscStringsCiStartsWith, string_should_start_with_own_prefix)
+    {
+        std::string string = "some string";
+        EXPECT_TRUE(ciStartsWith(string, string.substr(0, 4)));
+    }
+
+    TEST(MiscStringsCiStartsWith, string_should_start_with_the_same_value)
+    {
+        EXPECT_TRUE(ciStartsWith("foo", "foo"));
+    }
+
+    TEST(MiscStringsCiStartsWith, string_should_not_start_with_not_its_prefix)
+    {
+        EXPECT_FALSE(ciStartsWith("some string", "foo"));
+    }
+
+    TEST(MiscStringsCiStartsWith, string_should_not_start_with_longer_string_having_matching_prefix)
+    {
+        EXPECT_FALSE(ciStartsWith("foo", "foo bar"));
+    }
 }
