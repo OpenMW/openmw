@@ -10,13 +10,13 @@
 #include <variant>
 #include <optional>
 #include <functional>
+#include <span>
 
 #include <osg/Quat>
 #include <osg/BoundingBox>
 #include <osg/ref_ptr>
 #include <osg/Timer>
 
-#include <components/misc/span.hpp>
 #include <components/detournavigator/collisionshapetype.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -280,7 +280,7 @@ namespace MWPhysics
             }
 
             bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-                const Misc::Span<const MWWorld::ConstPtr>& ignore, std::vector<MWWorld::Ptr>* occupyingActors) const;
+                std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors) const;
 
             void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
             void reportCollision(const btVector3& position, const btVector3& normal);
