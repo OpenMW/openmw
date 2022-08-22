@@ -139,7 +139,7 @@ namespace MWClass
         return "Item Clothes Down";
     }
 
-    std::string Clothing::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Clothing::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
@@ -175,14 +175,14 @@ namespace MWClass
         return info;
     }
 
-    std::string Clothing::getEnchantment (const MWWorld::ConstPtr& ptr) const
+    std::string_view Clothing::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         return ref->mBase->mEnchant;
     }
 
-    std::string Clothing::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const std::string& Clothing::applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 

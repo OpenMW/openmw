@@ -181,7 +181,7 @@ namespace MWClass
             return "Item Armor Heavy Down";
     }
 
-    std::string Armor::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Armor::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
@@ -247,14 +247,14 @@ namespace MWClass
         return info;
     }
 
-    std::string Armor::getEnchantment (const MWWorld::ConstPtr& ptr) const
+    std::string_view Armor::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mEnchant;
     }
 
-    std::string Armor::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const std::string& Armor::applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 

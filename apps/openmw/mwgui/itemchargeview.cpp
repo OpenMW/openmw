@@ -184,7 +184,7 @@ namespace MWGui
                                        line.mItemPtr.getClass().getItemMaxHealth(line.mItemPtr));
                 break;
             case DisplayMode_EnchantmentCharge:
-                std::string enchId = line.mItemPtr.getClass().getEnchantment(line.mItemPtr);
+                std::string_view enchId = line.mItemPtr.getClass().getEnchantment(line.mItemPtr);
                 if (enchId.empty())
                     break;
                 const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);

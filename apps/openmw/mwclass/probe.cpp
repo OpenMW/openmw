@@ -86,7 +86,7 @@ namespace MWClass
         return "Item Probe Down";
     }
 
-    std::string Probe::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Probe::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 

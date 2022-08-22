@@ -48,26 +48,22 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
     return changeExtension(path, ".dds");
 }
 
-std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLevelDirectory, const std::string &resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctResourcePath(std::string_view topLevelDirectory, std::string_view resPath, const VFS::Manager* vfs)
 {
     /* Bethesda at some point converted all their BSA
      * textures from tga to dds for increased load speed, but all
      * texture file name references were kept as .tga.
      */
 
-    std::string prefix1 = topLevelDirectory + '\\';
-    std::string prefix2 = topLevelDirectory + '/';
-
-    std::string correctedPath = resPath;
-    Misc::StringUtils::lowerCaseInPlace(correctedPath);
+    std::string correctedPath = Misc::StringUtils::lowerCase(resPath);
 
     // Apparently, leading separators are allowed
     while (correctedPath.size() && (correctedPath[0] == '/' || correctedPath[0] == '\\'))
         correctedPath.erase(0, 1);
 
-    if(correctedPath.compare(0, prefix1.size(), prefix1.data()) != 0 &&
-       correctedPath.compare(0, prefix2.size(), prefix2.data()) != 0)
-        correctedPath = prefix1 + correctedPath;
+    if(!correctedPath.starts_with(topLevelDirectory) || correctedPath.size() <= topLevelDirectory.size() ||
+        (correctedPath[topLevelDirectory.size()] != '/' && correctedPath[topLevelDirectory.size()] != '\\'))
+        correctedPath = std::string{topLevelDirectory} + '\\' + correctedPath;
 
     std::string origExt = correctedPath;
 
@@ -82,13 +78,17 @@ std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLev
         return origExt;
 
     // fall back to a resource in the top level directory if it exists
-    std::string fallback = topLevelDirectory + "\\" + getBasename(correctedPath);
+    std::string fallback{topLevelDirectory};
+    fallback += '\\';
+    fallback += getBasename(correctedPath);
     if (vfs->exists(fallback))
         return fallback;
 
     if (changedToDds)
     {
-        fallback = topLevelDirectory + "\\" + getBasename(origExt);
+        fallback = topLevelDirectory;
+        fallback += '\\';
+        fallback += getBasename(origExt);
         if (vfs->exists(fallback))
             return fallback;
     }
@@ -96,27 +96,22 @@ std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLev
     return correctedPath;
 }
 
-std::string Misc::ResourceHelpers::correctTexturePath(const std::string &resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctTexturePath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    static const std::string dir = "textures";
-    return correctResourcePath(dir, resPath, vfs);
+    return correctResourcePath("textures", resPath, vfs);
 }
 
-std::string Misc::ResourceHelpers::correctIconPath(const std::string &resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctIconPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    static const std::string dir = "icons";
-    return correctResourcePath(dir, resPath, vfs);
+    return correctResourcePath("icons", resPath, vfs);
 }
 
-std::string Misc::ResourceHelpers::correctBookartPath(const std::string &resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    static const std::string dir = "bookart";
-    std::string image = correctResourcePath(dir, resPath, vfs);
-
-    return image;
+    return correctResourcePath("bookart", resPath, vfs);
 }
 
-std::string Misc::ResourceHelpers::correctBookartPath(const std::string &resPath, int width, int height, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, int width, int height, const VFS::Manager* vfs)
 {
     std::string image = correctBookartPath(resPath, vfs);
 
@@ -152,14 +147,16 @@ std::string Misc::ResourceHelpers::correctMeshPath(const std::string &resPath, c
     return "meshes\\" + resPath;
 }
 
-std::string Misc::ResourceHelpers::correctSoundPath(const std::string& resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctSoundPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    std::string sound = resPath;
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-    if (!vfs->exists(sound))
+    if (!vfs->exists(resPath))
+    {
+        std::string sound{resPath};
         changeExtension(sound, ".mp3");
-
-    return vfs->normalizeFilename(sound);
+        return vfs->normalizeFilename(sound);
+    }
+    return vfs->normalizeFilename(resPath);
 
 }
 

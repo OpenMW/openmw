@@ -281,7 +281,7 @@ namespace MWGui
             if (!(item.mFlags & ItemStack::Flag_Enchanted))
                 return false;
 
-            std::string enchId = base.getClass().getEnchantment(base);
+            std::string_view enchId = base.getClass().getEnchantment(base);
             const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
             if (!ench)
             {

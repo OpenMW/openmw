@@ -210,7 +210,7 @@ namespace MWMechanics
 
     bool CastSpell::cast(const MWWorld::Ptr &item, int slot, bool launchProjectile)
     {
-        std::string enchantmentName = item.getClass().getEnchantment(item);
+        std::string_view enchantmentName = item.getClass().getEnchantment(item);
         if (enchantmentName.empty())
             throw std::runtime_error("can't cast an item without an enchantment");
 

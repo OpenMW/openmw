@@ -209,7 +209,7 @@ namespace MWMechanics
                     auto slot = store.getSlot(slotIndex);
                     if(slot == store.end())
                         continue;
-                    const auto& enchantmentId = slot->getClass().getEnchantment(*slot);
+                    const std::string_view enchantmentId = slot->getClass().getEnchantment(*slot);
                     if(enchantmentId.empty())
                         continue;
                     const ESM::Enchantment* enchantment = world->getStore().get<ESM::Enchantment>().find(enchantmentId);

@@ -118,7 +118,7 @@ namespace MWClass
         return "Item Misc Down";
     }
 
-    std::string Miscellaneous::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Miscellaneous::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
 

@@ -92,7 +92,7 @@ namespace MWClass
         return "Item Book Down";
     }
 
-    std::string Book::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Book::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
@@ -126,14 +126,14 @@ namespace MWClass
         return info;
     }
 
-    std::string Book::getEnchantment (const MWWorld::ConstPtr& ptr) const
+    std::string_view Book::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mEnchant;
     }
 
-    std::string Book::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const std::string& Book::applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 

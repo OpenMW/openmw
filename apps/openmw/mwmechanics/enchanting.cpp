@@ -98,7 +98,7 @@ namespace MWMechanics
             enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
 
         // Apply the enchantment
-        std::string newItemId = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
+        const std::string& newItemId = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
         // Add the new item to player inventory and remove the old one
         store.remove(mOldItemPtr, count, player);

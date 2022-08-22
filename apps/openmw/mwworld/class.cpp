@@ -271,7 +271,7 @@ namespace MWWorld
         throw std::runtime_error("class does not support soundgen look up");
     }
 
-    std::string Class::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
+    const std::string& Class::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have any inventory icon");
     }
@@ -294,7 +294,7 @@ namespace MWWorld
         return true;
     }
 
-    std::string Class::getEnchantment (const ConstPtr& ptr) const
+    std::string_view Class::getEnchantment(const ConstPtr& ptr) const
     {
         return {};
     }
@@ -320,7 +320,7 @@ namespace MWWorld
             models.push_back(model);
     }
 
-    std::string Class::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const std::string& Class::applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         throw std::runtime_error ("class can't be enchanted");
     }
@@ -505,7 +505,7 @@ namespace MWWorld
     osg::Vec4f Class::getEnchantmentColor(const MWWorld::ConstPtr& item) const
     {
         osg::Vec4f result(1,1,1,1);
-        std::string enchantmentName = item.getClass().getEnchantment(item);
+        std::string_view enchantmentName = item.getClass().getEnchantment(item);
         if (enchantmentName.empty())
             return result;
 

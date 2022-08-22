@@ -16,7 +16,7 @@ namespace MWGui
         , mCount(count)
         , mBase(base)
     {
-        if (base.getClass().getEnchantment(base) != "")
+        if (!base.getClass().getEnchantment(base).empty())
             mFlags |= Flag_Enchanted;
 
         if (MWBase::Environment::get().getMechanicsManager()->isBoundItem(base))

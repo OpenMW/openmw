@@ -1195,10 +1195,10 @@ namespace MWWorld
 
     void MWWorld::CellStore::checkItem(const Ptr& ptr)
     {
-        if (ptr.getClass().getEnchantment(ptr).empty())
+        std::string_view enchantmentId = ptr.getClass().getEnchantment(ptr);
+        if (enchantmentId.empty())
             return;
 
-        std::string enchantmentId = ptr.getClass().getEnchantment(ptr);
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentId);
         if (!enchantment)
         {
