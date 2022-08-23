@@ -2347,7 +2347,7 @@ void CharacterController::unpersistAnimationState()
     }
 }
 
-bool CharacterController::playGroup(const std::string &groupname, int mode, int count, bool persist)
+bool CharacterController::playGroup(std::string_view groupname, int mode, int count, bool persist)
 {
     if(!mAnimation || !mAnimation->hasAnimation(groupname))
         return false;

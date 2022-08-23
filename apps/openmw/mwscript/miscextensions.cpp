@@ -64,7 +64,7 @@ namespace
         }
 
         ESM::LevelledListBase::LevelItem item;
-        item.mId = std::string{itemId};
+        item.mId = itemId;
         item.mLevel = level;
         list->mList.push_back(item);
     }

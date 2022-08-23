@@ -898,7 +898,7 @@ namespace MWClass
         MWMechanics::setBaseAISetting<ESM::Creature>(id, setting, value);
     }
 
-    void Creature::modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const
+    void Creature::modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::Creature>(actorId, itemId, amount);
     }

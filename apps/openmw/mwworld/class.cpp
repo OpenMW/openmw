@@ -531,7 +531,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not have creature stats");
     }
 
-    void Class::modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const
+    void Class::modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const
     {
         throw std::runtime_error ("class does not have an inventory store");
     }

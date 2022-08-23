@@ -2,6 +2,7 @@
 #define GAME_MWBASE_MECHANICSMANAGER_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <set>
 #include <cstdint>
@@ -158,7 +159,7 @@ namespace MWBase
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr) = 0;
             ///< Forces an object to refresh its animation state.
 
-            virtual bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1, bool persist=false) = 0;
+            virtual bool playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number=1, bool persist=false) = 0;
             ///< Run animation for a MW-reference. Calls to this function for references that are currently not
             /// in the scene should be ignored.
             ///

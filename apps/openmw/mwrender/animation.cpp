@@ -734,7 +734,7 @@ namespace MWRender
         return -1.f;
     }
 
-    float Animation::getTextKeyTime(const std::string &textKey) const
+    float Animation::getTextKeyTime(std::string_view textKey) const
     {
         for(AnimSourceList::const_reverse_iterator iter(mAnimSources.rbegin()); iter != mAnimSources.rend(); ++iter)
         {
@@ -742,7 +742,7 @@ namespace MWRender
 
             for(auto iterKey = keys.begin(); iterKey != keys.end(); ++iterKey)
             {
-                if(iterKey->second.compare(0, textKey.size(), textKey) == 0)
+                if(iterKey->second.starts_with(textKey) == 0)
                     return iterKey->first;
             }
         }
@@ -750,20 +750,17 @@ namespace MWRender
         return -1.f;
     }
 
-    void Animation::handleTextKey(AnimState &state, const std::string &groupname, SceneUtil::TextKeyMap::ConstIterator key,
+    void Animation::handleTextKey(AnimState &state, std::string_view groupname, SceneUtil::TextKeyMap::ConstIterator key,
                        const SceneUtil::TextKeyMap& map)
     {
-        const std::string &evt = key->second;
+        std::string_view evt = key->second;
 
-        size_t off = groupname.size()+2;
-        size_t len = evt.size() - off;
-
-        if(evt.compare(0, groupname.size(), groupname) == 0 &&
-           evt.compare(groupname.size(), 2, ": ") == 0)
+        if(evt.starts_with(groupname) && evt.substr(groupname.size()).starts_with(": "))
         {
-            if(evt.compare(off, len, "loop start") == 0)
+            size_t off = groupname.size() + 2;
+            if(evt.substr(off) == "loop start")
                 state.mLoopStartTime = key->first;
-            else if(evt.compare(off, len, "loop stop") == 0)
+            else if(evt.substr(off) == "loop stop")
                 state.mLoopStopTime = key->first;
         }
 
@@ -780,8 +777,8 @@ namespace MWRender
         }
     }
 
-    void Animation::play(const std::string &groupname, const AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
-                         const std::string &start, const std::string &stop, float startpoint, size_t loops, bool loopfallback)
+    void Animation::play(std::string_view groupname, const AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
+                         std::string_view start, std::string_view stop, float startpoint, size_t loops, bool loopfallback)
     {
         if(!mObjectRoot || mAnimSources.empty())
             return;
@@ -824,7 +821,7 @@ namespace MWRender
                 state.mPriority = priority;
                 state.mBlendMask = blendMask;
                 state.mAutoDisable = autodisable;
-                mStates[groupname] = state;
+                mStates[std::string{groupname}] = state;
 
                 if (state.mPlaying)
                 {
@@ -859,39 +856,48 @@ namespace MWRender
         resetActiveGroups();
     }
 
-    bool Animation::reset(AnimState &state, const SceneUtil::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, bool loopfallback)
+    bool Animation::reset(AnimState& state, const SceneUtil::TextKeyMap& keys, std::string_view groupname, std::string_view start, std::string_view stop, float startpoint, bool loopfallback)
     {
         // Look for text keys in reverse. This normally wouldn't matter, but for some reason undeadwolf_2.nif has two
         // separate walkforward keys, and the last one is supposed to be used.
         auto groupend = keys.rbegin();
         for(;groupend != keys.rend();++groupend)
         {
-            if(groupend->second.compare(0, groupname.size(), groupname) == 0 &&
+            if(groupend->second.starts_with(groupname) &&
                groupend->second.compare(groupname.size(), 2, ": ") == 0)
                 break;
         }
 
-        std::string starttag = groupname+": "+start;
+        auto equals = [] (std::string_view value, std::string_view s1, std::string_view s2, std::string_view s3 = {})
+        {
+            if (value.starts_with(s1))
+            {
+                value = value.substr(s1.size());
+                if(value.starts_with(s2))
+                    return value.substr(s2.size()) == s3;
+            }
+            return false;
+        };
+
         auto startkey = groupend;
-        while(startkey != keys.rend() && startkey->second != starttag)
+        while(startkey != keys.rend() && !equals(startkey->second, groupname, ": ", start))
             ++startkey;
         if(startkey == keys.rend() && start == "loop start")
         {
-            starttag = groupname+": start";
             startkey = groupend;
-            while(startkey != keys.rend() && startkey->second != starttag)
+            while(startkey != keys.rend() && !equals(startkey->second, groupname, ": start"))
                 ++startkey;
         }
         if(startkey == keys.rend())
             return false;
 
-        const std::string stoptag = groupname+": "+stop;
         auto stopkey = groupend;
+        std::size_t checkLength = groupname.size() + 2 + stop.size();
         while(stopkey != keys.rend()
               // We have to ignore extra garbage at the end.
               // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
               // Why, just why? :(
-              && (stopkey->second.size() < stoptag.size() || stopkey->second.compare(0,stoptag.size(), stoptag) != 0))
+              && !equals(std::string_view{stopkey->second}.substr(0, checkLength), groupname, ": ", stop))
             ++stopkey;
         if(stopkey == keys.rend())
             return false;
@@ -916,8 +922,6 @@ namespace MWRender
 
         // mLoopStartTime and mLoopStopTime normally get assigned when encountering these keys while playing the animation
         // (see handleTextKey). But if startpoint is already past these keys, or start time is == stop time, we need to assign them now.
-        const std::string loopstarttag = groupname+": loop start";
-        const std::string loopstoptag = groupname+": loop stop";
 
         auto key = groupend;
         for (; key != startkey && key != keys.rend(); ++key)
@@ -925,9 +929,9 @@ namespace MWRender
             if (key->first > state.getTime())
                 continue;
 
-            if (key->second == loopstarttag)
+            if (equals(key->second, groupname, ": loop start"))
                 state.mLoopStartTime = key->first;
-            else if (key->second == loopstoptag)
+            else if (equals(key->second, groupname, ": loop stop"))
                 state.mLoopStopTime = key->first;
         }
 
@@ -1021,7 +1025,7 @@ namespace MWRender
             state->second.mSpeedMult = speedmult;
     }
 
-    bool Animation::isPlaying(const std::string &groupname) const
+    bool Animation::isPlaying(std::string_view groupname) const
     {
         AnimStateMap::const_iterator state(mStates.find(groupname));
         if(state != mStates.end())
@@ -1029,7 +1033,7 @@ namespace MWRender
         return false;
     }
 
-    bool Animation::getInfo(const std::string &groupname, float *complete, float *speedmult) const
+    bool Animation::getInfo(std::string_view groupname, float *complete, float *speedmult) const
     {
         AnimStateMap::const_iterator iter = mStates.find(groupname);
         if(iter == mStates.end())
@@ -1069,7 +1073,7 @@ namespace MWRender
         return iter->second.mLoopCount;
     }
 
-    void Animation::disable(const std::string &groupname)
+    void Animation::disable(std::string_view groupname)
     {
         AnimStateMap::iterator iter = mStates.find(groupname);
         if(iter != mStates.end())
@@ -1272,7 +1276,7 @@ namespace MWRender
         return movement;
     }
 
-    void Animation::setLoopingEnabled(const std::string &groupname, bool enabled)
+    void Animation::setLoopingEnabled(std::string_view groupname, bool enabled)
     {
         AnimStateMap::iterator state(mStates.find(groupname));
         if(state != mStates.end())
@@ -1511,7 +1515,7 @@ namespace MWRender
         mExtraLightSource->setActorFade(mAlpha);
     }
 
-    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
+    void Animation::addEffect(const std::string& model, int effectId, bool loop, std::string_view bonename, std::string_view texture)
     {
         if (!mObjectRoot.get())
             return;
@@ -1537,7 +1541,7 @@ namespace MWRender
         {
             NodeMap::const_iterator found = getNodeMap().find(bonename);
             if (found == getNodeMap().end())
-                throw std::runtime_error("Can't find bone " + bonename);
+                throw std::runtime_error("Can't find bone " + std::string{bonename});
 
             parentNode = found->second;
         }
@@ -1648,7 +1652,7 @@ namespace MWRender
         return true;
     }
 
-    const osg::Node* Animation::getNode(const std::string &name) const
+    const osg::Node* Animation::getNode(std::string_view name) const
     {
         NodeMap::const_iterator found = getNodeMap().find(name);
         if (found == getNodeMap().end())
@@ -1733,7 +1737,7 @@ namespace MWRender
         mRootController = addRotateController("bip01");
     }
 
-    osg::ref_ptr<RotateController> Animation::addRotateController(const std::string &bone)
+    osg::ref_ptr<RotateController> Animation::addRotateController(std::string_view bone)
     {
         auto iter = getNodeMap().find(bone);
         if (iter == getNodeMap().end())

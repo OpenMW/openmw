@@ -277,7 +277,7 @@ namespace
             const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
             animation->addEffect(
                 Misc::ResourceHelpers::correctMeshPath(absorbStatic->mModel, vfs),
-                ESM::MagicEffect::SpellAbsorption, false, std::string());
+                ESM::MagicEffect::SpellAbsorption, false);
         }
         const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellId);
         int spellCost = 0;

@@ -228,7 +228,7 @@ protected:
             return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0;
         }
     };
-    typedef std::map<std::string,AnimState> AnimStateMap;
+    typedef std::map<std::string, AnimState, std::less<>> AnimStateMap;
     AnimStateMap mStates;
 
     typedef std::vector<std::shared_ptr<AnimSource> > AnimSourceList;
@@ -274,7 +274,7 @@ protected:
     float mLegsYawRadians;
     float mBodyPitchRadians;
 
-    osg::ref_ptr<RotateController> addRotateController(const std::string& bone);
+    osg::ref_ptr<RotateController> addRotateController(std::string_view bone);
 
     bool mHasMagicEffects;
 
@@ -307,10 +307,10 @@ protected:
      * false.
      */
     bool reset(AnimState &state, const SceneUtil::TextKeyMap &keys,
-               const std::string &groupname, const std::string &start, const std::string &stop,
+               std::string_view groupname, std::string_view start, std::string_view stop,
                float startpoint, bool loopfallback);
 
-    void handleTextKey(AnimState &state, const std::string &groupname, SceneUtil::TextKeyMap::ConstIterator key,
+    void handleTextKey(AnimState &state, std::string_view groupname, SceneUtil::TextKeyMap::ConstIterator key,
                        const SceneUtil::TextKeyMap& map);
 
     /** Sets the root model of the object.
@@ -374,7 +374,7 @@ public:
      * @param texture override the texture specified in the model's materials - if empty, do not override
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "");
+    void addEffect(const std::string& model, int effectId, bool loop = false, std::string_view bonename = {}, std::string_view texture = {});
     void removeEffect (int effectId);
     void removeEffects ();
     void getLoopingEffects (std::vector<int>& out) const;
@@ -412,8 +412,8 @@ public:
      * \param loopFallback Allow looping an animation that has no loop keys, i.e. fall back to use
      *                     the "start" and "stop" keys for looping?
      */
-    void play(const std::string &groupname, const AnimPriority& priority, int blendMask, bool autodisable,
-              float speedmult, const std::string &start, const std::string &stop,
+    void play(std::string_view groupname, const AnimPriority& priority, int blendMask, bool autodisable,
+              float speedmult, std::string_view start,std::string_view stop,
               float startpoint, size_t loops, bool loopfallback=false);
 
     /** Adjust the speed multiplier of an already playing animation.
@@ -421,7 +421,7 @@ public:
     void adjustSpeedMult (const std::string& groupname, float speedmult);
 
     /** Returns true if the named animation group is playing. */
-    bool isPlaying(const std::string &groupname) const;
+    bool isPlaying(std::string_view groupname) const;
 
     /// Returns true if no important animations are currently playing on the upper body.
     bool upperBodyReady() const;
@@ -432,13 +432,13 @@ public:
      * \param speedmult Stores the animation speed multiplier
      * \return True if the animation is active, false otherwise.
      */
-    bool getInfo(const std::string &groupname, float *complete=nullptr, float *speedmult=nullptr) const;
+    bool getInfo(std::string_view groupname, float *complete=nullptr, float *speedmult=nullptr) const;
 
     /// Get the absolute position in the animation track of the first text key with the given group.
     float getStartTime(const std::string &groupname) const;
 
     /// Get the absolute position in the animation track of the text key
-    float getTextKeyTime(const std::string &textKey) const;
+    float getTextKeyTime(std::string_view textKey) const;
 
     /// Get the current absolute position in the animation track for the animation that is currently playing from the given group.
     float getCurrentTime(const std::string& groupname) const;
@@ -448,21 +448,21 @@ public:
     /** Disables the specified animation group;
      * \param groupname Animation group to disable.
      */
-    void disable(const std::string &groupname);
+    void disable(std::string_view groupname);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
 
     virtual osg::Vec3f runAnimation(float duration);
 
-    void setLoopingEnabled(const std::string &groupname, bool enabled);
+    void setLoopingEnabled(std::string_view groupname, bool enabled);
 
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects();
 
     /// Return a node with the specified name, or nullptr if not existing.
     /// @note The matching is case-insensitive.
-    const osg::Node* getNode(const std::string& name) const;
+    const osg::Node* getNode(std::string_view name) const;
 
     virtual bool useShieldAnimations() const { return false; }
     virtual bool getWeaponsShown() const { return false; }

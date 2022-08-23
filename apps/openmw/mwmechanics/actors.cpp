@@ -1935,7 +1935,7 @@ namespace MWMechanics
             iter->second->getCharacterController().forceStateUpdate();
     }
 
-    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist) const
+    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if(iter != mIndex.end())

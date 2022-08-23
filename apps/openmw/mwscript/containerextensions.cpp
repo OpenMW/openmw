@@ -118,7 +118,7 @@ namespace MWScript
                     // Explicit calls to non-unique actors affect the base record
                     if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
                         return;
                     }
 
@@ -126,7 +126,7 @@ namespace MWScript
                     if(ptr.getClass().getType() == ESM::Container::sRecordId && (!ptr.getRefData().getCustomData() ||
                     !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
                         const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
                         const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                         for(const auto& container : ptrs)
@@ -231,14 +231,14 @@ namespace MWScript
                     // Explicit calls to non-unique actors affect the base record
                     if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, -count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                         return;
                     }
                     // Calls to unresolved containers affect the base record instead
                     else if(ptr.getClass().getType() == ESM::Container::sRecordId &&
                         (!ptr.getRefData().getCustomData() || !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
-                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), std::string{item}, -count);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                         const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
                         const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                         for(const auto& container : ptrs)
