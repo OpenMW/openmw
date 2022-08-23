@@ -126,7 +126,7 @@ namespace MWGui
             if (count == 1)
                 winMgr->messageBox("#{sPotionSuccess}");
             else
-                winMgr->messageBox("#{sPotionSuccess} "+mNameEdit->getCaption()+" ("+std::to_string(count)+")");
+                winMgr->messageBox("#{sPotionSuccess} "+mNameEdit->getCaption().asUTF8()+" ("+std::to_string(count)+")");
             break;
         case MWMechanics::Alchemy::Result_NoEffects:
         case MWMechanics::Alchemy::Result_RandomFailure:

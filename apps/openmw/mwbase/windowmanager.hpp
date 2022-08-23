@@ -241,13 +241,12 @@ namespace MWBase
             /** No guarantee of actually closing the window **/
             virtual void exitCurrentGuiMode() = 0;
 
-            virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
+            virtual void messageBox(std::string_view message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             /// Puts message into a queue to show on the next update. Thread safe alternative for messageBox.
             virtual void scheduleMessageBox(std::string message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
-            virtual void staticMessageBox(const std::string& message) = 0;
+            virtual void staticMessageBox(std::string_view message) = 0;
             virtual void removeStaticMessageBox() = 0;
-            virtual void interactiveMessageBox (const std::string& message,
-                                                const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false) = 0;
+            virtual void interactiveMessageBox(std::string_view message, const std::vector<std::string>& buttons = {}, bool block = false) = 0;
 
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;

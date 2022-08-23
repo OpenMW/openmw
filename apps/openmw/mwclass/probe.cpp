@@ -137,14 +137,14 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    std::pair<int, std::string> Probe::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Probe::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         // Do not allow equip tools from inventory during attack
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
-            return std::make_pair(0, "#{sCantEquipWeapWarning}");
+            return {0, "#{sCantEquipWeapWarning}"};
 
-        return std::make_pair(1, "");
+        return {1, {}};
     }
 
     bool Probe::canSell (const MWWorld::ConstPtr& item, int npcServices) const

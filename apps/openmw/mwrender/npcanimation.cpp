@@ -816,10 +816,10 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         return false;
     }
 
-    if (!mSoundsDisabled)
+    if (!mSoundsDisabled && group == MWWorld::InventoryStore::Slot_CarriedLeft)
     {
         const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-        MWWorld::ConstContainerStoreIterator csi = inv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
+        MWWorld::ConstContainerStoreIterator csi = inv.getSlot(group);
         if (csi != inv.end())
         {
             const auto soundId = csi->getClass().getSound(*csi);

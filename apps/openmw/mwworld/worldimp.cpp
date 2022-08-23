@@ -2971,7 +2971,7 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        std::string message;
+        std::string_view message;
         MWWorld::SpellCastState result = MWWorld::SpellCastState::Success;
         bool isPlayer = (actor == getPlayerPtr());
 

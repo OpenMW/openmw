@@ -32,7 +32,7 @@ class TextureOverrideVisitor : public osg::NodeVisitor
             }
             traverse(node);
         }
-        std::string mTexture;
+        std::string_view mTexture;
         Resource::ResourceSystem* mResourcesystem;
 };
 

@@ -325,9 +325,9 @@ namespace MWWorld
         throw std::runtime_error ("class can't be enchanted");
     }
 
-    std::pair<int, std::string> Class::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Class::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
-        return std::make_pair (1, "");
+        return {1, {}};
     }
 
     void Class::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
@@ -449,7 +449,7 @@ namespace MWWorld
         throw std::runtime_error("class does not support base gold");
     }
 
-    bool Class::isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const
+    bool Class::isClass(const MWWorld::ConstPtr& ptr, std::string_view className) const
     {
         return false;
     }
@@ -478,9 +478,9 @@ namespace MWWorld
         return encumbrance / capacity;
     }
 
-    std::string Class::getSound(const MWWorld::ConstPtr&) const
+    std::string_view Class::getSound(const MWWorld::ConstPtr&) const
     {
-      return std::string();
+      return {};
     }
 
     int Class::getBaseFightRating(const ConstPtr &ptr) const

@@ -34,7 +34,7 @@ namespace MWWorld
 
         if (!mForce)
         {
-            std::pair <int, std::string> result = object.getClass().canBeEquipped (object, actor);
+            auto result = object.getClass().canBeEquipped (object, actor);
 
             // display error message if the player tried to equip something
             if (!result.second.empty() && actor == MWMechanics::getPlayer())

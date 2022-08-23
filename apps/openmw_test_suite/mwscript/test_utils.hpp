@@ -154,7 +154,7 @@ namespace
 
         void setLocalFloat(int index, float value) override { mLocals.setFloat(index, value); };
 
-        void messageBox(const std::string& message, const std::vector<std::string>& buttons) override {};
+        void messageBox(std::string_view message, const std::vector<std::string>& buttons) override {};
 
         void report(const std::string& message) override {};
 

@@ -47,7 +47,7 @@ namespace MWClass
             const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of inventory icon.
 
-            std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const override;
+            std::pair<int, std::string_view> canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
 
             std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
             ///< Generate action for using via inventory menu

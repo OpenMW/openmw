@@ -195,13 +195,13 @@ namespace MWClass
         return record->mId;
     }
 
-    std::pair<int, std::string> Clothing::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Clothing::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
-            return std::make_pair(0, "");
+            return {0, {}};
 
         if (npc.getClass().isNpc())
         {
@@ -216,14 +216,14 @@ namespace MWClass
                 for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                 {
                     if((*itr).mPart == ESM::PRT_Head)
-                        return std::make_pair(0, "#{sNotifyMessage13}");
+                        return {0, "#{sNotifyMessage13}"};
                     if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
-                        return std::make_pair(0, "#{sNotifyMessage15}");
+                        return {0, "#{sNotifyMessage15}"};
                 }
             }
         }
 
-        return std::make_pair (1, "");
+        return {1, {}};
     }
 
     std::unique_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr, bool force) const

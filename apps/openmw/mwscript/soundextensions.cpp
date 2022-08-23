@@ -36,7 +36,7 @@ namespace MWScript
                     std::string file{runtime.getStringLiteral(runtime[0].mInteger)};
                     runtime.pop();
 
-                    std::string text{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view text = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->say (ptr, file);

@@ -272,12 +272,11 @@ namespace MWGui
     ///Gracefully attempts to exit the topmost GUI mode
     void exitCurrentGuiMode() override;
 
-    void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
+    void messageBox(std::string_view message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
     void scheduleMessageBox (std::string message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
-    void staticMessageBox(const std::string& message) override;
+    void staticMessageBox(std::string_view message) override;
     void removeStaticMessageBox() override;
-    void interactiveMessageBox (const std::string& message,
-                                        const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false) override;
+    void interactiveMessageBox(std::string_view message, const std::vector<std::string>& buttons = {}, bool block = false) override;
 
     int readPressedButton () override; ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 

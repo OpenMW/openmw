@@ -567,7 +567,7 @@ namespace MWRender
 
     size_t Animation::detectBlendMask(const osg::Node* node) const
     {
-        static const char sBlendMaskRoots[sNumBlendMasks][32] = {
+        static const std::string_view sBlendMaskRoots[sNumBlendMasks] = {
             "", /* Lower body / character root */
             "Bip01 Spine1", /* Torso */
             "Bip01 L Clavicle", /* Left arm */
@@ -742,7 +742,7 @@ namespace MWRender
 
             for(auto iterKey = keys.begin(); iterKey != keys.end(); ++iterKey)
             {
-                if(iterKey->second.starts_with(textKey) == 0)
+                if(iterKey->second.starts_with(textKey))
                     return iterKey->first;
             }
         }

@@ -189,7 +189,7 @@ namespace MWGui
             // we may still want to show the label if the caller requested it
             if (mImportantLabel)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox(mLoadingText->getCaption());
+                MWBase::Environment::get().getWindowManager()->messageBox(mLoadingText->getCaption().asUTF8());
                 mImportantLabel = false;
             }
         }
