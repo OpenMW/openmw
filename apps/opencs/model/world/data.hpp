@@ -318,9 +318,11 @@ namespace CSMWorld
 
             void assetTablesChanged();
 
-        private slots:
+        public slots:
 
             void assetsChanged();
+
+        private slots:
 
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 

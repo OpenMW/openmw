@@ -43,7 +43,7 @@ CSVWorld::PathgridCreator::PathgridCreator(
     insertBeforeButtons(mCell, true);
 
     connect(mCell, &CSVWidget::DropLineEdit::textChanged, this, &PathgridCreator::cellChanged);
-    connect(mCell, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
+    connect(mCell, &CSVWidget::DropLineEdit::returnPressed, this, &PathgridCreator::inputReturnPressed);
 }
 
 void CSVWorld::PathgridCreator::cloneMode(

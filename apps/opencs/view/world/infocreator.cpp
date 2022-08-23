@@ -85,7 +85,7 @@ CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     setManualEditing (false);
 
     connect (mTopic, &CSVWidget::DropLineEdit::textChanged, this, &InfoCreator::topicChanged);
-    connect (mTopic, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
+    connect (mTopic, &CSVWidget::DropLineEdit::returnPressed, this, &InfoCreator::inputReturnPressed);
 }
 
 void CSVWorld::InfoCreator::cloneMode (const std::string& originId,

@@ -261,7 +261,7 @@ void CSVDoc::View::setupAssetsMenu()
     QMenu *assets = menuBar()->addMenu (tr ("Assets"));
 
     QAction* reload = createMenuEntry("Reload", ":./menu-reload.png", assets, "document-assets-reload");
-    connect (reload, SIGNAL (triggered()), &mDocument->getData(), SLOT (assetsChanged()));
+    connect (reload, &QAction::triggered, &mDocument->getData(), &CSMWorld::Data::assetsChanged);
 
     assets->addSeparator();
 
