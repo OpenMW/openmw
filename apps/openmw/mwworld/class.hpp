@@ -281,7 +281,7 @@ namespace MWWorld
             virtual const std::string& applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
             ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
-            virtual std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const;
+            virtual std::pair<int, std::string_view> canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const;
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
             ///  Second item in the pair specifies the error message
 
@@ -345,7 +345,7 @@ namespace MWWorld
 
             virtual int getBaseGold(const MWWorld::ConstPtr& ptr) const;
 
-            virtual bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const;
+            virtual bool isClass(const MWWorld::ConstPtr& ptr, std::string_view className) const;
 
             virtual DoorState getDoorState (const MWWorld::ConstPtr &ptr) const;
             /// This does not actually cause the door to move. Use World::activateDoor instead.
@@ -354,7 +354,7 @@ namespace MWWorld
             virtual void respawn (const MWWorld::Ptr& ptr) const {}
 
             /// Returns sound id
-            virtual std::string getSound(const MWWorld::ConstPtr& ptr) const;
+            virtual std::string_view getSound(const MWWorld::ConstPtr& ptr) const;
 
             virtual int getBaseFightRating (const MWWorld::ConstPtr& ptr) const;
 

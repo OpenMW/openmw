@@ -539,7 +539,7 @@ namespace MWGui
 
             if (!force)
             {
-                std::pair<int, std::string> canEquip = ptr.getClass().canBeEquipped(ptr, player);
+                auto canEquip = ptr.getClass().canBeEquipped(ptr, player);
 
                 if (canEquip.first == 0)
                 {

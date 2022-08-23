@@ -714,7 +714,7 @@ namespace MWGui
         popGuiMode();
     }
 
-    void WindowManager::interactiveMessageBox(const std::string &message, const std::vector<std::string> &buttons, bool block)
+    void WindowManager::interactiveMessageBox(std::string_view message, const std::vector<std::string> &buttons, bool block)
     {
         mMessageBoxManager->createInteractiveMessageBox(message, buttons);
         updateVisible();
@@ -749,10 +749,10 @@ namespace MWGui
         }
     }
 
-    void WindowManager::messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode)
+    void WindowManager::messageBox(std::string_view message, enum MWGui::ShowInDialogueMode showInDialogueMode)
     {
         if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
-            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
+            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags({message.data(), message.size()}));
         } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
             mMessageBoxManager->createMessageBox(message);
         }
@@ -763,7 +763,7 @@ namespace MWGui
         mScheduledMessageBoxes.lock()->emplace_back(std::move(message), showInDialogueMode);
     }
 
-    void WindowManager::staticMessageBox(const std::string& message)
+    void WindowManager::staticMessageBox(std::string_view message)
     {
         mMessageBoxManager->createMessageBox(message, true);
     }

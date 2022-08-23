@@ -499,7 +499,7 @@ namespace MWClass
 
                 for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
                 {
-                    std::string partname = female ? it->mFemale : it->mMale;
+                    std::string_view partname = female ? it->mFemale : it->mMale;
                     if (partname.empty())
                         partname = female ? it->mMale : it->mFemale;
                     const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
@@ -1400,7 +1400,7 @@ namespace MWClass
         return ref->mBase->mNpdt.mGold;
     }
 
-    bool Npc::isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const
+    bool Npc::isClass(const MWWorld::ConstPtr& ptr, std::string_view className) const
     {
         return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
     }

@@ -72,9 +72,9 @@ namespace MWClass
 
             bool canSell (const MWWorld::ConstPtr& item, int npcServices) const override;
 
-            std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const override;
+            std::pair<int, std::string_view> canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
 
-            std::string getSound(const MWWorld::ConstPtr& ptr) const override;
+            std::string_view getSound(const MWWorld::ConstPtr& ptr) const override;
     };
 }
 

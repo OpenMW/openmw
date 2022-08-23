@@ -27,10 +27,10 @@ namespace Interpreter
 
             virtual void setLocalFloat (int index, float value) = 0;
 
-            virtual void messageBox (const std::string& message,
+            virtual void messageBox(std::string_view message,
                 const std::vector<std::string>& buttons) = 0;
 
-            void messageBox (const std::string& message)
+            void messageBox(std::string_view message)
             {
                 std::vector<std::string> empty;
                 messageBox (message, empty);

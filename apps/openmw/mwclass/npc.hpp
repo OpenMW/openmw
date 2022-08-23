@@ -149,7 +149,7 @@ namespace MWClass
 
             int getBaseGold(const MWWorld::ConstPtr& ptr) const override;
 
-            bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const override;
+            bool isClass(const MWWorld::ConstPtr& ptr, std::string_view className) const override;
 
             bool canSwim (const MWWorld::ConstPtr &ptr) const override;
 

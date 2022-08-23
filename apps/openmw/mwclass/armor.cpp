@@ -283,18 +283,18 @@ namespace MWClass
             return ref->mBase->mData.mArmor * armorSkill / static_cast<float>(iBaseArmorSkill);
     }
 
-    std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Armor::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         const MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
 
         if (getItemHealth(ptr) == 0)
-            return std::make_pair(0, "#{sInventoryMessage1}");
+            return {0, "#{sInventoryMessage1}"};
 
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
-            return std::make_pair(0, "");
+            return {0, {}};
 
         if (npc.getClass().isNpc())
         {
@@ -309,9 +309,9 @@ namespace MWClass
                 for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                 {
                     if((*itr).mPart == ESM::PRT_Head)
-                        return std::make_pair(0, "#{sNotifyMessage13}");
+                        return {0, "#{sNotifyMessage13}"};
                     if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
-                        return std::make_pair(0, "#{sNotifyMessage14}");
+                        return {0, "#{sNotifyMessage14}"};
                 }
             }
         }
@@ -327,13 +327,13 @@ namespace MWClass
                 {
                     const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
                     if (MWMechanics::getWeaponType(ref->mBase->mData.mType)->mFlags & ESM::WeaponType::TwoHanded)
-                        return std::make_pair(3,"");
+                        return {3, {}};
                 }
 
-                return std::make_pair(1,"");
+                return {1, {}};
             }
         }
-        return std::make_pair(1,"");
+        return {1, {}};
     }
 
     std::unique_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr, bool force) const

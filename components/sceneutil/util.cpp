@@ -171,7 +171,7 @@ float makeOsgColorComponent(unsigned int value, unsigned int shift)
     return float((value >> shift) & 0xFFu) / 255.0f;
 }
 
-bool hasUserDescription(const osg::Node* node, const std::string& pattern)
+bool hasUserDescription(const osg::Node* node, std::string_view pattern)
 {
     if (node == nullptr)
         return false;

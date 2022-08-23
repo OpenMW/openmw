@@ -434,7 +434,7 @@ namespace MWGui
         }
         else if (key->type == Type_Magic)
         {
-            std::string spellId = key->id;
+            const std::string& spellId = key->id;
 
             // Make sure the player still has this spell
             MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
@@ -534,8 +534,7 @@ namespace MWGui
                     break;
                 }
                 case Type_Magic:
-                    std::string spellId = button->getUserString("Spell");
-                    key.mId = spellId;
+                    key.mId = button->getUserString("Spell");
                     break;
             }
 

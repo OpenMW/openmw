@@ -89,11 +89,11 @@ namespace MWGui
         }
     }
 
-    void MessageBoxManager::createMessageBox (const std::string& message, bool stat)
+    void MessageBoxManager::createMessageBox(std::string_view message, bool stat)
     {
         MessageBox *box = new MessageBox(*this, message);
         box->mCurrentTime = 0;
-        std::string realMessage = MyGUI::LanguageManager::getInstance().replaceTags(message);
+        auto realMessage = MyGUI::LanguageManager::getInstance().replaceTags({message.data(), message.size()});
         box->mMaxTime = realMessage.length()*mMessageBoxSpeed;
 
         if(stat)
@@ -122,7 +122,7 @@ namespace MWGui
         mStaticMessageBox = nullptr;
     }
 
-    bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
+    bool MessageBoxManager::createInteractiveMessageBox(std::string_view message, const std::vector<std::string>& buttons)
     {
         if (mInterMessageBoxe != nullptr)
         {
@@ -132,7 +132,7 @@ namespace MWGui
             mInterMessageBoxe = nullptr;
         }
 
-        mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
+        mInterMessageBoxe = new InteractiveMessageBox(*this, std::string{message}, buttons);
         mLastButtonPressed = -1;
 
         return true;
@@ -178,7 +178,7 @@ namespace MWGui
             messageBox->setVisible(value);
     }
 
-    MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
+    MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, std::string_view message)
       : Layout("openmw_messagebox.layout")
       , mCurrentTime(0)
       , mMaxTime(0)

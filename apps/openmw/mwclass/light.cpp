@@ -224,16 +224,16 @@ namespace MWClass
         return ref->mBase->mData.mWeight;
     }
 
-    std::pair<int, std::string> Light::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Light::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         if (!(ref->mBase->mData.mFlags & ESM::Light::Carry))
-            return std::make_pair(0,"");
+            return {0, {}};
 
-        return std::make_pair(1,"");
+        return {1, {}};
     }
 
-    std::string Light::getSound(const MWWorld::ConstPtr& ptr) const
+    std::string_view Light::getSound(const MWWorld::ConstPtr& ptr) const
     {
       return ptr.get<ESM::Light>()->mBase->mSound;
     }

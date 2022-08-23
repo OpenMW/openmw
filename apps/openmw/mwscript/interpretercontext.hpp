@@ -61,7 +61,7 @@ namespace MWScript
 
             using Interpreter::Context::messageBox;
 
-            void messageBox (const std::string& message,
+            void messageBox(std::string_view message,
                 const std::vector<std::string>& buttons) override;
 
             void report (const std::string& message) override;
