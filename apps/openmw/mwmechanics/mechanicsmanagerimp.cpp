@@ -761,7 +761,7 @@ namespace MWMechanics
             mActors.forceStateUpdate(ptr);
     }
 
-    bool MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
+    bool MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist)
     {
         if(ptr.getClass().isActor())
             return mActors.playAnimationGroup(ptr, groupName, mode, number, persist);

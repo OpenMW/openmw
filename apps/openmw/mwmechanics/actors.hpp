@@ -121,7 +121,7 @@ namespace MWMechanics
 
             void forceStateUpdate(const MWWorld::Ptr &ptr) const;
 
-            bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
+            bool playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode,
                 int number, bool persist = false) const;
             void skipAnimation(const MWWorld::Ptr& ptr) const;
             bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) const;

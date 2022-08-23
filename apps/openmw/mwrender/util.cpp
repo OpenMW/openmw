@@ -14,7 +14,7 @@ namespace MWRender
 class TextureOverrideVisitor : public osg::NodeVisitor
     {
     public:
-        TextureOverrideVisitor(const std::string& texture, Resource::ResourceSystem* resourcesystem)
+        TextureOverrideVisitor(std::string_view texture, Resource::ResourceSystem* resourcesystem)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mTexture(texture)
             , mResourcesystem(resourcesystem)
@@ -36,13 +36,13 @@ class TextureOverrideVisitor : public osg::NodeVisitor
         Resource::ResourceSystem* mResourcesystem;
 };
 
-void overrideFirstRootTexture(const std::string &texture, Resource::ResourceSystem *resourceSystem, osg::ref_ptr<osg::Node> node)
+void overrideFirstRootTexture(std::string_view texture, Resource::ResourceSystem *resourceSystem, osg::ref_ptr<osg::Node> node)
 {
     TextureOverrideVisitor overrideVisitor(texture, resourceSystem);
     node->accept(overrideVisitor);
 }
 
-void overrideTexture(const std::string &texture, Resource::ResourceSystem *resourceSystem, osg::ref_ptr<osg::Node> node)
+void overrideTexture(std::string_view texture, Resource::ResourceSystem *resourceSystem, osg::ref_ptr<osg::Node> node)
 {
     if (texture.empty())
         return;

@@ -478,7 +478,7 @@ namespace MWMechanics
             {
                 animation->addEffect(
                     Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
-                    effect->mIndex, false, "", effect->mParticle);
+                    effect->mIndex, false, {}, effect->mParticle);
             }
             else
             {
@@ -561,7 +561,7 @@ namespace MWMechanics
                 const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 anim->addEffect(
                     Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
-                    magicEffect.mIndex, loop, "", magicEffect.mParticle);
+                    magicEffect.mIndex, loop, {}, magicEffect.mParticle);
             }
         }
     }

@@ -270,7 +270,7 @@ namespace MWMechanics
                     const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                     animation->addEffect(
                         Misc::ResourceHelpers::correctMeshPath(reflectStatic->mModel, vfs),
-                        ESM::MagicEffect::Reflect, false, std::string());
+                        ESM::MagicEffect::Reflect, false);
                 }
                 caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
             }
