@@ -24,8 +24,8 @@ CSVWidget::ColorEditor::ColorEditor(QWidget *parent, const bool popupOnStart)
       mColorPicker(new ColorPickerPopup(this)),
       mPopupOnStart(popupOnStart)
 {
-    connect(this, SIGNAL(clicked()), this, SLOT(showPicker()));
-    connect(mColorPicker, SIGNAL(colorChanged(const QColor &)), this, SLOT(pickerColorChanged(const QColor &)));
+    connect(this, &ColorEditor::clicked, this, &ColorEditor::showPicker);
+    connect(mColorPicker, &ColorPickerPopup::colorChanged, this, &ColorEditor::pickerColorChanged);
 }
 
 void CSVWidget::ColorEditor::paintEvent(QPaintEvent *event)

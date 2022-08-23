@@ -84,7 +84,7 @@ CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
 
     setManualEditing (false);
 
-    connect (mTopic, SIGNAL (textChanged (const QString&)), this, SLOT (topicChanged()));
+    connect (mTopic, &CSVWidget::DropLineEdit::textChanged, this, &InfoCreator::topicChanged);
     connect (mTopic, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
 }
 

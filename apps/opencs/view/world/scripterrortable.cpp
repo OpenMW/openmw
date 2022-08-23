@@ -96,11 +96,11 @@ CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, 
     Compiler::registerExtensions (mExtensions);
     mContext.setExtensions (&mExtensions);
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
+        this, &ScriptErrorTable::settingChanged);
     CSMPrefs::get()["Scripts"].update();
 
-    connect (this, SIGNAL (cellClicked (int, int)), this, SLOT (cellClicked (int, int)));
+    connect (this, &QTableWidget::cellClicked, this, &ScriptErrorTable::cellClicked);
 }
 
 void CSVWorld::ScriptErrorTable::update (const std::string& source)

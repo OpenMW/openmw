@@ -44,7 +44,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
                 "\nCan be useful in finding the moved or modified"
                 "\nobject instance while 3D editing.");
     autoJump->setCheckState(Qt::Unchecked);
-    connect(autoJump, SIGNAL (stateChanged(int)), mTable, SLOT (jumpAfterModChanged(int)));
+    connect(autoJump, &QCheckBox::stateChanged, mTable, &Table::jumpAfterModChanged);
     optHLayout->insertWidget(0, autoJump);
     optHLayout->setContentsMargins (QMargins (0, 3, 0, 0));
     mOptions->setLayout(optHLayout);
@@ -55,7 +55,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     opt->setIcon (QIcon (":startup/configure"));
     opt->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     opt->setToolTip ("Open additional options for this subview.");
-    connect (opt, SIGNAL (clicked()), this, SLOT (toggleOptions()));
+    connect (opt, &QPushButton::clicked, this, &TableSubView::toggleOptions);
 
     QVBoxLayout *buttonLayout = new QVBoxLayout; // work around margin issues
     buttonLayout->setContentsMargins (QMargins (0/*left*/, 3/*top*/, 3/*right*/, 0/*bottom*/));
@@ -78,13 +78,10 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         frameHeight = topLevel->frameGeometry().height() - topLevel->height();
     widget->setSizeHint(QSize(mTable->horizontalHeader()->length(), rect.height()-frameHeight));
 
-    connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
-        this, SLOT (editRequest (const CSMWorld::UniversalId&, const std::string&)));
+    connect (mTable, &Table::editRequest, this, &TableSubView::editRequest);
 
-    connect (mTable, SIGNAL (selectionSizeChanged (int)),
-        mBottom, SLOT (selectionSizeChanged (int)));
-    connect (mTable, SIGNAL (tableSizeChanged (int, int, int)),
-        mBottom, SLOT (tableSizeChanged (int, int, int)));
+    connect (mTable, &Table::selectionSizeChanged, mBottom, &TableBottomBox::selectionSizeChanged);
+    connect (mTable, &Table::tableSizeChanged, mBottom, &TableBottomBox::tableSizeChanged);
 
     mTable->tableSizeUpdate();
     mTable->selectionSizeUpdate();
@@ -94,33 +91,33 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     if (mBottom->canCreateAndDelete())
     {
-        connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
+        connect (mTable, &Table::createRequest, mBottom, &TableBottomBox::createRequest);
 
-        connect (mTable, SIGNAL (cloneRequest(const CSMWorld::UniversalId&)), this,
-                 SLOT(cloneRequest(const CSMWorld::UniversalId&)));
+        connect (mTable, &Table::cloneRequest, 
+            this, qOverload<const CSMWorld::UniversalId&>(&TableSubView::cloneRequest));
 
-        connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)),
-                mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
+        connect (this, 
+            qOverload<const std::string&,const CSMWorld::UniversalId::Type>(&TableSubView::cloneRequest), 
+            mBottom, &TableBottomBox::cloneRequest);
 
-        connect (mTable, SIGNAL(touchRequest(const std::vector<CSMWorld::UniversalId>&)),
-            mBottom, SLOT(touchRequest(const std::vector<CSMWorld::UniversalId>&)));
+        connect (mTable, &Table::touchRequest,
+            mBottom, &TableBottomBox::touchRequest);
 
-        connect (mTable, SIGNAL(extendedDeleteConfigRequest(const std::vector<std::string> &)),
-            mBottom, SLOT(extendedDeleteConfigRequest(const std::vector<std::string> &)));
-        connect (mTable, SIGNAL(extendedRevertConfigRequest(const std::vector<std::string> &)),
-            mBottom, SLOT(extendedRevertConfigRequest(const std::vector<std::string> &)));
+        connect (mTable, &Table::extendedDeleteConfigRequest,
+            mBottom, &TableBottomBox::extendedDeleteConfigRequest);
+        connect (mTable, &Table::extendedRevertConfigRequest,
+            mBottom, &TableBottomBox::extendedRevertConfigRequest);
     }
-    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
-        mTable, SLOT (requestFocus (const std::string&)));
+    connect (mBottom, &TableBottomBox::requestFocus, mTable, &Table::requestFocus);
 
-    connect (mFilterBox,
-        SIGNAL (recordFilterChanged (std::shared_ptr<CSMFilter::Node>)),
-        mTable, SLOT (recordFilterChanged (std::shared_ptr<CSMFilter::Node>)));
+    connect (mFilterBox, &CSVFilter::FilterBox::recordFilterChanged,
+        mTable, &Table::recordFilterChanged);
 
-    connect(mFilterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)),
-        this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)));
+    connect(mFilterBox, &CSVFilter::FilterBox::recordDropped,
+        this, &TableSubView::createFilterRequest);
 
-    connect (mTable, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
+
+    connect (mTable, &Table::closeRequest, this, qOverload<>(&TableSubView::closeRequest));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)

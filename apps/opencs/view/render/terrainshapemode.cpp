@@ -47,12 +47,12 @@ void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
     if(!mShapeBrushScenetool)
     {
         mShapeBrushScenetool = new CSVWidget::SceneToolShapeBrush (toolbar, "scenetoolshapebrush", getWorldspaceWidget().getDocument());
-        connect(mShapeBrushScenetool, SIGNAL (clicked()), mShapeBrushScenetool, SLOT (activate()));
-        connect(mShapeBrushScenetool->mShapeBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
-        connect(mShapeBrushScenetool->mShapeBrushWindow, SIGNAL(passBrushShape(CSVWidget::BrushShape)), this, SLOT(setBrushShape(CSVWidget::BrushShape)));
-        connect(mShapeBrushScenetool->mShapeBrushWindow->mSizeSliders->mBrushSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(setBrushSize(int)));
-        connect(mShapeBrushScenetool->mShapeBrushWindow->mToolSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(setShapeEditTool(int)));
-        connect(mShapeBrushScenetool->mShapeBrushWindow->mToolStrengthSlider, SIGNAL(valueChanged(int)), this, SLOT(setShapeEditToolStrength(int)));
+        connect(mShapeBrushScenetool, &CSVWidget::SceneTool::clicked, mShapeBrushScenetool, &CSVWidget::SceneToolShapeBrush::activate);
+        connect(mShapeBrushScenetool->mShapeBrushWindow, &CSVWidget::ShapeBrushWindow::passBrushSize, this, &TerrainShapeMode::setBrushSize);
+        connect(mShapeBrushScenetool->mShapeBrushWindow, &CSVWidget::ShapeBrushWindow::passBrushShape, this, &TerrainShapeMode::setBrushShape);
+        connect(mShapeBrushScenetool->mShapeBrushWindow->mSizeSliders->mBrushSizeSlider, &QSlider::valueChanged, this, &TerrainShapeMode::setBrushSize);
+        connect(mShapeBrushScenetool->mShapeBrushWindow->mToolSelector, qOverload<int>(&QComboBox::currentIndexChanged), this, &TerrainShapeMode::setShapeEditTool);
+        connect(mShapeBrushScenetool->mShapeBrushWindow->mToolStrengthSlider, &QSlider::valueChanged, this, &TerrainShapeMode::setShapeEditToolStrength);
     }
 
     if (!mBrushDraw)

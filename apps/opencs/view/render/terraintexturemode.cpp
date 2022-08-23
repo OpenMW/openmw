@@ -47,16 +47,16 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
     if(!mTextureBrushScenetool)
     {
         mTextureBrushScenetool = new CSVWidget::SceneToolTextureBrush (toolbar, "scenetooltexturebrush", getWorldspaceWidget().getDocument());
-        connect(mTextureBrushScenetool, SIGNAL (clicked()), mTextureBrushScenetool, SLOT (activate()));
-        connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
-        connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushShape(CSVWidget::BrushShape)), this, SLOT(setBrushShape(CSVWidget::BrushShape)));
-        connect(mTextureBrushScenetool->mTextureBrushWindow->mSizeSliders->mBrushSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(setBrushSize(int)));
-        connect(mTextureBrushScenetool, SIGNAL(passTextureId(std::string)), this, SLOT(setBrushTexture(std::string)));
-        connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passTextureId(std::string)), this, SLOT(setBrushTexture(std::string)));
+        connect(mTextureBrushScenetool, &CSVWidget::SceneTool::clicked, mTextureBrushScenetool, &CSVWidget::SceneToolTextureBrush::activate);
+        connect(mTextureBrushScenetool->mTextureBrushWindow, &CSVWidget::TextureBrushWindow::passBrushSize, this, &TerrainTextureMode::setBrushSize);
+        connect(mTextureBrushScenetool->mTextureBrushWindow, &CSVWidget::TextureBrushWindow::passBrushShape, this, &TerrainTextureMode::setBrushShape);
+        connect(mTextureBrushScenetool->mTextureBrushWindow->mSizeSliders->mBrushSizeSlider, &QSlider::valueChanged, this, &TerrainTextureMode::setBrushSize);
+        connect(mTextureBrushScenetool, &CSVWidget::SceneToolTextureBrush::passTextureId, this, &TerrainTextureMode::setBrushTexture);
+        connect(mTextureBrushScenetool->mTextureBrushWindow, &CSVWidget::TextureBrushWindow::passTextureId, this, &TerrainTextureMode::setBrushTexture);
 
-        connect(mTextureBrushScenetool, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
-        connect(this, SIGNAL(passBrushTexture(std::string)), mTextureBrushScenetool->mTextureBrushWindow, SLOT(setBrushTexture(std::string)));
-        connect(this, SIGNAL(passBrushTexture(std::string)), mTextureBrushScenetool, SLOT(updateBrushHistory(std::string)));
+        connect(mTextureBrushScenetool, qOverload<QDropEvent *>(&CSVWidget::SceneToolTextureBrush::passEvent), this, &TerrainTextureMode::handleDropEvent);
+        connect(this, &TerrainTextureMode::passBrushTexture, mTextureBrushScenetool->mTextureBrushWindow, &CSVWidget::TextureBrushWindow::setBrushTexture);
+        connect(this, &TerrainTextureMode::passBrushTexture, mTextureBrushScenetool, &CSVWidget::SceneToolTextureBrush::updateBrushHistory);
     }
 
     if (!mTerrainTextureSelection)

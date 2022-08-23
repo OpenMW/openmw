@@ -40,11 +40,10 @@ CSVDoc::NewGameDialogue::NewGameDialogue()
 
     setLayout (layout);
 
-    connect (mAdjusterWidget, SIGNAL (stateChanged (bool)), this, SLOT (stateChanged (bool)));
-    connect (mCreate, SIGNAL (clicked()), this, SLOT (create()));
-    connect (cancel, SIGNAL (clicked()), this, SLOT (reject()));
-    connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
-        mAdjusterWidget, SLOT (setName (const QString&, bool)));
+    connect (mAdjusterWidget, &AdjusterWidget::stateChanged, this, &NewGameDialogue::stateChanged);
+    connect (mCreate, &QPushButton::clicked, this, &NewGameDialogue::create);
+    connect (cancel, &QPushButton::clicked, this, &NewGameDialogue::reject);
+    connect (mFileWidget, &FileWidget::nameChanged, mAdjusterWidget, &AdjusterWidget::setName);
 
     QRect scr = QGuiApplication::primaryScreen()->geometry();
     QRect rect = geometry();

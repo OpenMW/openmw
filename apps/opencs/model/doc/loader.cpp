@@ -14,7 +14,7 @@ CSMDoc::Loader::Loader()
 {
     mTimer = new QTimer (this);
 
-    connect (mTimer, SIGNAL (timeout()), this, SLOT (load()));
+    connect (mTimer, &QTimer::timeout, this, &Loader::load);
     mTimer->start();
 }
 

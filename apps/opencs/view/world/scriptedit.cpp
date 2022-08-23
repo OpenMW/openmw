@@ -88,26 +88,26 @@ CSVWorld::ScriptEdit::ScriptEdit(
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
     
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(markOccurrences()));
+    connect(this, &ScriptEdit::cursorPositionChanged, this, &ScriptEdit::markOccurrences);
 
     mCommentAction = new QAction (tr ("Comment Selection"), this);
-    connect(mCommentAction, SIGNAL (triggered()), this, SLOT (commentSelection()));
+    connect(mCommentAction, &QAction::triggered, this, &ScriptEdit::commentSelection);
     CSMPrefs::Shortcut *commentShortcut = new CSMPrefs::Shortcut("script-editor-comment", this);
     commentShortcut->associateAction(mCommentAction);
 
     mUncommentAction = new QAction (tr ("Uncomment Selection"), this);
-    connect(mUncommentAction, SIGNAL (triggered()), this, SLOT (uncommentSelection()));
+    connect(mUncommentAction, &QAction::triggered, this, &ScriptEdit::uncommentSelection);
     CSMPrefs::Shortcut *uncommentShortcut = new CSMPrefs::Shortcut("script-editor-uncomment", this);
     uncommentShortcut->associateAction(mUncommentAction);
 
     mHighlighter = new ScriptHighlighter (document.getData(), mode, ScriptEdit::document());
 
-    connect (&document.getData(), SIGNAL (idListChanged()), this, SLOT (idListChanged()));
+    connect (&document.getData(), &CSMWorld::Data::idListChanged, this, &ScriptEdit::idListChanged);
 
-    connect (&mUpdateTimer, SIGNAL (timeout()), this, SLOT (updateHighlighting()));
+    connect (&mUpdateTimer, &QTimer::timeout, this, &ScriptEdit::updateHighlighting);
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
+        this, &ScriptEdit::settingChanged);
     {
         ChangeLock lock (*this);
         CSMPrefs::get()["Scripts"].update();
@@ -121,8 +121,8 @@ CSVWorld::ScriptEdit::ScriptEdit(
     mLineNumberArea = new LineNumberArea(this);
     updateLineNumberAreaWidth(0);
 
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
+    connect(this, &ScriptEdit::blockCountChanged, this, &ScriptEdit::updateLineNumberAreaWidth);
+    connect(this, &ScriptEdit::updateRequest, this, &ScriptEdit::updateLineNumberArea);
     updateHighlighting();
 }
 
@@ -313,9 +313,9 @@ void CSVWorld::ScriptEdit::markOccurrences()
         // prevent infinite recursion with cursor.select(),
         // which ends up calling this function again
         // could be fixed with blockSignals, but mDocument is const
-        disconnect(this, SIGNAL(cursorPositionChanged()), this, nullptr);
+        disconnect(this, &ScriptEdit::cursorPositionChanged, this, nullptr);
         cursor.select(QTextCursor::WordUnderCursor);
-        connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(markOccurrences()));
+        connect(this, &ScriptEdit::cursorPositionChanged, this, &ScriptEdit::markOccurrences);
 
         QString word = cursor.selectedText();
         mHighlighter->setMarkedWord(word.toStdString());

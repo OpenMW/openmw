@@ -100,7 +100,7 @@ void CSVWidget::SceneToolMode::addButton (ModeButton *button, const std::string&
 
     mButtons.insert (std::make_pair (button, id));
 
-    connect (button, SIGNAL (clicked()), this, SLOT (selected()));
+    connect (button, &ModeButton::clicked, this, &SceneToolMode::selected);
 
     if (mButtons.size()==1)
     {

@@ -57,20 +57,20 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
         if (!fixedRows)
         {
             mAddNewRowAction = new QAction (tr ("Add new row"), this);
-            connect(mAddNewRowAction, SIGNAL(triggered()),
-                    this, SLOT(addNewRowActionTriggered()));
+            connect(mAddNewRowAction, &QAction::triggered,
+                    this, &NestedTable::addNewRowActionTriggered);
             CSMPrefs::Shortcut* addRowShortcut = new CSMPrefs::Shortcut("table-add", this);
             addRowShortcut->associateAction(mAddNewRowAction);
 
             mRemoveRowAction = new QAction (tr ("Remove rows"), this);
-            connect(mRemoveRowAction, SIGNAL(triggered()),
-                    this, SLOT(removeRowActionTriggered()));
+            connect(mRemoveRowAction, &QAction::triggered,
+                    this, &NestedTable::removeRowActionTriggered);
             CSMPrefs::Shortcut* removeRowShortcut = new CSMPrefs::Shortcut("table-remove", this);
             removeRowShortcut->associateAction(mRemoveRowAction);
         }
 
         mEditIdAction = new TableEditIdAction(*this, this);
-        connect(mEditIdAction, SIGNAL(triggered()), this, SLOT(editCell()));
+        connect(mEditIdAction, &QAction::triggered, this, &NestedTable::editCell);
     }
 }
 

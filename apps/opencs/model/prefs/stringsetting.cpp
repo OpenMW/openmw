@@ -30,7 +30,7 @@ std::pair<QWidget *, QWidget *> CSMPrefs::StringSetting::makeWidgets (QWidget *p
         mWidget->setToolTip (tooltip);
     }
 
-    connect (mWidget, SIGNAL (textChanged (QString)), this, SLOT (textChanged (QString)));
+    connect (mWidget, &QLineEdit::textChanged, this, &StringSetting::textChanged);
 
     return std::make_pair (static_cast<QWidget *> (nullptr), mWidget);
 }

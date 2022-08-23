@@ -35,7 +35,7 @@ std::pair<QWidget *, QWidget *> CSMPrefs::ColourSetting::makeWidgets (QWidget *p
         mWidget->setToolTip (tooltip);
     }
 
-    connect (mWidget, SIGNAL (pickingFinished()), this, SLOT (valueChanged()));
+    connect (mWidget, &CSVWidget::ColorEditor::pickingFinished, this, &ColourSetting::valueChanged);
 
     return std::make_pair (label, mWidget);
 }

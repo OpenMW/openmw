@@ -36,7 +36,7 @@ void CSVDoc::GlobalDebugProfileMenu::rebuild()
     }
 
     mActions = new QActionGroup (this);
-    connect (mActions, SIGNAL (triggered (QAction *)), this, SLOT (actionTriggered (QAction *)));
+    connect (mActions, &QActionGroup::triggered, this, &GlobalDebugProfileMenu::actionTriggered);
 
     std::sort (ids.begin(), ids.end());
 
@@ -52,14 +52,14 @@ CSVDoc::GlobalDebugProfileMenu::GlobalDebugProfileMenu (CSMWorld::IdTable *debug
 {
     rebuild();
 
-    connect (mDebugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (profileAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (mDebugProfiles, &CSMWorld::IdTable::rowsAboutToBeRemoved,
+        this, &GlobalDebugProfileMenu::profileAboutToBeRemoved);
 
-    connect (mDebugProfiles, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (profileInserted (const QModelIndex&, int, int)));
+    connect (mDebugProfiles, &CSMWorld::IdTable::rowsInserted,
+        this, &GlobalDebugProfileMenu::profileInserted);
 
-    connect (mDebugProfiles, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (profileChanged (const QModelIndex&, const QModelIndex&)));
+    connect (mDebugProfiles, &CSMWorld::IdTable::dataChanged,
+        this, &GlobalDebugProfileMenu::profileChanged);
 }
 
 void CSVDoc::GlobalDebugProfileMenu::updateActions (bool running)

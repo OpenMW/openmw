@@ -270,36 +270,42 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         // is required here
         if (qobject_cast<CSVWidget::DropLineEdit*>(editor))
         {
-            connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+            connect(static_cast<CSVWidget::DropLineEdit*>(editor), &CSVWidget::DropLineEdit::editingFinished,
+                proxy, qOverload<>(&DialogueDelegateDispatcherProxy::editorDataCommited));
 
-            connect(editor, SIGNAL(tableMimeDataDropped(const CSMWorld::UniversalId&, const CSMDoc::Document*)),
-                    proxy, SLOT(editorDataCommited()));
+            connect(static_cast<CSVWidget::DropLineEdit*>(editor), &CSVWidget::DropLineEdit::tableMimeDataDropped,
+                    proxy, qOverload<>(&DialogueDelegateDispatcherProxy::editorDataCommited));
         }
         else if (qobject_cast<QCheckBox*>(editor))
         {
-            connect(editor, SIGNAL(stateChanged(int)), proxy, SLOT(editorDataCommited()));
+            connect(static_cast<QCheckBox*>(editor), &QCheckBox::stateChanged,
+                    proxy, qOverload<>(&DialogueDelegateDispatcherProxy::editorDataCommited));
         }
         else if (qobject_cast<QPlainTextEdit*>(editor))
         {
-            connect(editor, SIGNAL(textChanged()), proxy, SLOT(editorDataCommited()));
+            connect(static_cast<QPlainTextEdit*>(editor), &QPlainTextEdit::textChanged, proxy,
+                    qOverload<>(&DialogueDelegateDispatcherProxy::editorDataCommited));
         }
         else if (qobject_cast<QComboBox*>(editor))
         {
-            connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
+            connect(static_cast<QComboBox*>(editor), qOverload<int>(&QComboBox::currentIndexChanged),
+                    proxy, qOverload<>(&DialogueDelegateDispatcherProxy::editorDataCommited));
         }
         else if (qobject_cast<QAbstractSpinBox*>(editor) || qobject_cast<QLineEdit*>(editor))
         {
-            connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+            connect(static_cast<QAbstractSpinBox*>(editor), &QAbstractSpinBox::editingFinished,
+                    proxy, qOverload<>(&DialogueDelegateDispatcherProxy::editorDataCommited));
         }
         else if (qobject_cast<CSVWidget::ColorEditor *>(editor))
         {
-            connect(editor, SIGNAL(pickingFinished()), proxy, SLOT(editorDataCommited()));
+            connect(static_cast<CSVWidget::ColorEditor*>(editor), &CSVWidget::ColorEditor::pickingFinished,
+                    proxy, qOverload<>(&DialogueDelegateDispatcherProxy::editorDataCommited));
         }
         else // throw an exception because this is a coding error
             throw std::logic_error ("Dialogue editor type missing");
 
-        connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)),
-                this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
+        connect(proxy, qOverload<QWidget*,const QModelIndex&,CSMWorld::ColumnBase::Display>(&DialogueDelegateDispatcherProxy::editorDataCommited),
+                this, &DialogueDelegateDispatcher::editorDataCommited);
 
         mProxys.push_back(proxy); //deleted in the destructor
     }
@@ -325,13 +331,12 @@ CSVWorld::IdContextMenu::IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Di
     Q_ASSERT(mIdType != CSMWorld::UniversalId::Type_None);
 
     mWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(mWidget,
-            SIGNAL(customContextMenuRequested(const QPoint &)),
-            this,
-            SLOT(showContextMenu(const QPoint &)));
+    connect(mWidget, &QWidget::customContextMenuRequested,
+            this, &IdContextMenu::showContextMenu);
 
     mEditIdAction = new QAction(this);
-    connect(mEditIdAction, SIGNAL(triggered()), this, SLOT(editIdRequest()));
+    connect(mEditIdAction, &QAction::triggered,
+            this, qOverload<>(&IdContextMenu::editIdRequest));
 
     QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);
     if (lineEdit != nullptr)
@@ -442,10 +447,8 @@ void CSVWorld::EditWidget::createEditorContextMenu(QWidget *editor,
         IdContextMenu *menu = new IdContextMenu(editor, display);
         // Current ID is already opened, so no need to create Edit 'ID' action for it
         menu->excludeId(id.toUtf8().constData());
-        connect(menu,
-                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
-                this,
-                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
+        connect(menu, qOverload<const CSMWorld::UniversalId &,const std::string &>(&IdContextMenu::editIdRequest),
+                this, &EditWidget::editIdRequest);
     }
 }
 
@@ -598,10 +601,8 @@ void CSVWorld::EditWidget::remake(int row)
                     tablesLayout->addWidget(label);
                     tablesLayout->addWidget(table);
 
-                    connect(table,
-                            SIGNAL(editRequest(const CSMWorld::UniversalId &, const std::string &)),
-                            this,
-                            SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
+                    connect(table, &NestedTable::editRequest,
+                            this, &EditWidget::editIdRequest);
                 }
             }
             else if (!(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
@@ -744,8 +745,8 @@ CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::Universa
     mDocument(document),
     mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
 {
-    connect(mTable, SIGNAL(dataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT(dataChanged(const QModelIndex&)));
-    connect(mTable, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex&, int, int)));
+    connect(mTable, &CSMWorld::IdTable::dataChanged, this, &SimpleDialogueSubView::dataChanged);
+    connect(mTable, &CSMWorld::IdTable::rowsAboutToBeRemoved, this, &SimpleDialogueSubView::rowsAboutToBeRemoved);
 
     updateCurrentId();
 
@@ -764,10 +765,8 @@ CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::Universa
 
     dataChanged(mTable->getModelIndex (getUniversalId().getId(), idColumn));
 
-    connect(mEditWidget,
-            SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
-            this,
-            SIGNAL(focusId(const CSMWorld::UniversalId &, const std::string &)));
+    connect(mEditWidget, &EditWidget::editIdRequest,
+            this, &SimpleDialogueSubView::focusId);
 }
 
 void CSVWorld::SimpleDialogueSubView::setEditLock (bool locked)
@@ -864,12 +863,12 @@ void CSVWorld::DialogueSubView::addButtonBar()
     getMainLayout().insertWidget (1, mButtons);
 
     // connections
-    connect (mButtons, SIGNAL (showPreview()), this, SLOT (showPreview()));
-    connect (mButtons, SIGNAL (viewRecord()), this, SLOT (viewRecord()));
-    connect (mButtons, SIGNAL (switchToRow (int)), this, SLOT (switchToRow (int)));
+    connect (mButtons, &RecordButtonBar::showPreview, this, &DialogueSubView::showPreview);
+    connect (mButtons, &RecordButtonBar::viewRecord, this, &DialogueSubView::viewRecord);
+    connect (mButtons, &RecordButtonBar::switchToRow, this, &DialogueSubView::switchToRow);
 
-    connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
-        mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
+    connect (this, &DialogueSubView::universalIdChanged,
+        mButtons, &RecordButtonBar::universalIdChanged);
 }
 
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
@@ -879,14 +878,13 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     // bottom box
     mBottom = new TableBottomBox (creatorFactory, document, id, this);
 
-    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
-        this, SLOT (requestFocus (const std::string&)));
+    connect (mBottom, &TableBottomBox::requestFocus, this, &DialogueSubView::requestFocus);
 
     // layout
     getMainLayout().addWidget (mBottom);
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
+        this, &DialogueSubView::settingChanged);
     CSMPrefs::get()["ID Dialogues"].update();
 }
 

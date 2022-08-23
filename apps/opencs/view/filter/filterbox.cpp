@@ -20,9 +20,8 @@ CSVFilter::FilterBox::FilterBox (CSMWorld::Data& data, QWidget *parent)
 
     setLayout (layout);
 
-    connect (mRecordFilterBox,
-        SIGNAL (filterChanged (std::shared_ptr<CSMFilter::Node>)),
-        this, SIGNAL (recordFilterChanged (std::shared_ptr<CSMFilter::Node>)));
+    connect (mRecordFilterBox, &RecordFilterBox::filterChanged,
+        this, &FilterBox::recordFilterChanged);
 
     setAcceptDrops(true);
 }

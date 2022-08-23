@@ -325,22 +325,20 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     addOptionalGlobals();
     addOptionalMagicEffects();
 
-    connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
+    connect (&mUndoStack, &QUndoStack::cleanChanged, this, &Document::modificationStateChanged);
 
-    connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mTools, SIGNAL (done (int, bool)), this, SIGNAL (operationDone (int, bool)));
-    connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone2 (int, bool)));
-    connect (&mTools, SIGNAL (mergeDone (CSMDoc::Document*)),
-            this, SIGNAL (mergeDone (CSMDoc::Document*)));
+    connect (&mTools, &CSMTools::Tools::progress, this, qOverload<int, int, int>(&Document::progress));
+    connect (&mTools, &CSMTools::Tools::done, this, &Document::operationDone);
+    connect (&mTools, &CSMTools::Tools::done, this, &Document::operationDone2);
+    connect (&mTools, &CSMTools::Tools::mergeDone, this, &Document::mergeDone);
 
-    connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone2 (int, bool)));
+    connect (&mSaving, &OperationHolder::progress,
+        this, qOverload<int, int, int>(&Document::progress));
+    connect (&mSaving, &OperationHolder::done, this, &Document::operationDone2);
 
-    connect (
-        &mSaving, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
-        this, SLOT (reportMessage (const CSMDoc::Message&, int)));
+    connect (&mSaving, &OperationHolder::reportMessage, this, &Document::reportMessage);
 
-    connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
+    connect (&mRunner, &Runner::runStateChanged, this, &Document::runStateChanged);
 }
 
 CSMDoc::Document::~Document()

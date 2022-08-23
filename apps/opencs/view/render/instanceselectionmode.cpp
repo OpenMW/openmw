@@ -24,8 +24,8 @@ namespace CSVRender
         mSelectSame = new QAction("Extend selection to instances with same object ID", this);
         mDeleteSelection = new QAction("Delete selected instances", this);
 
-        connect(mSelectSame, SIGNAL(triggered()), this, SLOT(selectSame()));
-        connect(mDeleteSelection, SIGNAL(triggered()), this, SLOT(deleteSelection()));
+        connect(mSelectSame, &QAction::triggered, this, &InstanceSelectionMode::selectSame);
+        connect(mDeleteSelection, &QAction::triggered, this, &InstanceSelectionMode::deleteSelection);
     }
 
     InstanceSelectionMode::~InstanceSelectionMode()

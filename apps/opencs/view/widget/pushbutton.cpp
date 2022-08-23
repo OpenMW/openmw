@@ -82,14 +82,14 @@ CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const QString& 
     if (type==Type_Mode || type==Type_Toggle)
     {
         setCheckable (true);
-        connect (this, SIGNAL (toggled (bool)), this, SLOT (checkedStateChanged (bool)));
+        connect (this, &PushButton::toggled, this, &PushButton::checkedStateChanged);
     }
     setCheckable (type==Type_Mode || type==Type_Toggle);
     processShortcuts();
     setExtendedToolTip();
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
+        this, &PushButton::settingChanged);
 }
 
 CSVWidget::PushButton::PushButton (Type type, const QString& tooltip, QWidget *parent)

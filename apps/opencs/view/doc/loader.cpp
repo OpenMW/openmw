@@ -70,7 +70,7 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 
     show();
 
-    connect (mButtons, SIGNAL (rejected()), this, SLOT (cancel()));
+    connect (mButtons, &QDialogButtonBox::rejected, this, qOverload<>(&LoadingDocument::cancel));
 }
 
 void CSVDoc::LoadingDocument::nextStage (const std::string& name, int fileRecords)
@@ -146,10 +146,10 @@ void CSVDoc::Loader::add (CSMDoc::Document *document)
     LoadingDocument *loading = new LoadingDocument (document);
     mDocuments.insert (std::make_pair (document, loading));
 
-    connect (loading, SIGNAL (cancel (CSMDoc::Document *)),
-        this, SIGNAL (cancel (CSMDoc::Document *)));
-    connect (loading, SIGNAL (close (CSMDoc::Document *)),
-        this, SIGNAL (close (CSMDoc::Document *)));
+    connect (loading, qOverload<CSMDoc::Document *>(&LoadingDocument::cancel),
+        this, &Loader::cancel);
+    connect (loading, &LoadingDocument::close,
+        this, &Loader::close);
 }
 
 void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,

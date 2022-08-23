@@ -299,7 +299,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     setSortingEnabled (sorting);
 
     mEditAction = new QAction (tr ("Edit Record"), this);
-    connect (mEditAction, SIGNAL (triggered()), this, SLOT (editRecord()));
+    connect (mEditAction, &QAction::triggered, this, &Table::editRecord);
     mEditAction->setIcon(QIcon(":edit-edit"));
     addAction (mEditAction);
     CSMPrefs::Shortcut* editShortcut = new CSMPrefs::Shortcut("table-edit", this);
@@ -308,14 +308,14 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     if (createAndDelete)
     {
         mCreateAction = new QAction (tr ("Add Record"), this);
-        connect (mCreateAction, SIGNAL (triggered()), this, SIGNAL (createRequest()));
+        connect (mCreateAction, &QAction::triggered, this, &Table::createRequest);
         mCreateAction->setIcon(QIcon(":edit-add"));
         addAction (mCreateAction);
         CSMPrefs::Shortcut* createShortcut = new CSMPrefs::Shortcut("table-add", this);
         createShortcut->associateAction(mCreateAction);
 
         mCloneAction = new QAction (tr ("Clone Record"), this);
-        connect(mCloneAction, SIGNAL (triggered()), this, SLOT (cloneRecord()));
+        connect(mCloneAction, &QAction::triggered, this, &Table::cloneRecord);
         mCloneAction->setIcon(QIcon(":edit-clone"));
         addAction(mCloneAction);
         CSMPrefs::Shortcut* cloneShortcut = new CSMPrefs::Shortcut("table-clone", this);
@@ -325,7 +325,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     if (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_AllowTouch)
     {
         mTouchAction = new QAction(tr("Touch Record"), this);
-        connect(mTouchAction, SIGNAL(triggered()), this, SLOT(touchRecord()));
+        connect(mTouchAction, &QAction::triggered, this, &Table::touchRecord);
         mTouchAction->setIcon(QIcon(":edit-touch"));
         addAction(mTouchAction);
         CSMPrefs::Shortcut* touchShortcut = new CSMPrefs::Shortcut("table-touch", this);
@@ -333,85 +333,85 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     }
 
     mRevertAction = new QAction (tr ("Revert Record"), this);
-    connect (mRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeRevert()));
+    connect (mRevertAction, &QAction::triggered, mDispatcher, &CSMWorld::CommandDispatcher::executeRevert);
     mRevertAction->setIcon(QIcon(":edit-undo"));
     addAction (mRevertAction);
     CSMPrefs::Shortcut* revertShortcut = new CSMPrefs::Shortcut("table-revert", this);
     revertShortcut->associateAction(mRevertAction);
 
     mDeleteAction = new QAction (tr ("Delete Record"), this);
-    connect (mDeleteAction, SIGNAL (triggered()), mDispatcher, SLOT (executeDelete()));
+    connect (mDeleteAction, &QAction::triggered, mDispatcher, &CSMWorld::CommandDispatcher::executeDelete);
     mDeleteAction->setIcon(QIcon(":edit-delete"));
     addAction (mDeleteAction);
     CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("table-remove", this);
     deleteShortcut->associateAction(mDeleteAction);
 
     mMoveUpAction = new QAction (tr ("Move Up"), this);
-    connect (mMoveUpAction, SIGNAL (triggered()), this, SLOT (moveUpRecord()));
+    connect (mMoveUpAction, &QAction::triggered, this, &Table::moveUpRecord);
     mMoveUpAction->setIcon(QIcon(":record-up"));
     addAction (mMoveUpAction);
     CSMPrefs::Shortcut* moveUpShortcut = new CSMPrefs::Shortcut("table-moveup", this);
     moveUpShortcut->associateAction(mMoveUpAction);
 
     mMoveDownAction = new QAction (tr ("Move Down"), this);
-    connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
+    connect (mMoveDownAction, &QAction::triggered, this, &Table::moveDownRecord);
     mMoveDownAction->setIcon(QIcon(":record-down"));
     addAction (mMoveDownAction);
     CSMPrefs::Shortcut* moveDownShortcut = new CSMPrefs::Shortcut("table-movedown", this);
     moveDownShortcut->associateAction(mMoveDownAction);
 
     mViewAction = new QAction (tr ("View"), this);
-    connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
+    connect (mViewAction, &QAction::triggered, this, &Table::viewRecord);
     mViewAction->setIcon(QIcon(":/cell.png"));
     addAction (mViewAction);
     CSMPrefs::Shortcut* viewShortcut = new CSMPrefs::Shortcut("table-view", this);
     viewShortcut->associateAction(mViewAction);
 
     mPreviewAction = new QAction (tr ("Preview"), this);
-    connect (mPreviewAction, SIGNAL (triggered()), this, SLOT (previewRecord()));
+    connect (mPreviewAction, &QAction::triggered, this, &Table::previewRecord);
     mPreviewAction->setIcon(QIcon(":edit-preview"));
     addAction (mPreviewAction);
     CSMPrefs::Shortcut* previewShortcut = new CSMPrefs::Shortcut("table-preview", this);
     previewShortcut->associateAction(mPreviewAction);
 
     mExtendedDeleteAction = new QAction (tr ("Extended Delete Record"), this);
-    connect (mExtendedDeleteAction, SIGNAL (triggered()), this, SLOT (executeExtendedDelete()));
+    connect (mExtendedDeleteAction, &QAction::triggered, this, &Table::executeExtendedDelete);
     mExtendedDeleteAction->setIcon(QIcon(":edit-delete"));
     addAction (mExtendedDeleteAction);
     CSMPrefs::Shortcut* extendedDeleteShortcut = new CSMPrefs::Shortcut("table-extendeddelete", this);
     extendedDeleteShortcut->associateAction(mExtendedDeleteAction);
 
     mExtendedRevertAction = new QAction (tr ("Extended Revert Record"), this);
-    connect (mExtendedRevertAction, SIGNAL (triggered()), this, SLOT (executeExtendedRevert()));
+    connect (mExtendedRevertAction, &QAction::triggered, this, &Table::executeExtendedRevert);
     mExtendedRevertAction->setIcon(QIcon(":edit-undo"));
     addAction (mExtendedRevertAction);
     CSMPrefs::Shortcut* extendedRevertShortcut = new CSMPrefs::Shortcut("table-extendedrevert", this);
     extendedRevertShortcut->associateAction(mExtendedRevertAction);
 
     mEditIdAction = new TableEditIdAction (*this, this);
-    connect (mEditIdAction, SIGNAL (triggered()), this, SLOT (editCell()));
+    connect (mEditIdAction, &QAction::triggered, this, &Table::editCell);
     addAction (mEditIdAction);
 
     mHelpAction = new QAction (tr ("Help"), this);
-    connect (mHelpAction, SIGNAL (triggered()), this, SLOT (openHelp()));
+    connect (mHelpAction, &QAction::triggered, this, &Table::openHelp);
     mHelpAction->setIcon(QIcon(":/info.png"));
     addAction (mHelpAction);
     CSMPrefs::Shortcut* openHelpShortcut = new CSMPrefs::Shortcut("help", this);
     openHelpShortcut->associateAction(mHelpAction);
 
-    connect (mProxyModel, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
-        this, SLOT (tableSizeUpdate()));
+    connect (mProxyModel, &CSMWorld::IdTableProxyModel::rowsRemoved,
+        this, &Table::tableSizeUpdate);
 
-    connect (mProxyModel, SIGNAL (rowAdded (const std::string &)),
-        this, SLOT (rowAdded (const std::string &)));
+    connect (mProxyModel, &CSMWorld::IdTableProxyModel::rowAdded,
+        this, &Table::rowAdded);
 
     /// \note This signal could instead be connected to a slot that filters out changes not affecting
     /// the records status column (for permanence reasons)
-    connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (dataChangedEvent(const QModelIndex&, const QModelIndex&)));
+    connect (mProxyModel, &CSMWorld::IdTableProxyModel::dataChanged,
+        this, &Table::dataChangedEvent);
 
-    connect (selectionModel(), SIGNAL (selectionChanged (const QItemSelection&, const QItemSelection&)),
-        this, SLOT (selectionSizeUpdate ()));
+    connect (selectionModel(), &QItemSelectionModel::selectionChanged,
+        this, &Table::selectionSizeUpdate);
 
     setAcceptDrops(true);
 
@@ -420,8 +420,8 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_View));
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier | Qt::ControlModifier, Action_EditRecordAndClose));
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
+        this, &Table::settingChanged);
     CSMPrefs::get()["ID Tables"].update();
 
     new TableHeaderMouseEventHandler(this);

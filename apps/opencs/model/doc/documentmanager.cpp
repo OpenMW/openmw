@@ -19,20 +19,20 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
     mLoader.moveToThread (&mLoaderThread);
     mLoaderThread.start();
 
-    connect (&mLoader, SIGNAL (documentLoaded (Document *)),
-        this, SLOT (documentLoaded (Document *)));
-    connect (&mLoader, SIGNAL (documentNotLoaded (Document *, const std::string&)),
-        this, SLOT (documentNotLoaded (Document *, const std::string&)));
-    connect (this, SIGNAL (loadRequest (CSMDoc::Document *)),
-        &mLoader, SLOT (loadDocument (CSMDoc::Document *)));
-    connect (&mLoader, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)),
-        this, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)));
-    connect (&mLoader, SIGNAL (nextRecord (CSMDoc::Document *, int)),
-        this, SIGNAL (nextRecord (CSMDoc::Document *, int)));
-    connect (this, SIGNAL (cancelLoading (CSMDoc::Document *)),
-        &mLoader, SLOT (abortLoading (CSMDoc::Document *)));
-    connect (&mLoader, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),
-        this, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)));
+    connect (&mLoader, &Loader::documentLoaded,
+        this, &DocumentManager::documentLoaded);
+    connect (&mLoader, &Loader::documentNotLoaded,
+        this, &DocumentManager::documentNotLoaded);
+    connect (this, &DocumentManager::loadRequest,
+        &mLoader, &Loader::loadDocument);
+    connect (&mLoader, &Loader::nextStage,
+        this, &DocumentManager::nextStage);
+    connect (&mLoader, &Loader::nextRecord,
+        this, &DocumentManager::nextRecord);
+    connect (this, &DocumentManager::cancelLoading,
+        &mLoader, &Loader::abortLoading);
+    connect (&mLoader, &Loader::loadMessage,
+        this, &DocumentManager::loadMessage);
 }
 
 CSMDoc::DocumentManager::~DocumentManager()
