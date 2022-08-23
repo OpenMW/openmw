@@ -29,8 +29,8 @@ void ContentSelectorView::ContentSelector::buildGameFileView()
     ui.gameFileView->addItem("<No game file>");
     ui.gameFileView->setVisible(true);
 
-    connect (ui.gameFileView, SIGNAL (currentIndexChanged(int)),
-             this, SLOT (slotCurrentGameFileIndexChanged(int)));
+    connect (ui.gameFileView, qOverload<int>(&ComboBox::currentIndexChanged),
+             this, &ContentSelector::slotCurrentGameFileIndexChanged);
 
     ui.gameFileView->setCurrentIndex(0);
 }
@@ -63,20 +63,21 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     mAddonProxyModel->setDynamicSortFilter (true);
     mAddonProxyModel->setSourceModel (mContentModel);
 
-    connect(ui.searchFilter, SIGNAL(textEdited(QString)), mAddonProxyModel, SLOT(setFilterWildcard(QString)));
-    connect(ui.searchFilter, SIGNAL(textEdited(QString)), this, SLOT(slotSearchFilterTextChanged(QString)));
+    connect(ui.searchFilter, &QLineEdit::textEdited, mAddonProxyModel, &QSortFilterProxyModel::setFilterWildcard);
+    connect(ui.searchFilter, &QLineEdit::textEdited, this, &ContentSelector::slotSearchFilterTextChanged);
 
     ui.addonView->setModel(mAddonProxyModel);
 
-    connect(ui.addonView, SIGNAL(activated(const QModelIndex&)), this, SLOT(slotAddonTableItemActivated(const QModelIndex&)));
-    connect(mContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
+    connect(ui.addonView, &QTableView::activated, this, &ContentSelector::slotAddonTableItemActivated);
+    connect(mContentModel, &ContentSelectorModel::ContentModel::dataChanged,
+            this, &ContentSelector::signalAddonDataChanged);
     buildContextMenu();
 }
 
 void ContentSelectorView::ContentSelector::buildContextMenu()
 {
     ui.addonView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui.addonView, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotShowContextMenu(const QPoint&)));
+    connect(ui.addonView, &QTableView::customContextMenuRequested, this,  &ContentSelector::slotShowContextMenu);
 
     mContextMenu = new QMenu(ui.addonView);
     mContextMenu->addAction(tr("&Check Selected"), this, SLOT(slotCheckMultiSelectedItems()));
