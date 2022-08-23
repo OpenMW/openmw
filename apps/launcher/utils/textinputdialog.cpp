@@ -39,8 +39,8 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
 
     setModal(true);
 
-    connect(mButtonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(mButtonBox, &QDialogButtonBox::accepted, this, &TextInputDialog::accept);
+    connect(mButtonBox, &QDialogButtonBox::rejected, this, &TextInputDialog::reject);
 }
 
 Launcher::TextInputDialog::~TextInputDialog()

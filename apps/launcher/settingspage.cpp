@@ -36,22 +36,22 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     mImporterInvoker = new ProcessInvoker();
     resetProgressBar();
 
-    connect(mWizardInvoker->getProcess(), SIGNAL(started()),
-            this, SLOT(wizardStarted()));
+    connect(mWizardInvoker->getProcess(), &QProcess::started,
+            this, &SettingsPage::wizardStarted);
 
-    connect(mWizardInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(wizardFinished(int,QProcess::ExitStatus)));
+    connect(mWizardInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+            this, &SettingsPage::wizardFinished);
 
-    connect(mImporterInvoker->getProcess(), SIGNAL(started()),
-            this, SLOT(importerStarted()));
+    connect(mImporterInvoker->getProcess(), &QProcess::started,
+            this, &SettingsPage::importerStarted);
 
-    connect(mImporterInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(importerFinished(int,QProcess::ExitStatus)));
+    connect(mImporterInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+            this, &SettingsPage::importerFinished);
 
     mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
 
-    connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
-            this, SLOT(updateOkButton(QString)));
+    connect(mProfileDialog->lineEdit(), &LineEdit::textChanged,
+            this, &SettingsPage::updateOkButton);
 
     // Detect Morrowind configuration files
     QStringList iniPaths;
