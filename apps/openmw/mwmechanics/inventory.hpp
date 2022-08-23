@@ -10,12 +10,12 @@
 #include <components/esm3/loadcont.hpp>
 
 #include <algorithm>
-#include <string>
+#include <string_view>
 
 namespace MWMechanics
 {
     template <class T>
-    void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount)
+    void modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount)
     {
         T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(actorId);
         for (auto& it : copy.mInventory.mList)

@@ -288,7 +288,7 @@ namespace MWClass
         return !(ref->mBase->mFlags & ESM::Container::Organic);
     }
 
-    void Container::modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const
+    void Container::modifyBaseInventory(std::string_view containerId, std::string_view itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::Container>(containerId, itemId, amount);
     }

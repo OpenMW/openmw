@@ -1495,7 +1495,7 @@ namespace MWClass
         MWMechanics::setBaseAISetting<ESM::NPC>(id, setting, value);
     }
 
-    void Npc::modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const
+    void Npc::modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::NPC>(actorId, itemId, amount);
     }
