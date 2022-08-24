@@ -19,7 +19,7 @@ class btConvexShape;
 
 namespace Resource
 {
-    class BulletShape;
+    struct BulletShape;
 }
 
 namespace MWPhysics

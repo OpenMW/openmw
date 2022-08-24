@@ -175,7 +175,7 @@ namespace
                     transform
                 );
             }
-            else
+            else if (object->getShapeInstance()->mVisualCollisionType == Resource::VisualCollisionType::None)
             {
                 navigator.addObject(
                     DetourNavigator::ObjectId(object),
@@ -334,7 +334,8 @@ namespace MWWorld
         {
             if (const auto object = mPhysics->getObject(ptr))
             {
-                mNavigator.removeObject(DetourNavigator::ObjectId(object));
+                if (object->getShapeInstance()->mVisualCollisionType == Resource::VisualCollisionType::None)
+                    mNavigator.removeObject(DetourNavigator::ObjectId(object));
                 mPhysics->remove(ptr);
                 ptr.mRef->mData.mPhysicsPostponed = false;
             }
@@ -943,7 +944,8 @@ namespace MWWorld
         MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
         if (const auto object = mPhysics->getObject(ptr))
         {
-            mNavigator.removeObject(DetourNavigator::ObjectId(object));
+            if (object->getShapeInstance()->mVisualCollisionType == Resource::VisualCollisionType::None)
+                mNavigator.removeObject(DetourNavigator::ObjectId(object));
             if (mCurrentCell != nullptr)
             {
                 const auto player = mWorld.getPlayerPtr();

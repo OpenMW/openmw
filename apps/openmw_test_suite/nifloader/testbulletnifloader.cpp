@@ -12,6 +12,7 @@
 #include <gmock/gmock.h>
 
 #include <algorithm>
+#include <type_traits>
 
 namespace
 {
@@ -137,13 +138,13 @@ static std::ostream& operator <<(std::ostream& stream, const TriangleMeshShape& 
     return stream << "}}";
 }
 
-static bool operator ==(const BulletShape::CollisionBox& l, const BulletShape::CollisionBox& r)
+static bool operator ==(const CollisionBox& l, const CollisionBox& r)
 {
-    const auto tie = [] (const BulletShape::CollisionBox& v) { return std::tie(v.mExtents, v.mCenter); };
+    const auto tie = [] (const CollisionBox& v) { return std::tie(v.mExtents, v.mCenter); };
     return tie(l) == tie(r);
 }
 
-static std::ostream& operator <<(std::ostream& stream, const BulletShape::CollisionBox& value)
+static std::ostream& operator <<(std::ostream& stream, const CollisionBox& value)
 {
     return stream << "CollisionBox {" << WriteVec3f {value.mExtents} << ", " << WriteVec3f {value.mCenter} << "}";
 }
@@ -189,8 +190,22 @@ namespace Resource
         return compareObjects(lhs.mCollisionShape.get(), rhs.mCollisionShape.get())
             && compareObjects(lhs.mAvoidCollisionShape.get(), rhs.mAvoidCollisionShape.get())
             && lhs.mCollisionBox == rhs.mCollisionBox
-            && lhs.mCollisionType == rhs.mCollisionType
+            && lhs.mVisualCollisionType == rhs.mVisualCollisionType
             && lhs.mAnimatedShapes == rhs.mAnimatedShapes;
+    }
+
+    static std::ostream& operator <<(std::ostream& stream, Resource::VisualCollisionType value)
+    {
+        switch (value)
+        {
+            case Resource::VisualCollisionType::None:
+                return stream << "Resource::VisualCollisionType::None";
+            case Resource::VisualCollisionType::Default:
+                return stream << "Resource::VisualCollisionType::Default";
+            case Resource::VisualCollisionType::Camera:
+                return stream << "Resource::VisualCollisionType::Camera";
+        }
+        return stream << static_cast<std::underlying_type_t<Resource::VisualCollisionType>>(value);
     }
 
     static std::ostream& operator <<(std::ostream& stream, const Resource::BulletShape& value)
@@ -199,8 +214,8 @@ namespace Resource
             << value.mCollisionShape.get() << ", "
             << value.mAvoidCollisionShape.get() << ", "
             << value.mCollisionBox << ", "
-            << value.mAnimatedShapes
-            << ", collisionType=" << value.mCollisionType
+            << value.mAnimatedShapes<< ", "
+            << value.mVisualCollisionType
             << "}";
     }
 }
@@ -1030,7 +1045,7 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
-        expected.mCollisionType = Resource::BulletShape::CollisionType::Camera;
+        expected.mVisualCollisionType = Resource::VisualCollisionType::Camera;
 
         EXPECT_EQ(*result, expected);
     }
@@ -1053,7 +1068,7 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
-        expected.mCollisionType = Resource::BulletShape::CollisionType::Camera;
+        expected.mVisualCollisionType = Resource::VisualCollisionType::Camera;
 
         EXPECT_EQ(*result, expected);
     }
@@ -1075,7 +1090,7 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
-        expected.mCollisionType = Resource::BulletShape::CollisionType::None;
+        expected.mVisualCollisionType = Resource::VisualCollisionType::Default;
 
         EXPECT_EQ(*result, expected);
     }
@@ -1098,7 +1113,7 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
-        expected.mCollisionType = Resource::BulletShape::CollisionType::None;
+        expected.mVisualCollisionType = Resource::VisualCollisionType::Default;
 
         EXPECT_EQ(*result, expected);
     }
@@ -1128,7 +1143,7 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
-        expected.mCollisionType = Resource::BulletShape::CollisionType::Camera;
+        expected.mVisualCollisionType = Resource::VisualCollisionType::Camera;
 
         EXPECT_EQ(*result, expected);
     }
