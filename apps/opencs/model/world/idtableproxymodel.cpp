@@ -26,7 +26,7 @@ void CSMWorld::IdTableProxyModel::updateColumnMap()
     {
         std::vector<int> columns = mFilter->getReferencedColumns();
         for (std::vector<int>::const_iterator iter (columns.begin()); iter!=columns.end(); ++iter)
-            mColumnMap.insert (std::make_pair (*iter, 
+            mColumnMap.insert (std::make_pair (*iter,
                 mSourceModel->searchColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (*iter))));
     }
 }
@@ -51,7 +51,7 @@ bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelI
 }
 
 CSMWorld::IdTableProxyModel::IdTableProxyModel (QObject *parent)
-    : QSortFilterProxyModel (parent), 
+    : QSortFilterProxyModel (parent),
       mSourceModel(nullptr)
 {
     setSortCaseSensitivity (Qt::CaseInsensitive);
@@ -69,18 +69,12 @@ void CSMWorld::IdTableProxyModel::setSourceModel(QAbstractItemModel *model)
     QSortFilterProxyModel::setSourceModel(model);
 
     mSourceModel = dynamic_cast<IdTableBase *>(sourceModel());
-    connect(mSourceModel, 
-            SIGNAL(rowsInserted(const QModelIndex &, int, int)), 
-            this, 
-            SLOT(sourceRowsInserted(const QModelIndex &, int, int)));
-    connect(mSourceModel, 
-            SIGNAL(rowsRemoved(const QModelIndex &, int, int)), 
-            this,
-            SLOT(sourceRowsRemoved(const QModelIndex &, int, int)));
-    connect(mSourceModel, 
-            SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), 
-            this, 
-            SLOT(sourceDataChanged(const QModelIndex &, const QModelIndex &)));
+    connect(mSourceModel, &IdTableBase::rowsInserted,
+            this, &IdTableProxyModel::sourceRowsInserted);
+    connect(mSourceModel, &IdTableBase::rowsRemoved,
+            this, &IdTableProxyModel::sourceRowsRemoved);
+    connect(mSourceModel, &IdTableBase::dataChanged,
+            this, &IdTableProxyModel::sourceDataChanged);
 }
 
 void CSMWorld::IdTableProxyModel::setFilter (const std::shared_ptr<CSMFilter::Node>& filter)

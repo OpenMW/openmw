@@ -70,8 +70,7 @@ CSVWidget::SceneToolRun::SceneToolRun (SceneToolbar *parent, const QString& tool
 
     layout->addWidget (mTable);
 
-    connect (mTable, SIGNAL (clicked (const QModelIndex&)),
-        this, SLOT (clicked (const QModelIndex&)));
+    connect (mTable, &QTableWidget::clicked, this, &SceneToolRun::clicked);
 }
 
 void CSVWidget::SceneToolRun::showPanel (const QPoint& position)

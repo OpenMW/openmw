@@ -38,12 +38,9 @@ void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type
 
     if (update)
     {
-        connect (model, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-            this, SLOT (dataChanged (const QModelIndex&, const QModelIndex&)));
-        connect (model, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-            this, SLOT (rowsChanged (const QModelIndex&, int, int)));
-        connect (model, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
-            this, SLOT (rowsChanged (const QModelIndex&, int, int)));
+        connect (model, &QAbstractItemModel::dataChanged, this, &Data::dataChanged);
+        connect (model, &QAbstractItemModel::rowsInserted, this, &Data::rowsChanged);
+        connect (model, &QAbstractItemModel::rowsRemoved, this, &Data::rowsChanged);
     }
 }
 

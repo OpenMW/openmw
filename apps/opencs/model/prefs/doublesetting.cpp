@@ -66,7 +66,7 @@ std::pair<QWidget *, QWidget *> CSMPrefs::DoubleSetting::makeWidgets (QWidget *p
         mWidget->setToolTip (tooltip);
     }
 
-    connect (mWidget, SIGNAL (valueChanged (double)), this, SLOT (valueChanged (double)));
+    connect (mWidget, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &DoubleSetting::valueChanged);
 
     return std::make_pair (label, mWidget);
 }

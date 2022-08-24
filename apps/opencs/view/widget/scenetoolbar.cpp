@@ -27,7 +27,8 @@ CSVWidget::SceneToolbar::SceneToolbar (int buttonSize, QWidget *parent)
     setLayout (mLayout);
 
     CSMPrefs::Shortcut* focusSceneShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
-    connect(focusSceneShortcut, SIGNAL(activated()), this, SIGNAL(focusSceneRequest()));
+    connect(focusSceneShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
+            this, &SceneToolbar::focusSceneRequest);
 }
 
 void CSVWidget::SceneToolbar::addTool (SceneTool *tool, SceneTool *insertPoint)

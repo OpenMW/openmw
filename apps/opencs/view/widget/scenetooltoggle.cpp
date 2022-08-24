@@ -158,7 +158,7 @@ void CSVWidget::SceneToolToggle::addButton (const std::string& icon, unsigned in
 
     mButtons.insert (std::make_pair (button, desc));
 
-    connect (button, SIGNAL (clicked()), this, SLOT (selected()));
+    connect (button, &PushButton::clicked, this, &SceneToolToggle::selected);
 
     if (mButtons.size()==1)
         mFirst = button;

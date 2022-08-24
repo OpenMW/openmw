@@ -44,8 +44,8 @@ CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
     mLayoutSliderSize->addWidget(mBrushSizeSlider);
     mLayoutSliderSize->addWidget(mBrushSizeSpinBox);
 
-    connect(mBrushSizeSlider, SIGNAL(valueChanged(int)), mBrushSizeSpinBox, SLOT(setValue(int)));
-    connect(mBrushSizeSpinBox, SIGNAL(valueChanged(int)), mBrushSizeSlider, SLOT(setValue(int)));
+    connect(mBrushSizeSlider, &QSlider::valueChanged, mBrushSizeSpinBox,  &QSpinBox::setValue);
+    connect(mBrushSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), mBrushSizeSlider, &QSlider::setValue);
 
     setLayout(mLayoutSliderSize);
 }
@@ -117,10 +117,10 @@ CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QW
 
     setLayout(layoutMain);
 
-    connect(mButtonPoint, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(mButtonSquare, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(mButtonCircle, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(mButtonCustom, SIGNAL(clicked()), this, SLOT(setBrushShape()));
+    connect(mButtonPoint, &QPushButton::clicked, this, &TextureBrushWindow::setBrushShape);
+    connect(mButtonSquare, &QPushButton::clicked, this, &TextureBrushWindow::setBrushShape);
+    connect(mButtonCircle, &QPushButton::clicked, this, &TextureBrushWindow::setBrushShape);
+    connect(mButtonCustom, &QPushButton::clicked, this, &TextureBrushWindow::setBrushShape);
 }
 
 void CSVWidget::TextureBrushWindow::configureButtonInitialSettings(QPushButton *button)
@@ -224,7 +224,7 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, c
     mBrushHistory[0] = "L0#0";
 
     setAcceptDrops(true);
-    connect(mTextureBrushWindow, SIGNAL(passBrushShape(CSVWidget::BrushShape)), this, SLOT(setButtonIcon(CSVWidget::BrushShape)));
+    connect(mTextureBrushWindow, &TextureBrushWindow::passBrushShape, this, &SceneToolTextureBrush::setButtonIcon);
     setButtonIcon(mTextureBrushWindow->mBrushShape);
 
     mPanel = new QFrame (this, Qt::Popup);
@@ -244,8 +244,7 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, c
 
     layout->addWidget (mTable);
 
-    connect (mTable, SIGNAL (clicked (const QModelIndex&)),
-        this, SLOT (clicked (const QModelIndex&)));
+    connect (mTable, &QTableWidget::clicked, this, &SceneToolTextureBrush::clicked);
 
 }
 

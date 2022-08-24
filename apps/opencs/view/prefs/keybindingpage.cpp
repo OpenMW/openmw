@@ -29,7 +29,8 @@ namespace CSVPrefs
         mStackedLayout = new QStackedLayout(stackedWidget);
 
         mPageSelector = new QComboBox();
-        connect(mPageSelector, SIGNAL(currentIndexChanged(int)), mStackedLayout, SLOT(setCurrentIndex(int)));
+        connect(mPageSelector, qOverload<int>(&QComboBox::currentIndexChanged),
+                mStackedLayout, &QStackedLayout::setCurrentIndex);
 
         QFrame* lineSeparator = new QFrame(topWidget);
         lineSeparator->setFrameShape(QFrame::HLine);
@@ -37,7 +38,7 @@ namespace CSVPrefs
 
         // Reset key bindings button
         QPushButton* resetButton = new QPushButton ("Reset to Defaults", topWidget);
-        connect(resetButton, SIGNAL(clicked()), this, SLOT(resetKeyBindings()));
+        connect(resetButton, &QPushButton::clicked, this, &KeyBindingPage::resetKeyBindings);
 
         topLayout->addWidget(mPageSelector);
         topLayout->addWidget(stackedWidget);

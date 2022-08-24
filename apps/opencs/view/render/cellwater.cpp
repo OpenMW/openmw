@@ -51,8 +51,7 @@ namespace CSVRender
 
         // Keep water existence/height up to date
         QAbstractItemModel* cells = mData.getTableModel(CSMWorld::UniversalId::Type_Cells);
-        connect(cells, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-            this, SLOT(cellDataChanged(const QModelIndex&, const QModelIndex&)));
+        connect(cells, &QAbstractItemModel::dataChanged, this, &CellWater::cellDataChanged);
     }
 
     CellWater::~CellWater()

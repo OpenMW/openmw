@@ -42,8 +42,8 @@ CSVWorld::PathgridCreator::PathgridCreator(
     mCell->setCompleter(completionManager.getCompleter(displayType).get());
     insertBeforeButtons(mCell, true);
 
-    connect(mCell, SIGNAL (textChanged(const QString&)), this, SLOT (cellChanged()));
-    connect(mCell, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
+    connect(mCell, &CSVWidget::DropLineEdit::textChanged, this, &PathgridCreator::cellChanged);
+    connect(mCell, &CSVWidget::DropLineEdit::returnPressed, this, &PathgridCreator::inputReturnPressed);
 }
 
 void CSVWorld::PathgridCreator::cloneMode(

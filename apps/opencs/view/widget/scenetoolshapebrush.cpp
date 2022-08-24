@@ -39,8 +39,8 @@ CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString &title, 
     layoutSliderSize->addWidget(mBrushSizeSlider);
     layoutSliderSize->addWidget(mBrushSizeSpinBox);
 
-    connect(mBrushSizeSlider, SIGNAL(valueChanged(int)), mBrushSizeSpinBox, SLOT(setValue(int)));
-    connect(mBrushSizeSpinBox, SIGNAL(valueChanged(int)), mBrushSizeSlider, SLOT(setValue(int)));
+    connect(mBrushSizeSlider, &QSlider::valueChanged, mBrushSizeSpinBox,  &QSpinBox::setValue);
+    connect(mBrushSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), mBrushSizeSlider, &QSlider::setValue);
 
     setLayout(layoutSliderSize);
 }
@@ -115,10 +115,10 @@ CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidge
 
     setLayout(layoutMain);
 
-    connect(mButtonPoint, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(mButtonSquare, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(mButtonCircle, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(mButtonCustom, SIGNAL(clicked()), this, SLOT(setBrushShape()));
+    connect(mButtonPoint, &QPushButton::clicked, this, &ShapeBrushWindow::setBrushShape);
+    connect(mButtonSquare, &QPushButton::clicked, this, &ShapeBrushWindow::setBrushShape);
+    connect(mButtonCircle, &QPushButton::clicked, this, &ShapeBrushWindow::setBrushShape);
+    connect(mButtonCustom, &QPushButton::clicked, this, &ShapeBrushWindow::setBrushShape);
 }
 
 void CSVWidget::ShapeBrushWindow::configureButtonInitialSettings(QPushButton *button)
@@ -156,7 +156,7 @@ CSVWidget::SceneToolShapeBrush::SceneToolShapeBrush (SceneToolbar *parent, const
     mShapeBrushWindow(new ShapeBrushWindow(document, this))
 {
     setAcceptDrops(true);
-    connect(mShapeBrushWindow, SIGNAL(passBrushShape(CSVWidget::BrushShape)), this, SLOT(setButtonIcon(CSVWidget::BrushShape)));
+    connect(mShapeBrushWindow, &ShapeBrushWindow::passBrushShape, this, &SceneToolShapeBrush::setButtonIcon);
     setButtonIcon(mShapeBrushWindow->mBrushShape);
 
     mPanel = new QFrame (this, Qt::Popup);
@@ -176,8 +176,7 @@ CSVWidget::SceneToolShapeBrush::SceneToolShapeBrush (SceneToolbar *parent, const
 
     layout->addWidget (mTable);
 
-    connect (mTable, SIGNAL (clicked (const QModelIndex&)),
-        this, SLOT (clicked (const QModelIndex&)));
+    connect (mTable, &QTableWidget::clicked, this, &SceneToolShapeBrush::clicked);
 
 }
 

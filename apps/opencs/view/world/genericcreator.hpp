@@ -118,12 +118,14 @@ namespace CSVWorld
             /// Focus main input widget
             void focus() override;
 
-        private slots:
-
-            void textChanged (const QString& text);
+        protected slots:
 
             /// \brief Create record if able to after Return key is pressed on input.
             void inputReturnPressed();
+
+        private slots:
+
+            void textChanged (const QString& text);
 
             void create();
 

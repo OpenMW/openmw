@@ -40,7 +40,7 @@ namespace CSMPrefs
 
         mButton = widget;
 
-        connect(widget, SIGNAL(toggled(bool)), this, SLOT(buttonToggled(bool)));
+        connect (widget, &QPushButton::toggled, this, &ModifierSetting::buttonToggled);
 
         return std::make_pair(label, widget);
     }

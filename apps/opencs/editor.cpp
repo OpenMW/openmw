@@ -44,34 +44,31 @@ CS::Editor::Editor (int argc, char **argv)
     mFileDialog.setLocalData (mLocal);
     mMerge.setLocalData (mLocal);
 
-    connect (&mDocumentManager, SIGNAL (documentAdded (CSMDoc::Document *)),
-        this, SLOT (documentAdded (CSMDoc::Document *)));
-    connect (&mDocumentManager, SIGNAL (documentAboutToBeRemoved (CSMDoc::Document *)),
-        this, SLOT (documentAboutToBeRemoved (CSMDoc::Document *)));
-    connect (&mDocumentManager, SIGNAL (lastDocumentDeleted()),
-        this, SLOT (lastDocumentDeleted()));
+    connect (&mDocumentManager, &CSMDoc::DocumentManager::documentAdded,
+        this, &Editor::documentAdded);
+    connect (&mDocumentManager, &CSMDoc::DocumentManager::documentAboutToBeRemoved,
+        this, &Editor::documentAboutToBeRemoved);
+    connect (&mDocumentManager, &CSMDoc::DocumentManager::lastDocumentDeleted,
+        this, &Editor::lastDocumentDeleted);
 
-    connect (mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
-    connect (mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
-    connect (mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
-    connect (mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
-    connect (mViewManager, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SLOT (mergeDocument (CSMDoc::Document *)));
+    connect (mViewManager, &CSVDoc::ViewManager::newGameRequest, this, &Editor::createGame);
+    connect (mViewManager, &CSVDoc::ViewManager::newAddonRequest, this, &Editor::createAddon);
+    connect (mViewManager, &CSVDoc::ViewManager::loadDocumentRequest, this, &Editor::loadDocument);
+    connect (mViewManager, &CSVDoc::ViewManager::editSettingsRequest, this, &Editor::showSettings);
+    connect (mViewManager, &CSVDoc::ViewManager::mergeDocument, this, &Editor::mergeDocument);
 
-    connect (&mStartup, SIGNAL (createGame()), this, SLOT (createGame ()));
-    connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createAddon ()));
-    connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
-    connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
+    connect (&mStartup, &CSVDoc::StartupDialogue::createGame, this, &Editor::createGame);
+    connect (&mStartup, &CSVDoc::StartupDialogue::createAddon, this, &Editor::createAddon);
+    connect (&mStartup, &CSVDoc::StartupDialogue::loadDocument, this, &Editor::loadDocument);
+    connect (&mStartup, &CSVDoc::StartupDialogue::editConfig, this, &Editor::showSettings);
 
-    connect (&mFileDialog, SIGNAL(signalOpenFiles (const boost::filesystem::path&)),
-             this, SLOT(openFiles (const boost::filesystem::path&)));
+    connect (&mFileDialog, &CSVDoc::FileDialog::signalOpenFiles,
+        this, [this](const boost::filesystem::path &savePath){ this->openFiles(savePath); });
+    connect (&mFileDialog, &CSVDoc::FileDialog::signalCreateNewFile, this, &Editor::createNewFile);
+    connect (&mFileDialog, &CSVDoc::FileDialog::rejected, this, &Editor::cancelFileDialog);
 
-    connect (&mFileDialog, SIGNAL(signalCreateNewFile (const boost::filesystem::path&)),
-             this, SLOT(createNewFile (const boost::filesystem::path&)));
-    connect (&mFileDialog, SIGNAL (rejected()), this, SLOT (cancelFileDialog ()));
-
-    connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
-             this, SLOT (createNewGame (const boost::filesystem::path&)));
-    connect (&mNewGame, SIGNAL (cancelCreateGame()), this, SLOT (cancelCreateGame ()));
+    connect (&mNewGame, &CSVDoc::NewGameDialogue::createRequest, this, &Editor::createNewGame);
+    connect (&mNewGame, &CSVDoc::NewGameDialogue::cancelCreateGame, this, &Editor::cancelCreateGame);
 }
 
 CS::Editor::~Editor ()
@@ -343,7 +340,7 @@ bool CS::Editor::makeIPCServer()
 
     if(mServer->listen(mIpcServerName))
     {
-        connect(mServer, SIGNAL(newConnection()), this, SLOT(showStartup()));
+        connect(mServer, &QLocalServer::newConnection, this, &Editor::showStartup);
         return true;
     }
 

@@ -10,11 +10,11 @@
 CSMDoc::Runner::Runner (const boost::filesystem::path& projectPath)
 : mRunning (false), mStartup (nullptr), mProjectPath (projectPath)
 {
-    connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),
-        this, SLOT (finished (int, QProcess::ExitStatus)));
+    connect (&mProcess, qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
+        this, &Runner::finished);
 
-    connect (&mProcess, SIGNAL (readyReadStandardOutput()),
-        this, SLOT (readyReadStandardOutput()));
+    connect (&mProcess, &QProcess::readyReadStandardOutput,
+        this, &Runner::readyReadStandardOutput);
 
     mProcess.setProcessChannelMode (QProcess::MergedChannels);
 
@@ -149,7 +149,7 @@ void CSMDoc::Runner::readyReadStandardOutput()
 CSMDoc::SaveWatcher::SaveWatcher (Runner *runner, OperationHolder *operation)
 : QObject (runner), mRunner (runner)
 {
-    connect (operation, SIGNAL (done (int, bool)), this, SLOT (saveDone (int, bool)));
+    connect (operation, &OperationHolder::done, this, &SaveWatcher::saveDone);
 }
 
 void CSMDoc::SaveWatcher::saveDone (int type, bool failed)

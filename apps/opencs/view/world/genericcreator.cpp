@@ -175,13 +175,13 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
 
     setLayout (mLayout);
 
-    connect (mCancel, SIGNAL (clicked (bool)), this, SIGNAL (done()));
-    connect (mCreate, SIGNAL (clicked (bool)), this, SLOT (create()));
+    connect (mCancel, &QPushButton::clicked, this, &GenericCreator::done);
+    connect (mCreate, &QPushButton::clicked, this, &GenericCreator::create);
 
-    connect (mId, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
-    connect (mId, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
+    connect (mId, &QLineEdit::textChanged, this, &GenericCreator::textChanged);
+    connect (mId, &QLineEdit::returnPressed, this, &GenericCreator::inputReturnPressed);
 
-    connect (&mData, SIGNAL (idListChanged()), this, SLOT (dataIdListChanged()));
+    connect (&mData, &CSMWorld::Data::idListChanged, this, &GenericCreator::dataIdListChanged);
 }
 
 void CSVWorld::GenericCreator::setEditorMaxLength (int length)
@@ -317,7 +317,8 @@ void CSVWorld::GenericCreator::setScope (unsigned int scope)
                 "Record will be created in the reserved namespace \"session\".<p>"
                 "Record is not available when running OpenMW via OpenCS.");
 
-        connect (mScope, SIGNAL (currentIndexChanged (int)), this, SLOT (scopeChanged (int)));
+        connect (mScope, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, &GenericCreator::scopeChanged);
 
         mScopeLabel = new QLabel ("Scope", this);
         insertAtBeginning (mScopeLabel, false);

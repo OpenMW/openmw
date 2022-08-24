@@ -19,7 +19,7 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget *parent) :
     
     registerField(QLatin1String("installation.retailDisc"), retailDiscRadioButton);
     
-    connect(buyLinkButton, SIGNAL(released()), this, SLOT(handleBuyButton()));
+    connect(buyLinkButton, &QCommandLinkButton::released, this, &MethodSelectionPage::handleBuyButton);
 }
 
 int Wizard::MethodSelectionPage::nextId() const

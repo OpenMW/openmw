@@ -75,30 +75,32 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
 void CSVWorld::SceneSubView::makeConnections (CSVRender::UnpagedWorldspaceWidget* widget)
 {
-    connect (widget, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
+    connect(widget, &CSVRender::UnpagedWorldspaceWidget::closeRequest, 
+            this, qOverload<>(&SceneSubView::closeRequest));
 
-    connect(widget, SIGNAL(dataDropped(const std::vector<CSMWorld::UniversalId>&)),
-            this, SLOT(handleDrop(const std::vector<CSMWorld::UniversalId>&)));
+    connect(widget, &CSVRender::UnpagedWorldspaceWidget::dataDropped,
+            this, &SceneSubView::handleDrop);
 
-    connect(widget, SIGNAL(cellChanged(const CSMWorld::UniversalId&)),
-            this, SLOT(cellSelectionChanged(const CSMWorld::UniversalId&)));
+    connect(widget, &CSVRender::UnpagedWorldspaceWidget::cellChanged,
+            this, qOverload<const CSMWorld::UniversalId&>(&SceneSubView::cellSelectionChanged));
 
-    connect(widget, SIGNAL(requestFocus (const std::string&)),
-            this, SIGNAL(requestFocus (const std::string&)));
+    connect(widget, &CSVRender::UnpagedWorldspaceWidget::requestFocus,
+            this, &SceneSubView::requestFocus);
 }
 
 void CSVWorld::SceneSubView::makeConnections (CSVRender::PagedWorldspaceWidget* widget)
 {
-    connect (widget, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
+    connect(widget, &CSVRender::PagedWorldspaceWidget::closeRequest, 
+            this, qOverload<>(&SceneSubView::closeRequest));
 
-    connect(widget, SIGNAL(dataDropped(const std::vector<CSMWorld::UniversalId>&)),
-            this, SLOT(handleDrop(const std::vector<CSMWorld::UniversalId>&)));
+    connect(widget, &CSVRender::PagedWorldspaceWidget::dataDropped,
+            this, &SceneSubView::handleDrop);
 
-    connect (widget, SIGNAL (cellSelectionChanged (const CSMWorld::CellSelection&)),
-             this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
+    connect(widget, &CSVRender::PagedWorldspaceWidget::cellSelectionChanged,
+            this, qOverload<const CSMWorld::CellSelection&>(&SceneSubView::cellSelectionChanged));
 
-    connect(widget, SIGNAL(requestFocus (const std::string&)),
-            this, SIGNAL(requestFocus (const std::string&)));
+    connect(widget, &CSVRender::PagedWorldspaceWidget::requestFocus,
+            this, &SceneSubView::requestFocus);
 }
 
 CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::WorldspaceWidget* widget, widgetType type)
@@ -244,8 +246,10 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
     mScene = widget;
     mToolbar = toolbar;
 
-    connect (mScene, SIGNAL (focusToolbarRequest()), mToolbar, SLOT (setFocus()));
-    connect (mToolbar, SIGNAL (focusSceneRequest()), mScene, SLOT (setFocus()));
+    connect (mScene, &CSVRender::WorldspaceWidget::focusToolbarRequest, 
+        mToolbar, qOverload<>(&CSVWidget::SceneToolbar::setFocus));
+    connect (mToolbar, &CSVWidget::SceneToolbar::focusSceneRequest, 
+        mScene, qOverload<>(&CSVRender::WorldspaceWidget::setFocus));
 
     mLayout->addWidget (mToolbar, 0);
     mLayout->addWidget (mScene, 1);

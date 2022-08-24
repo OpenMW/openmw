@@ -34,7 +34,7 @@ namespace CSMPrefs
 
             // Intercept widget events
             widget->installEventFilter(this);
-            connect(widget, SIGNAL(destroyed()), this, SLOT(widgetDestroyed()));
+            connect(widget, &QWidget::destroyed, this, &ShortcutEventHandler::widgetDestroyed);
         }
 
         // Add to list

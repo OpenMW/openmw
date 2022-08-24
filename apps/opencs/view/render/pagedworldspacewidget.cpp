@@ -524,49 +524,54 @@ CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
 
-    connect (cells, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (cellDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (cells, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
-        this, SLOT (cellRemoved (const QModelIndex&, int, int)));
-    connect (cells, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (cellAdded (const QModelIndex&, int, int)));
+    connect (cells, &QAbstractItemModel::dataChanged,
+        this, &PagedWorldspaceWidget::cellDataChanged);
+    connect (cells, &QAbstractItemModel::rowsRemoved,
+        this, &PagedWorldspaceWidget::cellRemoved);
+    connect (cells, &QAbstractItemModel::rowsInserted,
+        this, &PagedWorldspaceWidget::cellAdded);
 
-    connect (&document.getData(), SIGNAL (assetTablesChanged ()),
-        this, SLOT (assetTablesChanged ()));
+    connect (&document.getData(), &CSMWorld::Data::assetTablesChanged,
+        this, &PagedWorldspaceWidget::assetTablesChanged);
 
     QAbstractItemModel *lands = document.getData().getTableModel (CSMWorld::UniversalId::Type_Lands);
 
-    connect (lands, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (landDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (lands, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (landAboutToBeRemoved (const QModelIndex&, int, int)));
-    connect (lands, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (landAdded (const QModelIndex&, int, int)));
+    connect (lands, &QAbstractItemModel::dataChanged,
+        this, &PagedWorldspaceWidget::landDataChanged);
+    connect (lands, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &PagedWorldspaceWidget::landAboutToBeRemoved);
+    connect (lands, &QAbstractItemModel::rowsInserted,
+        this, &PagedWorldspaceWidget::landAdded);
 
     QAbstractItemModel *ltexs = document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures);
 
-    connect (ltexs, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (landTextureDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (ltexs, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (landTextureAboutToBeRemoved (const QModelIndex&, int, int)));
-    connect (ltexs, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (landTextureAdded (const QModelIndex&, int, int)));
+    connect (ltexs, &QAbstractItemModel::dataChanged,
+        this, &PagedWorldspaceWidget::landTextureDataChanged);
+    connect (ltexs, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &PagedWorldspaceWidget::landTextureAboutToBeRemoved);
+    connect (ltexs, &QAbstractItemModel::rowsInserted,
+        this, &PagedWorldspaceWidget::landTextureAdded);
 
     // Shortcuts
     CSMPrefs::Shortcut* loadCameraCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-cell", this);
-    connect(loadCameraCellShortcut, SIGNAL(activated()), this, SLOT(loadCameraCell()));
+    connect(loadCameraCellShortcut, qOverload<>(&CSMPrefs::Shortcut::activated),
+        this, &PagedWorldspaceWidget::loadCameraCell);
 
     CSMPrefs::Shortcut* loadCameraEastCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-eastcell", this);
-    connect(loadCameraEastCellShortcut, SIGNAL(activated()), this, SLOT(loadEastCell()));
+    connect(loadCameraEastCellShortcut, qOverload<>(&CSMPrefs::Shortcut::activated),
+        this, &PagedWorldspaceWidget::loadEastCell);
 
     CSMPrefs::Shortcut* loadCameraNorthCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-northcell", this);
-    connect(loadCameraNorthCellShortcut, SIGNAL(activated()), this, SLOT(loadNorthCell()));
+    connect(loadCameraNorthCellShortcut, qOverload<>(&CSMPrefs::Shortcut::activated),
+        this, &PagedWorldspaceWidget::loadNorthCell);
 
     CSMPrefs::Shortcut* loadCameraWestCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-westcell", this);
-    connect(loadCameraWestCellShortcut, SIGNAL(activated()), this, SLOT(loadWestCell()));
+    connect(loadCameraWestCellShortcut, qOverload<>(&CSMPrefs::Shortcut::activated),
+        this, &PagedWorldspaceWidget::loadWestCell);
 
     CSMPrefs::Shortcut* loadCameraSouthCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-southcell", this);
-    connect(loadCameraSouthCellShortcut, SIGNAL(activated()), this, SLOT(loadSouthCell()));
+    connect(loadCameraSouthCellShortcut, qOverload<>(&CSMPrefs::Shortcut::activated),
+        this, &PagedWorldspaceWidget::loadSouthCell);
 }
 
 CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
@@ -888,8 +893,8 @@ CSVWidget::SceneToolToggle2 *CSVRender::PagedWorldspaceWidget::makeControlVisibi
 
     mControlElements->setSelectionMask (0xffffffff);
 
-    connect (mControlElements, SIGNAL (selectionChanged()),
-        this, SLOT (elementSelectionChanged()));
+    connect (mControlElements, &CSVWidget::SceneToolToggle2::selectionChanged,
+        this, &PagedWorldspaceWidget::elementSelectionChanged);
 
     return mControlElements;
 }

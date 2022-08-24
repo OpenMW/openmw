@@ -13,15 +13,13 @@ CSVTools::ReportSubView::ReportSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     setWidget (mTable = new ReportTable (document, id, false, mRefreshState, this));
 
-    connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
-        SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)));
-
+    connect (mTable, &ReportTable::editRequest, this, &ReportSubView::focusId);
+    
     if (mRefreshState==CSMDoc::State_Verifying)
     {
-        connect (mTable, SIGNAL (refreshRequest()), this, SLOT (refreshRequest()));
+        connect (mTable, &ReportTable::refreshRequest, this, &ReportSubView::refreshRequest);
 
-        connect (&document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
-            mTable, SLOT (stateChanged (int, CSMDoc::Document *)));
+        connect (&document, &CSMDoc::Document::stateChanged, mTable, &ReportTable::stateChanged);
     }
 }
 

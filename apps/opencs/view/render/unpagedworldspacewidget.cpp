@@ -44,13 +44,13 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
     mReferenceablesModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Referenceables));
 
-    connect (mCellsModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (cellDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (mCellsModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (cellRowsAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (mCellsModel, &CSMWorld::IdTable::dataChanged,
+        this, &UnpagedWorldspaceWidget::cellDataChanged);
+    connect (mCellsModel, &CSMWorld::IdTable::rowsAboutToBeRemoved,
+        this, &UnpagedWorldspaceWidget::cellRowsAboutToBeRemoved);
 
-    connect (&document.getData(), SIGNAL (assetTablesChanged ()),
-        this, SLOT (assetTablesChanged ()));
+    connect (&document.getData(), &CSMWorld::Data::assetTablesChanged,
+        this, &UnpagedWorldspaceWidget::assetTablesChanged);
 
     update();
 

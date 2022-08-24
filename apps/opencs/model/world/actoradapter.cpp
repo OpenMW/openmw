@@ -194,28 +194,28 @@ namespace CSMWorld
     {
         // Setup qt slots and signals
         QAbstractItemModel* refModel = data.getTableModel(UniversalId::Type_Referenceable);
-        connect(refModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)),
-                this, SLOT(handleReferenceablesInserted(const QModelIndex&, int, int)));
-        connect(refModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-                this, SLOT(handleReferenceableChanged(const QModelIndex&, const QModelIndex&)));
-        connect(refModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)),
-                this, SLOT(handleReferenceablesAboutToBeRemoved(const QModelIndex&, int, int)));
+        connect(refModel, &QAbstractItemModel::rowsInserted,
+                this, &ActorAdapter::handleReferenceablesInserted);
+        connect(refModel, &QAbstractItemModel::dataChanged,
+                this, &ActorAdapter::handleReferenceableChanged);
+        connect(refModel, &QAbstractItemModel::rowsAboutToBeRemoved,
+                this, &ActorAdapter::handleReferenceablesAboutToBeRemoved);
 
         QAbstractItemModel* raceModel = data.getTableModel(UniversalId::Type_Race);
-        connect(raceModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)),
-                this, SLOT(handleRacesAboutToBeRemoved(const QModelIndex&, int, int)));
-        connect(raceModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-                this, SLOT(handleRaceChanged(const QModelIndex&, const QModelIndex&)));
-        connect(raceModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)),
-                this, SLOT(handleRacesAboutToBeRemoved(const QModelIndex&, int, int)));
+        connect(raceModel, &QAbstractItemModel::rowsInserted,
+                this, &ActorAdapter::handleRacesAboutToBeRemoved);
+        connect(raceModel, &QAbstractItemModel::dataChanged,
+                this, &ActorAdapter::handleRaceChanged);
+        connect(raceModel, &QAbstractItemModel::rowsAboutToBeRemoved,
+                this, &ActorAdapter::handleRacesAboutToBeRemoved);
 
         QAbstractItemModel* partModel = data.getTableModel(UniversalId::Type_BodyPart);
-        connect(partModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)),
-                this, SLOT(handleBodyPartsInserted(const QModelIndex&, int, int)));
-        connect(partModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-                this, SLOT(handleBodyPartChanged(const QModelIndex&, const QModelIndex&)));
-        connect(partModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)),
-                this, SLOT(handleBodyPartsAboutToBeRemoved(const QModelIndex&, int, int)));
+        connect(partModel, &QAbstractItemModel::rowsInserted,
+                this, &ActorAdapter::handleBodyPartsInserted);
+        connect(partModel, &QAbstractItemModel::dataChanged,
+                this, &ActorAdapter::handleBodyPartChanged);
+        connect(partModel, &QAbstractItemModel::rowsAboutToBeRemoved,
+                this, &ActorAdapter::handleBodyPartsAboutToBeRemoved);
     }
 
     ActorAdapter::ActorDataPtr ActorAdapter::getActorData(const std::string& id)

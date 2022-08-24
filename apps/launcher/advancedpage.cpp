@@ -128,7 +128,7 @@ bool Launcher::AdvancedPage::loadSettings()
             antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
         }
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
-        connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
+        connect(animSourcesCheckBox, &QCheckBox::toggled, this, &AdvancedPage::slotAnimSourcesToggled);
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
         if (animSourcesCheckBox->checkState() != Qt::Unchecked)
         {
@@ -150,12 +150,12 @@ bool Launcher::AdvancedPage::loadSettings()
 
         loadSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
 
-        connect(postprocessEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotPostProcessToggled(bool)));
+        connect(postprocessEnabledCheckBox, &QCheckBox::toggled, this, &AdvancedPage::slotPostProcessToggled);
         loadSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
         loadSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
         postprocessHDRTimeComboBox->setValue(Settings::Manager::getDouble("auto exposure speed", "Post Processing"));
 
-        connect(skyBlendingCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotSkyBlendingToggled(bool)));
+        connect(skyBlendingCheckBox, &QCheckBox::toggled, this, &AdvancedPage::slotSkyBlendingToggled);
         loadSettingBool(radialFogCheckBox, "radial fog", "Fog");
         loadSettingBool(exponentialFogCheckBox, "exponential fog", "Fog");
         loadSettingBool(skyBlendingCheckBox, "sky blending", "Fog");
@@ -320,7 +320,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(skyBlendingCheckBox, "sky blending", "Fog");
         Settings::Manager::setDouble("sky blending start", "Fog", skyBlendingStartComboBox->value());
     }
-    
+
     // Audio
     {
         int audioDeviceIndex = audioDeviceSelectorComboBox->currentIndex();

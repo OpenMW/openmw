@@ -88,27 +88,25 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     stateChanged (document.getState(), &document);
 
-    connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
-        SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)));
+    connect (mTable, &ReportTable::editRequest, this, &SearchSubView::focusId);
 
-    connect (mTable, SIGNAL (replaceRequest()), this, SLOT (replaceRequest()));
+    connect (mTable, &ReportTable::replaceRequest, this, &SearchSubView::replaceRequest);
 
-    connect (&document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
-        this, SLOT (stateChanged (int, CSMDoc::Document *)));
+    connect (&document, &CSMDoc::Document::stateChanged, this, &SearchSubView::stateChanged);
 
-    connect (&mSearchBox, SIGNAL (startSearch (const CSMTools::Search&)),
-        this, SLOT (startSearch (const CSMTools::Search&)));
+    connect (&mSearchBox, qOverload<const CSMTools::Search&>(&SearchBox::startSearch),
+        this, &SearchSubView::startSearch);
 
-    connect (&mSearchBox, SIGNAL (replaceAll()), this, SLOT (replaceAllRequest()));
+    connect (&mSearchBox, qOverload<>(&SearchBox::replaceAll), this,
+        &SearchSubView::replaceAllRequest);
 
-    connect (document.getReport (id), SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
-        this, SLOT (tableSizeUpdate()));
+    connect (document.getReport(id), &CSMTools::ReportModel::rowsRemoved,
+        this, &SearchSubView::tableSizeUpdate);
 
-    connect (document.getReport (id), SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (tableSizeUpdate()));
+    connect (document.getReport(id), &CSMTools::ReportModel::rowsInserted,
+        this, &SearchSubView::tableSizeUpdate);
 
-    connect (&document, SIGNAL (operationDone (int, bool)),
-        this, SLOT (operationDone (int, bool)));
+    connect (&document, &CSMDoc::Document::operationDone, this, &SearchSubView::operationDone);
 }
 
 void CSVTools::SearchSubView::setEditLock (bool locked)

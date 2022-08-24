@@ -41,13 +41,13 @@ QWidget *CSVDoc::StartupDialogue::createButtons()
 
     /// \todo add icons
     QPushButton *loadDocument = addButton ("Edit A Content File", QIcon (":startup/edit-content"));
-    connect (loadDocument, SIGNAL (clicked()), this, SIGNAL (loadDocument()));
+    connect (loadDocument, &QPushButton::clicked, this, &StartupDialogue::loadDocument);
 
     QPushButton *createAddon = addButton ("Create A New Addon", QIcon (":startup/create-addon"));
-    connect (createAddon, SIGNAL (clicked()), this, SIGNAL (createAddon()));
+    connect (createAddon, &QPushButton::clicked, this, &StartupDialogue::createAddon);
 
     QPushButton *createGame = addButton ("Create A New Game", QIcon (":startup/create-game"));
-    connect (createGame, SIGNAL (clicked()), this, SIGNAL (createGame()));
+    connect (createGame, &QPushButton::clicked, this, &StartupDialogue::createGame);
 
     for (int i=0; i<3; ++i)
         mLayout->setColumnMinimumWidth (i, mWidth);
@@ -88,7 +88,7 @@ QWidget *CSVDoc::StartupDialogue::createTools()
 
     widget->setLayout (layout);
 
-    connect (config, SIGNAL (clicked()), this, SIGNAL (editConfig()));
+    connect (config, &QPushButton::clicked, this, &StartupDialogue::editConfig);
 
     return widget;
 }

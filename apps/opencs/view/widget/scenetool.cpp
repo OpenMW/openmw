@@ -11,7 +11,7 @@ CSVWidget::SceneTool::SceneTool (SceneToolbar *parent, Type type)
     setIconSize (QSize (parent->getIconSize(), parent->getIconSize()));
     setFixedSize (parent->getButtonSize(), parent->getButtonSize());
 
-    connect (this, SIGNAL (clicked()), this, SLOT (openRequest()));
+    connect (this, &SceneTool::clicked, this, &SceneTool::openRequest);
 }
 
 void CSVWidget::SceneTool::activate() {}

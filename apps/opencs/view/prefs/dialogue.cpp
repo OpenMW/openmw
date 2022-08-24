@@ -40,8 +40,8 @@ void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
 
     list->setMaximumWidth (maxWidth + 10);
 
-    connect (list, SIGNAL (currentItemChanged (QListWidgetItem *, QListWidgetItem *)),
-        this, SLOT (selectionChanged (QListWidgetItem *, QListWidgetItem *)));
+    connect (list, &ContextMenuList::currentItemChanged,
+        this, &Dialogue::selectionChanged);
 }
 
 void CSVPrefs::Dialogue::buildContentArea (QSplitter *main)

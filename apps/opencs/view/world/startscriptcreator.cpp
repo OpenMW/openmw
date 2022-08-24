@@ -44,8 +44,8 @@ CSVWorld::StartScriptCreator::StartScriptCreator(
     mScript->setCompleter(completionManager.getCompleter(displayType).get());
     insertBeforeButtons(mScript, true);
 
-    connect(mScript, SIGNAL (textChanged(const QString&)), this, SLOT (scriptChanged()));
-    connect(mScript, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
+    connect(mScript, &CSVWidget::DropLineEdit::textChanged, this, &StartScriptCreator::scriptChanged);
+    connect(mScript, &CSVWidget::DropLineEdit::returnPressed, this, &StartScriptCreator::inputReturnPressed);
 }
 
 void CSVWorld::StartScriptCreator::cloneMode(

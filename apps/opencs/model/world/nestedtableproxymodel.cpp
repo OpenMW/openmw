@@ -15,26 +15,26 @@ CSMWorld::NestedTableProxyModel::NestedTableProxyModel(const QModelIndex& parent
 
     QAbstractProxyModel::setSourceModel(parentModel);
 
-    connect(mMainModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex &, int, int)),
-            this, SLOT(forwardRowsAboutToInserted(const QModelIndex &, int, int)));
+    connect(mMainModel, &IdTree::rowsAboutToBeInserted,
+            this, &NestedTableProxyModel::forwardRowsAboutToInserted);
 
-    connect(mMainModel, SIGNAL(rowsInserted(const QModelIndex &, int, int)),
-            this, SLOT(forwardRowsInserted(const QModelIndex &, int, int)));
+    connect(mMainModel, &IdTree::rowsInserted,
+            this, &NestedTableProxyModel::forwardRowsInserted);
 
-    connect(mMainModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)),
-            this, SLOT(forwardRowsAboutToRemoved(const QModelIndex &, int, int)));
+    connect(mMainModel, &IdTree::rowsAboutToBeRemoved,
+            this, &NestedTableProxyModel::forwardRowsAboutToRemoved);
 
-    connect(mMainModel, SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
-            this, SLOT(forwardRowsRemoved(const QModelIndex &, int, int)));
+    connect(mMainModel, &IdTree::rowsRemoved,
+            this, &NestedTableProxyModel::forwardRowsRemoved);
 
-    connect(mMainModel, SIGNAL(resetStart(const QString&)),
-            this, SLOT(forwardResetStart(const QString&)));
+    connect(mMainModel, &IdTree::resetStart,
+            this, &NestedTableProxyModel::forwardResetStart);
 
-    connect(mMainModel, SIGNAL(resetEnd(const QString&)),
-            this, SLOT(forwardResetEnd(const QString&)));
+    connect(mMainModel, &IdTree::resetEnd,
+            this, &NestedTableProxyModel::forwardResetEnd);
 
-    connect(mMainModel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
-            this, SLOT(forwardDataChanged(const QModelIndex &, const QModelIndex &)));
+    connect(mMainModel, &IdTree::dataChanged,
+            this, &NestedTableProxyModel::forwardDataChanged);
 }
 
 QModelIndex CSMWorld::NestedTableProxyModel::mapFromSource(const QModelIndex& sourceIndex) const

@@ -38,11 +38,11 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     mGameInvoker = new ProcessInvoker();
     mWizardInvoker = new ProcessInvoker();
 
-    connect(mWizardInvoker->getProcess(), SIGNAL(started()),
-            this, SLOT(wizardStarted()));
+    connect(mWizardInvoker->getProcess(), &QProcess::started,
+            this, &MainDialog::wizardStarted);
 
-    connect(mWizardInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(wizardFinished(int,QProcess::ExitStatus)));
+    connect(mWizardInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+            this, &MainDialog::wizardFinished);
 
     iconWidget->setViewMode(QListView::IconMode);
     iconWidget->setWrapping(false);
@@ -60,9 +60,9 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     buttonBox->addButton(helpButton, QDialogButtonBox::HelpRole);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
-    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
+    connect(buttonBox, &QDialogButtonBox::rejected, this, &MainDialog::close);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &MainDialog::play);
+    connect(buttonBox, &QDialogButtonBox::helpRequested, this, &MainDialog::help);
 
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -111,9 +111,7 @@ void Launcher::MainDialog::createIcons()
     advancedButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     advancedButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    connect(iconWidget,
-            SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
-            this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
+    connect(iconWidget, &QListWidget::currentItemChanged, this, &MainDialog::changePage);
 
 }
 
@@ -143,12 +141,12 @@ void Launcher::MainDialog::createPages()
     // Select the first page
     iconWidget->setCurrentItem(iconWidget->item(0), QItemSelectionModel::Select);
 
-    connect(mPlayPage, SIGNAL(playButtonClicked()), this, SLOT(play()));
+    connect(mPlayPage, &PlayPage::playButtonClicked, this, &MainDialog::play);
 
-    connect(mPlayPage, SIGNAL(signalProfileChanged(int)), mDataFilesPage, SLOT(slotProfileChanged(int)));
-    connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
+    connect(mPlayPage, &PlayPage::signalProfileChanged, mDataFilesPage, &DataFilesPage::slotProfileChanged);
+    connect(mDataFilesPage, &DataFilesPage::signalProfileChanged, mPlayPage, &PlayPage::setProfilesIndex);
     // Using Qt::QueuedConnection because signal is emitted in a subthread and slot is in the main thread
-    connect(mDataFilesPage, SIGNAL(signalLoadedCellsChanged(QStringList)), mAdvancedPage, SLOT(slotLoadedCellsChanged(QStringList)), Qt::QueuedConnection);
+    connect(mDataFilesPage, &DataFilesPage::signalLoadedCellsChanged, mAdvancedPage, &AdvancedPage::slotLoadedCellsChanged, Qt::QueuedConnection);
 }
 
 Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()

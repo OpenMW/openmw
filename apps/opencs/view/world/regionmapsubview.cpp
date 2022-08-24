@@ -10,8 +10,7 @@ CSVWorld::RegionMapSubView::RegionMapSubView (CSMWorld::UniversalId universalId,
 
     setWidget (mRegionMap);
 
-    connect (mRegionMap, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
-        this, SLOT (editRequest (const CSMWorld::UniversalId&, const std::string&)));
+    connect (mRegionMap, &RegionMap::editRequest, this, &RegionMapSubView::editRequest);
 }
 
 void CSVWorld::RegionMapSubView::setEditLock (bool locked)

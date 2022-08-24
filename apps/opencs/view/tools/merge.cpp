@@ -72,17 +72,16 @@ CSVTools::Merge::Merge (CSMDoc::DocumentManager& documentManager, QWidget *paren
 
     rightLayout->addWidget (mAdjuster);
 
-    connect (mNewFile, SIGNAL (nameChanged (const QString&, bool)),
-        mAdjuster, SLOT (setName (const QString&, bool)));
-    connect (mAdjuster, SIGNAL (stateChanged (bool)), this, SLOT (stateChanged (bool)));
+    connect (mNewFile, &CSVDoc::FileWidget::nameChanged, mAdjuster, &CSVDoc::AdjusterWidget::setName);
+    connect (mAdjuster,  &CSVDoc::AdjusterWidget::stateChanged, this, &Merge::stateChanged);
 
     // buttons
     QDialogButtonBox *buttons = new QDialogButtonBox (QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
-    connect (buttons->button (QDialogButtonBox::Cancel), SIGNAL (clicked()), this, SLOT (cancel()));
+    connect (buttons->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &Merge::cancel);
 
     mOkay = new QPushButton ("Merge", this);
-    connect (mOkay, SIGNAL (clicked()), this, SLOT (accept()));
+    connect (mOkay, &QPushButton::clicked, this, &Merge::accept);
     mOkay->setDefault (true);
     buttons->addButton (mOkay, QDialogButtonBox::AcceptRole);
 

@@ -189,35 +189,35 @@ CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     resizeRowsToContents();
 
     mSelectAllAction = new QAction (tr ("Select All"), this);
-    connect (mSelectAllAction, SIGNAL (triggered()), this, SLOT (selectAll()));
+    connect (mSelectAllAction, &QAction::triggered, this, &RegionMap::selectAll);
     addAction (mSelectAllAction);
 
     mClearSelectionAction = new QAction (tr ("Clear Selection"), this);
-    connect (mClearSelectionAction, SIGNAL (triggered()), this, SLOT (clearSelection()));
+    connect (mClearSelectionAction, &QAction::triggered, this, &RegionMap::clearSelection);
     addAction (mClearSelectionAction);
 
     mSelectRegionsAction = new QAction (tr ("Select Regions"), this);
-    connect (mSelectRegionsAction, SIGNAL (triggered()), this, SLOT (selectRegions()));
+    connect (mSelectRegionsAction, &QAction::triggered, this, &RegionMap::selectRegions);
     addAction (mSelectRegionsAction);
 
     mCreateCellsAction = new QAction (tr ("Create Cells Action"), this);
-    connect (mCreateCellsAction, SIGNAL (triggered()), this, SLOT (createCells()));
+    connect (mCreateCellsAction, &QAction::triggered, this, &RegionMap::createCells);
     addAction (mCreateCellsAction);
 
     mSetRegionAction = new QAction (tr ("Set Region"), this);
-    connect (mSetRegionAction, SIGNAL (triggered()), this, SLOT (setRegion()));
+    connect (mSetRegionAction, &QAction::triggered, this, qOverload<>(&RegionMap::setRegion));
     addAction (mSetRegionAction);
 
     mUnsetRegionAction = new QAction (tr ("Unset Region"), this);
-    connect (mUnsetRegionAction, SIGNAL (triggered()), this, SLOT (unsetRegion()));
+    connect (mUnsetRegionAction, &QAction::triggered, this, &RegionMap::unsetRegion);
     addAction (mUnsetRegionAction);
 
     mViewAction = new QAction (tr ("View Cells"), this);
-    connect (mViewAction, SIGNAL (triggered()), this, SLOT (view()));
+    connect (mViewAction, &QAction::triggered, this, &RegionMap::view);
     addAction (mViewAction);
 
     mViewInTableAction = new QAction (tr ("View Cells in Table"), this);
-    connect (mViewInTableAction, SIGNAL (triggered()), this, SLOT (viewInTable()));
+    connect (mViewInTableAction, &QAction::triggered, this, &RegionMap::viewInTable);
     addAction (mViewInTableAction);
 
     setAcceptDrops(true);

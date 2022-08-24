@@ -23,8 +23,8 @@ namespace CSVRender
         , mSkeleton(nullptr)
     {
         mActorData = mData.getActorAdapter()->getActorData(mId);
-        connect(mData.getActorAdapter(), SIGNAL(actorChanged(const std::string&)),
-                this, SLOT(handleActorChanged(const std::string&)));
+        connect(mData.getActorAdapter(), &CSMWorld::ActorAdapter::actorChanged,
+                this, &Actor::handleActorChanged);
     }
 
     osg::Group* Actor::getBaseNode()
