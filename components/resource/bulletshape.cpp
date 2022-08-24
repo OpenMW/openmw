@@ -96,7 +96,7 @@ BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
 {
     mCollisionBox = mSource->mCollisionBox;
     mAnimatedShapes = mSource->mAnimatedShapes;
-    mCollisionType = mSource->mCollisionType;
+    mVisualCollisionType = mSource->mVisualCollisionType;
     mCollisionShape = duplicateCollisionShape(mSource->mCollisionShape.get());
     mAvoidCollisionShape = duplicateCollisionShape(mSource->mAvoidCollisionShape.get());
 }
