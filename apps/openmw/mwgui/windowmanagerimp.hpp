@@ -289,7 +289,7 @@ namespace MWGui
      * @param id Identifier for the GMST setting, e.g. "aName"
      * @param default Default value if the GMST setting cannot be used.
      */
-    std::string getGameSettingString(const std::string &id, const std::string &default_) override;
+    std::string_view getGameSettingString(std::string_view id, std::string_view default_) override;
 
     void processChangedSettings(const Settings::CategorySettingVector& changed) override;
 

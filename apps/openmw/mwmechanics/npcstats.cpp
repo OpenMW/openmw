@@ -267,8 +267,8 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
     MWBase::Environment::get().getWindowManager()->playSound("skillraise");
 
-    std::string message = MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", "");
-    message = Misc::StringUtils::format(message, ("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}"), static_cast<int>(base));
+    std::string message = Misc::StringUtils::format(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNotifyMessage39", {}),
+        ("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}"), static_cast<int>(base));
 
     if (readBook)
         message = "#{sBookSkillMessage}\n" + message;

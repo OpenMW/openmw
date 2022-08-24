@@ -17,6 +17,7 @@
 #include "../mwrender/characterpreview.hpp"
 
 #include "tooltips.hpp"
+#include "ustring.hpp"
 
 namespace
 {
@@ -105,7 +106,7 @@ namespace MWGui
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
-        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
+        okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
 
         updateRaces();
@@ -119,9 +120,9 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         if (shown)
-            okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", ""));
+            okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
-            okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
+            okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     void RaceDialog::onOpen()

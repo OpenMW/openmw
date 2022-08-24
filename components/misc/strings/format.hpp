@@ -51,9 +51,9 @@ namespace Misc::StringUtils
     }
 
     template <typename ... Args>
-    std::string format(const std::string& fmt, Args const & ... args)
+    std::string format(std::string_view fmt, Args const & ... args)
     {
-        return format(fmt.c_str(), args ...);
+        return format(fmt.data(), args ...);
     }
 }
 

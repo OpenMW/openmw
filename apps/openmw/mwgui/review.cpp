@@ -14,6 +14,7 @@
 #include "../mwmechanics/autocalcspell.hpp"
 
 #include "tooltips.hpp"
+#include "ustring.hpp"
 
 namespace
 {
@@ -58,15 +59,15 @@ namespace MWGui
 
         // Setup dynamic stats
         getWidget(mHealth, "Health");
-        mHealth->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sHealth", ""));
+        mHealth->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sHealth", {}));
         mHealth->setValue(45, 45);
 
         getWidget(mMagicka, "Magicka");
-        mMagicka->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sMagic", ""));
+        mMagicka->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sMagic", {}));
         mMagicka->setValue(50, 50);
 
         getWidget(mFatigue, "Fatigue");
-        mFatigue->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFatigue", ""));
+        mFatigue->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFatigue", {}));
         mFatigue->setValue(160, 160);
 
         // Setup attributes
@@ -250,11 +251,11 @@ namespace MWGui
         coord2.top += separator->getHeight();
     }
 
-    void ReviewDialog::addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+    void ReviewDialog::addGroup(std::string_view label, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         MyGUI::TextBox* groupWidget = mSkillView->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
-        groupWidget->setCaption(label);
+        groupWidget->setCaption(toUString(label));
         mSkillWidgets.push_back(groupWidget);
 
         int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
@@ -262,13 +263,13 @@ namespace MWGui
         coord2.top += lineHeight;
     }
 
-    MyGUI::TextBox* ReviewDialog::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+    MyGUI::TextBox* ReviewDialog::addValueItem(std::string_view text, const std::string& value, const std::string& state, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         MyGUI::TextBox* skillNameWidget;
         MyGUI::TextBox* skillValueWidget;
 
         skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
-        skillNameWidget->setCaption(text);
+        skillNameWidget->setCaption(toUString(text));
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
         skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
