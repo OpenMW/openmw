@@ -518,7 +518,7 @@ namespace
             AddNamesToList(Gui::MWList* list) : mList(list) {}
 
             Gui::MWList* mList;
-            void operator () (const std::string& name, bool finished=false)
+            void operator() (std::string_view name, bool finished = false)
             {
                 mList->addItem(name);
             }
@@ -528,7 +528,7 @@ namespace
             SetNamesInactive(Gui::MWList* list) : mList(list) {}
 
             Gui::MWList* mList;
-            void operator () (const std::string& name, bool finished)
+            void operator() (std::string_view name, bool finished)
             {
                 if (finished)
                 {

@@ -55,11 +55,6 @@ namespace MWGui
         center();
     }
 
-    std::string GenerateClassResultDialog::getClassId() const
-    {
-        return mClassName->getCaption();
-    }
-
     void GenerateClassResultDialog::setClassId(const std::string &classId)
     {
         mCurrentClassId = classId;

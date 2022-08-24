@@ -47,7 +47,7 @@ namespace MWDialogue
 
             std::string getTopic() const;
 
-            virtual std::string getName() const;
+            virtual std::string_view getName() const;
 
             void removeLastAddedResponse(std::string_view actorName);
 

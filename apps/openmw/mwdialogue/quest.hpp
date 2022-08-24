@@ -24,7 +24,7 @@ namespace MWDialogue
 
             Quest (const ESM::QuestState& state);
 
-            std::string getName() const override;
+            std::string_view getName() const override;
             ///< May be an empty string
 
             int getIndex() const;

@@ -115,7 +115,7 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
-        std::string typeGmst;
+        std::string_view typeGmst;
 
         switch (ref->mBase->mData.mType)
         {
@@ -298,7 +298,7 @@ namespace MWClass
 
         if (npc.getClass().isNpc())
         {
-            std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+            const std::string& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);

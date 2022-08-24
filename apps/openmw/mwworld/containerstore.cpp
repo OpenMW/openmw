@@ -543,7 +543,7 @@ void MWWorld::ContainerStore::fillNonRandom (const ESM::InventoryList& items, co
     mResolved = false;
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count,
+void MWWorld::ContainerStore::addInitialItem(std::string_view id, const std::string& owner, int count,
                                             Misc::Rng::Generator* prng, bool topLevel)
 {
     if (count == 0) return; //Don't restock with nothing.
@@ -584,7 +584,7 @@ void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const s
         }
         else
         {
-            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *prng);
+            std::string_view itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *prng);
             if (itemId.empty())
                 return;
             addInitialItem(itemId, owner, count, prng, false);

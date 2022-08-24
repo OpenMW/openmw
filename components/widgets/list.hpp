@@ -36,14 +36,14 @@ namespace Gui
          */
         void adjustSize();
 
-        void addItem(const std::string& name);
+        void addItem(std::string_view name);
         void addSeparator(); ///< add a seperator between the current and the next item.
         void removeItem(const std::string& name);
         unsigned int getItemCount();
         std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return "" at the place where the separator is
         void clear();
 
-        MyGUI::Button* getItemWidget(const std::string& name);
+        MyGUI::Button* getItemWidget(std::string_view name);
         ///< get widget for an item name, useful to set up tooltip
 
         void scrollToTop();

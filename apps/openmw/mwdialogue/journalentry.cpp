@@ -45,7 +45,7 @@ namespace MWDialogue
 
     Entry::Entry (const ESM::JournalEntry& record) : mInfoId (record.mInfo), mText (record.mText), mActorName(record.mActorName) {}
 
-    std::string Entry::getText() const
+    const std::string& Entry::getText() const
     {
         return mText;
     }

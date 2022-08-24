@@ -27,9 +27,9 @@ namespace Gui
             MyGUI::Align::Top | MyGUI::Align::Left | MyGUI::Align::Stretch, getName() + "_ScrollView");
     }
 
-    void MWList::addItem(const std::string& name)
+    void MWList::addItem(std::string_view name)
     {
-        mItems.push_back(name);
+        mItems.emplace_back(name);
     }
 
     void MWList::addSeparator()
@@ -152,9 +152,11 @@ namespace Gui
         eventWidgetSelected(_sender);
     }
 
-    MyGUI::Button *MWList::getItemWidget(const std::string& name)
+    MyGUI::Button* MWList::getItemWidget(std::string_view name)
     {
-        return mScrollView->findWidget (getName() + "_item_" + name)->castType<MyGUI::Button>();
+        std::string search = getName() + "_item_";
+        search += name;
+        return mScrollView->findWidget(search)->castType<MyGUI::Button>();
     }
 
     void MWList::scrollToTop()

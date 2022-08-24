@@ -1150,7 +1150,7 @@ namespace MWClass
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
         MWMechanics::CastSpell cast(actor, actor);
-        std::string recordId = consumable.getCellRef().getRefId();
+        const std::string& recordId = consumable.getCellRef().getRefId();
         MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
         actor.getClass().getContainerStore(actor).remove(consumable, 1, actor);
         return cast.cast(recordId);
