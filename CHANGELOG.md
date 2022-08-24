@@ -8,6 +8,7 @@
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
+    Bug #6964: Nerasa Dralor Won't Follow
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
 
 0.48.0

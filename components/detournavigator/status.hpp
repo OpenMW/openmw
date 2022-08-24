@@ -12,7 +12,6 @@ namespace DetourNavigator
         EndPolygonNotFound,
         MoveAlongSurfaceFailed,
         FindPathOverPolygonsFailed,
-        GetPolyHeightFailed,
         InitNavMeshQueryFailed,
     };
 
@@ -34,8 +33,6 @@ namespace DetourNavigator
                 return "move along surface on navmesh is failed";
             case Status::FindPathOverPolygonsFailed:
                 return "path over navmesh polygons is not found";
-            case Status::GetPolyHeightFailed:
-                return "failed to get polygon height";
             case Status::InitNavMeshQueryFailed:
                 return "failed to init navmesh query";
         }
