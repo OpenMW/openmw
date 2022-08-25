@@ -124,6 +124,7 @@
 #include "itemchargeview.hpp"
 #include "keyboardnavigation.hpp"
 #include "resourceskin.hpp"
+#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -752,7 +753,7 @@ namespace MWGui
     void WindowManager::messageBox(std::string_view message, enum MWGui::ShowInDialogueMode showInDialogueMode)
     {
         if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
-            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags({message.data(), message.size()}));
+            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(toUString(message)));
         } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
             mMessageBoxManager->createMessageBox(message);
         }
@@ -783,7 +784,7 @@ namespace MWGui
         return mMessageBoxManager->readPressedButton();
     }
 
-    std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
+    std::string_view WindowManager::getGameSettingString(std::string_view id, std::string_view default_)
     {
         const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().search(id);
 

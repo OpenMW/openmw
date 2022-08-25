@@ -3694,7 +3694,7 @@ namespace MWWorld
 
         for (int i=0; i<numCreatures; ++i)
         {
-            std::string selectedCreature = MWMechanics::getLevelledItem(list, true, mPrng);
+            std::string_view selectedCreature = MWMechanics::getLevelledItem(list, true, mPrng);
             if (selectedCreature.empty())
                 continue;
 

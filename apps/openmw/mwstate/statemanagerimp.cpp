@@ -124,8 +124,8 @@ void MWState::StateManager::askLoadRecent()
             std::vector<std::string> buttons;
             buttons.emplace_back("#{sYes}");
             buttons.emplace_back("#{sNo}");
-            std::string tag("%s");
-            std::string message = MWBase::Environment::get().getWindowManager()->getGameSettingString("sLoadLastSaveMsg", tag);
+            std::string_view tag = "%s";
+            std::string message{MWBase::Environment::get().getWindowManager()->getGameSettingString("sLoadLastSaveMsg", tag)};
             size_t pos = message.find(tag);
             message.replace(pos, tag.length(), lastSave.mProfile.mDescription);
             MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);

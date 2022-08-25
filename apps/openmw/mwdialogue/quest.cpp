@@ -23,7 +23,7 @@ namespace MWDialogue
     : Topic (state.mTopic), mIndex (state.mState), mFinished (state.mFinished!=0)
     {}
 
-    std::string Quest::getName() const
+    std::string_view Quest::getName() const
     {
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
@@ -33,7 +33,7 @@ namespace MWDialogue
             if (iter->mQuestStatus==ESM::DialInfo::QS_Name)
                 return iter->mResponse;
 
-        return "";
+        return {};
     }
 
     int Quest::getIndex() const

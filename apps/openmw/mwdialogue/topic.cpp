@@ -44,7 +44,7 @@ namespace MWDialogue
         return mTopic;
     }
 
-    std::string Topic::getName() const
+    std::string_view Topic::getName() const
     {
         return mName;
     }

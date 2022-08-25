@@ -132,7 +132,7 @@ namespace MWClass
             ptr.get<ESM::CreatureLevList>();
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        std::string id = MWMechanics::getLevelledItem(ref->mBase, true, prng);
+        std::string_view id = MWMechanics::getLevelledItem(ref->mBase, true, prng);
 
         if (!id.empty())
         {

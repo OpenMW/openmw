@@ -158,16 +158,17 @@ namespace MWGui
             isInherent = sign->mPowers.exists(spell->mId);
         }
 
+        const auto windowManager = MWBase::Environment::get().getWindowManager();
         if (isInherent)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sDeleteSpellError}");
+            windowManager->messageBox("#{sDeleteSpellError}");
         }
         else
         {
             // ask for confirmation
             mSpellToDelete = spellId;
-            ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-            std::string question = MWBase::Environment::get().getWindowManager()->getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
+            ConfirmationDialog* dialog = windowManager->getConfirmationDialog();
+            std::string question{windowManager->getGameSettingString("sQuestionDeleteSpell", "Delete %s?")};
             question = Misc::StringUtils::format(question, spell->mName);
             dialog->askForConfirmation(question);
             dialog->eventOkClicked.clear();

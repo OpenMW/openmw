@@ -24,6 +24,7 @@
 #include "sortfilteritemmodel.hpp"
 #include "itemview.hpp"
 #include "itemwidget.hpp"
+#include "ustring.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -151,10 +152,9 @@ namespace MWGui
     void AlchemyWindow::initFilter()
     {
         auto const& wm = MWBase::Environment::get().getWindowManager();
-        auto const ingredient  = wm->getGameSettingString("sIngredients", "Ingredients");
-        auto const effect = wm->getGameSettingString("sMagicEffects", "Magic Effects");
+        std::string_view ingredient = wm->getGameSettingString("sIngredients", "Ingredients");
 
-        if (mFilterType->getCaption() == ingredient)
+        if (mFilterType->getCaption() == toUString(ingredient))
             mCurrentFilter = FilterType::ByName;
         else
             mCurrentFilter = FilterType::ByEffect;
@@ -166,13 +166,12 @@ namespace MWGui
     void AlchemyWindow::switchFilterType(MyGUI::Widget* _sender)
     {
         auto const& wm = MWBase::Environment::get().getWindowManager();
-        auto const ingredient  = wm->getGameSettingString("sIngredients", "Ingredients");
-        auto const effect = wm->getGameSettingString("sMagicEffects", "Magic Effects");
+        MyGUI::UString ingredient = toUString(wm->getGameSettingString("sIngredients", "Ingredients"));
         auto *button = _sender->castType<MyGUI::Button>();
 
         if (button->getCaption() == ingredient)
         {
-            button->setCaption(effect);
+            button->setCaption(toUString(wm->getGameSettingString("sMagicEffects", "Magic Effects")));
             mCurrentFilter = FilterType::ByEffect;
         }
         else

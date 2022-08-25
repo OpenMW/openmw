@@ -38,8 +38,8 @@ namespace MWGui
         private:
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            std::pair<MyGUI::TextBox*, MyGUI::TextBox*> addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            void addGroup(std::string_view label, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
+            std::pair<MyGUI::TextBox*, MyGUI::TextBox*> addValueItem(std::string_view text, const std::string &value, const std::string& state, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
             MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
 
             void setFactions (const FactionList& factions);

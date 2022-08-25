@@ -61,7 +61,7 @@ namespace MWGui
 
     virtual void setVisible(bool b);
 
-    void setText(std::string_view name, const std::string& caption);
+    void setText(std::string_view name, std::string_view caption);
 
     // NOTE: this assume that mMainWidget is of type Window.
     void setTitle(std::string_view title);

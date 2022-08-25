@@ -7,11 +7,14 @@
 #include <string>
 #include <string_view>
 #include <stdexcept>
+#include <vector>
 
 namespace Misc::StringUtils
 {
-    namespace Details
+    struct Details
     {
+        std::vector<std::string> mMemorySafety;
+
         // Allow to convert complex arguments to C-style strings for format() function
         template <typename T>
         T argument(T value) noexcept
@@ -22,7 +25,9 @@ namespace Misc::StringUtils
         template <typename T>
         T const * argument(std::basic_string_view<T> const & value) noexcept
         {
-            return value.data();
+            // TODO: switch to a format function that doesn't require null termination
+            auto& inserted = mMemorySafety.emplace_back(value);
+            return inserted.c_str();
         }
 
         template <typename T>
@@ -30,7 +35,7 @@ namespace Misc::StringUtils
         {
             return value.c_str();
         }
-    }
+    };
 
     // Requires some C++11 features:
     // 1. std::string needs to be contiguous
@@ -39,12 +44,13 @@ namespace Misc::StringUtils
     template <typename ... Args>
     std::string format(const char* fmt, Args const & ... args)
     {
-        const int size = std::snprintf(nullptr, 0, fmt, Details::argument(args) ...);
+        Details details;
+        const int size = std::snprintf(nullptr, 0, fmt, details.argument(args) ...);
         if (size < 0)
             throw std::runtime_error(std::string("Failed to compute resulting string size: ") + std::strerror(errno));
         // Note: sprintf also writes a trailing null character. We should remove it.
         std::string ret(static_cast<std::size_t>(size) + 1, '\0');
-        if (std::sprintf(ret.data(), fmt, Details::argument(args) ...) < 0)
+        if (std::sprintf(ret.data(), fmt, details.argument(args) ...) < 0)
             throw std::runtime_error(std::string("Failed to format string: ") + std::strerror(errno));
         ret.erase(static_cast<std::size_t>(size));
         return ret;

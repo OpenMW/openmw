@@ -15,6 +15,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 
+#include "ustring.hpp"
 #include "widgets.hpp"
 
 namespace
@@ -51,7 +52,7 @@ namespace MWGui
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
-        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
+        okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
 
         updateBirths();
@@ -64,9 +65,9 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         if (shown)
-            okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", ""));
+            okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
-            okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
+            okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     void BirthDialog::onOpen()
@@ -235,7 +236,7 @@ namespace MWGui
             if (!categories[category].spells.empty())
             {
                 MyGUI::TextBox* label = mSpellArea->createWidget<MyGUI::TextBox>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
-                label->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString(categories[category].label, ""));
+                label->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(categories[category].label, {})));
                 mSpellItems.push_back(label);
                 coord.top += lineHeight;
 

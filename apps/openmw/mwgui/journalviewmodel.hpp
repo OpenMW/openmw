@@ -73,7 +73,7 @@ namespace MWGui
         virtual bool isEmpty () const = 0;
 
         /// walks the active and optionally completed, quests providing the name and completed status
-        virtual void visitQuestNames (bool active_only, std::function <void (const std::string&, bool)> visitor) const = 0;
+        virtual void visitQuestNames(bool active_only, std::function <void (std::string_view, bool)> visitor) const = 0;
 
         /// walks over the journal entries related to all quests with the given name
         /// If \a questName is empty, simply visits all journal entries
@@ -83,7 +83,7 @@ namespace MWGui
         virtual void visitTopicName (TopicId topicId, std::function <void (Utf8Span)> visitor) const = 0;
 
         /// walks over the topics whose names start with the character
-        virtual void visitTopicNamesStartingWith (Utf8Stream::UnicodeChar character, std::function < void (const std::string&) > visitor) const = 0;
+        virtual void visitTopicNamesStartingWith(Utf8Stream::UnicodeChar character, std::function < void (std::string_view) > visitor) const = 0;
 
         /// walks over the topic entries for the topic specified by its identifier
         virtual void visitTopicEntries (TopicId topicId, std::function <void (TopicEntry const &)> visitor) const = 0;

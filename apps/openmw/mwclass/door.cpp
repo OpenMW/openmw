@@ -24,6 +24,7 @@
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -118,18 +119,11 @@ namespace MWClass
         const std::string_view lockedSound = "LockedDoor";
         const std::string_view trapActivationSound = "Disarm Trap Fail";
 
-        MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
-
-        bool isLocked = ptr.getCellRef().getLockLevel() > 0;
-        bool isTrapped = !ptr.getCellRef().getTrap().empty();
-        bool hasKey = false;
-        std::string keyName;
-
         // FIXME: If NPC activate teleporting door, it can lead to crash due to iterator invalidation in the Actors update.
         // Make such activation a no-op for now, like how it is in the vanilla game.
         if (actor != MWMechanics::getPlayer() && ptr.getCellRef().getTeleport())
         {
-            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string(), ptr);
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string_view{}, ptr);
             action->setSound(lockedSound);
             return action;
         }
@@ -150,7 +144,13 @@ namespace MWClass
             }
         }
 
-        const std::string keyId = ptr.getCellRef().getKey();
+        MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
+
+        bool isLocked = ptr.getCellRef().getLockLevel() > 0;
+        bool isTrapped = !ptr.getCellRef().getTrap().empty();
+        bool hasKey = false;
+        std::string_view keyName;
+        const std::string& keyId = ptr.getCellRef().getKey();
         if (!keyId.empty())
         {
             MWWorld::Ptr keyPtr = invStore.search(keyId);
@@ -164,7 +164,7 @@ namespace MWClass
         if (isLocked && hasKey)
         {
             if(actor == MWMechanics::getPlayer())
-                MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
+                MWBase::Environment::get().getWindowManager()->messageBox(std::string{keyName} + " #{sKeyUsed}");
             ptr.getCellRef().unlock(); //Call the function here. because that makes sense.
             // using a key disarms the trap
             if(isTrapped)
@@ -236,7 +236,7 @@ namespace MWClass
         else
         {
             // locked, and we can't open.
-            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string(), ptr);
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string_view{}, ptr);
             action->setSound(lockedSound);
             return action;
         }
@@ -268,7 +268,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()});
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
 
         std::string text;
 

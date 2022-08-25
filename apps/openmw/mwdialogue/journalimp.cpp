@@ -96,7 +96,7 @@ namespace MWDialogue
         if(quest.addEntry(entry)) // we are doing slicing on purpose here
         {
             // Restart all "other" quests with the same name as well
-            std::string name = quest.getName();
+            std::string_view name = quest.getName();
             for(auto& it : mQuests)
             {
                 if(it.second.isFinished() && Misc::StringUtils::ciEqual(it.second.getName(), name))

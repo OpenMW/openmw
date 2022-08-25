@@ -55,6 +55,7 @@
 #include "../mwrender/npcanimation.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 namespace
 {
@@ -1118,7 +1119,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
 
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()});
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
         if(fullHelp && !ref->mBase->mName.empty() && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
@@ -1150,7 +1151,7 @@ namespace MWClass
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
         MWMechanics::CastSpell cast(actor, actor);
-        std::string recordId = consumable.getCellRef().getRefId();
+        const std::string& recordId = consumable.getCellRef().getRefId();
         MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
         actor.getClass().getContainerStore(actor).remove(consumable, 1, actor);
         return cast.cast(recordId);

@@ -6,6 +6,8 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Window.h>
 
+#include "ustring.hpp"
+
 namespace MWGui
 {
     void Layout::initialise(std::string_view _layout)
@@ -45,17 +47,17 @@ namespace MWGui
         mMainWidget->setVisible(b);
     }
 
-    void Layout::setText(std::string_view name, const std::string &caption)
+    void Layout::setText(std::string_view name, std::string_view caption)
     {
         MyGUI::Widget* pt;
         getWidget(pt, name);
-        static_cast<MyGUI::TextBox*>(pt)->setCaption(caption);
+        static_cast<MyGUI::TextBox*>(pt)->setCaption(toUString(caption));
     }
 
     void Layout::setTitle(std::string_view title)
     {
         MyGUI::Window* window = static_cast<MyGUI::Window*>(mMainWidget);
-        MyGUI::UString uTitle{title.data(), title.size()};
+        MyGUI::UString uTitle = toUString(title);
 
         if (window->getCaption() != uTitle)
             window->setCaptionWithReplacing(uTitle);
