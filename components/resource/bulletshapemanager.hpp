@@ -14,7 +14,7 @@ namespace Resource
     class SceneManager;
     class NifFileManager;
 
-    class BulletShape;
+    struct BulletShape;
     class BulletShapeInstance;
 
     class MultiObjectCache;

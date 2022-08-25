@@ -27,22 +27,24 @@ namespace Resource
 
     using CollisionShapePtr = std::unique_ptr<btCollisionShape, DeleteCollisionShape>;
 
-    class BulletShape : public osg::Object
+    struct CollisionBox
     {
-    public:
-        BulletShape() = default;
-        BulletShape(const BulletShape& copy, const osg::CopyOp& copyop);
+        osg::Vec3f mExtents;
+        osg::Vec3f mCenter;
+    };
 
-        META_Object(Resource, BulletShape)
+    enum class VisualCollisionType
+    {
+        None,
+        Default,
+        Camera
+    };
 
+    struct BulletShape : public osg::Object
+    {
         CollisionShapePtr mCollisionShape;
         CollisionShapePtr mAvoidCollisionShape;
 
-        struct CollisionBox
-        {
-            osg::Vec3f mExtents;
-            osg::Vec3f mCenter;
-        };
         // Used for actors and projectiles. mCollisionShape is used for actors only when we need to autogenerate collision box for creatures.
         // For now, use one file <-> one resource for simplicity.
         CollisionBox mCollisionBox;
@@ -56,16 +58,16 @@ namespace Resource
         std::string mFileName;
         std::string mFileHash;
 
+        VisualCollisionType mVisualCollisionType = VisualCollisionType::None;
+
+        BulletShape() = default;
+        BulletShape(const BulletShape& copy, const osg::CopyOp& copyop);
+
+        META_Object(Resource, BulletShape)
+
         void setLocalScaling(const btVector3& scale);
 
         bool isAnimated() const { return !mAnimatedShapes.empty(); }
-
-        unsigned int mCollisionType = 0;
-        enum CollisionType
-        {
-            None = 0x1,
-            Camera = 0x2
-        };
     };
 
 
