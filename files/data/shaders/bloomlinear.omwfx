@@ -191,17 +191,9 @@ fragment vertical(target=RT_Vertical, rt1=RT_Horizontal) {
 fragment final(rt1=RT_Vertical) {
     omw_In vec2 omw_TexCoord;
 
-    float clampify(float x, float clamp)
-    {
-        if(x < clamp)
-            return x;
-        return ((x-clamp)*0.5)+clamp;
-    }
-
     void main()
     {
-        vec3 color = vec3(0.0);
-        color = omw_Texture2D(RT_Vertical, omw_TexCoord).rgb;
+        vec3 color = omw_Texture2D(RT_Vertical, omw_TexCoord).rgb;
         // add dithering (in gamma-compressed light, because monitors are sRGB)
         color = powv(color, 1.0/uGamma);
         color += (scramblev2(omw_TexCoord).rgb/255.0 - vec3(0.5/255.0))*2.0;
@@ -218,7 +210,6 @@ fragment final(rt1=RT_Vertical) {
         vec3 base_color = powv(omw_GetLastShader(omw_TexCoord).rgb, uGamma);
         vec3 add_color = base_color + color * uStrength * 0.5;
         omw_FragColor = vec4(powv(add_color, 1.0/uGamma), 1.0);
-        //omw_FragColor = vec4(powv(color, 1.0/uGamma), 1.0);
     }
 }
 
