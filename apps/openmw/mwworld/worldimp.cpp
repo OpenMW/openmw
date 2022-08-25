@@ -1546,6 +1546,8 @@ namespace MWWorld
 
     void World::updateNavigatorObject(const MWPhysics::Object& object)
     {
+        if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
+            return;
         const MWWorld::Ptr ptr = object.getPtr();
         const DetourNavigator::ObjectShapes shapes(object.getShapeInstance(),
             DetourNavigator::ObjectTransform {ptr.getRefData().getPosition(), ptr.getCellRef().getScale()});

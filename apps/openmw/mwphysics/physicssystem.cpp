@@ -489,13 +489,15 @@ namespace MWPhysics
         assert(!getObject(ptr));
 
         // Override collision type based on shape content.
-        switch (shapeInstance->mCollisionType)
+        switch (shapeInstance->mVisualCollisionType)
         {
-            case Resource::BulletShape::CollisionType::Camera:
-                collisionType = CollisionType_CameraOnly;
+            case Resource::VisualCollisionType::None:
                 break;
-            case Resource::BulletShape::CollisionType::None:
+            case Resource::VisualCollisionType::Default:
                 collisionType = CollisionType_VisualOnly;
+                break;
+            case Resource::VisualCollisionType::Camera:
+                collisionType = CollisionType_CameraOnly;
                 break;
         }
 

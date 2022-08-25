@@ -304,6 +304,9 @@ namespace NavMeshTool
             forEachObject(cell, esmData, vfs, bulletShapeManager, readers,
                 [&] (BulletObject object)
                 {
+                    if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
+                        return;
+
                     const btTransform& transform = object.getCollisionObject().getWorldTransform();
                     const btAABB aabb = BulletHelpers::getAabb(*object.getCollisionObject().getCollisionShape(), transform);
                     mergeOrAssign(aabb, navMeshInput.mAabb, navMeshInput.mAabbInitialized);
