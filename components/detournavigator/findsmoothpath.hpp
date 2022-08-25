@@ -239,8 +239,7 @@ namespace DetourNavigator
                 }
             }
 
-            if (dtStatusFailed(navMeshQuery.getPolyHeight(polyRef, polyPos.ptr(), &iterPos.y())))
-                return Status::GetPolyHeightFailed;
+            navMeshQuery.getPolyHeight(polyRef, polyPos.ptr(), &iterPos.y());
             iterPos.x() = result->mResultPos.x();
             iterPos.z() = result->mResultPos.z();
 
