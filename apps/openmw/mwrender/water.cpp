@@ -351,6 +351,9 @@ public:
         camera->setName("ReflectionCamera");
         camera->addCullCallback(new InheritViewPointCallback);
 
+        // Inform the shader that we're in a reflection
+        camera->getOrCreateStateSet()->addUniform(new osg::Uniform("isReflection", true));
+
         // XXX: should really flip the FrontFace on each renderable instead of forcing clockwise.
         osg::ref_ptr<osg::FrontFace> frontFace(new osg::FrontFace);
         frontFace->setMode(osg::FrontFace::CLOCKWISE);
@@ -474,7 +477,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     geom2->setNodeMask(Mask_SimpleWater);
     geom2->setName("Simple Water Geometry");
     mWaterNode->addChild(geom2);
- 
+
     mSceneRoot->addChild(mWaterNode);
 
     setHeight(mTop);
@@ -701,7 +704,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     normalMap->setMaxAnisotropy(16);
     normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
     normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-    
+
 
     mRainIntensityUpdater = new RainIntensityUpdater();
     node->setUpdateCallback(mRainIntensityUpdater);
