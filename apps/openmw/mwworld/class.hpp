@@ -293,6 +293,8 @@ namespace MWWorld
 
             virtual bool isGold(const MWWorld::ConstPtr& ptr) const { return false; }
 
+            virtual bool isSoulGem(const MWWorld::ConstPtr& ptr) const { return false; }
+
             virtual bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const { return true; }
             ///< Return whether this class of object can be activated with telekinesis
 

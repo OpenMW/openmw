@@ -303,55 +303,35 @@ namespace MWScript
                     runtime.pop();
 
                     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
-                    MWWorld::ContainerStoreIterator it = invStore.begin();
+                    auto found = invStore.end();
+                    const auto& store = MWBase::Environment::get().getWorld()->getStore();
 
                     // With soul gems we prefer filled ones.
-
-                    const std::string soulgemPrefix = "misc_soulgem";
-
-                    if (Misc::StringUtils::ciStartsWith(item, soulgemPrefix))
+                    for (auto it = invStore.begin(); it != invStore.end(); ++it)
                     {
-                        it = invStore.end();
-
-                        for (auto it_any = invStore.begin(); it_any != invStore.end(); ++it_any)
+                        if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
                         {
-                            if (::Misc::StringUtils::ciEqual(it_any->getCellRef().getRefId(), item))
-                            {
-                                if (!it_any->getCellRef().getSoul().empty() &&
-                                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(it_any->getCellRef().getSoul()))
-                                {
-                                    it = it_any;
-                                    break;
-                                }
-                                else if (it == invStore.end())
-                                    it = it_any;
-                            }
-                        }
-                    }
-
-                    else
-                    {
-                        for (; it != invStore.end(); ++it)
-                        {
-                            if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
+                            found = it;
+                            const std::string& soul = it->getCellRef().getSoul();
+                            if (!it->getClass().isSoulGem(*it) || (!soul.empty() && store.get<ESM::Creature>().search(soul)))
                                 break;
                         }
                     }
 
-                    if (it == invStore.end())
+                    if (found == invStore.end())
                     {
-                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), item, 1);
-                        it = ptr.getClass().getContainerStore (ptr).add (ref.getPtr(), 1, ptr, false);
+                        MWWorld::ManualRef ref(store, item, 1);
+                        found = ptr.getClass().getContainerStore(ptr).add(ref.getPtr(), 1, ptr, false);
                         Log(Debug::Warning) << "Implicitly adding one " << item << 
                             " to the inventory store of " << ptr.getCellRef().getRefId() <<
                             " to fulfill the requirements of Equip instruction";
                     }
 
                     if (ptr == MWMechanics::getPlayer())
-                        MWBase::Environment::get().getWindowManager()->useItem(*it, true);
+                        MWBase::Environment::get().getWindowManager()->useItem(*found, true);
                     else
                     {
-                        std::unique_ptr<MWWorld::Action> action = it->getClass().use(*it, true);
+                        std::unique_ptr<MWWorld::Action> action = found->getClass().use(*found, true);
                         action->execute(ptr, true);
                     }
                 }

@@ -172,13 +172,9 @@ void soulTrap(const MWWorld::Ptr& creature)
             MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
             MWWorld::ContainerStoreIterator gem = container.end();
             float gemCapacity = std::numeric_limits<float>::max();
-            std::string soulgemFilter = "misc_soulgem"; // no other way to check for soulgems? :/
-            for (MWWorld::ContainerStoreIterator it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous);
-                 it != container.end(); ++it)
+            for (auto it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous); it != container.end(); ++it)
             {
-                const std::string& id = it->getCellRef().getRefId();
-                if (id.size() >= soulgemFilter.size()
-                        && id.substr(0,soulgemFilter.size()) == soulgemFilter)
+                if (it->getClass().isSoulGem(*it))
                 {
                     float thisGemCapacity = it->get<ESM::Miscellaneous>()->mBase->mData.mValue * fSoulgemMult;
                     if (thisGemCapacity >= creatureSoulValue && thisGemCapacity < gemCapacity
