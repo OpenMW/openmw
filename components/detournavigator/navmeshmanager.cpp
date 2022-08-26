@@ -177,16 +177,8 @@ namespace DetourNavigator
             const auto locked = cached->lockConst();
             const auto& navMesh = locked->getImpl();
             for (const auto& [tilePosition, changeType] : changedTiles)
-            {
                 if (navMesh.getTileAt(tilePosition.x(), tilePosition.y(), 0))
-                {
-                    auto tileToPost = tilesToPost.find(tilePosition);
-                    if (tileToPost == tilesToPost.end())
-                        tilesToPost.emplace(tilePosition, changeType);
-                    else
-                        tileToPost->second = addChangeType(tileToPost->second, changeType);
-                }
-            }
+                    tilesToPost.emplace(tilePosition, changeType);
             const auto maxTiles = std::min(mSettings.mMaxTilesNumber, navMesh.getParams()->maxTiles);
             mRecastMeshManager.forEachTile([&] (const TilePosition& tile, CachedRecastMeshManager& recastMeshManager)
             {
