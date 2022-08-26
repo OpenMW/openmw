@@ -182,4 +182,26 @@ namespace
     {
         EXPECT_FALSE(ciStartsWith("foo", "foo bar"));
     }
+
+    TEST(MiscStringsFormat, string_format)
+    {
+        std::string f = "1%s2";
+        EXPECT_EQ(Misc::StringUtils::format(f, ""), "12");
+    }
+
+    TEST(MiscStringsFormat, string_format_arg)
+    {
+        std::string arg = "12";
+        EXPECT_EQ(Misc::StringUtils::format("1%s2", arg), "1122");
+    }
+
+    TEST(MiscStringsFormat, string_view_format_arg)
+    {
+        std::string f = "1%s2";
+        std::string_view view = "12";
+        EXPECT_EQ(Misc::StringUtils::format(f, view), "1122");
+        EXPECT_EQ(Misc::StringUtils::format(f, view.substr(0, 1)), "112");
+        EXPECT_EQ(Misc::StringUtils::format(f, view.substr(1, 1)), "122");
+        EXPECT_EQ(Misc::StringUtils::format(f, view.substr(2)), "12");
+    }
 }
