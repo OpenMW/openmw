@@ -42,7 +42,7 @@ namespace
             osg::ref_ptr<Resource::BulletShapeInstance>(new Resource::BulletShapeInstance(bulletShape)),
             shape, objectTransform
         );
-        recastMeshManager.addObject(id, collisionShape, btTransform::getIdentity(), AreaType_ground, [] (auto) {});
+        recastMeshManager.addObject(id, collisionShape, btTransform::getIdentity(), AreaType_ground);
     }
 
     struct DetourNavigatorAsyncNavMeshUpdaterTest : Test

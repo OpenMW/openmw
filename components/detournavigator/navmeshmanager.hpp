@@ -50,7 +50,7 @@ namespace DetourNavigator
 
         void removeOffMeshConnections(const ObjectId id);
 
-        void update(const osg::Vec3f& playerPosition, const AgentBounds& agentBounds);
+        void update(const osg::Vec3f& playerPosition);
 
         void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
 
@@ -69,18 +69,14 @@ namespace DetourNavigator
         OffMeshConnectionsManager mOffMeshConnectionsManager;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;
         std::map<AgentBounds, SharedNavMeshCacheItem> mCache;
-        std::map<AgentBounds, std::map<TilePosition, ChangeType>> mChangedTiles;
         std::size_t mGenerationCounter = 0;
-        std::map<AgentBounds, TilePosition> mPlayerTile;
-        std::map<AgentBounds, std::size_t> mLastRecastMeshManagerRevision;
+        std::optional<TilePosition> mPlayerTile;
+        std::size_t mLastRecastMeshManagerRevision = 0;
 
-        void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, const ChangeType changeType);
+        inline SharedNavMeshCacheItem getCached(const AgentBounds& agentBounds) const;
 
-        void addChangedTiles(const int cellSize, const btVector3& shift, const ChangeType changeType);
-
-        void addChangedTile(const TilePosition& tilePosition, const ChangeType changeType);
-
-        SharedNavMeshCacheItem getCached(const AgentBounds& agentBounds) const;
+        inline void update(const AgentBounds& agentBounds, const TilePosition& playerTile,
+            const SharedNavMeshCacheItem& cached, const std::map<osg::Vec2i, ChangeType>& changedTiles);
     };
 }
 

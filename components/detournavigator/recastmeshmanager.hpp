@@ -23,12 +23,6 @@ namespace DetourNavigator
     struct Settings;
     class RecastMesh;
 
-    struct RemovedRecastMeshObject
-    {
-        std::reference_wrapper<const btCollisionShape> mShape;
-        btTransform mTransform;
-    };
-
     struct SizedHeightfieldShape
     {
         int mCellSize;
@@ -45,15 +39,15 @@ namespace DetourNavigator
 
         bool updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType);
 
-        std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
+        bool removeObject(const ObjectId id);
 
         bool addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
 
-        std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
+        bool removeWater(const osg::Vec2i& cellPosition);
 
         bool addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
 
-        std::optional<SizedHeightfieldShape> removeHeightfield(const osg::Vec2i& cellPosition);
+        bool removeHeightfield(const osg::Vec2i& cellPosition);
 
         std::shared_ptr<RecastMesh> getMesh() const;
 

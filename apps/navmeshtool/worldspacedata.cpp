@@ -318,13 +318,13 @@ namespace NavMeshTool
                     const CollisionShape shape(object.getShapeInstance(), *object.getCollisionObject().getCollisionShape(), object.getObjectTransform());
 
                     navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, shape, transform,
-                        DetourNavigator::AreaType_ground, [] (const auto&) {});
+                        DetourNavigator::AreaType_ground);
 
                     if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
                     {
                         const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
                         navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, avoidShape, transform,
-                            DetourNavigator::AreaType_null, [] (const auto&) {});
+                            DetourNavigator::AreaType_null);
                     }
 
                     data.mObjects.emplace_back(std::move(object));

@@ -149,8 +149,7 @@ namespace DetourNavigator
     void NavigatorImpl::update(const osg::Vec3f& playerPosition)
     {
         removeUnusedNavMeshes();
-        for (const auto& v : mAgents)
-            mNavMeshManager.update(playerPosition, v.first);
+        mNavMeshManager.update(playerPosition);
     }
 
     void NavigatorImpl::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
