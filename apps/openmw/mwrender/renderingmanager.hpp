@@ -74,7 +74,10 @@ namespace MWWorld
 {
     class GroundcoverStore;
 }
-
+namespace MWRenderDebug
+{
+    struct DebugDrawer;
+}
 namespace MWRender
 {
     class StateUpdater;
@@ -234,6 +237,8 @@ namespace MWRender
 
         void exportSceneGraph(const MWWorld::Ptr& ptr, const std::string& filename, const std::string& format);
 
+        MWRenderDebug::DebugDrawer& getDebugDrawer() const { return *mDebugDraw; }
+
         LandManager* getLandManager() const;
 
         bool toggleBorders();
@@ -306,6 +311,7 @@ namespace MWRender
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::unique_ptr<Camera> mCamera;
+        std::unique_ptr<MWRenderDebug::DebugDrawer> mDebugDraw;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
         osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;

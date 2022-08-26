@@ -82,6 +82,7 @@
 #include "screenshotmanager.hpp"
 #include "groundcover.hpp"
 #include "postprocessor.hpp"
+#include "debugdraw.hpp"
 
 namespace MWRender
 {
@@ -489,6 +490,7 @@ namespace MWRender
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         }
 
+        mDebugDraw = std::make_unique<MWRenderDebug::DebugDrawer>(*this, mRootNode);
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager = std::make_unique<EffectManager>(sceneRoot, mResourceSystem);
@@ -904,7 +906,7 @@ namespace MWRender
         reportStats();
 
         mResourceSystem->getSceneManager()->getShaderManager().update(*mViewer);
-
+        mDebugDraw->update();
         float rainIntensity = mSky->getPrecipitationAlpha();
         mWater->setRainIntensity(rainIntensity);
 
