@@ -28,8 +28,8 @@ namespace MWLua
             {"Boots", ESM::Armor::Boots},
             {"LGauntlet", ESM::Armor::LGauntlet},
             {"RGauntlet", ESM::Armor::RGauntlet},
-            {"LBracer", ESM::Armor::LBracer},
             {"Shield", ESM::Armor::Shield},
+            {"LBracer", ESM::Armor::LBracer},
             {"RBracer", ESM::Armor::RBracer},
         }));
 
