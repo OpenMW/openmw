@@ -55,7 +55,7 @@ namespace DetourNavigator
 
         void reportNavMeshChange(const Version& recastMeshVersion, const Version& navMeshVersion);
 
-        Version getVersion() const;
+        Version getVersion() const { return Version {mGeneration, mRevision}; }
 
     private:
         struct Report

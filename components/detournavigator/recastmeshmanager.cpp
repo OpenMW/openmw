@@ -164,9 +164,4 @@ namespace DetourNavigator
                 || mLastNavMeshReportedChange->mNavMeshVersion < mLastNavMeshReport->mNavMeshVersion)
             mLastNavMeshReportedChange = mLastNavMeshReport;
     }
-
-    Version RecastMeshManager::getVersion() const
-    {
-        return Version {mGeneration, mRevision};
-    }
 }
