@@ -55,6 +55,8 @@ namespace MWClass
             bool isKey (const MWWorld::ConstPtr &ptr) const override;
 
             bool isGold (const MWWorld::ConstPtr& ptr) const override;
+
+            bool isSoulGem(const MWWorld::ConstPtr& ptr) const override;
     };
 }
 
