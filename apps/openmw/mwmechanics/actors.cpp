@@ -1614,8 +1614,21 @@ namespace MWMechanics
                 world->setActorActive(actor.getPtr(), true);
 
                 const bool isDead = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead();
-
-                world->getRenderingManager()->getDebugDrawer().drawCube(actor.getPtr().getRefData().getPosition().asVec3(), osg::Vec3(50.,50.,50.), isDead ? MWRenderDebug::colorRed:MWRenderDebug::colorGreen);
+                auto actorPos = actor.getPtr().getRefData().getPosition().asVec3();
+                auto& debugRender = world->getRenderingManager()->getDebugDrawer();
+                if (isDead)
+                {
+                    debugRender.drawCube(actorPos, osg::Vec3(50.,50.,50.),MWRenderDebug::colorGreen);
+                }
+                else if (isPlayer)
+                {
+                    debugRender.addDrawCall(MWRenderDebug::DrawCall::cylinder(actorPos, osg::Vec3(50.,50.,75.),MWRenderDebug::colorRed ));
+                }
+                else
+                {
+                    debugRender.addDrawCall(MWRenderDebug::DrawCall::wireCube(actorPos));
+                }
+                
 
 
                 if (!isDead && (!godmode || !isPlayer) && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())

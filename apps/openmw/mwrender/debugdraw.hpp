@@ -43,7 +43,7 @@ namespace MWRenderDebug
     class CubeCustomDraw : public osg::Drawable
     {
     public:
-        CubeCustomDraw(osg::ref_ptr<osg::Geometry>&  CubeGeometry, std::vector<DrawCall>& cubesToDraw,std::mutex& mutex) : mCubeGeometry( CubeGeometry), mShapsToDraw(cubesToDraw),mDrawCallMutex(mutex) {}
+        CubeCustomDraw( std::vector<DrawCall>& cubesToDraw,std::mutex& mutex) : mShapsToDraw(cubesToDraw),mDrawCallMutex(mutex) {}
 
         std::vector<DrawCall>& mShapsToDraw;
 
@@ -79,6 +79,6 @@ namespace MWRenderDebug
         std::mutex mDrawCallMutex;
 
         osg::ref_ptr<CubeCustomDraw> mcustomCubesDrawer;
-        osg::ref_ptr<osg::Geometry>  mCubeGeometry;
+        osg::ref_ptr<osg::Group> mDebugDrawSceneObjects;
     };
 }

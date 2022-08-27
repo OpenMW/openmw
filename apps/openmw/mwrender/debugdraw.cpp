@@ -1,80 +1,16 @@
-#include "debugdraw.h"
 #include "debugdraw.hpp"
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/shader/shadermanager.hpp>
 
 
-#include <osg/uniform>
-#include <osg/drawable>
-#include <osg/program>
+#include <osg/Uniform>
+#include <osg/Drawable>
+#include <osg/Program>
 #include <osg/Array>
 #include <osg/Vec3>
 #include <osg/GLExtensions>
 
-namespace MWRenderDebug
-{
-    void CubeCustomDraw::drawImplementation(osg::RenderInfo& renderInfo) const
-    {
-        auto state = renderInfo.getState();
-        osg::GLExtensions* ext = osg::GLExtensions::Get( state->getContextID(), true );
-
-        const osg::StateSet* stateSet = this->getStateSet();
-
-        auto program = static_cast<const osg::Program*>( stateSet->getAttribute(osg::StateAttribute::PROGRAM));
-        const osg::Program::PerContextProgram* pcp = program->getPCP(*state);
-        if (!pcp)
-        {
-            return;
-        }
-        std::lock_guard lock(mDrawCallMutex);
-
-        osg::Uniform* uTrans = const_cast<osg::Uniform*>( stateSet->getUniform("trans"));
-        osg::Uniform* uCol = const_cast<osg::Uniform*>( stateSet->getUniform("passColor"));
-        osg::Uniform* uScale = const_cast<osg::Uniform*>( stateSet->getUniform("scale"));
-
-
-        auto transLocation = pcp->getUniformLocation(uTrans->getNameID() );
-        auto colLocation = pcp->getUniformLocation(uCol->getNameID() );
-        auto scaleLocation = pcp->getUniformLocation(uScale->getNameID() );
-
-
-        for (int i = 0; i < mShapsToDraw.size(); i++)
-        {
-            const auto& shapeToDraw = mShapsToDraw[i];
-            osg::Vec3f translation = shapeToDraw.mPosition;
-            osg::Vec3f color = shapeToDraw.mColor;
-            osg::Vec3f scale = shapeToDraw.mDims;
-
-
-            if (uTrans)
-                ext->glUniform3f(transLocation, translation.x(), translation.y(), translation.z());
-            if (uCol)
-            {
-                ext->glUniform3f(colLocation, color.x(), color.y(), color.z());
-            }
-            if (uScale)
-            {
-                ext->glUniform3f(scaleLocation, scale.x(), scale.y(), scale.z());
-            }
-            switch (shapeToDraw.mDrawShape)
-            {
-                case DrawShape::Cube:
-                    this->mCubeGeometry->drawImplementation(renderInfo);
-                    break;
-                case DrawShape::Cylinder:
-                    this->mCylinderGeometry->drawImplementation(renderInfo);
-                    break;
-                case DrawShape::WireCube:
-                    this->mWireCubeGeometry->drawImplementation(renderInfo);
-                    break;
-            }
-        }
-
-
-
-    }
-}
 
 static osg::Vec3 sphereCoordToCarthesian(float theta ,float phi ,float r ) 
 {
@@ -121,10 +57,9 @@ static void generateWireCube(osg::Geometry& geom, float dim)
         vertices->push_back(vert1 * dim);
         vertices->push_back(vert3 * dim);
     }
-    for (int i = 0; i < vertices->size(); i ++)
+    for (unsigned long i = 0; i < vertices->size(); i ++)
     {
         normals->push_back(osg::Vec3(1., 1., 1.));
-        
     }
 
     geom.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
@@ -289,6 +224,68 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     geom.addPrimitiveSet(indices);
 }
 
+
+namespace MWRenderDebug
+{
+    void CubeCustomDraw::drawImplementation(osg::RenderInfo& renderInfo) const
+    {
+        auto state = renderInfo.getState();
+        osg::GLExtensions* ext = osg::GLExtensions::Get( state->getContextID(), true );
+
+        const osg::StateSet* stateSet = this->getStateSet();
+
+        auto program = static_cast<const osg::Program*>( stateSet->getAttribute(osg::StateAttribute::PROGRAM));
+        const osg::Program::PerContextProgram* pcp = program->getPCP(*state);
+        if (!pcp)
+        {
+            return;
+        }
+        std::lock_guard lock(mDrawCallMutex);
+
+        osg::Uniform* uTrans = const_cast<osg::Uniform*>( stateSet->getUniform("trans"));
+        osg::Uniform* uCol = const_cast<osg::Uniform*>( stateSet->getUniform("passColor"));
+        osg::Uniform* uScale = const_cast<osg::Uniform*>( stateSet->getUniform("scale"));
+
+
+        auto transLocation = pcp->getUniformLocation(uTrans->getNameID() );
+        auto colLocation = pcp->getUniformLocation(uCol->getNameID() );
+        auto scaleLocation = pcp->getUniformLocation(uScale->getNameID() );
+
+
+        for (const auto& shapeToDraw : mShapsToDraw)
+        {
+            osg::Vec3f translation = shapeToDraw.mPosition;
+            osg::Vec3f color = shapeToDraw.mColor;
+            osg::Vec3f scale = shapeToDraw.mDims;
+
+
+            if (uTrans)
+                ext->glUniform3f(transLocation, translation.x(), translation.y(), translation.z());
+            if (uCol)
+            {
+                ext->glUniform3f(colLocation, color.x(), color.y(), color.z());
+            }
+            if (uScale)
+            {
+                ext->glUniform3f(scaleLocation, scale.x(), scale.y(), scale.z());
+            }
+            switch (shapeToDraw.mDrawShape)
+            {
+            case DrawShape::Cube:
+                this->mCubeGeometry->drawImplementation(renderInfo);
+                break;
+            case DrawShape::Cylinder:
+                this->mCylinderGeometry->drawImplementation(renderInfo);
+                break;
+            case DrawShape::WireCube:
+                this->mWireCubeGeometry->drawImplementation(renderInfo);
+                break;
+            }
+        }
+
+    }
+}
+
 MWRenderDebug::DebugDrawer::DebugDrawer(MWRender::RenderingManager& renderingManager,osg::ref_ptr<osg::Group> parentNode)
 {
     auto& shaderManager = renderingManager.getResourceSystem()->getSceneManager()->getShaderManager();
@@ -296,35 +293,39 @@ MWRenderDebug::DebugDrawer::DebugDrawer(MWRender::RenderingManager& renderingMan
     auto fragmentShader = shaderManager.getShader("debugDraw_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
 
     auto program = shaderManager.getProgram(vertexShader, fragmentShader);
-    mCubeGeometry = new osg::Geometry;
-    mcustomCubesDrawer = new CubeCustomDraw(mCubeGeometry, mShapesToDrawRead, mDrawCallMutex);
-    osg::StateSet* stateset = mcustomCubesDrawer->getOrCreateStateSet();
+    mcustomCubesDrawer = new CubeCustomDraw(mShapesToDrawRead, mDrawCallMutex);
 
+    mDebugDrawSceneObjects = new osg::Group;
+    mDebugDrawSceneObjects->setCullingActive(false);
+    osg::StateSet* stateset = mDebugDrawSceneObjects->getOrCreateStateSet();
     stateset->addUniform(new osg::Uniform("passColor", osg::Vec3f(1., 1., 1.)));
     stateset->addUniform(new osg::Uniform("trans", osg::Vec3f(1., 1., 1.)));
     stateset->addUniform(new osg::Uniform("scale", osg::Vec3f(1., 1., 1.)));
-
     stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
     stateset->setMode(GL_DEPTH_TEST, GL_TRUE);
     stateset->setMode(GL_CULL_FACE, GL_TRUE);
-    mCubeGeometry->setSupportsDisplayList(false);
-    mCubeGeometry->setUseVertexBufferObjects(true);
 
-    generateCube(*mCubeGeometry,1.);
+    auto cubeGeometry = new osg::Geometry;
+    cubeGeometry->setSupportsDisplayList(false);
+    cubeGeometry->setUseVertexBufferObjects(true);
+    generateCube(*cubeGeometry,1.);
+    mcustomCubesDrawer->mCubeGeometry = cubeGeometry;
+
     auto cylinderGeom = new osg::Geometry;
     cylinderGeom->setSupportsDisplayList(false);
     cylinderGeom->setUseVertexBufferObjects(true);
-    mcustomCubesDrawer->mCylinderGeometry = cylinderGeom;
     generateCylinder(*cylinderGeom, .5, 1., 20);
+    mcustomCubesDrawer->mCylinderGeometry = cylinderGeom;
 
     auto wireCube = new osg::Geometry;
     wireCube->setSupportsDisplayList(false);
     wireCube->setUseVertexBufferObjects(true);
-    mcustomCubesDrawer->mWireCubeGeometry = wireCube;
     generateWireCube(*wireCube, 1.);
-    //mCubeGeometry->setStateSet(stateset->clone(osg::CopyOp::DEEP_COPY_ALL)->asStateSet());
+    mcustomCubesDrawer->mWireCubeGeometry = wireCube;
 
-    parentNode->addChild(mcustomCubesDrawer);
+    mcustomCubesDrawer->setStateSet( stateset);
+    mDebugDrawSceneObjects->addChild(mcustomCubesDrawer);
+    parentNode->addChild(mDebugDrawSceneObjects);
 }
 
 void MWRenderDebug::DebugDrawer::update()
