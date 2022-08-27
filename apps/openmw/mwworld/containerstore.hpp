@@ -240,7 +240,7 @@ namespace MWWorld
             Ptr findReplacement(const std::string& id);
             ///< Returns replacement for object with given id. Prefer used items (with low durability left).
 
-            Ptr search (const std::string& id);
+            Ptr search(std::string_view id);
 
             virtual void writeState (ESM::InventoryState& state) const;
 

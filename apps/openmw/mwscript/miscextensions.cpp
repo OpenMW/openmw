@@ -591,7 +591,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string creature{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view creature = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     std::string_view gem = runtime.getStringLiteral(runtime[0].mInteger);

@@ -56,7 +56,7 @@
 namespace
 {
 
-std::string getBestAttack (const ESM::Weapon* weapon)
+std::string_view getBestAttack(const ESM::Weapon* weapon)
 {
     int slash = weapon->mData.mSlash[0] + weapon->mData.mSlash[1];
     int chop = weapon->mData.mChop[0] + weapon->mData.mChop[1];
@@ -104,7 +104,7 @@ MWMechanics::CharacterState hitStateToDeathState (MWMechanics::CharacterState st
 }
 
 // Converts a movement state to its equivalent base animation group as long as it is a movement state.
-std::string movementStateToAnimGroup(MWMechanics::CharacterState state)
+std::string_view movementStateToAnimGroup(MWMechanics::CharacterState state)
 {
     using namespace MWMechanics;
     switch (state)
@@ -143,7 +143,7 @@ std::string movementStateToAnimGroup(MWMechanics::CharacterState state)
 }
 
 // Converts a death state to its equivalent animation group as long as it is a death state.
-std::string deathStateToAnimGroup(MWMechanics::CharacterState state)
+std::string_view deathStateToAnimGroup(MWMechanics::CharacterState state)
 {
     using namespace MWMechanics;
     switch (state)
@@ -350,8 +350,8 @@ void CharacterController::refreshHitRecoilAnims()
         return;
 
     MWRender::Animation::AnimPriority priority(Priority_Knockdown);
-    std::string startKey = "start";
-    std::string stopKey = "stop";
+    std::string_view startKey = "start";
+    std::string_view stopKey = "stop";
     if (knockout)
     {
         mHitState = isSwimming ? CharState_SwimKnockOut : CharState_KnockOut;
@@ -563,15 +563,16 @@ void CharacterController::refreshMovementAnims(CharacterState movement, bool for
     if (movement == mMovementState && !force)
         return;
 
-    std::string movementAnimName = movementStateToAnimGroup(movement);
+    std::string_view movementAnimGroup = movementStateToAnimGroup(movement);
 
-    if (movementAnimName.empty())
+    if (movementAnimGroup.empty())
     {
         if (!mCurrentMovement.empty())
             resetCurrentIdleState();
         resetCurrentMovementState();
         return;
     }
+    std::string movementAnimName{movementAnimGroup};
 
     mMovementState = movement;
     std::string::size_type swimpos = movementAnimName.find("swim");
@@ -644,7 +645,7 @@ void CharacterController::refreshMovementAnims(CharacterState movement, bool for
     if (mPtr.getClass().getType() == ESM::Creature::sRecordId && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
     {
         CharacterState walkState = runStateToWalkState(mMovementState);
-        std::string anim = movementStateToAnimGroup(walkState);
+        std::string_view anim = movementStateToAnimGroup(walkState);
 
         mMovementAnimSpeed = mAnimation->getVelocity(anim);
         if (mMovementAnimSpeed <= 1.0f)
@@ -1009,19 +1010,21 @@ void CharacterController::handleTextKey(std::string_view groupname, SceneUtil::T
     {
         std::multimap<float, std::string>::const_iterator hitKey = key;
 
-        std::string hitKeyName = std::string(groupname) + ": hit";
-        std::string stopKeyName = std::string(groupname) + ": stop";
         // Not all animations have a hit key defined. If there is none, the hit happens with the start key.
         bool hasHitKey = false;
         while (hitKey != map.end())
         {
-            if (hitKey->second == hitKeyName)
+            if (hitKey->second.starts_with(groupname))
             {
-                hasHitKey = true;
-                break;
+                std::string_view suffix = std::string_view(hitKey->second).substr(groupname.size());
+                if (suffix == ": hit")
+                {
+                    hasHitKey = true;
+                    break;
+                }
+                if (suffix == ": stop")
+                    break;
             }
-            if (hitKey->second == stopKeyName)
-                break;
             ++hitKey;
         }
         if (!hasHitKey)
@@ -1383,10 +1386,10 @@ bool CharacterController::updateWeaponState()
                     // For the player, set the spell we want to cast
                     // This has to be done at the start of the casting animation,
                     // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
-                    std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+                    const std::string& selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
                     stats.getSpells().setSelectedSpell(selectedSpell);
                 }
-                std::string spellid = stats.getSpells().getSelectedSpell();
+                std::string_view spellid = stats.getSpells().getSelectedSpell();
                 bool isMagicItem = false;
 
                 // Play hand VFX and allow castSpell use (assuming an animation is going to be played) if spellcasting is successful.
@@ -1565,7 +1568,7 @@ bool CharacterController::updateWeaponState()
 
             if (!target.isEmpty())
             {
-                std::string resultMessage, resultSound;
+                std::string_view resultMessage, resultSound;
                 if (mWeapon.getType() == ESM::Lockpick::sRecordId)
                     Security(mPtr).pickLock(target, mWeapon, resultMessage, resultSound);
                 else if (mWeapon.getType() == ESM::Probe::sRecordId)
@@ -2082,7 +2085,7 @@ void CharacterController::update(float duration)
 
         if (playLandingSound)
         {
-            std::string sound;
+            std::string_view sound;
             osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
             if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
                 sound = "DefaultLandWater";
@@ -2425,7 +2428,7 @@ bool CharacterController::isPersistentAnimPlaying() const
     return false;
 }
 
-bool CharacterController::isAnimPlaying(const std::string &groupName) const
+bool CharacterController::isAnimPlaying(std::string_view groupName) const
 {
     if(mAnimation == nullptr)
         return false;
@@ -2714,7 +2717,7 @@ void CharacterController::setHeadTrackTarget(const MWWorld::ConstPtr &target)
 
 void CharacterController::playSwishSound() const
 {
-    std::string soundId = "Weapon Swish";
+    std::string_view soundId = "Weapon Swish";
     float volume = 0.98f + mAttackStrength * 0.02f;
     float pitch = 0.75f + mAttackStrength * 0.4f;
 

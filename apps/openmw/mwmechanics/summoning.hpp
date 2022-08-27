@@ -1,7 +1,7 @@
 #ifndef OPENMW_MECHANICS_SUMMONING_H
 #define OPENMW_MECHANICS_SUMMONING_H
 
-#include <string>
+#include <string_view>
 #include <utility>
 
 #include <components/esm3/magiceffects.hpp>
@@ -15,7 +15,7 @@ namespace MWMechanics
 {
     bool isSummoningEffect(int effectId);
 
-    std::string getSummonedCreature(int effectId);
+    std::string_view getSummonedCreature(int effectId);
 
     void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<int, int>& summon);
 

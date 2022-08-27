@@ -1,5 +1,7 @@
 #include "worldimp.hpp"
 
+#include <charconv>
+
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Timer>
@@ -665,7 +667,7 @@ namespace MWWorld
         return mGlobalVariables.getType (name);
     }
 
-    std::string World::getMonthName (int month) const
+    std::string_view World::getMonthName(int month) const
     {
         return mCurrentDate->getMonthName(month);
     }
@@ -1418,7 +1420,10 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            MWWorld::ActionTeleport(actor.getCell()->isExterior() ? "" : actor.getCell()->getCell()->mName, esmPos, false).execute(actor);
+            std::string_view cell;
+            if (!actor.getCell()->isExterior())
+                cell = actor.getCell()->getCell()->mName;
+            MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
         }
     }
 
@@ -1860,7 +1865,7 @@ namespace MWWorld
 
     void World::preloadSpells()
     {
-        std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+        const std::string& selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = mStore.get<ESM::Spell>().search(selectedSpell);
@@ -2839,29 +2844,29 @@ namespace MWWorld
         return false;
     }
 
-    bool World::findExteriorPosition(const std::string &name, ESM::Position &pos)
+    bool World::findExteriorPosition(std::string_view name, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
         const ESM::Cell *ext = getExterior(name);
-
-        if (!ext && name.find(',') != std::string::npos) {
-            try {
-                int x = std::stoi(name.substr(0, name.find(',')));
-                int y = std::stoi(name.substr(name.find(',')+1));
-                ext = getExterior(x, y)->getCell();
-            }
-            catch (const std::invalid_argument&)
+        if (!ext)
+        {
+            size_t comma = name.find(',');
+            if (comma != std::string::npos)
             {
-                // This exception can be ignored, as this means that name probably refers to a interior cell instead of comma separated coordinates
-            }
-            catch (const std::out_of_range&)
-            {
-                throw std::runtime_error("Cell coordinates out of range.");
+                int x, y;
+                std::from_chars_result xResult = std::from_chars(name.data(), name.data() + comma, x);
+                std::from_chars_result yResult = std::from_chars(name.data() + comma + 1, name.data() + name.size(), y);
+                if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
+                    throw std::runtime_error("Cell coordinates out of range.");
+                else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
+                    ext = getExterior(x, y)->getCell();
+                // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell instead of comma separated coordinates
             }
         }
 
-        if (ext) {
+        if (ext)
+        {
             int x = ext->getGridX();
             int y = ext->getGridY();
             indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
@@ -2977,7 +2982,7 @@ namespace MWWorld
         MWWorld::SpellCastState result = MWWorld::SpellCastState::Success;
         bool isPlayer = (actor == getPlayerPtr());
 
-        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        const std::string& selectedSpell = stats.getSpells().getSelectedSpell();
 
         if (!selectedSpell.empty())
         {
@@ -3108,7 +3113,7 @@ namespace MWWorld
             }
         }
 
-        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        const std::string& selectedSpell = stats.getSpells().getSelectedSpell();
 
         MWMechanics::CastSpell cast(actor, target, false, manualSpell);
         cast.mHitPosition = hitPosition;
@@ -3268,7 +3273,7 @@ namespace MWWorld
                     }
                     else
                     {
-                        std::string dest = ref.mRef.getDestCell();
+                        const std::string& dest = ref.mRef.getDestCell();
                         if ( !checkedCells.count(dest) && !currentCells.count(dest) )
                             nextCells.insert(dest);
                     }
@@ -3282,7 +3287,7 @@ namespace MWWorld
         return false;
     }
 
-    MWWorld::ConstPtr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
+    MWWorld::ConstPtr World::getClosestMarker(const MWWorld::ConstPtr& ptr, std::string_view id)
     {
         if ( ptr.getCell()->isExterior() ) {
             return getClosestMarkerFromExteriorPosition(mPlayer->getLastKnownExteriorPosition(), id);
@@ -3323,7 +3328,7 @@ namespace MWWorld
                     }
                     else
                     {
-                        std::string dest = ref.mRef.getDestCell();
+                        const std::string& dest = ref.mRef.getDestCell();
                         if ( !checkedCells.count(dest) && !currentCells.count(dest) )
                             nextCells.insert(dest);
                     }
@@ -3333,7 +3338,7 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
-    MWWorld::ConstPtr World::getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id ) {
+    MWWorld::ConstPtr World::getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id) {
         MWWorld::ConstPtr closestMarker;
         float closestDistance = std::numeric_limits<float>::max();
 
@@ -3374,8 +3379,7 @@ namespace MWWorld
             mCells.recharge(duration);
     }
 
-    void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                          const std::string& id)
+    void World::teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id)
     {
         MWWorld::ConstPtr closestMarker = getClosestMarker( ptr, id );
 
@@ -3385,7 +3389,7 @@ namespace MWWorld
             return;
         }
 
-        std::string cellName;
+        std::string_view cellName;
         if ( !closestMarker.mCell->isExterior() )
             cellName = closestMarker.mCell->getCell()->mName;
 
@@ -3584,7 +3588,7 @@ namespace MWWorld
             Log(Debug::Warning) << "Failed to confiscate items: no closest prison marker found.";
             return;
         }
-        std::string prisonName = prisonMarker.getCellRef().getDestCell();
+        const std::string& prisonName = prisonMarker.getCellRef().getDestCell();
         if ( prisonName.empty() )
         {
             Log(Debug::Warning) << "Failed to confiscate items: prison marker not linked to prison interior";
@@ -3751,7 +3755,7 @@ namespace MWWorld
             else
                 areaStatic = mStore.get<ESM::Static>().find ("VFX_DefaultArea");
 
-            std::string texture = effect->mParticle;
+            const std::string& texture = effect->mParticle;
 
             if (effectInfo.mArea <= 0)
             {

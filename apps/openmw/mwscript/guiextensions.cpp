@@ -114,7 +114,7 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                std::string cell = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral(runtime[0].mInteger));
+                std::string_view cell = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
@@ -127,9 +127,7 @@ namespace MWScript
 
                 for (auto it = cells.extBegin(); it != cells.extEnd(); ++it)
                 {
-                    std::string name = it->mName;
-                    ::Misc::StringUtils::lowerCaseInPlace(name);
-                    if (name.length() >= cell.length() && name.substr(0, cell.length()) == cell)
+                    if (Misc::StringUtils::ciStartsWith(it->mName, cell))
                         winMgr->addVisitedLocation(it->mName, it->getGridX(), it->getGridY());
                 }
             }
@@ -144,11 +142,10 @@ namespace MWScript
                 const MWWorld::Store<ESM::Cell> &cells =
                     MWBase::Environment::get().getWorld ()->getStore().get<ESM::Cell>();
 
-                MWWorld::Store<ESM::Cell>::iterator it = cells.extBegin();
-                for (; it != cells.extEnd(); ++it)
+                for (auto it = cells.extBegin(); it != cells.extEnd(); ++it)
                 {
-                    std::string name = it->mName;
-                    if (name != "")
+                    const std::string& name = it->mName;
+                    if (!name.empty())
                         MWBase::Environment::get().getWindowManager()->addVisitedLocation (
                             name,
                             it->getGridX(),

@@ -182,8 +182,8 @@ namespace MWWorld
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();
 
-            MWWorld::ConstPtr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
-            MWWorld::ConstPtr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
+            MWWorld::ConstPtr getClosestMarker(const MWWorld::ConstPtr& ptr, std::string_view id);
+            MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id);
 
         public:
             // FIXME
@@ -320,7 +320,7 @@ namespace MWWorld
             void advanceTime (double hours, bool incremental = false) override;
             ///< Advance in-game time.
 
-            std::string getMonthName (int month = -1) const override;
+            std::string_view getMonthName(int month = -1) const override;
             ///< Return name of month (-1: current month)
 
             TimeStamp getTimeStamp() const override;
@@ -612,7 +612,7 @@ namespace MWWorld
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise
-            bool findExteriorPosition(const std::string &name, ESM::Position &pos) override;
+            bool findExteriorPosition(std::string_view name, ESM::Position& pos) override;
 
             /// Find position in interior cell near door entrance
             /// \return false if interior with given name not exists, true otherwise
@@ -667,8 +667,7 @@ namespace MWWorld
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
-            void teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                                  const std::string& id) override;
+            void teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id) override;
 
             /// List all references (filtered by \a type) detected by \a ptr. The range
             /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.

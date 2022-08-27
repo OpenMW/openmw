@@ -166,13 +166,20 @@ namespace
         }
     };
 
-    float calcAnimVelocity(const SceneUtil::TextKeyMap& keys, SceneUtil::KeyframeController *nonaccumctrl,
-                           const osg::Vec3f& accum, const std::string &groupname)
+    bool equalsParts(std::string_view value, std::string_view s1, std::string_view s2, std::string_view s3 = {})
     {
-        const std::string start = groupname+": start";
-        const std::string loopstart = groupname+": loop start";
-        const std::string loopstop = groupname+": loop stop";
-        const std::string stop = groupname+": stop";
+        if (value.starts_with(s1))
+        {
+            value = value.substr(s1.size());
+            if(value.starts_with(s2))
+                return value.substr(s2.size()) == s3;
+        }
+        return false;
+    }
+
+    float calcAnimVelocity(const SceneUtil::TextKeyMap& keys, SceneUtil::KeyframeController *nonaccumctrl,
+                           const osg::Vec3f& accum, std::string_view groupname)
+    {
         float starttime = std::numeric_limits<float>::max();
         float stoptime = 0.0f;
 
@@ -185,7 +192,7 @@ namespace
         auto keyiter = keys.rbegin();
         while(keyiter != keys.rend())
         {
-            if(keyiter->second == start || keyiter->second == loopstart)
+            if(equalsParts(keyiter->second, groupname, ": start") || equalsParts(keyiter->second, groupname, ": loop start"))
             {
                 starttime = keyiter->first;
                 break;
@@ -195,9 +202,9 @@ namespace
         keyiter = keys.rbegin();
         while(keyiter != keys.rend())
         {
-            if (keyiter->second == stop)
+            if (equalsParts(keyiter->second, groupname, ": stop"))
                 stoptime = keyiter->first;
-            else if (keyiter->second == loopstop)
+            else if (equalsParts(keyiter->second, groupname, ": loop stop"))
             {
                 stoptime = keyiter->first;
                 break;
@@ -868,24 +875,13 @@ namespace MWRender
                 break;
         }
 
-        auto equals = [] (std::string_view value, std::string_view s1, std::string_view s2, std::string_view s3 = {})
-        {
-            if (value.starts_with(s1))
-            {
-                value = value.substr(s1.size());
-                if(value.starts_with(s2))
-                    return value.substr(s2.size()) == s3;
-            }
-            return false;
-        };
-
         auto startkey = groupend;
-        while(startkey != keys.rend() && !equals(startkey->second, groupname, ": ", start))
+        while(startkey != keys.rend() && !equalsParts(startkey->second, groupname, ": ", start))
             ++startkey;
         if(startkey == keys.rend() && start == "loop start")
         {
             startkey = groupend;
-            while(startkey != keys.rend() && !equals(startkey->second, groupname, ": start"))
+            while(startkey != keys.rend() && !equalsParts(startkey->second, groupname, ": start"))
                 ++startkey;
         }
         if(startkey == keys.rend())
@@ -897,7 +893,7 @@ namespace MWRender
               // We have to ignore extra garbage at the end.
               // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
               // Why, just why? :(
-              && !equals(std::string_view{stopkey->second}.substr(0, checkLength), groupname, ": ", stop))
+              && !equalsParts(std::string_view{stopkey->second}.substr(0, checkLength), groupname, ": ", stop))
             ++stopkey;
         if(stopkey == keys.rend())
             return false;
@@ -929,9 +925,9 @@ namespace MWRender
             if (key->first > state.getTime())
                 continue;
 
-            if (equals(key->second, groupname, ": loop start"))
+            if (equalsParts(key->second, groupname, ": loop start"))
                 state.mLoopStartTime = key->first;
-            else if (equals(key->second, groupname, ": loop stop"))
+            else if (equalsParts(key->second, groupname, ": loop stop"))
                 state.mLoopStopTime = key->first;
         }
 
@@ -1081,7 +1077,7 @@ namespace MWRender
         resetActiveGroups();
     }
 
-    float Animation::getVelocity(const std::string &groupname) const
+    float Animation::getVelocity(std::string_view groupname) const
     {
         if (!mAccumRoot)
             return 0.0f;
@@ -1137,7 +1133,7 @@ namespace MWRender
             }
         }
 
-        mAnimVelocities.insert(std::make_pair(groupname, velocity));
+        mAnimVelocities.emplace(groupname, velocity);
 
         return velocity;
     }

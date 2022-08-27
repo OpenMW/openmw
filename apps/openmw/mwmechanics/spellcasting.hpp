@@ -54,7 +54,7 @@ namespace MWMechanics
         /// @note Auto detects if spell, ingredient or potion
         bool cast (const std::string& id);
 
-        void playSpellCastingEffects(const std::string &spellid, bool enchantment);
+        void playSpellCastingEffects(std::string_view spellid, bool enchantment);
 
         /// Launch a bolt with the given effects.
         void launchMagicBolt ();

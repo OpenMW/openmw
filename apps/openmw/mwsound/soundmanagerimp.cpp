@@ -336,7 +336,7 @@ namespace MWSound
         {
             std::vector<std::string> filelist;
             // Is there an ini setting for this filename or something?
-            std::string filename = "music/special/morrowind title.mp3";
+            std::string_view filename = "music/special/morrowind title.mp3";
             if (mVFS->exists(filename))
             {
                 filelist.emplace_back(filename);

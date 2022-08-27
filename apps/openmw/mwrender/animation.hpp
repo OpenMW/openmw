@@ -285,7 +285,7 @@ protected:
 
     float mAlpha;
 
-    mutable std::map<std::string, float> mAnimVelocities;
+    mutable std::map<std::string, float, std::less<>> mAnimVelocities;
 
     osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
 
@@ -451,7 +451,7 @@ public:
     void disable(std::string_view groupname);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
-    float getVelocity(const std::string &groupname) const;
+    float getVelocity(std::string_view groupname) const;
 
     virtual osg::Vec3f runAnimation(float duration);
 

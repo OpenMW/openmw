@@ -56,15 +56,13 @@ namespace
     }
 
     template<typename T>
-    MWWorld::Ptr searchId (MWWorld::CellRefList<T>& list, const std::string& id,
-        MWWorld::ContainerStore *store)
+    MWWorld::Ptr searchId(MWWorld::CellRefList<T>& list, std::string_view id, MWWorld::ContainerStore* store)
     {
         store->resolve();
-        std::string id2 = Misc::StringUtils::lowerCase (id);
 
         for (MWWorld::LiveCellRef<T>& liveCellRef : list.mList)
         {
-            if (Misc::StringUtils::ciEqual(liveCellRef.mBase->mId, id2) && liveCellRef.mData.getCount())
+            if (Misc::StringUtils::ciEqual(liveCellRef.mBase->mId, id) && liveCellRef.mData.getCount())
             {
                 MWWorld::Ptr ptr(&liveCellRef, nullptr);
                 ptr.setContainerStore (store);
@@ -760,7 +758,7 @@ MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const std::string& id)
     return item;
 }
 
-MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
+MWWorld::Ptr MWWorld::ContainerStore::search(std::string_view id)
 {
     resolve();
     {
