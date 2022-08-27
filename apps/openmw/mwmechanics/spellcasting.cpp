@@ -435,7 +435,7 @@ namespace MWMechanics
         return true;
     }
 
-    void CastSpell::playSpellCastingEffects(const std::string &spellid, bool enchantment)
+    void CastSpell::playSpellCastingEffects(std::string_view spellid, bool enchantment)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (enchantment)
