@@ -606,22 +606,22 @@ namespace SceneUtil
             if (!lightManager->getUBOManager())
                 return;
 
-            for (size_t i = 0; i < mStateSet.size(); ++i)
+            for (size_t i = 0; i < mUBBs.size(); ++i)
             {
                 auto& buffer = lightManager->getUBOManager()->getLightBuffer(i);
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
-                mStateSet[i]->setAttributeAndModes(ubb, osg::StateAttribute::ON);
+                mUBBs[i] = new osg::UniformBufferBinding(static_cast<int>(Resource::SceneManager::UBOBinding::LightBuffer), buffer->getData(), 0, buffer->getData()->getTotalDataSize());
             }
         }
 
         void operator()(LightManager* node, osgUtil::CullVisitor* cv)
         {
-            const size_t frameId = cv->getTraversalNumber() % 2;
-
-            auto& stateset = mStateSet[frameId];
+            osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
 
             if (node->getLightingMethod() == LightingMethod::SingleUBO)
             {
+                const size_t frameId = cv->getTraversalNumber() % 2;
+                stateset->setAttributeAndModes(mUBBs[frameId], osg::StateAttribute::ON);
+
                 auto& buffer = node->getUBOManager()->getLightBuffer(cv->getTraversalNumber());
 
                 if (auto sun = node->getSunlight())
@@ -654,7 +654,7 @@ namespace SceneUtil
                 node->getPPLightsBuffer()->updateCount(cv->getTraversalNumber());
         }
 
-        std::array<osg::ref_ptr<osg::StateSet>, 2> mStateSet = { new osg::StateSet, new osg::StateSet };
+        std::array<osg::ref_ptr<osg::UniformBufferBinding>, 2> mUBBs;
     };
 
     UBOManager::UBOManager(int lightCount)
