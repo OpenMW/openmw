@@ -10,6 +10,7 @@ uniform mat4 projectionMatrix;
 
 uniform vec3 passColor;
 uniform vec3 trans;
+uniform vec3 scale;
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
@@ -19,7 +20,7 @@ out vec3 vertexNormal;
 
 void main()
 {
-    gl_Position = projectionMatrix * gl_ModelViewMatrix * vec4(aPos + trans, 1.);
+    gl_Position = projectionMatrix * gl_ModelViewMatrix * vec4(aPos * scale + trans, 1.);
 
     vertexNormal = aNormal;
     vertexColor = passColor.xyz;

@@ -7,7 +7,7 @@ out vec4 fragColor;
 
 void main()
 {
-    vec3 lightDir = normalize(vec3(-1.,-2.,-0.5));
+    vec3 lightDir = normalize(vec3(-1.,-0.5,-2.));
 
     float lightAttenuation = dot(-lightDir, vertexNormal) * 0.5  + 0.5; 
 

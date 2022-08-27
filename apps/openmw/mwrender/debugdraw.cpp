@@ -31,14 +31,21 @@ namespace MWRenderDebug
 
         osg::Uniform* uTrans = const_cast<osg::Uniform*>( stateSet->getUniform("trans"));
         osg::Uniform* uCol = const_cast<osg::Uniform*>( stateSet->getUniform("passColor"));
+        osg::Uniform* uScale = const_cast<osg::Uniform*>( stateSet->getUniform("scale"));
+
 
         auto transLocation = pcp->getUniformLocation(uTrans->getNameID() );
         auto colLocation = pcp->getUniformLocation(uCol->getNameID() );
+        auto scaleLocation = pcp->getUniformLocation(uScale->getNameID() );
 
-        for (int i = 0; i < mCubesToDraw.size(); i++)
+
+        for (int i = 0; i < mShapsToDraw.size(); i++)
         {
-            osg::Vec3f translation = mCubesToDraw[i].mPosition;
-            osg::Vec3f color = mCubesToDraw[i].mColor;
+            const auto& shapeToDraw = mShapsToDraw[i];
+            osg::Vec3f translation = shapeToDraw.mPosition;
+            osg::Vec3f color = shapeToDraw.mColor;
+            osg::Vec3f scale = shapeToDraw.mDims;
+
 
             if (uTrans)
                 ext->glUniform3f(transLocation, translation.x(), translation.y(), translation.z());
@@ -46,13 +53,83 @@ namespace MWRenderDebug
             {
                 ext->glUniform3f(colLocation, color.x(), color.y(), color.z());
             }
-            this->mCubeGeometry->drawImplementation(renderInfo);
+            if (uScale)
+            {
+                ext->glUniform3f(scaleLocation, scale.x(), scale.y(), scale.z());
+            }
+            switch (shapeToDraw.mDrawShape)
+            {
+                case DrawShape::Cube:
+                    this->mCubeGeometry->drawImplementation(renderInfo);
+                    break;
+                case DrawShape::Cylinder:
+                    this->mCylinderGeometry->drawImplementation(renderInfo);
+                    break;
+                case DrawShape::WireCube:
+                    this->mWireCubeGeometry->drawImplementation(renderInfo);
+                    break;
+            }
         }
 
 
 
     }
 }
+
+static osg::Vec3 sphereCoordToCarthesian(float theta ,float phi ,float r ) 
+{
+    osg::Vec3 returnVec = osg::Vec3(0.0,0.0,0.0);
+    float phiToHorizontal = osg::PI_2 - phi ;
+    returnVec.x() = std::cos( theta);
+    returnVec.y() = std::sin( theta);
+    returnVec.z() = std::sin(phiToHorizontal);
+
+    returnVec.x() *= std::cos(phiToHorizontal);
+    returnVec.y() *= std::cos(phiToHorizontal);
+    returnVec.x() *= r;
+    returnVec.z() *= r;
+
+    returnVec.y() *= r;
+    return returnVec;
+}
+
+static void generateWireCube(osg::Geometry& geom, float dim)
+{
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+    osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
+
+    geom.setVertexAttribArray(0, vertices, osg::Array::BIND_PER_VERTEX);
+    geom.setVertexAttribArray(1, normals, osg::Array::BIND_PER_VERTEX);
+
+    osg::Vec2i indexPos[] = { osg::Vec2i(0,0),osg::Vec2i(1,0),osg::Vec2i(1,1),osg::Vec2i(0,1) };
+
+    for (int i = 0; i < 4; i++)
+    {
+        osg::Vec3 vert1 = osg::Vec3(indexPos[i].x() - 0.5, indexPos[i].y()- 0.5, 0.5);
+        int next = (i + 1) % 4;
+        osg::Vec3 vert2 = osg::Vec3(indexPos[next].x()- 0.5, indexPos[next].y()- 0.5, 0.5);
+
+        vertices->push_back(vert1 * dim);
+        vertices->push_back(vert2 * dim);
+        vert1.z() *= -1;
+        vert2.z() *= -1;
+        vertices->push_back(vert1 * dim);
+        vertices->push_back(vert2 * dim);
+
+        auto vert3 = vert1;
+        vert3.z() *= -1;
+        vertices->push_back(vert1 * dim);
+        vertices->push_back(vert3 * dim);
+    }
+    for (int i = 0; i < vertices->size(); i ++)
+    {
+        normals->push_back(osg::Vec3(1., 1., 1.));
+        
+    }
+
+    geom.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
+}
+
 
 static void generateCube(osg::Geometry& geom, float dim)
 {
@@ -105,6 +182,113 @@ static void generateCube(osg::Geometry& geom, float dim)
 }
 
 
+static void generateCylinder(osg::Geometry& geom, float radius, float height, int subdiv)
+{
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+    osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
+    osg::ref_ptr<osg::DrawElementsUShort> indices = new osg::DrawElementsUShort(osg::DrawElementsUShort::TRIANGLES, 0);
+    int vertexCount = subdiv * 4 + 2; //2 discs + top and bottom + 2 center
+    indices->reserve(vertexCount );
+    int iVertex = 0;
+
+    int beginTop = iVertex;
+    auto topNormal = osg::Vec3(0.,0.,1.);
+    //top disk
+    for (int i = 0 ;i <  subdiv; i++)
+    {
+        float theta = (float(i )/ float(subdiv )) * osg::PI * 2.;
+        osg::Vec3 pos= sphereCoordToCarthesian(theta, osg::PI_2, 1.);
+        pos *= radius;
+        pos.z() = height / 2.;
+        vertices->push_back(pos);
+        normals->push_back(topNormal);
+        iVertex+=1;
+    }
+    auto centerTop = iVertex;
+    //centerTop
+    {
+        vertices->push_back(osg::Vec3(0.,0.,height/2.));
+        normals->push_back(topNormal);
+        iVertex+=1;
+    }
+    auto centerBot = iVertex;
+    //centerBot
+    {
+        vertices->push_back(osg::Vec3(0.,0.,-height/2));
+        normals->push_back(-topNormal);
+        iVertex+=1;
+    }
+    //bottom disk
+    auto begin_bot = iVertex;
+    for (int i = 0 ;i <  subdiv; i++)
+    {
+        float theta = float(i)/ float(subdiv) * osg::PI*2.;
+        osg::Vec3 pos= sphereCoordToCarthesian(theta, osg::PI_2, 1.);
+        pos *= radius;
+        pos.z() = - height / 2.;
+        vertices->push_back(pos);
+        normals->push_back(-topNormal);
+        iVertex+=1;
+    }
+        //sides
+    int beginSide = iVertex;
+    for (int i = 0 ;i <  subdiv; i++)
+    {
+        float theta = float(i )/ float(subdiv) * osg::PI*2.;
+        osg::Vec3 normal = sphereCoordToCarthesian(theta, osg::PI_2, 1.);
+        auto posTop = normal;
+        posTop *= radius;
+        auto posBot = posTop;
+        posTop.z() =  height /2.;
+        posBot.z() = -height /2.;
+        vertices->push_back(posTop);
+        normals->push_back(normal);
+        iVertex+=1;
+        vertices->push_back(posBot);
+        normals->push_back(normal);
+        iVertex+=1;
+    }
+
+        //create triangles sides
+    for (int i = 0 ;i <  subdiv; i++)
+    {
+        auto next_vert = (i+1)%subdiv;
+        auto v1 = (beginSide + 2 *i);
+        auto v2 = (beginSide + 2 *i +1);
+        auto v3 = (beginSide + 2 *next_vert);
+        auto v4 = (beginSide + 2 *next_vert +1);
+        indices->push_back(v1);
+        indices->push_back(v2);
+        indices->push_back(v4);
+
+        indices->push_back(v4);
+        indices->push_back(v3);
+        indices->push_back(v1);
+
+    }
+    for (int i = 0 ;i < subdiv; i++)
+    {
+        auto next_vert = (i+1)%subdiv;
+        auto top1 = (beginTop + i) ;
+        auto top2 = (beginTop + next_vert) ;
+
+        auto bot1 = (begin_bot + i) ;
+        auto bot2 = (begin_bot + next_vert) ;
+
+        indices->push_back(top2);
+        indices->push_back(centerTop);
+        indices->push_back(top1);
+
+        indices->push_back(bot1);
+        indices->push_back(centerBot);
+        indices->push_back(bot2);
+    }
+
+    geom.setVertexAttribArray(0, vertices, osg::Array::BIND_PER_VERTEX);
+    geom.setVertexAttribArray(1, normals, osg::Array::BIND_PER_VERTEX);
+    geom.addPrimitiveSet(indices);
+}
+
 MWRenderDebug::DebugDrawer::DebugDrawer(MWRender::RenderingManager& renderingManager,osg::ref_ptr<osg::Group> parentNode)
 {
     auto& shaderManager = renderingManager.getResourceSystem()->getSceneManager()->getShaderManager();
@@ -112,25 +296,33 @@ MWRenderDebug::DebugDrawer::DebugDrawer(MWRender::RenderingManager& renderingMan
     auto fragmentShader = shaderManager.getShader("debugDraw_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
 
     auto program = shaderManager.getProgram(vertexShader, fragmentShader);
-    program->addBindAttribLocation("aPos", 0);
-    program->addBindAttribLocation("aNormal", 1);
     mCubeGeometry = new osg::Geometry;
-    mcustomCubesDrawer = new CubeCustomDraw(mCubeGeometry, mCubesToDrawRead, mDrawCallMutex);
+    mcustomCubesDrawer = new CubeCustomDraw(mCubeGeometry, mShapesToDrawRead, mDrawCallMutex);
     osg::StateSet* stateset = mcustomCubesDrawer->getOrCreateStateSet();
 
     stateset->addUniform(new osg::Uniform("passColor", osg::Vec3f(1., 1., 1.)));
     stateset->addUniform(new osg::Uniform("trans", osg::Vec3f(1., 1., 1.)));
+    stateset->addUniform(new osg::Uniform("scale", osg::Vec3f(1., 1., 1.)));
 
     stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
     stateset->setMode(GL_DEPTH_TEST, GL_TRUE);
     stateset->setMode(GL_CULL_FACE, GL_TRUE);
-    mCubeGeometry->setCullingActive(false);
     mCubeGeometry->setSupportsDisplayList(false);
     mCubeGeometry->setUseVertexBufferObjects(true);
 
-    generateCube(*mCubeGeometry,50.);
+    generateCube(*mCubeGeometry,1.);
+    auto cylinderGeom = new osg::Geometry;
+    cylinderGeom->setSupportsDisplayList(false);
+    cylinderGeom->setUseVertexBufferObjects(true);
+    mcustomCubesDrawer->mCylinderGeometry = cylinderGeom;
+    generateCylinder(*cylinderGeom, .5, 1., 20);
 
-    mCubeGeometry->setStateSet(stateset->clone(osg::CopyOp::DEEP_COPY_ALL)->asStateSet());
+    auto wireCube = new osg::Geometry;
+    wireCube->setSupportsDisplayList(false);
+    wireCube->setUseVertexBufferObjects(true);
+    mcustomCubesDrawer->mWireCubeGeometry = wireCube;
+    generateWireCube(*wireCube, 1.);
+    //mCubeGeometry->setStateSet(stateset->clone(osg::CopyOp::DEEP_COPY_ALL)->asStateSet());
 
     parentNode->addChild(mcustomCubesDrawer);
 }
@@ -139,14 +331,24 @@ void MWRenderDebug::DebugDrawer::update()
 {
     {
         std::lock_guard lock(mDrawCallMutex);
-        mCubesToDrawRead.swap(mCubesToDrawWrite);
+        mShapesToDrawRead.swap(mShapesToDrawWrite);
     }
-    mCubesToDrawWrite.clear();
-
-
+    mShapesToDrawWrite.clear();
 }
 
 void MWRenderDebug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
 {
-    mCubesToDrawWrite.push_back({ mDims, mColor, mPosition });
+    mShapesToDrawWrite.push_back({mPosition, mDims, mColor, DrawShape::Cube});
+}
+
+void MWRenderDebug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f color)
+{
+    osg::Vec3 dims = max - min;
+    osg::Vec3 pos = min + dims * 0.5f;
+    drawCube(pos, dims, color);
+}
+
+void MWRenderDebug::DebugDrawer::addDrawCall(const DrawCall& draw)
+{
+    mShapesToDrawWrite.push_back(draw);
 }
