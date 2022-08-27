@@ -3,6 +3,7 @@
 
 #include <set>
 #include <string>
+#include <string_view>
 
 #include <components/esm/defs.hpp>
 
@@ -26,7 +27,7 @@ namespace MWWorld
 
             /// If cellName is empty, an exterior cell is assumed.
             /// @param teleportFollowers Whether to teleport any following actors of the target actor as well.
-            ActionTeleport (const std::string& cellName, const ESM::Position& position, bool teleportFollowers);
+            ActionTeleport(std::string_view cellName, const ESM::Position& position, bool teleportFollowers);
 
             /// @param includeHostiles If true, include hostile followers (which won't actually be teleported) in the output,
             ///                        e.g. so that the teleport action can calm them.

@@ -224,7 +224,7 @@ namespace MWBase
             virtual void advanceTime (double hours, bool incremental = false) = 0;
             ///< Advance in-game time.
 
-            virtual std::string getMonthName (int month = -1) const = 0;
+            virtual std::string_view getMonthName(int month = -1) const = 0;
             ///< Return name of month (-1: current month)
 
             virtual MWWorld::TimeStamp getTimeStamp() const = 0;
@@ -514,7 +514,7 @@ namespace MWBase
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise
-            virtual bool findExteriorPosition(const std::string &name, ESM::Position &pos) = 0;
+            virtual bool findExteriorPosition(std::string_view name, ESM::Position& pos) = 0;
 
             /// Find default position inside interior cell specified by name
             /// \return false if interior with given name not exists, true otherwise
@@ -566,8 +566,7 @@ namespace MWBase
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
-            virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                                  const std::string& id) = 0;
+            virtual void teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id) = 0;
 
             enum DetectionType
             {

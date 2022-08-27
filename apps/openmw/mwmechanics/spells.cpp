@@ -106,7 +106,7 @@ namespace MWMechanics
         mSelectedSpell = spellId;
     }
 
-    const std::string Spells::getSelectedSpell() const
+    const std::string& Spells::getSelectedSpell() const
     {
         return mSelectedSpell;
     }

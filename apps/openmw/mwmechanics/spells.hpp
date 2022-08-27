@@ -87,7 +87,7 @@ namespace MWMechanics
             void setSelectedSpell (const std::string& spellId);
             ///< This function does not verify, if the spell is available.
 
-            const std::string getSelectedSpell() const;
+            const std::string& getSelectedSpell() const;
             ///< May return an empty string.
 
             bool hasCommonDisease() const;

@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWWORLD_CELLREF_H
 #define OPENMW_MWWORLD_CELLREF_H
 
+#include <string_view>
+
 #include <components/esm3/cellref.hpp>
 
 namespace ESM
@@ -87,7 +89,7 @@ namespace MWWorld
 
         // ID of creature trapped in this soul gem
         const std::string& getSoul() const { return mCellRef.mSoul; }
-        void setSoul(const std::string& soul);
+        void setSoul(std::string_view soul);
 
         // The faction that owns this object (and will get angry if
         // you take it and are not a faction member)

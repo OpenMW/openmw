@@ -231,8 +231,7 @@ namespace
                 }
                 catch (const std::exception& e)
                 {
-                    std::string error ("failed to render '" + ptr.getCellRef().getRefId() + "': ");
-                    Log(Debug::Error) << error + e.what();
+                    Log(Debug::Error) << "failed to render '" << ptr.getCellRef().getRefId() << "': " << e.what();
                 }
             }
 

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <typeinfo>
 #include <map>
 #include <memory>
@@ -224,17 +225,17 @@ namespace MWWorld
             bool hasState() const;
             ///< Does this cell have state that needs to be stored in a saved game file?
 
-            bool hasId (const std::string& id) const;
+            bool hasId(std::string_view id) const;
             ///< May return true for deleted IDs when in preload state. Will return false, if cell is
             /// unloaded.
             /// @note Will not account for moved references which may exist in Loaded state. Use search() instead if the cell is loaded.
 
-            Ptr search (const std::string& id);
+            Ptr search(std::string_view id);
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
             /// containers.
             /// @note Triggers CellStore hasState flag.
 
-            ConstPtr searchConst (const std::string& id) const;
+            ConstPtr searchConst(std::string_view id) const;
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
             /// containers.
             /// @note Does not trigger CellStore hasState flag.
@@ -372,7 +373,7 @@ namespace MWWorld
 
             bool isQuasiExterior() const;
 
-            Ptr searchInContainer (const std::string& id);
+            Ptr searchInContainer(std::string_view id);
 
             void loadState (const ESM::CellState& state);
 

@@ -87,7 +87,7 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    std::string cell{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view cell = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     ESM::Position pos;
@@ -96,7 +96,7 @@ namespace MWScript
 
                     if (world->findExteriorPosition(cell, pos))
                     {
-                        MWWorld::ActionTeleport("", pos, false).execute(playerPtr);
+                        MWWorld::ActionTeleport({}, pos, false).execute(playerPtr);
                         world->adjustPosition(playerPtr, false);
                     }
                     else
@@ -130,7 +130,7 @@ namespace MWScript
 
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-                    MWWorld::ActionTeleport("", pos, false).execute(playerPtr);
+                    MWWorld::ActionTeleport({}, pos, false).execute(playerPtr);
                     world->adjustPosition(playerPtr, false);
                 }
         };

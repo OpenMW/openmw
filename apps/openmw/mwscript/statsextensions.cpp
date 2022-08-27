@@ -757,7 +757,7 @@ namespace MWScript
                 {
                     MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                    std::string factionId;
+                    std::string_view factionId;
 
                     if (arg0==1)
                     {
@@ -790,7 +790,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    std::string factionId;
+                    std::string_view factionId;
 
                     if (arg0==1)
                     {
@@ -822,7 +822,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    std::string factionId;
+                    std::string_view factionId;
 
                     if (arg0==1)
                     {

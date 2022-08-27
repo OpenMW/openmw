@@ -242,7 +242,7 @@ namespace MWGui
     /// update activated quick key state (if action executing was delayed for some reason)
     void updateActivatedQuickKey () override;
 
-    std::string getSelectedSpell() override { return mSelectedSpell; }
+    const std::string& getSelectedSpell() override { return mSelectedSpell; }
     void setSelectedSpell(const std::string& spellId, int successChancePercent) override;
     void setSelectedEnchantItem(const MWWorld::Ptr& item) override;
     const MWWorld::Ptr& getSelectedEnchantItem() const override;

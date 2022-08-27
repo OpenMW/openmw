@@ -136,7 +136,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setSoul(const std::string &soul)
+    void CellRef::setSoul(std::string_view soul)
     {
         if (soul != mCellRef.mSoul)
         {

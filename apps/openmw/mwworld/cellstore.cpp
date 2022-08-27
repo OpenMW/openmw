@@ -36,7 +36,7 @@
 namespace
 {
     template<typename T>
-    MWWorld::Ptr searchInContainerList (MWWorld::CellRefList<T>& containerList, const std::string& id)
+    MWWorld::Ptr searchInContainerList(MWWorld::CellRefList<T>& containerList, std::string_view id)
     {
         for (typename MWWorld::CellRefList<T>::List::iterator iter (containerList.mList.begin());
              iter!=containerList.mList.end(); ++iter)
@@ -420,7 +420,7 @@ namespace MWWorld
         return mHasState;
     }
 
-    bool CellStore::hasId (const std::string& id) const
+    bool CellStore::hasId(std::string_view id) const
     {
         if (mState==State_Unloaded)
             return false;
@@ -435,10 +435,10 @@ namespace MWWorld
     struct SearchVisitor
     {
         PtrType mFound;
-        const std::string *mIdToFind;
+        std::string_view mIdToFind;
         bool operator()(const PtrType& ptr)
         {
-            if (ptr.getCellRef().getRefId() == *mIdToFind)
+            if (ptr.getCellRef().getRefId() == mIdToFind)
             {
                 mFound = ptr;
                 return false;
@@ -447,18 +447,18 @@ namespace MWWorld
         }
     };
 
-    Ptr CellStore::search (const std::string& id)
+    Ptr CellStore::search(std::string_view id)
     {
         SearchVisitor<MWWorld::Ptr> searchVisitor;
-        searchVisitor.mIdToFind = &id;
+        searchVisitor.mIdToFind = id;
         forEach(searchVisitor);
         return searchVisitor.mFound;
     }
 
-    ConstPtr CellStore::searchConst (const std::string& id) const
+    ConstPtr CellStore::searchConst(std::string_view id) const
     {
         SearchVisitor<MWWorld::ConstPtr> searchVisitor;
-        searchVisitor.mIdToFind = &id;
+        searchVisitor.mIdToFind = id;
         forEachConst(searchVisitor);
         return searchVisitor.mFound;
     }
@@ -676,7 +676,7 @@ namespace MWWorld
         return (mCell->mData.mFlags & ESM::Cell::QuasiEx) != 0;
     }
 
-    Ptr CellStore::searchInContainer (const std::string& id)
+    Ptr CellStore::searchInContainer(std::string_view id)
     {
         bool oldState = mHasState;
 

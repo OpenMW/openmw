@@ -428,7 +428,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 invalid = true;
             else if (world->isTeleportingEnabled())
             {
-                auto marker = (effect.mEffectId == ESM::MagicEffect::DivineIntervention) ? "divinemarker" : "templemarker";
+                std::string_view marker = (effect.mEffectId == ESM::MagicEffect::DivineIntervention) ? "divinemarker" : "templemarker";
                 world->teleportToClosestMarker(target, marker);
                 if(!caster.isEmpty())
                 {
@@ -464,7 +464,10 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 world->getPlayer().getMarkedPosition(markedCell, markedPosition);
                 if (markedCell)
                 {
-                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName, markedPosition, false);
+                    std::string_view dest;
+                    if (!markedCell->isExterior())
+                        dest = markedCell->getCell()->mName;
+                    MWWorld::ActionTeleport action(dest, markedPosition, false);
                     action.execute(target);
                     if(!caster.isEmpty())
                     {

@@ -1383,7 +1383,7 @@ bool CharacterController::updateWeaponState()
                     // For the player, set the spell we want to cast
                     // This has to be done at the start of the casting animation,
                     // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
-                    std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+                    const std::string& selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
                     stats.getSpells().setSelectedSpell(selectedSpell);
                 }
                 std::string spellid = stats.getSpells().getSelectedSpell();
