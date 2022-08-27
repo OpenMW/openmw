@@ -111,6 +111,11 @@ namespace DetourNavigator
             static std::atomic_size_t nextJobId {1};
             return nextJobId.fetch_add(1);
         }
+
+        bool isWritingDbJob(const Job& job)
+        {
+            return job.mGeneratedNavMeshData != nullptr;
+        }
     }
 
     std::ostream& operator<<(std::ostream& stream, JobStatus value)
@@ -328,7 +333,8 @@ namespace DetourNavigator
 
         if (stats.mDb.has_value())
         {
-            out.setAttribute(frameNumber, "NavMesh DbJobs", static_cast<double>(stats.mDb->mJobs));
+            out.setAttribute(frameNumber, "NavMesh DbJobs Write", static_cast<double>(stats.mDb->mJobs.mWritingJobs));
+            out.setAttribute(frameNumber, "NavMesh DbJobs Read", static_cast<double>(stats.mDb->mJobs.mReadingJobs));
 
             if (stats.mDb->mGetTileCount > 0)
                 out.setAttribute(frameNumber, "NavMesh DbCacheHitRate", static_cast<double>(stats.mDbGetTileHits)
@@ -690,6 +696,10 @@ namespace DetourNavigator
     {
         const std::lock_guard lock(mMutex);
         insertPrioritizedDbJob(job, mJobs);
+        if (isWritingDbJob(*job))
+            ++mWritingJobs;
+        else
+            ++mReadingJobs;
         mHasJob.notify_all();
     }
 
@@ -701,6 +711,10 @@ namespace DetourNavigator
             return std::nullopt;
         const JobIt job = mJobs.front();
         mJobs.pop_front();
+        if (isWritingDbJob(*job))
+            --mWritingJobs;
+        else
+            --mReadingJobs;
         return job;
     }
 
@@ -719,10 +733,10 @@ namespace DetourNavigator
         mHasJob.notify_all();
     }
 
-    std::size_t DbJobQueue::size() const
+    DbJobQueue::Stats DbJobQueue::getStats() const
     {
         const std::lock_guard lock(mMutex);
-        return mJobs.size();
+        return Stats {.mWritingJobs = mWritingJobs, .mReadingJobs = mReadingJobs};
     }
 
     DbWorker::DbWorker(AsyncNavMeshUpdater& updater, std::unique_ptr<NavMeshDb>&& db,
@@ -751,10 +765,7 @@ namespace DetourNavigator
 
     DbWorker::Stats DbWorker::getStats() const
     {
-        Stats result;
-        result.mJobs = mQueue.size();
-        result.mGetTileCount = mGetTileCount.load(std::memory_order_relaxed);
-        return result;
+        return Stats {.mJobs = mQueue.getStats(), .mGetTileCount = mGetTileCount.load(std::memory_order_relaxed)};
     }
 
     void DbWorker::stop()
@@ -809,7 +820,7 @@ namespace DetourNavigator
             }
         };
 
-        if (job->mGeneratedNavMeshData != nullptr)
+        if (isWritingDbJob(*job))
         {
             process([&] (JobIt job) { processWritingJob(job); });
             mUpdater.removeJob(job);

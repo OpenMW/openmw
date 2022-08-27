@@ -80,6 +80,12 @@ namespace DetourNavigator
     class DbJobQueue
     {
     public:
+        struct Stats
+        {
+            std::size_t mWritingJobs;
+            std::size_t mReadingJobs;
+        };
+
         void push(JobIt job);
 
         std::optional<JobIt> pop();
@@ -88,13 +94,15 @@ namespace DetourNavigator
 
         void stop();
 
-        std::size_t size() const;
+        Stats getStats() const;
 
     private:
         mutable std::mutex mMutex;
         std::condition_variable mHasJob;
         std::deque<JobIt> mJobs;
         bool mShouldStop = false;
+        std::size_t mWritingJobs = 0;
+        std::size_t mReadingJobs = 0;
     };
 
     class AsyncNavMeshUpdater;
@@ -104,8 +112,8 @@ namespace DetourNavigator
     public:
         struct Stats
         {
-            std::size_t mJobs = 0;
-            std::size_t mGetTileCount = 0;
+            DbJobQueue::Stats mJobs;
+            std::size_t mGetTileCount;
         };
 
         DbWorker(AsyncNavMeshUpdater& updater, std::unique_ptr<NavMeshDb>&& db,
