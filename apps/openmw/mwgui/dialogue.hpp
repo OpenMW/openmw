@@ -1,6 +1,8 @@
 #ifndef MWGUI_DIALOGE_H
 #define MWGUI_DIALOGE_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
@@ -22,7 +24,7 @@ namespace MWGui
     class PersuasionDialog : public WindowModal
     {
     public:
-        PersuasionDialog(ResponseCallback* callback);
+        PersuasionDialog(std::unique_ptr<ResponseCallback> callback);
 
         void onOpen() override;
 
@@ -81,14 +83,14 @@ namespace MWGui
     struct DialogueText
     {
         virtual ~DialogueText() {}
-        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const = 0;
+        virtual void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const = 0;
         std::string mText;
     };
 
     struct Response : DialogueText
     {
         Response(const std::string& text, const std::string& title = "", bool needMargin = true);
-        void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const override;
+        void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
         void addTopicLink (BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const;
         std::string mTitle;
         bool mNeedMargin;
@@ -97,14 +99,13 @@ namespace MWGui
     struct Message : DialogueText
     {
         Message(const std::string& text);
-        void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const override;
+        void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
     };
 
     class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
         DialogueWindow();
-        ~DialogueWindow();
 
         void onTradeComplete();
 
@@ -158,14 +159,14 @@ namespace MWGui
         bool mIsCompanion;
         std::list<std::string> mKeywords;
 
-        std::vector<DialogueText*> mHistoryContents;
+        std::vector<std::unique_ptr<DialogueText>> mHistoryContents;
         std::vector<std::pair<std::string, int> > mChoices;
         bool mGoodbye;
 
-        std::vector<Link*> mLinks;
-        std::map<std::string, Link*> mTopicLinks;
+        std::vector<std::unique_ptr<Link>> mLinks;
+        std::map<std::string, std::unique_ptr<Link>> mTopicLinks;
 
-        std::vector<Link*> mDeleteLater;
+        std::vector<std::unique_ptr<Link>> mDeleteLater;
 
         KeywordSearchT mKeywordSearch;
 

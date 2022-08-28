@@ -56,9 +56,9 @@ namespace MWGui
         bool mNeedMargin;
     };
 
-    PersuasionDialog::PersuasionDialog(ResponseCallback* callback)
+    PersuasionDialog::PersuasionDialog(std::unique_ptr<ResponseCallback> callback)
         : WindowModal("openmw_persuasion_dialog.layout")
-        , mCallback(callback)
+        , mCallback(std::move(callback))
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mAdmireButton, "AdmireButton");
@@ -130,14 +130,15 @@ namespace MWGui
         mText = text;
     }
 
-    void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
+    void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
     {
         typesetter->sectionBreak(mNeedMargin ? 9 : 0);
+        auto windowManager = MWBase::Environment::get().getWindowManager();
 
-        if (mTitle != "")
+        if (!mTitle.empty())
         {
-            const MyGUI::Colour& headerColour = MWBase::Environment::get().getWindowManager()->getTextColours().header;
-            BookTypesetter::Style* title = typesetter->createStyle("", headerColour, false);
+            const MyGUI::Colour& headerColour = windowManager->getTextColours().header;
+            BookTypesetter::Style* title = typesetter->createStyle({}, headerColour, false);
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
             typesetter->sectionBreak();
         }
@@ -160,8 +161,7 @@ namespace MWGui
                 std::string link = text.substr(pos_begin + 1, pos_end - pos_begin - 1);
                 const char specialPseudoAsteriskCharacter = 127;
                 std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
-                std::string topicName = MWBase::Environment::get().getWindowManager()->
-                        getTranslationDataStorage().topicStandardForm(link);
+                std::string topicName = Misc::StringUtils::lowerCase(windowManager->getTranslationDataStorage().topicStandardForm(link));
 
                 std::string displayName = link;
                 while (displayName[displayName.size()-1] == '*')
@@ -169,8 +169,8 @@ namespace MWGui
 
                 text.replace(pos_begin, pos_end+1-pos_begin, displayName);
 
-                if (topicLinks.find(Misc::StringUtils::lowerCase(topicName)) != topicLinks.end())
-                    hyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = intptr_t(topicLinks[Misc::StringUtils::lowerCase(topicName)]);
+                if (topicLinks.find(topicName) != topicLinks.end())
+                    hyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = intptr_t(topicLinks[topicName].get());
             }
             else
                 break;
@@ -235,7 +235,7 @@ namespace MWGui
         mText = text;
     }
 
-    void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
+    void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
     {
         const MyGUI::Colour& textColour = MWBase::Environment::get().getWindowManager()->getTextColours().notify;
         BookTypesetter::Style* title = typesetter->createStyle("", textColour, false);
@@ -269,9 +269,9 @@ namespace MWGui
         : WindowBase("openmw_dialogue_window.layout")
         , mIsCompanion(false)
         , mGoodbye(false)
-        , mPersuasionDialog(new ResponseCallback(this))
-        , mCallback(new ResponseCallback(this))
-        , mGreetingCallback(new ResponseCallback(this, false))
+        , mPersuasionDialog(std::make_unique<ResponseCallback>(this))
+        , mCallback(std::make_unique<ResponseCallback>(this))
+        , mGreetingCallback(std::make_unique<ResponseCallback>(this, false))
     {
         // Centre dialog
         center();
@@ -299,17 +299,6 @@ namespace MWGui
         mHistory->adviseLinkClicked(callback);
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
-    }
-
-    DialogueWindow::~DialogueWindow()
-    {
-        deleteLater();
-        for (Link* link : mLinks)
-            delete link;
-        for (const auto& link : mTopicLinks)
-            delete link.second;
-        for (auto history : mHistoryContents)
-            delete history;
     }
 
     void DialogueWindow::onTradeComplete()
@@ -425,8 +414,8 @@ namespace MWGui
             // The history is not reset here
             mKeywords.clear();
             mTopicsList->clear();
-            for (Link* link : mLinks)
-                mDeleteLater.push_back(link); // Links are not deleted right away to prevent issues with event handlers
+            for (auto& link : mLinks)
+                mDeleteLater.push_back(std::move(link)); // Links are not deleted right away to prevent issues with event handlers
             mLinks.clear();
         }
 
@@ -472,8 +461,6 @@ namespace MWGui
 
     void DialogueWindow::deleteLater()
     {
-        for (Link* link : mDeleteLater)
-            delete link;
         mDeleteLater.clear();
     }
 
@@ -482,8 +469,6 @@ namespace MWGui
         if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Dialogue))
             return;
         // Reset history
-        for (DialogueText* text : mHistoryContents)
-            delete text;
         mHistoryContents.clear();
     }
 
@@ -501,7 +486,7 @@ namespace MWGui
     {
         mTopicsList->clear();
         for (auto& linkPair : mTopicLinks)
-            mDeleteLater.push_back(linkPair.second);
+            mDeleteLater.push_back(std::move(linkPair.second));
         mTopicLinks.clear();
         mKeywordSearch.clear();
 
@@ -549,11 +534,10 @@ namespace MWGui
             std::string topicId = Misc::StringUtils::lowerCase(keyword);
             mTopicsList->addItem(keyword);
 
-            Topic* t = new Topic(keyword);
+            auto t = std::make_unique<Topic>(keyword);
+            mKeywordSearch.seed(topicId, intptr_t(t.get()));
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
-            mTopicLinks[topicId] = t;
-
-            mKeywordSearch.seed(topicId, intptr_t(t));
+            mTopicLinks[topicId] = std::move(t);
         }
         mTopicsList->adjustSize();
 
@@ -577,7 +561,7 @@ namespace MWGui
 
         BookTypesetter::Ptr typesetter = BookTypesetter::create (mHistory->getWidth(), std::numeric_limits<int>::max());
 
-        for (DialogueText* text : mHistoryContents)
+        for (const auto& text : mHistoryContents)
             text->write(typesetter, &mKeywordSearch, mTopicLinks);
 
         BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::White, false);
@@ -588,27 +572,27 @@ namespace MWGui
         mChoices = MWBase::Environment::get().getDialogueManager()->getChoices();
         for (std::pair<std::string, int>& choice : mChoices)
         {
-            Choice* link = new Choice(choice.second);
+            auto link = std::make_unique<Choice>(choice.second);
             link->eventChoiceActivated += MyGUI::newDelegate(this, &DialogueWindow::onChoiceActivated);
-            mLinks.push_back(link);
+            auto interactiveId = TypesetBook::InteractiveId(link.get());
+            mLinks.push_back(std::move(link));
 
             typesetter->lineBreak();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
-                                                                              textColours.answerPressed,
-                                                                              TypesetBook::InteractiveId(link));
+                                                                              textColours.answerPressed, interactiveId);
             typesetter->write(questionStyle, to_utf8_span(choice.first.c_str()));
         }
 
         mGoodbye = MWBase::Environment::get().getDialogueManager()->isGoodbye();
         if (mGoodbye)
         {
-            Goodbye* link = new Goodbye();
+            auto link = std::make_unique<Goodbye>();
             link->eventActivated += MyGUI::newDelegate(this, &DialogueWindow::onGoodbyeActivated);
-            mLinks.push_back(link);
+            auto interactiveId = TypesetBook::InteractiveId(link.get());
+            mLinks.push_back(std::move(link));
             const std::string& goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->mValue.getString();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
-                textColours.answerPressed,
-                TypesetBook::InteractiveId(link));
+                textColours.answerPressed, interactiveId);
             typesetter->lineBreak();
             typesetter->write(questionStyle, to_utf8_span(goodbye.c_str()));
         }
@@ -682,13 +666,13 @@ namespace MWGui
 
     void DialogueWindow::addResponse(const std::string &title, const std::string &text, bool needMargin)
     {
-        mHistoryContents.push_back(new Response(text, title, needMargin));
+        mHistoryContents.push_back(std::make_unique<Response>(text, title, needMargin));
         updateHistory();
     }
 
     void DialogueWindow::addMessageBox(const std::string& text)
     {
-        mHistoryContents.push_back(new Message(text));
+        mHistoryContents.push_back(std::make_unique<Message>(text));
         updateHistory();
     }
 
