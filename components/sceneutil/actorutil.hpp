@@ -5,7 +5,7 @@
 
 namespace SceneUtil
 {
-    std::string getActorSkeleton(bool firstPerson, bool female, bool beast, bool werewolf);
+    const std::string& getActorSkeleton(bool firstPerson, bool female, bool beast, bool werewolf);
 }
 
 #endif

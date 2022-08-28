@@ -96,12 +96,12 @@ namespace MWSound
             return;
         }
 
-        std::string hrtfname = Settings::Manager::getString("hrtf", "Sound");
+        const std::string& hrtfname = Settings::Manager::getString("hrtf", "Sound");
         int hrtfstate = Settings::Manager::getInt("hrtf enable", "Sound");
         HrtfMode hrtfmode = hrtfstate < 0 ? HrtfMode::Auto :
                             hrtfstate > 0 ? HrtfMode::Enable : HrtfMode::Disable;
 
-        std::string devname = Settings::Manager::getString("device", "Sound");
+        const std::string& devname = Settings::Manager::getString("device", "Sound");
         if(!mOutput->init(devname, hrtfname, hrtfmode))
         {
             Log(Debug::Error) << "Failed to initialize audio output, sound disabled";

@@ -49,7 +49,7 @@ namespace CSMPrefs
     {
         if (mButton)
         {
-            std::string shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
+            const std::string& shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
 
             int modifier;
             State::get().getShortcutManager().convertFromString(shortcut, modifier);

@@ -71,7 +71,7 @@ void Manager::saveUser(const std::string &file)
     parser.saveSettingsFile(file, mUserSettings);
 }
 
-std::string Manager::getString(std::string_view setting, std::string_view category)
+const std::string& Manager::getString(std::string_view setting, std::string_view category)
 {
     const auto key = std::make_pair(category, setting);
     CategorySettingValueMap::iterator it = mUserSettings.find(key);

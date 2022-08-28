@@ -493,9 +493,9 @@ namespace MWRender
 
         mEffectManager = std::make_unique<EffectManager>(sceneRoot, mResourceSystem);
 
-        const std::string normalMapPattern = Settings::Manager::getString("normal map pattern", "Shaders");
-        const std::string heightMapPattern = Settings::Manager::getString("normal height map pattern", "Shaders");
-        const std::string specularMapPattern = Settings::Manager::getString("terrain specular map pattern", "Shaders");
+        const std::string& normalMapPattern = Settings::Manager::getString("normal map pattern", "Shaders");
+        const std::string& heightMapPattern = Settings::Manager::getString("normal height map pattern", "Shaders");
+        const std::string& specularMapPattern = Settings::Manager::getString("terrain specular map pattern", "Shaders");
         const bool useTerrainNormalMaps = Settings::Manager::getBool("auto use terrain normal maps", "Shaders");
         const bool useTerrainSpecularMaps = Settings::Manager::getBool("auto use terrain specular maps", "Shaders");
 

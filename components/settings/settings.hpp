@@ -63,7 +63,7 @@ namespace Settings
         static std::int64_t getInt64(std::string_view setting, std::string_view category);
         static float getFloat(std::string_view setting, std::string_view category);
         static double getDouble(std::string_view setting, std::string_view category);
-        static std::string getString(std::string_view setting, std::string_view category);
+        static const std::string& getString(std::string_view setting, std::string_view category);
         static std::vector<std::string> getStringArray(std::string_view setting, std::string_view category);
         static bool getBool(std::string_view setting, std::string_view category);
         static osg::Vec2f getVector2(std::string_view setting, std::string_view category);

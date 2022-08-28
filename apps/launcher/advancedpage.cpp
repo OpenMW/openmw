@@ -164,7 +164,7 @@ bool Launcher::AdvancedPage::loadSettings()
 
     // Audio
     {
-        std::string selectedAudioDevice = Settings::Manager::getString("device", "Sound");
+        const std::string& selectedAudioDevice = Settings::Manager::getString("device", "Sound");
         if (selectedAudioDevice.empty() == false)
         {
             int audioDeviceIndex = audioDeviceSelectorComboBox->findData(QString::fromStdString(selectedAudioDevice));
@@ -178,7 +178,7 @@ bool Launcher::AdvancedPage::loadSettings()
         {
             enableHRTFComboBox->setCurrentIndex(hrtfEnabledIndex + 1);
         }
-        std::string selectedHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
+        const std::string& selectedHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
         if (selectedHRTFProfile.empty() == false)
         {
             int hrtfProfileIndex = hrtfProfileSelectorComboBox->findData(QString::fromStdString(selectedHRTFProfile));
@@ -324,7 +324,7 @@ void Launcher::AdvancedPage::saveSettings()
     // Audio
     {
         int audioDeviceIndex = audioDeviceSelectorComboBox->currentIndex();
-        std::string prevAudioDevice = Settings::Manager::getString("device", "Sound");
+        const std::string& prevAudioDevice = Settings::Manager::getString("device", "Sound");
         if (audioDeviceIndex != 0)
         {
             const std::string& newAudioDevice = audioDeviceSelectorComboBox->currentText().toUtf8().constData();
@@ -341,7 +341,7 @@ void Launcher::AdvancedPage::saveSettings()
             Settings::Manager::setInt("hrtf enable", "Sound", hrtfEnabledIndex);
         }
         int selectedHRTFProfileIndex = hrtfProfileSelectorComboBox->currentIndex();
-        std::string prevHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
+        const std::string& prevHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
         if (selectedHRTFProfileIndex != 0)
         {
             const std::string& newHRTFProfile  = hrtfProfileSelectorComboBox->currentText().toUtf8().constData();
