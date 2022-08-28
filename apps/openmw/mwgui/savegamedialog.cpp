@@ -47,7 +47,6 @@ namespace MWGui
         getWidget(mDeleteButton, "DeleteButton");
         getWidget(mSaveList, "SaveList");
         getWidget(mSaveNameEdit, "SaveNameEdit");
-        getWidget(mSpacer, "Spacer");
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onOkButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onCancelButtonClicked);
         mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteButtonClicked);
@@ -219,7 +218,6 @@ namespace MWGui
         mSaveNameEdit->setVisible(!load);
         mCharacterSelection->setUserString("Hidden", load ? "false" : "true");
         mCharacterSelection->setVisible(load);
-        mSpacer->setUserString("Hidden", load ? "false" : "true");
 
         mDeleteButton->setUserString("Hidden", load ? "false" : "true");
         mDeleteButton->setVisible(load);
