@@ -1807,9 +1807,9 @@ namespace MWGui
                 && (!isGuiMode() || (mGuiModes.size() == 1 && (getMode() == GM_MainMenu || getMode() == GM_Rest)));
     }
 
-    void WindowManager::playVideo(const std::string &name, bool allowSkipping, bool overrideSounds)
+    void WindowManager::playVideo(std::string_view name, bool allowSkipping, bool overrideSounds)
     {
-        mVideoWidget->playVideo("video\\" + name);
+        mVideoWidget->playVideo("video\\" + std::string{name});
 
         mVideoWidget->eventKeyButtonPressed.clear();
         mVideoBackground->eventKeyButtonPressed.clear();

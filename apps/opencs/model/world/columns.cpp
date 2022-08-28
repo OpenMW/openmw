@@ -629,7 +629,7 @@ std::vector<std::pair<int,std::string>>CSMWorld::Columns::getEnums (ColumnId col
     {
         for (int i=0; i<8; i++)
         {
-            const std::string& bloodName = Fallback::Map::getString("Blood_Texture_Name_" + std::to_string(i));
+            std::string_view bloodName = Fallback::Map::getString("Blood_Texture_Name_" + std::to_string(i));
             if (!bloodName.empty())
                 enums.emplace_back(i, bloodName);
         }

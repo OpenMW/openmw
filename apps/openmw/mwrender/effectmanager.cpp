@@ -27,7 +27,7 @@ EffectManager::~EffectManager()
     clear();
 }
 
-void EffectManager::addEffect(const std::string &model, const std::string& textureOverride, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
+void EffectManager::addEffect(const std::string& model, std::string_view textureOverride, const osg::Vec3f& worldPosition, float scale, bool isMagicVFX)
 {
     osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model);
 

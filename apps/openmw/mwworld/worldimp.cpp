@@ -271,7 +271,7 @@ namespace MWWorld
 
         if (!bypass)
         {
-            const std::string& video = Fallback::Map::getString("Movies_New_Game");
+            std::string_view video = Fallback::Map::getString("Movies_New_Game");
             if (!video.empty())
                 MWBase::Environment::get().getWindowManager()->playVideo(video, true);
         }
@@ -3713,12 +3713,12 @@ namespace MWWorld
         if (ptr == getPlayerPtr() && Settings::Manager::getBool("hit fader", "GUI"))
             return;
 
-        std::string texture = Fallback::Map::getString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
+        std::string_view texture = Fallback::Map::getString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
         if (texture.empty())
             texture = Fallback::Map::getString("Blood_Texture_0");
 
         std::string model = Misc::ResourceHelpers::correctMeshPath(
-            Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))), // [0, 2]
+            std::string{Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3)))}, // [0, 2]
             mResourceSystem->getVFS());
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);

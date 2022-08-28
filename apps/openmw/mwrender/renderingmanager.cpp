@@ -1174,7 +1174,7 @@ namespace MWRender
         mActorsPaths->updatePtr(old, updated);
     }
 
-    void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
+    void RenderingManager::spawnEffect(const std::string& model, std::string_view texture, const osg::Vec3f& worldPosition, float scale, bool isMagicVFX)
     {
         mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX);
     }

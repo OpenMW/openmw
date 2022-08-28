@@ -108,7 +108,7 @@ namespace MWBase
 
             /// @note This method will block until the video finishes playing
             /// (and will continually update the window while doing so)
-            virtual void playVideo(const std::string& name, bool allowSkipping, bool overrideSounds = true) = 0;
+            virtual void playVideo(std::string_view name, bool allowSkipping, bool overrideSounds = true) = 0;
 
             virtual void setNewGame(bool newgame) = 0;
 

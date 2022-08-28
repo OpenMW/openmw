@@ -18,7 +18,7 @@ bool replaceTag(const MyGUI::UString& tag, MyGUI::UString& out)
     if (tag.compare(0, fontcolourLength, fontcolour) == 0)
     {
         std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourLength);
-        std::string str = Fallback::Map::getString(fallbackName);
+        std::string_view str = Fallback::Map::getString(fallbackName);
         if (str.empty())
             throw std::runtime_error("Unknown fallback name: " + fallbackName);
 
@@ -36,7 +36,7 @@ bool replaceTag(const MyGUI::UString& tag, MyGUI::UString& out)
     else if (tag.compare(0, fontcolourhtmlLength, fontcolourhtml) == 0)
     {
         std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourhtmlLength);
-        std::string str = Fallback::Map::getString(fallbackName);
+        std::string_view str = Fallback::Map::getString(fallbackName);
         if (str.empty())
             throw std::runtime_error("Unknown fallback name: " + fallbackName);
 

@@ -850,7 +850,7 @@ void OMW::Engine::prepareEngine()
 
     if (!mSkipMenu)
     {
-        const std::string& logo = Fallback::Map::getString("Movies_Company_Logo");
+        std::string_view logo = Fallback::Map::getString("Movies_Company_Logo");
         if (!logo.empty())
             mWindowManager->playVideo(logo, true);
     }
@@ -1069,7 +1069,7 @@ void OMW::Engine::go()
         // start in main menu
         mWindowManager->pushGuiMode (MWGui::GM_MainMenu);
         mSoundManager->playTitleMusic();
-        const std::string& logo = Fallback::Map::getString("Movies_Morrowind_Logo");
+        std::string_view logo = Fallback::Map::getString("Movies_Morrowind_Logo");
         if (!logo.empty())
             mWindowManager->playVideo(logo, /*allowSkipping*/true, /*overrideSounds*/false);
     }
