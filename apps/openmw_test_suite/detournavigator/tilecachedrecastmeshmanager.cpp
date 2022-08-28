@@ -43,14 +43,6 @@ namespace
         EXPECT_EQ(manager.getRevision(), 0);
     }
 
-    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, for_each_tile_position_for_empty_should_call_none)
-    {
-        TileCachedRecastMeshManager manager(mSettings);
-        std::size_t calls = 0;
-        manager.forEachTile([&] (const TilePosition&, const CachedRecastMeshManager&) { ++calls; });
-        EXPECT_EQ(calls, 0);
-    }
-
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_object_for_new_object_should_return_true)
     {
         TileCachedRecastMeshManager manager(mSettings);
@@ -105,7 +97,7 @@ namespace
         manager.setBounds(bounds);
         manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
         manager.takeChangedTiles();
-        EXPECT_TRUE(manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        EXPECT_TRUE(manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground));
         EXPECT_THAT(manager.takeChangedTiles(), ElementsAre(
             std::pair(TilePosition(-1, -1), ChangeType::add),
             std::pair(TilePosition(-1, 0), ChangeType::add),
@@ -123,7 +115,7 @@ namespace
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         manager.takeChangedTiles();
-        EXPECT_FALSE(manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        EXPECT_FALSE(manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground));
         EXPECT_THAT(manager.takeChangedTiles(), IsEmpty());
     }
 
@@ -184,7 +176,7 @@ namespace
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(1, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(1, -1)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
@@ -204,7 +196,7 @@ namespace
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(1, 0)), nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(1, -1)), nullptr);
     }
@@ -236,7 +228,7 @@ namespace
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, 0)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
@@ -272,7 +264,7 @@ namespace
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
         const auto beforeUpdateRevision = manager.getRevision();
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_EQ(manager.getRevision(), beforeUpdateRevision + 1);
     }
 
@@ -284,7 +276,7 @@ namespace
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
         const auto beforeUpdateRevision = manager.getRevision();
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground);
         EXPECT_EQ(manager.getRevision(), beforeUpdateRevision);
     }
 

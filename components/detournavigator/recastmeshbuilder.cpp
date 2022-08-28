@@ -277,6 +277,8 @@ namespace DetourNavigator
         mTriangles.erase(std::remove_if(mTriangles.begin(), mTriangles.end(), isNan), mTriangles.end());
         std::sort(mTriangles.begin(), mTriangles.end());
         std::sort(mWater.begin(), mWater.end());
+        std::sort(mHeightfields.begin(), mHeightfields.end());
+        std::sort(mFlatHeightfields.begin(), mFlatHeightfields.end());
         Mesh mesh = makeMesh(std::move(mTriangles));
         return std::make_shared<RecastMesh>(version, std::move(mesh), std::move(mWater),
                                             std::move(mHeightfields), std::move(mFlatHeightfields),

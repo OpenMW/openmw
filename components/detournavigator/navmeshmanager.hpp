@@ -29,8 +29,7 @@ namespace DetourNavigator
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
-        bool updateObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
-                          const AreaType areaType);
+        bool updateObject(ObjectId id, const btTransform& transform, AreaType areaType);
 
         void removeObject(const ObjectId id);
 
@@ -76,7 +75,8 @@ namespace DetourNavigator
         inline SharedNavMeshCacheItem getCached(const AgentBounds& agentBounds) const;
 
         inline void update(const AgentBounds& agentBounds, const TilePosition& playerTile,
-            const SharedNavMeshCacheItem& cached, const std::map<osg::Vec2i, ChangeType>& changedTiles);
+            const TilesPositionsRange& range, const SharedNavMeshCacheItem& cached,
+            const std::map<osg::Vec2i, ChangeType>& changedTiles);
     };
 }
 
