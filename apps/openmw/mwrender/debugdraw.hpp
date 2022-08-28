@@ -43,9 +43,10 @@ namespace MWRenderDebug
     class CubeCustomDraw : public osg::Drawable
     {
     public:
-        CubeCustomDraw( std::vector<DrawCall>& cubesToDraw,std::mutex& mutex) : mShapsToDraw(cubesToDraw),mDrawCallMutex(mutex) {}
+        CubeCustomDraw( std::vector<DrawCall>& cubesToDraw,osg::ref_ptr<osg::Geometry>& linesToDraw ,std::mutex& mutex) : mShapsToDraw(cubesToDraw),mlinesToDraw(linesToDraw), mDrawCallMutex(mutex) {}
 
         std::vector<DrawCall>& mShapsToDraw;
+        osg::ref_ptr<osg::Geometry>& mlinesToDraw;
 
         std::mutex& mDrawCallMutex;
 
@@ -63,16 +64,22 @@ namespace MWRenderDebug
 
     };
 
+    struct DebugLines;
+
     struct DebugDrawer
     {
         DebugDrawer(MWRender::RenderingManager& manager,osg::ref_ptr<osg::Group> parentNode);
+        ~DebugDrawer();
 
         void update();
-        void drawCube(osg::Vec3f mPosition, osg::Vec3f mDims = osg::Vec3(50.,50.,50.), osg::Vec3f mColor = osg::Vec3(1.,1.,1.));
-        void drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f mColor = osg::Vec3(1.,1.,1.));
+        void drawCube(osg::Vec3f mPosition, osg::Vec3f mDims = osg::Vec3(50.,50.,50.), osg::Vec3f mColor = colorWhite);
+        void drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f mColor = colorWhite);
         void addDrawCall(const DrawCall& draw);
+        void addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color = colorWhite);
 
         private:
+
+        std::unique_ptr<DebugLines> mDebugLines;
 
         std::vector<DrawCall> mShapesToDrawRead;
         std::vector<DrawCall> mShapesToDrawWrite;

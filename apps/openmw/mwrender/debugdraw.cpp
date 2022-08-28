@@ -245,12 +245,24 @@ namespace MWRenderDebug
         osg::Uniform* uTrans = const_cast<osg::Uniform*>( stateSet->getUniform("trans"));
         osg::Uniform* uCol = const_cast<osg::Uniform*>( stateSet->getUniform("passColor"));
         osg::Uniform* uScale = const_cast<osg::Uniform*>( stateSet->getUniform("scale"));
+        osg::Uniform* uUseNormalAsColor = const_cast<osg::Uniform*>( stateSet->getUniform("useNormalAsColor"));
+
 
 
         auto transLocation = pcp->getUniformLocation(uTrans->getNameID() );
         auto colLocation = pcp->getUniformLocation(uCol->getNameID() );
         auto scaleLocation = pcp->getUniformLocation(uScale->getNameID() );
+        auto normalAsColorLocation = pcp->getUniformLocation(uUseNormalAsColor->getNameID() );
 
+
+        ext->glUniform3f(transLocation, 0., 0., 0.);
+        ext->glUniform3f(colLocation, 1., 1., 1.);
+        ext->glUniform3f(scaleLocation,  1., 1., 1.);
+        ext->glUniform1i(normalAsColorLocation,  1);
+
+        mlinesToDraw->drawImplementation(renderInfo);
+
+        ext->glUniform1i(normalAsColorLocation,  0);
 
         for (const auto& shapeToDraw : mShapsToDraw)
         {
@@ -284,6 +296,64 @@ namespace MWRenderDebug
         }
 
     }
+
+    struct DebugLines
+    {
+
+        static void makeLineInstance( osg::Geometry& lines)
+        {
+            auto vertices  = new osg::Vec3Array;
+            auto color     = new osg::Vec3Array;
+
+            for (int i = 0; i < 2; i++)
+            {
+                vertices->push_back(osg::Vec3());
+                vertices->push_back(osg::Vec3(0., 0., 0.));
+                color->push_back(osg::Vec3(1., 1., 1.));
+                color->push_back(osg::Vec3(1., 1., 1.));
+            }
+
+            lines.setUseVertexArrayObject(true);
+            lines.setUseDisplayList(false);
+            lines.setCullingActive(false);
+
+            lines.setVertexAttribArray(0, vertices, osg::Array::BIND_PER_VERTEX);
+            lines.setVertexAttribArray(1, color, osg::Array::BIND_PER_VERTEX);
+
+            lines.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
+
+            //lines.setStateSet(stateSet->clone(osg::CopyOp::DEEP_COPY_ALL)->asStateSet());
+        }
+
+        DebugLines()
+        {
+
+            mLinesWrite = new osg::Geometry();
+            mLinesRead  = new osg::Geometry();
+
+            makeLineInstance(*mLinesRead);
+            makeLineInstance(*mLinesWrite);
+
+        }
+
+        void update(std::mutex& mutex)
+        {
+            mLinesWrite->removePrimitiveSet(0, 1);
+            mLinesWrite->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0,static_cast<osg::Vec3Array*>(mLinesWrite->getVertexAttribArray(0))->size()));
+
+            {
+                auto lock = std::scoped_lock(mutex);
+                mLinesWrite.swap(mLinesRead);
+            }
+
+
+            static_cast<osg::Vec3Array*>(mLinesWrite->getVertexAttribArray(0))->resize(2, osg::Vec3());
+            static_cast<osg::Vec3Array*>(mLinesWrite->getVertexAttribArray(1))->resize(2, osg::Vec3());
+        }
+
+        osg::ref_ptr<osg::Geometry>  mLinesWrite;
+        osg::ref_ptr<osg::Geometry>  mLinesRead;
+    };
 }
 
 MWRenderDebug::DebugDrawer::DebugDrawer(MWRender::RenderingManager& renderingManager,osg::ref_ptr<osg::Group> parentNode)
@@ -293,14 +363,17 @@ MWRenderDebug::DebugDrawer::DebugDrawer(MWRender::RenderingManager& renderingMan
     auto fragmentShader = shaderManager.getShader("debugDraw_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
 
     auto program = shaderManager.getProgram(vertexShader, fragmentShader);
-    mcustomCubesDrawer = new CubeCustomDraw(mShapesToDrawRead, mDrawCallMutex);
+    mDebugLines = std::make_unique<DebugLines>();
+    mcustomCubesDrawer = new CubeCustomDraw(mShapesToDrawRead,mDebugLines->mLinesRead, mDrawCallMutex);
 
     mDebugDrawSceneObjects = new osg::Group;
     mDebugDrawSceneObjects->setCullingActive(false);
     osg::StateSet* stateset = mDebugDrawSceneObjects->getOrCreateStateSet();
     stateset->addUniform(new osg::Uniform("passColor", osg::Vec3f(1., 1., 1.)));
-    stateset->addUniform(new osg::Uniform("trans", osg::Vec3f(1., 1., 1.)));
+    stateset->addUniform(new osg::Uniform("trans", osg::Vec3f(0., 0., 0.)));
     stateset->addUniform(new osg::Uniform("scale", osg::Vec3f(1., 1., 1.)));
+    stateset->addUniform(new osg::Uniform("useNormalAsColor", 0));
+
     stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
     stateset->setMode(GL_DEPTH_TEST, GL_TRUE);
     stateset->setMode(GL_CULL_FACE, GL_TRUE);
@@ -322,10 +395,16 @@ MWRenderDebug::DebugDrawer::DebugDrawer(MWRender::RenderingManager& renderingMan
     wireCube->setUseVertexBufferObjects(true);
     generateWireCube(*wireCube, 1.);
     mcustomCubesDrawer->mWireCubeGeometry = wireCube;
-
     mcustomCubesDrawer->setStateSet( stateset);
+
     mDebugDrawSceneObjects->addChild(mcustomCubesDrawer);
+
     parentNode->addChild(mDebugDrawSceneObjects);
+}
+
+MWRenderDebug::DebugDrawer::~DebugDrawer()
+{
+
 }
 
 void MWRenderDebug::DebugDrawer::update()
@@ -335,6 +414,7 @@ void MWRenderDebug::DebugDrawer::update()
         mShapesToDrawRead.swap(mShapesToDrawWrite);
     }
     mShapesToDrawWrite.clear();
+    mDebugLines->update(mDrawCallMutex);
 }
 
 void MWRenderDebug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
@@ -352,4 +432,19 @@ void MWRenderDebug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, 
 void MWRenderDebug::DebugDrawer::addDrawCall(const DrawCall& draw)
 {
     mShapesToDrawWrite.push_back(draw);
+}
+
+void MWRenderDebug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
+{
+    auto     vertices = static_cast<osg::Vec3Array*>(mDebugLines->mLinesWrite->getVertexAttribArray(0));
+    auto     colors = static_cast<osg::Vec3Array*>(mDebugLines->mLinesWrite->getVertexAttribArray(1));
+
+    vertices->push_back(start);
+    vertices->push_back(end);
+    vertices->dirty();
+
+    colors->push_back(color);
+    colors->push_back(color);
+    colors->dirty();
+
 }
