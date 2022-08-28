@@ -34,10 +34,7 @@ namespace MWGui
 
     bool SpellBuyingWindow::sortSpells (const ESM::Spell* left, const ESM::Spell* right)
     {
-        std::string leftName = Misc::StringUtils::lowerCase(left->mName);
-        std::string rightName = Misc::StringUtils::lowerCase(right->mName);
-
-        return leftName.compare(rightName) < 0;
+        return Misc::StringUtils::ciLess(left->mName, right->mName);
     }
 
     void SpellBuyingWindow::addSpell(const ESM::Spell& spell)

@@ -300,7 +300,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
             return;
         }
 
-        const std::string keyId = door.getCellRef().getKey();
+        const std::string& keyId = door.getCellRef().getKey();
         if (keyId.empty())
             return;
 

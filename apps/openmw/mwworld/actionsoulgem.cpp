@@ -30,7 +30,7 @@ namespace MWWorld
         }
 
         const auto& target = getTarget();
-        const std::string targetSoul = target.getCellRef().getSoul();
+        const std::string& targetSoul = target.getCellRef().getSoul();
 
         if (targetSoul.empty())
         {

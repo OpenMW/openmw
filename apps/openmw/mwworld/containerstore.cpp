@@ -137,7 +137,7 @@ void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
     }
 }
 
-const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
+const std::string_view MWWorld::ContainerStore::sGoldId = "gold_001";
 
 MWWorld::ContainerStore::ContainerStore()
     : mListener(nullptr)

@@ -555,7 +555,7 @@ namespace MWGui
 
         for (const short effectId : knownEffects)
         {
-            std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
+            const std::string& name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
                                                ESM::MagicEffect::effectIdToString(effectId))->mValue.getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
 

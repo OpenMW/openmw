@@ -93,7 +93,7 @@ namespace MWGui
     {
         MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
 
-        std::string name = *sender->getUserData<std::string>();
+        const std::string& name = *sender->getUserData<std::string>();
         winMgr->playSound("Menu Click");
         if (name == "return")
         {

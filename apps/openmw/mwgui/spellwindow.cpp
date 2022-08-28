@@ -147,7 +147,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        std::string raceId = player.get<ESM::NPC>()->mBase->mRace;
+        const std::string& raceId = player.get<ESM::NPC>()->mBase->mRace;
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceId);
         // can't delete racial spells, birthsign spells or powers
         bool isInherent = race->mPowers.exists(spell->mId) || spell->mData.mType == ESM::Spell::ST_Power;

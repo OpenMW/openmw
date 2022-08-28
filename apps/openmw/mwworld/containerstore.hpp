@@ -90,7 +90,7 @@ namespace MWWorld
 
             static constexpr int Type_All = 0xffff;
 
-            static const std::string sGoldId;
+            static const std::string_view sGoldId;
 
         protected:
             ContainerStoreListener* mListener;
