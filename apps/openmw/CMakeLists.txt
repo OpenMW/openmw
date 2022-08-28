@@ -23,7 +23,7 @@ add_openmw_dir (mwrender
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation screenshotmanager
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
     renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging groundcover
-    postprocessor pingpongcull luminancecalculator pingpongcanvas transparentpass navmeshmode debugdraw
+    postprocessor pingpongcull luminancecalculator pingpongcanvas transparentpass navmeshmode
     )
 
 add_openmw_dir (mwinput

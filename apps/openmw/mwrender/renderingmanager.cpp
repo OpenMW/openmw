@@ -52,6 +52,7 @@
 
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/navmeshcacheitem.hpp>
+#include <components/debug/debugdraw.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -82,7 +83,7 @@
 #include "screenshotmanager.hpp"
 #include "groundcover.hpp"
 #include "postprocessor.hpp"
-#include "debugdraw.hpp"
+
 
 namespace MWRender
 {
@@ -490,7 +491,7 @@ namespace MWRender
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         }
 
-        mDebugDraw = std::make_unique<MWRenderDebug::DebugDrawer>(*this, mRootNode);
+        mDebugDraw = std::make_unique<MWRenderDebug::DebugDrawer>(mResourceSystem->getSceneManager()->getShaderManager(), mRootNode);
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager = std::make_unique<EffectManager>(sceneRoot, mResourceSystem);

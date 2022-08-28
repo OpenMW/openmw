@@ -3,12 +3,7 @@
 
 uniform mat4 projectionMatrix;
 
-
-// vec4 mw_modelToClip(vec4 pos);
-// vec4 mw_modelToView(vec4 pos);
-// vec4 mw_viewToClip(vec4 pos);
-
-uniform vec3 passColor;
+uniform vec3 color;
 uniform vec3 trans;
 uniform vec3 scale;
 uniform int useNormalAsColor;
@@ -24,5 +19,5 @@ void main()
     gl_Position = projectionMatrix * gl_ModelViewMatrix * vec4(aPos * scale + trans, 1.);
 
     vertexNormal = useNormalAsColor == 1? vec3(1.,1.,1.) : aNormal ;
-    vertexColor = useNormalAsColor == 1? aNormal : passColor.xyz;
+    vertexColor = useNormalAsColor == 1? aNormal : color.xyz;
 }

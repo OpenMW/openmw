@@ -28,7 +28,7 @@
 #include "../mwbase/luamanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
-#include "../mwrender/debugdraw.hpp"
+#include <components/debug/debugdraw.hpp>
 
 #include "../mwmechanics/aibreathe.hpp"
 
@@ -1628,7 +1628,8 @@ namespace MWMechanics
                 {
                     debugRender.addDrawCall(MWRenderDebug::DrawCall::wireCube(actorPos));
                 }
-                
+                debugRender.addLine(actorPos, actorPos + osg::Vec3(0., 0., 200.),MWRenderDebug::colorBlue);
+
 
 
                 if (!isDead && (!godmode || !isPlayer) && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())
