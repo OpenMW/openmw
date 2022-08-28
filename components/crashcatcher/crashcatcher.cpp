@@ -34,6 +34,7 @@
 #if defined(__APPLE__)
 #include <sys/sysctl.h>
 #include <libproc.h>
+#include <cassert>
 #endif
 
 #if defined(__FreeBSD__)
