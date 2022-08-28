@@ -316,6 +316,7 @@ add_component_dir(detournavigator
     recast
     gettilespositions
     collisionshapetype
+    stats
     )
 
 add_component_dir(loadinglistener

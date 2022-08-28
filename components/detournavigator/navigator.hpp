@@ -23,15 +23,11 @@ namespace Loading
     class Listener;
 }
 
-namespace osg
-{
-    class Stats;
-}
-
 namespace DetourNavigator
 {
     struct Settings;
     struct AgentBounds;
+    struct Stats;
 
     struct ObjectShapes
     {
@@ -181,7 +177,7 @@ namespace DetourNavigator
 
         virtual const Settings& getSettings() const = 0;
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
+        virtual Stats getStats() const = 0;
 
         virtual RecastMeshTiles getRecastMeshTiles() const = 0;
 

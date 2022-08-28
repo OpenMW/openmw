@@ -268,9 +268,9 @@ namespace DetourNavigator
         return mCache;
     }
 
-    void NavMeshManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    Stats NavMeshManager::getStats() const
     {
-        DetourNavigator::reportStats(mAsyncNavMeshUpdater.getStats(), frameNumber, stats);
+        return Stats {.mUpdater = mAsyncNavMeshUpdater.getStats()};
     }
 
     RecastMeshTiles NavMeshManager::getRecastMeshTiles() const

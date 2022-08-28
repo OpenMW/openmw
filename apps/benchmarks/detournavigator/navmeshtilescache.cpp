@@ -1,6 +1,7 @@
 #include <benchmark/benchmark.h>
 
 #include <components/detournavigator/navmeshtilescache.hpp>
+#include <components/detournavigator/stats.hpp>
 #include <components/esm3/loadland.hpp>
 
 #include <algorithm>

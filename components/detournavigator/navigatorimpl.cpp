@@ -1,5 +1,6 @@
 #include "navigatorimpl.hpp"
 #include "settingsutils.hpp"
+#include "stats.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadpgrd.hpp>
@@ -173,9 +174,9 @@ namespace DetourNavigator
         return mSettings;
     }
 
-    void NavigatorImpl::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    Stats NavigatorImpl::getStats() const
     {
-        mNavMeshManager.reportStats(frameNumber, stats);
+        return mNavMeshManager.getStats();
     }
 
     RecastMeshTiles NavigatorImpl::getRecastMeshTiles() const

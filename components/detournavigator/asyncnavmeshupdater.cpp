@@ -15,7 +15,6 @@
 
 #include <DetourNavMesh.h>
 
-#include <osg/Stats>
 #include <osg/io_utils>
 
 #include <algorithm>
@@ -307,9 +306,9 @@ namespace DetourNavigator
         mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
     }
 
-    AsyncNavMeshUpdater::Stats AsyncNavMeshUpdater::getStats() const
+    AsyncNavMeshUpdaterStats AsyncNavMeshUpdater::getStats() const
     {
-        Stats result;
+        AsyncNavMeshUpdaterStats result;
         {
             const std::lock_guard<std::mutex> lock(mMutex);
             result.mJobs = mJobs.size();
@@ -322,26 +321,6 @@ namespace DetourNavigator
         result.mCache = mNavMeshTilesCache.getStats();
         result.mDbGetTileHits = mDbGetTileHits.load(std::memory_order_relaxed);
         return result;
-    }
-
-    void reportStats(const AsyncNavMeshUpdater::Stats& stats, unsigned int frameNumber, osg::Stats& out)
-    {
-        out.setAttribute(frameNumber, "NavMesh Jobs", static_cast<double>(stats.mJobs));
-        out.setAttribute(frameNumber, "NavMesh Waiting", static_cast<double>(stats.mWaiting));
-        out.setAttribute(frameNumber, "NavMesh Pushed", static_cast<double>(stats.mPushed));
-        out.setAttribute(frameNumber, "NavMesh Processing", static_cast<double>(stats.mProcessing));
-
-        if (stats.mDb.has_value())
-        {
-            out.setAttribute(frameNumber, "NavMesh DbJobs Write", static_cast<double>(stats.mDb->mJobs.mWritingJobs));
-            out.setAttribute(frameNumber, "NavMesh DbJobs Read", static_cast<double>(stats.mDb->mJobs.mReadingJobs));
-
-            if (stats.mDb->mGetTileCount > 0)
-                out.setAttribute(frameNumber, "NavMesh DbCacheHitRate", static_cast<double>(stats.mDbGetTileHits)
-                                    / static_cast<double>(stats.mDb->mGetTileCount) * 100.0);
-        }
-
-        reportStats(stats.mCache, frameNumber, out);
     }
 
     void AsyncNavMeshUpdater::process() noexcept
@@ -733,10 +712,10 @@ namespace DetourNavigator
         mHasJob.notify_all();
     }
 
-    DbJobQueue::Stats DbJobQueue::getStats() const
+    DbJobQueueStats DbJobQueue::getStats() const
     {
         const std::lock_guard lock(mMutex);
-        return Stats {.mWritingJobs = mWritingJobs, .mReadingJobs = mReadingJobs};
+        return DbJobQueueStats {.mWritingJobs = mWritingJobs, .mReadingJobs = mReadingJobs};
     }
 
     DbWorker::DbWorker(AsyncNavMeshUpdater& updater, std::unique_ptr<NavMeshDb>&& db,
@@ -763,9 +742,12 @@ namespace DetourNavigator
         mQueue.push(job);
     }
 
-    DbWorker::Stats DbWorker::getStats() const
+    DbWorkerStats DbWorker::getStats() const
     {
-        return Stats {.mJobs = mQueue.getStats(), .mGetTileCount = mGetTileCount.load(std::memory_order_relaxed)};
+        return DbWorkerStats {
+            .mJobs = mQueue.getStats(),
+            .mGetTileCount = mGetTileCount.load(std::memory_order_relaxed)
+        };
     }
 
     void DbWorker::stop()
