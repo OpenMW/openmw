@@ -513,9 +513,7 @@ namespace DetourNavigator
         const Job& job, const GuardedNavMeshCacheItem& navMeshCacheItem, const RecastMesh& recastMesh)
     {
         const Version navMeshVersion = navMeshCacheItem.lockConst()->getVersion();
-        mRecastMeshManager.get().reportNavMeshChange(job.mChangedTile,
-            Version {recastMesh.getGeneration(), recastMesh.getRevision()},
-            navMeshVersion);
+        mRecastMeshManager.get().reportNavMeshChange(job.mChangedTile, recastMesh.getVersion(), navMeshVersion);
 
         if (status == UpdateNavMeshStatus::removed || status == UpdateNavMeshStatus::lost)
         {

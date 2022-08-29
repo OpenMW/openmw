@@ -58,8 +58,7 @@ namespace
     struct DetourNavigatorRecastMeshBuilderTest : Test
     {
         TileBounds mBounds;
-        const std::size_t mGeneration = 0;
-        const std::size_t mRevision = 0;
+        const Version mVersion {0, 0};
         const osg::ref_ptr<const Resource::BulletShape> mSource {nullptr};
         const ObjectTransform mObjectTransform {ESM::Position {{0, 0, 0}, {0, 0, 0}}, 0.0f};
 
@@ -75,7 +74,7 @@ namespace
     TEST_F(DetourNavigatorRecastMeshBuilderTest, create_for_empty_should_return_empty)
     {
         RecastMeshBuilder builder(mBounds);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>());
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>());
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>());
@@ -90,7 +89,7 @@ namespace
         RecastMeshBuilder builder(mBounds);
         builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(),
                           AreaType_ground, mSource, mObjectTransform);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -1, -1, 0,
             -1, 1, 0,
@@ -111,7 +110,7 @@ namespace
             btTransform(btMatrix3x3::getIdentity().scaled(btVector3(1, 2, 3)), btVector3(1, 2, 3)),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             0, 0, 3,
             0, 4, 3,
@@ -128,7 +127,7 @@ namespace
         RecastMeshBuilder builder(mBounds);
         builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(),
                           AreaType_ground, mSource, mObjectTransform);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -0.5, -0.5, 0,
             -0.5, 0.5, 0,
@@ -145,7 +144,7 @@ namespace
         RecastMeshBuilder builder(mBounds);
         builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(),
                           AreaType_ground, mSource, mObjectTransform);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -1, -1, -2,
             -1, -1, 2,
@@ -192,7 +191,7 @@ namespace
             btTransform::getIdentity(),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -1, -1, -2,
             -1, -1, 0,
@@ -239,7 +238,7 @@ namespace
             btTransform(btMatrix3x3::getIdentity().scaled(btVector3(1, 2, 3)), btVector3(1, 2, 3)),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             0, 0, 3,
             0, 4, 3,
@@ -263,7 +262,7 @@ namespace
             btTransform(btMatrix3x3::getIdentity().scaled(btVector3(1, 2, 3)), btVector3(1, 2, 3)),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             1, 2, 12,
             1, 10, 12,
@@ -285,7 +284,7 @@ namespace
             btTransform::getIdentity(),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -3, -3, 0,
             -3, -2, 0,
@@ -312,7 +311,7 @@ namespace
             btTransform::getIdentity(),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -3, -3, 0,
             -3, -2, 0,
@@ -337,7 +336,7 @@ namespace
             static_cast<btScalar>(-osg::PI_4))),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5f), std::vector<float>({
             0, -4.24264049530029296875f, 4.44089209850062616169452667236328125e-16f,
             0, -3.535533905029296875f, -0.707106769084930419921875f,
@@ -362,7 +361,7 @@ namespace
             static_cast<btScalar>(osg::PI_4))),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5f), std::vector<float>({
             -4.24264049530029296875f, 0, 4.44089209850062616169452667236328125e-16f,
             -3.535533905029296875f, 0, -0.707106769084930419921875f,
@@ -387,7 +386,7 @@ namespace
             static_cast<btScalar>(osg::PI_4))),
             AreaType_ground, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5f), std::vector<float>({
             -1.41421353816986083984375f, -1.1102230246251565404236316680908203125e-16f, 0,
             1.1102230246251565404236316680908203125e-16f, -1.41421353816986083984375f, 0,
@@ -416,7 +415,7 @@ namespace
             btTransform::getIdentity(),
             AreaType_null, mSource, mObjectTransform
         );
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -3, -3, 0,
             -3, -2, 0,
@@ -433,7 +432,7 @@ namespace
     {
         RecastMeshBuilder builder(mBounds);
         builder.addWater(osg::Vec2i(1, 2), Water {1000, 300.0f});
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getWater(), std::vector<CellWater>({
             CellWater {osg::Vec2i(1, 2), Water {1000, 300.0f}}
         }));
@@ -448,7 +447,7 @@ namespace
 
         RecastMeshBuilder builder(mBounds);
         builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground, mSource, mObjectTransform);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
             -1, -1, 0,
             -1, 1, 0,
@@ -467,7 +466,7 @@ namespace
         mBounds.mMin = osg::Vec2f(100, 100);
         RecastMeshBuilder builder(mBounds);
         builder.addHeightfield(cellPosition, cellSize, height);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getFlatHeightfields(), std::vector<FlatHeightfield>({
             FlatHeightfield {cellPosition, cellSize, height},
         }));
@@ -487,7 +486,7 @@ namespace
         const float maxHeight = 8;
         RecastMeshBuilder builder(mBounds);
         builder.addHeightfield(cellPosition, cellSize, heights.data(), size, minHeight, maxHeight);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         Heightfield expected;
         expected.mCellPosition = cellPosition;
         expected.mCellSize = cellSize;
@@ -519,7 +518,7 @@ namespace
         const float maxHeight = 8;
         RecastMeshBuilder builder(maxCellTileBounds(cellPosition, cellSize));
         builder.addHeightfield(cellPosition, cellSize, heights.data(), size, minHeight, maxHeight);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         Heightfield expected;
         expected.mCellPosition = cellPosition;
         expected.mCellSize = cellSize;
@@ -552,7 +551,7 @@ namespace
         mBounds.mMin = osg::Vec2f(750, 750);
         RecastMeshBuilder builder(mBounds);
         builder.addHeightfield(cellPosition, cellSize, heights.data(), size, minHeight, maxHeight);
-        const auto recastMesh = std::move(builder).create(mGeneration, mRevision);
+        const auto recastMesh = std::move(builder).create(mVersion);
         Heightfield expected;
         expected.mCellPosition = cellPosition;
         expected.mCellSize = cellSize;

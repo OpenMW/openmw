@@ -143,7 +143,7 @@ namespace DetourNavigator
         }
         for (const auto& [instance, objectTransform, shape, transform, areaType] : objects)
             builder.addObject(shape, transform, areaType, instance->getSource(), objectTransform);
-        return std::move(builder).create(mGeneration, revision);
+        return std::move(builder).create(Version {.mGeneration = mGeneration, .mRevision = revision});
     }
 
     bool RecastMeshManager::isEmpty() const

@@ -272,13 +272,13 @@ namespace DetourNavigator
         mHeightfields.push_back(std::move(heightfield));
     }
 
-    std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) &&
+    std::shared_ptr<RecastMesh> RecastMeshBuilder::create(const Version& version) &&
     {
         mTriangles.erase(std::remove_if(mTriangles.begin(), mTriangles.end(), isNan), mTriangles.end());
         std::sort(mTriangles.begin(), mTriangles.end());
         std::sort(mWater.begin(), mWater.end());
         Mesh mesh = makeMesh(std::move(mTriangles));
-        return std::make_shared<RecastMesh>(generation, revision, std::move(mesh), std::move(mWater),
+        return std::make_shared<RecastMesh>(version, std::move(mesh), std::move(mWater),
                                             std::move(mHeightfields), std::move(mFlatHeightfields),
                                             std::move(mSources));
     }
