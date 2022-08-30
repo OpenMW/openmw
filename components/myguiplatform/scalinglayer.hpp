@@ -21,9 +21,10 @@ namespace osgMyGUI
 
         void resizeView(const MyGUI::IntSize& _viewSize) override;
 
+        static float getScaleFactor(const MyGUI::IntSize& _layerViewSize);
+
     private:
         void screenToLayerCoords(int& _left, int& _top) const;
-        float getScaleFactor() const;
     };
 
 }

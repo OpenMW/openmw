@@ -39,14 +39,13 @@ TrueType fonts are configured via ``openmw.cfg`` too:
 In this example, OpenMW will scan ``Fonts`` folder in data directories for ``.omwfont`` files.
 These files are XML files with schema provided by MyGUI. OpenMW uses ``.omwfont`` files which name (without extension) matches ``openmw.cfg`` entries.
 
-It is also possible to adjust the font size and resolution via ``settings.cfg`` file::
+It is also possible to adjust the font size via ``settings.cfg`` file::
 
 			[GUI]
 			font size = 16
-			ttf resolution = 75
 
-The ``font size`` setting accepts clamped values in range from 12 to 18 while ``ttf resolution`` setting accepts values from 50 to 125.
+The ``font size`` setting accepts clamped values in range from 12 to 18.
 
-Any Resolution or Size properties in the ``.omwfont`` file have no effect because the engine settings override them.
+Any Size property in the ``.omwfont`` file has no effect because the engine overrides it.
 
 The engine automatically takes UI scaling factor into account, so don't account for it when tweaking the settings.
