@@ -14,8 +14,8 @@ OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 
 Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see [files/data/fonts/DejaVuFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/DejaVuFontLicense.txt) for more information)
-* OMWAyembedt.ttf: SIL Open Font License (see [files/data/fonts/OMWAyembedtFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/OMWAyembedtFontLicense.txt) for more information)
-* Pelagiad.ttf: SIL Open Font License (see [files/data/fonts/PelagiadFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/PelagiadFontLicense.txt) for more information)
+* DemonicLetters.ttf: SIL Open Font License (see [files/data/fonts/DemonicLettersFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/DemonicLettersFontLicense.txt) for more information)
+* MysticCards.ttf: SIL Open Font License (see [files/data/fonts/MysticCardsFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/MysticCardsFontLicense.txt) for more information)
 
 Current Status
 --------------

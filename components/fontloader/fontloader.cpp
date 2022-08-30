@@ -25,11 +25,52 @@
 #include <components/misc/stringops.hpp>
 
 #include <components/myguiplatform/myguitexture.hpp>
+#include <components/myguiplatform/scalinglayer.hpp>
 
 #include <components/settings/settings.hpp>
 
 namespace
 {
+    MyGUI::xml::ElementPtr getProperty(MyGUI::xml::ElementPtr resourceNode, const std::string propertyName)
+    {
+        MyGUI::xml::ElementPtr propertyNode = nullptr;
+        MyGUI::xml::ElementEnumerator propertyIterator = resourceNode->getElementEnumerator();
+        while (propertyIterator.next("Property"))
+        {
+            std::string key = propertyIterator->findAttribute("key");
+
+            if (key == propertyName)
+            {
+                propertyNode = propertyIterator.current();
+                break;
+            }
+        }
+
+        return propertyNode;
+    }
+
+    MyGUI::IntSize getBookSize(MyGUI::IDataStream* layersStream)
+    {
+        MyGUI::xml::Document xmlDocument;
+        xmlDocument.open(layersStream);
+        MyGUI::xml::ElementPtr root = xmlDocument.getRoot();
+        MyGUI::xml::ElementEnumerator layersIterator = root->getElementEnumerator();
+        while (layersIterator.next("Layer"))
+        {
+            std::string name = layersIterator->findAttribute("name");
+
+            if (name == "JournalBooks")
+            {
+                MyGUI::xml::ElementPtr sizeProperty = getProperty(layersIterator.current(), "Size");
+                const std::string& sizeValue = sizeProperty != nullptr ? sizeProperty->findAttribute("value") : std::string();
+                if (!sizeValue.empty())
+                    return MyGUI::IntSize::parse(sizeValue);
+            }
+        }
+
+        return MyGUI::RenderManager::getInstance().getViewSize();
+    }
+
     unsigned long utf8ToUnicode(std::string_view utf8)
     {
         if (utf8.empty())
@@ -155,7 +196,7 @@ namespace Gui
 
     FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor)
         : mVFS(vfs)
-        , mFontHeight(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 20))
+        , mFontHeight(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 18))
         , mScalingFactor(scalingFactor)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
@@ -165,6 +206,8 @@ namespace Gui
 
         MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
         MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = MyGUI::newDelegate(this, &FontLoader::overrideLineHeight);
+
+        loadFonts();
     }
 
     void FontLoader::loadFonts()
@@ -176,10 +219,10 @@ namespace Gui
         loadFont("DejaVuLGCSansMono", "MonoFont"); // We need to use a TrueType monospace font to display debug texts properly.
 
         // Use our TrueType fonts as a fallback.
-        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && !Misc::StringUtils::ciEqual(defaultFont, "Pelagiad"))
-            loadFont("Pelagiad", "DefaultFont");
-        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && !Misc::StringUtils::ciEqual(scrollFont, "OMWAyembedt"))
-            loadFont("OMWAyembedt", "ScrollFont");
+        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && !Misc::StringUtils::ciEqual(defaultFont, "MysticCards"))
+            loadFont("MysticCards", "DefaultFont");
+        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && !Misc::StringUtils::ciEqual(scrollFont, "DemonicLetters"))
+            loadFont("DemonicLetters", "ScrollFont");
     }
 
     void FontLoader::loadFont(const std::string& fileName, const std::string& fontId)
@@ -202,6 +245,11 @@ namespace Gui
             Log(Debug::Error) << "Can not load TrueType font " << fontId << ": osgMyGUI::DataManager is not available.";
             return;
         }
+
+        // TODO: it may be worth to take in account resolution change, but it is not safe to replace used assets
+        std::unique_ptr<MyGUI::IDataStream> layersStream(dataManager->getData("openmw_layers.xml"));
+        MyGUI::IntSize bookSize = getBookSize(layersStream.get());
+        float bookScale = osgMyGUI::ScalingLayer::getScaleFactor(bookSize);
 
         std::string oldDataPath = dataManager->getDataPath("");
         dataManager->setResourcePath("fonts");
@@ -226,15 +274,17 @@ namespace Gui
             return;
         }
 
-        // For TrueType fonts we should override Size and Resolution properties
-        // to allow to configure font size via config file, without need to edit XML files.
-        // Also we should take UI scaling factor in account.
-        int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-        resolution = std::clamp(resolution, 50, 125) * mScalingFactor;
+        int resolution = 70;
+        MyGUI::xml::ElementPtr resolutionNode = getProperty(resourceNode.current(), "Resolution");
+        if (resolutionNode == nullptr)
+        {
+            resolutionNode = resourceNode->createChild("Property");
+            resolutionNode->addAttribute("key", "Resolution");
+        }
+        else
+            resolution = MyGUI::utility::parseInt(resolutionNode->findAttribute("value"));
 
-        MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
-        resolutionNode->addAttribute("key", "Resolution");
-        resolutionNode->addAttribute("value", std::to_string(resolution));
+        resolutionNode->setAttribute("value", MyGUI::utility::toString(resolution * std::ceil(mScalingFactor)));
 
         MyGUI::xml::ElementPtr sizeNode = resourceNode->createChild("Property");
         sizeNode->addAttribute("key", "Size");
@@ -246,16 +296,7 @@ namespace Gui
         font->setResourceName(fontId);
         MyGUI::ResourceManager::getInstance().addResource(font);
 
-        float currentX = Settings::Manager::getInt("resolution x", "Video");
-        float currentY = Settings::Manager::getInt("resolution y", "Video");
-        // TODO: read size from openmw_layout.xml somehow
-        // TODO: it may be worth to take in account resolution change, but it is not safe to replace used assets
-        float heightScale = (currentY / 520);
-        float widthScale = (currentX / 600);
-        float uiScale = std::min(widthScale, heightScale);
-        resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-        resolution = std::clamp(resolution, 50, 125) * uiScale;
-        resolutionNode->setAttribute("value", std::to_string(resolution));
+        resolutionNode->setAttribute("value", MyGUI::utility::toString(static_cast<int>(resolution * bookScale * mScalingFactor)));
 
         MyGUI::ResourceTrueTypeFont* bookFont = static_cast<MyGUI::ResourceTrueTypeFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceTrueTypeFont"));
@@ -553,12 +594,9 @@ namespace Gui
     std::string FontLoader::getFontForFace(const std::string& face)
     {
         const std::string lowerFace = Misc::StringUtils::lowerCase(face);
-
-        if (lowerFace == "magic cards")
-            return "DefaultFont";
         if (lowerFace == "daedric")
             return "ScrollFont";
 
-        return face;
+        return "DefaultFont";
     }
 }

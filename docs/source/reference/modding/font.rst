@@ -3,8 +3,8 @@ Fonts
 
 Default UI font and font used in magic scrolls are defined in ``openmw.cfg``:
 
-			fallback=Fonts_Font_0,Pelagiad
-			fallback=Fonts_Font_2,OMWAyembedt
+			fallback=Fonts_Font_0,MysticCards
+			fallback=Fonts_Font_2,DemonicLetters
 
 When there are no ``Fonts_Font_*`` lines in user's ``openmw.cfg``, built-in TrueType fonts are used.
 Font used by console and another debug windows is not configurable (so ``Fonts_Font_1`` is unused).
@@ -30,23 +30,22 @@ TrueType fonts
 --------------
 
 Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. This is the recommended fonts format.
-OpenMW has build-in TrueType fonts: Pelagiad, OMWAyembedt and DejaVuLGCSansMono, which are used by default.
+OpenMW has build-in TrueType fonts: MysticCards, DemonicLetters and DejaVuLGCSansMono, which are used by default.
 TrueType fonts are configured via ``openmw.cfg`` too:
 
-			fallback=Fonts_Font_0,Pelagiad
-			fallback=Fonts_Font_2,OMWAyembedt
+			fallback=Fonts_Font_0,MysticCards
+			fallback=Fonts_Font_2,DemonicLetters
 
 In this example, OpenMW will scan ``Fonts`` folder in data directories for ``.omwfont`` files.
 These files are XML files with schema provided by MyGUI. OpenMW uses ``.omwfont`` files which name (without extension) matches ``openmw.cfg`` entries.
 
-It is also possible to adjust the font size and resolution via ``settings.cfg`` file::
+It is also possible to adjust the font size via ``settings.cfg`` file::
 
 			[GUI]
 			font size = 16
-			ttf resolution = 75
 
-The ``font size`` setting accepts clamped values in range from 12 to 20 while ``ttf resolution`` setting accepts values from 50 to 125.
+The ``font size`` setting accepts clamped values in range from 12 to 18.
 
-Any Resolution or Size properties in the ``.omwfont`` file have no effect because the engine settings override them.
+Any Size property in the ``.omwfont`` file has no effect because the engine overrides it.
 
 The engine automatically takes UI scaling factor into account, so don't account for it when tweaking the settings.

@@ -7,6 +7,7 @@
 #include <MyGUI_Button.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/widgets/box.hpp>
 #include <components/widgets/list.hpp>
 #include <components/translation/translation.hpp>
 
@@ -25,6 +26,7 @@
 
 #include "bookpage.hpp"
 #include "textcolours.hpp"
+#include "tooltips.hpp"
 
 #include "journalbooks.hpp" // to_utf8_span
 
@@ -59,6 +61,8 @@ namespace MWGui
     PersuasionDialog::PersuasionDialog(ResponseCallback* callback)
         : WindowModal("openmw_persuasion_dialog.layout")
         , mCallback(callback)
+        , mInitialGoldLabelWidth(0)
+        , mInitialMainWidgetWidth(0)
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mAdmireButton, "AdmireButton");
@@ -68,6 +72,26 @@ namespace MWGui
         getWidget(mBribe100Button, "Bribe100Button");
         getWidget(mBribe1000Button, "Bribe1000Button");
         getWidget(mGoldLabel, "GoldLabel");
+        getWidget(mActionsBox, "ActionsBox");
+
+        int totalHeight = 3;
+        adjustAction(mAdmireButton, totalHeight);
+        adjustAction(mIntimidateButton, totalHeight);
+        adjustAction(mTauntButton, totalHeight);
+        adjustAction(mBribe10Button, totalHeight);
+        adjustAction(mBribe100Button, totalHeight);
+        adjustAction(mBribe1000Button, totalHeight);
+        totalHeight += 3;
+
+        int diff = totalHeight - mActionsBox->getSize().height;
+        if (diff > 0)
+        {
+            auto mainWidgetSize = mMainWidget->getSize();
+            mMainWidget->setSize(mainWidgetSize.width, mainWidgetSize.height + diff);
+        }
+
+        mInitialGoldLabelWidth = mActionsBox->getSize().width - mCancelButton->getSize().width - 8;
+        mInitialMainWidgetWidth = mMainWidget->getSize().width;
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onCancel);
         mAdmireButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
@@ -76,6 +100,14 @@ namespace MWGui
         mBribe10Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
         mBribe100Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
         mBribe1000Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    }
+
+    void PersuasionDialog::adjustAction(MyGUI::Widget* action, int& totalHeight)
+    {
+        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        auto currentCoords = action->getCoord();
+        action->setCoord(currentCoords.left, totalHeight, currentCoords.width, lineHeight);
+        totalHeight += lineHeight;
     }
 
     void PersuasionDialog::onCancel(MyGUI::Widget *sender)
@@ -114,6 +146,13 @@ namespace MWGui
         mBribe1000Button->setEnabled (playerGold >= 1000);
 
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
+
+        int diff = mGoldLabel->getRequestedSize().width - mInitialGoldLabelWidth;
+        if (diff > 0)
+            mMainWidget->setSize(mInitialMainWidgetWidth + diff, mMainWidget->getSize().height);
+        else
+            mMainWidget->setSize(mInitialMainWidgetWidth, mMainWidget->getSize().height);
+
         WindowModal::onOpen();
     }
 
