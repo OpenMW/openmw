@@ -41,13 +41,13 @@
     </Resource>
 
     <Resource type="ResourceLayout" name="TabControl" version="3.2.0">
-        <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
+        <Widget type="Widget" skin="" position="5 5 89 64" name="Root">
             <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
-            <Widget type="Widget" skin="MW_Box" position="0 28 89 32" align="Left Top Stretch">
+            <Widget type="Widget" skin="MW_Box" position="0 30 89 32" align="Left Top Stretch">
                 <Widget type="Widget" skin="" position="4 4 81 28" align="Left Top Stretch" name="TabItem"/>
             </Widget>
-            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
-                <Widget type="Widget" skin="" position="0 0 60 23" name="Controls">
+            <Widget type="Widget" skin="" position="0 0 89 24" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="0 0 60 28" name="Controls">
                     <Widget type="Widget" skin="MW_Box" position="10 0 15 14" align="Left VCenter">
                         <Widget type="Button" skin="MW_ArrowLeft" position="2 2 10 10" align="Left VStretch" name="Left" />
                     </Widget>
@@ -63,8 +63,8 @@
         <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
             <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
             <Widget type="Widget" skin="" position="0 28 89 32" align="Left Top Stretch" name="TabItem"/>
-            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
-                <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">
+            <Widget type="Widget" skin="" position="0 0 89 24" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="52 0 37 28" name="Controls">
                 </Widget>
             </Widget>
         </Widget>
@@ -75,8 +75,8 @@
             <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
             <Widget type="Widget" skin="" position="0 28 89 32" align="Left Top Stretch" name="TabItem"/>
 
-            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
-                <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">
+            <Widget type="Widget" skin="" position="0 0 89 24" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="52 0 37 28" name="Controls">
                 </Widget>
             </Widget>
         </Widget>

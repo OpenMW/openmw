@@ -71,9 +71,9 @@ fallback=Water_UnderwaterColor,012,030,037
 fallback=Water_UnderwaterColorWeight,0.85
 
 # fonts
-fallback=Fonts_Font_0,Pelagiad
+fallback=Fonts_Font_0,MysticCards
 fallback=Fonts_Font_1,DejaVuLGCSansMono
-fallback=Fonts_Font_2,OMWAyembedt
+fallback=Fonts_Font_2,DemonicLetters
 fallback=FontColor_color_normal,202,165,96
 fallback=FontColor_color_normal_over,223,201,159
 fallback=FontColor_color_normal_pressed,243,237,221

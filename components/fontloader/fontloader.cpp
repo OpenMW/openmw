@@ -155,7 +155,7 @@ namespace Gui
 
     FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor)
         : mVFS(vfs)
-        , mFontHeight(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 20))
+        , mFontHeight(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 18))
         , mScalingFactor(scalingFactor)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
@@ -176,10 +176,10 @@ namespace Gui
         loadFont("DejaVuLGCSansMono", "MonoFont"); // We need to use a TrueType monospace font to display debug texts properly.
 
         // Use our TrueType fonts as a fallback.
-        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && !Misc::StringUtils::ciEqual(defaultFont, "Pelagiad"))
-            loadFont("Pelagiad", "DefaultFont");
-        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && !Misc::StringUtils::ciEqual(scrollFont, "OMWAyembedt"))
-            loadFont("OMWAyembedt", "ScrollFont");
+        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && !Misc::StringUtils::ciEqual(defaultFont, "MysticCards"))
+            loadFont("MysticCards", "DefaultFont");
+        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && !Misc::StringUtils::ciEqual(scrollFont, "DemonicLetters"))
+            loadFont("DemonicLetters", "ScrollFont");
     }
 
     void FontLoader::loadFont(const std::string& fileName, const std::string& fontId)
@@ -553,12 +553,9 @@ namespace Gui
     std::string FontLoader::getFontForFace(const std::string& face)
     {
         const std::string lowerFace = Misc::StringUtils::lowerCase(face);
-
-        if (lowerFace == "magic cards")
-            return "DefaultFont";
         if (lowerFace == "daedric")
             return "ScrollFont";
 
-        return face;
+        return "DefaultFont";
     }
 }

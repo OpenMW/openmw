@@ -98,6 +98,8 @@ namespace MWGui
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
+        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+
         for (int i=0; i<3; ++i)
         {
             int price = static_cast<int>(pcStats.getSkill (skills[i].first).getBase() * gmst.find("iTrainingMod")->mValue.getInteger());
@@ -105,7 +107,7 @@ namespace MWGui
             price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
-                MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);
+                MyGUI::IntCoord(5, 5+i*lineHeight, mTrainingOptions->getWidth()-10, lineHeight), MyGUI::Align::Default);
 
             button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);

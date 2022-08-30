@@ -14,6 +14,7 @@
 
 namespace Gui
 {
+    class AutoSizedTextBox;
     class MWList;
 }
 
@@ -33,6 +34,9 @@ namespace MWGui
     private:
         std::unique_ptr<ResponseCallback> mCallback;
 
+        int mInitialGoldLabelWidth;
+        int mInitialMainWidgetWidth;
+
         MyGUI::Button* mCancelButton;
         MyGUI::Button* mAdmireButton;
         MyGUI::Button* mIntimidateButton;
@@ -40,7 +44,10 @@ namespace MWGui
         MyGUI::Button* mBribe10Button;
         MyGUI::Button* mBribe100Button;
         MyGUI::Button* mBribe1000Button;
-        MyGUI::TextBox* mGoldLabel;
+        MyGUI::Widget* mActionsBox;
+        Gui::AutoSizedTextBox* mGoldLabel;
+
+        void adjustAction(MyGUI::Widget* action, int& totalHeight);
 
         void onCancel (MyGUI::Widget* sender);
         void onPersuade (MyGUI::Widget* sender);
