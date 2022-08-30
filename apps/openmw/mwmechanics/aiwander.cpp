@@ -360,14 +360,27 @@ namespace MWMechanics
             if (!isWaterCreature && !isFlyingCreature)
             {
                 // findRandomPointAroundCircle uses wanderDistance as limit for random and not as exact distance
-                if (const auto destination = DetourNavigator::findRandomPointAroundCircle(*navigator, agentBounds,
-                    mInitialActorPosition, wanderDistance, navigatorFlags, []() {
-                        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-                        return Misc::Rng::rollProbability(prng);
-                    }))
-                    mDestination = *destination;
-                else
-                    mDestination = getRandomPointAround(mInitialActorPosition, wanderRadius);
+                const auto getRandom = []()
+                {
+                    return Misc::Rng::rollProbability(MWBase::Environment::get().getWorld()->getPrng());
+                };
+                auto destination = DetourNavigator::findRandomPointAroundCircle(*navigator, agentBounds,
+                    mInitialActorPosition, wanderRadius, navigatorFlags, getRandom);
+                if (destination.has_value())
+                {
+                    osg::Vec3f direction = *destination - mInitialActorPosition;
+                    if (direction.length() > wanderDistance)
+                    {
+                        direction.normalize();
+                        const osg::Vec3f adjustedDestination = mInitialActorPosition + direction * wanderRadius;
+                        destination = DetourNavigator::raycast(*navigator, agentBounds, currentPosition,
+                            adjustedDestination, navigatorFlags);
+                        if (destination.has_value() && (*destination - mInitialActorPosition).length() > wanderDistance)
+                            continue;
+                    }
+                }
+                mDestination = destination.has_value() ? *destination
+                                                       : getRandomPointAround(mInitialActorPosition, wanderRadius);
             }
             else
                 mDestination = getRandomPointAround(mInitialActorPosition, wanderRadius);
