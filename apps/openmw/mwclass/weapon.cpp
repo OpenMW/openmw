@@ -163,7 +163,7 @@ namespace MWClass
             text += "\n#{sType} ";
 
             int skill = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mSkill;
-            const std::string type = ESM::Skill::sSkillNameIds[skill];
+            const std::string& type = ESM::Skill::sSkillNameIds[skill];
             std::string_view oneOrTwoHanded;
             if (weaponType->mWeaponClass == ESM::WeaponType::Melee)
             {

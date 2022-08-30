@@ -55,7 +55,7 @@ namespace CSMPrefs
     {
         if (mButton)
         {
-            std::string shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
+            const std::string& shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
 
             QKeySequence sequence;
             State::get().getShortcutManager().convertFromString(shortcut, sequence);

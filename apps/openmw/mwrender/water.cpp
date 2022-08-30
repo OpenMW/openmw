@@ -587,7 +587,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     // Add animated textures
     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
     const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
-    const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
+    std::string_view texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
         std::ostringstream texname;
@@ -734,7 +734,7 @@ Water::~Water()
 void Water::listAssetsToPreload(std::vector<std::string> &textures)
 {
     const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
-    const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
+    std::string_view texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
         std::ostringstream texname;

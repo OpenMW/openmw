@@ -30,6 +30,7 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
+#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -176,7 +177,7 @@ namespace MWGui
 
                 // For a custom class, we will not find it in the store (unless we loaded the savegame first).
                 // Fall back to name stored in savegame header in that case.
-                std::string className;
+                std::string_view className;
                 if (it->getSignature().mPlayerClassId.empty())
                     className = it->getSignature().mPlayerClassName;
                 else
@@ -190,7 +191,7 @@ namespace MWGui
                         className = "?"; // From an older savegame format that did not support custom classes properly.
                 }
 
-                title << " (#{sLevel} " << it->getSignature().mPlayerLevel << " " << MyGUI::TextIterator::toTagsString(className) << ")";
+                title << " (#{sLevel} " << it->getSignature().mPlayerLevel << " " << MyGUI::TextIterator::toTagsString(toUString(className)) << ")";
 
                 mCharacterSelection->addItem (MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
 

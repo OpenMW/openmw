@@ -814,7 +814,7 @@ namespace SceneUtil
             return;
         }
 
-        std::string lightingMethodString = Settings::Manager::getString("lighting method", "Shaders");
+        const std::string& lightingMethodString = Settings::Manager::getString("lighting method", "Shaders");
         auto lightingMethod = LightManager::getLightingMethodFromString(lightingMethodString);
 
         static bool hasLoggedWarnings = false;

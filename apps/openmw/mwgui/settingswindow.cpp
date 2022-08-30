@@ -238,7 +238,7 @@ namespace MWGui
         , mCurrentPage(-1)
     {
         bool terrain = Settings::Manager::getBool("distant terrain", "Terrain");
-        const std::string widgetName = terrain ? "RenderingDistanceSlider" : "LargeRenderingDistanceSlider";
+        const std::string_view widgetName = terrain ? "RenderingDistanceSlider" : "LargeRenderingDistanceSlider";
         MyGUI::Widget* unusedSlider;
         getWidget(unusedSlider, widgetName);
         unusedSlider->setVisible(false);
@@ -338,7 +338,7 @@ namespace MWGui
         }
         highlightCurrentResolution();
 
-        std::string tmip = Settings::Manager::getString("texture mipmap", "General");
+        const std::string& tmip = Settings::Manager::getString("texture mipmap", "General");
         mTextureFilteringButton->setCaptionWithReplacing(textureMipmappingToStr(tmip));
 
         int waterTextureSize = Settings::Manager::getInt("rtt size", "Water");

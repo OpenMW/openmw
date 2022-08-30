@@ -60,8 +60,7 @@ namespace MWMechanics
                 actor.getClass().getCreatureStats(actor).getSpells().add(spell);
                 MWBase::Environment::get().getWorld()->applyLoopingParticles(actor);
 
-                std::string msg = "sMagicContractDisease";
-                msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(msg)->mValue.getString();
+                std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicContractDisease")->mValue.getString();
                 msg = Misc::StringUtils::format(msg, spell->mName);
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
             }

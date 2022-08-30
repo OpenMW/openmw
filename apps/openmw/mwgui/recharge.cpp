@@ -68,7 +68,7 @@ void Recharge::updateView()
 {
     MWWorld::Ptr gem = *mGemIcon->getUserData<MWWorld::Ptr>();
 
-    std::string soul = gem.getCellRef().getSoul();
+    const std::string& soul = gem.getCellRef().getSoul();
     const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
     mChargeLabel->setCaptionWithReplacing("#{sCharges} " + MyGUI::utility::toString(creature->mData.mSoul));

@@ -212,8 +212,8 @@ namespace Gui
 
     void FontLoader::loadFonts()
     {
-        std::string defaultFont = Fallback::Map::getString("Fonts_Font_0");
-        std::string scrollFont = Fallback::Map::getString("Fonts_Font_2");
+        std::string defaultFont{Fallback::Map::getString("Fonts_Font_0")};
+        std::string scrollFont{Fallback::Map::getString("Fonts_Font_2")};
         loadFont(defaultFont, "DefaultFont");
         loadFont(scrollFont, "ScrollFont");
         loadFont("DejaVuLGCSansMono", "MonoFont"); // We need to use a TrueType monospace font to display debug texts properly.

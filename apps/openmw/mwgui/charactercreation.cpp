@@ -45,10 +45,10 @@ namespace
     {
         number++;
 
-        std::string question = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_Question");
-        std::string answer0 = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerOne");
-        std::string answer1 = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerTwo");
-        std::string answer2 = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerThree");
+        std::string question{Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_Question")};
+        std::string answer0{Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerOne")};
+        std::string answer1{Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerTwo")};
+        std::string answer2{Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerThree")};
         std::string sound = "vo\\misc\\chargen qa" + MyGUI::utility::toString(number) + ".wav";
 
         Response r0 = {answer0, ESM::Class::Combat};

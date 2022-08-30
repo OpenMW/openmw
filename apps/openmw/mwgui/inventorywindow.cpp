@@ -791,7 +791,7 @@ namespace MWGui
 
         int incr = next ? 1 : -1;
         bool found = false;
-        std::string lastId;
+        std::string_view lastId;
         if (selected != -1)
             lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;

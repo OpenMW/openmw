@@ -393,7 +393,7 @@ namespace MWGui
         const ESM::Spell* spell =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
 
-        std::string spellName = spell->mName;
+        const std::string& spellName = spell->mName;
         if (spellName != mSpellName && mSpellVisible)
         {
             mWeaponSpellTimer = 5.0f;
@@ -463,7 +463,7 @@ namespace MWGui
 
     void HUD::unsetSelectedSpell()
     {
-        std::string spellName = "#{sNone}";
+        std::string_view spellName = "#{sNone}";
         if (spellName != mSpellName && mSpellVisible)
         {
             mWeaponSpellTimer = 5.0f;

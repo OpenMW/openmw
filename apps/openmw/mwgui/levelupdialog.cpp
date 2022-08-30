@@ -18,6 +18,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "class.hpp"
+#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -138,13 +139,13 @@ namespace MWGui
         int level = creatureStats.getLevel ()+1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
 
-        std::string levelupdescription;
+        std::string_view levelupdescription;
         levelupdescription = Fallback::Map::getString("Level_Up_Level"+MyGUI::utility::toString(level));
 
-        if (levelupdescription == "")
+        if (levelupdescription.empty())
             levelupdescription = Fallback::Map::getString("Level_Up_Default");
 
-        mLevelDescription->setCaption (levelupdescription);
+        mLevelDescription->setCaption(toUString(levelupdescription));
 
         unsigned int availableAttributes = 0;
         for (int i = 0; i < 8; ++i)

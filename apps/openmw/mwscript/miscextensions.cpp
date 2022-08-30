@@ -210,7 +210,7 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                std::string name{runtime.getStringLiteral(runtime[0].mInteger)};
+                std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 bool allowSkipping = runtime[0].mInteger != 0;

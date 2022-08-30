@@ -493,9 +493,9 @@ namespace MWRender
 
         mEffectManager = std::make_unique<EffectManager>(sceneRoot, mResourceSystem);
 
-        const std::string normalMapPattern = Settings::Manager::getString("normal map pattern", "Shaders");
-        const std::string heightMapPattern = Settings::Manager::getString("normal height map pattern", "Shaders");
-        const std::string specularMapPattern = Settings::Manager::getString("terrain specular map pattern", "Shaders");
+        const std::string& normalMapPattern = Settings::Manager::getString("normal map pattern", "Shaders");
+        const std::string& heightMapPattern = Settings::Manager::getString("normal height map pattern", "Shaders");
+        const std::string& specularMapPattern = Settings::Manager::getString("terrain specular map pattern", "Shaders");
         const bool useTerrainNormalMaps = Settings::Manager::getBool("auto use terrain normal maps", "Shaders");
         const bool useTerrainSpecularMaps = Settings::Manager::getBool("auto use terrain specular maps", "Shaders");
 
@@ -1174,7 +1174,7 @@ namespace MWRender
         mActorsPaths->updatePtr(old, updated);
     }
 
-    void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
+    void RenderingManager::spawnEffect(const std::string& model, std::string_view texture, const osg::Vec3f& worldPosition, float scale, bool isMagicVFX)
     {
         mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX);
     }
