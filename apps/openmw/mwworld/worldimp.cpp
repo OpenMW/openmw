@@ -35,6 +35,7 @@
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/detournavigator/stats.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -3992,7 +3993,7 @@ namespace MWWorld
 
     void World::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        mNavigator->reportStats(frameNumber, stats);
+        DetourNavigator::reportStats(mNavigator->getStats(), frameNumber, stats);
         mPhysics->reportStats(frameNumber, stats);
     }
 

@@ -14,11 +14,6 @@
 #include <cstring>
 #include <vector>
 
-namespace osg
-{
-    class Stats;
-}
-
 namespace DetourNavigator
 {
     struct RecastMeshData
@@ -46,6 +41,8 @@ namespace DetourNavigator
         return std::tie(lhs.getMesh(), lhs.getWater(), lhs.getHeightfields(), lhs.getFlatHeightfields())
                 < std::tie(rhs.mMesh, rhs.mWater, rhs.mHeightfields, rhs.mFlatHeightfields);
     }
+
+    struct NavMeshTilesCacheStats;
 
     class NavMeshTilesCache
     {
@@ -126,15 +123,6 @@ namespace DetourNavigator
             ItemIterator mIterator;
         };
 
-        struct Stats
-        {
-            std::size_t mNavMeshCacheSize;
-            std::size_t mUsedNavMeshTiles;
-            std::size_t mCachedNavMeshTiles;
-            std::size_t mHitCount;
-            std::size_t mGetCount;
-        };
-
         NavMeshTilesCache(const std::size_t maxNavMeshDataSize);
 
         Value get(const AgentBounds& agentBounds, const TilePosition& changedTile,
@@ -143,7 +131,7 @@ namespace DetourNavigator
         Value set(const AgentBounds& agentBounds, const TilePosition& changedTile,
             const RecastMesh& recastMesh, std::unique_ptr<PreparedNavMeshData>&& value);
 
-        Stats getStats() const;
+        NavMeshTilesCacheStats getStats() const;
 
     private:
         mutable std::mutex mMutex;
@@ -162,8 +150,6 @@ namespace DetourNavigator
 
         void releaseItem(ItemIterator iterator);
     };
-
-    void reportStats(const NavMeshTilesCache::Stats& stats, unsigned int frameNumber, osg::Stats& out);
 }
 
 #endif

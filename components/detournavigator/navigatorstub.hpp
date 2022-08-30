@@ -3,6 +3,7 @@
 
 #include "navigator.hpp"
 #include "settings.hpp"
+#include "stats.hpp"
 
 namespace Loading
 {
@@ -66,7 +67,7 @@ namespace DetourNavigator
             return mDefaultSettings;
         }
 
-        void reportStats(unsigned int /*frameNumber*/, osg::Stats& /*stats*/) const override {}
+        Stats getStats() const override { return Stats {}; }
 
         RecastMeshTiles getRecastMeshTiles() const override
         {

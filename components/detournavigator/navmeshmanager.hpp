@@ -58,7 +58,7 @@ namespace DetourNavigator
 
         std::map<AgentBounds, SharedNavMeshCacheItem> getNavMeshes() const;
 
-        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+        Stats getStats() const;
 
         RecastMeshTiles getRecastMeshTiles() const;
 
