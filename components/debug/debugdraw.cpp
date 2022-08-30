@@ -1,21 +1,21 @@
 #include "debugdraw.hpp"
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/shader/shadermanager.hpp>
 
-
-#include <osg/Uniform>
-#include <osg/Drawable>
-#include <osg/Program>
 #include <osg/Array>
-#include <osg/Vec3>
+#include <osg/Drawable>
 #include <osg/GLExtensions>
+#include <osg/Geometry>
+#include <osg/Program>
+#include <osg/Uniform>
+#include <osg/Vec3>
 
-
-static osg::Vec3 sphereCoordToCartesian(float theta ,float phi ,float r ) 
+static osg::Vec3 sphereCoordToCartesian(float theta, float phi, float r)
 {
-    osg::Vec3 returnVec = osg::Vec3(0.0,0.0,0.0);
-    float phiToHorizontal = osg::PI_2 - phi ;
-    returnVec.x() = std::cos( theta);
-    returnVec.y() = std::sin( theta);
+    osg::Vec3 returnVec = osg::Vec3(0.0, 0.0, 0.0);
+    float phiToHorizontal = osg::PI_2 - phi;
+    returnVec.x() = std::cos(theta);
+    returnVec.y() = std::sin(theta);
     returnVec.z() = std::sin(phiToHorizontal);
 
     returnVec.x() *= std::cos(phiToHorizontal);
@@ -35,13 +35,13 @@ static void generateWireCube(osg::Geometry& geom, float dim)
     geom.setVertexAttribArray(0, vertices, osg::Array::BIND_PER_VERTEX);
     geom.setVertexAttribArray(1, normals, osg::Array::BIND_PER_VERTEX);
 
-    osg::Vec2i indexPos[] = { osg::Vec2i(0,0),osg::Vec2i(1,0),osg::Vec2i(1,1),osg::Vec2i(0,1) };
+    osg::Vec2i indexPos[] = { osg::Vec2i(0, 0), osg::Vec2i(1, 0), osg::Vec2i(1, 1), osg::Vec2i(0, 1) };
 
     for (int i = 0; i < 4; i++)
     {
-        osg::Vec3 vert1 = osg::Vec3(indexPos[i].x() - 0.5, indexPos[i].y()- 0.5, 0.5);
+        osg::Vec3 vert1 = osg::Vec3(indexPos[i].x() - 0.5, indexPos[i].y() - 0.5, 0.5);
         int next = (i + 1) % 4;
-        osg::Vec3 vert2 = osg::Vec3(indexPos[next].x()- 0.5, indexPos[next].y()- 0.5, 0.5);
+        osg::Vec3 vert2 = osg::Vec3(indexPos[next].x() - 0.5, indexPos[next].y() - 0.5, 0.5);
 
         vertices->push_back(vert1 * dim);
         vertices->push_back(vert2 * dim);
@@ -55,14 +55,13 @@ static void generateWireCube(osg::Geometry& geom, float dim)
         vertices->push_back(vert1 * dim);
         vertices->push_back(vert3 * dim);
     }
-    for (unsigned long i = 0; i < vertices->size(); i ++)
+    for (unsigned long i = 0; i < vertices->size(); i++)
     {
         normals->push_back(osg::Vec3(1., 1., 1.));
     }
 
     geom.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
 }
-
 
 static void generateCube(osg::Geometry& geom, float dim)
 {
@@ -84,7 +83,7 @@ static void generateCube(osg::Geometry& geom, float dim)
 
         for (int i_point = 0; i_point < 4; i_point++)
         {
-            float iu = i_point % 2 == 1 ? float_dir : -float_dir;//This is to get the right triangle orientation when the normal changes*
+            float iu = i_point % 2 == 1 ? float_dir : -float_dir; //This is to get the right triangle orientation when the normal changes*
             float iv = i_point / 2 == 1 ? 1.0 : -1.0;
             osg::Vec3f point = (u * iu) + (v * iv);
             point = (point + normale);
@@ -93,12 +92,12 @@ static void generateCube(osg::Geometry& geom, float dim)
             normals->push_back(normale);
         }
         int start_vertex(i_face * 4);
-        int newFace1[] = { start_vertex,start_vertex + 1,start_vertex + 2 };
+        int newFace1[] = { start_vertex, start_vertex + 1, start_vertex + 2 };
         for (int i = 0; i < 3; i++)
         {
             indices->push_back(newFace1[i]);
         }
-        int newFace2[] = { start_vertex + 2,start_vertex + 1,start_vertex + 3 };
+        int newFace2[] = { start_vertex + 2, start_vertex + 1, start_vertex + 3 };
         for (int i = 0; i < 3; i++)
         {
             indices->push_back(newFace2[i]);
@@ -109,82 +108,81 @@ static void generateCube(osg::Geometry& geom, float dim)
     geom.addPrimitiveSet(indices);
 }
 
-
 static void generateCylinder(osg::Geometry& geom, float radius, float height, int subdiv)
 {
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
     osg::ref_ptr<osg::DrawElementsUShort> indices = new osg::DrawElementsUShort(osg::DrawElementsUShort::TRIANGLES, 0);
     int vertexCount = subdiv * 4 + 2; //2 discs + top and bottom + 2 center
-    indices->reserve(vertexCount );
+    indices->reserve(vertexCount);
     int iVertex = 0;
 
     int beginTop = iVertex;
-    auto topNormal = osg::Vec3(0.,0.,1.);
+    auto topNormal = osg::Vec3(0., 0., 1.);
     //top disk
-    for (int i = 0 ;i <  subdiv; i++)
+    for (int i = 0; i < subdiv; i++)
     {
-        float theta = (float(i )/ float(subdiv )) * osg::PI * 2.;
-        osg::Vec3 pos= sphereCoordToCartesian(theta, osg::PI_2, 1.);
+        float theta = (float(i) / float(subdiv)) * osg::PI * 2.;
+        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2, 1.);
         pos *= radius;
         pos.z() = height / 2.;
         vertices->push_back(pos);
         normals->push_back(topNormal);
-        iVertex+=1;
+        iVertex += 1;
     }
     auto centerTop = iVertex;
     //centerTop
     {
-        vertices->push_back(osg::Vec3(0.,0.,height/2.));
+        vertices->push_back(osg::Vec3(0., 0., height / 2.));
         normals->push_back(topNormal);
-        iVertex+=1;
+        iVertex += 1;
     }
     auto centerBot = iVertex;
     //centerBot
     {
-        vertices->push_back(osg::Vec3(0.,0.,-height/2));
+        vertices->push_back(osg::Vec3(0., 0., -height / 2));
         normals->push_back(-topNormal);
-        iVertex+=1;
+        iVertex += 1;
     }
     //bottom disk
     auto begin_bot = iVertex;
-    for (int i = 0 ;i <  subdiv; i++)
+    for (int i = 0; i < subdiv; i++)
     {
-        float theta = float(i)/ float(subdiv) * osg::PI*2.;
-        osg::Vec3 pos= sphereCoordToCartesian(theta, osg::PI_2, 1.);
+        float theta = float(i) / float(subdiv) * osg::PI * 2.;
+        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2, 1.);
         pos *= radius;
-        pos.z() = - height / 2.;
+        pos.z() = -height / 2.;
         vertices->push_back(pos);
         normals->push_back(-topNormal);
-        iVertex+=1;
+        iVertex += 1;
     }
-        //sides
+    //sides
     int beginSide = iVertex;
-    for (int i = 0 ;i <  subdiv; i++)
+    for (int i = 0; i < subdiv; i++)
     {
-        float theta = float(i )/ float(subdiv) * osg::PI*2.;
+        float theta = float(i) / float(subdiv) * osg::PI * 2.;
         osg::Vec3 normal = sphereCoordToCartesian(theta, osg::PI_2, 1.);
         auto posTop = normal;
         posTop *= radius;
         auto posBot = posTop;
-        posTop.z() =  height /2.;
-        posBot.z() = -height /2.;
+        posTop.z() = height / 2.;
+        posBot.z() = -height / 2.;
         vertices->push_back(posTop);
         normals->push_back(normal);
-        iVertex+=1;
+        iVertex += 1;
         vertices->push_back(posBot);
         normals->push_back(normal);
-        iVertex+=1;
+        iVertex += 1;
     }
 
-        //create triangles sides
-    for (int i = 0 ;i <  subdiv; i++)
+    //create triangles sides
+    for (int i = 0; i < subdiv; i++)
     {
-        auto next_vert = (i+1)%subdiv;
-        auto v1 = (beginSide + 2 *i);
-        auto v2 = (beginSide + 2 *i +1);
-        auto v3 = (beginSide + 2 *next_vert);
-        auto v4 = (beginSide + 2 *next_vert +1);
+        auto next_vert = (i + 1) % subdiv;
+        auto v1 = (beginSide + 2 * i);
+        auto v2 = (beginSide + 2 * i + 1);
+        auto v3 = (beginSide + 2 * next_vert);
+        auto v4 = (beginSide + 2 * next_vert + 1);
         indices->push_back(v1);
         indices->push_back(v2);
         indices->push_back(v4);
@@ -193,14 +191,14 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
         indices->push_back(v3);
         indices->push_back(v1);
     }
-    for (int i = 0 ;i < subdiv; i++)
+    for (int i = 0; i < subdiv; i++)
     {
-        auto next_vert = (i+1)%subdiv;
-        auto top1 = (beginTop + i) ;
-        auto top2 = (beginTop + next_vert) ;
+        auto next_vert = (i + 1) % subdiv;
+        auto top1 = (beginTop + i);
+        auto top2 = (beginTop + next_vert);
 
-        auto bot1 = (begin_bot + i) ;
-        auto bot2 = (begin_bot + next_vert) ;
+        auto bot1 = (begin_bot + i);
+        auto bot2 = (begin_bot + next_vert);
 
         indices->push_back(top2);
         indices->push_back(centerTop);
@@ -216,44 +214,52 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     geom.addPrimitiveSet(indices);
 }
 
+static int getIdexBufferReadFromFrame(const long long int& nFrame)
+{
+    return nFrame % 2;
+}
+
+static int getIdexBufferWriteFromFrame(const long long int& nFrame)
+{
+    return (nFrame + 1) % 2;
+}
 
 namespace MWRenderDebug
 {
     void DebugCustomDraw::drawImplementation(osg::RenderInfo& renderInfo) const
     {
         auto state = renderInfo.getState();
-        osg::GLExtensions* ext = osg::GLExtensions::Get( state->getContextID(), true );
+        osg::GLExtensions* ext = osg::GLExtensions::Get(state->getContextID(), true);
 
         const osg::StateSet* stateSet = this->getStateSet();
 
-        auto program = static_cast<const osg::Program*>( stateSet->getAttribute(osg::StateAttribute::PROGRAM));
+        auto program = static_cast<const osg::Program*>(stateSet->getAttribute(osg::StateAttribute::PROGRAM));
         const osg::Program::PerContextProgram* pcp = program->getPCP(*state);
         if (!pcp)
         {
             return;
         }
-        std::lock_guard lock(mDrawCallMutex);
 
-        osg::Uniform* uTrans = const_cast<osg::Uniform*>( stateSet->getUniform("trans"));
-        osg::Uniform* uCol = const_cast<osg::Uniform*>( stateSet->getUniform("color"));
-        osg::Uniform* uScale = const_cast<osg::Uniform*>( stateSet->getUniform("scale"));
-        osg::Uniform* uUseNormalAsColor = const_cast<osg::Uniform*>( stateSet->getUniform("useNormalAsColor"));
+        osg::Uniform* uTrans = const_cast<osg::Uniform*>(stateSet->getUniform("trans"));
+        osg::Uniform* uCol = const_cast<osg::Uniform*>(stateSet->getUniform("color"));
+        osg::Uniform* uScale = const_cast<osg::Uniform*>(stateSet->getUniform("scale"));
+        osg::Uniform* uUseNormalAsColor = const_cast<osg::Uniform*>(stateSet->getUniform("useNormalAsColor"));
 
-        auto transLocation = pcp->getUniformLocation(uTrans->getNameID() );
-        auto colLocation = pcp->getUniformLocation(uCol->getNameID() );
-        auto scaleLocation = pcp->getUniformLocation(uScale->getNameID() );
-        auto normalAsColorLocation = pcp->getUniformLocation(uUseNormalAsColor->getNameID() );
+        auto transLocation = pcp->getUniformLocation(uTrans->getNameID());
+        auto colLocation = pcp->getUniformLocation(uCol->getNameID());
+        auto scaleLocation = pcp->getUniformLocation(uScale->getNameID());
+        auto normalAsColorLocation = pcp->getUniformLocation(uUseNormalAsColor->getNameID());
 
         ext->glUniform3f(transLocation, 0., 0., 0.);
         ext->glUniform3f(colLocation, 1., 1., 1.);
-        ext->glUniform3f(scaleLocation,  1., 1., 1.);
-        ext->glUniform1i(normalAsColorLocation,  1);
+        ext->glUniform3f(scaleLocation, 1., 1., 1.);
+        ext->glUniform1i(normalAsColorLocation, 1);
 
         mLinesToDraw->drawImplementation(renderInfo);
 
-        ext->glUniform1i(normalAsColorLocation,  0);
+        ext->glUniform1i(normalAsColorLocation, 0);
 
-        for (const auto& shapeToDraw : mShapsToDraw)
+        for (const auto& shapeToDraw : mShapesToDraw)
         {
             osg::Vec3f translation = shapeToDraw.mPosition;
             osg::Vec3f color = shapeToDraw.mColor;
@@ -265,24 +271,26 @@ namespace MWRenderDebug
 
             switch (shapeToDraw.mDrawShape)
             {
-            case DrawShape::Cube:
-                this->mCubeGeometry->drawImplementation(renderInfo);
-                break;
-            case DrawShape::Cylinder:
-                this->mCylinderGeometry->drawImplementation(renderInfo);
-                break;
-            case DrawShape::WireCube:
-                this->mWireCubeGeometry->drawImplementation(renderInfo);
-                break;
+                case DrawShape::Cube:
+                    this->mCubeGeometry->drawImplementation(renderInfo);
+                    break;
+                case DrawShape::Cylinder:
+                    this->mCylinderGeometry->drawImplementation(renderInfo);
+                    break;
+                case DrawShape::WireCube:
+                    this->mWireCubeGeometry->drawImplementation(renderInfo);
+                    break;
             }
         }
-
+        mShapesToDraw.clear();
+        static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexAttribArray(0))->clear();
+        static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexAttribArray(1))->clear();
     }
 
     struct DebugLines
     {
 
-        static void makeLineInstance( osg::Geometry& lines)
+        static void makeLineInstance(osg::Geometry& lines)
         {
             auto vertices = new osg::Vec3Array;
             auto color = new osg::Vec3Array;
@@ -299,40 +307,46 @@ namespace MWRenderDebug
 
         DebugLines()
         {
-            mLinesWrite = new osg::Geometry();
-            mLinesRead = new osg::Geometry();
+            mLinesGeom[0] = new osg::Geometry();
+            mLinesGeom[1] = new osg::Geometry();
 
-            makeLineInstance(*mLinesRead);
-            makeLineInstance(*mLinesWrite);
+            makeLineInstance(*mLinesGeom[0]);
+            makeLineInstance(*mLinesGeom[1]);
         }
 
-        void update(std::mutex& mutex)
+        std::array<osg::ref_ptr<osg::Geometry>, 2> mLinesGeom;
+    };
+
+    class DebugDrawCallback : public SceneUtil::NodeCallback<DebugDrawCallback>
+    {
+    public:
+        DebugDrawCallback(MWRenderDebug::DebugDrawer& debugDrawer) : mDebugDrawer(debugDrawer) {}
+
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
-            mLinesWrite->removePrimitiveSet(0, 1);
-            mLinesWrite->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0,static_cast<osg::Vec3Array*>(mLinesWrite->getVertexAttribArray(0))->size()));
+            mDebugDrawer.mCurrentFrame = nv->getTraversalNumber();
+            int indexRead = getIdexBufferReadFromFrame(mDebugDrawer.mCurrentFrame);
+            auto& lines = mDebugDrawer.mDebugLines;
+            lines->mLinesGeom[indexRead]->removePrimitiveSet(0, 1);
+            lines->mLinesGeom[indexRead]->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->mLinesGeom[indexRead]->getVertexAttribArray(0))->size()));
 
-            {
-                auto lock = std::scoped_lock(mutex);
-                mLinesWrite.swap(mLinesRead);
-            }
-
-            static_cast<osg::Vec3Array*>(mLinesWrite->getVertexAttribArray(0))->clear();
-            static_cast<osg::Vec3Array*>(mLinesWrite->getVertexAttribArray(1))->clear();
+            nv->pushOntoNodePath(mDebugDrawer.mCustomDebugDrawer[indexRead]);
+            nv->apply(*mDebugDrawer.mCustomDebugDrawer[indexRead]);
+            nv->popFromNodePath();
         }
 
-        osg::ref_ptr<osg::Geometry> mLinesWrite;
-        osg::ref_ptr<osg::Geometry> mLinesRead;
+        MWRenderDebug::DebugDrawer& mDebugDrawer;
     };
 }
 
-MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager,osg::ref_ptr<osg::Group> parentNode)
+MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
 {
+    mCurrentFrame = 0;
     auto vertexShader = shaderManager.getShader("debugDraw_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::VERTEX);
     auto fragmentShader = shaderManager.getShader("debugDraw_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
 
     auto program = shaderManager.getProgram(vertexShader, fragmentShader);
     mDebugLines = std::make_unique<DebugLines>();
-    mCustomDebugDrawer = new DebugCustomDraw(mShapesToDrawRead,mDebugLines->mLinesRead, mDrawCallMutex);
 
     mDebugDrawSceneObjects = new osg::Group;
     mDebugDrawSceneObjects->setCullingActive(false);
@@ -349,45 +363,42 @@ MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager,osg
     auto cubeGeometry = new osg::Geometry;
     cubeGeometry->setSupportsDisplayList(false);
     cubeGeometry->setUseVertexBufferObjects(true);
-    generateCube(*cubeGeometry,1.);
-    mCustomDebugDrawer ->mCubeGeometry = cubeGeometry;
+    generateCube(*cubeGeometry, 1.);
 
     auto cylinderGeom = new osg::Geometry;
     cylinderGeom->setSupportsDisplayList(false);
     cylinderGeom->setUseVertexBufferObjects(true);
     generateCylinder(*cylinderGeom, .5, 1., 20);
-    mCustomDebugDrawer ->mCylinderGeometry = cylinderGeom;
 
     auto wireCube = new osg::Geometry;
     wireCube->setSupportsDisplayList(false);
     wireCube->setUseVertexBufferObjects(true);
     generateWireCube(*wireCube, 1.);
-    mCustomDebugDrawer->mWireCubeGeometry = wireCube;
-    mCustomDebugDrawer->setStateSet(stateset);
 
-    mDebugDrawSceneObjects->addChild(mCustomDebugDrawer);
+    for (unsigned long i = 0; i < mShapesToDraw.size(); i++)
+    {
+        mCustomDebugDrawer[i] = new DebugCustomDraw(mShapesToDraw[i], mDebugLines->mLinesGeom[i]);
+        mCustomDebugDrawer[i]->setStateSet(stateset);
+        mCustomDebugDrawer[i]->mWireCubeGeometry = wireCube;
+        mCustomDebugDrawer[i]->mCubeGeometry = cubeGeometry;
+        mCustomDebugDrawer[i]->mCylinderGeometry = cylinderGeom;
+    }
+    mDebugDrawSceneObjects->addCullCallback(new DebugDrawCallback(*this));
 
     parentNode->addChild(mDebugDrawSceneObjects);
 }
 
 MWRenderDebug::DebugDrawer::~DebugDrawer()
 {
-
 }
 
 void MWRenderDebug::DebugDrawer::update()
 {
-    {
-        std::lock_guard lock(mDrawCallMutex);
-        mShapesToDrawRead.swap(mShapesToDrawWrite);
-    }
-    mShapesToDrawWrite.clear();
-    mDebugLines->update(mDrawCallMutex);
 }
 
 void MWRenderDebug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
 {
-    mShapesToDrawWrite.push_back({mPosition, mDims, mColor, DrawShape::Cube});
+    mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)].push_back({ mPosition, mDims, mColor, DrawShape::Cube });
 }
 
 void MWRenderDebug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f color)
@@ -399,13 +410,14 @@ void MWRenderDebug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, 
 
 void MWRenderDebug::DebugDrawer::addDrawCall(const DrawCall& draw)
 {
-    mShapesToDrawWrite.push_back(draw);
+    mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)].push_back(draw);
 }
 
 void MWRenderDebug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
 {
-    auto vertices = static_cast<osg::Vec3Array*>(mDebugLines->mLinesWrite->getVertexAttribArray(0));
-    auto colors = static_cast<osg::Vec3Array*>(mDebugLines->mLinesWrite->getVertexAttribArray(1));
+    const int indexWrite = getIdexBufferWriteFromFrame(this->mCurrentFrame);
+    auto vertices = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getVertexAttribArray(0));
+    auto colors = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getVertexAttribArray(1));
 
     vertices->push_back(start);
     vertices->push_back(end);
@@ -414,5 +426,4 @@ void MWRenderDebug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3
     colors->push_back(color);
     colors->push_back(color);
     colors->dirty();
-
 }
