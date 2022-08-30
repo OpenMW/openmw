@@ -25,13 +25,28 @@ namespace
         if (count == 1)
             return "";
 
+        // With small text size we can use up to 4 characters, while with large ones - only up to 3.
+        if (fontHeight > 16)
+        {
+            if (count > 999999999)
+                return MyGUI::utility::toString(count/1000000000) + "b";
+            else if (count > 9999999)
+                return ">9m";
+            else if (count > 999999)
+                return MyGUI::utility::toString(count/1000000) + "m";
+            else if (count > 9999)
+                return ">9k";
+            else if (count > 999)
+                return MyGUI::utility::toString(count/1000) + "k";
+            else
+                return MyGUI::utility::toString(count);
+        }
+
         if (count > 999999999)
             return MyGUI::utility::toString(count/1000000000) + "b";
         else if (count > 999999)
             return MyGUI::utility::toString(count/1000000) + "m";
         else if (count > 9999)
-            return MyGUI::utility::toString(count/1000) + "k";
-        else if (fontHeight >= 18 && count > 999)
             return MyGUI::utility::toString(count/1000) + "k";
         else
             return MyGUI::utility::toString(count);

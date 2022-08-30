@@ -35,7 +35,7 @@ namespace Gui
         std::string getFontSize()
         {
             // Note: we can not use the FontLoader here, so there is a code duplication a bit.
-            static const std::string fontSize = std::to_string(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 20));
+            static const std::string fontSize = std::to_string(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 18));
             return fontSize;
         }
     };

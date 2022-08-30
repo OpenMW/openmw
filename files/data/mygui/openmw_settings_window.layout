@@ -5,7 +5,7 @@
         <Widget type="TabControl" skin="TabControl" position="8 8 368 405" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
             <Widget type="TabItem">
-                <Property key="Caption" value="  #{sPrefs}  "/>
+                <Property key="Caption" value=" #{sPrefs} "/>
                 <Widget type="Widget" position="4 4 352 54" align="Left Top HStretch">
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top">
                         <Property key="Caption" value="#{sTransparency_Menu}"/>
@@ -98,7 +98,7 @@
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 250 260 24">
+                <Widget type="HBox" position="4 250 260 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Saves"/>
                         <UserString key="SettingName" value="autosave"/>
@@ -108,7 +108,7 @@
                         <Property key="Caption" value="#{sQuick_Save}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 280 260 24">
+                <Widget type="HBox" position="4 280 260 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="best attack"/>
@@ -118,7 +118,7 @@
                         <Property key="Caption" value="#{sBestAttack}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 310 260 24">
+                <Widget type="HBox" position="4 310 260 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="GUI"/>
                         <UserString key="SettingName" value="subtitles"/>
@@ -128,7 +128,7 @@
                         <Property key="Caption" value="#{sSubtitles}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 340 260 24">
+                <Widget type="HBox" position="4 340 260 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="HUD"/>
                         <UserString key="SettingName" value="crosshair"/>
@@ -140,7 +140,7 @@
                 </Widget>
             </Widget>
             <Widget type="TabItem">
-                <Property key="Caption" value="  #{sAudio}  "/>
+                <Property key="Caption" value=" #{sAudio} "/>
                 <Widget type="TextBox" skin="NormalText" position="4 4 352 18" align="Left Top">
                     <Property key="Caption" value="#{sMaster}"/>
                 </Widget>
@@ -198,9 +198,9 @@
                 </Widget>
             </Widget>
             <Widget type="TabItem">
-                <Property key="Caption" value="  #{sControls}  "/>
+                <Property key="Caption" value=" #{sControls} "/>
 
-                <Widget type="HBox" position="4 4 360 24">
+                <Widget type="HBox" position="4 4 360 28">
                     <Property key="Padding" value="0"/>
                     <Property key="Spacing" value="4"/>
                     <Widget type="AutoSizedButton" skin="MW_Button" name="KeyboardButton">
@@ -211,15 +211,15 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="Widget" skin="MW_Box" position="4 34 352 154" align="Stretch">
+                <Widget type="Widget" skin="MW_Box" position="4 38 352 154" align="Stretch">
                     <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 344 146" align="Stretch" name="ControlsBox">
                         <Property key="CanvasAlign" value="Left Top"/>
                     </Widget>
                 </Widget>
-                <Widget type="AutoSizedButton" skin="MW_Button" position="4 194 137 24" align="Left Bottom" name="ResetControlsButton">
+                <Widget type="AutoSizedButton" skin="MW_Button" position="4 198 137 24" align="Left Bottom" name="ResetControlsButton">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
-                <Widget type="HBox" position="4 224 600 24" align="Left Bottom">
+                <Widget type="HBox" position="4 228 600 28" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert x axis"/>
@@ -237,10 +237,10 @@
                         <Property key="Caption" value="#{sMouseFlip}"/>
                     </Widget>
                 </Widget>
-                <Widget type="TextBox" skin="NormalText" position="4 254 352 18" align="Left Bottom">
+                <Widget type="TextBox" skin="NormalText" position="4 258 352 18" align="Left Bottom">
                     <Property key="Caption" value="#{SettingsMenu:CameraSensitivity}"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HScroll" position="4 278 352 18" align="HStretch Bottom">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 282 352 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -250,15 +250,15 @@
                     <UserString key="SettingMin" value="0.2"/>
                     <UserString key="SettingMax" value="5.0"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 302 352 18" align="Left Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 306 352 18" align="Left Bottom">
                     <Property key="Caption" value="#{sLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 302 352 18" align="Right Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 306 352 18" align="Right Bottom">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
-                <Widget type="HBox" position="4 324 352 24" align="Left Bottom">
+                <Widget type="HBox" position="4 328 352 28" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="enable controller"/>
@@ -270,11 +270,11 @@
                 </Widget>
             </Widget>
             <Widget type="TabItem">
-                <Property key="Caption" value="  #{sVideo}  "/>
+                <Property key="Caption" value=" #{sVideo} "/>
                 <Widget type="TabControl" skin="TabControlInner" position="4 4 352 390" align="Stretch">
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem">
-                        <Property key="Caption" value="  #{sVideo}  "/>
+                        <Property key="Caption" value=" #{sVideo} "/>
                         <Widget type="ListBox" skin="MW_List" position="0 4 185 215" align="Left Top" name="ResolutionList"/>
                         <Widget type="TextBox" skin="NormalText" position="197 4 185 18" align="Left Top">
                             <Property key="Caption" value="#{SettingsMenu:WindowMode}"/>
@@ -286,7 +286,7 @@
                                 <Property key="AddItem" value="#{SettingsMenu:WindowModeWindowed}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="197 64 400 24">
+                        <Widget type="HBox" position="197 58 400 28">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="VSyncButton">
                                 <UserString key="SettingCategory" value="Video"/>
                                 <UserString key="SettingName" value="vsync"/>
@@ -296,7 +296,7 @@
                                 <Property key="Caption" value="#{SettingsMenu:VSync}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="197 94 300 24">
+                        <Widget type="HBox" position="197 88 300 28">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
                                 <UserString key="SettingCategory" value="Video"/>
                                 <UserString key="SettingName" value="window border"/>
@@ -306,7 +306,7 @@
                                 <Property key="Caption" value="#{SettingsMenu:WindowBorder}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="197 124 300 24">
+                        <Widget type="HBox" position="197 118 300 28">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
                                 <UserString key="SettingCategory" value="Post Processing"/>
                                 <UserString key="SettingName" value="enabled"/>
@@ -369,7 +369,7 @@
                         </Widget>
                     </Widget>
                     <Widget type="TabItem">
-                        <Property key="Caption" value="  #{sDetail_Level}  "/>
+                        <Property key="Caption" value=" #{sDetail_Level} "/>
 
                         <Widget type="AutoSizedTextBox" skin="NormalText" align="Left Top">
                             <Property key="Caption" value="#{SettingsMenu:TextureFiltering}"/>
@@ -432,7 +432,7 @@
 
                     </Widget>
                     <Widget type="TabItem">
-                        <Property key="Caption" value="  #{SettingsMenu:Water}  "/>
+                        <Property key="Caption" value=" #{SettingsMenu:Water} "/>
 
                         <Widget type="VBox" position_real="0 0 1 1" align="Stretch">
 
@@ -529,7 +529,7 @@
 
                     </Widget>
                     <Widget type="TabItem">
-                        <Property key="Caption" value="  #{SettingsMenu:Lights}  "/>
+                        <Property key="Caption" value=" #{SettingsMenu:Lights} "/>
                         <!-- Lighting Method -->
                         <Widget type="TextBox" skin="NormalText" position="0 4 250 18" align="Left Top">
                             <Property key="Caption" value="#{SettingsMenu:LightingMethod}"/>
@@ -637,7 +637,7 @@
                 </Widget>
             </Widget>
             <Widget type="TabItem">
-                <Property key="Caption" value="  #{SettingsMenu:Scripts}  "/>
+                <Property key="Caption" value=" #{SettingsMenu:Scripts} "/>
 
                 <Widget name="ScriptDisabled" type="EditBox" skin="SandText" position_real="0 0 1 1" align="HStretch Top">
                     <Property key="Caption" value="#{SettingsMenu:ScriptsDisabled}"/>
@@ -678,7 +678,7 @@
 
             </Widget>
             <Widget type="TabItem">
-                <Property key="Caption" value="  #{SettingsMenu:Language}  "/>
+                <Property key="Caption" value=" #{SettingsMenu:Language} "/>
                 <Widget type="AutoSizedTextBox" skin="SandText" position="4 4 300 32" align="Left Top">
                     <Property key="Caption" value="#{SettingsMenu:LanguageNote}"/>
                 </Widget>

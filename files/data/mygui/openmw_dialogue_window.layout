@@ -18,7 +18,7 @@
         <!-- The disposition bar-->
         <Widget type="ProgressBar" skin="MW_Progress_Blue" position="398 8 166 18"
             align="Right Top" name="Disposition">
-            <Widget type="TextBox" skin="ProgressText" position="0 0 166 14" name="DispositionText" align="Right VCenter">
+            <Widget type="TextBox" skin="ProgressText" position="0 0 166 12" name="DispositionText" align="Right VCenter">
                 <Property key="NeedMouse" value="false"/>
              </Widget>
         </Widget>

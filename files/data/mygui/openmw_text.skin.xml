@@ -149,18 +149,18 @@ color_misc=0,205,205 # ????
     <Resource type="ResourceSkin" name="MW_DynamicStat_Red" size="204 18">
         <Child type="TextBox" skin="SandText" offset="0 0 100 18" align="Left Top" name="Text"/>
         <Child type="ProgressBar" skin="MW_Progress_Red" offset="74 0 130 18" align="Right Top" name="Bar"/>
-        <Child type="TextBox" skin="ProgressText" offset="74 0 130 14" align="Right Top" name="BarText"/>
+        <Child type="TextBox" skin="ProgressText" offset="74 0 130 12" align="Right Top" name="BarText"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_DynamicStat_Blue" size="204 18">
         <Child type="TextBox" skin="SandText" offset="0 0 100 18" align="Left Top" name="Text"/>
         <Child type="ProgressBar" skin="MW_Progress_Blue" offset="74 0 130 18" align="Right Top" name="Bar"/>
-        <Child type="TextBox" skin="ProgressText" offset="74 0 130 14" align="Right Top" name="BarText"/>
+        <Child type="TextBox" skin="ProgressText" offset="74 0 130 12" align="Right Top" name="BarText"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_DynamicStat_Green" size="204 18">
         <Child type="TextBox" skin="SandText" offset="0 0 100 18" align="Left Top" name="Text"/>
         <Child type="ProgressBar" skin="MW_Progress_Green" offset="74 0 130 18" align="Right Top" name="Bar"/>
-        <Child type="TextBox" skin="ProgressText" offset="74 0 130 14" align="Right Top" name="BarText"/>
+        <Child type="TextBox" skin="ProgressText" offset="74 0 130 12" align="Right Top" name="BarText"/>
     </Resource>
 </MyGUI>
