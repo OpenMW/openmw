@@ -17,7 +17,7 @@ font size
 ---------
 
 :Type:		integer
-:Range:		12 to 20
+:Range:		12 to 18
 :Default:	16
 
 Allows to specify glyph size for in-game fonts.

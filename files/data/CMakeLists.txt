@@ -13,12 +13,12 @@ set(BUILTIN_DATA_FILES
     fonts/DejaVuFontLicense.txt
     fonts/DejaVuLGCSansMono.ttf
     fonts/DejaVuLGCSansMono.omwfont
-    fonts/OMWAyembedt.ttf
-    fonts/OMWAyembedt.omwfont
-    fonts/OMWAyembedtFontLicense.txt
-    fonts/Pelagiad.ttf
-    fonts/Pelagiad.omwfont
-    fonts/PelagiadFontLicense.txt
+    fonts/DemonicLetters.ttf
+    fonts/DemonicLetters.omwfont
+    fonts/DemonicLettersFontLicense.txt
+    fonts/MysticCards.ttf
+    fonts/MysticCards.omwfont
+    fonts/MysticCardsFontLicense.txt
 
     l10n/BuiltInShaders/de.yaml
     l10n/BuiltInShaders/en.yaml

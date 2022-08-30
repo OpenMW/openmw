@@ -13,7 +13,7 @@ LanguageNote: "Примечание: эти настройки не затраг
 LightingMethod: "Способ освещения"
 LightingMethodLegacy: "Устаревший"
 LightingMethodShaders: "Шейдеры"
-LightingMethodShadersCompatibility: "Шейдеры (режим совместимости)"
+LightingMethodShadersCompatibility: "Шейдеры (режим совм-ти)"
 LightingResetToDefaults: "Обнулить настройки освещения? Смена метода освещения вступит в силу только после перезапуска приложения."
 Lights: "Освещение"
 LightsBoundingSphereMultiplier: "Множитель размера ограничивающей сферы"

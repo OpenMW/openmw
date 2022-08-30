@@ -3,12 +3,12 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_DialogNoTransp" layer="Modal" position="0 0 220 192" align="Center" name="_Main">
 
-        <Widget type="TextBox" skin="NormalText" position="0 4 220 24">
+        <Widget type="TextBox" skin="NormalText" position="0 4 220 24" align="HCenter Top">
             <Property key="Caption" value="#{sPersuasionMenuTitle}"/>
             <Property key="TextAlign" value="Center"/>
         </Widget>
 
-        <Widget type="Widget" skin="MW_Box" position="8 32 196 115">
+        <Widget type="Widget" skin="MW_Box" position="8 32 196 114" align="Stretch Top" name="ActionsBox">
             <Widget type="AutoSizedButton" skin="SandTextButton" position="4 0 0 18" name="AdmireButton">
                 <Property key="Caption" value="#{sAdmire}"/>
                 <Property key="TextAlign" value="Left"/>
@@ -35,11 +35,11 @@
             </Widget>
         </Widget>
 
-        <Widget type="TextBox" skin="SandText" position="8 152 208 24" name="GoldLabel">
+        <Widget type="AutoSizedTextBox" skin="SandText" position="8 158 102 24" align="Left Bottom" name="GoldLabel">
             <Property key="TextAlign" value="Left VCenter"/>
         </Widget>
 
-        <Widget type="AutoSizedButton" skin="MW_Button" position="204 154 0 24" name="CancelButton">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="204 154 0 24" align="Right Bottom" name="CancelButton">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{sCancel}"/>
         </Widget>
