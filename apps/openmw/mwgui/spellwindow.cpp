@@ -34,7 +34,7 @@ namespace MWGui
         , mSpellView(nullptr)
         , mUpdateTimer(0.0f)
     {
-        mSpellIcons = new SpellIcons();
+        mSpellIcons = std::make_unique<SpellIcons>();
 
         MyGUI::Widget* deleteButton;
         getWidget(deleteButton, "DeleteSpellButton");
@@ -52,11 +52,6 @@ namespace MWGui
         // Adjust the spell filtering widget size because of MyGUI limitations.
         int filterWidth = mSpellView->getSize().width - deleteButton->getSize().width - 3;
         mFilterEdit->setSize(filterWidth, mFilterEdit->getSize().height);
-    }
-
-    SpellWindow::~SpellWindow()
-    {
-        delete mSpellIcons;
     }
 
     void SpellWindow::onPinToggled()

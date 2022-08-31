@@ -1,6 +1,8 @@
 #ifndef MWGUI_SPELLWINDOW_H
 #define MWGUI_SPELLWINDOW_H
 
+#include <memory>
+
 #include "windowpinnablebase.hpp"
 
 #include "spellmodel.hpp"
@@ -14,7 +16,6 @@ namespace MWGui
     {
     public:
         SpellWindow(DragAndDrop* drag);
-        virtual ~SpellWindow();
 
         void updateSpells();
 
@@ -41,7 +42,7 @@ namespace MWGui
         void onOpen() override;
 
         SpellView* mSpellView;
-        SpellIcons* mSpellIcons;
+        std::unique_ptr<SpellIcons> mSpellIcons;
         MyGUI::EditBox* mFilterEdit;
 
     private:
