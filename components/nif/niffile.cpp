@@ -51,7 +51,7 @@ static std::map<std::string, CreateRecord> makeFactory()
         {"NiCollisionSwitch"            , &construct <NiNode                      , RC_NiCollisionSwitch          >},
         {"NiBSParticleNode"             , &construct <NiNode                      , RC_NiBSParticleNode           >},
         {"NiBSAnimationNode"            , &construct <NiNode                      , RC_NiBSAnimationNode          >},
-        {"NiBillboardNode"              , &construct <NiNode                      , RC_NiBillboardNode            >},
+        {"NiBillboardNode"              , &construct <NiBillboardNode             , RC_NiBillboardNode            >},
         {"NiTriShape"                   , &construct <NiTriShape                  , RC_NiTriShape                 >},
         {"NiTriStrips"                  , &construct <NiTriStrips                 , RC_NiTriStrips                >},
         {"NiLines"                      , &construct <NiLines                     , RC_NiLines                    >},
