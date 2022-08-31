@@ -1,7 +1,7 @@
 #version 120
-
 #include "vertexcolors.glsl"
 
+varying vec3 vertexColor;
 varying vec3 vertexNormal;
 
 uniform int  useAdvancedShader = 0;
@@ -18,6 +18,6 @@ void main()
     }
     else
     {
-        gl_FragData[0] = vec4(passColor.xyz * lightAttenuation, 1.);
+        gl_FragData[0] = vec4(vertexColor * lightAttenuation, 1.);
     }
 }

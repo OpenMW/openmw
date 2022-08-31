@@ -32,9 +32,6 @@ static void generateWireCube(osg::Geometry& geom, float dim)
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
 
-    geom.setVertexAttribArray(0, vertices, osg::Array::BIND_PER_VERTEX);
-    geom.setVertexAttribArray(1, normals, osg::Array::BIND_PER_VERTEX);
-
     osg::Vec2i indexPos[] = { osg::Vec2i(0, 0), osg::Vec2i(1, 0), osg::Vec2i(1, 1), osg::Vec2i(0, 1) };
 
     for (int i = 0; i < 4; i++)
@@ -55,11 +52,13 @@ static void generateWireCube(osg::Geometry& geom, float dim)
         vertices->push_back(vert1 * dim);
         vertices->push_back(vert3 * dim);
     }
-    for (unsigned long i = 0; i < vertices->size(); i++)
+    for (std::size_t i = 0; i < vertices->size(); i++)
     {
         normals->push_back(osg::Vec3(1., 1., 1.));
     }
 
+    geom.setVertexArray( vertices);
+    geom.setNormalArray( normals, osg::Array::BIND_PER_VERTEX);
     geom.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
 }
 
@@ -103,8 +102,8 @@ static void generateCube(osg::Geometry& geom, float dim)
             indices->push_back(newFace2[i]);
         }
     }
-    geom.setVertexAttribArray(0, vertices, osg::Array::BIND_PER_VERTEX);
-    geom.setVertexAttribArray(1, normals, osg::Array::BIND_PER_VERTEX);
+    geom.setVertexArray(vertices);
+    geom.setNormalArray( normals, osg::Array::BIND_PER_VERTEX);
     geom.addPrimitiveSet(indices);
 }
 
@@ -209,8 +208,8 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
         indices->push_back(bot2);
     }
 
-    geom.setVertexAttribArray(0, vertices, osg::Array::BIND_PER_VERTEX);
-    geom.setVertexAttribArray(1, normals, osg::Array::BIND_PER_VERTEX);
+    geom.setVertexArray(vertices);
+    geom.setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
     geom.addPrimitiveSet(indices);
 }
 
@@ -240,10 +239,10 @@ namespace MWRenderDebug
             return;
         }
 
-        osg::Uniform* uTrans = const_cast<osg::Uniform*>(stateSet->getUniform("trans"));
-        osg::Uniform* uCol = const_cast<osg::Uniform*>(stateSet->getUniform("color"));
-        osg::Uniform* uScale = const_cast<osg::Uniform*>(stateSet->getUniform("scale"));
-        osg::Uniform* uUseNormalAsColor = const_cast<osg::Uniform*>(stateSet->getUniform("useNormalAsColor"));
+        const osg::Uniform* uTrans = stateSet->getUniform("trans");
+        const osg::Uniform* uCol = stateSet->getUniform("color");
+        const osg::Uniform* uScale = stateSet->getUniform("scale");
+        const osg::Uniform* uUseNormalAsColor = stateSet->getUniform("useNormalAsColor");
 
         auto transLocation = pcp->getUniformLocation(uTrans->getNameID());
         auto colLocation = pcp->getUniformLocation(uCol->getNameID());
@@ -283,8 +282,8 @@ namespace MWRenderDebug
             }
         }
         mShapesToDraw.clear();
-        static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexAttribArray(0))->clear();
-        static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexAttribArray(1))->clear();
+        static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexArray())->clear();
+        static_cast<osg::Vec3Array*>(mLinesToDraw->getNormalArray())->clear();
     }
 
     struct DebugLines
@@ -299,8 +298,8 @@ namespace MWRenderDebug
             lines.setUseDisplayList(false);
             lines.setCullingActive(false);
 
-            lines.setVertexAttribArray(0, vertices, osg::Array::BIND_PER_VERTEX);
-            lines.setVertexAttribArray(1, color, osg::Array::BIND_PER_VERTEX);
+            lines.setVertexArray( vertices);
+            lines.setNormalArray(color, osg::Array::BIND_PER_VERTEX);
 
             lines.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
         }
@@ -328,7 +327,7 @@ namespace MWRenderDebug
             int indexRead = getIdexBufferReadFromFrame(mDebugDrawer.mCurrentFrame);
             auto& lines = mDebugDrawer.mDebugLines;
             lines->mLinesGeom[indexRead]->removePrimitiveSet(0, 1);
-            lines->mLinesGeom[indexRead]->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->mLinesGeom[indexRead]->getVertexAttribArray(0))->size()));
+            lines->mLinesGeom[indexRead]->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->mLinesGeom[indexRead]->getVertexArray())->size()));
 
             nv->pushOntoNodePath(mDebugDrawer.mCustomDebugDrawer[indexRead]);
             nv->apply(*mDebugDrawer.mCustomDebugDrawer[indexRead]);
@@ -342,8 +341,8 @@ namespace MWRenderDebug
 MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
 {
     mCurrentFrame = 0;
-    auto vertexShader = shaderManager.getShader("debugDraw_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::VERTEX);
-    auto fragmentShader = shaderManager.getShader("debugDraw_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
+    auto vertexShader = shaderManager.getShader("debug_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::VERTEX);
+    auto fragmentShader = shaderManager.getShader("debug_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
 
     auto program = shaderManager.getProgram(vertexShader, fragmentShader);
     mDebugLines = std::make_unique<DebugLines>();
@@ -355,6 +354,7 @@ MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, os
     stateset->addUniform(new osg::Uniform("trans", osg::Vec3f(0., 0., 0.)));
     stateset->addUniform(new osg::Uniform("scale", osg::Vec3f(1., 1., 1.)));
     stateset->addUniform(new osg::Uniform("useNormalAsColor", 0));
+    stateset->addUniform(new osg::Uniform("useAdvancedShader", 1));
 
     stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
     stateset->setMode(GL_DEPTH_TEST, GL_TRUE);
@@ -375,7 +375,7 @@ MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, os
     wireCube->setUseVertexBufferObjects(true);
     generateWireCube(*wireCube, 1.);
 
-    for (unsigned long i = 0; i < mShapesToDraw.size(); i++)
+    for (std::size_t i = 0; i < mShapesToDraw.size(); i++)
     {
         mCustomDebugDrawer[i] = new DebugCustomDraw(mShapesToDraw[i], mDebugLines->mLinesGeom[i]);
         mCustomDebugDrawer[i]->setStateSet(stateset);
@@ -416,8 +416,8 @@ void MWRenderDebug::DebugDrawer::addDrawCall(const DrawCall& draw)
 void MWRenderDebug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
 {
     const int indexWrite = getIdexBufferWriteFromFrame(this->mCurrentFrame);
-    auto vertices = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getVertexAttribArray(0));
-    auto colors = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getVertexAttribArray(1));
+    auto vertices = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getVertexArray());
+    auto colors = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getNormalArray());
 
     vertices->push_back(start);
     vertices->push_back(end);

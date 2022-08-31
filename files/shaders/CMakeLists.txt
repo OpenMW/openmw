@@ -46,8 +46,8 @@ set(SHADER_FILES
     gui_fragment.glsl
     debug_vertex.glsl
     debug_fragment.glsl
-    debugDraw_vertex.glsl
-    debugDraw_fragment.glsl
+    debugdraw_vertex.glsl
+    debugdraw_fragment.glsl
     sky_vertex.glsl
     sky_fragment.glsl
     skypasses.glsl
