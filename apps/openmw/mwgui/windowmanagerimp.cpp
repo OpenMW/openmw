@@ -773,7 +773,7 @@ namespace MWGui
         mMessageBoxManager->removeStaticMessageBox();
     }
 
-    const std::vector<MWGui::MessageBox*> WindowManager::getActiveMessageBoxes()
+    const std::vector<std::unique_ptr<MWGui::MessageBox>>& WindowManager::getActiveMessageBoxes() const
     {
         return mMessageBoxManager->getActiveMessageBoxes();
     }

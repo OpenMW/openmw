@@ -97,8 +97,8 @@ namespace MWInput
                 if (playerPtr.getClass().getEncumbrance(playerPtr) > playerPtr.getClass().getCapacity(playerPtr))
                 {
                     player.setAutoMove (false);
-                    std::vector<MWGui::MessageBox*> msgboxs = MWBase::Environment::get().getWindowManager()->getActiveMessageBoxes();
-                    const std::vector<MWGui::MessageBox*>::iterator it = std::find_if(msgboxs.begin(), msgboxs.end(), [](MWGui::MessageBox*& msgbox)
+                    const auto& msgboxs = MWBase::Environment::get().getWindowManager()->getActiveMessageBoxes();
+                    auto it = std::find_if(msgboxs.begin(), msgboxs.end(), [](const std::unique_ptr<MWGui::MessageBox>& msgbox)
                     {
                         return (msgbox->getMessage() == "#{sNotifyMessage59}");
                     });

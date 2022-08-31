@@ -190,7 +190,7 @@ namespace MWGui
     MWGui::CountDialog* getCountDialog() override;
     MWGui::ConfirmationDialog* getConfirmationDialog() override;
     MWGui::TradeWindow* getTradeWindow() override;
-    const std::vector<MWGui::MessageBox*> getActiveMessageBoxes() override;
+    const std::vector<std::unique_ptr<MWGui::MessageBox>>& getActiveMessageBoxes() const override;
     MWGui::PostProcessorHud* getPostProcessorHud() override;
 
     /// Make the player use an item, while updating GUI state accordingly

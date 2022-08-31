@@ -18,7 +18,6 @@ namespace MWGui
 
     MessageBoxManager::MessageBoxManager (float timePerChar)
     {
-        mInterMessageBoxe = nullptr;
         mStaticMessageBox = nullptr;
         mLastButtonPressed = -1;
         mMessageBoxSpeed = timePerChar;
@@ -39,31 +38,22 @@ namespace MWGui
         if (mInterMessageBoxe)
         {
             mInterMessageBoxe->setVisible(false);
-
-            delete mInterMessageBoxe;
-            mInterMessageBoxe = nullptr;
+            mInterMessageBoxe.reset();
         }
 
-        for (MessageBox* messageBox : mMessageBoxes)
-        {
-            if (messageBox == mStaticMessageBox)
-                mStaticMessageBox = nullptr;
-            delete messageBox;
-        }
         mMessageBoxes.clear();
+        mStaticMessageBox = nullptr;
 
         mLastButtonPressed = -1;
     }
 
     void MessageBoxManager::onFrame (float frameDuration)
     {
-        std::vector<MessageBox*>::iterator it;
-        for(it = mMessageBoxes.begin(); it != mMessageBoxes.end();)
+        for(auto it = mMessageBoxes.begin(); it != mMessageBoxes.end();)
         {
             (*it)->mCurrentTime += frameDuration;
-            if((*it)->mCurrentTime >= (*it)->mMaxTime && *it != mStaticMessageBox)
+            if((*it)->mCurrentTime >= (*it)->mMaxTime && it->get() != mStaticMessageBox)
             {
-                delete *it;
                 it = mMessageBoxes.erase(it);
             }
             else
@@ -71,7 +61,7 @@ namespace MWGui
         }
 
         float height = 0;
-        it = mMessageBoxes.begin();
+        auto it = mMessageBoxes.begin();
         while(it != mMessageBoxes.end())
         {
             (*it)->update(static_cast<int>(height));
@@ -82,8 +72,7 @@ namespace MWGui
         if(mInterMessageBoxe != nullptr && mInterMessageBoxe->mMarkedToDelete) {
             mLastButtonPressed = mInterMessageBoxe->readPressedButton();
             mInterMessageBoxe->setVisible(false);
-            delete mInterMessageBoxe;
-            mInterMessageBoxe = nullptr;
+            mInterMessageBoxe.reset();
             MWBase::Environment::get().getInputManager()->changeInputMode(
                         MWBase::Environment::get().getWindowManager()->isGuiMode());
         }
@@ -91,25 +80,24 @@ namespace MWGui
 
     void MessageBoxManager::createMessageBox(std::string_view message, bool stat)
     {
-        MessageBox *box = new MessageBox(*this, message);
+        auto box = std::make_unique<MessageBox>(*this, message);
         box->mCurrentTime = 0;
         auto realMessage = MyGUI::LanguageManager::getInstance().replaceTags({message.data(), message.size()});
         box->mMaxTime = realMessage.length()*mMessageBoxSpeed;
 
         if(stat)
-            mStaticMessageBox = box;
+            mStaticMessageBox = box.get();
 
         box->setVisible(mVisible);
 
-        mMessageBoxes.push_back(box);
+        mMessageBoxes.push_back(std::move(box));
 
         if(mMessageBoxes.size() > 3) {
-            delete *mMessageBoxes.begin();
             mMessageBoxes.erase(mMessageBoxes.begin());
         }
 
         int height = 0;
-        for (MessageBox* messageBox : mMessageBoxes)
+        for (const auto& messageBox : mMessageBoxes)
         {
             messageBox->update(height);
             height += messageBox->getHeight();
@@ -128,11 +116,9 @@ namespace MWGui
         {
             Log(Debug::Warning) << "Warning: replacing an interactive message box that was not answered yet";
             mInterMessageBoxe->setVisible(false);
-            delete mInterMessageBoxe;
-            mInterMessageBoxe = nullptr;
         }
 
-        mInterMessageBoxe = new InteractiveMessageBox(*this, std::string{message}, buttons);
+        mInterMessageBoxe = std::make_unique<InteractiveMessageBox>(*this, std::string{message}, buttons);
         mLastButtonPressed = -1;
 
         return true;
@@ -145,12 +131,10 @@ namespace MWGui
 
     bool MessageBoxManager::removeMessageBox (MessageBox *msgbox)
     {
-        std::vector<MessageBox*>::iterator it;
-        for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
+        for(auto it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
         {
-            if((*it) == msgbox)
+            if(it->get() == msgbox)
             {
-                delete (*it);
                 mMessageBoxes.erase(it);
                 return true;
             }
@@ -158,7 +142,7 @@ namespace MWGui
         return false;
     }
 
-    const std::vector<MessageBox*> MessageBoxManager::getActiveMessageBoxes()
+    const std::vector<std::unique_ptr<MessageBox>>& MessageBoxManager::getActiveMessageBoxes() const
     {
         return mMessageBoxes;
     }
@@ -174,7 +158,7 @@ namespace MWGui
     void MessageBoxManager::setVisible(bool value)
     {
         mVisible = value;
-        for (MessageBox* messageBox : mMessageBoxes)
+        for (const auto& messageBox : mMessageBoxes)
             messageBox->setVisible(value);
     }
 
