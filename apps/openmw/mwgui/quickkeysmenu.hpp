@@ -1,6 +1,8 @@
 #ifndef MWGUI_QUICKKEYS_H
 #define MWGUI_QUICKKEYS_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 
 #include "spellmodel.hpp"
@@ -18,7 +20,6 @@ namespace MWGui
     {
     public:
         QuickKeysMenu();
-        ~QuickKeysMenu();
 
         void onResChange(int, int) override { center(); }
 
@@ -71,9 +72,9 @@ namespace MWGui
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
 
-        QuickKeysMenuAssign* mAssignDialog;
-        ItemSelectionDialog* mItemSelectionDialog;
-        MagicSelectionDialog* mMagicSelectionDialog;
+        std::unique_ptr<QuickKeysMenuAssign> mAssignDialog;
+        std::unique_ptr<ItemSelectionDialog> mItemSelectionDialog;
+        std::unique_ptr<MagicSelectionDialog> mMagicSelectionDialog;
 
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
