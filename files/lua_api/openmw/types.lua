@@ -705,7 +705,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this potion (can be empty)
+-- @field #string mwscript MWScript on this light (can be empty)
 -- @field #string icon VFS path to the icon
 -- @field #string sound VFS path to the sound
 -- @field #number weight
