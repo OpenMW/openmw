@@ -1,6 +1,8 @@
 #ifndef OPENMW_GAME_MWGUI_HUD_H
 #define OPENMW_GAME_MWGUI_HUD_H
 
+#include <memory>
+
 #include "mapwindow.hpp"
 #include "statswatcher.hpp"
 
@@ -95,7 +97,7 @@ namespace MWGui
 
         bool mWorldMouseOver;
 
-        SpellIcons* mSpellIcons;
+        std::unique_ptr<SpellIcons> mSpellIcons;
 
         int mEnemyActorId;
         float mEnemyHealthTimer;
