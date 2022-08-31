@@ -5,9 +5,14 @@
 
 namespace Misc
 {
+    inline size_t findExtension(std::string_view file)
+    {
+        return file.find_last_of('.');
+    }
+
     inline std::string_view getFileExtension(std::string_view file)
     {
-        if (auto extPos = file.find_last_of('.'); extPos != std::string::npos)
+        if (auto extPos = findExtension(file); extPos != std::string::npos)
         {
             file.remove_prefix(extPos + 1);
             return file;

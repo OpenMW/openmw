@@ -76,6 +76,7 @@ namespace MWRender
 
     osg::ref_ptr<osg::Node> ObjectPaging::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
+        lod = static_cast<unsigned char>(lodFlags >> (4 * 4));
         if (activeGrid && !mActiveGrid)
             return nullptr;
 
@@ -86,7 +87,7 @@ namespace MWRender
             return static_cast<osg::Node*>(obj.get());
         else
         {
-            osg::ref_ptr<osg::Node> node = createChunk(size, center, activeGrid, viewPoint, compile);
+            osg::ref_ptr<osg::Node> node = createChunk(size, center, activeGrid, viewPoint, compile, lod);
             mCache->addEntryToObjectCache(id, node.get());
             return node;
         }
@@ -411,7 +412,7 @@ namespace MWRender
         mMinSizeCostMultiplier = Settings::Manager::getFloat("object paging min size cost multiplier", "Terrain");
     }
 
-    osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
+    osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid, const osg::Vec3f& viewPoint, bool compile, unsigned char lod)
     {
         osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size/2.f), std::floor(center.y() - size/2.f));
 
@@ -546,6 +547,17 @@ namespace MWRender
                     if (mSceneManager->getVFS()->exists(kfname))
                         continue;
                 }
+            }
+
+            if (!activeGrid)
+            {
+                std::lock_guard<std::mutex> lock(mLODNameCacheMutex);
+                LODNameCacheKey key{ model, lod };
+                LODNameCache::const_iterator found = mLODNameCache.lower_bound(key);
+                if (found != mLODNameCache.end() && found->first == key)
+                    model = found->second;
+                else
+                    model = mLODNameCache.insert(found, { key, Misc::ResourceHelpers::getLODMeshName(model, mSceneManager->getVFS(), lod) })->second;
             }
 
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
