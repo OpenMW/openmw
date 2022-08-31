@@ -17,11 +17,11 @@
 namespace MWGui
 {
 
-    PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& actor, ItemModel *sourceModel, bool hideItems)
+    PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& actor, std::unique_ptr<ItemModel> sourceModel, bool hideItems)
         : mActor(actor), mPickpocketDetected(false)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        mSourceModel = sourceModel;
+        mSourceModel = std::move(sourceModel);
         float chance = player.getClass().getSkill(player, ESM::Skill::Sneak);
 
         mSourceModel->update();

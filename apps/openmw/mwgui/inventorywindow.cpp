@@ -122,12 +122,13 @@ namespace MWGui
     void InventoryWindow::updatePlayer()
     {
         mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
+        auto tradeModel = std::make_unique<TradeItemModel>(std::make_unique<InventoryItemModel>(mPtr), MWWorld::Ptr());
+        mTradeModel = tradeModel.get();
 
         if (mSortModel) // reuse existing SortModel when possible to keep previous category/filter settings
-            mSortModel->setSourceModel(mTradeModel);
+            mSortModel->setSourceModel(std::move(tradeModel));
         else
-            mSortModel = new SortFilterItemModel(mTradeModel);
+            mSortModel = new SortFilterItemModel(std::move(tradeModel));
 
         mSortModel->setNameFilter(mFilterEdit->getCaption());
 
@@ -776,7 +777,7 @@ namespace MWGui
 
         ItemModel::ModelIndex selected = -1;
         // not using mSortFilterModel as we only need sorting, not filtering
-        SortFilterItemModel model(new InventoryItemModel(player));
+        SortFilterItemModel model(std::make_unique<InventoryItemModel>(player));
         model.setSortByType(false);
         model.update();
         if (model.getItemCount() == 0)

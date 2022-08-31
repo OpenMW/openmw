@@ -36,7 +36,6 @@ namespace MWGui
     private:
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;
-        InventoryItemModel* mModel;
 
         void onSelectedItem(int index);
 

@@ -47,7 +47,7 @@ void Recharge::onOpen()
 {
     center();
 
-    SortFilterItemModel * model = new SortFilterItemModel(new InventoryItemModel(MWMechanics::getPlayer()));
+    SortFilterItemModel * model = new SortFilterItemModel(std::make_unique<InventoryItemModel>(MWMechanics::getPlayer()));
     model->setFilter(SortFilterItemModel::Filter_OnlyRechargable);
     mBox->setModel(model);
 

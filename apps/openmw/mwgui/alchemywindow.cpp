@@ -245,8 +245,9 @@ namespace MWGui
         mAlchemy->clear();
         mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
-        mModel = new InventoryItemModel(MWMechanics::getPlayer());
-        mSortModel = new SortFilterItemModel(mModel);
+        auto model = std::make_unique<InventoryItemModel>(MWMechanics::getPlayer());
+        mModel = model.get();
+        mSortModel = new SortFilterItemModel(std::move(model));
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
         mItemView->setModel (mSortModel);
         mItemView->resetScrollBars();
