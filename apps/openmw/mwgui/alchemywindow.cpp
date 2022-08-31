@@ -34,7 +34,7 @@ namespace MWGui
         , mCurrentFilter(FilterType::ByName)
         , mModel(nullptr)
         , mSortModel(nullptr)
-        , mAlchemy(new MWMechanics::Alchemy())
+        , mAlchemy(std::make_unique<MWMechanics::Alchemy>())
         , mApparatus (4)
         , mIngredients (4)
     {

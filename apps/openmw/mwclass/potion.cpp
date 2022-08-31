@@ -125,8 +125,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        std::unique_ptr<MWWorld::Action> action (
-            new MWWorld::ActionApply (ptr, ref->mBase->mId));
+        auto action = std::make_unique<MWWorld::ActionApply>(ptr, ref->mBase->mId);
 
         action->setSound ("Drink");
 
