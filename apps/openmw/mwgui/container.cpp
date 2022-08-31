@@ -148,9 +148,10 @@ namespace MWGui
 
         mDisposeCorpseButton->setVisible(loot);
         mModel = model.get();
-        mSortModel = new SortFilterItemModel(std::move(model));
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::move(model));
+        mSortModel = sortModel.get();
 
-        mItemView->setModel (mSortModel);
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);

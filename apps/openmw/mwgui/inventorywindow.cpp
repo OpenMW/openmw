@@ -128,11 +128,13 @@ namespace MWGui
         if (mSortModel) // reuse existing SortModel when possible to keep previous category/filter settings
             mSortModel->setSourceModel(std::move(tradeModel));
         else
-            mSortModel = new SortFilterItemModel(std::move(tradeModel));
+        {
+            auto sortModel = std::make_unique<SortFilterItemModel>(std::move(tradeModel));
+            mSortModel = sortModel.get();
+            mItemView->setModel(std::move(sortModel));
+        }
 
         mSortModel->setNameFilter(mFilterEdit->getCaption());
-
-        mItemView->setModel(mSortModel);
 
         mFilterAll->setStateSelected(true);
         mFilterWeapon->setStateSelected(false);

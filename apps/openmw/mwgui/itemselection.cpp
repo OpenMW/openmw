@@ -36,8 +36,9 @@ namespace MWGui
 
     void ItemSelectionDialog::openContainer(const MWWorld::Ptr& container)
     {
-        mSortModel = new SortFilterItemModel(std::make_unique<InventoryItemModel>(container));
-        mItemView->setModel(mSortModel);
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::make_unique<InventoryItemModel>(container));
+        mSortModel = sortModel.get();
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
     }
 

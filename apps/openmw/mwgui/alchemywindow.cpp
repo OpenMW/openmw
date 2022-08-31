@@ -247,12 +247,13 @@ namespace MWGui
 
         auto model = std::make_unique<InventoryItemModel>(MWMechanics::getPlayer());
         mModel = model.get();
-        mSortModel = new SortFilterItemModel(std::move(model));
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::move(model));
+        mSortModel = sortModel.get();
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
-        mItemView->setModel (mSortModel);
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
 
-        mNameEdit->setCaption("");
+        mNameEdit->setCaption({});
         mBrewCountEdit->setValue(1);
 
         int index = 0;

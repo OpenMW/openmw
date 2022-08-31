@@ -116,8 +116,9 @@ namespace MWGui
 
         auto tradeModel = std::make_unique<TradeItemModel>(std::make_unique<ContainerItemModel>(itemSources, worldItems), mPtr);
         mTradeModel = tradeModel.get();
-        mSortModel = new SortFilterItemModel(std::move(tradeModel));
-        mItemView->setModel (mSortModel);
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::move(tradeModel));
+        mSortModel = sortModel.get();
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
 
         updateLabels();

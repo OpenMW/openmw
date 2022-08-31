@@ -125,9 +125,10 @@ void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
     updateEncumbranceBar();
     auto model = std::make_unique<CompanionItemModel>(npc);
     mModel = model.get();
-    mSortModel = new SortFilterItemModel(std::move(model));
-    mFilterEdit->setCaption(std::string());
-    mItemView->setModel(mSortModel);
+    auto sortModel = std::make_unique<SortFilterItemModel>(std::move(model));
+    mSortModel = sortModel.get();
+    mFilterEdit->setCaption({});
+    mItemView->setModel(std::move(sortModel));
     mItemView->resetScrollBars();
 
     setTitle(npc.getClass().getName(npc));
