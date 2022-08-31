@@ -401,7 +401,7 @@ namespace MWGui
     Resource::ResourceSystem* mResourceSystem;
     osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
-    osgMyGUI::Platform* mGuiPlatform;
+    std::unique_ptr<osgMyGUI::Platform> mGuiPlatform;
     osgViewer::Viewer* mViewer;
 
     std::unique_ptr<Gui::FontLoader> mFontLoader;
@@ -424,13 +424,13 @@ namespace MWGui
 
     HUD *mHud;
     MapWindow *mMap;
-    MWRender::LocalMap* mLocalMapRender;
-    ToolTips *mToolTips;
+    std::unique_ptr<MWRender::LocalMap> mLocalMapRender;
+    std::unique_ptr<ToolTips> mToolTips;
     StatsWindow *mStatsWindow;
-    MessageBoxManager *mMessageBoxManager;
+    std::unique_ptr<MessageBoxManager> mMessageBoxManager;
     Console *mConsole;
     DialogueWindow *mDialogueWindow;
-    DragAndDrop* mDragAndDrop;
+    std::unique_ptr<DragAndDrop> mDragAndDrop;
     InventoryWindow *mInventoryWindow;
     ScrollWindow* mScrollWindow;
     BookWindow* mBookWindow;
@@ -442,7 +442,7 @@ namespace MWGui
     QuickKeysMenu* mQuickKeysMenu;
     LoadingScreen* mLoadingScreen;
     WaitDialog* mWaitDialog;
-    SoulgemDialog* mSoulgemDialog;
+    std::unique_ptr<SoulgemDialog> mSoulgemDialog;
     MyGUI::ImageBox* mVideoBackground;
     VideoWidget* mVideoWidget;
     ScreenFader* mWerewolfFader;
@@ -454,11 +454,11 @@ namespace MWGui
     JailScreen* mJailScreen;
     ContainerWindow* mContainerWindow;
 
-    std::vector<WindowBase*> mWindows;
+    std::vector<std::unique_ptr<WindowBase>> mWindows;
 
     Translation::Storage& mTranslationDataStorage;
 
-    CharacterCreation* mCharGen;
+    std::unique_ptr<CharacterCreation> mCharGen;
 
     MyGUI::Widget* mInputBlocker;
 
@@ -474,7 +474,7 @@ namespace MWGui
 
     void setCursorVisible(bool visible) override;
 
-    MyGUI::Gui *mGui; // Gui
+    std::unique_ptr<MyGUI::Gui> mGui; // Gui
 
     struct GuiModeState
     {
@@ -498,7 +498,7 @@ namespace MWGui
     // The currently active stack of GUI modes (top mode is the one we are in).
     std::vector<GuiMode> mGuiModes;
 
-    SDLUtil::SDLCursorManager* mCursorManager;
+    std::unique_ptr<SDLUtil::SDLCursorManager> mCursorManager;
 
     std::vector<std::unique_ptr<Layout>> mGarbageDialogs;
     void cleanupGarbage();
@@ -531,7 +531,7 @@ namespace MWGui
 
     std::unique_ptr<KeyboardNavigation> mKeyboardNavigation;
 
-    SDLUtil::VideoWrapper* mVideoWrapper;
+    std::unique_ptr<SDLUtil::VideoWrapper> mVideoWrapper;
 
     float mScalingFactor;
 

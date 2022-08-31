@@ -142,13 +142,9 @@ namespace MWGui
       , mCurrentModals()
       , mHud(nullptr)
       , mMap(nullptr)
-      , mLocalMapRender(nullptr)
-      , mToolTips(nullptr)
       , mStatsWindow(nullptr)
-      , mMessageBoxManager(nullptr)
       , mConsole(nullptr)
       , mDialogueWindow(nullptr)
-      , mDragAndDrop(nullptr)
       , mInventoryWindow(nullptr)
       , mScrollWindow(nullptr)
       , mBookWindow(nullptr)
@@ -160,7 +156,6 @@ namespace MWGui
       , mQuickKeysMenu(nullptr)
       , mLoadingScreen(nullptr)
       , mWaitDialog(nullptr)
-      , mSoulgemDialog(nullptr)
       , mVideoBackground(nullptr)
       , mVideoWidget(nullptr)
       , mWerewolfFader(nullptr)
@@ -172,7 +167,6 @@ namespace MWGui
       , mJailScreen(nullptr)
       , mContainerWindow(nullptr)
       , mTranslationDataStorage (translationDataStorage)
-      , mCharGen(nullptr)
       , mInputBlocker(nullptr)
       , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
       , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
@@ -182,9 +176,7 @@ namespace MWGui
       , mCursorVisible(true)
       , mCursorActive(true)
       , mPlayerBounty(-1)
-      , mGui(nullptr)
       , mGuiModes()
-      , mCursorManager(nullptr)
       , mGarbageDialogs()
       , mShown(GW_ALL)
       , mForceHidden(GW_None)
@@ -196,11 +188,11 @@ namespace MWGui
       , mWindowVisible(true)
     {
         mScalingFactor = std::clamp(Settings::Manager::getFloat("scaling factor", "GUI"), 0.5f, 8.f);
-        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(),
+        mGuiPlatform = std::make_unique<osgMyGUI::Platform>(viewer, guiRoot, resourceSystem->getImageManager(),
             resourceSystem->getVFS(), mScalingFactor, "mygui",
             (std::filesystem::path(logpath) / "MyGUI.log").generic_string());
 
-        mGui = new MyGUI::Gui;
+        mGui = std::make_unique<MyGUI::Gui>();
         mGui->initialise("");
 
         createTextures();
@@ -242,11 +234,12 @@ namespace MWGui
         mKeyboardNavigation->setEnabled(keyboardNav);
         Gui::ImageButton::setDefaultNeedKeyFocus(keyboardNav);
 
-        mLoadingScreen = new LoadingScreen(mResourceSystem, mViewer);
-        mWindows.push_back(mLoadingScreen);
+        auto loadingScreen = std::make_unique<LoadingScreen>(mResourceSystem, mViewer);
+        mLoadingScreen = loadingScreen.get();
+        mWindows.push_back(std::move(loadingScreen));
 
         //set up the hardware cursor manager
-        mCursorManager = new SDLUtil::SDLCursorManager();
+        mCursorManager = std::make_unique<SDLUtil::SDLCursorManager>();
 
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
@@ -281,7 +274,7 @@ namespace MWGui
 
         mShowOwned = Settings::Manager::getInt("show owned", "Game");
 
-        mVideoWrapper = new SDLUtil::VideoWrapper(window, viewer);
+        mVideoWrapper = std::make_unique<SDLUtil::VideoWrapper>(window, viewer);
         mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
                                         Settings::Manager::getFloat("contrast", "Video"));
 
@@ -299,157 +292,176 @@ namespace MWGui
 
         mTextColours.loadColours();
 
-        mDragAndDrop = new DragAndDrop();
+        mDragAndDrop = std::make_unique<DragAndDrop>();
 
-        Recharge* recharge = new Recharge();
-        mGuiModeStates[GM_Recharge] = GuiModeState(recharge);
-        mWindows.push_back(recharge);
+        auto recharge = std::make_unique<Recharge>();
+        mGuiModeStates[GM_Recharge] = GuiModeState(recharge.get());
+        mWindows.push_back(std::move(recharge));
 
-        MainMenu* menu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
-        mGuiModeStates[GM_MainMenu] = GuiModeState(menu);
-        mWindows.push_back(menu);
+        auto menu = std::make_unique<MainMenu>(w, h, mResourceSystem->getVFS(), mVersionDescription);
+        mGuiModeStates[GM_MainMenu] = GuiModeState(menu.get());
+        mWindows.push_back(std::move(menu));
 
-        mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
-        mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue);
-        mWindows.push_back(mMap);
+        mLocalMapRender = std::make_unique<MWRender::LocalMap>(mViewer->getSceneData()->asGroup());
+        auto map = std::make_unique<MapWindow>(mCustomMarkers, mDragAndDrop.get(), mLocalMapRender.get(), mWorkQueue);
+        mMap = map.get();
+        mWindows.push_back(std::move(map));
         mMap->renderGlobalMap();
         trackWindow(mMap, "map");
 
-        mStatsWindow = new StatsWindow(mDragAndDrop);
-        mWindows.push_back(mStatsWindow);
+        auto statsWindow = std::make_unique<StatsWindow>(mDragAndDrop.get());
+        mStatsWindow = statsWindow.get();
+        mWindows.push_back(std::move(statsWindow));
         trackWindow(mStatsWindow, "stats");
 
-        mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer->getSceneData()->asGroup(), mResourceSystem);
-        mWindows.push_back(mInventoryWindow);
+        auto inventoryWindow = std::make_unique<InventoryWindow>(mDragAndDrop.get(), mViewer->getSceneData()->asGroup(), mResourceSystem);
+        mInventoryWindow = inventoryWindow.get();
+        mWindows.push_back(std::move(inventoryWindow));
 
-        mSpellWindow = new SpellWindow(mDragAndDrop);
-        mWindows.push_back(mSpellWindow);
+        auto spellWindow = std::make_unique<SpellWindow>(mDragAndDrop.get());
+        mSpellWindow = spellWindow.get();
+        mWindows.push_back(std::move(spellWindow));
         trackWindow(mSpellWindow, "spells");
 
         mGuiModeStates[GM_Inventory] = GuiModeState({mMap, mInventoryWindow, mSpellWindow, mStatsWindow});
         mGuiModeStates[GM_None] = GuiModeState({mMap, mInventoryWindow, mSpellWindow, mStatsWindow});
 
-        mTradeWindow = new TradeWindow();
-        mWindows.push_back(mTradeWindow);
+        auto tradeWindow = std::make_unique<TradeWindow>();
+        mTradeWindow = tradeWindow.get();
+        mWindows.push_back(std::move(tradeWindow));
         trackWindow(mTradeWindow, "barter");
         mGuiModeStates[GM_Barter] = GuiModeState({mInventoryWindow, mTradeWindow});
 
-        mConsole = new Console(w,h, mConsoleOnlyScripts);
-        mWindows.push_back(mConsole);
+        auto console = std::make_unique<Console>(w,h, mConsoleOnlyScripts);
+        mConsole = console.get();
+        mWindows.push_back(std::move(console));
         trackWindow(mConsole, "console");
 
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
-        JournalWindow* journal = JournalWindow::create(JournalViewModel::create (), questList, mEncoding);
-        mWindows.push_back(journal);
-        mGuiModeStates[GM_Journal] = GuiModeState(journal);
+        auto journal = JournalWindow::create(JournalViewModel::create(), questList, mEncoding);
+        mGuiModeStates[GM_Journal] = GuiModeState(journal.get());
         mGuiModeStates[GM_Journal].mCloseSound = "book close";
         mGuiModeStates[GM_Journal].mOpenSound = "book open";
+        mWindows.push_back(std::move(journal));
 
-        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->mValue.getFloat());
+        mMessageBoxManager = std::make_unique<MessageBoxManager>(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->mValue.getFloat());
 
-        SpellBuyingWindow* spellBuyingWindow = new SpellBuyingWindow();
-        mWindows.push_back(spellBuyingWindow);
-        mGuiModeStates[GM_SpellBuying] = GuiModeState(spellBuyingWindow);
+        auto spellBuyingWindow = std::make_unique<SpellBuyingWindow>();
+        mGuiModeStates[GM_SpellBuying] = GuiModeState(spellBuyingWindow.get());
+        mWindows.push_back(std::move(spellBuyingWindow));
 
-        TravelWindow* travelWindow = new TravelWindow();
-        mWindows.push_back(travelWindow);
-        mGuiModeStates[GM_Travel] = GuiModeState(travelWindow);
+        auto travelWindow = std::make_unique<TravelWindow>();
+        mGuiModeStates[GM_Travel] = GuiModeState(travelWindow.get());
+        mWindows.push_back(std::move(travelWindow));
 
-        mDialogueWindow = new DialogueWindow();
-        mWindows.push_back(mDialogueWindow);
+        auto dialogueWindow = std::make_unique<DialogueWindow>();
+        mDialogueWindow = dialogueWindow.get();
+        mWindows.push_back(std::move(dialogueWindow));
         trackWindow(mDialogueWindow, "dialogue");
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
         mTradeWindow->eventTradeDone += MyGUI::newDelegate(mDialogueWindow, &DialogueWindow::onTradeComplete);
 
-        mContainerWindow = new ContainerWindow(mDragAndDrop);
-        mWindows.push_back(mContainerWindow);
+        auto containerWindow = std::make_unique<ContainerWindow>(mDragAndDrop.get());
+        mContainerWindow = containerWindow.get();
+        mWindows.push_back(std::move(containerWindow));
         trackWindow(mContainerWindow, "container");
         mGuiModeStates[GM_Container] = GuiModeState({mContainerWindow, mInventoryWindow});
 
-        mHud = new HUD(mCustomMarkers, mDragAndDrop, mLocalMapRender);
-        mWindows.push_back(mHud);
+        auto hud = std::make_unique<HUD>(mCustomMarkers, mDragAndDrop.get(), mLocalMapRender.get());
+        mHud = hud.get();
+        mWindows.push_back(std::move(hud));
 
-        mToolTips = new ToolTips();
+        mToolTips = std::make_unique<ToolTips>();
 
-        mScrollWindow = new ScrollWindow();
-        mWindows.push_back(mScrollWindow);
+        auto scrollWindow = std::make_unique<ScrollWindow>();
+        mScrollWindow = scrollWindow.get();
+        mWindows.push_back(std::move(scrollWindow));
         mGuiModeStates[GM_Scroll] = GuiModeState(mScrollWindow);
         mGuiModeStates[GM_Scroll].mOpenSound = "scroll";
         mGuiModeStates[GM_Scroll].mCloseSound = "scroll";
 
-        mBookWindow = new BookWindow();
-        mWindows.push_back(mBookWindow);
+        auto bookWindow = std::make_unique<BookWindow>();
+        mBookWindow = bookWindow.get();
+        mWindows.push_back(std::move(bookWindow));
         mGuiModeStates[GM_Book] = GuiModeState(mBookWindow);
         mGuiModeStates[GM_Book].mOpenSound = "book open";
         mGuiModeStates[GM_Book].mCloseSound = "book close";
 
-        mCountDialog = new CountDialog();
-        mWindows.push_back(mCountDialog);
+        auto countDialog = std::make_unique<CountDialog>();
+        mCountDialog = countDialog.get();
+        mWindows.push_back(std::move(countDialog));
 
-        mSettingsWindow = new SettingsWindow();
-        mWindows.push_back(mSettingsWindow);
+        auto settingsWindow = std::make_unique<SettingsWindow>();
+        mSettingsWindow = settingsWindow.get();
+        mWindows.push_back(std::move(settingsWindow));
         trackWindow(mSettingsWindow, "settings");
         mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 
-        mConfirmationDialog = new ConfirmationDialog();
-        mWindows.push_back(mConfirmationDialog);
+        auto confirmationDialog = std::make_unique<ConfirmationDialog>();
+        mConfirmationDialog = confirmationDialog.get();
+        mWindows.push_back(std::move(confirmationDialog));
 
-        AlchemyWindow* alchemyWindow = new AlchemyWindow();
-        mWindows.push_back(alchemyWindow);
-        trackWindow(alchemyWindow, "alchemy");
-        mGuiModeStates[GM_Alchemy] = GuiModeState(alchemyWindow);
+        auto alchemyWindow = std::make_unique<AlchemyWindow>();
+        trackWindow(alchemyWindow.get(), "alchemy");
+        mGuiModeStates[GM_Alchemy] = GuiModeState(alchemyWindow.get());
+        mWindows.push_back(std::move(alchemyWindow));
 
-        mQuickKeysMenu = new QuickKeysMenu();
-        mWindows.push_back(mQuickKeysMenu);
+        auto quickKeysMenu = std::make_unique<QuickKeysMenu>();
+        mQuickKeysMenu = quickKeysMenu.get();
+        mWindows.push_back(std::move(quickKeysMenu));
         mGuiModeStates[GM_QuickKeysMenu] = GuiModeState(mQuickKeysMenu);
 
-        LevelupDialog* levelupDialog = new LevelupDialog();
-        mWindows.push_back(levelupDialog);
-        mGuiModeStates[GM_Levelup] = GuiModeState(levelupDialog);
+        auto levelupDialog = std::make_unique<LevelupDialog>();
+        mGuiModeStates[GM_Levelup] = GuiModeState(levelupDialog.get());
+        mWindows.push_back(std::move(levelupDialog));
 
-        mWaitDialog = new WaitDialog();
-        mWindows.push_back(mWaitDialog);
+        auto waitDialog = std::make_unique<WaitDialog>();
+        mWaitDialog = waitDialog.get();
+        mWindows.push_back(std::move(waitDialog));
         mGuiModeStates[GM_Rest] = GuiModeState({mWaitDialog->getProgressBar(), mWaitDialog});
 
-        SpellCreationDialog* spellCreationDialog = new SpellCreationDialog();
-        mWindows.push_back(spellCreationDialog);
-        mGuiModeStates[GM_SpellCreation] = GuiModeState(spellCreationDialog);
+        auto spellCreationDialog = std::make_unique<SpellCreationDialog>();
+        mGuiModeStates[GM_SpellCreation] = GuiModeState(spellCreationDialog.get());
+        mWindows.push_back(std::move(spellCreationDialog));
 
-        EnchantingDialog* enchantingDialog = new EnchantingDialog();
-        mWindows.push_back(enchantingDialog);
-        mGuiModeStates[GM_Enchanting] = GuiModeState(enchantingDialog);
+        auto enchantingDialog = std::make_unique<EnchantingDialog>();
+        mGuiModeStates[GM_Enchanting] = GuiModeState(enchantingDialog.get());
+        mWindows.push_back(std::move(enchantingDialog));
 
-        TrainingWindow* trainingWindow = new TrainingWindow();
-        mWindows.push_back(trainingWindow);
-        mGuiModeStates[GM_Training] = GuiModeState({trainingWindow->getProgressBar(), trainingWindow});
+        auto trainingWindow = std::make_unique<TrainingWindow>();
+        mGuiModeStates[GM_Training] = GuiModeState({trainingWindow->getProgressBar(), trainingWindow.get()});
+        mWindows.push_back(std::move(trainingWindow));
 
-        MerchantRepair* merchantRepair = new MerchantRepair();
-        mWindows.push_back(merchantRepair);
-        mGuiModeStates[GM_MerchantRepair] = GuiModeState(merchantRepair);
+        auto merchantRepair = std::make_unique<MerchantRepair>();
+        mGuiModeStates[GM_MerchantRepair] = GuiModeState(merchantRepair.get());
+        mWindows.push_back(std::move(merchantRepair));
 
-        Repair* repair = new Repair();
-        mWindows.push_back(repair);
-        mGuiModeStates[GM_Repair] = GuiModeState(repair);
+        auto repair = std::make_unique<Repair>();
+        mGuiModeStates[GM_Repair] = GuiModeState(repair.get());
+        mWindows.push_back(std::move(repair));
 
-        mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
+        mSoulgemDialog = std::make_unique<SoulgemDialog>(mMessageBoxManager.get());
 
-        CompanionWindow* companionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
-        mWindows.push_back(companionWindow);
-        trackWindow(companionWindow, "companion");
-        mGuiModeStates[GM_Companion] = GuiModeState({mInventoryWindow, companionWindow});
+        auto companionWindow = std::make_unique<CompanionWindow>(mDragAndDrop.get(), mMessageBoxManager.get());
+        trackWindow(companionWindow.get(), "companion");
+        mGuiModeStates[GM_Companion] = GuiModeState({mInventoryWindow, companionWindow.get()});
+        mWindows.push_back(std::move(companionWindow));
 
-        mJailScreen = new JailScreen();
-        mWindows.push_back(mJailScreen);
+        auto jailScreen = std::make_unique<JailScreen>();
+        mJailScreen = jailScreen.get();
+        mWindows.push_back(std::move(jailScreen));
         mGuiModeStates[GM_Jail] = GuiModeState(mJailScreen);
 
         std::string werewolfFaderTex = "textures\\werewolfoverlay.dds";
         if (mResourceSystem->getVFS()->exists(werewolfFaderTex))
         {
-            mWerewolfFader = new ScreenFader(werewolfFaderTex);
-            mWindows.push_back(mWerewolfFader);
+            auto werewolfFader = std::make_unique<ScreenFader>(werewolfFaderTex);
+            mWerewolfFader = werewolfFader.get();
+            mWindows.push_back(std::move(werewolfFader));
         }
-        mBlindnessFader = new ScreenFader("black");
-        mWindows.push_back(mBlindnessFader);
+        auto blindnessFader = std::make_unique<ScreenFader>("black");
+        mBlindnessFader = blindnessFader.get();
+        mWindows.push_back(std::move(blindnessFader));
 
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
         std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
@@ -460,24 +472,28 @@ namespace MWGui
             hitFaderTexture = "textures\\player_hit_01.dds";
             hitFaderCoord = MyGUI::FloatCoord(0.2, 0.25, 0.6, 0.5);
         }
-        mHitFader = new ScreenFader(hitFaderTexture, hitFaderLayout, hitFaderCoord);
-        mWindows.push_back(mHitFader);
+        auto hitFader = std::make_unique<ScreenFader>(hitFaderTexture, hitFaderLayout, hitFaderCoord);
+        mHitFader = hitFader.get();
+        mWindows.push_back(std::move(hitFader));
 
-        mScreenFader = new ScreenFader("black");
-        mWindows.push_back(mScreenFader);
+        auto screenFader = std::make_unique<ScreenFader>("black");
+        mScreenFader = screenFader.get();
+        mWindows.push_back(std::move(screenFader));
 
-        mDebugWindow = new DebugWindow();
-        mWindows.push_back(mDebugWindow);
+        auto debugWindow = std::make_unique<DebugWindow>();
+        mDebugWindow = debugWindow.get();
+        mWindows.push_back(std::move(debugWindow));
 
-        mPostProcessorHud = new PostProcessorHud();
-        mWindows.push_back(mPostProcessorHud);
+        auto postProcessorHud = std::make_unique<PostProcessorHud>();
+        mPostProcessorHud = postProcessorHud.get();
+        mWindows.push_back(std::move(postProcessorHud));
         trackWindow(mPostProcessorHud, "postprocessor");
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"InputBlocker");
 
         mHud->setVisible(true);
 
-        mCharGen = new CharacterCreation(mViewer->getSceneData()->asGroup(), mResourceSystem);
+        mCharGen = std::make_unique<CharacterCreation>(mViewer->getSceneData()->asGroup(), mResourceSystem);
 
         updatePinnedWindows();
 
@@ -486,7 +502,7 @@ namespace MWGui
 
         mStatsWatcher->addListener(mHud);
         mStatsWatcher->addListener(mStatsWindow);
-        mStatsWatcher->addListener(mCharGen);
+        mStatsWatcher->addListener(mCharGen.get());
     }
 
     int WindowManager::getFontHeight() const
@@ -500,10 +516,9 @@ namespace MWGui
         {
             disallowAll();
 
-            mStatsWatcher->removeListener(mCharGen);
-            delete mCharGen;
-            mCharGen = new CharacterCreation(mViewer->getSceneData()->asGroup(), mResourceSystem);
-            mStatsWatcher->addListener(mCharGen);
+            mStatsWatcher->removeListener(mCharGen.get());
+            mCharGen = std::make_unique<CharacterCreation>(mViewer->getSceneData()->asGroup(), mResourceSystem);
+            mStatsWatcher->addListener(mCharGen.get());
         }
         else
             allow(GW_ALL);
@@ -525,17 +540,9 @@ namespace MWGui
             MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
             MyGUI::ClipboardManager::getInstance().eventClipboardRequested.clear();
 
-            for (WindowBase* window : mWindows)
-                delete window;
             mWindows.clear();
-
-            delete mMessageBoxManager;
-            delete mLocalMapRender;
-            delete mCharGen;
-            delete mDragAndDrop;
-            delete mSoulgemDialog;
-            delete mCursorManager;
-            delete mToolTips;
+            mMessageBoxManager.reset();
+            mToolTips.reset();
 
             mKeyboardNavigation.reset();
 
@@ -544,11 +551,8 @@ namespace MWGui
             mFontLoader.reset();
 
             mGui->shutdown();
-            delete mGui;
 
             mGuiPlatform->shutdown();
-            delete mGuiPlatform;
-            delete mVideoWrapper;
         }
         catch(const MyGUI::Exception& e)
         {
@@ -700,7 +704,7 @@ namespace MWGui
         }
 
         GuiModeState& state = mGuiModeStates[mGuiModes.back()];
-        for (WindowBase* window : state.mWindows)
+        for (const auto& window : state.mWindows)
         {
             if (!window->exit())
             {
@@ -1164,7 +1168,7 @@ namespace MWGui
             it->first->setSize(size);
         }
 
-        for (WindowBase* window : mWindows)
+        for (const auto& window : mWindows)
             window->onResChange(x, y);
 
         // TODO: check if any windows are now off-screen and move them back if so
@@ -1726,7 +1730,7 @@ namespace MWGui
     {
         mPlayerBounty = -1;
 
-        for (WindowBase* window : mWindows)
+        for (const auto& window : mWindows)
             window->clear();
 
         if (mLocalMapRender)
@@ -2270,8 +2274,8 @@ namespace MWGui
 
     void WindowManager::GuiModeState::update(bool visible)
     {
-        for (unsigned int i=0; i<mWindows.size(); ++i)
-            mWindows[i]->setVisible(visible);
+        for (const auto& window : mWindows)
+            window->setVisible(visible);
     }
 
     void WindowManager::watchActor(const MWWorld::Ptr& ptr)
@@ -2299,7 +2303,7 @@ namespace MWGui
 
     void WindowManager::onDeleteCustomData(const MWWorld::Ptr& ptr)
     {
-        for(auto* window : mWindows)
+        for(const auto& window : mWindows)
             window->onDeleteCustomData(ptr);
     }
 

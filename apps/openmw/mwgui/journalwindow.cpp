@@ -648,9 +648,9 @@ namespace
 }
 
 // glue the implementation to the interface
-MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
+std::unique_ptr<MWGui::JournalWindow> MWGui::JournalWindow::create(JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
 {
-    return new JournalWindowImpl (Model, questList, encoding);
+    return std::make_unique<JournalWindowImpl>(Model, questList, encoding);
 }
 
 MWGui::JournalWindow::JournalWindow()
