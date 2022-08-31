@@ -34,7 +34,6 @@ namespace MWGui
     EnchantingDialog::EnchantingDialog()
         : WindowBase("openmw_enchanting_dialog.layout")
         , EffectEditorBase(EffectEditorBase::Enchanting)
-        , mItemSelectionDialog(nullptr)
     {
         getWidget(mName, "NameEdit");
         getWidget(mCancelButton, "CancelButton");
@@ -60,11 +59,6 @@ namespace MWGui
         mBuyButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onBuyButtonClicked);
         mTypeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onTypeButtonClicked);
         mName->eventEditSelectAccept += MyGUI::newDelegate(this, &EnchantingDialog::onAccept);
-    }
-
-    EnchantingDialog::~EnchantingDialog()
-    {
-        delete mItemSelectionDialog;
     }
 
     void EnchantingDialog::onOpen()
@@ -195,8 +189,7 @@ namespace MWGui
     {
         if (mEnchanting.getOldItem().isEmpty())
         {
-            delete mItemSelectionDialog;
-            mItemSelectionDialog = new ItemSelectionDialog("#{sEnchantItems}");
+            mItemSelectionDialog = std::make_unique<ItemSelectionDialog>("#{sEnchantItems}");
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
             mItemSelectionDialog->setVisible(true);
@@ -250,8 +243,7 @@ namespace MWGui
     {
         if (mEnchanting.getGem().isEmpty())
         {
-            delete mItemSelectionDialog;
-            mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}");
+            mItemSelectionDialog = std::make_unique<ItemSelectionDialog>("#{sSoulGemsWithSouls}");
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
             mItemSelectionDialog->setVisible(true);

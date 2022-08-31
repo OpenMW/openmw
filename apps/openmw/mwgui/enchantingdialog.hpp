@@ -1,6 +1,8 @@
 #ifndef MWGUI_ENCHANTINGDIALOG_H
 #define MWGUI_ENCHANTINGDIALOG_H
 
+#include <memory>
+
 #include "spellcreationdialog.hpp"
 
 #include "../mwmechanics/enchanting.hpp"
@@ -15,7 +17,7 @@ namespace MWGui
     {
     public:
         EnchantingDialog();
-        virtual ~EnchantingDialog();
+        virtual ~EnchantingDialog() = default;
 
         void onOpen() override;
 
@@ -48,7 +50,7 @@ namespace MWGui
         void onTypeButtonClicked(MyGUI::Widget* sender);
         void onAccept(MyGUI::EditBox* sender);
 
-        ItemSelectionDialog* mItemSelectionDialog;
+        std::unique_ptr<ItemSelectionDialog> mItemSelectionDialog;
 
         MyGUI::Widget* mChanceLayout;
 
