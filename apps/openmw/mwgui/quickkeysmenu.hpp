@@ -3,15 +3,14 @@
 
 #include <memory>
 
-#include "windowbase.hpp"
-
+#include "itemselection.hpp"
 #include "spellmodel.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
 
     class QuickKeysMenuAssign;
-    class ItemSelectionDialog;
     class MagicSelectionDialog;
     class ItemWidget;
     class SpellView;

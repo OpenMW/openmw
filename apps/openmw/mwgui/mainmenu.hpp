@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "savegamedialog.hpp"
 #include "windowbase.hpp"
 
 namespace Gui
@@ -19,7 +20,6 @@ namespace MWGui
 {
 
     class BackgroundImage;
-    class SaveGameDialog;
     class VideoWidget;
 
     class MainMenu : public WindowBase

@@ -3,13 +3,12 @@
 
 #include <memory>
 
-#include "windowpinnablebase.hpp"
-
+#include "spellicons.hpp"
 #include "spellmodel.hpp"
+#include "windowpinnablebase.hpp"
 
 namespace MWGui
 {
-    class SpellIcons;
     class SpellView;
 
     class SpellWindow : public WindowPinnableBase, public NoDrop

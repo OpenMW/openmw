@@ -14,7 +14,6 @@ namespace MWGui
 {
     class ItemView;
     class SortFilterItemModel;
-    class InventoryItemModel;
 
     class ItemSelectionDialog : public WindowModal
     {

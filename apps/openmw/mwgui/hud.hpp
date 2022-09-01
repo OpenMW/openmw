@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "mapwindow.hpp"
+#include "spellicons.hpp"
 #include "statswatcher.hpp"
 
 namespace MWWorld
@@ -14,7 +15,6 @@ namespace MWWorld
 namespace MWGui
 {
     class DragAndDrop;
-    class SpellIcons;
     class ItemWidget;
     class SpellWidget;
 
