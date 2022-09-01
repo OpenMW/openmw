@@ -8,6 +8,7 @@
 
 #include "bookpage.hpp"
 
+#include "../mwbase/dialoguemanager.hpp"
 #include "../mwdialogue/keywordsearch.hpp"
 
 #include <MyGUI_Delegate.h>
@@ -20,7 +21,21 @@ namespace Gui
 
 namespace MWGui
 {
-    class ResponseCallback;
+    class DialogueWindow;
+
+    class ResponseCallback : public MWBase::DialogueManager::ResponseCallback
+    {
+        DialogueWindow* mWindow;
+        bool mNeedMargin;
+        
+    public:
+        ResponseCallback(DialogueWindow* win, bool needMargin = true) : mWindow(win), mNeedMargin(needMargin)
+        {}
+
+        void addResponse(const std::string& title, const std::string& text) override;
+
+        void updateTopics() const;
+    };
 
     class PersuasionDialog : public WindowModal
     {

@@ -13,7 +13,6 @@
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_PointerManager.h>
 #include <MyGUI_InputManager.h>
-#include <MyGUI_Gui.h>
 #include <MyGUI_ClipboardManager.h>
 
 // For BT_NO_PROFILE
@@ -23,9 +22,6 @@
 #include <SDL_clipboard.h>
 
 #include <components/debug/debuglog.hpp>
-
-#include <components/sdlutil/sdlcursormanager.hpp>
-#include <components/sdlutil/sdlvideowrapper.hpp>
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -71,17 +67,13 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-#include "../mwrender/localmap.hpp"
 #include "../mwrender/postprocessor.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
 #include "journalviewmodel.hpp"
-#include "charactercreation.hpp"
 #include "dialogue.hpp"
 #include "statswindow.hpp"
-#include "messagebox.hpp"
-#include "tooltips.hpp"
 #include "scrollwindow.hpp"
 #include "bookwindow.hpp"
 #include "hud.hpp"
@@ -105,7 +97,6 @@
 #include "cursor.hpp"
 #include "merchantrepair.hpp"
 #include "repair.hpp"
-#include "soulgemdialog.hpp"
 #include "companionwindow.hpp"
 #include "inventorywindow.hpp"
 #include "bookpage.hpp"
@@ -117,7 +108,6 @@
 #include "debugwindow.hpp"
 #include "postprocessorhud.hpp"
 #include "spellview.hpp"
-#include "draganddrop.hpp"
 #include "container.hpp"
 #include "controllers.hpp"
 #include "jailscreen.hpp"

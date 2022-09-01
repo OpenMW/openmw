@@ -12,10 +12,7 @@
 
 #include "windowbase.hpp"
 
-namespace MWMechanics
-{
-    class Alchemy;
-}
+#include "../mwmechanics/alchemy.hpp"
 
 namespace MWGui
 {

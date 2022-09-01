@@ -32,31 +32,15 @@
 
 namespace MWGui
 {
-
-    class ResponseCallback : public MWBase::DialogueManager::ResponseCallback
+    void ResponseCallback::addResponse(const std::string& title, const std::string& text)
     {
-    public:
-        ResponseCallback(DialogueWindow* win, bool needMargin=true)
-            : mWindow(win)
-            , mNeedMargin(needMargin)
-        {
+        mWindow->addResponse(title, text, mNeedMargin);
+    }
 
-        }
-
-        void addResponse(const std::string& title, const std::string& text) override
-        {
-            mWindow->addResponse(title, text, mNeedMargin);
-        }
-
-        void updateTopics()
-        {
-            mWindow->updateTopics();
-        }
-
-    private:
-        DialogueWindow* mWindow;
-        bool mNeedMargin;
-    };
+    void ResponseCallback::updateTopics() const
+    {
+        mWindow->updateTopics();
+    }
 
     PersuasionDialog::PersuasionDialog(std::unique_ptr<ResponseCallback> callback)
         : WindowModal("openmw_persuasion_dialog.layout")
