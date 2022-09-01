@@ -9,7 +9,7 @@ namespace MWGui
     class SortFilterItemModel : public ProxyItemModel
     {
     public:
-        SortFilterItemModel (ItemModel* sourceModel);
+        SortFilterItemModel(std::unique_ptr<ItemModel> sourceModel);
 
         void update() override;
 

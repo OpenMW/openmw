@@ -1,6 +1,9 @@
 #ifndef OPENMW_GAME_MWGUI_MAINMENU_H
 #define OPENMW_GAME_MWGUI_MAINMENU_H
 
+#include <memory>
+
+#include "savegamedialog.hpp"
 #include "windowbase.hpp"
 
 namespace Gui
@@ -17,7 +20,6 @@ namespace MWGui
 {
 
     class BackgroundImage;
-    class SaveGameDialog;
     class VideoWidget;
 
     class MainMenu : public WindowBase
@@ -30,7 +32,6 @@ namespace MWGui
         public:
 
             MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription);
-            ~MainMenu();
 
             void onResChange(int w, int h) override;
 
@@ -61,7 +62,7 @@ namespace MWGui
 
             void updateMenu();
 
-            SaveGameDialog* mSaveGameDialog;
+            std::unique_ptr<SaveGameDialog> mSaveGameDialog;
     };
 
 }

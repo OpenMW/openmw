@@ -163,7 +163,7 @@ namespace MWGui
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
         mMainWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &HUD::onWorldMouseLostFocus);
 
-        mSpellIcons = new SpellIcons();
+        mSpellIcons = std::make_unique<SpellIcons>();
     }
 
     HUD::~HUD()
@@ -171,8 +171,6 @@ namespace MWGui
         mMainWidget->eventMouseLostFocus.clear();
         mMainWidget->eventMouseMove.clear();
         mMainWidget->eventMouseButtonClick.clear();
-
-        delete mSpellIcons;
     }
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)

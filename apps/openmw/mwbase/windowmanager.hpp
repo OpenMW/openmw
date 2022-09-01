@@ -150,7 +150,7 @@ namespace MWBase
             virtual MWGui::CountDialog* getCountDialog() = 0;
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
-            virtual const std::vector<MWGui::MessageBox*> getActiveMessageBoxes() = 0;
+            virtual const std::vector<std::unique_ptr<MWGui::MessageBox>>& getActiveMessageBoxes() const = 0;
             virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
 
             /// Make the player use an item, while updating GUI state accordingly

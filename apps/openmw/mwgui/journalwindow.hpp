@@ -18,7 +18,7 @@ namespace MWGui
         JournalWindow();
 
         /// construct a new instance of the one JournalWindow implementation
-        static JournalWindow * create (std::shared_ptr <JournalViewModel> Model, bool questList, ToUTF8::FromType encoding);
+        static std::unique_ptr<JournalWindow> create(std::shared_ptr<JournalViewModel> Model, bool questList, ToUTF8::FromType encoding);
 
         /// destroy this instance of the JournalWindow implementation
         virtual ~JournalWindow () {}

@@ -14,7 +14,6 @@ namespace MWGui
 {
     class ItemView;
     class SortFilterItemModel;
-    class InventoryItemModel;
 
     class ItemSelectionDialog : public WindowModal
     {
@@ -36,7 +35,6 @@ namespace MWGui
     private:
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;
-        InventoryItemModel* mModel;
 
         void onSelectedItem(int index);
 

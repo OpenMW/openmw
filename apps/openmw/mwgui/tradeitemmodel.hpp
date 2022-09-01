@@ -13,7 +13,7 @@ namespace MWGui
     class TradeItemModel : public ProxyItemModel
     {
     public:
-        TradeItemModel (ItemModel* sourceModel, const MWWorld::Ptr& merchant);
+        TradeItemModel(std::unique_ptr<ItemModel> sourceModel, const MWWorld::Ptr& merchant);
 
         bool allowedToUseItems() const override;
 

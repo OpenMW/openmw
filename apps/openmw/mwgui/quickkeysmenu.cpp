@@ -39,9 +39,6 @@ namespace MWGui
         , mKey(std::vector<keyData>(10))
         , mSelected(nullptr)
         , mActivated(nullptr)
-        , mAssignDialog(nullptr)
-        , mItemSelectionDialog(nullptr)
-        , mMagicSelectionDialog(nullptr)
 
     {
         getWidget(mOkButton, "OKButton");
@@ -72,13 +69,6 @@ namespace MWGui
         {
             unassign(&mKey[i]);
         }
-    }
-
-    QuickKeysMenu::~QuickKeysMenu()
-    {
-        delete mAssignDialog;
-        delete mItemSelectionDialog;
-        delete mMagicSelectionDialog;
     }
 
     inline void QuickKeysMenu::validate(int index)
@@ -194,7 +184,7 @@ namespace MWGui
 
         // open assign dialog
         if (!mAssignDialog)
-            mAssignDialog = new QuickKeysMenuAssign(this);
+            mAssignDialog = std::make_unique<QuickKeysMenuAssign>(this);
 
         mAssignDialog->setVisible(true);
     }
@@ -208,7 +198,7 @@ namespace MWGui
     {
         if (!mItemSelectionDialog)
         {
-            mItemSelectionDialog = new ItemSelectionDialog("#{sQuickMenu6}");
+            mItemSelectionDialog = std::make_unique<ItemSelectionDialog>("#{sQuickMenu6}");
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItem);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItemCancel);
         }
@@ -223,7 +213,7 @@ namespace MWGui
     {
         if (!mMagicSelectionDialog)
         {
-            mMagicSelectionDialog = new MagicSelectionDialog(this);
+            mMagicSelectionDialog = std::make_unique<MagicSelectionDialog>(this);
         }
         mMagicSelectionDialog->setVisible(true);
 

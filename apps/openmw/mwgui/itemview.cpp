@@ -16,23 +16,13 @@ namespace MWGui
 {
 
 ItemView::ItemView()
-    : mModel(nullptr)
-    , mScrollView(nullptr)
+    : mScrollView(nullptr)
 {
 }
 
-ItemView::~ItemView()
+void ItemView::setModel(std::unique_ptr<ItemModel> model)
 {
-    delete mModel;
-}
-
-void ItemView::setModel(ItemModel *model)
-{
-    if (mModel == model)
-        return;
-
-    delete mModel;
-    mModel = model;
+    mModel = std::move(model);
 
     update();
 }
@@ -114,7 +104,7 @@ void ItemView::update()
         ItemWidget* itemWidget = dragArea->createWidget<ItemWidget>("MW_ItemIcon",
             MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
         itemWidget->setUserString("ToolTipType", "ItemModelIndex");
-        itemWidget->setUserData(std::make_pair(i, mModel));
+        itemWidget->setUserData(std::make_pair(i, mModel.get()));
         ItemWidget::ItemState state = ItemWidget::None;
         if (item.mType == ItemStack::Type_Barter)
             state = ItemWidget::Barter;

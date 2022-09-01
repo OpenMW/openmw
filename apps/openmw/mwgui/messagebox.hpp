@@ -1,6 +1,8 @@
 #ifndef MWGUI_MESSAGE_BOX_H
 #define MWGUI_MESSAGE_BOX_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 
 namespace MyGUI
@@ -28,7 +30,7 @@ namespace MWGui
 
             int getMessagesCount();
 
-            const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe; }
+            const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe.get(); }
 
             /// Remove all message boxes
             void clear();
@@ -47,11 +49,11 @@ namespace MWGui
 
             void setVisible(bool value);
 
-            const std::vector<MessageBox*> getActiveMessageBoxes();
+            const std::vector<std::unique_ptr<MessageBox>>& getActiveMessageBoxes() const;
 
         private:
-            std::vector<MessageBox*> mMessageBoxes;
-            InteractiveMessageBox* mInterMessageBoxe;
+            std::vector<std::unique_ptr<MessageBox>> mMessageBoxes;
+            std::unique_ptr<InteractiveMessageBox> mInterMessageBoxe;
             MessageBox* mStaticMessageBox;
             float mMessageBoxSpeed;
             int mLastButtonPressed;

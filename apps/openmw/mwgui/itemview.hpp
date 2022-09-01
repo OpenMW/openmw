@@ -13,13 +13,12 @@ namespace MWGui
     MYGUI_RTTI_DERIVED(ItemView)
     public:
         ItemView();
-        ~ItemView() override;
 
         /// Register needed components with MyGUI's factory manager
         static void registerComponents ();
 
         /// Takes ownership of \a model
-        void setModel (ItemModel* model);
+        void setModel(std::unique_ptr<ItemModel> model);
 
         typedef MyGUI::delegates::CMultiDelegate1<ItemModel::ModelIndex> EventHandle_ModelIndex;
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -44,7 +43,7 @@ namespace MWGui
         void onSelectedBackground (MyGUI::Widget* sender);
         void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
 
-        ItemModel* mModel;
+        std::unique_ptr<ItemModel> mModel;
         MyGUI::ScrollView* mScrollView;
 
     };

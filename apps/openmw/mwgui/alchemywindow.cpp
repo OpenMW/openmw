@@ -34,7 +34,7 @@ namespace MWGui
         , mCurrentFilter(FilterType::ByName)
         , mModel(nullptr)
         , mSortModel(nullptr)
-        , mAlchemy(new MWMechanics::Alchemy())
+        , mAlchemy(std::make_unique<MWMechanics::Alchemy>())
         , mApparatus (4)
         , mIngredients (4)
     {
@@ -245,13 +245,15 @@ namespace MWGui
         mAlchemy->clear();
         mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
-        mModel = new InventoryItemModel(MWMechanics::getPlayer());
-        mSortModel = new SortFilterItemModel(mModel);
+        auto model = std::make_unique<InventoryItemModel>(MWMechanics::getPlayer());
+        mModel = model.get();
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::move(model));
+        mSortModel = sortModel.get();
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
-        mItemView->setModel (mSortModel);
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
 
-        mNameEdit->setCaption("");
+        mNameEdit->setCaption({});
         mBrewCountEdit->setValue(1);
 
         int index = 0;
