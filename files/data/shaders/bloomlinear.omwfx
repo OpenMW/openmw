@@ -11,32 +11,32 @@ uniform_float uThreshold {
     min = 0.0;
     max = 1.0;
     step = 0.01;
-    description = "#{BuiltInShaders:ThresholdLevelName}";
-    display_name = "#{BuiltInShaders:ThresholdLevelDescription}";
+    display_name = "#{BuiltInShaders:BloomThresholdLevelName}";
+    description = "#{BuiltInShaders:BloomThresholdLevelDescription}";
 }
 uniform_float uClamp {
     default = 1.0;
     min = 0.0;
     max = 1.0;
     step = 0.01;
-    description = "#{BuiltInShaders:BloomClampLevelName}";
-    display_name = "#{BuiltInShaders:BloomClampLevelDescription}";
+    display_name = "#{BuiltInShaders:BloomClampLevelName}";
+    description = "#{BuiltInShaders:BloomClampLevelDescription}";
 }
 uniform_float uSkyFactor {
     default = 0.5;
     min = 0.0;
     max = 2.0;
     step = 0.01;
-    description = "#{BuiltInShaders:SkyFactorLevelName}";
-    display_name = "#{BuiltInShaders:SkyFactorLevelDescription}";
+    display_name = "#{BuiltInShaders:SkyFactorLevelName}";
+    description = "#{BuiltInShaders:SkyFactorLevelDescription}";
 }
 uniform_float uRadius {
     default = 0.5;
     min = 0.0;
     max = 1.0;
     step = 0.01;
-    description = "#{BuiltInShaders:RadiusLevelName}";
-    display_name = "#{BuiltInShaders:RadiusLevelDescription}";
+    display_name = "#{BuiltInShaders:RadiusLevelName}";
+    description = "#{BuiltInShaders:RadiusLevelDescription}";
 }
 uniform_float uStrength {
     default = 0.25;
