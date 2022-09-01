@@ -21,6 +21,8 @@
 #include <numeric>
 #include <set>
 #include <type_traits>
+#include <optional>
+#include <tuple>
 
 namespace DetourNavigator
 {
@@ -31,15 +33,22 @@ namespace DetourNavigator
             return std::abs(lhs.x() - rhs.x()) + std::abs(lhs.y() - rhs.y());
         }
 
-        int getMinDistanceTo(const TilePosition& position, int maxDistance,
-                             const std::set<std::tuple<AgentBounds, TilePosition>>& pushedTiles,
-                             const std::set<std::tuple<AgentBounds, TilePosition>>& presentTiles)
+        bool isAbsentTileTooClose(const TilePosition& position, int distance,
+            const std::set<std::tuple<AgentBounds, TilePosition>>& pushedTiles,
+            const std::set<std::tuple<AgentBounds, TilePosition>>& presentTiles,
+            const Misc::ScopeGuarded<std::set<std::tuple<AgentBounds, TilePosition>>>& processingTiles)
         {
-            int result = maxDistance;
-            for (const auto& [agentBounds, tile] : pushedTiles)
-                if (presentTiles.find(std::tie(agentBounds, tile)) == presentTiles.end())
-                    result = std::min(result, getManhattanDistance(position, tile));
-            return result;
+            const auto isAbsentAndCloserThan = [&] (const std::tuple<AgentBounds, TilePosition>& v)
+            {
+                return presentTiles.find(v) == presentTiles.end()
+                    && getManhattanDistance(position, std::get<1>(v)) < distance;
+            };
+            if (std::any_of(pushedTiles.begin(), pushedTiles.end(), isAbsentAndCloserThan))
+                return true;
+            if (const auto locked = processingTiles.lockConst();
+                std::any_of(locked->begin(), locked->end(), isAbsentAndCloserThan))
+                return true;
+            return false;
         }
 
         auto getPriority(const Job& job) noexcept
@@ -248,27 +257,22 @@ namespace DetourNavigator
     void AsyncNavMeshUpdater::waitUntilJobsDoneForNotPresentTiles(Loading::Listener& listener)
     {
         const std::size_t initialJobsLeft = getTotalJobs();
-        std::size_t maxProgress = initialJobsLeft + mThreads.size();
+        std::size_t maxProgress = initialJobsLeft;
         std::size_t prevJobsLeft = initialJobsLeft;
         std::size_t jobsDone = 0;
         std::size_t jobsLeft = 0;
         const int maxDistanceToPlayer = mSettings.get().mWaitUntilMinDistanceToPlayer;
         const TilePosition playerPosition = *mPlayerTile.lockConst();
-        int minDistanceToPlayer = 0;
         const auto isDone = [&]
         {
             jobsLeft = mJobs.size();
             if (jobsLeft == 0)
-            {
-                minDistanceToPlayer = 0;
                 return true;
-            }
-            minDistanceToPlayer = getMinDistanceTo(playerPosition, maxDistanceToPlayer, mPushed, mPresentTiles);
-            return minDistanceToPlayer >= maxDistanceToPlayer;
+            return !isAbsentTileTooClose(playerPosition, maxDistanceToPlayer, mPushed, mPresentTiles, mProcessingTiles);
         };
         std::unique_lock<std::mutex> lock(mMutex);
-        if (getMinDistanceTo(playerPosition, maxDistanceToPlayer, mPushed, mPresentTiles) >= maxDistanceToPlayer
-                || (mJobs.empty() && mProcessingTiles.lockConst()->empty()))
+        if (!isAbsentTileTooClose(playerPosition, maxDistanceToPlayer, mPushed, mPresentTiles, mProcessingTiles)
+            || mJobs.empty())
             return;
         Loading::ScopedLoad load(&listener);
         listener.setLabel("#{Navigation:BuildingNavigationMesh}");
@@ -277,7 +281,7 @@ namespace DetourNavigator
         {
             if (maxProgress < jobsLeft)
             {
-                maxProgress = jobsLeft + mThreads.size();
+                maxProgress = jobsLeft;
                 listener.setProgressRange(maxProgress);
                 listener.setProgress(jobsDone);
             }
@@ -288,12 +292,6 @@ namespace DetourNavigator
                 prevJobsLeft = jobsLeft;
                 listener.increaseProgress(newJobsDone);
             }
-        }
-        lock.unlock();
-        if (minDistanceToPlayer < maxDistanceToPlayer)
-        {
-            mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
-            listener.setProgress(maxProgress);
         }
     }
 
