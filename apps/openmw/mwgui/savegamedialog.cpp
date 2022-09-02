@@ -432,7 +432,7 @@ namespace MWGui
         const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
         if (!data.size())
         {
-            Log(Debug::Warning) << "Warning: Selected saved game has no savegame screenshot";
+            Log(Debug::Warning) << "Selected save file '" << mCurrentSlot->mPath.filename() << "' has no savegame screenshot";
             return;
         }
 
@@ -441,14 +441,14 @@ namespace MWGui
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
         if (!readerwriter)
         {
-            Log(Debug::Error) << "Error: Can't open savegame screenshot, no jpg readerwriter found";
+            Log(Debug::Error) << "Can't open savegame screenshot, no jpg readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
         if (!result.success())
         {
-            Log(Debug::Error) << "Error: Failed to read savegame screenshot: " << result.message() << " code " << result.status();
+            Log(Debug::Error) << "Failed to read savegame screenshot: " << result.message() << " code " << result.status();
             return;
         }
 
