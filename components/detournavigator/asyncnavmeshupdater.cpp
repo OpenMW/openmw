@@ -125,7 +125,7 @@ namespace DetourNavigator
             case JobStatus::Fail: return stream << "JobStatus::Fail";
             case JobStatus::MemoryCacheMiss: return stream << "JobStatus::MemoryCacheMiss";
         }
-        return stream << "JobStatus::" << static_cast<std::underlying_type_t<JobState>>(value);
+        return stream << "JobStatus::" << static_cast<std::underlying_type_t<JobStatus>>(value);
     }
 
     Job::Job(const AgentBounds& agentBounds, std::weak_ptr<GuardedNavMeshCacheItem> navMeshCacheItem,
