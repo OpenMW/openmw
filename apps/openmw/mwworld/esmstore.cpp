@@ -215,8 +215,8 @@ namespace MWWorld
         Store<ESM::Skill> mSkills;
         Store<ESM::Attribute> mAttributes;
 
-        std::map<ESM::RecNameInts, StoreBase*>                   mRecNameToStore;
-        std::unordered_map<const StoreBase*, ESM::RecNameInts>   mStoreToRecName;
+        std::map<ESM::RecNameInts, DynamicStore*>                   mRecNameToStore;
+        std::unordered_map<const DynamicStore*, ESM::RecNameInts>   mStoreToRecName;
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
@@ -291,7 +291,7 @@ namespace MWWorld
         template<typename T>
         static void createStore(ESMStore& stores)
         {
-            if constexpr (std::is_convertible<Store<T>*, StoreBase*>::value)
+            if constexpr (std::is_convertible<Store<T>*, DynamicStore*>::value)
             {
                 int storeIndex = SRecordType<T>::sStoreIndex;
                 stores.mStores[storeIndex] = std::make_unique<Store<T>>();
@@ -307,7 +307,7 @@ namespace MWWorld
         {
             for (const auto& recordStorePair : mRecNameToStore)
             {
-                const StoreBase* storePtr = recordStorePair.second;
+                const DynamicStore* storePtr = recordStorePair.second;
                 mStoreToRecName[storePtr] = recordStorePair.first;
             }
         }
@@ -481,7 +481,7 @@ void ESMStore::setUp()
 {
     mStoreImp->mIds.clear();
 
-    std::map<ESM::RecNameInts, StoreBase*>::iterator storeIt = mStoreImp->mRecNameToStore.begin();
+    std::map<ESM::RecNameInts, DynamicStore*>::iterator storeIt = mStoreImp->mRecNameToStore.begin();
     for (; storeIt != mStoreImp->mRecNameToStore.end(); ++storeIt) {
         storeIt->second->setUp();
 

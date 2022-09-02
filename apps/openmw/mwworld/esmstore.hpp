@@ -38,7 +38,7 @@ namespace MWWorld
 
         std::unordered_map<std::string, int> mRefCount;
 
-        std::vector<std::unique_ptr< StoreBase >> mStores;
+        std::vector<std::unique_ptr< DynamicStore >> mStores;
 
         unsigned int mDynamicCount;
 
@@ -65,7 +65,7 @@ namespace MWWorld
         ESM::LuaScriptsCfg getLuaScriptsCfg() const;
 
         /// \todo replace with SharedIterator<StoreBase>
-        typedef std::vector<std::unique_ptr< StoreBase>>::const_iterator iterator;
+        typedef std::vector<std::unique_ptr< DynamicStore>>::const_iterator iterator;
 
         iterator begin() const {
             return mStores.begin();
@@ -130,7 +130,7 @@ namespace MWWorld
         std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
     };
 
-    //Special cases these aren't StoreBase, but IndexedStore
+    //Special cases these aren't DynamicStore, but IndexedStore
     template <> const Store<ESM::MagicEffect>& ESMStore::get<ESM::MagicEffect>() const;
     template <> Store<ESM::MagicEffect>& ESMStore::getWritable<ESM::MagicEffect>();
 
