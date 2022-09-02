@@ -27,9 +27,6 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/luamanager.hpp"
 
-#include "../mwrender/renderingmanager.hpp"
-#include <components/debug/debugdraw.hpp>
-
 #include "../mwmechanics/aibreathe.hpp"
 
 #include "../mwrender/vismask.hpp"
@@ -1610,28 +1607,9 @@ namespace MWMechanics
                     continue;
                 }
 
-
                 world->setActorActive(actor.getPtr(), true);
 
                 const bool isDead = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead();
-                auto actorPos = actor.getPtr().getRefData().getPosition().asVec3();
-                auto& debugRender = world->getRenderingManager()->getDebugDrawer();
-                if (isDead)
-                {
-                    debugRender.drawCube(actorPos, osg::Vec3(50.,50.,50.),MWRenderDebug::colorGreen);
-                }
-                else if (isPlayer)
-                {
-                    debugRender.addDrawCall(MWRenderDebug::DrawCall::cylinder(actorPos, osg::Vec3(50.,50.,75.),MWRenderDebug::colorRed ));
-                }
-                else
-                {
-                    debugRender.addDrawCall(MWRenderDebug::DrawCall::wireCube(actorPos));
-                }
-                debugRender.addLine(actorPos, actorPos + osg::Vec3(0., 0., 200.),MWRenderDebug::colorBlue);
-
-
-
                 if (!isDead && (!godmode || !isPlayer) && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())
                     ctrl.skipAnim();
 

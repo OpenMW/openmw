@@ -4,7 +4,7 @@
 
 varying vec3 vertexNormal;
 
-uniform int  useAdvancedShader = 0;
+uniform bool useAdvancedShader = false;
 
 void main()
 {
@@ -12,7 +12,7 @@ void main()
 
     float lightAttenuation = dot(-lightDir, vertexNormal) * 0.5 + 0.5;
 
-    if(useAdvancedShader == 0)
+    if(!useAdvancedShader)
     {
         gl_FragData[0] = getDiffuseColor();
     }

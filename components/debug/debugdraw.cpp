@@ -57,8 +57,8 @@ static void generateWireCube(osg::Geometry& geom, float dim)
         normals->push_back(osg::Vec3(1., 1., 1.));
     }
 
-    geom.setVertexArray( vertices);
-    geom.setNormalArray( normals, osg::Array::BIND_PER_VERTEX);
+    geom.setVertexArray(vertices);
+    geom.setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
     geom.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
 }
 
@@ -103,7 +103,7 @@ static void generateCube(osg::Geometry& geom, float dim)
         }
     }
     geom.setVertexArray(vertices);
-    geom.setNormalArray( normals, osg::Array::BIND_PER_VERTEX);
+    geom.setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
     geom.addPrimitiveSet(indices);
 }
 
@@ -223,7 +223,7 @@ static int getIdexBufferWriteFromFrame(const long long int& nFrame)
     return (nFrame + 1) % 2;
 }
 
-namespace MWRenderDebug
+namespace Debug
 {
     void DebugCustomDraw::drawImplementation(osg::RenderInfo& renderInfo) const
     {
@@ -252,11 +252,11 @@ namespace MWRenderDebug
         ext->glUniform3f(transLocation, 0., 0., 0.);
         ext->glUniform3f(colLocation, 1., 1., 1.);
         ext->glUniform3f(scaleLocation, 1., 1., 1.);
-        ext->glUniform1i(normalAsColorLocation, 1);
+        ext->glUniform1i(normalAsColorLocation, true);
 
         mLinesToDraw->drawImplementation(renderInfo);
 
-        ext->glUniform1i(normalAsColorLocation, 0);
+        ext->glUniform1i(normalAsColorLocation, false);
 
         for (const auto& shapeToDraw : mShapesToDraw)
         {
@@ -298,7 +298,7 @@ namespace MWRenderDebug
             lines.setUseDisplayList(false);
             lines.setCullingActive(false);
 
-            lines.setVertexArray( vertices);
+            lines.setVertexArray(vertices);
             lines.setNormalArray(color, osg::Array::BIND_PER_VERTEX);
 
             lines.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
@@ -319,7 +319,7 @@ namespace MWRenderDebug
     class DebugDrawCallback : public SceneUtil::NodeCallback<DebugDrawCallback>
     {
     public:
-        DebugDrawCallback(MWRenderDebug::DebugDrawer& debugDrawer) : mDebugDrawer(debugDrawer) {}
+        DebugDrawCallback(Debug::DebugDrawer& debugDrawer) : mDebugDrawer(debugDrawer) {}
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
@@ -334,11 +334,11 @@ namespace MWRenderDebug
             nv->popFromNodePath();
         }
 
-        MWRenderDebug::DebugDrawer& mDebugDrawer;
+        Debug::DebugDrawer& mDebugDrawer;
     };
 }
 
-MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
+Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
 {
     mCurrentFrame = 0;
     auto vertexShader = shaderManager.getShader("debug_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::VERTEX);
@@ -353,8 +353,8 @@ MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, os
     stateset->addUniform(new osg::Uniform("color", osg::Vec3f(1., 1., 1.)));
     stateset->addUniform(new osg::Uniform("trans", osg::Vec3f(0., 0., 0.)));
     stateset->addUniform(new osg::Uniform("scale", osg::Vec3f(1., 1., 1.)));
-    stateset->addUniform(new osg::Uniform("useNormalAsColor", 0));
-    stateset->addUniform(new osg::Uniform("useAdvancedShader", 1));
+    stateset->addUniform(new osg::Uniform("useNormalAsColor", false));
+    stateset->addUniform(new osg::Uniform("useAdvancedShader", true));
 
     stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
     stateset->setMode(GL_DEPTH_TEST, GL_TRUE);
@@ -388,32 +388,28 @@ MWRenderDebug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, os
     parentNode->addChild(mDebugDrawSceneObjects);
 }
 
-MWRenderDebug::DebugDrawer::~DebugDrawer()
+Debug::DebugDrawer::~DebugDrawer()
 {
 }
 
-void MWRenderDebug::DebugDrawer::update()
-{
-}
-
-void MWRenderDebug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
+void Debug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
 {
     mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)].push_back({ mPosition, mDims, mColor, DrawShape::Cube });
 }
 
-void MWRenderDebug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f color)
+void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f color)
 {
     osg::Vec3 dims = max - min;
     osg::Vec3 pos = min + dims * 0.5f;
     drawCube(pos, dims, color);
 }
 
-void MWRenderDebug::DebugDrawer::addDrawCall(const DrawCall& draw)
+void Debug::DebugDrawer::addDrawCall(const DrawCall& draw)
 {
     mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)].push_back(draw);
 }
 
-void MWRenderDebug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
+void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
 {
     const int indexWrite = getIdexBufferWriteFromFrame(this->mCurrentFrame);
     auto vertices = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getVertexArray());

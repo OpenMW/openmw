@@ -19,12 +19,15 @@ namespace Shader
     class ShaderManager;
 }
 
-namespace MWRenderDebug
+namespace Debug
 {
     static const osg::Vec3f colorWhite = osg::Vec3(1., 1., 1.);
     static const osg::Vec3f colorRed = osg::Vec3(1., 0., 0.);
     static const osg::Vec3f colorBlue = osg::Vec3(0., 0., 1.);
     static const osg::Vec3f colorGreen = osg::Vec3(0., 1., 0.);
+    static const osg::Vec3f colorMagenta = osg::Vec3(1., 0., 1.);
+    static const osg::Vec3f colorYellow = osg::Vec3(1., 1., 0.);
+    static const osg::Vec3f colorCyan = osg::Vec3(0., 1., 1.);
     static const osg::Vec3f colorBlack = osg::Vec3(0., 0., 0.);
     static const osg::Vec3f colorDarkGrey = osg::Vec3(0.25, 0.25, 0.25);
 
@@ -74,7 +77,6 @@ namespace MWRenderDebug
         DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode);
         ~DebugDrawer();
 
-        void update();
         void drawCube(osg::Vec3f mPosition, osg::Vec3f mDims = osg::Vec3(50., 50., 50.), osg::Vec3f mColor = colorWhite);
         void drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f mColor = colorWhite);
         void addDrawCall(const DrawCall& draw);

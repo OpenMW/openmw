@@ -84,7 +84,6 @@
 #include "groundcover.hpp"
 #include "postprocessor.hpp"
 
-
 namespace MWRender
 {
     class PerViewUniformStateUpdater final : public SceneUtil::StateSetUpdater
@@ -491,7 +490,7 @@ namespace MWRender
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         }
 
-        mDebugDraw = std::make_unique<MWRenderDebug::DebugDrawer>(mResourceSystem->getSceneManager()->getShaderManager(), mRootNode);
+        mDebugDraw = std::make_unique<Debug::DebugDrawer>(mResourceSystem->getSceneManager()->getShaderManager(), mRootNode);
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager = std::make_unique<EffectManager>(sceneRoot, mResourceSystem);
@@ -907,7 +906,7 @@ namespace MWRender
         reportStats();
 
         mResourceSystem->getSceneManager()->getShaderManager().update(*mViewer);
-        mDebugDraw->update();
+
         float rainIntensity = mSky->getPrecipitationAlpha();
         mWater->setRainIntensity(rainIntensity);
 
