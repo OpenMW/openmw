@@ -136,17 +136,10 @@ struct StoreIndexToRecordType {
     typedef void recordType;
 };
 
-template <typename T> 
-struct RecordTypeToRecName
-{
-    static const ESM::RecNameInts sRecName;
-};
-
 static int sRecordTypeCounter = 0;
 
 #define OPENMW_ESM_ADD_STORE_TYPE(__Type, __REC_NAME,__ID_NUM) template<> const int MWWorld::SRecordType<__Type>::sStoreIndex = sRecordTypeCounter ++;  \
 template<> struct StoreIndexToRecordType<__ID_NUM > {typedef __Type recordType;}; \
-template<> const ESM::RecNameInts RecordTypeToRecName<__Type>::sRecName = __REC_NAME
 
 OPENMW_ESM_ADD_STORE_TYPE(ESM::Activator,ESM::REC_ACTI,0);
 OPENMW_ESM_ADD_STORE_TYPE(ESM::Potion,ESM::REC_ALCH,1);
@@ -302,7 +295,7 @@ namespace MWWorld
             {
                 int storeIndex = SRecordType<T>::sStoreIndex;
                 stores.mStores[storeIndex] = std::make_unique<Store<T>>();
-                constexpr ESM::RecNameInts recName = RecordTypeToRecName<T>::sRecName;
+                constexpr ESM::RecNameInts recName = T::sRecordId;
                 if constexpr (recName != ESM::REC_INTERNAL_PLAYER)
                 {
                     stores.mStoreImp->mEsm3RecordToStore[recName] = stores.mStores[storeIndex].get();
