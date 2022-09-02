@@ -215,8 +215,8 @@ namespace MWWorld
         Store<ESM::Skill> mSkills;
         Store<ESM::Attribute> mAttributes;
 
-        std::map<ESM::RecNameInts, StoreBase*>                   mEsm3RecordToStore;
-        std::unordered_map<const StoreBase*, ESM::RecNameInts>   mStoreToEsm3Record;
+        std::map<ESM::RecNameInts, StoreBase*>                   mRecNameToStore;
+        std::unordered_map<const StoreBase*, ESM::RecNameInts>   mStoreToRecName;
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
@@ -240,9 +240,9 @@ namespace MWWorld
             record.mId = id;
 
             T *ptr = store.insert(record);
-            auto esm3RecordType_find = stores.mStoreImp->mStoreToEsm3Record.find(&stores.get<T>());
+            auto esm3RecordType_find = stores.mStoreImp->mStoreToRecName.find(&stores.get<T>());
 
-            if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
+            if (esm3RecordType_find != stores.mStoreImp->mStoreToRecName.end())
             {
                 stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
             }
@@ -254,8 +254,8 @@ namespace MWWorld
             Store<T> &store = stores.getWritable<T>();
 
             T *ptr = store.insert(x);
-            auto esm3RecordType_find = stores.mStoreImp->mStoreToEsm3Record.find(&stores.get<T>());
-            if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
+            auto esm3RecordType_find = stores.mStoreImp->mStoreToRecName.find(&stores.get<T>());
+            if (esm3RecordType_find != stores.mStoreImp->mStoreToRecName.end())
             {
                 stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
             }
@@ -276,8 +276,8 @@ namespace MWWorld
             T record = x;
 
             T *ptr = store.insertStatic(record);
-            auto esm3RecordType_find = stores.mStoreImp->mStoreToEsm3Record.find(&stores.get<T>());
-            if (esm3RecordType_find != stores.mStoreImp->mStoreToEsm3Record.end())
+            auto esm3RecordType_find = stores.mStoreImp->mStoreToRecName.find(&stores.get<T>());
+            if (esm3RecordType_find != stores.mStoreImp->mStoreToRecName.end())
             {
                 stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
             }
@@ -298,17 +298,17 @@ namespace MWWorld
                 constexpr ESM::RecNameInts recName = T::sRecordId;
                 if constexpr (recName != ESM::REC_INTERNAL_PLAYER)
                 {
-                    stores.mStoreImp->mEsm3RecordToStore[recName] = stores.mStores[storeIndex].get();
+                    stores.mStoreImp->mRecNameToStore[recName] = stores.mStores[storeIndex].get();
                 }
             }
         }
 
         void SetupAfterStoresCreation(ESMStore& store)
         {
-            for (const auto& recordStorePair : mEsm3RecordToStore)
+            for (const auto& recordStorePair : mRecNameToStore)
             {
                 const StoreBase* storePtr = recordStorePair.second;
-                mStoreToEsm3Record[storePtr] = recordStorePair.first;
+                mStoreToRecName[storePtr] = recordStorePair.first;
             }
         }
     };
@@ -399,9 +399,9 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
 
         // Look up the record type.
         ESM::RecNameInts recName = static_cast<ESM::RecNameInts>(n.toInt());
-        const auto& it = mStoreImp->mEsm3RecordToStore.find(recName);
+        const auto& it = mStoreImp->mRecNameToStore.find(recName);
 
-        if (it == mStoreImp->mEsm3RecordToStore.end()) {
+        if (it == mStoreImp->mRecNameToStore.end()) {
             if (recName == ESM::REC_INFO) {
                 if (dialogue)
                 {
@@ -481,8 +481,8 @@ void ESMStore::setUp()
 {
     mStoreImp->mIds.clear();
 
-    std::map<ESM::RecNameInts, StoreBase*>::iterator storeIt = mStoreImp->mEsm3RecordToStore.begin();
-    for (; storeIt != mStoreImp->mEsm3RecordToStore.end(); ++storeIt) {
+    std::map<ESM::RecNameInts, StoreBase*>::iterator storeIt = mStoreImp->mRecNameToStore.begin();
+    for (; storeIt != mStoreImp->mRecNameToStore.end(); ++storeIt) {
         storeIt->second->setUp();
 
         if (isCacheableRecord(storeIt->first))
@@ -726,12 +726,12 @@ void ESMStore::removeMissingObjects(Store<T>& store)
             case ESM::REC_WEAP:
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
-                mStoreImp->mEsm3RecordToStore[type]->read (reader);
+                mStoreImp->mRecNameToStore[type]->read (reader);
                 return true;
             case ESM::REC_NPC_:
             case ESM::REC_CREA:
             case ESM::REC_CONT:
-                mStoreImp->mEsm3RecordToStore[type]->read (reader, true);
+                mStoreImp->mRecNameToStore[type]->read (reader, true);
                 return true;
 
             case ESM::REC_DYNA:
