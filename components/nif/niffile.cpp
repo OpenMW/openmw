@@ -137,6 +137,7 @@ static std::map<std::string, CreateRecord> makeFactory()
         {"NiBoolInterpolator"               , &construct <NiBoolInterpolator                , RC_NiBoolInterpolator                 >},
         {"NiPoint3Interpolator"             , &construct <NiPoint3Interpolator              , RC_NiPoint3Interpolator               >},
         {"NiTransformController"            , &construct <NiKeyframeController              , RC_NiKeyframeController               >},
+        {"NiMultiTargetTransformController" , &construct <NiMultiTargetTransformController  , RC_NiMultiTargetTransformController   >},
         {"NiTransformInterpolator"          , &construct <NiTransformInterpolator           , RC_NiTransformInterpolator            >},
         {"NiColorInterpolator"              , &construct <NiColorInterpolator               , RC_NiColorInterpolator                >},
         {"BSShaderTextureSet"               , &construct <BSShaderTextureSet                , RC_BSShaderTextureSet                 >},

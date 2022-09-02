@@ -144,7 +144,8 @@ enum RecordType
   RC_BSLightingShaderProperty,
   RC_NiClusterAccumulator,
   RC_NiAlphaAccumulator,
-  RC_NiSortAdjustNode
+  RC_NiSortAdjustNode,
+  RC_NiMultiTargetTransformController
 };
 
 /// Base class for all records
