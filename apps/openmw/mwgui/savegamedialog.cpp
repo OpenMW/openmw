@@ -430,7 +430,13 @@ namespace MWGui
 
         // Decode screenshot
         const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
-        Files::IMemStream instream (&data[0], data.size());
+        if (!data.size())
+        {
+            Log(Debug::Warning) << "Warning: Selected saved game has no savegame screenshot";
+            return;
+        }
+
+        Files::IMemStream instream (data.data(), data.size());
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
         if (!readerwriter)
