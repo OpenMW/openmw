@@ -49,7 +49,7 @@ namespace MWInput
         float getIdleTime() const { return mTimeIdle; }
 
         bool isAlwaysRunActive() const { return mAlwaysRunActive; }
-        bool isSneaking() const { return mSneaking; }
+        bool isSneaking() const;
 
         void setAttemptJump(bool enabled) { mAttemptJump = enabled; }
 
@@ -62,7 +62,6 @@ namespace MWInput
         osgViewer::ScreenCaptureHandler::CaptureOperation* mScreenCaptureOperation;
 
         bool mAlwaysRunActive;
-        bool mSneaking;
         bool mAttemptJump;
 
         float mTimeIdle;

@@ -37,7 +37,6 @@ namespace MWInput
         , mScreenCaptureHandler(screenCaptureHandler)
         , mScreenCaptureOperation(screenCaptureOperation)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
-        , mSneaking(false)
         , mAttemptJump(false)
         , mTimeIdle(0.f)
     {
@@ -535,15 +534,20 @@ namespace MWInput
         Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);
     }
 
+    bool ActionManager::isSneaking() const
+    {
+        const MWBase::Environment& env = MWBase::Environment::get();
+        return env.getMechanicsManager()->isSneaking(env.getWorld()->getPlayer().getPlayer());
+    }
+
     void ActionManager::toggleSneaking()
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
         if (!MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
             return;
-        mSneaking = !mSneaking;
         MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-        player.setSneak(mSneaking);
+        player.setSneak(!isSneaking());
     }
 
     void ActionManager::handleGuiArrowKey(int action)
