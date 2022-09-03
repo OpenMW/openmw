@@ -88,18 +88,18 @@ bool inline operator!= (const Position& left, const Position& right) noexcept
            left.rot[2] != right.rot[2];
 }
 
-constexpr unsigned int esm4RecnameFlag = 0x00800000;
+constexpr unsigned int sEsm4RecnameFlag = 0x00800000;
 
 constexpr unsigned int esm3Recname(const char(&name)[5]) {
-    if ((fourCC(name) & esm4RecnameFlag) == 0)
+    if ((fourCC(name) & sEsm4RecnameFlag) == 0)
         return fourCC(name);
     else
-        throw std::logic_error("there must be no collision between esm3 records and esm4 records"); //The throw errors ensures at compile time that no collision between ESM4 and ESM3 is possible
+        throw std::logic_error("there must be no collision between esm3 records and esm4 records");//The throw errors ensures at compile time that no collision between ESM4 and ESM3 is possible
 }
 
 constexpr unsigned int esm4Recname(const ESM4::RecordTypes recType) {
-    if ((recType & esm4RecnameFlag) == 0)
-        return (recType | esm4RecnameFlag);
+    if ((recType & sEsm4RecnameFlag) == 0)
+        return (recType | sEsm4RecnameFlag);
     else
         throw std::logic_error("there must be no collision between esm3 records and esm4 records");//The throw errors ensures at compile time that no collision between ESM4 and ESM3 is possible
 }
