@@ -272,7 +272,7 @@ namespace MWWorld
         {
             const int storeIndex = ESMStore::getTypeIndex<T>();
             assert(ESMStore::getTypeIndex<T>() == storeIndex);
-            const std::size_t index_t(storeIndex)
+            const std::size_t index_t(storeIndex);
             if (stores.mStores.size() <= index_t)
                 stores.mStores.resize(index_t + 1);
 
