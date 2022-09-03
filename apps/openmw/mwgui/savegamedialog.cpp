@@ -430,19 +430,25 @@ namespace MWGui
 
         // Decode screenshot
         const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
-        Files::IMemStream instream (&data[0], data.size());
+        if (!data.size())
+        {
+            Log(Debug::Warning) << "Selected save file '" << mCurrentSlot->mPath.filename() << "' has no savegame screenshot";
+            return;
+        }
+
+        Files::IMemStream instream (data.data(), data.size());
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
         if (!readerwriter)
         {
-            Log(Debug::Error) << "Error: Can't open savegame screenshot, no jpg readerwriter found";
+            Log(Debug::Error) << "Can't open savegame screenshot, no jpg readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
         if (!result.success())
         {
-            Log(Debug::Error) << "Error: Failed to read savegame screenshot: " << result.message() << " code " << result.status();
+            Log(Debug::Error) << "Failed to read savegame screenshot: " << result.message() << " code " << result.status();
             return;
         }
 

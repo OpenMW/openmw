@@ -50,7 +50,7 @@ void SavedGame::save (ESMWriter &esm) const
          esm.writeHNString ("DEPE", *iter);
 
     esm.startSubRecord("SCRN");
-    esm.write(&mScreenshot[0], mScreenshot.size());
+    esm.write(mScreenshot.data(), mScreenshot.size());
     esm.endRecord("SCRN");
 }
 
