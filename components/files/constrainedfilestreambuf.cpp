@@ -27,7 +27,7 @@ namespace Files
             // Read in the next chunk of data, and set the read pointers on success
             // Failure will throw exception.
             const std::size_t got = File::read(mFile, mBuffer, toRead);
-            setg(&mBuffer[0], &mBuffer[0], &mBuffer[0] + got);
+            setg(mBuffer, mBuffer, mBuffer + got);
         }
         if (gptr() == egptr())
             return traits_type::eof();

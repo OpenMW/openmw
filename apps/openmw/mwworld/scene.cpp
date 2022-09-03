@@ -1148,7 +1148,7 @@ namespace MWWorld
     {
         std::vector<PositionCellGrid> vec;
         vec.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
-        mPreloader->abortTerrainPreloadExcept(&vec[0]);
+        mPreloader->abortTerrainPreloadExcept(vec.data());
         mPreloader->setTerrainPreloadPositions(vec);
         if (!sync) return;
 

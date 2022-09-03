@@ -245,7 +245,7 @@ void CompressedBSAFile::readHeader()
     if ((archiveFlags & 0x2) != 0)
     {
         mStringBuf.resize(totalFileNameLength);
-        input.read(&mStringBuf[0], mStringBuf.size()); // TODO: maybe useful in building a lookup map?
+        input.read(mStringBuf.data(), mStringBuf.size()); // TODO: maybe useful in building a lookup map?
     }
 
     size_t mStringBuffOffset = 0;

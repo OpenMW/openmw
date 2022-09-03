@@ -121,9 +121,9 @@ boost::filesystem::path WindowsPath::getInstallPath() const
         std::vector<char> buf(512);
         int len = 512;
 
-        if (RegQueryValueEx(hKey, TEXT("Installed Path"), nullptr, nullptr, (LPBYTE)&buf[0], (LPDWORD)&len) == ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, TEXT("Installed Path"), nullptr, nullptr, (LPBYTE)buf.data(), (LPDWORD)&len) == ERROR_SUCCESS)
         {
-            installPath = &buf[0];
+            installPath = buf.data();
         }
         RegCloseKey(hKey);
     }

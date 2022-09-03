@@ -210,7 +210,7 @@ namespace MWGui
                 MWScript::installOpcodes (interpreter, mConsoleOnlyScripts);
                 std::vector<Interpreter::Type_Code> code;
                 output.getCode (code);
-                interpreter.run (&code[0], code.size(), interpreterContext);
+                interpreter.run (code.data(), code.size(), interpreterContext);
             }
             catch (const std::exception& error)
             {

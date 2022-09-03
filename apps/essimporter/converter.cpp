@@ -104,11 +104,11 @@ namespace ESSImport
         esm.getSubNameIs("MAPD");
         esm.getSubHeader();
         data.resize(esm.getSubSize());
-        esm.getExact(&data[0], data.size());
+        esm.getExact(data.data(), data.size());
 
         mGlobalMapImage = new osg::Image;
         mGlobalMapImage->allocateImage(maph.size, maph.size, 1, GL_RGB, GL_UNSIGNED_BYTE);
-        memcpy(mGlobalMapImage->data(), &data[0], data.size());
+        memcpy(mGlobalMapImage->data(), data.data(), data.size());
 
         // to match openmw size
         // FIXME: filtering?
@@ -135,7 +135,7 @@ namespace ESSImport
         data.resize(width*height*4, 0);
 
         image2->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-        memcpy(image2->data(), &data[0], data.size());
+        memcpy(image2->data(), data.data(), data.size());
 
         for (const auto & exploredCell : mContext->mExploredCells)
         {

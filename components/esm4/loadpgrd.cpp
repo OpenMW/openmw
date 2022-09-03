@@ -125,7 +125,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
             {
 #if 0
                 boost::scoped_array<unsigned char> mDataBuf(new unsigned char[subHdr.dataSize]);
-                reader.get(&mDataBuf[0], subHdr.dataSize);
+                reader.get(mDataBuf.get(), subHdr.dataSize);
 
                 std::ostringstream ss;
                 ss << mEditorId << " " << ESM::printName(subHdr.typeId) << ":size " << subHdr.dataSize << "\n";
