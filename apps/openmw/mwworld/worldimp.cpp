@@ -3746,8 +3746,9 @@ namespace MWWorld
             if (fromProjectile && effectInfo.mArea <= 0)
                 continue; // Don't play explosion for projectiles with 0-area effects
 
-            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && !ignore.isEmpty() && !ignore.getClass().isActor() && !ignore.getClass().hasToolTip(ignore))
-                continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from the projectile enchantment
+            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && !ignore.isEmpty() && !ignore.getClass().isActor() && !ignore.getClass().hasToolTip(ignore)
+                && (caster.isEmpty() || caster.getClass().isActor()))
+                continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from a projectile enchantment or ExplodeSpell
 
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
