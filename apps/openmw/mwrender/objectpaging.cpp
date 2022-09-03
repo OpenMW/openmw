@@ -421,7 +421,8 @@ namespace MWRender
 
         std::map<ESM::RefNum, ESM::CellRef> refs;
         ESM::ReadersCache readers;
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const auto& world = MWBase::Environment::get().getWorld();
+        const auto& store = world->getStore();
 
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
@@ -557,7 +558,7 @@ namespace MWRender
                 if (found != mLODNameCache.end() && found->first == key)
                     model = found->second;
                 else
-                    model = mLODNameCache.insert(found, { key, Misc::ResourceHelpers::getLODMeshName(model, mSceneManager->getVFS(), lod) })->second;
+                    model = mLODNameCache.insert(found, { key, Misc::ResourceHelpers::getLODMeshName(world->getESMVersions()[ref.mRefNum.mContentFile], model, mSceneManager->getVFS(), lod) })->second;
             }
 
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);

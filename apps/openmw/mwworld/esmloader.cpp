@@ -7,11 +7,12 @@
 namespace MWWorld
 {
 
-EsmLoader::EsmLoader(MWWorld::ESMStore& store, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder)
+EsmLoader::EsmLoader(MWWorld::ESMStore& store, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder, std::vector<int>& esmVersions)
     : mReaders(readers)
     , mStore(store)
     , mEncoder(encoder)
     , mDialogue(nullptr) // A content file containing INFO records without a DIAL record appends them to the previous file's dialogue
+    , mESMVersions(esmVersions)
 {
 }
 
@@ -32,6 +33,7 @@ void EsmLoader::load(const boost::filesystem::path& filepath, int& index, Loadin
                 + ", but it is not available or has been loaded in the wrong order. "
                   "Please run the launcher to fix this issue.");
 
+    mESMVersions[index] = reader->getVer();
     mStore.load(*reader, listener, mDialogue);
 
     if (!mMasterFileFormat.has_value() && (Misc::StringUtils::ciEndsWith(reader->getName(), ".esm")

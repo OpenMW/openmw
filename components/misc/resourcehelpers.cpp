@@ -4,6 +4,8 @@
 #include <string_view>
 #include <algorithm>
 
+#include <components/esm/common.hpp>
+
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -184,18 +186,29 @@ std::string getBestLODMeshName(std::string const& resPath, const VFS::Manager* v
 }
 }
 
-std::string Misc::ResourceHelpers::getLODMeshName(std::string resPath, const VFS::Manager* vfs, unsigned char lod)
+std::string Misc::ResourceHelpers::getLODMeshName(int esmVersion, std::string resPath, const VFS::Manager* vfs, unsigned char lod)
 {
-    static const std::string distantMeshPattern = Settings::Manager::getString("distant mesh pattern", "Terrain");
-    std::string meshName = getBestLODMeshName(resPath, vfs, distantMeshPattern + "_" + std::to_string(lod));
-    if (meshName != resPath)
-        return meshName;
-
+    const std::string distantMeshPattern = [&esmVersion] {
+        switch (esmVersion)
+        {
+            case ESM::VER_120:
+            case ESM::VER_130:
+                return "_dist";
+            case ESM::VER_080:
+            case ESM::VER_100:
+                return "_far";
+            case ESM::VER_094:
+            case ESM::VER_170:
+                return "_lod";
+            default:
+                return "";
+        }
+    }();
     for (char l = lod; l >= 0; --l)
     {
         std::stringstream patern;
         patern << distantMeshPattern << "_" << int(l);
-        meshName = getBestLODMeshName(resPath, vfs, patern.str());
+        std::string const meshName = getBestLODMeshName(resPath, vfs, patern.str());
         if (meshName != resPath)
             return meshName;
     }

@@ -205,12 +205,3 @@ object paging min size cost multiplier
 This setting adjusts the calculated cost of merging an object used in the mentioned functionality.
 The larger this value is, the less expensive objects can be before they are discarded.
 See the formula above to figure out the math.
-
-distant mesh pattern
-------------------
-
-:Type:		string
-:Range:
-:Default:	_dist
-
-The mesh filename pattern to look for when detecting distant meshes (it will replace original mesh outside active grid)

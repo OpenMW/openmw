@@ -30,7 +30,7 @@ namespace Misc
 
         /// marker objects that have a hardcoded function in the game logic, should be hidden from the player
         bool isHiddenMarker(std::string_view id);
-        std::string getLODMeshName(std::string resPath, const VFS::Manager* vfs, unsigned char lod = 0);
+        std::string getLODMeshName(int esmVersion, std::string resPath, const VFS::Manager* vfs, unsigned char lod = 0);
     }
 }
 

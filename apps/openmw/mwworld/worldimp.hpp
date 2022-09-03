@@ -138,6 +138,8 @@ namespace MWWorld
 
             float mSimulationTimeScale = 1.0;
 
+            std::vector<int> mESMVersions;  //the versions of esm files
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
@@ -248,6 +250,8 @@ namespace MWWorld
             MWWorld::ConstPtr getPlayerConstPtr() const override;
 
             const MWWorld::ESMStore& getStore() const override;
+
+            const std::vector<int>& getESMVersions() const override;
 
             LocalScripts& getLocalScripts() override;
 
