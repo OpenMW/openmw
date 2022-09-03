@@ -45,7 +45,7 @@ namespace MWWorld
 
     class StoreBase {}; //Empty interface to be parent of all store types
 
-    class DynamicStore : StoreBase
+    class DynamicStore : public StoreBase
     {
     public:
         virtual ~DynamicStore() {}
@@ -69,7 +69,7 @@ namespace MWWorld
     };
 
     template <class T>
-    class IndexedStore : StoreBase
+    class IndexedStore : public StoreBase
     {
     protected:
         typedef typename std::map<int, T> Static;

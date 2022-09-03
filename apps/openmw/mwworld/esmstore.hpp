@@ -26,26 +26,33 @@ namespace ESM
 namespace MWWorld
 {
     struct ESMStoreImp;
-    template<typename T> struct SRecordType
-    {
-        static const int sStoreIndex;
-    };
 
     class ESMStore
     {
         friend struct ESMStoreImp; //This allows StoreImp to extend esmstore without beeing included everywhere
+
+        static int& getTypeIndexCounter();
+
+        template<typename T> 
+        static int getTypeIndex()
+        {
+            static int index = getTypeIndexCounter()++;
+            return index;
+        }
+
         std::unique_ptr<ESMStoreImp> mStoreImp;
 
         std::unordered_map<std::string, int> mRefCount;
 
-        std::vector<std::unique_ptr< DynamicStore >> mStores;
+        std::vector<StoreBase*> mStores;
+        std::vector<DynamicStore*> mDynamicStores;
 
         unsigned int mDynamicCount;
 
         mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
 
         template <class T>
-        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[SRecordType<T>::sStoreIndex]);}
+        Store<T>& getWritable() {return static_cast<Store<T>&>(*mStores[getTypeIndex<T>()]);}
 
         /// Validate entries in store after setup
         void validate();
@@ -65,14 +72,14 @@ namespace MWWorld
         ESM::LuaScriptsCfg getLuaScriptsCfg() const;
 
         /// \todo replace with SharedIterator<StoreBase>
-        typedef std::vector<std::unique_ptr< DynamicStore>>::const_iterator iterator;
+        typedef std::vector<DynamicStore*>::const_iterator iterator;
 
         iterator begin() const {
-            return mStores.begin();
+            return mDynamicStores.begin();
         }
 
         iterator end() const {
-            return mStores.end();
+            return mDynamicStores.end();
         }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
@@ -94,7 +101,7 @@ namespace MWWorld
         void load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
 
         template <class T>
-        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[SRecordType<T>::sStoreIndex]);}
+        const Store<T>& get() const {return static_cast<const Store<T>&>(*mStores[getTypeIndex<T>()]);}
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>
@@ -129,17 +136,6 @@ namespace MWWorld
         /// @return The shared spell list to use for this actor and whether or not it has already been initialized.
         std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
     };
-
-    //Special cases these aren't DynamicStore, but IndexedStore
-    template <> const Store<ESM::MagicEffect>& ESMStore::get<ESM::MagicEffect>() const;
-    template <> Store<ESM::MagicEffect>& ESMStore::getWritable<ESM::MagicEffect>();
-
-    template <> const Store<ESM::Skill>& ESMStore::get<ESM::Skill>() const;
-    template <> Store<ESM::Skill>& ESMStore::getWritable<ESM::Skill>();
-
-    template <> const Store<ESM::Attribute>& ESMStore::get<ESM::Attribute>() const;
-    template <> Store<ESM::Attribute>& ESMStore::getWritable<ESM::Attribute>();
-
 }
 
 #endif
