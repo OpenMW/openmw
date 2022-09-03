@@ -36,8 +36,8 @@ namespace MWWorld
         template<typename T> 
         static std::size_t getTypeIndex()
         {
-            static std::size_t index = getTypeIndexCounter()++;
-            return index;
+            static std::size_t sIndex = getTypeIndexCounter()++;
+            return sIndex;
         }
 
         std::unique_ptr<ESMStoreImp> mStoreImp;

@@ -7,7 +7,7 @@
 
 #include <osg/Vec3f>
 
-#include<components/esm4/common.hpp>
+#include <components/esm4/common.hpp>
 
 namespace ESM
 {

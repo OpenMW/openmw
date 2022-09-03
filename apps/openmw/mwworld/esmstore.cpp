@@ -131,21 +131,9 @@ namespace
 
 }
 
-template <auto Start, auto End, auto Inc, class F>
-constexpr void constexpr_for(F&& f)
-{
-    if constexpr (Start < End)
-    {
-        f(std::integral_constant<decltype(Start), Start>());
-        constexpr_for<Start + Inc, End, Inc>(f);
-    }
-}
-
-
 namespace MWWorld
 {
     using IDMap = std::unordered_map<std::string, int, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
-
 
     struct ESMStoreImp
     {
@@ -206,7 +194,6 @@ namespace MWWorld
         IDMap mIds;
         IDMap mStaticIds;
 
-
         template<typename T> 
         static const T* esm3StoreInsert(ESMStore& stores, const T &toInsert)
         {
@@ -245,7 +232,7 @@ namespace MWWorld
             return ptr;
         }
 
-                template <class T>
+        template <class T>
         static const T *esm3insertStatic(ESMStore& stores, const T &x)
         {
             const std::string id = "$dynamic" + std::to_string(stores.mDynamicCount++);
@@ -289,11 +276,6 @@ namespace MWWorld
             return 0;
         }
 
-        ESMStoreImp(ESMStore& store)
-        {
-            
-        }
-
         void SetupAfterStoresCreation(ESMStore& store)
         {
             for (const auto& recordStorePair : mRecNameToStore)
@@ -307,13 +289,11 @@ namespace MWWorld
 
     int ESMStore::find(const std::string& id) const
     {
-        
         IDMap::const_iterator it = mStoreImp->mIds.find(id);
         if (it == mStoreImp->mIds.end()) {
             return 0;
         }
         return it->second;
-        
     }
 
     int ESMStore::findStatic(const std::string& id) const
@@ -334,7 +314,7 @@ namespace MWWorld
         getWritable<ESM::Pathgrid>().setCells(getWritable<ESM::Cell>());
     }
 
-    ESMStore::~ESMStore()
+    ESMStore::~ESMStore() //necessary for the destruction of of unique_ptr<ESMStoreImp>
     {
     }
 
@@ -348,14 +328,31 @@ namespace MWWorld
 
 static bool isCacheableRecord(int id)
 {
-    if (id == ESM::REC_ACTI || id == ESM::REC_ALCH || id == ESM::REC_APPA || id == ESM::REC_ARMO ||
-        id == ESM::REC_BOOK || id == ESM::REC_CLOT || id == ESM::REC_CONT || id == ESM::REC_CREA ||
-        id == ESM::REC_DOOR || id == ESM::REC_INGR || id == ESM::REC_LEVC || id == ESM::REC_LEVI ||
-        id == ESM::REC_LIGH || id == ESM::REC_LOCK || id == ESM::REC_MISC || id == ESM::REC_NPC_ ||
-        id == ESM::REC_PROB || id == ESM::REC_REPA || id == ESM::REC_STAT || id == ESM::REC_WEAP ||
-        id == ESM::REC_BODY)
+    switch (id)
     {
-        return true;
+        case ESM::REC_ACTI:
+        case ESM::REC_ALCH:
+        case ESM::REC_APPA:
+        case ESM::REC_ARMO:
+        case ESM::REC_BOOK:
+        case ESM::REC_CLOT:
+        case ESM::REC_CONT:
+        case ESM::REC_CREA:
+        case ESM::REC_DOOR:
+        case ESM::REC_INGR:
+        case ESM::REC_LEVC:
+        case ESM::REC_LEVI:
+        case ESM::REC_LIGH:
+        case ESM::REC_LOCK:
+        case ESM::REC_MISC:
+        case ESM::REC_NPC_:
+        case ESM::REC_PROB:
+        case ESM::REC_REPA:
+        case ESM::REC_STAT:
+        case ESM::REC_WEAP:
+        case ESM::REC_BODY:
+            return true;
+            break;
     }
     return false;
 }
