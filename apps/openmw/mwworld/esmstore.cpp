@@ -307,7 +307,7 @@ namespace MWWorld
 
     ESMStore::ESMStore()
     {
-        mStoreImp = std::make_unique<ESMStoreImp>(*this);
+        mStoreImp = std::make_unique<ESMStoreImp>();
         std::apply([this](auto& ...x) {(ESMStoreImp::AssignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
         mDynamicCount = 0;
         mStoreImp->SetupAfterStoresCreation(*this);
