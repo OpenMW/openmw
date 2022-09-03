@@ -11,6 +11,7 @@
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
+    Feature #6979: Add support of loading and displaying LOD assets purely based on their filename extension
 
 0.48.0
 ------
