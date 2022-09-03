@@ -13,9 +13,15 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    enum class MagicApplicationResult
+    struct MagicApplicationResult
     {
-        APPLIED, REMOVED, REFLECTED
+        enum class Type
+        {
+            APPLIED, REMOVED, REFLECTED
+        };
+        Type mType;
+        bool mShowHit;
+        bool mShowHealth;
     };
 
     // Applies a tick of a single effect. Returns true if the effect should be removed immediately

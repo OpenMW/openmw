@@ -299,7 +299,7 @@ namespace
         stats.setMagicka(magicka);
     }
 
-    MWMechanics::MagicApplicationResult applyProtections(const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
+    MWMechanics::MagicApplicationResult::Type applyProtections(const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
         const MWMechanics::ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, const ESM::MagicEffect* magicEffect)
     {
         auto& stats = target.getClass().getCreatureStats(target);
@@ -323,7 +323,7 @@ namespace
                         {
                             if(canReflect && Misc::Rng::roll0to99(prng) < activeEffect.mMagnitude)
                             {
-                                return MWMechanics::MagicApplicationResult::REFLECTED;
+                                return MWMechanics::MagicApplicationResult::Type::REFLECTED;
                             }
                         }
                         else if(activeEffect.mEffectId == ESM::MagicEffect::SpellAbsorption)
@@ -331,7 +331,7 @@ namespace
                             if(canAbsorb && Misc::Rng::roll0to99(prng) < activeEffect.mMagnitude)
                             {
                                 absorbSpell(spellParams.getId(), caster, target);
-                                return MWMechanics::MagicApplicationResult::REMOVED;
+                                return MWMechanics::MagicApplicationResult::Type::REMOVED;
                             }
                         }
                     }
@@ -356,12 +356,12 @@ namespace
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
                 else if (caster == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
-                return MWMechanics::MagicApplicationResult::REMOVED;
+                return MWMechanics::MagicApplicationResult::Type::REMOVED;
             }
             effect.mMinMagnitude *= magnitudeMult;
             effect.mMaxMagnitude *= magnitudeMult;
         }
-        return MWMechanics::MagicApplicationResult::APPLIED;
+        return MWMechanics::MagicApplicationResult::Type::APPLIED;
     }
 
     static const std::map<int, std::string> sBoundItemsMap{
@@ -382,7 +382,7 @@ namespace
 namespace MWMechanics
 {
 
-void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, bool& invalid, bool& receivedMagicDamage, bool& recalculateMagicka)
+void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, bool& invalid, bool& receivedMagicDamage, bool& affectedHealth, bool& recalculateMagicka)
 {
     const auto world = MWBase::Environment::get().getWorld();
     bool godmode = target == getPlayer() && world->getGodModeState();
@@ -606,7 +606,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                     static const bool uncappedDamageFatigue = Settings::Manager::getBool("uncapped damage fatigue", "Game");
                     adjustDynamicStat(target, index, -effect.mMagnitude, index == 2 && uncappedDamageFatigue);
                     if(index == 0)
-                        receivedMagicDamage = true;
+                        receivedMagicDamage = affectedHealth = true;
                 }
             }
             break;
@@ -641,6 +641,8 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 restoreSkill(target, effect, effect.mMagnitude);
             break;
         case ESM::MagicEffect::RestoreHealth:
+            affectedHealth = true;
+            [[fallthrough]];
         case ESM::MagicEffect::RestoreMagicka:
         case ESM::MagicEffect::RestoreFatigue:
             adjustDynamicStat(target, effect.mEffectId - ESM::MagicEffect::RestoreHealth, effect.mMagnitude);
@@ -662,7 +664,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 float damage = effect.mMagnitude * damageScale;
                 adjustDynamicStat(target, 0, -damage);
                 if (damage > 0.f)
-                    receivedMagicDamage = true;
+                    receivedMagicDamage = affectedHealth = true;
             }
             break;
         case ESM::MagicEffect::DrainHealth:
@@ -674,7 +676,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 int index = effect.mEffectId - ESM::MagicEffect::DrainHealth;
                 adjustDynamicStat(target, index, -effect.mMagnitude, uncappedDamageFatigue && index == 2);
                 if(index == 0)
-                    receivedMagicDamage = true;
+                    receivedMagicDamage = affectedHealth = true;
             }
             break;
         case ESM::MagicEffect::FortifyHealth:
@@ -733,7 +735,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 if(!caster.isEmpty())
                     adjustDynamicStat(caster, index, effect.mMagnitude);
                 if(index == 0)
-                    receivedMagicDamage = true;
+                    receivedMagicDamage = affectedHealth = true;
             }
             break;
         case ESM::MagicEffect::AbsorbAttribute:
@@ -839,22 +841,23 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
     bool invalid = false;
     bool receivedMagicDamage = false;
     bool recalculateMagicka = false;
+    bool affectedHealth = false;
     if(effect.mEffectId == ESM::MagicEffect::Corprus && spellParams.shouldWorsen())
     {
         spellParams.worsen();
         for(auto& otherEffect : spellParams.getEffects())
         {
             if(isCorprusEffect(otherEffect))
-                applyMagicEffect(target, caster, spellParams, otherEffect, invalid, receivedMagicDamage, recalculateMagicka);
+                applyMagicEffect(target, caster, spellParams, otherEffect, invalid, receivedMagicDamage, affectedHealth, recalculateMagicka);
         }
         if(target == getPlayer())
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
-        return MagicApplicationResult::APPLIED;
+        return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
     }
     else if(shouldRemoveEffect(target, effect))
     {
         onMagicEffectRemoved(target, spellParams, effect);
-        return MagicApplicationResult::REMOVED;
+        return {MagicApplicationResult::Type::REMOVED, receivedMagicDamage, affectedHealth};
     }
     const auto* magicEffect = world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
     if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
@@ -862,10 +865,10 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
         if(magicEffect->mData.mFlags & ESM::MagicEffect::Flags::AppliedOnce)
         {
             effect.mTimeLeft -= dt;
-            return MagicApplicationResult::APPLIED;
+            return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
         }
         else if(!dt)
-            return MagicApplicationResult::APPLIED;
+            return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
     }
     if(effect.mEffectId == ESM::MagicEffect::Lock)
     {
@@ -925,9 +928,9 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
         auto& magnitudes = stats.getMagicEffects();
         if(spellParams.getType() != ESM::ActiveSpells::Type_Ability && !(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
         {
-            MagicApplicationResult result = applyProtections(target, caster, spellParams, effect, magicEffect);
-            if(result != MagicApplicationResult::APPLIED)
-                return result;
+            MagicApplicationResult::Type result = applyProtections(target, caster, spellParams, effect, magicEffect);
+            if(result != MagicApplicationResult::Type::APPLIED)
+                return {result, receivedMagicDamage, affectedHealth};
         }
         float oldMagnitude = 0.f;
         if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
@@ -956,13 +959,13 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
                 effect.mMagnitude = oldMagnitude;
                 effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
                 effect.mTimeLeft -= dt;
-                return MagicApplicationResult::APPLIED;
+                return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
             }
         }
         if(effect.mEffectId == ESM::MagicEffect::Corprus)
             spellParams.worsen();
         else
-            applyMagicEffect(target, caster, spellParams, effect, invalid, receivedMagicDamage, recalculateMagicka);
+            applyMagicEffect(target, caster, spellParams, effect, invalid, receivedMagicDamage, affectedHealth, recalculateMagicka);
         effect.mMagnitude = magnitude;
         magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(effect.mMagnitude - oldMagnitude));
     }
@@ -977,11 +980,9 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
     }
     else
         effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
-    if (receivedMagicDamage && target == getPlayer())
-        MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
     if(recalculateMagicka)
         target.getClass().getCreatureStats(target).recalculateMagicka();
-    return MagicApplicationResult::APPLIED;
+    return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
 }
 
 void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellParams& spellParams, const ESM::ActiveEffect& effect)

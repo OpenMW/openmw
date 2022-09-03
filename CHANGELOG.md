@@ -6,6 +6,7 @@
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
+    Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6937: Divided by Nix Hounds quest is broken
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
