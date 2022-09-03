@@ -13,11 +13,13 @@
 
 #include <components/settings/settings.hpp>
 
+#include "actorutil.hpp"
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
 #include "spelleffects.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwrender/animation.hpp"
@@ -230,6 +232,9 @@ namespace MWMechanics
             }
         }
 
+        const MWWorld::Ptr player = MWMechanics::getPlayer();
+        bool updatedHitOverlay = false;
+        bool updatedEnemy = false;
         // Update effects
         for(auto spellIt = mSpells.begin(); spellIt != mSpells.end();)
         {
@@ -239,7 +244,7 @@ namespace MWMechanics
             for(auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
             {
                 auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration);
-                if(result == MagicApplicationResult::REFLECTED)
+                if(result.mType == MagicApplicationResult::Type::REFLECTED)
                 {
                     if(!reflected)
                     {
@@ -253,10 +258,22 @@ namespace MWMechanics
                     reflectedEffect.mFlags = ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
                     it = spellIt->mEffects.erase(it);
                 }
-                else if(result == MagicApplicationResult::REMOVED)
+                else if(result.mType == MagicApplicationResult::Type::REMOVED)
                     it = spellIt->mEffects.erase(it);
                 else
+                {
                     ++it;
+                    if(!updatedEnemy && result.mShowHealth && caster == player && ptr != player)
+                    {
+                        MWBase::Environment::get().getWindowManager()->setEnemy(ptr);
+                        updatedEnemy = true;
+                    }
+                    if(!updatedHitOverlay && result.mShowHit && ptr == player)
+                    {
+                        MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+                        updatedHitOverlay = true;
+                    }
+                }
                 removedSpell = applyPurges(ptr, &spellIt, &it);
                 if(removedSpell)
                     break;
