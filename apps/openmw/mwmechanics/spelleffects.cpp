@@ -307,8 +307,8 @@ namespace
         // Apply reflect and spell absorption
         if(target != caster && spellParams.getType() != ESM::ActiveSpells::Type_Enchantment && spellParams.getType() != ESM::ActiveSpells::Type_Permanent)
         {
-            bool canReflect = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable) &&
-                !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Reflect) && magnitudes.get(ESM::MagicEffect::Reflect).getMagnitude() > 0.f && !caster.isEmpty();
+            bool canReflect = !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable) && !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Reflect) &&
+                magnitudes.get(ESM::MagicEffect::Reflect).getMagnitude() > 0.f && !caster.isEmpty();
             bool canAbsorb = !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_SpellAbsorption) && magnitudes.get(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f;
             if(canReflect || canAbsorb)
             {

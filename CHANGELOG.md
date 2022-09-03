@@ -10,6 +10,7 @@
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
+    Bug #6974: Only harmful effects are reflected
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
 
 0.48.0
