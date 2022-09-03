@@ -31,12 +31,12 @@ namespace MWWorld
     {
         friend struct ESMStoreImp; //This allows StoreImp to extend esmstore without beeing included everywhere
 
-        static int& getTypeIndexCounter();
+        static std::size_t &getTypeIndexCounter();
 
         template<typename T> 
-        static int getTypeIndex()
+        static std::size_t getTypeIndex()
         {
-            static int index = getTypeIndexCounter()++;
+            static std::size_t index = getTypeIndexCounter()++;
             return index;
         }
 

@@ -271,10 +271,8 @@ namespace MWWorld
         static int AssignStoreToIndex(ESMStore& stores, Store<T>& store)
         {
             const int storeIndex = ESMStore::getTypeIndex<T>();
-            assert(ESMStore::getTypeIndex<T>() == storeIndex);
-            const std::size_t index_t(storeIndex);
-            if (stores.mStores.size() <= index_t)
-                stores.mStores.resize(index_t + 1);
+            if (stores.mStores.size() <= storeIndex)
+                stores.mStores.resize(storeIndex + 1);
 
             assert(&store == &std::get<Store<T>>(stores.mStoreImp->mStores));
 
@@ -330,7 +328,7 @@ namespace MWWorld
     ESMStore::ESMStore()
     {
         mStoreImp = std::make_unique<ESMStoreImp>(*this);
-        std::apply([this](auto& ...x){std::make_tuple(ESMStoreImp::AssignStoreToIndex(*this, x)...);} , mStoreImp->mStores);
+        std::apply([this](auto& ...x) {(ESMStoreImp::AssignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
         mDynamicCount = 0;
         mStoreImp->SetupAfterStoresCreation(*this);
         getWritable<ESM::Pathgrid>().setCells(getWritable<ESM::Cell>());
@@ -437,9 +435,9 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
     }
 }
 
-static int sTypeIndexCounter = 0;
+static std::size_t sTypeIndexCounter = 0;
 
-int& ESMStore::getTypeIndexCounter()
+std::size_t& ESMStore::getTypeIndexCounter()
 {
     return sTypeIndexCounter;
 }
