@@ -91,12 +91,17 @@ bool inline operator!= (const Position& left, const Position& right) noexcept
 constexpr unsigned int esm4RecnameFlag = 0x00800000;
 
 constexpr unsigned int esm3Recname(const char(&name)[5]) {
-    return (fourCC(name) & esm4RecnameFlag) == 0 ? fourCC(name) : throw std::logic_error("there must be no collision between esm3 records and esm4 records"); //The throw errors ensures at compile time that no collision between ESM4 and ESM3 is possible
+    if ((fourCC(name) & esm4RecnameFlag) == 0)
+        return fourCC(name);
+    else
+        throw std::logic_error("there must be no collision between esm3 records and esm4 records"); //The throw errors ensures at compile time that no collision between ESM4 and ESM3 is possible
 }
 
 constexpr unsigned int esm4Recname(const ESM4::RecordTypes recType) {
-    
-    return (recType & esm4RecnameFlag) == 0 ? (recType | esm4RecnameFlag) : throw std::logic_error("there must be no collision between esm3 records and esm4 records");//The throw errors ensures at compile time that no collision between ESM4 and ESM3 is possible
+    if ((recType & esm4RecnameFlag) == 0)
+        return (recType | esm4RecnameFlag);
+    else
+        throw std::logic_error("there must be no collision between esm3 records and esm4 records");//The throw errors ensures at compile time that no collision between ESM4 and ESM3 is possible
 }
 
 enum RecNameInts : unsigned int
