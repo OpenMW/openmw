@@ -270,7 +270,7 @@ namespace MWWorld
         template<typename T>  
         static int AssignStoreToIndex(ESMStore& stores, Store<T>& store)
         {
-            const int storeIndex = ESMStore::getTypeIndex<T>();
+            const std::size_t storeIndex = ESMStore::getTypeIndex<T>();
             if (stores.mStores.size() <= storeIndex)
                 stores.mStores.resize(storeIndex + 1);
 
