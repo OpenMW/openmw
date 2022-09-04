@@ -28,7 +28,7 @@ void convertFogOfWar(std::vector<char>& imageData)
         return;
     }
 
-    Files::IMemStream in(&imageData[0], imageData.size());
+    Files::IMemStream in(imageData.data(), imageData.size());
 
     osgDB::ReaderWriter::ReadResult result = tgaReader->readImage(in);
     if (!result.success())

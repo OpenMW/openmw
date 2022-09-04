@@ -132,7 +132,7 @@ const MWState::Slot *MWState::Character::createSlot (const ESM::SavedGame& profi
 
 void MWState::Character::deleteSlot (const Slot *slot)
 {
-    int index = slot - &mSlots[0];
+    int index = slot - mSlots.data();
 
     if (index<0 || index>=static_cast<int> (mSlots.size()))
     {
@@ -147,7 +147,7 @@ void MWState::Character::deleteSlot (const Slot *slot)
 
 const MWState::Slot *MWState::Character::updateSlot (const Slot *slot, const ESM::SavedGame& profile)
 {
-    int index = slot - &mSlots[0];
+    int index = slot - mSlots.data();
 
     if (index<0 || index>=static_cast<int> (mSlots.size()))
     {

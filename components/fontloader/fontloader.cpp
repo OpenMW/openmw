@@ -386,7 +386,7 @@ namespace Gui
 
         std::vector<char> textureData;
         textureData.resize(width*height*4);
-        bitmapFile->read(&textureData[0], width*height*4);
+        bitmapFile->read(textureData.data(), width*height*4);
         if (!bitmapFile->good())
             fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
         bitmapFile.reset();
@@ -394,7 +394,7 @@ namespace Gui
         MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture(bitmapFilename);
         tex->createManual(width, height, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
         unsigned char* texData = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
-        memcpy(texData, &textureData[0], textureData.size());
+        memcpy(texData, textureData.data(), textureData.size());
         tex->unlock();
 
         // We need to emulate loading from XML because the data members are private as of mygui 3.2.0

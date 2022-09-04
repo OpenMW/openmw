@@ -110,7 +110,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 // 00 00 00 00 9a 99 99 3e 00 00 a0 40 02 00 00 00
 #if 0
                 unsigned char mDataBuf[256/*bufSize*/];
-                reader.get(&mDataBuf[0], subHdr.dataSize);
+                reader.get(mDataBuf, subHdr.dataSize);
 
                 std::ostringstream ss;
                 ss << ESM::printName(subHdr.typeId) << ":size " << subHdr.dataSize << "\n";

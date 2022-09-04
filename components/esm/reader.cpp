@@ -58,7 +58,7 @@ namespace ESM
                 newSize -= 1; // don't read the null terminator yet
 
             str.resize(newSize); // assumed C++11
-            stream.read(&str[0], newSize);
+            stream.read(str.data(), newSize);
             if (static_cast<std::size_t>(stream.gcount()) == newSize)
             {
                 if (hasNull)

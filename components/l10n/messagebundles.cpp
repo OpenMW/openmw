@@ -138,7 +138,7 @@ namespace l10n
         if (message)
         {
             if (!args.empty() && !argNames.empty())
-                message->format(&argNames[0], &args[0], args.size(), result, success);
+                message->format(argNames.data(), args.data(), args.size(), result, success);
             else
                 message->format(nullptr, nullptr, args.size(), result, success);
             checkSuccess(success, std::string("Failed to format message ") + key.data());
@@ -158,7 +158,7 @@ namespace l10n
             return std::string(key);
 
         if (!args.empty() && !argNames.empty())
-            defaultMessage.format(&argNames[0], &args[0], args.size(), result, success);
+            defaultMessage.format(argNames.data(), args.data(), args.size(), result, success);
         else
             defaultMessage.format(nullptr, nullptr, args.size(), result, success);
         checkSuccess(success, std::string("Failed to format message ") + key.data());

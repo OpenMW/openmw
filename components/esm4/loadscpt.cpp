@@ -56,7 +56,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
     // For debugging only
 #if 0
                 unsigned char mDataBuf[256/*bufSize*/];
-                reader.get(&mDataBuf[0], subHdr.dataSize);
+                reader.get(mDataBuf, subHdr.dataSize);
 
                 std::ostringstream ss;
                 for (unsigned int i = 0; i < subHdr.dataSize; ++i)
@@ -94,7 +94,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
                 std::cout << mEditorId << std::endl;
 
                 unsigned char mDataBuf[4096/*bufSize*/];
-                reader.get(&mDataBuf[0], subHdr.dataSize);
+                reader.get(mDataBuf, subHdr.dataSize);
 
                 std::ostringstream ss;
                 for (unsigned int i = 0; i < subHdr.dataSize; ++i)

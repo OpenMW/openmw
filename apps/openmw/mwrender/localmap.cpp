@@ -591,7 +591,7 @@ void LocalMap::MapSegment::initFogOfWar()
     std::vector<uint32_t> data;
     data.resize(sFogOfWarResolution*sFogOfWarResolution, 0xff000000);
 
-    memcpy(mFogOfWarImage->data(), &data[0], data.size()*4);
+    memcpy(mFogOfWarImage->data(), data.data(), data.size()*4);
 
     createFogOfWarTexture();
 }
@@ -612,7 +612,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
         return;
     }
 
-    Files::IMemStream in(&data[0], data.size());
+    Files::IMemStream in(data.data(), data.size());
 
     osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(in);
     if (!result.success())

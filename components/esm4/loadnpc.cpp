@@ -231,7 +231,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             {
 #if 1
                 boost::scoped_array<unsigned char> dataBuf(new unsigned char[subHdr.dataSize]);
-                reader.get(&dataBuf[0], subHdr.dataSize);
+                reader.get(dataBuf.get(), subHdr.dataSize);
 
                 std::ostringstream ss;
                 ss << mEditorId << " " << ESM::printName(subHdr.typeId) << ":size " << subHdr.dataSize << "\n";
