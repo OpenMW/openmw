@@ -122,18 +122,13 @@ namespace MWMechanics
             if (applyPair.first == ignore)
                 continue;
 
-            MWMechanics::CastSpell cast(mCaster, applyPair.first);
-            cast.mHitPosition = mHitPosition;
-            cast.mId = mId;
-            cast.mSourceName = mSourceName;
-            cast.mSlot = mSlot;
             ESM::EffectList effectsToApply;
             effectsToApply.mList = applyPair.second;
-            cast.inflict(applyPair.first, effectsToApply, rangeType, true);
+            inflict(applyPair.first, effectsToApply, rangeType, true);
         }
     }
 
-    void CastSpell::launchMagicBolt ()
+    void CastSpell::launchMagicBolt() const
     {
         osg::Vec3f fallbackDirection(0, 1, 0);
         osg::Vec3f offset(0, 0, 0);
@@ -150,7 +145,7 @@ namespace MWMechanics
         MWBase::Environment::get().getWorld()->launchMagicBolt(mId, mCaster, fallbackDirection, mSlot);
     }
 
-    void CastSpell::inflict(const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range, bool exploded)
+    void CastSpell::inflict(const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range, bool exploded) const
     {
         const bool targetIsActor = !target.isEmpty() && target.getClass().isActor();
         if (targetIsActor)
@@ -285,7 +280,7 @@ namespace MWMechanics
         }
     }
 
-    bool CastSpell::cast(const std::string &id)
+    bool CastSpell::cast(const std::string& id)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (const auto spell = store.get<ESM::Spell>().search(id))
@@ -527,7 +522,7 @@ namespace MWMechanics
         return true;
     }
 
-    void CastSpell::playSpellCastingEffects(std::string_view spellid, bool enchantment)
+    void CastSpell::playSpellCastingEffects(std::string_view spellid, bool enchantment) const
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (enchantment)
@@ -542,7 +537,7 @@ namespace MWMechanics
         }
     }
 
-    void CastSpell::playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects)
+    void CastSpell::playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects) const
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         std::vector<std::string> addedEffects;
