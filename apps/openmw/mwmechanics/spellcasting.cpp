@@ -169,24 +169,6 @@ namespace MWMechanics
         if (!found)
             return;
 
-        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (mId);
-        if (spell && targetIsActor && (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight))
-        {
-            int requiredResistance = (spell->mData.mType == ESM::Spell::ST_Disease) ?
-                ESM::MagicEffect::ResistCommonDisease
-                : ESM::MagicEffect::ResistBlightDisease;
-            float x = target.getClass().getCreatureStats(target).getMagicEffects().get(requiredResistance).getMagnitude();
-
-            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            if (Misc::Rng::roll0to99(prng) <= x)
-            {
-                // Fully resisted, show message
-                if (target == getPlayer())
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
-                return;
-            }
-        }
-
         ActiveSpells::ActiveSpellParams params(*this, mCaster);
 
         bool castByPlayer = (!mCaster.isEmpty() && mCaster == getPlayer());
@@ -522,19 +504,14 @@ namespace MWMechanics
         return true;
     }
 
-    void CastSpell::playSpellCastingEffects(std::string_view spellid, bool enchantment) const
+    void CastSpell::playSpellCastingEffects(const ESM::Enchantment* enchantment) const
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-        if (enchantment)
-        {
-            if (const auto spell = store.get<ESM::Enchantment>().search(spellid))
-                playSpellCastingEffects(spell->mEffects.mList);
-        }
-        else
-        {
-            if (const auto spell = store.get<ESM::Spell>().search(spellid))
-                playSpellCastingEffects(spell->mEffects.mList);
-        }
+        playSpellCastingEffects(enchantment->mEffects.mList);
+    }
+
+    void CastSpell::playSpellCastingEffects(const ESM::Spell* spell) const
+    {
+        playSpellCastingEffects(spell->mEffects.mList);
     }
 
     void CastSpell::playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects) const

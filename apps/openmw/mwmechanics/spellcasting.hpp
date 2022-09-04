@@ -12,6 +12,7 @@ namespace ESM
     struct Ingredient;
     struct Potion;
     struct EffectList;
+    struct Enchantment;
     struct MagicEffect;
 }
 
@@ -58,7 +59,9 @@ namespace MWMechanics
         /// @note Auto detects if spell, ingredient or potion
         bool cast (const std::string& id);
 
-        void playSpellCastingEffects(std::string_view spellid, bool enchantment) const;
+        void playSpellCastingEffects(const ESM::Enchantment* enchantment) const;
+
+        void playSpellCastingEffects(const ESM::Spell* spell) const;
 
         /// @note \a target can be any type of object, not just actors.
         void inflict(const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range, bool exploded = false) const;

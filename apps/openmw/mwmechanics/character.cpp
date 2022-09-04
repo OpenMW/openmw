@@ -1426,30 +1426,31 @@ bool CharacterController::updateWeaponState()
                 else if (!spellid.empty() && spellCastResult != MWWorld::SpellCastState::PowerAlreadyUsed)
                 {
                     world->breakInvisibility(mPtr);
-                    MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
-                    cast.playSpellCastingEffects(spellid, isMagicItem);
+                    MWMechanics::CastSpell cast(mPtr, {}, false, mCastingManualSpell);
 
-                    std::vector<ESM::ENAMstruct> effects;
+                    const std::vector<ESM::ENAMstruct>* effects{nullptr};
                     const MWWorld::ESMStore &store = world->getStore();
                     if (isMagicItem)
                     {
                         const ESM::Enchantment *enchantment = store.get<ESM::Enchantment>().find(spellid);
-                        effects = enchantment->mEffects.mList;
+                        effects = &enchantment->mEffects.mList;
+                        cast.playSpellCastingEffects(enchantment);
                     }
                     else
                     {
                         const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-                        effects = spell->mEffects.mList;
+                        effects = &spell->mEffects.mList;
+                        cast.playSpellCastingEffects(spell);
                     }
                     if (mCanCast)
                     {
-                        const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(effects.back().mEffectID); // use last effect of list for color of VFX_Hands
+                        const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(effects->back().mEffectID); // use last effect of list for color of VFX_Hands
 
                         const ESM::Static* castStatic = world->getStore().get<ESM::Static>().find ("VFX_Hands");
 
                         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-                        for (size_t iter = 0; iter < effects.size(); ++iter) // play hands vfx for each effect
+                        if (!effects->empty())
                         {
                             if (mAnimation->getNode("Bip01 L Hand"))
                                 mAnimation->addEffect(
@@ -1463,7 +1464,7 @@ bool CharacterController::updateWeaponState()
                         }
                     }
 
-                    const ESM::ENAMstruct &firstEffect = effects.at(0); // first effect used for casting animation
+                    const ESM::ENAMstruct& firstEffect = effects->at(0); // first effect used for casting animation
 
                     std::string startKey;
                     std::string stopKey;
