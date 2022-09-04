@@ -5,6 +5,7 @@
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5129: Stuttering animation on Centurion Archer
+    Bug #5714: Touch spells cast using ExplodeSpell don't always explode
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6937: Divided by Nix Hounds quest is broken
