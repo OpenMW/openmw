@@ -162,6 +162,7 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
+        mESMVersions.resize(mContentFiles.size(), -1);
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
@@ -618,6 +619,11 @@ namespace MWWorld
     MWWorld::Player& World::getPlayer()
     {
         return *mPlayer;
+    }
+
+    const std::vector<int>& World::getESMVersions() const
+    {
+        return mESMVersions;
     }
 
     const MWWorld::ESMStore& World::getStore() const
@@ -2933,7 +2939,7 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         GameContentLoader gameContentLoader;
-        EsmLoader esmLoader(mStore, mReaders, encoder);
+        EsmLoader esmLoader(mStore, mReaders, encoder, mESMVersions);
 
         gameContentLoader.addLoader(".esm", esmLoader);
         gameContentLoader.addLoader(".esp", esmLoader);

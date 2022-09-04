@@ -14,6 +14,7 @@
     Bug #6964: Nerasa Dralor Won't Follow
     Bug #6974: Only harmful effects are reflected
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
+    Feature #6979: Add support of loading and displaying LOD assets purely based on their filename extension
 
 0.48.0
 ------

@@ -160,6 +160,8 @@ namespace MWBase
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
 
+            virtual const std::vector<int>& getESMVersions() const = 0;
+
             virtual MWWorld::LocalScripts& getLocalScripts() = 0;
 
             virtual bool hasCellChanged() const = 0;
