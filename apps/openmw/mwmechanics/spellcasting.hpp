@@ -27,7 +27,10 @@ namespace MWMechanics
 
         void playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects);
 
-        void explodeSpell(const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const;
+        void explodeSpell(const ESM::EffectList& effects, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const;
+
+        /// Launch a bolt with the given effects.
+        void launchMagicBolt();
 
     public:
         std::string mId; // ID of spell, potion, item etc
@@ -57,13 +60,8 @@ namespace MWMechanics
 
         void playSpellCastingEffects(std::string_view spellid, bool enchantment);
 
-        /// Launch a bolt with the given effects.
-        void launchMagicBolt ();
-
         /// @note \a target can be any type of object, not just actors.
-        /// @note \a caster can be any type of object, or even an empty object.
-        void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
-                      const ESM::EffectList& effects, ESM::RangeType range, bool exploded=false);
+        void inflict(const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range, bool exploded = false);
     };
 
     void playEffects(const MWWorld::Ptr& target, const ESM::MagicEffect& magicEffect, bool playNonLooping = true);

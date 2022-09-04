@@ -39,7 +39,7 @@ namespace MWMechanics
     {
     }
 
-    void CastSpell::explodeSpell(const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const
+    void CastSpell::explodeSpell(const ESM::EffectList& effects, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const
     {
         const auto world = MWBase::Environment::get().getWorld();
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -57,7 +57,7 @@ namespace MWMechanics
                 continue; // Don't play explosion for projectiles with 0-area effects
 
             if (!mFromProjectile && effectInfo.mRange == ESM::RT_Touch && !ignore.isEmpty() && !ignore.getClass().isActor() && !ignore.getClass().hasToolTip(ignore)
-                && (caster.isEmpty() || caster.getClass().isActor()))
+                && (mCaster.isEmpty() || mCaster.getClass().isActor()))
                 continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from a projectile enchantment or ExplodeSpell
 
             // Spawn the explosion orb effect
@@ -114,26 +114,22 @@ namespace MWMechanics
         // Now apply the appropriate effects to each actor in range
         for (auto& applyPair : toApply)
         {
-            MWWorld::Ptr source = caster;
             // Vanilla-compatible behaviour of never applying the spell to the caster
             // (could be changed by mods later)
-            if (applyPair.first == caster)
+            if (applyPair.first == mCaster)
                 continue;
 
             if (applyPair.first == ignore)
                 continue;
 
-            if (source.isEmpty())
-                source = applyPair.first;
-
-            MWMechanics::CastSpell cast(source, applyPair.first);
+            MWMechanics::CastSpell cast(mCaster, applyPair.first);
             cast.mHitPosition = mHitPosition;
             cast.mId = mId;
             cast.mSourceName = mSourceName;
             cast.mSlot = mSlot;
             ESM::EffectList effectsToApply;
             effectsToApply.mList = applyPair.second;
-            cast.inflict(applyPair.first, caster, effectsToApply, rangeType, true);
+            cast.inflict(applyPair.first, effectsToApply, rangeType, true);
         }
     }
 
@@ -154,8 +150,7 @@ namespace MWMechanics
         MWBase::Environment::get().getWorld()->launchMagicBolt(mId, mCaster, fallbackDirection, mSlot);
     }
 
-    void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
-                            const ESM::EffectList &effects, ESM::RangeType range, bool exploded)
+    void CastSpell::inflict(const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range, bool exploded)
     {
         const bool targetIsActor = !target.isEmpty() && target.getClass().isActor();
         if (targetIsActor)
@@ -197,9 +192,9 @@ namespace MWMechanics
             }
         }
 
-        ActiveSpells::ActiveSpellParams params(*this, caster);
+        ActiveSpells::ActiveSpellParams params(*this, mCaster);
 
-        bool castByPlayer = (!caster.isEmpty() && caster == getPlayer());
+        bool castByPlayer = (!mCaster.isEmpty() && mCaster == getPlayer());
 
         const ActiveSpells* targetSpells = nullptr;
         if (targetIsActor)
@@ -230,8 +225,7 @@ namespace MWMechanics
             canCastAnEffect = true;
 
             // caster needs to be an actor for linked effects (e.g. Absorb)
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked
-                    && (caster.isEmpty() || !caster.getClass().isActor()))
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked && (mCaster.isEmpty() || !mCaster.getClass().isActor()))
                 continue;
 
             ActiveSpells::ActiveEffect effect;
@@ -259,7 +253,7 @@ namespace MWMechanics
             params.getEffects().emplace_back(effect);
 
             bool effectAffectsHealth = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful || effectIt->mEffectID == ESM::MagicEffect::RestoreHealth;
-            if (castByPlayer && target != caster && targetIsActor && effectAffectsHealth)
+            if (castByPlayer && target != mCaster && targetIsActor && effectAffectsHealth)
             {
                 // If player is attempting to cast a harmful spell on or is healing a living target, show the target's HP bar.
                 MWBase::Environment::get().getWindowManager()->setEnemy(target);
@@ -272,7 +266,7 @@ namespace MWMechanics
         }
 
         if (!exploded)
-            explodeSpell(effects, caster, target, range);
+            explodeSpell(effects, target, range);
 
         if (!target.isEmpty())
         {
@@ -285,7 +279,7 @@ namespace MWMechanics
                     // Apply effects instantly. We can ignore effect deletion since the entire params object gets deleted afterwards anyway
                     // and we can ignore reflection since non-actors cannot reflect spells
                     for(auto& effect : params.getEffects())
-                        applyMagicEffect(target, caster, params, effect, 0.f);
+                        applyMagicEffect(target, mCaster, params, effect, 0.f);
                 }
             }
         }
@@ -381,17 +375,17 @@ namespace MWMechanics
         }
 
         if (isProjectile)
-            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Self);
+            inflict(mTarget, enchantment->mEffects, ESM::RT_Self);
         else
-            inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
+            inflict(mCaster, enchantment->mEffects, ESM::RT_Self);
 
         if (isProjectile || !mTarget.isEmpty())
-            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
+            inflict(mTarget, enchantment->mEffects, ESM::RT_Touch);
 
         if (launchProjectile)
             launchMagicBolt();
         else if (isProjectile || !mTarget.isEmpty())
-            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Target);
+            inflict(mTarget, enchantment->mEffects, ESM::RT_Target);
 
         return true;
     }
@@ -402,7 +396,7 @@ namespace MWMechanics
         mId = potion->mId;
         mType = ESM::ActiveSpells::Type_Consumable;
 
-        inflict(mCaster, mCaster, potion->mEffects, ESM::RT_Self);
+        inflict(mCaster, potion->mEffects, ESM::RT_Self);
 
         return true;
     }
@@ -461,10 +455,10 @@ namespace MWMechanics
         if (!mCaster.getClass().isActor())
             playSpellCastingEffects(spell->mEffects.mList);
 
-        inflict(mCaster, mCaster, spell->mEffects, ESM::RT_Self);
+        inflict(mCaster, spell->mEffects, ESM::RT_Self);
 
         if (!mTarget.isEmpty())
-            inflict(mTarget, mCaster, spell->mEffects, ESM::RT_Touch);
+            inflict(mTarget, spell->mEffects, ESM::RT_Touch);
 
         launchMagicBolt();
 
@@ -528,7 +522,7 @@ namespace MWMechanics
         ESM::EffectList effects;
         effects.mList.push_back(effect);
 
-        inflict(mCaster, mCaster, effects, ESM::RT_Self);
+        inflict(mCaster, effects, ESM::RT_Self);
 
         return true;
     }
