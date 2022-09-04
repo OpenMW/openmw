@@ -1,0 +1,7 @@
+# This file lists revisions meant to be ignored by `git blame`.
+# Pass `--ignore-revs-file .git-blame-ignore-revs` to `git blame` to make your life easier.
+
+# Author: Alexei Kotov <alexdobrohotov@yandex.ru>
+# Date:   Fri Sep 2 02:52:49 2022 +0000
+# Reformat NIF record type mapping
+8df0587793a07ec556dc9cb575cd2af4204c456b
