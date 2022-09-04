@@ -27,6 +27,8 @@ namespace MWMechanics
 
         void playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects);
 
+        void explodeSpell(const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const;
+
     public:
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
@@ -37,7 +39,6 @@ namespace MWMechanics
         int mSlot{0};
         ESM::ActiveSpells::EffectType mType{ESM::ActiveSpells::Type_Temporary};
 
-    public:
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false, const bool manualSpell=false);
 
         bool cast (const ESM::Spell* spell);

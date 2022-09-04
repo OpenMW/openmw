@@ -39,6 +39,104 @@ namespace MWMechanics
     {
     }
 
+    void CastSpell::explodeSpell(const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const
+    {
+        const auto world = MWBase::Environment::get().getWorld();
+        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
+        int index = -1;
+        for (const ESM::ENAMstruct& effectInfo : effects.mList)
+        {
+            ++index;
+            const ESM::MagicEffect* effect = world->getStore().get<ESM::MagicEffect>().find(effectInfo.mEffectID);
+
+            if (effectInfo.mRange != rangeType || (effectInfo.mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
+                continue; // Not right range type, or not area effect and hit an actor
+
+            if (mFromProjectile && effectInfo.mArea <= 0)
+                continue; // Don't play explosion for projectiles with 0-area effects
+
+            if (!mFromProjectile && effectInfo.mRange == ESM::RT_Touch && !ignore.isEmpty() && !ignore.getClass().isActor() && !ignore.getClass().hasToolTip(ignore)
+                && (caster.isEmpty() || caster.getClass().isActor()))
+                continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from a projectile enchantment or ExplodeSpell
+
+            // Spawn the explosion orb effect
+            const ESM::Static* areaStatic;
+            if (!effect->mArea.empty())
+                areaStatic = world->getStore().get<ESM::Static>().find(effect->mArea);
+            else
+                areaStatic = world->getStore().get<ESM::Static>().find("VFX_DefaultArea");
+
+            const std::string& texture = effect->mParticle;
+
+            if (effectInfo.mArea <= 0)
+            {
+                if (effectInfo.mRange == ESM::RT_Target)
+                    world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel, vfs), texture, mHitPosition, 1.0f);
+                continue;
+            }
+            else
+                world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel, vfs), texture, mHitPosition, static_cast<float>(effectInfo.mArea * 2));
+
+            // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+            {
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                if(!effect->mAreaSound.empty())
+                    sndMgr->playSound3D(mHitPosition, effect->mAreaSound, 1.0f, 1.0f);
+                else
+                    sndMgr->playSound3D(mHitPosition, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f);
+            }
+            // Get the actors in range of the effect
+            std::vector<MWWorld::Ptr> objects;
+            static const int unitsPerFoot = ceil(Constants::UnitsPerFoot);
+            MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(mHitPosition, static_cast<float>(effectInfo.mArea * unitsPerFoot), objects);
+            for (const MWWorld::Ptr& affected : objects)
+            {
+                // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
+                if (affected.getClass().isActor() && !world->isActorCollisionEnabled(affected))
+                    continue;
+
+                auto& list = toApply[affected];
+                while (list.size() < static_cast<std::size_t>(index))
+                {
+                    // Insert dummy effects to preserve indices
+                    auto& dummy = list.emplace_back(effectInfo);
+                    dummy.mRange = ESM::RT_Self;
+                    assert(dummy.mRange != rangeType);
+                }
+                list.push_back(effectInfo);
+            }
+        }
+
+        // Now apply the appropriate effects to each actor in range
+        for (auto& applyPair : toApply)
+        {
+            MWWorld::Ptr source = caster;
+            // Vanilla-compatible behaviour of never applying the spell to the caster
+            // (could be changed by mods later)
+            if (applyPair.first == caster)
+                continue;
+
+            if (applyPair.first == ignore)
+                continue;
+
+            if (source.isEmpty())
+                source = applyPair.first;
+
+            MWMechanics::CastSpell cast(source, applyPair.first);
+            cast.mHitPosition = mHitPosition;
+            cast.mId = mId;
+            cast.mSourceName = mSourceName;
+            cast.mSlot = mSlot;
+            ESM::EffectList effectsToApply;
+            effectsToApply.mList = applyPair.second;
+            cast.inflict(applyPair.first, caster, effectsToApply, rangeType, true);
+        }
+    }
+
     void CastSpell::launchMagicBolt ()
     {
         osg::Vec3f fallbackDirection(0, 1, 0);
@@ -174,7 +272,7 @@ namespace MWMechanics
         }
 
         if (!exploded)
-            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, target, range, mId, mSourceName, mFromProjectile, mSlot);
+            explodeSpell(effects, caster, target, range);
 
         if (!target.isEmpty())
         {
