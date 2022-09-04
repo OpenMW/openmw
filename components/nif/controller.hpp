@@ -148,6 +148,14 @@ struct NiKeyframeController : public Controller
     void post(NIFFile *nif) override;
 };
 
+struct NiMultiTargetTransformController : public Controller
+{
+    NodeList mExtraTargets;
+
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
 struct NiFloatInterpController : public Controller
 {
     NiFloatDataPtr data;

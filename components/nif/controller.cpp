@@ -180,6 +180,23 @@ namespace Nif
         interpolator.post(nif);
     }
 
+    void NiMultiTargetTransformController::read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        size_t numTargets = nif->getUShort();
+        std::vector<NodePtr> targets;
+        targets.resize(numTargets);
+        for (size_t i = 0; i < targets.size(); i++)
+            targets[i].read(nif);
+        mExtraTargets = targets;
+    }
+
+    void NiMultiTargetTransformController::post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        mExtraTargets.post(nif);
+    }
+
     void NiFloatInterpController::read(NIFStream *nif)
     {
         Controller::read(nif);
