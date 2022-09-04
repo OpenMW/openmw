@@ -1263,7 +1263,7 @@ namespace MWScript
                     return;
 
                 MWMechanics::CastSpell cast(ptr, target, false, true);
-                cast.playSpellCastingEffects(spell->mId, false);
+                cast.playSpellCastingEffects(spell);
                 cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);

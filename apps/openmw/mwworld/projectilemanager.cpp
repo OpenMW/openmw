@@ -575,7 +575,7 @@ namespace MWWorld
                 const MWWorld::Ptr& ptr = ref.getPtr();
                 effects = &esmStore.get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr))->mEffects;
             }
-            cast.inflict(target, caster, *effects, ESM::RT_Target);
+            cast.inflict(target, *effects, ESM::RT_Target);
 
             magicBoltState.mToDelete = true;
         }
