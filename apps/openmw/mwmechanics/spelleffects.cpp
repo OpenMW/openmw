@@ -530,6 +530,14 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
         case ESM::MagicEffect::RallyHumanoid:
             modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, -effect.mMagnitude, invalid);
             break;
+        case ESM::MagicEffect::Sound:
+            if(target == getPlayer())
+            {
+                const auto& magnitudes = target.getClass().getCreatureStats(target).getMagicEffects();
+                float volume = std::clamp((magnitudes.get(effect.mEffectId).getModifier() + effect.mMagnitude) / 100.f, 0.f, 1.f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(target, "magic sound", volume, 1.f, MWSound::Type::Sfx, MWSound::PlayMode::LoopNoEnv);
+            }
+            break;
         case ESM::MagicEffect::SummonScamp:
         case ESM::MagicEffect::SummonClannfear:
         case ESM::MagicEffect::SummonDaedroth:
@@ -1030,6 +1038,10 @@ void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellPara
         case ESM::MagicEffect::RallyCreature:
         case ESM::MagicEffect::RallyHumanoid:
             modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, effect.mMagnitude, invalid);
+            break;
+        case ESM::MagicEffect::Sound:
+            if(magnitudes.get(effect.mEffectId).getModifier() <= 0.f && target == getPlayer())
+                MWBase::Environment::get().getSoundManager()->stopSound3D(target, "magic sound");
             break;
         case ESM::MagicEffect::SummonScamp:
         case ESM::MagicEffect::SummonClannfear:
