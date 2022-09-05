@@ -166,7 +166,8 @@ namespace MWWorld
 
             void updateNavigator();
 
-            void updateNavigatorObject(const MWPhysics::Object& object);
+            void updateNavigatorObject(const MWPhysics::Object& object,
+                const DetourNavigator::UpdateGuard* navigatorUpdateGuard = nullptr);
 
             void ensureNeededRecords();
 

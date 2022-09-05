@@ -43,6 +43,18 @@ namespace DetourNavigator
         {
             return TilePosition(v.get<0>(), v.get<1>());
         }
+
+        template <class Mutex>
+        class MaybeLockGuard
+        {
+        public:
+            explicit MaybeLockGuard(Mutex& mutex, const TileCachedRecastMeshManager::UpdateGuard* guard)
+                : mImpl(guard == nullptr ? std::optional<std::unique_lock<Mutex>>(mutex) : std::nullopt)
+            {}
+
+        private:
+            const std::optional<std::unique_lock<Mutex>> mImpl;
+        };
     }
 
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
@@ -51,7 +63,7 @@ namespace DetourNavigator
         , mRange(makeTilesPositionsRange(mBounds.mMin, mBounds.mMax, mSettings))
     {}
 
-    void TileCachedRecastMeshManager::setBounds(const TileBounds& bounds)
+    void TileCachedRecastMeshManager::setBounds(const TileBounds& bounds, const UpdateGuard* guard)
     {
         if (mBounds == bounds)
             return;
@@ -87,7 +99,7 @@ namespace DetourNavigator
 
         if (changed)
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             ++mRevision;
         }
 
@@ -104,9 +116,9 @@ namespace DetourNavigator
         };
     }
 
-    void TileCachedRecastMeshManager::setWorldspace(std::string_view worldspace)
+    void TileCachedRecastMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
     {
-        const std::lock_guard lock(mMutex);
+        const MaybeLockGuard lock(mMutex, guard);
         if (mWorldspace == worldspace)
             return;
         mWorldspace = worldspace;
@@ -120,11 +132,11 @@ namespace DetourNavigator
     }
 
     bool TileCachedRecastMeshManager::addObject(ObjectId id, const CollisionShape& shape, const btTransform& transform,
-        const AreaType areaType)
+        const AreaType areaType, const UpdateGuard* guard)
     {
         const TilesPositionsRange range = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             const auto it = mObjects.find(id);
             if (it != mObjects.end())
                 return false;
@@ -147,12 +159,12 @@ namespace DetourNavigator
         return true;
     }
 
-    bool TileCachedRecastMeshManager::updateObject(ObjectId id, const btTransform& transform, const AreaType areaType)
+    bool TileCachedRecastMeshManager::updateObject(ObjectId id, const btTransform& transform, const AreaType areaType, const UpdateGuard* guard)
     {
         TilesPositionsRange newRange;
         TilesPositionsRange oldRange;
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             const auto it = mObjects.find(id);
             if (it == mObjects.end())
                 return false;
@@ -196,11 +208,11 @@ namespace DetourNavigator
         return true;
     }
 
-    void TileCachedRecastMeshManager::removeObject(ObjectId id)
+    void TileCachedRecastMeshManager::removeObject(ObjectId id, const UpdateGuard* guard)
     {
         TilesPositionsRange range;
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             const auto it = mObjects.find(id);
             if (it == mObjects.end())
                 return;
@@ -213,14 +225,14 @@ namespace DetourNavigator
                           [&] (const TilePosition& v) { addChangedTile(v, ChangeType::remove); });
     }
 
-    void TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const float level)
+    void TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const float level, const UpdateGuard* guard)
     {
         const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
         const std::optional<TilesPositionsRange> range = cellSize == std::numeric_limits<int>::max()
                 ? std::optional<TilesPositionsRange>()
                 : makeTilesPositionsRange(cellSize, shift, mSettings);
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             auto it = mWater.find(cellPosition);
             if (it != mWater.end())
                 return;
@@ -239,11 +251,11 @@ namespace DetourNavigator
         addChangedTiles(range, ChangeType::add);
     }
 
-    void TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    void TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
     {
         std::optional<TilesPositionsRange> range;
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             const auto it = mWater.find(cellPosition);
             if (it == mWater.end())
                 return;
@@ -259,14 +271,14 @@ namespace DetourNavigator
     }
 
     void TileCachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, const int cellSize,
-        const HeightfieldShape& shape)
+        const HeightfieldShape& shape, const UpdateGuard* guard)
     {
         const btVector3 shift = getHeightfieldShift(shape, cellPosition, cellSize);
         const std::optional<TilesPositionsRange> range = cellSize == std::numeric_limits<int>::max()
                 ? std::optional<TilesPositionsRange>()
                 : makeTilesPositionsRange(cellSize, shift, mSettings);
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             auto it = mHeightfields.find(cellPosition);
             if (it != mHeightfields.end())
                 return;
@@ -286,11 +298,11 @@ namespace DetourNavigator
         addChangedTiles(range, ChangeType::add);
     }
 
-    void TileCachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    void TileCachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
     {
         std::optional<TilesPositionsRange> range;
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             const auto it = mHeightfields.find(cellPosition);
             if (it == mHeightfields.end())
                 return;
@@ -378,10 +390,10 @@ namespace DetourNavigator
             tile->second = addChangeType(tile->second, changeType);
     }
 
-    std::map<osg::Vec2i, ChangeType> TileCachedRecastMeshManager::takeChangedTiles()
+    std::map<osg::Vec2i, ChangeType> TileCachedRecastMeshManager::takeChangedTiles(const UpdateGuard* guard)
     {
         {
-            const std::lock_guard lock(mMutex);
+            const MaybeLockGuard lock(mMutex, guard);
             for (const auto& [tilePosition, changeType] : mChangedTiles)
                 if (const auto it = mCache.find(tilePosition); it != mCache.end())
                     ++it->second.mVersion.mRevision;

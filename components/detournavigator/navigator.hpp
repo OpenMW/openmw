@@ -55,6 +55,8 @@ namespace DetourNavigator
         {}
     };
 
+    class UpdateGuard;
+
     /**
      * @brief Top level interface of detournavigator component. Navigator allows to build a scene with navmesh and find
      * a path for an agent there. Scene contains agents, geometry objects and water. Agent are distinguished only by
@@ -65,6 +67,8 @@ namespace DetourNavigator
     struct Navigator
     {
         virtual ~Navigator() = default;
+
+        virtual std::unique_ptr<const UpdateGuard> makeUpdateGuard() = 0;
 
         /**
          * @brief addAgent should be called for each agent even if all of them has same half extents.
@@ -83,13 +87,13 @@ namespace DetourNavigator
          * @brief setWorldspace should be called before adding object from new worldspace
          * @param worldspace
          */
-        virtual void setWorldspace(std::string_view worldspace) = 0;
+        virtual void setWorldspace(std::string_view worldspace, const UpdateGuard* guard) = 0;
 
         /**
          * @brief updateBounds should be called before adding object from loading cell
          * @param playerPosition corresponds to the bounds center
          */
-        virtual void updateBounds(const osg::Vec3f& playerPosition) = 0;
+        virtual void updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard) = 0;
 
         /**
          * @brief addObject is used to add complex object with allowed to walk and avoided to walk shapes
@@ -97,7 +101,8 @@ namespace DetourNavigator
          * @param shape members must live until object is updated by another shape removed from Navigator
          * @param transform allows to setup objects geometry according to its world state
          */
-        virtual void addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) = 0;
+        virtual void addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
+            const UpdateGuard* guard) = 0;
 
         /**
          * @brief addObject is used to add doors.
@@ -105,7 +110,8 @@ namespace DetourNavigator
          * @param shape members must live until object is updated by another shape or removed from Navigator.
          * @param transform allows to setup objects geometry according to its world state.
          */
-        virtual void addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
+        virtual void addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform,
+            const UpdateGuard* guard) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -113,7 +119,8 @@ namespace DetourNavigator
          * @param shape members must live until object is updated by another shape removed from Navigator.
          * @param transform allows to setup objects geometry according to its world state.
          */
-        virtual void updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) = 0;
+        virtual void updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
+            const UpdateGuard* guard) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -121,13 +128,14 @@ namespace DetourNavigator
          * @param shape members must live until object is updated by another shape removed from Navigator.
          * @param transform allows to setup objects geometry according to its world state.
          */
-        virtual void updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
+        virtual void updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform,
+            const UpdateGuard* guard) = 0;
 
         /**
          * @brief removeObject to make it no more available at the scene.
          * @param id is used to find object.
          */
-        virtual void removeObject(const ObjectId id) = 0;
+        virtual void removeObject(const ObjectId id, const UpdateGuard* guard) = 0;
 
         /**
          * @brief addWater is used to set water level at given world cell.
@@ -135,17 +143,19 @@ namespace DetourNavigator
          * @param cellSize set cell borders. std::numeric_limits<int>::max() disables cell borders.
          * @param shift set global shift of cell center.
          */
-        virtual void addWater(const osg::Vec2i& cellPosition, int cellSize, float level) = 0;
+        virtual void addWater(const osg::Vec2i& cellPosition, int cellSize, float level,
+            const UpdateGuard* guard) = 0;
 
         /**
          * @brief removeWater to make it no more available at the scene.
          * @param cellPosition allows to find cell.
          */
-        virtual void removeWater(const osg::Vec2i& cellPosition) = 0;
+        virtual void removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard) = 0;
 
-        virtual void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape) = 0;
+        virtual void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape,
+            const UpdateGuard* guard) = 0;
 
-        virtual void removeHeightfield(const osg::Vec2i& cellPosition) = 0;
+        virtual void removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard) = 0;
 
         virtual void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) = 0;
 
@@ -155,13 +165,14 @@ namespace DetourNavigator
          * @brief update starts background navmesh update using current scene state.
          * @param playerPosition setup initial point to order build tiles of navmesh.
          */
-        virtual void update(const osg::Vec3f& playerPosition) = 0;
+        virtual void update(const osg::Vec3f& playerPosition, const UpdateGuard* guard) = 0;
 
         /**
          * @brief wait locks thread until tiles are updated from last update call based on passed condition type.
          * @param waitConditionType defines when waiting will stop
+         * @param listener optional listener for a progress bar
          */
-        virtual void wait(Loading::Listener& listener, WaitConditionType waitConditionType) = 0;
+        virtual void wait(WaitConditionType waitConditionType, Loading::Listener* listener) = 0;
 
         /**
          * @brief getNavMesh returns navmesh for specific agent half extents

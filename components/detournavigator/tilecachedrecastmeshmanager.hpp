@@ -31,27 +31,38 @@ namespace DetourNavigator
     class TileCachedRecastMeshManager
     {
     public:
+        class UpdateGuard
+        {
+        public:
+            explicit UpdateGuard(TileCachedRecastMeshManager& manager) : mImpl(manager.mMutex) {}
+
+        private:
+            const std::lock_guard<std::mutex> mImpl;
+        };
+
         explicit TileCachedRecastMeshManager(const RecastSettings& settings);
 
-        void setBounds(const TileBounds& bounds);
+        void setBounds(const TileBounds& bounds, const UpdateGuard* guard);
 
         TilesPositionsRange getRange() const;
 
-        void setWorldspace(std::string_view worldspace);
+        void setWorldspace(std::string_view worldspace, const UpdateGuard* guard);
 
-        bool addObject(ObjectId id, const CollisionShape& shape, const btTransform& transform, AreaType areaType);
+        bool addObject(ObjectId id, const CollisionShape& shape, const btTransform& transform, AreaType areaType,
+            const UpdateGuard* guard);
 
-        bool updateObject(ObjectId id, const btTransform& transform, AreaType areaType);
+        bool updateObject(ObjectId id, const btTransform& transform, AreaType areaType, const UpdateGuard* guard);
 
-        void removeObject(ObjectId id);
+        void removeObject(ObjectId id, const UpdateGuard* guard);
 
-        void addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
+        void addWater(const osg::Vec2i& cellPosition, int cellSize, float level, const UpdateGuard* guard);
 
-        void removeWater(const osg::Vec2i& cellPosition);
+        void removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
-        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
+        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape,
+            const UpdateGuard* guard);
 
-        void removeHeightfield(const osg::Vec2i& cellPosition);
+        void removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
         std::shared_ptr<RecastMesh> getMesh(std::string_view worldspace, const TilePosition& tilePosition);
 
@@ -65,7 +76,7 @@ namespace DetourNavigator
 
         void addChangedTile(const TilePosition& tilePosition, ChangeType changeType);
 
-        std::map<osg::Vec2i, ChangeType> takeChangedTiles();
+        std::map<osg::Vec2i, ChangeType> takeChangedTiles(const UpdateGuard* guard);
 
     private:
         struct Report

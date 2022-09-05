@@ -57,57 +57,57 @@ namespace DetourNavigator
         , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager, std::move(db))
     {}
 
-    void NavMeshManager::setWorldspace(std::string_view worldspace)
+    void NavMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
     {
         if (worldspace == mWorldspace)
             return;
-        mRecastMeshManager.setWorldspace(worldspace);
+        mRecastMeshManager.setWorldspace(worldspace, getImpl(guard));
         for (auto& [agent, cache] : mCache)
             cache = std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter);
         mWorldspace = worldspace;
     }
 
-    void NavMeshManager::updateBounds(const osg::Vec3f& playerPosition)
+    void NavMeshManager::updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard)
     {
         const TileBounds bounds = makeBounds(mSettings.mRecast, osg::Vec2f(playerPosition.x(), playerPosition.y()),
                                              mSettings.mMaxTilesNumber);
-        mRecastMeshManager.setBounds(bounds);
+        mRecastMeshManager.setBounds(bounds, getImpl(guard));
     }
 
     bool NavMeshManager::addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
-                                   const AreaType areaType)
+                                   const AreaType areaType, const UpdateGuard* guard)
     {
-        return mRecastMeshManager.addObject(id, shape, transform, areaType);
+        return mRecastMeshManager.addObject(id, shape, transform, areaType, getImpl(guard));
     }
 
-    bool NavMeshManager::updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType)
+    bool NavMeshManager::updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType, const UpdateGuard* guard)
     {
-        return mRecastMeshManager.updateObject(id, transform, areaType);
+        return mRecastMeshManager.updateObject(id, transform, areaType, getImpl(guard));
     }
 
-    void NavMeshManager::removeObject(const ObjectId id)
+    void NavMeshManager::removeObject(const ObjectId id, const UpdateGuard* guard)
     {
-        mRecastMeshManager.removeObject(id);
+        mRecastMeshManager.removeObject(id, getImpl(guard));
     }
 
-    void NavMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
+    void NavMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level, const UpdateGuard* guard)
     {
-        mRecastMeshManager.addWater(cellPosition, cellSize, level);
+        mRecastMeshManager.addWater(cellPosition, cellSize, level, getImpl(guard));
     }
 
-    void NavMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    void NavMeshManager::removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
     {
-        mRecastMeshManager.removeWater(cellPosition);
+        mRecastMeshManager.removeWater(cellPosition, getImpl(guard));
     }
 
-    void NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape)
+    void NavMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape, const UpdateGuard* guard)
     {
-        mRecastMeshManager.addHeightfield(cellPosition, cellSize, shape);
+        mRecastMeshManager.addHeightfield(cellPosition, cellSize, shape, getImpl(guard));
     }
 
-    void NavMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    void NavMeshManager::removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
     {
-        mRecastMeshManager.removeHeightfield(cellPosition);
+        mRecastMeshManager.removeHeightfield(cellPosition, getImpl(guard));
     }
 
     void NavMeshManager::addAgent(const AgentBounds& agentBounds)
@@ -153,7 +153,7 @@ namespace DetourNavigator
             mRecastMeshManager.addChangedTile(tile, ChangeType::update);
     }
 
-    void NavMeshManager::update(const osg::Vec3f& playerPosition)
+    void NavMeshManager::update(const osg::Vec3f& playerPosition, const UpdateGuard* guard)
     {
         const auto playerTile = getTilePosition(mSettings.mRecast,
             toNavMeshCoordinates(mSettings.mRecast, playerPosition));
@@ -162,7 +162,7 @@ namespace DetourNavigator
             return;
         mLastRecastMeshManagerRevision = mRecastMeshManager.getRevision();
         mPlayerTile = playerTile;
-        const auto changedTiles = mRecastMeshManager.takeChangedTiles();
+        const auto changedTiles = mRecastMeshManager.takeChangedTiles(getImpl(guard));
         const TilesPositionsRange range = mRecastMeshManager.getRange();
         for (const auto& [agentBounds, cached] : mCache)
             update(agentBounds, playerTile, range, cached, changedTiles);
@@ -194,9 +194,9 @@ namespace DetourNavigator
             " playerTile=" << playerTile << " recastMeshManagerRevision=" << mLastRecastMeshManagerRevision;
     }
 
-    void NavMeshManager::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
+    void NavMeshManager::wait(WaitConditionType waitConditionType, Loading::Listener* listener)
     {
-        mAsyncNavMeshUpdater.wait(listener, waitConditionType);
+        mAsyncNavMeshUpdater.wait(waitConditionType, listener);
     }
 
     SharedNavMeshCacheItem NavMeshManager::getNavMesh(const AgentBounds& agentBounds) const

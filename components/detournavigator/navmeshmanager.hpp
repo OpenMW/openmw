@@ -20,28 +20,44 @@ namespace DetourNavigator
     class NavMeshManager
     {
     public:
+        class UpdateGuard
+        {
+        public:
+            explicit UpdateGuard(NavMeshManager& manager) : mImpl(manager.mRecastMeshManager) {}
+
+            friend const TileCachedRecastMeshManager::UpdateGuard* getImpl(const UpdateGuard* guard)
+            {
+                return guard == nullptr ? nullptr : &guard->mImpl;
+            }
+
+        private:
+            const TileCachedRecastMeshManager::UpdateGuard mImpl;
+        };
+
         explicit NavMeshManager(const Settings& settings, std::unique_ptr<NavMeshDb>&& db);
 
-        void setWorldspace(std::string_view worldspace);
+        void setWorldspace(std::string_view worldspace, const UpdateGuard* guard);
 
-        void updateBounds(const osg::Vec3f& playerPosition);
+        void updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard);
 
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
-                       const AreaType areaType);
+            const AreaType areaType, const UpdateGuard* guard);
 
-        bool updateObject(ObjectId id, const btTransform& transform, AreaType areaType);
+        bool updateObject(ObjectId id, const btTransform& transform, AreaType areaType,
+            const UpdateGuard* guard);
 
-        void removeObject(const ObjectId id);
+        void removeObject(const ObjectId id, const UpdateGuard* guard);
 
         void addAgent(const AgentBounds& agentBounds);
 
-        void addWater(const osg::Vec2i& cellPosition, int cellSize, float level);
+        void addWater(const osg::Vec2i& cellPosition, int cellSize, float level, const UpdateGuard* guard);
 
-        void removeWater(const osg::Vec2i& cellPosition);
+        void removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
-        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape);
+        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape,
+            const UpdateGuard* guard);
 
-        void removeHeightfield(const osg::Vec2i& cellPosition);
+        void removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
         bool reset(const AgentBounds& agentBounds);
 
@@ -49,9 +65,9 @@ namespace DetourNavigator
 
         void removeOffMeshConnections(const ObjectId id);
 
-        void update(const osg::Vec3f& playerPosition);
+        void update(const osg::Vec3f& playerPosition, const UpdateGuard* guard);
 
-        void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
+        void wait(WaitConditionType waitConditionType, Loading::Listener* listener);
 
         SharedNavMeshCacheItem getNavMesh(const AgentBounds& agentBounds) const;
 

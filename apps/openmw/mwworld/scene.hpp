@@ -38,6 +38,7 @@ namespace Loading
 namespace DetourNavigator
 {
     struct Navigator;
+    class UpdateGuard;
 }
 
 namespace MWRender
@@ -110,7 +111,9 @@ namespace MWWorld
 
             std::optional<ChangeCellGridRequest> mChangeCellGridRequest;
 
-            void insertCell(CellStore &cell, Loading::Listener* loadingListener);
+            void insertCell(CellStore &cell, Loading::Listener* loadingListener,
+                const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
+
             osg::Vec2i mCurrentGridCenter;
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
@@ -128,8 +131,9 @@ namespace MWWorld
             osg::Vec4i gridCenterToBounds(const osg::Vec2i &centerCell) const;
             osg::Vec2i getNewGridCenter(const osg::Vec3f &pos, const osg::Vec2i *currentGridCenter = nullptr) const;
 
-            void unloadCell(CellStore* cell);
-            void loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position);
+            void unloadCell(CellStore* cell, const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
+            void loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position,
+                const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
 
         public:
 

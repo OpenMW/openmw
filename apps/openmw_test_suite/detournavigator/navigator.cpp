@@ -155,9 +155,11 @@ namespace
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
+        auto updateGuard = mNavigator->makeUpdateGuard();
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, updateGuard.get());
+        mNavigator->update(mPlayerPosition, updateGuard.get());
+        updateGuard.reset();
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -207,9 +209,9 @@ namespace
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -239,9 +241,12 @@ namespace
             Vec3fEq(460, 56.66666412353515625, 1.99998295307159423828125)
         )) << mPath;
 
-        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        {
+            auto updateGuard = mNavigator->makeUpdateGuard();
+            mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, updateGuard.get());
+            mNavigator->update(mPlayerPosition, updateGuard.get());
+        }
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
@@ -291,10 +296,10 @@ namespace
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -327,9 +332,9 @@ namespace
 
         compound.shape().updateChildTransform(0, btTransform(btMatrix3x3::getIdentity(), btVector3(1000, 0, 0)));
 
-        mNavigator->updateObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->updateObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
@@ -385,10 +390,10 @@ namespace
         heightfield2.shape().setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addObject(ObjectId(&heightfield1.shape()), ObjectShapes(heightfield1.instance(), mObjectTransform), mTransform);
-        mNavigator->addObject(ObjectId(&heightfield2.shape()), ObjectShapes(heightfield2.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addObject(ObjectId(&heightfield1.shape()), ObjectShapes(heightfield1.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->addObject(ObjectId(&heightfield2.shape()), ObjectShapes(heightfield2.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -442,15 +447,15 @@ namespace
         const int cellSize2 = mHeightfieldTileSize * (surface2.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize1, surface1);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize1, surface1, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const Version version = mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion();
 
-        mNavigator->addHeightfield(mCellPosition, cellSize2, surface2);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize2, surface2, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion(), version);
     }
@@ -484,9 +489,9 @@ namespace
         osg::ref_ptr<const Resource::BulletShapeInstance> instance(new Resource::BulletShapeInstance(bulletShape));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addObject(ObjectId(instance->mCollisionShape.get()), ObjectShapes(instance, mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addObject(ObjectId(instance->mCollisionShape.get()), ObjectShapes(instance, mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -531,10 +536,10 @@ namespace
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addWater(mCellPosition, cellSize, 300);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize, 300, nullptr);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mStart.x() = 256;
         mStart.z() = 300;
@@ -579,10 +584,10 @@ namespace
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addWater(mCellPosition, cellSize, -25);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize, -25, nullptr);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mStart.x() = 256;
         mEnd.x() = 256;
@@ -625,10 +630,10 @@ namespace
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->addWater(mCellPosition, std::numeric_limits<int>::max(), -25);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->addWater(mCellPosition, std::numeric_limits<int>::max(), -25, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mStart.x() = 256;
         mEnd.x() = 256;
@@ -671,10 +676,10 @@ namespace
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addWater(mCellPosition, cellSize, -25);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize, -25, nullptr);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mStart.x() = 256;
         mEnd.x() = 256;
@@ -715,17 +720,17 @@ namespace
         heightfield.shape().setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->removeObject(ObjectId(&heightfield.shape()));
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->removeObject(ObjectId(&heightfield.shape()), nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -769,17 +774,17 @@ namespace
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->removeHeightfield(mCellPosition);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->removeHeightfield(mCellPosition, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -824,9 +829,9 @@ namespace
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         Misc::Rng::init(42);
 
@@ -862,12 +867,12 @@ namespace
 
         mNavigator->addAgent(mAgentBounds);
 
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
 
         for (std::size_t i = 0; i < boxes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(shift.x() + i * 10, shift.y() + i * 10, i * 10));
-            mNavigator->addObject(ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform);
+            mNavigator->addObject(ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform, nullptr);
         }
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -875,11 +880,11 @@ namespace
         for (std::size_t i = 0; i < boxes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(shift.x() + i * 10 + 1, shift.y() + i * 10 + 1, i * 10 + 1));
-            mNavigator->updateObject(ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform);
+            mNavigator->updateObject(ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform, nullptr);
         }
 
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -921,27 +926,27 @@ namespace
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32, i * 32, i * 32));
-            mNavigator->addObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform);
+            mNavigator->addObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const auto start = std::chrono::steady_clock::now();
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 1, i * 32 + 1, i * 32 + 1));
-            mNavigator->updateObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform);
+            mNavigator->updateObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 2, i * 32 + 2, i * 32 + 2));
-            mNavigator->updateObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform);
+            mNavigator->updateObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const auto duration = std::chrono::steady_clock::now() - start;
 
@@ -962,9 +967,9 @@ namespace
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const osg::Vec3f start(57, 460, 1);
         const osg::Vec3f end(460, 57, 1);
@@ -991,14 +996,14 @@ namespace
         CollisionShapeInstance borderBox(std::make_unique<btBoxShape>(btVector3(50, 50, 50)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
         mNavigator->addObject(ObjectId(&oscillatingBox.shape()), ObjectShapes(oscillatingBox.instance(), mObjectTransform),
-                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition));
+                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition), nullptr);
         // add this box to make navmesh bound box independent from oscillatingBoxShape rotations
         mNavigator->addObject(ObjectId(&borderBox.shape()), ObjectShapes(borderBox.instance(), mObjectTransform),
-                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition + btVector3(0, 0, 200)));
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition + btVector3(0, 0, 200)), nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const Version expectedVersion {1, 4};
 
@@ -1010,9 +1015,9 @@ namespace
         {
             const btTransform transform(btQuaternion(btVector3(0, 0, 1), n * 2 * osg::PI / 10),
                                         oscillatingBoxShapePosition);
-            mNavigator->updateObject(ObjectId(&oscillatingBox.shape()), ObjectShapes(oscillatingBox.instance(), mObjectTransform), transform);
-            mNavigator->update(mPlayerPosition);
-            mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+            mNavigator->updateObject(ObjectId(&oscillatingBox.shape()), ObjectShapes(oscillatingBox.instance(), mObjectTransform), transform, nullptr);
+            mNavigator->update(mPlayerPosition, nullptr);
+            mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
         }
 
         ASSERT_EQ(navMeshes.size(), 1);
@@ -1025,9 +1030,9 @@ namespace
         const int cellSize = mHeightfieldTileSize * 4;
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, plane);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
+        mNavigator->addHeightfield(mCellPosition, cellSize, plane, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -1075,10 +1080,10 @@ namespace
                                        new btBoxShape(btVector3(200, 200, 1000)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::PartialPath);
@@ -1114,10 +1119,10 @@ namespace
                                        new btBoxShape(btVector3(100, 100, 1000)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const float endTolerance = 1000.0f;
 
@@ -1154,15 +1159,15 @@ namespace
         const float level2 = 2;
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addWater(mCellPosition, cellSize1, level1);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize1, level1, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const Version version = mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion();
 
-        mNavigator->addWater(mCellPosition, cellSize2, level2);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize2, level2, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion(), version);
     }
