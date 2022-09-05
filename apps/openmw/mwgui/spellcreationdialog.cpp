@@ -9,6 +9,8 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
+#include <components/esm3/loadgmst.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/environment.hpp"

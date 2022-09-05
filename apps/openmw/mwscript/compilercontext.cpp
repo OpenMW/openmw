@@ -3,7 +3,8 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <components/esm3/loaddial.hpp>
-
+#include <components/esm3/loadscpt.hpp>
+#include <components/esm/records.hpp>
 #include <components/compiler/locals.hpp>
 
 #include "../mwbase/environment.hpp"

@@ -5,6 +5,8 @@
 
 #include <components/settings/settings.hpp>
 #include <components/misc/strings/format.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadbsgn.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"

@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <components/compiler/locals.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwworld/esmstore.hpp"
 

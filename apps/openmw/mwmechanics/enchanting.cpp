@@ -2,6 +2,8 @@
 
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"

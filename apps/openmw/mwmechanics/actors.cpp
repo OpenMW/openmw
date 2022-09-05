@@ -12,6 +12,10 @@
 #include <components/settings/settings.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadgmst.hpp>
+
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"

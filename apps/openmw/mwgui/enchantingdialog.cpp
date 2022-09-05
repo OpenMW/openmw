@@ -10,6 +10,8 @@
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 
+#include <components/esm3/loadgmst.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"

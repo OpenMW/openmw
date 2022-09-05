@@ -16,6 +16,8 @@
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadlevlist.hpp>
 
+#include <components/esm3/loadcrea.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

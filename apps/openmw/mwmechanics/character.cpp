@@ -25,6 +25,7 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm/records.hpp>
 
 #include <components/settings/settings.hpp>
 

@@ -7,7 +7,7 @@
 #include <tuple>
 
 #include <components/esm/luascripts.hpp>
-#include <components/esm/records.hpp>
+#include <components/esm3/loadgmst.hpp>
 
 #include "store.hpp"
 
@@ -24,6 +24,48 @@ namespace MWMechanics
 namespace ESM
 {
     class ReadersCache;
+    struct Activator;
+    struct Potion;
+    struct Apparatus;
+    struct Armor;
+    struct BodyPart;
+    struct Book;
+    struct BirthSign;
+    struct Class;
+    struct Clothing;
+    struct Container;
+    struct Creature;
+    struct Dialogue;
+    struct Door;
+    struct Enchantment;
+    struct Faction;
+    struct Global;
+    struct Ingredient;
+    struct CreatureLevList;
+    struct ItemLevList;
+    struct Light;
+    struct Lockpick;
+    struct Miscellaneous;
+    struct NPC;
+    struct Probe;
+    struct Race;
+    struct Region;
+    struct Repair;
+    struct SoundGenerator;
+    struct Sound;
+    struct Spell;
+    struct StartScript;
+    struct Static;
+    struct Weapon;
+    struct GameSetting;
+    class Script;
+    struct Cell;
+    struct Land;
+    struct LandTexture;
+    struct Pathgrid;
+    struct MagicEffect;
+    struct Skill;
+    struct Attribute;
 }
 
 namespace MWWorld

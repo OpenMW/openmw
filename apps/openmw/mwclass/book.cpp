@@ -3,6 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadsoun.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

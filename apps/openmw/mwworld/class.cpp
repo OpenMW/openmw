@@ -3,6 +3,9 @@
 #include <stdexcept>
 
 #include <components/esm/defs.hpp>
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

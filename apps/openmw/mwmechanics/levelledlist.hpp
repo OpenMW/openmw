@@ -3,6 +3,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
+#include <components/esm3/loadlevlist.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/esmstore.hpp"

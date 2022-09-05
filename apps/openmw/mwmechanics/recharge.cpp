@@ -2,6 +2,8 @@
 
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/format.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

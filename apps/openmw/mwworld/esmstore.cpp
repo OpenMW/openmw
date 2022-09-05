@@ -11,6 +11,8 @@
 #include <components/lua/configuration.hpp>
 #include <components/misc/algorithm.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/esm/records.hpp>
+
 #include <components/esmloader/load.hpp>
 #include <components/esm4/common.hpp>
 

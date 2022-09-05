@@ -16,6 +16,10 @@
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/mathutil.hpp>

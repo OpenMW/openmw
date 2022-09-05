@@ -10,6 +10,7 @@
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadbsgn.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"

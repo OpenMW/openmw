@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "spells.hpp"
 

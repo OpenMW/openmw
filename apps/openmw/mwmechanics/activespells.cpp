@@ -10,6 +10,9 @@
 #include <components/misc/strings/algorithm.hpp>
 
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadrace.hpp>
 
 #include <components/settings/settings.hpp>
 

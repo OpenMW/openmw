@@ -10,6 +10,9 @@
 #include <components/debug/debuglog.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
 
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadrace.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

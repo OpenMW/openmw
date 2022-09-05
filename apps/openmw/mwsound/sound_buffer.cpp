@@ -7,6 +7,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/esm3/loadsoun.hpp>
 
 #include <algorithm>
 #include <cmath>

@@ -8,6 +8,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

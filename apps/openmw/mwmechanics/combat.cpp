@@ -6,6 +6,10 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadsoun.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

@@ -3,6 +3,9 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/utf8stream.hpp>
 
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadench.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

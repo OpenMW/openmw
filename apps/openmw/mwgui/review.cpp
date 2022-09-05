@@ -7,6 +7,10 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
+#include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadspel.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

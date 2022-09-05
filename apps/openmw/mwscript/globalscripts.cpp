@@ -4,6 +4,8 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/globalscript.hpp>
+#include <components/esm3/loadsscr.hpp>
+#include <components/esm3/loadscpt.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"

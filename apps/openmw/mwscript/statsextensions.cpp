@@ -12,6 +12,9 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
+#include <components/esm3/loadfact.hpp>
+
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

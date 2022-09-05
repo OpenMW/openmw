@@ -2,6 +2,9 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadstat.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

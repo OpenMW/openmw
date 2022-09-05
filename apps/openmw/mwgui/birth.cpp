@@ -7,6 +7,8 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadspel.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

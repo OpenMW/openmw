@@ -10,6 +10,8 @@
 #include <components/widgets/box.hpp>
 #include <components/widgets/list.hpp>
 #include <components/translation/translation.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadfact.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

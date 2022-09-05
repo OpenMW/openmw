@@ -5,6 +5,9 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/creaturestate.hpp>
 #include <components/settings/settings.hpp>
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadsndg.hpp>
+#include <components/esm3/loadclas.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"

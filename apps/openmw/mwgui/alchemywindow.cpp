@@ -7,6 +7,9 @@
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ControllerRepeatClick.h>
 
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadingr.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

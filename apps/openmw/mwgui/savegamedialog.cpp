@@ -21,6 +21,8 @@
 
 #include <components/files/memorystream.hpp>
 
+#include <components/esm3/loadclas.hpp>
+
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
