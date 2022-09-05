@@ -10,6 +10,11 @@ namespace DetourNavigator
         add = 2,
         update = 3,
     };
+
+    inline ChangeType addChangeType(const ChangeType current, const ChangeType add)
+    {
+        return current == add ? current : ChangeType::mixed;
+    }
 }
 
 #endif

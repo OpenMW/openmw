@@ -62,16 +62,15 @@ namespace DetourNavigator
         return true;
     }
 
-    std::optional<RemovedRecastMeshObject> RecastMeshManager::removeObject(const ObjectId id)
+    bool RecastMeshManager::removeObject(const ObjectId id)
     {
         const std::lock_guard lock(mMutex);
         const auto object = mObjects.find(id);
         if (object == mObjects.end())
-            return std::nullopt;
-        const RemovedRecastMeshObject result {object->second.getImpl().getShape(), object->second.getImpl().getTransform()};
+            return false;
         mObjects.erase(object);
         ++mRevision;
-        return result;
+        return true;
     }
 
     bool RecastMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
@@ -83,16 +82,15 @@ namespace DetourNavigator
         return true;
     }
 
-    std::optional<Water> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    bool RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const std::lock_guard lock(mMutex);
         const auto water = mWater.find(cellPosition);
         if (water == mWater.end())
-            return std::nullopt;
+            return false;
         ++mRevision;
-        Water result = water->second;
         mWater.erase(water);
-        return result;
+        return true;
     }
 
     bool RecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
@@ -105,16 +103,15 @@ namespace DetourNavigator
         return true;
     }
 
-    std::optional<SizedHeightfieldShape> RecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
+    bool RecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
     {
         const std::lock_guard lock(mMutex);
         const auto it = mHeightfields.find(cellPosition);
         if (it == mHeightfields.end())
-            return std::nullopt;
+            return false;
         ++mRevision;
-        auto result = std::make_optional(it->second);
         mHeightfields.erase(it);
-        return result;
+        return true;
     }
 
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh() const
