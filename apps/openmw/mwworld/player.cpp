@@ -563,7 +563,7 @@ namespace MWWorld
         int blind = 0;
         const auto& magicEffects = playerClass.getCreatureStats(player).getMagicEffects();
         if (!world->getGodModeState())
-            blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
+            blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getModifier());
         windowMgr->setBlindness(std::clamp(blind, 0, 100));
 
         int nightEye = static_cast<int>(magicEffects.get(ESM::MagicEffect::NightEye).getMagnitude());
