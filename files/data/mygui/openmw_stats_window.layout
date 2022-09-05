@@ -21,7 +21,7 @@
                     </Widget>
                     <Widget type="ProgressBar" skin="MW_Progress_Red" position="74 0 130 18" name="HBar" align="Right Top">
                         <Property key="NeedMouse" value="false"/>
-                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 12" name="HBarT" align="Right Top">
+                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 14" name="HBarT" align="Right VCenter">
                             <Property key="NeedMouse" value="false"/>
                         </Widget>
                     </Widget>
@@ -41,7 +41,7 @@
 
                     <Widget type="ProgressBar" skin="MW_Progress_Blue" position="74 0 130 18" name="MBar" align="Right Top">
                         <Property key="NeedMouse" value="false"/>
-                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 12" name="MBarT" align="Right VCenter">
+                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 14" name="MBarT" align="Right VCenter">
                             <Property key="NeedMouse" value="false"/>
                         </Widget>
                     </Widget>
@@ -61,7 +61,7 @@
 
                     <Widget type="ProgressBar" skin="MW_Progress_Green" position="74 0 130 18" name="FBar" align="Right Top">
                         <Property key="NeedMouse" value="false"/>
-                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 12" name="FBarT" align="Right VCenter">
+                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 14" name="FBarT" align="Right VCenter">
                             <Property key="NeedMouse" value="false"/>
                         </Widget>
                     </Widget>
