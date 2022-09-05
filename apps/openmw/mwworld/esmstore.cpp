@@ -127,8 +127,6 @@ namespace
             }
         }
     }
-
-
 }
 
 namespace MWWorld
@@ -287,7 +285,7 @@ namespace MWWorld
     };
 
 
-    int ESMStore::find(const std::string& id) const
+    int ESMStore::find(const std::string_view& id) const
     {
         IDMap::const_iterator it = mStoreImp->mIds.find(id);
         if (it == mStoreImp->mIds.end()) {

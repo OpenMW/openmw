@@ -6,6 +6,8 @@
 #include <unordered_map>
 
 #include <components/esm/luascripts.hpp>
+#include <components/esm/records.hpp>
+
 #include "store.hpp"
 
 namespace Loading
@@ -83,7 +85,7 @@ namespace MWWorld
         }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
-        int find(const std::string& id) const;
+        int find(const std::string_view& id) const;
 
         int findStatic(const std::string& id) const;
 
