@@ -2,6 +2,7 @@
 #define OPENMW_ESM_DEFS_H
 
 #include <stdint.h>
+#include <stdexcept>
 
 #include <tuple>
 
