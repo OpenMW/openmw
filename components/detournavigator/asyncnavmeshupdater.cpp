@@ -256,12 +256,14 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::waitUntilJobsDoneForNotPresentTiles(Loading::Listener& listener)
     {
+        const int maxDistanceToPlayer = mSettings.get().mWaitUntilMinDistanceToPlayer;
+        if (maxDistanceToPlayer <= 0)
+            return;
         const std::size_t initialJobsLeft = getTotalJobs();
         std::size_t maxProgress = initialJobsLeft;
         std::size_t prevJobsLeft = initialJobsLeft;
         std::size_t jobsDone = 0;
         std::size_t jobsLeft = 0;
-        const int maxDistanceToPlayer = mSettings.get().mWaitUntilMinDistanceToPlayer;
         const TilePosition playerPosition = *mPlayerTile.lockConst();
         const auto isDone = [&]
         {

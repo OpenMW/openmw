@@ -190,6 +190,9 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, add_object_should_change_navmesh)
     {
+        mSettings.mWaitUntilMinDistanceToPlayer = 0;
+        mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max())));
+
         const std::array<float, 5 * 5> heightfieldData {{
             0,   0,    0,    0,    0,
             0, -25,  -25,  -25,  -25,
