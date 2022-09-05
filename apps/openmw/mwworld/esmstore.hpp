@@ -4,6 +4,7 @@
 #include <memory>
 #include <stdexcept>
 #include <unordered_map>
+#include <tuple>
 
 #include <components/esm/luascripts.hpp>
 #include <components/esm/records.hpp>
@@ -33,11 +34,69 @@ namespace MWWorld
     {
         friend struct ESMStoreImp; //This allows StoreImp to extend esmstore without beeing included everywhere
 
+        using StoreTuple = std::tuple < 
+            Store<ESM::Activator>,
+            Store<ESM::Potion>,
+            Store<ESM::Apparatus>,
+            Store<ESM::Armor>,
+            Store<ESM::BodyPart>,
+            Store<ESM::Book>,
+            Store<ESM::BirthSign>,
+            Store<ESM::Class>,
+            Store<ESM::Clothing>,
+            Store<ESM::Container>,
+            Store<ESM::Creature>,
+            Store<ESM::Dialogue>,
+            Store<ESM::Door>,
+            Store<ESM::Enchantment>,
+            Store<ESM::Faction>,
+            Store<ESM::Global>,
+            Store<ESM::Ingredient>,
+            Store<ESM::CreatureLevList>,
+            Store<ESM::ItemLevList>,
+            Store<ESM::Light>,
+            Store<ESM::Lockpick>,
+            Store<ESM::Miscellaneous>,
+            Store<ESM::NPC>,
+            Store<ESM::Probe>,
+            Store<ESM::Race>,
+            Store<ESM::Region>,
+            Store<ESM::Repair>,
+            Store<ESM::SoundGenerator>,
+            Store<ESM::Sound>,
+            Store<ESM::Spell>,
+            Store<ESM::StartScript>,
+            Store<ESM::Static>,
+            Store<ESM::Weapon>,
+            Store<ESM::GameSetting>,
+            Store<ESM::Script>,
+
+            // Lists that need special rules
+            Store<ESM::Cell>,
+            Store<ESM::Land>,
+            Store<ESM::LandTexture>,
+            Store<ESM::Pathgrid>,
+
+            Store<ESM::MagicEffect>,
+            Store<ESM::Skill>,
+
+            // Special entry which is hardcoded and not loaded from an ESM
+            Store<ESM::Attribute >>;
+
+        template <class T, class Tuple>
+        struct HasMember;
+
+        template <class T, class ... Args>
+        struct HasMember<T, std::tuple<Store<Args> ...>> {
+            static constexpr bool value = (std::is_same_v<T, Args> || ...);
+        };
+
         static std::size_t &getTypeIndexCounter();
 
         template<typename T> 
         static std::size_t getTypeIndex()
         {
+            static_assert(HasMember<T, StoreTuple>::value);
             static std::size_t sIndex = getTypeIndexCounter()++;
             return sIndex;
         }
