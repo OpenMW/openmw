@@ -1027,6 +1027,19 @@ void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellPara
         case ESM::MagicEffect::DemoralizeHumanoid:
             modifyAiSetting(target, effect, ESM::MagicEffect::DemoralizeCreature, AiSetting::Flee, -effect.mMagnitude, invalid);
             break;
+        case ESM::MagicEffect::NightEye:
+            {
+                const MWMechanics::EffectParam nightEye = magnitudes.get(effect.mEffectId);
+                if(nightEye.getMagnitude() < 0.f && nightEye.getBase() < 0)
+                {
+                    // The PCVisionBonus functions are different from every other magic effect function in that they clamp the value to [0, 1].
+                    // Morrowind.exe applies the same clamping to the night-eye effect, which can create situations where an effect is still active
+                    // (i.e. shown in the menu) but the screen is no longer bright. Modifying the base value here should prevent that while preserving their function.
+                    float delta = std::clamp(-nightEye.getMagnitude(), 0.f, -static_cast<float>(nightEye.getBase()));
+                    magnitudes.modifyBase(effect.mEffectId, static_cast<int>(delta));
+                }
+            }
+            break;
         case ESM::MagicEffect::RallyCreature:
         case ESM::MagicEffect::RallyHumanoid:
             modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, effect.mMagnitude, invalid);

@@ -484,6 +484,10 @@ namespace Compiler
 
         const int opcodeGetStat = 0x200024e;
         const int opcodeGetStatExplicit = 0x200024f;
+
+        const int opcodeGetPCVisionBonus = 0x2000322;
+        const int opcodeSetPCVisionBonus = 0x2000323;
+        const int opcodeModPCVisionBonus = 0x2000324;
     }
 
     namespace Transformation

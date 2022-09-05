@@ -537,6 +537,10 @@ namespace Compiler
             extensions.registerInstruction("becomewerewolf", "", opcodeBecomeWerewolf, opcodeBecomeWerewolfExplicit);
             extensions.registerInstruction("undowerewolf", "", opcodeUndoWerewolf, opcodeUndoWerewolfExplicit);
             extensions.registerInstruction("setwerewolfacrobatics", "", opcodeSetWerewolfAcrobatics, opcodeSetWerewolfAcrobaticsExplicit);
+
+            extensions.registerFunction("getpcvisionbonus", 'f', "", opcodeGetPCVisionBonus);
+            extensions.registerInstruction("setpcvisionbonus", "f", opcodeSetPCVisionBonus);
+            extensions.registerInstruction("modpcvisionbonus", "f", opcodeModPCVisionBonus);
         }
     }
 
