@@ -147,7 +147,7 @@ namespace MWWorld
         IDMap mStaticIds;
 
         template<typename T>  
-        static int assignStoreToIndex(ESMStore& stores, Store<T>& store)
+        static void assignStoreToIndex(ESMStore& stores, Store<T>& store)
         {
             const std::size_t storeIndex = ESMStore::getTypeIndex<T>();
             if (stores.mStores.size() <= storeIndex)
@@ -165,7 +165,6 @@ namespace MWWorld
                     stores.mStoreImp->mRecNameToStore[recName] = &store;
                 }
             }
-            return 0;
         }
     };
 
