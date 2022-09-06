@@ -285,12 +285,12 @@ namespace MWWorld
         /// @return The shared spell list to use for this actor and whether or not it has already been initialized.
         std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
 
-        template <>
-        const ESM::Cell* insert<ESM::Cell>(const ESM::Cell& cell);
-
-        template <>
-        const ESM::NPC* insert<ESM::NPC>(const ESM::NPC& npc);
     };
+    template <>
+    const ESM::Cell* ESMStore::insert<ESM::Cell>(const ESM::Cell& cell);
+
+    template <>
+    const ESM::NPC* ESMStore::insert<ESM::NPC>(const ESM::NPC& npc);
 }
 
 #endif
