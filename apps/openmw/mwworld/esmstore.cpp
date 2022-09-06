@@ -148,7 +148,7 @@ namespace MWWorld
         IDMap mStaticIds;
 
         template<typename T>  
-        static int AssignStoreToIndex(ESMStore& stores, Store<T>& store)
+        static int assignStoreToIndex(ESMStore& stores, Store<T>& store)
         {
             const std::size_t storeIndex = ESMStore::getTypeIndex<T>();
             if (stores.mStores.size() <= storeIndex)
@@ -169,7 +169,7 @@ namespace MWWorld
             return 0;
         }
 
-        void SetupAfterStoresCreation(ESMStore& store)
+        void setupAfterStoresCreation(ESMStore& store)
         {
             for (const auto& recordStorePair : mRecNameToStore)
             {
@@ -201,9 +201,9 @@ namespace MWWorld
     ESMStore::ESMStore()
     {
         mStoreImp = std::make_unique<ESMStoreImp>();
-        std::apply([this](auto& ...x) {(ESMStoreImp::AssignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
+        std::apply([this](auto& ...x) {(ESMStoreImp::assignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
         mDynamicCount = 0;
-        mStoreImp->SetupAfterStoresCreation(*this);
+        mStoreImp->setupAfterStoresCreation(*this);
         getWritable<ESM::Pathgrid>().setCells(getWritable<ESM::Cell>());
     }
 
