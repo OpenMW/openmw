@@ -20,6 +20,7 @@
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadclas.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/mathutil.hpp>

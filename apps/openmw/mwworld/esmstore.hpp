@@ -165,6 +165,8 @@ namespace MWWorld
         template<class T>
         void removeMissingObjects(Store<T>& store);
 
+        int& getIdType(std::string& id);
+
         using LuaContent = std::variant<
             ESM::LuaScriptsCfg,  // data from an omwaddon
             std::string>;  // path to an omwscripts file
@@ -208,14 +210,58 @@ namespace MWWorld
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>
-        const T* insert(const T& x);
+        const T *insert(const T &x)
+        {
+            const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
+
+            Store<T> &store = getWritable<T>();
+            if (store.search(id) != nullptr)
+            {
+                const std::string msg = "Try to override existing record '" + id + "'";
+                throw std::runtime_error(msg);
+            }
+            T record = x;
+
+            record.mId = id;
+
+            T *ptr = store.insert(record);
+            if constexpr (std::is_convertible<Store<T>*, DynamicStore*>::value)
+            {
+                getIdType(ptr->mId) = T::sRecordId;
+            }
+            return ptr;
+        }
 
         /// Insert a record with set ID, and allow it to override a pre-existing static record.
         template <class T>
-        const T *overrideRecord(const T &x);
+        const T *overrideRecord(const T &x) {
+            Store<T> &store = getWritable<T>();
+
+            T *ptr = store.insert(x);
+            if constexpr (std::is_convertible<Store<T>*, DynamicStore*>::value)
+            {
+                getIdType(ptr->mId) = T::sRecordId;
+            }
+            return ptr;
+        }
 
         template <class T>
-        const T *insertStatic(const T &x);
+        const T *insertStatic(const T &x)
+        {
+            Store<T>& store = getWritable<T>();
+            if (store.search(x.mId) != nullptr)
+            {
+                const std::string msg = "Try to override existing record '" + x.mId + "'";
+                throw std::runtime_error(msg);
+            }
+
+            T *ptr = store.insertStatic(x);
+            if constexpr (std::is_convertible<Store<T>*, DynamicStore*>::value)
+            {
+                getIdType(ptr->mId) = T::sRecordId;
+            }
+            return ptr;
+        }
 
         // This method must be called once, after loading all master/plugin files. This can only be done
         //  from the outside, so it must be public.
@@ -238,6 +284,12 @@ namespace MWWorld
         /// Actors with the same ID share spells, abilities, etc.
         /// @return The shared spell list to use for this actor and whether or not it has already been initialized.
         std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
+
+        template <>
+        const ESM::Cell* insert<ESM::Cell>(const ESM::Cell& cell);
+
+        template <>
+        const ESM::NPC* insert<ESM::NPC>(const ESM::NPC& npc);
     };
 }
 

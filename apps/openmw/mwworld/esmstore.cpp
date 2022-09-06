@@ -147,63 +147,6 @@ namespace MWWorld
         IDMap mIds;
         IDMap mStaticIds;
 
-        template<typename T> 
-        static const T* esm3StoreInsert(ESMStore& stores, const T &toInsert)
-        {
-            const std::string id = "$dynamic" + std::to_string(stores.mDynamicCount++);
-
-            Store<T> &store = stores.getWritable<T>();
-            if (store.search(id) != nullptr)
-            {
-                const std::string msg = "Try to override existing record '" + id + "'";
-                throw std::runtime_error(msg);
-            }
-            T record = toInsert;
-
-            record.mId = id;
-
-            T *ptr = store.insert(record);
-            auto esm3RecordType_find = stores.mStoreImp->mStoreToRecName.find(&stores.get<T>());
-
-            if (esm3RecordType_find != stores.mStoreImp->mStoreToRecName.end())
-            {
-                stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
-            }
-            return ptr;
-        }
-
-        template <class T>
-        static const T * esm3overrideRecord(ESMStore& stores, const T &x) {
-            Store<T> &store = stores.getWritable<T>();
-
-            T *ptr = store.insert(x);
-            auto esm3RecordType_find = stores.mStoreImp->mStoreToRecName.find(&stores.get<T>());
-            if (esm3RecordType_find != stores.mStoreImp->mStoreToRecName.end())
-            {
-                stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
-            }
-            return ptr;
-        }
-
-        template <class T>
-        static const T *esm3insertStatic(ESMStore& stores, const T &x)
-        {
-            Store<T> &store = stores.getWritable<T>();
-            if (store.search(x.mId) != nullptr)
-            {
-                const std::string msg = "Try to override existing record '" + x.mId + "'";
-                throw std::runtime_error(msg);
-            }
-
-            T *ptr = store.insertStatic(x);
-            auto esm3RecordType_find = stores.mStoreImp->mStoreToRecName.find(&stores.get<T>());
-            if (esm3RecordType_find != stores.mStoreImp->mStoreToRecName.end())
-            {
-                stores.mStoreImp->mIds[ptr->mId] = esm3RecordType_find->second;
-            }
-            return ptr;
-        }
-
         template<typename T>  
         static int AssignStoreToIndex(ESMStore& stores, Store<T>& store)
         {
@@ -380,6 +323,11 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
         if (listener != nullptr)
             listener->setProgress(::EsmLoader::fileProgress * esm.getFileOffset() / esm.getFileSize());
     }
+}
+
+int& ESMStore::getIdType(std::string& id)
+{
+    return mStoreImp->mIds[id];
 }
 
 static std::size_t sTypeIndexCounter = 0;
@@ -742,28 +690,4 @@ void ESMStore::removeMissingObjects(Store<T>& store)
         return ptr;
     }
 
-
-    template<> const ESM::Book* ESMStore::insert<ESM::Book>(const ESM::Book &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
-    template<> const ESM::Armor* ESMStore::insert<ESM::Armor>(const ESM::Armor &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
-    template<> const ESM::Class* ESMStore::insert<ESM::Class>(const ESM::Class &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
-    template<> const ESM::Enchantment* ESMStore::insert<ESM::Enchantment>(const ESM::Enchantment &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
-    template<> const ESM::Potion* ESMStore::insert<ESM::Potion>(const ESM::Potion &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
-    template<> const ESM::Weapon* ESMStore::insert<ESM::Weapon>(const ESM::Weapon &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
-    template<> const ESM::Clothing* ESMStore::insert<ESM::Clothing>(const ESM::Clothing &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
-    template<> const ESM::Spell* ESMStore::insert<ESM::Spell>(const ESM::Spell &toInsert) { return ESMStoreImp::esm3StoreInsert(*this, toInsert);}
-
-
-    template<> const ESM::GameSetting* ESMStore::insertStatic<ESM::GameSetting>(const ESM::GameSetting &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
-    template<> const ESM::Static* ESMStore::insertStatic<ESM::Static>(const ESM::Static &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
-    template<> const ESM::Door* ESMStore::insertStatic<ESM::Door>(const ESM::Door &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
-    template<> const ESM::Global* ESMStore::insertStatic<ESM::Global>(const ESM::Global &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
-    template<> const ESM::NPC* ESMStore::insertStatic<ESM::NPC>(const ESM::NPC &toInsert) { return ESMStoreImp::esm3insertStatic(*this, toInsert);   }
-
-
-    template<> const ESM::Container* ESMStore::overrideRecord<ESM::Container>(const ESM::Container &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
-    template<> const ESM::Creature* ESMStore::overrideRecord<ESM::Creature>(const ESM::Creature &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
-    template<> const ESM::CreatureLevList* ESMStore::overrideRecord<ESM::CreatureLevList>(const ESM::CreatureLevList &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
-    template<> const ESM::Door* ESMStore::overrideRecord<ESM::Door>(const ESM::Door &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
-    template<> const ESM::ItemLevList* ESMStore::overrideRecord<ESM::ItemLevList>(const ESM::ItemLevList &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
-    template<> const ESM::NPC* ESMStore::overrideRecord<ESM::NPC>(const ESM::NPC &toInsert) { return ESMStoreImp::esm3overrideRecord(*this, toInsert);   }
 } // end namespace
