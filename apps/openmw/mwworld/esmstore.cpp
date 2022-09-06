@@ -140,7 +140,6 @@ namespace MWWorld
         ESMStore::StoreTuple mStores;
 
         std::map<ESM::RecNameInts, DynamicStore*>                   mRecNameToStore;
-        std::unordered_map<const DynamicStore*, ESM::RecNameInts>   mStoreToRecName;
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
@@ -157,7 +156,7 @@ namespace MWWorld
             assert(&store == &std::get<Store<T>>(stores.mStoreImp->mStores));
 
             stores.mStores[storeIndex] = &store;
-            if constexpr (std::is_convertible<Store<T>*, DynamicStore*>::value)
+            if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)
             {
                 stores.mDynamicStores.push_back(&store);
                 constexpr ESM::RecNameInts recName = T::sRecordId;
@@ -168,19 +167,10 @@ namespace MWWorld
             }
             return 0;
         }
-
-        void setupAfterStoresCreation(ESMStore& store)
-        {
-            for (const auto& recordStorePair : mRecNameToStore)
-            {
-                const DynamicStore* storePtr = recordStorePair.second;
-                mStoreToRecName[storePtr] = recordStorePair.first;
-            }
-        }
     };
 
 
-    int ESMStore::find(const std::string_view& id) const
+    int ESMStore::find(const std::string_view id) const
     {
         IDMap::const_iterator it = mStoreImp->mIds.find(id);
         if (it == mStoreImp->mIds.end()) {
@@ -189,7 +179,7 @@ namespace MWWorld
         return it->second;
     }
 
-    int ESMStore::findStatic(const std::string& id) const
+    int ESMStore::findStatic(const std::string_view id) const
     {
         IDMap::const_iterator it = mStoreImp-> mStaticIds.find(id);
         if (it == mStoreImp->mStaticIds.end()) {
@@ -203,13 +193,10 @@ namespace MWWorld
         mStoreImp = std::make_unique<ESMStoreImp>();
         std::apply([this](auto& ...x) {(ESMStoreImp::assignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
         mDynamicCount = 0;
-        mStoreImp->setupAfterStoresCreation(*this);
         getWritable<ESM::Pathgrid>().setCells(getWritable<ESM::Cell>());
     }
 
-    ESMStore::~ESMStore() //necessary for the destruction of of unique_ptr<ESMStoreImp>
-    {
-    }
+    ESMStore::~ESMStore() = default;
 
     void ESMStore::clearDynamic()
     {
@@ -325,16 +312,16 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
     }
 }
 
-int& ESMStore::getIdType(std::string& id)
+int& ESMStore::getIdType(const std::string& id)
 {
     return mStoreImp->mIds[id];
 }
 
 static std::size_t sTypeIndexCounter = 0;
 
-std::size_t& ESMStore::getTypeIndexCounter()
+std::size_t ESMStore::geNextTypeIndex()
 {
-    return sTypeIndexCounter;
+    return sTypeIndexCounter++;
 }
 
 ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
@@ -448,8 +435,8 @@ void ESMStore::validate()
 
     // Validate spell effects for invalid arguments
     std::vector<ESM::Spell> spellsToReplace;
-    auto& Spells = getWritable<ESM::Spell>();
-    for (ESM::Spell spell : Spells)
+    auto& spells = getWritable<ESM::Spell>();
+    for (ESM::Spell spell : spells)
     {
         if (spell.mEffects.mList.empty())
             continue;
@@ -505,8 +492,8 @@ void ESMStore::validate()
 
     for (const ESM::Spell &spell : spellsToReplace)
     {
-        Spells.eraseStatic(spell.mId);
-        Spells.insertStatic(spell);
+        spells.eraseStatic(spell.mId);
+        spells.insertStatic(spell);
     }
 }
 

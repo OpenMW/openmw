@@ -133,13 +133,13 @@ namespace MWWorld
             static constexpr bool value = (std::is_same_v<T, Args> || ...);
         };
 
-        static std::size_t &getTypeIndexCounter();
+        static std::size_t geNextTypeIndex();
 
         template<typename T> 
         static std::size_t getTypeIndex()
         {
             static_assert(HasMember<T, StoreTuple>::value);
-            static std::size_t sIndex = getTypeIndexCounter()++;
+            static std::size_t sIndex = geNextTypeIndex();
             return sIndex;
         }
 
@@ -165,7 +165,7 @@ namespace MWWorld
         template<class T>
         void removeMissingObjects(Store<T>& store);
 
-        int& getIdType(std::string& id);
+        int& getIdType(const std::string& id);
 
         using LuaContent = std::variant<
             ESM::LuaScriptsCfg,  // data from an omwaddon
@@ -188,9 +188,9 @@ namespace MWWorld
         }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
-        int find(const std::string_view& id) const;
+        int find(const std::string_view id) const;
 
-        int findStatic(const std::string& id) const;
+        int findStatic(const std::string_view id) const;
 
 
         ESMStore();
@@ -225,7 +225,7 @@ namespace MWWorld
             record.mId = id;
 
             T *ptr = store.insert(record);
-            if constexpr (std::is_convertible<Store<T>*, DynamicStore*>::value)
+            if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)
             {
                 getIdType(ptr->mId) = T::sRecordId;
             }
@@ -238,7 +238,7 @@ namespace MWWorld
             Store<T> &store = getWritable<T>();
 
             T *ptr = store.insert(x);
-            if constexpr (std::is_convertible<Store<T>*, DynamicStore*>::value)
+            if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)
             {
                 getIdType(ptr->mId) = T::sRecordId;
             }
@@ -256,7 +256,7 @@ namespace MWWorld
             }
 
             T *ptr = store.insertStatic(x);
-            if constexpr (std::is_convertible<Store<T>*, DynamicStore*>::value)
+            if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)
             {
                 getIdType(ptr->mId) = T::sRecordId;
             }
