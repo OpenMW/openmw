@@ -708,9 +708,9 @@ namespace MWPhysics
         }
     }
 
-    std::vector<Simulation> PhysicsSystem::prepareSimulation(bool willSimulate)
+    void PhysicsSystem::prepareSimulation(bool willSimulate, std::vector<Simulation>& simulations)
     {
-        std::vector<Simulation> simulations;
+        assert(simulations.empty());
         simulations.reserve(mActors.size() + mProjectiles.size());
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         for (const auto& [ref, physicActor] : mActors)
@@ -754,8 +754,6 @@ namespace MWPhysics
         {
             simulations.emplace_back(ProjectileSimulation{projectile, ProjectileFrameData{*projectile}});
         }
-
-        return simulations;
     }
 
     void PhysicsSystem::stepSimulation(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
@@ -786,9 +784,10 @@ namespace MWPhysics
             mTaskScheduler->resetSimulation(mActors);
         else
         {
-            auto simulations = prepareSimulation(mTimeAccum >= mPhysicsDt);
+            std::vector<Simulation>& simulations = mSimulations[mSimulationsCounter++ % mSimulations.size()];
+            prepareSimulation(mTimeAccum >= mPhysicsDt, simulations);
             // modifies mTimeAccum
-            mTaskScheduler->applyQueuedMovements(mTimeAccum, std::move(simulations), frameStart, frameNumber, stats);
+            mTaskScheduler->applyQueuedMovements(mTimeAccum, simulations, frameStart, frameNumber, stats);
         }
     }
 
