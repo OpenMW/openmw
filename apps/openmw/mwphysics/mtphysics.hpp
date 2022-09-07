@@ -40,7 +40,7 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            void applyQueuedMovements(float & timeAccum, std::vector<Simulation>&& simulations, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            void applyQueuedMovements(float& timeAccum, std::vector<Simulation>& simulations, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             void resetSimulation(const ActorMap& actors);
 
@@ -77,7 +77,7 @@ namespace MWPhysics
             void waitForWorkers();
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
-            std::vector<Simulation> mSimulations;
+            std::vector<Simulation>* mSimulations = nullptr;
             std::unordered_set<const btCollisionObject*> mCollisionObjects;
             float mDefaultPhysicsDt;
             float mPhysicsDt;

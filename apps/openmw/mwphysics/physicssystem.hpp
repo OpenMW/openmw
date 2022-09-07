@@ -289,7 +289,7 @@ namespace MWPhysics
 
             void updateWater();
 
-            std::vector<Simulation> prepareSimulation(bool willSimulate);
+            void prepareSimulation(bool willSimulate, std::vector<Simulation>& simulations);
 
             std::unique_ptr<btBroadphaseInterface> mBroadphase;
             std::unique_ptr<btDefaultCollisionConfiguration> mCollisionConfiguration;
@@ -332,6 +332,9 @@ namespace MWPhysics
             float mPhysicsDt;
 
             DetourNavigator::CollisionShapeType mActorCollisionShapeType;
+
+            std::size_t mSimulationsCounter = 0;
+            std::array<std::vector<Simulation>, 2> mSimulations;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);
