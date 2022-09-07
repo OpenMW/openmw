@@ -1,6 +1,7 @@
 #include "localscripts.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/loadscpt.hpp>
 
 #include "esmstore.hpp"
 #include "cellstore.hpp"

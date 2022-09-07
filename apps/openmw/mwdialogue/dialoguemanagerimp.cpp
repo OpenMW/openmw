@@ -10,6 +10,7 @@
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/dialoguestate.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/loadfact.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>

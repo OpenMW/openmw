@@ -7,6 +7,7 @@
 #include <variant>
 
 #include <components/lua/luastate.hpp>
+#include <components/esm3/loadclas.hpp>
 
 #include "localscripts.hpp"
 #include "luamanagerimp.hpp"

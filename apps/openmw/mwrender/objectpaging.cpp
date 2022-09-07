@@ -11,6 +11,11 @@
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loaddoor.hpp>
+
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/optimizer.hpp>

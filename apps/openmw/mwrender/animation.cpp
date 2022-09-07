@@ -21,6 +21,8 @@
 #include <components/misc/constants.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadrace.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
 

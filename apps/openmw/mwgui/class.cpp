@@ -16,6 +16,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "tooltips.hpp"
 #include "ustring.hpp"

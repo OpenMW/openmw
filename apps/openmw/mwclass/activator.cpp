@@ -5,6 +5,8 @@
 #include <components/esm3/loadacti.hpp>
 #include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadsndg.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

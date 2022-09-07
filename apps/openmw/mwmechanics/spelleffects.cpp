@@ -6,6 +6,7 @@
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

@@ -28,6 +28,7 @@
 #include <components/misc/convert.hpp>
 #include <components/settings/settings.hpp>
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

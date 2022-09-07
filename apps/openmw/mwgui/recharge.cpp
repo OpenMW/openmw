@@ -6,6 +6,8 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/esm3/loadcrea.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

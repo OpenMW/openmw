@@ -43,10 +43,12 @@ namespace MWWorld
         RecordId(const std::string &id = {}, bool isDeleted = false);
     };
 
-    class StoreBase
+    class StoreBase {}; //Empty interface to be parent of all store types
+
+    class DynamicStore : public StoreBase
     {
     public:
-        virtual ~StoreBase() {}
+        virtual ~DynamicStore() {}
 
         virtual void setUp() {}
 
@@ -67,7 +69,7 @@ namespace MWWorld
     };
 
     template <class T>
-    class IndexedStore
+    class IndexedStore : public StoreBase
     {
     protected:
         typedef typename std::map<int, T> Static;
@@ -161,7 +163,7 @@ namespace MWWorld
     class ESMStore;
 
     template <class T>
-    class Store : public StoreBase
+    class Store : public DynamicStore
     {
         typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Static;
         Static mStatic;
@@ -220,7 +222,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::LandTexture> : public StoreBase
+    class Store<ESM::LandTexture> : public DynamicStore
     {
         // For multiple ESM/ESP files we need one list per file.
         typedef std::vector<ESM::LandTexture> LandTextureList;
@@ -248,7 +250,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::Land> : public StoreBase
+    class Store<ESM::Land> : public DynamicStore
     {
         struct SpatialComparator
         {
@@ -291,7 +293,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::Cell> : public StoreBase
+    class Store<ESM::Cell> : public DynamicStore
     {
         struct DynamicExtCmp
         {
@@ -366,7 +368,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::Pathgrid> : public StoreBase
+    class Store<ESM::Pathgrid> : public DynamicStore
     {
     private:
         typedef std::unordered_map<std::string, ESM::Pathgrid, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Interior;
@@ -433,7 +435,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::WeaponType> : public StoreBase
+    class Store<ESM::WeaponType> : public DynamicStore
     {
         std::map<int, ESM::WeaponType> mStatic;
 
@@ -459,7 +461,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::Dialogue> : public StoreBase
+    class Store<ESM::Dialogue> : public DynamicStore
     {
         typedef std::unordered_map<std::string, ESM::Dialogue, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Static;
         Static mStatic;

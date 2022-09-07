@@ -16,6 +16,8 @@
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/compiler/scriptparser.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include "filter.hpp"
 

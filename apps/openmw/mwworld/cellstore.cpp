@@ -18,6 +18,7 @@
 #include <components/esm3/creaturelevliststate.hpp>
 #include <components/esm3/doorstate.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"

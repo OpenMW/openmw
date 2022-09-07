@@ -2,6 +2,11 @@
 
 #include <limits>
 
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm/attr.hpp>
+#include <components/esm3/loadmgef.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/world.hpp"

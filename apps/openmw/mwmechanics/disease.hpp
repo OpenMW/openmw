@@ -3,6 +3,7 @@
 
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/format.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"

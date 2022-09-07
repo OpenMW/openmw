@@ -4,6 +4,7 @@
 
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/doorstate.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"

@@ -30,9 +30,16 @@
 #include <cstdint>
 #include <string>
 
-#include <components/esm/defs.hpp>
-
 #include "formid.hpp"
+
+namespace ESM
+{
+    template<std::size_t len>
+    constexpr unsigned int fourCC(const char(&name)[len]) {
+        static_assert(len == 5, "Constant must be 4 characters long. (Plus null terminator)");
+        return static_cast<unsigned char>(name[0]) | (static_cast<unsigned char>(name[1]) << 8) | (static_cast<unsigned char>(name[2]) << 16) | (static_cast<unsigned char>(name[3]) << 24);
+    }
+}
 
 namespace ESM4
 {

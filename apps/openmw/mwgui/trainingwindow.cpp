@@ -16,6 +16,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include <components/settings/settings.hpp>
+#include <components/esm3/loadclas.hpp>
 
 #include "tooltips.hpp"
 

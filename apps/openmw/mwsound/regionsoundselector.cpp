@@ -2,6 +2,7 @@
 
 #include <components/fallback/fallback.hpp>
 #include <components/misc/rng.hpp>
+#include <components/esm3/loadregn.hpp>
 
 #include <algorithm>
 #include <numeric>

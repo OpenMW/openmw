@@ -1,4 +1,5 @@
 #include "manualref.hpp"
+#include <components/esm/records.hpp>
 
 #include "esmstore.hpp"
 

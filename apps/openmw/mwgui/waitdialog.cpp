@@ -9,6 +9,7 @@
 #include <components/widgets/box.hpp>
 #include <components/settings/settings.hpp>
 #include <components/misc/strings/format.hpp>
+#include <components/esm3/loadregn.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

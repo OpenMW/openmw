@@ -10,6 +10,7 @@
 #include <components/esm3/quickkeys.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"

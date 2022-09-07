@@ -1,5 +1,8 @@
 #include "actionread.hpp"
 
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclas.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

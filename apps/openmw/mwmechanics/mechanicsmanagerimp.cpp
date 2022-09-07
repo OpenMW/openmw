@@ -6,6 +6,9 @@
 
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/stolenitems.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm/records.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 

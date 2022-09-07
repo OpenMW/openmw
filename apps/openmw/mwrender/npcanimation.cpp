@@ -21,7 +21,13 @@
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/depth.hpp>
-
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadrace.hpp>
 #include <components/settings/settings.hpp>
 
 #include <components/vfs/manager.hpp>

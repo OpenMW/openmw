@@ -11,6 +11,9 @@
 
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/projectilestate.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>

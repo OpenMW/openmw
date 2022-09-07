@@ -2,6 +2,8 @@
 
 #include <limits>
 
+#include <components/esm3/loadmgef.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 

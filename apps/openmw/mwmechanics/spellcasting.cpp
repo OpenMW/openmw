@@ -4,6 +4,8 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/format.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"

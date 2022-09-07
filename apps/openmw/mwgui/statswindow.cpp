@@ -9,6 +9,13 @@
 #include <MyGUI_TextIterator.h>
 #include <MyGUI_Gui.h>
 
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadrace.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"

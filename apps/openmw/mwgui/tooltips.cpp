@@ -10,6 +10,7 @@
 #include <components/settings/settings.hpp>
 #include <components/widgets/box.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
