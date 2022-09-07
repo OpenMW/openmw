@@ -138,6 +138,8 @@ enum RecordType
   RC_hkPackedNiTriStripsData,
   RC_bhkConvexVerticesShape,
   RC_bhkBoxShape,
+  RC_bhkCapsuleShape,
+  RC_bhkSphereShape,
   RC_bhkListShape,
   RC_bhkRigidBody,
   RC_bhkRigidBodyT,

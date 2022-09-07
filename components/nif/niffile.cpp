@@ -156,6 +156,8 @@ static std::map<std::string, CreateRecord> makeFactory()
         {"hkPackedNiTriStripsData"          , &construct <hkPackedNiTriStripsData           , RC_hkPackedNiTriStripsData            >},
         {"bhkConvexVerticesShape"           , &construct <bhkConvexVerticesShape            , RC_bhkConvexVerticesShape             >},
         {"bhkBoxShape"                      , &construct <bhkBoxShape                       , RC_bhkBoxShape                        >},
+        {"bhkCapsuleShape"                  , &construct <bhkCapsuleShape                   , RC_bhkCapsuleShape                    >},
+        {"bhkSphereShape"                   , &construct <bhkSphereShape                    , RC_bhkSphereShape                     >},
         {"bhkListShape"                     , &construct <bhkListShape                      , RC_bhkListShape                       >},
         {"bhkRigidBody"                     , &construct <bhkRigidBody                      , RC_bhkRigidBody                       >},
         {"bhkRigidBodyT"                    , &construct <bhkRigidBody                      , RC_bhkRigidBodyT                      >},
