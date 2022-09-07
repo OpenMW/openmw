@@ -126,14 +126,11 @@ namespace MWWorld
             // Special entry which is hardcoded and not loaded from an ESM
             Store<ESM::Attribute >>;
 
-        static std::size_t geNextTypeIndex();
-
         template<typename T> 
-        static std::size_t getTypeIndex()
+        static constexpr std::size_t getTypeIndex()
         {
             static_assert(Misc::TupleHasType<Store<T>, StoreTuple>::value);
-            static std::size_t sIndex = geNextTypeIndex();
-            return sIndex;
+            return Misc::TupleTypeIndex<Store<T>, StoreTuple>::value;
         }
 
         std::unique_ptr<ESMStoreImp> mStoreImp;

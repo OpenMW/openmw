@@ -316,13 +316,6 @@ void ESMStore::setIdType(const std::string& id, ESM::RecNameInts type)
     mStoreImp->mIds[id] = type;
 }
 
-static std::size_t sTypeIndexCounter = 0;
-
-std::size_t ESMStore::geNextTypeIndex()
-{
-    return sTypeIndexCounter++;
-}
-
 ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
 {
     ESM::LuaScriptsCfg cfg;
