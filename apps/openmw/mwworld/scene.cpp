@@ -391,8 +391,6 @@ namespace MWWorld
         const int cellX = cell->getCell()->getGridX();
         const int cellY = cell->getCell()->getGridY();
 
-        mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace);
-
         if (cell->getCell()->isExterior())
         {
             osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
@@ -541,6 +539,7 @@ namespace MWWorld
                 unloadCell (cell);
         }
 
+        mNavigator.setWorldspace(mWorld.getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace);
         mNavigator.updateBounds(pos);
 
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
@@ -659,7 +658,10 @@ namespace MWWorld
             loadingListener->setLabel("Testing exterior cells ("+std::to_string(i)+"/"+std::to_string(cells.getExtSize())+")...");
 
             CellStore *cell = mWorld.getExterior(it->mData.mX, it->mData.mY);
-            loadCell(cell, nullptr, false, osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits);
+            mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace);
+            const osg::Vec3f position = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
+            mNavigator.updateBounds(position);
+            loadCell(cell, nullptr, false, position);
 
             auto iter = mActiveCells.begin();
             while (iter != mActiveCells.end())
@@ -704,8 +706,10 @@ namespace MWWorld
             loadingListener->setLabel("Testing interior cells ("+std::to_string(i)+"/"+std::to_string(cells.getIntSize())+")...");
 
             CellStore *cell = mWorld.getInterior(it->mName);
+            mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace);
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
+            mNavigator.updateBounds(position.asVec3());
             loadCell(cell, nullptr, false, position.asVec3());
 
             auto iter = mActiveCells.begin();
@@ -844,6 +848,7 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell->count());
 
+        mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace);
         mNavigator.updateBounds(position.asVec3());
 
         // Load cell.

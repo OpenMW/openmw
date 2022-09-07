@@ -53,8 +53,7 @@ namespace MWRender
                 continue;
             }
 
-            if (it->second.mGeneration != tile->second->getGeneration()
-                || it->second.mRevision != tile->second->getRevision())
+            if (it->second.mVersion != tile->second->getVersion())
             {
                 const auto group = SceneUtil::createRecastMeshGroup(*tile->second, settings.mRecast);
                 MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
@@ -62,8 +61,7 @@ namespace MWRender
                 mRootNode->removeChild(it->second.mValue);
                 mRootNode->addChild(group);
                 it->second.mValue = group;
-                it->second.mGeneration = tile->second->getGeneration();
-                it->second.mRevision = tile->second->getRevision();
+                it->second.mVersion = tile->second->getVersion();
             }
 
             ++it;
@@ -76,7 +74,7 @@ namespace MWRender
             const auto group = SceneUtil::createRecastMeshGroup(*tile.second, settings.mRecast);
             MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
             group->setNodeMask(Mask_Debug);
-            mGroups.emplace(tile.first, Group {tile.second->getGeneration(), tile.second->getRevision(), group});
+            mGroups.emplace(tile.first, Group {tile.second->getVersion(), group});
             mRootNode->addChild(group);
         }
     }

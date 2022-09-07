@@ -154,8 +154,7 @@ namespace DetourNavigator
 
     void NavigatorImpl::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
     {
-        if (mSettings.mWaitUntilMinDistanceToPlayer > 0)
-            mNavMeshManager.wait(listener, waitConditionType);
+        mNavMeshManager.wait(listener, waitConditionType);
     }
 
     SharedNavMeshCacheItem NavigatorImpl::getNavMesh(const AgentBounds& agentBounds) const

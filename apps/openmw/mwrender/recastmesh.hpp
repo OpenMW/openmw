@@ -2,6 +2,7 @@
 #define OPENMW_MWRENDER_RECASTMESH_H
 
 #include <components/detournavigator/recastmeshtiles.hpp>
+#include <components/detournavigator/version.hpp>
 
 #include <osg/ref_ptr>
 
@@ -44,8 +45,7 @@ namespace MWRender
     private:
         struct Group
         {
-            std::size_t mGeneration;
-            std::size_t mRevision;
+            DetourNavigator::Version mVersion;
             osg::ref_ptr<osg::Group> mValue;
         };
 

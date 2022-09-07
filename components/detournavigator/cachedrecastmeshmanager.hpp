@@ -41,7 +41,7 @@ namespace DetourNavigator
 
         void reportNavMeshChange(const Version& recastMeshVersion, const Version& navMeshVersion);
 
-        Version getVersion() const;
+        Version getVersion() const { return mImpl.getVersion(); }
 
     private:
         RecastMeshManager mImpl;
