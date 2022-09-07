@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <tuple>
 
+#include <components/misc/meta.hpp>
 #include <components/esm/luascripts.hpp>
 #include <components/esm3/loadgmst.hpp>
 
@@ -125,20 +126,12 @@ namespace MWWorld
             // Special entry which is hardcoded and not loaded from an ESM
             Store<ESM::Attribute >>;
 
-        template <class T, class Tuple>
-        struct HasMember;
-
-        template <class T, class ... Args>
-        struct HasMember<T, std::tuple<Store<Args> ...>> {
-            static constexpr bool value = (std::is_same_v<T, Args> || ...);
-        };
-
         static std::size_t geNextTypeIndex();
 
         template<typename T> 
         static std::size_t getTypeIndex()
         {
-            static_assert(HasMember<T, StoreTuple>::value);
+            static_assert(Misc::TupleHasType<Store<T>, StoreTuple>::value);
             static std::size_t sIndex = geNextTypeIndex();
             return sIndex;
         }
