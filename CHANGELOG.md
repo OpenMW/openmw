@@ -8,6 +8,7 @@
     Bug #5714: Touch spells cast using ExplodeSpell don't always explode
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6427: Enemy health bar disappears before damaging effect ends
+    Bug #6661: Saved games that have no preview screenshot cause issues or crashes
     Bug #6937: Divided by Nix Hounds quest is broken
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
