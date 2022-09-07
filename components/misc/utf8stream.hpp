@@ -129,6 +129,7 @@ public:
 
         // Decode string as utf8 characters, convert to lower case and pack them to string
         std::string out;
+        out.reserve(str.length());
         Utf8Stream stream (str);
         while (!stream.eof ())
         {
