@@ -289,6 +289,16 @@ namespace Nif
         nif->skip(4); // Unused
     }
 
+    void bhkCapsuleShape::read(NIFStream *nif)
+    {
+        bhkConvexShape::read(nif);
+        nif->skip(8); // Unused
+        mPoint1 = nif->getVector3();
+        mRadius1 = nif->getFloat();
+        mPoint2 = nif->getVector3();
+        mRadius2 = nif->getFloat();
+    }
+
     void bhkListShape::read(NIFStream *nif)
     {
         mSubshapes.read(nif);
