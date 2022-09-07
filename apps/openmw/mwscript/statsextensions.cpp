@@ -1296,6 +1296,48 @@ namespace MWScript
             }
         };
 
+        class OpGetPCVisionBonus : public Interpreter::Opcode0
+        {
+        public:
+            void execute(Interpreter::Runtime& runtime) override
+            {
+                MWWorld::Ptr player = MWMechanics::getPlayer();
+                MWMechanics::EffectParam nightEye = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye);
+                runtime.push(std::clamp(nightEye.getMagnitude() / 100.f, 0.f, 1.f));
+            }
+        };
+
+        class OpSetPCVisionBonus : public Interpreter::Opcode0
+        {
+        public:
+            void execute(Interpreter::Runtime& runtime) override
+            {
+                float arg = runtime[0].mFloat;
+                runtime.pop();
+                MWWorld::Ptr player = MWMechanics::getPlayer();
+                auto& effects = player.getClass().getCreatureStats(player).getMagicEffects();
+                float delta = std::clamp(arg * 100.f, 0.f, 100.f) - effects.get(ESM::MagicEffect::NightEye).getMagnitude();
+                effects.modifyBase(ESM::MagicEffect::NightEye, static_cast<int>(delta));
+            }
+        };
+
+        class OpModPCVisionBonus : public Interpreter::Opcode0
+        {
+        public:
+            void execute(Interpreter::Runtime& runtime) override
+            {
+                float arg = runtime[0].mFloat;
+                runtime.pop();
+                MWWorld::Ptr player = MWMechanics::getPlayer();
+                auto& effects = player.getClass().getCreatureStats(player).getMagicEffects();
+                const MWMechanics::EffectParam nightEye = effects.get(ESM::MagicEffect::NightEye);
+                float newBase = std::clamp(nightEye.getMagnitude() + arg * 100.f, 0.f, 100.f);
+                newBase -= nightEye.getModifier();
+                float delta = std::clamp(newBase, 0.f, 100.f) - nightEye.getMagnitude();
+                effects.modifyBase(ESM::MagicEffect::NightEye, static_cast<int>(delta));
+            }
+        };
+
         struct MagicEffect
         {
             int mPositiveEffect;
@@ -1474,6 +1516,10 @@ namespace MWScript
                 interpreter.installSegment5<OpModMagicEffect<ImplicitRef>>(Compiler::Stats::opcodeModMagicEffect + i, positive, negative);
                 interpreter.installSegment5<OpModMagicEffect<ExplicitRef>>(Compiler::Stats::opcodeModMagicEffectExplicit + i, positive, negative);
             }
+
+            interpreter.installSegment5<OpGetPCVisionBonus>(Compiler::Stats::opcodeGetPCVisionBonus);
+            interpreter.installSegment5<OpSetPCVisionBonus>(Compiler::Stats::opcodeSetPCVisionBonus);
+            interpreter.installSegment5<OpModPCVisionBonus>(Compiler::Stats::opcodeModPCVisionBonus);
         }
     }
 }

@@ -20,6 +20,7 @@
     Bug #6993: Shooting your last round of ammunition causes the attack animation to cancel
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
     Feature #6979: Add support of loading and displaying LOD assets purely based on their filename extension
+    Feature #6983: PCVisionBonus script functions
 
 0.48.0
 ------
