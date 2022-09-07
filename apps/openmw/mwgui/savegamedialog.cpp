@@ -429,12 +429,16 @@ namespace MWGui
 
         mInfoText->setCaptionWithReplacing(text.str());
 
+        // Reset the image for the case we're unable to recover a screenshot
+        mScreenshotTexture.reset();
+        mScreenshot->setRenderItemTexture(nullptr);
+        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 
         // Decode screenshot
         const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
         if (!data.size())
         {
-            Log(Debug::Warning) << "Selected save file '" << mCurrentSlot->mPath.filename() << "' has no savegame screenshot";
+            Log(Debug::Warning) << "Selected save file '" << mCurrentSlot->mPath.filename().string() << "' has no savegame screenshot";
             return;
         }
 
@@ -465,8 +469,6 @@ namespace MWGui
         texture->setUnRefImageDataAfterApply(true);
 
         mScreenshotTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
-
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
-        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 }
