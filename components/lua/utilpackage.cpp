@@ -115,10 +115,10 @@ namespace LuaUtil
 
         // Lua bindings for Color
         sol::usertype<Misc::Color> colorType = lua.new_usertype<Misc::Color>("Color");
-        colorType["r"] = [](const Misc::Color& c) { return c.r(); };
-        colorType["g"] = [](const Misc::Color& c) { return c.g(); };
-        colorType["b"] = [](const Misc::Color& c) { return c.b(); };
-        colorType["a"] = [](const Misc::Color& c) { return c.a(); };
+        colorType["r"] = sol::readonly_property([](const Misc::Color& c) { return c.r(); });
+        colorType["g"] = sol::readonly_property([](const Misc::Color& c) { return c.g(); });
+        colorType["b"] = sol::readonly_property([](const Misc::Color& c) { return c.b(); });
+        colorType["a"] = sol::readonly_property([](const Misc::Color& c) { return c.a(); });
         colorType[sol::meta_function::to_string] = [](const Misc::Color& c) { return c.toString(); };
         colorType["asRgba"] = [](const Misc::Color& c) { return Vec4(c.r(), c.g(), c.b(), c.a()); };
         colorType["asRgb"] = [](const Misc::Color& c) { return Vec3(c.r(), c.g(), c.b()); };
