@@ -165,7 +165,7 @@ namespace MWWorld
         template<class T>
         void removeMissingObjects(Store<T>& store);
 
-        int& getIdType(const std::string& id);
+        void setIdType(const std::string& id, ESM::RecNameInts type);
 
         using LuaContent = std::variant<
             ESM::LuaScriptsCfg,  // data from an omwaddon
@@ -227,7 +227,7 @@ namespace MWWorld
             T *ptr = store.insert(record);
             if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)
             {
-                getIdType(ptr->mId) = T::sRecordId;
+                setIdType(ptr->mId, T::sRecordId);
             }
             return ptr;
         }
@@ -240,7 +240,7 @@ namespace MWWorld
             T *ptr = store.insert(x);
             if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)
             {
-                getIdType(ptr->mId) = T::sRecordId;
+                setIdType(ptr->mId, T::sRecordId);
             }
             return ptr;
         }
@@ -258,7 +258,7 @@ namespace MWWorld
             T *ptr = store.insertStatic(x);
             if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)
             {
-                getIdType(ptr->mId) = T::sRecordId;
+                setIdType(ptr->mId, T::sRecordId);
             }
             return ptr;
         }

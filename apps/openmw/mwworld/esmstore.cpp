@@ -311,9 +311,9 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialo
     }
 }
 
-int& ESMStore::getIdType(const std::string& id)
+void ESMStore::setIdType(const std::string& id, ESM::RecNameInts type)
 {
-    return mStoreImp->mIds[id];
+    mStoreImp->mIds[id] = type;
 }
 
 static std::size_t sTypeIndexCounter = 0;
