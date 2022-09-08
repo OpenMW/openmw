@@ -44,10 +44,9 @@ In this case OpenMW replaces it for value of ``Key`` key from the
 Hot Reloading
 =============
 
-It is possible to modify a shader without restarting OpenMW, :ref:`live reload`
-must be enabled by using the lua command `debug.setShaderHotReloadEnabled(true)`. 
+It is possible to modify a shader without restarting OpenMW, hot reloading
+can be enabled by using the lua command `debug.setShaderHotReloadEnabled(true)`.
 Whenever a file is modified and saved, the shader will automatically reload in game.
-You can also trigger a single reload using `debug.triggerShaderReload()`
 This allows shaders to be written in a text editor you are comfortable with. 
 The only restriction is that the VFS is not aware of new files or changes in non-shader files, 
 so new shaders and localization strings can not be used.

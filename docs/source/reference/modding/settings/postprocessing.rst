@@ -22,18 +22,6 @@ Note, an empty chain will not disable post processing.
 
 This setting has no effect if :ref:`enabled` is set to false.
 
-live reload
------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Automatically reloads a shader if the file has been changed. This is useful for debugging and writing shaders yourself.
-
-.. warning::
-    This should be disabled for normal gameplay
-
 auto exposure speed
 -------------------
 
