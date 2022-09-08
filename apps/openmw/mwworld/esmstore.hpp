@@ -6,9 +6,9 @@
 #include <unordered_map>
 #include <tuple>
 
-#include <components/misc/meta.hpp>
 #include <components/esm/luascripts.hpp>
 #include <components/esm3/loadgmst.hpp>
+#include <components/misc/tuplemeta.hpp>
 
 #include "store.hpp"
 
