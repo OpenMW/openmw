@@ -729,29 +729,29 @@ namespace MWGui
         if (years)
         {
             units++;
-            ret += toString(years) + " y ";
+            ret += toString(years) + " #{Interface:DurationYear} ";
         }
         if (months)
         {
             units++;
-            ret += toString(months) + " mo ";
+            ret += toString(months) + " #{Interface:DurationMonth} ";
         }
         if (units < 2 && days)
         {
             units++;
-            ret += toString(days) + " d ";
+            ret += toString(days) + " #{Interface:DurationDay} ";
         }
         if (units < 2 && hours)
         {
             units++;
-            ret += toString(hours) + " h ";
+            ret += toString(hours) + " #{Interface:DurationHour} ";
         }
         if (units >= 2)
             return ret;
         if (minutes)
-            ret += toString(minutes) + " min ";
+            ret += toString(minutes) + " #{Interface:DurationMinute} ";
         if (seconds)
-            ret += toString(seconds) + " s ";
+            ret += toString(seconds) + " #{Interface:DurationSecond} ";
 
         return ret;
     }

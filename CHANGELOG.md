@@ -21,6 +21,7 @@
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
     Feature #6979: Add support of loading and displaying LOD assets purely based on their filename extension
     Feature #6983: PCVisionBonus script functions
+    Feature #6995: Localize the "show effect duration" option
 
 0.48.0
 ------
