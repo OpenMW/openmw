@@ -233,6 +233,22 @@ namespace
 
 namespace MWWorld
 {
+    struct CellStoreImp
+    {
+        CellStoreTuple  mRefLists;
+
+        template<typename T>  
+        static void assignStoreToIndex(CellStore& stores, CellRefList<T>& refList)
+        {
+            const std::size_t storeIndex = CellStore::getTypeIndex<T>();
+            if (stores.mCellRefLists.size() <= storeIndex)
+                stores.mCellRefLists.resize(storeIndex + 1);
+
+            assert(&store == &std::get<Store<T>>(stores.mCellStoreImp->mRefLists));
+
+            stores.mCellRefLists[storeIndex] = &refList;
+        }
+    };
 
     template <typename X>
     void CellRefList<X>::load(ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore)
@@ -397,9 +413,14 @@ namespace MWWorld
         , mHasState(false)
         , mLastRespawn(0, 0)
         , mRechargingItemsUpToDate(false)
+        , mCellStoreImp(std::make_unique<CellStoreImp>())
     {
+        std::apply([this](auto& ...x) {(CellStoreImp::assignStoreToIndex(*this, x), ...); }, mCellStoreImp->mRefLists);
         mWaterLevel = cell->mWater;
     }
+
+    CellStore::~CellStore() = default;
+    CellStore::CellStore(CellStore&&) = default;
 
     const ESM::Cell *CellStore::getCell() const
     {
@@ -466,10 +487,10 @@ namespace MWWorld
 
     Ptr CellStore::searchViaActorId (int id)
     {
-        if (Ptr ptr = ::searchViaActorId (mNpcs, id, this, mMovedToAnotherCell))
+        if (Ptr ptr = ::searchViaActorId (get<ESM::NPC>(), id, this, mMovedToAnotherCell))
             return ptr;
 
-        if (Ptr ptr = ::searchViaActorId (mCreatures, id, this, mMovedToAnotherCell))
+        if (Ptr ptr = ::searchViaActorId (get<ESM::Creature>(), id, this, mMovedToAnotherCell))
             return ptr;
 
         for (const auto& [base, _] : mMovedHere)
@@ -683,13 +704,13 @@ namespace MWWorld
 
         mHasState = true;
 
-        if (Ptr ptr = searchInContainerList (mContainers, id))
+        if (Ptr ptr = searchInContainerList (get<ESM::Container>(), id))
             return ptr;
 
-        if (Ptr ptr = searchInContainerList (mCreatures, id))
+        if (Ptr ptr = searchInContainerList (get<ESM::Creature>(), id))
             return ptr;
 
-        if (Ptr ptr = searchInContainerList (mNpcs, id))
+        if (Ptr ptr = searchInContainerList (get<ESM::NPC>(), id))
             return ptr;
 
         mHasState = oldState;
@@ -711,27 +732,27 @@ namespace MWWorld
                 // refID was modified, make sure we don't end up with duplicated refs
                 switch (store.find(it->second))
                 {
-                    case ESM::REC_ACTI: mActivators.remove(ref.mRefNum); break;
-                    case ESM::REC_ALCH: mPotions.remove(ref.mRefNum); break;
-                    case ESM::REC_APPA: mAppas.remove(ref.mRefNum); break;
-                    case ESM::REC_ARMO: mArmors.remove(ref.mRefNum); break;
-                    case ESM::REC_BOOK: mBooks.remove(ref.mRefNum); break;
-                    case ESM::REC_CLOT: mClothes.remove(ref.mRefNum); break;
-                    case ESM::REC_CONT: mContainers.remove(ref.mRefNum); break;
-                    case ESM::REC_CREA: mCreatures.remove(ref.mRefNum); break;
-                    case ESM::REC_DOOR: mDoors.remove(ref.mRefNum); break;
-                    case ESM::REC_INGR: mIngreds.remove(ref.mRefNum); break;
-                    case ESM::REC_LEVC: mCreatureLists.remove(ref.mRefNum); break;
-                    case ESM::REC_LEVI: mItemLists.remove(ref.mRefNum); break;
-                    case ESM::REC_LIGH: mLights.remove(ref.mRefNum); break;
-                    case ESM::REC_LOCK: mLockpicks.remove(ref.mRefNum); break;
-                    case ESM::REC_MISC: mMiscItems.remove(ref.mRefNum); break;
-                    case ESM::REC_NPC_: mNpcs.remove(ref.mRefNum); break;
-                    case ESM::REC_PROB: mProbes.remove(ref.mRefNum); break;
-                    case ESM::REC_REPA: mRepairs.remove(ref.mRefNum); break;
-                    case ESM::REC_STAT: mStatics.remove(ref.mRefNum); break;
-                    case ESM::REC_WEAP: mWeapons.remove(ref.mRefNum); break;
-                    case ESM::REC_BODY: mBodyParts.remove(ref.mRefNum); break;
+                    case ESM::REC_ACTI: get<ESM::Activator>().remove(ref.mRefNum); break;
+                    case ESM::REC_ALCH: get<ESM::Potion>().remove(ref.mRefNum); break;
+                    case ESM::REC_APPA: get<ESM::Apparatus>().remove(ref.mRefNum); break;
+                    case ESM::REC_ARMO: get<ESM::Armor>().remove(ref.mRefNum); break;
+                    case ESM::REC_BOOK: get<ESM::Book>().remove(ref.mRefNum); break;
+                    case ESM::REC_CLOT: get<ESM::Clothing>().remove(ref.mRefNum); break;
+                    case ESM::REC_CONT: get<ESM::Container>().remove(ref.mRefNum); break;
+                    case ESM::REC_CREA: get<ESM::Creature>().remove(ref.mRefNum); break;
+                    case ESM::REC_DOOR: get<ESM::Door>().remove(ref.mRefNum); break;
+                    case ESM::REC_INGR: get<ESM::Ingredient>().remove(ref.mRefNum); break;
+                    case ESM::REC_LEVC: get<ESM::CreatureLevList>().remove(ref.mRefNum); break;
+                    case ESM::REC_LEVI: get<ESM::ItemLevList>().remove(ref.mRefNum); break;
+                    case ESM::REC_LIGH: get<ESM::Light>().remove(ref.mRefNum); break;
+                    case ESM::REC_LOCK: get<ESM::Lockpick>().remove(ref.mRefNum); break;
+                    case ESM::REC_MISC: get<ESM::Miscellaneous>().remove(ref.mRefNum); break;
+                    case ESM::REC_NPC_: get<ESM::NPC>().remove(ref.mRefNum); break;
+                    case ESM::REC_PROB: get<ESM::Probe>().remove(ref.mRefNum); break;
+                    case ESM::REC_REPA: get<ESM::Repair>().remove(ref.mRefNum); break;
+                    case ESM::REC_STAT: get<ESM::Static>().remove(ref.mRefNum); break;
+                    case ESM::REC_WEAP: get<ESM::Weapon>().remove(ref.mRefNum); break;
+                    case ESM::REC_BODY: get<ESM::BodyPart>().remove(ref.mRefNum); break;
                     default:
                         break;
                 }
@@ -740,27 +761,27 @@ namespace MWWorld
 
         switch (store.find (ref.mRefID))
         {
-            case ESM::REC_ACTI: mActivators.load(ref, deleted, store); break;
-            case ESM::REC_ALCH: mPotions.load(ref, deleted,store); break;
-            case ESM::REC_APPA: mAppas.load(ref, deleted, store); break;
-            case ESM::REC_ARMO: mArmors.load(ref, deleted, store); break;
-            case ESM::REC_BOOK: mBooks.load(ref, deleted, store); break;
-            case ESM::REC_CLOT: mClothes.load(ref, deleted, store); break;
-            case ESM::REC_CONT: mContainers.load(ref, deleted, store); break;
-            case ESM::REC_CREA: mCreatures.load(ref, deleted, store); break;
-            case ESM::REC_DOOR: mDoors.load(ref, deleted, store); break;
-            case ESM::REC_INGR: mIngreds.load(ref, deleted, store); break;
-            case ESM::REC_LEVC: mCreatureLists.load(ref, deleted, store); break;
-            case ESM::REC_LEVI: mItemLists.load(ref, deleted, store); break;
-            case ESM::REC_LIGH: mLights.load(ref, deleted, store); break;
-            case ESM::REC_LOCK: mLockpicks.load(ref, deleted, store); break;
-            case ESM::REC_MISC: mMiscItems.load(ref, deleted, store); break;
-            case ESM::REC_NPC_: mNpcs.load(ref, deleted, store); break;
-            case ESM::REC_PROB: mProbes.load(ref, deleted, store); break;
-            case ESM::REC_REPA: mRepairs.load(ref, deleted, store); break;
-            case ESM::REC_STAT: mStatics.load(ref, deleted, store); break;
-            case ESM::REC_WEAP: mWeapons.load(ref, deleted, store); break;
-            case ESM::REC_BODY: mBodyParts.load(ref, deleted, store); break;
+            case ESM::REC_ACTI: get<ESM::Activator>().load(ref, deleted, store); break;
+            case ESM::REC_ALCH: get<ESM::Potion>().load(ref, deleted,store); break;
+            case ESM::REC_APPA: get<ESM::Apparatus>().load(ref, deleted, store); break;
+            case ESM::REC_ARMO: get<ESM::Armor>().load(ref, deleted, store); break;
+            case ESM::REC_BOOK: get<ESM::Book>().load(ref, deleted, store); break;
+            case ESM::REC_CLOT: get<ESM::Clothing>().load(ref, deleted, store); break;
+            case ESM::REC_CONT: get<ESM::Container>().load(ref, deleted, store); break;
+            case ESM::REC_CREA: get<ESM::Creature>().load(ref, deleted, store); break;
+            case ESM::REC_DOOR: get<ESM::Door>().load(ref, deleted, store); break;
+            case ESM::REC_INGR: get<ESM::Ingredient>().load(ref, deleted, store); break;
+            case ESM::REC_LEVC: get<ESM::CreatureLevList>().load(ref, deleted, store); break;
+            case ESM::REC_LEVI: get<ESM::ItemLevList>().load(ref, deleted, store); break;
+            case ESM::REC_LIGH: get<ESM::Light>().load(ref, deleted, store); break;
+            case ESM::REC_LOCK: get<ESM::Lockpick>().load(ref, deleted, store); break;
+            case ESM::REC_MISC: get<ESM::Miscellaneous>().load(ref, deleted, store); break;
+            case ESM::REC_NPC_: get<ESM::NPC>().load(ref, deleted, store); break;
+            case ESM::REC_PROB: get<ESM::Probe>().load(ref, deleted, store); break;
+            case ESM::REC_REPA: get<ESM::Repair>().load(ref, deleted, store); break;
+            case ESM::REC_STAT: get<ESM::Static>().load(ref, deleted, store); break;
+            case ESM::REC_WEAP: get<ESM::Weapon>().load(ref, deleted, store); break;
+            case ESM::REC_BODY: get<ESM::BodyPart>().load(ref, deleted, store); break;
 
             case 0: Log(Debug::Error) << "Cell reference '" + ref.mRefID + "' not found!"; return;
 
@@ -809,27 +830,27 @@ namespace MWWorld
 
     void CellStore::writeReferences (ESM::ESMWriter& writer) const
     {
-        writeReferenceCollection<ESM::ObjectState> (writer, mActivators);
-        writeReferenceCollection<ESM::ObjectState> (writer, mPotions);
-        writeReferenceCollection<ESM::ObjectState> (writer, mAppas);
-        writeReferenceCollection<ESM::ObjectState> (writer, mArmors);
-        writeReferenceCollection<ESM::ObjectState> (writer, mBooks);
-        writeReferenceCollection<ESM::ObjectState> (writer, mClothes);
-        writeReferenceCollection<ESM::ContainerState> (writer, mContainers);
-        writeReferenceCollection<ESM::CreatureState> (writer, mCreatures);
-        writeReferenceCollection<ESM::DoorState> (writer, mDoors);
-        writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
-        writeReferenceCollection<ESM::CreatureLevListState> (writer, mCreatureLists);
-        writeReferenceCollection<ESM::ObjectState> (writer, mItemLists);
-        writeReferenceCollection<ESM::ObjectState> (writer, mLights);
-        writeReferenceCollection<ESM::ObjectState> (writer, mLockpicks);
-        writeReferenceCollection<ESM::ObjectState> (writer, mMiscItems);
-        writeReferenceCollection<ESM::NpcState> (writer, mNpcs);
-        writeReferenceCollection<ESM::ObjectState> (writer, mProbes);
-        writeReferenceCollection<ESM::ObjectState> (writer, mRepairs);
-        writeReferenceCollection<ESM::ObjectState> (writer, mStatics);
-        writeReferenceCollection<ESM::ObjectState> (writer, mWeapons);
-        writeReferenceCollection<ESM::ObjectState> (writer, mBodyParts);
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Activator>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Potion>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Apparatus>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Armor>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Book>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Clothing>());
+        writeReferenceCollection<ESM::ContainerState> (writer, get<ESM::Container>());
+        writeReferenceCollection<ESM::CreatureState> (writer, get<ESM::Creature>());
+        writeReferenceCollection<ESM::DoorState> (writer, get<ESM::Door>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Ingredient>());
+        writeReferenceCollection<ESM::CreatureLevListState> (writer, get<ESM::CreatureLevList>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::ItemLevList>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Light>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Lockpick>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Miscellaneous>());
+        writeReferenceCollection<ESM::NpcState> (writer, get<ESM::NPC>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Probe>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Repair>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Static>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Weapon>());
+        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::BodyPart>());
 
         for (const auto& [base, store] : mMovedToAnotherCell)
         {
@@ -871,107 +892,107 @@ namespace MWWorld
             {
                 case ESM::REC_ACTI:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mActivators, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Activator>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_ALCH:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mPotions, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Potion>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_APPA:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mAppas, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Apparatus>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_ARMO:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mArmors, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Armor>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_BOOK:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mBooks, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Book>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_CLOT:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mClothes, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Clothing>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_CONT:
 
-                    readReferenceCollection<ESM::ContainerState> (reader, mContainers, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ContainerState> (reader, get<ESM::Container>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_CREA:
 
-                    readReferenceCollection<ESM::CreatureState> (reader, mCreatures, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::CreatureState> (reader, get<ESM::Creature>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_DOOR:
 
-                    readReferenceCollection<ESM::DoorState> (reader, mDoors, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::DoorState> (reader, get<ESM::Door>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_INGR:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mIngreds, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Ingredient>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_LEVC:
 
-                    readReferenceCollection<ESM::CreatureLevListState> (reader, mCreatureLists, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::CreatureLevListState> (reader, get<ESM::CreatureLevList>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_LEVI:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mItemLists, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::ItemLevList>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_LIGH:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mLights, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Light>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_LOCK:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mLockpicks, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Lockpick>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_MISC:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mMiscItems, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Miscellaneous>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_NPC_:
 
-                    readReferenceCollection<ESM::NpcState> (reader, mNpcs, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::NpcState> (reader, get<ESM::NPC>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_PROB:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mProbes, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Probe>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_REPA:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mRepairs, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Repair>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_STAT:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mStatics, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Static>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_WEAP:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mWeapons, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Weapon>(), cref, contentFileMap, this);
                     break;
 
                 case ESM::REC_BODY:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mBodyParts, cref, contentFileMap, this);
+                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::BodyPart>(), cref, contentFileMap, this);
                     break;
 
                 default:
@@ -1067,7 +1088,7 @@ namespace MWWorld
     {
         if (mState == State_Loaded)
         {
-            for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
+            for (CellRefList<ESM::Creature>::List::iterator it (get<ESM::Creature>().mList.begin()); it!=get<ESM::Creature>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
@@ -1075,7 +1096,7 @@ namespace MWWorld
                     MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
             }
-            for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
+            for (CellRefList<ESM::NPC>::List::iterator it (get<ESM::NPC>().mList.begin()); it!=get<ESM::NPC>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
@@ -1093,7 +1114,7 @@ namespace MWWorld
 
         if (mState == State_Loaded)
         {
-            for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
+            for (CellRefList<ESM::Creature>::List::iterator it (get<ESM::Creature>().mList.begin()); it!=get<ESM::Creature>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
@@ -1101,7 +1122,7 @@ namespace MWWorld
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
             }
-            for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
+            for (CellRefList<ESM::NPC>::List::iterator it (get<ESM::NPC>().mList.begin()); it!=get<ESM::NPC>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
@@ -1109,7 +1130,7 @@ namespace MWWorld
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
             }
-            for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
+            for (CellRefList<ESM::Container>::List::iterator it (get<ESM::Container>().mList.begin()); it!=get<ESM::Container>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0
@@ -1131,29 +1152,29 @@ namespace MWWorld
             if (MWBase::Environment::get().getWorld()->getTimeStamp() - mLastRespawn > 24*30*iMonthsToRespawn)
             {
                 mLastRespawn = MWBase::Environment::get().getWorld()->getTimeStamp();
-                for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
+                for (CellRefList<ESM::Container>::List::iterator it (get<ESM::Container>().mList.begin()); it!=get<ESM::Container>().mList.end(); ++it)
                 {
                     Ptr ptr = getCurrentPtr(&*it);
                     ptr.getClass().respawn(ptr);
                 }
             }
 
-            for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
+            for (CellRefList<ESM::Creature>::List::iterator it (get<ESM::Creature>().mList.begin()); it!=get<ESM::Creature>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
                 clearCorpse(ptr);
                 ptr.getClass().respawn(ptr);
             }
-            for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
+            for (CellRefList<ESM::NPC>::List::iterator it (get<ESM::NPC>().mList.begin()); it!=get<ESM::NPC>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
                 clearCorpse(ptr);
                 ptr.getClass().respawn(ptr);
             }
-            for (CellRefList<ESM::CreatureLevList>::List::iterator it (mCreatureLists.mList.begin()); it!=mCreatureLists.mList.end(); ++it)
+            for (CellRefList<ESM::CreatureLevList>::List::iterator it (get<ESM::CreatureLevList>().mList.begin()); it!=get<ESM::CreatureLevList>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
-                // no need to clearCorpse, handled as part of mCreatures
+                // no need to clearCorpse, handled as part of get<ESM::Creature>()
                 ptr.getClass().respawn(ptr);
             }
         }
@@ -1188,10 +1209,10 @@ namespace MWWorld
             }
         };
 
-        update(mWeapons.mList);
-        update(mArmors.mList);
-        update(mClothes.mList);
-        update(mBooks.mList);
+        update(get<ESM::Weapon>().mList);
+        update(get<ESM::Armor>().mList);
+        update(get<ESM::Clothing>().mList);
+        update(get<ESM::Book>().mList);
     }
 
     void MWWorld::CellStore::checkItem(const Ptr& ptr)
