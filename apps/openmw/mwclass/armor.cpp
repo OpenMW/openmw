@@ -6,6 +6,7 @@
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

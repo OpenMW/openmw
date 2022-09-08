@@ -7,6 +7,7 @@
 
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadbody.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>

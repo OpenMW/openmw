@@ -3,6 +3,9 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadcrea.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"

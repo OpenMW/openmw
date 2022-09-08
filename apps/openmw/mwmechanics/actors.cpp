@@ -14,6 +14,8 @@
 
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadstat.hpp>
 
 
 #include "../mwworld/esmstore.hpp"

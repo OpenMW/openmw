@@ -3,6 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadlock.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

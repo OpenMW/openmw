@@ -15,26 +15,6 @@
 #include "cellreflist.hpp"
 
 #include <components/misc/tuplemeta.hpp>
-#include <components/esm3/loadacti.hpp>
-#include <components/esm3/loadalch.hpp>
-#include <components/esm3/loadappa.hpp>
-#include <components/esm3/loadarmo.hpp>
-#include <components/esm3/loadbook.hpp>
-#include <components/esm3/loadclot.hpp>
-#include <components/esm3/loadcont.hpp>
-#include <components/esm3/loadcrea.hpp>
-#include <components/esm3/loaddoor.hpp>
-#include <components/esm3/loadingr.hpp>
-#include <components/esm3/loadlevlist.hpp>
-#include <components/esm3/loadligh.hpp>
-#include <components/esm3/loadlock.hpp>
-#include <components/esm3/loadprob.hpp>
-#include <components/esm3/loadrepa.hpp>
-#include <components/esm3/loadstat.hpp>
-#include <components/esm3/loadweap.hpp>
-#include <components/esm3/loadnpc.hpp>
-#include <components/esm3/loadmisc.hpp>
-#include <components/esm3/loadbody.hpp>
 #include <components/esm3/fogstate.hpp>
 
 #include "timestamp.hpp"

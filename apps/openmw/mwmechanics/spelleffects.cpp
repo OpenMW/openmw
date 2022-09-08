@@ -7,6 +7,9 @@
 #include <components/settings/settings.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadbody.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

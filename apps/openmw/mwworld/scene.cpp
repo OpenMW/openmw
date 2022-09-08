@@ -17,6 +17,7 @@
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/misc/convert.hpp>
 #include <components/detournavigator/heightfieldshape.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

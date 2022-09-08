@@ -3,7 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadalch.hpp>
-
+#include <components/esm3/loadnpc.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

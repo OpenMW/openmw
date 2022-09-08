@@ -7,6 +7,8 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadsndg.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

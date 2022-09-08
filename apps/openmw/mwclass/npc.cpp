@@ -17,6 +17,7 @@
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadbody.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
