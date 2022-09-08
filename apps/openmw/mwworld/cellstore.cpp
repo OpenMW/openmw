@@ -182,14 +182,14 @@ namespace
             fixRestocking(record, state);
         if (state.mVersion < 17)
         {
-            if constexpr (std::is_same_v<T, ESM::Creature>)
+            if constexpr (std::is_same_v<T, ESM::Creature> && std::is_same_v<RecordType, ESM::CreatureState>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory);
-            else if constexpr (std::is_same_v<T, ESM::NPC>)
+            else if constexpr (std::is_same_v<T, ESM::NPC>&& std::is_same_v<RecordType, ESM::NpcState>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory, &state.mNpcStats);
         }
         else if(state.mVersion < 20)
         {
-            if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
+            if constexpr ((std::is_same_v<T, ESM::Creature> && std::is_same_v<RecordType, ESM::CreatureState> )|| (std::is_same_v<RecordType, ESM::NPC>&& std::is_same_v<T, ESM::NpcState>))
                 MWWorld::convertStats(state.mCreatureStats);
         }
 
@@ -247,6 +247,15 @@ namespace MWWorld
             assert(&store == &std::get<Store<T>>(stores.mCellStoreImp->mRefLists));
 
             stores.mCellRefLists[storeIndex] = &refList;
+        }
+
+        template<typename RecordKind, typename RecordType>
+        static void ReadReferenceSwitcher(CellRefList<RecordType>& collection, ESM::ESMReader& reader,const ESM::CellRef& cref, const std::map<int, int>& contentFileMap, MWWorld::CellStore* cellstore, ESM::RecNameInts recnNameInt)
+        {
+            if (RecordType::sRecordId == recnNameInt)
+            {
+                readReferenceCollection<RecordKind>(reader, collection, cref, contentFileMap, cellstore);
+            }
         }
     };
 
@@ -891,110 +900,40 @@ namespace MWWorld
             switch (type)
             {
                 case ESM::REC_ACTI:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Activator>(), cref, contentFileMap, this);
-                    break;
-
                 case ESM::REC_ALCH:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Potion>(), cref, contentFileMap, this);
-                    break;
-
                 case ESM::REC_APPA:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Apparatus>(), cref, contentFileMap, this);
-                    break;
-
                 case ESM::REC_ARMO:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Armor>(), cref, contentFileMap, this);
-                    break;
-
                 case ESM::REC_BOOK:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Book>(), cref, contentFileMap, this);
-                    break;
-
                 case ESM::REC_CLOT:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Clothing>(), cref, contentFileMap, this);
+                case ESM::REC_INGR:
+                case ESM::REC_LEVI:
+                case ESM::REC_LIGH:
+                case ESM::REC_LOCK:
+                case ESM::REC_MISC:
+                case ESM::REC_PROB:
+                case ESM::REC_REPA:
+                case ESM::REC_STAT:
+                case ESM::REC_WEAP:
+                case ESM::REC_BODY:
+                    std::apply([&reader, this, &cref, &contentFileMap, type](auto& ...x){
+                        (CellStoreImp::ReadReferenceSwitcher<ESM::ObjectState>(x, reader, cref, contentFileMap, this, (ESM::RecNameInts)type),... ); 
+                        }, this->mCellStoreImp->mRefLists);
                     break;
-
                 case ESM::REC_CONT:
-
                     readReferenceCollection<ESM::ContainerState> (reader, get<ESM::Container>(), cref, contentFileMap, this);
                     break;
-
                 case ESM::REC_CREA:
-
                     readReferenceCollection<ESM::CreatureState> (reader, get<ESM::Creature>(), cref, contentFileMap, this);
                     break;
-
                 case ESM::REC_DOOR:
-
                     readReferenceCollection<ESM::DoorState> (reader, get<ESM::Door>(), cref, contentFileMap, this);
                     break;
-
-                case ESM::REC_INGR:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Ingredient>(), cref, contentFileMap, this);
-                    break;
-
                 case ESM::REC_LEVC:
-
                     readReferenceCollection<ESM::CreatureLevListState> (reader, get<ESM::CreatureLevList>(), cref, contentFileMap, this);
                     break;
-
-                case ESM::REC_LEVI:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::ItemLevList>(), cref, contentFileMap, this);
-                    break;
-
-                case ESM::REC_LIGH:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Light>(), cref, contentFileMap, this);
-                    break;
-
-                case ESM::REC_LOCK:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Lockpick>(), cref, contentFileMap, this);
-                    break;
-
-                case ESM::REC_MISC:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Miscellaneous>(), cref, contentFileMap, this);
-                    break;
-
                 case ESM::REC_NPC_:
-
                     readReferenceCollection<ESM::NpcState> (reader, get<ESM::NPC>(), cref, contentFileMap, this);
                     break;
-
-                case ESM::REC_PROB:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Probe>(), cref, contentFileMap, this);
-                    break;
-
-                case ESM::REC_REPA:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Repair>(), cref, contentFileMap, this);
-                    break;
-
-                case ESM::REC_STAT:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Static>(), cref, contentFileMap, this);
-                    break;
-
-                case ESM::REC_WEAP:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::Weapon>(), cref, contentFileMap, this);
-                    break;
-
-                case ESM::REC_BODY:
-
-                    readReferenceCollection<ESM::ObjectState> (reader, get<ESM::BodyPart>(), cref, contentFileMap, this);
-                    break;
-
                 default:
 
                     throw std::runtime_error ("unknown type in cell reference section");
