@@ -4,6 +4,7 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "version.hpp"
+#include "tilespositionsrange.hpp"
 
 #include <components/bullethelpers/operators.hpp>
 
@@ -194,6 +195,11 @@ namespace DetourNavigator
     std::ostream& operator<<(std::ostream& stream, const Version& value)
     {
         return stream << "Version {" << value.mGeneration << ", " << value.mRevision << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const TilesPositionsRange& value)
+    {
+        return stream << "TilesPositionsRange {" << value.mBegin << ", " << value.mEnd << "}";
     }
 
     void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix,

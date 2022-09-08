@@ -17,40 +17,47 @@ namespace DetourNavigator
     public:
         NavigatorStub() = default;
 
+        std::unique_ptr<const UpdateGuard> makeUpdateGuard() override { return nullptr; }
+
         void addAgent(const AgentBounds& /*agentBounds*/) override {}
 
         void removeAgent(const AgentBounds& /*agentBounds*/) override {}
 
-        void setWorldspace(std::string_view /*worldspace*/) override {}
+        void setWorldspace(std::string_view /*worldspace*/, const UpdateGuard* /*guard*/) override {}
 
-        void addObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/) override {}
+        void addObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/,
+            const UpdateGuard* /*guard*/) override {}
 
-        void addObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/) override {}
+        void addObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/,
+            const UpdateGuard* /*guard*/) override {}
 
-        void updateObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/) override {}
+        void updateObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/,
+            const UpdateGuard* /*guard*/) override {}
 
-        void updateObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/) override {}
+        void updateObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/,
+            const UpdateGuard* /*guard*/) override {}
 
-        void removeObject(const ObjectId /*id*/) override {}
+        void removeObject(const ObjectId /*id*/, const UpdateGuard* /*guard*/) override {}
 
-        void addWater(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, float /*level*/) override {}
+        void addWater(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, float /*level*/,
+            const UpdateGuard* /*guard*/) override {}
 
-        void removeWater(const osg::Vec2i& /*cellPosition*/) override {}
+        void removeWater(const osg::Vec2i& /*cellPosition*/, const UpdateGuard* /*guard*/) override {}
 
-        void addHeightfield(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const HeightfieldShape& /*height*/)
-            override {}
+        void addHeightfield(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const HeightfieldShape& /*height*/,
+            const UpdateGuard* /*guard*/) override {}
 
-        void removeHeightfield(const osg::Vec2i& /*cellPosition*/) override {}
+        void removeHeightfield(const osg::Vec2i& /*cellPosition*/, const UpdateGuard* /*guard*/) override {}
 
         void addPathgrid(const ESM::Cell& /*cell*/, const ESM::Pathgrid& /*pathgrid*/) override {}
 
         void removePathgrid(const ESM::Pathgrid& /*pathgrid*/) override {}
 
-        void update(const osg::Vec3f& /*playerPosition*/) override {}
+        void update(const osg::Vec3f& /*playerPosition*/, const UpdateGuard* /*guard*/) override {}
 
-        void updateBounds(const osg::Vec3f& /*playerPosition*/) override {}
+        void updateBounds(const osg::Vec3f& /*playerPosition*/, const UpdateGuard* /*guard*/) override {}
 
-        void wait(Loading::Listener& /*listener*/, WaitConditionType /*waitConditionType*/) override {}
+        void wait(WaitConditionType /*waitConditionType*/, Loading::Listener* /*listener*/) override {}
 
         SharedNavMeshCacheItem getNavMesh(const AgentBounds& /*agentBounds*/) const override
         {

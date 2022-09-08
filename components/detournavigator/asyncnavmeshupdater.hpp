@@ -151,7 +151,7 @@ namespace DetourNavigator
             const TilePosition& playerTile, std::string_view worldspace,
             const std::map<TilePosition, ChangeType>& changedTiles);
 
-        void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
+        void wait(WaitConditionType waitConditionType, Loading::Listener* listener);
 
         void stop();
 
@@ -209,7 +209,7 @@ namespace DetourNavigator
 
         void cleanupLastUpdates();
 
-        inline void waitUntilJobsDoneForNotPresentTiles(Loading::Listener& listener);
+        inline void waitUntilJobsDoneForNotPresentTiles(Loading::Listener* listener);
 
         inline void waitUntilAllJobsDone();
     };

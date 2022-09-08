@@ -19,6 +19,7 @@ class dtNavMesh;
 namespace DetourNavigator
 {
     struct Version;
+    struct TilesPositionsRange;
 
     std::ostream& operator<<(std::ostream& stream, const TileBounds& value);
 
@@ -57,6 +58,8 @@ namespace DetourNavigator
     std::ostream& operator<<(std::ostream& stream, ChangeType value);
 
     std::ostream& operator<<(std::ostream& stream, const Version& value);
+
+    std::ostream& operator<<(std::ostream& stream, const TilesPositionsRange& value);
 
     class RecastMesh;
     struct RecastSettings;

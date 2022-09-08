@@ -41,6 +41,7 @@
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/detournavigator/stats.hpp>
+#include <components/detournavigator/navigatorimpl.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -1541,28 +1542,32 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
+        auto navigatorUpdateGuard = mNavigator->makeUpdateGuard();
+
         mPhysics->forEachAnimatedObject([&] (const auto& pair)
         {
             const auto [object, changed] = pair;
             if (changed)
-                updateNavigatorObject(*object);
+                updateNavigatorObject(*object, navigatorUpdateGuard.get());
         });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))
-                updateNavigatorObject(*object);
+                updateNavigatorObject(*object, navigatorUpdateGuard.get());
 
-        mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+        mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3(), navigatorUpdateGuard.get());
     }
 
-    void World::updateNavigatorObject(const MWPhysics::Object& object)
+    void World::updateNavigatorObject(const MWPhysics::Object& object,
+        const DetourNavigator::UpdateGuard* navigatorUpdateGuard)
     {
         if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
             return;
         const MWWorld::Ptr ptr = object.getPtr();
         const DetourNavigator::ObjectShapes shapes(object.getShapeInstance(),
             DetourNavigator::ObjectTransform {ptr.getRefData().getPosition(), ptr.getCellRef().getScale()});
-        mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform());
+        mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform(),
+            navigatorUpdateGuard);
     }
 
     const MWPhysics::RayCastingInterface* World::getRayCasting() const
@@ -1854,8 +1859,8 @@ namespace MWWorld
 
         if (mWorldScene->hasCellLoaded())
         {
-            mNavigator->wait(*MWBase::Environment::get().getWindowManager()->getLoadingScreen(),
-                             DetourNavigator::WaitConditionType::requiredTilesPresent);
+            mNavigator->wait(DetourNavigator::WaitConditionType::requiredTilesPresent,
+                             MWBase::Environment::get().getWindowManager()->getLoadingScreen());
             mWorldScene->resetCellLoaded();
         }
     }

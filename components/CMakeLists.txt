@@ -290,8 +290,6 @@ add_component_dir(detournavigator
     makenavmesh
     findsmoothpath
     recastmeshbuilder
-    recastmeshmanager
-    cachedrecastmeshmanager
     navmeshmanager
     navigatorimpl
     asyncnavmeshupdater
@@ -304,7 +302,6 @@ add_component_dir(detournavigator
     findrandompointaroundcircle
     raycast
     navmeshtileview
-    oscillatingrecastmeshobject
     offmeshconnectionsmanager
     preparednavmeshdata
     navmeshcacheitem
@@ -317,6 +314,7 @@ add_component_dir(detournavigator
     gettilespositions
     collisionshapetype
     stats
+    commulativeaabb
     )
 
 add_component_dir(loadinglistener
