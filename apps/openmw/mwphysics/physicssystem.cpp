@@ -798,16 +798,16 @@ namespace MWPhysics
         const auto world = MWBase::Environment::get().getWorld();
 
         // copy new ptr position in temporary vector. player is handled separately as its movement might change active cell.
-        std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>> newPositions;
-        newPositions.reserve(mActors.size() - 1);
+        mActorsPositions.clear();
+        mActorsPositions.reserve(mActors.size() - 1);
         for (const auto& [ptr, physicActor] : mActors)
         {
             if (physicActor.get() == player)
                 continue;
-            newPositions.emplace_back(physicActor->getPtr(), physicActor->getSimulationPosition());
+            mActorsPositions.emplace_back(physicActor->getPtr(), physicActor->getSimulationPosition());
         }
 
-        for (auto& [ptr, pos] : newPositions)
+        for (const auto& [ptr, pos] : mActorsPositions)
             world->moveObject(ptr, pos, false, false);
 
         world->moveObject(player->getPtr(), player->getSimulationPosition(), false, false);
