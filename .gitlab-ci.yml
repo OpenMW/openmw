@@ -1,5 +1,14 @@
 default:
   interruptible: true
+  
+# Merge requests have two pipelines, filter pipelines using branch and merge request event together.
+# See https://docs.gitlab.com/ee/ci/pipelines/merge_request_pipelines.html#two-pipelines-when-pushing-to-a-branch
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 # Note: We set `needs` on each job to control the job DAG.
 # See https://docs.gitlab.com/ee/ci/yaml/#needs
