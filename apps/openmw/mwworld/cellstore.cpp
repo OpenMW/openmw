@@ -36,6 +36,7 @@
 
 namespace
 {
+
     template<typename T>
     MWWorld::Ptr searchInContainerList(MWWorld::CellRefList<T>& containerList, std::string_view id)
     {
@@ -244,17 +245,18 @@ namespace MWWorld
             if (stores.mCellRefLists.size() <= storeIndex)
                 stores.mCellRefLists.resize(storeIndex + 1);
 
-            assert(&store == &std::get<Store<T>>(stores.mCellStoreImp->mRefLists));
+            assert(&refList == &std::get<CellRefList<T>>(stores.mCellStoreImp->mRefLists));
 
             stores.mCellRefLists[storeIndex] = &refList;
         }
 
-        template<typename RecordKind, typename RecordType>
-        static void ReadReferenceSwitcher(CellRefList<RecordType>& collection, ESM::ESMReader& reader,const ESM::CellRef& cref, const std::map<int, int>& contentFileMap, MWWorld::CellStore* cellstore, ESM::RecNameInts recnNameInt)
+        //this function allows us to link a CellRefList<T> to the associated recNameInt, and apply a function
+        template<typename RecordType, typename Callable>
+        static void recNameSwitcher(CellRefList<RecordType>& store, Callable&& f, ESM::RecNameInts recnNameInt)
         {
             if (RecordType::sRecordId == recnNameInt)
             {
-                readReferenceCollection<RecordKind>(reader, collection, cref, contentFileMap, cellstore);
+                f(store);
             }
         }
     };
@@ -421,8 +423,8 @@ namespace MWWorld
         , mState(State_Unloaded)
         , mHasState(false)
         , mLastRespawn(0, 0)
-        , mRechargingItemsUpToDate(false)
         , mCellStoreImp(std::make_unique<CellStoreImp>())
+        , mRechargingItemsUpToDate(false)
     {
         std::apply([this](auto& ...x) {(CellStoreImp::assignStoreToIndex(*this, x), ...); }, mCellStoreImp->mRefLists);
         mWaterLevel = cell->mWater;
@@ -739,64 +741,35 @@ namespace MWWorld
             if (it->second != ref.mRefID)
             {
                 // refID was modified, make sure we don't end up with duplicated refs
-                switch (store.find(it->second))
-                {
-                    case ESM::REC_ACTI: get<ESM::Activator>().remove(ref.mRefNum); break;
-                    case ESM::REC_ALCH: get<ESM::Potion>().remove(ref.mRefNum); break;
-                    case ESM::REC_APPA: get<ESM::Apparatus>().remove(ref.mRefNum); break;
-                    case ESM::REC_ARMO: get<ESM::Armor>().remove(ref.mRefNum); break;
-                    case ESM::REC_BOOK: get<ESM::Book>().remove(ref.mRefNum); break;
-                    case ESM::REC_CLOT: get<ESM::Clothing>().remove(ref.mRefNum); break;
-                    case ESM::REC_CONT: get<ESM::Container>().remove(ref.mRefNum); break;
-                    case ESM::REC_CREA: get<ESM::Creature>().remove(ref.mRefNum); break;
-                    case ESM::REC_DOOR: get<ESM::Door>().remove(ref.mRefNum); break;
-                    case ESM::REC_INGR: get<ESM::Ingredient>().remove(ref.mRefNum); break;
-                    case ESM::REC_LEVC: get<ESM::CreatureLevList>().remove(ref.mRefNum); break;
-                    case ESM::REC_LEVI: get<ESM::ItemLevList>().remove(ref.mRefNum); break;
-                    case ESM::REC_LIGH: get<ESM::Light>().remove(ref.mRefNum); break;
-                    case ESM::REC_LOCK: get<ESM::Lockpick>().remove(ref.mRefNum); break;
-                    case ESM::REC_MISC: get<ESM::Miscellaneous>().remove(ref.mRefNum); break;
-                    case ESM::REC_NPC_: get<ESM::NPC>().remove(ref.mRefNum); break;
-                    case ESM::REC_PROB: get<ESM::Probe>().remove(ref.mRefNum); break;
-                    case ESM::REC_REPA: get<ESM::Repair>().remove(ref.mRefNum); break;
-                    case ESM::REC_STAT: get<ESM::Static>().remove(ref.mRefNum); break;
-                    case ESM::REC_WEAP: get<ESM::Weapon>().remove(ref.mRefNum); break;
-                    case ESM::REC_BODY: get<ESM::BodyPart>().remove(ref.mRefNum); break;
-                    default:
-                        break;
-                }
+                ESM::RecNameInts foundType = (ESM::RecNameInts)store.find(it->second);
+                Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, foundType](auto& x) {CellStoreImp::recNameSwitcher(x, [&ref](auto& storeIn)
+                    {
+                        storeIn.remove(ref.mRefNum);
+                    }, foundType);
+                });
             }
         }
 
-        switch (store.find (ref.mRefID))
+        ESM::RecNameInts foundType = (ESM::RecNameInts)store.find(ref.mRefID);
+        bool handledType = false;
+        if (foundType != 0)
         {
-            case ESM::REC_ACTI: get<ESM::Activator>().load(ref, deleted, store); break;
-            case ESM::REC_ALCH: get<ESM::Potion>().load(ref, deleted,store); break;
-            case ESM::REC_APPA: get<ESM::Apparatus>().load(ref, deleted, store); break;
-            case ESM::REC_ARMO: get<ESM::Armor>().load(ref, deleted, store); break;
-            case ESM::REC_BOOK: get<ESM::Book>().load(ref, deleted, store); break;
-            case ESM::REC_CLOT: get<ESM::Clothing>().load(ref, deleted, store); break;
-            case ESM::REC_CONT: get<ESM::Container>().load(ref, deleted, store); break;
-            case ESM::REC_CREA: get<ESM::Creature>().load(ref, deleted, store); break;
-            case ESM::REC_DOOR: get<ESM::Door>().load(ref, deleted, store); break;
-            case ESM::REC_INGR: get<ESM::Ingredient>().load(ref, deleted, store); break;
-            case ESM::REC_LEVC: get<ESM::CreatureLevList>().load(ref, deleted, store); break;
-            case ESM::REC_LEVI: get<ESM::ItemLevList>().load(ref, deleted, store); break;
-            case ESM::REC_LIGH: get<ESM::Light>().load(ref, deleted, store); break;
-            case ESM::REC_LOCK: get<ESM::Lockpick>().load(ref, deleted, store); break;
-            case ESM::REC_MISC: get<ESM::Miscellaneous>().load(ref, deleted, store); break;
-            case ESM::REC_NPC_: get<ESM::NPC>().load(ref, deleted, store); break;
-            case ESM::REC_PROB: get<ESM::Probe>().load(ref, deleted, store); break;
-            case ESM::REC_REPA: get<ESM::Repair>().load(ref, deleted, store); break;
-            case ESM::REC_STAT: get<ESM::Static>().load(ref, deleted, store); break;
-            case ESM::REC_WEAP: get<ESM::Weapon>().load(ref, deleted, store); break;
-            case ESM::REC_BODY: get<ESM::BodyPart>().load(ref, deleted, store); break;
+            Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &deleted, &store, foundType, &handledType](auto& x) {CellStoreImp::recNameSwitcher(x, [&ref, &deleted, &store, &handledType](auto& storeIn)
+                {
+                    handledType = true;
+                    storeIn.load(ref, deleted, store);
+                }, foundType);
+            });
+        }
+        else
+        {
+            Log(Debug::Error) << "Cell reference '" + ref.mRefID + "' not found!"; return;
+        }
 
-            case 0: Log(Debug::Error) << "Cell reference '" + ref.mRefID + "' not found!"; return;
-
-            default:
-                Log(Debug::Error) << "Error: Ignoring reference '" << ref.mRefID << "' of unhandled type";
-                return;
+        if (!handledType)
+        {
+            Log(Debug::Error) << "Error: Ignoring reference '" << ref.mRefID << "' of unhandled type";
+            return;
         }
 
         refNumToID[ref.mRefNum] = ref.mRefID;
@@ -915,9 +888,13 @@ namespace MWWorld
                 case ESM::REC_STAT:
                 case ESM::REC_WEAP:
                 case ESM::REC_BODY:
-                    std::apply([&reader, this, &cref, &contentFileMap, type](auto& ...x){
-                        (CellStoreImp::ReadReferenceSwitcher<ESM::ObjectState>(x, reader, cref, contentFileMap, this, (ESM::RecNameInts)type),... ); 
-                        }, this->mCellStoreImp->mRefLists);
+                    Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&reader, this, &cref, &contentFileMap, type](auto&& x) {
+                        CellStoreImp::recNameSwitcher(
+                            x,
+                            [&reader, this, &cref, &contentFileMap](
+                                auto& store) { readReferenceCollection<ESM::ObjectState>(reader, store, cref, contentFileMap, this); },
+                            (ESM::RecNameInts)type);
+                    });
                     break;
                 case ESM::REC_CONT:
                     readReferenceCollection<ESM::ContainerState> (reader, get<ESM::Container>(), cref, contentFileMap, this);

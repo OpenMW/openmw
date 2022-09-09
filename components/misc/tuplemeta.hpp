@@ -30,6 +30,12 @@ namespace Misc
     {
         static constexpr std::size_t value = 1 + TupleTypeIndex<T, std::tuple<Types...>>::value;
     };
+
+    template<typename TupleType, typename Callable>
+    void tupleForEach(TupleType& tuple, Callable&& f)
+    {
+        std::apply([&f](auto& ...x) {(f(x), ...); }, tuple);
+    }
 }
 
 #endif
