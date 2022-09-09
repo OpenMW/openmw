@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <fstream>
+#include <boost/filesystem/fstream.hpp>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -109,7 +109,8 @@ TEST_F(ContentFileTest, dialogue_merging_test)
     }
 
     const std::string file = TestingOpenMW::outputFilePath("test_dialogue_merging.txt");
-    std::ofstream stream(file);
+    boost::filesystem::ofstream stream;
+    stream.open(file);
 
     const MWWorld::Store<ESM::Dialogue>& dialStore = mEsmStore.get<ESM::Dialogue>();
     for (const auto & dial : dialStore)
@@ -189,7 +190,8 @@ TEST_F(ContentFileTest, content_diagnostics_test)
     }
 
     const std::string file = TestingOpenMW::outputFilePath("test_content_diagnostics.txt");
-    std::ofstream stream(file);
+    boost::filesystem::ofstream stream;
+    stream.open(file);
 
     RUN_TEST_FOR_TYPES(printRecords, mEsmStore, stream);
 

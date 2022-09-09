@@ -1,7 +1,7 @@
 #include "storage.hpp"
 
-#include <filesystem>
-#include <fstream>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include <components/debug/debuglog.hpp>
 
@@ -155,13 +155,13 @@ namespace LuaUtil
         }
     }
 
-    void LuaStorage::load(const std::string& path)
+    void LuaStorage::load(const boost::filesystem::path& path)
     {
         assert(mData.empty());  // Shouldn't be used before loading
         try
         {
-            Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << std::filesystem::file_size(path) << " bytes)";
-            std::ifstream fin(path, std::fstream::binary);
+            Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << boost::filesystem::file_size(path) << " bytes)";
+            boost::filesystem::ifstream fin(path, boost::filesystem::fstream::binary);
             std::string serializedData((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
             sol::table data = deserialize(mLua, serializedData);
             for (const auto& [sectionName, sectionTable] : data)
@@ -177,7 +177,7 @@ namespace LuaUtil
         }
     }
 
-    void LuaStorage::save(const std::string& path) const
+    void LuaStorage::save(const boost::filesystem::path& path) const
     {
         sol::table data(mLua, sol::create);
         for (const auto& [sectionName, section] : mData)
@@ -187,7 +187,7 @@ namespace LuaUtil
         }
         std::string serializedData = serialize(data);
         Log(Debug::Info) << "Saving Lua storage \"" << path << "\" (" << serializedData.size() << " bytes)";
-        std::ofstream fout(path, std::fstream::binary);
+        boost::filesystem::ofstream fout(path, boost::filesystem::ofstream::binary);
         fout.write(serializedData.data(), serializedData.size());
         fout.close();
     }

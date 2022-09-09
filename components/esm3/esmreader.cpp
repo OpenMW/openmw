@@ -2,13 +2,12 @@
 
 #include "readerscache.hpp"
 
+#include <boost/filesystem/path.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/files/openfile.hpp>
 
 #include <stdexcept>
 #include <sstream>
-#include <filesystem>
-#include <fstream>
 
 namespace ESM
 {
@@ -76,9 +75,8 @@ void ESMReader::resolveParentFileIndices(ReadersCache& readers)
             if (reader->getFileSize() == 0)
                 continue;  // Content file in non-ESM format
             const std::string& candidate = reader->getName();
-            std::string fnamecandidate = std::filesystem::path(candidate).filename().string();
-            if (Misc::StringUtils::ciEqual(fname, fnamecandidate))
-            {
+            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
+            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;
                 break;
             }

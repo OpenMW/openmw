@@ -3,8 +3,6 @@
 #include <chrono>
 #include <memory>
 #include <functional>
-#include <fstream>
-#include <filesystem>
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -244,7 +242,7 @@ namespace Debug
 static std::unique_ptr<std::ostream> rawStdout = nullptr;
 static std::unique_ptr<std::ostream> rawStderr = nullptr;
 static std::unique_ptr<std::mutex> rawStderrMutex = nullptr;
-static std::ofstream logfile;
+static boost::filesystem::ofstream logfile;
 
 #if defined(_WIN32) && defined(_DEBUG)
 static boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
@@ -278,7 +276,7 @@ void setupLogging(const std::string& logDir, const std::string& appName, std::io
     std::cerr.rdbuf(&sb);
 #else
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-    logfile.open(std::filesystem::path(logDir) / logName, mode);
+    logfile.open(boost::filesystem::path(logDir) / logName, mode);
 
     coutsb.open(Debug::Tee(logfile, *rawStdout));
     cerrsb.open(Debug::Tee(logfile, *rawStderr));

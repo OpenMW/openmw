@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
-#include <filesystem>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -712,7 +711,7 @@ void OMW::Engine::createWindow()
 
 void OMW::Engine::setWindowIcon()
 {
-    std::ifstream windowIconStream;
+    boost::filesystem::ifstream windowIconStream;
     std::string windowIcon = (mResDir / "openmw.png").string();
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
@@ -789,13 +788,13 @@ void OMW::Engine::prepareEngine()
     // showing a loading screen and keeping the window responsive while doing so
 
     std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v3.xml").string();
-    bool keybinderUserExists = std::filesystem::exists(keybinderUser);
+    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
     if(!keybinderUserExists)
     {
         std::string input2 = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
-        if(std::filesystem::exists(input2)) {
-            std::filesystem::copy_file(input2, keybinderUser);
-            keybinderUserExists = std::filesystem::exists(keybinderUser);
+        if(boost::filesystem::exists(input2)) {
+            boost::filesystem::copy_file(input2, keybinderUser);
+            keybinderUserExists = boost::filesystem::exists(keybinderUser);
             Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
         }
     }
@@ -807,13 +806,13 @@ void OMW::Engine::prepareEngine()
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
 
     std::string userGameControllerdb;
-    if (std::filesystem::exists(userdefault))
+    if (boost::filesystem::exists(userdefault))
         userGameControllerdb = userdefault;
 
     std::string gameControllerdb;
-    if (std::filesystem::exists(localdefault))
+    if (boost::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
-    else if (std::filesystem::exists(globaldefault))
+    else if (boost::filesystem::exists(globaldefault))
         gameControllerdb = globaldefault;
     //else if it doesn't exist, pass in an empty string
 
@@ -1037,7 +1036,7 @@ void OMW::Engine::go()
 
     prepareEngine();
 
-    std::ofstream stats;
+    boost::filesystem::ofstream stats;
     if (const auto path = std::getenv("OPENMW_OSG_STATS_FILE"))
     {
         stats.open(path, std::ios_base::out);

@@ -11,6 +11,8 @@
 #include <osg/Texture3D>
 #include <osg/Texture2DArray>
 
+#include <boost/filesystem/operations.hpp>
+
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/color.hpp>
@@ -216,11 +218,11 @@ namespace MWRender
     {
         for (const auto& name : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
         {
-            std::filesystem::path path = name;
+            boost::filesystem::path path = name;
             std::string fileExt = Misc::StringUtils::lowerCase(path.extension().string());
             if (!path.parent_path().has_parent_path() && fileExt == fx::Technique::sExt)
             {
-                auto absolutePath = std::filesystem::path(mVFS->getAbsoluteFileName(name));
+                auto absolutePath = boost::filesystem::path(mVFS->getAbsoluteFileName(name));
                 mTechniqueFileMap[absolutePath.stem().string()] = absolutePath;
             }
         }
@@ -375,7 +377,7 @@ namespace MWRender
             if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
                 continue;
 
-            const auto lastWriteTime = std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]);
+            const auto lastWriteTime = boost::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]);
             const bool isDirty = technique->setLastModificationTime(lastWriteTime);
 
             if (!isDirty)
@@ -788,7 +790,7 @@ namespace MWRender
         technique->compile();
 
         if (technique->getStatus() != fx::Technique::Status::File_Not_exists)
-            technique->setLastModificationTime(std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
+            technique->setLastModificationTime(boost::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
 
         if (loadNextFrame)
         {

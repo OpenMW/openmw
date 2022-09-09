@@ -21,8 +21,6 @@
 extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #endif
 
-#include <filesystem>
-
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
 #include <unistd.h>
 #endif
@@ -214,8 +212,8 @@ int runApplication(int argc, char *argv[])
     Platform::init();
 
 #ifdef __APPLE__
-    std::filesystem::path binary_path = std::filesystem::absolute(std::filesystem::path(argv[0]));
-    std::filesystem::current_path(binary_path.parent_path());
+    boost::filesystem::path binary_path = boost::filesystem::system_complete(boost::filesystem::path(argv[0]));
+    boost::filesystem::current_path(binary_path.parent_path());
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
 

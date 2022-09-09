@@ -1,7 +1,8 @@
 #include "esmstore.hpp"
 
 #include <algorithm>
-#include <fstream>
+
+#include <boost/filesystem/fstream.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -229,7 +230,7 @@ ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
             // It is important for the `reloadlua` console command.
             try
             {
-                auto file = std::ifstream(std::get<std::string>(c));
+                auto file = boost::filesystem::ifstream(std::get<std::string>(c));
                 std::string fileContent(std::istreambuf_iterator<char>(file), {});
                 LuaUtil::parseOMWScripts(cfg, fileContent);
             }

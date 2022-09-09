@@ -1,12 +1,12 @@
 #ifndef OPENMW_COMPONENTS_FX_TECHNIQUE_H
 #define OPENMW_COMPONENTS_FX_TECHNIQUE_H
 
+#include <chrono>
 #include <vector>
 #include <string>
 #include <variant>
 #include <memory>
 #include <unordered_map>
-#include <filesystem>
 
 #include <osg/Node>
 #include <osg/Program>
@@ -19,6 +19,8 @@
 #include <osg/Vec4f>
 #include <osg/BlendFunc>
 #include <osg/BlendEquation>
+
+#include <boost/filesystem/path.hpp>
 
 #include "pass.hpp"
 #include "lexer.hpp"
@@ -131,7 +133,7 @@ namespace fx
 
         std::string getFileName() const;
 
-        bool setLastModificationTime(std::filesystem::file_time_type timeStamp);
+        bool setLastModificationTime(std::time_t timeStamp);
 
         bool isValid() const { return mValid; }
 
@@ -263,7 +265,7 @@ namespace fx
 
         bool mEnabled;
 
-        std::filesystem::file_time_type mLastModificationTime;
+        std::chrono::time_point<std::chrono::system_clock> mLastModificationTime;
         bool mValid;
         bool mHDR;
         bool mNormals;

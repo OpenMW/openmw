@@ -1,7 +1,6 @@
 #ifndef CSM_DOC_SAVINGSTATE_H
 #define CSM_DOC_SAVINGSTATE_H
 
-#include <fstream>
 #include <map>
 #include <deque>
 

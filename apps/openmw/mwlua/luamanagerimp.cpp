@@ -1,7 +1,5 @@
 #include "luamanagerimp.hpp"
 
-#include <filesystem>
-
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm3/esmreader.hpp>
@@ -111,19 +109,19 @@ namespace MWLua
 
     void LuaManager::loadPermanentStorage(const std::string& userConfigPath)
     {
-        auto globalPath = std::filesystem::path(userConfigPath) / "global_storage.bin";
-        auto playerPath = std::filesystem::path(userConfigPath) / "player_storage.bin";
-        if (std::filesystem::exists(globalPath))
-            mGlobalStorage.load(globalPath.string());
-        if (std::filesystem::exists(playerPath))
-            mPlayerStorage.load(playerPath.string());
+        auto globalPath = boost::filesystem::path(userConfigPath) / "global_storage.bin";
+        auto playerPath = boost::filesystem::path(userConfigPath) / "player_storage.bin";
+        if (boost::filesystem::exists(globalPath))
+            mGlobalStorage.load(globalPath);
+        if (boost::filesystem::exists(playerPath))
+            mPlayerStorage.load(playerPath);
     }
 
     void LuaManager::savePermanentStorage(const std::string& userConfigPath)
     {
-        std::filesystem::path confDir(userConfigPath);
-        mGlobalStorage.save((confDir / "global_storage.bin").string());
-        mPlayerStorage.save((confDir / "player_storage.bin").string());
+        boost::filesystem::path confDir(userConfigPath);
+        mGlobalStorage.save((confDir / "global_storage.bin"));
+        mPlayerStorage.save((confDir / "player_storage.bin"));
     }
 
     void LuaManager::update()

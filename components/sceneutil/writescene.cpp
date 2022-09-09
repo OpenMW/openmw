@@ -1,10 +1,10 @@
 #include "writescene.hpp"
 
 #include <stdexcept>
-#include <fstream>
 
 #include <osgDB/Registry>
 
+#include <boost/filesystem/fstream.hpp>
 
 #include "serialize.hpp"
 
@@ -16,7 +16,7 @@ void SceneUtil::writeScene(osg::Node *node, const std::string& filename, const s
     if (!rw)
         throw std::runtime_error("can not find readerwriter for " + format);
 
-    std::ofstream stream;
+    boost::filesystem::ofstream stream;
     stream.open(filename);
 
     osg::ref_ptr<osgDB::Options> options = new osgDB::Options;

@@ -1,6 +1,6 @@
 #include <components/settings/parser.hpp>
 
-#include <fstream>
+#include <boost/filesystem/fstream.hpp>
 
 #include <gtest/gtest.h>
 
@@ -23,7 +23,7 @@ namespace
                 std::string(UnitTest::GetInstance()->current_test_info()->name()) + ".cfg");
 
             {
-                std::ofstream stream(path);
+                boost::filesystem::ofstream stream(path);
                 stream << content;
                 stream.close();
             }

@@ -5,9 +5,11 @@
 #include <memory>
 #include <string>
 
+#include <boost/filesystem/fstream.hpp>
+
 namespace Files
 {
-    std::unique_ptr<std::ifstream> openBinaryInputFileStream(const std::string& path);
+    std::unique_ptr<boost::filesystem::ifstream> openBinaryInputFileStream(const std::string& path);
 }
 
 #endif

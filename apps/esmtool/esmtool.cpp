@@ -4,12 +4,12 @@
 #include <list>
 #include <unordered_set>
 #include <map>
-#include <fstream>
 #include <cmath>
 #include <memory>
 #include <optional>
 #include <iomanip>
 
+#include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 
 #include <components/esm3/esmreader.hpp>
@@ -308,7 +308,7 @@ void printRawTes3(std::string_view path)
     }
 }
 
-int loadTes3(const Arguments& info, std::unique_ptr<std::ifstream>&& stream, ESMData* data)
+int loadTes3(const Arguments& info, std::unique_ptr<boost::filesystem::ifstream>&& stream, ESMData* data)
 {
     std::cout << "Loading TES3 file: " << info.filename << '\n';
 
@@ -499,7 +499,7 @@ int clone(const Arguments& info)
     esm.setVersion(ESM::VER_13);
     esm.setRecordCount (recordCount);
 
-    std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
+    boost::filesystem::fstream save(info.outname, boost::filesystem::fstream::out | boost::filesystem::fstream::binary);
     esm.save(save);
 
     int saved = 0;

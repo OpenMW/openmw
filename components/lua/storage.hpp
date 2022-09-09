@@ -4,6 +4,8 @@
 #include <map>
 #include <sol/sol.hpp>
 
+#include <boost/filesystem/path.hpp>
+
 #include "scriptscontainer.hpp"
 #include "serialization.hpp"
 
@@ -18,8 +20,8 @@ namespace LuaUtil
         explicit LuaStorage(lua_State* lua) : mLua(lua) {}
 
         void clearTemporaryAndRemoveCallbacks();
-        void load(const std::string& path);
-        void save(const std::string& path) const;
+        void load(const boost::filesystem::path& path);
+        void save(const boost::filesystem::path& path) const;
 
         sol::object getSection(std::string_view sectionName, bool readOnly);
         sol::object getMutableSection(std::string_view sectionName) { return getSection(sectionName, false); }

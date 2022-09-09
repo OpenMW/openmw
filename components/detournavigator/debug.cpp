@@ -4,6 +4,9 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include <components/bullethelpers/operators.hpp>
 
 #include <DetourNavMesh.h>
@@ -11,8 +14,6 @@
 
 #include <osg/io_utils>
 
-#include <filesystem>
-#include <fstream>
 #include <ostream>
 #include <array>
 #include <string_view>
@@ -195,7 +196,7 @@ namespace DetourNavigator
         const std::string& revision, const RecastSettings& settings)
     {
         const auto path = pathPrefix + "recastmesh" + revision + ".obj";
-        std::ofstream file(std::filesystem::path(path), std::ios::out);
+        boost::filesystem::ofstream file(boost::filesystem::path(path), std::ios::out);
         if (!file.is_open())
             throw NavigatorException("Open file failed: " + path);
         file.exceptions(std::ios::failbit | std::ios::badbit);
@@ -242,7 +243,7 @@ namespace DetourNavigator
         };
 
         const auto path = pathPrefix + "all_tiles_navmesh" + revision + ".bin";
-        std::ofstream file(std::filesystem::path(path), std::ios::out | std::ios::binary);
+        boost::filesystem::ofstream file(boost::filesystem::path(path), std::ios::out | std::ios::binary);
         if (!file.is_open())
             throw NavigatorException("Open file failed: " + path);
         file.exceptions(std::ios::failbit | std::ios::badbit);

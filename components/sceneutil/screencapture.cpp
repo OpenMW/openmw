@@ -8,10 +8,10 @@
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include <cassert>
-#include <fstream>
-#include <filesystem>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -82,10 +82,10 @@ namespace SceneUtil
             lastFileName = stream.str();
             lastFilePath = screenshotPath + "/" + lastFileName;
 
-        } while (std::filesystem::exists(lastFilePath));
+        } while (boost::filesystem::exists(lastFilePath));
 
-        std::ofstream outStream;
-        outStream.open(std::filesystem::path(std::move(lastFilePath)), std::ios::binary);
+        boost::filesystem::ofstream outStream;
+        outStream.open(boost::filesystem::path(std::move(lastFilePath)), std::ios::binary);
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(screenshotFormat);
         if (!readerwriter)
