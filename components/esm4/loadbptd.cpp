@@ -28,6 +28,7 @@
 
 #include <stdexcept>
 #include <iostream> // FIXME: testing only
+#include <cstring>
 
 #include "reader.hpp"
 //#include "writer.hpp"
