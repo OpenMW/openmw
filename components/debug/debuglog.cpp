@@ -63,7 +63,7 @@ Log& Log::operator<<(std::u8string&& rhs)
     return *this;
 }
 
-Log& Log::operator<<(const std::u8string& rhs)
+Log& Log::operator<<(const std::u8string_view rhs)
 {
     if (mShouldLog)
         std::cout << Misc::StringUtils::u8StringToString(rhs);

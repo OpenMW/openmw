@@ -43,7 +43,7 @@ public:
 
     Log& operator<<(std::u8string&& rhs);
 
-    Log& operator<<(const std::u8string& rhs);
+    Log& operator<<(std::u8string_view rhs);
 
     Log& operator<<(const char8_t* rhs);
 
