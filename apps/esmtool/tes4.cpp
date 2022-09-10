@@ -9,6 +9,7 @@
 #include <components/esm/esmcommon.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/records.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 namespace EsmTool
 {

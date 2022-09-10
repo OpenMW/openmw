@@ -50,6 +50,7 @@
 #include <components/bsa/memorystream.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/files/constrainedfilestream.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 #include "formid.hpp"
 
@@ -644,6 +645,53 @@ void Reader::adjustGRUPFormId()
         ss << "\n  Offset: 0x" << std::hex << mStream->tellg();
 
     throw std::runtime_error(ss.str());
+}
+
+bool Reader::getStringImpl(std::string& str, std::size_t size,
+        std::istream& stream, const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull)
+{
+    std::size_t newSize = size;
+
+    if (encoder)
+    {
+        std::string input(size, '\0');
+        stream.read(input.data(), size);
+        if (stream.gcount() == static_cast<std::streamsize>(size))
+        {
+            encoder->getUtf8(input, ToUTF8::BufferAllocationPolicy::FitToRequiredSize, str);
+            return true;
+        }
+    }
+    else
+    {
+        if (hasNull)
+            newSize -= 1; // don't read the null terminator yet
+
+        str.resize(newSize); // assumed C++11
+        stream.read(str.data(), newSize);
+        if (static_cast<std::size_t>(stream.gcount()) == newSize)
+        {
+            if (hasNull)
+            {
+                char ch;
+                stream.read(&ch, 1); // read the null terminator
+                assert (ch == '\0'
+                        && "ESM4::Reader::getString string is not terminated with a null");
+            }
+#if 0
+            else
+            {
+                // NOTE: normal ESMs don't but omwsave has locals or spells with null terminator
+                assert (str[newSize - 1] != '\0'
+                        && "ESM4::Reader::getString string is unexpectedly terminated with a null");
+            }
+#endif
+            return true;
+        }
+    }
+
+    str.clear();
+    return false; // FIXME: throw instead?
 }
 
 }
