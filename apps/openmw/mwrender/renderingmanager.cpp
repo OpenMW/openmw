@@ -173,6 +173,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("far", 0.f));
             stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
             stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{}));
+            stateset->addUniform(new osg::Uniform("isReflection", false));
             if (mUsePlayerUniforms)
             {
                 stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
