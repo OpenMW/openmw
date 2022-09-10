@@ -230,6 +230,31 @@ namespace
         MWWorld::LiveCellRefBase* base = &collection.mList.back();
         MWBase::Environment::get().getLuaManager()->registerObject(MWWorld::Ptr(base, cellstore));
     }
+
+    //this function allows us to link a CellRefList<T> to the associated recNameInt, and apply a function
+    template<typename RecordType, typename Callable>
+    static void recNameSwitcher(MWWorld::CellRefList<RecordType>& store, Callable&& f, ESM::RecNameInts recnNameInt)
+    {
+        if (RecordType::sRecordId == recnNameInt)
+        {
+            f(store);
+        }
+    }
+
+    // helper function for forEachInternal
+    template<class Visitor, class List>
+    bool forEachImp (Visitor& visitor, List& list, MWWorld::CellStore* cellStore)
+    {
+        for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
+            ++iter)
+        {
+            if (!MWWorld::CellStore::isAccessible(iter->mData, iter->mRef))
+                continue;
+            if (!visitor (MWWorld::Ptr(&*iter, cellStore)))
+                return false;
+        }
+        return true;
+    }
 }
 
 namespace MWWorld
@@ -250,14 +275,16 @@ namespace MWWorld
             stores.mCellRefLists[storeIndex] = &refList;
         }
 
-        //this function allows us to link a CellRefList<T> to the associated recNameInt, and apply a function
-        template<typename RecordType, typename Callable>
-        static void recNameSwitcher(CellRefList<RecordType>& store, Callable&& f, ESM::RecNameInts recnNameInt)
+
+        // listing only objects owned by this cell. Internal use only, you probably want to use forEach() so that moved objects are accounted for.
+        template<class Visitor>
+        static bool forEachInternal (Visitor& visitor, MWWorld::CellStore& cellStore)
         {
-            if (RecordType::sRecordId == recnNameInt)
-            {
-                f(store);
-            }
+            bool returnValue = true;
+
+            Misc::tupleForEach(cellStore.mCellStoreImp->mRefLists, [&visitor, &returnValue, &cellStore](auto& store) { returnValue = returnValue && forEachImp(visitor, store, &cellStore); });
+
+            return returnValue;
         }
     };
 
@@ -401,7 +428,7 @@ namespace MWWorld
         mMergedRefs.clear();
         mRechargingItemsUpToDate = false;
         MergeVisitor visitor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
-        forEachInternal(visitor);
+        CellStoreImp::forEachInternal(visitor, *this);
         visitor.merge();
     }
 
@@ -742,7 +769,7 @@ namespace MWWorld
             {
                 // refID was modified, make sure we don't end up with duplicated refs
                 ESM::RecNameInts foundType = (ESM::RecNameInts)store.find(it->second);
-                Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, foundType](auto& x) {CellStoreImp::recNameSwitcher(x, [&ref](auto& storeIn)
+                Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, foundType](auto& x) {recNameSwitcher(x, [&ref](auto& storeIn)
                     {
                         storeIn.remove(ref.mRefNum);
                     }, foundType);
@@ -754,7 +781,7 @@ namespace MWWorld
         bool handledType = false;
         if (foundType != 0)
         {
-            Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &deleted, &store, foundType, &handledType](auto& x) {CellStoreImp::recNameSwitcher(x, [&ref, &deleted, &store, &handledType](auto& storeIn)
+            Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &deleted, &store, foundType, &handledType](auto& x) {recNameSwitcher(x, [&ref, &deleted, &store, &handledType](auto& storeIn)
                 {
                     handledType = true;
                     storeIn.load(ref, deleted, store);
@@ -889,7 +916,7 @@ namespace MWWorld
                 case ESM::REC_WEAP:
                 case ESM::REC_BODY:
                     Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&reader, this, &cref, &contentFileMap, type](auto&& x) {
-                        CellStoreImp::recNameSwitcher(
+                        recNameSwitcher(
                             x,
                             [&reader, this, &cref, &contentFileMap](
                                 auto& store) { readReferenceCollection<ESM::ObjectState>(reader, store, cref, contentFileMap, this); },

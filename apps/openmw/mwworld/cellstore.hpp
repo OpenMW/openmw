@@ -161,48 +161,6 @@ namespace MWWorld
             void rechargeItems(float duration);
             void checkItem(const Ptr& ptr);
 
-            // helper function for forEachInternal
-            template<class Visitor, class List>
-            bool forEachImp (Visitor& visitor, List& list)
-            {
-                for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
-                    ++iter)
-                {
-                    if (!isAccessible(iter->mData, iter->mRef))
-                        continue;
-                    if (!visitor (MWWorld::Ptr(&*iter, this)))
-                        return false;
-                }
-                return true;
-            }
-
-            // listing only objects owned by this cell. Internal use only, you probably want to use forEach() so that moved objects are accounted for.
-            template<class Visitor>
-            bool forEachInternal (Visitor& visitor)
-            {
-                return
-                    forEachImp (visitor, get<ESM::Activator>()) &&
-                    forEachImp (visitor, get<ESM::Potion>()) &&
-                    forEachImp (visitor, get<ESM::Apparatus>()) &&
-                    forEachImp (visitor, get<ESM::Armor>()) &&
-                    forEachImp (visitor, get<ESM::Book>()) &&
-                    forEachImp (visitor, get<ESM::Clothing>()) &&
-                    forEachImp (visitor, get<ESM::Container>()) &&
-                    forEachImp (visitor, get<ESM::Door>()) &&
-                    forEachImp (visitor, get<ESM::Ingredient>()) &&
-                    forEachImp (visitor, get<ESM::ItemLevList>()) &&
-                    forEachImp (visitor, get<ESM::Light>()) &&
-                    forEachImp (visitor, get<ESM::Lockpick>()) &&
-                    forEachImp (visitor, get<ESM::Miscellaneous>()) &&
-                    forEachImp (visitor, get<ESM::Probe>()) &&
-                    forEachImp (visitor, get<ESM::Repair>()) &&
-                    forEachImp (visitor, get<ESM::Static>()) &&
-                    forEachImp (visitor, get<ESM::Weapon>()) &&
-                    forEachImp (visitor, get<ESM::BodyPart>()) &&
-                    forEachImp (visitor, get<ESM::Creature>()) &&
-                    forEachImp (visitor, get<ESM::NPC>()) &&
-                    forEachImp (visitor, get<ESM::CreatureLevList>());
-            }
 
         public:
 
