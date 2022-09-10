@@ -20,6 +20,11 @@ if(POLICY CMP0092)
     cmake_policy(SET CMP0092 NEW)
 endif()
 
+#  set the timestamps of extracted contents to the time of extraction
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 project(OpenMW)
 
 set(CMAKE_CXX_STANDARD 20)
