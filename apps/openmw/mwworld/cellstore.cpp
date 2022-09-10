@@ -41,7 +41,6 @@
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadench.hpp>
 
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -152,7 +151,7 @@ namespace
                     // Deleted reference that did not come from a content file -> ignore
                     continue;
                 }
-                using StateType = RecordToState<T>::StateType;
+                using StateType = typename RecordToState<T>::StateType;
                 StateType state;
                 iter->save (state);
 
@@ -209,7 +208,7 @@ namespace
     {
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-        using StateType = RecordToState<T>::StateType;
+        using StateType = typename RecordToState<T>::StateType;
         StateType state;
         state.mRef = cref;
         state.load(reader);
@@ -245,7 +244,7 @@ namespace
         }
         else if(state.mVersion < 20)
         {
-            if constexpr (std::is_same_v<T, ESM::Creature>|| std::is_same_v<T, ESM::NPC>)
+            if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertStats(state.mCreatureStats);
         }
 
