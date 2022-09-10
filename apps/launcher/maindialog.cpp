@@ -159,7 +159,7 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
     // Dialog wizard and setup will fail if the config directory does not already exist
     const auto& userConfigDir = mCfgMgr.getUserConfigPath();
     if ( ! exists(userConfigDir) ) {
-        if ( ! create_directory(userConfigDir) )
+        if ( ! create_directories(userConfigDir) )
         {
             cfgError(tr("Error opening OpenMW configuration file"),
                      tr("<br><b>Could not create directory %0</b><br><br> \
@@ -484,7 +484,7 @@ bool Launcher::MainDialog::writeSettings()
     const auto& userPath = mCfgMgr.getUserConfigPath();
 
     if (!exists(userPath)) {
-        if (!create_directory(userPath)) {
+        if (!create_directories(userPath)) {
             cfgError(tr("Error creating OpenMW configuration directory"),
                      tr("<br><b>Could not create %0</b><br><br> \
                          Please make sure you have the right permissions \
