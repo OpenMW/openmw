@@ -5,6 +5,7 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/misc/tuplehelpers.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
