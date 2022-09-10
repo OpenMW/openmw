@@ -18,7 +18,28 @@
 #include <components/esm3/creaturelevliststate.hpp>
 #include <components/esm3/doorstate.hpp>
 #include <components/esm3/readerscache.hpp>
-#include <components/esm/records.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadlock.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadench.hpp>
+
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -233,7 +254,7 @@ namespace
 
     //this function allows us to link a CellRefList<T> to the associated recNameInt, and apply a function
     template<typename RecordType, typename Callable>
-    static void recNameSwitcher(MWWorld::CellRefList<RecordType>& store, Callable&& f, ESM::RecNameInts recnNameInt)
+    static void recNameSwitcher(MWWorld::CellRefList<RecordType>& store, ESM::RecNameInts recnNameInt, Callable&& f)
     {
         if (RecordType::sRecordId == recnNameInt)
         {
@@ -768,24 +789,24 @@ namespace MWWorld
             if (it->second != ref.mRefID)
             {
                 // refID was modified, make sure we don't end up with duplicated refs
-                ESM::RecNameInts foundType = (ESM::RecNameInts)store.find(it->second);
-                Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, foundType](auto& x) {recNameSwitcher(x, [&ref](auto& storeIn)
-                    {
-                        storeIn.remove(ref.mRefNum);
-                    }, foundType);
-                });
+                ESM::RecNameInts foundType = static_cast<ESM::RecNameInts>(store.find(it->second));
+                if (foundType != 0)
+                {
+                    Misc::tupleForEach(this->mCellStoreImp->mRefLists,
+                        [&ref, foundType](auto& x) { recNameSwitcher(x, foundType, [&ref](auto& storeIn) { storeIn.remove(ref.mRefNum); }); });
+                }
             }
         }
 
-        ESM::RecNameInts foundType = (ESM::RecNameInts)store.find(ref.mRefID);
+        ESM::RecNameInts foundType = static_cast<ESM::RecNameInts>(store.find(ref.mRefID));
         bool handledType = false;
         if (foundType != 0)
         {
-            Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &deleted, &store, foundType, &handledType](auto& x) {recNameSwitcher(x, [&ref, &deleted, &store, &handledType](auto& storeIn)
-                {
+            Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &deleted, &store, foundType, &handledType](auto& x) {
+                recNameSwitcher(x, foundType, [&ref, &deleted, &store, &handledType](auto& storeIn) {
                     handledType = true;
                     storeIn.load(ref, deleted, store);
-                }, foundType);
+                });
             });
         }
         else
@@ -916,11 +937,9 @@ namespace MWWorld
                 case ESM::REC_WEAP:
                 case ESM::REC_BODY:
                     Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&reader, this, &cref, &contentFileMap, type](auto&& x) {
-                        recNameSwitcher(
-                            x,
-                            [&reader, this, &cref, &contentFileMap](
-                                auto& store) { readReferenceCollection<ESM::ObjectState>(reader, store, cref, contentFileMap, this); },
-                            (ESM::RecNameInts)type);
+                        recNameSwitcher(x, static_cast<ESM::RecNameInts>(type), [&reader, this, &cref, &contentFileMap](auto& store) {
+                            readReferenceCollection<ESM::ObjectState>(reader, store, cref, contentFileMap, this);
+                        });
                     });
                     break;
                 case ESM::REC_CONT:
