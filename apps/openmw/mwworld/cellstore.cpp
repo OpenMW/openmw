@@ -59,6 +59,38 @@
 namespace
 {
 
+    template <typename Record>
+    struct RecordToState
+    {
+        using StateType = ESM::ObjectState;
+    };
+
+    template <>
+    struct RecordToState<ESM::NPC>
+    {
+        using StateType = ESM::NpcState;
+    };
+    template <>
+    struct RecordToState<ESM::Creature>
+    {
+        using StateType = ESM::CreatureState;
+    };
+    template <>
+    struct RecordToState<ESM::Door>
+    {
+        using StateType = ESM::DoorState;
+    };
+    template <>
+    struct RecordToState<ESM::Container>
+    {
+        using StateType = ESM::ContainerState;
+    };
+    template <>
+    struct RecordToState<ESM::CreatureLevList>
+    {
+        using StateType = ESM::CreatureLevListState;
+    };
+
     template<typename T>
     MWWorld::Ptr searchInContainerList(MWWorld::CellRefList<T>& containerList, std::string_view id)
     {
@@ -99,7 +131,7 @@ namespace
         return MWWorld::Ptr();
     }
 
-    template<typename RecordType, typename T>
+    template<typename T>
     void writeReferenceCollection (ESM::ESMWriter& writer,
         const MWWorld::CellRefList<T>& collection)
     {
@@ -120,8 +152,8 @@ namespace
                     // Deleted reference that did not come from a content file -> ignore
                     continue;
                 }
-
-                RecordType state;
+                using StateType = RecordToState<T>::StateType;
+                StateType state;
                 iter->save (state);
 
                 // recordId currently unused
@@ -171,13 +203,14 @@ namespace
         fixRestockingImpl(base, state);
     }
 
-    template<typename RecordType, typename T>
+    template<typename T>
     void readReferenceCollection (ESM::ESMReader& reader,
         MWWorld::CellRefList<T>& collection, const ESM::CellRef& cref, const std::map<int, int>& contentFileMap, MWWorld::CellStore* cellstore)
     {
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-        RecordType state;
+        using StateType = RecordToState<T>::StateType;
+        StateType state;
         state.mRef = cref;
         state.load(reader);
 
@@ -205,14 +238,14 @@ namespace
             fixRestocking(record, state);
         if (state.mVersion < 17)
         {
-            if constexpr (std::is_same_v<T, ESM::Creature> && std::is_same_v<RecordType, ESM::CreatureState>)
+            if constexpr (std::is_same_v<T, ESM::Creature>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory);
-            else if constexpr (std::is_same_v<T, ESM::NPC>&& std::is_same_v<RecordType, ESM::NpcState>)
+            else if constexpr (std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory, &state.mNpcStats);
         }
         else if(state.mVersion < 20)
         {
-            if constexpr ((std::is_same_v<T, ESM::Creature> && std::is_same_v<RecordType, ESM::CreatureState> )|| (std::is_same_v<RecordType, ESM::NPC>&& std::is_same_v<T, ESM::NpcState>))
+            if constexpr (std::is_same_v<T, ESM::Creature>|| std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertStats(state.mCreatureStats);
         }
 
@@ -861,27 +894,7 @@ namespace MWWorld
 
     void CellStore::writeReferences (ESM::ESMWriter& writer) const
     {
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Activator>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Potion>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Apparatus>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Armor>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Book>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Clothing>());
-        writeReferenceCollection<ESM::ContainerState> (writer, get<ESM::Container>());
-        writeReferenceCollection<ESM::CreatureState> (writer, get<ESM::Creature>());
-        writeReferenceCollection<ESM::DoorState> (writer, get<ESM::Door>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Ingredient>());
-        writeReferenceCollection<ESM::CreatureLevListState> (writer, get<ESM::CreatureLevList>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::ItemLevList>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Light>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Lockpick>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Miscellaneous>());
-        writeReferenceCollection<ESM::NpcState> (writer, get<ESM::NPC>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Probe>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Repair>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Static>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::Weapon>());
-        writeReferenceCollection<ESM::ObjectState> (writer, get<ESM::BodyPart>());
+        Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&writer](auto& cellRefList) { writeReferenceCollection(writer, cellRefList); });
 
         for (const auto& [base, store] : mMovedToAnotherCell)
         {
@@ -919,48 +932,18 @@ namespace MWWorld
                 continue;
             }
 
-            switch (type)
+            if (type != 0)
             {
-                case ESM::REC_ACTI:
-                case ESM::REC_ALCH:
-                case ESM::REC_APPA:
-                case ESM::REC_ARMO:
-                case ESM::REC_BOOK:
-                case ESM::REC_CLOT:
-                case ESM::REC_INGR:
-                case ESM::REC_LEVI:
-                case ESM::REC_LIGH:
-                case ESM::REC_LOCK:
-                case ESM::REC_MISC:
-                case ESM::REC_PROB:
-                case ESM::REC_REPA:
-                case ESM::REC_STAT:
-                case ESM::REC_WEAP:
-                case ESM::REC_BODY:
-                    Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&reader, this, &cref, &contentFileMap, type](auto&& x) {
-                        recNameSwitcher(x, static_cast<ESM::RecNameInts>(type), [&reader, this, &cref, &contentFileMap](auto& store) {
-                            readReferenceCollection<ESM::ObjectState>(reader, store, cref, contentFileMap, this);
+                bool foundCorrespondingStore = false;
+                Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&reader, this, &cref, &contentFileMap, &foundCorrespondingStore, type](auto&& x) {
+                    recNameSwitcher(x, static_cast<ESM::RecNameInts>(type), [&reader, this, &cref, &contentFileMap, &foundCorrespondingStore](auto& store) {
+                        foundCorrespondingStore = true;
+                        readReferenceCollection(reader, store, cref, contentFileMap, this);
                         });
                     });
-                    break;
-                case ESM::REC_CONT:
-                    readReferenceCollection<ESM::ContainerState> (reader, get<ESM::Container>(), cref, contentFileMap, this);
-                    break;
-                case ESM::REC_CREA:
-                    readReferenceCollection<ESM::CreatureState> (reader, get<ESM::Creature>(), cref, contentFileMap, this);
-                    break;
-                case ESM::REC_DOOR:
-                    readReferenceCollection<ESM::DoorState> (reader, get<ESM::Door>(), cref, contentFileMap, this);
-                    break;
-                case ESM::REC_LEVC:
-                    readReferenceCollection<ESM::CreatureLevListState> (reader, get<ESM::CreatureLevList>(), cref, contentFileMap, this);
-                    break;
-                case ESM::REC_NPC_:
-                    readReferenceCollection<ESM::NpcState> (reader, get<ESM::NPC>(), cref, contentFileMap, this);
-                    break;
-                default:
 
-                    throw std::runtime_error ("unknown type in cell reference section");
+                if (!foundCorrespondingStore)
+                    throw std::runtime_error("unknown type in cell reference section");
             }
         }
 
