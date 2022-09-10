@@ -300,6 +300,13 @@ void CompressedBSAFile::readHeader()
 
 CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string& str) const
 {
+    for (const auto c : str)
+    {
+        if (((static_cast<unsigned>(c) >> 7U) & 1U) != 0U) {
+            fail("File record " + str + " contains unicode characters, refusing to load.");
+        }
+    }
+
 #ifdef _WIN32
     const auto& path = str;
 #else
@@ -310,9 +317,9 @@ CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string
     std::replace(path.begin(), path.end(), '\\', '/');
 #endif
 
-    auto p = Files::pathFromUnicodeString(path);
+    const auto p = std::filesystem::path{ path }; // Purposefully damage Unicode strings.
     const auto stem = p.stem();
-    const auto ext = p.extension().u8string();
+    const auto ext = p.extension().string();  // Purposefully damage Unicode strings.
 
     std::uint64_t folderHash = generateHash(p.parent_path(), {});
 
@@ -471,13 +478,13 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
     }
 }
 
-std::uint64_t CompressedBSAFile::generateHash(const std::filesystem::path& stem, std::u8string extension)
+std::uint64_t CompressedBSAFile::generateHash(const std::filesystem::path& stem, std::string extension)
 {
     auto str = stem.u8string();
     size_t len = str.length();
     if (len == 0)
         return 0;
-    std::replace(str.begin(), str.end(), u8'/', u8'\\');
+    std::replace(str.begin(), str.end(), '/', '\\');
     Misc::StringUtils::lowerCaseInPlace(str);
     uint64_t result = str[len-1] | (len >= 3 ? (str[len-2] << 8) : 0) | (len << 16) | (str[0] << 24);
     if (len >= 4)
@@ -490,10 +497,10 @@ std::uint64_t CompressedBSAFile::generateHash(const std::filesystem::path& stem,
     if (extension.empty())
         return result;
     Misc::StringUtils::lowerCaseInPlace(extension);
-    if (extension == u8".kf")       result |= 0x80;
-    else if (extension == u8".nif") result |= 0x8000;
-    else if (extension == u8".dds") result |= 0x8080;
-    else if (extension == u8".wav") result |= 0x80000000;
+    if (extension == ".kf")       result |= 0x80;
+    else if (extension == ".nif") result |= 0x8000;
+    else if (extension == ".dds") result |= 0x8080;
+    else if (extension == ".wav") result |= 0x80000000;
     uint32_t hash = 0;
     for (const auto &c : extension)
         hash = hash * 0x1003f + c;

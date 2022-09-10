@@ -35,7 +35,7 @@ using namespace Bsa;
 
 
 /// Error handling
-[[noreturn]] void BSAFile::fail(const std::string &msg)
+[[noreturn]] void BSAFile::fail(const std::string &msg) const
 {
     throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + Files::pathToUnicodeString(mFilepath));
 }

@@ -90,7 +90,7 @@ protected:
     std::filesystem::path mFilepath;
 
     /// Error handling
-    [[noreturn]] void fail(const std::string &msg);
+    [[noreturn]] void fail(const std::string &msg) const;
 
     /// Read header information from the input source
     virtual void readHeader();
