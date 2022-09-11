@@ -10,7 +10,10 @@
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/settings/settings.hpp>
 
@@ -63,7 +66,7 @@ CS::Editor::Editor (int argc, char **argv)
     connect (&mStartup, &CSVDoc::StartupDialogue::editConfig, this, &Editor::showSettings);
 
     connect (&mFileDialog, &CSVDoc::FileDialog::signalOpenFiles,
-        this, [this](const boost::filesystem::path &savePath){ this->openFiles(savePath); });
+        this, [this](const std::filesystem::path &savePath){ this->openFiles(savePath); });
     connect (&mFileDialog, &CSVDoc::FileDialog::signalCreateNewFile, this, &Editor::createNewFile);
     connect (&mFileDialog, &CSVDoc::FileDialog::rejected, this, &Editor::cancelFileDialog);
 
@@ -77,9 +80,8 @@ CS::Editor::~Editor ()
 
     mPidFile.close();
 
-    if(mServer && boost::filesystem::exists(mPid))
-        static_cast<void> ( // silence coverity warning
-        remove(mPid.string().c_str())); // ignore any error
+    if(mServer && std::filesystem::exists(mPid))
+        std::filesystem::remove(mPid);
 }
 
 boost::program_options::variables_map CS::Editor::readConfiguration()
@@ -107,7 +109,7 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
 
     mCfgMgr.readConfiguration(variables, desc, false);
     Settings::Manager::load(mCfgMgr, true);
-    setupLogging(mCfgMgr.getLogPath().string(), "OpenMW-CS");
+    setupLogging(mCfgMgr.getLogPath(), "OpenMW-CS");
 
     return variables;
 }
@@ -122,7 +124,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     mDocumentManager.setEncoding(ToUTF8::calculateEncoding(mEncodingName));
     mFileDialog.setEncoding (QString::fromUtf8(mEncodingName.c_str()));
 
-    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::MaybeQuotedPath>());
+    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
@@ -135,10 +137,10 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         dataDirs = asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>());
     }
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     if (!local.empty())
     {
-        boost::filesystem::create_directories(local);
+        std::filesystem::create_directories(local);
         dataLocal.push_back(local);
     }
     mCfgMgr.filterOutNonExistingPaths(dataDirs);
@@ -225,14 +227,15 @@ void CS::Editor::loadDocument()
     mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
 
-void CS::Editor::openFiles (const boost::filesystem::path &savePath, const std::vector<boost::filesystem::path> &discoveredFiles)
+void CS::Editor::openFiles (const std::filesystem::path &savePath, const std::vector<std::filesystem::path> &discoveredFiles)
 {
-    std::vector<boost::filesystem::path> files;
+    std::vector<std::filesystem::path> files;
 
     if(discoveredFiles.empty())
     {
-        for (const QString &path : mFileDialog.selectedFilePaths())
-            files.emplace_back(path.toUtf8().constData());
+        for (const QString &path : mFileDialog.selectedFilePaths()) {
+            files.emplace_back(Files::pathFromQString(path));
+        }
     }
     else
     {
@@ -244,12 +247,12 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath, const std::
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
+void CS::Editor::createNewFile (const std::filesystem::path &savePath)
 {
-    std::vector<boost::filesystem::path> files;
+    std::vector<std::filesystem::path> files;
 
     for (const QString &path : mFileDialog.selectedFilePaths()) {
-        files.emplace_back(path.toUtf8().constData());
+        files.emplace_back(Files::pathFromQString(path));
     }
 
     files.push_back (savePath);
@@ -259,9 +262,9 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewGame (const boost::filesystem::path& file)
+void CS::Editor::createNewGame (const std::filesystem::path& file)
 {
-    std::vector<boost::filesystem::path> files;
+    std::vector<std::filesystem::path> files;
 
     files.push_back (file);
 
@@ -292,13 +295,13 @@ bool CS::Editor::makeIPCServer()
 {
     try
     {
-        mPid = boost::filesystem::temp_directory_path();
+        mPid = std::filesystem::temp_directory_path();
         mPid /= "openmw-cs.pid";
-        bool pidExists = boost::filesystem::exists(mPid);
+        bool pidExists = std::filesystem::exists(mPid);
 
         mPidFile.open(mPid);
 
-        mLock = boost::interprocess::file_lock(mPid.string().c_str());
+        mLock = boost::interprocess::file_lock(mPid.c_str());
         if(!mLock.try_lock())
         {
             Log(Debug::Error) << "Error: OpenMW-CS is already running.";
@@ -321,12 +324,13 @@ bool CS::Editor::makeIPCServer()
             mServer->close();
             fullPath.remove(QRegExp("dummy$"));
             fullPath += mIpcServerName;
-            if(boost::filesystem::exists(fullPath.toUtf8().constData()))
+            const auto path = Files::pathFromQString(fullPath);
+            if(exists(path))
             {
                 // TODO: compare pid of the current process with that in the file
                 Log(Debug::Info) << "Detected unclean shutdown.";
                 // delete the stale file
-                if(remove(fullPath.toUtf8().constData()))
+                if(remove(path))
                     Log(Debug::Error) << "Error: can not remove stale connection file.";
             }
         }
@@ -374,27 +378,24 @@ int CS::Editor::run()
         ESM::ESMReader fileReader;
         ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncodingName));
         fileReader.setEncoder(&encoder);
-        fileReader.open(mFileToLoad.string());
+        fileReader.open(mFileToLoad);
 
-        std::vector<boost::filesystem::path> discoveredFiles;
+        std::vector<std::filesystem::path> discoveredFiles;
 
-        for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
-            itemIter != fileReader.getGameFiles().end(); ++itemIter)
+        for (const auto& item : fileReader.getGameFiles())
         {
-            for (Files::PathContainer::const_iterator pathIter = mDataDirs.begin();
-                pathIter != mDataDirs.end(); ++pathIter)
+            for (const auto& path : mDataDirs)
             {
-                const boost::filesystem::path masterPath = *pathIter / itemIter->name;
-                if (boost::filesystem::exists(masterPath))
+                if (auto masterPath = path / item.name; std::filesystem::exists(masterPath))
                 {
-                    discoveredFiles.push_back(masterPath);
+                    discoveredFiles.emplace_back(std::move(masterPath));
                     break;
                 }
             }
         }
         discoveredFiles.push_back(mFileToLoad);
 
-        QString extension = QString::fromStdString(mFileToLoad.extension().string()).toLower();
+        const auto extension = Files::pathToQString(mFileToLoad.extension()).toLower();
         if (extension == ".esm")
         {
             mFileToLoad.replace_extension(".omwgame");

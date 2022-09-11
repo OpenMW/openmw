@@ -214,7 +214,7 @@ IF(NOT WIN32 AND NOT APPLE)
 ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
-    constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf
+    constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf conversion
     )
 
 add_component_dir (compiler
@@ -379,6 +379,10 @@ if (USE_QT)
         helpviewer
         )
 
+    add_component_qt_dir (files
+        qtconversion
+        )
+
     QT5_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
@@ -411,7 +415,6 @@ target_link_libraries(components
     ${OPENTHREADS_LIBRARIES}
 
     ${Boost_SYSTEM_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
 

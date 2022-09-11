@@ -37,6 +37,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_KeyCode.h>
 #include <MyGUI_Types.h>
+#include <filesystem>
 
 namespace MyGUI
 {
@@ -124,7 +125,7 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
 
     WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                  const std::string& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
+                  const std::filesystem::path& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
                   ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders);
     virtual ~WindowManager();
 

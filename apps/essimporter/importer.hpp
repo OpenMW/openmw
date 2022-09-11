@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESSIMPORTER_IMPORTER_H
 #define OPENMW_ESSIMPORTER_IMPORTER_H
 
-#include <string>
+#include <filesystem>
 
 namespace ESSImport
 {
@@ -9,15 +9,15 @@ namespace ESSImport
     class Importer
     {
     public:
-        Importer(const std::string& essfile, const std::string& outfile, const std::string& encoding);
+        Importer(const std::filesystem::path &essfile, const std::filesystem::path &outfile, const std::string& encoding);
 
         void run();
 
         void compare();
 
     private:
-        std::string mEssFile;
-        std::string mOutFile;
+        std::filesystem::path mEssFile;
+        std::filesystem::path mOutFile;
         std::string mEncoding;
     };
 

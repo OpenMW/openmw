@@ -238,7 +238,7 @@ private:
     float mRainIntensity;
 };
 
-osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
+osg::ref_ptr<osg::Image> readPngImage (const std::filesystem::path& file)
 {
     std::ifstream inStream;
     inStream.open(file, std::ios_base::in | std::ios_base::binary);
@@ -444,7 +444,7 @@ public:
 };
 
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem,
-             osgUtil::IncrementalCompileOperation *ico, const std::string& resourcePath)
+             osgUtil::IncrementalCompileOperation *ico, const std::filesystem::path& resourcePath)
     : mRainIntensityUpdater(nullptr)
     , mParent(parent)
     , mSceneRoot(sceneRoot)
@@ -695,7 +695,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Shader> fragmentShader(shaderMgr.getShader("water_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
     osg::ref_ptr<osg::Program> program = shaderMgr.getProgram(vertexShader, fragmentShader);
 
-    osg::ref_ptr<osg::Texture2D> normalMap(new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
+    osg::ref_ptr<osg::Texture2D> normalMap(new osg::Texture2D(readPngImage(mResourcePath / "shaders" / "water_nm.png")));
 
     if (normalMap->getImage())
         normalMap->getImage()->flipVertical();

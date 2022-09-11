@@ -3,7 +3,7 @@
 
 #if defined(_WIN32) || defined(__WINDOWS__)
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 /**
  * \namespace Files
@@ -27,47 +27,47 @@ struct WindowsPath
      * \brief Returns user path i.e.:
      * "X:\Documents And Settings\<User name>\My Documents\My Games\"
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getUserConfigPath() const;
+    std::filesystem::path getUserConfigPath() const;
 
-    boost::filesystem::path getUserDataPath() const;
+    std::filesystem::path getUserDataPath() const;
 
     /**
      * \brief Returns "X:\Program Files\"
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getGlobalConfigPath() const;
+    std::filesystem::path getGlobalConfigPath() const;
 
     /**
      * \brief Return local path which is a location where
      * an application was started
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getLocalPath() const;
+    std::filesystem::path getLocalPath() const;
 
     /**
      * \brief
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getCachePath() const;
+    std::filesystem::path getCachePath() const;
 
     /**
      * \brief Return same path like getGlobalPath
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getGlobalDataPath() const;
+    std::filesystem::path getGlobalDataPath() const;
 
     /**
      * \brief Gets the path of the installed Morrowind version if there is one.
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getInstallPath() const;
+    std::filesystem::path getInstallPath() const;
 
     std::string mName;
 };

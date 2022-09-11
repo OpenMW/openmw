@@ -30,6 +30,7 @@
 
 #include <components/misc/helpviewer.hpp>
 #include <components/version/version.hpp>
+#include <components/files/conversion.hpp>
 
 #include "viewmanager.hpp"
 #include "operations.hpp"
@@ -387,7 +388,7 @@ void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
 
-    stream << mDocument->getSavePath().filename().string();
+    stream << Files::pathToUnicodeString(mDocument->getSavePath().filename());
 
     if (mDocument->getState() & CSMDoc::State_Modified)
             stream << " *";
@@ -747,7 +748,7 @@ void CSVDoc::View::tutorial()
 void CSVDoc::View::infoAbout()
 {
     // Get current OpenMW version
-    QString versionInfo = (Version::getOpenmwVersionDescription(mDocument->getResourceDir().string())+
+    QString versionInfo = (Version::getOpenmwVersionDescription(mDocument->getResourceDir())+
 #if defined(__x86_64__) || defined(_M_X64)
     " (64-bit)").c_str();
 #else

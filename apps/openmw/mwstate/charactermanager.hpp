@@ -1,7 +1,8 @@
 #ifndef GAME_STATE_CHARACTERMANAGER_H
 #define GAME_STATE_CHARACTERMANAGER_H
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
+#include <list>
 
 #include "character.hpp"
 
@@ -9,7 +10,7 @@ namespace MWState
 {
     class CharacterManager
     {
-            boost::filesystem::path mPath;
+            std::filesystem::path mPath;
 
             // Uses std::list, so that mCurrent stays valid when characters are deleted
             std::list<Character> mCharacters;
@@ -29,7 +30,7 @@ namespace MWState
 
         public:
 
-            CharacterManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles);
+            CharacterManager (std::filesystem::path  saves, const std::vector<std::string>& contentFiles);
 
             Character *getCurrentCharacter ();
             ///< @note May return null

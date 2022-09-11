@@ -7,8 +7,10 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-#include "../../model/doc/documentmanager.hpp"
+#include <components/files/qtconversion.hpp>
+
 #include "../../model/doc/document.hpp"
+#include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/state.hpp"
 
 #include "../../model/world/columns.hpp"
@@ -261,7 +263,7 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (CSVDoc::View *view)
     QMessageBox messageBox(view);
     CSMDoc::Document *document = view->getDocument();
 
-    messageBox.setWindowTitle (QString::fromUtf8(document->getSavePath().filename().string().c_str()));
+    messageBox.setWindowTitle (Files::pathToQString(document->getSavePath().filename()));
     messageBox.setText ("The document has been modified.");
     messageBox.setInformativeText ("Do you want to save your changes?");
     messageBox.setStandardButtons (QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);

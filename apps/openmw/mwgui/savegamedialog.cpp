@@ -20,6 +20,8 @@
 #include <components/settings/settings.hpp>
 
 #include <components/files/memorystream.hpp>
+#include <components/misc/timeconvert.hpp>
+#include <components/files/conversion.hpp>
 
 #include <components/esm3/loadclas.hpp>
 
@@ -199,7 +201,7 @@ namespace MWGui
 
                 if (mCurrentCharacter == &*it ||
                     (!mCurrentCharacter && !mSaving && directory==Misc::StringUtils::lowerCase (
-                    it->begin()->mPath.parent_path().filename().string())))
+                    Files::pathToUnicodeString(it->begin()->mPath.parent_path().filename()))))
                 {
                     mCurrentCharacter = &*it;
                     selectedIndex = mCharacterSelection->getItemCount()-1;
@@ -302,7 +304,7 @@ namespace MWGui
         else
         {
             assert (mCurrentCharacter && mCurrentSlot);
-            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath.string());
+            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath);
         }
     }
 
@@ -403,7 +405,7 @@ namespace MWGui
             throw std::runtime_error("Can't find selected slot");
 
         std::stringstream text;
-        time_t time = mCurrentSlot->mTimeStamp;
+        time_t time = Misc::to_time_t(mCurrentSlot->mTimeStamp);
         struct tm* timeinfo;
         timeinfo = localtime(&time);
 
@@ -438,7 +440,7 @@ namespace MWGui
         const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
         if (!data.size())
         {
-            Log(Debug::Warning) << "Selected save file '" << mCurrentSlot->mPath.filename().string() << "' has no savegame screenshot";
+            Log(Debug::Warning) << "Selected save file '" << Files::pathToUnicodeString(mCurrentSlot->mPath.filename()) << "' has no savegame screenshot";
             return;
         }
 

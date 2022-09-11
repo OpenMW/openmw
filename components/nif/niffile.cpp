@@ -2,6 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/hash.hpp>
+#include <components/files/conversion.hpp>
 
 #include <algorithm>
 #include <array>
@@ -22,7 +23,7 @@ namespace Nif
 {
 
 /// Open a NIF stream. The name is used for error messages.
-NIFFile::NIFFile(Files::IStreamPtr&& stream, const std::string &name)
+NIFFile::NIFFile(Files::IStreamPtr&& stream, const std::filesystem::path &name)
     : filename(name)
 {
     parse(std::move(stream));
@@ -373,7 +374,7 @@ void NIFFile::warn(const std::string &msg) const
 
 [[noreturn]] void NIFFile::fail(const std::string &msg) const
 {
-    throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + filename);
+    throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + Files::pathToUnicodeString(filename));
 }
 
 std::string NIFFile::getString(uint32_t index) const

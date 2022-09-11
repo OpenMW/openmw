@@ -4,10 +4,11 @@
 #include "recastglobalallocator.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
 
 namespace DetourNavigator
 {
-    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::string& userDataPath)
+    std::unique_ptr<Navigator> makeNavigator(const Settings& settings, const std::filesystem::path& userDataPath)
     {
         DetourNavigator::RecastGlobalAllocator::init();
 
@@ -16,7 +17,7 @@ namespace DetourNavigator
         {
             try
             {
-                db = std::make_unique<NavMeshDb>(userDataPath + "/navmesh.db", settings.mMaxDbFileSize);
+                db = std::make_unique<NavMeshDb>(Files::pathToUnicodeString(userDataPath / "navmesh.db"), settings.mMaxDbFileSize);
             }
             catch (const std::exception& e)
             {

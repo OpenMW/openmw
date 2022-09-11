@@ -2,27 +2,27 @@
 
 #include <cctype>
 #include <sstream>
-
-#include <boost/filesystem.hpp>
+#include <filesystem>
+#include <utility>
 
 #include <components/misc/utf8stream.hpp>
 
-MWState::CharacterManager::CharacterManager (const boost::filesystem::path& saves,
+MWState::CharacterManager::CharacterManager (std::filesystem::path  saves,
     const std::vector<std::string>& contentFiles)
-: mPath (saves), mCurrent (nullptr), mGame (getFirstGameFile(contentFiles))
+: mPath (std::move(saves)), mCurrent (nullptr), mGame (getFirstGameFile(contentFiles))
 {
-    if (!boost::filesystem::is_directory (mPath))
+    if (!std::filesystem::is_directory (mPath))
     {
-        boost::filesystem::create_directories (mPath);
+        std::filesystem::create_directories (mPath);
     }
     else
     {
-        for (boost::filesystem::directory_iterator iter (mPath);
-            iter!=boost::filesystem::directory_iterator(); ++iter)
+        for (std::filesystem::directory_iterator iter (mPath);
+            iter!=std::filesystem::directory_iterator(); ++iter)
         {
-            boost::filesystem::path characterDir = *iter;
+            std::filesystem::path characterDir = *iter;
 
-            if (boost::filesystem::is_directory (characterDir))
+            if (std::filesystem::is_directory (characterDir))
             {
                 Character character (characterDir, mGame);
 
@@ -69,11 +69,11 @@ MWState::Character* MWState::CharacterManager::createCharacter(const std::string
             stream << '_';
     }
 
-    boost::filesystem::path path = mPath / stream.str();
+    std::filesystem::path path = mPath / stream.str();
 
     // Append an index if necessary to ensure a unique directory
     int i=0;
-    while (boost::filesystem::exists(path))
+    while (std::filesystem::exists(path))
     {
            std::ostringstream test;
            test << stream.str();

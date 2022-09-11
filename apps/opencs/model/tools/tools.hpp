@@ -8,8 +8,6 @@
 
 #include <QObject>
 
-#include <boost/filesystem/path.hpp>
-
 #include "../doc/operationholder.hpp"
 
 namespace CSMWorld

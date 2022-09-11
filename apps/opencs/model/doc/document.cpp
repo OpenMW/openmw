@@ -4,9 +4,8 @@
 
 #include <cassert>
 #include <memory>
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <utility>
 
 #include "../world/defaultgmsts.hpp"
 
@@ -15,6 +14,7 @@
 #endif
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
 
 void CSMDoc::Document::addGmsts()
 {
@@ -277,14 +277,14 @@ void CSMDoc::Document::createBase()
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
-    const std::vector< boost::filesystem::path >& files,bool new_,
-    const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+    std::vector< std::filesystem::path >  files,bool new_,
+    const std::filesystem::path& savePath, const std::filesystem::path& resDir,
     ToUTF8::FromType encoding, const std::vector<std::string>& blacklistedScripts,
     bool fsStrict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives)
-: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, fsStrict, dataPaths, archives, resDir),
+: mSavePath (savePath), mContentFiles (std::move(files)), mNew (new_), mData (encoding, fsStrict, dataPaths, archives, resDir),
   mTools (*this, encoding),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
-  (savePath.filename().string() + ".project")),
+  (savePath.filename().u8string() + u8".project")),
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir), mRunner (mProjectPath),
@@ -293,21 +293,21 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
 
-    if (mNew || !boost::filesystem::exists (mProjectPath))
+    if (mNew || !std::filesystem::exists (mProjectPath))
     {
-        boost::filesystem::path filtersPath (configuration.getUserDataPath() / "defaultfilters");
+        auto filtersPath = configuration.getUserDataPath() / "defaultfilters";
 
-        boost::filesystem::ofstream destination(mProjectPath, std::ios::out | std::ios::binary);
+        std::ofstream destination(mProjectPath, std::ios::out | std::ios::binary);
         if (!destination.is_open())
-            throw std::runtime_error("Can not create project file: " + mProjectPath.string());
+            throw std::runtime_error("Can not create project file: " + Files::pathToUnicodeString(mProjectPath));
         destination.exceptions(std::ios::failbit | std::ios::badbit);
 
-        if (!boost::filesystem::exists (filtersPath))
+        if (!std::filesystem::exists (filtersPath))
             filtersPath = mResDir / "defaultfilters";
 
-        boost::filesystem::ifstream source(filtersPath, std::ios::in | std::ios::binary);
+        std::ifstream source(filtersPath, std::ios::in | std::ios::binary);
         if (!source.is_open())
-            throw std::runtime_error("Can not read filters file: " + filtersPath.string());
+            throw std::runtime_error("Can not read filters file: " + Files::pathToUnicodeString(filtersPath));
         source.exceptions(std::ios::failbit | std::ios::badbit);
 
         destination << source.rdbuf();
@@ -369,22 +369,22 @@ int CSMDoc::Document::getState() const
     return state;
 }
 
-const boost::filesystem::path& CSMDoc::Document::getResourceDir() const
+const std::filesystem::path& CSMDoc::Document::getResourceDir() const
 {
     return mResDir;
 }
 
-const boost::filesystem::path& CSMDoc::Document::getSavePath() const
+const std::filesystem::path& CSMDoc::Document::getSavePath() const
 {
     return mSavePath;
 }
 
-const boost::filesystem::path& CSMDoc::Document::getProjectPath() const
+const std::filesystem::path& CSMDoc::Document::getProjectPath() const
 {
     return mProjectPath;
 }
 
-const std::vector<boost::filesystem::path>& CSMDoc::Document::getContentFiles() const
+const std::vector<std::filesystem::path>& CSMDoc::Document::getContentFiles() const
 {
     return mContentFiles;
 }
@@ -481,11 +481,11 @@ bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
 void CSMDoc::Document::startRunning (const std::string& profile,
     const std::string& startupInstruction)
 {
-    std::vector<std::string> contentFiles;
+    std::vector<std::filesystem::path> contentFiles;
 
-    for (std::vector<boost::filesystem::path>::const_iterator iter (mContentFiles.begin());
-        iter!=mContentFiles.end(); ++iter)
-        contentFiles.push_back (iter->filename().string());
+    for (const auto & mContentFile : mContentFiles) {
+        contentFiles.emplace_back(mContentFile.filename());
+    }
 
     mRunner.configure (getData().getDebugProfiles().getRecord (profile).get(), contentFiles,
         startupInstruction);

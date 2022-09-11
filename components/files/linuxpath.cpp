@@ -4,14 +4,15 @@
 
 #include <pwd.h>
 #include <unistd.h>
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
+#include <cstring>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace
 {
-    boost::filesystem::path getUserHome()
+    std::filesystem::path getUserHome()
     {
         const char* dir = getenv("HOME");
         if (dir == nullptr)
@@ -23,17 +24,17 @@ namespace
             }
         }
         if (dir == nullptr)
-            return boost::filesystem::path();
+            return {};
         else
-            return boost::filesystem::path(dir);
+            return dir;
     }
 
-    boost::filesystem::path getEnv(const std::string& envVariable, const boost::filesystem::path& fallback)
+    std::filesystem::path getEnv(const std::string& envVariable, const std::filesystem::path& fallback)
     {
         const char* result = getenv(envVariable.c_str());
         if (!result)
             return fallback;
-        boost::filesystem::path dir(result);
+        std::filesystem::path dir(result);
         if (dir.empty())
             return fallback;
         else
@@ -50,46 +51,47 @@ namespace Files
 LinuxPath::LinuxPath(const std::string& application_name)
     : mName(application_name)
 {
-    boost::filesystem::path localPath = getLocalPath();
-    if (chdir(localPath.string().c_str()) != 0)
-        Log(Debug::Warning) << "Error " << errno << " when changing current directory";
+    std::error_code ec;
+    current_path(getLocalPath(), ec);
+    const auto err = ec.value();
+    if (err != 0) {
+        Log(Debug::Warning) << "Error " << err << " " << std::strerror(err) << " when changing current directory";
+    }
 }
 
-boost::filesystem::path LinuxPath::getUserConfigPath() const
+std::filesystem::path LinuxPath::getUserConfigPath() const
 {
     return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
 }
 
-boost::filesystem::path LinuxPath::getUserDataPath() const
+std::filesystem::path LinuxPath::getUserDataPath() const
 {
     return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
 }
 
-boost::filesystem::path LinuxPath::getCachePath() const
+std::filesystem::path LinuxPath::getCachePath() const
 {
     return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
 }
 
-boost::filesystem::path LinuxPath::getGlobalConfigPath() const
+std::filesystem::path LinuxPath::getGlobalConfigPath() const
 {
-    boost::filesystem::path globalPath(GLOBAL_CONFIG_PATH);
+    std::filesystem::path globalPath(GLOBAL_CONFIG_PATH);
     return globalPath / mName;
 }
 
-boost::filesystem::path LinuxPath::getLocalPath() const
+std::filesystem::path LinuxPath::getLocalPath() const
 {
-    boost::filesystem::path localPath("./");
-    const char *statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
+    auto localPath = std::filesystem::current_path();
+    static const std::filesystem::path statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
 
-    for(const char *path : statusPaths)
+    for(const auto& path : statusPaths)
     {
-        boost::filesystem::path statusPath(path);
-        if (!boost::filesystem::exists(statusPath)) continue;
-
-        statusPath = boost::filesystem::read_symlink(statusPath);
-        if (!boost::filesystem::is_empty(statusPath))
+        std::error_code ec;
+        const auto binPath = read_symlink(path, ec);
+        if (ec.value() != -1)
         {
-            localPath = statusPath.parent_path() / "/";
+            localPath = binPath.parent_path();
             break;
         }
     }
@@ -97,26 +99,26 @@ boost::filesystem::path LinuxPath::getLocalPath() const
     return localPath;
 }
 
-boost::filesystem::path LinuxPath::getGlobalDataPath() const
+std::filesystem::path LinuxPath::getGlobalDataPath() const
 {
-    boost::filesystem::path globalDataPath(GLOBAL_DATA_PATH);
+    std::filesystem::path globalDataPath(GLOBAL_DATA_PATH);
     return globalDataPath / mName;
 }
 
-boost::filesystem::path LinuxPath::getInstallPath() const
+std::filesystem::path LinuxPath::getInstallPath() const
 {
-    boost::filesystem::path installPath;
+    std::filesystem::path installPath;
 
-    boost::filesystem::path homePath = getUserHome();
+    std::filesystem::path homePath = getUserHome();
 
     if (!homePath.empty())
     {
-        boost::filesystem::path wineDefaultRegistry(homePath);
+        std::filesystem::path wineDefaultRegistry(homePath);
         wineDefaultRegistry /= ".wine/system.reg";
 
-        if (boost::filesystem::is_regular_file(wineDefaultRegistry))
+        if (std::filesystem::is_regular_file(wineDefaultRegistry))
         {
-            boost::filesystem::ifstream file(wineDefaultRegistry);
+            std::ifstream file(wineDefaultRegistry);
             bool isRegEntry = false;
             std::string line;
             std::string mwpath;
@@ -163,7 +165,7 @@ boost::filesystem::path LinuxPath::getInstallPath() const
                 installPath /= ".wine/dosdevices/";
                 installPath /= mwpath;
 
-                if (!boost::filesystem::is_directory(installPath))
+                if (!std::filesystem::is_directory(installPath))
                 {
                     installPath.clear();
                 }

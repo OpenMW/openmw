@@ -1,5 +1,7 @@
 #include "loader.hpp"
 
+#include <components/files/conversion.hpp>
+
 #include <iostream>
 
 #include "../tools/reportmodel.hpp"
@@ -87,13 +89,13 @@ void CSMDoc::Loader::load()
 
         if (iter->second.mFile<size) // start loading the files
         {
-            boost::filesystem::path path = document->getContentFiles()[iter->second.mFile];
+            std::filesystem::path path = document->getContentFiles()[iter->second.mFile];
 
             int steps = document->getData().startLoading (path, iter->second.mFile!=editedIndex, /*project*/false);
             iter->second.mRecordsLeft = true;
             iter->second.mRecordsLoaded = 0;
 
-            emit nextStage (document, path.filename().string(), steps);
+            emit nextStage (document, Files::pathToUnicodeString(path.filename()), steps);
         }
         else if (iter->second.mFile==size) // start loading the last (project) file
         {

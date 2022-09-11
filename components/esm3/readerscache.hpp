@@ -25,7 +25,7 @@ namespace ESM
             {
                 State mState = State::Busy;
                 ESMReader mReader;
-                std::optional<std::string> mName;
+                std::optional<std::filesystem::path> mName;
 
                 Item() = default;
             };

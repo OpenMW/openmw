@@ -24,6 +24,7 @@
 #include <components/esm3/loadcrea.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1527,8 +1528,8 @@ namespace MWScript
                     runtime.getContext().report("Exporting the entire scene graph will result in a large file. Confirm this action using 'showscenegraph 1' or select an object instead.");
                 else
                 {
-                    const std::string& filename = MWBase::Environment::get().getWorld()->exportSceneGraph(ptr);
-                    runtime.getContext().report("Wrote '" + filename + "'");
+                    const auto filename = MWBase::Environment::get().getWorld()->exportSceneGraph(ptr);
+                    runtime.getContext().report("Wrote '" + Files::pathToUnicodeString(filename) + "'");
                 }
             }
         };

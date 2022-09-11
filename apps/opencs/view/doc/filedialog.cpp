@@ -20,7 +20,7 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     mAdjusterWidget = new AdjusterWidget (this);
 }
 
-void CSVDoc::FileDialog::addFiles(const std::vector<boost::filesystem::path>& dataDirs)
+void CSVDoc::FileDialog::addFiles(const std::vector<std::filesystem::path>& dataDirs)
 {
     for (auto iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
     {
@@ -50,7 +50,7 @@ QStringList CSVDoc::FileDialog::selectedFilePaths()
     return filePaths;
 }
 
-void CSVDoc::FileDialog::setLocalData (const boost::filesystem::path& localData)
+void CSVDoc::FileDialog::setLocalData (const std::filesystem::path& localData)
 {
     mAdjusterWidget->setLocalData (localData);
 }

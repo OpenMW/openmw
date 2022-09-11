@@ -12,12 +12,14 @@
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 
-#include "playpage.hpp"
-#include "graphicspage.hpp"
-#include "datafilespage.hpp"
-#include "settingspage.hpp"
 #include "advancedpage.hpp"
+#include "datafilespage.hpp"
+#include "graphicspage.hpp"
+#include "playpage.hpp"
+#include "settingspage.hpp"
 
 using namespace Process;
 
@@ -155,14 +157,14 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         return FirstRunDialogResultFailure;
 
     // Dialog wizard and setup will fail if the config directory does not already exist
-    QDir userConfigDir = QDir(QString::fromStdString(mCfgMgr.getUserConfigPath().string()));
-    if ( ! userConfigDir.exists() ) {
-        if ( ! userConfigDir.mkpath(".") )
+    const auto& userConfigDir = mCfgMgr.getUserConfigPath();
+    if ( ! exists(userConfigDir) ) {
+        if ( ! create_directories(userConfigDir) )
         {
             cfgError(tr("Error opening OpenMW configuration file"),
                      tr("<br><b>Could not create directory %0</b><br><br> \
                         Please make sure you have the right permissions \
-                        and try again.<br>").arg(userConfigDir.canonicalPath())
+                        and try again.<br>").arg(Files::pathToQString(canonical(userConfigDir)))
             );
             return FirstRunDialogResultFailure;
         }
@@ -295,7 +297,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
+    const auto userPath = Files::pathToQString(mCfgMgr.getUserConfigPath());
 
     QStringList paths;
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
@@ -328,9 +330,9 @@ bool Launcher::MainDialog::setupGameSettings()
 {
     mGameSettings.clear();
 
-    QString localPath = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str());
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
-    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
+    const auto localPath = Files::pathToQString(mCfgMgr.getLocalPath());
+    const auto userPath = Files::pathToQString(mCfgMgr.getUserConfigPath());
+    const auto globalPath = Files::pathToQString(mCfgMgr.getGlobalPath());
 
     QFile file;
 
@@ -479,21 +481,24 @@ bool Launcher::MainDialog::writeSettings()
     mSettingsPage->saveSettings();
     mAdvancedPage->saveSettings();
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
-    QDir dir(userPath);
+    const auto& userPath = mCfgMgr.getUserConfigPath();
 
-    if (!dir.exists()) {
-        if (!dir.mkpath(userPath)) {
+    if (!exists(userPath)) {
+        if (!create_directories(userPath)) {
             cfgError(tr("Error creating OpenMW configuration directory"),
                      tr("<br><b>Could not create %0</b><br><br> \
                          Please make sure you have the right permissions \
-                         and try again.<br>").arg(userPath));
+                         and try again.<br>").arg(Files::pathToQString(userPath)));
             return false;
         }
     }
 
     // Game settings
-    QFile file(userPath + QString("openmw.cfg"));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QFile file(userPath / "openmw.cfg");
+#else
+    QFile file(Files::pathToQString(userPath / "openmw.cfg"));
+#endif
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
@@ -509,19 +514,19 @@ bool Launcher::MainDialog::writeSettings()
     file.close();
 
     // Graphics settings
-    const std::string settingsPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
+    const auto settingsPath = mCfgMgr.getUserConfigPath() / "settings.cfg";
     try {
         Settings::Manager::saveUser(settingsPath);
     }
     catch (std::exception& e) {
         std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +
-            settingsPath + "<br><br>" + e.what();
+            Files::pathToUnicodeString(settingsPath) + "<br><br>" + e.what();
         cfgError(tr("Error writing user settings file"), tr(msg.c_str()));
         return false;
     }
 
     // Launcher settings
-    file.setFileName(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
+    file.setFileName(Files::pathToQString(userPath / Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created

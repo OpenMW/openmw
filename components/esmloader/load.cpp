@@ -20,6 +20,7 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/files/conversion.hpp>
 
 #include <algorithm>
 #include <filesystem>
@@ -228,7 +229,7 @@ namespace EsmLoader
             for (std::size_t i = 0; i < contentFiles.size(); ++i)
             {
                 const std::string &file = contentFiles[i];
-                const std::string extension = Misc::StringUtils::lowerCase(std::filesystem::path(file).extension().string());
+                const std::string extension = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(std::filesystem::path(file).extension()));
 
                 if (supportedFormats.find(extension) == supportedFormats.end())
                 {
@@ -247,7 +248,7 @@ namespace EsmLoader
                 const ESM::ReadersCache::BusyItem reader = readers.get(i);
                 reader->setEncoder(encoder);
                 reader->setIndex(static_cast<int>(i));
-                reader->open(collection.getPath(file).string());
+                reader->open(collection.getPath(file));
                 if (query.mLoadCells)
                     reader->resolveParentFileIndices(readers);
 

@@ -1,7 +1,7 @@
 #ifndef WINDOWS_CRASHCATCHER_HPP
 #define WINDOWS_CRASHCATCHER_HPP
 
-#include <string>
+#include <filesystem>
 
 #include <components/windows.hpp>
 #include <components/crashcatcher/crashcatcher.hpp>
@@ -28,7 +28,7 @@ namespace Crash
     {
     public:
 
-        CrashCatcher(int argc, char **argv, const std::string& crashLogPath);
+        CrashCatcher(int argc, char **argv, const std::filesystem::path& crashLogPath);
         ~CrashCatcher();
 
     private:
@@ -56,7 +56,7 @@ namespace Crash
 
         void shmUnlock();
 
-        void startMonitorProcess(const std::string& crashLogPath);
+        void startMonitorProcess(const std::filesystem::path& crashLogPath);
 
         void waitMonitor();
 

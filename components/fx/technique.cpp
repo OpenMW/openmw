@@ -2,6 +2,7 @@
 
 #include <array>
 #include <string>
+#include <utility>
 
 #include <osg/Texture1D>
 #include <osg/Texture2D>
@@ -16,6 +17,7 @@
 #include <components/sceneutil/util.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
 
 #include "parse_constants.hpp"
 
@@ -37,9 +39,9 @@ namespace
 
 namespace fx
 {
-    Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, const std::string& name, int width, int height, bool ubo, bool supportsNormals)
-        : mName(name)
-        , mFileName((std::filesystem::path(Technique::sSubdir) / (mName + Technique::sExt)).string())
+    Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string  name, int width, int height, bool ubo, bool supportsNormals)
+        : mName(std::move(name))
+        , mFileName(Files::pathToUnicodeString((Files::pathFromUnicodeString(Technique::sSubdir) / (mName + Technique::sExt))))
         , mLastModificationTime(std::filesystem::file_time_type())
         , mWidth(width)
         , mHeight(height)

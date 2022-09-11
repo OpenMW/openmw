@@ -123,7 +123,7 @@ namespace fx
         static constexpr FlagsType Flag_Disable_SunGlare = (1 << 4);
         static constexpr FlagsType Flag_Hidden = (1 << 5);
 
-        Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, const std::string& name, int width, int height, bool ubo, bool supportsNormals);
+        Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string  name, int width, int height, bool ubo, bool supportsNormals);
 
         bool compile();
 

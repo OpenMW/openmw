@@ -102,7 +102,7 @@ namespace MWRender
     {
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::string& resourcePath,
+            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::filesystem::path& resourcePath,
             DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
             SceneUtil::UnrefQueue& unrefQueue);
         ~RenderingManager();
@@ -232,7 +232,7 @@ namespace MWRender
 
         osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& object) const;
 
-        void exportSceneGraph(const MWWorld::Ptr& ptr, const std::string& filename, const std::string& format);
+        void exportSceneGraph(const MWWorld::Ptr& ptr, const std::filesystem::path& filename, const std::string& format);
 
         LandManager* getLandManager() const;
 

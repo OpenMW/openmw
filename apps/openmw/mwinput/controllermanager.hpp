@@ -5,6 +5,7 @@
 
 #include <components/settings/settings.hpp>
 #include <components/sdlutil/events.hpp>
+#include <filesystem>
 
 namespace MWInput
 {
@@ -18,8 +19,8 @@ namespace MWInput
         ControllerManager(BindingsManager* bindingsManager,
             ActionManager* actionManager,
             MouseManager* mouseManager,
-            const std::string& userControllerBindingsFile,
-            const std::string& controllerBindingsFile);
+            const std::filesystem::path &userControllerBindingsFile,
+            const std::filesystem::path &controllerBindingsFile);
 
         virtual ~ControllerManager() = default;
 

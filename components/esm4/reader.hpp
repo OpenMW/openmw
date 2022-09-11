@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <memory>
 #include <istream>
+#include <filesystem>
 
 #include "common.hpp"
 #include "loadtes4.hpp"
@@ -47,7 +48,7 @@ namespace ESM4 {
 
     struct ReaderContext
     {
-        std::string filename;         // in case we need to reopen to restore the context
+        std::filesystem::path filename;         // in case we need to reopen to restore the context
         std::uint32_t modIndex;         // the sequential position of this file in the load order:
         //  0x00 reserved, 0xFF in-game (see notes below)
 
@@ -113,7 +114,7 @@ namespace ESM4 {
 
         std::vector<Reader*>* mGlobalReaderList = nullptr;
 
-        void buildLStringIndex(const std::string& stringFile, LocalizedStringType stringType);
+        void buildLStringIndex(const std::filesystem::path& stringFile, LocalizedStringType stringType);
 
         inline bool hasLocalizedStrings() const { return (mHeader.mFlags & Rec_Localized) != 0; }
 
@@ -124,11 +125,11 @@ namespace ESM4 {
         //void close();
 
         // Raw opening. Opens the file and sets everything up but doesn't parse the header.
-        void openRaw(Files::IStreamPtr&& stream, const std::string& filename);
+        void openRaw(Files::IStreamPtr&& stream, const std::filesystem::path& filename);
 
         // Load ES file from a new stream, parses the header.
         // Closes the currently open file first, if any.
-        void open(Files::IStreamPtr&& stream, const std::string& filename);
+        void open(Files::IStreamPtr&& stream, const std::filesystem::path& filename);
 
         Reader() = default;
 
@@ -137,13 +138,12 @@ namespace ESM4 {
 
     public:
 
-        Reader(Files::IStreamPtr&& esmStream, const std::string& filename);
+        Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename);
         ~Reader();
 
-        // FIXME: should be private but ESMTool uses it
-        void openRaw(const std::string& filename);
 
-        void open(const std::string& filename);
+
+        void open(const std::filesystem::path& filename);
 
         void close();
 
@@ -158,7 +158,7 @@ namespace ESM4 {
         inline int getFormat() const { return 0; }; // prob. not relevant for ESM4
         inline const std::string getDesc() const { return mHeader.mDesc; }
 
-        inline std::string getFileName() const { return mCtx.filename; }; // not used
+        inline std::filesystem::path getFileName() const { return mCtx.filename; }; // not used
 
         inline bool hasMoreRecs() const { return (mFileSize - mCtx.fileRead) > 0; }
 

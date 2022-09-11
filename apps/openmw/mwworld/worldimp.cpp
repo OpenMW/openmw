@@ -44,6 +44,7 @@
 #include <components/detournavigator/navigatorimpl.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -102,21 +103,21 @@ namespace MWWorld
             mLoaders.emplace(std::move(extension), &loader);
         }
 
-        void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override
+        void load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener) override
         {
-            const auto it = mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string()));
+            const auto it = mLoaders.find(Misc::StringUtils::lowerCase( Files::pathToUnicodeString(filepath.extension())));
             if (it != mLoaders.end())
             {
-                const std::string filename = filepath.filename().string();
+                const auto filename = filepath.filename();
                 Log(Debug::Info) << "Loading content file " << filename;
                 if (listener != nullptr)
-                    listener->setLabel(MyGUI::TextIterator::toTagsString(filename));
+                    listener->setLabel(MyGUI::TextIterator::toTagsString(Files::pathToUnicodeString(filename)));
                 it->second->load(filepath, index, listener);
             }
             else
             {
                 std::string msg("Cannot load file: ");
-                msg += filepath.string();
+                msg += Files::pathToUnicodeString(filepath);
                 throw std::runtime_error(msg.c_str());
             }
         }
@@ -129,9 +130,9 @@ namespace MWWorld
     {
         ESMStore& mStore;
         OMWScriptsLoader(ESMStore& store) : mStore(store) {}
-        void load(const boost::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
+        void load(const std::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
         {
-            mStore.addOMWScripts(filepath.string());
+            mStore.addOMWScripts(filepath);
         }
     };
 
@@ -156,7 +157,7 @@ namespace MWWorld
         const std::vector<std::string>& groundcoverFiles,
         ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
         const std::string& startCell, const std::string& startupScript,
-        const std::string& resourcePath, const std::string& userDataPath)
+        const std::filesystem::path& resourcePath, const std::filesystem::path& userDataPath)
     : mResourceSystem(resourceSystem), mLocalScripts(mStore),
       mCells(mStore, mReaders), mSky(true),
       mGodMode(false), mScriptsEnabled(true), mDiscardMovements(true), mContentFiles (contentFiles),
@@ -2963,8 +2964,8 @@ namespace MWWorld
         int idx = 0;
         for (const std::string &file : content)
         {
-            boost::filesystem::path filename(file);
-            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
+            const auto filename = Files::pathFromUnicodeString( file);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(Files::pathToUnicodeString(filename.extension()));
             if (col.doesExist(file))
             {
                 gameContentLoader.load(col.getPath(file), idx, listener);
@@ -3694,9 +3695,9 @@ namespace MWWorld
             return mPhysics->getHalfExtents(object);
     }
 
-    std::string World::exportSceneGraph(const Ptr &ptr)
+    std::filesystem::path World::exportSceneGraph(const Ptr& ptr)
     {
-        std::string file = mUserDataPath + "/openmw.osgt";
+        auto file = mUserDataPath / "openmw.osgt";
         if (!ptr.isEmpty())
         {
             mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);

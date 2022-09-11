@@ -369,7 +369,7 @@ namespace MWRender
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::string& resourcePath,
+        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::filesystem::path& resourcePath,
         DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
         SceneUtil::UnrefQueue& unrefQueue)
         : mSkyBlending(Settings::Manager::getBool("sky blending", "Fog"))
@@ -1526,7 +1526,7 @@ namespace MWRender
             updateProjectionMatrix();
         }
     }
-    void RenderingManager::exportSceneGraph(const MWWorld::Ptr &ptr, const std::string &filename, const std::string &format)
+    void RenderingManager::exportSceneGraph(const MWWorld::Ptr &ptr, const std::filesystem::path& filename, const std::string &format)
     {
         osg::Node* node = mViewer->getSceneData();
         if (!ptr.isEmpty())

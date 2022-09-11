@@ -88,7 +88,7 @@ namespace
         mLua.safe_script("permanent:set('x', 1)");
         mLua.safe_script("temporary:set('y', 2)");
 
-        std::string tmpFile = (std::filesystem::temp_directory_path() / "test_storage.bin").string();
+        const auto tmpFile = std::filesystem::temp_directory_path() / "test_storage.bin";
         storage.save(tmpFile);
         EXPECT_EQ(get<int>(mLua, "permanent:get('x')"), 1);
         EXPECT_EQ(get<int>(mLua, "temporary:get('y')"), 2);

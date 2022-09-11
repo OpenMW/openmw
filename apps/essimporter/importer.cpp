@@ -85,7 +85,7 @@ namespace
 namespace ESSImport
 {
 
-    Importer::Importer(const std::string &essfile, const std::string &outfile, const std::string &encoding)
+    Importer::Importer(const std::filesystem::path &essfile, const std::filesystem::path &outfile, const std::string &encoding)
         : mEssFile(essfile)
         , mOutFile(outfile)
         , mEncoding(encoding)
@@ -112,7 +112,7 @@ namespace ESSImport
         std::vector<Record> mRecords;
     };
 
-    void read(const std::string& filename, File& file)
+    void read(const std::filesystem::path &filename, File& file)
     {
         ESM::ESMReader esm;
         esm.open(filename);
@@ -345,7 +345,7 @@ namespace ESSImport
 
         writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
-        std::ofstream stream(std::filesystem::path(mOutFile), std::ios::out | std::ios::binary);
+        std::ofstream stream(mOutFile, std::ios::out | std::ios::binary);
         // all unused
         writer.setVersion(0);
         writer.setType(0);

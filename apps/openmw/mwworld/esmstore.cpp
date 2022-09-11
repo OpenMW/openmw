@@ -321,13 +321,13 @@ ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
     ESM::LuaScriptsCfg cfg;
     for (const LuaContent& c : mLuaContent)
     {
-        if (std::holds_alternative<std::string>(c))
+        if (std::holds_alternative<std::filesystem::path>(c))
         {
             // *.omwscripts are intentionally reloaded every time when `getLuaScriptsCfg` is called.
             // It is important for the `reloadlua` console command.
             try
             {
-                auto file = std::ifstream(std::get<std::string>(c));
+                auto file = std::ifstream(std::get<std::filesystem::path>(c));
                 std::string fileContent(std::istreambuf_iterator<char>(file), {});
                 LuaUtil::parseOMWScripts(cfg, fileContent);
             }

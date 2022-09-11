@@ -169,7 +169,9 @@ void CSMWorld::RegionMap::updateRegions (const std::vector<std::string>& regions
 {
     std::vector<std::string> regions2 (regions);
 
-    std::for_each (regions2.begin(), regions2.end(), Misc::StringUtils::lowerCaseInPlace);
+    for (auto& region2 : regions2) {
+        Misc::StringUtils::lowerCaseInPlace(region2);
+    }
     std::sort (regions2.begin(), regions2.end());
 
     for (std::map<CellCoordinates, CellDescription>::const_iterator iter (mMap.begin());

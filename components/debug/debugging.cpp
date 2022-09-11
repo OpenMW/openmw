@@ -2,15 +2,17 @@
 
 #include <chrono>
 #include <memory>
-#include <functional>
 #include <fstream>
-#include <filesystem>
+
+#include <boost/iostreams/stream.hpp>
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 #ifdef _WIN32
 #include <components/crashcatcher/windows_crashcatcher.hpp>
 #include <components/windows.hpp>
+#include <components/files/conversion.hpp>
 #endif
 
 #include <SDL_messagebox.h>
@@ -269,7 +271,7 @@ Misc::Locked<std::ostream&> getLockedRawStderr()
 }
 
 // Redirect cout and cerr to the log file
-void setupLogging(const std::string& logDir, const std::string& appName, std::ios_base::openmode mode)
+void setupLogging(const std::filesystem::path &logDir, const std::string& appName, std::ios_base::openmode mode)
 {
 #if defined(_WIN32) && defined(_DEBUG)
     // Redirect cout and cerr to VS debug output when running in debug mode
@@ -278,7 +280,7 @@ void setupLogging(const std::string& logDir, const std::string& appName, std::io
     std::cerr.rdbuf(&sb);
 #else
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-    logfile.open(std::filesystem::path(logDir) / logName, mode);
+    logfile.open(logDir / logName, mode);
 
     coutsb.open(Debug::Tee(logfile, *rawStdout));
     cerrsb.open(Debug::Tee(logfile, *rawStderr));
@@ -311,19 +313,19 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
             if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
                 mode |= std::ios::app;
 
-            setupLogging(cfgMgr.getLogPath().string(), appName, mode);
+            setupLogging(cfgMgr.getLogPath(), appName, mode);
         }
 
         if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"); env == nullptr || std::atol(env) == 0)
         {
 #if defined(_WIN32)
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
-            Crash::CrashCatcher crashy(argc, argv, (cfgMgr.getLogPath() / crashLogName).make_preferred().string());
+            Crash::CrashCatcher crashy(argc, argv, Files::pathToUnicodeString(cfgMgr.getLogPath() / crashLogName));
 #else
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
             // install the crash handler as soon as possible. note that the log path
             // does not depend on config being read.
-            crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / crashLogName).string());
+            crashCatcherInstall(argc, argv, Files::pathToUnicodeString(cfgMgr.getLogPath() / crashLogName));
 #endif
             ret = innerApplication(argc, argv);
         }

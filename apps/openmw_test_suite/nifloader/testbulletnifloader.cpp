@@ -353,7 +353,7 @@ namespace
         MOCK_METHOD(std::string, getString, (uint32_t), (const, override));
         MOCK_METHOD(void, setUseSkinning, (bool), (override));
         MOCK_METHOD(bool, getUseSkinning, (), (const, override));
-        MOCK_METHOD(std::string, getFilename, (), (const, override));
+        MOCK_METHOD(std::filesystem::path, getFilename, (), (const, override));
         MOCK_METHOD(std::string, getHash, (), (const, override));
         MOCK_METHOD(unsigned int, getVersion, (), (const, override));
         MOCK_METHOD(unsigned int, getUserVersion, (), (const, override));

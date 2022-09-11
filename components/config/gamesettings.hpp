@@ -7,11 +7,11 @@
 #include <QFile>
 #include <QMultiMap>
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 namespace Files
 {
-  typedef std::vector<boost::filesystem::path> PathContainer;
+  typedef std::vector<std::filesystem::path> PathContainer;
   struct ConfigurationManager;
 }
 
@@ -54,7 +54,7 @@ namespace Config
         }
 
         QStringList getDataDirs() const;
-        std::string getGlobalDataDir() const;
+        std::filesystem::path getGlobalDataDir() const;
 
         inline void removeDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.removeAll(dir); }
         inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }

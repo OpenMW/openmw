@@ -4,18 +4,19 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/files/conversion.hpp>
 
 #include <fstream>
 #include <filesystem>
 
 #include <Base64.h>
 
-void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, CategorySettingValueMap& settings,
+void Settings::SettingsFileParser::loadSettingsFile(const std::filesystem::path &file, CategorySettingValueMap& settings,
                                                     bool base64Encoded, bool overrideExisting)
 {
     mFile = file;
     std::ifstream fstream;
-    fstream.open(std::filesystem::path(file));
+    fstream.open(file);
     auto stream = std::ref<std::istream>(fstream);
 
     std::istringstream decodedStream;
@@ -82,7 +83,7 @@ void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, Cat
     }
 }
 
-void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, const CategorySettingValueMap& settings)
+void Settings::SettingsFileParser::saveSettingsFile(const std::filesystem::path &file, const CategorySettingValueMap& settings)
 {
     using CategorySettingStatusMap = std::map<CategorySetting, bool>;
 
@@ -108,8 +109,7 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
     // as the output file if we're copying the setting from the default settings.cfg for the
     // first time.  A minor change in API to pass the source file might be in order here.
     std::ifstream istream;
-    std::filesystem::path ipath(file);
-    istream.open(ipath);
+    istream.open(file);
 
     // Create a new string stream to write the current settings to.  It's likely that the
     // input file and the output file are the same, so this stream serves as a temporary file
@@ -305,9 +305,9 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
 
     // Now install the newly written file in the requested place.
     if (changed) {
-        Log(Debug::Info) << "Updating settings file: " << ipath;
+        Log(Debug::Info) << "Updating settings file: " << file;
         std::ofstream ofstream;
-        ofstream.open(ipath);
+        ofstream.open(file);
         ofstream << ostream.rdbuf();
         ofstream.close();
     }
@@ -325,6 +325,6 @@ bool Settings::SettingsFileParser::skipWhiteSpace(size_t& i, std::string& str)
 [[noreturn]] void Settings::SettingsFileParser::fail(const std::string& message)
 {
     std::stringstream error;
-    error << "Error on line " << mLine << " in " << mFile << ":\n" << message;
+    error << "Error on line " << mLine << " in " << Files::pathToUnicodeString(mFile) << ":\n" << message;
     throw std::runtime_error(error.str());
 }
