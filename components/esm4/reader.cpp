@@ -652,7 +652,12 @@ bool Reader::getStringImpl(std::string& str, std::size_t size,
         stream.read(input.data(), size);
         if (stream.gcount() == static_cast<std::streamsize>(size))
         {
-            encoder->getUtf8(input, ToUTF8::BufferAllocationPolicy::FitToRequiredSize, str);
+            const std::string_view result = encoder->getUtf8(input, ToUTF8::BufferAllocationPolicy::FitToRequiredSize, str);
+            if (str.empty() && !result.empty())
+            {
+                str = std::move(input);
+                str.resize(result.size());
+            }
             return true;
         }
     }
