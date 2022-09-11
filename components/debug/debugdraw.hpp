@@ -1,10 +1,12 @@
 #ifndef OPENMW_COMPONENTS_DEBUG_DEBUGDRAW_H
 #define OPENMW_COMPONENTS_DEBUG_DEBUGDRAW_H
 
-#include <memory>
 #include <osg/Drawable>
 #include <osg/Vec3>
 #include <osg/ref_ptr>
+
+#include <array>
+#include <memory>
 #include <vector>
 
 namespace osg
