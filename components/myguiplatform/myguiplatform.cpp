@@ -4,14 +4,16 @@
 #include "myguidatamanager.hpp"
 #include "myguiloglistener.hpp"
 
+#include "components/files/conversion.hpp"
+
 namespace osgMyGUI
 {
 
 Platform::Platform(osgViewer::Viewer *viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager,
-    const VFS::Manager* vfs, float uiScalingFactor, const std::string& resourcePath, const std::string& logName)
+    const VFS::Manager* vfs, float uiScalingFactor, const std::filesystem::path& resourcePath, const std::filesystem::path& logName)
     : mLogFacility(logName.empty() ? nullptr : std::make_unique<LogFacility>(logName, false))
     , mLogManager(std::make_unique<MyGUI::LogManager>())
-    , mDataManager(std::make_unique<DataManager>(resourcePath, vfs))
+    , mDataManager(std::make_unique<DataManager>(Files::pathToUnicodeString(resourcePath), vfs))
     , mRenderManager(std::make_unique<RenderManager>(viewer, guiRoot, imageManager, uiScalingFactor))
 {
     if (mLogFacility != nullptr)

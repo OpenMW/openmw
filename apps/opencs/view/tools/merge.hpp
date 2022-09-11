@@ -3,9 +3,7 @@
 
 #include <QWidget>
 
-#ifndef Q_MOC_RUN
-#include <boost/filesystem/path.hpp>
-#endif
+#include <filesystem>
 
 class QPushButton;
 class QListWidget;
@@ -44,7 +42,7 @@ namespace CSVTools
             /// Configure dialogue for a new merge
             void configure (CSMDoc::Document *document);
 
-            void setLocalData (const boost::filesystem::path& localData);
+            void setLocalData (const std::filesystem::path& localData);
 
             CSMDoc::Document *getDocument() const;
 

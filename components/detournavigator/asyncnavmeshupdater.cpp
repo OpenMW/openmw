@@ -227,7 +227,7 @@ namespace DetourNavigator
             mDbWorker->updateJobs(playerTile, maxTiles);
     }
 
-    void AsyncNavMeshUpdater::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
+    void AsyncNavMeshUpdater::wait(WaitConditionType waitConditionType, Loading::Listener* listener)
     {
         switch (waitConditionType)
         {
@@ -254,7 +254,7 @@ namespace DetourNavigator
                 thread.join();
     }
 
-    void AsyncNavMeshUpdater::waitUntilJobsDoneForNotPresentTiles(Loading::Listener& listener)
+    void AsyncNavMeshUpdater::waitUntilJobsDoneForNotPresentTiles(Loading::Listener* listener)
     {
         const int maxDistanceToPlayer = mSettings.get().mWaitUntilMinDistanceToPlayer;
         if (maxDistanceToPlayer <= 0)
@@ -276,23 +276,28 @@ namespace DetourNavigator
         if (!isAbsentTileTooClose(playerPosition, maxDistanceToPlayer, mPushed, mPresentTiles, mProcessingTiles)
             || mJobs.empty())
             return;
-        Loading::ScopedLoad load(&listener);
-        listener.setLabel("#{Navigation:BuildingNavigationMesh}");
-        listener.setProgressRange(maxProgress);
+        const Loading::ScopedLoad load(listener);
+        if (listener != nullptr)
+        {
+            listener->setLabel("#{Navigation:BuildingNavigationMesh}");
+            listener->setProgressRange(maxProgress);
+        }
         while (!mDone.wait_for(lock, std::chrono::milliseconds(20), isDone))
         {
+            if (listener == nullptr)
+                continue;
             if (maxProgress < jobsLeft)
             {
                 maxProgress = jobsLeft;
-                listener.setProgressRange(maxProgress);
-                listener.setProgress(jobsDone);
+                listener->setProgressRange(maxProgress);
+                listener->setProgress(jobsDone);
             }
             else if (jobsLeft < prevJobsLeft)
             {
                 const std::size_t newJobsDone = prevJobsLeft - jobsLeft;
                 jobsDone += newJobsDone;
                 prevJobsLeft = jobsLeft;
-                listener.increaseProgress(newJobsDone);
+                listener->increaseProgress(newJobsDone);
             }
         }
     }

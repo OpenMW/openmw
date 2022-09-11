@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <tuple>
+#include <filesystem>
 
 #include <components/esm/luascripts.hpp>
 #include <components/esm3/loadgmst.hpp>
@@ -159,11 +160,11 @@ namespace MWWorld
 
         using LuaContent = std::variant<
             ESM::LuaScriptsCfg,  // data from an omwaddon
-            std::string>;  // path to an omwscripts file
+            std::filesystem::path>;  // path to an omwscripts file
         std::vector<LuaContent> mLuaContent;
 
     public:
-        void addOMWScripts(std::string filePath) { mLuaContent.push_back(std::move(filePath)); }
+        void addOMWScripts(std::filesystem::path filePath) { mLuaContent.push_back(std::move(filePath)); }
         ESM::LuaScriptsCfg getLuaScriptsCfg() const;
 
         /// \todo replace with SharedIterator<StoreBase>

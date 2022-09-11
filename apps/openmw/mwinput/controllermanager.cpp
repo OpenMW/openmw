@@ -7,6 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -27,8 +28,8 @@ namespace MWInput
     ControllerManager::ControllerManager(BindingsManager* bindingsManager,
             ActionManager* actionManager,
             MouseManager* mouseManager,
-            const std::string& userControllerBindingsFile,
-            const std::string& controllerBindingsFile)
+            const std::filesystem::path &userControllerBindingsFile,
+            const std::filesystem::path &controllerBindingsFile)
         : mBindingsManager(bindingsManager)
         , mActionManager(actionManager)
         , mMouseManager(mouseManager)
@@ -43,12 +44,12 @@ namespace MWInput
     {
         if (!controllerBindingsFile.empty())
         {
-            SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.c_str());
+            SDL_GameControllerAddMappingsFromFile(Files::pathToUnicodeString(controllerBindingsFile).c_str());
         }
 
         if (!userControllerBindingsFile.empty())
         {
-            SDL_GameControllerAddMappingsFromFile(userControllerBindingsFile.c_str());
+            SDL_GameControllerAddMappingsFromFile(Files::pathToUnicodeString(userControllerBindingsFile).c_str());
         }
 
         // Open all presently connected sticks

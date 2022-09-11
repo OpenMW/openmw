@@ -48,6 +48,7 @@
 
 #include <components/files/hash.hpp>
 #include <components/files/memorystream.hpp>
+#include <components/files/conversion.hpp>
 
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
@@ -477,7 +478,7 @@ namespace Resource
         return *mShaderManager.get();
     }
 
-    void SceneManager::setShaderPath(const std::string &path)
+    void SceneManager::setShaderPath(const std::filesystem::path &path)
     {
         mShaderManager->setShaderPath(path);
     }
@@ -498,14 +499,14 @@ namespace Resource
 
         osgDB::ReaderWriter::ReadResult readImage(const std::string& filename, const osgDB::Options* options) override
         {
-            std::filesystem::path filePath(filename);
+            auto filePath = Files::pathFromUnicodeString(filename);
             if (filePath.is_absolute())
                 // It is a hack. Needed because either OSG or libcollada-dom tries to make an absolute path from
                 // our relative VFS path by adding current working directory.
                 filePath = std::filesystem::relative(filename, osgDB::getCurrentWorkingDirectory());
             try
             {
-                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(filePath.string()),
+                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(Files::pathToUnicodeString(filePath)),
                                                        osgDB::ReaderWriter::ReadResult::FILE_LOADED);
             }
             catch (std::exception& e)

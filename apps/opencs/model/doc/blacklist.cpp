@@ -25,6 +25,6 @@ void CSMDoc::Blacklist::add (CSMWorld::UniversalId::Type type,
 
     list.resize (size+ids.size());
 
-    std::transform (ids.begin(), ids.end(), list.begin()+size, Misc::StringUtils::lowerCase);
+    std::transform (ids.begin(), ids.end(), list.begin()+size, [](const std::string& s) { return Misc::StringUtils::lowerCase(s); } );
     std::sort (list.begin(), list.end());
 }

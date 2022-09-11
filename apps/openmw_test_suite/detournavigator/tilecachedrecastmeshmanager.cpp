@@ -43,20 +43,12 @@ namespace
         EXPECT_EQ(manager.getRevision(), 0);
     }
 
-    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, for_each_tile_position_for_empty_should_call_none)
-    {
-        TileCachedRecastMeshManager manager(mSettings);
-        std::size_t calls = 0;
-        manager.forEachTile([&] (const TilePosition&, const CachedRecastMeshManager&) { ++calls; });
-        EXPECT_EQ(calls, 0);
-    }
-
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_object_for_new_object_should_return_true)
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        EXPECT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        EXPECT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_object_for_existing_object_should_return_false)
@@ -64,17 +56,17 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
-        EXPECT_FALSE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
+        EXPECT_FALSE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_object_should_add_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
         for (int x = -1; x < 1; ++x)
             for (int y = -1; y < 1; ++y)
                 ASSERT_NE(manager.getMesh("worldspace", TilePosition(x, y)), nullptr);
@@ -88,9 +80,9 @@ namespace
         TileBounds bounds;
         bounds.mMin = osg::Vec2f(182, 182);
         bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
-        EXPECT_THAT(manager.takeChangedTiles(), ElementsAre(std::pair(TilePosition(0, 0), ChangeType::add)));
+        manager.setBounds(bounds, nullptr);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
+        EXPECT_THAT(manager.takeChangedTiles(nullptr), ElementsAre(std::pair(TilePosition(0, 0), ChangeType::add)));
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, update_object_for_changed_object_should_add_changed_tiles)
@@ -102,11 +94,11 @@ namespace
         TileBounds bounds;
         bounds.mMin = osg::Vec2f(-1000, -1000);
         bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds);
-        manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
-        manager.takeChangedTiles();
-        EXPECT_TRUE(manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
-        EXPECT_THAT(manager.takeChangedTiles(), ElementsAre(
+        manager.setBounds(bounds, nullptr);
+        manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground, nullptr);
+        manager.takeChangedTiles(nullptr);
+        EXPECT_TRUE(manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
+        EXPECT_THAT(manager.takeChangedTiles(nullptr), ElementsAre(
             std::pair(TilePosition(-1, -1), ChangeType::add),
             std::pair(TilePosition(-1, 0), ChangeType::add),
             std::pair(TilePosition(0, -1), ChangeType::update),
@@ -121,10 +113,10 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
-        manager.takeChangedTiles();
-        EXPECT_FALSE(manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
-        EXPECT_THAT(manager.takeChangedTiles(), IsEmpty());
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
+        manager.takeChangedTiles(nullptr);
+        EXPECT_FALSE(manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
+        EXPECT_THAT(manager.takeChangedTiles(nullptr), IsEmpty());
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_object_should_return_add_changed_tiles)
@@ -135,20 +127,20 @@ namespace
         TileBounds bounds;
         bounds.mMin = osg::Vec2f(182, 182);
         bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
-        manager.takeChangedTiles();
-        manager.removeObject(ObjectId(&boxShape));
-        EXPECT_THAT(manager.takeChangedTiles(), ElementsAre(std::pair(TilePosition(0, 0), ChangeType::remove)));
+        manager.setBounds(bounds, nullptr);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
+        manager.takeChangedTiles(nullptr);
+        manager.removeObject(ObjectId(&boxShape), nullptr);
+        EXPECT_THAT(manager.takeChangedTiles(nullptr), ElementsAre(std::pair(TilePosition(0, 0), ChangeType::remove)));
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_mesh_after_add_object_should_return_recast_mesh_for_each_used_tile)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
@@ -158,10 +150,10 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_mesh_after_add_object_should_return_nullptr_for_unused_tile)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(1, 0)), nullptr);
     }
 
@@ -171,20 +163,20 @@ namespace
         TileBounds bounds;
         bounds.mMin = osg::Vec2f(-1000, -1000);
         bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds);
-        manager.setWorldspace("worldspace");
+        manager.setBounds(bounds, nullptr);
+        manager.setWorldspace("worldspace", nullptr);
 
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
 
-        manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground, nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(1, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(1, -1)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
@@ -194,17 +186,17 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_mesh_for_moved_object_should_return_nullptr_for_unused_tile)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
 
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
 
-        manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground, nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(1, 0)), nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(1, -1)), nullptr);
     }
@@ -212,11 +204,11 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_mesh_for_removed_object_should_return_nullptr_for_all_previously_used_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
-        manager.removeObject(ObjectId(&boxShape));
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
+        manager.removeObject(ObjectId(&boxShape), nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
         EXPECT_EQ(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
@@ -226,17 +218,17 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_mesh_for_not_changed_object_after_update_should_return_recast_mesh_for_same_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
 
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, 0)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(-1, 0)), nullptr);
         EXPECT_NE(manager.getMesh("worldspace", TilePosition(0, -1)), nullptr);
@@ -249,7 +241,7 @@ namespace
         const auto initialRevision = manager.getRevision();
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_EQ(manager.getRevision(), initialRevision + 1);
     }
 
@@ -258,9 +250,9 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         const auto beforeAddRevision = manager.getRevision();
-        EXPECT_FALSE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        EXPECT_FALSE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
         EXPECT_EQ(manager.getRevision(), beforeAddRevision);
     }
 
@@ -270,21 +262,21 @@ namespace
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground, nullptr);
         const auto beforeUpdateRevision = manager.getRevision();
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_EQ(manager.getRevision(), beforeUpdateRevision + 1);
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_revision_after_update_not_changed_object_should_return_same_value)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         const auto beforeUpdateRevision = manager.getRevision();
-        manager.updateObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_EQ(manager.getRevision(), beforeUpdateRevision);
     }
 
@@ -293,9 +285,9 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         const auto beforeRemoveRevision = manager.getRevision();
-        manager.removeObject(ObjectId(&boxShape));
+        manager.removeObject(ObjectId(&boxShape), nullptr);
         EXPECT_EQ(manager.getRevision(), beforeRemoveRevision + 1);
     }
 
@@ -303,7 +295,7 @@ namespace
     {
         TileCachedRecastMeshManager manager(mSettings);
         const auto beforeRemoveRevision = manager.getRevision();
-        manager.removeObject(ObjectId(&manager));
+        manager.removeObject(ObjectId(&manager), nullptr);
         EXPECT_EQ(manager.getRevision(), beforeRemoveRevision);
     }
 
@@ -312,8 +304,8 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        manager.addWater(cellPosition, cellSize, 0.0f);
-        const auto changedTiles = manager.takeChangedTiles();
+        manager.addWater(cellPosition, cellSize, 0.0f, nullptr);
+        const auto changedTiles = manager.takeChangedTiles(nullptr);
         EXPECT_EQ(changedTiles.begin()->first, TilePosition(-1, -1));
         EXPECT_EQ(changedTiles.rbegin()->first, TilePosition(11, 11));
         for (const auto& [k, v] : changedTiles)
@@ -323,10 +315,10 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_water_for_not_max_int_should_add_new_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        manager.addWater(cellPosition, cellSize, 0.0f);
+        manager.addWater(cellPosition, cellSize, 0.0f, nullptr);
         for (int x = -1; x < 12; ++x)
             for (int y = -1; y < 12; ++y)
                 ASSERT_NE(manager.getMesh("worldspace", TilePosition(x, y)), nullptr);
@@ -335,13 +327,13 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, add_water_for_max_int_should_not_add_new_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = std::numeric_limits<int>::max();
-        manager.addWater(cellPosition, cellSize, 0.0f);
+        manager.addWater(cellPosition, cellSize, 0.0f, nullptr);
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
                 ASSERT_EQ(manager.getMesh("worldspace", TilePosition(x, y)) != nullptr, -1 <= x && x <= 0 && -1 <= y && y <= 0);
@@ -350,8 +342,8 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_water_for_absent_cell_should_not_add_changed_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.removeWater(osg::Vec2i(0, 0));
-        EXPECT_THAT(manager.takeChangedTiles(), ElementsAre());
+        manager.removeWater(osg::Vec2i(0, 0), nullptr);
+        EXPECT_THAT(manager.takeChangedTiles(nullptr), ElementsAre());
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_water_for_existing_cell_should_add_changed_tiles)
@@ -359,10 +351,10 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        manager.addWater(cellPosition, cellSize, 0.0f);
-        manager.takeChangedTiles();
-        manager.removeWater(cellPosition);
-        const auto changedTiles = manager.takeChangedTiles();
+        manager.addWater(cellPosition, cellSize, 0.0f, nullptr);
+        manager.takeChangedTiles(nullptr);
+        manager.removeWater(cellPosition, nullptr);
+        const auto changedTiles = manager.takeChangedTiles(nullptr);
         EXPECT_EQ(changedTiles.begin()->first, TilePosition(-1, -1));
         EXPECT_EQ(changedTiles.rbegin()->first, TilePosition(11, 11));
         for (const auto& [k, v] : changedTiles)
@@ -372,11 +364,11 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_water_for_existing_cell_should_remove_empty_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        manager.addWater(cellPosition, cellSize, 0.0f);
-        manager.removeWater(cellPosition);
+        manager.addWater(cellPosition, cellSize, 0.0f, nullptr);
+        manager.removeWater(cellPosition, nullptr);
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
                 ASSERT_EQ(manager.getMesh("worldspace", TilePosition(x, y)), nullptr);
@@ -385,14 +377,14 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_water_for_existing_cell_should_leave_not_empty_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
+        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
-        manager.addWater(cellPosition, cellSize, 0.0f);
-        manager.removeWater(cellPosition);
+        manager.addWater(cellPosition, cellSize, 0.0f, nullptr);
+        manager.removeWater(cellPosition, nullptr);
         for (int x = -6; x < 6; ++x)
             for (int y = -6; y < 6; ++y)
                 ASSERT_EQ(manager.getMesh("worldspace", TilePosition(x, y)) != nullptr, -1 <= x && x <= 0 && -1 <= y && y <= 0);
@@ -401,14 +393,14 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, remove_object_should_not_remove_tile_with_water)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 8192;
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
-        manager.addWater(cellPosition, cellSize, 0.0f);
-        manager.removeObject(ObjectId(&boxShape));
+        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
+        manager.addWater(cellPosition, cellSize, 0.0f, nullptr);
+        manager.removeObject(ObjectId(&boxShape), nullptr);
         for (int x = -1; x < 12; ++x)
             for (int y = -1; y < 12; ++y)
                 ASSERT_NE(manager.getMesh("worldspace", TilePosition(x, y)), nullptr);
@@ -417,11 +409,11 @@ namespace
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, set_new_worldspace_should_remove_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        manager.setWorldspace("worldspace");
+        manager.setWorldspace("worldspace", nullptr);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(nullptr, boxShape, mObjectTransform);
-        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground));
-        manager.setWorldspace("other");
+        ASSERT_TRUE(manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr));
+        manager.setWorldspace("other", nullptr);
         for (int x = -1; x < 1; ++x)
             for (int y = -1; y < 1; ++y)
                 ASSERT_EQ(manager.getMesh("other", TilePosition(x, y)), nullptr);
@@ -435,13 +427,13 @@ namespace
         TileBounds bounds;
         bounds.mMin = osg::Vec2f(182, 0);
         bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds);
-        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.setBounds(bounds, nullptr);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         bounds.mMin = osg::Vec2f(-1000, -1000);
         bounds.mMax = osg::Vec2f(0, -182);
-        manager.takeChangedTiles();
-        manager.setBounds(bounds);
-        EXPECT_THAT(manager.takeChangedTiles(), ElementsAre(
+        manager.takeChangedTiles(nullptr);
+        manager.setBounds(bounds, nullptr);
+        EXPECT_THAT(manager.takeChangedTiles(nullptr), ElementsAre(
             std::pair(TilePosition(-1, -1), ChangeType::add),
             std::pair(TilePosition(0, 0), ChangeType::remove)
         ));

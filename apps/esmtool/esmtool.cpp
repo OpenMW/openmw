@@ -17,6 +17,8 @@
 #include <components/esm/format.hpp>
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 
 #include "record.hpp"
 #include "labels.hpp"
@@ -83,7 +85,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
     hidden.add_options()
         ( "mode,m", bpo::value<std::string>(), "esmtool mode")
-        ( "input-file,i", bpo::value< std::vector<std::string> >(), "input file")
+        ( "input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file")
         ;
 
     bpo::positional_options_description p;
@@ -154,9 +156,10 @@ bool parseOptions (int argc, char** argv, Arguments &info)
       return false;
       }*/
 
-    info.filename = variables["input-file"].as< std::vector<std::string> >()[0];
-    if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-        info.outname = variables["input-file"].as< std::vector<std::string> >()[1];
+    const auto inputFiles = variables["input-file"].as< Files::MaybeQuotedPathContainer >();
+    info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+    if (inputFiles.size() > 1)
+        info.outname = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
     if (const auto it = variables.find("raw"); it != variables.end())
         info.mRawFormat = ESM::parseFormat(it->second.as<std::string>());
@@ -284,9 +287,9 @@ void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMDa
     }
 }
 
-void printRawTes3(std::string_view path)
+void printRawTes3(const std::filesystem::path &path)
 {
-    std::cout << "TES3 RAW file listing: " << path << '\n';
+    std::cout << "TES3 RAW file listing: " << Files::pathToUnicodeString(path) << '\n';
     ESM::ESMReader esm;
     esm.openRaw(path);
     while(esm.hasMoreRecs())
@@ -419,7 +422,7 @@ int load(const Arguments& info, ESMData* data)
                 printRawTes3(info.filename);
                 break;
             case ESM::Format::Tes4:
-                std::cout << "Printing raw TES4 file is not supported: " << info.filename << "\n";
+                std::cout << "Printing raw TES4 file is not supported: " << Files::pathToUnicodeString(info.filename) << "\n";
                 break;
         }
         return 0;
@@ -490,7 +493,7 @@ int clone(const Arguments& info)
     if (i % 3 != 0)
         std::cout << '\n';
 
-    std::cout << "\nSaving records to: " << info.outname << "...\n";
+    std::cout << "\nSaving records to: " << Files::pathToUnicodeString(info.outname) << "...\n";
 
     ESM::ESMWriter esm;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
@@ -499,7 +502,7 @@ int clone(const Arguments& info)
     esm.setVersion(ESM::VER_13);
     esm.setRecordCount (recordCount);
 
-    std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
+    std::fstream save(info.outname, std::fstream::out | std::fstream::binary);
     esm.save(save);
 
     int saved = 0;
@@ -563,14 +566,14 @@ int comp(const Arguments& info)
     ESMData dataOne;
     if (load(fileOne, &dataOne) != 0)
     {
-        std::cout << "Failed to load " << info.filename << ", aborting comparison." << std::endl;
+        std::cout << "Failed to load " << Files::pathToUnicodeString(info.filename) << ", aborting comparison." << std::endl;
         return 1;
     }
 
     ESMData dataTwo;
     if (load(fileTwo, &dataTwo) != 0)
     {
-        std::cout << "Failed to load " << info.outname << ", aborting comparison." << std::endl;
+        std::cout << "Failed to load " << Files::pathToUnicodeString(info.outname) << ", aborting comparison." << std::endl;
         return 1;
     }
 

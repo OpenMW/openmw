@@ -1,4 +1,5 @@
 #include "collections.hpp"
+#include "conversion.hpp"
 
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
@@ -34,23 +35,23 @@ namespace Files
         return iter->second;
     }
 
-    boost::filesystem::path Collections::getPath(const std::string& file) const
+    std::filesystem::path Collections::getPath(const std::string& file) const
     {
-        for (Files::PathContainer::const_iterator iter = mDirectories.begin();
-             iter != mDirectories.end(); ++iter)
+        for (const auto & mDirectorie : mDirectories)
         {
-            for (boost::filesystem::directory_iterator iter2 (*iter);
-                iter2!=boost::filesystem::directory_iterator(); ++iter2)
+            for (const auto& iter2 :
+                std::filesystem::directory_iterator (mDirectorie))
             {
-                boost::filesystem::path path = *iter2;
+                const auto& path = iter2.path();
+                const auto str = Files::pathToUnicodeString(path.filename());
 
                 if (mFoldCase)
                 {
-                    if (Misc::StringUtils::ciEqual(file, path.filename().string()))
-                        return path.string();
+                    if (Misc::StringUtils::ciEqual(file, str))
+                        return path;
                 }
-                else if (path.filename().string() == file)
-                    return path.string();
+                else if (str == file)
+                    return path;
             }
         }
 
@@ -59,20 +60,20 @@ namespace Files
 
     bool Collections::doesExist(const std::string& file) const
     {
-        for (Files::PathContainer::const_iterator iter = mDirectories.begin();
-             iter != mDirectories.end(); ++iter)
+        for (const auto & mDirectorie : mDirectories)
         {
-            for (boost::filesystem::directory_iterator iter2 (*iter);
-                iter2!=boost::filesystem::directory_iterator(); ++iter2)
+            for (const auto& iter2 :
+                std::filesystem::directory_iterator (mDirectorie))
             {
-                boost::filesystem::path path = *iter2;
+                const auto& path = iter2.path();
+                const auto str = Files::pathToUnicodeString(path.filename());
 
                 if (mFoldCase)
                 {
-                    if (Misc::StringUtils::ciEqual(file, path.filename().string()))
+                    if (Misc::StringUtils::ciEqual(file, str))
                         return true;
                 }
-                else if (path.filename().string() == file)
+                else if (str == file)
                     return true;
             }
         }

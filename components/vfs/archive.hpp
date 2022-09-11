@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_RESOURCE_ARCHIVE_H
 
 #include <map>
+#include <filesystem>
 
 #include <components/files/istreamptr.hpp>
 
@@ -15,7 +16,7 @@ namespace VFS
 
         virtual Files::IStreamPtr open() = 0;
 
-        virtual std::string getPath() = 0;
+        virtual std::filesystem::path getPath() = 0;
     };
 
     class Archive

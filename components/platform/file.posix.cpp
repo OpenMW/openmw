@@ -9,6 +9,8 @@
 #include <string>
 #include <cassert>
 
+#include <components/files/conversion.hpp>
+
 namespace Platform::File {
 
     static auto getNativeHandle(Handle handle)
@@ -29,7 +31,7 @@ namespace Platform::File {
         return -1;
     }
 
-    Handle open(const char* filename)
+    Handle open(const std::filesystem::path& filename)
     {
 #ifdef O_BINARY
         static const int openFlags = O_RDONLY | O_BINARY;
@@ -37,10 +39,10 @@ namespace Platform::File {
         static const int openFlags = O_RDONLY;
 #endif
 
-        auto handle = ::open(filename, openFlags, 0);
+        auto handle = ::open(filename.c_str(), openFlags, 0);
         if (handle == -1)
         {
-            throw std::runtime_error(std::string("Failed to open '") + filename + "' for reading: " + strerror(errno));
+            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename) + "' for reading: " + strerror(errno));
         }
         return static_cast<Handle>(handle);
     }

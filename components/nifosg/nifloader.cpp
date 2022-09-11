@@ -225,12 +225,12 @@ namespace NifOsg
     {
     public:
         /// @param filename used for warning messages.
-        LoaderImpl(const std::string& filename, unsigned int ver, unsigned int userver, unsigned int bethver)
+        LoaderImpl(const std::filesystem::path& filename, unsigned int ver, unsigned int userver, unsigned int bethver)
             : mFilename(filename), mVersion(ver), mUserVersion(userver), mBethVersion(bethver)
         {
 
         }
-        std::string mFilename;
+        std::filesystem::path mFilename;
         unsigned int mVersion, mUserVersion, mBethVersion;
 
         size_t mFirstRootTextureIndex{~0u};

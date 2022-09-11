@@ -6,6 +6,8 @@
 #include <boost/locale.hpp>
 #include <cassert>
 
+#include <components/files/conversion.hpp>
+
 namespace Platform::File {
 
     static auto getNativeHandle(Handle handle)
@@ -26,13 +28,12 @@ namespace Platform::File {
         return -1;
     }
 
-    Handle open(const char* filename)
+    Handle open(const std::filesystem::path& filename)
     {
-        std::wstring wname = boost::locale::conv::utf_to_utf<wchar_t>(filename);
-        HANDLE handle = CreateFileW(wname.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+        HANDLE handle = CreateFileW(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
         if (handle == INVALID_HANDLE_VALUE)
         {
-            throw std::runtime_error(std::string("Failed to open '") + filename + "' for reading: " + std::to_string(GetLastError()));
+            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename) + "' for reading: " + std::to_string(GetLastError()));
         }
         return static_cast<Handle>(reinterpret_cast<intptr_t>(handle));
     }

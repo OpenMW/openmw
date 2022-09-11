@@ -4,9 +4,7 @@
 #include <fstream>
 #include <map>
 #include <deque>
-
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 
 #include <components/esm3/esmwriter.hpp>
 
@@ -20,18 +18,18 @@ namespace CSMDoc
     class SavingState
     {
             Operation& mOperation;
-            boost::filesystem::path mPath;
-            boost::filesystem::path mTmpPath;
+            std::filesystem::path mPath;
+            std::filesystem::path mTmpPath;
             ToUTF8::Utf8Encoder mEncoder;
-            boost::filesystem::ofstream mStream;
+            std::ofstream mStream;
             ESM::ESMWriter mWriter;
-            boost::filesystem::path mProjectPath;
+            std::filesystem::path mProjectPath;
             bool mProjectFile;
             std::map<std::string, std::deque<int> > mSubRecords; // record ID, list of subrecords
 
         public:
 
-            SavingState (Operation& operation, const boost::filesystem::path& projectPath,
+            SavingState (Operation& operation, std::filesystem::path  projectPath,
                 ToUTF8::FromType encoding);
 
             bool hasError() const;
@@ -39,11 +37,11 @@ namespace CSMDoc
             void start (Document& document, bool project);
             ///< \param project Save project file instead of content file.
 
-            const boost::filesystem::path& getPath() const;
+            const std::filesystem::path& getPath() const;
 
-            const boost::filesystem::path& getTmpPath() const;
+            const std::filesystem::path& getTmpPath() const;
 
-            boost::filesystem::ofstream& getStream();
+            std::ofstream& getStream();
 
             ESM::ESMWriter& getWriter();
 

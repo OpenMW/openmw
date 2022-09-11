@@ -559,7 +559,7 @@ static bool is_debugger_present()
 #endif
 }
 
-void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
+void crashCatcherInstall(int argc, char **argv, const std::filesystem::path &crashLogPath)
 {
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {

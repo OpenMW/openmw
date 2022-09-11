@@ -2,6 +2,7 @@
 #define DEBUG_LOG_H
 
 #include <iostream>
+#include <filesystem>
 
 namespace Debug
 {
@@ -35,6 +36,16 @@ public:
 
         return *this;
     }
+
+    Log& operator<<(std::filesystem::path&& rhs);
+
+    Log& operator<<(const std::filesystem::path& rhs);
+
+    Log& operator<<(std::u8string&& rhs);
+
+    Log& operator<<(std::u8string_view rhs);
+
+    Log& operator<<(const char8_t* rhs);
 
 private:
     const bool mShouldLog;

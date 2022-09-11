@@ -145,7 +145,7 @@ namespace
 
         const auto fsStrict = variables["fs-strict"].as<bool>();
         const auto resDir = variables["resources"].as<Files::MaybeQuotedPath>();
-        Version::Version v = Version::getOpenmwVersion(resDir.string());
+        const auto v = Version::getOpenmwVersion(resDir);
         Log(Debug::Info) << v.describe();
         dataDirs.insert(dataDirs.begin(), resDir / "vfs");
         const auto fileCollections = Files::Collections(dataDirs, !fsStrict);

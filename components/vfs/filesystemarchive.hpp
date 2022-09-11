@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_FILESYSTEMARCHIVE_H
 #define OPENMW_COMPONENTS_RESOURCE_FILESYSTEMARCHIVE_H
 
+#include <filesystem>
 #include "archive.hpp"
 
 #include <string>
@@ -11,21 +12,21 @@ namespace VFS
     class FileSystemArchiveFile : public File
     {
     public:
-        FileSystemArchiveFile(const std::string& path);
+        FileSystemArchiveFile(const std::filesystem::path &path);
 
         Files::IStreamPtr open() override;
 
-        std::string getPath() override { return mPath; }
+        std::filesystem::path getPath() override { return mPath; }
 
     private:
-        std::string mPath;
+        std::filesystem::path mPath;
 
     };
 
     class FileSystemArchive : public Archive
     {
     public:
-        FileSystemArchive(const std::string& path);
+        FileSystemArchive(const std::filesystem::path &path);
 
         void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
 
@@ -38,7 +39,7 @@ namespace VFS
         index mIndex;
 
         bool mBuiltIndex;
-        std::string mPath;
+        std::filesystem::path mPath;
 
     };
 

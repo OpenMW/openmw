@@ -2,7 +2,7 @@
 #define OPENMW_COMPONENTS_PLATFORM_FILE_HPP
 
 #include <cstdlib>
-#include <string_view>
+#include <filesystem>
 
 namespace Platform::File {
 
@@ -18,7 +18,7 @@ namespace Platform::File {
         End
     };
 
-    Handle open(const char* filename);
+    Handle open(const std::filesystem::path& filename);
 
     void close(Handle handle);
 

@@ -43,8 +43,10 @@
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/detournavigator/stats.hpp>
+#include <components/detournavigator/navigatorimpl.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -103,21 +105,21 @@ namespace MWWorld
             mLoaders.emplace(std::move(extension), &loader);
         }
 
-        void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override
+        void load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener) override
         {
-            const auto it = mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string()));
+            const auto it = mLoaders.find(Misc::StringUtils::lowerCase( Files::pathToUnicodeString(filepath.extension())));
             if (it != mLoaders.end())
             {
-                const std::string filename = filepath.filename().string();
+                const auto filename = filepath.filename();
                 Log(Debug::Info) << "Loading content file " << filename;
                 if (listener != nullptr)
-                    listener->setLabel(MyGUI::TextIterator::toTagsString(filename));
+                    listener->setLabel(MyGUI::TextIterator::toTagsString(Files::pathToUnicodeString(filename)));
                 it->second->load(filepath, index, listener);
             }
             else
             {
                 std::string msg("Cannot load file: ");
-                msg += filepath.string();
+                msg += Files::pathToUnicodeString(filepath);
                 throw std::runtime_error(msg.c_str());
             }
         }
@@ -130,9 +132,9 @@ namespace MWWorld
     {
         ESMStore& mStore;
         OMWScriptsLoader(ESMStore& store) : mStore(store) {}
-        void load(const boost::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
+        void load(const std::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
         {
-            mStore.addOMWScripts(filepath.string());
+            mStore.addOMWScripts(filepath);
         }
     };
 
@@ -157,7 +159,7 @@ namespace MWWorld
         const std::vector<std::string>& groundcoverFiles,
         ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
         const std::string& startCell, const std::string& startupScript,
-        const std::string& resourcePath, const std::string& userDataPath)
+        const std::filesystem::path& resourcePath, const std::filesystem::path& userDataPath)
     : mResourceSystem(resourceSystem), mLocalScripts(mStore),
       mCells(mStore, mReaders), mSky(true),
       mGodMode(false), mScriptsEnabled(true), mDiscardMovements(true), mContentFiles (contentFiles),
@@ -1543,28 +1545,32 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
+        auto navigatorUpdateGuard = mNavigator->makeUpdateGuard();
+
         mPhysics->forEachAnimatedObject([&] (const auto& pair)
         {
             const auto [object, changed] = pair;
             if (changed)
-                updateNavigatorObject(*object);
+                updateNavigatorObject(*object, navigatorUpdateGuard.get());
         });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))
-                updateNavigatorObject(*object);
+                updateNavigatorObject(*object, navigatorUpdateGuard.get());
 
-        mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+        mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3(), navigatorUpdateGuard.get());
     }
 
-    void World::updateNavigatorObject(const MWPhysics::Object& object)
+    void World::updateNavigatorObject(const MWPhysics::Object& object,
+        const DetourNavigator::UpdateGuard* navigatorUpdateGuard)
     {
         if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
             return;
         const MWWorld::Ptr ptr = object.getPtr();
         const DetourNavigator::ObjectShapes shapes(object.getShapeInstance(),
             DetourNavigator::ObjectTransform {ptr.getRefData().getPosition(), ptr.getCellRef().getScale()});
-        mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform());
+        mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform(),
+            navigatorUpdateGuard);
     }
 
     const MWPhysics::RayCastingInterface* World::getRayCasting() const
@@ -1856,8 +1862,8 @@ namespace MWWorld
 
         if (mWorldScene->hasCellLoaded())
         {
-            mNavigator->wait(*MWBase::Environment::get().getWindowManager()->getLoadingScreen(),
-                             DetourNavigator::WaitConditionType::requiredTilesPresent);
+            mNavigator->wait(DetourNavigator::WaitConditionType::requiredTilesPresent,
+                             MWBase::Environment::get().getWindowManager()->getLoadingScreen());
             mWorldScene->resetCellLoaded();
         }
     }
@@ -2960,8 +2966,8 @@ namespace MWWorld
         int idx = 0;
         for (const std::string &file : content)
         {
-            boost::filesystem::path filename(file);
-            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
+            const auto filename = Files::pathFromUnicodeString( file);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(Files::pathToUnicodeString(filename.extension()));
             if (col.doesExist(file))
             {
                 gameContentLoader.load(col.getPath(file), idx, listener);
@@ -3691,9 +3697,9 @@ namespace MWWorld
             return mPhysics->getHalfExtents(object);
     }
 
-    std::string World::exportSceneGraph(const Ptr &ptr)
+    std::filesystem::path World::exportSceneGraph(const Ptr& ptr)
     {
-        std::string file = mUserDataPath + "/openmw.osgt";
+        auto file = mUserDataPath / "openmw.osgt";
         if (!ptr.isEmpty())
         {
             mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);

@@ -155,7 +155,7 @@ namespace LuaUtil
         }
     }
 
-    void LuaStorage::load(const std::string& path)
+    void LuaStorage::load(const std::filesystem::path &path)
     {
         assert(mData.empty());  // Shouldn't be used before loading
         try
@@ -177,7 +177,7 @@ namespace LuaUtil
         }
     }
 
-    void LuaStorage::save(const std::string& path) const
+    void LuaStorage::save(const std::filesystem::path &path) const
     {
         sol::table data(mLua, sol::create);
         for (const auto& [sectionName, section] : mData)

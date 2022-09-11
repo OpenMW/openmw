@@ -50,7 +50,7 @@ CSVDoc::NewGameDialogue::NewGameDialogue()
     move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
 }
 
-void CSVDoc::NewGameDialogue::setLocalData (const boost::filesystem::path& localData)
+void CSVDoc::NewGameDialogue::setLocalData (const std::filesystem::path& localData)
 {
     mAdjusterWidget->setLocalData (localData);
 }

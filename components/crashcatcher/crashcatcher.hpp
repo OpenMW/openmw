@@ -12,7 +12,7 @@
 constexpr char crash_switch[] = "--cc-handle-crash";
 
 #if USE_CRASH_CATCHER
-extern void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath);
+extern void crashCatcherInstall(int argc, char **argv, const std::filesystem::path &crashLogPath);
 #else
 inline void crashCatcherInstall(int, char **, const std::string &crashLogPath)
 {

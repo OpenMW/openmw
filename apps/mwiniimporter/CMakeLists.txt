@@ -15,7 +15,6 @@ openmw_add_executable(openmw-iniimporter
 
 target_link_libraries(openmw-iniimporter
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
     components
 )
 

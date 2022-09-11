@@ -21,10 +21,10 @@ void Manager::clear()
     mChangedSettings.clear();
 }
 
-std::string Manager::load(const Files::ConfigurationManager& cfgMgr, bool loadEditorSettings)
+std::filesystem::path Manager::load(const Files::ConfigurationManager& cfgMgr, bool loadEditorSettings)
 {
     SettingsFileParser parser;
-    const std::vector<boost::filesystem::path>& paths = cfgMgr.getActiveConfigPaths();
+    const std::vector<std::filesystem::path>& paths = cfgMgr.getActiveConfigPaths();
     if (paths.empty())
         throw std::runtime_error("No config dirs! ConfigurationManager::readConfiguration must be called first.");
 
@@ -44,7 +44,7 @@ std::string Manager::load(const Files::ConfigurationManager& cfgMgr, bool loadEd
     }
 
     // Create the settings manager and load default settings file.
-    const std::string defaultsBin = (paths.front() / defaultSettingsFile).string();
+    const auto defaultsBin = paths.front() / defaultSettingsFile;
     if (!std::filesystem::exists(defaultsBin))
         throw std::runtime_error ("No default settings file found! Make sure the file \"" + defaultSettingsFile + "\" was properly installed.");
     parser.loadSettingsFile(defaultsBin, mDefaultSettings, true, false);
@@ -52,20 +52,20 @@ std::string Manager::load(const Files::ConfigurationManager& cfgMgr, bool loadEd
     // Load "settings.cfg" or "openmw-cs.cfg" from every config dir except the last one as additional default settings.
     for (int i = 0; i < static_cast<int>(paths.size()) - 1; ++i)
     {
-        const std::string additionalDefaults = (paths[i] / userSettingsFile).string();
+        const auto additionalDefaults = paths[i] / userSettingsFile;
         if (std::filesystem::exists(additionalDefaults))
             parser.loadSettingsFile(additionalDefaults, mDefaultSettings, false, true);
     }
 
     // Load "settings.cfg" or "openmw-cs.cfg" from the last config dir as user settings. This path will be used to save modified settings.
-    std::string settingspath = (paths.back() / userSettingsFile).string();
+    auto settingspath = paths.back() / userSettingsFile;
     if (std::filesystem::exists(settingspath))
         parser.loadSettingsFile(settingspath, mUserSettings, false, false);
 
     return settingspath;
 }
 
-void Manager::saveUser(const std::string &file)
+void Manager::saveUser(const std::filesystem::path &file)
 {
     SettingsFileParser parser;
     parser.saveSettingsFile(file, mUserSettings);

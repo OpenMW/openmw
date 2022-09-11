@@ -4,13 +4,13 @@
 #include <vector>
 #include <string>
 
-#include <boost/filesystem/path.hpp>
-
 #include <QObject>
 #include <QProcess>
 #include <QTextDocument>
 
 #include <components/esm3/debugprofile.hpp>
+
+#include <filesystem>
 
 class QTemporaryFile;
 
@@ -25,15 +25,15 @@ namespace CSMDoc
             QProcess mProcess;
             bool mRunning;
             ESM::DebugProfile mProfile;
-            std::vector<std::string> mContentFiles;
+            std::vector<std::filesystem::path> mContentFiles;
             std::string mStartupInstruction;
             QTemporaryFile *mStartup;
             QTextDocument mLog;
-            boost::filesystem::path mProjectPath;
+            std::filesystem::path mProjectPath;
 
         public:
 
-            Runner (const boost::filesystem::path& projectPath);
+            Runner (std::filesystem::path  projectPath);
 
             ~Runner();
 
@@ -48,7 +48,7 @@ namespace CSMDoc
             bool isRunning() const;
 
             void configure (const ESM::DebugProfile& profile,
-                const std::vector<std::string>& contentFiles,
+                const std::vector<std::filesystem::path> &contentFiles,
                 const std::string& startupInstruction);
 
             QTextDocument *getLog();

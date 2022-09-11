@@ -32,41 +32,44 @@ namespace DetourNavigator
             --it->second;
     }
 
-    void NavigatorImpl::setWorldspace(std::string_view worldspace)
+    void NavigatorImpl::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
     {
-        mNavMeshManager.setWorldspace(worldspace);
+        mNavMeshManager.setWorldspace(worldspace, getImpl(guard));
     }
 
-    void NavigatorImpl::updateBounds(const osg::Vec3f& playerPosition)
+    void NavigatorImpl::updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard)
     {
-        mNavMeshManager.updateBounds(playerPosition);
+        mNavMeshManager.updateBounds(playerPosition, getImpl(guard));
     }
 
-    void NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
+    void NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
+        const UpdateGuard* guard)
     {
-        addObjectImpl(id, shapes, transform);
+        addObjectImpl(id, shapes, transform, guard);
     }
 
-    bool NavigatorImpl::addObjectImpl(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
+    bool NavigatorImpl::addObjectImpl(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
+        const UpdateGuard* guard)
     {
         const CollisionShape collisionShape(shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
-        bool result = mNavMeshManager.addObject(id, collisionShape, transform, AreaType_ground);
+        bool result = mNavMeshManager.addObject(id, collisionShape, transform, AreaType_ground, getImpl(guard));
         if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
             const ObjectId avoidId(avoidShape);
             const CollisionShape avoidCollisionShape(shapes.mShapeInstance, *avoidShape, shapes.mTransform);
-            if (mNavMeshManager.addObject(avoidId, avoidCollisionShape, transform, AreaType_null))
+            if (mNavMeshManager.addObject(avoidId, avoidCollisionShape, transform, AreaType_null, getImpl(guard)))
             {
-                updateAvoidShapeId(id, avoidId);
+                updateAvoidShapeId(id, avoidId, guard);
                 result = true;
             }
         }
         return result;
     }
 
-    void NavigatorImpl::addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform)
+    void NavigatorImpl::addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform,
+        const UpdateGuard* guard)
     {
-        if (addObjectImpl(id, static_cast<const ObjectShapes&>(shapes), transform))
+        if (addObjectImpl(id, static_cast<const ObjectShapes&>(shapes), transform, guard))
         {
             const osg::Vec3f start = toNavMeshCoordinates(mSettings.mRecast, shapes.mConnectionStart);
             const osg::Vec3f end = toNavMeshCoordinates(mSettings.mRecast, shapes.mConnectionEnd);
@@ -75,54 +78,55 @@ namespace DetourNavigator
         }
     }
 
-    void NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
+    void NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
+        const UpdateGuard* guard)
     {
-        const CollisionShape collisionShape(shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
-        mNavMeshManager.updateObject(id, collisionShape, transform, AreaType_ground);
+        mNavMeshManager.updateObject(id, transform, AreaType_ground, getImpl(guard));
         if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
             const ObjectId avoidId(avoidShape);
-            const CollisionShape avoidCollisionShape(shapes.mShapeInstance, *avoidShape, shapes.mTransform);
-            if (mNavMeshManager.updateObject(avoidId, avoidCollisionShape, transform, AreaType_null))
-                updateAvoidShapeId(id, avoidId);
+            if (mNavMeshManager.updateObject(avoidId, transform, AreaType_null, getImpl(guard)))
+                updateAvoidShapeId(id, avoidId, guard);
         }
     }
 
-    void NavigatorImpl::updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform)
+    void NavigatorImpl::updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform,
+        const UpdateGuard* guard)
     {
-        return updateObject(id, static_cast<const ObjectShapes&>(shapes), transform);
+        return updateObject(id, static_cast<const ObjectShapes&>(shapes), transform, guard);
     }
 
-    void NavigatorImpl::removeObject(const ObjectId id)
+    void NavigatorImpl::removeObject(const ObjectId id, const UpdateGuard* guard)
     {
-        mNavMeshManager.removeObject(id);
+        mNavMeshManager.removeObject(id, getImpl(guard));
         const auto avoid = mAvoidIds.find(id);
         if (avoid != mAvoidIds.end())
-            mNavMeshManager.removeObject(avoid->second);
+            mNavMeshManager.removeObject(avoid->second, getImpl(guard));
         const auto water = mWaterIds.find(id);
         if (water != mWaterIds.end())
-            mNavMeshManager.removeObject(water->second);
+            mNavMeshManager.removeObject(water->second, getImpl(guard));
         mNavMeshManager.removeOffMeshConnections(id);
     }
 
-    void NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
+    void NavigatorImpl::addWater(const osg::Vec2i& cellPosition, int cellSize, float level, const UpdateGuard* guard)
     {
-        mNavMeshManager.addWater(cellPosition, cellSize, level);
+        mNavMeshManager.addWater(cellPosition, cellSize, level, getImpl(guard));
     }
 
-    void NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)
+    void NavigatorImpl::removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
     {
-        mNavMeshManager.removeWater(cellPosition);
+        mNavMeshManager.removeWater(cellPosition, getImpl(guard));
     }
 
-    void NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape)
+    void NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape,
+        const UpdateGuard* guard)
     {
-        mNavMeshManager.addHeightfield(cellPosition, cellSize, shape);
+        mNavMeshManager.addHeightfield(cellPosition, cellSize, shape, getImpl(guard));
     }
 
-    void NavigatorImpl::removeHeightfield(const osg::Vec2i& cellPosition)
+    void NavigatorImpl::removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
     {
-        mNavMeshManager.removeHeightfield(cellPosition);
+        mNavMeshManager.removeHeightfield(cellPosition, getImpl(guard));
     }
 
     void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)
@@ -146,15 +150,15 @@ namespace DetourNavigator
         mNavMeshManager.removeOffMeshConnections(ObjectId(&pathgrid));
     }
 
-    void NavigatorImpl::update(const osg::Vec3f& playerPosition)
+    void NavigatorImpl::update(const osg::Vec3f& playerPosition, const UpdateGuard* guard)
     {
         removeUnusedNavMeshes();
-        mNavMeshManager.update(playerPosition);
+        mNavMeshManager.update(playerPosition, getImpl(guard));
     }
 
-    void NavigatorImpl::wait(Loading::Listener& listener, WaitConditionType waitConditionType)
+    void NavigatorImpl::wait(WaitConditionType waitConditionType, Loading::Listener* listener)
     {
-        mNavMeshManager.wait(listener, waitConditionType);
+        mNavMeshManager.wait(waitConditionType, listener);
     }
 
     SharedNavMeshCacheItem NavigatorImpl::getNavMesh(const AgentBounds& agentBounds) const
@@ -182,22 +186,18 @@ namespace DetourNavigator
         return mNavMeshManager.getRecastMeshTiles();
     }
 
-    void NavigatorImpl::updateAvoidShapeId(const ObjectId id, const ObjectId avoidId)
+    void NavigatorImpl::updateAvoidShapeId(const ObjectId id, const ObjectId avoidId, const UpdateGuard* guard)
     {
-        updateId(id, avoidId, mWaterIds);
+        updateId(id, avoidId, mWaterIds, guard);
     }
 
-    void NavigatorImpl::updateWaterShapeId(const ObjectId id, const ObjectId waterId)
-    {
-        updateId(id, waterId, mWaterIds);
-    }
-
-    void NavigatorImpl::updateId(const ObjectId id, const ObjectId updateId, std::unordered_map<ObjectId, ObjectId>& ids)
+    void NavigatorImpl::updateId(const ObjectId id, const ObjectId updateId,
+        std::unordered_map<ObjectId, ObjectId>& ids, const UpdateGuard* guard)
     {
         auto inserted = ids.insert(std::make_pair(id, updateId));
         if (!inserted.second)
         {
-            mNavMeshManager.removeObject(inserted.first->second);
+            mNavMeshManager.removeObject(inserted.first->second, getImpl(guard));
             inserted.first->second = updateId;
         }
     }

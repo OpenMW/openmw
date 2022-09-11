@@ -1,5 +1,6 @@
 #include <components/files/hash.hpp>
 #include <components/files/constrainedfilestream.hpp>
+#include <components/files/conversion.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -27,7 +28,7 @@ namespace
 
     TEST(FilesGetHash, shouldClearErrors)
     {
-        const std::string fileName = temporaryFilePath("fileName");
+        const auto fileName = temporaryFilePath("fileName");
         std::string content;
         std::fill_n(std::back_inserter(content), 1, 'a');
         std::istringstream stream(content);
@@ -37,7 +38,7 @@ namespace
 
     TEST_P(FilesGetHash, shouldReturnHashForStringStream)
     {
-        const std::string fileName = temporaryFilePath("fileName");
+        const auto fileName = temporaryFilePath("fileName");
         std::string content;
         std::fill_n(std::back_inserter(content), GetParam().mSize, 'a');
         std::istringstream stream(content);
@@ -50,11 +51,11 @@ namespace
         std::replace(fileName.begin(), fileName.end(), '/', '_');
         std::string content;
         std::fill_n(std::back_inserter(content), GetParam().mSize, 'a');
-        fileName = outputFilePath(fileName);
-        std::fstream(fileName, std::ios_base::out | std::ios_base::binary)
+        const auto file = outputFilePath(fileName);
+        std::fstream(file, std::ios_base::out | std::ios_base::binary)
             .write(content.data(), static_cast<std::streamsize>(content.size()));
-        const auto stream = Files::openConstrainedFileStream(fileName, 0, content.size());
-        EXPECT_EQ(getHash(fileName, *stream), GetParam().mHash);
+        const auto stream = Files::openConstrainedFileStream(file, 0, content.size());
+        EXPECT_EQ(getHash(file, *stream), GetParam().mHash);
     }
 
     INSTANTIATE_TEST_SUITE_P(Params, FilesGetHash, Values(

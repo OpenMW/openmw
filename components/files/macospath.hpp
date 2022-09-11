@@ -3,7 +3,7 @@
 
 #if defined(macintosh) || defined(Macintosh) || defined(__APPLE__) || defined(__MACH__)
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 /**
  * \namespace Files
@@ -21,42 +21,42 @@ struct MacOsPath
     /**
      * \brief Return path to the local directory.
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getUserConfigPath() const;
+    std::filesystem::path getUserConfigPath() const;
 
-    boost::filesystem::path getUserDataPath() const;
+    std::filesystem::path getUserDataPath() const;
 
     /**
      * \brief Return path to the global (system) directory.
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getGlobalConfigPath() const;
+    std::filesystem::path getGlobalConfigPath() const;
 
     /**
      * \brief Return path to the runtime directory which is the
      * place where an application was started.
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getLocalPath() const;
+    std::filesystem::path getLocalPath() const;
 
     /**
      * \brief
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getCachePath() const;
+    std::filesystem::path getCachePath() const;
 
     /**
      * \brief
      *
-     * \return boost::filesystem::path
+     * \return std::filesystem::path
      */
-    boost::filesystem::path getGlobalDataPath() const;
+    std::filesystem::path getGlobalDataPath() const;
 
-    boost::filesystem::path getInstallPath() const;
+    std::filesystem::path getInstallPath() const;
 
     std::string mName;
 };

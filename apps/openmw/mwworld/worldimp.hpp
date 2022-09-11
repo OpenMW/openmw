@@ -109,7 +109,7 @@ namespace MWWorld
             bool mDiscardMovements;
             std::vector<std::string> mContentFiles;
 
-            std::string mUserDataPath;
+            std::filesystem::path mUserDataPath;
 
             osg::Vec3f mDefaultHalfExtents;
             DetourNavigator::CollisionShapeType mDefaultActorCollisionShapeType;
@@ -166,7 +166,8 @@ namespace MWWorld
 
             void updateNavigator();
 
-            void updateNavigatorObject(const MWPhysics::Object& object);
+            void updateNavigatorObject(const MWPhysics::Object& object,
+                const DetourNavigator::UpdateGuard* navigatorUpdateGuard = nullptr);
 
             void ensureNeededRecords();
 
@@ -202,7 +203,7 @@ namespace MWWorld
                 const std::vector<std::string>& groundcoverFiles,
                 ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
                 const std::string& startCell, const std::string& startupScript,
-                const std::string& resourcePath, const std::string& userDataPath);
+                const std::filesystem::path& resourcePath, const std::filesystem::path& userDataPath);
 
             virtual ~World();
 
@@ -729,7 +730,7 @@ namespace MWWorld
 
             /// Export scene graph to a file and return the filename.
             /// \param ptr object to export scene graph for (if empty, export entire scene graph)
-            std::string exportSceneGraph(const MWWorld::Ptr& ptr) override;
+            std::filesystem::path exportSceneGraph(const MWWorld::Ptr& ptr) override;
 
             /// Preload VFX associated with this effect list
             void preloadEffects(const ESM::EffectList* effectList) override;

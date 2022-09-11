@@ -173,6 +173,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("far", 0.f));
             stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
             stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{}));
+            stateset->addUniform(new osg::Uniform("isReflection", false));
             if (mUsePlayerUniforms)
             {
                 stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
@@ -368,7 +369,7 @@ namespace MWRender
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::string& resourcePath,
+        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::filesystem::path& resourcePath,
         DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
         SceneUtil::UnrefQueue& unrefQueue)
         : mSkyBlending(Settings::Manager::getBool("sky blending", "Fog"))
@@ -1525,7 +1526,7 @@ namespace MWRender
             updateProjectionMatrix();
         }
     }
-    void RenderingManager::exportSceneGraph(const MWWorld::Ptr &ptr, const std::string &filename, const std::string &format)
+    void RenderingManager::exportSceneGraph(const MWWorld::Ptr &ptr, const std::filesystem::path& filename, const std::string &format)
     {
         osg::Node* node = mViewer->getSceneData();
         if (!ptr.isEmpty())

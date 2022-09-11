@@ -1,13 +1,16 @@
 
 #include "merge.hpp"
 
-#include <QVBoxLayout>
 #include <QDialogButtonBox>
-#include <QSplitter>
-#include <QPushButton>
-#include <QListWidget>
-#include <QLabel>
 #include <QKeyEvent>
+#include <QLabel>
+#include <QListWidget>
+#include <QPushButton>
+#include <QSplitter>
+#include <QVBoxLayout>
+
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/doc/documentmanager.hpp"
@@ -98,14 +101,14 @@ void CSVTools::Merge::configure (CSMDoc::Document *document)
     while (mFiles->count())
         delete mFiles->takeItem (0);
 
-    std::vector<boost::filesystem::path> files = document->getContentFiles();
+    std::vector<std::filesystem::path> files = document->getContentFiles();
 
-    for (std::vector<boost::filesystem::path>::const_iterator iter (files.begin());
+    for (std::vector<std::filesystem::path>::const_iterator iter (files.begin());
         iter!=files.end(); ++iter)
-        mFiles->addItem (QString::fromUtf8 (iter->filename().string().c_str()));
+        mFiles->addItem (Files::pathToQString(iter->filename()));
 }
 
-void CSVTools::Merge::setLocalData (const boost::filesystem::path& localData)
+void CSVTools::Merge::setLocalData (const std::filesystem::path& localData)
 {
     mAdjuster->setLocalData (localData);
 }
@@ -125,7 +128,7 @@ void CSVTools::Merge::accept()
 {
     if ((mDocument->getState() & CSMDoc::State_Merging)==0)
     {
-        std::vector< boost::filesystem::path > files (1, mAdjuster->getPath());
+        std::vector< std::filesystem::path > files { mAdjuster->getPath() };
 
         std::unique_ptr<CSMDoc::Document> target (
             mDocumentManager.makeDocument (files, files[0], true));

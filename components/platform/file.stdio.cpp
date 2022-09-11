@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <cassert>
 
+#include <components/files/conversion.hpp>
+
 namespace Platform::File {
 
     static auto getNativeHandle(Handle handle)
@@ -26,12 +28,12 @@ namespace Platform::File {
         return -1;
     }
 
-    Handle open(const char* filename)
+    Handle open(const std::filesystem::path& filename)
     {
-        FILE* handle = fopen(filename, "rb");
+        FILE* handle = fopen(filename.c_str(), "rb");
         if (handle == nullptr)
         {
-            throw std::runtime_error(std::string("Failed to open '") + filename + "' for reading: " + strerror(errno));
+            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename) + "' for reading: " + strerror(errno));
         }
         return static_cast<Handle>(reinterpret_cast<intptr_t>(handle));
     }

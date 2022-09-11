@@ -1,16 +1,19 @@
 #include "importer.hpp"
 
 #include <iostream>
+#include <filesystem>
+#include <fstream>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/esm3/esmreader.hpp>
+#include <components/misc/timeconvert.hpp>
+#include <components/files/conversion.hpp>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 
-namespace bfs = boost::filesystem;
+
+namespace sfs = std::filesystem;
 
 MwIniImporter::MwIniImporter()
     : mVerbose(false)
@@ -654,12 +657,12 @@ void MwIniImporter::setVerbose(bool verbose) {
     mVerbose = verbose;
 }
 
-MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::path&  filename) const {
-    std::cout << "load ini file: " << filename << std::endl;
+MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::filesystem::path&  filename) const {
+    std::cout << "load ini file: " << Files::pathToUnicodeString(filename) << std::endl;
 
     std::string section("");
     MwIniImporter::multistrmap map;
-    bfs::ifstream file((bfs::path(filename)));
+    std::ifstream file(filename);
     ToUTF8::Utf8Encoder encoder(mEncoding);
 
     std::string line;
@@ -715,11 +718,11 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::p
     return map;
 }
 
-MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::path& filename) {
-    std::cout << "load cfg file: " << filename << std::endl;
+MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::filesystem::path& filename) {
+    std::cout << "load cfg file: " << Files::pathToUnicodeString(filename) << std::endl;
 
     MwIniImporter::multistrmap map;
-    bfs::ifstream file((bfs::path(filename)));
+    std::ifstream file(filename);
 
     std::string line;
     while (std::getline(file, line)) {
@@ -861,7 +864,7 @@ std::vector<std::string>::iterator MwIniImporter::findString(std::vector<std::st
     });
 }
 
-void MwIniImporter::addPaths(std::vector<boost::filesystem::path>& output, std::vector<std::string> input) {
+void MwIniImporter::addPaths(std::vector<std::filesystem::path>& output, std::vector<std::string> input) {
     for (auto& path : input)
     {
         if (path.front() == '"')
@@ -869,18 +872,18 @@ void MwIniImporter::addPaths(std::vector<boost::filesystem::path>& output, std::
             // Drop first and last characters - quotation marks
             path = path.substr(1, path.size() - 2);
         }
-        output.emplace_back(path);
+        output.emplace_back(Files::pathFromUnicodeString(path));
     }
 }
 
-void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const boost::filesystem::path& iniFilename) const
+void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const std::filesystem::path& iniFilename) const
 {
-    std::vector<std::pair<std::time_t, boost::filesystem::path>> contentFiles;
+    std::vector<std::pair<std::time_t, std::filesystem::path>> contentFiles;
     std::string baseGameFile("Game Files:GameFile");
     std::time_t defaultTime = 0;
     ToUTF8::Utf8Encoder encoder(mEncoding);
 
-    std::vector<boost::filesystem::path> dataPaths;
+    std::vector<std::filesystem::path> dataPaths;
     if (cfg.count("data"))
         addPaths(dataPaths, cfg["data"]);
 
@@ -909,7 +912,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
                 bool found = false;
                 for (auto & dataPath : dataPaths)
                 {
-                    boost::filesystem::path path = dataPath / *entry;
+                    std::filesystem::path path = dataPath / *entry;
                     std::time_t time = lastWriteTime(path, defaultTime);
                     if (time != defaultTime)
                     {
@@ -936,13 +939,13 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     reader.setEncoder(&encoder);
     for (auto& file : contentFiles)
     {
-        reader.open(file.second.string());
+        reader.open(file.second);
         std::vector<std::string> dependencies;
         for (auto& gameFile : reader.getGameFiles())
         {
             dependencies.push_back(gameFile.name);
         }
-        unsortedFiles.emplace_back(boost::filesystem::path(reader.getName()).filename().string(), dependencies);
+        unsortedFiles.emplace_back(Files::pathToUnicodeString(reader.getName().filename()), dependencies);
         reader.close();
     }
 
@@ -983,13 +986,13 @@ void MwIniImporter::setInputEncoding(const ToUTF8::FromType &encoding)
   mEncoding = encoding;
 }
 
-std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename, std::time_t defaultTime)
+std::time_t MwIniImporter::lastWriteTime(const std::filesystem::path& filename, std::time_t defaultTime)
 {
     std::time_t writeTime(defaultTime);
-    if (boost::filesystem::exists(filename))
+    if (std::filesystem::exists(filename))
     {
-        boost::filesystem::path resolved = boost::filesystem::canonical(filename);
-        writeTime = boost::filesystem::last_write_time(resolved);
+        std::filesystem::path resolved = std::filesystem::canonical(filename);
+        writeTime = Misc::to_time_t(std::filesystem::last_write_time (resolved));
 
         // print timestamp
         const int size=1024;
