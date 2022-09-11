@@ -243,17 +243,20 @@ if (USE_QT)
 endif()
 
 set(USED_OSG_COMPONENTS
+    osgAnimation
     osgDB
-    osgViewer
-    osgText
     osgGA
-    osgParticle
-    osgUtil
     osgFX
+    osgParticle
+    osgText
+    osgUtil
     osgShadow
-    osgAnimation)
+    osgSim
+    osgViewer
+    )
 set(USED_OSG_PLUGINS
     osgdb_bmp
+    osgdb_dae
     osgdb_dds
     osgdb_freetype
     osgdb_jpeg
