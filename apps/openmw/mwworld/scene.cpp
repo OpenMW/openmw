@@ -18,6 +18,7 @@
 #include <components/misc/convert.hpp>
 #include <components/detournavigator/heightfieldshape.hpp>
 #include <components/detournavigator/navigatorimpl.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

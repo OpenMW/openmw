@@ -4,6 +4,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loaddoor.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"

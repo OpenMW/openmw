@@ -3,6 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

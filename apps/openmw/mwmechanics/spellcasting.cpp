@@ -6,6 +6,7 @@
 #include <components/misc/strings/format.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadstat.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"

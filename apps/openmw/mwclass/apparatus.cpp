@@ -3,7 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadappa.hpp>
-
+#include <components/esm3/loadnpc.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 

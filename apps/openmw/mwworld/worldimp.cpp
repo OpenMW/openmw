@@ -21,6 +21,8 @@
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadstat.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/mathutil.hpp>

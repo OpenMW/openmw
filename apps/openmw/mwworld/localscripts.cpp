@@ -2,6 +2,9 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadscpt.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "esmstore.hpp"
 #include "cellstore.hpp"

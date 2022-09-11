@@ -4,6 +4,7 @@
 
 #include <components/esm3/loadclot.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

@@ -23,6 +23,9 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
 

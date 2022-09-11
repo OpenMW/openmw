@@ -1,5 +1,7 @@
 #include "bodypart.hpp"
 
+#include <components/esm3/loadbody.hpp>
+
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/objects.hpp"
 
