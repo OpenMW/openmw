@@ -205,7 +205,7 @@ add_component_dir (stereo
     )
 
 add_component_dir (debug
-    debugging debuglog gldebug
+    debugging debuglog gldebug debugdraw
     )
 
 IF(NOT WIN32 AND NOT APPLE)
