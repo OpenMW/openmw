@@ -18,6 +18,7 @@
     Bug #6987: Set/Mod Blindness should not darken the screen
     Bug #6992: Crossbow reloading doesn't look the same as in Morrowind
     Bug #6993: Shooting your last round of ammunition causes the attack animation to cancel
+    Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
     Feature #6979: Add support of loading and displaying LOD assets purely based on their filename extension
     Feature #6983: PCVisionBonus script functions
