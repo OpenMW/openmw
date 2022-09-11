@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <memory>
 #include <istream>
+#include <filesystem>
 
 #include "common.hpp"
 #include "loadtes4.hpp"

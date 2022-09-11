@@ -2,6 +2,7 @@
 #define ESMLOADER_HPP
 
 #include <optional>
+#include <vector>
 
 #include "contentloader.hpp"
 

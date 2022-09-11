@@ -31,7 +31,6 @@
 #include <cassert>
 #include <stdexcept>
 #include <unordered_map>
-#include <filesystem>
 #include <iostream> // for debugging
 #include <sstream>  // for debugging
 #include <iomanip>  // for debugging
