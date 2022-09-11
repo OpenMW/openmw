@@ -32,11 +32,20 @@ namespace Misc::StringUtils
     {
         return tolowermap[static_cast<unsigned char>(c)];
     }
+    inline constexpr char8_t toLower(char8_t c)
+    {
+        return tolowermap[static_cast<unsigned char>(c)];
+    }
 
     /// Transforms input string to lower case w/o copy
     inline void lowerCaseInPlace(std::string& str)
     {
-        for (char& ch : str)
+        for (auto& ch : str)
+            ch = toLower(ch);
+    }
+    inline void lowerCaseInPlace(std::u8string& str)
+    {
+        for (auto& ch : str)
             ch = toLower(ch);
     }
 
@@ -44,6 +53,12 @@ namespace Misc::StringUtils
     inline std::string lowerCase(std::string_view in)
     {
         std::string out(in);
+        lowerCaseInPlace(out);
+        return out;
+    }
+    inline std::u8string lowerCase(std::u8string_view in)
+    {
+        std::u8string out(in);
         lowerCaseInPlace(out);
         return out;
     }

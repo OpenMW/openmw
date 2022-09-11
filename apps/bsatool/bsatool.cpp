@@ -10,6 +10,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 #define BSATOOL_VERSION 1.1
 

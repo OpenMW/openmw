@@ -9,7 +9,7 @@
 #include "windows_crashshm.hpp"
 #include <SDL_messagebox.h>
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 namespace Crash
 {

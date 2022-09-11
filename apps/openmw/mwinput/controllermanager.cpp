@@ -7,7 +7,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
-#include <components/misc/stringops.hpp>
 #include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"

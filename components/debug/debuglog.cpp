@@ -3,7 +3,7 @@
 #include <mutex>
 
 #include <components/files/conversion.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 namespace Debug
 {

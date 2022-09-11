@@ -1,7 +1,7 @@
 
 #include "conversion.hpp"
 
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 std::string Files::pathToUnicodeString(const std::filesystem::path& path)
 {

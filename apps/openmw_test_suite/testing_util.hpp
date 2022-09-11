@@ -6,7 +6,7 @@
 
 #include <components/vfs/archive.hpp>
 #include <components/vfs/manager.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 namespace TestingOpenMW
 {
