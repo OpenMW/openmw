@@ -3,25 +3,25 @@
 
 #include <string>
 
-std::string bodyPartLabel(int idx);
-std::string meshPartLabel(int idx);
-std::string meshTypeLabel(int idx);
-std::string clothingTypeLabel(int idx);
-std::string armorTypeLabel(int idx);
-std::string dialogTypeLabel(int idx);
-std::string questStatusLabel(int idx);
-std::string creatureTypeLabel(int idx);
-std::string soundTypeLabel(int idx);
-std::string weaponTypeLabel(int idx);
+std::string_view bodyPartLabel(int idx);
+std::string_view meshPartLabel(int idx);
+std::string_view meshTypeLabel(int idx);
+std::string_view clothingTypeLabel(int idx);
+std::string_view armorTypeLabel(int idx);
+std::string_view dialogTypeLabel(int idx);
+std::string_view questStatusLabel(int idx);
+std::string_view creatureTypeLabel(int idx);
+std::string_view soundTypeLabel(int idx);
+std::string_view weaponTypeLabel(int idx);
 
 // This function's a bit different because the types are record types,
 // not consecutive values.
-std::string aiTypeLabel(int type);
+std::string_view aiTypeLabel(int type);
 
 // This one's also a bit different, because it enumerates dialog
 // select rule functions, not types.  Structurally, it still converts
 // indexes to strings for display.
-std::string ruleFunction(int idx);
+std::string_view ruleFunction(int idx);
 
 // The labels below here can all be loaded from GMSTs, but are not
 // currently because among other things, that requires loading the
@@ -32,15 +32,15 @@ std::string ruleFunction(int idx);
 // and the indexes for referencing the types in other records in the
 // database.  Then a single label function could work for all types.
 
-std::string magicEffectLabel(int idx);
-std::string attributeLabel(int idx);
-std::string spellTypeLabel(int idx);
-std::string specializationLabel(int idx);
-std::string skillLabel(int idx);
-std::string apparatusTypeLabel(int idx);
-std::string rangeTypeLabel(int idx);
-std::string schoolLabel(int idx);
-std::string enchantTypeLabel(int idx);
+std::string_view magicEffectLabel(int idx);
+std::string_view attributeLabel(int idx);
+std::string_view spellTypeLabel(int idx);
+std::string_view specializationLabel(int idx);
+std::string_view skillLabel(int idx);
+std::string_view apparatusTypeLabel(int idx);
+std::string_view rangeTypeLabel(int idx);
+std::string_view schoolLabel(int idx);
+std::string_view enchantTypeLabel(int idx);
 
 // The are the flag functions that convert a bitmask into a list of
 // human readble strings representing the set bits.
