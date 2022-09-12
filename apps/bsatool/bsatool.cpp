@@ -45,21 +45,18 @@ bool parseOptions (int argc, char** argv, Arguments &info)
             "      Create an archive.\n\n"
             "Allowed options");
 
-    desc.add_options()
-        ("help,h", "print help message.")
-        ("version,v", "print version information and quit.")
-        ("long,l", "Include extra information in archive listing.")
-        ("full-path,f", "Create directory hierarchy on file extraction "
-         "(always true for extractall).")
-        ;
+    auto addOption = desc.add_options();
+    addOption("help,h", "print help message.");
+    addOption("version,v", "print version information and quit.");
+    addOption("long,l", "Include extra information in archive listing.");
+    addOption("full-path,f", "Create directory hierarchy on file extraction (always true for extractall).");
 
     // input-file is hidden and used as a positional argument
     bpo::options_description hidden("Hidden Options");
 
-    hidden.add_options()
-        ( "mode,m", bpo::value<std::string>(), "bsatool mode")
-        ( "input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file")
-        ;
+    auto addHiddenOption = hidden.add_options();
+    addHiddenOption("mode,m", bpo::value<std::string>(), "bsatool mode");
+    addHiddenOption("input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
 
     bpo::positional_options_description p;
     p.add("mode", 1).add("input-file", 3);

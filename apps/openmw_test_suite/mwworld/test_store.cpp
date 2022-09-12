@@ -61,11 +61,11 @@ struct ContentFileTest : public ::testing::Test
         boost::program_options::variables_map variables;
 
         boost::program_options::options_description desc("Allowed options");
-        desc.add_options()
-        ("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing())
-        ("content", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
-            ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
-        ("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""));
+        auto addOption = desc.add_options();
+        addOption("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing());
+        addOption("content", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
+            ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon");
+        addOption("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""));
         Files::ConfigurationManager::addCommonOptions(desc);
 
         mConfigurationManager.readConfiguration(variables, desc, true);

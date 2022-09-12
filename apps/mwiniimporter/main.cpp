@@ -61,20 +61,20 @@ int wmain(int argc, wchar_t *wargv[]) {
     {
         bpo::options_description desc("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
         bpo::positional_options_description p_desc;
-        desc.add_options()
-            ("help,h", "produce help message")
-            ("verbose,v", "verbose output")
-            ("ini,i", bpo::value<Files::MaybeQuotedPath>(), "morrowind.ini file")
-            ("cfg,c", bpo::value<Files::MaybeQuotedPath>(), "openmw.cfg file")
-            ("output,o", bpo::value<Files::MaybeQuotedPath>()->default_value({}), "openmw.cfg file")
-            ("game-files,g", "import esm and esp files")
-            ("fonts,f", "import bitmap fonts")
-            ("no-archives,A", "disable bsa archives import")
-            ("encoding,e", bpo::value<std::string>()-> default_value("win1252"),
+        auto addOption = desc.add_options();
+        addOption("help,h", "produce help message");
+        addOption("verbose,v", "verbose output");
+        addOption("ini,i", bpo::value<Files::MaybeQuotedPath>(), "morrowind.ini file");
+        addOption("cfg,c", bpo::value<Files::MaybeQuotedPath>(), "openmw.cfg file");
+        addOption("output,o", bpo::value<Files::MaybeQuotedPath>()->default_value({}), "openmw.cfg file");
+        addOption("game-files,g", "import esm and esp files");
+        addOption("fonts,f", "import bitmap fonts");
+        addOption("no-archives,A", "disable bsa archives import");
+        addOption("encoding,e", bpo::value<std::string>()-> default_value("win1252"),
                 "Character encoding used in OpenMW game messages:\n"
                 "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
                 "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-                "\n\twin1252 - Western European (Latin) alphabet, used by default")
+                "\n\twin1252 - Western European (Latin) alphabet, used by default");
             ;
         p_desc.add("ini", 1).add("cfg", 1);
 
@@ -84,7 +84,6 @@ int wmain(int argc, wchar_t *wargv[]) {
             .options(desc)
             .positional(p_desc)
             .run();
-
         bpo::store(parsed, vm);
 
         if(vm.count("help") || !vm.count("ini") || !vm.count("cfg")) {

@@ -75,10 +75,9 @@ bool parseOptions (int argc, char** argv, std::vector<Files::MaybeQuotedPath> &f
         "  niftool <nif files, BSA files, or directories>\n"
         "      Scan the file or directories for nif errors.\n\n"
         "Allowed options");
-    desc.add_options()
-        ("help,h", "print help message.")
-        ("input-file", bpo::value< Files::MaybeQuotedPathContainer >(), "input file")
-        ;
+    auto addOption = desc.add_options();
+    addOption("help,h", "print help message.");
+    addOption("input-file", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
 
     //Default option if none provided
     bpo::positional_options_description p;
