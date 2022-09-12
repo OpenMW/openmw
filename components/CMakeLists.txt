@@ -50,7 +50,7 @@ add_component_dir (vfs
 
 add_component_dir (resource
     scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem
-    resourcemanager stats animation foreachbulletobject
+    resourcemanager stats animation foreachbulletobject errormarker
     )
 
 add_component_dir (shader
@@ -197,7 +197,7 @@ add_component_dir (esm4
 
 add_component_dir (misc
     constants utf8stream resourcehelpers rng messageformatparser weakcache thread
-    compression osguservalues errorMarker color tuplemeta tuplehelpers
+    compression osguservalues color tuplemeta tuplehelpers
     )
 
 add_component_dir (stereo
