@@ -49,6 +49,7 @@ namespace SDLUtil
         bool _handleWarpMotion(const SDL_MouseMotionEvent& evt);
         void _wrapMousePointer(const SDL_MouseMotionEvent &evt);
         MouseMotionEvent _packageMouseMotion(const SDL_Event& evt);
+        void _setWindowScale();
 
         SDL_Window* mSDLWindow;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
@@ -79,6 +80,9 @@ namespace SDLUtil
 
         bool mWindowHasFocus;
         bool mMouseInWindow;
+
+        Uint16 mScaleX;
+        Uint16 mScaleY;
     };
 
 }

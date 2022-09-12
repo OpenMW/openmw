@@ -36,10 +36,21 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         Uint32 flags = SDL_GetWindowFlags(mSDLWindow);
         mWindowHasFocus = (flags & SDL_WINDOW_INPUT_FOCUS);
         mMouseInWindow = (flags & SDL_WINDOW_MOUSE_FOCUS);
+        _setWindowScale();
     }
 
     InputWrapper::~InputWrapper()
     {
+    }
+
+    void InputWrapper::_setWindowScale()
+    {
+        int w,h;
+        SDL_GetWindowSize(mSDLWindow, &w, &h);
+        int dw,dh;
+        SDL_GL_GetDrawableSize(mSDLWindow, &dw, &dh);
+        mScaleX = dw / w;
+        mScaleY = dh / h;
     }
 
     void InputWrapper::capture(bool windowEventsOnly)
@@ -231,7 +242,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                 break;
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 int w,h;
-                SDL_GetWindowSize(mSDLWindow, &w, &h);
+                SDL_GL_GetDrawableSize(mSDLWindow, &w, &h);
                 int x,y;
                 SDL_GetWindowPosition(mSDLWindow, &x,&y);
                 mViewer->getCamera()->getGraphicsContext()->resized(x,y,w,h);
@@ -240,6 +251,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
                 if (mWindowListener)
                     mWindowListener->windowResized(w, h);
+
+                _setWindowScale();
 
                 break;
 
@@ -383,16 +396,16 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
     MouseMotionEvent InputWrapper::_packageMouseMotion(const SDL_Event &evt)
     {
         MouseMotionEvent pack_evt = {};
-        pack_evt.x = mMouseX;
-        pack_evt.y = mMouseY;
+        pack_evt.x = mMouseX * mScaleX;
+        pack_evt.y = mMouseY * mScaleY;
         pack_evt.z = mMouseZ;
 
         if(evt.type == SDL_MOUSEMOTION)
         {
-            pack_evt.x = mMouseX = evt.motion.x;
-            pack_evt.y = mMouseY = evt.motion.y;
-            pack_evt.xrel = evt.motion.xrel;
-            pack_evt.yrel = evt.motion.yrel;
+            pack_evt.x = mMouseX = evt.motion.x * mScaleX;
+            pack_evt.y = mMouseY = evt.motion.y * mScaleY;
+            pack_evt.xrel = evt.motion.xrel * mScaleX;
+            pack_evt.yrel = evt.motion.yrel * mScaleY;
             pack_evt.type = SDL_MOUSEMOTION;
             if (mFirstMouseMove)
             {

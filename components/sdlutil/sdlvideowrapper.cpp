@@ -76,18 +76,23 @@ namespace SDLUtil
         if (SDL_GetWindowFlags(mWindow) & SDL_WINDOW_MAXIMIZED)
             SDL_RestoreWindow(mWindow);
 
+        int w,h;
+        SDL_GetWindowSize(mWindow, &w, &h);
+        int dw,dh;
+        SDL_GL_GetDrawableSize(mWindow, &dw, &dh);
+
         if (windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::WindowedFullscreen)
         {
             SDL_DisplayMode mode;
             SDL_GetWindowDisplayMode(mWindow, &mode);
-            mode.w = width;
-            mode.h = height;
+            mode.w = width / (dw / w);
+            mode.h = height / (dh / h);
             SDL_SetWindowDisplayMode(mWindow, &mode);
             SDL_SetWindowFullscreen(mWindow, windowMode == Settings::WindowMode::Fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP);
         }
         else
         {
-            SDL_SetWindowSize(mWindow, width, height);
+            SDL_SetWindowSize(mWindow, width / (dw / w), height / (dh / h));
             SDL_SetWindowBordered(mWindow, windowBorder ? SDL_TRUE : SDL_FALSE);
 
             centerWindow();

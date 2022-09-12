@@ -584,7 +584,7 @@ void OMW::Engine::createWindow()
         pos_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
     }
 
-    Uint32 flags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE;
+    Uint32 flags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE|SDL_WINDOW_ALLOW_HIGHDPI;
     if(windowMode == Settings::WindowMode::Fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
     else if (windowMode == Settings::WindowMode::WindowedFullscreen)
@@ -640,11 +640,21 @@ void OMW::Engine::createWindow()
             }
         }
 
+        // Since we use physical resolution internally, we have to create the window with scaled resolution,
+        // but we can't get the scale before the window exists, so instead we have to resize aftewards.
+        int w,h;
+        SDL_GetWindowSize(mWindow, &w, &h);
+        int dw,dh;
+        SDL_GL_GetDrawableSize(mWindow, &dw, &dh);
+        if (dw != w || dh != h) {
+            SDL_SetWindowSize(mWindow, width / (dw / w), height / (dh / h));
+        }
+
         setWindowIcon();
 
         osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
         SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
-        SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
+        SDL_GL_GetDrawableSize(mWindow, &traits->width, &traits->height);
         traits->windowName = SDL_GetWindowTitle(mWindow);
         traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
         traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);

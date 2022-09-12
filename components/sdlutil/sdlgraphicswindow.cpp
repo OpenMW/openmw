@@ -54,8 +54,13 @@ bool GraphicsWindowSDL2::setWindowRectangleImplementation(int x, int y, int widt
 {
     if(!mWindow) return false;
 
+    int w,h;
+    SDL_GetWindowSize(mWindow, &w, &h);
+    int dw,dh;
+    SDL_GL_GetDrawableSize(mWindow, &dw, &dh);
+
     SDL_SetWindowPosition(mWindow, x, y);
-    SDL_SetWindowSize(mWindow, width, height);
+    SDL_SetWindowSize(mWindow, width / (dw / w), height / (dh / h));
     return true;
 }
 
