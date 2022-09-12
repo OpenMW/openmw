@@ -145,11 +145,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_then_find_path_should_return_path)
     {
         constexpr std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -196,11 +196,11 @@ namespace
         mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max())));
 
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -283,11 +283,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_changed_object_should_change_navmesh)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -370,21 +370,21 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, for_overlapping_heightfields_objects_should_use_higher)
     {
         const std::array<btScalar, 5 * 5> heightfieldData1 {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         CollisionShapeInstance heightfield1(makeSquareHeightfieldTerrainShape(heightfieldData1));
         heightfield1.shape().setLocalScaling(btVector3(128, 128, 1));
 
         const std::array<btScalar, 5 * 5> heightfieldData2 {{
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
+            -25, -25, -25, -25, -25, // row 0
+            -25, -25, -25, -25, -25, // row 1
+            -25, -25, -25, -25, -25, // row 2
+            -25, -25, -25, -25, -25, // row 3
+            -25, -25, -25, -25, -25, // row 4
         }};
         CollisionShapeInstance heightfield2(makeSquareHeightfieldTerrainShape(heightfieldData2));
         heightfield2.shape().setLocalScaling(btVector3(128, 128, 1));
@@ -427,21 +427,21 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, only_one_heightfield_per_cell_is_allowed)
     {
         const std::array<float, 5 * 5> heightfieldData1 {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface1 = makeSquareHeightfieldSurface(heightfieldData1);
         const int cellSize1 = mHeightfieldTileSize * (surface1.mSize - 1);
 
         const std::array<float, 5 * 5> heightfieldData2 {{
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
+            -25, -25, -25, -25, -25, // row 0
+            -25, -25, -25, -25, -25, // row 1
+            -25, -25, -25, -25, -25, // row 2
+            -25, -25, -25, -25, -25, // row 3
+            -25, -25, -25, -25, -25, // row 4
         }};
         const HeightfieldSurface surface2 = makeSquareHeightfieldSurface(heightfieldData2);
         const int cellSize2 = mHeightfieldTileSize * (surface2.mSize - 1);
@@ -465,22 +465,22 @@ namespace
         osg::ref_ptr<Resource::BulletShape> bulletShape(new Resource::BulletShape);
 
         std::array<btScalar, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         std::unique_ptr<btHeightfieldTerrainShape> shapePtr = makeSquareHeightfieldTerrainShape(heightfieldData);
         shapePtr->setLocalScaling(btVector3(128, 128, 1));
         bulletShape->mCollisionShape.reset(shapePtr.release());
 
         std::array<btScalar, 5 * 5> heightfieldDataAvoid {{
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
+            -25, -25, -25, -25, -25, // row 0
+            -25, -25, -25, -25, -25, // row 1
+            -25, -25, -25, -25, -25, // row 2
+            -25, -25, -25, -25, -25, // row 3
+            -25, -25, -25, -25, -25, // row 4
         }};
         std::unique_ptr<btHeightfieldTerrainShape> shapeAvoidPtr = makeSquareHeightfieldTerrainShape(heightfieldDataAvoid);
         shapeAvoidPtr->setLocalScaling(btVector3(128, 128, 1));
@@ -526,11 +526,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_ground_lower_than_water_with_only_swim_flag)
     {
         std::array<float, 5 * 5> heightfieldData {{
-            -50,  -50,  -50,  -50,    0,
-            -50, -100, -150, -100,  -50,
-            -50, -150, -200, -150, -100,
-            -50, -100, -150, -100, -100,
-              0,  -50, -100, -100, -100,
+            -50,  -50,  -50,  -50,    0, // row 0
+            -50, -100, -150, -100,  -50, // row 1
+            -50, -150, -200, -150, -100, // row 2
+            -50, -100, -150, -100, -100, // row 3
+              0,  -50, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -572,13 +572,13 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water_with_swim_and_walk_flags)
     {
         std::array<float, 7 * 7> heightfieldData {{
-            0,    0,    0,    0,    0,    0, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -150, -200, -150, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0,    0,    0,    0,    0,    0, 0,
+            0,    0,    0,    0,    0,    0, 0, // row 0
+            0, -100, -100, -100, -100, -100, 0, // row 1
+            0, -100, -150, -150, -150, -100, 0, // row 2
+            0, -100, -150, -200, -150, -100, 0, // row 3
+            0, -100, -150, -150, -150, -100, 0, // row 4
+            0, -100, -100, -100, -100, -100, 0, // row 5
+            0,    0,    0,    0,    0,    0, 0, // row 6
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -618,13 +618,13 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water_with_max_int_cells_size_and_swim_and_walk_flags)
     {
         std::array<float, 7 * 7> heightfieldData {{
-            0,    0,    0,    0,    0,    0, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -150, -200, -150, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0,    0,    0,    0,    0,    0, 0,
+            0,    0,    0,    0,    0,    0, 0, // row 0
+            0, -100, -100, -100, -100, -100, 0, // row 1
+            0, -100, -150, -150, -150, -100, 0, // row 2
+            0, -100, -150, -200, -150, -100, 0, // row 3
+            0, -100, -150, -150, -150, -100, 0, // row 4
+            0, -100, -100, -100, -100, -100, 0, // row 5
+            0,    0,    0,    0,    0,    0, 0, // row 6
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -664,13 +664,13 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_ground_when_ground_cross_water_with_only_walk_flag)
     {
         std::array<float, 7 * 7> heightfieldData {{
-            0,    0,    0,    0,    0,    0, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -150, -200, -150, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0,    0,    0,    0,    0,    0, 0,
+            0,    0,    0,    0,    0,    0, 0, // row 0
+            0, -100, -100, -100, -100, -100, 0, // row 1
+            0, -100, -150, -150, -150, -100, 0, // row 2
+            0, -100, -150, -200, -150, -100, 0, // row 3
+            0, -100, -150, -150, -150, -100, 0, // row 4
+            0, -100, -100, -100, -100, -100, 0, // row 5
+            0,    0,    0,    0,    0,    0, 0, // row 6
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -710,11 +710,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_object_remove_and_update_then_find_path_should_return_path)
     {
         const std::array<btScalar, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         CollisionShapeInstance heightfield(makeSquareHeightfieldTerrainShape(heightfieldData));
         heightfield.shape().setLocalScaling(btVector3(128, 128, 1));
@@ -764,11 +764,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_heightfield_remove_and_update_then_find_path_should_return_path)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -818,12 +818,12 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_then_find_random_point_around_circle_should_return_position)
     {
         const std::array<float, 6 * 6> heightfieldData {{
-            0,   0,     0,     0,    0,    0,
-            0, -25,   -25,   -25,  -25,  -25,
-            0, -25, -1000, -1000, -100, -100,
-            0, -25, -1000, -1000, -100, -100,
-            0, -25,  -100,  -100, -100, -100,
-            0, -25,  -100,  -100, -100, -100,
+            0,   0,     0,     0,    0,    0, // row 0
+            0, -25,   -25,   -25,  -25,  -25, // row 1
+            0, -25, -1000, -1000, -100, -100, // row 2
+            0, -25, -1000, -1000, -100, -100, // row 3
+            0, -25,  -100,  -100, -100, -100, // row 4
+            0, -25,  -100,  -100, -100, -100, // row 5
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -852,11 +852,11 @@ namespace
         mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max())));
 
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -957,11 +957,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_then_raycast_should_return_position)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -982,11 +982,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_for_oscillating_object_that_does_not_change_navmesh_should_not_trigger_navmesh_update)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -1066,11 +1066,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, for_not_reachable_destination_find_path_should_provide_partial_path)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -1105,11 +1105,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, end_tolerance_should_extent_available_destinations)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);

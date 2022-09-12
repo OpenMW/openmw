@@ -91,9 +91,9 @@ namespace
                           AreaType_ground, mSource, mObjectTransform);
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            -1, -1, 0,
-            -1, 1, 0,
-            1, -1, 0,
+            -1, -1, 0, // vertex 0
+            -1, 1, 0, // vertex 1
+            1, -1, 0, // vertex 2
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
@@ -112,9 +112,9 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            0, 0, 3,
-            0, 4, 3,
-            2, 0, 3,
+            0, 0, 3, // vertex 0
+            0, 4, 3, // vertex 1
+            2, 0, 3, // vertex 2
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
@@ -129,10 +129,10 @@ namespace
                           AreaType_ground, mSource, mObjectTransform);
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            -0.5, -0.5, 0,
-            -0.5, 0.5, 0,
-            0.5, -0.5, 0,
-            0.5, 0.5, 0,
+            -0.5, -0.5, 0, // vertex 0
+            -0.5, 0.5, 0, // vertex 1
+            0.5, -0.5, 0, // vertex 2
+            0.5, 0.5, 0, // vertex 3
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({0, 1, 2, 2, 1, 3}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground, AreaType_ground}));
@@ -146,28 +146,28 @@ namespace
                           AreaType_ground, mSource, mObjectTransform);
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            -1, -1, -2,
-            -1, -1, 2,
-            -1, 1, -2,
-            -1, 1, 2,
-            1, -1, -2,
-            1, -1, 2,
-            1, 1, -2,
-            1, 1, 2,
+            -1, -1, -2, // vertex 0
+            -1, -1, 2, // vertex 1
+            -1, 1, -2, // vertex 2
+            -1, 1, 2, // vertex 3
+            1, -1, -2, // vertex 4
+            1, -1, 2, // vertex 5
+            1, 1, -2, // vertex 6
+            1, 1, 2, // vertex 7
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({
-            0, 1, 5,
-            0, 2, 3,
-            0, 4, 6,
-            1, 3, 7,
-            2, 6, 7,
-            3, 1, 0,
-            4, 5, 7,
-            5, 4, 0,
-            6, 2, 0,
-            7, 3, 2,
-            7, 5, 1,
-            7, 6, 4,
+            0, 1, 5, // triangle 0
+            0, 2, 3, // triangle 1
+            0, 4, 6, // triangle 2
+            1, 3, 7, // triangle 3
+            2, 6, 7, // triangle 4
+            3, 1, 0, // triangle 5
+            4, 5, 7, // triangle 6
+            5, 4, 0, // triangle 7
+            6, 2, 0, // triangle 8
+            7, 3, 2, // triangle 9
+            7, 5, 1, // triangle 10
+            7, 6, 4, // triangle 11
         })) << recastMesh->getMesh().getIndices();
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>(12, AreaType_ground));
     }
@@ -193,34 +193,34 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            -1, -1, -2,
-            -1, -1, 0,
-            -1, -1, 2,
-            -1, 1, -2,
-            -1, 1, 0,
-            -1, 1, 2,
-            1, -1, -2,
-            1, -1, 0,
-            1, -1, 2,
-            1, 1, -2,
-            1, 1, 0,
-            1, 1, 2,
+            -1, -1, -2, // vertex 0
+            -1, -1, 0, // vertex 1
+            -1, -1, 2, // vertex 2
+            -1, 1, -2, // vertex 3
+            -1, 1, 0, // vertex 4
+            -1, 1, 2, // vertex 5
+            1, -1, -2, // vertex 6
+            1, -1, 0, // vertex 7
+            1, -1, 2, // vertex 8
+            1, 1, -2, // vertex 9
+            1, 1, 0, // vertex 10
+            1, 1, 2, // vertex 11
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({
-            0, 2, 8,
-            0, 3, 5,
-            0, 6, 9,
-            2, 5, 11,
-            3, 9, 11,
-            5, 2, 0,
-            6, 8, 11,
-            7, 4, 1,
-            7, 4, 10,
-            8, 6, 0,
-            9, 3, 0,
-            11, 5, 3,
-            11, 8, 2,
-            11, 9, 6,
+            0, 2, 8, // triangle 0
+            0, 3, 5, // triangle 1
+            0, 6, 9, // triangle 2
+            2, 5, 11, // triangle 3
+            3, 9, 11, // triangle 4
+            5, 2, 0, // triangle 5
+            6, 8, 11, // triangle 6
+            7, 4, 1, // triangle 7
+            7, 4, 10, // triangle 8
+            8, 6, 0, // triangle 9
+            9, 3, 0, // triangle 10
+            11, 5, 3, // triangle 11
+            11, 8, 2, // triangle 12
+            11, 9, 6, // triangle 13
         })) << recastMesh->getMesh().getIndices();
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>(14, AreaType_ground));
     }
@@ -240,9 +240,9 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            0, 0, 3,
-            0, 4, 3,
-            2, 0, 3,
+            0, 0, 3, // vertex 0
+            0, 4, 3, // vertex 1
+            2, 0, 3, // vertex 2
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
@@ -264,9 +264,9 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            1, 2, 12,
-            1, 10, 12,
-            3, 2, 12,
+            1, 2, 12, // vertex 0
+            1, 10, 12, // vertex 1
+            3, 2, 12, // vertex 2
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
@@ -286,12 +286,12 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            -3, -3, 0,
-            -3, -2, 0,
-            -2, -3, 0,
-            -1, -1, 0,
-            -1, 1, 0,
-            1, -1, 0,
+            -3, -3, 0, // vertex 0
+            -3, -2, 0, // vertex 1
+            -2, -3, 0, // vertex 2
+            -1, -1, 0, // vertex 3
+            -1, 1, 0, // vertex 4
+            1, -1, 0, // vertex 5
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0, 5, 4, 3}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>(2, AreaType_ground));
@@ -313,9 +313,9 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            -3, -3, 0,
-            -3, -2, 0,
-            -2, -3, 0,
+            -3, -3, 0, // vertex 0
+            -3, -2, 0, // vertex 1
+            -2, -3, 0, // vertex 2
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
@@ -338,9 +338,9 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5f), std::vector<float>({
-            0, -4.24264049530029296875f, 4.44089209850062616169452667236328125e-16f,
-            0, -3.535533905029296875f, -0.707106769084930419921875f,
-            0, -3.535533905029296875f, 0.707106769084930419921875f,
+            0, -4.24264049530029296875f, 4.44089209850062616169452667236328125e-16f, // vertex 0
+            0, -3.535533905029296875f, -0.707106769084930419921875f, // vertex 1
+            0, -3.535533905029296875f, 0.707106769084930419921875f, // vertex 2
         }))) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({1, 2, 0}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
@@ -363,9 +363,9 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5f), std::vector<float>({
-            -4.24264049530029296875f, 0, 4.44089209850062616169452667236328125e-16f,
-            -3.535533905029296875f, 0, -0.707106769084930419921875f,
-            -3.535533905029296875f, 0, 0.707106769084930419921875f,
+            -4.24264049530029296875f, 0, 4.44089209850062616169452667236328125e-16f, // vertex 0
+            -3.535533905029296875f, 0, -0.707106769084930419921875f, // vertex 1
+            -3.535533905029296875f, 0, 0.707106769084930419921875f, // vertex 2
         }))) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({1, 2, 0}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
@@ -388,9 +388,9 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_THAT(recastMesh->getMesh().getVertices(), Pointwise(FloatNear(1e-5f), std::vector<float>({
-            -1.41421353816986083984375f, -1.1102230246251565404236316680908203125e-16f, 0,
-            1.1102230246251565404236316680908203125e-16f, -1.41421353816986083984375f, 0,
-            1.41421353816986083984375f, 1.1102230246251565404236316680908203125e-16f, 0,
+            -1.41421353816986083984375f, -1.1102230246251565404236316680908203125e-16f, 0, // vertex 0
+            1.1102230246251565404236316680908203125e-16f, -1.41421353816986083984375f, 0, // vertex 1
+            1.41421353816986083984375f, 1.1102230246251565404236316680908203125e-16f, 0, // vertex 2
         }))) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 0, 1}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
@@ -417,12 +417,12 @@ namespace
         );
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            -3, -3, 0,
-            -3, -2, 0,
-            -2, -3, 0,
-            -1, -1, 0,
-            -1, 1, 0,
-            1, -1, 0,
+            -3, -3, 0, // vertex 0
+            -3, -2, 0, // vertex 1
+            -2, -3, 0, // vertex 2
+            -1, -1, 0, // vertex 3
+            -1, 1, 0, // vertex 4
+            1, -1, 0, // vertex 5
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0, 5, 4, 3}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_null, AreaType_ground}));
@@ -449,10 +449,10 @@ namespace
         builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground, mSource, mObjectTransform);
         const auto recastMesh = std::move(builder).create(mVersion);
         EXPECT_EQ(recastMesh->getMesh().getVertices(), std::vector<float>({
-            -1, -1, 0,
-            -1, 1, 0,
-            1, -1, 0,
-            1, 1, 0,
+            -1, -1, 0, // vertex 0
+            -1, 1, 0, // vertex 1
+            1, -1, 0, // vertex 2
+            1, 1, 0, // vertex 3
         })) << recastMesh->getMesh().getVertices();
         EXPECT_EQ(recastMesh->getMesh().getIndices(), std::vector<int>({2, 1, 0, 2, 1, 3}));
         EXPECT_EQ(recastMesh->getMesh().getAreaTypes(), std::vector<AreaType>({AreaType_ground, AreaType_ground}));
@@ -476,9 +476,9 @@ namespace
     {
         constexpr std::size_t size = 3;
         constexpr std::array<float, size * size> heights {{
-            0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
+            0, 1, 2, // row 0
+            3, 4, 5, // row 1
+            6, 7, 8, // row 2
         }};
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 1000;
@@ -493,11 +493,7 @@ namespace
         expected.mLength = size;
         expected.mMinHeight = minHeight;
         expected.mMaxHeight = maxHeight;
-        expected.mHeights = {
-            0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
-        };
+        expected.mHeights.assign(heights.begin(), heights.end());
         expected.mOriginalSize = 3;
         expected.mMinX = 0;
         expected.mMinY = 0;
@@ -508,9 +504,9 @@ namespace
     {
         constexpr std::size_t size = 3;
         constexpr std::array<float, size * size> heights {{
-            0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
+            0, 1, 2, // row 0
+            3, 4, 5, // row 1
+            6, 7, 8, // row 2
         }};
         const osg::Vec2i cellPosition(1, 2);
         const int cellSize = 1000;
@@ -525,11 +521,7 @@ namespace
         expected.mLength = size;
         expected.mMinHeight = minHeight;
         expected.mMaxHeight = maxHeight;
-        expected.mHeights = {
-            0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
-        };
+        expected.mHeights.assign(heights.begin(), heights.end());
         expected.mOriginalSize = 3;
         expected.mMinX = 0;
         expected.mMinY = 0;
@@ -540,9 +532,9 @@ namespace
     {
         constexpr std::size_t size = 3;
         constexpr std::array<float, 3 * 3> heights {{
-            0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
+            0, 1, 2, // row 0
+            3, 4, 5, // row 1
+            6, 7, 8, // row 2
         }};
         const osg::Vec2i cellPosition(0, 0);
         const int cellSize = 1000;
@@ -559,8 +551,8 @@ namespace
         expected.mMinHeight = 0;
         expected.mMaxHeight = 8;
         expected.mHeights = {
-            4, 5,
-            7, 8,
+            4, 5, // row 0
+            7, 8, // row 1
         };
         expected.mOriginalSize = 3;
         expected.mMinX = 1;
