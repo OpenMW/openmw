@@ -46,7 +46,7 @@ std::string bodyPartLabel(int idx)
             "Right Shoulder",
             "Left Shoulder",
             "Weapon",
-            "Tail"
+            "Tail",
         };
         return bodyPartLabels[idx];
     }
@@ -73,7 +73,7 @@ std::string meshPartLabel(int idx)
             "Knee",
             "Upper Leg",
             "Clavicle",
-            "Tail"
+            "Tail",
         };
         return meshPartLabels[idx];
     }
@@ -88,7 +88,7 @@ std::string meshTypeLabel(int idx)
         static const char *meshTypeLabels[] =  {
             "Skin",
             "Clothing",
-            "Armor"
+            "Armor",
         };
         return meshTypeLabels[idx];
     }
@@ -110,7 +110,7 @@ std::string clothingTypeLabel(int idx)
             "Left Glove",
             "Skirt",
             "Ring",
-            "Amulet"
+            "Amulet",
         };
         return clothingTypeLabels[idx];
     }
@@ -133,7 +133,7 @@ std::string armorTypeLabel(int idx)
             "Right Gauntlet",
             "Shield",
             "Left Bracer",
-            "Right Bracer"
+            "Right Bracer",
         };
         return armorTypeLabels[idx];
     }
@@ -150,7 +150,7 @@ std::string dialogTypeLabel(int idx)
             "Voice",
             "Greeting",
             "Persuasion",
-            "Journal"
+            "Journal",
         };
         return dialogTypeLabels[idx];
     }
@@ -169,7 +169,7 @@ std::string questStatusLabel(int idx)
             "Name",
             "Finished",
             "Restart",
-            "Deleted"
+            "Deleted",
         };
         return questStatusLabels[idx];
     }
@@ -205,7 +205,7 @@ std::string soundTypeLabel(int idx)
             "Moan",
             "Roar",
             "Scream",
-            "Land"
+            "Land",
         };
         return soundTypeLabels[idx];
     }
@@ -231,7 +231,7 @@ std::string weaponTypeLabel(int idx)
             "Marksman Crossbow",
             "Marksman Thrown",
             "Arrow",
-            "Bolt"
+            "Bolt",
         };
         return weaponTypeLabels[idx];
     }
@@ -396,7 +396,7 @@ std::string magicEffectLabel(int idx)
             "sEffectSummonCreature02",
             "sEffectSummonCreature03",
             "sEffectSummonCreature04",
-            "sEffectSummonCreature05"
+            "sEffectSummonCreature05",
         };
         return magicEffectLabels[idx];
     }
@@ -416,7 +416,7 @@ std::string attributeLabel(int idx)
             "Speed",
             "Endurance",
             "Personality",
-            "Luck"
+            "Luck",
         };
         return attributeLabels[idx];
     }
@@ -434,7 +434,7 @@ std::string spellTypeLabel(int idx)
             "Blight Disease",
             "Disease",
             "Curse",
-            "Powers"
+            "Powers",
         };
         return spellTypeLabels[idx];
     }
@@ -449,7 +449,7 @@ std::string specializationLabel(int idx)
         const char* specializationLabels [] = {
             "Combat",
             "Magic",
-            "Stealth"
+            "Stealth",
         };
         return specializationLabels[idx];
     }
@@ -488,7 +488,7 @@ std::string skillLabel(int idx)
             "Marksman",
             "Mercantile",
             "Speechcraft",
-            "Hand-to-hand"
+            "Hand-to-hand",
         };
         return skillLabels[idx];
     }
@@ -519,7 +519,7 @@ std::string rangeTypeLabel(int idx)
         const char* rangeTypeLabels [] = {
             "Self",
             "Touch",
-            "Target"
+            "Target",
         };
         return rangeTypeLabels[idx];
     }
@@ -537,7 +537,7 @@ std::string schoolLabel(int idx)
             "Destruction",
             "Illusion",
             "Mysticism",
-            "Restoration"
+            "Restoration",
         };
         return schoolLabels[idx];
     }
@@ -553,7 +553,7 @@ std::string enchantTypeLabel(int idx)
             "Cast Once",
             "Cast When Strikes",
             "Cast When Used",
-            "Constant Effect"
+            "Constant Effect",
         };
         return enchantTypeLabels[idx];
     }
@@ -638,7 +638,7 @@ std::string ruleFunction(int idx)
             "Alarm",
             "Flee",
             "Should Attack",
-            "Werewolf"
+            "Werewolf",
         };
         return ruleFunctions[idx];
     }

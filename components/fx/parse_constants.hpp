@@ -23,7 +23,7 @@ namespace fx
             {"disable_underwater" ,  Technique::Flag_Disable_Underwater},
             {"disable_abovewater" ,  Technique::Flag_Disable_Abovewater},
             {"disable_sunglare"   ,  Technique::Flag_Disable_SunGlare},
-            {"hidden"             ,  Technique::Flag_Hidden}
+            {"hidden"             ,  Technique::Flag_Hidden},
         }};
 
         constexpr std::array<std::pair<std::string_view, int>, 6> SourceFormat = {{
@@ -63,7 +63,7 @@ namespace fx
             {"depth_component16" ,  GL_DEPTH_COMPONENT16},
             {"depth_component24" ,  GL_DEPTH_COMPONENT24},
             {"depth_component32" ,  GL_DEPTH_COMPONENT32},
-            {"depth_component32f",  GL_DEPTH_COMPONENT32F}
+            {"depth_component32f",  GL_DEPTH_COMPONENT32F},
         }};
 
         constexpr std::array<std::pair<std::string_view, osg::Texture::InternalFormatMode>, 13> Compression = {{
@@ -79,7 +79,7 @@ namespace fx
             {"rgtc1"       , osg::Texture::USE_RGTC1_COMPRESSION},
             {"rgtc2"       , osg::Texture::USE_RGTC2_COMPRESSION},
             {"s3tc_dxt1c"  , osg::Texture::USE_S3TC_DXT1c_COMPRESSION},
-            {"s3tc_dxt1a"  , osg::Texture::USE_S3TC_DXT1a_COMPRESSION}
+            {"s3tc_dxt1a"  , osg::Texture::USE_S3TC_DXT1a_COMPRESSION},
         }};
 
         constexpr std::array<std::pair<std::string_view, osg::Texture::WrapMode>, 6> WrapMode = {{
@@ -87,7 +87,7 @@ namespace fx
             {"clamp_to_edge"  , osg::Texture::CLAMP_TO_EDGE},
             {"clamp_to_border", osg::Texture::CLAMP_TO_BORDER},
             {"repeat"         , osg::Texture::REPEAT},
-            {"mirror"         , osg::Texture::MIRROR}
+            {"mirror"         , osg::Texture::MIRROR},
         }};
 
         constexpr std::array<std::pair<std::string_view, osg::Texture::FilterMode>, 6> FilterMode = {{
@@ -96,7 +96,7 @@ namespace fx
             {"linear_mipmap_nearest" , osg::Texture::LINEAR_MIPMAP_NEAREST},
             {"nearest"               , osg::Texture::NEAREST},
             {"nearest_mipmap_linear" , osg::Texture::NEAREST_MIPMAP_LINEAR},
-            {"nearest_mipmap_nearest", osg::Texture::NEAREST_MIPMAP_NEAREST}
+            {"nearest_mipmap_nearest", osg::Texture::NEAREST_MIPMAP_NEAREST},
         }};
 
         constexpr std::array<std::pair<std::string_view, osg::BlendFunc::BlendFuncMode>, 15> BlendFunc = {{
@@ -114,7 +114,7 @@ namespace fx
             {"one_minus_constant_color" , osg::BlendFunc::ONE_MINUS_CONSTANT_COLOR},
             {"constant_alpha"           , osg::BlendFunc::CONSTANT_ALPHA},
             {"one_minus_constant_alpha" , osg::BlendFunc::ONE_MINUS_CONSTANT_ALPHA},
-            {"zero"                     , osg::BlendFunc::ZERO}
+            {"zero"                     , osg::BlendFunc::ZERO},
         }};
 
         constexpr std::array<std::pair<std::string_view, osg::BlendEquation::Equation>, 8> BlendEquation = {{
@@ -125,7 +125,7 @@ namespace fx
             {"logic_op"             , osg::BlendEquation::LOGIC_OP},
             {"add"                  , osg::BlendEquation::FUNC_ADD},
             {"subtract"             , osg::BlendEquation::FUNC_SUBTRACT},
-            {"reverse_subtract"     , osg::BlendEquation::FUNC_REVERSE_SUBTRACT}
+            {"reverse_subtract"     , osg::BlendEquation::FUNC_REVERSE_SUBTRACT},
         }};
     }
 }

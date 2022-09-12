@@ -140,7 +140,7 @@ namespace MWLua
             {"TogglePostProcessorHUD", MWInput::A_TogglePostProcessorHUD},
 
             {"ZoomIn", MWInput::A_ZoomIn},
-            {"ZoomOut", MWInput::A_ZoomOut}
+            {"ZoomOut", MWInput::A_ZoomOut},
         }));
 
         api["CONTROL_SWITCH"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, std::string_view>({
@@ -150,7 +150,7 @@ namespace MWLua
             {"Looking", "playerlooking"},
             {"Magic", "playermagic"},
             {"ViewMode", "playerviewswitch"},
-            {"VanityMode", "vanitymode"}
+            {"VanityMode", "vanitymode"},
         }));
 
         api["CONTROLLER_BUTTON"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, SDL_GameControllerButton>({
@@ -168,7 +168,7 @@ namespace MWLua
             {"DPadUp", SDL_CONTROLLER_BUTTON_DPAD_UP},
             {"DPadDown", SDL_CONTROLLER_BUTTON_DPAD_DOWN},
             {"DPadLeft", SDL_CONTROLLER_BUTTON_DPAD_LEFT},
-            {"DPadRight", SDL_CONTROLLER_BUTTON_DPAD_RIGHT}
+            {"DPadRight", SDL_CONTROLLER_BUTTON_DPAD_RIGHT},
         }));
 
         api["CONTROLLER_AXIS"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
@@ -182,7 +182,7 @@ namespace MWLua
             {"LookUpDown", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_LookUpDown)},
             {"LookLeftRight", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_LookLeftRight)},
             {"MoveForwardBackward", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_MoveForwardBackward)},
-            {"MoveLeftRight", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_MoveLeftRight)}
+            {"MoveLeftRight", SDL_CONTROLLER_AXIS_MAX + static_cast<int>(MWInput::A_MoveLeftRight)},
         }));
 
         api["KEY"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, SDL_Scancode>({
@@ -293,7 +293,7 @@ namespace MWLua
             {"Semicolon", SDL_SCANCODE_SEMICOLON},
             {"Slash", SDL_SCANCODE_SLASH},
             {"Space", SDL_SCANCODE_SPACE},
-            {"Tab", SDL_SCANCODE_TAB}
+            {"Tab", SDL_SCANCODE_TAB},
         }));
 
         return LuaUtil::makeReadOnly(api);
