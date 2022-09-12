@@ -239,14 +239,17 @@ std::string_view weaponTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string_view aiTypeLabel(int type)
+std::string_view aiTypeLabel(ESM::AiPackageType type)
 {
-    if (type == ESM::AI_Wander) return "Wander";
-    else if (type == ESM::AI_Travel) return "Travel";
-    else if (type == ESM::AI_Follow) return "Follow";
-    else if (type == ESM::AI_Escort) return "Escort";
-    else if (type == ESM::AI_Activate) return "Activate";
-    else return "Invalid";
+    switch (type)
+    {
+        case ESM::AI_Wander: return "Wander";
+        case ESM::AI_Travel: return "Travel";
+        case ESM::AI_Follow: return "Follow";
+        case ESM::AI_Escort: return "Escort";
+        case ESM::AI_Activate: return "Activate";
+    }
+    return "Invalid";
 }
 
 std::string_view magicEffectLabel(int idx)

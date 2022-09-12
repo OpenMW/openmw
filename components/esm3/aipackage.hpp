@@ -58,21 +58,22 @@ namespace ESM
 
     #pragma pack(pop)
 
-    enum
+    enum AiPackageType : std::uint32_t
     {
         AI_Wander = 0x575f4941,
         AI_Travel = 0x545f4941,
         AI_Follow = 0x465f4941,
         AI_Escort = 0x455f4941,
         AI_Activate = 0x415f4941,
-        AI_CNDT = 0x54444e43
     };
+
+    inline constexpr std::uint32_t AI_CNDT = 0x54444e43;
 
     /// \note Used for storaging packages in a single container
     /// w/o manual memory allocation accordingly to policy standards
     struct AIPackage
     {
-        int mType;
+        AiPackageType mType;
 
         // Anonymous union
         union
