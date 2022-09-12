@@ -1,3 +1,4 @@
+// clang-format off
 /* This file is based on OpenSceneGraph's src/osgShadow/ViewDependentShadowMap.cpp.
  * Where applicable, any changes made are covered by OpenMW's GPL 3 license, not the OSGPL.
  * The original copyright notice is listed below.
@@ -3381,3 +3382,4 @@ osg::ref_ptr<osg::StateSet> SceneUtil::MWShadowTechnique::getOrCreateShadowsBinS
     }
     return _shadowsBinStateSet;
 }
+// clang-format on
