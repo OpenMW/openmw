@@ -71,7 +71,7 @@ void ProfilesComboBox::slotEditingFinished()
         return;
 
     setItemText(currentIndex(), current);
-    emit(profileRenamed(previous, current));
+    emit profileRenamed(previous, current);
 }
 
 void ProfilesComboBox::slotIndexChangedByUser(int index)
@@ -79,7 +79,7 @@ void ProfilesComboBox::slotIndexChangedByUser(int index)
     if (index == -1)
         return;
 
-    emit (signalProfileChanged(mOldProfile, currentText()));
+    emit signalProfileChanged(mOldProfile, currentText());
     mOldProfile = currentText();
 }
 
