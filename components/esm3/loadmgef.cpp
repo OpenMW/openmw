@@ -160,7 +160,7 @@ namespace
         "SummonBear",
         "SummonBonewolf",
         "SummonCreature04",
-        "SummonCreature05"
+        "SummonCreature05",
     };
 
     const int NumberOfHardcodedFlags = 143;

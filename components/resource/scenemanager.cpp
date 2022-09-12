@@ -28,7 +28,6 @@
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/algorithm.hpp>
-#include <components/misc/errorMarker.hpp>
 #include <components/misc/osguservalues.hpp>
 
 #include <components/vfs/manager.hpp>
@@ -53,6 +52,7 @@
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
+#include "errormarker.hpp"
 
 namespace
 {
@@ -759,7 +759,7 @@ namespace Resource
                         if (mVFS->exists(normalized))
                             return load(normalized, mVFS, mImageManager, mNifFileManager);
                     }
-                    Files::IMemStream file(Misc::errorMarker.data(), Misc::errorMarker.size());
+                    Files::IMemStream file(ErrorMarker::sValue.data(), ErrorMarker::sValue.size());
                     return loadNonNif("error_marker.osgt", file, mImageManager);
                 }();
 

@@ -177,12 +177,12 @@ void ConfigurationManager::addExtraConfigDirs(std::stack<std::filesystem::path>&
 
 void ConfigurationManager::addCommonOptions(bpo::options_description& description)
 {
-    description.add_options()
-        ("config", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "")
-            ->multitoken()->composing(), "additional config directories")
-        ("replace", bpo::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")->multitoken()->composing(),
-            "settings where the values from the current source should replace those from lower-priority sources instead of being appended")
-        ("user-data", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), ""),
+    auto addOption = description.add_options();
+    addOption("config", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "")
+            ->multitoken()->composing(), "additional config directories");
+    addOption("replace", bpo::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")->multitoken()->composing(),
+            "settings where the values from the current source should replace those from lower-priority sources instead of being appended");
+    addOption("user-data", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), ""),
             "set user data directory (used for saves, screenshots, etc)");
 }
 

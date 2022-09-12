@@ -48,29 +48,35 @@ struct ESMData
 
 bool parseOptions (int argc, char** argv, Arguments &info)
 {
-    bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed modes:\n  dump\t Dumps all readable data from the input file.\n  clone\t Clones the input file to the output file.\n  comp\t Compares the given files.\n\nAllowed options");
+    bpo::options_description desc(R"(Inspect and extract from Morrowind ES files (ESM, ESP, ESS)
+Syntax: esmtool [options] mode infile [outfile]
+Allowed modes:
+  dump   Dumps all readable data from the input file.
+  clone  Clones the input file to the output file.
+  comp   Compares the given files.
 
-    desc.add_options()
-        ("help,h", "print help message.")
-        ("version,v", "print version information and quit.")
-        ("raw,r", bpo::value<std::string>(),
+Allowed options)");
+    auto addOption = desc.add_options();
+    addOption("help,h", "print help message.");
+    addOption("version,v", "print version information and quit.");
+    addOption("raw,r", bpo::value<std::string>(),
          "Show an unformatted list of all records and subrecords of given format:\n"
          "\n\tTES3"
-         "\n\tTES4")
+         "\n\tTES4");
         // The intention is that this option would interact better
         // with other modes including clone, dump, and raw.
-        ("type,t", bpo::value< std::vector<std::string> >(),
+    addOption("type,t", bpo::value< std::vector<std::string> >(),
          "Show only records of this type (four character record code).  May "
-         "be specified multiple times.  Only affects dump mode.")
-        ("name,n", bpo::value<std::string>(),
-         "Show only the record with this name.  Only affects dump mode.")
-        ("plain,p", "Print contents of dialogs, books and scripts. "
+         "be specified multiple times.  Only affects dump mode.");
+    addOption("name,n", bpo::value<std::string>(),
+         "Show only the record with this name.  Only affects dump mode.");
+    addOption("plain,p", "Print contents of dialogs, books and scripts. "
          "(skipped by default)"
-         "Only affects dump mode.")
-        ("quiet,q", "Suppress all record information. Useful for speed tests.")
-        ("loadcells,C", "Browse through contents of all cells.")
+         "Only affects dump mode.");
+    addOption("quiet,q", "Suppress all record information. Useful for speed tests.");
+    addOption("loadcells,C", "Browse through contents of all cells.");
 
-        ( "encoding,e", bpo::value<std::string>(&(info.encoding))->
+    addOption( "encoding,e", bpo::value<std::string>(&(info.encoding))->
           default_value("win1252"),
           "Character encoding used in ESMTool:\n"
           "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
@@ -82,11 +88,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
     // input-file is hidden and used as a positional argument
     bpo::options_description hidden("Hidden Options");
-
-    hidden.add_options()
-        ( "mode,m", bpo::value<std::string>(), "esmtool mode")
-        ( "input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file")
-        ;
+    auto addHiddenOption = hidden.add_options();
+    addHiddenOption( "mode,m", bpo::value<std::string>(), "esmtool mode");
+    addHiddenOption( "input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
 
     bpo::positional_options_description p;
     p.add("mode", 1).add("input-file", 2);

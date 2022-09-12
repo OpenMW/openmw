@@ -89,19 +89,19 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
 
-    desc.add_options()
-    ("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing())
-    ("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""))
-    ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
-    ("resources", boost::program_options::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"))
-    ("fallback-archive", boost::program_options::value<std::vector<std::string>>()->
-        default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
-    ("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
-        ->multitoken()->composing(), "fallback values")
-    ("script-blacklist", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
-        ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
-    ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
+    auto addOption = desc.add_options();
+    addOption("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing());
+    addOption("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""));
+    addOption("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false));
+    addOption("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+    addOption("resources", boost::program_options::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"));
+    addOption("fallback-archive", boost::program_options::value<std::vector<std::string>>()->
+        default_value(std::vector<std::string>(), "fallback-archive")->multitoken());
+    addOption("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
+        ->multitoken()->composing(), "fallback values");
+    addOption("script-blacklist", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
+        ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)");
+    addOption("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
         ->default_value(true), "enable script blacklisting");
     Files::ConfigurationManager::addCommonOptions(desc);
 

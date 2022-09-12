@@ -375,7 +375,8 @@ namespace CSMWorld
 
             { ColumnId_LevelledCreatureId,"Levelled Creature" },
 
-            { -1, 0 } // end marker
+            // end marker
+            { -1, 0 },
         };
     }
 }
