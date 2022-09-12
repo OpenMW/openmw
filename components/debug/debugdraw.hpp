@@ -58,10 +58,14 @@ namespace Debug
     class DebugCustomDraw : public osg::Drawable
     {
     public:
-        DebugCustomDraw(std::vector<DrawCall>& cubesToDraw, osg::ref_ptr<osg::Geometry>& linesToDraw) : mShapesToDraw(cubesToDraw), mLinesToDraw(linesToDraw) {}
+        DebugCustomDraw(std::shared_ptr<std::vector<DrawCall>> cubesToDraw, osg::ref_ptr<osg::Geometry>& linesToDraw)
+            : mShapesToDraw(cubesToDraw)
+            , mLinesToDraw(linesToDraw)
+        {
+        }
 
-        std::vector<DrawCall>& mShapesToDraw;
-        osg::ref_ptr<osg::Geometry>& mLinesToDraw;
+        std::shared_ptr<std::vector<DrawCall>> mShapesToDraw;
+        osg::ref_ptr<osg::Geometry> mLinesToDraw;
 
         osg::ref_ptr<osg::Geometry> mCubeGeometry;
         osg::ref_ptr<osg::Geometry> mCylinderGeometry;
@@ -87,7 +91,7 @@ namespace Debug
     private:
         std::unique_ptr<DebugLines> mDebugLines;
 
-        std::array<std::vector<DrawCall>, 2> mShapesToDraw;
+        std::array<std::shared_ptr<std::vector<DrawCall>>, 2> mShapesToDraw;
         long long int mCurrentFrame;
 
         std::array<osg::ref_ptr<DebugCustomDraw>, 2> mCustomDebugDrawer;

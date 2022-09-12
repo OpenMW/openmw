@@ -258,7 +258,7 @@ namespace Debug
 
         ext->glUniform1i(normalAsColorLocation, false);
 
-        for (const auto& shapeToDraw : mShapesToDraw)
+        for (const auto& shapeToDraw : *mShapesToDraw)
         {
             osg::Vec3f translation = shapeToDraw.mPosition;
             osg::Vec3f color = shapeToDraw.mColor;
@@ -281,7 +281,7 @@ namespace Debug
                     break;
             }
         }
-        mShapesToDraw.clear();
+        mShapesToDraw->clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexArray())->clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getNormalArray())->clear();
     }
@@ -377,6 +377,8 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
 
     for (std::size_t i = 0; i < mShapesToDraw.size(); i++)
     {
+        mShapesToDraw[i] = std::make_shared<std::vector<DrawCall>>();
+
         mCustomDebugDrawer[i] = new DebugCustomDraw(mShapesToDraw[i], mDebugLines->mLinesGeom[i]);
         mCustomDebugDrawer[i]->setStateSet(stateset);
         mCustomDebugDrawer[i]->mWireCubeGeometry = wireCube;
@@ -390,11 +392,17 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
 
 Debug::DebugDrawer::~DebugDrawer()
 {
-}
+    auto parentsList = mDebugDrawSceneObjects->getParents();
+
+    for (auto parent : parentsList)
+    {
+        parent->removeChild(mDebugDrawSceneObjects);
+    }
+} 
 
 void Debug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
 {
-    mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)].push_back({ mPosition, mDims, mColor, DrawShape::Cube });
+    mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)]->push_back({ mPosition, mDims, mColor, DrawShape::Cube });
 }
 
 void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f color)
@@ -406,7 +414,7 @@ void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec
 
 void Debug::DebugDrawer::addDrawCall(const DrawCall& draw)
 {
-    mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)].push_back(draw);
+    mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)]->push_back(draw);
 }
 
 void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
