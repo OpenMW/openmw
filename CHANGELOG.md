@@ -9,7 +9,6 @@
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
-    Bug #6937: Divided by Nix Hounds quest is broken
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
@@ -179,6 +178,7 @@
     Bug #6910: Torches should not be extinguished when not being held
     Bug #6913: Constant effect enchanted items don't break invisibility
     Bug #6923: Dispose of corpse prevents respawning after load
+    Bug #6937: Divided by Nix Hounds quest is broken
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
