@@ -48,7 +48,14 @@ struct ESMData
 
 bool parseOptions (int argc, char** argv, Arguments &info)
 {
-    bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed modes:\n  dump\t Dumps all readable data from the input file.\n  clone\t Clones the input file to the output file.\n  comp\t Compares the given files.\n\nAllowed options");
+    bpo::options_description desc(R"(Inspect and extract from Morrowind ES files (ESM, ESP, ESS)
+Syntax: esmtool [options] mode infile [outfile]
+Allowed modes:
+  dump   Dumps all readable data from the input file.
+  clone  Clones the input file to the output file.
+  comp   Compares the given files.
+
+Allowed options)");
     auto addOption = desc.add_options();
     addOption("help,h", "print help message.");
     addOption("version,v", "print version information and quit.");

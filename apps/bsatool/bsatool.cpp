@@ -31,19 +31,24 @@ struct Arguments
 
 bool parseOptions (int argc, char** argv, Arguments &info)
 {
-    bpo::options_description desc("Inspect and extract files from Bethesda BSA archives\n\n"
-            "Usages:\n"
-            "  bsatool list [-l] archivefile\n"
-            "      List the files presents in the input archive.\n\n"
-            "  bsatool extract [-f] archivefile [file_to_extract] [output_directory]\n"
-            "      Extract a file from the input archive.\n\n"
-            "  bsatool extractall archivefile [output_directory]\n"
-            "      Extract all files from the input archive.\n\n"
-            "  bsatool add [-a] archivefile file_to_add\n"
-            "      Add a file to the input archive.\n\n"
-            "  bsatool create [-c] archivefile\n"
-            "      Create an archive.\n\n"
-            "Allowed options");
+    bpo::options_description desc(R"(Inspect and extract files from Bethesda BSA archives
+
+Usages:
+  bsatool list [-l] archivefile\n
+      List the files presents in the input archive.
+
+  bsatool extract [-f] archivefile [file_to_extract] [output_directory]
+      Extract a file from the input archive.
+
+  bsatool extractall archivefile [output_directory]
+      Extract all files from the input archive.
+
+  bsatool add [-a] archivefile file_to_add
+      Add a file to the input archive.
+
+  bsatool create [-c] archivefile
+      Create an archive.
+Allowed options)");
 
     auto addOption = desc.add_options();
     addOption("help,h", "print help message.");

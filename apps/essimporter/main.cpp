@@ -14,7 +14,8 @@ int main(int argc, char** argv)
 {
     try
     {
-        bpo::options_description desc("Syntax: openmw-essimporter <options> infile.ess outfile.omwsave\nAllowed options");
+        bpo::options_description desc(R"(Syntax: openmw-essimporter <options> infile.ess outfile.omwsave
+Allowed options)");
         bpo::positional_options_description p_desc;
         auto addOption = desc.add_options();
         addOption("help,h", "produce help message");

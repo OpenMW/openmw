@@ -70,11 +70,13 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
 
 bool parseOptions (int argc, char** argv, std::vector<Files::MaybeQuotedPath> &files)
 {
-    bpo::options_description desc("Ensure that OpenMW can use the provided NIF and BSA files\n\n"
-        "Usages:\n"
-        "  niftool <nif files, BSA files, or directories>\n"
-        "      Scan the file or directories for nif errors.\n\n"
-        "Allowed options");
+    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF and BSA files
+
+Usages:
+  niftool <nif files, BSA files, or directories>
+      Scan the file or directories for nif errors.
+
+Allowed options)");
     auto addOption = desc.add_options();
     addOption("help,h", "print help message.");
     addOption("input-file", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
