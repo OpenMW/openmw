@@ -62,6 +62,24 @@ namespace EsmTool
         template <class T>
         constexpr bool hasFlags = HasFlags<T>::value;
 
+        template <class T, class = std::void_t<>>
+        struct HasEditorId : std::false_type {};
+
+        template <class T>
+        struct HasEditorId<T, std::void_t<decltype(T::mEditorId)>> : std::true_type {};
+
+        template <class T>
+        constexpr bool hasEditorId = HasEditorId<T>::value;
+
+        template <class T, class = std::void_t<>>
+        struct HasModel : std::false_type {};
+
+        template <class T>
+        struct HasModel<T, std::void_t<decltype(T::mModel)>> : std::true_type {};
+
+        template <class T>
+        constexpr bool hasModel = HasModel<T>::value;
+
         template <class T>
         void readTypedRecord(const Params& params, ESM4::Reader& reader)
         {
@@ -75,9 +93,13 @@ namespace EsmTool
 
             std::cout << "\n  Record: " << ESM::NAME(reader.hdr().record.typeId).toStringView();
             if constexpr (hasFormId<T>)
-                std::cout << ' ' << value.mFormId;
+                std::cout << "\n  FormId: " << value.mFormId;
             if constexpr (hasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
+            if constexpr (hasEditorId<T>)
+                std::cout << "\n  EditorId: " << value.mEditorId;
+            if constexpr (hasModel<T>)
+                std::cout << "\n  Model: " << value.mModel;
             std::cout << '\n';
         }
 
