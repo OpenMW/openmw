@@ -177,7 +177,12 @@ namespace MWGui
       , mVersionDescription(versionDescription)
       , mWindowVisible(true)
     {
-        mScalingFactor = std::clamp(Settings::Manager::getFloat("scaling factor", "GUI"), 0.5f, 8.f);
+        int w,h;
+        SDL_GetWindowSize(window, &w, &h);
+        int dw,dh;
+        SDL_GL_GetDrawableSize(window, &dw, &dh);
+
+        mScalingFactor = std::clamp(Settings::Manager::getFloat("scaling factor", "GUI"), 0.5f, 8.f) * (dw / w);
         mGuiPlatform = std::make_unique<osgMyGUI::Platform>(viewer, guiRoot, resourceSystem->getImageManager(),
             resourceSystem->getVFS(), mScalingFactor, "mygui",
             logpath / "MyGUI.log");
