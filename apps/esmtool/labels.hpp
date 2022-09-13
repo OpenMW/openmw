@@ -2,6 +2,9 @@
 #define OPENMW_ESMTOOL_LABELS_H
 
 #include <string>
+#include <string_view>
+
+#include <components/esm3/aipackage.hpp>
 
 std::string_view bodyPartLabel(int idx);
 std::string_view meshPartLabel(int idx);
@@ -16,7 +19,7 @@ std::string_view weaponTypeLabel(int idx);
 
 // This function's a bit different because the types are record types,
 // not consecutive values.
-std::string_view aiTypeLabel(int type);
+std::string_view aiTypeLabel(ESM::AiPackageType type);
 
 // This one's also a bit different, because it enumerates dialog
 // select rule functions, not types.  Structurally, it still converts
