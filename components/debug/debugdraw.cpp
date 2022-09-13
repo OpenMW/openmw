@@ -225,6 +225,28 @@ static int getIdexBufferWriteFromFrame(const long long int& nFrame)
 
 namespace Debug
 {
+    static void makeLineInstance(osg::Geometry& lines)
+    {
+        auto vertices = new osg::Vec3Array;
+        auto color = new osg::Vec3Array;
+        lines.setDataVariance(osg::Object::STATIC);
+        lines.setUseVertexArrayObject(true);
+        lines.setUseDisplayList(false);
+        lines.setCullingActive(false);
+
+        lines.setVertexArray(vertices);
+        lines.setNormalArray(color, osg::Array::BIND_PER_VERTEX);
+
+        lines.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
+    }
+
+
+    DebugCustomDraw::DebugCustomDraw()
+    {
+        mLinesToDraw = new osg::Geometry();
+        makeLineInstance(*mLinesToDraw);
+    }
+
     void DebugCustomDraw::drawImplementation(osg::RenderInfo& renderInfo) const
     {
         auto state = renderInfo.getState();
@@ -258,7 +280,7 @@ namespace Debug
 
         ext->glUniform1i(normalAsColorLocation, false);
 
-        for (const auto& shapeToDraw : *mShapesToDraw)
+        for (const auto& shapeToDraw : mShapesToDraw)
         {
             osg::Vec3f translation = shapeToDraw.mPosition;
             osg::Vec3f color = shapeToDraw.mColor;
@@ -281,40 +303,10 @@ namespace Debug
                     break;
             }
         }
-        mShapesToDraw->clear();
+        mShapesToDraw.clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexArray())->clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getNormalArray())->clear();
     }
-
-    struct DebugLines
-    {
-
-        static void makeLineInstance(osg::Geometry& lines)
-        {
-            auto vertices = new osg::Vec3Array;
-            auto color = new osg::Vec3Array;
-
-            lines.setUseVertexArrayObject(true);
-            lines.setUseDisplayList(false);
-            lines.setCullingActive(false);
-
-            lines.setVertexArray(vertices);
-            lines.setNormalArray(color, osg::Array::BIND_PER_VERTEX);
-
-            lines.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
-        }
-
-        DebugLines()
-        {
-            mLinesGeom[0] = new osg::Geometry();
-            mLinesGeom[1] = new osg::Geometry();
-
-            makeLineInstance(*mLinesGeom[0]);
-            makeLineInstance(*mLinesGeom[1]);
-        }
-
-        std::array<osg::ref_ptr<osg::Geometry>, 2> mLinesGeom;
-    };
 
     class DebugDrawCallback : public SceneUtil::NodeCallback<DebugDrawCallback>
     {
@@ -325,9 +317,9 @@ namespace Debug
         {
             mDebugDrawer.mCurrentFrame = nv->getTraversalNumber();
             int indexRead = getIdexBufferReadFromFrame(mDebugDrawer.mCurrentFrame);
-            auto& lines = mDebugDrawer.mDebugLines;
-            lines->mLinesGeom[indexRead]->removePrimitiveSet(0, 1);
-            lines->mLinesGeom[indexRead]->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->mLinesGeom[indexRead]->getVertexArray())->size()));
+            auto& lines = mDebugDrawer.mCustomDebugDrawer[indexRead]->mLinesToDraw;
+            lines->removePrimitiveSet(0, 1);
+            lines->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->getVertexArray())->size()));
 
             nv->pushOntoNodePath(mDebugDrawer.mCustomDebugDrawer[indexRead]);
             nv->apply(*mDebugDrawer.mCustomDebugDrawer[indexRead]);
@@ -345,7 +337,6 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
     auto fragmentShader = shaderManager.getShader("debug_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
 
     auto program = shaderManager.getProgram(vertexShader, fragmentShader);
-    mDebugLines = std::make_unique<DebugLines>();
 
     mDebugDrawSceneObjects = new osg::Group;
     mDebugDrawSceneObjects->setCullingActive(false);
@@ -375,11 +366,9 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
     wireCube->setUseVertexBufferObjects(true);
     generateWireCube(*wireCube, 1.);
 
-    for (std::size_t i = 0; i < mShapesToDraw.size(); i++)
+    for (std::size_t i = 0; i < mCustomDebugDrawer.size(); i++)
     {
-        mShapesToDraw[i] = std::make_shared<std::vector<DrawCall>>();
-
-        mCustomDebugDrawer[i] = new DebugCustomDraw(mShapesToDraw[i], mDebugLines->mLinesGeom[i]);
+        mCustomDebugDrawer[i] = new DebugCustomDraw();
         mCustomDebugDrawer[i]->setStateSet(stateset);
         mCustomDebugDrawer[i]->mWireCubeGeometry = wireCube;
         mCustomDebugDrawer[i]->mCubeGeometry = cubeGeometry;
@@ -402,7 +391,7 @@ Debug::DebugDrawer::~DebugDrawer()
 
 void Debug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
 {
-    mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)]->push_back({ mPosition, mDims, mColor, DrawShape::Cube });
+    mCustomDebugDrawer[getIdexBufferWriteFromFrame(this->mCurrentFrame)]->mShapesToDraw.push_back({ mPosition, mDims, mColor, DrawShape::Cube });
 }
 
 void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f color)
@@ -414,14 +403,15 @@ void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec
 
 void Debug::DebugDrawer::addDrawCall(const DrawCall& draw)
 {
-    mShapesToDraw[getIdexBufferWriteFromFrame(this->mCurrentFrame)]->push_back(draw);
+    mCustomDebugDrawer[getIdexBufferWriteFromFrame(this->mCurrentFrame)]->mShapesToDraw.push_back(draw);
 }
 
 void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
 {
     const int indexWrite = getIdexBufferWriteFromFrame(this->mCurrentFrame);
-    auto vertices = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getVertexArray());
-    auto colors = static_cast<osg::Vec3Array*>(mDebugLines->mLinesGeom[indexWrite]->getNormalArray());
+    auto lines = mCustomDebugDrawer[indexWrite]->mLinesToDraw;
+    auto vertices = static_cast<osg::Vec3Array*>(lines->getVertexArray());
+    auto colors = static_cast<osg::Vec3Array*>(lines->getNormalArray());
 
     vertices->push_back(start);
     vertices->push_back(end);
