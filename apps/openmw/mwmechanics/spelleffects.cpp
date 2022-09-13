@@ -379,7 +379,7 @@ namespace
         {ESM::MagicEffect::BoundLongsword, "sMagicBoundLongswordID"},
         {ESM::MagicEffect::BoundMace, "sMagicBoundMaceID"},
         {ESM::MagicEffect::BoundShield, "sMagicBoundShieldID"},
-        {ESM::MagicEffect::BoundSpear, "sMagicBoundSpearID"}
+        {ESM::MagicEffect::BoundSpear, "sMagicBoundSpearID"},
     };
 }
 
@@ -787,7 +787,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 MWWorld::InventoryStore::Slot_RightGauntlet,
                 MWWorld::InventoryStore::Slot_Helmet,
                 MWWorld::InventoryStore::Slot_Greaves,
-                MWWorld::InventoryStore::Slot_Boots
+                MWWorld::InventoryStore::Slot_Boots,
             };
             for (const int priority : priorities)
             {

@@ -780,7 +780,7 @@ namespace CSMPrefs
         std::make_pair((int)Qt::Key_LastNumberRedial       , "LastNumberRedial"),
         std::make_pair((int)Qt::Key_Camera                 , "Camera"),
         std::make_pair((int)Qt::Key_CameraFocus            , "CameraFocus"),
-        std::make_pair(0                                   , (const char*) nullptr)
+        std::make_pair(0                                   , static_cast<const char*>(nullptr)),
     };
 
 }

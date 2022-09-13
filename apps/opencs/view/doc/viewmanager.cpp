@@ -112,7 +112,7 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_BookType, CSMWorld::Columns::ColumnId_BookType, false },
         { CSMWorld::ColumnBase::Display_BloodType, CSMWorld::Columns::ColumnId_BloodType, false },
         { CSMWorld::ColumnBase::Display_EmitterType, CSMWorld::Columns::ColumnId_EmitterType, false },
-        { CSMWorld::ColumnBase::Display_GenderNpc, CSMWorld::Columns::ColumnId_Gender, false }
+        { CSMWorld::ColumnBase::Display_GenderNpc, CSMWorld::Columns::ColumnId_Gender, false },
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)

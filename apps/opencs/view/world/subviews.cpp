@@ -45,8 +45,8 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Spells,
         CSMWorld::UniversalId::Type_Enchantments,
         CSMWorld::UniversalId::Type_SoundGens,
-
-        CSMWorld::UniversalId::Type_None // end marker
+        // end marker
+        CSMWorld::UniversalId::Type_None,
     };
 
     for (int i=0; sTableTypes[i]!=CSMWorld::UniversalId::Type_None; ++i)
@@ -141,8 +141,8 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Faction,
         CSMWorld::UniversalId::Type_Enchantment,
         CSMWorld::UniversalId::Type_SoundGen,
-
-        CSMWorld::UniversalId::Type_None // end marker
+        // end marker
+        CSMWorld::UniversalId::Type_None,
     };
 
     for (int i=0; sTableTypes2[i]!=CSMWorld::UniversalId::Type_None; ++i)

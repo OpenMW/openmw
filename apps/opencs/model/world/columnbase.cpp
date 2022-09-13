@@ -91,7 +91,7 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_EffectAttribute,
         Display_IngredEffectId,
 
-        Display_None
+        Display_None,
     };
 
     for (int i=0; ids[i]!=Display_None; ++i)

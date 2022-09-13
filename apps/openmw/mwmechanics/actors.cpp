@@ -728,7 +728,7 @@ namespace MWMechanics
                 {
                     static const std::array<int, 7> damageEffects{
                         ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison,
-                        ESM::MagicEffect::SunDamage, ESM::MagicEffect::DamageHealth, ESM::MagicEffect::AbsorbHealth
+                        ESM::MagicEffect::SunDamage, ESM::MagicEffect::DamageHealth, ESM::MagicEffect::AbsorbHealth,
                     };
 
                     const bool isDamageEffect = std::find(damageEffects.begin(), damageEffects.end(), effect.mEffectId) != damageEffects.end();

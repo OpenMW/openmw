@@ -243,7 +243,7 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
         ESM::Skill::Spear,
         ESM::Skill::ShortBlade,
         ESM::Skill::Marksman,
-        ESM::Skill::BluntWeapon
+        ESM::Skill::BluntWeapon,
     };
     const size_t weaponSkillsLength = sizeof(weaponSkills) / sizeof(weaponSkills[0]);
 

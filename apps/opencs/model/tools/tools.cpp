@@ -245,7 +245,7 @@ int CSMTools::Tools::getRunningOperations() const
        CSMDoc::State_Verifying,
        CSMDoc::State_Searching,
        CSMDoc::State_Merging,
-        -1
+        -1,
     };
 
     int result = 0;

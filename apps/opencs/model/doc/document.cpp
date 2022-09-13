@@ -87,7 +87,7 @@ void CSMDoc::Document::addOptionalGlobals()
         "DaysPassed",
         "PCWerewolf",
         "PCYear",
-        0
+        nullptr,
     };
 
     for (int i=0; sGlobals[i]; ++i)
@@ -162,7 +162,7 @@ void CSMDoc::Document::createBase()
         "PCVampire",
         "PCWerewolf",
         "PCYear",
-        0
+        nullptr,
     };
 
     for (int i=0; sGlobals[i]; ++i)
@@ -200,7 +200,7 @@ void CSMDoc::Document::createBase()
         "Idle",
         "Flee",
         "Hit",
-        0
+        nullptr,
     };
 
     for (int i=0; sVoice[i]; ++i)
@@ -225,7 +225,7 @@ void CSMDoc::Document::createBase()
         "Greeting 7",
         "Greeting 8",
         "Greeting 9",
-        0
+        nullptr,
     };
 
     for (int i=0; sGreetings[i]; ++i)
@@ -250,7 +250,7 @@ void CSMDoc::Document::createBase()
         "Admire Fail",
         "Taunt Fail",
         "Bribe Fail",
-        0
+        nullptr,
     };
 
     for (int i=0; sPersuasion[i]; ++i)

@@ -495,7 +495,7 @@ namespace MWMechanics
                     MWWorld::InventoryStore::Slot_RightGauntlet,
                     MWWorld::InventoryStore::Slot_Helmet,
                     MWWorld::InventoryStore::Slot_Greaves,
-                    MWWorld::InventoryStore::Slot_Boots
+                    MWWorld::InventoryStore::Slot_Boots,
                 };
 
                 bool enemyHasArmor = false;
