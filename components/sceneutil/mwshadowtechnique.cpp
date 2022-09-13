@@ -1,3 +1,4 @@
+// clang-format off
 /* This file is based on OpenSceneGraph's src/osgShadow/ViewDependentShadowMap.cpp.
  * Where applicable, any changes made are covered by OpenMW's GPL 3 license, not the OSGPL.
  * The original copyright notice is listed below.
@@ -42,159 +43,127 @@ using namespace SceneUtil;
 // fragment shader
 //
 #if 0
-const std::string fragmentShaderSource_withBaseTexture = R"glsl(
-uniform sampler2D baseTexture;
-uniform sampler2DShadow shadowTexture;
-
-void main(void)
-{
-    vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;
-    vec4 color = texture2D( baseTexture, gl_TexCoord[0].xy );
-    color *= mix( colorAmbientEmissive, gl_Color, shadow2DProj( shadowTexture, gl_TexCoord[1] ).r );
-    gl_FragColor = color;
-}
-)glsl";
+static const char fragmentShaderSource_withBaseTexture[] =
+        "uniform sampler2D baseTexture;                                          \n"
+        "uniform sampler2DShadow shadowTexture;                                  \n"
+        "                                                                        \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
+        "  vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;     \n"
+        "  vec4 color = texture2D( baseTexture, gl_TexCoord[0].xy );                                            \n"
+        "  color *= mix( colorAmbientEmissive, gl_Color, shadow2DProj( shadowTexture, gl_TexCoord[1] ).r );     \n"
+        "  gl_FragColor = color;                                                                                \n"
+        "} \n";
 #else
-const std::string fragmentShaderSource_withBaseTexture = R"glsl(
-uniform sampler2D baseTexture;
-uniform int baseTextureUnit;
-uniform sampler2DShadow shadowTexture0;
-uniform int shadowTextureUnit0;
+static const char fragmentShaderSource_withBaseTexture[] =
+        "uniform sampler2D baseTexture;                                          \n"
+        "uniform int baseTextureUnit;                                            \n"
+        "uniform sampler2DShadow shadowTexture0;                                 \n"
+        "uniform int shadowTextureUnit0;                                         \n"
+        "                                                                        \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
+        "  vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;     \n"
+        "  vec4 color = texture2D( baseTexture, gl_TexCoord[baseTextureUnit].xy );                                              \n"
+        "  color *= mix( colorAmbientEmissive, gl_Color, shadow2DProj( shadowTexture0, gl_TexCoord[shadowTextureUnit0] ).r );     \n"
+        "  gl_FragColor = color;                                                                                                \n"
+        "} \n";
 
-void main(void)
-{
-    vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;
-    vec4 color = texture2D( baseTexture, gl_TexCoord[baseTextureUnit].xy );
-    color *= mix( colorAmbientEmissive, gl_Color, shadow2DProj( shadowTexture0, gl_TexCoord[shadowTextureUnit0] ).r );
-    gl_FragColor = color;
-}
-)glsl";
-
-const std::string fragmentShaderSource_withBaseTexture_twoShadowMaps = R"glsl(
-uniform sampler2D baseTexture;
-uniform int baseTextureUnit;
-uniform sampler2DShadow shadowTexture0;
-uniform int shadowTextureUnit0;
-uniform sampler2DShadow shadowTexture1;
-uniform int shadowTextureUnit1;
-
-void main(void)
-{
-  vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;
-  vec4 color = texture2D( baseTexture, gl_TexCoord[baseTextureUnit].xy );
-  float shadow0 = shadow2DProj( shadowTexture0, gl_TexCoord[shadowTextureUnit0] ).r;
-  float shadow1 = shadow2DProj( shadowTexture1, gl_TexCoord[shadowTextureUnit1] ).r;
-  color *= mix( colorAmbientEmissive, gl_Color, shadow0*shadow1 );
-  gl_FragColor = color;
-}
-)glsl";
+static const char fragmentShaderSource_withBaseTexture_twoShadowMaps[] =
+        "uniform sampler2D baseTexture;                                          \n"
+        "uniform int baseTextureUnit;                                            \n"
+        "uniform sampler2DShadow shadowTexture0;                                 \n"
+        "uniform int shadowTextureUnit0;                                         \n"
+        "uniform sampler2DShadow shadowTexture1;                                 \n"
+        "uniform int shadowTextureUnit1;                                         \n"
+        "                                                                        \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
+        "  vec4 colorAmbientEmissive = gl_FrontLightModelProduct.sceneColor;     \n"
+        "  vec4 color = texture2D( baseTexture, gl_TexCoord[baseTextureUnit].xy );              \n"
+        "  float shadow0 = shadow2DProj( shadowTexture0, gl_TexCoord[shadowTextureUnit0] ).r;   \n"
+        "  float shadow1 = shadow2DProj( shadowTexture1, gl_TexCoord[shadowTextureUnit1] ).r;   \n"
+        "  color *= mix( colorAmbientEmissive, gl_Color, shadow0*shadow1 );                     \n"
+        "  gl_FragColor = color;                                                                \n"
+        "} \n";
 #endif
 
-const std::string debugVertexShaderSource = R"glsl(
-void main(void)
-{
-    gl_Position = gl_Vertex;
-    gl_TexCoord[0] = gl_MultiTexCoord0;
-}
-)glsl";
-
-const std::string debugFragmentShaderSource = R"glsl(
-uniform sampler2D texture;
-
-void main(void)
-{
-)glsl"
+std::string debugVertexShaderSource = "void main(void){gl_Position = gl_Vertex; gl_TexCoord[0]=gl_MultiTexCoord0;}";
+std::string debugFragmentShaderSource =
+        "uniform sampler2D texture;                                              \n"
+        "                                                                        \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
 #if 1
-R"glsl(
-    float f = texture2D(texture, gl_TexCoord[0].xy).r;
-
-    f = 256.0 * f;
-    float fC = floor( f ) / 256.0;
-
-    f = 256.0 * fract( f );
-    float fS = floor( f ) / 256.0;
-
-    f = 256.0 * fract( f );
-    float fH = floor( f ) / 256.0;
-
-    fS *= 0.5;
-    fH = ( fH  * 0.34 + 0.66 ) * ( 1.0 - fS );
-
-    vec3 rgb = vec3( ( fC > 0.5 ? ( 1.0 - fC ) : fC ),
-                     abs( fC - 0.333333 ),
-                     abs( fC - 0.666667 ) );
-
-    rgb = min( vec3( 1.0, 1.0, 1.0 ), 3.0 * rgb );
-
-    float fMax = max( max( rgb.r, rgb.g ), rgb.b );
-    fMax = 1.0 / fMax;
-
-    vec3 color = fMax * rgb;
-
-    gl_FragColor =  vec4( fS + fH * color, 1 );
-)glsl"
+        "    float f = texture2D(texture, gl_TexCoord[0].xy).r;                  \n"
+        "                                                                        \n"
+        "    f = 256.0 * f;                                                      \n"
+        "    float fC = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    f = 256.0 * fract( f );                                             \n"
+        "    float fS = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    f = 256.0 * fract( f );                                             \n"
+        "    float fH = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    fS *= 0.5;                                                          \n"
+        "    fH = ( fH  * 0.34 + 0.66 ) * ( 1.0 - fS );                          \n"
+        "                                                                        \n"
+        "    vec3 rgb = vec3( ( fC > 0.5 ? ( 1.0 - fC ) : fC ),                  \n"
+        "                     abs( fC - 0.333333 ),                              \n"
+        "                     abs( fC - 0.666667 ) );                            \n"
+        "                                                                        \n"
+        "    rgb = min( vec3( 1.0, 1.0, 1.0 ), 3.0 * rgb );                      \n"
+        "                                                                        \n"
+        "    float fMax = max( max( rgb.r, rgb.g ), rgb.b );                     \n"
+        "    fMax = 1.0 / fMax;                                                  \n"
+        "                                                                        \n"
+        "    vec3 color = fMax * rgb;                                            \n"
+        "                                                                        \n"
+        "    gl_FragColor =  vec4( fS + fH * color, 1 );                         \n"
 #else
-R"glsl(
-    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
-)glsl"
+        "    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);               \n"
 #endif
-R"glsl(
-}
-)glsl";
+        "}                                                                       \n";
 
-const std::string debugFrustumVertexShaderSource = R"glsl(
-varying float depth;
-uniform mat4 transform;
-void main(void)
-{
-    gl_Position = transform * gl_Vertex;
-    depth = gl_Position.z / gl_Position.w;
-}
-)glsl";
-
-const std::string debugFrustumFragmentShaderSource = R"glsl(
-varying float depth;
-
-void main(void)
-{
-)glsl"
+std::string debugFrustumVertexShaderSource = "varying float depth; uniform mat4 transform; void main(void){gl_Position = transform * gl_Vertex; depth = gl_Position.z / gl_Position.w;}";
+std::string debugFrustumFragmentShaderSource =
+        "varying float depth;                                                    \n"
+        "                                                                        \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
 #if 1
-R"glsl(
-    float f = depth;
-
-    f = 256.0 * f;
-    float fC = floor( f ) / 256.0;
-
-    f = 256.0 * fract( f );
-    float fS = floor( f ) / 256.0;
-
-    f = 256.0 * fract( f );
-    float fH = floor( f ) / 256.0;
-
-    fS *= 0.5;
-    fH = ( fH  * 0.34 + 0.66 ) * ( 1.0 - fS );
-
-    vec3 rgb = vec3( ( fC > 0.5 ? ( 1.0 - fC ) : fC ),
-                     abs( fC - 0.333333 ),
-                     abs( fC - 0.666667 ) );
-
-    rgb = min( vec3( 1.0, 1.0, 1.0 ), 3.0 * rgb );
-
-    float fMax = max( max( rgb.r, rgb.g ), rgb.b );
-    fMax = 1.0 / fMax;
-
-    vec3 color = fMax * rgb;
-
-    gl_FragColor =  vec4( fS + fH * color, 1 );
-)glsl"
+        "    float f = depth;                                                    \n"
+        "                                                                        \n"
+        "    f = 256.0 * f;                                                      \n"
+        "    float fC = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    f = 256.0 * fract( f );                                             \n"
+        "    float fS = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    f = 256.0 * fract( f );                                             \n"
+        "    float fH = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    fS *= 0.5;                                                          \n"
+        "    fH = ( fH  * 0.34 + 0.66 ) * ( 1.0 - fS );                          \n"
+        "                                                                        \n"
+        "    vec3 rgb = vec3( ( fC > 0.5 ? ( 1.0 - fC ) : fC ),                  \n"
+        "                     abs( fC - 0.333333 ),                              \n"
+        "                     abs( fC - 0.666667 ) );                            \n"
+        "                                                                        \n"
+        "    rgb = min( vec3( 1.0, 1.0, 1.0 ), 3.0 * rgb );                      \n"
+        "                                                                        \n"
+        "    float fMax = max( max( rgb.r, rgb.g ), rgb.b );                     \n"
+        "    fMax = 1.0 / fMax;                                                  \n"
+        "                                                                        \n"
+        "    vec3 color = fMax * rgb;                                            \n"
+        "                                                                        \n"
+        "    gl_FragColor =  vec4( fS + fH * color, 1 );                         \n"
 #else
-R"glsl(
-    gl_FragColor = vec4(0.0, 0.0, 1.0, 0.0);
-)glsl"
+        "    gl_FragColor = vec4(0.0, 0.0, 1.0, 0.0);                            \n"
 #endif
-R"glsl(
-}
-)glsl";
+        "}                                                                       \n";
+
 
 template<class T>
 class RenderLeafTraverser : public T
@@ -3413,3 +3382,4 @@ osg::ref_ptr<osg::StateSet> SceneUtil::MWShadowTechnique::getOrCreateShadowsBinS
     }
     return _shadowsBinStateSet;
 }
+// clang-format on

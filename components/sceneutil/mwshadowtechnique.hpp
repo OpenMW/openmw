@@ -1,3 +1,4 @@
+// clang-format off
 /* This file is based on OpenSceneGraph's include/osgShadow/ViewDependentShadowMap.
  * Where applicable, any changes made are covered by OpenMW's GPL 3 license, not the OSGPL.
  * The original copyright notice is listed below.
@@ -336,3 +337,4 @@ namespace SceneUtil {
 }
 
 #endif
+// clang-format on
