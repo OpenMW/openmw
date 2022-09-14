@@ -80,6 +80,45 @@ namespace EsmTool
         template <class T>
         constexpr bool hasModel = HasModel<T>::value;
 
+        template <class T, class = std::void_t<>>
+        struct HasNif : std::false_type {};
+
+        template <class T>
+        struct HasNif<T, std::void_t<decltype(T::mNif)>> : std::true_type {};
+
+        template <class T>
+        constexpr bool hasNif = HasNif<T>::value;
+
+        template <class T, class = std::void_t<>>
+        struct HasKf : std::false_type {};
+
+        template <class T>
+        struct HasKf<T, std::void_t<decltype(T::mKf)>> : std::true_type {};
+
+        template <class T>
+        constexpr bool hasKf = HasKf<T>::value;
+
+        template <class T>
+        struct WriteArray
+        {
+            std::string_view mPrefix;
+            const T& mValue;
+
+            explicit WriteArray(std::string_view prefix, const T& value)
+                : mPrefix(prefix)
+                , mValue(value)
+            {
+            }
+        };
+
+        template <class T>
+        std::ostream& operator<<(std::ostream& stream, const WriteArray<T>& write)
+        {
+            for (const auto& value : write.mValue)
+                stream << write.mPrefix << value;
+            return stream;
+        }
+
         template <class T>
         void readTypedRecord(const Params& params, ESM4::Reader& reader)
         {
@@ -100,6 +139,10 @@ namespace EsmTool
                 std::cout << "\n  EditorId: " << value.mEditorId;
             if constexpr (hasModel<T>)
                 std::cout << "\n  Model: " << value.mModel;
+            if constexpr (hasNif<T>)
+                std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);
+            if constexpr (hasKf<T>)
+                std::cout << "\n  Kf:" << WriteArray("\n  - ", value.mKf);
             std::cout << '\n';
         }
 
