@@ -29,6 +29,24 @@
 namespace Nif
 {
 
+// Base class for controllers that use NiInterpolators to animate objects.
+struct NiInterpController : public Controller
+{
+    // Usually one of the flags.
+    bool mManagerControlled{false};
+
+    void read(NIFStream* nif) override;
+};
+
+// Base class for controllers that use one NiInterpolator.
+struct NiSingleInterpController : public NiInterpController
+{
+    NiInterpolatorPtr mInterpolator;
+
+    void read(NIFStream* nif) override;
+    void post(NIFFile* nif) override;
+};
+
 struct NiParticleSystemController : public Controller
 {
     enum BSPArrayController {
@@ -88,11 +106,10 @@ struct NiParticleSystemController : public Controller
 };
 using NiBSPArrayController = NiParticleSystemController;
 
-struct NiMaterialColorController : public Controller
+struct NiMaterialColorController : public NiSingleInterpController
 {
-    NiPoint3InterpolatorPtr interpolator;
-    NiPosDataPtr data;
-    unsigned int targetColor;
+    NiPosDataPtr mData;
+    unsigned int mTargetColor;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
@@ -139,16 +156,15 @@ struct NiUVController : public Controller
     void post(NIFFile *nif) override;
 };
 
-struct NiKeyframeController : public Controller
+struct NiKeyframeController : public NiSingleInterpController
 {
-    NiKeyframeDataPtr data;
-    NiTransformInterpolatorPtr interpolator;
+    NiKeyframeDataPtr mData;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 };
 
-struct NiMultiTargetTransformController : public Controller
+struct NiMultiTargetTransformController : public NiInterpController
 {
     NodeList mExtraTargets;
 
@@ -156,19 +172,29 @@ struct NiMultiTargetTransformController : public Controller
     void post(NIFFile *nif) override;
 };
 
-struct NiFloatInterpController : public Controller
+// Base class for controllers that use a NiFloatInterpolator to animate their target.
+struct NiFloatInterpController : public NiSingleInterpController { };
+
+// Ditto for NiBoolInterpolator.
+struct NiBoolInterpController : public NiSingleInterpController { };
+
+struct NiAlphaController : public NiFloatInterpController
 {
-    NiFloatDataPtr data;
-    NiFloatInterpolatorPtr interpolator;
+    NiFloatDataPtr mData;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 };
 
-struct NiAlphaController : public NiFloatInterpController { };
-struct NiRollController : public NiFloatInterpController { };
+struct NiRollController : public NiSingleInterpController
+{
+    NiFloatDataPtr mData;
 
-struct NiGeomMorpherController : public Controller
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct NiGeomMorpherController : public NiInterpController
 {
     NiMorphDataPtr data;
     NiFloatInterpolatorList interpolators;
@@ -177,17 +203,16 @@ struct NiGeomMorpherController : public Controller
     void post(NIFFile *nif) override;
 };
 
-struct NiVisController : public Controller
+struct NiVisController : public NiBoolInterpController
 {
-    NiVisDataPtr data;
+    NiVisDataPtr mData;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 };
 
-struct NiFlipController : public Controller
+struct NiFlipController : public NiFloatInterpController
 {
-    NiFloatInterpolatorPtr mInterpolator;
     int mTexSlot; // NiTexturingProperty::TextureType
     float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
     NiSourceTextureList mSources;
@@ -207,9 +232,9 @@ struct NiControllerManager : public Controller
     void read(NIFStream *nif) override;
 };
 
-struct Interpolator : public Record { };
+struct NiInterpolator : public Record { };
 
-struct NiPoint3Interpolator : public Interpolator
+struct NiPoint3Interpolator : public NiInterpolator
 {
     osg::Vec3f defaultVal;
     NiPosDataPtr data;
@@ -217,15 +242,15 @@ struct NiPoint3Interpolator : public Interpolator
     void post(NIFFile *nif) override;
 };
 
-struct NiBoolInterpolator : public Interpolator
+struct NiBoolInterpolator : public NiInterpolator
 {
-    bool defaultVal;
+    char defaultVal;
     NiBoolDataPtr data;
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 };
 
-struct NiFloatInterpolator : public Interpolator
+struct NiFloatInterpolator : public NiInterpolator
 {
     float defaultVal;
     NiFloatDataPtr data;
@@ -233,7 +258,7 @@ struct NiFloatInterpolator : public Interpolator
     void post(NIFFile *nif) override;
 };
 
-struct NiTransformInterpolator : public Interpolator
+struct NiTransformInterpolator : public NiInterpolator
 {
     osg::Vec3f defaultPos;
     osg::Quat defaultRot;
@@ -244,7 +269,7 @@ struct NiTransformInterpolator : public Interpolator
     void post(NIFFile *nif) override;
 };
 
-struct NiColorInterpolator : public Interpolator
+struct NiColorInterpolator : public NiInterpolator
 {
     osg::Vec4f defaultVal;
     NiColorDataPtr data;

@@ -72,7 +72,8 @@ namespace NifOsg
                         std::is_same<ValueT, float>,
                         std::is_same<ValueT, osg::Vec3f>,
                         std::is_same<ValueT, bool>,
-                        std::is_same<ValueT, osg::Vec4f>
+                        std::is_same<ValueT, osg::Vec4f>,
+                        std::is_same<ValueT, char>
                     >,
                     std::is_same<decltype(T::defaultVal), ValueT>
                 >,
@@ -192,6 +193,7 @@ namespace NifOsg
     using FloatInterpolator = ValueInterpolator<Nif::FloatKeyMap>;
     using Vec3Interpolator = ValueInterpolator<Nif::Vector3KeyMap>;
     using Vec4Interpolator = ValueInterpolator<Nif::Vector4KeyMap>;
+    using ByteInterpolator = ValueInterpolator<Nif::ByteKeyMap>;
 
     class ControllerFunction : public SceneUtil::ControllerFunction
     {
@@ -289,12 +291,13 @@ namespace NifOsg
     {
     private:
         std::vector<Nif::NiVisData::VisData> mData;
-        unsigned int mMask;
+        ByteInterpolator mInterpolator;
+        unsigned int mMask{0u};
 
         bool calculate(float time) const;
 
     public:
-        VisController(const Nif::NiVisData *data, unsigned int mask);
+        VisController(const Nif::NiVisController* ctrl, unsigned int mask);
         VisController();
         VisController(const VisController& copy, const osg::CopyOp& copyop);
 
@@ -310,8 +313,7 @@ namespace NifOsg
         double mStartingTime{0};
 
     public:
-        RollController(const Nif::NiFloatData *data);
-        RollController(const Nif::NiFloatInterpolator* interpolator);
+        RollController(const Nif::NiRollController* interpolator);
         RollController() = default;
         RollController(const RollController& copy, const osg::CopyOp& copyop);
 
@@ -326,8 +328,7 @@ namespace NifOsg
         FloatInterpolator mData;
         osg::ref_ptr<const osg::Material> mBaseMaterial;
     public:
-        AlphaController(const Nif::NiFloatData *data, const osg::Material* baseMaterial);
-        AlphaController(const Nif::NiFloatInterpolator* interpolator, const osg::Material* baseMaterial);
+        AlphaController(const Nif::NiAlphaController* ctrl, const osg::Material* baseMaterial);
         AlphaController();
         AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
 
@@ -348,8 +349,7 @@ namespace NifOsg
             Specular = 2,
             Emissive = 3
         };
-        MaterialColorController(const Nif::NiPosData *data, TargetColor color, const osg::Material* baseMaterial);
-        MaterialColorController(const Nif::NiPoint3Interpolator* interpolator, TargetColor color, const osg::Material* baseMaterial);
+        MaterialColorController(const Nif::NiMaterialColorController* ctrl, const osg::Material* baseMaterial);
         MaterialColorController();
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
 
