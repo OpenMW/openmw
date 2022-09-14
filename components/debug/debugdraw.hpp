@@ -67,7 +67,7 @@ namespace Debug
         osg::ref_ptr<osg::Geometry> mCylinderGeometry;
         osg::ref_ptr<osg::Geometry> mWireCubeGeometry;
 
-        virtual void drawImplementation(osg::RenderInfo&) const;
+        virtual void drawImplementation(osg::RenderInfo&) const override;
     };
 
     struct DebugDrawer
@@ -87,6 +87,7 @@ namespace Debug
 
         std::array<osg::ref_ptr<DebugCustomDraw>, 2> mCustomDebugDrawer;
         osg::ref_ptr<osg::Group> mDebugDrawSceneObjects;
+        osg::ref_ptr<osg::Group> mParentNode;
     };
 }
 #endif // !

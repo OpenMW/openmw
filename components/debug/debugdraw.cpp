@@ -330,7 +330,7 @@ namespace Debug
     };
 }
 
-Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
+Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode) : mParentNode(parentNode)
 {
     mCurrentFrame = 0;
     auto vertexShader = shaderManager.getShader("debug_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::VERTEX);
@@ -376,17 +376,12 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
     }
     mDebugDrawSceneObjects->addCullCallback(new DebugDrawCallback(*this));
 
-    parentNode->addChild(mDebugDrawSceneObjects);
+    mParentNode->addChild(mDebugDrawSceneObjects);
 }
 
 Debug::DebugDrawer::~DebugDrawer()
 {
-    auto parentsList = mDebugDrawSceneObjects->getParents();
-
-    for (auto parent : parentsList)
-    {
-        parent->removeChild(mDebugDrawSceneObjects);
-    }
+    mParentNode->removeChild(mDebugDrawSceneObjects);
 } 
 
 void Debug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
@@ -409,7 +404,7 @@ void Debug::DebugDrawer::addDrawCall(const DrawCall& draw)
 void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
 {
     const int indexWrite = getIdexBufferWriteFromFrame(mCurrentFrame);
-    auto lines = mCustomDebugDrawer[indexWrite]->mLinesToDraw;
+    const auto& lines = mCustomDebugDrawer[indexWrite]->mLinesToDraw;
     auto vertices = static_cast<osg::Vec3Array*>(lines->getVertexArray());
     auto colors = static_cast<osg::Vec3Array*>(lines->getNormalArray());
 
