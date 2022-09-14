@@ -144,19 +144,12 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_MODB: reader.get(mBoundRadius); break;
             case ESM4::SUB_KFFZ:
             {
-                std::string str;
-                if (!reader.getZString(str))
-                    throw std::runtime_error ("NPC_ KFFZ data read error");
-
                 // Seems to be only below 3, and only happens 3 times while loading TES4:
                 //   Forward_SheogorathWithCane.kf
                 //   TurnLeft_SheogorathWithCane.kf
                 //   TurnRight_SheogorathWithCane.kf
-                std::stringstream ss(str);
-                std::string file;
-                while (std::getline(ss, file, '\0')) // split the strings
-                    mKf.push_back(file);
-
+                if (!reader.getZeroTerminatedStringArray(mKf))
+                    throw std::runtime_error ("NPC_ KFFZ data read error");
                 break;
             }
             case ESM4::SUB_LNAM: reader.get(mHairLength); break;

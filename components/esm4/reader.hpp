@@ -293,6 +293,8 @@ namespace ESM4 {
             return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, mEncoder);
         }
 
+        bool getZeroTerminatedStringArray(std::vector<std::string>& values);
+
         void enterGroup();
         void exitGroupCheck();
 

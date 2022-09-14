@@ -121,15 +121,8 @@ void ESM4::Creature::load(ESM4::Reader& reader)
             case ESM4::SUB_NAM1: reader.getZString(mBloodDecal); break;
             case ESM4::SUB_NIFZ:
             {
-                std::string str;
-                if (!reader.getZString(str))
+                if (!reader.getZeroTerminatedStringArray(mNif))
                     throw std::runtime_error ("CREA NIFZ data read error");
-
-                std::stringstream ss(str);
-                std::string file;
-                while (std::getline(ss, file, '\0')) // split the strings
-                    mNif.push_back(file);
-
                 break;
             }
             case ESM4::SUB_NIFT:
@@ -149,15 +142,8 @@ void ESM4::Creature::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_KFFZ:
             {
-                std::string str;
-                if (!reader.getZString(str))
+                if (!reader.getZeroTerminatedStringArray(mKf))
                     throw std::runtime_error ("CREA KFFZ data read error");
-
-                std::stringstream ss(str);
-                std::string file;
-                while (std::getline(ss, file, '\0')) // split the strings
-                    mKf.push_back(file);
-
                 break;
             }
             case ESM4::SUB_TPLT: reader.get(mBaseTemplate); break; // FO3
