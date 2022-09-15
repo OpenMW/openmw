@@ -176,26 +176,28 @@ namespace MWGui
         {
             if (it->begin()!=it->end())
             {
+                const ESM::SavedGame& signature = it->getSignature();
+
                 std::stringstream title;
-                title << it->getSignature().mPlayerName;
+                title << signature.mPlayerName;
 
                 // For a custom class, we will not find it in the store (unless we loaded the savegame first).
                 // Fall back to name stored in savegame header in that case.
                 std::string_view className;
-                if (it->getSignature().mPlayerClassId.empty())
-                    className = it->getSignature().mPlayerClassName;
+                if (signature.mPlayerClassId.empty())
+                    className = signature.mPlayerClassName;
                 else
                 {
                     // Find the localised name for this class from the store
-                    const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().search(
-                                it->getSignature().mPlayerClassId);
+                    const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>()
+                            .search(signature.mPlayerClassId);
                     if (class_)
                         className = class_->mName;
                     else
                         className = "?"; // From an older savegame format that did not support custom classes properly.
                 }
 
-                title << " (#{sLevel} " << it->getSignature().mPlayerLevel << " " << MyGUI::TextIterator::toTagsString(toUString(className)) << ")";
+                title << " (#{sLevel} " << signature.mPlayerLevel << " " << MyGUI::TextIterator::toTagsString(toUString(className)) << ")";
 
                 mCharacterSelection->addItem (MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
 

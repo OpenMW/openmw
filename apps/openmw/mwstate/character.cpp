@@ -4,6 +4,8 @@
 #include <filesystem>
 #include <sstream>
 #include <utility>
+#include <algorithm>
+#include <tuple>
 
 #include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -172,23 +174,22 @@ MWState::Character::SlotIterator MWState::Character::end() const
     return mSlots.rend();
 }
 
-ESM::SavedGame MWState::Character::getSignature() const
+const ESM::SavedGame& MWState::Character::getSignature() const
 {
     if (mSlots.empty())
         throw std::logic_error ("character signature not available");
 
-    std::vector<Slot>::const_iterator iter (mSlots.begin());
+    const auto tiePlayerLevelAndTimeStamp = [] (const Slot& v)
+    {
+        return std::tie(v.mProfile.mPlayerLevel, v.mTimeStamp);
+    };
 
-    Slot slot = *iter;
+    const auto lessByPlayerLevelAndTimeStamp = [&] (const Slot& l, const Slot& r)
+    {
+        return tiePlayerLevelAndTimeStamp(l) < tiePlayerLevelAndTimeStamp(r);
+    };
 
-    for (++iter; iter!=mSlots.end(); ++iter)
-        if (iter->mProfile.mPlayerLevel>slot.mProfile.mPlayerLevel)
-            slot = *iter;
-        else if (iter->mProfile.mPlayerLevel==slot.mProfile.mPlayerLevel &&
-            iter->mTimeStamp>slot.mTimeStamp)
-            slot = *iter;
-
-    return slot.mProfile;
+    return std::max_element(mSlots.begin(), mSlots.end(), lessByPlayerLevelAndTimeStamp)->mProfile;
 }
 
 const std::filesystem::path& MWState::Character::getPath() const
