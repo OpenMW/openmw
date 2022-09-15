@@ -98,7 +98,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] =
     "Not Race",
     "Not Cell",
     "Not Local",
-    0
+    nullptr,
 };
 
 const char* CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[] =
@@ -109,7 +109,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[] =
     ">=",
     "<",
     "<=",
-    0
+    nullptr,
 };
 
 const char* CSMWorld::ConstInfoSelectWrapper::ComparisonEnumStrings[] =
@@ -117,7 +117,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::ComparisonEnumStrings[] =
     "Boolean",
     "Integer",
     "Numeric",
-    0
+    nullptr,
 };
 
 // static functions

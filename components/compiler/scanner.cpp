@@ -249,7 +249,7 @@ namespace Compiler
         "return",
         "messagebox",
         "set", "to",
-        nullptr
+        nullptr,
     };
 
     bool Scanner::scanName (MultiChar& c, Parser& parser, bool& cont, std::string name)

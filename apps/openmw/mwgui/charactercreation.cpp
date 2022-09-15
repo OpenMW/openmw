@@ -105,7 +105,7 @@ namespace MWGui
         static const char *ids[] =
         {
             "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4",
-            "AttribVal5", "AttribVal6", "AttribVal7", "AttribVal8", 0
+            "AttribVal5", "AttribVal6", "AttribVal7", "AttribVal8", nullptr,
         };
 
         for (int i=0; ids[i]; ++i)

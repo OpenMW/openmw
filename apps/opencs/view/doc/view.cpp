@@ -538,7 +538,8 @@ void CSVDoc::View::updateDocumentState()
     {
         CSMDoc::State_Saving, CSMDoc::State_Verifying, CSMDoc::State_Searching,
         CSMDoc::State_Merging,
-        -1 // end marker
+        // end marker
+        -1,
     };
 
     int state = mDocument->getState() ;

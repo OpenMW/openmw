@@ -199,7 +199,7 @@ CSMFilter::Token CSMFilter::Parser::checkKeywords (const Token& token)
         "true", "false",
         "and", "or", "not",
         "string", "value",
-        0
+        nullptr,
     };
 
     std::string string = Misc::StringUtils::lowerCase (token.mString);

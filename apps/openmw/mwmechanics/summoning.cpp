@@ -55,7 +55,7 @@ namespace MWMechanics
             {ESM::MagicEffect::SummonBear, "sMagicCreature02ID"},
             {ESM::MagicEffect::SummonBonewolf, "sMagicCreature03ID"},
             {ESM::MagicEffect::SummonCreature04, "sMagicCreature04ID"},
-            {ESM::MagicEffect::SummonCreature05, "sMagicCreature05ID"}
+            {ESM::MagicEffect::SummonCreature05, "sMagicCreature05ID"},
         };
 
         auto it = summonMap.find(effectId);

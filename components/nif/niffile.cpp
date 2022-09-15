@@ -196,7 +196,7 @@ void NIFFile::parse(Files::IStreamPtr&& stream)
     static const std::array<std::string, 2> verStrings =
     {
         "NetImmerse File Format",
-        "Gamebryo File Format"
+        "Gamebryo File Format",
     };
     const bool supportedHeader = std::any_of(verStrings.begin(), verStrings.end(),
         [&] (const std::string& verString) { return head.compare(0, verString.size(), verString) == 0; });
@@ -210,7 +210,7 @@ void NIFFile::parse(Files::IStreamPtr&& stream)
     static const std::array<uint32_t, 2> supportedVers =
     {
         NIFStream::generateVersion(4,0,0,0),
-        VER_MW
+        VER_MW,
     };
     const bool supportedVersion = std::find(supportedVers.begin(), supportedVers.end(), ver) != supportedVers.end();
     if (!supportedVersion)
