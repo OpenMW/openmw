@@ -2,9 +2,7 @@
 #define OPENMW_COMPONENTS_SETTINGS_SHADERMANAGER_H
 
 #include <unordered_map>
-#include <filesystem>
 #include <optional>
-#include <fstream>
 #include <vector>
 
 #include <yaml-cpp/yaml.h>
@@ -12,6 +10,10 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
+
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <components/serialization/osgyaml.hpp>
 #include <components/debug/debuglog.hpp>
@@ -107,13 +109,13 @@ namespace Settings
         bool load(const std::string& path)
         {
             mData = YAML::Null;
-            mPath = std::filesystem::path(path);
+            mPath = boost::filesystem::path(path);
 
             Log(Debug::Info) << "Loading shader settings file: " << mPath;
 
-            if (!std::filesystem::exists(mPath))
+            if (!boost::filesystem::exists(mPath))
             {
-                std::ofstream fout(mPath);
+                boost::filesystem::ofstream fout(mPath);
                 if (!fout)
                 {
                     Log(Debug::Error) << "Failed creating shader settings file: " << mPath;
@@ -123,7 +125,8 @@ namespace Settings
 
             try
             {
-                mData = YAML::LoadFile(mPath.string());
+                boost::filesystem::ifstream fin(mPath);
+                mData = YAML::Load(fin);
                 mData.SetStyle(YAML::EmitterStyle::Block);
 
                 if (!mData["config"])
@@ -153,7 +156,7 @@ namespace Settings
             out.SetMapFormat(YAML::Block);
             out << mData;
 
-            std::ofstream fout(mPath.string());
+            boost::filesystem::ofstream fout(mPath);
             fout << out.c_str();
 
             if (!fout)
@@ -166,7 +169,7 @@ namespace Settings
         }
 
     private:
-        std::filesystem::path mPath;
+        boost::filesystem::path mPath;
         YAML::Node mData;
         Mode mMode = Mode::Normal;
     };

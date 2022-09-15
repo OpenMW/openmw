@@ -6,8 +6,6 @@
 #include <string>
 #include <unordered_map>
 
-#include <filesystem>
-
 #include <osg/Texture2D>
 #include <osg/Group>
 #include <osg/FrameBufferObject>
@@ -220,7 +218,7 @@ namespace MWRender
         TechniqueList mTemplates;
         TechniqueList mQueuedTemplates;
 
-        std::unordered_map<std::string, std::filesystem::path> mTechniqueFileMap;
+        std::unordered_map<std::string, boost::filesystem::path> mTechniqueFileMap;
 
         int mSamples;
 

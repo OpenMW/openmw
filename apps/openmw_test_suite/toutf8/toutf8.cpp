@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include <fstream>
+#include <boost/filesystem/fstream.hpp>
 
 #ifndef OPENMW_TEST_SUITE_SOURCE_DIR
 #define OPENMW_TEST_SUITE_SOURCE_DIR ""
@@ -22,8 +22,8 @@ namespace
 
     std::string readContent(const std::string& fileName)
     {
-        std::ifstream file;
-        file.exceptions(std::ios::failbit | std::ios::badbit);
+        boost::filesystem::ifstream file;
+        file.exceptions(boost::filesystem::fstream::failbit | boost::filesystem::fstream::badbit);
         file.open(std::string(OPENMW_TEST_SUITE_SOURCE_DIR) + "/toutf8/data/" + fileName);
         std::stringstream buffer;
         buffer << file.rdbuf();

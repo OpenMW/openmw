@@ -1,7 +1,7 @@
 #include "gmock/gmock.h"
 #include <gtest/gtest.h>
 
-#include <fstream>
+#include <boost/filesystem/fstream.hpp>
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -182,7 +182,7 @@ namespace
 
         {
             // Save for manual testing.
-            std::ofstream f(TestingOpenMW::outputFilePath("lua_conf_test.omwaddon"), std::ios::binary);
+            boost::filesystem::ofstream f(TestingOpenMW::outputFilePath("lua_conf_test.omwaddon"), boost::filesystem::fstream::binary);
             f << serializedOMWAddon;
             f.close();
         }

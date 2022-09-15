@@ -1,6 +1,8 @@
-#include <filesystem>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <components/lua/scriptscontainer.hpp>
 #include <components/lua/storage.hpp>
@@ -88,7 +90,7 @@ namespace
         mLua.safe_script("permanent:set('x', 1)");
         mLua.safe_script("temporary:set('y', 2)");
 
-        std::string tmpFile = (std::filesystem::temp_directory_path() / "test_storage.bin").string();
+        std::string tmpFile = (boost::filesystem::temp_directory_path() / "test_storage.bin").string();
         storage.save(tmpFile);
         EXPECT_EQ(get<int>(mLua, "permanent:get('x')"), 1);
         EXPECT_EQ(get<int>(mLua, "temporary:get('y')"), 2);

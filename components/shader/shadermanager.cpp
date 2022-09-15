@@ -1,15 +1,19 @@
 #include "shadermanager.hpp"
 
-#include <fstream>
 #include <algorithm>
 #include <sstream>
 #include <regex>
-#include <filesystem>
 #include <set>
 #include <unordered_map>
 #include <chrono>
+
 #include <osg/Program>
 #include <osgViewer/Viewer>
+
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
@@ -73,7 +77,7 @@ namespace Shader
     // Recursively replaces include statements with the actual source of the included files.
     // Adjusts #line statements accordingly and detects cyclic includes.
     // cycleIncludeChecker is the set of files that include this file directly or indirectly, and is intentionally not a reference to allow automatic cleanup.
-    static bool parseIncludes(const std::filesystem::path& shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<std::filesystem::path> cycleIncludeChecker,std::set<std::filesystem::path>& includedFiles)
+    static bool parseIncludes(const boost::filesystem::path& shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<boost::filesystem::path> cycleIncludeChecker,std::set<boost::filesystem::path>& includedFiles)
     {
         includedFiles.insert(shaderPath / fileName);
         // An include is cyclic if it is being included by itself
@@ -101,7 +105,7 @@ namespace Shader
                 return false;
             }
             std::string includeFilename = source.substr(start + 1, end - (start + 1));
-            std::filesystem::path includePath = shaderPath / includeFilename;
+            boost::filesystem::path includePath = shaderPath / includeFilename;
 
             // Determine the line number that will be used for the #line directive following the included source
             size_t lineDirectivePosition = source.rfind("#line", foundPos);
@@ -121,7 +125,7 @@ namespace Shader
             lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
 
             // Include the file recursively
-            std::ifstream includeFstream;
+            boost::filesystem::ifstream includeFstream;
             includeFstream.open(includePath);
             if (includeFstream.fail())
             {
@@ -366,8 +370,8 @@ namespace Shader
         using KeysHolder = std::set<ShaderManager::MapKey>;
 
         std::unordered_map<std::string, KeysHolder> mShaderFiles;
-        std::unordered_map<std::string, std::set<std::filesystem::path>> templateIncludedFiles;
-        std::filesystem::file_time_type mLastAutoRecompileTime;
+        std::unordered_map<std::string, std::set<boost::filesystem::path>> templateIncludedFiles;
+        std::chrono::time_point<std::chrono::system_clock> mLastAutoRecompileTime;
         bool mHotReloadEnabled;
         bool mTriggerReload;
 
@@ -375,13 +379,13 @@ namespace Shader
         {
             mTriggerReload = false;
             mHotReloadEnabled = false;
-            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
+            mLastAutoRecompileTime = std::chrono::system_clock::now();
         }
 
         void addShaderFiles(const std::string& templateName,const ShaderManager::DefineMap& defines )
         {
-            const std::set<std::filesystem::path>& shaderFiles = templateIncludedFiles[templateName];
-            for (const std::filesystem::path& file : shaderFiles)
+            const std::set<boost::filesystem::path>& shaderFiles = templateIncludedFiles[templateName];
+            for (const boost::filesystem::path& file : shaderFiles)
             {
                 mShaderFiles[file.string()].insert(std::make_pair(templateName, defines));
             }
@@ -389,7 +393,7 @@ namespace Shader
 
         void update(ShaderManager& Manager,osgViewer::Viewer& viewer)
         {
-            auto timeSinceLastCheckMillis = std::chrono::duration_cast<std::chrono::milliseconds>(std::filesystem::file_time_type::clock::now() - mLastAutoRecompileTime);
+            auto timeSinceLastCheckMillis = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - mLastAutoRecompileTime);
             if ((mHotReloadEnabled && timeSinceLastCheckMillis.count() > 200) || mTriggerReload == true)
             {
                 reloadTouchedShaders(Manager, viewer);
@@ -403,7 +407,7 @@ namespace Shader
             for (auto& [pathShaderToTest,  shaderKeys]: mShaderFiles)
             {
 
-                std::filesystem::file_time_type write_time = std::filesystem::last_write_time(pathShaderToTest);
+                auto write_time = std::chrono::system_clock::from_time_t(boost::filesystem::last_write_time(pathShaderToTest));
                 if (write_time.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
                 {
                     if (!threadsRunningToStop)
@@ -419,9 +423,9 @@ namespace Shader
 
                         ShaderManager::TemplateMap::iterator templateIt = Manager.mShaderTemplates.find(templateName); //Can't be Null, if we're here it means the template was added
                         std::string& shaderSource = templateIt->second;
-                        std::set<std::filesystem::path> insertedPaths;
-                        std::filesystem::path path = (std::filesystem::path(Manager.mPath) / templateName);
-                        std::ifstream stream;
+                        std::set<boost::filesystem::path> insertedPaths;
+                        boost::filesystem::path path = (boost::filesystem::path(Manager.mPath) / templateName);
+                        boost::filesystem::ifstream stream;
                         stream.open(path);
                         if (stream.fail())
                         {
@@ -434,7 +438,7 @@ namespace Shader
                         int fileNumber = 1;
                         std::string source = buffer.str();
                         if (!addLineDirectivesAfterConditionalBlocks(source)
-                            || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber, {}, insertedPaths))
+                            || !parseIncludes(boost::filesystem::path(Manager.mPath), source, templateName, fileNumber, {}, insertedPaths))
                         {
                             break;
                         }
@@ -452,7 +456,7 @@ namespace Shader
             }
             if (threadsRunningToStop)
                 viewer.startThreading();
-            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
+            mLastAutoRecompileTime = std::chrono::system_clock::now();
         }
     };
 
@@ -462,12 +466,12 @@ namespace Shader
 
         // read the template if we haven't already
         TemplateMap::iterator templateIt = mShaderTemplates.find(templateName);
-        std::set<std::filesystem::path> insertedPaths;
+        std::set<boost::filesystem::path> insertedPaths;
 
         if (templateIt == mShaderTemplates.end())
         {
-            std::filesystem::path path = (std::filesystem::path(mPath) / templateName);
-            std::ifstream stream;
+            boost::filesystem::path path = (boost::filesystem::path(mPath) / templateName);
+            boost::filesystem::ifstream stream;
             stream.open(path);
             if (stream.fail())
             {
@@ -481,7 +485,7 @@ namespace Shader
             int fileNumber = 1;
             std::string source = buffer.str();
             if (!addLineDirectivesAfterConditionalBlocks(source)
-                || !parseIncludes(std::filesystem::path(mPath), source, templateName, fileNumber, {}, insertedPaths))
+                || !parseIncludes(boost::filesystem::path(mPath), source, templateName, fileNumber, {}, insertedPaths))
                 return nullptr;
             mHotReloadManager->templateIncludedFiles[templateName] = insertedPaths;
             templateIt = mShaderTemplates.insert(std::make_pair(templateName, source)).first;

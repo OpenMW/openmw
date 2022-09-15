@@ -5,8 +5,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
-#include <fstream>
-#include <filesystem>
+#include <boost/filesystem/fstream.hpp>
 
 #include <Base64.h>
 
@@ -14,8 +13,8 @@ void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, Cat
                                                     bool base64Encoded, bool overrideExisting)
 {
     mFile = file;
-    std::ifstream fstream;
-    fstream.open(std::filesystem::path(file));
+    boost::filesystem::ifstream fstream;
+    fstream.open(boost::filesystem::path(file));
     auto stream = std::ref<std::istream>(fstream);
 
     std::istringstream decodedStream;
@@ -107,8 +106,8 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
     // Open the existing settings.cfg file to copy comments.  This might not be the same file
     // as the output file if we're copying the setting from the default settings.cfg for the
     // first time.  A minor change in API to pass the source file might be in order here.
-    std::ifstream istream;
-    std::filesystem::path ipath(file);
+    boost::filesystem::ifstream istream;
+    boost::filesystem::path ipath(file);
     istream.open(ipath);
 
     // Create a new string stream to write the current settings to.  It's likely that the
@@ -306,7 +305,7 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
     // Now install the newly written file in the requested place.
     if (changed) {
         Log(Debug::Info) << "Updating settings file: " << ipath;
-        std::ofstream ofstream;
+        boost::filesystem::ofstream ofstream;
         ofstream.open(ipath);
         ofstream << ostream.rdbuf();
         ofstream.close();

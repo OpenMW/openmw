@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
@@ -21,7 +21,7 @@ namespace VFS
     {
         if (!mBuiltIndex)
         {
-            typedef std::filesystem::recursive_directory_iterator directory_iterator;
+            typedef boost::filesystem::recursive_directory_iterator directory_iterator;
 
             directory_iterator end;
 
@@ -30,14 +30,14 @@ namespace VFS
             if (mPath.size () > 0 && mPath [prefix - 1] != '\\' && mPath [prefix - 1] != '/')
                 ++prefix;
 
-            for (directory_iterator i (std::filesystem::u8path(mPath)); i != end; ++i)
+            for (directory_iterator i (mPath); i != end; ++i)
             {
-                if(std::filesystem::is_directory (*i))
+                if(boost::filesystem::is_directory (*i))
                     continue;
 
-                auto proper = i->path ().u8string ();
+                std::string proper = i->path ().string ();
 
-                FileSystemArchiveFile file(std::string((char*)proper.c_str(), proper.size()));
+                FileSystemArchiveFile file(proper);
 
                 std::string searchable;
 
@@ -45,7 +45,7 @@ namespace VFS
 
                 const auto inserted = mIndex.insert(std::make_pair(searchable, file));
                 if (!inserted.second)
-                    Log(Debug::Warning) << "Warning: found duplicate file for '" << std::string((char*)proper.c_str(), proper.size()) << "', please check your file system for two files with the same name in different cases.";
+                    Log(Debug::Warning) << "Warning: found duplicate file for '" << proper << "', please check your file system for two files with the same name in different cases.";
                 else
                     out[inserted.first->first] = &inserted.first->second;
             }

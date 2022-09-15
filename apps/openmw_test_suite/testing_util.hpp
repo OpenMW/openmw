@@ -1,8 +1,10 @@
 #ifndef TESTING_UTIL_H
 #define TESTING_UTIL_H
 
-#include <filesystem>
 #include <sstream>
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <components/vfs/archive.hpp>
 #include <components/vfs/manager.hpp>
@@ -12,14 +14,14 @@ namespace TestingOpenMW
 
     inline std::string outputFilePath(const std::string name)
     {
-        std::filesystem::path dir("tests_output");
-        std::filesystem::create_directory(dir);
+        boost::filesystem::path dir("tests_output");
+        boost::filesystem::create_directory(dir);
         return (dir / name).string();
     }
 
     inline std::string temporaryFilePath(const std::string name)
     {
-        return (std::filesystem::temp_directory_path() / name).string();
+        return (boost::filesystem::temp_directory_path() / name).string();
     }
 
     class VFSTestFile : public VFS::File

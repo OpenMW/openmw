@@ -1,7 +1,6 @@
 #include "registerarchives.hpp"
 
 #include <set>
-#include <filesystem>
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
@@ -39,11 +38,10 @@ namespace VFS
 
         if (useLooseFiles)
         {
-            std::set<std::filesystem::path> seen;
+            std::set<boost::filesystem::path> seen;
             for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
             {
-                // TODO(jvoisin) Get rid of `->native()` when we move PathContainer from boost::filesystem to std::filesystem.
-                if (seen.insert(iter->native()).second)
+                if (seen.insert(*iter).second)
                 {
                     Log(Debug::Info) << "Adding data directory " << iter->string();
                     // Last data dir has the highest priority

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <cstring>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -10,14 +9,17 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
-#include <fstream>
-#include <filesystem>
 
 #include <pthread.h>
 #include <stdbool.h>
 #include <sys/ptrace.h>
 
 #include <components/debug/debuglog.hpp>
+
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/operations.hpp>
+
+namespace bfs = boost::filesystem;
 
 #include <SDL_messagebox.h>
 
@@ -499,10 +501,10 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
 static bool is_debugger_present()
 {
 #if defined (__linux__)
-    std::filesystem::path procstatus = std::filesystem::path("/proc/self/status");
-    if (std::filesystem::exists(procstatus))
+    bfs::path procstatus = bfs::path("/proc/self/status");
+    if (bfs::exists(procstatus))
     {
-        std::ifstream file((procstatus));
+        bfs::ifstream file((procstatus));
         while (!file.eof())
         {
             std::string word;

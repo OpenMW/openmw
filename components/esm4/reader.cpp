@@ -31,7 +31,6 @@
 #include <cassert>
 #include <stdexcept>
 #include <unordered_map>
-#include <filesystem>
 #include <iostream> // for debugging
 #include <sstream>  // for debugging
 #include <iomanip>  // for debugging
@@ -46,6 +45,8 @@
 #endif
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include <components/bsa/memorystream.hpp>
 #include <components/misc/stringops.hpp>
@@ -204,7 +205,7 @@ void Reader::buildLStringIndex()
     if ((mHeader.mFlags & Rec_ESM) == 0 || (mHeader.mFlags & Rec_Localized) == 0)
         return;
 
-    std::filesystem::path p(mCtx.filename);
+    boost::filesystem::path p(mCtx.filename);
     std::string filename = p.stem().filename().string();
 
     buildLStringIndex("Strings/" + filename + "_English.STRINGS",   Type_Strings);

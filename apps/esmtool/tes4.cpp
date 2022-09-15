@@ -2,7 +2,6 @@
 #include "arguments.hpp"
 #include "labels.hpp"
 
-#include <fstream>
 #include <iostream>
 #include <type_traits>
 
@@ -286,7 +285,7 @@ namespace EsmTool
         }
     }
 
-    int loadTes4(const Arguments& info, std::unique_ptr<std::ifstream>&& stream)
+    int loadTes4(const Arguments& info, std::unique_ptr<boost::filesystem::ifstream>&& stream)
     {
         std::cout << "Loading TES4 file: " << info.filename << '\n';
 

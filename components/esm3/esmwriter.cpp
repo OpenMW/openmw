@@ -1,7 +1,7 @@
 #include "esmwriter.hpp"
 
 #include <cassert>
-#include <fstream>
+#include <iostream>
 #include <stdexcept>
 
 #include <components/to_utf8/to_utf8.hpp>

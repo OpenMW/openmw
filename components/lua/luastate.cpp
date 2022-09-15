@@ -4,7 +4,7 @@
 #include <luajit.h>
 #endif // NO_LUAJIT
 
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
@@ -34,12 +34,12 @@ namespace LuaUtil
         path.append(".lua");
         for (const std::string& dir : searchDirs)
         {
-            std::filesystem::path base(dir);
-            std::filesystem::path p1 = base / path;
-            if (std::filesystem::exists(p1))
+            boost::filesystem::path base(dir);
+            boost::filesystem::path p1 = base / path;
+            if (boost::filesystem::exists(p1))
                 return p1.string();
-            std::filesystem::path p2 = base / pathWithInit;
-            if (std::filesystem::exists(p2))
+            boost::filesystem::path p2 = base / pathWithInit;
+            if (boost::filesystem::exists(p2))
                 return p2.string();
         }
         throw std::runtime_error("module not found: " + std::string(packageName));

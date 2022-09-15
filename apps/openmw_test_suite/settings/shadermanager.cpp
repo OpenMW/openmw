@@ -1,7 +1,6 @@
 #include <components/settings/shadermanager.hpp>
 
-#include <filesystem>
-#include <fstream>
+#include <boost/filesystem/fstream.hpp>
 
 #include <gtest/gtest.h>
 
@@ -21,7 +20,7 @@ namespace
                 std::string(UnitTest::GetInstance()->current_test_info()->name()) + ".yaml");
 
             {
-                std::ofstream stream;
+                boost::filesystem::ofstream stream;
                 stream.open(path);
                 stream << content;
                 stream.close();

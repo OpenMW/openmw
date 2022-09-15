@@ -39,8 +39,8 @@ namespace fx
 {
     Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, const std::string& name, int width, int height, bool ubo, bool supportsNormals)
         : mName(name)
-        , mFileName((std::filesystem::path(Technique::sSubdir) / (mName + Technique::sExt)).string())
-        , mLastModificationTime(std::filesystem::file_time_type())
+        , mFileName((boost::filesystem::path(Technique::sSubdir) / (mName + Technique::sExt)).string())
+        , mLastModificationTime(std::chrono::time_point<std::chrono::system_clock>())
         , mWidth(width)
         , mHeight(height)
         , mVFS(vfs)
@@ -179,10 +179,11 @@ namespace fx
         return mFileName;
     }
 
-    bool Technique::setLastModificationTime(std::filesystem::file_time_type timeStamp)
+    bool Technique::setLastModificationTime(std::time_t timeStamp)
     {
-        const bool isDirty = timeStamp != mLastModificationTime;
-        mLastModificationTime = timeStamp;
+        auto convertedTime = std::chrono::system_clock::from_time_t(timeStamp);
+        const bool isDirty = convertedTime != mLastModificationTime;
+        mLastModificationTime = convertedTime;
         return isDirty;
     }
 

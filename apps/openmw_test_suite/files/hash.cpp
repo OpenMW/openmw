@@ -4,8 +4,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <boost/filesystem/fstream.hpp>
+
 #include <algorithm>
-#include <fstream>
 #include <sstream>
 #include <string>
 
@@ -51,7 +52,7 @@ namespace
         std::string content;
         std::fill_n(std::back_inserter(content), GetParam().mSize, 'a');
         fileName = outputFilePath(fileName);
-        std::fstream(fileName, std::ios_base::out | std::ios_base::binary)
+        boost::filesystem::fstream(fileName, boost::filesystem::fstream::out | boost::filesystem::fstream::binary)
             .write(content.data(), static_cast<std::streamsize>(content.size()));
         const auto stream = Files::openConstrainedFileStream(fileName, 0, content.size());
         EXPECT_EQ(getHash(fileName, *stream), GetParam().mHash);
