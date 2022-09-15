@@ -179,6 +179,7 @@
     Bug #6913: Constant effect enchanted items don't break invisibility
     Bug #6923: Dispose of corpse prevents respawning after load
     Bug #6937: Divided by Nix Hounds quest is broken
+    Bug #7008: Race condition on initializing a vector of reserved node names
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
