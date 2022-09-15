@@ -86,29 +86,32 @@ KeyframeController::KeyframeController(const KeyframeController &copy, const osg
 
 KeyframeController::KeyframeController(const Nif::NiKeyframeController *keyctrl)
 {
-    if (!keyctrl->interpolator.empty())
+    if (!keyctrl->mInterpolator.empty())
     {
-        const Nif::NiTransformInterpolator* interp = keyctrl->interpolator.getPtr();
-        if (!interp->data.empty())
+        if (keyctrl->mInterpolator->recType == Nif::RC_NiTransformInterpolator)
         {
-            mRotations = QuaternionInterpolator(interp->data->mRotations, interp->defaultRot);
-            mXRotations = FloatInterpolator(interp->data->mXRotations);
-            mYRotations = FloatInterpolator(interp->data->mYRotations);
-            mZRotations = FloatInterpolator(interp->data->mZRotations);
-            mTranslations = Vec3Interpolator(interp->data->mTranslations, interp->defaultPos);
-            mScales = FloatInterpolator(interp->data->mScales, interp->defaultScale);
-            mAxisOrder = interp->data->mAxisOrder;
-        }
-        else
-        {
-            mRotations = QuaternionInterpolator(Nif::QuaternionKeyMapPtr(), interp->defaultRot);
-            mTranslations = Vec3Interpolator(Nif::Vector3KeyMapPtr(), interp->defaultPos);
-            mScales = FloatInterpolator(Nif::FloatKeyMapPtr(), interp->defaultScale);
+            const Nif::NiTransformInterpolator* interp = static_cast<const Nif::NiTransformInterpolator*>(keyctrl->mInterpolator.getPtr());
+            if (!interp->data.empty())
+            {
+                mRotations = QuaternionInterpolator(interp->data->mRotations, interp->defaultRot);
+                mXRotations = FloatInterpolator(interp->data->mXRotations);
+                mYRotations = FloatInterpolator(interp->data->mYRotations);
+                mZRotations = FloatInterpolator(interp->data->mZRotations);
+                mTranslations = Vec3Interpolator(interp->data->mTranslations, interp->defaultPos);
+                mScales = FloatInterpolator(interp->data->mScales, interp->defaultScale);
+                mAxisOrder = interp->data->mAxisOrder;
+            }
+            else
+            {
+                mRotations = QuaternionInterpolator(Nif::QuaternionKeyMapPtr(), interp->defaultRot);
+                mTranslations = Vec3Interpolator(Nif::Vector3KeyMapPtr(), interp->defaultPos);
+                mScales = FloatInterpolator(Nif::FloatKeyMapPtr(), interp->defaultScale);
+            }
         }
     }
-    else if (!keyctrl->data.empty())
+    else if (!keyctrl->mData.empty())
     {
-        const Nif::NiKeyframeData* keydata = keyctrl->data.getPtr();
+        const Nif::NiKeyframeData* keydata = keyctrl->mData.getPtr();
         mRotations = QuaternionInterpolator(keydata->mRotations);
         mXRotations = FloatInterpolator(keydata->mXRotations);
         mYRotations = FloatInterpolator(keydata->mYRotations);
@@ -298,14 +301,20 @@ void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     }
 }
 
-VisController::VisController(const Nif::NiVisData *data, unsigned int mask)
-    : mData(data->mVis)
-    , mMask(mask)
+VisController::VisController(const Nif::NiVisController *ctrl, unsigned int mask)
+    : mMask(mask)
 {
+    if (!ctrl->mInterpolator.empty())
+    {
+        if (ctrl->mInterpolator->recType == Nif::RC_NiBoolInterpolator)
+            mInterpolator = ByteInterpolator(static_cast<const Nif::NiBoolInterpolator*>(ctrl->mInterpolator.getPtr()));
+    }
+    else if (!ctrl->mData.empty())
+        mData = ctrl->mData->mVis;
+
 }
 
 VisController::VisController()
-    : mMask(0)
 {
 }
 
@@ -313,12 +322,16 @@ VisController::VisController(const VisController &copy, const osg::CopyOp &copyo
     : SceneUtil::NodeCallback<VisController>(copy, copyop)
     , Controller(copy)
     , mData(copy.mData)
+    , mInterpolator(copy.mInterpolator)
     , mMask(copy.mMask)
 {
 }
 
 bool VisController::calculate(float time) const
 {
+    if (!mInterpolator.empty())
+        return mInterpolator.interpKey(time);
+
     if(mData.size() == 0)
         return true;
 
@@ -340,14 +353,15 @@ void VisController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     traverse(node, nv);
 }
 
-RollController::RollController(const Nif::NiFloatData *data)
-    : mData(data->mKeyList, 1.f)
+RollController::RollController(const Nif::NiRollController* ctrl)
 {
-}
-
-RollController::RollController(const Nif::NiFloatInterpolator* interpolator)
-    : mData(interpolator)
-{
+    if (!ctrl->mInterpolator.empty())
+    {
+        if (ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+            mData = FloatInterpolator(static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr()));
+    }
+    else if (!ctrl->mData.empty())
+        mData = FloatInterpolator(ctrl->mData->mKeyList, 1.f);
 }
 
 RollController::RollController(const RollController &copy, const osg::CopyOp &copyop)
@@ -386,17 +400,16 @@ AlphaController::AlphaController()
 {
 }
 
-AlphaController::AlphaController(const Nif::NiFloatData *data, const osg::Material* baseMaterial)
-    : mData(data->mKeyList, 1.f)
-    , mBaseMaterial(baseMaterial)
+AlphaController::AlphaController(const Nif::NiAlphaController* ctrl, const osg::Material* baseMaterial)
+    : mBaseMaterial(baseMaterial)
 {
-
-}
-
-AlphaController::AlphaController(const Nif::NiFloatInterpolator* interpolator, const osg::Material* baseMaterial)
-    : mData(interpolator)
-    , mBaseMaterial(baseMaterial)
-{
+    if (!ctrl->mInterpolator.empty())
+    {
+        if (ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+            mData = FloatInterpolator(static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr()));
+    }
+    else if (!ctrl->mData.empty())
+        mData = FloatInterpolator(ctrl->mData->mKeyList, 1.f);
 }
 
 AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp &copyop)
@@ -427,18 +440,17 @@ MaterialColorController::MaterialColorController()
 {
 }
 
-MaterialColorController::MaterialColorController(const Nif::NiPosData *data, TargetColor color, const osg::Material* baseMaterial)
-    : mData(data->mKeyList, osg::Vec3f(1,1,1))
-    , mTargetColor(color)
+MaterialColorController::MaterialColorController(const Nif::NiMaterialColorController* ctrl, const osg::Material* baseMaterial)
+    : mTargetColor(static_cast<MaterialColorController::TargetColor>(ctrl->mTargetColor))
     , mBaseMaterial(baseMaterial)
 {
-}
-
-MaterialColorController::MaterialColorController(const Nif::NiPoint3Interpolator* interpolator, TargetColor color, const osg::Material* baseMaterial)
-    : mData(interpolator)
-    , mTargetColor(color)
-    , mBaseMaterial(baseMaterial)
-{
+    if (!ctrl->mInterpolator.empty())
+    {
+        if (ctrl->mInterpolator->recType == Nif::RC_NiPoint3Interpolator)
+            mData = Vec3Interpolator(static_cast<const Nif::NiPoint3Interpolator*>(ctrl->mInterpolator.getPtr()));
+    }
+    else if (!ctrl->mData.empty())
+        mData = Vec3Interpolator(ctrl->mData->mKeyList, osg::Vec3f(1, 1, 1));
 }
 
 MaterialColorController::MaterialColorController(const MaterialColorController &copy, const osg::CopyOp &copyop)
@@ -499,8 +511,8 @@ FlipController::FlipController(const Nif::NiFlipController *ctrl, const std::vec
     , mDelta(ctrl->mDelta)
     , mTextures(textures)
 {
-    if (!ctrl->mInterpolator.empty())
-        mData = ctrl->mInterpolator.getPtr();
+    if (!ctrl->mInterpolator.empty() && ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+        mData = static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr());
 }
 
 FlipController::FlipController(int texSlot, float delta, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
