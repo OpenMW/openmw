@@ -693,4 +693,30 @@ bool Reader::getStringImpl(std::string& str, std::size_t size,
     return false; // FIXME: throw instead?
 }
 
+bool Reader::getZeroTerminatedStringArray(std::vector<std::string>& values)
+{
+    const std::size_t size = mCtx.subRecordHeader.dataSize;
+    std::string input(size, '\0');
+    mStream->read(input.data(), size);
+
+    if (mStream->gcount() != static_cast<std::streamsize>(size))
+        return false;
+
+    std::string_view inputView(input.data(), input.size());
+    std::string buffer;
+    while (true)
+    {
+        std::string_view value(inputView.data());
+        const std::size_t next = inputView.find_first_not_of('\0', value.size());
+        if (mEncoder != nullptr)
+            value = mEncoder->getUtf8(value, ToUTF8::BufferAllocationPolicy::UseGrowFactor, buffer);
+        values.emplace_back(value);
+        if (next == std::string_view::npos)
+            break;
+        inputView = inputView.substr(next);
+    }
+
+    return true;
+}
+
 }
