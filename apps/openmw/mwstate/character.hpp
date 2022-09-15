@@ -62,7 +62,7 @@ namespace MWState
 
             const std::filesystem::path& getPath() const;
 
-            ESM::SavedGame getSignature() const;
+            const ESM::SavedGame& getSignature() const;
             ///< Return signature information for this character.
             ///
             /// \attention This function must not be called if there are no slots.
