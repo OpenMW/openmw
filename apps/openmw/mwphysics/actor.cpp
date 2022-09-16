@@ -93,13 +93,13 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     mCollisionObject->setCollisionShape(mShape.get());
     mCollisionObject->setUserPointer(this);
 
-    updateScale();
+    updateScaleUnsafe();
 
     if(!mRotationallyInvariant)
-        setRotation(mPtr.getRefData().getBaseNode()->getAttitude());
+        mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
 
     addCollisionMask(getCollisionMask());
-    updateCollisionObjectPosition();
+    updateCollisionObjectPositionUnsafe();
 }
 
 Actor::~Actor()
@@ -167,6 +167,11 @@ osg::Vec3f Actor::getScaledMeshTranslation() const
 void Actor::updateCollisionObjectPosition()
 {
     std::scoped_lock lock(mPositionMutex);
+    updateCollisionObjectPositionUnsafe();
+}
+
+void Actor::updateCollisionObjectPositionUnsafe()
+{
     mShape->setLocalScaling(Misc::Convert::toBullet(mScale));
     osg::Vec3f newPosition = getScaledMeshTranslation() + mPosition;
 
@@ -228,6 +233,11 @@ bool Actor::isRotationallyInvariant() const
 void Actor::updateScale()
 {
     std::scoped_lock lock(mPositionMutex);
+    updateScaleUnsafe();
+}
+
+void Actor::updateScaleUnsafe()
+{
     float scale = mPtr.getCellRef().getScale();
     osg::Vec3f scaleVec(scale,scale,scale);
 

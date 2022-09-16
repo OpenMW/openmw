@@ -189,7 +189,7 @@ namespace MWPhysics
 
         osg::Vec3f mScale;
         osg::Vec3f mPositionOffset;
-        bool mWorldPositionChanged;
+        bool mWorldPositionChanged = false;
         bool mSkipSimulation = true;
         mutable std::mutex mPositionMutex;
 
@@ -207,6 +207,10 @@ namespace MWPhysics
 
         Actor(const Actor&);
         Actor& operator=(const Actor&);
+
+        inline void updateScaleUnsafe();
+
+        inline void updateCollisionObjectPositionUnsafe();
     };
 
 }
