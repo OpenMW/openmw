@@ -15,14 +15,14 @@
 namespace MWPhysics
 {
     Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, osg::Quat rotation, int collisionType, PhysicsTaskScheduler* scheduler)
-        : mShapeInstance(std::move(shapeInstance))
+        : PtrHolder(ptr, osg::Vec3f())
+        , mShapeInstance(std::move(shapeInstance))
         , mSolid(true)
         , mScale(ptr.getCellRef().getScale(), ptr.getCellRef().getScale(), ptr.getCellRef().getScale())
         , mPosition(ptr.getRefData().getPosition().asVec3())
         , mRotation(rotation)
         , mTaskScheduler(scheduler)
     {
-        mPtr = ptr;
         mCollisionObject = BulletHelpers::makeCollisionObject(mShapeInstance->mCollisionShape.get(),
             Misc::Convert::toBullet(mPosition), Misc::Convert::toBullet(rotation));
         mCollisionObject->setUserPointer(this);
