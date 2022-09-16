@@ -225,6 +225,7 @@ namespace NifOsg
 
     private:
         std::vector<FloatInterpolator> mKeyFrames;
+        std::vector<float> mWeights;
     };
 
 #ifdef _MSC_VER

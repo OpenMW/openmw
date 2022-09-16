@@ -196,26 +196,31 @@ GeomMorpherController::GeomMorpherController(const GeomMorpherController &copy, 
     : Controller(copy)
     , SceneUtil::NodeCallback<GeomMorpherController, SceneUtil::MorphGeometry*>(copy, copyop)
     , mKeyFrames(copy.mKeyFrames)
+    , mWeights(copy.mWeights)
 {
 }
 
 GeomMorpherController::GeomMorpherController(const Nif::NiGeomMorpherController* ctrl)
 {
-    if (ctrl->interpolators.length() == 0)
+    if (ctrl->mInterpolators.length() == 0)
     {
-        if (ctrl->data.empty())
-            return;
-        for (const auto& morph : ctrl->data->mMorphs)
-           mKeyFrames.emplace_back(morph.mKeyFrames);
-    }
-    else
-    {
-        for (size_t i = 0; i < ctrl->interpolators.length(); ++i)
+        if (!ctrl->mData.empty())
         {
-            if (!ctrl->interpolators[i].empty())
-                mKeyFrames.emplace_back(ctrl->interpolators[i].getPtr());
-            else
-                mKeyFrames.emplace_back();
+            for (const auto& morph : ctrl->mData->mMorphs)
+                mKeyFrames.emplace_back(morph.mKeyFrames);
+        }
+        return;
+    }
+
+    mKeyFrames.resize(ctrl->mInterpolators.length());
+    mWeights = ctrl->mWeights;
+
+    for (size_t i = 0; i < ctrl->mInterpolators.length(); ++i)
+    {
+        if (!ctrl->mInterpolators[i].empty() && ctrl->mInterpolators[i]->recType == Nif::RC_NiFloatInterpolator)
+        {
+            auto interpolator = static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolators[i].getPtr());
+            mKeyFrames[i] = FloatInterpolator(interpolator);
         }
     }
 }
@@ -227,12 +232,16 @@ void GeomMorpherController::operator()(SceneUtil::MorphGeometry* node, osg::Node
         if (mKeyFrames.size() <= 1)
             return;
         float input = getInputValue(nv);
-        int i = 1;
+        size_t i = 1;
         for (std::vector<FloatInterpolator>::iterator it = mKeyFrames.begin()+1; it != mKeyFrames.end(); ++it,++i)
         {
             float val = 0;
             if (!(*it).empty())
+            {
                 val = it->interpKey(input);
+                if (i < mWeights.size())
+                    val *= mWeights[i];
+            }
 
             SceneUtil::MorphGeometry::MorphTarget& target = node->getMorphTarget(i);
             if (target.getWeight() != val)

@@ -152,7 +152,6 @@ struct bhkSerializable;
 struct hkPackedNiTriStripsData;
 struct NiAccumulator;
 struct NiInterpolator;
-struct NiFloatInterpolator;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -188,7 +187,7 @@ using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;
 using ExtraList = RecordListT<Extra>;
 using NiSourceTextureList = RecordListT<NiSourceTexture>;
-using NiFloatInterpolatorList = RecordListT<NiFloatInterpolator>;
+using NiInterpolatorList = RecordListT<NiInterpolator>;
 using NiTriStripsDataList = RecordListT<NiTriStripsData>;
 using bhkShapeList = RecordListT<bhkShape>;
 using bhkSerializableList = RecordListT<bhkSerializable>;
