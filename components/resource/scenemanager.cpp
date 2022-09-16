@@ -665,10 +665,11 @@ namespace Resource
             };
 
             std::vector<std::string> result;
-            result.reserve(std::size(names));
+            result.reserve(2 * std::size(names));
 
             for (std::string_view name : names)
             {
+                result.emplace_back(name);
                 std::string prefixedName("Tri ");
                 prefixedName += name;
                 result.push_back(std::move(prefixedName));
