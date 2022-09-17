@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.19.0)
 
 # for link time optimization, remove if cmake version is >= 3.9
 if(POLICY CMP0069) # LTO
@@ -888,6 +888,9 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
         fixup_bundle(\"${INSTALLED_OPENMW_APP}\" \"${PLUGINS}\" \"\")
         fixup_bundle(\"${INSTALLED_OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"\")
         " COMPONENT Runtime)
+
+    set(CPACK_PRE_BUILD_SCRIPTS ${CMAKE_SOURCE_DIR}/cmake/SignMacApplications.cmake)
+
     include(CPack)
 elseif(NOT APPLE)
     get_generator_is_multi_config(multi_config)
