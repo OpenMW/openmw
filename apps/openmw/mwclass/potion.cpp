@@ -3,7 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadalch.hpp>
-
+#include <components/esm3/loadnpc.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -13,6 +13,7 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -92,7 +93,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -124,8 +125,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        std::unique_ptr<MWWorld::Action> action (
-            new MWWorld::ActionApply (ptr, ref->mBase->mId));
+        auto action = std::make_unique<MWWorld::ActionApply>(ptr, ref->mBase->mId);
 
         action->setSound ("Drink");
 

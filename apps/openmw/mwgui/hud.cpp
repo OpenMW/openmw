@@ -10,6 +10,8 @@
 #include <components/settings/settings.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -163,7 +165,7 @@ namespace MWGui
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
         mMainWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &HUD::onWorldMouseLostFocus);
 
-        mSpellIcons = new SpellIcons();
+        mSpellIcons = std::make_unique<SpellIcons>();
     }
 
     HUD::~HUD()
@@ -171,8 +173,6 @@ namespace MWGui
         mMainWidget->eventMouseLostFocus.clear();
         mMainWidget->eventMouseMove.clear();
         mMainWidget->eventMouseButtonClick.clear();
-
-        delete mSpellIcons;
     }
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
@@ -393,7 +393,7 @@ namespace MWGui
         const ESM::Spell* spell =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
 
-        std::string spellName = spell->mName;
+        const std::string& spellName = spell->mName;
         if (spellName != mSpellName && mSpellVisible)
         {
             mWeaponSpellTimer = 5.0f;
@@ -463,7 +463,7 @@ namespace MWGui
 
     void HUD::unsetSelectedSpell()
     {
-        std::string spellName = "#{sNone}";
+        std::string_view spellName = "#{sNone}";
         if (spellName != mSpellName && mSpellVisible)
         {
             mWeaponSpellTimer = 5.0f;

@@ -71,7 +71,6 @@ namespace MWGui
     public:
         GenerateClassResultDialog();
 
-        std::string getClassId() const;
         void setClassId(const std::string &classId);
 
         bool exit() override { return false; }

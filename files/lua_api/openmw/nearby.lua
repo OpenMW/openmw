@@ -121,8 +121,6 @@
 -- algorithm implementation or bad navigation mesh data;
 -- @field [parent=#FIND_PATH_STATUS] #number FindPathOverPolygonsFailed Path over navigation mesh from `source` to
 -- `destination` does not exist or navigation mesh is not fully generated to provide the path;
--- @field [parent=#FIND_PATH_STATUS] #number GetPolyHeightFailed Found path couldn't be smoothed due to imperfect
--- algorithm implementation or bad navigation mesh data;
 -- @field [parent=#FIND_PATH_STATUS] #number InitNavMeshQueryFailed Couldn't initialize required data due to bad input
 -- or bad navigation mesh data.
 

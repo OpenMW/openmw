@@ -2,9 +2,12 @@
 #include "gettilespositions.hpp"
 #include "settingsutils.hpp"
 #include "changetype.hpp"
+#include "recastmeshbuilder.hpp"
 
-#include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
+#include <components/bullethelpers/aabb.hpp>
+
+#include <boost/geometry/geometry.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -18,6 +21,40 @@ namespace DetourNavigator
             osg::Vec2f(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()),
             osg::Vec2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
         };
+
+        struct AddHeightfield
+        {
+            osg::Vec2i mCellPosition;
+            int mCellSize;
+            RecastMeshBuilder& mBuilder;
+
+            void operator()(const HeightfieldSurface& v)
+            {
+                mBuilder.addHeightfield(mCellPosition, mCellSize, v.mHeights, v.mSize, v.mMinHeight, v.mMaxHeight);
+            }
+
+            void operator()(HeightfieldPlane v)
+            {
+                mBuilder.addHeightfield(mCellPosition, mCellSize, v.mHeight);
+            }
+        };
+
+        TilePosition makeTilePosition(const boost::geometry::model::point<int, 2, boost::geometry::cs::cartesian>& v)
+        {
+            return TilePosition(v.get<0>(), v.get<1>());
+        }
+
+        template <class Mutex>
+        class MaybeLockGuard
+        {
+        public:
+            explicit MaybeLockGuard(Mutex& mutex, const TileCachedRecastMeshManager::UpdateGuard* guard)
+                : mImpl(guard == nullptr ? std::optional<std::unique_lock<Mutex>>(mutex) : std::nullopt)
+            {}
+
+        private:
+            const std::optional<std::unique_lock<Mutex>> mImpl;
+        };
     }
 
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
@@ -26,331 +63,439 @@ namespace DetourNavigator
         , mRange(makeTilesPositionsRange(mBounds.mMin, mBounds.mMax, mSettings))
     {}
 
-    TileBounds TileCachedRecastMeshManager::getBounds() const
+    void TileCachedRecastMeshManager::setBounds(const TileBounds& bounds, const UpdateGuard* guard)
     {
-        return mBounds;
-    }
-
-    std::vector<std::pair<TilePosition, ChangeType>> TileCachedRecastMeshManager::setBounds(const TileBounds& bounds)
-    {
-        std::vector<std::pair<TilePosition, ChangeType>> changedTiles;
-
         if (mBounds == bounds)
-            return changedTiles;
+            return;
 
+        bool changed = false;
         const auto newRange = makeTilesPositionsRange(bounds.mMin, bounds.mMax, mSettings);
-
         if (mBounds != infiniteTileBounds)
         {
-            const auto locked = mWorldspaceTiles.lock();
-            for (auto& object : mObjects)
+            for (const auto& [id, data] : mObjects)
             {
-                const ObjectId id = object.first;
-                ObjectData& data = object.second;
-                const TilesPositionsRange objectRange = makeTilesPositionsRange(data.mShape.getShape(), data.mTransform, mSettings);
+                const TilesPositionsRange objectRange = makeTilesPositionsRange(data->mObject.getShape(),
+                    data->mObject.getTransform(), mSettings);
 
-                const auto onOldTilePosition = [&] (const TilePosition& position)
+                getTilesPositions(getIntersection(mRange, objectRange), [&] (const TilePosition& v)
                 {
-                    if (isInTilesPositionsRange(newRange, position))
-                        return;
-                    const auto it = data.mTiles.find(position);
-                    if (it == data.mTiles.end())
-                        return;
-                    data.mTiles.erase(it);
-                    if (removeTile(id, position, locked->mTiles))
-                        changedTiles.emplace_back(position, ChangeType::remove);
-                };
-                getTilesPositions(getIntersection(mRange, objectRange), onOldTilePosition);
-
-                const auto onNewTilePosition = [&] (const TilePosition& position)
-                {
-                    if (data.mTiles.find(position) != data.mTiles.end())
-                        return;
-                    if (addTile(id, data.mShape, data.mTransform, data.mAreaType, position, locked->mTiles))
+                    if (!isInTilesPositionsRange(newRange, v))
                     {
-                        data.mTiles.insert(position);
-                        changedTiles.emplace_back(position, ChangeType::add);
+                        addChangedTile(v, ChangeType::remove);
+                        changed = true;
                     }
-                };
-                getTilesPositions(getIntersection(newRange, objectRange), onNewTilePosition);
-            }
+                });
 
-            std::sort(changedTiles.begin(), changedTiles.end());
-            changedTiles.erase(std::unique(changedTiles.begin(), changedTiles.end()), changedTiles.end());
+                getTilesPositions(getIntersection(newRange, objectRange), [&] (const TilePosition& v)
+                {
+                    if (!isInTilesPositionsRange(mRange, v))
+                    {
+                        addChangedTile(v, ChangeType::add);
+                        changed = true;
+                    }
+                });
+            }
         }
 
-        if (!changedTiles.empty())
+        if (changed)
+        {
+            const MaybeLockGuard lock(mMutex, guard);
             ++mRevision;
+        }
 
         mBounds = bounds;
         mRange = newRange;
-
-        return changedTiles;
     }
 
-    std::string TileCachedRecastMeshManager::getWorldspace() const
+    TilesPositionsRange TileCachedRecastMeshManager::getRange() const
     {
-        return mWorldspaceTiles.lockConst()->mWorldspace;
+        const auto bounds = mObjectIndex.bounds();
+        return TilesPositionsRange {
+            .mBegin = makeTilePosition(bounds.min_corner()),
+            .mEnd = makeTilePosition(bounds.max_corner()) + TilePosition(1, 1),
+        };
     }
 
-    void TileCachedRecastMeshManager::setWorldspace(std::string_view worldspace)
+    void TileCachedRecastMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
     {
-        const auto locked = mWorldspaceTiles.lock();
-        if (locked->mWorldspace == worldspace)
+        const MaybeLockGuard lock(mMutex, guard);
+        if (mWorldspace == worldspace)
             return;
-        locked->mTiles.clear();
-        locked->mWorldspace = worldspace;
+        mWorldspace = worldspace;
+        ++mGeneration;
+        ++mRevision;
+        mObjectIndex.clear();
+        mObjects.clear();
+        mWater.clear();
+        mHeightfields.clear();
+        mCache.clear();
     }
 
-    std::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeObject(const ObjectId id)
+    bool TileCachedRecastMeshManager::addObject(ObjectId id, const CollisionShape& shape, const btTransform& transform,
+        const AreaType areaType, const UpdateGuard* guard)
     {
-        const auto object = mObjects.find(id);
-        if (object == mObjects.end())
-            return std::nullopt;
-        std::optional<RemovedRecastMeshObject> result;
+        const TilesPositionsRange range = makeTilesPositionsRange(shape.getShape(), transform, mSettings);
         {
-            const auto locked = mWorldspaceTiles.lock();
-            for (const auto& tilePosition : object->second.mTiles)
-            {
-                const auto removed = removeTile(id, tilePosition, locked->mTiles);
-                if (removed && !result)
-                    result = removed;
-            }
+            const MaybeLockGuard lock(mMutex, guard);
+            const auto it = mObjects.find(id);
+            if (it != mObjects.end())
+                return false;
+            const std::size_t revision = mRevision + 1;
+            ObjectData* const dataPtr = mObjects.emplace_hint(it, id, std::unique_ptr<ObjectData>(new ObjectData {
+                .mObject = RecastMeshObject(shape, transform, areaType),
+                .mRange = range,
+                .mAabb = CommulativeAabb(revision, BulletHelpers::getAabb(shape.getShape(), transform)),
+                .mGeneration = mGeneration,
+                .mRevision = revision,
+                .mLastNavMeshReportedChange = {},
+                .mLastNavMeshReport = {},
+            }))->second.get();
+            assert(range.mBegin != range.mEnd);
+            mObjectIndex.insert(makeObjectIndexValue(range, dataPtr));
+            mRevision = revision;
         }
-        mObjects.erase(object);
-        if (result)
-            ++mRevision;
-        return result;
+        getTilesPositions(getIntersection(range, mRange),
+                          [&] (const TilePosition& v) { addChangedTile(v, ChangeType::add); });
+        return true;
     }
 
-    bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, int cellSize, float level)
+    bool TileCachedRecastMeshManager::updateObject(ObjectId id, const btTransform& transform, const AreaType areaType, const UpdateGuard* guard)
     {
-        const auto it = mWaterTilesPositions.find(cellPosition);
-        if (it != mWaterTilesPositions.end())
-            return false;
-
-        std::vector<TilePosition>& tilesPositions = mWaterTilesPositions.emplace_hint(
-            it, cellPosition, std::vector<TilePosition>())->second;
-
-        bool result = false;
-
-        if (cellSize == std::numeric_limits<int>::max())
+        TilesPositionsRange newRange;
+        TilesPositionsRange oldRange;
         {
-            const auto locked = mWorldspaceTiles.lock();
-            for (auto& tile : locked->mTiles)
+            const MaybeLockGuard lock(mMutex, guard);
+            const auto it = mObjects.find(id);
+            if (it == mObjects.end())
+                return false;
+            if (!it->second->mObject.update(transform, areaType))
+                return false;
+            const std::size_t lastChangeRevision = it->second->mLastNavMeshReportedChange.has_value()
+                    ? it->second->mLastNavMeshReportedChange->mRevision : mRevision;
+            const btCollisionShape& shape = it->second->mObject.getShape();
+            if (!it->second->mAabb.update(lastChangeRevision, BulletHelpers::getAabb(shape, transform)))
+                return false;
+            newRange = makeTilesPositionsRange(shape, transform, mSettings);
+            oldRange = it->second->mRange;
+            if (newRange != oldRange)
             {
-                if (tile.second->addWater(cellPosition, cellSize, level))
-                {
-                    tilesPositions.push_back(tile.first);
-                    result = true;
-                }
+                mObjectIndex.remove(makeObjectIndexValue(oldRange, it->second.get()));
+                mObjectIndex.insert(makeObjectIndexValue(newRange, it->second.get()));
+                it->second->mRange = newRange;
             }
+            ++mRevision;
+            it->second->mRevision = mRevision;
+        }
+        if (newRange == oldRange)
+        {
+            getTilesPositions(getIntersection(newRange, mRange),
+                              [&] (const TilePosition& v) { addChangedTile(v, ChangeType::update); });
         }
         else
         {
-            const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
-            const auto worldspaceTiles = mWorldspaceTiles.lock();
-            getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
-                [&] (const TilePosition& tilePosition)
-                {
-                    auto tile = worldspaceTiles->mTiles.find(tilePosition);
-                    if (tile == worldspaceTiles->mTiles.end())
-                    {
-                        const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
-                        tile = worldspaceTiles->mTiles.emplace_hint(tile, tilePosition,
-                                std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration));
-                    }
-                    if (tile->second->addWater(cellPosition, cellSize, level))
-                    {
-                        tilesPositions.push_back(tilePosition);
-                        result = true;
-                    }
-                });
-        }
-
-        if (result)
-            ++mRevision;
-
-        return result;
-    }
-
-    std::optional<Water> TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
-    {
-        const auto object = mWaterTilesPositions.find(cellPosition);
-        if (object == mWaterTilesPositions.end())
-            return std::nullopt;
-        std::optional<Water> result;
-        {
-            const auto worldspaceTiles = mWorldspaceTiles.lock();
-            for (const auto& tilePosition : object->second)
+            getTilesPositions(getIntersection(newRange, mRange), [&] (const TilePosition& v)
             {
-                const auto tile = worldspaceTiles->mTiles.find(tilePosition);
-                if (tile == worldspaceTiles->mTiles.end())
-                    continue;
-                const auto tileResult = tile->second->removeWater(cellPosition);
-                if (tile->second->isEmpty())
-                {
-                    worldspaceTiles->mTiles.erase(tile);
-                    ++mTilesGeneration;
-                }
-                if (tileResult && !result)
-                    result = tileResult;
-            }
+                const ChangeType changeType = isInTilesPositionsRange(oldRange, v)
+                        ? ChangeType::update : ChangeType::add;
+                addChangedTile(v, changeType);
+            });
+            getTilesPositions(getIntersection(oldRange, mRange), [&] (const TilePosition& v)
+            {
+                if (!isInTilesPositionsRange(newRange, v))
+                    addChangedTile(v, ChangeType::remove);
+            });
         }
-        mWaterTilesPositions.erase(object);
-        if (result)
-            ++mRevision;
-        return result;
+        return true;
     }
 
-    bool TileCachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, int cellSize,
-        const HeightfieldShape& shape)
+    void TileCachedRecastMeshManager::removeObject(ObjectId id, const UpdateGuard* guard)
     {
-        const auto it = mHeightfieldTilesPositions.find(cellPosition);
-        if (it != mHeightfieldTilesPositions.end())
-            return false;
+        TilesPositionsRange range;
+        {
+            const MaybeLockGuard lock(mMutex, guard);
+            const auto it = mObjects.find(id);
+            if (it == mObjects.end())
+                return;
+            range = it->second->mRange;
+            mObjectIndex.remove(makeObjectIndexValue(range, it->second.get()));
+            mObjects.erase(it);
+            ++mRevision;
+        }
+        getTilesPositions(getIntersection(range, mRange),
+                          [&] (const TilePosition& v) { addChangedTile(v, ChangeType::remove); });
+    }
 
-        std::vector<TilePosition>& tilesPositions = mHeightfieldTilesPositions.emplace_hint(
-            it, cellPosition, std::vector<TilePosition>())->second;
+    void TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const float level, const UpdateGuard* guard)
+    {
+        const btVector3 shift = Misc::Convert::toBullet(getWaterShift3d(cellPosition, cellSize, level));
+        const std::optional<TilesPositionsRange> range = cellSize == std::numeric_limits<int>::max()
+                ? std::optional<TilesPositionsRange>()
+                : makeTilesPositionsRange(cellSize, shift, mSettings);
+        {
+            const MaybeLockGuard lock(mMutex, guard);
+            auto it = mWater.find(cellPosition);
+            if (it != mWater.end())
+                return;
+            const std::size_t revision = mRevision + 1;
+            it = mWater.emplace_hint(it, cellPosition, WaterData {
+                .mWater = Water {.mCellSize = cellSize, .mLevel = level},
+                .mRange = range,
+                .mRevision = revision,
+            });
+            if (range.has_value())
+                mWaterIndex.insert(makeWaterIndexValue(*range, it));
+            else
+                mInfiniteWater = it;
+            mRevision = revision;
+        }
+        addChangedTiles(range, ChangeType::add);
+    }
+
+    void TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
+    {
+        std::optional<TilesPositionsRange> range;
+        {
+            const MaybeLockGuard lock(mMutex, guard);
+            const auto it = mWater.find(cellPosition);
+            if (it == mWater.end())
+                return;
+            range = it->second.mRange;
+            if (range.has_value())
+                mWaterIndex.remove(makeWaterIndexValue(*range, it));
+            else
+                mInfiniteWater = mWater.end();
+            mWater.erase(it);
+            ++mRevision;
+        }
+        addChangedTiles(range, ChangeType::remove);
+    }
+
+    void TileCachedRecastMeshManager::addHeightfield(const osg::Vec2i& cellPosition, const int cellSize,
+        const HeightfieldShape& shape, const UpdateGuard* guard)
+    {
         const btVector3 shift = getHeightfieldShift(shape, cellPosition, cellSize);
-
-        bool result = false;
-
+        const std::optional<TilesPositionsRange> range = cellSize == std::numeric_limits<int>::max()
+                ? std::optional<TilesPositionsRange>()
+                : makeTilesPositionsRange(cellSize, shift, mSettings);
         {
-            const auto worldspaceTiles = mWorldspaceTiles.lock();
-            getTilesPositions(makeTilesPositionsRange(cellSize, shift, mSettings),
-                [&] (const TilePosition& tilePosition)
-                {
-                    auto tile = worldspaceTiles->mTiles.find(tilePosition);
-                    if (tile == worldspaceTiles->mTiles.end())
-                    {
-                        const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
-                        tile = worldspaceTiles->mTiles.emplace_hint(tile, tilePosition,
-                                std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration));
-                    }
-                    if (tile->second->addHeightfield(cellPosition, cellSize, shape))
-                    {
-                        tilesPositions.push_back(tilePosition);
-                        result = true;
-                    }
-                });
+            const MaybeLockGuard lock(mMutex, guard);
+            auto it = mHeightfields.find(cellPosition);
+            if (it != mHeightfields.end())
+                return;
+            const std::size_t revision = mRevision + 1;
+            it = mHeightfields.emplace_hint(it, cellPosition, HeightfieldData {
+                .mCellSize = cellSize,
+                .mShape = shape,
+                .mRange = range,
+                .mRevision = revision,
+            });
+            if (range.has_value())
+                mHeightfieldIndex.insert(makeHeightfieldIndexValue(*range, it));
+            else
+                mInfiniteHeightfield = it;
+            mRevision = revision;
         }
+        addChangedTiles(range, ChangeType::add);
+    }
 
-        if (result)
+    void TileCachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
+    {
+        std::optional<TilesPositionsRange> range;
+        {
+            const MaybeLockGuard lock(mMutex, guard);
+            const auto it = mHeightfields.find(cellPosition);
+            if (it == mHeightfields.end())
+                return;
+            range = it->second.mRange;
+            if (range.has_value())
+                mHeightfieldIndex.remove(makeHeightfieldIndexValue(*range, it));
+            else
+                mInfiniteHeightfield = mHeightfields.end();
+            mHeightfields.erase(it);
             ++mRevision;
+        }
+        addChangedTiles(range, ChangeType::remove);
+    }
 
+    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(std::string_view worldspace,
+        const TilePosition& tilePosition)
+    {
+        {
+            const std::lock_guard lock(mMutex);
+            if (mWorldspace != worldspace)
+                return nullptr;
+            const auto it = mCache.find(tilePosition);
+            if (it != mCache.end() && it->second.mRecastMesh->getVersion() == it->second.mVersion)
+                return it->second.mRecastMesh;
+        }
+        auto result = makeMesh(tilePosition);
+        if (result != nullptr)
+        {
+            const std::lock_guard lock(mMutex);
+            mCache.insert_or_assign(tilePosition, CachedTile {
+                .mVersion = result->getVersion(),
+                .mRecastMesh = result,
+            });
+        }
         return result;
     }
 
-    std::optional<SizedHeightfieldShape> TileCachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition)
-    {
-        const auto object = mHeightfieldTilesPositions.find(cellPosition);
-        if (object == mHeightfieldTilesPositions.end())
-            return std::nullopt;
-        std::optional<SizedHeightfieldShape> result;
-        {
-            const auto worldspaceTiles = mWorldspaceTiles.lock();
-            for (const auto& tilePosition : object->second)
-            {
-                const auto tile = worldspaceTiles->mTiles.find(tilePosition);
-                if (tile == worldspaceTiles->mTiles.end())
-                    continue;
-                const auto tileResult = tile->second->removeHeightfield(cellPosition);
-                if (tile->second->isEmpty())
-                {
-                    worldspaceTiles->mTiles.erase(tile);
-                    ++mTilesGeneration;
-                }
-                if (tileResult && !result)
-                    result = tileResult;
-            }
-        }
-        mHeightfieldTilesPositions.erase(object);
-        if (result)
-            ++mRevision;
-        return result;
-    }
-
-    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(std::string_view worldspace, const TilePosition& tilePosition) const
-    {
-        if (const auto manager = getManager(worldspace, tilePosition))
-            return manager->getMesh();
-        return nullptr;
-    }
-
-    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getCachedMesh(std::string_view worldspace, const TilePosition& tilePosition) const
-    {
-        if (const auto manager = getManager(worldspace, tilePosition))
-            return manager->getCachedMesh();
-        return nullptr;
-    }
-
-    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getNewMesh(std::string_view worldspace, const TilePosition& tilePosition) const
-    {
-        if (const auto manager = getManager(worldspace, tilePosition))
-            return manager->getNewMesh();
-        return nullptr;
-    }
-
-    std::size_t TileCachedRecastMeshManager::getRevision() const
-    {
-        return mRevision;
-    }
-
-    void TileCachedRecastMeshManager::reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion) const
-    {
-        const auto locked = mWorldspaceTiles.lockConst();
-        const auto it = locked->mTiles.find(tilePosition);
-        if (it == locked->mTiles.end())
-            return;
-        it->second->reportNavMeshChange(recastMeshVersion, navMeshVersion);
-    }
-
-    bool TileCachedRecastMeshManager::addTile(const ObjectId id, const CollisionShape& shape,
-        const btTransform& transform, const AreaType areaType, const TilePosition& tilePosition,
-        TilesMap& tiles)
-    {
-        auto tile = tiles.find(tilePosition);
-        if (tile == tiles.end())
-        {
-            const TileBounds tileBounds = makeRealTileBoundsWithBorder(mSettings, tilePosition);
-            tile = tiles.emplace_hint(tile, tilePosition,
-                    std::make_shared<CachedRecastMeshManager>(tileBounds, mTilesGeneration));
-        }
-        return tile->second->addObject(id, shape, transform, areaType);
-    }
-
-    bool TileCachedRecastMeshManager::updateTile(const ObjectId id, const btTransform& transform,
-        const AreaType areaType, const TilePosition& tilePosition, TilesMap& tiles)
-    {
-        const auto tile = tiles.find(tilePosition);
-        return tile != tiles.end() && tile->second->updateObject(id, transform, areaType);
-    }
-
-    std::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeTile(const ObjectId id,
-        const TilePosition& tilePosition, TilesMap& tiles)
-    {
-        const auto tile = tiles.find(tilePosition);
-        if (tile == tiles.end())
-            return std::optional<RemovedRecastMeshObject>();
-        auto tileResult = tile->second->removeObject(id);
-        if (tile->second->isEmpty())
-        {
-            tiles.erase(tile);
-            ++mTilesGeneration;
-        }
-        return tileResult;
-    }
-
-    std::shared_ptr<CachedRecastMeshManager> TileCachedRecastMeshManager::getManager(std::string_view worldspace,
+    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getCachedMesh(std::string_view worldspace,
         const TilePosition& tilePosition) const
     {
-        const auto locked = mWorldspaceTiles.lockConst();
-        if (locked->mWorldspace != worldspace)
+        const std::lock_guard lock(mMutex);
+        if (mWorldspace != worldspace)
             return nullptr;
-        const auto it = locked->mTiles.find(tilePosition);
-        if (it == locked->mTiles.end())
+        const auto it = mCache.find(tilePosition);
+        if (it == mCache.end())
             return nullptr;
-        return it->second;
+        return it->second.mRecastMesh;
+    }
+
+    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getNewMesh(std::string_view worldspace,
+        const TilePosition& tilePosition) const
+    {
+        {
+            const std::lock_guard lock(mMutex);
+            if (mWorldspace != worldspace)
+                return nullptr;
+        }
+        return makeMesh(tilePosition);
+    }
+
+    void TileCachedRecastMeshManager::reportNavMeshChange(const TilePosition& tilePosition,
+        Version recastMeshVersion, Version navMeshVersion)
+    {
+        const std::lock_guard lock(mMutex);
+        for (auto it = mObjectIndex.qbegin(makeIndexQuery(tilePosition)); it != mObjectIndex.qend(); ++it)
+        {
+            ObjectData& object = *it->second;
+            if (recastMeshVersion.mGeneration != object.mGeneration)
+                continue;
+            if (object.mLastNavMeshReport.has_value() && navMeshVersion < object.mLastNavMeshReport->mNavMeshVersion)
+                continue;
+            object.mLastNavMeshReport = {recastMeshVersion.mRevision, navMeshVersion};
+            if (!object.mLastNavMeshReportedChange.has_value()
+                    || object.mLastNavMeshReportedChange->mNavMeshVersion < object.mLastNavMeshReport->mNavMeshVersion)
+                object.mLastNavMeshReportedChange = object.mLastNavMeshReport;
+        }
+    }
+
+    void TileCachedRecastMeshManager::addChangedTile(const TilePosition& tilePosition, const ChangeType changeType)
+    {
+        auto tile = mChangedTiles.find(tilePosition);
+        if (tile == mChangedTiles.end())
+            mChangedTiles.emplace(tilePosition, changeType);
+        else
+            tile->second = addChangeType(tile->second, changeType);
+    }
+
+    std::map<osg::Vec2i, ChangeType> TileCachedRecastMeshManager::takeChangedTiles(const UpdateGuard* guard)
+    {
+        {
+            const MaybeLockGuard lock(mMutex, guard);
+            for (const auto& [tilePosition, changeType] : mChangedTiles)
+                if (const auto it = mCache.find(tilePosition); it != mCache.end())
+                    ++it->second.mVersion.mRevision;
+        }
+        return std::move(mChangedTiles);
+    }
+
+    TileCachedRecastMeshManager::IndexPoint TileCachedRecastMeshManager::makeIndexPoint(const TilePosition& tilePosition)
+    {
+        return IndexPoint(tilePosition.x(), tilePosition.y());
+    }
+
+    TileCachedRecastMeshManager::IndexBox TileCachedRecastMeshManager::makeIndexBox(const TilesPositionsRange& range)
+    {
+        assert(range.mBegin != range.mEnd);
+        return IndexBox(makeIndexPoint(range.mBegin), makeIndexPoint(range.mEnd - TilePosition(1, 1)));
+    }
+
+    TileCachedRecastMeshManager::ObjectIndexValue TileCachedRecastMeshManager::makeObjectIndexValue(
+        const TilesPositionsRange& range, ObjectData* id)
+    {
+        return {makeIndexBox(range), id};
+    }
+
+    TileCachedRecastMeshManager::WaterIndexValue TileCachedRecastMeshManager::makeWaterIndexValue(
+        const TilesPositionsRange& range, std::map<osg::Vec2i, WaterData>::const_iterator it)
+    {
+        return {makeIndexBox(range), it};
+    }
+
+    TileCachedRecastMeshManager::HeightfieldIndexValue TileCachedRecastMeshManager::makeHeightfieldIndexValue(
+        const TilesPositionsRange& range, std::map<osg::Vec2i, HeightfieldData>::const_iterator it)
+    {
+        return {makeIndexBox(range), it};
+    }
+
+    auto TileCachedRecastMeshManager::makeIndexQuery(const TilePosition& tilePosition)
+        -> decltype(boost::geometry::index::intersects(IndexBox()))
+    {
+        const IndexPoint point = makeIndexPoint(tilePosition);
+        return boost::geometry::index::intersects(IndexBox(point, point));
+    }
+
+    std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::makeMesh(const TilePosition& tilePosition) const
+    {
+        RecastMeshBuilder builder(makeRealTileBoundsWithBorder(mSettings, tilePosition));
+        using Object = std::tuple<
+            osg::ref_ptr<const Resource::BulletShapeInstance>,
+            ObjectTransform,
+            std::reference_wrapper<const btCollisionShape>,
+            btTransform,
+            AreaType
+        >;
+        std::vector<Object> objects;
+        Version version;
+        bool hasInput = false;
+        {
+            const std::lock_guard lock(mMutex);
+            for (auto it = mWaterIndex.qbegin(makeIndexQuery(tilePosition)); it != mWaterIndex.qend(); ++it)
+            {
+                const auto& [cellPosition, data] = *it->second;
+                builder.addWater(cellPosition, data.mWater);
+                hasInput = true;
+            }
+            for (auto it = mHeightfieldIndex.qbegin(makeIndexQuery(tilePosition)); it != mHeightfieldIndex.qend(); ++it)
+            {
+                const auto& [cellPosition, data] = *it->second;
+                std::visit(AddHeightfield {cellPosition, data.mCellSize, builder}, data.mShape);
+                hasInput = true;
+            }
+            objects.reserve(mObjects.size());
+            for (auto it = mObjectIndex.qbegin(makeIndexQuery(tilePosition)); it != mObjectIndex.qend(); ++it)
+            {
+                const auto& object = it->second->mObject;
+                objects.emplace_back(object.getInstance(), object.getObjectTransform(), object.getShape(),
+                                     object.getTransform(), object.getAreaType());
+                hasInput = true;
+            }
+            if (hasInput)
+            {
+                if (mInfiniteWater != mWater.end())
+                    builder.addWater(mInfiniteWater->first, mInfiniteWater->second.mWater);
+                if (mInfiniteHeightfield != mHeightfields.end())
+                    std::visit(
+                        AddHeightfield {mInfiniteHeightfield->first, mInfiniteHeightfield->second.mCellSize, builder},
+                        mInfiniteHeightfield->second.mShape
+                    );
+                version.mGeneration = mGeneration;
+                version.mRevision = mRevision;
+            }
+        }
+        if (!hasInput)
+            return nullptr;
+        for (const auto& [instance, objectTransform, shape, transform, areaType] : objects)
+            builder.addObject(shape, transform, areaType, instance->getSource(), objectTransform);
+        return std::move(builder).create(version);
+    }
+
+    void TileCachedRecastMeshManager::addChangedTiles(const std::optional<TilesPositionsRange>& range,
+        ChangeType changeType)
+    {
+        if (range.has_value())
+            getTilesPositions(*range, [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
 }

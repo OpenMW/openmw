@@ -9,6 +9,8 @@
 #include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
+#include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 
 #include <boost/program_options.hpp>
 
@@ -16,26 +18,26 @@
 namespace bpo = boost::program_options;
 
 ///See if the file has the named extension
-bool hasExtension(std::string filename, std::string extensionToFind)
+bool hasExtension(const std::filesystem::path& filename, const std::string& extensionToFind)
 {
-    std::string extension = filename.substr(filename.find_last_of('.')+1);
+    const auto extension = Files::pathToUnicodeString(filename.extension());
     return Misc::StringUtils::ciEqual(extension, extensionToFind);
 }
 
 ///See if the file has the "nif" extension.
-bool isNIF(const std::string & filename)
+bool isNIF(const std::filesystem::path &filename)
 {
     return hasExtension(filename,"nif");
 }
 ///See if the file has the "bsa" extension.
-bool isBSA(const std::string & filename)
+bool isBSA(const std::filesystem::path &filename)
 {
     return hasExtension(filename,"bsa");
 }
 
 /// Check all the nif files in a given VFS::Archive
 /// \note Can not read a bsa file inside of a bsa file.
-void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, std::string archivePath = "")
+void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::path& archivePath = {})
 {
     VFS::Manager myManager(true);
     myManager.addArchive(std::move(anArchive));
@@ -47,14 +49,14 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, std::string archivePath 
             if(isNIF(name))
             {
             //           std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile temp_nif(myManager.get(name),archivePath+name);
+                Nif::NIFFile temp_nif(myManager.get(name),archivePath / name);
             }
             else if(isBSA(name))
             {
                 if(!archivePath.empty() && !isBSA(archivePath))
                 {
 //                     std::cout << "Reading BSA File: " << name << std::endl;
-                    readVFS(std::make_unique<VFS::BsaArchive>(archivePath + name), archivePath + name + "/");
+                    readVFS(std::make_unique<VFS::BsaArchive>(archivePath / name), archivePath / name);
 //                     std::cout << "Done with BSA File: " << name << std::endl;
                 }
             }
@@ -66,17 +68,18 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, std::string archivePath 
     }
 }
 
-bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
+bool parseOptions (int argc, char** argv, std::vector<Files::MaybeQuotedPath> &files)
 {
-    bpo::options_description desc("Ensure that OpenMW can use the provided NIF and BSA files\n\n"
-        "Usages:\n"
-        "  niftool <nif files, BSA files, or directories>\n"
-        "      Scan the file or directories for nif errors.\n\n"
-        "Allowed options");
-    desc.add_options()
-        ("help,h", "print help message.")
-        ("input-file", bpo::value< std::vector<std::string> >(), "input file")
-        ;
+    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF and BSA files
+
+Usages:
+  niftool <nif files, BSA files, or directories>
+      Scan the file or directories for nif errors.
+
+Allowed options)");
+    auto addOption = desc.add_options();
+    addOption("help,h", "print help message.");
+    addOption("input-file", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
 
     //Default option if none provided
     bpo::positional_options_description p;
@@ -96,7 +99,7 @@ bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
         }
         if (variables.count("input-file"))
         {
-            files = variables["input-file"].as< std::vector<std::string> >();
+            files = variables["input-file"].as< Files::MaybeQuotedPathContainer >();
             return true;
         }
     }
@@ -114,36 +117,34 @@ bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
 
 int main(int argc, char **argv)
 {
-    std::vector<std::string> files;
+    std::vector<Files::MaybeQuotedPath> files;
     if(!parseOptions (argc, argv, files))
         return 1;
 
     Nif::NIFFile::setLoadUnsupportedFiles(true);
 //     std::cout << "Reading Files" << std::endl;
-    for(auto it=files.begin(); it!=files.end(); ++it)
+    for(const auto& path : files)
     {
-        std::string name = *it;
-
         try
         {
-            if(isNIF(name))
+            if(isNIF(path))
             {
                 //std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile temp_nif(Files::openConstrainedFileStream(name), name);
+                Nif::NIFFile temp_nif(Files::openConstrainedFileStream(path), path);
              }
-             else if(isBSA(name))
+             else if(isBSA(path))
              {
 //                 std::cout << "Reading BSA File: " << name << std::endl;
-                readVFS(std::make_unique<VFS::BsaArchive>(name));
+                readVFS(std::make_unique<VFS::BsaArchive>(path));
              }
-             else if(std::filesystem::is_directory(std::filesystem::path(name)))
+             else if(std::filesystem::is_directory(path))
              {
 //                 std::cout << "Reading All Files in: " << name << std::endl;
-                readVFS(std::make_unique<VFS::FileSystemArchive>(name), name);
+                readVFS(std::make_unique<VFS::FileSystemArchive>(path), path);
              }
              else
              {
-                 std::cerr << "ERROR:  \"" << name << "\" is not a nif file, bsa file, or directory!" << std::endl;
+                 std::cerr << "ERROR:  \"" << Files::pathToUnicodeString(path) << "\" is not a nif file, bsa file, or directory!" << std::endl;
              }
         }
         catch (std::exception& e)

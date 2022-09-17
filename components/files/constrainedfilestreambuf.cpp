@@ -2,15 +2,16 @@
 
 #include <algorithm>
 #include <limits>
+#include <filesystem>
 
 namespace Files
 {
     namespace File = Platform::File;
-    
-    ConstrainedFileStreamBuf::ConstrainedFileStreamBuf(const std::string& fname, std::size_t start, std::size_t length)
+
+    ConstrainedFileStreamBuf::ConstrainedFileStreamBuf(const std::filesystem::path& fname, std::size_t start, std::size_t length)
         : mOrigin(start)
     {
-        mFile = File::open(fname.c_str());
+        mFile = File::open(fname);
         mSize  = length != std::numeric_limits<std::size_t>::max() ? length : File::size(mFile) - start;
 
         if (start != 0)
@@ -27,7 +28,7 @@ namespace Files
             // Read in the next chunk of data, and set the read pointers on success
             // Failure will throw exception.
             const std::size_t got = File::read(mFile, mBuffer, toRead);
-            setg(&mBuffer[0], &mBuffer[0], &mBuffer[0] + got);
+            setg(mBuffer, mBuffer, mBuffer + got);
         }
         if (gptr() == egptr())
             return traits_type::eof();

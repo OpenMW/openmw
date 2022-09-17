@@ -65,7 +65,7 @@ namespace MWClass
             const std::string& applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const override;
             ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
-            std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const override;
+            std::pair<int, std::string_view> canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that. \n
             ///  Second item in the pair specifies the error message
 

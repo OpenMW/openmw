@@ -17,6 +17,8 @@
 #include <components/esm/format.hpp>
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 
 #include "record.hpp"
 #include "labels.hpp"
@@ -46,29 +48,35 @@ struct ESMData
 
 bool parseOptions (int argc, char** argv, Arguments &info)
 {
-    bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed modes:\n  dump\t Dumps all readable data from the input file.\n  clone\t Clones the input file to the output file.\n  comp\t Compares the given files.\n\nAllowed options");
+    bpo::options_description desc(R"(Inspect and extract from Morrowind ES files (ESM, ESP, ESS)
+Syntax: esmtool [options] mode infile [outfile]
+Allowed modes:
+  dump   Dumps all readable data from the input file.
+  clone  Clones the input file to the output file.
+  comp   Compares the given files.
 
-    desc.add_options()
-        ("help,h", "print help message.")
-        ("version,v", "print version information and quit.")
-        ("raw,r", bpo::value<std::string>(),
+Allowed options)");
+    auto addOption = desc.add_options();
+    addOption("help,h", "print help message.");
+    addOption("version,v", "print version information and quit.");
+    addOption("raw,r", bpo::value<std::string>(),
          "Show an unformatted list of all records and subrecords of given format:\n"
          "\n\tTES3"
-         "\n\tTES4")
+         "\n\tTES4");
         // The intention is that this option would interact better
         // with other modes including clone, dump, and raw.
-        ("type,t", bpo::value< std::vector<std::string> >(),
+    addOption("type,t", bpo::value< std::vector<std::string> >(),
          "Show only records of this type (four character record code).  May "
-         "be specified multiple times.  Only affects dump mode.")
-        ("name,n", bpo::value<std::string>(),
-         "Show only the record with this name.  Only affects dump mode.")
-        ("plain,p", "Print contents of dialogs, books and scripts. "
+         "be specified multiple times.  Only affects dump mode.");
+    addOption("name,n", bpo::value<std::string>(),
+         "Show only the record with this name.  Only affects dump mode.");
+    addOption("plain,p", "Print contents of dialogs, books and scripts. "
          "(skipped by default)"
-         "Only affects dump mode.")
-        ("quiet,q", "Suppress all record information. Useful for speed tests.")
-        ("loadcells,C", "Browse through contents of all cells.")
+         "Only affects dump mode.");
+    addOption("quiet,q", "Suppress all record information. Useful for speed tests.");
+    addOption("loadcells,C", "Browse through contents of all cells.");
 
-        ( "encoding,e", bpo::value<std::string>(&(info.encoding))->
+    addOption( "encoding,e", bpo::value<std::string>(&(info.encoding))->
           default_value("win1252"),
           "Character encoding used in ESMTool:\n"
           "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
@@ -80,11 +88,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
     // input-file is hidden and used as a positional argument
     bpo::options_description hidden("Hidden Options");
-
-    hidden.add_options()
-        ( "mode,m", bpo::value<std::string>(), "esmtool mode")
-        ( "input-file,i", bpo::value< std::vector<std::string> >(), "input file")
-        ;
+    auto addHiddenOption = hidden.add_options();
+    addHiddenOption( "mode,m", bpo::value<std::string>(), "esmtool mode");
+    addHiddenOption( "input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
 
     bpo::positional_options_description p;
     p.add("mode", 1).add("input-file", 2);
@@ -154,9 +160,10 @@ bool parseOptions (int argc, char** argv, Arguments &info)
       return false;
       }*/
 
-    info.filename = variables["input-file"].as< std::vector<std::string> >()[0];
-    if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-        info.outname = variables["input-file"].as< std::vector<std::string> >()[1];
+    const auto inputFiles = variables["input-file"].as< Files::MaybeQuotedPathContainer >();
+    info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+    if (inputFiles.size() > 1)
+        info.outname = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
     if (const auto it = variables.find("raw"); it != variables.end())
         info.mRawFormat = ESM::parseFormat(it->second.as<std::string>());
@@ -284,9 +291,9 @@ void loadCell(const Arguments& info, ESM::Cell &cell, ESM::ESMReader &esm, ESMDa
     }
 }
 
-void printRawTes3(std::string_view path)
+void printRawTes3(const std::filesystem::path &path)
 {
-    std::cout << "TES3 RAW file listing: " << path << '\n';
+    std::cout << "TES3 RAW file listing: " << Files::pathToUnicodeString(path) << '\n';
     ESM::ESMReader esm;
     esm.openRaw(path);
     while(esm.hasMoreRecs())
@@ -419,7 +426,7 @@ int load(const Arguments& info, ESMData* data)
                 printRawTes3(info.filename);
                 break;
             case ESM::Format::Tes4:
-                std::cout << "Printing raw TES4 file is not supported: " << info.filename << "\n";
+                std::cout << "Printing raw TES4 file is not supported: " << Files::pathToUnicodeString(info.filename) << "\n";
                 break;
         }
         return 0;
@@ -490,7 +497,7 @@ int clone(const Arguments& info)
     if (i % 3 != 0)
         std::cout << '\n';
 
-    std::cout << "\nSaving records to: " << info.outname << "...\n";
+    std::cout << "\nSaving records to: " << Files::pathToUnicodeString(info.outname) << "...\n";
 
     ESM::ESMWriter esm;
     ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
@@ -499,7 +506,7 @@ int clone(const Arguments& info)
     esm.setVersion(ESM::VER_13);
     esm.setRecordCount (recordCount);
 
-    std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
+    std::fstream save(info.outname, std::fstream::out | std::fstream::binary);
     esm.save(save);
 
     int saved = 0;
@@ -563,14 +570,14 @@ int comp(const Arguments& info)
     ESMData dataOne;
     if (load(fileOne, &dataOne) != 0)
     {
-        std::cout << "Failed to load " << info.filename << ", aborting comparison." << std::endl;
+        std::cout << "Failed to load " << Files::pathToUnicodeString(info.filename) << ", aborting comparison." << std::endl;
         return 1;
     }
 
     ESMData dataTwo;
     if (load(fileTwo, &dataTwo) != 0)
     {
-        std::cout << "Failed to load " << info.outname << ", aborting comparison." << std::endl;
+        std::cout << "Failed to load " << Files::pathToUnicodeString(info.outname) << ", aborting comparison." << std::endl;
         return 1;
     }
 

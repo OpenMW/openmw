@@ -95,7 +95,9 @@ void CSMWorld::CommandDispatcher::setEditLock (bool locked)
 void CSMWorld::CommandDispatcher::setSelection (const std::vector<std::string>& selection)
 {
     mSelection = selection;
-    std::for_each (mSelection.begin(), mSelection.end(), Misc::StringUtils::lowerCaseInPlace);
+    for (auto& sel : mSelection) {
+        Misc::StringUtils::lowerCaseInPlace(sel);
+    }
     std::sort (mSelection.begin(), mSelection.end());
 }
 

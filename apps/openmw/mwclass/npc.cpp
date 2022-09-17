@@ -16,6 +16,8 @@
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadbody.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -55,6 +57,7 @@
 #include "../mwrender/npcanimation.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 namespace
 {
@@ -499,7 +502,7 @@ namespace MWClass
 
                 for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
                 {
-                    std::string partname = female ? it->mFemale : it->mMale;
+                    std::string_view partname = female ? it->mFemale : it->mMale;
                     if (partname.empty())
                         partname = female ? it->mMale : it->mFemale;
                     const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
@@ -1118,7 +1121,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
 
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()});
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
         if(fullHelp && !ref->mBase->mName.empty() && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
@@ -1150,7 +1153,7 @@ namespace MWClass
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
         MWMechanics::CastSpell cast(actor, actor);
-        std::string recordId = consumable.getCellRef().getRefId();
+        const std::string& recordId = consumable.getCellRef().getRefId();
         MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
         actor.getClass().getContainerStore(actor).remove(consumable, 1, actor);
         return cast.cast(recordId);
@@ -1400,7 +1403,7 @@ namespace MWClass
         return ref->mBase->mNpdt.mGold;
     }
 
-    bool Npc::isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const
+    bool Npc::isClass(const MWWorld::ConstPtr& ptr, std::string_view className) const
     {
         return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
     }
@@ -1495,7 +1498,7 @@ namespace MWClass
         MWMechanics::setBaseAISetting<ESM::NPC>(id, setting, value);
     }
 
-    void Npc::modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const
+    void Npc::modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::NPC>(actorId, itemId, amount);
     }

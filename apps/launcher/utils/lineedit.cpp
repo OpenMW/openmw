@@ -15,8 +15,8 @@ void LineEdit::setupClearButton()
     mClearButton->setCursor(Qt::ArrowCursor);
     mClearButton->setStyleSheet("QToolButton { border: none; padding: 0px; }");
     mClearButton->hide();
-    connect(mClearButton, SIGNAL(clicked()), this, SLOT(clear()));
-    connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(updateClearButton(const QString&)));
+    connect(mClearButton, &QToolButton::clicked, this, &LineEdit::clear);
+    connect(this, &LineEdit::textChanged, this, &LineEdit::updateClearButton);
 }
 
 void LineEdit::resizeEvent(QResizeEvent *)

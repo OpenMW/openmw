@@ -18,8 +18,8 @@ namespace CSVRender
         mRemoveSelectedNodes = new QAction("Remove selected nodes", this);
         mRemoveSelectedEdges = new QAction("Remove edges between selected nodes", this);
 
-        connect(mRemoveSelectedNodes, SIGNAL(triggered()), this, SLOT(removeSelectedNodes()));
-        connect(mRemoveSelectedEdges, SIGNAL(triggered()), this, SLOT(removeSelectedEdges()));
+        connect(mRemoveSelectedNodes, &QAction::triggered, this, &PathgridSelectionMode::removeSelectedNodes);
+        connect(mRemoveSelectedEdges, &QAction::triggered, this, &PathgridSelectionMode::removeSelectedEdges);
     }
 
     bool PathgridSelectionMode::createContextMenu(QMenu* menu)

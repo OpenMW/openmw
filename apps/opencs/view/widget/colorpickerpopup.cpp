@@ -18,10 +18,8 @@ CSVWidget::ColorPickerPopup::ColorPickerPopup(QWidget *parent)
     mColorPicker->setWindowFlags(Qt::Widget);
     mColorPicker->setOptions(QColorDialog::NoButtons | QColorDialog::DontUseNativeDialog);
     mColorPicker->installEventFilter(this);
-    connect(mColorPicker,
-            SIGNAL(currentColorChanged(const QColor &)),
-            this,
-            SIGNAL(colorChanged(const QColor &)));
+    connect(mColorPicker, &QColorDialog::currentColorChanged,
+            this, &ColorPickerPopup::colorChanged);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(mColorPicker);

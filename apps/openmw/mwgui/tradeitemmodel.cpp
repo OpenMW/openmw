@@ -10,10 +10,10 @@
 namespace MWGui
 {
 
-    TradeItemModel::TradeItemModel(ItemModel *sourceModel, const MWWorld::Ptr& merchant)
+    TradeItemModel::TradeItemModel(std::unique_ptr<ItemModel> sourceModel, const MWWorld::Ptr& merchant)
         : mMerchant(merchant)
     {
-        mSourceModel = sourceModel;
+        mSourceModel = std::move(sourceModel);
     }
 
     bool TradeItemModel::allowedToUseItems() const

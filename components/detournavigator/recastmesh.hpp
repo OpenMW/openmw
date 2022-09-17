@@ -3,6 +3,7 @@
 
 #include "areatype.hpp"
 #include "objecttransform.hpp"
+#include "version.hpp"
 
 #include <components/bullethelpers/operators.hpp>
 #include <components/resource/bulletshape.hpp>
@@ -129,19 +130,11 @@ namespace DetourNavigator
     class RecastMesh
     {
     public:
-        RecastMesh(std::size_t generation, std::size_t revision, Mesh mesh, std::vector<CellWater> water,
+        explicit RecastMesh(const Version& version, Mesh mesh, std::vector<CellWater> water,
             std::vector<Heightfield> heightfields, std::vector<FlatHeightfield> flatHeightfields,
             std::vector<MeshSource> sources);
 
-        std::size_t getGeneration() const
-        {
-            return mGeneration;
-        }
-
-        std::size_t getRevision() const
-        {
-            return mRevision;
-        }
+        const Version& getVersion() const noexcept { return mVersion; }
 
         const Mesh& getMesh() const noexcept { return mMesh; }
 
@@ -163,8 +156,7 @@ namespace DetourNavigator
         const std::vector<MeshSource>& getMeshSources() const noexcept { return mMeshSources; }
 
     private:
-        std::size_t mGeneration;
-        std::size_t mRevision;
+        Version mVersion;
         Mesh mMesh;
         std::vector<CellWater> mWater;
         std::vector<Heightfield> mHeightfields;

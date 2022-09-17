@@ -109,7 +109,7 @@ namespace MWWorld
             bool mDiscardMovements;
             std::vector<std::string> mContentFiles;
 
-            std::string mUserDataPath;
+            std::filesystem::path mUserDataPath;
 
             osg::Vec3f mDefaultHalfExtents;
             DetourNavigator::CollisionShapeType mDefaultActorCollisionShapeType;
@@ -138,6 +138,8 @@ namespace MWWorld
 
             float mSimulationTimeScale = 1.0;
 
+            std::vector<int> mESMVersions;  //the versions of esm files
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
@@ -164,7 +166,8 @@ namespace MWWorld
 
             void updateNavigator();
 
-            void updateNavigatorObject(const MWPhysics::Object& object);
+            void updateNavigatorObject(const MWPhysics::Object& object,
+                const DetourNavigator::UpdateGuard* navigatorUpdateGuard = nullptr);
 
             void ensureNeededRecords();
 
@@ -182,8 +185,8 @@ namespace MWWorld
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();
 
-            MWWorld::ConstPtr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
-            MWWorld::ConstPtr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
+            MWWorld::ConstPtr getClosestMarker(const MWWorld::ConstPtr& ptr, std::string_view id);
+            MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id);
 
         public:
             // FIXME
@@ -200,7 +203,7 @@ namespace MWWorld
                 const std::vector<std::string>& groundcoverFiles,
                 ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
                 const std::string& startCell, const std::string& startupScript,
-                const std::string& resourcePath, const std::string& userDataPath);
+                const std::filesystem::path& resourcePath, const std::filesystem::path& userDataPath);
 
             virtual ~World();
 
@@ -248,6 +251,8 @@ namespace MWWorld
             MWWorld::ConstPtr getPlayerConstPtr() const override;
 
             const MWWorld::ESMStore& getStore() const override;
+
+            const std::vector<int>& getESMVersions() const override;
 
             LocalScripts& getLocalScripts() override;
 
@@ -320,7 +325,7 @@ namespace MWWorld
             void advanceTime (double hours, bool incremental = false) override;
             ///< Advance in-game time.
 
-            std::string getMonthName (int month = -1) const override;
+            std::string_view getMonthName(int month = -1) const override;
             ///< Return name of month (-1: current month)
 
             TimeStamp getTimeStamp() const override;
@@ -612,7 +617,7 @@ namespace MWWorld
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise
-            bool findExteriorPosition(const std::string &name, ESM::Position &pos) override;
+            bool findExteriorPosition(std::string_view name, ESM::Position& pos) override;
 
             /// Find position in interior cell near door entrance
             /// \return false if interior with given name not exists, true otherwise
@@ -667,8 +672,7 @@ namespace MWWorld
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
-            void teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                                  const std::string& id) override;
+            void teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id) override;
 
             /// List all references (filtered by \a type) detected by \a ptr. The range
             /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.
@@ -692,10 +696,6 @@ namespace MWWorld
             void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
 
             void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) override;
-
-            void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
-                                      ESM::RangeType rangeType, const std::string& id, const std::string& sourceName,
-                                      const bool fromProjectile=false, int slot = 0) override;
 
             void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override;
 
@@ -730,7 +730,7 @@ namespace MWWorld
 
             /// Export scene graph to a file and return the filename.
             /// \param ptr object to export scene graph for (if empty, export entire scene graph)
-            std::string exportSceneGraph(const MWWorld::Ptr& ptr) override;
+            std::filesystem::path exportSceneGraph(const MWWorld::Ptr& ptr) override;
 
             /// Preload VFX associated with this effect list
             void preloadEffects(const ESM::EffectList* effectList) override;

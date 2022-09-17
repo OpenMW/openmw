@@ -23,6 +23,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -217,12 +218,12 @@ namespace MWRender
     {
         for (const auto& name : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
         {
-            std::filesystem::path path = name;
-            std::string fileExt = Misc::StringUtils::lowerCase(path.extension().string());
+            std::filesystem::path path = Files::pathFromUnicodeString(name);
+            std::string fileExt = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(path.extension()));
             if (!path.parent_path().has_parent_path() && fileExt == fx::Technique::sExt)
             {
-                auto absolutePath = std::filesystem::path(mVFS->getAbsoluteFileName(name));
-                mTechniqueFileMap[absolutePath.stem().string()] = absolutePath;
+                const auto absolutePath = mVFS->getAbsoluteFileName(path);
+                mTechniqueFileMap[Files::pathToUnicodeString(absolutePath.stem())] = absolutePath;
             }
         }
     }
@@ -387,7 +388,7 @@ namespace MWRender
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
             if (technique->compile())
-                Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()].string();
+                Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()];
 
             mReload = technique->isValid();
         }

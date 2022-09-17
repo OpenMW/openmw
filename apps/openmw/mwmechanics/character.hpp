@@ -260,9 +260,9 @@ public:
     void persistAnimationState() const;
     void unpersistAnimationState();
 
-    bool playGroup(const std::string &groupname, int mode, int count, bool persist=false);
+    bool playGroup(std::string_view groupname, int mode, int count, bool persist=false);
     void skipAnim();
-    bool isAnimPlaying(const std::string &groupName) const;
+    bool isAnimPlaying(std::string_view groupName) const;
 
     enum KillResult
     {

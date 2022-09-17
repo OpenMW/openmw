@@ -1,7 +1,7 @@
 #ifndef GAME_STATE_CHARACTER_H
 #define GAME_STATE_CHARACTER_H
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <components/esm3/savedgame.hpp>
 
@@ -9,9 +9,9 @@ namespace MWState
 {
     struct Slot
     {
-        boost::filesystem::path mPath;
+        std::filesystem::path mPath;
         ESM::SavedGame mProfile;
-        std::time_t mTimeStamp;
+        std::filesystem::file_time_type mTimeStamp;
     };
 
     bool operator< (const Slot& left, const Slot& right);
@@ -26,16 +26,16 @@ namespace MWState
 
         private:
 
-            boost::filesystem::path mPath;
+            std::filesystem::path mPath;
             std::vector<Slot> mSlots;
 
-            void addSlot (const boost::filesystem::path& path, const std::string& game);
+            void addSlot (const std::filesystem::path& path, const std::string& game);
 
             void addSlot (const ESM::SavedGame& profile);
 
         public:
 
-            Character (const boost::filesystem::path& saves, const std::string& game);
+            Character (std::filesystem::path  saves, const std::string& game);
 
             void cleanup();
             ///< Delete the directory we used, if it is empty
@@ -60,9 +60,9 @@ namespace MWState
 
             SlotIterator end() const;
 
-            const boost::filesystem::path& getPath() const;
+            const std::filesystem::path& getPath() const;
 
-            ESM::SavedGame getSignature() const;
+            const ESM::SavedGame& getSignature() const;
             ///< Return signature information for this character.
             ///
             /// \attention This function must not be called if there are no slots.

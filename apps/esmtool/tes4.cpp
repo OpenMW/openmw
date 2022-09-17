@@ -9,6 +9,7 @@
 #include <components/esm/esmcommon.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/records.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 namespace EsmTool
 {
@@ -61,6 +62,63 @@ namespace EsmTool
         template <class T>
         constexpr bool hasFlags = HasFlags<T>::value;
 
+        template <class T, class = std::void_t<>>
+        struct HasEditorId : std::false_type {};
+
+        template <class T>
+        struct HasEditorId<T, std::void_t<decltype(T::mEditorId)>> : std::true_type {};
+
+        template <class T>
+        constexpr bool hasEditorId = HasEditorId<T>::value;
+
+        template <class T, class = std::void_t<>>
+        struct HasModel : std::false_type {};
+
+        template <class T>
+        struct HasModel<T, std::void_t<decltype(T::mModel)>> : std::true_type {};
+
+        template <class T>
+        constexpr bool hasModel = HasModel<T>::value;
+
+        template <class T, class = std::void_t<>>
+        struct HasNif : std::false_type {};
+
+        template <class T>
+        struct HasNif<T, std::void_t<decltype(T::mNif)>> : std::true_type {};
+
+        template <class T>
+        constexpr bool hasNif = HasNif<T>::value;
+
+        template <class T, class = std::void_t<>>
+        struct HasKf : std::false_type {};
+
+        template <class T>
+        struct HasKf<T, std::void_t<decltype(T::mKf)>> : std::true_type {};
+
+        template <class T>
+        constexpr bool hasKf = HasKf<T>::value;
+
+        template <class T>
+        struct WriteArray
+        {
+            std::string_view mPrefix;
+            const T& mValue;
+
+            explicit WriteArray(std::string_view prefix, const T& value)
+                : mPrefix(prefix)
+                , mValue(value)
+            {
+            }
+        };
+
+        template <class T>
+        std::ostream& operator<<(std::ostream& stream, const WriteArray<T>& write)
+        {
+            for (const auto& value : write.mValue)
+                stream << write.mPrefix << value;
+            return stream;
+        }
+
         template <class T>
         void readTypedRecord(const Params& params, ESM4::Reader& reader)
         {
@@ -74,9 +132,17 @@ namespace EsmTool
 
             std::cout << "\n  Record: " << ESM::NAME(reader.hdr().record.typeId).toStringView();
             if constexpr (hasFormId<T>)
-                std::cout << ' ' << value.mFormId;
+                std::cout << "\n  FormId: " << value.mFormId;
             if constexpr (hasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
+            if constexpr (hasEditorId<T>)
+                std::cout << "\n  EditorId: " << value.mEditorId;
+            if constexpr (hasModel<T>)
+                std::cout << "\n  Model: " << value.mModel;
+            if constexpr (hasNif<T>)
+                std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);
+            if constexpr (hasKf<T>)
+                std::cout << "\n  Kf:" << WriteArray("\n  - ", value.mKf);
             std::cout << '\n';
         }
 

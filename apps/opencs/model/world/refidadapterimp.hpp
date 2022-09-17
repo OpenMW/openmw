@@ -1756,7 +1756,6 @@ namespace CSMWorld
                         case ESM::AI_Follow: return 2;
                         case ESM::AI_Escort: return 3;
                         case ESM::AI_Activate: return 4;
-                        case ESM::AI_CNDT:
                         default: return QVariant();
                     }
                 case 1: // wander dist

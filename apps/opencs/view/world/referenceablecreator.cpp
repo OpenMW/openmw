@@ -23,7 +23,7 @@ CSVWorld::ReferenceableCreator::ReferenceableCreator (CSMWorld::Data& data, QUnd
 
     mType = new QComboBox (this);
     mType->setMaxVisibleItems(20);
-    
+
     for (std::vector<CSMWorld::UniversalId::Type>::const_iterator iter (types.begin());
          iter!=types.end(); ++iter)
     {
@@ -32,12 +32,12 @@ CSVWorld::ReferenceableCreator::ReferenceableCreator (CSMWorld::Data& data, QUnd
         mType->addItem (QIcon (id2.getIcon().c_str()), id2.getTypeName().c_str(),
             static_cast<int> (id2.getType()));
     }
-    
+
     mType->model()->sort(0);
-    
+
     insertBeforeButtons (mType, false);
 
-    connect (mType, SIGNAL (currentIndexChanged (int)), this, SLOT (setType (int)));
+    connect (mType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ReferenceableCreator::setType);
 }
 
 void CSVWorld::ReferenceableCreator::reset()

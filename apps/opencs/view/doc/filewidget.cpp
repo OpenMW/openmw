@@ -23,7 +23,7 @@ CSVDoc::FileWidget::FileWidget (QWidget *parent) : QWidget (parent), mAddon (fal
 
     layout ->addWidget (mType);
 
-    connect (mInput, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+    connect (mInput, &QLineEdit::textChanged, this, &FileWidget::textChanged);
 
     setLayout (layout);
 }

@@ -299,7 +299,7 @@ namespace MWMechanics
         const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        std::string selectedSpellId = stats.getSpells().getSelectedSpell();
+        const std::string& selectedSpellId = stats.getSpells().getSelectedSpell();
         MWWorld::Ptr selectedEnchItem;
 
         MWWorld::Ptr activeWeapon, activeAmmo;

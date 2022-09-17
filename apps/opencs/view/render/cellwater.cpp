@@ -51,8 +51,7 @@ namespace CSVRender
 
         // Keep water existence/height up to date
         QAbstractItemModel* cells = mData.getTableModel(CSMWorld::UniversalId::Type_Cells);
-        connect(cells, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-            this, SLOT(cellDataChanged(const QModelIndex&, const QModelIndex&)));
+        connect(cells, &QAbstractItemModel::dataChanged, this, &CellWater::cellDataChanged);
     }
 
     CellWater::~CellWater()
@@ -163,8 +162,9 @@ namespace CSVRender
         mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(Alpha, RenderBin));
 
         // Add water texture
-        std::string textureName = Fallback::Map::getString("Water_SurfaceTexture");
-        textureName = "textures/water/" + textureName + "00.dds";
+        std::string textureName = "textures/water/";
+        textureName += Fallback::Map::getString("Water_SurfaceTexture");
+        textureName += "00.dds";
 
         Resource::ImageManager* imageManager = mData.getResourceSystem()->getImageManager();
 

@@ -31,7 +31,6 @@
 #include <cassert>
 #include <stdexcept>
 #include <unordered_map>
-#include <filesystem>
 #include <iostream> // for debugging
 #include <sstream>  // for debugging
 #include <iomanip>  // for debugging
@@ -50,6 +49,8 @@
 #include <components/bsa/memorystream.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/files/constrainedfilestream.hpp>
+#include <components/to_utf8/to_utf8.hpp>
+#include <components/files/conversion.hpp>
 
 #include "formid.hpp"
 
@@ -66,7 +67,7 @@ ReaderContext::ReaderContext() : modIndex(0), recHeaderSize(sizeof(RecordHeader)
     subRecordHeader.dataSize = 0;
 }
 
-Reader::Reader(Files::IStreamPtr&& esmStream, const std::string& filename)
+Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path &filename)
     : mEncoder(nullptr), mFileSize(0), mStream(std::move(esmStream))
 {
     // used by ESMReader only?
@@ -149,7 +150,7 @@ void Reader::close()
     //mHeader.blank();
 }
 
-void Reader::openRaw(Files::IStreamPtr&& stream, const std::string& filename)
+void Reader::openRaw(Files::IStreamPtr&& stream, const std::filesystem::path &filename)
 {
     close();
 
@@ -162,7 +163,7 @@ void Reader::openRaw(Files::IStreamPtr&& stream, const std::string& filename)
 
 }
 
-void Reader::open(Files::IStreamPtr&& stream, const std::string &filename)
+void Reader::open(Files::IStreamPtr&& stream, const std::filesystem::path &filename)
 {
     openRaw(std::move(stream), filename);
 
@@ -183,12 +184,7 @@ void Reader::open(Files::IStreamPtr&& stream, const std::string &filename)
     throw std::runtime_error("Unknown file format"); // can't yet use fail() as mCtx is not setup
 }
 
-void Reader::openRaw(const std::string& filename)
-{
-    openRaw(Files::openConstrainedFileStream(filename), filename);
-}
-
-void Reader::open(const std::string& filename)
+void Reader::open(const std::filesystem::path& filename)
 {
     open(Files::openConstrainedFileStream(filename), filename);
 }
@@ -198,21 +194,20 @@ void Reader::setRecHeaderSize(const std::size_t size)
     mCtx.recHeaderSize = size;
 }
 
-// FIXME: only "English" strings supported for now
 void Reader::buildLStringIndex()
 {
     if ((mHeader.mFlags & Rec_ESM) == 0 || (mHeader.mFlags & Rec_Localized) == 0)
         return;
 
-    std::filesystem::path p(mCtx.filename);
-    std::string filename = p.stem().filename().string();
+    const auto filename = mCtx.filename.stem().filename().u8string();
 
-    buildLStringIndex("Strings/" + filename + "_English.STRINGS",   Type_Strings);
-    buildLStringIndex("Strings/" + filename + "_English.ILSTRINGS", Type_ILStrings);
-    buildLStringIndex("Strings/" + filename + "_English.DLSTRINGS", Type_DLStrings);
+    static const std::filesystem::path s("Strings");
+    buildLStringIndex(s / (filename + u8"_English.STRINGS"),   Type_Strings);
+    buildLStringIndex(s / (filename + u8"_English.ILSTRINGS"), Type_ILStrings);
+    buildLStringIndex(s / (filename + u8"_English.DLSTRINGS"), Type_DLStrings);
 }
 
-void Reader::buildLStringIndex(const std::string& stringFile, LocalizedStringType stringType)
+void Reader::buildLStringIndex(const std::filesystem::path &stringFile, LocalizedStringType stringType)
 {
     std::uint32_t numEntries;
     std::uint32_t dataSize;
@@ -637,13 +632,91 @@ void Reader::adjustGRUPFormId()
     std::stringstream ss;
 
     ss << "ESM Error: " << msg;
-    ss << "\n  File: " << mCtx.filename;
+    ss << "\n  File: " << Files::pathToUnicodeString(mCtx.filename);
     ss << "\n  Record: " << ESM::printName(mCtx.recordHeader.record.typeId);
     ss << "\n  Subrecord: " << ESM::printName(mCtx.subRecordHeader.typeId);
     if (mStream.get())
         ss << "\n  Offset: 0x" << std::hex << mStream->tellg();
 
     throw std::runtime_error(ss.str());
+}
+
+bool Reader::getStringImpl(std::string& str, std::size_t size,
+        std::istream& stream, const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull)
+{
+    std::size_t newSize = size;
+
+    if (encoder)
+    {
+        std::string input(size, '\0');
+        stream.read(input.data(), size);
+        if (stream.gcount() == static_cast<std::streamsize>(size))
+        {
+            const std::string_view result = encoder->getUtf8(input, ToUTF8::BufferAllocationPolicy::FitToRequiredSize, str);
+            if (str.empty() && !result.empty())
+            {
+                str = std::move(input);
+                str.resize(result.size());
+            }
+            return true;
+        }
+    }
+    else
+    {
+        if (hasNull)
+            newSize -= 1; // don't read the null terminator yet
+
+        str.resize(newSize); // assumed C++11
+        stream.read(str.data(), newSize);
+        if (static_cast<std::size_t>(stream.gcount()) == newSize)
+        {
+            if (hasNull)
+            {
+                char ch;
+                stream.read(&ch, 1); // read the null terminator
+                assert (ch == '\0'
+                        && "ESM4::Reader::getString string is not terminated with a null");
+            }
+#if 0
+            else
+            {
+                // NOTE: normal ESMs don't but omwsave has locals or spells with null terminator
+                assert (str[newSize - 1] != '\0'
+                        && "ESM4::Reader::getString string is unexpectedly terminated with a null");
+            }
+#endif
+            return true;
+        }
+    }
+
+    str.clear();
+    return false; // FIXME: throw instead?
+}
+
+bool Reader::getZeroTerminatedStringArray(std::vector<std::string>& values)
+{
+    const std::size_t size = mCtx.subRecordHeader.dataSize;
+    std::string input(size, '\0');
+    mStream->read(input.data(), size);
+
+    if (mStream->gcount() != static_cast<std::streamsize>(size))
+        return false;
+
+    std::string_view inputView(input.data(), input.size());
+    std::string buffer;
+    while (true)
+    {
+        std::string_view value(inputView.data());
+        const std::size_t next = inputView.find_first_not_of('\0', value.size());
+        if (mEncoder != nullptr)
+            value = mEncoder->getUtf8(value, ToUTF8::BufferAllocationPolicy::UseGrowFactor, buffer);
+        values.emplace_back(value);
+        if (next == std::string_view::npos)
+            break;
+        inputView = inputView.substr(next);
+    }
+
+    return true;
 }
 
 }

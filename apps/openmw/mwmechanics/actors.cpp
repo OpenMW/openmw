@@ -12,6 +12,12 @@
 #include <components/settings/settings.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadstat.hpp>
+
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -172,13 +178,9 @@ void soulTrap(const MWWorld::Ptr& creature)
             MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
             MWWorld::ContainerStoreIterator gem = container.end();
             float gemCapacity = std::numeric_limits<float>::max();
-            std::string soulgemFilter = "misc_soulgem"; // no other way to check for soulgems? :/
-            for (MWWorld::ContainerStoreIterator it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous);
-                 it != container.end(); ++it)
+            for (auto it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous); it != container.end(); ++it)
             {
-                const std::string& id = it->getCellRef().getRefId();
-                if (id.size() >= soulgemFilter.size()
-                        && id.substr(0,soulgemFilter.size()) == soulgemFilter)
+                if (it->getClass().isSoulGem(*it))
                 {
                     float thisGemCapacity = it->get<ESM::Miscellaneous>()->mBase->mData.mValue * fSoulgemMult;
                     if (thisGemCapacity >= creatureSoulValue && thisGemCapacity < gemCapacity
@@ -726,7 +728,7 @@ namespace MWMechanics
                 {
                     static const std::array<int, 7> damageEffects{
                         ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison,
-                        ESM::MagicEffect::SunDamage, ESM::MagicEffect::DamageHealth, ESM::MagicEffect::AbsorbHealth
+                        ESM::MagicEffect::SunDamage, ESM::MagicEffect::DamageHealth, ESM::MagicEffect::AbsorbHealth,
                     };
 
                     const bool isDamageEffect = std::find(damageEffects.begin(), damageEffects.end(), effect.mEffectId) != damageEffects.end();
@@ -1935,7 +1937,7 @@ namespace MWMechanics
             iter->second->getCharacterController().forceStateUpdate();
     }
 
-    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist) const
+    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if(iter != mIndex.end())

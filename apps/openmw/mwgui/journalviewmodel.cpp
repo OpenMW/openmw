@@ -35,12 +35,12 @@ struct JournalViewModelImpl : JournalViewModel
     }
 
     /// \todo replace this nasty BS
-    static Utf8Span toUtf8Span (std::string const & str)
+    static Utf8Span toUtf8Span(std::string_view str)
     {
         if (str.size () == 0)
             return Utf8Span (Utf8Point (nullptr), Utf8Point (nullptr));
 
-        Utf8Point point = reinterpret_cast <Utf8Point> (str.c_str ());
+        Utf8Point point = reinterpret_cast<Utf8Point>(str.data());
 
         return Utf8Span (point, point + str.size ());
     }
@@ -191,11 +191,11 @@ struct JournalViewModelImpl : JournalViewModel
 
     };
 
-    void visitQuestNames (bool active_only, std::function <void (const std::string&, bool)> visitor) const override
+    void visitQuestNames(bool active_only, std::function <void (std::string_view, bool)> visitor) const override
     {
         MWBase::Journal * journal = MWBase::Environment::get ().getJournal ();
 
-        std::set<std::string> visitedQuests;
+        std::set<std::string, std::less<>> visitedQuests;
 
         // Note that for purposes of the journal GUI, quests are identified by the name, not the ID, so several
         // different quest IDs can end up in the same quest log. A quest log should be considered finished
@@ -225,7 +225,7 @@ struct JournalViewModelImpl : JournalViewModel
 
                 visitor (quest.getName(), isFinished);
 
-                visitedQuests.insert(quest.getName());
+                visitedQuests.emplace(quest.getName());
             }
         }
     }
@@ -305,7 +305,7 @@ struct JournalViewModelImpl : JournalViewModel
         visitor (toUtf8Span (topic.getName()));
     }
 
-    void visitTopicNamesStartingWith (Utf8Stream::UnicodeChar character, std::function < void (const std::string&) > visitor) const override
+    void visitTopicNamesStartingWith(Utf8Stream::UnicodeChar character, std::function < void (std::string_view) > visitor) const override
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 

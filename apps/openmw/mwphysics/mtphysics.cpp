@@ -3,6 +3,7 @@
 #include <optional>
 #include <shared_mutex>
 #include <mutex>
+#include <cassert>
 
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
@@ -410,8 +411,10 @@ namespace MWPhysics
         return std::make_tuple(numSteps, actualDelta);
     }
 
-    void PhysicsTaskScheduler::applyQueuedMovements(float & timeAccum, std::vector<Simulation>&& simulations, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    void PhysicsTaskScheduler::applyQueuedMovements(float& timeAccum, std::vector<Simulation>& simulations, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
+        assert(mSimulations != &simulations);
+
         waitForWorkers();
 
         // This function run in the main thread.
@@ -444,10 +447,10 @@ namespace MWPhysics
         mRemainingSteps = numSteps;
         mTimeAccum = timeAccum;
         mPhysicsDt = newDelta;
-        mSimulations = std::move(simulations);
+        mSimulations = &simulations;
         mAdvanceSimulation = (mRemainingSteps != 0);
         ++mFrameCounter;
-        mNumJobs = mSimulations.size();
+        mNumJobs = mSimulations->size();
         mNextLOS.store(0, std::memory_order_relaxed);
         mNextJob.store(0, std::memory_order_release);
 
@@ -478,7 +481,11 @@ namespace MWPhysics
         MaybeExclusiveLock lock(mSimulationMutex, mNumThreads);
         mBudget.reset(mDefaultPhysicsDt);
         mAsyncBudget.reset(0.0f);
-        mSimulations.clear();
+        if (mSimulations != nullptr)
+        {
+            mSimulations->clear();
+            mSimulations = nullptr;
+        }
         for (const auto& [_, actor] : actors)
         {
             actor->updatePosition();
@@ -654,7 +661,7 @@ namespace MWPhysics
     {
         const Visitors::UpdatePosition impl{mCollisionWorld};
         const Visitors::WithLockedPtr<Visitors::UpdatePosition, MaybeExclusiveLock> vis{impl, mCollisionWorldMutex, mNumThreads};
-        for (Simulation& sim : mSimulations)
+        for (Simulation& sim : *mSimulations)
             std::visit(vis, sim);
     }
 
@@ -682,7 +689,7 @@ namespace MWPhysics
             const Visitors::Move impl{mPhysicsDt, mCollisionWorld, *mWorldFrameData};
             const Visitors::WithLockedPtr<Visitors::Move, MaybeLock> vis{impl, mCollisionWorldMutex, mNumThreads};
             while ((job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
-                std::visit(vis, mSimulations[job]);
+                std::visit(vis, (*mSimulations)[job]);
 
             mPostStepBarrier->wait([this] { afterPostStep(); });
         }
@@ -724,7 +731,11 @@ namespace MWPhysics
     {
         waitForWorkers();
         std::scoped_lock lock(mSimulationMutex, mUpdateAabbMutex);
-        mSimulations.clear();
+        if (mSimulations != nullptr)
+        {
+            mSimulations->clear();
+            mSimulations = nullptr;
+        }
         mUpdateAabb.clear();
     }
 
@@ -735,7 +746,7 @@ namespace MWPhysics
             return;
         const Visitors::PreStep impl{mCollisionWorld};
         const Visitors::WithLockedPtr<Visitors::PreStep, MaybeExclusiveLock> vis{impl, mCollisionWorldMutex, mNumThreads};
-        for (auto& sim : mSimulations)
+        for (auto& sim : *mSimulations)
             std::visit(vis, sim);
     }
 
@@ -767,9 +778,13 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::syncWithMainThread()
     {
+        if (mSimulations == nullptr)
+            return;
         const Visitors::Sync vis{mAdvanceSimulation, mTimeAccum, mPhysicsDt, this};
-        for (auto& sim : mSimulations)
+        for (auto& sim : *mSimulations)
             std::visit(vis, sim);
+        mSimulations->clear();
+        mSimulations = nullptr;
     }
 
     // Attempt to acquire unique lock on mSimulationMutex while not all worker

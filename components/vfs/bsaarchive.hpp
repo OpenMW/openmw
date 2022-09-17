@@ -15,7 +15,7 @@ namespace VFS
 
         Files::IStreamPtr open() override;
 
-        std::string getPath() override { return mInfo->name(); }
+        std::filesystem::path getPath() override { return mInfo->name(); }
 
         const Bsa::BSAFile::FileStruct* mInfo;
         Bsa::BSAFile* mFile;
@@ -28,7 +28,7 @@ namespace VFS
 
         Files::IStreamPtr open() override;
 
-        std::string getPath() override { return mInfo->name(); }
+        std::filesystem::path getPath() override { return mInfo->name(); }
 
         const Bsa::BSAFile::FileStruct* mInfo;
         Bsa::CompressedBSAFile* mCompressedFile;
@@ -38,7 +38,7 @@ namespace VFS
     class BsaArchive : public Archive
     {
     public:
-        BsaArchive(const std::string& filename);
+        BsaArchive(const std::filesystem::path &filename);
         BsaArchive();
         virtual ~BsaArchive();
         void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
@@ -53,7 +53,7 @@ namespace VFS
     class CompressedBsaArchive : public Archive
     {
     public:
-        CompressedBsaArchive(const std::string& filename);
+        CompressedBsaArchive(const std::filesystem::path &filename);
         virtual ~CompressedBsaArchive() {}
         void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
         bool contains(const std::string& file, char (*normalize_function) (char)) const override;

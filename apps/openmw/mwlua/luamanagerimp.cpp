@@ -31,7 +31,7 @@
 namespace MWLua
 {
 
-    LuaManager::LuaManager(const VFS::Manager* vfs, const std::string& libsDir)
+    LuaManager::LuaManager(const VFS::Manager* vfs, const std::filesystem::path &libsDir)
         : mLua(vfs, &mConfiguration)
         , mUiResourceManager(vfs)
         , mL10n(vfs, &mLua)
@@ -110,21 +110,20 @@ namespace MWLua
         return mL10n.translate(contextName, key);
     }
 
-    void LuaManager::loadPermanentStorage(const std::string& userConfigPath)
+    void LuaManager::loadPermanentStorage(const std::filesystem::path &userConfigPath)
     {
-        auto globalPath = std::filesystem::path(userConfigPath) / "global_storage.bin";
-        auto playerPath = std::filesystem::path(userConfigPath) / "player_storage.bin";
+        const auto globalPath = userConfigPath / "global_storage.bin";
+        const auto playerPath = userConfigPath / "player_storage.bin";
         if (std::filesystem::exists(globalPath))
-            mGlobalStorage.load(globalPath.string());
+            mGlobalStorage.load(globalPath);
         if (std::filesystem::exists(playerPath))
-            mPlayerStorage.load(playerPath.string());
+            mPlayerStorage.load(playerPath);
     }
 
-    void LuaManager::savePermanentStorage(const std::string& userConfigPath)
+    void LuaManager::savePermanentStorage(const std::filesystem::path &userConfigPath)
     {
-        std::filesystem::path confDir(userConfigPath);
-        mGlobalStorage.save((confDir / "global_storage.bin").string());
-        mPlayerStorage.save((confDir / "player_storage.bin").string());
+        mGlobalStorage.save(userConfigPath / "global_storage.bin");
+        mPlayerStorage.save(userConfigPath / "player_storage.bin");
     }
 
     void LuaManager::update()

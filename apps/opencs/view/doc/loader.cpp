@@ -8,6 +8,9 @@
 #include <QCloseEvent>
 #include <QListWidget>
 
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
+
 #include "../../model/doc/document.hpp"
 
 void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
@@ -19,7 +22,7 @@ void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 : mDocument (document), mTotalRecordsLabel (0), mRecordsLabel (0), mAborted (false), mMessages (nullptr), mRecords(0)
 {
-    setWindowTitle (QString::fromUtf8((std::string("Opening ") + document->getSavePath().filename().string()).c_str()));
+    setWindowTitle ("Opening " + Files::pathToQString(document->getSavePath().filename()));
 
     setMinimumWidth (400);
 
@@ -70,7 +73,7 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 
     show();
 
-    connect (mButtons, SIGNAL (rejected()), this, SLOT (cancel()));
+    connect (mButtons, &QDialogButtonBox::rejected, this, qOverload<>(&LoadingDocument::cancel));
 }
 
 void CSVDoc::LoadingDocument::nextStage (const std::string& name, int fileRecords)
@@ -89,16 +92,16 @@ void CSVDoc::LoadingDocument::nextStage (const std::string& name, int fileRecord
     mRecords = fileRecords;
 }
 
-void CSVDoc::LoadingDocument::nextRecord (int records)
+void CSVDoc::LoadingDocument::nextRecord(int records)
 {
     if (records <= mRecords)
     {
-        mTotalProgress->setValue (mTotalRecords+records);
+        mTotalProgress->setValue(mTotalRecords + records);
 
         mRecordProgress->setValue(records);
 
-        mRecordsLabel->setText(QString::fromStdString(
-                    "Records: "+std::to_string(records)+" of "+std::to_string(mRecords)));
+        mRecordsLabel->setText(
+            "Records: " + QString::number(records) + " of " + QString::number(mRecords));
     }
 }
 
@@ -146,10 +149,10 @@ void CSVDoc::Loader::add (CSMDoc::Document *document)
     LoadingDocument *loading = new LoadingDocument (document);
     mDocuments.insert (std::make_pair (document, loading));
 
-    connect (loading, SIGNAL (cancel (CSMDoc::Document *)),
-        this, SIGNAL (cancel (CSMDoc::Document *)));
-    connect (loading, SIGNAL (close (CSMDoc::Document *)),
-        this, SIGNAL (close (CSMDoc::Document *)));
+    connect (loading, qOverload<CSMDoc::Document *>(&LoadingDocument::cancel),
+        this, &Loader::cancel);
+    connect (loading, &LoadingDocument::close,
+        this, &Loader::close);
 }
 
 void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,

@@ -21,7 +21,13 @@
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/depth.hpp>
-
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadrace.hpp>
 #include <components/settings/settings.hpp>
 
 #include <components/vfs/manager.hpp>
@@ -514,7 +520,7 @@ void NpcAnimation::updateNpcBase()
 
     if(!is1stPerson)
     {
-        const std::string base = Settings::Manager::getString("xbaseanim", "Models");
+        const std::string& base = Settings::Manager::getString("xbaseanim", "Models");
         if (smodel != base && !isWerewolf)
             addAnimSource(base, smodel);
 
@@ -528,7 +534,7 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
-        const std::string base = Settings::Manager::getString("xbaseanim1st", "Models");
+        const std::string& base = Settings::Manager::getString("xbaseanim1st", "Models");
         if (smodel != base && !isWerewolf)
             addAnimSource(base, smodel);
 
@@ -816,10 +822,10 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         return false;
     }
 
-    if (!mSoundsDisabled)
+    if (!mSoundsDisabled && group == MWWorld::InventoryStore::Slot_CarriedLeft)
     {
         const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-        MWWorld::ConstContainerStoreIterator csi = inv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
+        MWWorld::ConstContainerStoreIterator csi = inv.getSlot(group);
         if (csi != inv.end())
         {
             const auto soundId = csi->getClass().getSound(*csi);

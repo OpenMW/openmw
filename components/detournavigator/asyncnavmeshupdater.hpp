@@ -12,6 +12,7 @@
 #include "agentbounds.hpp"
 #include "guardednavmeshcacheitem.hpp"
 #include "sharednavmeshcacheitem.hpp"
+#include "stats.hpp"
 
 #include <osg/Vec3f>
 
@@ -88,13 +89,15 @@ namespace DetourNavigator
 
         void stop();
 
-        std::size_t size() const;
+        DbJobQueueStats getStats() const;
 
     private:
         mutable std::mutex mMutex;
         std::condition_variable mHasJob;
         std::deque<JobIt> mJobs;
         bool mShouldStop = false;
+        std::size_t mWritingJobs = 0;
+        std::size_t mReadingJobs = 0;
     };
 
     class AsyncNavMeshUpdater;
@@ -102,18 +105,12 @@ namespace DetourNavigator
     class DbWorker
     {
     public:
-        struct Stats
-        {
-            std::size_t mJobs = 0;
-            std::size_t mGetTileCount = 0;
-        };
-
         DbWorker(AsyncNavMeshUpdater& updater, std::unique_ptr<NavMeshDb>&& db,
             TileVersion version, const RecastSettings& recastSettings, bool writeToDb);
 
         ~DbWorker();
 
-        Stats getStats() const;
+        DbWorkerStats getStats() const;
 
         void enqueueJob(JobIt job);
 
@@ -146,17 +143,6 @@ namespace DetourNavigator
     class AsyncNavMeshUpdater
     {
     public:
-        struct Stats
-        {
-            std::size_t mJobs = 0;
-            std::size_t mWaiting = 0;
-            std::size_t mPushed = 0;
-            std::size_t mProcessing = 0;
-            std::size_t mDbGetTileHits = 0;
-            std::optional<DbWorker::Stats> mDb;
-            NavMeshTilesCache::Stats mCache;
-        };
-
         AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager,
             OffMeshConnectionsManager& offMeshConnectionsManager, std::unique_ptr<NavMeshDb>&& db);
         ~AsyncNavMeshUpdater();
@@ -165,11 +151,11 @@ namespace DetourNavigator
             const TilePosition& playerTile, std::string_view worldspace,
             const std::map<TilePosition, ChangeType>& changedTiles);
 
-        void wait(Loading::Listener& listener, WaitConditionType waitConditionType);
+        void wait(WaitConditionType waitConditionType, Loading::Listener* listener);
 
         void stop();
 
-        Stats getStats() const;
+        AsyncNavMeshUpdaterStats getStats() const;
 
         void enqueueJob(JobIt job);
 
@@ -223,12 +209,10 @@ namespace DetourNavigator
 
         void cleanupLastUpdates();
 
-        inline void waitUntilJobsDoneForNotPresentTiles(Loading::Listener& listener);
+        inline void waitUntilJobsDoneForNotPresentTiles(Loading::Listener* listener);
 
         inline void waitUntilAllJobsDone();
     };
-
-    void reportStats(const AsyncNavMeshUpdater::Stats& stats, unsigned int frameNumber, osg::Stats& out);
 }
 
 #endif

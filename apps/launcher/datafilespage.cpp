@@ -19,13 +19,15 @@
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
-#include <components/settings/settings.hpp>
 #include <components/bsa/compressedbsafile.hpp>
+#include <components/files/qtconversion.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/navmeshtool/protocol.hpp>
+#include <components/settings/settings.hpp>
 #include <components/vfs/bsaarchive.hpp>
 
-#include "utils/textinputdialog.hpp"
 #include "utils/profilescombobox.hpp"
+#include "utils/textinputdialog.hpp"
 
 #include "ui_directorypicker.h"
 
@@ -132,10 +134,10 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
     mNewProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
     mCloneProfileDialog = new TextInputDialog(tr("Clone Content List"), tr("Content List name:"), this);
 
-    connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
-            this, SLOT(updateNewProfileOkButton(QString)));
-    connect(mCloneProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
-            this, SLOT(updateCloneProfileOkButton(QString)));
+    connect(mNewProfileDialog->lineEdit(), &LineEdit::textChanged,
+            this, &DataFilesPage::updateNewProfileOkButton);
+    connect(mCloneProfileDialog->lineEdit(), &LineEdit::textChanged,
+            this, &DataFilesPage::updateCloneProfileOkButton);
     connect(ui.directoryAddSubdirsButton, &QPushButton::released, this, [this]() { this->addSubdirectories(true); });
     connect(ui.directoryInsertButton,     &QPushButton::released, this, [this]() { this->addSubdirectories(false); });
     connect(ui.directoryUpButton,         &QPushButton::released, this, [this]() { this->moveDirectory(-1); });
@@ -150,8 +152,8 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
 
     // Connect signal and slot after the settings have been loaded. We only care about the user changing
     // the addons and don't want to get signals of the system doing it during startup.
-    connect(mSelector, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)),
-            this, SLOT(slotAddonDataChanged()));
+    connect(mSelector, &ContentSelectorView::ContentSelector::signalAddonDataChanged,
+            this, &DataFilesPage::slotAddonDataChanged);
     // Call manually to indicate all changes to addon data during startup.
     slotAddonDataChanged();
 }
@@ -177,23 +179,24 @@ void Launcher::DataFilesPage::buildView()
     refreshButton->setDefaultAction(ui.refreshDataFilesAction);
 
     //establish connections
-    connect (ui.profilesComboBox, SIGNAL (currentIndexChanged(int)),
-             this, SLOT (slotProfileChanged(int)));
+    connect (ui.profilesComboBox, qOverload<int>(&::ProfilesComboBox::currentIndexChanged),
+             this, &DataFilesPage::slotProfileChanged);
 
-    connect (ui.profilesComboBox, SIGNAL (profileRenamed(QString, QString)),
-             this, SLOT (slotProfileRenamed(QString, QString)));
+    connect (ui.profilesComboBox, &::ProfilesComboBox::profileRenamed,
+             this, &DataFilesPage::slotProfileRenamed);
 
-    connect (ui.profilesComboBox, SIGNAL (signalProfileChanged(QString, QString)),
-             this, SLOT (slotProfileChangedByUser(QString, QString)));
+    connect (ui.profilesComboBox, qOverload<const QString&,const QString&>(&::ProfilesComboBox::signalProfileChanged),
+             this, &DataFilesPage::slotProfileChangedByUser);
 
-    connect(ui.refreshDataFilesAction, SIGNAL(triggered()),this, SLOT(slotRefreshButtonClicked()));
+    connect(ui.refreshDataFilesAction, &QAction::triggered,
+            this, &DataFilesPage::slotRefreshButtonClicked);
 
-    connect(ui.updateNavMeshButton, SIGNAL(clicked()), this, SLOT(startNavMeshTool()));
-    connect(ui.cancelNavMeshButton, SIGNAL(clicked()), this, SLOT(killNavMeshTool()));
+    connect(ui.updateNavMeshButton, &QPushButton::clicked, this, &DataFilesPage::startNavMeshTool);
+    connect(ui.cancelNavMeshButton, &QPushButton::clicked, this, &DataFilesPage::killNavMeshTool);
 
-    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(readyReadStandardOutput()), this, SLOT(readNavMeshToolStdout()));
-    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(readyReadStandardError()), this, SLOT(readNavMeshToolStderr()));
-    connect(mNavMeshToolInvoker->getProcess(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(navMeshToolFinished(int, QProcess::ExitStatus)));
+    connect(mNavMeshToolInvoker->getProcess(), &QProcess::readyReadStandardOutput, this, &DataFilesPage::readNavMeshToolStdout);
+    connect(mNavMeshToolInvoker->getProcess(), &QProcess::readyReadStandardError, this, &DataFilesPage::readNavMeshToolStderr);
+    connect(mNavMeshToolInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished), this, &DataFilesPage::navMeshToolFinished);
 }
 
 bool Launcher::DataFilesPage::loadSettings()
@@ -229,9 +232,9 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     if (!mDataLocal.isEmpty())
         directories.insert(0, mDataLocal);
 
-    const auto globalDataDir = QString(mGameSettings.getGlobalDataDir().c_str());
-    if (!globalDataDir.isEmpty())
-        directories.insert(0, globalDataDir);
+    const auto& globalDataDir = mGameSettings.getGlobalDataDir();
+    if (!globalDataDir.empty())
+        directories.insert(0, Files::pathToQString(globalDataDir));
 
     // normalize user supplied directories: resolve symlink, convert to native separator, make absolute
     for (auto& currentDir : directories)
@@ -263,7 +266,8 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         }
 
         // deactivate data-local and global data directory: they are always included
-        if (currentDir == mDataLocal || currentDir == globalDataDir)
+        const auto tmp = currentDir.toUtf8();
+        if (currentDir == mDataLocal || std::filesystem::path(Misc::StringUtils::stringToU8String(tmp)) == globalDataDir)
         {
             auto flags = item->flags();
             item->setFlags(flags & ~(Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled|Qt::ItemIsEnabled));

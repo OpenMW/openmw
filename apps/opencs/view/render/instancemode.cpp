@@ -134,21 +134,26 @@ CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget,  osg:
   parent), mSubMode (nullptr), mSubModeId ("move"), mSelectionMode (nullptr), mDragMode (DragMode_None),
   mDragAxis (-1), mLocked (false), mUnitScaleDist(1), mParentNode (parentNode)
 {
-    connect(this, SIGNAL(requestFocus(const std::string&)),
-            worldspaceWidget, SIGNAL(requestFocus(const std::string&)));
+    connect(this, &InstanceMode::requestFocus,
+            worldspaceWidget, &WorldspaceWidget::requestFocus);
 
     CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("scene-delete", worldspaceWidget);
-    connect(deleteShortcut, SIGNAL(activated(bool)), this, SLOT(deleteSelectedInstances(bool)));
+    connect(deleteShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), 
+            this, &InstanceMode::deleteSelectedInstances);
 
     // Following classes could be simplified by using QSignalMapper, which is obsolete in Qt5.10, but not in Qt4.8 and Qt5.14
     CSMPrefs::Shortcut* dropToCollisionShortcut = new CSMPrefs::Shortcut("scene-instance-drop-collision", worldspaceWidget);
-        connect(dropToCollisionShortcut, SIGNAL(activated()), this, SLOT(dropSelectedInstancesToCollision()));
+        connect(dropToCollisionShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
+                this, &InstanceMode::dropSelectedInstancesToCollision);
     CSMPrefs::Shortcut* dropToTerrainLevelShortcut = new CSMPrefs::Shortcut("scene-instance-drop-terrain", worldspaceWidget);
-        connect(dropToTerrainLevelShortcut, SIGNAL(activated()), this, SLOT(dropSelectedInstancesToTerrain()));
+        connect(dropToTerrainLevelShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
+                this, &InstanceMode::dropSelectedInstancesToTerrain);
     CSMPrefs::Shortcut* dropToCollisionShortcut2 = new CSMPrefs::Shortcut("scene-instance-drop-collision-separately", worldspaceWidget);
-        connect(dropToCollisionShortcut2, SIGNAL(activated()), this, SLOT(dropSelectedInstancesToCollisionSeparately()));
+        connect(dropToCollisionShortcut2, qOverload<>(&CSMPrefs::Shortcut::activated), 
+                this, &InstanceMode::dropSelectedInstancesToCollisionSeparately);
     CSMPrefs::Shortcut* dropToTerrainLevelShortcut2 = new CSMPrefs::Shortcut("scene-instance-drop-terrain-separately", worldspaceWidget);
-        connect(dropToTerrainLevelShortcut2, SIGNAL(activated()), this, SLOT(dropSelectedInstancesToTerrainSeparately()));
+        connect(dropToTerrainLevelShortcut2, qOverload<>(&CSMPrefs::Shortcut::activated), 
+                this, &InstanceMode::dropSelectedInstancesToTerrainSeparately);
 }
 
 void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
@@ -172,8 +177,7 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
 
         mSubMode->setButton (mSubModeId);
 
-        connect (mSubMode, SIGNAL (modeChanged (const std::string&)),
-            this, SLOT (subModeChanged (const std::string&)));
+        connect (mSubMode, &CSVWidget::SceneToolMode::modeChanged, this, &InstanceMode::subModeChanged);
     }
 
     if (!mSelectionMode)

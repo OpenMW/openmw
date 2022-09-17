@@ -14,22 +14,33 @@
 #include <osg/ref_ptr>
 
 #include "../mwbase/windowmanager.hpp"
+#include "../mwrender/localmap.hpp"
 
+#include <components/misc/guarded.hpp>
+#include <components/myguiplatform/myguiplatform.hpp>
 #include <components/sdlutil/events.hpp>
+#include <components/sdlutil/sdlcursormanager.hpp>
+#include <components/sdlutil/sdlvideowrapper.hpp>
 #include <components/settings/settings.hpp>
 #include <components/to_utf8/to_utf8.hpp>
-#include <components/misc/guarded.hpp>
 
+#include "charactercreation.hpp"
+#include "draganddrop.hpp"
 #include "mapwindow.hpp"
+#include "messagebox.hpp"
+#include "soulgemdialog.hpp"
 #include "statswatcher.hpp"
 #include "textcolours.hpp"
+#include "tooltips.hpp"
+#include "windowbase.hpp"
 
+#include <MyGUI_Gui.h>
 #include <MyGUI_KeyCode.h>
 #include <MyGUI_Types.h>
+#include <filesystem>
 
 namespace MyGUI
 {
-    class Gui;
     class Widget;
     class Window;
     class UString;
@@ -70,42 +81,21 @@ namespace SceneUtil
     class WorkQueue;
 }
 
-namespace SDLUtil
-{
-    class SDLCursorManager;
-    class VideoWrapper;
-}
-
-namespace osgMyGUI
-{
-    class Platform;
-}
-
 namespace Gui
 {
     class FontLoader;
 }
 
-namespace MWRender
-{
-    class LocalMap;
-}
-
 namespace MWGui
 {
-  class WindowBase;
   class HUD;
   class MapWindow;
   class MainMenu;
   class StatsWindow;
   class InventoryWindow;
   struct JournalWindow;
-  class CharacterCreation;
-  class DragAndDrop;
-  class ToolTips;
   class TextInputDialog;
   class InfoBoxDialog;
-  class MessageBoxManager;
   class SettingsWindow;
   class AlchemyWindow;
   class QuickKeysMenu;
@@ -117,7 +107,6 @@ namespace MWGui
   class TrainingWindow;
   class SpellIcons;
   class MerchantRepair;
-  class SoulgemDialog;
   class Recharge;
   class CompanionWindow;
   class VideoWidget;
@@ -136,7 +125,7 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
 
     WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                  const std::string& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
+                  const std::filesystem::path& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
                   ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders);
     virtual ~WindowManager();
 
@@ -149,7 +138,7 @@ namespace MWGui
 
     /// @note This method will block until the video finishes playing
     /// (and will continually update the window while doing so)
-    void playVideo(const std::string& name, bool allowSkipping, bool overrideSounds = true) override;
+    void playVideo(std::string_view name, bool allowSkipping, bool overrideSounds = true) override;
 
     /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
     void setKeyFocusWidget (MyGUI::Widget* widget) override;
@@ -190,7 +179,7 @@ namespace MWGui
     MWGui::CountDialog* getCountDialog() override;
     MWGui::ConfirmationDialog* getConfirmationDialog() override;
     MWGui::TradeWindow* getTradeWindow() override;
-    const std::vector<MWGui::MessageBox*> getActiveMessageBoxes() override;
+    const std::vector<std::unique_ptr<MWGui::MessageBox>>& getActiveMessageBoxes() const override;
     MWGui::PostProcessorHud* getPostProcessorHud() override;
 
     /// Make the player use an item, while updating GUI state accordingly
@@ -242,7 +231,7 @@ namespace MWGui
     /// update activated quick key state (if action executing was delayed for some reason)
     void updateActivatedQuickKey () override;
 
-    std::string getSelectedSpell() override { return mSelectedSpell; }
+    const std::string& getSelectedSpell() override { return mSelectedSpell; }
     void setSelectedSpell(const std::string& spellId, int successChancePercent) override;
     void setSelectedEnchantItem(const MWWorld::Ptr& item) override;
     const MWWorld::Ptr& getSelectedEnchantItem() const override;
@@ -272,12 +261,11 @@ namespace MWGui
     ///Gracefully attempts to exit the topmost GUI mode
     void exitCurrentGuiMode() override;
 
-    void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
+    void messageBox(std::string_view message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
     void scheduleMessageBox (std::string message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
-    void staticMessageBox(const std::string& message) override;
+    void staticMessageBox(std::string_view message) override;
     void removeStaticMessageBox() override;
-    void interactiveMessageBox (const std::string& message,
-                                        const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false) override;
+    void interactiveMessageBox(std::string_view message, const std::vector<std::string>& buttons = {}, bool block = false) override;
 
     int readPressedButton () override; ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
@@ -290,7 +278,7 @@ namespace MWGui
      * @param id Identifier for the GMST setting, e.g. "aName"
      * @param default Default value if the GMST setting cannot be used.
      */
-    std::string getGameSettingString(const std::string &id, const std::string &default_) override;
+    std::string_view getGameSettingString(std::string_view id, std::string_view default_) override;
 
     void processChangedSettings(const Settings::CategorySettingVector& changed) override;
 
@@ -402,7 +390,7 @@ namespace MWGui
     Resource::ResourceSystem* mResourceSystem;
     osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
-    osgMyGUI::Platform* mGuiPlatform;
+    std::unique_ptr<osgMyGUI::Platform> mGuiPlatform;
     osgViewer::Viewer* mViewer;
 
     std::unique_ptr<Gui::FontLoader> mFontLoader;
@@ -425,13 +413,13 @@ namespace MWGui
 
     HUD *mHud;
     MapWindow *mMap;
-    MWRender::LocalMap* mLocalMapRender;
-    ToolTips *mToolTips;
+    std::unique_ptr<MWRender::LocalMap> mLocalMapRender;
+    std::unique_ptr<ToolTips> mToolTips;
     StatsWindow *mStatsWindow;
-    MessageBoxManager *mMessageBoxManager;
+    std::unique_ptr<MessageBoxManager> mMessageBoxManager;
     Console *mConsole;
     DialogueWindow *mDialogueWindow;
-    DragAndDrop* mDragAndDrop;
+    std::unique_ptr<DragAndDrop> mDragAndDrop;
     InventoryWindow *mInventoryWindow;
     ScrollWindow* mScrollWindow;
     BookWindow* mBookWindow;
@@ -443,7 +431,7 @@ namespace MWGui
     QuickKeysMenu* mQuickKeysMenu;
     LoadingScreen* mLoadingScreen;
     WaitDialog* mWaitDialog;
-    SoulgemDialog* mSoulgemDialog;
+    std::unique_ptr<SoulgemDialog> mSoulgemDialog;
     MyGUI::ImageBox* mVideoBackground;
     VideoWidget* mVideoWidget;
     ScreenFader* mWerewolfFader;
@@ -455,11 +443,11 @@ namespace MWGui
     JailScreen* mJailScreen;
     ContainerWindow* mContainerWindow;
 
-    std::vector<WindowBase*> mWindows;
+    std::vector<std::unique_ptr<WindowBase>> mWindows;
 
     Translation::Storage& mTranslationDataStorage;
 
-    CharacterCreation* mCharGen;
+    std::unique_ptr<CharacterCreation> mCharGen;
 
     MyGUI::Widget* mInputBlocker;
 
@@ -475,7 +463,7 @@ namespace MWGui
 
     void setCursorVisible(bool visible) override;
 
-    MyGUI::Gui *mGui; // Gui
+    std::unique_ptr<MyGUI::Gui> mGui; // Gui
 
     struct GuiModeState
     {
@@ -499,7 +487,7 @@ namespace MWGui
     // The currently active stack of GUI modes (top mode is the one we are in).
     std::vector<GuiMode> mGuiModes;
 
-    SDLUtil::SDLCursorManager* mCursorManager;
+    std::unique_ptr<SDLUtil::SDLCursorManager> mCursorManager;
 
     std::vector<std::unique_ptr<Layout>> mGarbageDialogs;
     void cleanupGarbage();
@@ -532,7 +520,7 @@ namespace MWGui
 
     std::unique_ptr<KeyboardNavigation> mKeyboardNavigation;
 
-    SDLUtil::VideoWrapper* mVideoWrapper;
+    std::unique_ptr<SDLUtil::VideoWrapper> mVideoWrapper;
 
     float mScalingFactor;
 

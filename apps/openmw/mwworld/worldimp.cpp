@@ -1,5 +1,7 @@
 #include "worldimp.hpp"
 
+#include <charconv>
+
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Timer>
@@ -14,6 +16,13 @@
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadstat.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/mathutil.hpp>
@@ -33,8 +42,11 @@
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/detournavigator/stats.hpp>
+#include <components/detournavigator/navigatorimpl.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -93,21 +105,21 @@ namespace MWWorld
             mLoaders.emplace(std::move(extension), &loader);
         }
 
-        void load(const boost::filesystem::path& filepath, int& index, Loading::Listener* listener) override
+        void load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener) override
         {
-            const auto it = mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string()));
+            const auto it = mLoaders.find(Misc::StringUtils::lowerCase( Files::pathToUnicodeString(filepath.extension())));
             if (it != mLoaders.end())
             {
-                const std::string filename = filepath.filename().string();
+                const auto filename = filepath.filename();
                 Log(Debug::Info) << "Loading content file " << filename;
                 if (listener != nullptr)
-                    listener->setLabel(MyGUI::TextIterator::toTagsString(filename));
+                    listener->setLabel(MyGUI::TextIterator::toTagsString(Files::pathToUnicodeString(filename)));
                 it->second->load(filepath, index, listener);
             }
             else
             {
                 std::string msg("Cannot load file: ");
-                msg += filepath.string();
+                msg += Files::pathToUnicodeString(filepath);
                 throw std::runtime_error(msg.c_str());
             }
         }
@@ -120,9 +132,9 @@ namespace MWWorld
     {
         ESMStore& mStore;
         OMWScriptsLoader(ESMStore& store) : mStore(store) {}
-        void load(const boost::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
+        void load(const std::filesystem::path& filepath, int& /*index*/, Loading::Listener* /*listener*/) override
         {
-            mStore.addOMWScripts(filepath.string());
+            mStore.addOMWScripts(filepath);
         }
     };
 
@@ -147,7 +159,7 @@ namespace MWWorld
         const std::vector<std::string>& groundcoverFiles,
         ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
         const std::string& startCell, const std::string& startupScript,
-        const std::string& resourcePath, const std::string& userDataPath)
+        const std::filesystem::path& resourcePath, const std::filesystem::path& userDataPath)
     : mResourceSystem(resourceSystem), mLocalScripts(mStore),
       mCells(mStore, mReaders), mSky(true),
       mGodMode(false), mScriptsEnabled(true), mDiscardMovements(true), mContentFiles (contentFiles),
@@ -159,6 +171,7 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
+        mESMVersions.resize(mContentFiles.size(), -1);
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
@@ -269,7 +282,7 @@ namespace MWWorld
 
         if (!bypass)
         {
-            const std::string& video = Fallback::Map::getString("Movies_New_Game");
+            std::string_view video = Fallback::Map::getString("Movies_New_Game");
             if (!video.empty())
                 MWBase::Environment::get().getWindowManager()->playVideo(video, true);
         }
@@ -617,6 +630,11 @@ namespace MWWorld
         return *mPlayer;
     }
 
+    const std::vector<int>& World::getESMVersions() const
+    {
+        return mESMVersions;
+    }
+
     const MWWorld::ESMStore& World::getStore() const
     {
         return mStore;
@@ -665,7 +683,7 @@ namespace MWWorld
         return mGlobalVariables.getType (name);
     }
 
-    std::string World::getMonthName (int month) const
+    std::string_view World::getMonthName(int month) const
     {
         return mCurrentDate->getMonthName(month);
     }
@@ -1418,7 +1436,10 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            MWWorld::ActionTeleport(actor.getCell()->isExterior() ? "" : actor.getCell()->getCell()->mName, esmPos, false).execute(actor);
+            std::string_view cell;
+            if (!actor.getCell()->isExterior())
+                cell = actor.getCell()->getCell()->mName;
+            MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
         }
     }
 
@@ -1524,26 +1545,32 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
+        auto navigatorUpdateGuard = mNavigator->makeUpdateGuard();
+
         mPhysics->forEachAnimatedObject([&] (const auto& pair)
         {
             const auto [object, changed] = pair;
             if (changed)
-                updateNavigatorObject(*object);
+                updateNavigatorObject(*object, navigatorUpdateGuard.get());
         });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))
-                updateNavigatorObject(*object);
+                updateNavigatorObject(*object, navigatorUpdateGuard.get());
 
-        mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+        mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3(), navigatorUpdateGuard.get());
     }
 
-    void World::updateNavigatorObject(const MWPhysics::Object& object)
+    void World::updateNavigatorObject(const MWPhysics::Object& object,
+        const DetourNavigator::UpdateGuard* navigatorUpdateGuard)
     {
+        if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
+            return;
         const MWWorld::Ptr ptr = object.getPtr();
         const DetourNavigator::ObjectShapes shapes(object.getShapeInstance(),
             DetourNavigator::ObjectTransform {ptr.getRefData().getPosition(), ptr.getCellRef().getScale()});
-        mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform());
+        mNavigator->updateObject(DetourNavigator::ObjectId(&object), shapes, object.getTransform(),
+            navigatorUpdateGuard);
     }
 
     const MWPhysics::RayCastingInterface* World::getRayCasting() const
@@ -1835,8 +1862,8 @@ namespace MWWorld
 
         if (mWorldScene->hasCellLoaded())
         {
-            mNavigator->wait(*MWBase::Environment::get().getWindowManager()->getLoadingScreen(),
-                             DetourNavigator::WaitConditionType::requiredTilesPresent);
+            mNavigator->wait(DetourNavigator::WaitConditionType::requiredTilesPresent,
+                             MWBase::Environment::get().getWindowManager()->getLoadingScreen());
             mWorldScene->resetCellLoaded();
         }
     }
@@ -1858,7 +1885,7 @@ namespace MWWorld
 
     void World::preloadSpells()
     {
-        std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+        const std::string& selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = mStore.get<ESM::Spell>().search(selectedSpell);
@@ -2837,29 +2864,29 @@ namespace MWWorld
         return false;
     }
 
-    bool World::findExteriorPosition(const std::string &name, ESM::Position &pos)
+    bool World::findExteriorPosition(std::string_view name, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
         const ESM::Cell *ext = getExterior(name);
-
-        if (!ext && name.find(',') != std::string::npos) {
-            try {
-                int x = std::stoi(name.substr(0, name.find(',')));
-                int y = std::stoi(name.substr(name.find(',')+1));
-                ext = getExterior(x, y)->getCell();
-            }
-            catch (const std::invalid_argument&)
+        if (!ext)
+        {
+            size_t comma = name.find(',');
+            if (comma != std::string::npos)
             {
-                // This exception can be ignored, as this means that name probably refers to a interior cell instead of comma separated coordinates
-            }
-            catch (const std::out_of_range&)
-            {
-                throw std::runtime_error("Cell coordinates out of range.");
+                int x, y;
+                std::from_chars_result xResult = std::from_chars(name.data(), name.data() + comma, x);
+                std::from_chars_result yResult = std::from_chars(name.data() + comma + 1, name.data() + name.size(), y);
+                if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
+                    throw std::runtime_error("Cell coordinates out of range.");
+                else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
+                    ext = getExterior(x, y)->getCell();
+                // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell instead of comma separated coordinates
             }
         }
 
-        if (ext) {
+        if (ext)
+        {
             int x = ext->getGridX();
             int y = ext->getGridY();
             indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
@@ -2925,7 +2952,7 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         GameContentLoader gameContentLoader;
-        EsmLoader esmLoader(mStore, mReaders, encoder);
+        EsmLoader esmLoader(mStore, mReaders, encoder, mESMVersions);
 
         gameContentLoader.addLoader(".esm", esmLoader);
         gameContentLoader.addLoader(".esp", esmLoader);
@@ -2939,8 +2966,8 @@ namespace MWWorld
         int idx = 0;
         for (const std::string &file : content)
         {
-            boost::filesystem::path filename(file);
-            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
+            const auto filename = Files::pathFromUnicodeString( file);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(Files::pathToUnicodeString(filename.extension()));
             if (col.doesExist(file))
             {
                 gameContentLoader.load(col.getPath(file), idx, listener);
@@ -2971,11 +2998,11 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        std::string message;
+        std::string_view message;
         MWWorld::SpellCastState result = MWWorld::SpellCastState::Success;
         bool isPlayer = (actor == getPlayerPtr());
 
-        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        const std::string& selectedSpell = stats.getSpells().getSelectedSpell();
 
         if (!selectedSpell.empty())
         {
@@ -3106,7 +3133,7 @@ namespace MWWorld
             }
         }
 
-        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        const std::string& selectedSpell = stats.getSpells().getSelectedSpell();
 
         MWMechanics::CastSpell cast(actor, target, false, manualSpell);
         cast.mHitPosition = hitPosition;
@@ -3266,7 +3293,7 @@ namespace MWWorld
                     }
                     else
                     {
-                        std::string dest = ref.mRef.getDestCell();
+                        const std::string& dest = ref.mRef.getDestCell();
                         if ( !checkedCells.count(dest) && !currentCells.count(dest) )
                             nextCells.insert(dest);
                     }
@@ -3280,7 +3307,7 @@ namespace MWWorld
         return false;
     }
 
-    MWWorld::ConstPtr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
+    MWWorld::ConstPtr World::getClosestMarker(const MWWorld::ConstPtr& ptr, std::string_view id)
     {
         if ( ptr.getCell()->isExterior() ) {
             return getClosestMarkerFromExteriorPosition(mPlayer->getLastKnownExteriorPosition(), id);
@@ -3321,7 +3348,7 @@ namespace MWWorld
                     }
                     else
                     {
-                        std::string dest = ref.mRef.getDestCell();
+                        const std::string& dest = ref.mRef.getDestCell();
                         if ( !checkedCells.count(dest) && !currentCells.count(dest) )
                             nextCells.insert(dest);
                     }
@@ -3331,7 +3358,7 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
-    MWWorld::ConstPtr World::getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id ) {
+    MWWorld::ConstPtr World::getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id) {
         MWWorld::ConstPtr closestMarker;
         float closestDistance = std::numeric_limits<float>::max();
 
@@ -3372,8 +3399,7 @@ namespace MWWorld
             mCells.recharge(duration);
     }
 
-    void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                          const std::string& id)
+    void World::teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id)
     {
         MWWorld::ConstPtr closestMarker = getClosestMarker( ptr, id );
 
@@ -3383,7 +3409,7 @@ namespace MWWorld
             return;
         }
 
-        std::string cellName;
+        std::string_view cellName;
         if ( !closestMarker.mCell->isExterior() )
             cellName = closestMarker.mCell->getCell()->mName;
 
@@ -3582,7 +3608,7 @@ namespace MWWorld
             Log(Debug::Warning) << "Failed to confiscate items: no closest prison marker found.";
             return;
         }
-        std::string prisonName = prisonMarker.getCellRef().getDestCell();
+        const std::string& prisonName = prisonMarker.getCellRef().getDestCell();
         if ( prisonName.empty() )
         {
             Log(Debug::Warning) << "Failed to confiscate items: prison marker not linked to prison interior";
@@ -3671,9 +3697,9 @@ namespace MWWorld
             return mPhysics->getHalfExtents(object);
     }
 
-    std::string World::exportSceneGraph(const Ptr &ptr)
+    std::filesystem::path World::exportSceneGraph(const Ptr& ptr)
     {
-        std::string file = mUserDataPath + "/openmw.osgt";
+        auto file = mUserDataPath / "openmw.osgt";
         if (!ptr.isEmpty())
         {
             mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
@@ -3692,7 +3718,7 @@ namespace MWWorld
 
         for (int i=0; i<numCreatures; ++i)
         {
-            std::string selectedCreature = MWMechanics::getLevelledItem(list, true, mPrng);
+            std::string_view selectedCreature = MWMechanics::getLevelledItem(list, true, mPrng);
             if (selectedCreature.empty())
                 continue;
 
@@ -3707,12 +3733,12 @@ namespace MWWorld
         if (ptr == getPlayerPtr() && Settings::Manager::getBool("hit fader", "GUI"))
             return;
 
-        std::string texture = Fallback::Map::getString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
+        std::string_view texture = Fallback::Map::getString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
         if (texture.empty())
             texture = Fallback::Map::getString("Blood_Texture_0");
 
         std::string model = Misc::ResourceHelpers::correctMeshPath(
-            Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))), // [0, 2]
+            std::string{Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3)))}, // [0, 2]
             mResourceSystem->getVFS());
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
@@ -3721,106 +3747,6 @@ namespace MWWorld
     void World::spawnEffect(const std::string &model, const std::string &textureOverride, const osg::Vec3f &worldPos, float scale, bool isMagicVFX)
     {
         mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
-    }
-
-    void World::explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const Ptr& caster, const Ptr& ignore, ESM::RangeType rangeType,
-                             const std::string& id, const std::string& sourceName, const bool fromProjectile, int slot)
-    {
-        std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
-        int index = -1;
-        for (const ESM::ENAMstruct& effectInfo : effects.mList)
-        {
-            ++index;
-            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
-
-            if (effectInfo.mRange != rangeType || (effectInfo.mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
-                continue; // Not right range type, or not area effect and hit an actor
-
-            if (fromProjectile && effectInfo.mArea <= 0)
-                continue; // Don't play explosion for projectiles with 0-area effects
-
-            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && !ignore.isEmpty() && !ignore.getClass().isActor() && !ignore.getClass().hasToolTip(ignore))
-                continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from the projectile enchantment
-
-            // Spawn the explosion orb effect
-            const ESM::Static* areaStatic;
-            if (!effect->mArea.empty())
-                areaStatic = mStore.get<ESM::Static>().find (effect->mArea);
-            else
-                areaStatic = mStore.get<ESM::Static>().find ("VFX_DefaultArea");
-
-            std::string texture = effect->mParticle;
-
-            if (effectInfo.mArea <= 0)
-            {
-                if (effectInfo.mRange == ESM::RT_Target)
-                    mRendering->spawnEffect(
-                        Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel, mResourceSystem->getVFS()),
-                        texture, origin, 1.0f);
-                continue;
-            }
-            else
-                mRendering->spawnEffect(
-                    Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel, mResourceSystem->getVFS()),
-                    texture, origin, static_cast<float>(effectInfo.mArea * 2));
-
-            // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
-            static const std::string schools[] = {
-                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-            };
-            {
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                if(!effect->mAreaSound.empty())
-                    sndMgr->playSound3D(origin, effect->mAreaSound, 1.0f, 1.0f);
-                else
-                    sndMgr->playSound3D(origin, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f);
-            }
-            // Get the actors in range of the effect
-            std::vector<MWWorld::Ptr> objects;
-            MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
-                        origin, feetToGameUnits(static_cast<float>(effectInfo.mArea)), objects);
-            for (const Ptr& affected : objects)
-            {
-                // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
-                if (affected.getClass().isActor() && !isActorCollisionEnabled(affected))
-                    continue;
-
-                auto& list = toApply[affected];
-                while (list.size() < static_cast<std::size_t>(index))
-                {
-                    // Insert dummy effects to preserve indices
-                    auto& dummy = list.emplace_back(effectInfo);
-                    dummy.mRange = ESM::RT_Self;
-                    assert(dummy.mRange != rangeType);
-                }
-                list.push_back(effectInfo);
-            }
-        }
-
-        // Now apply the appropriate effects to each actor in range
-        for (auto& applyPair : toApply)
-        {
-            MWWorld::Ptr source = caster;
-            // Vanilla-compatible behaviour of never applying the spell to the caster
-            // (could be changed by mods later)
-            if (applyPair.first == caster)
-                continue;
-
-            if (applyPair.first == ignore)
-                continue;
-
-            if (source.isEmpty())
-                source = applyPair.first;
-
-            MWMechanics::CastSpell cast(source, applyPair.first);
-            cast.mHitPosition = origin;
-            cast.mId = id;
-            cast.mSourceName = sourceName;
-            cast.mSlot = slot;
-            ESM::EffectList effectsToApply;
-            effectsToApply.mList = applyPair.second;
-            cast.inflict(applyPair.first, caster, effectsToApply, rangeType, true);
-        }
     }
 
     void World::activate(const Ptr &object, const Ptr &actor)
@@ -3986,7 +3912,7 @@ namespace MWWorld
 
     void World::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        mNavigator->reportStats(frameNumber, stats);
+        DetourNavigator::reportStats(mNavigator->getStats(), frameNumber, stats);
         mPhysics->reportStats(frameNumber, stats);
     }
 

@@ -8,17 +8,16 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadclas.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/files/conversion.hpp>
 
 #include <osg/Image>
 
 #include <osgDB/Registry>
-
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -90,7 +89,7 @@ std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::E
     return map;
 }
 
-MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::vector<std::string>& contentFiles)
+MWState::StateManager::StateManager (const std::filesystem::path& saves, const std::vector<std::string>& contentFiles)
 : mQuitRequest (false), mAskLoadRecent(false), mState (State_NoGame), mCharacterManager (saves, contentFiles), mTimePlayed (0)
 {
 
@@ -124,8 +123,8 @@ void MWState::StateManager::askLoadRecent()
             std::vector<std::string> buttons;
             buttons.emplace_back("#{sYes}");
             buttons.emplace_back("#{sNo}");
-            std::string tag("%s");
-            std::string message = MWBase::Environment::get().getWindowManager()->getGameSettingString("sLoadLastSaveMsg", tag);
+            std::string_view tag = "%s";
+            std::string message{MWBase::Environment::get().getWindowManager()->getGameSettingString("sLoadLastSaveMsg", tag)};
             size_t pos = message.find(tag);
             message.replace(pos, tag.length(), lastSave.mProfile.mDescription);
             MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
@@ -300,14 +299,14 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             throw std::runtime_error("Write operation failed (memory stream)");
 
         // All good, write to file
-        boost::filesystem::ofstream filestream (slot->mPath, std::ios::binary);
+        std::ofstream filestream (slot->mPath, std::ios::binary);
         filestream << stream.rdbuf();
 
         if (filestream.fail())
             throw std::runtime_error("Write operation failed (file stream)");
 
         Settings::Manager::setString ("character", "Saves",
-            slot->mPath.parent_path().filename().string());
+            Files::pathToUnicodeString(slot->mPath.parent_path().filename()));
 
         const auto finish = std::chrono::steady_clock::now();
 
@@ -326,7 +325,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
 
         // If no file was written, clean up the slot
-        if (character && slot && !boost::filesystem::exists(slot->mPath))
+        if (character && slot && !std::filesystem::exists(slot->mPath))
         {
             character->deleteSlot(slot);
             character->cleanup();
@@ -366,15 +365,15 @@ void MWState::StateManager::quickSave (std::string name)
     saveGame(name, saveFinder.getNextQuickSaveSlot());
 }
 
-void MWState::StateManager::loadGame(const std::string& filepath)
+void MWState::StateManager::loadGame(const std::filesystem::path &filepath)
 {
     for (const auto& character : mCharacterManager)
     {
         for (const auto& slot : character)
         {
-            if (slot.mPath == boost::filesystem::path(filepath))
+            if (slot.mPath == filepath)
             {
-                loadGame(&character, slot.mPath.string());
+                loadGame(&character, slot.mPath);
                 return;
             }
         }
@@ -384,13 +383,13 @@ void MWState::StateManager::loadGame(const std::string& filepath)
     loadGame(character, filepath);
 }
 
-void MWState::StateManager::loadGame (const Character *character, const std::string& filepath)
+void MWState::StateManager::loadGame (const Character *character, const std::filesystem::path &filepath)
 {
     try
     {
         cleanup();
 
-        Log(Debug::Info) << "Reading save file " << std::filesystem::path(filepath).filename().string();
+        Log(Debug::Info) << "Reading save file " << filepath.filename();
 
         ESM::ESMReader reader;
         reader.open (filepath);
@@ -523,7 +522,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         if (character)
             Settings::Manager::setString ("character", "Saves",
-                                      character->getPath().filename().string());
+                                      Files::pathToUnicodeString(character->getPath().filename()));
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
         MWBase::Environment::get().getWorld()->saveLoaded();
@@ -595,7 +594,7 @@ void MWState::StateManager::quickLoad()
     {
         if (currentCharacter->begin() == currentCharacter->end())
             return;
-        loadGame (currentCharacter, currentCharacter->begin()->mPath.string()); //Get newest save
+        loadGame (currentCharacter, currentCharacter->begin()->mPath); //Get newest save
     }
 }
 
@@ -634,7 +633,7 @@ void MWState::StateManager::update (float duration)
             //Load last saved game for current character
 
             MWState::Slot lastSave = *curCharacter->begin();
-            loadGame(curCharacter, lastSave.mPath.string());
+            loadGame(curCharacter, lastSave.mPath);
         }
         else if(iButton==1)
         {

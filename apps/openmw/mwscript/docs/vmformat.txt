@@ -481,5 +481,8 @@ op 0x200031e: GetDistance
 op 0x200031f: GetDistance, explicit
 op 0x2000320: Help
 op 0x2000321: ReloadLua
+op 0x2000322: GetPCVisionBonus
+op 0x2000323: SetPCVisionBonus
+op 0x2000324: ModPCVisionBonus
 
-opcodes 0x2000322-0x3ffffff unused
+opcodes 0x2000325-0x3ffffff unused

@@ -12,6 +12,7 @@ namespace ESM
     struct Ingredient;
     struct Potion;
     struct EffectList;
+    struct Enchantment;
     struct MagicEffect;
 }
 
@@ -25,7 +26,12 @@ namespace MWMechanics
         MWWorld::Ptr mCaster; // May be empty
         MWWorld::Ptr mTarget; // May be empty
 
-        void playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects);
+        void playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects) const;
+
+        void explodeSpell(const ESM::EffectList& effects, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const;
+
+        /// Launch a bolt with the given effects.
+        void launchMagicBolt() const;
 
     public:
         std::string mId; // ID of spell, potion, item etc
@@ -37,7 +43,6 @@ namespace MWMechanics
         int mSlot{0};
         ESM::ActiveSpells::EffectType mType{ESM::ActiveSpells::Type_Temporary};
 
-    public:
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false, const bool manualSpell=false);
 
         bool cast (const ESM::Spell* spell);
@@ -54,15 +59,12 @@ namespace MWMechanics
         /// @note Auto detects if spell, ingredient or potion
         bool cast (const std::string& id);
 
-        void playSpellCastingEffects(const std::string &spellid, bool enchantment);
+        void playSpellCastingEffects(const ESM::Enchantment* enchantment) const;
 
-        /// Launch a bolt with the given effects.
-        void launchMagicBolt ();
+        void playSpellCastingEffects(const ESM::Spell* spell) const;
 
         /// @note \a target can be any type of object, not just actors.
-        /// @note \a caster can be any type of object, or even an empty object.
-        void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
-                      const ESM::EffectList& effects, ESM::RangeType range, bool exploded=false);
+        void inflict(const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range, bool exploded = false) const;
     };
 
     void playEffects(const MWWorld::Ptr& target, const ESM::MagicEffect& magicEffect, bool playNonLooping = true);

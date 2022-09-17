@@ -146,7 +146,7 @@ CompositeViewer::CompositeViewer()
     //setRunFrameScheme(osgViewer::ViewerBase::ON_DEMAND);
     setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
 
-    connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
+    connect(&mTimer, &QTimer::timeout, this, &CompositeViewer::update);
     mTimer.start( 10 );
 
     int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
@@ -227,8 +227,8 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
     setMouseTracking(true);
     setFocusPolicy(Qt::ClickFocus);
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
+        this, &SceneWidget::settingChanged);
 
     // TODO update this outside of the constructor where virtual methods can be used
     if (retrieveInput)
@@ -237,14 +237,16 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
         CSMPrefs::get()["Tooltips"].update();
     }
 
-    connect (&CompositeViewer::get(), SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
+    connect (&CompositeViewer::get(), &CompositeViewer::simulationUpdated, this, &SceneWidget::update);
 
     // Shortcuts
     CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
-    connect(focusToolbarShortcut, SIGNAL(activated()), this, SIGNAL(focusToolbarRequest()));
+    connect(focusToolbarShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
+            this, &SceneWidget::focusToolbarRequest);
 
     CSMPrefs::Shortcut* renderStatsShortcut = new CSMPrefs::Shortcut("scene-render-stats", this);
-    connect(renderStatsShortcut, SIGNAL(activated()), this, SLOT(toggleRenderStats()));
+    connect(renderStatsShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
+            this, &SceneWidget::toggleRenderStats);
 }
 
 SceneWidget::~SceneWidget()
@@ -430,8 +432,7 @@ CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToo
         "<ul><li>Maximum ambient</li>"
         "<li>Strong directional light source</li></ul>");
 
-    connect (tool, SIGNAL (modeChanged (const std::string&)),
-        this, SLOT (selectLightingMode (const std::string&)));
+    connect (tool, &CSVWidget::SceneToolMode::modeChanged, this, &SceneWidget::selectLightingMode);
 
     return tool;
 }

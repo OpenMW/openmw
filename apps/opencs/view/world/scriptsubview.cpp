@@ -29,10 +29,9 @@ void CSVWorld::ScriptSubView::addButtonBar()
 
     mLayout.insertWidget (1, mButtons);
 
-    connect (mButtons, SIGNAL (switchToRow (int)), this, SLOT (switchToRow (int)));
+    connect (mButtons, &RecordButtonBar::switchToRow, this, &ScriptSubView::switchToRow);
 
-    connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
-        mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
+    connect (this, &ScriptSubView::universalIdChanged, mButtons, &RecordButtonBar::universalIdChanged);
 }
 
 void CSVWorld::ScriptSubView::recompile()
@@ -124,36 +123,33 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     // bottom box and buttons
     mBottom = new TableBottomBox (CreatorFactory<GenericCreator>(), document, id, this);
 
-    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
-        this, SLOT (switchToId (const std::string&)));
+    connect (mBottom, &TableBottomBox::requestFocus, this, &ScriptSubView::switchToId);
 
     mLayout.addWidget (mBottom);
 
     // signals
-    connect (mEditor, SIGNAL (textChanged()), this, SLOT (textChanged()));
+    connect (mEditor, &ScriptEdit::textChanged, this, &ScriptSubView::textChanged);
 
-    connect (mModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (dataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (mModel, &CSMWorld::IdTable::dataChanged, this, &ScriptSubView::dataChanged);
 
-    connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (mModel, &CSMWorld::IdTable::rowsAboutToBeRemoved,
+        this, &ScriptSubView::rowsAboutToBeRemoved);
 
     updateStatusBar();
-    connect(mEditor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBar()));
+    connect(mEditor, &ScriptEdit::cursorPositionChanged, this, &ScriptSubView::updateStatusBar);
 
     mErrors->update (source.toUtf8().constData());
 
-    connect (mErrors, SIGNAL (highlightError (int, int)),
-        this, SLOT (highlightError (int, int)));
+    connect (mErrors, &ScriptErrorTable::highlightError, this, &ScriptSubView::highlightError);
 
     mCompileDelay = new QTimer (this);
     mCompileDelay->setSingleShot (true);
-    connect (mCompileDelay, SIGNAL (timeout()), this, SLOT (updateRequest()));
+    connect (mCompileDelay, &QTimer::timeout, this, &ScriptSubView::updateRequest);
 
     updateDeletedState();
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
+        this, &ScriptSubView::settingChanged);
     CSMPrefs::get()["Scripts"].update();
 }
 

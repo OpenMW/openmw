@@ -5,6 +5,8 @@
 #include <components/esm3/spellstate.hpp>
 #include <components/misc/rng.hpp>
 
+#include <components/esm3/loadmgef.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -106,7 +108,7 @@ namespace MWMechanics
         mSelectedSpell = spellId;
     }
 
-    const std::string Spells::getSelectedSpell() const
+    const std::string& Spells::getSelectedSpell() const
     {
         return mSelectedSpell;
     }

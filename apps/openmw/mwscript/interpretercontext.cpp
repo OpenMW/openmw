@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <components/compiler/locals.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -185,7 +186,7 @@ namespace MWScript
         mLocals->mFloats.at (index) = value;
     }
 
-    void InterpreterContext::messageBox (const std::string& message,
+    void InterpreterContext::messageBox(std::string_view message,
         const std::vector<std::string>& buttons)
     {
         if (buttons.empty())

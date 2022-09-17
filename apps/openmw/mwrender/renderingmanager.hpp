@@ -75,6 +75,11 @@ namespace MWWorld
     class GroundcoverStore;
 }
 
+namespace Debug
+{
+    struct DebugDrawer;
+}
+
 namespace MWRender
 {
     class StateUpdater;
@@ -102,7 +107,7 @@ namespace MWRender
     {
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::string& resourcePath,
+            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::filesystem::path& resourcePath,
             DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
             SceneUtil::UnrefQueue& unrefQueue);
         ~RenderingManager();
@@ -184,7 +189,7 @@ namespace MWRender
 
         SkyManager* getSkyManager();
 
-        void spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale = 1.f, bool isMagicVFX = true);
+        void spawnEffect(const std::string& model, std::string_view texture, const osg::Vec3f& worldPosition, float scale = 1.f, bool isMagicVFX = true);
 
         /// Clear all savegame-specific data
         void clear();
@@ -232,7 +237,9 @@ namespace MWRender
 
         osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& object) const;
 
-        void exportSceneGraph(const MWWorld::Ptr& ptr, const std::string& filename, const std::string& format);
+        void exportSceneGraph(const MWWorld::Ptr& ptr, const std::filesystem::path& filename, const std::string& format);
+
+        Debug::DebugDrawer& getDebugDrawer() const { return *mDebugDraw; }
 
         LandManager* getLandManager() const;
 
@@ -306,6 +313,7 @@ namespace MWRender
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::unique_ptr<Camera> mCamera;
+        std::unique_ptr<Debug::DebugDrawer> mDebugDraw;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
         osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;

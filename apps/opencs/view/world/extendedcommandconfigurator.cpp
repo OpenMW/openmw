@@ -24,16 +24,16 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
 {
     mCommandDispatcher = new CSMWorld::CommandDispatcher(document, id, this);
 
-    connect(&mData, SIGNAL(idListChanged()), this, SLOT(dataIdListChanged()));
+    connect(&mData, &CSMWorld::Data::idListChanged, this, &ExtendedCommandConfigurator::dataIdListChanged);
 
     mPerformButton = new QPushButton(this);
     mPerformButton->setDefault(true);
     mPerformButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(mPerformButton, SIGNAL(clicked(bool)), this, SLOT(performExtendedCommand()));
+    connect(mPerformButton, &QPushButton::clicked, this, &ExtendedCommandConfigurator::performExtendedCommand);
 
     mCancelButton = new QPushButton("Cancel", this);
     mCancelButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(mCancelButton, SIGNAL(clicked(bool)), this, SIGNAL(done()));
+    connect(mCancelButton, &QPushButton::clicked, this, &ExtendedCommandConfigurator::done);
 
     mTypeGroup = new QGroupBox(this);
 
@@ -128,7 +128,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CS
         for (int i = numTypes - numCheckBoxes; i > 0; --i)
         {
             QCheckBox *checkBox = new QCheckBox(mTypeGroup);
-            connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(checkBoxStateChanged(int)));
+            connect(checkBox, &QCheckBox::stateChanged, this, &ExtendedCommandConfigurator::checkBoxStateChanged);
             mTypeCheckBoxes.insert(std::make_pair(checkBox, CSMWorld::UniversalId::Type_None));
         }
     }
@@ -170,7 +170,7 @@ void CSVWorld::ExtendedCommandConfigurator::lockWidgets(bool locked)
 void CSVWorld::ExtendedCommandConfigurator::performExtendedCommand()
 {
     std::vector<CSMWorld::UniversalId> types;
-    
+
     CheckBoxMap::const_iterator current = mTypeCheckBoxes.begin();
     CheckBoxMap::const_iterator end = mTypeCheckBoxes.end();
     for (; current != end; ++current)

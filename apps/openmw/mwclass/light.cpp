@@ -3,6 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/esm3/objectstate.hpp>
 #include <components/settings/settings.hpp>
 
@@ -19,6 +20,7 @@
 #include "../mwphysics/physicssystem.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -151,7 +153,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -224,16 +226,16 @@ namespace MWClass
         return ref->mBase->mData.mWeight;
     }
 
-    std::pair<int, std::string> Light::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Light::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         if (!(ref->mBase->mData.mFlags & ESM::Light::Carry))
-            return std::make_pair(0,"");
+            return {0, {}};
 
-        return std::make_pair(1,"");
+        return {1, {}};
     }
 
-    std::string Light::getSound(const MWWorld::ConstPtr& ptr) const
+    std::string_view Light::getSound(const MWWorld::ConstPtr& ptr) const
     {
       return ptr.get<ESM::Light>()->mBase->mSound;
     }

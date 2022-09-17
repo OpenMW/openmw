@@ -14,11 +14,11 @@ Process::ProcessInvoker::ProcessInvoker(QObject* parent)
 {
     mProcess = new QProcess(this);
 
-    connect(mProcess, SIGNAL(error(QProcess::ProcessError)),
-            this, SLOT(processError(QProcess::ProcessError)));
+    connect(mProcess, &QProcess::errorOccurred,
+            this, &ProcessInvoker::processError);
 
-    connect(mProcess, SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(processFinished(int,QProcess::ExitStatus)));
+    connect(mProcess, qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+            this, &ProcessInvoker::processFinished);
 
 
     mName = QString();

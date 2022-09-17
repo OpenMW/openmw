@@ -1,12 +1,13 @@
 #include "adjusterwidget.hpp"
-
-#include <components/misc/strings/lower.hpp>
-
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QStyle>
+
+#include <components/files/qtconversion.hpp>
+#include <components/misc/strings/conversion.hpp>
+#include <components/misc/strings/lower.hpp>
 
 CSVDoc::AdjusterWidget::AdjusterWidget (QWidget *parent)
     : QWidget (parent), mValid (false), mAction (ContentAction_Undefined)
@@ -33,12 +34,12 @@ void CSVDoc::AdjusterWidget::setAction (ContentAction action)
     mAction = action;
 }
 
-void CSVDoc::AdjusterWidget::setLocalData (const boost::filesystem::path& localData)
+void CSVDoc::AdjusterWidget::setLocalData (const std::filesystem::path& localData)
 {
     mLocalData = localData;
 }
 
-boost::filesystem::path CSVDoc::AdjusterWidget::getPath() const
+std::filesystem::path CSVDoc::AdjusterWidget::getPath() const
 {
     if (!mValid)
         throw std::logic_error ("invalid content file path");
@@ -69,14 +70,14 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     }
     else
     {
-        boost::filesystem::path path (name.toUtf8().data());
+        auto path = Files::pathFromQString(name);
 
-        std::string extension = Misc::StringUtils::lowerCase(path.extension().string());
+        const auto extension = Misc::StringUtils::lowerCase(path.extension().u8string());
 
-        bool isLegacyPath = (extension == ".esm" ||
-                             extension == ".esp");
+        bool isLegacyPath = (extension == u8".esm" ||
+                             extension == u8".esp");
 
-        bool isFilePathChanged = (path.parent_path().string() != mLocalData.string());
+        bool isFilePathChanged = (path.parent_path() != mLocalData);
 
         if (isLegacyPath)
             path.replace_extension (addon ? ".omwaddon" : ".omwgame");
@@ -86,7 +87,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
         if (!isFilePathChanged && !isLegacyPath)
         {
             // path already points to the local data directory
-            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
+            message = "Will be saved as: " + Files::pathToQString(path);
             mResultPath = path;
         }
         //in all other cases, ensure the path points to data-local and do an existing file check
@@ -96,10 +97,10 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
             if (isFilePathChanged)
                 path = mLocalData / path.filename();
 
-            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
+            message = "Will be saved as: " + Files::pathToQString(path);
             mResultPath = path;
 
-            if (boost::filesystem::exists (path))
+            if (std::filesystem::exists (path))
             {
                 /// \todo add an user setting to make this an error.
                 message += "<p>A file with the same name already exists. If you continue, it will be overwritten.";

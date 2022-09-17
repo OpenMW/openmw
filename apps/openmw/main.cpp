@@ -61,7 +61,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         cfgMgr.readConfiguration(variables, desc, true);
 
-        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
         getRawStdout() << v.describe() << std::endl;
         return false;
     }
@@ -69,10 +69,10 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.readConfiguration(variables, desc);
     Settings::Manager::load(cfgMgr);
 
-    setupLogging(cfgMgr.getLogPath().string(), "OpenMW");
+    setupLogging(cfgMgr.getLogPath(), "OpenMW");
     MWGui::DebugWindow::startLogRecording();
 
-    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     Log(Debug::Info) << v.describe();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
@@ -87,13 +87,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     Files::PathContainer dataDirs(asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>()));
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>());
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     if (!local.empty())
         dataDirs.push_back(local);
 
     cfgMgr.filterOutNonExistingPaths(dataDirs);
 
-    engine.setResourceDir(variables["resources"].as<Files::MaybeQuotedPath>());
+    engine.setResourceDir(variables["resources"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     engine.setDataDirs(dataDirs);
 
     // fallback archives
@@ -150,7 +150,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setWarningsMode (variables["script-warn"].as<int>());
     engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
-    engine.setSaveGameFile (variables["load-savegame"].as<Files::MaybeQuotedPath>().string());
+    engine.setSaveGameFile (variables["load-savegame"].as<Files::MaybeQuotedPath>().u8string());
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);

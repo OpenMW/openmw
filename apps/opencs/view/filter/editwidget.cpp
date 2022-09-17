@@ -19,26 +19,23 @@ CSVFilter::EditWidget::EditWidget (CSMWorld::Data& data, QWidget *parent)
 : QLineEdit (parent), mParser (data), mIsEmpty(true)
 {
     mPalette = palette();
-    connect (this, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+    connect (this, &QLineEdit::textChanged, this, &EditWidget::textChanged);
 
     const CSMWorld::IdTableBase *model =
             static_cast<const CSMWorld::IdTableBase *> (data.getTableModel (CSMWorld::UniversalId::Type_Filters));
 
-    connect (model, SIGNAL (dataChanged (const QModelIndex &, const QModelIndex&)),
-        this, SLOT (filterDataChanged (const QModelIndex &, const QModelIndex&)),
-        Qt::QueuedConnection);
-    connect (model, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
-        this, SLOT (filterRowsRemoved (const QModelIndex&, int, int)),
-        Qt::QueuedConnection);
-    connect (model, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (filterRowsInserted (const QModelIndex&, int, int)),
-        Qt::QueuedConnection);
+    connect (model, &CSMWorld::IdTableBase::dataChanged,
+        this, &EditWidget::filterDataChanged, Qt::QueuedConnection);
+    connect (model, &CSMWorld::IdTableBase::rowsRemoved,
+        this, &EditWidget::filterRowsRemoved, Qt::QueuedConnection);
+    connect (model, &CSMWorld::IdTableBase::rowsInserted,
+        this, &EditWidget::filterRowsInserted, Qt::QueuedConnection);
 
     mStateColumnIndex   = model->findColumnIndex(CSMWorld::Columns::ColumnId_Modification);
     mDescColumnIndex    = model->findColumnIndex(CSMWorld::Columns::ColumnId_Description);
 
     mHelpAction = new QAction (tr ("Help"), this);
-    connect (mHelpAction, SIGNAL (triggered()), this, SLOT (openHelp()));
+    connect (mHelpAction, &QAction::triggered, this, &EditWidget::openHelp);
     mHelpAction->setIcon(QIcon(":/info.png"));
     addAction (mHelpAction);
     auto* openHelpShortcut = new CSMPrefs::Shortcut("help", this);

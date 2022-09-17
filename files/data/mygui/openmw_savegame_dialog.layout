@@ -5,6 +5,11 @@
         <Property key="Padding" value="8"/>
         <Property key="Spacing" value="8"/>
 
+        <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 0 24" name="SelectCharacter">
+            <Property key="Caption" value="#{SavegameMenu:SelectCharacter}"/>
+            <UserString key="HStretch" value="true"/>
+        </Widget>
+
         <Widget type="HBox" skin="">
             <UserString key="HStretch" value="true"/>
             <UserString key="VStretch" value="true"/>
@@ -15,12 +20,6 @@
                 <UserString key="HStretch" value="true"/>
                 <UserString key="VStretch" value="true"/>
                 <Property key="Spacing" value="8"/>
-
-                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" name="SelectCharacter">
-                    <Property key="Caption" value="#{SavegameMenu:SelectCharacter}"/>
-                    <UserString key="HStretch" value="true"/>
-                </Widget>
-
 
                 <Widget type="ListBox" skin="MW_List" position="0 0 200 200" name="SaveList">
                     <UserString key="HStretch" value="true"/>
@@ -33,10 +32,6 @@
                 <UserString key="HStretch" value="false"/>
                 <UserString key="VStretch" value="true"/>
                 <Property key="Spacing" value="8"/>
-
-                <Widget type="Widget" skin="" position="0 0 200 24" name="Spacer">
-                    <Property key="Visible" value="false"/>
-                </Widget>
 
                 <Widget type="Widget" skin="MW_Box" position="0 0 263 137">
                     <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="Screenshot"/>

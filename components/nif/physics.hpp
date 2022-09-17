@@ -319,6 +319,18 @@ struct bhkBoxShape : public bhkConvexShape
     void read(NIFStream *nif) override;
 };
 
+// A capsule
+struct bhkCapsuleShape : public bhkConvexShape
+{
+    osg::Vec3f mPoint1, mPoint2;
+    float mRadius1, mRadius2;
+
+    void read(NIFStream *nif) override;
+};
+
+// A sphere
+using bhkSphereShape = bhkConvexShape;
+
 // A list of shapes
 struct bhkListShape : public bhkShapeCollection
 {

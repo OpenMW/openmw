@@ -27,6 +27,13 @@ namespace Misc::StringUtils
         return std::equal(std::begin(x), std::end(x), std::begin(y),
                           [] (char l, char r) { return toLower(l) == toLower(r); });
     }
+    inline bool ciEqual(std::u8string_view x, std::u8string_view y)
+    {
+        if (std::size(x) != std::size(y))
+            return false;
+        return std::equal(std::begin(x), std::end(x), std::begin(y),
+            [](char l, char r) { return toLower(l) == toLower(r); });
+    }
 
     inline bool ciStartsWith(std::string_view value, std::string_view prefix)
     {
@@ -114,11 +121,27 @@ namespace Misc::StringUtils
         }
         return str;
     }
+    inline std::u8string& replaceAll(std::u8string& str, std::u8string_view what, std::u8string_view with)
+    {
+        std::size_t found;
+        std::size_t offset = 0;
+        while ((found = str.find(what, offset)) != std::u8string::npos)
+        {
+            str.replace(found, what.size(), with);
+            offset = found + with.size();
+        }
+        return str;
+    }
 
     inline bool ciEndsWith(std::string_view s, std::string_view suffix)
     {
         return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(),
                                                        [](char l, char r) { return toLower(l) == toLower(r); });
+    }
+    inline bool ciEndsWith(std::u8string_view s, std::u8string_view suffix)
+    {
+        return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(),
+            [](char l, char r) { return toLower(l) == toLower(r); });
     }
 
     inline void trim(std::string& s)

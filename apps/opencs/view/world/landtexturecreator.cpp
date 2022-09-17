@@ -35,8 +35,9 @@ namespace CSVWorld
         mIndexBox->setMaximum(MaxIndex);
         insertBeforeButtons(mIndexBox, true);
 
-        connect(mNameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(nameChanged(const QString&)));
-        connect(mIndexBox, SIGNAL(valueChanged(int)), this, SLOT(indexChanged(int)));
+        connect(mNameEdit, &QLineEdit::textChanged, this, &LandTextureCreator::nameChanged);
+        connect(mIndexBox, qOverload<int>(&QSpinBox::valueChanged),
+                this, &LandTextureCreator::indexChanged);
     }
 
     void LandTextureCreator::cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type)

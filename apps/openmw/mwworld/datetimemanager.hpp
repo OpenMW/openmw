@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_DATETIMEMANAGER_H
 #define GAME_MWWORLD_DATETIMEMANAGER_H
 
-#include <string>
+#include <string_view>
 
 namespace ESM
 {
@@ -27,7 +27,7 @@ namespace MWWorld
         void setMonth(int month);
 
     public:
-        std::string getMonthName(int month) const;
+        std::string_view getMonthName(int month) const;
         TimeStamp getTimeStamp() const;
         ESM::EpochTimeStamp getEpochTimeStamp() const;
         float getTimeScaleFactor() const;

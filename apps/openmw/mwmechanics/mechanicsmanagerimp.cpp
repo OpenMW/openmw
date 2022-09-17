@@ -6,6 +6,9 @@
 
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/stolenitems.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm/records.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -533,7 +536,7 @@ namespace MWMechanics
             std::map<std::string, int>::const_iterator playerFactionIt = playerStats.getFactionRanks().begin();
             for (; playerFactionIt != playerStats.getFactionRanks().end(); ++playerFactionIt)
             {
-                std::string itFaction = playerFactionIt->first;
+                const std::string& itFaction = playerFactionIt->first;
 
                 // Ignore the faction, if a player was expelled from it.
                 if (playerStats.getExpelled(itFaction))
@@ -761,7 +764,7 @@ namespace MWMechanics
             mActors.forceStateUpdate(ptr);
     }
 
-    bool MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
+    bool MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist)
     {
         if(ptr.getClass().isActor())
             return mActors.playAnimationGroup(ptr, groupName, mode, number, persist);
@@ -839,12 +842,8 @@ namespace MWMechanics
 
             for (const ESM::GameSetting &currentSetting : gameSettings)
             {
-                std::string currentGMSTID = currentSetting.mId;
-                Misc::StringUtils::lowerCaseInPlace(currentGMSTID);
-
                 // Don't bother checking this GMST if it's not a sMagicBound* one.
-                const std::string& toFind = "smagicbound";
-                if (currentGMSTID.compare(0, toFind.length(), toFind) != 0)
+                if (!Misc::StringUtils::ciStartsWith(currentSetting.mId, "smagicbound"))
                     continue;
 
                 // All sMagicBound* GMST's should be of type string
@@ -970,7 +969,7 @@ namespace MWMechanics
             return false;
 
         const OwnerMap& owners = it->second;
-        const std::string ownerid = ptr.getCellRef().getRefId();
+        const std::string& ownerid = ptr.getCellRef().getRefId();
         OwnerMap::const_iterator ownerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
         if (ownerFound != owners.end())
             return true;

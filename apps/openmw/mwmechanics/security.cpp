@@ -26,7 +26,7 @@ namespace MWMechanics
     }
 
     void Security::pickLock(const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick,
-                            std::string& resultMessage, std::string& resultSound)
+                            std::string_view& resultMessage, std::string_view& resultSound)
     {
         if (lock.getCellRef().getLockLevel() <= 0 ||
             lock.getCellRef().getLockLevel() == ESM::UnbreakableLock ||
@@ -72,7 +72,7 @@ namespace MWMechanics
     }
 
     void Security::probeTrap(const MWWorld::Ptr &trap, const MWWorld::Ptr &probe,
-                             std::string& resultMessage, std::string& resultSound)
+                             std::string_view& resultMessage, std::string_view& resultSound)
     {
         if (trap.getCellRef().getTrap().empty())
             return;

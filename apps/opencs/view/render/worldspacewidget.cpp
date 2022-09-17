@@ -55,42 +55,42 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     QAbstractItemModel *referenceables =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Referenceables);
 
-    connect (referenceables, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (referenceableDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (referenceables, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (referenceableAboutToBeRemoved (const QModelIndex&, int, int)));
-    connect (referenceables, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (referenceableAdded (const QModelIndex&, int, int)));
+    connect (referenceables, &QAbstractItemModel::dataChanged,
+        this, &WorldspaceWidget::referenceableDataChanged);
+    connect (referenceables, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &WorldspaceWidget::referenceableAboutToBeRemoved);
+    connect (referenceables, &QAbstractItemModel::rowsInserted,
+        this, &WorldspaceWidget::referenceableAdded);
 
     QAbstractItemModel *references =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_References);
 
-    connect (references, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (referenceDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (references, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (referenceAboutToBeRemoved (const QModelIndex&, int, int)));
-    connect (references, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (referenceAdded (const QModelIndex&, int, int)));
+    connect (references, &QAbstractItemModel::dataChanged,
+        this, &WorldspaceWidget::referenceDataChanged);
+    connect (references, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &WorldspaceWidget::referenceAboutToBeRemoved);
+    connect (references, &QAbstractItemModel::rowsInserted,
+        this, &WorldspaceWidget::referenceAdded);
 
     QAbstractItemModel *pathgrids = document.getData().getTableModel (CSMWorld::UniversalId::Type_Pathgrids);
 
-    connect (pathgrids, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (pathgridDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (pathgrids, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (pathgridAboutToBeRemoved (const QModelIndex&, int, int)));
-    connect (pathgrids, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (pathgridAdded (const QModelIndex&, int, int)));
+    connect (pathgrids, &QAbstractItemModel::dataChanged,
+        this, &WorldspaceWidget::pathgridDataChanged);
+    connect (pathgrids, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &WorldspaceWidget::pathgridAboutToBeRemoved);
+    connect (pathgrids, &QAbstractItemModel::rowsInserted,
+        this, &WorldspaceWidget::pathgridAdded);
 
     QAbstractItemModel *debugProfiles =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_DebugProfiles);
 
-    connect (debugProfiles, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (debugProfileDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (debugProfiles, &QAbstractItemModel::dataChanged,
+        this, &WorldspaceWidget::debugProfileDataChanged);
+    connect (debugProfiles, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &WorldspaceWidget::debugProfileAboutToBeRemoved);
 
     mToolTipDelayTimer.setSingleShot (true);
-    connect (&mToolTipDelayTimer, SIGNAL (timeout()), this, SLOT (showToolTip()));
+    connect (&mToolTipDelayTimer, &QTimer::timeout, this, &WorldspaceWidget::showToolTip);
 
     CSMPrefs::get()["3D Scene Input"].update();
     CSMPrefs::get()["Tooltips"].update();
@@ -100,21 +100,28 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
             CSMPrefs::Shortcut::SM_Detach, this);
     CSMPrefs::Shortcut* primaryOpenShortcut = new CSMPrefs::Shortcut("scene-open-primary", this);
 
-    connect(primaryOpenShortcut, SIGNAL(activated(bool)), this, SLOT(primaryOpen(bool)));
-    connect(primaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(primaryEdit(bool)));
-    connect(primaryEditShortcut, SIGNAL(secondary(bool)), this, SLOT(speedMode(bool)));
+    connect(primaryOpenShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), 
+            this, &WorldspaceWidget::primaryOpen);
+    connect(primaryEditShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), 
+            this, &WorldspaceWidget::primaryEdit);
+    connect(primaryEditShortcut, qOverload<bool>(&CSMPrefs::Shortcut::secondary), 
+            this, &WorldspaceWidget::speedMode);
 
     CSMPrefs::Shortcut* secondaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-secondary", this);
-    connect(secondaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(secondaryEdit(bool)));
+    connect(secondaryEditShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), 
+            this, &WorldspaceWidget::secondaryEdit);
 
     CSMPrefs::Shortcut* primarySelectShortcut = new CSMPrefs::Shortcut("scene-select-primary", this);
-    connect(primarySelectShortcut, SIGNAL(activated(bool)), this, SLOT(primarySelect(bool)));
+    connect(primarySelectShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), 
+            this, &WorldspaceWidget::primarySelect);
 
     CSMPrefs::Shortcut* secondarySelectShortcut = new CSMPrefs::Shortcut("scene-select-secondary", this);
-    connect(secondarySelectShortcut, SIGNAL(activated(bool)), this, SLOT(secondarySelect(bool)));
+    connect(secondarySelectShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), 
+            this, &WorldspaceWidget::secondarySelect);
 
     CSMPrefs::Shortcut* abortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
-    connect(abortShortcut, SIGNAL(activated()), this, SLOT(abortDrag()));
+    connect(abortShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
+            this, &WorldspaceWidget::abortDrag);
 
     mInConstructor = false;
 }
@@ -209,8 +216,8 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
             "</ul>", tool),
         "orbit");
 
-    connect (tool, SIGNAL (modeChanged (const std::string&)),
-        this, SLOT (selectNavigationMode (const std::string&)));
+    connect (tool, &CSVWidget::SceneToolMode::modeChanged, 
+        this, &WorldspaceWidget::selectNavigationMode);
 
     return tool;
 }
@@ -224,8 +231,8 @@ CSVWidget::SceneToolToggle2 *CSVRender::WorldspaceWidget::makeSceneVisibilitySel
 
     mSceneElements->setSelectionMask (0xffffffff);
 
-    connect (mSceneElements, SIGNAL (selectionChanged()),
-        this, SLOT (elementSelectionChanged()));
+    connect (mSceneElements, &CSVWidget::SceneToolToggle2::selectionChanged,
+        this, &WorldspaceWidget::elementSelectionChanged);
 
     return mSceneElements;
 }
@@ -261,8 +268,8 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
     mRun = new CSVWidget::SceneToolRun (parent, "Run OpenMW from the current camera position",
         ":scenetoolbar/play", profiles);
 
-    connect (mRun, SIGNAL (runRequest (const std::string&)),
-        this, SLOT (runRequest (const std::string&)));
+    connect (mRun, &CSVWidget::SceneToolRun::runRequest,
+        this, &WorldspaceWidget::runRequest);
 
     return mRun;
 }
@@ -274,8 +281,8 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeEditModeSelector (
 
     addEditModeSelectorButtons (mEditMode);
 
-    connect (mEditMode, SIGNAL (modeChanged (const std::string&)),
-        this, SLOT (editModeChanged (const std::string&)));
+    connect (mEditMode, &CSVWidget::SceneToolMode::modeChanged,
+        this, &WorldspaceWidget::editModeChanged);
 
     return mEditMode;
 }

@@ -9,6 +9,7 @@
 #include <components/widgets/box.hpp>
 #include <components/settings/settings.hpp>
 #include <components/misc/strings/format.hpp>
+#include <components/esm3/loadregn.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -153,7 +154,7 @@ namespace MWGui
         onHourSliderChangedPosition(mHourSlider, 0);
         mHourSlider->setScrollPosition (0);
 
-        std::string month = MWBase::Environment::get().getWorld ()->getMonthName();
+        std::string_view month = MWBase::Environment::get().getWorld ()->getMonthName();
         int hour = static_cast<int>(MWBase::Environment::get().getWorld()->getTimeStamp().getHour());
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;
@@ -161,7 +162,7 @@ namespace MWGui
 
         ESM::EpochTimeStamp currentDate = MWBase::Environment::get().getWorld()->getEpochTimeStamp();
         std::string daysPassed = Misc::StringUtils::format("(#{sDay} %i)", MWBase::Environment::get().getWorld()->getTimeStamp().getDay());
-        std::string formattedHour(pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
+        std::string_view formattedHour(pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
         std::string dateTimeText = Misc::StringUtils::format("%i %s %s %i %s", currentDate.mDay, month, daysPassed, hour, formattedHour);
         mDateTimeText->setCaptionWithReplacing (dateTimeText);
     }
@@ -195,7 +196,7 @@ namespace MWGui
         MWWorld::Ptr player = world->getPlayerPtr();
         if (mSleeping && player.getCell()->isExterior())
         {
-            std::string regionstr = player.getCell()->getCell()->mRegion;
+            const std::string& regionstr = player.getCell()->getCell()->mRegion;
             if (!regionstr.empty())
             {
                 const ESM::Region *region = world->getStore().get<ESM::Region>().find (regionstr);

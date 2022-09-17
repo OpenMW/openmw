@@ -2,6 +2,8 @@
 
 #include <limits>
 
+#include <components/esm3/loadmgef.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -18,7 +20,7 @@ namespace MWMechanics
         static const std::array<ESM::Skill::SkillEnum, 6> schoolSkillArray
         {
             ESM::Skill::Alteration, ESM::Skill::Conjuration, ESM::Skill::Destruction,
-            ESM::Skill::Illusion, ESM::Skill::Mysticism, ESM::Skill::Restoration
+            ESM::Skill::Illusion, ESM::Skill::Mysticism, ESM::Skill::Restoration,
         };
         return schoolSkillArray.at(school);
     }

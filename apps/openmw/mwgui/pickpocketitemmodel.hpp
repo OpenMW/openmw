@@ -10,7 +10,7 @@ namespace MWGui
     class PickpocketItemModel : public ProxyItemModel
     {
     public:
-        PickpocketItemModel (const MWWorld::Ptr& thief, ItemModel* sourceModel, bool hideItems=true);
+        PickpocketItemModel(const MWWorld::Ptr& thief, std::unique_ptr<ItemModel> sourceModel, bool hideItems = true);
 
         bool allowedToUseItems() const override;
         ItemStack getItem (ModelIndex index) override;

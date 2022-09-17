@@ -1,20 +1,25 @@
 #include "runner.hpp"
 
+#include <utility>
+
 #include <QDir>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QCoreApplication>
 
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
+
 #include "operationholder.hpp"
 
-CSMDoc::Runner::Runner (const boost::filesystem::path& projectPath)
-: mRunning (false), mStartup (nullptr), mProjectPath (projectPath)
+CSMDoc::Runner::Runner (std::filesystem::path  projectPath)
+: mRunning (false), mStartup (nullptr), mProjectPath (std::move(projectPath))
 {
-    connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),
-        this, SLOT (finished (int, QProcess::ExitStatus)));
+    connect (&mProcess, qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
+        this, &Runner::finished);
 
-    connect (&mProcess, SIGNAL (readyReadStandardOutput()),
-        this, SLOT (readyReadStandardOutput()));
+    connect (&mProcess, &QProcess::readyReadStandardOutput,
+        this, &Runner::readyReadStandardOutput);
 
     mProcess.setProcessChannelMode (QProcess::MergedChannels);
 
@@ -78,23 +83,21 @@ void CSMDoc::Runner::start (bool delayed)
         else
             arguments << "--new-game=1";
 
-        arguments << ("--script-run="+mStartup->fileName());
+        arguments << ("--script-run=" + mStartup->fileName());
 
-        arguments <<
-            QString::fromUtf8 (("--data=\""+mProjectPath.parent_path().string()+"\"").c_str());
+        arguments << "--data=\"" + Files::pathToQString(mProjectPath.parent_path()) + "\"";
 
         arguments << "--replace=content";
 
-        for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
-            iter!=mContentFiles.end(); ++iter)
+        for (const auto& mContentFile : mContentFiles)
         {
-            arguments << QString::fromUtf8 (("--content="+*iter).c_str());
+            arguments << "--content=" + Files::pathToQString(mContentFile);
         }
 
         arguments
-            << QString::fromUtf8 (("--content="+mProjectPath.filename().string()).c_str());
+            << "--content=" + Files::pathToQString(mProjectPath.filename());
 
-        mProcess.start (path, arguments);
+        mProcess.start(path, arguments);
     }
 
     mRunning = true;
@@ -121,7 +124,7 @@ bool CSMDoc::Runner::isRunning() const
 }
 
 void CSMDoc::Runner::configure (const ESM::DebugProfile& profile,
-    const std::vector<std::string>& contentFiles, const std::string& startupInstruction)
+    const std::vector<std::filesystem::path> &contentFiles, const std::string& startupInstruction)
 {
     mProfile = profile;
     mContentFiles = contentFiles;
@@ -149,7 +152,7 @@ void CSMDoc::Runner::readyReadStandardOutput()
 CSMDoc::SaveWatcher::SaveWatcher (Runner *runner, OperationHolder *operation)
 : QObject (runner), mRunner (runner)
 {
-    connect (operation, SIGNAL (done (int, bool)), this, SLOT (saveDone (int, bool)));
+    connect (operation, &OperationHolder::done, this, &SaveWatcher::saveDone);
 }
 
 void CSMDoc::SaveWatcher::saveDone (int type, bool failed)

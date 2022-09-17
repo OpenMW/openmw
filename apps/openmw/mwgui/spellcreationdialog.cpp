@@ -9,6 +9,8 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
+#include <components/esm3/loadgmst.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -146,7 +148,7 @@ namespace MWGui
 
         mDurationValue->setCaption("1");
         mMagnitudeMinValue->setCaption("1");
-        const std::string to = MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-");
+        const std::string to{MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-")};
 
         mMagnitudeMaxValue->setCaption(to + " 1");
         mAreaValue->setCaption("0");
@@ -314,7 +316,7 @@ namespace MWGui
         }
 
         mEffect.mMagnMax = pos+1;
-        const std::string to = MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-");
+        const std::string to{MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-")};
 
         mMagnitudeMaxValue->setCaption(to + " " + MyGUI::utility::toString(pos+1));
 
@@ -555,7 +557,7 @@ namespace MWGui
 
         for (const short effectId : knownEffects)
         {
-            std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
+            const std::string& name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
                                                ESM::MagicEffect::effectIdToString(effectId))->mValue.getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
 

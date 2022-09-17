@@ -1,28 +1,46 @@
 #ifndef MWGUI_DIALOGE_H
 #define MWGUI_DIALOGE_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
 #include "bookpage.hpp"
 
+#include "../mwbase/dialoguemanager.hpp"
 #include "../mwdialogue/keywordsearch.hpp"
 
 #include <MyGUI_Delegate.h>
 
 namespace Gui
 {
+    class AutoSizedTextBox;
     class MWList;
 }
 
 namespace MWGui
 {
-    class ResponseCallback;
+    class DialogueWindow;
+
+    class ResponseCallback : public MWBase::DialogueManager::ResponseCallback
+    {
+        DialogueWindow* mWindow;
+        bool mNeedMargin;
+        
+    public:
+        ResponseCallback(DialogueWindow* win, bool needMargin = true) : mWindow(win), mNeedMargin(needMargin)
+        {}
+
+        void addResponse(const std::string& title, const std::string& text) override;
+
+        void updateTopics() const;
+    };
 
     class PersuasionDialog : public WindowModal
     {
     public:
-        PersuasionDialog(ResponseCallback* callback);
+        PersuasionDialog(std::unique_ptr<ResponseCallback> callback);
 
         void onOpen() override;
 
@@ -31,6 +49,9 @@ namespace MWGui
     private:
         std::unique_ptr<ResponseCallback> mCallback;
 
+        int mInitialGoldLabelWidth;
+        int mInitialMainWidgetWidth;
+
         MyGUI::Button* mCancelButton;
         MyGUI::Button* mAdmireButton;
         MyGUI::Button* mIntimidateButton;
@@ -38,7 +59,10 @@ namespace MWGui
         MyGUI::Button* mBribe10Button;
         MyGUI::Button* mBribe100Button;
         MyGUI::Button* mBribe1000Button;
-        MyGUI::TextBox* mGoldLabel;
+        MyGUI::Widget* mActionsBox;
+        Gui::AutoSizedTextBox* mGoldLabel;
+
+        void adjustAction(MyGUI::Widget* action, int& totalHeight);
 
         void onCancel (MyGUI::Widget* sender);
         void onPersuade (MyGUI::Widget* sender);
@@ -81,14 +105,14 @@ namespace MWGui
     struct DialogueText
     {
         virtual ~DialogueText() {}
-        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const = 0;
+        virtual void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const = 0;
         std::string mText;
     };
 
     struct Response : DialogueText
     {
         Response(const std::string& text, const std::string& title = "", bool needMargin = true);
-        void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const override;
+        void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
         void addTopicLink (BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const;
         std::string mTitle;
         bool mNeedMargin;
@@ -97,14 +121,13 @@ namespace MWGui
     struct Message : DialogueText
     {
         Message(const std::string& text);
-        void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const override;
+        void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
     };
 
     class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
         DialogueWindow();
-        ~DialogueWindow();
 
         void onTradeComplete();
 
@@ -158,14 +181,14 @@ namespace MWGui
         bool mIsCompanion;
         std::list<std::string> mKeywords;
 
-        std::vector<DialogueText*> mHistoryContents;
+        std::vector<std::unique_ptr<DialogueText>> mHistoryContents;
         std::vector<std::pair<std::string, int> > mChoices;
         bool mGoodbye;
 
-        std::vector<Link*> mLinks;
-        std::map<std::string, Link*> mTopicLinks;
+        std::vector<std::unique_ptr<Link>> mLinks;
+        std::map<std::string, std::unique_ptr<Link>> mTopicLinks;
 
-        std::vector<Link*> mDeleteLater;
+        std::vector<std::unique_ptr<Link>> mDeleteLater;
 
         KeywordSearchT mKeywordSearch;
 

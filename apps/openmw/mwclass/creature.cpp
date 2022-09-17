@@ -5,6 +5,9 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/creaturestate.hpp>
 #include <components/settings/settings.hpp>
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadsndg.hpp>
+#include <components/esm3/loadclas.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
@@ -40,6 +43,7 @@
 #include "../mwrender/objects.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "classmodel.hpp"
 
@@ -589,7 +593,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()});
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
@@ -898,7 +902,7 @@ namespace MWClass
         MWMechanics::setBaseAISetting<ESM::Creature>(id, setting, value);
     }
 
-    void Creature::modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const
+    void Creature::modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::Creature>(actorId, itemId, amount);
     }

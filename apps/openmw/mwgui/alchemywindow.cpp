@@ -7,6 +7,9 @@
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ControllerRepeatClick.h>
 
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadingr.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -24,6 +27,7 @@
 #include "sortfilteritemmodel.hpp"
 #include "itemview.hpp"
 #include "itemwidget.hpp"
+#include "ustring.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -33,7 +37,7 @@ namespace MWGui
         , mCurrentFilter(FilterType::ByName)
         , mModel(nullptr)
         , mSortModel(nullptr)
-        , mAlchemy(new MWMechanics::Alchemy())
+        , mAlchemy(std::make_unique<MWMechanics::Alchemy>())
         , mApparatus (4)
         , mIngredients (4)
     {
@@ -126,7 +130,7 @@ namespace MWGui
             if (count == 1)
                 winMgr->messageBox("#{sPotionSuccess}");
             else
-                winMgr->messageBox("#{sPotionSuccess} "+mNameEdit->getCaption()+" ("+std::to_string(count)+")");
+                winMgr->messageBox("#{sPotionSuccess} "+mNameEdit->getCaption().asUTF8()+" ("+std::to_string(count)+")");
             break;
         case MWMechanics::Alchemy::Result_NoEffects:
         case MWMechanics::Alchemy::Result_RandomFailure:
@@ -151,10 +155,9 @@ namespace MWGui
     void AlchemyWindow::initFilter()
     {
         auto const& wm = MWBase::Environment::get().getWindowManager();
-        auto const ingredient  = wm->getGameSettingString("sIngredients", "Ingredients");
-        auto const effect = wm->getGameSettingString("sMagicEffects", "Magic Effects");
+        std::string_view ingredient = wm->getGameSettingString("sIngredients", "Ingredients");
 
-        if (mFilterType->getCaption() == ingredient)
+        if (mFilterType->getCaption() == toUString(ingredient))
             mCurrentFilter = FilterType::ByName;
         else
             mCurrentFilter = FilterType::ByEffect;
@@ -166,13 +169,12 @@ namespace MWGui
     void AlchemyWindow::switchFilterType(MyGUI::Widget* _sender)
     {
         auto const& wm = MWBase::Environment::get().getWindowManager();
-        auto const ingredient  = wm->getGameSettingString("sIngredients", "Ingredients");
-        auto const effect = wm->getGameSettingString("sMagicEffects", "Magic Effects");
+        MyGUI::UString ingredient = toUString(wm->getGameSettingString("sIngredients", "Ingredients"));
         auto *button = _sender->castType<MyGUI::Button>();
 
         if (button->getCaption() == ingredient)
         {
-            button->setCaption(effect);
+            button->setCaption(toUString(wm->getGameSettingString("sMagicEffects", "Magic Effects")));
             mCurrentFilter = FilterType::ByEffect;
         }
         else
@@ -246,13 +248,15 @@ namespace MWGui
         mAlchemy->clear();
         mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
-        mModel = new InventoryItemModel(MWMechanics::getPlayer());
-        mSortModel = new SortFilterItemModel(mModel);
+        auto model = std::make_unique<InventoryItemModel>(MWMechanics::getPlayer());
+        mModel = model.get();
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::move(model));
+        mSortModel = sortModel.get();
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
-        mItemView->setModel (mSortModel);
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
 
-        mNameEdit->setCaption("");
+        mNameEdit->setCaption({});
         mBrewCountEdit->setValue(1);
 
         int index = 0;

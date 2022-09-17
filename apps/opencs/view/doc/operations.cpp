@@ -33,7 +33,7 @@ void CSVDoc::Operations::setProgress (int current, int max, int type, int thread
     int newCount = oldCount + 1;
 
     Operation *operation = new Operation (type, this);
-    connect (operation, SIGNAL (abortOperation (int)), this, SIGNAL (abortOperation (int)));
+    connect (operation, qOverload<int>(&Operation::abortOperation), this, &Operations::abortOperation);
 
     mLayout->addLayout (operation->getLayout());
     mOperations.push_back (operation);

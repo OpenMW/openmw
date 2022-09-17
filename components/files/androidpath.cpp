@@ -7,7 +7,7 @@
 #include <cstring>
 #include <pwd.h>
 #include <unistd.h>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 
 static const char *g_path_global; //< Path to global directory root, e.g. /data/data/com.libopenmw.openmw
 static const char *g_path_user; //< Path to user root, e.g. /sdcard/Android/data/com.libopenmw.openmw
@@ -29,47 +29,47 @@ AndroidPath::AndroidPath(const std::string& application_name)
 }
 
 // /sdcard/Android/data/com.libopenmw.openmw/config
-boost::filesystem::path AndroidPath::getUserConfigPath() const
+std::filesystem::path AndroidPath::getUserConfigPath() const
 {
-    return boost::filesystem::path(g_path_user) / "config";
+    return std::filesystem::path(g_path_user) / "config";
 }
 
 // /sdcard/Android/data/com.libopenmw.openmw/
 // (so that saves are placed at /sdcard/Android/data/com.libopenmw.openmw/saves)
-boost::filesystem::path AndroidPath::getUserDataPath() const
+std::filesystem::path AndroidPath::getUserDataPath() const
 {
-    return boost::filesystem::path(g_path_user);
+    return std::filesystem::path(g_path_user);
 }
 
 // /data/data/com.libopenmw.openmw/cache
 // (supposed to be "official" android cache location)
-boost::filesystem::path AndroidPath::getCachePath() const
+std::filesystem::path AndroidPath::getCachePath() const
 {
-    return boost::filesystem::path(g_path_global) / "cache";
+    return std::filesystem::path(g_path_global) / "cache";
 }
 
 // /data/data/com.libopenmw.openmw/files/config
 // (note the addition of "files")
-boost::filesystem::path AndroidPath::getGlobalConfigPath() const
+std::filesystem::path AndroidPath::getGlobalConfigPath() const
 {
-    return boost::filesystem::path(g_path_global) / "files" / "config";
+    return std::filesystem::path(g_path_global) / "files" / "config";
 }
 
-boost::filesystem::path AndroidPath::getLocalPath() const
+std::filesystem::path AndroidPath::getLocalPath() const
 {
-    return boost::filesystem::path("./");
+    return std::filesystem::path("./");
 }
 
 // /sdcard/Android/data/com.libopenmw.openmw
 // (so that the data is at /sdcard/Android/data/com.libopenmw.openmw/data)
-boost::filesystem::path AndroidPath::getGlobalDataPath() const
+std::filesystem::path AndroidPath::getGlobalDataPath() const
 {
-    return boost::filesystem::path(g_path_user);
+    return std::filesystem::path(g_path_user);
 }
 
-boost::filesystem::path AndroidPath::getInstallPath() const
+std::filesystem::path AndroidPath::getInstallPath() const
 {
-    return boost::filesystem::path();
+    return std::filesystem::path();
 }
 
 

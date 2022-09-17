@@ -150,7 +150,6 @@ namespace MWLua
                 {"EndPolygonNotFound", DetourNavigator::Status::EndPolygonNotFound},
                 {"MoveAlongSurfaceFailed", DetourNavigator::Status::MoveAlongSurfaceFailed},
                 {"FindPathOverPolygonsFailed", DetourNavigator::Status::FindPathOverPolygonsFailed},
-                {"GetPolyHeightFailed", DetourNavigator::Status::GetPolyHeightFailed},
                 {"InitNavMeshQueryFailed", DetourNavigator::Status::InitNavMeshQueryFailed},
             }));
 

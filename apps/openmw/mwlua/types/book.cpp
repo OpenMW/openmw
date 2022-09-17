@@ -8,6 +8,7 @@
 #include <apps/openmw/mwworld/esmstore.hpp>
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/world.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace sol
 {

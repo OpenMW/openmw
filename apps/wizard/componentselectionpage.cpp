@@ -18,8 +18,8 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(QWidget *parent) :
 
     registerField(QLatin1String("installation.components"), componentsList);
 
-    connect(componentsList, SIGNAL(itemChanged(QListWidgetItem *)),
-            this, SLOT(updateButton(QListWidgetItem *)));
+    connect(componentsList, &ComponentListWidget::itemChanged,
+            this, &ComponentSelectionPage::updateButton);
 
 }
 

@@ -10,6 +10,7 @@
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/dialoguestate.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/loadfact.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>
@@ -248,7 +249,7 @@ namespace MWDialogue
                 MWScript::InterpreterContext interpreterContext(&actor.getRefData().getLocals(), actor);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
-                interpreter.run (&code[0], code.size(), interpreterContext);
+                interpreter.run (code.data(), code.size(), interpreterContext);
             }
             catch (const std::exception& error)
             {

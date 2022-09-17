@@ -10,7 +10,7 @@ const Attribute::AttributeID Attribute::sAttributeIds[Attribute::Length] = {
     Attribute::Speed,
     Attribute::Endurance,
     Attribute::Personality,
-    Attribute::Luck
+    Attribute::Luck,
 };
 
 const std::string Attribute::sAttributeNames[Attribute::Length] = {
@@ -21,7 +21,7 @@ const std::string Attribute::sAttributeNames[Attribute::Length] = {
     "Speed",
     "Endurance",
     "Personality",
-    "Luck"
+    "Luck",
 };
 
 const std::string Attribute::sGmstAttributeIds[Attribute::Length] = {
@@ -32,7 +32,7 @@ const std::string Attribute::sGmstAttributeIds[Attribute::Length] = {
     "sAttributeSpeed",
     "sAttributeEndurance",
     "sAttributePersonality",
-    "sAttributeLuck"
+    "sAttributeLuck",
 };
 
 const std::string Attribute::sGmstAttributeDescIds[Attribute::Length] = {
@@ -43,7 +43,7 @@ const std::string Attribute::sGmstAttributeDescIds[Attribute::Length] = {
     "sSpdDesc",
     "sEndDesc",
     "sPerDesc",
-    "sLucDesc"
+    "sLucDesc",
 };
 
 const std::string Attribute::sAttributeIcons[Attribute::Length] = {
@@ -54,5 +54,5 @@ const std::string Attribute::sAttributeIcons[Attribute::Length] = {
     "icons\\k\\attribute_speed.dds",
     "icons\\k\\attribute_endurance.dds",
     "icons\\k\\attribute_personality.dds",
-    "icons\\k\\attribute_luck.dds"
+    "icons\\k\\attribute_luck.dds",
 };

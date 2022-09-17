@@ -8,6 +8,9 @@
 
 #include <components/bsa/compressedbsafile.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 #define BSATOOL_VERSION 1.1
 
@@ -17,10 +20,10 @@ namespace bpo = boost::program_options;
 struct Arguments
 {
     std::string mode;
-    std::string filename;
-    std::string extractfile;
-    std::string addfile;
-    std::string outdir;
+    std::filesystem::path filename;
+    std::filesystem::path extractfile;
+    std::filesystem::path addfile;
+    std::filesystem::path outdir;
 
     bool longformat;
     bool fullpath;
@@ -28,35 +31,37 @@ struct Arguments
 
 bool parseOptions (int argc, char** argv, Arguments &info)
 {
-    bpo::options_description desc("Inspect and extract files from Bethesda BSA archives\n\n"
-            "Usages:\n"
-            "  bsatool list [-l] archivefile\n"
-            "      List the files presents in the input archive.\n\n"
-            "  bsatool extract [-f] archivefile [file_to_extract] [output_directory]\n"
-            "      Extract a file from the input archive.\n\n"
-            "  bsatool extractall archivefile [output_directory]\n"
-            "      Extract all files from the input archive.\n\n"
-            "  bsatool add [-a] archivefile file_to_add\n"
-            "      Add a file to the input archive.\n\n"
-            "  bsatool create [-c] archivefile\n"
-            "      Create an archive.\n\n"
-            "Allowed options");
+    bpo::options_description desc(R"(Inspect and extract files from Bethesda BSA archives
 
-    desc.add_options()
-        ("help,h", "print help message.")
-        ("version,v", "print version information and quit.")
-        ("long,l", "Include extra information in archive listing.")
-        ("full-path,f", "Create directory hierarchy on file extraction "
-         "(always true for extractall).")
-        ;
+Usages:
+  bsatool list [-l] archivefile\n
+      List the files presents in the input archive.
+
+  bsatool extract [-f] archivefile [file_to_extract] [output_directory]
+      Extract a file from the input archive.
+
+  bsatool extractall archivefile [output_directory]
+      Extract all files from the input archive.
+
+  bsatool add [-a] archivefile file_to_add
+      Add a file to the input archive.
+
+  bsatool create [-c] archivefile
+      Create an archive.
+Allowed options)");
+
+    auto addOption = desc.add_options();
+    addOption("help,h", "print help message.");
+    addOption("version,v", "print version information and quit.");
+    addOption("long,l", "Include extra information in archive listing.");
+    addOption("full-path,f", "Create directory hierarchy on file extraction (always true for extractall).");
 
     // input-file is hidden and used as a positional argument
     bpo::options_description hidden("Hidden Options");
 
-    hidden.add_options()
-        ( "mode,m", bpo::value<std::string>(), "bsatool mode")
-        ( "input-file,i", bpo::value< std::vector<std::string> >(), "input file")
-        ;
+    auto addHiddenOption = hidden.add_options();
+    addHiddenOption("mode,m", bpo::value<std::string>(), "bsatool mode");
+    addHiddenOption("input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
 
     bpo::positional_options_description p;
     p.add("mode", 1).add("input-file", 3);
@@ -112,37 +117,39 @@ bool parseOptions (int argc, char** argv, Arguments &info)
             << desc << std::endl;
         return false;
     }
-    info.filename = variables["input-file"].as< std::vector<std::string> >()[0];
+    auto inputFiles = variables["input-file"].as< Files::MaybeQuotedPathContainer >();
+
+    info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
     // Default output to the working directory
-    info.outdir = ".";
+    info.outdir = std::filesystem::current_path();
 
     if (info.mode == "extract")
     {
-        if (variables["input-file"].as< std::vector<std::string> >().size() < 2)
+        if (inputFiles.size() < 2)
         {
             std::cout << "\nERROR: file to extract unspecified\n\n"
                 << desc << std::endl;
             return false;
         }
-        if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-            info.extractfile = variables["input-file"].as< std::vector<std::string> >()[1];
-        if (variables["input-file"].as< std::vector<std::string> >().size() > 2)
-            info.outdir = variables["input-file"].as< std::vector<std::string> >()[2];
+        if (inputFiles.size() > 1)
+            info.extractfile = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+        if (inputFiles.size() > 2)
+            info.outdir = inputFiles[2].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     }
     else if (info.mode == "add")
     {
-        if (variables["input-file"].as< std::vector<std::string> >().size() < 1)
+        if (inputFiles.empty())
         {
             std::cout << "\nERROR: file to add unspecified\n\n"
                 << desc << std::endl;
             return false;
         }
-        if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-            info.addfile = variables["input-file"].as< std::vector<std::string> >()[1];
+        if (inputFiles.size() > 1)
+            info.addfile = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
     }
-    else if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-        info.outdir = variables["input-file"].as< std::vector<std::string> >()[1];
+    else if (inputFiles.size() > 1)
+        info.outdir = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
     info.longformat = variables.count("long") != 0;
     info.fullpath = variables.count("full-path") != 0;
@@ -176,17 +183,17 @@ int list(std::unique_ptr<File>& bsa, Arguments& info)
 template<typename File>
 int extract(std::unique_ptr<File>& bsa, Arguments& info)
 {
-    std::string archivePath = info.extractfile;
-    Misc::StringUtils::replaceAll(archivePath, "/", "\\");
+    auto archivePath = info.extractfile.u8string();
+    Misc::StringUtils::replaceAll(archivePath, u8"/", u8"\\");
 
-    std::string extractPath = info.extractfile;
-    Misc::StringUtils::replaceAll(extractPath, "\\", "/");
+    auto extractPath = info.extractfile.u8string();
+    Misc::StringUtils::replaceAll(extractPath, u8"\\", u8"/");
 
     Files::IStreamPtr stream;
     // Get a stream for the file to extract
     for (auto it = bsa->getList().rbegin(); it != bsa->getList().rend(); ++it)
     {
-        if (Misc::StringUtils::ciEqual(std::string(it->name()), archivePath))
+        if (Misc::StringUtils::ciEqual(Misc::StringUtils::stringToU8String(it->name()), archivePath))
         {
             stream = bsa->getFile(&*it);
             break;
@@ -194,20 +201,19 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     }
     if (!stream)
     {
-        std::cout << "ERROR: file '" << archivePath << "' not found\n";
-        std::cout << "In archive: " << info.filename << std::endl;
+        std::cout << "ERROR: file '" << Misc::StringUtils::u8StringToString(archivePath) << "' not found\n";
+        std::cout << "In archive: " << Files::pathToUnicodeString(info.filename) << std::endl;
         return 3;
     }
 
     // Get the target path (the path the file will be extracted to)
     std::filesystem::path relPath (extractPath);
-    std::filesystem::path outdir (info.outdir);
 
     std::filesystem::path target;
     if (info.fullpath)
-        target = outdir / relPath;
+        target = info.outdir / relPath;
     else
-        target = outdir / relPath.filename();
+        target = info.outdir / relPath.filename();
 
     // Create the directory hierarchy
     std::filesystem::create_directories(target.parent_path());
@@ -215,14 +221,14 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     std::filesystem::file_status s = std::filesystem::status(target.parent_path());
     if (!std::filesystem::is_directory(s))
     {
-        std::cout << "ERROR: " << target.parent_path() << " is not a directory." << std::endl;
+        std::cout << "ERROR: " << Files::pathToUnicodeString(target.parent_path()) << " is not a directory." << std::endl;
         return 3;
     }
 
     std::ofstream out(target, std::ios::binary);
 
     // Write the file to disk
-    std::cout << "Extracting " << info.extractfile << " to " << target << std::endl;
+    std::cout << "Extracting " << Files::pathToUnicodeString(info.extractfile) << " to " << Files::pathToUnicodeString(target) << std::endl;
 
     out << stream->rdbuf();
     out.close();
@@ -239,8 +245,8 @@ int extractAll(std::unique_ptr<File>& bsa, Arguments& info)
         Misc::StringUtils::replaceAll(extractPath, "\\", "/");
 
         // Get the target path (the path the file will be extracted to)
-        std::filesystem::path target (info.outdir);
-        target /= extractPath;
+        auto target = info.outdir;
+        target /= Misc::StringUtils::stringToU8String(extractPath);
 
         // Create the directory hierarchy
         std::filesystem::create_directories(target.parent_path());
@@ -257,7 +263,7 @@ int extractAll(std::unique_ptr<File>& bsa, Arguments& info)
         std::ofstream out(target, std::ios::binary);
 
         // Write the file to disk
-        std::cout << "Extracting " << target << std::endl;
+        std::cout << "Extracting " << Files::pathToUnicodeString(target) << std::endl;
         out << data->rdbuf();
         out.close();
     }
@@ -269,7 +275,7 @@ template<typename File>
 int add(std::unique_ptr<File>& bsa, Arguments& info)
 {
     std::fstream stream(info.addfile, std::ios_base::binary | std::ios_base::out | std::ios_base::in);
-    bsa->addFile(info.addfile, stream);
+    bsa->addFile(Files::pathToUnicodeString(info.addfile), stream);
 
     return 0;
 }

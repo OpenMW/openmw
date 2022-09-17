@@ -10,6 +10,7 @@
 #include <components/settings/settings.hpp>
 #include <components/widgets/box.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -400,9 +401,9 @@ namespace MWGui
         else
             mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "HUD_Box_NoTransp" : "HUD_Box");
 
-        std::string caption = info.caption;
-        std::string image = info.icon;
-        int imageSize = (image != "") ? info.imageSize : 0;
+        const std::string& caption = info.caption;
+        const std::string& image = info.icon;
+        int imageSize = (!image.empty()) ? info.imageSize : 0;
         std::string text = info.text;
 
         // remove the first newline (easier this way)
@@ -411,7 +412,7 @@ namespace MWGui
 
         const ESM::Enchantment* enchant = nullptr;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-        if (info.enchant != "")
+        if (!info.enchant.empty())
         {
             enchant = store.get<ESM::Enchantment>().search(info.enchant);
             if (enchant)
@@ -432,8 +433,8 @@ namespace MWGui
 
         const MyGUI::IntPoint padding(8, 8);
 
-        const int imageCaptionHPadding = (caption != "" ? 8 : 0);
-        const int imageCaptionVPadding = (caption != "" ? 4 : 0);
+        const int imageCaptionHPadding = !caption.empty() ? 8 : 0;
+        const int imageCaptionVPadding = !caption.empty() ? 4 : 0;
 
         const int maximumWidth = MyGUI::RenderManager::getInstance().getViewSize().width - imageCaptionHPadding * 2;
 
@@ -446,7 +447,7 @@ namespace MWGui
         captionWidget->setCaptionWithReplacing(caption);
         MyGUI::IntSize captionSize = captionWidget->getTextSize();
 
-        int captionHeight = std::max(caption != "" ? captionSize.height : 0, imageSize);
+        int captionHeight = std::max(!caption.empty() ? captionSize.height : 0, imageSize);
 
         Gui::EditBox* textWidget = mDynamicToolTipBox->createWidget<Gui::EditBox>("SandText", MyGUI::IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), MyGUI::Align::Stretch, "ToolTipText");
         textWidget->setEditStatic(true);
@@ -458,8 +459,8 @@ namespace MWGui
         MyGUI::IntSize textSize = textWidget->getTextSize();
 
         captionSize += MyGUI::IntSize(imageSize, 0); // adjust for image
-        MyGUI::IntSize totalSize = MyGUI::IntSize( std::min(std::max(textSize.width,captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),maximumWidth),
-            ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
+        MyGUI::IntSize totalSize = MyGUI::IntSize( std::min(std::max(textSize.width,captionSize.width + ((!image.empty()) ? imageCaptionHPadding : 0)),maximumWidth),
+            (!text.empty() ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
         for (const std::string& note : info.notes)
         {
@@ -578,7 +579,7 @@ namespace MWGui
 
         textWidget->setPosition (textWidget->getPosition() + MyGUI::IntPoint(0, padding.top)); // only apply vertical padding, the horizontal works automatically due to Align::HCenter
 
-        if (image != "")
+        if (!image.empty())
         {
             MyGUI::ImageBox* imageWidget = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("ImageBox",
                 MyGUI::IntCoord((totalSize.width - captionSize.width - imageCaptionHPadding)/2, 0, imageSize, imageSize),
@@ -611,7 +612,7 @@ namespace MWGui
     std::string ToolTips::getWeightString(const float weight, const std::string& prefix)
     {
         if (weight == 0)
-            return "";
+            return {};
         else
             return "\n" + prefix + ": " + toString(weight);
     }
@@ -619,7 +620,7 @@ namespace MWGui
     std::string ToolTips::getPercentString(const float value, const std::string& prefix)
     {
         if (value == 0)
-            return "";
+            return {};
         else
             return "\n" + prefix + ": " + toString(value*100) +"%";
     }
@@ -627,15 +628,15 @@ namespace MWGui
     std::string ToolTips::getValueString(const int value, const std::string& prefix)
     {
         if (value == 0)
-            return "";
+            return {};
         else
             return "\n" + prefix + ": " + toString(value);
     }
 
     std::string ToolTips::getMiscString(const std::string& text, const std::string& prefix)
     {
-        if (text == "")
-            return "";
+        if (text.empty())
+            return {};
         else
             return "\n" + prefix + ": " + text;
     }
@@ -643,7 +644,7 @@ namespace MWGui
     std::string ToolTips::getCountString(const int value)
     {
         if (value == 1)
-            return "";
+            return {};
         else
             return " (" + MyGUI::utility::toString(value) + ")";
     }
@@ -652,11 +653,11 @@ namespace MWGui
     {
         const std::string& soul = cellref.getSoul();
         if (soul.empty())
-            return std::string();
+            return {};
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Creature *creature = store.get<ESM::Creature>().search(soul);
         if (!creature)
-            return std::string();
+            return {};
         if (creature->mName.empty())
             return " (" + creature->mId + ")";
         return " (" + creature->mName + ")";
@@ -677,7 +678,7 @@ namespace MWGui
                 if (cellref.getFactionRank() >= 0)
                 {
                     int rank = cellref.getFactionRank();
-                    const std::string rankName = fact->mRanks[rank];
+                    const std::string& rankName = fact->mRanks[rank];
                     if (rankName.empty())
                         ret += getValueString(cellref.getFactionRank(), "Rank");
                     else
@@ -728,29 +729,29 @@ namespace MWGui
         if (years)
         {
             units++;
-            ret += toString(years) + " y ";
+            ret += toString(years) + " #{Interface:DurationYear} ";
         }
         if (months)
         {
             units++;
-            ret += toString(months) + " mo ";
+            ret += toString(months) + " #{Interface:DurationMonth} ";
         }
         if (units < 2 && days)
         {
             units++;
-            ret += toString(days) + " d ";
+            ret += toString(days) + " #{Interface:DurationDay} ";
         }
         if (units < 2 && hours)
         {
             units++;
-            ret += toString(hours) + " h ";
+            ret += toString(hours) + " #{Interface:DurationHour} ";
         }
         if (units >= 2)
             return ret;
         if (minutes)
-            ret += toString(minutes) + " min ";
+            ret += toString(minutes) + " #{Interface:DurationMinute} ";
         if (seconds)
-            ret += toString(seconds) + " s ";
+            ret += toString(seconds) + " #{Interface:DurationSecond} ";
 
         return ret;
     }
@@ -802,9 +803,9 @@ namespace MWGui
         if (attributeId == -1)
             return;
 
-        std::string icon = ESM::Attribute::sAttributeIcons[attributeId];
-        std::string name = ESM::Attribute::sGmstAttributeIds[attributeId];
-        std::string desc = ESM::Attribute::sGmstAttributeDescIds[attributeId];
+        const std::string& icon = ESM::Attribute::sAttributeIcons[attributeId];
+        const std::string& name = ESM::Attribute::sGmstAttributeIds[attributeId];
+        const std::string& desc = ESM::Attribute::sGmstAttributeDescIds[attributeId];
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "AttributeToolTip");
@@ -850,12 +851,9 @@ namespace MWGui
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
         widget->setUserString("ImageTexture_BirthSignImage", Misc::ResourceHelpers::correctTexturePath(sign->mTexture, vfs));
-        std::string text;
+        std::string text = sign->mName + "\n#{fontcolourhtml=normal}" + sign->mDescription;
 
-        text += sign->mName;
-        text += "\n#{fontcolourhtml=normal}" + sign->mDescription;
-
-        std::vector<std::string> abilities, powers, spells;
+        std::vector<const ESM::Spell*> abilities, powers, spells;
 
         for (const std::string& spellId : sign->mPowers.mList)
         {
@@ -867,35 +865,27 @@ namespace MWGui
                 continue; // We only want spell, ability and powers.
 
             if (type == ESM::Spell::ST_Ability)
-                abilities.push_back(spellId);
+                abilities.push_back(spell);
             else if (type == ESM::Spell::ST_Power)
-                powers.push_back(spellId);
+                powers.push_back(spell);
             else if (type == ESM::Spell::ST_Spell)
-                spells.push_back(spellId);
+                spells.push_back(spell);
         }
 
-        struct {
-            const std::vector<std::string> &spells;
-            std::string label;
-        }
-        categories[3] = {
-            {abilities, "sBirthsignmenu1"},
-            {powers,    "sPowers"},
-            {spells,    "sBirthsignmenu2"}
-        };
-
-        for (int category = 0; category < 3; ++category)
+        using Category = std::pair<const std::vector<const ESM::Spell*>&, std::string_view>;
+        for (const auto&[category, label] : std::initializer_list<Category>{{abilities, "sBirthsignmenu1"}, {powers, "sPowers"}, {spells, "sBirthsignmenu2"}})
         {
             bool addHeader = true;
-            for (const std::string& spellId : categories[category].spells)
+            for (const ESM::Spell* spell : category)
             {
                 if (addHeader)
                 {
-                    text += std::string("\n\n#{fontcolourhtml=header}") + std::string("#{") + categories[category].label + "}";
+                    text += "\n\n#{fontcolourhtml=header}#{";
+                    text += label;
+                    text += '}';
                     addHeader = false;
                 }
 
-                const ESM::Spell *spell = store.get<ESM::Spell>().find(spellId);
                 text += "\n#{fontcolourhtml=normal}" + spell->mName;
             }
         }

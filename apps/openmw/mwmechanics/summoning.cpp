@@ -2,6 +2,9 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadstat.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -27,9 +30,9 @@ namespace MWMechanics
              || (effectId >= ESM::MagicEffect::SummonFabricant && effectId <= ESM::MagicEffect::SummonCreature05));
     }
 
-    std::string getSummonedCreature(int effectId)
+    std::string_view getSummonedCreature(int effectId)
     {
-        static const std::map<int, std::string> summonMap
+        static const std::map<int, std::string_view> summonMap
         {
             {ESM::MagicEffect::SummonAncestralGhost, "sMagicAncestralGhostID"},
             {ESM::MagicEffect::SummonBonelord, "sMagicBonelordID"},
@@ -52,18 +55,18 @@ namespace MWMechanics
             {ESM::MagicEffect::SummonBear, "sMagicCreature02ID"},
             {ESM::MagicEffect::SummonBonewolf, "sMagicCreature03ID"},
             {ESM::MagicEffect::SummonCreature04, "sMagicCreature04ID"},
-            {ESM::MagicEffect::SummonCreature05, "sMagicCreature05ID"}
+            {ESM::MagicEffect::SummonCreature05, "sMagicCreature05ID"},
         };
 
         auto it = summonMap.find(effectId);
         if (it != summonMap.end())
             return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(it->second)->mValue.getString();
-        return std::string();
+        return {};
     }
 
     int summonCreature(int effectId, const MWWorld::Ptr& summoner)
     {
-        std::string creatureID = getSummonedCreature(effectId);
+        std::string_view creatureID = getSummonedCreature(effectId);
         int creatureActorId = -1;
         if (!creatureID.empty())
         {

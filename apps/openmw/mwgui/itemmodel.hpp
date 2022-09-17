@@ -1,6 +1,8 @@
 #ifndef MWGUI_ITEM_MODEL_H
 #define MWGUI_ITEM_MODEL_H
 
+#include <memory>
+
 #include "../mwworld/ptr.hpp"
 
 namespace MWGui
@@ -87,8 +89,8 @@ namespace MWGui
     class ProxyItemModel : public ItemModel
     {
     public:
-        ProxyItemModel();
-        virtual ~ProxyItemModel();
+        ProxyItemModel() = default;
+        virtual ~ProxyItemModel() = default;
 
         bool allowedToUseItems() const override;
 
@@ -101,14 +103,14 @@ namespace MWGui
         ModelIndex getIndex (const ItemStack &item) override;
 
         /// @note Takes ownership of the passed pointer.
-        void setSourceModel(ItemModel* sourceModel);
+        void setSourceModel(std::unique_ptr<ItemModel> sourceModel);
 
         ModelIndex mapToSource (ModelIndex index);
         ModelIndex mapFromSource (ModelIndex index);
 
         bool usesContainer(const MWWorld::Ptr& container) override;
     protected:
-        ItemModel* mSourceModel;
+        std::unique_ptr<ItemModel> mSourceModel;
     };
 
 }

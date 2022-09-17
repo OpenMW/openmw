@@ -122,16 +122,19 @@ namespace MWGui
     void InventoryWindow::updatePlayer()
     {
         mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
+        auto tradeModel = std::make_unique<TradeItemModel>(std::make_unique<InventoryItemModel>(mPtr), MWWorld::Ptr());
+        mTradeModel = tradeModel.get();
 
         if (mSortModel) // reuse existing SortModel when possible to keep previous category/filter settings
-            mSortModel->setSourceModel(mTradeModel);
+            mSortModel->setSourceModel(std::move(tradeModel));
         else
-            mSortModel = new SortFilterItemModel(mTradeModel);
+        {
+            auto sortModel = std::make_unique<SortFilterItemModel>(std::move(tradeModel));
+            mSortModel = sortModel.get();
+            mItemView->setModel(std::move(sortModel));
+        }
 
         mSortModel->setNameFilter(mFilterEdit->getCaption());
-
-        mItemView->setModel(mSortModel);
 
         mFilterAll->setStateSelected(true);
         mFilterWeapon->setStateSelected(false);
@@ -539,7 +542,7 @@ namespace MWGui
 
             if (!force)
             {
-                std::pair<int, std::string> canEquip = ptr.getClass().canBeEquipped(ptr, player);
+                auto canEquip = ptr.getClass().canBeEquipped(ptr, player);
 
                 if (canEquip.first == 0)
                 {
@@ -776,7 +779,7 @@ namespace MWGui
 
         ItemModel::ModelIndex selected = -1;
         // not using mSortFilterModel as we only need sorting, not filtering
-        SortFilterItemModel model(new InventoryItemModel(player));
+        SortFilterItemModel model(std::make_unique<InventoryItemModel>(player));
         model.setSortByType(false);
         model.update();
         if (model.getItemCount() == 0)
@@ -791,7 +794,7 @@ namespace MWGui
 
         int incr = next ? 1 : -1;
         bool found = false;
-        std::string lastId;
+        std::string_view lastId;
         if (selected != -1)
             lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;

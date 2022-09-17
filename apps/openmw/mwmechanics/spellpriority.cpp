@@ -4,6 +4,7 @@
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadrace.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -494,7 +495,7 @@ namespace MWMechanics
                     MWWorld::InventoryStore::Slot_RightGauntlet,
                     MWWorld::InventoryStore::Slot_Helmet,
                     MWWorld::InventoryStore::Slot_Greaves,
-                    MWWorld::InventoryStore::Slot_Boots
+                    MWWorld::InventoryStore::Slot_Boots,
                 };
 
                 bool enemyHasArmor = false;

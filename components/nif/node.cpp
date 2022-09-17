@@ -272,4 +272,13 @@ namespace Nif
         NiNode::post(nif);
         mSubSorter.post(nif);
     }
+
+    void NiBillboardNode::read(NIFStream *nif)
+    {
+        NiNode::read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+            mMode = nif->getUShort() & 0x7;
+        else
+            mMode = (flags >> 5) & 0x3;
+    }
 }

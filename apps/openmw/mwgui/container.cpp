@@ -129,27 +129,29 @@ namespace MWGui
 
         bool loot = mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead();
 
+        std::unique_ptr<ItemModel> model;
         if (mPtr.getClass().hasInventoryStore(mPtr))
         {
             if (mPtr.getClass().isNpc() && !loot && !lootAnyway)
             {
                 // we are stealing stuff
-                mModel = new PickpocketItemModel(mPtr, new InventoryItemModel(container),
+                model = std::make_unique<PickpocketItemModel>(mPtr, std::make_unique<InventoryItemModel>(container),
                                                  !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown());
             }
             else
-                mModel = new InventoryItemModel(container);
+                model = std::make_unique<InventoryItemModel>(container);
         }
         else
         {
-            mModel = new ContainerItemModel(container);
+            model = std::make_unique<ContainerItemModel>(container);
         }
 
         mDisposeCorpseButton->setVisible(loot);
+        mModel = model.get();
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::move(model));
+        mSortModel = sortModel.get();
 
-        mSortModel = new SortFilterItemModel(mModel);
-
-        mItemView->setModel (mSortModel);
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);

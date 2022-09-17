@@ -9,6 +9,8 @@
 #include "windows_crashshm.hpp"
 #include <SDL_messagebox.h>
 
+#include <components/misc/strings/conversion.hpp>
+
 namespace Crash
 {
 
@@ -26,7 +28,7 @@ namespace Crash
 
     CrashCatcher* CrashCatcher::sInstance = nullptr;
 
-    CrashCatcher::CrashCatcher(int argc, char **argv, const std::string& crashLogPath)
+    CrashCatcher::CrashCatcher(int argc, char **argv, const std::filesystem::path& crashLogPath)
     {
         assert(sInstance == nullptr); // don't allow two instances
 
@@ -124,7 +126,7 @@ namespace Crash
         SetUnhandledExceptionFilter(vectoredExceptionHandler);
     }
 
-    void CrashCatcher::startMonitorProcess(const std::string& crashLogPath)
+    void CrashCatcher::startMonitorProcess(const std::filesystem::path& crashLogPath)
     {
         std::wstring executablePath;
         DWORD copied = 0;
@@ -135,9 +137,10 @@ namespace Crash
         executablePath.resize(copied);
 
         memset(mShm->mStartup.mLogFilePath, 0, sizeof(mShm->mStartup.mLogFilePath));
-        size_t length = crashLogPath.length();
+        const auto str = crashLogPath.u8string();
+        size_t length = str.length();
         if (length >= MAX_LONG_PATH) length = MAX_LONG_PATH - 1;
-        strncpy(mShm->mStartup.mLogFilePath, crashLogPath.c_str(), length);
+        strncpy_s(mShm->mStartup.mLogFilePath, sizeof mShm->mStartup.mLogFilePath, Misc::StringUtils::u8StringToString(str).c_str(), length);
         mShm->mStartup.mLogFilePath[length] = '\0';
 
         // note that we don't need to lock the SHM here, the other process has not started yet

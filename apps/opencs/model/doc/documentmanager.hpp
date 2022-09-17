@@ -4,8 +4,6 @@
 #include <vector>
 #include <string>
 
-#include <boost/filesystem/path.hpp>
-
 #include <QObject>
 #include <QThread>
 
@@ -40,7 +38,7 @@ namespace CSMDoc
             ToUTF8::FromType mEncoding;
             std::vector<std::string> mBlacklistedScripts;
 
-            boost::filesystem::path mResDir;
+            std::filesystem::path mResDir;
 
             bool mFsStrict;
             Files::PathContainer mDataPaths;
@@ -55,8 +53,8 @@ namespace CSMDoc
 
             ~DocumentManager();
 
-            void addDocument (const std::vector< boost::filesystem::path >& files,
-                const boost::filesystem::path& savePath, bool new_);
+            void addDocument (const std::vector< std::filesystem::path >& files,
+                const std::filesystem::path& savePath, bool new_);
             ///< \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
 
@@ -66,10 +64,10 @@ namespace CSMDoc
             ///
             /// \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
-            Document *makeDocument (const std::vector< boost::filesystem::path >& files,
-                const boost::filesystem::path& savePath, bool new_);
+            Document *makeDocument (const std::vector< std::filesystem::path >& files,
+                const std::filesystem::path& savePath, bool new_);
 
-            void setResourceDir (const boost::filesystem::path& parResDir);
+            void setResourceDir (const std::filesystem::path& parResDir);
 
             void setEncoding (ToUTF8::FromType encoding);
 

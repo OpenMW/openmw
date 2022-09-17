@@ -225,12 +225,12 @@ namespace NifOsg
     {
     public:
         /// @param filename used for warning messages.
-        LoaderImpl(const std::string& filename, unsigned int ver, unsigned int userver, unsigned int bethver)
+        LoaderImpl(const std::filesystem::path& filename, unsigned int ver, unsigned int userver, unsigned int bethver)
             : mFilename(filename), mVersion(ver), mUserVersion(userver), mBethVersion(bethver)
         {
 
         }
-        std::string mFilename;
+        std::filesystem::path mFilename;
         unsigned int mVersion, mUserVersion, mBethVersion;
 
         size_t mFirstRootTextureIndex{~0u};
@@ -246,7 +246,7 @@ namespace NifOsg
         // This is used to queue emitters that weren't attached to their node yet.
         std::vector<std::pair<size_t, osg::ref_ptr<Emitter>>> mEmitterQueue;
 
-        static void loadKf(Nif::NIFFilePtr nif, SceneUtil::KeyframeHolder& target)
+        void loadKf(Nif::NIFFilePtr nif, SceneUtil::KeyframeHolder& target) const
         {
             const Nif::NiSequenceStreamHelper *seq = nullptr;
             const size_t numRoots = nif->numRoots();
@@ -292,8 +292,14 @@ namespace NifOsg
                 const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
                 const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
 
-                if (key->data.empty() && key->interpolator.empty())
+                if (key->mData.empty() && key->mInterpolator.empty())
                     continue;
+
+                if (!key->mInterpolator.empty() && key->mInterpolator->recType != Nif::RC_NiTransformInterpolator)
+                {
+                    Log(Debug::Error) << "Unsupported interpolator type for NiKeyframeController " << key->recIndex << " in " << mFilename;
+                    continue;
+                }
 
                 osg::ref_ptr<SceneUtil::KeyframeController> callback = new NifOsg::KeyframeController(key);
                 setupController(key, callback, /*animflags*/0);
@@ -827,8 +833,13 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiKeyframeController)
                 {
                     const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-                    if (key->data.empty() && key->interpolator.empty())
+                    if (key->mData.empty() && key->mInterpolator.empty())
                         continue;
+                    if (!key->mInterpolator.empty() && key->mInterpolator->recType != Nif::RC_NiTransformInterpolator)
+                    {
+                        Log(Debug::Error) << "Unsupported interpolator type for NiKeyframeController " << key->recIndex << " in " << mFilename;
+                        continue;
+                    }
                     osg::ref_ptr<KeyframeController> callback = new KeyframeController(key);
                     setupController(key, callback, animflags);
                     node->addUpdateCallback(callback);
@@ -847,22 +858,28 @@ namespace NifOsg
                 else if (ctrl->recType == Nif::RC_NiVisController)
                 {
                     const Nif::NiVisController *visctrl = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
-                    if (visctrl->data.empty())
+                    if (visctrl->mData.empty() && visctrl->mInterpolator.empty())
                         continue;
-                    osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr(), Loader::getHiddenNodeMask()));
+                    if (!visctrl->mInterpolator.empty() && visctrl->mInterpolator->recType != Nif::RC_NiBoolInterpolator)
+                    {
+                        Log(Debug::Error) << "Unsupported interpolator type for NiVisController " << visctrl->recIndex << " in " << mFilename;
+                        continue;
+                    }
+                    osg::ref_ptr<VisController> callback(new VisController(visctrl, Loader::getHiddenNodeMask()));
                     setupController(visctrl, callback, animflags);
                     node->addUpdateCallback(callback);
                 }
                 else if (ctrl->recType == Nif::RC_NiRollController)
                 {
                     const Nif::NiRollController *rollctrl = static_cast<const Nif::NiRollController*>(ctrl.getPtr());
-                    if (rollctrl->data.empty() && rollctrl->interpolator.empty())
+                    if (rollctrl->mData.empty() && rollctrl->mInterpolator.empty())
                         continue;
-                    osg::ref_ptr<RollController> callback;
-                    if (!rollctrl->interpolator.empty())
-                        callback = new RollController(rollctrl->interpolator.getPtr());
-                    else // if (!rollctrl->data.empty())
-                        callback = new RollController(rollctrl->data.getPtr());
+                    if (!rollctrl->mInterpolator.empty() && rollctrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
+                    {
+                        Log(Debug::Error) << "Unsupported interpolator type for NiRollController " << rollctrl->recIndex << " in " << mFilename;
+                        continue;
+                    }
+                    osg::ref_ptr<RollController> callback = new RollController(rollctrl);
                     setupController(rollctrl, callback, animflags);
                     node->addUpdateCallback(callback);
                     isAnimated = true;
@@ -888,29 +905,31 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiAlphaController)
                 {
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
-                    if (alphactrl->data.empty() && alphactrl->interpolator.empty())
+                    if (alphactrl->mData.empty() && alphactrl->mInterpolator.empty())
                         continue;
-                    osg::ref_ptr<AlphaController> osgctrl;
-                    if (!alphactrl->interpolator.empty())
-                        osgctrl = new AlphaController(alphactrl->interpolator.getPtr(), baseMaterial);
-                    else // if (!alphactrl->data.empty())
-                        osgctrl = new AlphaController(alphactrl->data.getPtr(), baseMaterial);
+                    if (!alphactrl->mInterpolator.empty() && alphactrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
+                    {
+                        Log(Debug::Error) << "Unsupported interpolator type for NiAlphaController " << alphactrl->recIndex << " in " << mFilename;
+                        continue;
+                    }
+                    osg::ref_ptr<AlphaController> osgctrl = new AlphaController(alphactrl, baseMaterial);
                     setupController(alphactrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
                 {
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                    if (matctrl->data.empty() && matctrl->interpolator.empty())
+                    if (matctrl->mData.empty() && matctrl->mInterpolator.empty())
                         continue;
-                    auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->targetColor);
+                    auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->mTargetColor);
                     if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW && targetColor == MaterialColorController::TargetColor::Specular)
                         continue;
-                    osg::ref_ptr<MaterialColorController> osgctrl;
-                    if (!matctrl->interpolator.empty())
-                        osgctrl = new MaterialColorController(matctrl->interpolator.getPtr(), targetColor, baseMaterial);
-                    else // if (!matctrl->data.empty())
-                        osgctrl = new MaterialColorController(matctrl->data.getPtr(), targetColor, baseMaterial);
+                    if (!matctrl->mInterpolator.empty() && matctrl->mInterpolator->recType != Nif::RC_NiPoint3Interpolator)
+                    {
+                        Log(Debug::Error) << "Unsupported interpolator type for NiMaterialColorController " << matctrl->recIndex << " in " << mFilename;
+                        continue;
+                    }
+                    osg::ref_ptr<MaterialColorController> osgctrl = new MaterialColorController(matctrl, baseMaterial);
                     setupController(matctrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
@@ -928,6 +947,11 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiFlipController)
                 {
                     const Nif::NiFlipController* flipctrl = static_cast<const Nif::NiFlipController*>(ctrl.getPtr());
+                    if (!flipctrl->mInterpolator.empty() && flipctrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
+                    {
+                        Log(Debug::Error) << "Unsupported interpolator type for NiFlipController " << flipctrl->recIndex << " in " << mFilename;
+                        continue;
+                    }
                     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
 
                     // inherit wrap settings from the target slot

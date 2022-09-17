@@ -4,10 +4,11 @@
 #include <iosfwd>
 #include <memory>
 #include <string>
+#include <filesystem>
 
 namespace Files
 {
-    std::unique_ptr<std::ifstream> openBinaryInputFileStream(const std::string& path);
+    std::unique_ptr<std::ifstream> openBinaryInputFileStream(const std::filesystem::path &path);
 }
 
 #endif

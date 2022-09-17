@@ -1,6 +1,8 @@
 #ifndef MWGUI_MESSAGE_BOX_H
 #define MWGUI_MESSAGE_BOX_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 
 namespace MyGUI
@@ -21,14 +23,14 @@ namespace MWGui
             MessageBoxManager (float timePerChar);
             ~MessageBoxManager ();
             void onFrame (float frameDuration);
-            void createMessageBox (const std::string& message, bool stat = false);
+            void createMessageBox(std::string_view message, bool stat = false);
             void removeStaticMessageBox ();
-            bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
+            bool createInteractiveMessageBox(std::string_view message, const std::vector<std::string>& buttons);
             bool isInteractiveMessageBox ();
 
             int getMessagesCount();
 
-            const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe; }
+            const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe.get(); }
 
             /// Remove all message boxes
             void clear();
@@ -47,11 +49,11 @@ namespace MWGui
 
             void setVisible(bool value);
 
-            const std::vector<MessageBox*> getActiveMessageBoxes();
+            const std::vector<std::unique_ptr<MessageBox>>& getActiveMessageBoxes() const;
 
         private:
-            std::vector<MessageBox*> mMessageBoxes;
-            InteractiveMessageBox* mInterMessageBoxe;
+            std::vector<std::unique_ptr<MessageBox>> mMessageBoxes;
+            std::unique_ptr<InteractiveMessageBox> mInterMessageBoxe;
             MessageBox* mStaticMessageBox;
             float mMessageBoxSpeed;
             int mLastButtonPressed;
@@ -61,8 +63,7 @@ namespace MWGui
     class MessageBox : public Layout
     {
         public:
-            MessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message);
-            void setMessage (const std::string& message);
+            MessageBox (MessageBoxManager& parMessageBoxManager, std::string_view message);
             const std::string& getMessage() { return mMessage; };
             int getHeight ();
             void update (int height);

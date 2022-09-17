@@ -45,17 +45,17 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
     for (std::vector<std::pair<int,std::string>>::const_iterator iter (states.begin()); iter!=states.end();
         ++iter)
         mRecordState.addItem (QString::fromUtf8 (iter->second.c_str()));
-        
+
     mMode.addItem (tr("Text"));
     mMode.addItem (tr("Text (RegEx)"));
     mMode.addItem (tr("ID"));
     mMode.addItem (tr("ID (RegEx)"));
     mMode.addItem (tr("Record State"));
-    connect (&mMode, SIGNAL (activated (int)), this, SLOT (modeSelected (int)));
+    connect (&mMode, qOverload<int>(&QComboBox::activated), this, &SearchBox::modeSelected);
     mLayout->addWidget (&mMode, 0, 0);
 
-    connect (&mText, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
-    connect (&mText, SIGNAL (returnPressed()), this, SLOT (startSearch()));
+    connect (&mText, &QLineEdit::textChanged, this, &SearchBox::textChanged);
+    connect (&mText, &QLineEdit::returnPressed, this, [this](){ this->startSearch(false); });
     mInput.insertWidget (0, &mText);
 
     mInput.insertWidget (1, &mRecordState);
@@ -64,7 +64,7 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
     mCaseSensitive.setText (tr ("Case"));
     mLayout->addWidget (&mCaseSensitive, 0, 2);
 
-    connect (&mSearch, SIGNAL (clicked (bool)), this, SLOT (startSearch (bool)));
+    connect (&mSearch, &QPushButton::clicked, this, qOverload<bool>(&SearchBox::startSearch));
     mLayout->addWidget (&mSearch, 0, 3);
 
     // replace panel
@@ -74,15 +74,15 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
     mLayout->addWidget (&mReplaceInput, 1, 1);
 
     mLayout->addWidget (&mReplace, 1, 3);
-    
+
     // layout adjustments
     mLayout->setColumnMinimumWidth (2, 50);
     mLayout->setColumnStretch (1, 1);
 
     mLayout->setContentsMargins (0, 0, 0, 0);
 
-    connect (&mReplace, (SIGNAL (clicked (bool))), this, SLOT (replaceAll (bool)));
-    
+    connect (&mReplace, &QPushButton::clicked, this, qOverload<bool>(&SearchBox::replaceAll));
+
     // update
     modeSelected (0);
 
@@ -97,7 +97,7 @@ void CSVTools::SearchBox::setSearchMode (bool enabled)
 
 CSMTools::Search CSVTools::SearchBox::getSearch() const
 {
-    CSMTools::Search::Type type = static_cast<CSMTools::Search::Type> (mMode.currentIndex());    
+    CSMTools::Search::Type type = static_cast<CSMTools::Search::Type> (mMode.currentIndex());
     bool caseSensitive = mCaseSensitive.isChecked();
 
     switch (type)
@@ -106,12 +106,12 @@ CSMTools::Search CSVTools::SearchBox::getSearch() const
         case CSMTools::Search::Type_Id:
 
             return CSMTools::Search (type, caseSensitive, std::string (mText.text().toUtf8().data()));
-        
+
         case CSMTools::Search::Type_TextRegEx:
         case CSMTools::Search::Type_IdRegEx:
 
             return CSMTools::Search (type, caseSensitive, QRegExp (mText.text().toUtf8().data(), Qt::CaseInsensitive));
-        
+
         case CSMTools::Search::Type_RecordState:
 
             return CSMTools::Search (type, caseSensitive, mRecordState.currentIndex());
@@ -127,7 +127,7 @@ CSMTools::Search CSVTools::SearchBox::getSearch() const
 std::string CSVTools::SearchBox::getReplaceText() const
 {
     CSMTools::Search::Type type = static_cast<CSMTools::Search::Type> (mMode.currentIndex());
-    
+
     switch (type)
     {
         case CSMTools::Search::Type_Text:
@@ -173,7 +173,7 @@ void CSVTools::SearchBox::modeSelected (int index)
     }
 
     mInput.currentWidget()->setFocus();
-    
+
     updateSearchButton();
 }
 

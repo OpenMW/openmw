@@ -13,7 +13,7 @@ void GlobalMap::load (ESMReader &esm)
     esm.getSubNameIs("DATA");
     esm.getSubHeader();
     mImageData.resize(esm.getSubSize());
-    esm.getExact(&mImageData[0], mImageData.size());
+    esm.getExact(mImageData.data(), mImageData.size());
 
     while (esm.isNextSub("MRK_"))
     {
@@ -30,7 +30,7 @@ void GlobalMap::save (ESMWriter &esm) const
     esm.writeHNT("BNDS", mBounds);
 
     esm.startSubRecord("DATA");
-    esm.write(&mImageData[0], mImageData.size());
+    esm.write(mImageData.data(), mImageData.size());
     esm.endRecord("DATA");
 
     for (std::set<CellId>::const_iterator it = mMarkers.begin(); it != mMarkers.end(); ++it)

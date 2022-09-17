@@ -128,7 +128,7 @@ bool Launcher::AdvancedPage::loadSettings()
             antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
         }
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
-        connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
+        connect(animSourcesCheckBox, &QCheckBox::toggled, this, &AdvancedPage::slotAnimSourcesToggled);
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
         if (animSourcesCheckBox->checkState() != Qt::Unchecked)
         {
@@ -150,12 +150,12 @@ bool Launcher::AdvancedPage::loadSettings()
 
         loadSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
 
-        connect(postprocessEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotPostProcessToggled(bool)));
+        connect(postprocessEnabledCheckBox, &QCheckBox::toggled, this, &AdvancedPage::slotPostProcessToggled);
         loadSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
         loadSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
         postprocessHDRTimeComboBox->setValue(Settings::Manager::getDouble("auto exposure speed", "Post Processing"));
 
-        connect(skyBlendingCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotSkyBlendingToggled(bool)));
+        connect(skyBlendingCheckBox, &QCheckBox::toggled, this, &AdvancedPage::slotSkyBlendingToggled);
         loadSettingBool(radialFogCheckBox, "radial fog", "Fog");
         loadSettingBool(exponentialFogCheckBox, "exponential fog", "Fog");
         loadSettingBool(skyBlendingCheckBox, "sky blending", "Fog");
@@ -164,7 +164,7 @@ bool Launcher::AdvancedPage::loadSettings()
 
     // Audio
     {
-        std::string selectedAudioDevice = Settings::Manager::getString("device", "Sound");
+        const std::string& selectedAudioDevice = Settings::Manager::getString("device", "Sound");
         if (selectedAudioDevice.empty() == false)
         {
             int audioDeviceIndex = audioDeviceSelectorComboBox->findData(QString::fromStdString(selectedAudioDevice));
@@ -178,7 +178,7 @@ bool Launcher::AdvancedPage::loadSettings()
         {
             enableHRTFComboBox->setCurrentIndex(hrtfEnabledIndex + 1);
         }
-        std::string selectedHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
+        const std::string& selectedHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
         if (selectedHRTFProfile.empty() == false)
         {
             int hrtfProfileIndex = hrtfProfileSelectorComboBox->findData(QString::fromStdString(selectedHRTFProfile));
@@ -205,7 +205,6 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
         scalingSpinBox->setValue(Settings::Manager::getFloat("scaling factor", "GUI"));
         fontSizeSpinBox->setValue(Settings::Manager::getInt("font size", "GUI"));
-        ttfResolutionSpinBox->setValue(Settings::Manager::getInt("ttf resolution", "GUI"));
     }
 
     // Bug fixes
@@ -320,11 +319,11 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(skyBlendingCheckBox, "sky blending", "Fog");
         Settings::Manager::setDouble("sky blending start", "Fog", skyBlendingStartComboBox->value());
     }
-    
+
     // Audio
     {
         int audioDeviceIndex = audioDeviceSelectorComboBox->currentIndex();
-        std::string prevAudioDevice = Settings::Manager::getString("device", "Sound");
+        const std::string& prevAudioDevice = Settings::Manager::getString("device", "Sound");
         if (audioDeviceIndex != 0)
         {
             const std::string& newAudioDevice = audioDeviceSelectorComboBox->currentText().toUtf8().constData();
@@ -341,7 +340,7 @@ void Launcher::AdvancedPage::saveSettings()
             Settings::Manager::setInt("hrtf enable", "Sound", hrtfEnabledIndex);
         }
         int selectedHRTFProfileIndex = hrtfProfileSelectorComboBox->currentIndex();
-        std::string prevHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
+        const std::string& prevHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
         if (selectedHRTFProfileIndex != 0)
         {
             const std::string& newHRTFProfile  = hrtfProfileSelectorComboBox->currentText().toUtf8().constData();
@@ -373,10 +372,6 @@ void Launcher::AdvancedPage::saveSettings()
         int fontSize = fontSizeSpinBox->value();
         if (fontSize != Settings::Manager::getInt("font size", "GUI"))
             Settings::Manager::setInt("font size", "GUI", fontSize);
-
-        int ttfResolution = ttfResolutionSpinBox->value();
-        if (ttfResolution != Settings::Manager::getInt("ttf resolution", "GUI"))
-            Settings::Manager::setInt("ttf resolution", "GUI", ttfResolution);
     }
 
     // Bug fixes

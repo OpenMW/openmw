@@ -75,7 +75,7 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
         previewButton->setIcon(QIcon(":edit-preview"));
         previewButton->setToolTip ("Open a preview of this record");
         buttonsLayout->addWidget(previewButton);
-        connect (previewButton, SIGNAL(clicked()), this, SIGNAL (showPreview()));
+        connect (previewButton, &QToolButton::clicked, this, &RecordButtonBar::showPreview);
     }
 
     if (mTable.getFeatures() & CSMWorld::IdTable::Feature_View)
@@ -84,7 +84,7 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
         viewButton->setIcon(QIcon(":/cell.png"));
         viewButton->setToolTip ("Open a scene view of the cell this record is located in");
         buttonsLayout->addWidget(viewButton);
-        connect (viewButton, SIGNAL(clicked()), this, SIGNAL (viewRecord()));
+        connect (viewButton, &QToolButton::clicked, this, &RecordButtonBar::viewRecord);
     }
 
     // right section
@@ -113,26 +113,28 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     // connections
     if(mBottom && mBottom->canCreateAndDelete())
     {
-        connect (mAddButton, SIGNAL (clicked()), mBottom, SLOT (createRequest()));
-        connect (mCloneButton, SIGNAL (clicked()), this, SLOT (cloneRequest()));
+        connect (mAddButton, &QToolButton::clicked, mBottom, &TableBottomBox::createRequest);
+        connect (mCloneButton, &QToolButton::clicked, this, &RecordButtonBar::cloneRequest);
     }
 
-    connect (mNextButton, SIGNAL (clicked()), this, SLOT (nextId()));
-    connect (mPrevButton, SIGNAL (clicked()), this, SLOT (prevId()));
+    connect (mNextButton, &QToolButton::clicked, this, &RecordButtonBar::nextId);
+    connect (mPrevButton, &QToolButton::clicked, this, &RecordButtonBar::prevId);
 
     if (mCommandDispatcher)
     {
-        connect (mRevertButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeRevert()));
-        connect (mDeleteButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeDelete()));
+        connect (mRevertButton, &QToolButton::clicked,
+            mCommandDispatcher, &CSMWorld::CommandDispatcher::executeRevert);
+        connect (mDeleteButton, &QToolButton::clicked,
+            mCommandDispatcher, &CSMWorld::CommandDispatcher::executeDelete);
     }
 
-    connect (&mTable, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (rowNumberChanged (const QModelIndex&, int, int)));
-    connect (&mTable, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
-        this, SLOT (rowNumberChanged (const QModelIndex&, int, int)));
+    connect (&mTable, &CSMWorld::IdTable::rowsInserted,
+        this, &RecordButtonBar::rowNumberChanged);
+    connect (&mTable, &CSMWorld::IdTable::rowsRemoved,
+        this, &RecordButtonBar::rowNumberChanged);
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
+        this, &RecordButtonBar::settingChanged);
 
     updateModificationButtons();
     updatePrevNextButtons();

@@ -149,7 +149,7 @@ namespace MWClass
 
             int getBaseGold(const MWWorld::ConstPtr& ptr) const override;
 
-            bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const override;
+            bool isClass(const MWWorld::ConstPtr& ptr, std::string_view className) const override;
 
             bool canSwim (const MWWorld::ConstPtr &ptr) const override;
 
@@ -166,7 +166,7 @@ namespace MWClass
 
             void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const override;
 
-            void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const override;
+            void modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const override;
 
             float getWalkSpeed(const MWWorld::Ptr& ptr) const override;
 

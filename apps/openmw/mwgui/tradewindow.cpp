@@ -114,9 +114,11 @@ namespace MWGui
         std::vector<MWWorld::Ptr> worldItems;
         MWBase::Environment::get().getWorld()->getItemsOwnedBy(actor, worldItems);
 
-        mTradeModel = new TradeItemModel(new ContainerItemModel(itemSources, worldItems), mPtr);
-        mSortModel = new SortFilterItemModel(mTradeModel);
-        mItemView->setModel (mSortModel);
+        auto tradeModel = std::make_unique<TradeItemModel>(std::make_unique<ContainerItemModel>(itemSources, worldItems), mPtr);
+        mTradeModel = tradeModel.get();
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::move(tradeModel));
+        mSortModel = sortModel.get();
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
 
         updateLabels();

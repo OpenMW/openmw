@@ -57,6 +57,14 @@ struct KeyMapT {
         if (morph && nif->getVersion() >= NIFStream::generateVersion(10,1,0,106))
             nif->getString(); // Frame name
 
+        if (morph && nif->getVersion() > NIFStream::generateVersion(10,1,0,0))
+        {
+            if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,104) &&
+                nif->getVersion() <= NIFStream::generateVersion(20,1,0,2) && nif->getBethVersion() < 10)
+                nif->getFloat(); // Legacy weight
+            return;
+        }
+
         size_t count = nif->getUInt();
 
         if (count != 0 || morph)
@@ -102,13 +110,6 @@ struct KeyMapT {
         else if (count != 0)
         {
             nif->file->fail("Unhandled interpolation type: " + std::to_string(mInterpolationType));
-        }
-
-        if (morph && nif->getVersion() > NIFStream::generateVersion(10,1,0,0))
-        {
-            if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,104) &&
-                nif->getVersion() <= NIFStream::generateVersion(20,1,0,2) && nif->getBethVersion() < 10)
-                nif->getFloat(); // Legacy weight
         }
     }
 

@@ -3,6 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -14,6 +15,7 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -99,7 +101,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -137,14 +139,14 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    std::pair<int, std::string> Probe::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Probe::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         // Do not allow equip tools from inventory during attack
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
-            return std::make_pair(0, "#{sCantEquipWeapWarning}");
+            return {0, "#{sCantEquipWeapWarning}"};
 
-        return std::make_pair(1, "");
+        return {1, {}};
     }
 
     bool Probe::canSell (const MWWorld::ConstPtr& item, int npcServices) const

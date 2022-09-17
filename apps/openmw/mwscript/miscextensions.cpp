@@ -22,8 +22,11 @@
 
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loaddoor.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/files/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -64,7 +67,7 @@ namespace
         }
 
         ESM::LevelledListBase::LevelItem item;
-        item.mId = std::string{itemId};
+        item.mId = itemId;
         item.mLevel = level;
         list->mList.push_back(item);
     }
@@ -210,7 +213,7 @@ namespace MWScript
 
             void execute (Interpreter::Runtime& runtime) override
             {
-                std::string name{runtime.getStringLiteral(runtime[0].mInteger)};
+                std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 bool allowSkipping = runtime[0].mInteger != 0;
@@ -591,7 +594,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string creature{runtime.getStringLiteral(runtime[0].mInteger)};
+                    std::string_view creature = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
                     std::string_view gem = runtime.getStringLiteral(runtime[0].mInteger);
@@ -1263,7 +1266,7 @@ namespace MWScript
                     return;
 
                 MWMechanics::CastSpell cast(ptr, target, false, true);
-                cast.playSpellCastingEffects(spell->mId, false);
+                cast.playSpellCastingEffects(spell);
                 cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);
@@ -1527,8 +1530,8 @@ namespace MWScript
                     runtime.getContext().report("Exporting the entire scene graph will result in a large file. Confirm this action using 'showscenegraph 1' or select an object instead.");
                 else
                 {
-                    const std::string& filename = MWBase::Environment::get().getWorld()->exportSceneGraph(ptr);
-                    runtime.getContext().report("Wrote '" + filename + "'");
+                    const auto filename = MWBase::Environment::get().getWorld()->exportSceneGraph(ptr);
+                    runtime.getContext().report("Wrote '" + Files::pathToUnicodeString(filename) + "'");
                 }
             }
         };

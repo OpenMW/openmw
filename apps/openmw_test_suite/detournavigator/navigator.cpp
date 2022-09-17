@@ -145,19 +145,21 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_then_find_path_should_return_path)
     {
         constexpr std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
+        auto updateGuard = mNavigator->makeUpdateGuard();
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, updateGuard.get());
+        mNavigator->update(mPlayerPosition, updateGuard.get());
+        updateGuard.reset();
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -190,12 +192,15 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, add_object_should_change_navmesh)
     {
+        mSettings.mWaitUntilMinDistanceToPlayer = 0;
+        mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max())));
+
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -204,9 +209,9 @@ namespace
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -236,9 +241,12 @@ namespace
             Vec3fEq(460, 56.66666412353515625, 1.99998295307159423828125)
         )) << mPath;
 
-        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        {
+            auto updateGuard = mNavigator->makeUpdateGuard();
+            mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, updateGuard.get());
+            mNavigator->update(mPlayerPosition, updateGuard.get());
+        }
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
@@ -275,11 +283,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_changed_object_should_change_navmesh)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -288,10 +296,10 @@ namespace
         compound.shape().addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -324,9 +332,9 @@ namespace
 
         compound.shape().updateChildTransform(0, btTransform(btMatrix3x3::getIdentity(), btVector3(1000, 0, 0)));
 
-        mNavigator->updateObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->updateObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
@@ -362,30 +370,30 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, for_overlapping_heightfields_objects_should_use_higher)
     {
         const std::array<btScalar, 5 * 5> heightfieldData1 {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         CollisionShapeInstance heightfield1(makeSquareHeightfieldTerrainShape(heightfieldData1));
         heightfield1.shape().setLocalScaling(btVector3(128, 128, 1));
 
         const std::array<btScalar, 5 * 5> heightfieldData2 {{
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
+            -25, -25, -25, -25, -25, // row 0
+            -25, -25, -25, -25, -25, // row 1
+            -25, -25, -25, -25, -25, // row 2
+            -25, -25, -25, -25, -25, // row 3
+            -25, -25, -25, -25, -25, // row 4
         }};
         CollisionShapeInstance heightfield2(makeSquareHeightfieldTerrainShape(heightfieldData2));
         heightfield2.shape().setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addObject(ObjectId(&heightfield1.shape()), ObjectShapes(heightfield1.instance(), mObjectTransform), mTransform);
-        mNavigator->addObject(ObjectId(&heightfield2.shape()), ObjectShapes(heightfield2.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addObject(ObjectId(&heightfield1.shape()), ObjectShapes(heightfield1.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->addObject(ObjectId(&heightfield2.shape()), ObjectShapes(heightfield2.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -419,35 +427,35 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, only_one_heightfield_per_cell_is_allowed)
     {
         const std::array<float, 5 * 5> heightfieldData1 {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface1 = makeSquareHeightfieldSurface(heightfieldData1);
         const int cellSize1 = mHeightfieldTileSize * (surface1.mSize - 1);
 
         const std::array<float, 5 * 5> heightfieldData2 {{
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
+            -25, -25, -25, -25, -25, // row 0
+            -25, -25, -25, -25, -25, // row 1
+            -25, -25, -25, -25, -25, // row 2
+            -25, -25, -25, -25, -25, // row 3
+            -25, -25, -25, -25, -25, // row 4
         }};
         const HeightfieldSurface surface2 = makeSquareHeightfieldSurface(heightfieldData2);
         const int cellSize2 = mHeightfieldTileSize * (surface2.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize1, surface1);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize1, surface1, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const Version version = mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion();
 
-        mNavigator->addHeightfield(mCellPosition, cellSize2, surface2);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize2, surface2, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion(), version);
     }
@@ -457,22 +465,22 @@ namespace
         osg::ref_ptr<Resource::BulletShape> bulletShape(new Resource::BulletShape);
 
         std::array<btScalar, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         std::unique_ptr<btHeightfieldTerrainShape> shapePtr = makeSquareHeightfieldTerrainShape(heightfieldData);
         shapePtr->setLocalScaling(btVector3(128, 128, 1));
         bulletShape->mCollisionShape.reset(shapePtr.release());
 
         std::array<btScalar, 5 * 5> heightfieldDataAvoid {{
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
-            -25, -25, -25, -25, -25,
+            -25, -25, -25, -25, -25, // row 0
+            -25, -25, -25, -25, -25, // row 1
+            -25, -25, -25, -25, -25, // row 2
+            -25, -25, -25, -25, -25, // row 3
+            -25, -25, -25, -25, -25, // row 4
         }};
         std::unique_ptr<btHeightfieldTerrainShape> shapeAvoidPtr = makeSquareHeightfieldTerrainShape(heightfieldDataAvoid);
         shapeAvoidPtr->setLocalScaling(btVector3(128, 128, 1));
@@ -481,9 +489,9 @@ namespace
         osg::ref_ptr<const Resource::BulletShapeInstance> instance(new Resource::BulletShapeInstance(bulletShape));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addObject(ObjectId(instance->mCollisionShape.get()), ObjectShapes(instance, mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addObject(ObjectId(instance->mCollisionShape.get()), ObjectShapes(instance, mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -518,20 +526,20 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_ground_lower_than_water_with_only_swim_flag)
     {
         std::array<float, 5 * 5> heightfieldData {{
-            -50,  -50,  -50,  -50,    0,
-            -50, -100, -150, -100,  -50,
-            -50, -150, -200, -150, -100,
-            -50, -100, -150, -100, -100,
-              0,  -50, -100, -100, -100,
+            -50,  -50,  -50,  -50,    0, // row 0
+            -50, -100, -150, -100,  -50, // row 1
+            -50, -150, -200, -150, -100, // row 2
+            -50, -100, -150, -100, -100, // row 3
+              0,  -50, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addWater(mCellPosition, cellSize, 300);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize, 300, nullptr);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mStart.x() = 256;
         mStart.z() = 300;
@@ -564,22 +572,22 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water_with_swim_and_walk_flags)
     {
         std::array<float, 7 * 7> heightfieldData {{
-            0,    0,    0,    0,    0,    0, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -150, -200, -150, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0,    0,    0,    0,    0,    0, 0,
+            0,    0,    0,    0,    0,    0, 0, // row 0
+            0, -100, -100, -100, -100, -100, 0, // row 1
+            0, -100, -150, -150, -150, -100, 0, // row 2
+            0, -100, -150, -200, -150, -100, 0, // row 3
+            0, -100, -150, -150, -150, -100, 0, // row 4
+            0, -100, -100, -100, -100, -100, 0, // row 5
+            0,    0,    0,    0,    0,    0, 0, // row 6
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addWater(mCellPosition, cellSize, -25);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize, -25, nullptr);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mStart.x() = 256;
         mEnd.x() = 256;
@@ -610,22 +618,22 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water_with_max_int_cells_size_and_swim_and_walk_flags)
     {
         std::array<float, 7 * 7> heightfieldData {{
-            0,    0,    0,    0,    0,    0, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -150, -200, -150, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0,    0,    0,    0,    0,    0, 0,
+            0,    0,    0,    0,    0,    0, 0, // row 0
+            0, -100, -100, -100, -100, -100, 0, // row 1
+            0, -100, -150, -150, -150, -100, 0, // row 2
+            0, -100, -150, -200, -150, -100, 0, // row 3
+            0, -100, -150, -150, -150, -100, 0, // row 4
+            0, -100, -100, -100, -100, -100, 0, // row 5
+            0,    0,    0,    0,    0,    0, 0, // row 6
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->addWater(mCellPosition, std::numeric_limits<int>::max(), -25);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->addWater(mCellPosition, std::numeric_limits<int>::max(), -25, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mStart.x() = 256;
         mEnd.x() = 256;
@@ -656,22 +664,22 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_ground_when_ground_cross_water_with_only_walk_flag)
     {
         std::array<float, 7 * 7> heightfieldData {{
-            0,    0,    0,    0,    0,    0, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -150, -200, -150, -100, 0,
-            0, -100, -150, -150, -150, -100, 0,
-            0, -100, -100, -100, -100, -100, 0,
-            0,    0,    0,    0,    0,    0, 0,
+            0,    0,    0,    0,    0,    0, 0, // row 0
+            0, -100, -100, -100, -100, -100, 0, // row 1
+            0, -100, -150, -150, -150, -100, 0, // row 2
+            0, -100, -150, -200, -150, -100, 0, // row 3
+            0, -100, -150, -150, -150, -100, 0, // row 4
+            0, -100, -100, -100, -100, -100, 0, // row 5
+            0,    0,    0,    0,    0,    0, 0, // row 6
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addWater(mCellPosition, cellSize, -25);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize, -25, nullptr);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         mStart.x() = 256;
         mEnd.x() = 256;
@@ -702,27 +710,27 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_object_remove_and_update_then_find_path_should_return_path)
     {
         const std::array<btScalar, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         CollisionShapeInstance heightfield(makeSquareHeightfieldTerrainShape(heightfieldData));
         heightfield.shape().setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->removeObject(ObjectId(&heightfield.shape()));
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->removeObject(ObjectId(&heightfield.shape()), nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -756,27 +764,27 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_heightfield_remove_and_update_then_find_path_should_return_path)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->removeHeightfield(mCellPosition);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->removeHeightfield(mCellPosition, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -810,20 +818,20 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_then_find_random_point_around_circle_should_return_position)
     {
         const std::array<float, 6 * 6> heightfieldData {{
-            0,   0,     0,     0,    0,    0,
-            0, -25,   -25,   -25,  -25,  -25,
-            0, -25, -1000, -1000, -100, -100,
-            0, -25, -1000, -1000, -100, -100,
-            0, -25,  -100,  -100, -100, -100,
-            0, -25,  -100,  -100, -100, -100,
+            0,   0,     0,     0,    0,    0, // row 0
+            0, -25,   -25,   -25,  -25,  -25, // row 1
+            0, -25, -1000, -1000, -100, -100, // row 2
+            0, -25, -1000, -1000, -100, -100, // row 3
+            0, -25,  -100,  -100, -100, -100, // row 4
+            0, -25,  -100,  -100, -100, -100, // row 5
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         Misc::Rng::init(42);
 
@@ -844,11 +852,11 @@ namespace
         mNavigator.reset(new NavigatorImpl(mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max())));
 
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -859,12 +867,12 @@ namespace
 
         mNavigator->addAgent(mAgentBounds);
 
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
 
         for (std::size_t i = 0; i < boxes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(shift.x() + i * 10, shift.y() + i * 10, i * 10));
-            mNavigator->addObject(ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform);
+            mNavigator->addObject(ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform, nullptr);
         }
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -872,11 +880,11 @@ namespace
         for (std::size_t i = 0; i < boxes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(shift.x() + i * 10 + 1, shift.y() + i * 10 + 1, i * 10 + 1));
-            mNavigator->updateObject(ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform);
+            mNavigator->updateObject(ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform, nullptr);
         }
 
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -918,27 +926,27 @@ namespace
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32, i * 32, i * 32));
-            mNavigator->addObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform);
+            mNavigator->addObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const auto start = std::chrono::steady_clock::now();
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 1, i * 32 + 1, i * 32 + 1));
-            mNavigator->updateObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform);
+            mNavigator->updateObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
             const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 2, i * 32 + 2, i * 32 + 2));
-            mNavigator->updateObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform);
+            mNavigator->updateObject(ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const auto duration = std::chrono::steady_clock::now() - start;
 
@@ -949,19 +957,19 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_then_raycast_should_return_position)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const osg::Vec3f start(57, 460, 1);
         const osg::Vec3f end(460, 57, 1);
@@ -974,11 +982,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, update_for_oscillating_object_that_does_not_change_navmesh_should_not_trigger_navmesh_update)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -988,14 +996,14 @@ namespace
         CollisionShapeInstance borderBox(std::make_unique<btBoxShape>(btVector3(50, 50, 50)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
         mNavigator->addObject(ObjectId(&oscillatingBox.shape()), ObjectShapes(oscillatingBox.instance(), mObjectTransform),
-                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition));
+                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition), nullptr);
         // add this box to make navmesh bound box independent from oscillatingBoxShape rotations
         mNavigator->addObject(ObjectId(&borderBox.shape()), ObjectShapes(borderBox.instance(), mObjectTransform),
-                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition + btVector3(0, 0, 200)));
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+                              btTransform(btMatrix3x3::getIdentity(), oscillatingBoxShapePosition + btVector3(0, 0, 200)), nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const Version expectedVersion {1, 4};
 
@@ -1007,9 +1015,9 @@ namespace
         {
             const btTransform transform(btQuaternion(btVector3(0, 0, 1), n * 2 * osg::PI / 10),
                                         oscillatingBoxShapePosition);
-            mNavigator->updateObject(ObjectId(&oscillatingBox.shape()), ObjectShapes(oscillatingBox.instance(), mObjectTransform), transform);
-            mNavigator->update(mPlayerPosition);
-            mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+            mNavigator->updateObject(ObjectId(&oscillatingBox.shape()), ObjectShapes(oscillatingBox.instance(), mObjectTransform), transform, nullptr);
+            mNavigator->update(mPlayerPosition, nullptr);
+            mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
         }
 
         ASSERT_EQ(navMeshes.size(), 1);
@@ -1022,9 +1030,9 @@ namespace
         const int cellSize = mHeightfieldTileSize * 4;
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, plane);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::requiredTilesPresent);
+        mNavigator->addHeightfield(mCellPosition, cellSize, plane, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::Success);
@@ -1058,11 +1066,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, for_not_reachable_destination_find_path_should_provide_partial_path)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -1072,10 +1080,10 @@ namespace
                                        new btBoxShape(btVector3(200, 200, 1000)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
                   Status::PartialPath);
@@ -1097,11 +1105,11 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, end_tolerance_should_extent_available_destinations)
     {
         const std::array<float, 5 * 5> heightfieldData {{
-            0,   0,    0,    0,    0,
-            0, -25,  -25,  -25,  -25,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
-            0, -25, -100, -100, -100,
+            0,   0,    0,    0,    0, // row 0
+            0, -25,  -25,  -25,  -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
         }};
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
         const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
@@ -1111,10 +1119,10 @@ namespace
                                        new btBoxShape(btVector3(100, 100, 1000)));
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addHeightfield(mCellPosition, cellSize, surface);
-        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, nullptr);
+        mNavigator->addObject(ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), mTransform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const float endTolerance = 1000.0f;
 
@@ -1151,15 +1159,15 @@ namespace
         const float level2 = 2;
 
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addWater(mCellPosition, cellSize1, level1);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize1, level1, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         const Version version = mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion();
 
-        mNavigator->addWater(mCellPosition, cellSize2, level2);
-        mNavigator->update(mPlayerPosition);
-        mNavigator->wait(mListener, WaitConditionType::allJobsDone);
+        mNavigator->addWater(mCellPosition, cellSize2, level2, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
         EXPECT_EQ(mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion(), version);
     }

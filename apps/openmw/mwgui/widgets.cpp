@@ -9,6 +9,9 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm/attr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -17,6 +20,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "controllers.hpp"
+#include "ustring.hpp"
 
 namespace MWGui::Widgets
     {
@@ -61,7 +65,7 @@ namespace MWGui::Widgets
                 }
                 else
                 {
-                    const std::string &name = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mSkillId], "");
+                    MyGUI::UString name = toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mSkillId], {}));
                     mSkillNameWidget->setCaption(name);
                 }
             }
@@ -147,7 +151,7 @@ namespace MWGui::Widgets
                 }
                 else
                 {
-                    static const char *attributes[8] = {
+                    static const std::string_view attributes[8] = {
                         "sAttributeStrength",
                         "sAttributeIntelligence",
                         "sAttributeWillpower",
@@ -157,7 +161,7 @@ namespace MWGui::Widgets
                         "sAttributePersonality",
                         "sAttributeLuck"
                     };
-                    const std::string &name = MWBase::Environment::get().getWindowManager()->getGameSettingString(attributes[mId], "");
+                    MyGUI::UString name = toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(attributes[mId], {}));
                     mAttributeNameWidget->setCaption(name);
                 }
             }
@@ -390,32 +394,34 @@ namespace MWGui::Widgets
 
             assert(magicEffect);
 
-            std::string pt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "");
-            std::string pts =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "");
-            std::string pct =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
-            std::string ft =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sfeet", "");
-            std::string lvl =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevel", "");
-            std::string lvls =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevels", "");
-            std::string to =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "") + " ";
-            std::string sec =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("ssecond", "");
-            std::string secs =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sseconds", "");
+            std::string_view pt = MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", {});
+            std::string_view pts = MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", {});
+            std::string_view pct = MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", {});
+            std::string_view ft = MWBase::Environment::get().getWindowManager()->getGameSettingString("sfeet", {});
+            std::string_view lvl = MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevel", {});
+            std::string_view lvls = MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevels", {});
+            std::string to =  " " + std::string{MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", {})} + " ";
+            std::string sec =  " " + std::string{MWBase::Environment::get().getWindowManager()->getGameSettingString("ssecond", {})};
+            std::string secs =  " " + std::string{MWBase::Environment::get().getWindowManager()->getGameSettingString("sseconds", {})};
 
-            std::string effectIDStr = ESM::MagicEffect::effectIdToString(mEffectParams.mEffectID);
-            std::string spellLine = MWBase::Environment::get().getWindowManager()->getGameSettingString(effectIDStr, "");
+            const std::string& effectIDStr = ESM::MagicEffect::effectIdToString(mEffectParams.mEffectID);
+            std::string spellLine{MWBase::Environment::get().getWindowManager()->getGameSettingString(effectIDStr, {})};
 
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && mEffectParams.mSkill != -1)
             {
-                spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], "");
+                spellLine += ' ';
+                spellLine += MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], {});
             }
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && mEffectParams.mAttribute != -1)
             {
-                spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
+                spellLine += ' ';
+                spellLine += MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], {});
             }
 
             if (mEffectParams.mMagnMin || mEffectParams.mMagnMax) {
                 ESM::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
                 if ( displayType == ESM::MagicEffect::MDT_TimesInt ) {
-                    std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
+                    std::string_view timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", {});
                     std::stringstream formatter;
 
                     formatter << std::fixed << std::setprecision(1) << " " << (mEffectParams.mMagnMin / 10.0f);
@@ -433,11 +439,26 @@ namespace MWGui::Widgets
                     if ( displayType == ESM::MagicEffect::MDT_Percentage )
                         spellLine += pct;
                     else if ( displayType == ESM::MagicEffect::MDT_Feet )
-                        spellLine += " " + ft;
+                    {
+                        spellLine += ' ';
+                        spellLine += ft;
+                    }
                     else if ( displayType == ESM::MagicEffect::MDT_Level )
-                        spellLine += " " + ((mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1) ? lvl : lvls );
+                    {
+                        spellLine += ' ';
+                        if (mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1)
+                            spellLine += lvl;
+                        else
+                            spellLine += lvls;
+                    }
                     else  // ESM::MagicEffect::MDT_Points
-                        spellLine += " " + ((mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1) ? pt : pts );
+                    {
+                        spellLine += ' ';
+                        if (mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1)
+                            spellLine += pt;
+                        else
+                            spellLine += pts;
+                    }
                 }
             }
 
@@ -449,7 +470,9 @@ namespace MWGui::Widgets
 
                 if (mEffectParams.mDuration > 0 && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
                 {
-                    spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sfor", "") + " " + MyGUI::utility::toString(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
+                    spellLine += ' ';
+                    spellLine += MWBase::Environment::get().getWindowManager()->getGameSettingString("sfor", {});
+                    spellLine += ' ' + MyGUI::utility::toString(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
                 }
 
                 if (mEffectParams.mArea > 0)
@@ -460,13 +483,15 @@ namespace MWGui::Widgets
                 // potions have no target
                 if (!mEffectParams.mNoTarget)
                 {
-                    std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sonword", "");
+                    spellLine += ' ';
+                    spellLine += MWBase::Environment::get().getWindowManager()->getGameSettingString("sonword", {});
+                    spellLine += ' ';
                     if (mEffectParams.mRange == ESM::RT_Self)
-                        spellLine += " " + on + " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeSelf", "");
+                        spellLine += MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeSelf", {});
                     else if (mEffectParams.mRange == ESM::RT_Touch)
-                        spellLine += " " + on + " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeTouch", "");
+                        spellLine += MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeTouch", {});
                     else if (mEffectParams.mRange == ESM::RT_Target)
-                        spellLine += " " + on + " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeTarget", "");
+                        spellLine += MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeTarget", {});
                 }
             }
 
@@ -517,10 +542,10 @@ namespace MWGui::Widgets
                 mBarTextWidget->setCaption(out.str().c_str());
             }
         }
-        void MWDynamicStat::setTitle(const std::string& text)
+        void MWDynamicStat::setTitle(std::string_view text)
         {
             if (mTextWidget)
-                mTextWidget->setCaption(text);
+                mTextWidget->setCaption(toUString(text));
         }
 
         MWDynamicStat::~MWDynamicStat()

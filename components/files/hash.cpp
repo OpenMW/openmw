@@ -1,4 +1,5 @@
 #include "hash.hpp"
+#include "conversion.hpp"
 
 #include <extern/smhasher/MurmurHash3.h>
 
@@ -9,7 +10,7 @@
 
 namespace Files
 {
-    std::array<std::uint64_t, 2> getHash(const std::string& fileName, std::istream& stream)
+    std::array<std::uint64_t, 2> getHash(const std::filesystem::path& fileName, std::istream& stream)
     {
         std::array<std::uint64_t, 2> hash {0, 0};
         try
@@ -34,7 +35,7 @@ namespace Files
         }
         catch (const std::exception& e)
         {
-            throw std::runtime_error("Error while reading \"" + fileName + "\" to get hash: " + std::string(e.what()));
+            throw std::runtime_error("Error while reading \"" + Files::pathToUnicodeString(fileName) + "\" to get hash: " + e.what());
         }
         return hash;
     }

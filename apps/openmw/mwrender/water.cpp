@@ -238,7 +238,7 @@ private:
     float mRainIntensity;
 };
 
-osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
+osg::ref_ptr<osg::Image> readPngImage (const std::filesystem::path& file)
 {
     std::ifstream inStream;
     inStream.open(file, std::ios_base::in | std::ios_base::binary);
@@ -351,6 +351,9 @@ public:
         camera->setName("ReflectionCamera");
         camera->addCullCallback(new InheritViewPointCallback);
 
+        // Inform the shader that we're in a reflection
+        camera->getOrCreateStateSet()->addUniform(new osg::Uniform("isReflection", true));
+
         // XXX: should really flip the FrontFace on each renderable instead of forcing clockwise.
         osg::ref_ptr<osg::FrontFace> frontFace(new osg::FrontFace);
         frontFace->setMode(osg::FrontFace::CLOCKWISE);
@@ -441,7 +444,7 @@ public:
 };
 
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem,
-             osgUtil::IncrementalCompileOperation *ico, const std::string& resourcePath)
+             osgUtil::IncrementalCompileOperation *ico, const std::filesystem::path& resourcePath)
     : mRainIntensityUpdater(nullptr)
     , mParent(parent)
     , mSceneRoot(sceneRoot)
@@ -474,7 +477,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     geom2->setNodeMask(Mask_SimpleWater);
     geom2->setName("Simple Water Geometry");
     mWaterNode->addChild(geom2);
- 
+
     mSceneRoot->addChild(mWaterNode);
 
     setHeight(mTop);
@@ -587,7 +590,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     // Add animated textures
     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
     const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
-    const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
+    std::string_view texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
         std::ostringstream texname;
@@ -692,7 +695,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Shader> fragmentShader(shaderMgr.getShader("water_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
     osg::ref_ptr<osg::Program> program = shaderMgr.getProgram(vertexShader, fragmentShader);
 
-    osg::ref_ptr<osg::Texture2D> normalMap(new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
+    osg::ref_ptr<osg::Texture2D> normalMap(new osg::Texture2D(readPngImage(mResourcePath / "shaders" / "water_nm.png")));
 
     if (normalMap->getImage())
         normalMap->getImage()->flipVertical();
@@ -701,7 +704,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     normalMap->setMaxAnisotropy(16);
     normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
     normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-    
+
 
     mRainIntensityUpdater = new RainIntensityUpdater();
     node->setUpdateCallback(mRainIntensityUpdater);
@@ -734,7 +737,7 @@ Water::~Water()
 void Water::listAssetsToPreload(std::vector<std::string> &textures)
 {
     const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
-    const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
+    std::string_view texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
         std::ostringstream texname;

@@ -15,6 +15,7 @@
 
 #include <components/serialization/osgyaml.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
 
 namespace Settings
 {
@@ -104,10 +105,10 @@ namespace Settings
             return std::nullopt;
         }
 
-        bool load(const std::string& path)
+        bool load(const std::filesystem::path &path)
         {
             mData = YAML::Null;
-            mPath = std::filesystem::path(path);
+            mPath = path;
 
             Log(Debug::Info) << "Loading shader settings file: " << mPath;
 
@@ -123,7 +124,8 @@ namespace Settings
 
             try
             {
-                mData = YAML::LoadFile(mPath.string());
+                std::ifstream file{mPath};
+                mData = YAML::Load(file);
                 mData.SetStyle(YAML::EmitterStyle::Block);
 
                 if (!mData["config"])
@@ -153,7 +155,7 @@ namespace Settings
             out.SetMapFormat(YAML::Block);
             out << mData;
 
-            std::ofstream fout(mPath.string());
+            std::ofstream fout(mPath);
             fout << out.c_str();
 
             if (!fout)

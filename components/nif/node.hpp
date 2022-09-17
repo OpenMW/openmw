@@ -251,5 +251,12 @@ struct NiSortAdjustNode : NiNode
     void post(NIFFile *nif) override;
 };
 
+struct NiBillboardNode : NiNode
+{
+    int mMode{0};
+
+    void read(NIFStream *nif) override;
+};
+
 } // Namespace
 #endif

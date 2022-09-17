@@ -14,6 +14,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
+#include <components/files/conversion.hpp>
 
 namespace Shader
 {
@@ -25,7 +26,7 @@ namespace Shader
 
     ShaderManager::~ShaderManager() = default;
 
-    void ShaderManager::setShaderPath(const std::string &path)
+    void ShaderManager::setShaderPath(const std::filesystem::path &path)
     {
         mPath = path;
     }
@@ -126,7 +127,7 @@ namespace Shader
             includeFstream.open(includePath);
             if (includeFstream.fail())
             {
-                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath.string();
+                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath;
                 return false;
             }
             int includedFileNumber = fileNumber++;
@@ -384,7 +385,7 @@ namespace Shader
             const std::set<std::filesystem::path>& shaderFiles = templateIncludedFiles[templateName];
             for (const std::filesystem::path& file : shaderFiles)
             {
-                mShaderFiles[file.string()].insert(std::make_pair(templateName, defines));
+                mShaderFiles[Files::pathToUnicodeString(file)].insert(std::make_pair(templateName, defines));
             }
         }
 
@@ -426,7 +427,7 @@ namespace Shader
                         stream.open(path);
                         if (stream.fail())
                         {
-                            Log(Debug::Error) << "Failed to open " << path.string();
+                            Log(Debug::Error) << "Failed to open " << Files::pathToUnicodeString(path);
                         }
                         std::stringstream buffer;
                         buffer << stream.rdbuf();
@@ -467,12 +468,12 @@ namespace Shader
 
         if (templateIt == mShaderTemplates.end())
         {
-            std::filesystem::path path = (std::filesystem::path(mPath) / templateName);
+            std::filesystem::path path = mPath / templateName;
             std::ifstream stream;
             stream.open(path);
             if (stream.fail())
             {
-                Log(Debug::Error) << "Failed to open " << path.string();
+                Log(Debug::Error) << "Failed to open " << path;
                 return nullptr;
             }
             std::stringstream buffer;
@@ -482,7 +483,7 @@ namespace Shader
             int fileNumber = 1;
             std::string source = buffer.str();
             if (!addLineDirectivesAfterConditionalBlocks(source)
-                || !parseIncludes(std::filesystem::path(mPath), source, templateName, fileNumber, {}, insertedPaths))
+                || !parseIncludes(mPath, source, templateName, fileNumber, {}, insertedPaths))
                 return nullptr;
             mHotReloadManager->templateIncludedFiles[templateName] = insertedPaths;
             templateIt = mShaderTemplates.insert(std::make_pair(templateName, source)).first;

@@ -1,5 +1,8 @@
-Copyright (c) 2014, Georg Duffner (https://github.com/georgd/OpenMW-Fonts),
-with Reserved Font Name "OMWAyembedt.ttf".
+Copyright (c) 2022, OpenMW Team (https://gitlab.com/OpenMW),
+with Reserved Font Name "MysticCards.ttf".
+
+Copyright (c) 2015, Isak Larborn (isaskar.github.io/Pelagiad|Isaskar@users.noreply.github.com),
+with Reserved Font Name "Pelagiad.ttf".
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

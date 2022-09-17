@@ -41,9 +41,9 @@ namespace CSVRender
         mDeselectAll = new QAction("Clear selection", this);
         mInvertSelection = new QAction("Invert selection", this);
 
-        connect(mSelectAll, SIGNAL(triggered()), this, SLOT(selectAll()));
-        connect(mDeselectAll, SIGNAL(triggered()), this, SLOT(clearSelection()));
-        connect(mInvertSelection, SIGNAL(triggered()), this, SLOT(invertSelection()));
+        connect(mSelectAll, &QAction::triggered, this, &SelectionMode::selectAll);
+        connect(mDeselectAll, &QAction::triggered, this, &SelectionMode::clearSelection);
+        connect(mInvertSelection, &QAction::triggered, this, &SelectionMode::invertSelection);
     }
 
     WorldspaceWidget& SelectionMode::getWorldspaceWidget()

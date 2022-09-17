@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <filesystem>
 
 namespace VFS
 {
@@ -94,7 +95,7 @@ namespace VFS
         /// Retrieve the absolute path to the file
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
-        std::string getAbsoluteFileName(std::string_view name) const;
+        std::filesystem::path getAbsoluteFileName(const std::filesystem::path &name) const;
 
     private:
         bool mStrict;

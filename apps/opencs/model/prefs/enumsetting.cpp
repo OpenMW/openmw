@@ -97,7 +97,7 @@ std::pair<QWidget *, QWidget *> CSMPrefs::EnumSetting::makeWidgets (QWidget *par
         label->setToolTip (tooltip);
     }
 
-    connect (mWidget, SIGNAL (currentIndexChanged (int)), this, SLOT (valueChanged (int)));
+    connect (mWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, &EnumSetting::valueChanged);
 
     return std::make_pair (label, mWidget);
 }

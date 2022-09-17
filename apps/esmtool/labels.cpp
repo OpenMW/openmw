@@ -15,11 +15,11 @@
 
 #include <components/misc/strings/format.hpp>
 
-std::string bodyPartLabel(int idx)
+std::string_view bodyPartLabel(int idx)
 {
     if (idx >= 0 && idx <= 26)
     {
-        static const char *bodyPartLabels[] =  {
+        static constexpr std::string_view bodyPartLabels[] =  {
             "Head",
             "Hair",
             "Neck",
@@ -46,7 +46,7 @@ std::string bodyPartLabel(int idx)
             "Right Shoulder",
             "Left Shoulder",
             "Weapon",
-            "Tail"
+            "Tail",
         };
         return bodyPartLabels[idx];
     }
@@ -54,11 +54,11 @@ std::string bodyPartLabel(int idx)
         return "Invalid";
 }
 
-std::string meshPartLabel(int idx)
+std::string_view meshPartLabel(int idx)
 {
     if (idx >= 0 && idx <= ESM::BodyPart::MP_Tail)
     {
-        static const char *meshPartLabels[] =  {
+        static constexpr std::string_view meshPartLabels[] =  {
             "Head",
             "Hair",
             "Neck",
@@ -73,7 +73,7 @@ std::string meshPartLabel(int idx)
             "Knee",
             "Upper Leg",
             "Clavicle",
-            "Tail"
+            "Tail",
         };
         return meshPartLabels[idx];
     }
@@ -81,14 +81,14 @@ std::string meshPartLabel(int idx)
         return "Invalid";
 }
 
-std::string meshTypeLabel(int idx)
+std::string_view meshTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= ESM::BodyPart::MT_Armor)
     {
-        static const char *meshTypeLabels[] =  {
+        static constexpr std::string_view meshTypeLabels[] =  {
             "Skin",
             "Clothing",
-            "Armor"
+            "Armor",
         };
         return meshTypeLabels[idx];
     }
@@ -96,11 +96,11 @@ std::string meshTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string clothingTypeLabel(int idx)
+std::string_view clothingTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 9)
     {
-        static const char *clothingTypeLabels[] = {
+        static constexpr std::string_view clothingTypeLabels[] = {
             "Pants",
             "Shoes",
             "Shirt",
@@ -110,7 +110,7 @@ std::string clothingTypeLabel(int idx)
             "Left Glove",
             "Skirt",
             "Ring",
-            "Amulet"
+            "Amulet",
         };
         return clothingTypeLabels[idx];
     }
@@ -118,11 +118,11 @@ std::string clothingTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string armorTypeLabel(int idx)
+std::string_view armorTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 10)
     {
-        static const char *armorTypeLabels[] = {
+         static constexpr std::string_view armorTypeLabels[] = {
             "Helmet",
             "Cuirass",
             "Left Pauldron",
@@ -133,7 +133,7 @@ std::string armorTypeLabel(int idx)
             "Right Gauntlet",
             "Shield",
             "Left Bracer",
-            "Right Bracer"
+            "Right Bracer",
         };
         return armorTypeLabels[idx];
     }
@@ -141,16 +141,16 @@ std::string armorTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string dialogTypeLabel(int idx)
+std::string_view dialogTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 4)
     {
-        static const char *dialogTypeLabels[] = {
+        static constexpr std::string_view dialogTypeLabels[] = {
             "Topic",
             "Voice",
             "Greeting",
             "Persuasion",
-            "Journal"
+            "Journal",
         };
         return dialogTypeLabels[idx];
     }
@@ -160,16 +160,16 @@ std::string dialogTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string questStatusLabel(int idx)
+std::string_view questStatusLabel(int idx)
 {
     if (idx >= 0 && idx <= 4)
     {
-        static const char *questStatusLabels[] = {
+        static constexpr std::string_view questStatusLabels[] = {
             "None",
             "Name",
             "Finished",
             "Restart",
-            "Deleted"
+            "Deleted",
         };
         return questStatusLabels[idx];
     }
@@ -177,11 +177,11 @@ std::string questStatusLabel(int idx)
         return "Invalid";
 }
 
-std::string creatureTypeLabel(int idx)
+std::string_view creatureTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 3)
     {
-        static const char *creatureTypeLabels[] = {
+        static constexpr std::string_view creatureTypeLabels[] = {
             "Creature",
             "Daedra",
             "Undead",
@@ -193,11 +193,11 @@ std::string creatureTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string soundTypeLabel(int idx)
+std::string_view soundTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 7)
     {
-        static const char *soundTypeLabels[] = {
+        static constexpr std::string_view soundTypeLabels[] = {
             "Left Foot",
             "Right Foot",
             "Swim Left",
@@ -205,7 +205,7 @@ std::string soundTypeLabel(int idx)
             "Moan",
             "Roar",
             "Scream",
-            "Land"
+            "Land",
         };
         return soundTypeLabels[idx];
     }
@@ -213,11 +213,11 @@ std::string soundTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string weaponTypeLabel(int idx)
+std::string_view weaponTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 13)
     {
-        static const char *weaponTypeLabels[] = {
+        static constexpr std::string_view weaponTypeLabels[] = {
             "Short Blade One Hand",
             "Long Blade One Hand",
             "Long Blade Two Hand",
@@ -231,7 +231,7 @@ std::string weaponTypeLabel(int idx)
             "Marksman Crossbow",
             "Marksman Thrown",
             "Arrow",
-            "Bolt"
+            "Bolt",
         };
         return weaponTypeLabels[idx];
     }
@@ -239,21 +239,24 @@ std::string weaponTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string aiTypeLabel(int type)
+std::string_view aiTypeLabel(ESM::AiPackageType type)
 {
-    if (type == ESM::AI_Wander) return "Wander";
-    else if (type == ESM::AI_Travel) return "Travel";
-    else if (type == ESM::AI_Follow) return "Follow";
-    else if (type == ESM::AI_Escort) return "Escort";
-    else if (type == ESM::AI_Activate) return "Activate";
-    else return "Invalid";
+    switch (type)
+    {
+        case ESM::AI_Wander: return "Wander";
+        case ESM::AI_Travel: return "Travel";
+        case ESM::AI_Follow: return "Follow";
+        case ESM::AI_Escort: return "Escort";
+        case ESM::AI_Activate: return "Activate";
+    }
+    return "Invalid";
 }
 
-std::string magicEffectLabel(int idx)
+std::string_view magicEffectLabel(int idx)
 {
     if (idx >= 0 && idx <= 142)
     {
-        const char* magicEffectLabels [] = {
+        static constexpr std::string_view magicEffectLabels [] = {
             "Water Breathing",
             "Swift Swim",
             "Water Walking",
@@ -396,7 +399,7 @@ std::string magicEffectLabel(int idx)
             "sEffectSummonCreature02",
             "sEffectSummonCreature03",
             "sEffectSummonCreature04",
-            "sEffectSummonCreature05"
+            "sEffectSummonCreature05",
         };
         return magicEffectLabels[idx];
     }
@@ -404,11 +407,11 @@ std::string magicEffectLabel(int idx)
         return "Invalid";
 }
 
-std::string attributeLabel(int idx)
+std::string_view attributeLabel(int idx)
 {
     if (idx >= 0 && idx <= 7)
     {
-        const char* attributeLabels [] = {
+        static constexpr std::string_view attributeLabels [] = {
             "Strength",
             "Intelligence",
             "Willpower",
@@ -416,7 +419,7 @@ std::string attributeLabel(int idx)
             "Speed",
             "Endurance",
             "Personality",
-            "Luck"
+            "Luck",
         };
         return attributeLabels[idx];
     }
@@ -424,17 +427,17 @@ std::string attributeLabel(int idx)
         return "Invalid";
 }
 
-std::string spellTypeLabel(int idx)
+std::string_view spellTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 5)
     {
-        const char* spellTypeLabels [] = {
+        static constexpr std::string_view spellTypeLabels [] = {
             "Spells",
             "Abilities",
             "Blight Disease",
             "Disease",
             "Curse",
-            "Powers"
+            "Powers",
         };
         return spellTypeLabels[idx];
     }
@@ -442,14 +445,14 @@ std::string spellTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string specializationLabel(int idx)
+std::string_view specializationLabel(int idx)
 {
     if (idx >= 0 && idx <= 2)
     {
-        const char* specializationLabels [] = {
+        static constexpr std::string_view specializationLabels [] = {
             "Combat",
             "Magic",
-            "Stealth"
+            "Stealth",
         };
         return specializationLabels[idx];
     }
@@ -457,11 +460,11 @@ std::string specializationLabel(int idx)
         return "Invalid";
 }
 
-std::string skillLabel(int idx)
+std::string_view skillLabel(int idx)
 {
     if (idx >= 0 && idx <= 26)
     {
-        const char* skillLabels [] = {
+        static constexpr std::string_view skillLabels [] = {
             "Block",
             "Armorer",
             "Medium Armor",
@@ -488,7 +491,7 @@ std::string skillLabel(int idx)
             "Marksman",
             "Mercantile",
             "Speechcraft",
-            "Hand-to-hand"
+            "Hand-to-hand",
         };
         return skillLabels[idx];
     }
@@ -496,11 +499,11 @@ std::string skillLabel(int idx)
         return "Invalid";
 }
 
-std::string apparatusTypeLabel(int idx)
+std::string_view apparatusTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 3)
     {
-        const char* apparatusTypeLabels [] = {
+        static constexpr std::string_view apparatusTypeLabels [] = {
             "Mortar",
             "Alembic",
             "Calcinator",
@@ -512,14 +515,14 @@ std::string apparatusTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string rangeTypeLabel(int idx)
+std::string_view rangeTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 2)
     {
-        const char* rangeTypeLabels [] = {
+        static constexpr std::string_view rangeTypeLabels [] = {
             "Self",
             "Touch",
-            "Target"
+            "Target",
         };
         return rangeTypeLabels[idx];
     }
@@ -527,17 +530,17 @@ std::string rangeTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string schoolLabel(int idx)
+std::string_view schoolLabel(int idx)
 {
     if (idx >= 0 && idx <= 5)
     {
-        const char* schoolLabels [] = {
+        static constexpr std::string_view schoolLabels [] = {
             "Alteration",
             "Conjuration",
             "Destruction",
             "Illusion",
             "Mysticism",
-            "Restoration"
+            "Restoration",
         };
         return schoolLabels[idx];
     }
@@ -545,15 +548,15 @@ std::string schoolLabel(int idx)
         return "Invalid";
 }
 
-std::string enchantTypeLabel(int idx)
+std::string_view enchantTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 3)
     {
-        const char* enchantTypeLabels [] = {
+        static constexpr std::string_view enchantTypeLabels [] = {
             "Cast Once",
             "Cast When Strikes",
             "Cast When Used",
-            "Constant Effect"
+            "Constant Effect",
         };
         return enchantTypeLabels[idx];
     }
@@ -561,11 +564,11 @@ std::string enchantTypeLabel(int idx)
         return "Invalid";
 }
 
-std::string ruleFunction(int idx)
+std::string_view ruleFunction(int idx)
 {
     if (idx >= 0 && idx <= 72)
     {
-        std::string ruleFunctions[] = {
+        static constexpr std::string_view ruleFunctions[] = {
             "Reaction Low",
             "Reaction High",
             "Rank Requirement",
@@ -638,7 +641,7 @@ std::string ruleFunction(int idx)
             "Alarm",
             "Flee",
             "Should Attack",
-            "Werewolf"
+            "Werewolf",
         };
         return ruleFunctions[idx];
     }

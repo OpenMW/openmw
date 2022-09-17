@@ -1,6 +1,9 @@
 #include "filter.hpp"
 
 #include <components/compiler/locals.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

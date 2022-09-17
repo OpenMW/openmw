@@ -108,7 +108,7 @@ namespace MWBase
 
             /// @note This method will block until the video finishes playing
             /// (and will continually update the window while doing so)
-            virtual void playVideo(const std::string& name, bool allowSkipping, bool overrideSounds = true) = 0;
+            virtual void playVideo(std::string_view name, bool allowSkipping, bool overrideSounds = true) = 0;
 
             virtual void setNewGame(bool newgame) = 0;
 
@@ -150,7 +150,7 @@ namespace MWBase
             virtual MWGui::CountDialog* getCountDialog() = 0;
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
-            virtual const std::vector<MWGui::MessageBox*> getActiveMessageBoxes() = 0;
+            virtual const std::vector<std::unique_ptr<MWGui::MessageBox>>& getActiveMessageBoxes() const = 0;
             virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
 
             /// Make the player use an item, while updating GUI state accordingly
@@ -214,7 +214,7 @@ namespace MWBase
             /// update activated quick key state (if action executing was delayed for some reason)
             virtual void updateActivatedQuickKey () = 0;
 
-            virtual std::string getSelectedSpell() = 0;
+            virtual const std::string& getSelectedSpell() = 0;
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
             virtual void setSelectedEnchantItem(const MWWorld::Ptr& item) = 0;
             virtual const MWWorld::Ptr& getSelectedEnchantItem() const = 0;
@@ -241,13 +241,12 @@ namespace MWBase
             /** No guarantee of actually closing the window **/
             virtual void exitCurrentGuiMode() = 0;
 
-            virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
+            virtual void messageBox(std::string_view message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             /// Puts message into a queue to show on the next update. Thread safe alternative for messageBox.
             virtual void scheduleMessageBox(std::string message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
-            virtual void staticMessageBox(const std::string& message) = 0;
+            virtual void staticMessageBox(std::string_view message) = 0;
             virtual void removeStaticMessageBox() = 0;
-            virtual void interactiveMessageBox (const std::string& message,
-                                                const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false) = 0;
+            virtual void interactiveMessageBox(std::string_view message, const std::vector<std::string>& buttons = {}, bool block = false) = 0;
 
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
@@ -261,7 +260,7 @@ namespace MWBase
              * @param id Identifier for the GMST setting, e.g. "aName"
              * @param default Default value if the GMST setting cannot be used.
              */
-            virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
+            virtual std::string_view getGameSettingString(std::string_view id, std::string_view default_) = 0;
 
             virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 

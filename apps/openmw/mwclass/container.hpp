@@ -89,7 +89,7 @@ namespace MWClass
 
             bool useAnim() const override;
 
-            void modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const override;
+            void modifyBaseInventory(std::string_view containerId, std::string_view itemId, int amount) const override;
     };
 }
 

@@ -3,6 +3,9 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadcrea.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -16,6 +19,7 @@
 #include "../mwworld/actionsoulgem.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -142,7 +146,7 @@ namespace MWClass
             countString = " (" + std::to_string(count) + ")";
 
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count) + MWGui::ToolTips::getSoulString(ptr.getCellRef());
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -203,9 +207,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        const std::string_view soulgemPrefix = "misc_soulgem";
-
-        if (Misc::StringUtils::ciStartsWith(ptr.getCellRef().getRefId(), soulgemPrefix))
+        if (isSoulGem(ptr))
             return std::make_unique<MWWorld::ActionSoulgem>(ptr);
 
         return std::make_unique<MWWorld::NullAction>();
@@ -228,6 +230,11 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
         return ref->mBase->mData.mIsKey != 0;
+    }
+
+    bool Miscellaneous::isSoulGem(const MWWorld::ConstPtr& ptr) const
+    {
+        return Misc::StringUtils::ciStartsWith(ptr.getCellRef().getRefId(), "misc_soulgem");
     }
 
 }

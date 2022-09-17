@@ -4,6 +4,7 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "version.hpp"
+#include "tilespositionsrange.hpp"
 
 #include <components/bullethelpers/operators.hpp>
 
@@ -38,7 +39,6 @@ namespace DetourNavigator
             OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(EndPolygonNotFound)
             OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(MoveAlongSurfaceFailed)
             OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(FindPathOverPolygonsFailed)
-            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(GetPolyHeightFailed)
             OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(InitNavMeshQueryFailed)
         }
 #undef OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE
@@ -195,6 +195,11 @@ namespace DetourNavigator
     std::ostream& operator<<(std::ostream& stream, const Version& value)
     {
         return stream << "Version {" << value.mGeneration << ", " << value.mRevision << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const TilesPositionsRange& value)
+    {
+        return stream << "TilesPositionsRange {" << value.mBegin << ", " << value.mEnd << "}";
     }
 
     void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix,

@@ -7,8 +7,10 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-#include "../../model/doc/documentmanager.hpp"
+#include <components/files/qtconversion.hpp>
+
 #include "../../model/doc/document.hpp"
+#include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/state.hpp"
 
 #include "../../model/world/columns.hpp"
@@ -110,39 +112,33 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_BookType, CSMWorld::Columns::ColumnId_BookType, false },
         { CSMWorld::ColumnBase::Display_BloodType, CSMWorld::Columns::ColumnId_BloodType, false },
         { CSMWorld::ColumnBase::Display_EmitterType, CSMWorld::Columns::ColumnId_EmitterType, false },
-        { CSMWorld::ColumnBase::Display_GenderNpc, CSMWorld::Columns::ColumnId_Gender, false }
+        { CSMWorld::ColumnBase::Display_GenderNpc, CSMWorld::Columns::ColumnId_Gender, false },
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)
         mDelegateFactories->add (sMapping[i].mDisplay, new CSVWorld::EnumDelegateFactory (
             CSMWorld::Columns::getEnums (sMapping[i].mColumnId), sMapping[i].mAllowNone));
 
-    connect (&mDocumentManager, SIGNAL (loadRequest (CSMDoc::Document *)),
-        &mLoader, SLOT (add (CSMDoc::Document *)));
+    connect (&mDocumentManager, &CSMDoc::DocumentManager::loadRequest,
+        &mLoader, &Loader::add);
 
-    connect (
-        &mDocumentManager, SIGNAL (loadingStopped (CSMDoc::Document *, bool, const std::string&)),
-        &mLoader, SLOT (loadingStopped (CSMDoc::Document *, bool, const std::string&)));
+    connect (&mDocumentManager, &CSMDoc::DocumentManager::loadingStopped,
+        &mLoader, &Loader::loadingStopped);
 
-    connect (
-        &mDocumentManager, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)),
-        &mLoader, SLOT (nextStage (CSMDoc::Document *, const std::string&, int)));
+    connect (&mDocumentManager, &CSMDoc::DocumentManager::nextStage,
+        &mLoader, &Loader::nextStage);
 
-    connect (
-        &mDocumentManager, SIGNAL (nextRecord (CSMDoc::Document *, int)),
-        &mLoader, SLOT (nextRecord (CSMDoc::Document *, int)));
+    connect (&mDocumentManager, &CSMDoc::DocumentManager::nextRecord,
+        &mLoader, &Loader::nextRecord);
 
-    connect (
-        &mDocumentManager, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),
-        &mLoader, SLOT (loadMessage (CSMDoc::Document *, const std::string&)));
+    connect (&mDocumentManager, &CSMDoc::DocumentManager::loadMessage,
+        &mLoader, &Loader::loadMessage);
 
-    connect (
-        &mLoader, SIGNAL (cancel (CSMDoc::Document *)),
-        &mDocumentManager, SIGNAL (cancelLoading (CSMDoc::Document *)));
+    connect (&mLoader, &Loader::cancel,
+        &mDocumentManager, &CSMDoc::DocumentManager::cancelLoading);
 
-    connect (
-        &mLoader, SIGNAL (close (CSMDoc::Document *)),
-        &mDocumentManager, SLOT (removeDocument (CSMDoc::Document *)));
+    connect (&mLoader, &Loader::close,
+        &mDocumentManager, &CSMDoc::DocumentManager::removeDocument);
 }
 
 CSVDoc::ViewManager::~ViewManager()
@@ -158,11 +154,11 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     if (countViews (document)==0)
     {
         // new document
-        connect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
-            this, SLOT (documentStateChanged (int, CSMDoc::Document *)));
+        connect (document, &CSMDoc::Document::stateChanged,
+            this, &ViewManager::documentStateChanged);
 
-        connect (document, SIGNAL (progress (int, int, int, int, CSMDoc::Document *)),
-            this, SLOT (progress (int, int, int, int, CSMDoc::Document *)));
+        connect (document, qOverload<int,int,int,int,CSMDoc::Document*>(&CSMDoc::Document::progress),
+            this, &ViewManager::progress);
     }
 
     View *view = new View (*this, document, countViews (document)+1);
@@ -172,11 +168,11 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     view->toggleStatusBar (CSMPrefs::get()["Windows"]["show-statusbar"].isTrue());
     view->show();
 
-    connect (view, SIGNAL (newGameRequest ()), this, SIGNAL (newGameRequest()));
-    connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
-    connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
-    connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
-    connect (view, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SIGNAL (mergeDocument (CSMDoc::Document *)));
+    connect (view, &View::newGameRequest, this, &ViewManager::newGameRequest);
+    connect (view, &View::newAddonRequest, this, &ViewManager::newAddonRequest);
+    connect (view, &View::loadDocumentRequest, this, &ViewManager::loadDocumentRequest);
+    connect (view, &View::editSettingsRequest, this, &ViewManager::editSettingsRequest);
+    connect (view, &View::mergeDocument, this, &ViewManager::mergeDocument);
 
     updateIndices();
 
@@ -267,7 +263,7 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (CSVDoc::View *view)
     QMessageBox messageBox(view);
     CSMDoc::Document *document = view->getDocument();
 
-    messageBox.setWindowTitle (QString::fromUtf8(document->getSavePath().filename().string().c_str()));
+    messageBox.setWindowTitle (Files::pathToQString(document->getSavePath().filename()));
     messageBox.setText ("The document has been modified.");
     messageBox.setInformativeText ("Do you want to save your changes?");
     messageBox.setStandardButtons (QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -278,9 +274,9 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (CSVDoc::View *view)
 
     bool retVal = true;
 
-    connect (this, SIGNAL (closeMessageBox()), &messageBox, SLOT (close()));
+    connect (this, &ViewManager::closeMessageBox, &messageBox, &QMessageBox::close);
 
-    connect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
+    connect (document, &CSMDoc::Document::stateChanged, this, &ViewManager::onExitWarningHandler);
 
     mUserWarned = true;
     int response = messageBox.exec();
@@ -297,13 +293,15 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (CSVDoc::View *view)
 
         case QMessageBox::Discard:
 
-            disconnect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
+            disconnect (document, &CSMDoc::Document::stateChanged,
+                this, &ViewManager::onExitWarningHandler);
         break;
 
         case QMessageBox::Cancel:
 
             //disconnect to prevent unintended view closures
-            disconnect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
+            disconnect (document, &CSMDoc::Document::stateChanged,
+                this, &ViewManager::onExitWarningHandler);
             retVal = false;
         break;
 
@@ -332,8 +330,8 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox (CSVDoc::View *view)
     bool retVal = true;
 
     //Connections shut down message box if operation ends before user makes a decision.
-    connect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
-    connect (this, SIGNAL (closeMessageBox()), &messageBox, SLOT (close()));
+    connect (document, &CSMDoc::Document::stateChanged, this, &ViewManager::onExitWarningHandler);
+    connect (this, &ViewManager::closeMessageBox, &messageBox, &QMessageBox::close);
 
     //set / clear the user warned flag to indicate whether or not the message box is currently active.
     mUserWarned = true;
@@ -351,7 +349,7 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox (CSVDoc::View *view)
     else if (messageBox.clickedButton() == closeButton)
     {
         //disconnect to avoid segmentation fault
-        disconnect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
+        disconnect (document, &CSMDoc::Document::stateChanged, this, &ViewManager::onExitWarningHandler);
 
         view->abortOperation(CSMDoc::State_Saving);
         mExitOnSaveStateChange = true;
@@ -362,7 +360,7 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox (CSVDoc::View *view)
         //abort shutdown, allow save to complete
         //disconnection to prevent unintended view closures
         mExitOnSaveStateChange = false;
-        disconnect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
+        disconnect (document, &CSMDoc::Document::stateChanged, this, &ViewManager::onExitWarningHandler);
         retVal = false;
     }
 

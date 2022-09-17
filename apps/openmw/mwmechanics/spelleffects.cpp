@@ -6,6 +6,10 @@
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadbody.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -277,7 +281,7 @@ namespace
             const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
             animation->addEffect(
                 Misc::ResourceHelpers::correctMeshPath(absorbStatic->mModel, vfs),
-                ESM::MagicEffect::SpellAbsorption, false, std::string());
+                ESM::MagicEffect::SpellAbsorption, false);
         }
         const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellId);
         int spellCost = 0;
@@ -299,7 +303,7 @@ namespace
         stats.setMagicka(magicka);
     }
 
-    MWMechanics::MagicApplicationResult applyProtections(const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
+    MWMechanics::MagicApplicationResult::Type applyProtections(const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
         const MWMechanics::ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, const ESM::MagicEffect* magicEffect)
     {
         auto& stats = target.getClass().getCreatureStats(target);
@@ -307,8 +311,8 @@ namespace
         // Apply reflect and spell absorption
         if(target != caster && spellParams.getType() != ESM::ActiveSpells::Type_Enchantment && spellParams.getType() != ESM::ActiveSpells::Type_Permanent)
         {
-            bool canReflect = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable) &&
-                !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Reflect) && magnitudes.get(ESM::MagicEffect::Reflect).getMagnitude() > 0.f;
+            bool canReflect = !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable) && !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Reflect) &&
+                magnitudes.get(ESM::MagicEffect::Reflect).getMagnitude() > 0.f && !caster.isEmpty();
             bool canAbsorb = !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_SpellAbsorption) && magnitudes.get(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f;
             if(canReflect || canAbsorb)
             {
@@ -323,7 +327,7 @@ namespace
                         {
                             if(canReflect && Misc::Rng::roll0to99(prng) < activeEffect.mMagnitude)
                             {
-                                return MWMechanics::MagicApplicationResult::REFLECTED;
+                                return MWMechanics::MagicApplicationResult::Type::REFLECTED;
                             }
                         }
                         else if(activeEffect.mEffectId == ESM::MagicEffect::SpellAbsorption)
@@ -331,7 +335,7 @@ namespace
                             if(canAbsorb && Misc::Rng::roll0to99(prng) < activeEffect.mMagnitude)
                             {
                                 absorbSpell(spellParams.getId(), caster, target);
-                                return MWMechanics::MagicApplicationResult::REMOVED;
+                                return MWMechanics::MagicApplicationResult::Type::REMOVED;
                             }
                         }
                     }
@@ -356,12 +360,12 @@ namespace
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
                 else if (caster == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
-                return MWMechanics::MagicApplicationResult::REMOVED;
+                return MWMechanics::MagicApplicationResult::Type::REMOVED;
             }
             effect.mMinMagnitude *= magnitudeMult;
             effect.mMaxMagnitude *= magnitudeMult;
         }
-        return MWMechanics::MagicApplicationResult::APPLIED;
+        return MWMechanics::MagicApplicationResult::Type::APPLIED;
     }
 
     static const std::map<int, std::string> sBoundItemsMap{
@@ -375,14 +379,14 @@ namespace
         {ESM::MagicEffect::BoundLongsword, "sMagicBoundLongswordID"},
         {ESM::MagicEffect::BoundMace, "sMagicBoundMaceID"},
         {ESM::MagicEffect::BoundShield, "sMagicBoundShieldID"},
-        {ESM::MagicEffect::BoundSpear, "sMagicBoundSpearID"}
+        {ESM::MagicEffect::BoundSpear, "sMagicBoundSpearID"},
     };
 }
 
 namespace MWMechanics
 {
 
-void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, bool& invalid, bool& receivedMagicDamage, bool& recalculateMagicka)
+void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, bool& invalid, bool& receivedMagicDamage, bool& affectedHealth, bool& recalculateMagicka)
 {
     const auto world = MWBase::Environment::get().getWorld();
     bool godmode = target == getPlayer() && world->getGodModeState();
@@ -428,7 +432,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 invalid = true;
             else if (world->isTeleportingEnabled())
             {
-                auto marker = (effect.mEffectId == ESM::MagicEffect::DivineIntervention) ? "divinemarker" : "templemarker";
+                std::string_view marker = (effect.mEffectId == ESM::MagicEffect::DivineIntervention) ? "divinemarker" : "templemarker";
                 world->teleportToClosestMarker(target, marker);
                 if(!caster.isEmpty())
                 {
@@ -464,7 +468,10 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 world->getPlayer().getMarkedPosition(markedCell, markedPosition);
                 if (markedCell)
                 {
-                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName, markedPosition, false);
+                    std::string_view dest;
+                    if (!markedCell->isExterior())
+                        dest = markedCell->getCell()->mName;
+                    MWWorld::ActionTeleport action(dest, markedPosition, false);
                     action.execute(target);
                     if(!caster.isEmpty())
                     {
@@ -526,6 +533,14 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
         case ESM::MagicEffect::RallyCreature:
         case ESM::MagicEffect::RallyHumanoid:
             modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, -effect.mMagnitude, invalid);
+            break;
+        case ESM::MagicEffect::Sound:
+            if(target == getPlayer())
+            {
+                const auto& magnitudes = target.getClass().getCreatureStats(target).getMagicEffects();
+                float volume = std::clamp((magnitudes.get(effect.mEffectId).getModifier() + effect.mMagnitude) / 100.f, 0.f, 1.f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(target, "magic sound", volume, 1.f, MWSound::Type::Sfx, MWSound::PlayMode::LoopNoEnv);
+            }
             break;
         case ESM::MagicEffect::SummonScamp:
         case ESM::MagicEffect::SummonClannfear:
@@ -603,7 +618,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                     static const bool uncappedDamageFatigue = Settings::Manager::getBool("uncapped damage fatigue", "Game");
                     adjustDynamicStat(target, index, -effect.mMagnitude, index == 2 && uncappedDamageFatigue);
                     if(index == 0)
-                        receivedMagicDamage = true;
+                        receivedMagicDamage = affectedHealth = true;
                 }
             }
             break;
@@ -638,6 +653,8 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 restoreSkill(target, effect, effect.mMagnitude);
             break;
         case ESM::MagicEffect::RestoreHealth:
+            affectedHealth = true;
+            [[fallthrough]];
         case ESM::MagicEffect::RestoreMagicka:
         case ESM::MagicEffect::RestoreFatigue:
             adjustDynamicStat(target, effect.mEffectId - ESM::MagicEffect::RestoreHealth, effect.mMagnitude);
@@ -659,7 +676,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 float damage = effect.mMagnitude * damageScale;
                 adjustDynamicStat(target, 0, -damage);
                 if (damage > 0.f)
-                    receivedMagicDamage = true;
+                    receivedMagicDamage = affectedHealth = true;
             }
             break;
         case ESM::MagicEffect::DrainHealth:
@@ -671,7 +688,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 int index = effect.mEffectId - ESM::MagicEffect::DrainHealth;
                 adjustDynamicStat(target, index, -effect.mMagnitude, uncappedDamageFatigue && index == 2);
                 if(index == 0)
-                    receivedMagicDamage = true;
+                    receivedMagicDamage = affectedHealth = true;
             }
             break;
         case ESM::MagicEffect::FortifyHealth:
@@ -730,7 +747,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 if(!caster.isEmpty())
                     adjustDynamicStat(caster, index, effect.mMagnitude);
                 if(index == 0)
-                    receivedMagicDamage = true;
+                    receivedMagicDamage = affectedHealth = true;
             }
             break;
         case ESM::MagicEffect::AbsorbAttribute:
@@ -770,7 +787,7 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 MWWorld::InventoryStore::Slot_RightGauntlet,
                 MWWorld::InventoryStore::Slot_Helmet,
                 MWWorld::InventoryStore::Slot_Greaves,
-                MWWorld::InventoryStore::Slot_Boots
+                MWWorld::InventoryStore::Slot_Boots,
             };
             for (const int priority : priorities)
             {
@@ -836,22 +853,23 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
     bool invalid = false;
     bool receivedMagicDamage = false;
     bool recalculateMagicka = false;
+    bool affectedHealth = false;
     if(effect.mEffectId == ESM::MagicEffect::Corprus && spellParams.shouldWorsen())
     {
         spellParams.worsen();
         for(auto& otherEffect : spellParams.getEffects())
         {
             if(isCorprusEffect(otherEffect))
-                applyMagicEffect(target, caster, spellParams, otherEffect, invalid, receivedMagicDamage, recalculateMagicka);
+                applyMagicEffect(target, caster, spellParams, otherEffect, invalid, receivedMagicDamage, affectedHealth, recalculateMagicka);
         }
         if(target == getPlayer())
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
-        return MagicApplicationResult::APPLIED;
+        return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
     }
     else if(shouldRemoveEffect(target, effect))
     {
         onMagicEffectRemoved(target, spellParams, effect);
-        return MagicApplicationResult::REMOVED;
+        return {MagicApplicationResult::Type::REMOVED, receivedMagicDamage, affectedHealth};
     }
     const auto* magicEffect = world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
     if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
@@ -859,10 +877,10 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
         if(magicEffect->mData.mFlags & ESM::MagicEffect::Flags::AppliedOnce)
         {
             effect.mTimeLeft -= dt;
-            return MagicApplicationResult::APPLIED;
+            return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
         }
         else if(!dt)
-            return MagicApplicationResult::APPLIED;
+            return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
     }
     if(effect.mEffectId == ESM::MagicEffect::Lock)
     {
@@ -922,9 +940,9 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
         auto& magnitudes = stats.getMagicEffects();
         if(spellParams.getType() != ESM::ActiveSpells::Type_Ability && !(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
         {
-            MagicApplicationResult result = applyProtections(target, caster, spellParams, effect, magicEffect);
-            if(result != MagicApplicationResult::APPLIED)
-                return result;
+            MagicApplicationResult::Type result = applyProtections(target, caster, spellParams, effect, magicEffect);
+            if(result != MagicApplicationResult::Type::APPLIED)
+                return {result, receivedMagicDamage, affectedHealth};
         }
         float oldMagnitude = 0.f;
         if(effect.mFlags & ESM::ActiveEffect::Flag_Applied)
@@ -953,13 +971,13 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
                 effect.mMagnitude = oldMagnitude;
                 effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
                 effect.mTimeLeft -= dt;
-                return MagicApplicationResult::APPLIED;
+                return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
             }
         }
         if(effect.mEffectId == ESM::MagicEffect::Corprus)
             spellParams.worsen();
         else
-            applyMagicEffect(target, caster, spellParams, effect, invalid, receivedMagicDamage, recalculateMagicka);
+            applyMagicEffect(target, caster, spellParams, effect, invalid, receivedMagicDamage, affectedHealth, recalculateMagicka);
         effect.mMagnitude = magnitude;
         magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(effect.mMagnitude - oldMagnitude));
     }
@@ -974,11 +992,9 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
     }
     else
         effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
-    if (receivedMagicDamage && target == getPlayer())
-        MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
     if(recalculateMagicka)
         target.getClass().getCreatureStats(target).recalculateMagicka();
-    return MagicApplicationResult::APPLIED;
+    return {MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth};
 }
 
 void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellParams& spellParams, const ESM::ActiveEffect& effect)
@@ -1023,9 +1039,26 @@ void removeMagicEffect(const MWWorld::Ptr& target, ActiveSpells::ActiveSpellPara
         case ESM::MagicEffect::DemoralizeHumanoid:
             modifyAiSetting(target, effect, ESM::MagicEffect::DemoralizeCreature, AiSetting::Flee, -effect.mMagnitude, invalid);
             break;
+        case ESM::MagicEffect::NightEye:
+            {
+                const MWMechanics::EffectParam nightEye = magnitudes.get(effect.mEffectId);
+                if(nightEye.getMagnitude() < 0.f && nightEye.getBase() < 0)
+                {
+                    // The PCVisionBonus functions are different from every other magic effect function in that they clamp the value to [0, 1].
+                    // Morrowind.exe applies the same clamping to the night-eye effect, which can create situations where an effect is still active
+                    // (i.e. shown in the menu) but the screen is no longer bright. Modifying the base value here should prevent that while preserving their function.
+                    float delta = std::clamp(-nightEye.getMagnitude(), 0.f, -static_cast<float>(nightEye.getBase()));
+                    magnitudes.modifyBase(effect.mEffectId, static_cast<int>(delta));
+                }
+            }
+            break;
         case ESM::MagicEffect::RallyCreature:
         case ESM::MagicEffect::RallyHumanoid:
             modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, effect.mMagnitude, invalid);
+            break;
+        case ESM::MagicEffect::Sound:
+            if(magnitudes.get(effect.mEffectId).getModifier() <= 0.f && target == getPlayer())
+                MWBase::Environment::get().getSoundManager()->stopSound3D(target, "magic sound");
             break;
         case ESM::MagicEffect::SummonScamp:
         case ESM::MagicEffect::SummonClannfear:

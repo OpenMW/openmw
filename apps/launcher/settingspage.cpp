@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QDir>
 
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
+
 #include "utils/textinputdialog.hpp"
 #include "datafilespage.hpp"
 
@@ -36,22 +39,22 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     mImporterInvoker = new ProcessInvoker();
     resetProgressBar();
 
-    connect(mWizardInvoker->getProcess(), SIGNAL(started()),
-            this, SLOT(wizardStarted()));
+    connect(mWizardInvoker->getProcess(), &QProcess::started,
+            this, &SettingsPage::wizardStarted);
 
-    connect(mWizardInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(wizardFinished(int,QProcess::ExitStatus)));
+    connect(mWizardInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+            this, &SettingsPage::wizardFinished);
 
-    connect(mImporterInvoker->getProcess(), SIGNAL(started()),
-            this, SLOT(importerStarted()));
+    connect(mImporterInvoker->getProcess(), &QProcess::started,
+            this, &SettingsPage::importerStarted);
 
-    connect(mImporterInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(importerFinished(int,QProcess::ExitStatus)));
+    connect(mImporterInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+            this, &SettingsPage::importerFinished);
 
     mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
 
-    connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
-            this, SLOT(updateOkButton(QString)));
+    connect(mProfileDialog->lineEdit(), &LineEdit::textChanged,
+            this, &SettingsPage::updateOkButton);
 
     // Detect Morrowind configuration files
     QStringList iniPaths;
@@ -102,9 +105,13 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     mMain->writeSettings();
 
     // Create the file if it doesn't already exist, else the importer will fail
-    QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
-    path.append(QLatin1String("openmw.cfg"));
+    auto path = mCfgMgr.getUserConfigPath();
+    path /= "openmw.cfg";
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QFile file(path);
+#else
+    QFile file(Files::pathToQString(path));
+#endif
 
     if (!file.exists()) {
         if (!file.open(QIODevice::ReadWrite)) {
@@ -137,7 +144,7 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     arguments.append(QString("--ini"));
     arguments.append(settingsComboBox->currentText());
     arguments.append(QString("--cfg"));
-    arguments.append(path);
+    arguments.append(Files::pathToQString(path));
 
     qDebug() << "arguments " << arguments;
 

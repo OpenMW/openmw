@@ -4,9 +4,13 @@
 #include <string_view>
 #include <algorithm>
 
+#include <components/esm/common.hpp>
+
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
+#include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace
@@ -163,4 +167,50 @@ std::string Misc::ResourceHelpers::correctSoundPath(std::string_view resPath, co
 bool Misc::ResourceHelpers::isHiddenMarker(std::string_view id)
 {
     return Misc::StringUtils::ciEqual(id, "prisonmarker") || Misc::StringUtils::ciEqual(id, "divinemarker") || Misc::StringUtils::ciEqual(id, "templemarker") || Misc::StringUtils::ciEqual(id, "northmarker");
+}
+
+namespace
+{
+std::string getLODMeshNameImpl(std::string resPath, const VFS::Manager* vfs, std::string_view pattern)
+{
+    if (auto w = Misc::findExtension(resPath); w != std::string::npos)
+        resPath.insert(w, pattern);
+    return vfs->normalizeFilename(resPath);
+}
+
+std::string getBestLODMeshName(std::string const& resPath, const VFS::Manager* vfs, std::string_view pattern)
+{
+    if (const auto& result = getLODMeshNameImpl(resPath, vfs, pattern); vfs->exists(result))
+        return result;
+    return resPath;
+}
+}
+
+std::string Misc::ResourceHelpers::getLODMeshName(int esmVersion, std::string resPath, const VFS::Manager* vfs, unsigned char lod)
+{
+    const std::string distantMeshPattern = [&esmVersion] {
+        switch (esmVersion)
+        {
+            case ESM::VER_120:
+            case ESM::VER_130:
+                return "_dist";
+            case ESM::VER_080:
+            case ESM::VER_100:
+                return "_far";
+            case ESM::VER_094:
+            case ESM::VER_170:
+                return "_lod";
+            default:
+                return "";
+        }
+    }();
+    for (char l = lod; l >= 0; --l)
+    {
+        std::stringstream patern;
+        patern << distantMeshPattern << "_" << int(l);
+        std::string const meshName = getBestLODMeshName(resPath, vfs, patern.str());
+        if (meshName != resPath)
+            return meshName;
+    }
+    return getBestLODMeshName(resPath, vfs, distantMeshPattern);
 }

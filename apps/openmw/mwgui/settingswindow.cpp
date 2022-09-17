@@ -38,6 +38,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "confirmationdialog.hpp"
+#include "ustring.hpp"
 
 namespace
 {
@@ -237,7 +238,7 @@ namespace MWGui
         , mCurrentPage(-1)
     {
         bool terrain = Settings::Manager::getBool("distant terrain", "Terrain");
-        const std::string widgetName = terrain ? "RenderingDistanceSlider" : "LargeRenderingDistanceSlider";
+        const std::string_view widgetName = terrain ? "RenderingDistanceSlider" : "LargeRenderingDistanceSlider";
         MyGUI::Widget* unusedSlider;
         getWidget(unusedSlider, widgetName);
         unusedSlider->setVisible(false);
@@ -337,7 +338,7 @@ namespace MWGui
         }
         highlightCurrentResolution();
 
-        std::string tmip = Settings::Manager::getString("texture mipmap", "General");
+        const std::string& tmip = Settings::Manager::getString("texture mipmap", "General");
         mTextureFilteringButton->setCaptionWithReplacing(textureMipmappingToStr(tmip));
 
         int waterTextureSize = Settings::Manager::getInt("rtt size", "Water");
@@ -584,11 +585,11 @@ namespace MWGui
 
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
     {
-        std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
-        std::string off = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "On");
+        MyGUI::UString on = toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On"));
         bool newState;
         if (_sender->castType<MyGUI::Button>()->getCaption() == on)
         {
+            MyGUI::UString off = toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "Off"));
             _sender->castType<MyGUI::Button>()->setCaption(off);
             newState = false;
         }

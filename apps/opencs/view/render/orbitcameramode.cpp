@@ -16,7 +16,8 @@ namespace CSVRender
     {
         mCenterShortcut = new CSMPrefs::Shortcut("orbit-center-selection", worldspaceWidget);
         mCenterShortcut->enable(false);
-        connect(mCenterShortcut, SIGNAL(activated()), this, SLOT(centerSelection()));
+        connect(mCenterShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
+                this, &OrbitCameraMode::centerSelection);
     }
 
     OrbitCameraMode::~OrbitCameraMode()
@@ -27,7 +28,7 @@ namespace CSVRender
     {
         mCenterOnSelection = new QAction("Center on selected object", this);
         mCenterShortcut->associateAction(mCenterOnSelection);
-        connect(mCenterOnSelection, SIGNAL(triggered()), this, SLOT(centerSelection()));
+        connect(mCenterOnSelection, &QAction::triggered, this, &OrbitCameraMode::centerSelection);
 
         mCenterShortcut->enable(true);
     }

@@ -48,6 +48,7 @@
 #include <components/bsa/memorystream.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/files/constrainedfilestream.hpp>
+#include <components/files/conversion.hpp>
 
 namespace Bsa
 {
@@ -119,7 +120,7 @@ void CompressedBSAFile::readHeader()
 {
     assert(!mIsLoaded);
 
-    std::ifstream input(std::filesystem::path(mFilename), std::ios_base::binary);
+    std::ifstream input(mFilepath, std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -214,7 +215,7 @@ void CompressedBSAFile::readHeader()
         if ((archiveFlags & 0x1) != 0)
             getBZString(folder, input);
 
-        folderHash = generateHash(folder, std::string());
+        folderHash = generateHash(folder, {});
 
         auto iter = mFolders.find(folderHash);
         if (iter == mFolders.end())
@@ -245,7 +246,7 @@ void CompressedBSAFile::readHeader()
     if ((archiveFlags & 0x2) != 0)
     {
         mStringBuf.resize(totalFileNameLength);
-        input.read(&mStringBuf[0], mStringBuf.size()); // TODO: maybe useful in building a lookup map?
+        input.read(mStringBuf.data(), mStringBuf.size()); // TODO: maybe useful in building a lookup map?
     }
 
     size_t mStringBuffOffset = 0;
@@ -299,18 +300,28 @@ void CompressedBSAFile::readHeader()
 
 CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string& str) const
 {
-    // Force-convert the path into something both Windows and UNIX can handle first
-    // to make sure Boost doesn't think the entire path is the filename on Linux
+    for (const auto c : str)
+    {
+        if (((static_cast<unsigned>(c) >> 7U) & 1U) != 0U) {
+            fail("File record " + str + " contains unicode characters, refusing to load.");
+        }
+    }
+
+#ifdef _WIN32
+    const auto& path = str;
+#else
+    // Force-convert the path into something UNIX can handle first
+    // to make sure std::filesystem::path doesn't think the entire path is the filename on Linux
     // and subsequently purge it to determine the file folder.
     std::string path = str;
     std::replace(path.begin(), path.end(), '\\', '/');
+#endif
 
-    std::filesystem::path p(path);
-    std::string stem = p.stem().string();
-    std::string ext = p.extension().string();
-    
-    std::string folder = p.parent_path().string();
-    std::uint64_t folderHash = generateHash(folder, std::string());
+    const auto p = std::filesystem::path{ path }; // Purposefully damage Unicode strings.
+    const auto stem = p.stem();
+    const auto ext = p.extension().string();  // Purposefully damage Unicode strings.
+
+    std::uint64_t folderHash = generateHash(p.parent_path(), {});
 
     auto it = mFolders.find(folderHash);
     if (it == mFolders.end())
@@ -353,7 +364,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
     size_t size = fileRecord.getSizeWithoutCompressionFlag();
     size_t uncompressedSize = size;
     bool compressed = fileRecord.isCompressed(mCompressedByDefault);
-    Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilename, fileRecord.offset, size);
+    Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, fileRecord.offset, size);
     std::istream* fileStream = streamPtr.get();
     if (mEmbeddedFileNames)
     {
@@ -390,10 +401,10 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
             LZ4F_decompressOptions_t options = {};
             LZ4F_errorCode_t errorCode = LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.data(), &size, &options);
             if (LZ4F_isError(errorCode))
-                fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
+                fail("LZ4 decompression error (file " + Files::pathToUnicodeString(mFilepath) + "): " + LZ4F_getErrorName(errorCode));
             errorCode = LZ4F_freeDecompressionContext(context);
             if (LZ4F_isError(errorCode))
-                fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
+                fail("LZ4 decompression error (file " + Files::pathToUnicodeString(mFilepath) + "): " + LZ4F_getErrorName(errorCode));
         }
     }
     else
@@ -404,9 +415,9 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
     return std::make_unique<Files::StreamWithBuffer<MemoryInputStream>>(std::move(memoryStreamPtr));
 }
 
-BsaVersion CompressedBSAFile::detectVersion(const std::string& filePath)
+BsaVersion CompressedBSAFile::detectVersion(const std::filesystem::path &filePath)
 {
-    std::ifstream input(std::filesystem::path(filePath), std::ios_base::binary);
+    std::ifstream input(filePath, std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -455,7 +466,7 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
             continue;
         }
 
-        Files::IStreamPtr dataBegin = Files::openConstrainedFileStream(mFilename, fileRecord.offset, fileRecord.getSizeWithoutCompressionFlag());
+        Files::IStreamPtr dataBegin = Files::openConstrainedFileStream(mFilepath, fileRecord.offset, fileRecord.getSizeWithoutCompressionFlag());
 
         if (mEmbeddedFileNames)
         {
@@ -467,19 +478,20 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
     }
 }
 
-std::uint64_t CompressedBSAFile::generateHash(std::string stem, std::string extension)
+std::uint64_t CompressedBSAFile::generateHash(const std::filesystem::path& stem, std::string extension)
 {
-    size_t len = stem.length();
+    auto str = stem.u8string();
+    size_t len = str.length();
     if (len == 0)
         return 0;
-    std::replace(stem.begin(), stem.end(), '/', '\\');
-    Misc::StringUtils::lowerCaseInPlace(stem);
-    uint64_t result = stem[len-1] | (len >= 3 ? (stem[len-2] << 8) : 0) | (len << 16) | (stem[0] << 24);
+    std::replace(str.begin(), str.end(), '/', '\\');
+    Misc::StringUtils::lowerCaseInPlace(str);
+    uint64_t result = str[len-1] | (len >= 3 ? (str[len-2] << 8) : 0) | (len << 16) | (str[0] << 24);
     if (len >= 4)
     {
         uint32_t hash = 0;
         for (size_t i = 1; i <= len-3; ++i)
-            hash = hash * 0x1003f + stem[i];
+            hash = hash * 0x1003f + str[i];
         result += static_cast<uint64_t>(hash) << 32;
     }
     if (extension.empty())
@@ -490,7 +502,7 @@ std::uint64_t CompressedBSAFile::generateHash(std::string stem, std::string exte
     else if (extension == ".dds") result |= 0x8080;
     else if (extension == ".wav") result |= 0x80000000;
     uint32_t hash = 0;
-    for (const char &c : extension)
+    for (const auto &c : extension)
         hash = hash * 0x1003f + c;
     result += static_cast<uint64_t>(hash) << 32;
     return result;

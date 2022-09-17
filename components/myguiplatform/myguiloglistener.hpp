@@ -2,7 +2,8 @@
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_LOGLISTENER_H
 
 #include <string>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 
 #include <MyGUI_ILogListener.h>
 #include <MyGUI_LogSource.h>
@@ -18,7 +19,7 @@ namespace osgMyGUI
     class CustomLogListener : public MyGUI::ILogListener
     {
     public:
-        CustomLogListener(const std::string &name)
+        CustomLogListener(const std::filesystem::path &name)
             : mFileName(name)
         {}
 
@@ -30,11 +31,9 @@ namespace osgMyGUI
 
         void log(const std::string& _section, MyGUI::LogLevel _level, const struct tm* _time, const std::string& _message, const char* _file, int _line) override;
 
-        const std::string& getFileName() const { return mFileName; }
-
     private:
-        boost::filesystem::ofstream mStream;
-        std::string mFileName;
+        std::ofstream mStream;
+        std::filesystem::path mFileName;
     };
 
     /// \brief Helper class holding data that required during
@@ -48,7 +47,7 @@ namespace osgMyGUI
 
     public:
 
-        LogFacility(const std::string &output, bool console)
+        LogFacility(const std::filesystem::path &output, bool console)
           : mFile(output)
         {
             mConsole.setEnabled(console);

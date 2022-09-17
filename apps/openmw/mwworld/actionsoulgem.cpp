@@ -1,6 +1,7 @@
 #include "actionsoulgem.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -30,7 +31,7 @@ namespace MWWorld
         }
 
         const auto& target = getTarget();
-        const std::string targetSoul = target.getCellRef().getSoul();
+        const std::string& targetSoul = target.getCellRef().getSoul();
 
         if (targetSoul.empty())
         {

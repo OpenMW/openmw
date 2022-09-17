@@ -202,7 +202,8 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_WerewolfKills,
         Function_RankLow, Function_RankHigh,
         Function_CreatureTargetted,
-        Function_None // end marker
+        // end marker
+        Function_None,
     };
 
     static const Function numericFunctions[] =
@@ -210,7 +211,8 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Global, Function_Local, Function_NotLocal,
         Function_PcDynamicStat, Function_PcHealthPercent,
         Function_HealthPercent,
-        Function_None // end marker
+        // end marker
+        Function_None,
     };
 
     static const Function booleanFunctions[] =
@@ -223,14 +225,16 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Alarmed, Function_Detected,
         Function_Attacked, Function_ShouldAttack,
         Function_Werewolf,
-        Function_None // end marker
+        // end marker
+        Function_None,
     };
 
     static const Function invertedBooleanFunctions[] =
     {
         Function_NotId, Function_NotFaction, Function_NotClass,
         Function_NotRace, Function_NotCell,
-        Function_None // end marker
+        // end marker
+        Function_None,
     };
 
     Function function = getFunction();
@@ -264,7 +268,8 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
         Function_Reputation, Function_FactionRankDiff,
         Function_Werewolf, Function_WerewolfKills,
         Function_RankLow, Function_RankHigh,
-        Function_None // end marker
+        // end marker
+        Function_None,
     };
 
     Function function = getFunction();

@@ -1,6 +1,6 @@
 #include "documentmanager.hpp"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
@@ -11,28 +11,28 @@
 CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& configuration)
 : mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252), mFsStrict(false)
 {
-    boost::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
+    std::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 
-    if (!boost::filesystem::is_directory (projectPath))
-        boost::filesystem::create_directories (projectPath);
+    if (!std::filesystem::is_directory (projectPath))
+        std::filesystem::create_directories (projectPath);
 
     mLoader.moveToThread (&mLoaderThread);
     mLoaderThread.start();
 
-    connect (&mLoader, SIGNAL (documentLoaded (Document *)),
-        this, SLOT (documentLoaded (Document *)));
-    connect (&mLoader, SIGNAL (documentNotLoaded (Document *, const std::string&)),
-        this, SLOT (documentNotLoaded (Document *, const std::string&)));
-    connect (this, SIGNAL (loadRequest (CSMDoc::Document *)),
-        &mLoader, SLOT (loadDocument (CSMDoc::Document *)));
-    connect (&mLoader, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)),
-        this, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)));
-    connect (&mLoader, SIGNAL (nextRecord (CSMDoc::Document *, int)),
-        this, SIGNAL (nextRecord (CSMDoc::Document *, int)));
-    connect (this, SIGNAL (cancelLoading (CSMDoc::Document *)),
-        &mLoader, SLOT (abortLoading (CSMDoc::Document *)));
-    connect (&mLoader, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),
-        this, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)));
+    connect (&mLoader, &Loader::documentLoaded,
+        this, &DocumentManager::documentLoaded);
+    connect (&mLoader, &Loader::documentNotLoaded,
+        this, &DocumentManager::documentNotLoaded);
+    connect (this, &DocumentManager::loadRequest,
+        &mLoader, &Loader::loadDocument);
+    connect (&mLoader, &Loader::nextStage,
+        this, &DocumentManager::nextStage);
+    connect (&mLoader, &Loader::nextRecord,
+        this, &DocumentManager::nextRecord);
+    connect (this, &DocumentManager::cancelLoading,
+        &mLoader, &Loader::abortLoading);
+    connect (&mLoader, &Loader::loadMessage,
+        this, &DocumentManager::loadMessage);
 }
 
 CSMDoc::DocumentManager::~DocumentManager()
@@ -51,7 +51,7 @@ bool CSMDoc::DocumentManager::isEmpty()
     return mDocuments.empty();
 }
 
-void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
+void CSMDoc::DocumentManager::addDocument (const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath,
     bool new_)
 {
     Document *document = makeDocument (files, savePath, new_);
@@ -59,8 +59,8 @@ void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::
 }
 
 CSMDoc::Document *CSMDoc::DocumentManager::makeDocument (
-    const std::vector< boost::filesystem::path >& files,
-    const boost::filesystem::path& savePath, bool new_)
+    const std::vector< std::filesystem::path >& files,
+    const std::filesystem::path& savePath, bool new_)
 {
     return new Document (mConfiguration, files, new_, savePath, mResDir, mEncoding, mBlacklistedScripts, mFsStrict, mDataPaths, mArchives);
 }
@@ -93,9 +93,9 @@ void CSMDoc::DocumentManager::removeDocument (CSMDoc::Document *document)
         emit lastDocumentDeleted();
 }
 
-void CSMDoc::DocumentManager::setResourceDir (const boost::filesystem::path& parResDir)
+void CSMDoc::DocumentManager::setResourceDir (const std::filesystem::path& parResDir)
 {
-    mResDir = boost::filesystem::system_complete(parResDir);
+    mResDir = std::filesystem::absolute(parResDir);
 }
 
 void CSMDoc::DocumentManager::setEncoding (ToUTF8::FromType encoding)

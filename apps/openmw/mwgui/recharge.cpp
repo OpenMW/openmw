@@ -6,6 +6,8 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/esm3/loadcrea.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -47,7 +49,7 @@ void Recharge::onOpen()
 {
     center();
 
-    SortFilterItemModel * model = new SortFilterItemModel(new InventoryItemModel(MWMechanics::getPlayer()));
+    SortFilterItemModel * model = new SortFilterItemModel(std::make_unique<InventoryItemModel>(MWMechanics::getPlayer()));
     model->setFilter(SortFilterItemModel::Filter_OnlyRechargable);
     mBox->setModel(model);
 
@@ -68,7 +70,7 @@ void Recharge::updateView()
 {
     MWWorld::Ptr gem = *mGemIcon->getUserData<MWWorld::Ptr>();
 
-    std::string soul = gem.getCellRef().getSoul();
+    const std::string& soul = gem.getCellRef().getSoul();
     const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
     mChargeLabel->setCaptionWithReplacing("#{sCharges} " + MyGUI::utility::toString(creature->mData.mSoul));

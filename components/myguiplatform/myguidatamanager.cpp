@@ -1,12 +1,12 @@
 #include "myguidatamanager.hpp"
 
-#include <memory>
 #include <string>
 #include <stdexcept>
 
 #include <MyGUI_DataFileStream.h>
 
 #include <components/vfs/manager.hpp>
+#include <components/files/conversion.hpp>
 
 namespace
 {
@@ -26,7 +26,7 @@ namespace
 namespace osgMyGUI
 {
 
-void DataManager::setResourcePath(const std::string &path)
+void DataManager::setResourcePath(const std::filesystem::path &path)
 {
     mResourcePath = path;
 }
@@ -39,7 +39,7 @@ DataManager::DataManager(const std::string& resourcePath, const VFS::Manager* vf
 
 MyGUI::IDataStream *DataManager::getData(const std::string &name) const
 {
-    return new DataStream(mVfs->get(mResourcePath + "/" + name));
+    return new DataStream(mVfs->get(Files::pathToUnicodeString(mResourcePath / name)));
 }
 
 void DataManager::freeData(MyGUI::IDataStream *data)
@@ -49,7 +49,7 @@ void DataManager::freeData(MyGUI::IDataStream *data)
 
 bool DataManager::isDataExist(const std::string &name) const
 {
-    return mVfs->exists(mResourcePath + "/" + name);
+    return mVfs->exists(Files::pathToUnicodeString(mResourcePath / name));
 }
 
 const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern) const
@@ -62,13 +62,15 @@ const std::string &DataManager::getDataPath(const std::string &name) const
     static std::string result;
     result.clear();
 
-    if (name.empty())
-        return mResourcePath;
+    if (name.empty()) {
+        result = Files::pathToUnicodeString(mResourcePath);
+        return result;
+    }
 
     if (!isDataExist(name))
         return result;
 
-    result = mResourcePath + "/" + name;
+    result = Files::pathToUnicodeString(mResourcePath / name);
     return result;
 }
 

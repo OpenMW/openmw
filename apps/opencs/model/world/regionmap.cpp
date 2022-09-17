@@ -169,7 +169,9 @@ void CSMWorld::RegionMap::updateRegions (const std::vector<std::string>& regions
 {
     std::vector<std::string> regions2 (regions);
 
-    std::for_each (regions2.begin(), regions2.end(), Misc::StringUtils::lowerCaseInPlace);
+    for (auto& region2 : regions2) {
+        Misc::StringUtils::lowerCaseInPlace(region2);
+    }
     std::sort (regions2.begin(), regions2.end());
 
     for (std::map<CellCoordinates, CellDescription>::const_iterator iter (mMap.begin());
@@ -280,21 +282,21 @@ CSMWorld::RegionMap::RegionMap (Data& data) : mData (data)
 
     QAbstractItemModel *regions = data.getTableModel (UniversalId (UniversalId::Type_Regions));
 
-    connect (regions, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (regionsAboutToBeRemoved (const QModelIndex&, int, int)));
-    connect (regions, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (regionsInserted (const QModelIndex&, int, int)));
-    connect (regions, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (regionsChanged (const QModelIndex&, const QModelIndex&)));
+    connect (regions, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &RegionMap::regionsAboutToBeRemoved);
+    connect (regions, &QAbstractItemModel::rowsInserted,
+        this, &RegionMap::regionsInserted);
+    connect (regions, &QAbstractItemModel::dataChanged,
+        this, &RegionMap::regionsChanged);
 
     QAbstractItemModel *cells = data.getTableModel (UniversalId (UniversalId::Type_Cells));
 
-    connect (cells, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (cellsAboutToBeRemoved (const QModelIndex&, int, int)));
-    connect (cells, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (cellsInserted (const QModelIndex&, int, int)));
-    connect (cells, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (cellsChanged (const QModelIndex&, const QModelIndex&)));
+    connect (cells, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &RegionMap::cellsAboutToBeRemoved);
+    connect (cells, &QAbstractItemModel::rowsInserted,
+        this, &RegionMap::cellsInserted);
+    connect (cells, &QAbstractItemModel::dataChanged,
+        this, &RegionMap::cellsChanged);
 }
 
 int CSMWorld::RegionMap::rowCount (const QModelIndex& parent) const

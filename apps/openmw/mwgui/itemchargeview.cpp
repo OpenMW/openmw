@@ -17,6 +17,7 @@
 
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
+#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -170,7 +171,7 @@ namespace MWGui
     void ItemChargeView::updateLine(const ItemChargeView::Line& line)
     {
         std::string_view name = line.mItemPtr.getClass().getName(line.mItemPtr);
-        line.mText->setCaption({name.data(), name.size()});
+        line.mText->setCaption(toUString(name));
 
         line.mCharge->setVisible(false);
         switch (mDisplayMode)

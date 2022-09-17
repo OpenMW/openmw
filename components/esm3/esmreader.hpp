@@ -5,6 +5,7 @@
 #include <vector>
 #include <istream>
 #include <memory>
+#include <filesystem>
 
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -38,7 +39,7 @@ public:
   int getFormat() const { return mHeader.mFormat; };
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
-  const std::string& getName() const { return mCtx.filename; };
+  const std::filesystem::path& getName() const { return mCtx.filename; };
   bool isOpen() const { return mEsm != nullptr; }
 
   /*************************************************************************
@@ -62,15 +63,15 @@ public:
 
   /// Raw opening. Opens the file and sets everything up but doesn't
   /// parse the header.
-  void openRaw(std::unique_ptr<std::istream>&& stream, std::string_view name);
+  void openRaw(std::unique_ptr<std::istream>&& stream, const std::filesystem::path &name);
 
   /// Load ES file from a new stream, parses the header. Closes the
   /// currently open file first, if any.
-  void open(std::unique_ptr<std::istream>&& stream, const std::string &name);
+  void open(std::unique_ptr<std::istream>&& stream, const std::filesystem::path &name);
 
-  void open(const std::string &file);
+  void open(const std::filesystem::path &file);
 
-  void openRaw(std::string_view filename);
+  void openRaw(const std::filesystem::path &filename);
 
   /// Get the current position in the file. Make sure that the file has been opened!
   size_t getFileOffset() const { return mEsm->tellg(); };

@@ -3,6 +3,9 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/utf8stream.hpp>
 
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadench.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -21,11 +24,7 @@ namespace
     {
         if (left.mType != right.mType)
             return left.mType < right.mType;
-
-        std::string leftName = Misc::StringUtils::lowerCase(left.mName);
-        std::string rightName = Misc::StringUtils::lowerCase(right.mName);
-
-        return leftName.compare(rightName) < 0;
+        return Misc::StringUtils::ciLess(left.mName, right.mName);
     }
 
 }
@@ -57,17 +56,19 @@ namespace MWGui
             {
                 const ESM::MagicEffect *magicEffect =
                     store.get<ESM::MagicEffect>().find(effectId);
-                std::string effectIDStr = ESM::MagicEffect::effectIdToString(effectId);
-                std::string fullEffectName = wm->getGameSettingString(effectIDStr, "");
+                const std::string& effectIDStr = ESM::MagicEffect::effectIdToString(effectId);
+                std::string fullEffectName{wm->getGameSettingString(effectIDStr, {})};
 
                 if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && effect.mSkill != -1)
                 {
-                    fullEffectName += " " + wm->getGameSettingString(ESM::Skill::sSkillNameIds[effect.mSkill], "");
+                    fullEffectName += ' ';
+                    fullEffectName += wm->getGameSettingString(ESM::Skill::sSkillNameIds[effect.mSkill], {});
                 }
 
                 if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && effect.mAttribute != -1)
                 {
-                    fullEffectName += " " + wm->getGameSettingString(ESM::Attribute::sGmstAttributeIds[effect.mAttribute], "");
+                    fullEffectName += ' ';
+                    fullEffectName += wm->getGameSettingString(ESM::Attribute::sGmstAttributeIds[effect.mAttribute], {});
                 }
 
                 std::string convert = Utf8Stream::lowerCaseUtf8(fullEffectName);

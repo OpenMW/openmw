@@ -10,6 +10,8 @@
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 
+#include <components/esm3/loadgmst.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -25,6 +27,7 @@
 #include "itemwidget.hpp"
 
 #include "sortfilteritemmodel.hpp"
+#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -33,7 +36,6 @@ namespace MWGui
     EnchantingDialog::EnchantingDialog()
         : WindowBase("openmw_enchanting_dialog.layout")
         , EffectEditorBase(EffectEditorBase::Enchanting)
-        , mItemSelectionDialog(nullptr)
     {
         getWidget(mName, "NameEdit");
         getWidget(mCancelButton, "CancelButton");
@@ -59,11 +61,6 @@ namespace MWGui
         mBuyButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onBuyButtonClicked);
         mTypeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onTypeButtonClicked);
         mName->eventEditSelectAccept += MyGUI::newDelegate(this, &EnchantingDialog::onAccept);
-    }
-
-    EnchantingDialog::~EnchantingDialog()
-    {
-        delete mItemSelectionDialog;
     }
 
     void EnchantingDialog::onOpen()
@@ -100,7 +97,7 @@ namespace MWGui
         else
         {
             std::string_view name = item.getClass().getName(item);
-            mName->setCaption({name.data(), name.size()});
+            mName->setCaption(toUString(name));
             mItemBox->setItem(item);
             mItemBox->setUserString ("ToolTipType", "ItemPtr");
             mItemBox->setUserData(MWWorld::Ptr(item));
@@ -119,19 +116,19 @@ namespace MWGui
         switch(mEnchanting.getCastStyle())
         {
             case ESM::Enchantment::CastOnce:
-                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
+                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce", "Cast Once")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenStrikes:
-                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
+                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenUsed:
-                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
+                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::ConstantEffect:
-                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
+                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant")));
                 setConstantEffect(true);
                 break;
         }
@@ -194,8 +191,7 @@ namespace MWGui
     {
         if (mEnchanting.getOldItem().isEmpty())
         {
-            delete mItemSelectionDialog;
-            mItemSelectionDialog = new ItemSelectionDialog("#{sEnchantItems}");
+            mItemSelectionDialog = std::make_unique<ItemSelectionDialog>("#{sEnchantItems}");
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
             mItemSelectionDialog->setVisible(true);
@@ -249,8 +245,7 @@ namespace MWGui
     {
         if (mEnchanting.getGem().isEmpty())
         {
-            delete mItemSelectionDialog;
-            mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}");
+            mItemSelectionDialog = std::make_unique<ItemSelectionDialog>("#{sSoulGemsWithSouls}");
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
             mItemSelectionDialog->setVisible(true);

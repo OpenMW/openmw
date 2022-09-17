@@ -138,13 +138,16 @@ enum RecordType
   RC_hkPackedNiTriStripsData,
   RC_bhkConvexVerticesShape,
   RC_bhkBoxShape,
+  RC_bhkCapsuleShape,
+  RC_bhkSphereShape,
   RC_bhkListShape,
   RC_bhkRigidBody,
   RC_bhkRigidBodyT,
   RC_BSLightingShaderProperty,
   RC_NiClusterAccumulator,
   RC_NiAlphaAccumulator,
-  RC_NiSortAdjustNode
+  RC_NiSortAdjustNode,
+  RC_NiMultiTargetTransformController
 };
 
 /// Base class for all records

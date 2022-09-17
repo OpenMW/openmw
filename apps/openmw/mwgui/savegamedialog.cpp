@@ -20,6 +20,10 @@
 #include <components/settings/settings.hpp>
 
 #include <components/files/memorystream.hpp>
+#include <components/misc/timeconvert.hpp>
+#include <components/files/conversion.hpp>
+
+#include <components/esm3/loadclas.hpp>
 
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -30,6 +34,7 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
+#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -47,7 +52,6 @@ namespace MWGui
         getWidget(mDeleteButton, "DeleteButton");
         getWidget(mSaveList, "SaveList");
         getWidget(mSaveNameEdit, "SaveNameEdit");
-        getWidget(mSpacer, "Spacer");
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onOkButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onCancelButtonClicked);
         mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteButtonClicked);
@@ -172,32 +176,34 @@ namespace MWGui
         {
             if (it->begin()!=it->end())
             {
+                const ESM::SavedGame& signature = it->getSignature();
+
                 std::stringstream title;
-                title << it->getSignature().mPlayerName;
+                title << signature.mPlayerName;
 
                 // For a custom class, we will not find it in the store (unless we loaded the savegame first).
                 // Fall back to name stored in savegame header in that case.
-                std::string className;
-                if (it->getSignature().mPlayerClassId.empty())
-                    className = it->getSignature().mPlayerClassName;
+                std::string_view className;
+                if (signature.mPlayerClassId.empty())
+                    className = signature.mPlayerClassName;
                 else
                 {
                     // Find the localised name for this class from the store
-                    const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().search(
-                                it->getSignature().mPlayerClassId);
+                    const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>()
+                            .search(signature.mPlayerClassId);
                     if (class_)
                         className = class_->mName;
                     else
                         className = "?"; // From an older savegame format that did not support custom classes properly.
                 }
 
-                title << " (#{sLevel} " << it->getSignature().mPlayerLevel << " " << MyGUI::TextIterator::toTagsString(className) << ")";
+                title << " (#{sLevel} " << signature.mPlayerLevel << " " << MyGUI::TextIterator::toTagsString(toUString(className)) << ")";
 
                 mCharacterSelection->addItem (MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
 
                 if (mCurrentCharacter == &*it ||
                     (!mCurrentCharacter && !mSaving && directory==Misc::StringUtils::lowerCase (
-                    it->begin()->mPath.parent_path().filename().string())))
+                    Files::pathToUnicodeString(it->begin()->mPath.parent_path().filename()))))
                 {
                     mCurrentCharacter = &*it;
                     selectedIndex = mCharacterSelection->getItemCount()-1;
@@ -219,7 +225,6 @@ namespace MWGui
         mSaveNameEdit->setVisible(!load);
         mCharacterSelection->setUserString("Hidden", load ? "false" : "true");
         mCharacterSelection->setVisible(load);
-        mSpacer->setUserString("Hidden", load ? "false" : "true");
 
         mDeleteButton->setUserString("Hidden", load ? "false" : "true");
         mDeleteButton->setVisible(load);
@@ -301,7 +306,7 @@ namespace MWGui
         else
         {
             assert (mCurrentCharacter && mCurrentSlot);
-            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath.string());
+            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath);
         }
     }
 
@@ -402,7 +407,7 @@ namespace MWGui
             throw std::runtime_error("Can't find selected slot");
 
         std::stringstream text;
-        time_t time = mCurrentSlot->mTimeStamp;
+        time_t time = Misc::to_time_t(mCurrentSlot->mTimeStamp);
         struct tm* timeinfo;
         timeinfo = localtime(&time);
 
@@ -428,22 +433,32 @@ namespace MWGui
 
         mInfoText->setCaptionWithReplacing(text.str());
 
+        // Reset the image for the case we're unable to recover a screenshot
+        mScreenshotTexture.reset();
+        mScreenshot->setRenderItemTexture(nullptr);
+        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 
         // Decode screenshot
         const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
-        Files::IMemStream instream (&data[0], data.size());
+        if (!data.size())
+        {
+            Log(Debug::Warning) << "Selected save file '" << Files::pathToUnicodeString(mCurrentSlot->mPath.filename()) << "' has no savegame screenshot";
+            return;
+        }
+
+        Files::IMemStream instream (data.data(), data.size());
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
         if (!readerwriter)
         {
-            Log(Debug::Error) << "Error: Can't open savegame screenshot, no jpg readerwriter found";
+            Log(Debug::Error) << "Can't open savegame screenshot, no jpg readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
         if (!result.success())
         {
-            Log(Debug::Error) << "Error: Failed to read savegame screenshot: " << result.message() << " code " << result.status();
+            Log(Debug::Error) << "Failed to read savegame screenshot: " << result.message() << " code " << result.status();
             return;
         }
 
@@ -458,8 +473,6 @@ namespace MWGui
         texture->setUnRefImageDataAfterApply(true);
 
         mScreenshotTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
-
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
-        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 }

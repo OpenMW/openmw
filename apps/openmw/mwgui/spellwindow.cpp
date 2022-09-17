@@ -5,6 +5,8 @@
 
 #include <components/settings/settings.hpp>
 #include <components/misc/strings/format.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadbsgn.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -34,7 +36,7 @@ namespace MWGui
         , mSpellView(nullptr)
         , mUpdateTimer(0.0f)
     {
-        mSpellIcons = new SpellIcons();
+        mSpellIcons = std::make_unique<SpellIcons>();
 
         MyGUI::Widget* deleteButton;
         getWidget(deleteButton, "DeleteSpellButton");
@@ -52,11 +54,6 @@ namespace MWGui
         // Adjust the spell filtering widget size because of MyGUI limitations.
         int filterWidth = mSpellView->getSize().width - deleteButton->getSize().width - 3;
         mFilterEdit->setSize(filterWidth, mFilterEdit->getSize().height);
-    }
-
-    SpellWindow::~SpellWindow()
-    {
-        delete mSpellIcons;
     }
 
     void SpellWindow::onPinToggled()
@@ -147,7 +144,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        std::string raceId = player.get<ESM::NPC>()->mBase->mRace;
+        const std::string& raceId = player.get<ESM::NPC>()->mBase->mRace;
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceId);
         // can't delete racial spells, birthsign spells or powers
         bool isInherent = race->mPowers.exists(spell->mId) || spell->mData.mType == ESM::Spell::ST_Power;
@@ -158,16 +155,17 @@ namespace MWGui
             isInherent = sign->mPowers.exists(spell->mId);
         }
 
+        const auto windowManager = MWBase::Environment::get().getWindowManager();
         if (isInherent)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sDeleteSpellError}");
+            windowManager->messageBox("#{sDeleteSpellError}");
         }
         else
         {
             // ask for confirmation
             mSpellToDelete = spellId;
-            ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-            std::string question = MWBase::Environment::get().getWindowManager()->getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
+            ConfirmationDialog* dialog = windowManager->getConfirmationDialog();
+            std::string question{windowManager->getGameSettingString("sQuestionDeleteSpell", "Delete %s?")};
             question = Misc::StringUtils::format(question, spell->mName);
             dialog->askForConfirmation(question);
             dialog->eventOkClicked.clear();

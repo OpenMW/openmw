@@ -26,7 +26,7 @@ CSVWorld::BodyPartCreator::BodyPartCreator(
     mFirstPerson = new QCheckBox("First Person", this);
     insertBeforeButtons(mFirstPerson, false);
 
-    connect(mFirstPerson, SIGNAL(clicked(bool)), this, SLOT(checkboxClicked()));
+    connect(mFirstPerson, &QCheckBox::clicked, this, &BodyPartCreator::checkboxClicked);
 }
 
 std::string CSVWorld::BodyPartCreator::getErrors() const

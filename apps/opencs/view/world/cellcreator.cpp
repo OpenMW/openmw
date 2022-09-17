@@ -39,7 +39,7 @@ CSVWorld::CellCreator::CellCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     mY->setVisible (false);
     mY->setMinimum (std::numeric_limits<int>::min());
     mY->setMaximum (std::numeric_limits<int>::max());
-    connect (mY, SIGNAL (valueChanged (int)), this, SLOT (valueChanged (int)));
+    connect (mY, qOverload<int>(&QSpinBox::valueChanged), this, &CellCreator::valueChanged);
     insertAtBeginning (mY, true);
 
     mYLabel = new QLabel ("Y", this);
@@ -50,7 +50,7 @@ CSVWorld::CellCreator::CellCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     mX->setVisible (false);
     mX->setMinimum (std::numeric_limits<int>::min());
     mX->setMaximum (std::numeric_limits<int>::max());
-    connect (mX, SIGNAL (valueChanged (int)), this, SLOT (valueChanged (int)));
+    connect (mX, qOverload<int>(&QSpinBox::valueChanged), this, &CellCreator::valueChanged);
     insertAtBeginning (mX, true);
 
     mXLabel = new QLabel ("X", this);
@@ -62,7 +62,7 @@ CSVWorld::CellCreator::CellCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     mType->addItem ("Interior Cell");
     mType->addItem ("Exterior Cell");
 
-    connect (mType, SIGNAL (currentIndexChanged (int)), this, SLOT (setType (int)));
+    connect (mType, qOverload<int>(&QComboBox::currentIndexChanged), this, &CellCreator::setType);
 
     insertAtBeginning (mType, false);
 }
@@ -99,7 +99,7 @@ void CSVWorld::CellCreator::valueChanged (int index)
     update();
 }
 
-void CSVWorld::CellCreator::cloneMode(const std::string& originId, 
+void CSVWorld::CellCreator::cloneMode(const std::string& originId,
                                       const CSMWorld::UniversalId::Type type)
 {
     CSVWorld::GenericCreator::cloneMode(originId, type);

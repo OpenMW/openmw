@@ -37,8 +37,8 @@ namespace CSVWorld
         insertBeforeButtons(mYLabel, false);
         insertBeforeButtons(mY, true);
 
-        connect (mX, SIGNAL(valueChanged(int)), this, SLOT(coordChanged(int)));
-        connect (mY, SIGNAL(valueChanged(int)), this, SLOT(coordChanged(int)));
+        connect (mX, qOverload<int>(&QSpinBox::valueChanged), this, &LandCreator::coordChanged);
+        connect (mY, qOverload<int>(&QSpinBox::valueChanged), this, &LandCreator::coordChanged);
     }
 
     void LandCreator::cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type)

@@ -58,7 +58,7 @@ namespace DetourNavigator
         void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const float* heights, std::size_t size,
             float minHeight, float maxHeight);
 
-        std::shared_ptr<RecastMesh> create(std::size_t generation, std::size_t revision) &&;
+        std::shared_ptr<RecastMesh> create(const Version& version) &&;
 
     private:
         const TileBounds mBounds;

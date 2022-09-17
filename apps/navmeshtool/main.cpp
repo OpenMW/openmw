@@ -24,6 +24,7 @@
 #include <components/esm3/readerscache.hpp>
 #include <components/platform/platform.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/files/conversion.hpp>
 
 #include <osg/Vec3f>
 
@@ -53,52 +54,51 @@ namespace NavMeshTool
             using Fallback::FallbackMap;
 
             bpo::options_description result;
+            auto addOption = result.add_options();
+            addOption("help", "print help message");
 
-            result.add_options()
-                ("help", "print help message")
+            addOption("version", "print version information and quit");
 
-                ("version", "print version information and quit")
+            addOption("data", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")
+                    ->multitoken()->composing(), "set data directories (later directories have higher priority)");
 
-                ("data", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")
-                    ->multitoken()->composing(), "set data directories (later directories have higher priority)")
+            addOption("data-local", bpo::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""),
+                    "set local data directory (highest priority)");
 
-                ("data-local", bpo::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""),
-                    "set local data directory (highest priority)")
+            addOption("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
+                    ->multitoken()->composing(), "set fallback BSA archives (later archives have higher priority)");
 
-                ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
-                    ->multitoken()->composing(), "set fallback BSA archives (later archives have higher priority)")
+            addOption("resources", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
+                    "set resources directory");
 
-                ("resources", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
-                    "set resources directory")
+            addOption("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+                    ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon/omwscripts");
 
-                ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
-                    ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon/omwscripts")
+            addOption("fs-strict", bpo::value<bool>()->implicit_value(true)
+                    ->default_value(false), "strict file system handling (no case folding)");
 
-                ("fs-strict", bpo::value<bool>()->implicit_value(true)
-                    ->default_value(false), "strict file system handling (no case folding)")
-
-                ("encoding", bpo::value<std::string>()->
+            addOption("encoding", bpo::value<std::string>()->
                     default_value("win1252"),
                     "Character encoding used in OpenMW game messages:\n"
                     "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
                     "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-                    "\n\twin1252 - Western European (Latin) alphabet, used by default")
+                    "\n\twin1252 - Western European (Latin) alphabet, used by default");
 
-                ("fallback", bpo::value<Fallback::FallbackMap>()->default_value(Fallback::FallbackMap(), "")
-                    ->multitoken()->composing(), "fallback values")
+            addOption("fallback", bpo::value<Fallback::FallbackMap>()->default_value(Fallback::FallbackMap(), "")
+                    ->multitoken()->composing(), "fallback values");
 
-                ("threads", bpo::value<std::size_t>()->default_value(std::max<std::size_t>(std::thread::hardware_concurrency() - 1, 1)),
-                    "number of threads for parallel processing")
+            addOption("threads", bpo::value<std::size_t>()->default_value(std::max<std::size_t>(std::thread::hardware_concurrency() - 1, 1)),
+                    "number of threads for parallel processing");
 
-                ("process-interior-cells", bpo::value<bool>()->implicit_value(true)
-                    ->default_value(false), "build navmesh for interior cells")
+            addOption("process-interior-cells", bpo::value<bool>()->implicit_value(true)
+                    ->default_value(false), "build navmesh for interior cells");
 
-                ("remove-unused-tiles", bpo::value<bool>()->implicit_value(true)
-                    ->default_value(false), "remove tiles from cache that will not be used with current content profile")
+            addOption("remove-unused-tiles", bpo::value<bool>()->implicit_value(true)
+                    ->default_value(false), "remove tiles from cache that will not be used with current content profile");
 
-                ("write-binary-log", bpo::value<bool>()->implicit_value(true)
-                    ->default_value(false), "write progress in binary messages to be consumed by the launcher")
-            ;
+            addOption("write-binary-log", bpo::value<bool>()->implicit_value(true)
+                    ->default_value(false), "write progress in binary messages to be consumed by the launcher");
+
             Files::ConfigurationManager::addCommonOptions(result);
 
             return result;
@@ -143,7 +143,7 @@ namespace NavMeshTool
 
             const auto fsStrict = variables["fs-strict"].as<bool>();
             const auto resDir = variables["resources"].as<Files::MaybeQuotedPath>();
-            Version::Version v = Version::getOpenmwVersion(resDir.string());
+            Version::Version v = Version::getOpenmwVersion(resDir);
             Log(Debug::Info) << v.describe();
             dataDirs.insert(dataDirs.begin(), resDir / "vfs");
             const auto fileCollections = Files::Collections(dataDirs, !fsStrict);
@@ -179,7 +179,7 @@ namespace NavMeshTool
             const osg::Vec3f agentHalfExtents = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
             const DetourNavigator::AgentBounds agentBounds {agentCollisionShape, agentHalfExtents};
             const std::uint64_t maxDbFileSize = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
-            const std::string dbPath = (config.getUserDataPath() / "navmesh.db").string();
+            const auto dbPath = Files::pathToUnicodeString(config.getUserDataPath() / "navmesh.db");
 
             DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
 

@@ -111,7 +111,7 @@ namespace MWGui
 
             for (MWWorld::ESMStore::iterator it = store.begin(); it != store.end(); ++it)
             {
-                it->second->listIdentifier (mNames);
+                (*it)->listIdentifier (mNames);
             }
 
             // exterior cell names aren't technically identifiers, but since the COC function accepts them,
@@ -210,7 +210,7 @@ namespace MWGui
                 MWScript::installOpcodes (interpreter, mConsoleOnlyScripts);
                 std::vector<Interpreter::Type_Code> code;
                 output.getCode (code);
-                interpreter.run (&code[0], code.size(), interpreterContext);
+                interpreter.run (code.data(), code.size(), interpreterContext);
             }
             catch (const std::exception& error)
             {

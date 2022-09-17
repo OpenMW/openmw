@@ -28,6 +28,7 @@
 #include <components/misc/convert.hpp>
 #include <components/settings/settings.hpp>
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -489,13 +490,15 @@ namespace MWPhysics
         assert(!getObject(ptr));
 
         // Override collision type based on shape content.
-        switch (shapeInstance->mCollisionType)
+        switch (shapeInstance->mVisualCollisionType)
         {
-            case Resource::BulletShape::CollisionType::Camera:
-                collisionType = CollisionType_CameraOnly;
+            case Resource::VisualCollisionType::None:
                 break;
-            case Resource::BulletShape::CollisionType::None:
+            case Resource::VisualCollisionType::Default:
                 collisionType = CollisionType_VisualOnly;
+                break;
+            case Resource::VisualCollisionType::Camera:
+                collisionType = CollisionType_CameraOnly;
                 break;
         }
 
@@ -706,9 +709,9 @@ namespace MWPhysics
         }
     }
 
-    std::vector<Simulation> PhysicsSystem::prepareSimulation(bool willSimulate)
+    void PhysicsSystem::prepareSimulation(bool willSimulate, std::vector<Simulation>& simulations)
     {
-        std::vector<Simulation> simulations;
+        assert(simulations.empty());
         simulations.reserve(mActors.size() + mProjectiles.size());
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         for (const auto& [ref, physicActor] : mActors)
@@ -752,8 +755,6 @@ namespace MWPhysics
         {
             simulations.emplace_back(ProjectileSimulation{projectile, ProjectileFrameData{*projectile}});
         }
-
-        return simulations;
     }
 
     void PhysicsSystem::stepSimulation(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
@@ -784,9 +785,10 @@ namespace MWPhysics
             mTaskScheduler->resetSimulation(mActors);
         else
         {
-            auto simulations = prepareSimulation(mTimeAccum >= mPhysicsDt);
+            std::vector<Simulation>& simulations = mSimulations[mSimulationsCounter++ % mSimulations.size()];
+            prepareSimulation(mTimeAccum >= mPhysicsDt, simulations);
             // modifies mTimeAccum
-            mTaskScheduler->applyQueuedMovements(mTimeAccum, std::move(simulations), frameStart, frameNumber, stats);
+            mTaskScheduler->applyQueuedMovements(mTimeAccum, simulations, frameStart, frameNumber, stats);
         }
     }
 
@@ -796,16 +798,16 @@ namespace MWPhysics
         const auto world = MWBase::Environment::get().getWorld();
 
         // copy new ptr position in temporary vector. player is handled separately as its movement might change active cell.
-        std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>> newPositions;
-        newPositions.reserve(mActors.size() - 1);
+        mActorsPositions.clear();
+        mActorsPositions.reserve(mActors.size() - 1);
         for (const auto& [ptr, physicActor] : mActors)
         {
             if (physicActor.get() == player)
                 continue;
-            newPositions.emplace_back(physicActor->getPtr(), physicActor->getSimulationPosition());
+            mActorsPositions.emplace_back(physicActor->getPtr(), physicActor->getSimulationPosition());
         }
 
-        for (auto& [ptr, pos] : newPositions)
+        for (const auto& [ptr, pos] : mActorsPositions)
             world->moveObject(ptr, pos, false, false);
 
         world->moveObject(player->getPtr(), player->getSimulationPosition(), false, false);

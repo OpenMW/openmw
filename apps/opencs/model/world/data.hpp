@@ -4,8 +4,6 @@
 #include <map>
 #include <vector>
 
-#include <boost/filesystem/path.hpp>
-
 #include <QObject>
 #include <QModelIndex>
 
@@ -128,8 +126,6 @@ namespace CSMWorld
 
             std::vector<std::shared_ptr<ESM::ESMReader> > mReaders;
 
-            std::map<std::string, int> mContentFileNames;
-
             // not implemented
             Data (const Data&);
             Data& operator= (const Data&);
@@ -148,7 +144,7 @@ namespace CSMWorld
         public:
 
             Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
-                const std::vector<std::string>& archives, const boost::filesystem::path& resDir);
+                const std::vector<std::string>& archives, const std::filesystem::path& resDir);
 
             ~Data() override;
 
@@ -290,9 +286,9 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
-            int getTotalRecords (const std::vector<boost::filesystem::path>& files); // for better loading bar
+            int getTotalRecords (const std::vector<std::filesystem::path>& files); // for better loading bar
 
-            int startLoading (const boost::filesystem::path& path, bool base, bool project);
+            int startLoading (const std::filesystem::path& path, bool base, bool project);
             ///< Begin merging content of a file into base or modified.
             ///
             /// \param project load project file instead of content file
@@ -318,9 +314,11 @@ namespace CSMWorld
 
             void assetTablesChanged();
 
-        private slots:
+        public slots:
 
             void assetsChanged();
+
+        private slots:
 
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 

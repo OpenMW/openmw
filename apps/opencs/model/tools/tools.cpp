@@ -55,10 +55,10 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
     {
         mVerifierOperation = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
 
-        connect (&mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
-        connect (&mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
-        connect (&mVerifier, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
-            this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
+        connect (&mVerifier, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
+        connect (&mVerifier, &CSMDoc::OperationHolder::done, this, &Tools::done);
+        connect (&mVerifier, &CSMDoc::OperationHolder::reportMessage,
+            this, &Tools::verifierMessage);
 
         std::vector<std::string> mandatoryIds {"Day", "DaysPassed", "GameHour", "Month", "PCRace"};
 
@@ -143,13 +143,13 @@ CSMTools::Tools::Tools (CSMDoc::Document& document, ToUTF8::FromType encoding)
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
     mActiveReports.insert (std::make_pair (CSMDoc::State_Loading, 0));
 
-    connect (&mSearch, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
-    connect (&mSearch, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
-    connect (&mSearch, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
-        this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
+    connect (&mSearch, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
+    connect (&mSearch, &CSMDoc::OperationHolder::done, this, &Tools::done);
+    connect (&mSearch, &CSMDoc::OperationHolder::reportMessage,
+        this, &Tools::verifierMessage);
 
-    connect (&mMerge, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
-    connect (&mMerge, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
+    connect (&mMerge, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
+    connect (&mMerge, &CSMDoc::OperationHolder::done, this, &Tools::done);
     // don't need to connect report message, since there are no messages for merge
 }
 
@@ -222,8 +222,7 @@ void CSMTools::Tools::runMerge (std::unique_ptr<CSMDoc::Document> target)
     {
         mMergeOperation = new MergeOperation (mDocument, mEncoding);
         mMerge.setOperation (mMergeOperation);
-        connect (mMergeOperation, SIGNAL (mergeDone (CSMDoc::Document*)),
-            this, SIGNAL (mergeDone (CSMDoc::Document*)));
+        connect (mMergeOperation, &MergeOperation::mergeDone, this, &Tools::mergeDone);
     }
 
     target->flagAsDirty();
@@ -246,7 +245,7 @@ int CSMTools::Tools::getRunningOperations() const
        CSMDoc::State_Verifying,
        CSMDoc::State_Searching,
        CSMDoc::State_Merging,
-        -1
+        -1,
     };
 
     int result = 0;

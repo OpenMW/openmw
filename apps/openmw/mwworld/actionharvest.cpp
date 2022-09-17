@@ -53,9 +53,9 @@ namespace MWWorld
             std::ostringstream stream;
             int lineCount = 0;
             const static int maxLines = 10;
-            for (auto & pair : takenMap)
+            for (const auto& pair : takenMap)
             {
-                std::string itemName = pair.first;
+                const std::string& itemName = pair.first;
                 int itemCount = pair.second;
                 lineCount++;
                 if (lineCount == maxLines)

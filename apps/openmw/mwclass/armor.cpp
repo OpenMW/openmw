@@ -5,6 +5,8 @@
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -23,6 +25,7 @@
 #include "../mwmechanics/weapontype.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "classmodel.hpp"
 
@@ -115,7 +118,7 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
-        std::string typeGmst;
+        std::string_view typeGmst;
 
         switch (ref->mBase->mData.mType)
         {
@@ -194,7 +197,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -283,22 +286,22 @@ namespace MWClass
             return ref->mBase->mData.mArmor * armorSkill / static_cast<float>(iBaseArmorSkill);
     }
 
-    std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Armor::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         const MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
 
         if (getItemHealth(ptr) == 0)
-            return std::make_pair(0, "#{sInventoryMessage1}");
+            return {0, "#{sInventoryMessage1}"};
 
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
-            return std::make_pair(0, "");
+            return {0, {}};
 
         if (npc.getClass().isNpc())
         {
-            std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+            const std::string& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
@@ -309,9 +312,9 @@ namespace MWClass
                 for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                 {
                     if((*itr).mPart == ESM::PRT_Head)
-                        return std::make_pair(0, "#{sNotifyMessage13}");
+                        return {0, "#{sNotifyMessage13}"};
                     if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
-                        return std::make_pair(0, "#{sNotifyMessage14}");
+                        return {0, "#{sNotifyMessage14}"};
                 }
             }
         }
@@ -327,13 +330,13 @@ namespace MWClass
                 {
                     const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
                     if (MWMechanics::getWeaponType(ref->mBase->mData.mType)->mFlags & ESM::WeaponType::TwoHanded)
-                        return std::make_pair(3,"");
+                        return {3, {}};
                 }
 
-                return std::make_pair(1,"");
+                return {1, {}};
             }
         }
-        return std::make_pair(1,"");
+        return {1, {}};
     }
 
     std::unique_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr, bool force) const

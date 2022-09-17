@@ -8,6 +8,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/esm3/loadench.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -56,15 +57,13 @@ namespace
     }
 
     template<typename T>
-    MWWorld::Ptr searchId (MWWorld::CellRefList<T>& list, const std::string& id,
-        MWWorld::ContainerStore *store)
+    MWWorld::Ptr searchId(MWWorld::CellRefList<T>& list, std::string_view id, MWWorld::ContainerStore* store)
     {
         store->resolve();
-        std::string id2 = Misc::StringUtils::lowerCase (id);
 
         for (MWWorld::LiveCellRef<T>& liveCellRef : list.mList)
         {
-            if (Misc::StringUtils::ciEqual(liveCellRef.mBase->mId, id2) && liveCellRef.mData.getCount())
+            if (Misc::StringUtils::ciEqual(liveCellRef.mBase->mId, id) && liveCellRef.mData.getCount())
             {
                 MWWorld::Ptr ptr(&liveCellRef, nullptr);
                 ptr.setContainerStore (store);
@@ -139,7 +138,7 @@ void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
     }
 }
 
-const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
+const std::string_view MWWorld::ContainerStore::sGoldId = "gold_001";
 
 MWWorld::ContainerStore::ContainerStore()
     : mListener(nullptr)
@@ -543,7 +542,7 @@ void MWWorld::ContainerStore::fillNonRandom (const ESM::InventoryList& items, co
     mResolved = false;
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count,
+void MWWorld::ContainerStore::addInitialItem(std::string_view id, const std::string& owner, int count,
                                             Misc::Rng::Generator* prng, bool topLevel)
 {
     if (count == 0) return; //Don't restock with nothing.
@@ -584,7 +583,7 @@ void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const s
         }
         else
         {
-            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *prng);
+            std::string_view itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *prng);
             if (itemId.empty())
                 return;
             addInitialItem(itemId, owner, count, prng, false);
@@ -760,7 +759,7 @@ MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const std::string& id)
     return item;
 }
 
-MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
+MWWorld::Ptr MWWorld::ContainerStore::search(std::string_view id)
 {
     resolve();
     {

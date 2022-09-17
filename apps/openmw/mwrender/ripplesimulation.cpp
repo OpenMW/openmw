@@ -34,7 +34,7 @@ namespace
         if (rippleFrameCount <= 0)
             return;
 
-        const std::string& tex = Fallback::Map::getString("Water_RippleTexture");
+        std::string_view tex = Fallback::Map::getString("Water_RippleTexture");
 
         std::vector<osg::ref_ptr<osg::Texture2D> > textures;
         for (int i=0; i<rippleFrameCount; ++i)

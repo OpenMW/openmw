@@ -9,6 +9,13 @@
 #include <MyGUI_TextIterator.h>
 #include <MyGUI_Gui.h>
 
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadrace.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -23,6 +30,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
+#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -155,7 +163,7 @@ namespace MWGui
         {
             "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
             "AttribVal6", "AttribVal7", "AttribVal8",
-            0
+            nullptr,
         };
 
         for (int i=0; ids[i]; ++i)
@@ -411,12 +419,12 @@ namespace MWGui
         coord2.top += separator->getHeight();
     }
 
-    void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+    void StatsWindow::addGroup(std::string_view label, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         MyGUI::TextBox* groupWidget = mSkillView->createWidget<MyGUI::TextBox>("SandBrightText",
             MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height),
             MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
-        groupWidget->setCaption(label);
+        groupWidget->setCaption(toUString(label));
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
         mSkillWidgets.push_back(groupWidget);
 
@@ -425,12 +433,12 @@ namespace MWGui
         coord2.top += lineHeight;
     }
 
-    std::pair<MyGUI::TextBox*, MyGUI::TextBox*> StatsWindow::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+    std::pair<MyGUI::TextBox*, MyGUI::TextBox*> StatsWindow::addValueItem(std::string_view text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
     {
         MyGUI::TextBox *skillNameWidget, *skillValueWidget;
 
         skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
-        skillNameWidget->setCaption(text);
+        skillNameWidget->setCaption(toUString(text));
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
 
         skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Right | MyGUI::Align::Top);
@@ -501,7 +509,7 @@ namespace MWGui
                 esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
-                "", "normal", coord1, coord2);
+                {}, "normal", coord1, coord2);
             mSkillWidgetMap[skillId] = widgets;
 
             for (int i=0; i<2; ++i)

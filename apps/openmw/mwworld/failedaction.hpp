@@ -8,12 +8,12 @@ namespace MWWorld
 {
     class FailedAction : public Action
     {
-        std::string mMessage;
+        std::string_view mMessage;
 
         void executeImp(const Ptr &actor) override;
 
     public:
-        FailedAction(const std::string &message = std::string(), const Ptr& target = Ptr());
+        FailedAction(std::string_view message = {}, const Ptr& target = Ptr());
     };
 }
 

@@ -139,16 +139,16 @@ namespace MWWorld
         globalVariables["year"].setInteger(mYear);
     }
 
-    std::string DateTimeManager::getMonthName(int month) const
+    std::string_view DateTimeManager::getMonthName(int month) const
     {
         if (month == -1)
             month = mMonth;
 
         const int months = 12;
         if (month < 0 || month >= months)
-            return std::string();
+            return {};
 
-        static const char *monthNames[months] =
+        static const std::string_view monthNames[months] =
         {
             "sMonthMorningstar", "sMonthSunsdawn", "sMonthFirstseed", "sMonthRainshand",
             "sMonthSecondseed", "sMonthMidyear", "sMonthSunsheight", "sMonthLastseed",

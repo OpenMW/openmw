@@ -15,7 +15,7 @@
 #include <components/esm3/loadrepa.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/esm3/loadench.hpp>
-
+#include <components/esm3/loadcrea.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -152,14 +152,12 @@ namespace
 namespace MWGui
 {
 
-    SortFilterItemModel::SortFilterItemModel(ItemModel *sourceModel)
+    SortFilterItemModel::SortFilterItemModel(std::unique_ptr<ItemModel> sourceModel)
         : mCategory(Category_All)
         , mFilter(0)
         , mSortByType(true)
-        , mNameFilter("")
-        , mEffectFilter("")
     {
-        mSourceModel = sourceModel;
+        mSourceModel = std::move(sourceModel);
     }
 
     bool SortFilterItemModel::allowedToUseItems() const

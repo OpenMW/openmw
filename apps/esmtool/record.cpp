@@ -73,7 +73,7 @@ std::string ruleString(const ESM::DialInfo::SelectStruct& ss)
     {
     case '1':
         type_str = "Function";
-        func_str = ruleFunction(func);
+        func_str = std::string(ruleFunction(func));
         break;
     case '2':
         if (indicator == 's') type_str = "Global short";

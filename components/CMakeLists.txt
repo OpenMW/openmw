@@ -50,7 +50,7 @@ add_component_dir (vfs
 
 add_component_dir (resource
     scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem
-    resourcemanager stats animation foreachbulletobject
+    resourcemanager stats animation foreachbulletobject errormarker
     )
 
 add_component_dir (shader
@@ -80,7 +80,7 @@ add_component_dir (to_utf8
     to_utf8
     )
 
-add_component_dir(esm attr common defs esmcommon reader records util luascripts format)
+add_component_dir(esm attr common defs esmcommon records util luascripts format)
 
 add_component_dir(fx pass technique lexer widgets stateupdater)
 
@@ -197,7 +197,7 @@ add_component_dir (esm4
 
 add_component_dir (misc
     constants utf8stream resourcehelpers rng messageformatparser weakcache thread
-    compression osguservalues errorMarker color
+    compression osguservalues color tuplemeta tuplehelpers
     )
 
 add_component_dir (stereo
@@ -205,7 +205,7 @@ add_component_dir (stereo
     )
 
 add_component_dir (debug
-    debugging debuglog gldebug
+    debugging debuglog gldebug debugdraw
     )
 
 IF(NOT WIN32 AND NOT APPLE)
@@ -214,7 +214,7 @@ IF(NOT WIN32 AND NOT APPLE)
 ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
-    constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf
+    constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf conversion
     )
 
 add_component_dir (compiler
@@ -290,8 +290,6 @@ add_component_dir(detournavigator
     makenavmesh
     findsmoothpath
     recastmeshbuilder
-    recastmeshmanager
-    cachedrecastmeshmanager
     navmeshmanager
     navigatorimpl
     asyncnavmeshupdater
@@ -304,7 +302,6 @@ add_component_dir(detournavigator
     findrandompointaroundcircle
     raycast
     navmeshtileview
-    oscillatingrecastmeshobject
     offmeshconnectionsmanager
     preparednavmeshdata
     navmeshcacheitem
@@ -316,6 +313,8 @@ add_component_dir(detournavigator
     recast
     gettilespositions
     collisionshapetype
+    stats
+    commulativeaabb
     )
 
 add_component_dir(loadinglistener
@@ -380,6 +379,10 @@ if (USE_QT)
         helpviewer
         )
 
+    add_component_qt_dir (files
+        qtconversion
+        )
+
     QT5_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
@@ -412,7 +415,6 @@ target_link_libraries(components
     ${OPENTHREADS_LIBRARIES}
 
     ${Boost_SYSTEM_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
 

@@ -27,12 +27,17 @@
 #include <cstddef>
 #include <memory>
 #include <istream>
+#include <filesystem>
 
 #include "common.hpp"
 #include "loadtes4.hpp"
-#include "../esm/reader.hpp"
 
 #include <components/files/istreamptr.hpp>
+
+namespace ToUTF8
+{
+    class StatelessUtf8Encoder;
+}
 
 namespace ESM4 {
     //                                                   bytes read from group, updated by
@@ -43,7 +48,7 @@ namespace ESM4 {
 
     struct ReaderContext
     {
-        std::string filename;         // in case we need to reopen to restore the context
+        std::filesystem::path filename;         // in case we need to reopen to restore the context
         std::uint32_t modIndex;         // the sequential position of this file in the load order:
         //  0x00 reserved, 0xFF in-game (see notes below)
 
@@ -75,7 +80,7 @@ namespace ESM4 {
         ReaderContext();
     };
 
-    class Reader : public ESM::Reader
+    class Reader
     {
         Header               mHeader;     // ESM4 header
 
@@ -107,7 +112,9 @@ namespace ESM4 {
 
         std::map<FormId, LStringOffset> mLStringIndex;
 
-        void buildLStringIndex(const std::string& stringFile, LocalizedStringType stringType);
+        std::vector<Reader*>* mGlobalReaderList = nullptr;
+
+        void buildLStringIndex(const std::filesystem::path& stringFile, LocalizedStringType stringType);
 
         inline bool hasLocalizedStrings() const { return (mHeader.mFlags & Rec_Localized) != 0; }
 
@@ -118,40 +125,42 @@ namespace ESM4 {
         //void close();
 
         // Raw opening. Opens the file and sets everything up but doesn't parse the header.
-        void openRaw(Files::IStreamPtr&& stream, const std::string& filename);
+        void openRaw(Files::IStreamPtr&& stream, const std::filesystem::path& filename);
 
         // Load ES file from a new stream, parses the header.
         // Closes the currently open file first, if any.
-        void open(Files::IStreamPtr&& stream, const std::string& filename);
+        void open(Files::IStreamPtr&& stream, const std::filesystem::path& filename);
 
         Reader() = default;
 
+        bool getStringImpl(std::string& str, std::size_t size,
+                std::istream& stream, const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull = false);
+
     public:
 
-        Reader(Files::IStreamPtr&& esmStream, const std::string& filename);
+        Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename);
         ~Reader();
 
-        // FIXME: should be private but ESMTool uses it
-        void openRaw(const std::string& filename);
 
-        void open(const std::string& filename);
 
-        void close() final;
+        void open(const std::filesystem::path& filename);
 
-        inline bool isEsm4() const final { return true; }
+        void close();
 
-        inline void setEncoder(const ToUTF8::StatelessUtf8Encoder* encoder) final { mEncoder = encoder; };
+        inline bool isEsm4() const { return true; }
 
-        const std::vector<ESM::MasterData>& getGameFiles() const final { return mHeader.mMaster; }
+        inline void setEncoder(const ToUTF8::StatelessUtf8Encoder* encoder) { mEncoder = encoder; };
 
-        inline int getRecordCount() const final { return mHeader.mData.records; }
-        inline const std::string getAuthor() const final { return mHeader.mAuthor; }
-        inline int getFormat() const final { return 0; }; // prob. not relevant for ESM4
-        inline const std::string getDesc() const final { return mHeader.mDesc; }
+        const std::vector<ESM::MasterData>& getGameFiles() const { return mHeader.mMaster; }
 
-        inline std::string getFileName() const final { return mCtx.filename; }; // not used
+        inline int getRecordCount() const { return mHeader.mData.records; }
+        inline const std::string getAuthor() const { return mHeader.mAuthor; }
+        inline int getFormat() const { return 0; }; // prob. not relevant for ESM4
+        inline const std::string getDesc() const { return mHeader.mDesc; }
 
-        inline bool hasMoreRecs() const final { return (mFileSize - mCtx.fileRead) > 0; }
+        inline std::filesystem::path getFileName() const { return mCtx.filename; }; // not used
+
+        inline bool hasMoreRecs() const { return (mFileSize - mCtx.fileRead) > 0; }
 
         // Methods added for updating loading progress bars
         inline std::size_t getFileSize() const { return mFileSize; }
@@ -195,7 +204,7 @@ namespace ESM4 {
 
         // The object setting up this reader needs to supply the file's load order index
         // so that the formId's in this file can be adjusted with the file (i.e. mod) index.
-        void setModIndex(std::uint32_t index) final { mCtx.modIndex = (index << 24) & 0xff000000; }
+        void setModIndex(std::uint32_t index) { mCtx.modIndex = (index << 24) & 0xff000000; }
         void updateModIndices(const std::vector<std::string>& files);
 
         // Maybe should throw an exception if called when not valid?
@@ -284,6 +293,8 @@ namespace ESM4 {
             return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, mEncoder);
         }
 
+        bool getZeroTerminatedStringArray(std::vector<std::string>& values);
+
         void enterGroup();
         void exitGroupCheck();
 
@@ -292,6 +303,10 @@ namespace ESM4 {
 
         // Used for error handling
         [[noreturn]] void fail(const std::string& msg);
+
+        void setGlobalReaderList(std::vector<Reader*> *list) { mGlobalReaderList = list; }
+
+        std::vector<Reader*> *getGlobalReaderList() { return mGlobalReaderList; }
     };
 }
 

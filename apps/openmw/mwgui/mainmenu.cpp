@@ -28,7 +28,6 @@ namespace MWGui
         , mBackground(nullptr)
         , mVideoBackground(nullptr)
         , mVideo(nullptr)
-        , mSaveGameDialog(nullptr)
     {
         getWidget(mVersionText, "VersionText");
         mVersionText->setCaption(versionDescription);
@@ -36,11 +35,6 @@ namespace MWGui
         mHasAnimatedMenu = mVFS->exists("video/menu_background.bik");
 
         updateMenu();
-    }
-
-    MainMenu::~MainMenu()
-    {
-        delete mSaveGameDialog;
     }
 
     void MainMenu::onResChange(int w, int h)
@@ -93,7 +87,7 @@ namespace MWGui
     {
         MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
 
-        std::string name = *sender->getUserData<std::string>();
+        const std::string& name = *sender->getUserData<std::string>();
         winMgr->playSound("Menu Click");
         if (name == "return")
         {
@@ -133,7 +127,7 @@ namespace MWGui
         else
         {
             if (!mSaveGameDialog)
-                mSaveGameDialog = new SaveGameDialog();
+                mSaveGameDialog = std::make_unique<SaveGameDialog>();
             if (name == "loadgame")
                 mSaveGameDialog->setLoadOrSave(true);
             else if (name == "savegame")

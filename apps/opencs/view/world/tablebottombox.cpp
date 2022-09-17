@@ -91,7 +91,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
 
     mLayout = new QStackedLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
-    connect (mLayout, SIGNAL (currentChanged (int)), this, SLOT (currentWidgetChanged (int)));
+    connect (mLayout, &QStackedLayout::currentChanged, this, &TableBottomBox::currentWidgetChanged);
 
     mStatus = new QLabel;
 
@@ -110,16 +110,16 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
         mCreator->installEventFilter(this);
         mLayout->addWidget (mCreator);
 
-        connect (mCreator, SIGNAL (done()), this, SLOT (requestDone()));
+        connect (mCreator, &Creator::done, this, &TableBottomBox::requestDone);
 
-        connect (mCreator, SIGNAL (requestFocus (const std::string&)),
-            this, SIGNAL (requestFocus (const std::string&)));
+        connect (mCreator, &Creator::requestFocus, this, &TableBottomBox::requestFocus);
     }
 
     mExtendedConfigurator = new ExtendedCommandConfigurator (document, id, this);
     mExtendedConfigurator->installEventFilter(this);
     mLayout->addWidget (mExtendedConfigurator);
-    connect (mExtendedConfigurator, SIGNAL (done()), this, SLOT (requestDone()));
+    connect (mExtendedConfigurator, &ExtendedCommandConfigurator::done, 
+        this, &TableBottomBox::requestDone);
 
     updateSize();
 }

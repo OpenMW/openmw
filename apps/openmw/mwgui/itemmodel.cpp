@@ -79,17 +79,6 @@ namespace MWGui
         return true;
     }
 
-
-    ProxyItemModel::ProxyItemModel()
-        : mSourceModel(nullptr)
-    {
-    }
-
-    ProxyItemModel::~ProxyItemModel()
-    {
-        delete mSourceModel;
-    }
-
     bool ProxyItemModel::allowedToUseItems() const
     {
         return mSourceModel->allowedToUseItems();
@@ -134,18 +123,9 @@ namespace MWGui
         return mSourceModel->getIndex(item);
     }
 
-    void ProxyItemModel::setSourceModel(ItemModel *sourceModel)
+    void ProxyItemModel::setSourceModel(std::unique_ptr<ItemModel> sourceModel)
     {
-        if (mSourceModel == sourceModel)
-            return;
-
-        if (mSourceModel)
-        {
-            delete mSourceModel;
-            mSourceModel = nullptr;
-        }
-
-        mSourceModel = sourceModel;
+        mSourceModel = std::move(sourceModel);
     }
 
     void ProxyItemModel::onClose()

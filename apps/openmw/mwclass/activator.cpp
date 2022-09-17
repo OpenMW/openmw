@@ -5,6 +5,10 @@
 #include <components/esm3/loadacti.hpp>
 #include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadsndg.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -24,6 +28,7 @@
 #include "../mwrender/vismask.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -96,7 +101,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

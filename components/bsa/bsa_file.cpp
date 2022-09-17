@@ -35,9 +35,9 @@ using namespace Bsa;
 
 
 /// Error handling
-[[noreturn]] void BSAFile::fail(const std::string &msg)
+[[noreturn]] void BSAFile::fail(const std::string &msg) const
 {
-    throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + mFilename);
+    throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + Files::pathToUnicodeString(mFilepath));
 }
 
 //the getHash code is from bsapack from ghostwheel
@@ -100,7 +100,7 @@ void BSAFile::readHeader()
      */
     assert(!mIsLoaded);
 
-    std::ifstream input(std::filesystem::path(mFilename), std::ios_base::binary);
+    std::ifstream input(mFilepath, std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -196,7 +196,7 @@ void BSAFile::readHeader()
 /// Write header information to the output sink
 void Bsa::BSAFile::writeHeader()
 {
-    std::fstream output(mFilename, std::ios::binary | std::ios::in | std::ios::out);
+    std::fstream output(mFilepath, std::ios::binary | std::ios::in | std::ios::out);
 
     uint32_t head[3];
     head[0] = 0x100;
@@ -231,17 +231,17 @@ void Bsa::BSAFile::writeHeader()
 }
 
 /// Open an archive file.
-void BSAFile::open(const std::string &file)
+void BSAFile::open(const std::filesystem::path &file)
 {
     if (mIsLoaded)
         close();
 
-    mFilename = file;
+    mFilepath = file;
     if(std::filesystem::exists(file))
         readHeader();
     else
     {
-        { std::fstream(mFilename, std::ios::binary | std::ios::out); }
+        { std::fstream(mFilepath, std::ios::binary | std::ios::out); }
         writeHeader();
         mIsLoaded = true;
     }
@@ -260,7 +260,7 @@ void Bsa::BSAFile::close()
 
 Files::IStreamPtr Bsa::BSAFile::getFile(const FileStruct *file)
 {
-    return Files::openConstrainedFileStream(mFilename, file->offset, file->fileSize);
+    return Files::openConstrainedFileStream(mFilepath, file->offset, file->fileSize);
 }
 
 void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
@@ -270,9 +270,9 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
 
     auto newStartOfDataBuffer = 12 + (12 + 8) * (mFiles.size() + 1) + mStringBuf.size() + filename.size() + 1;
     if (mFiles.empty())
-        std::filesystem::resize_file(mFilename, newStartOfDataBuffer);
+        std::filesystem::resize_file(mFilepath, newStartOfDataBuffer);
 
-    std::fstream stream(mFilename, std::ios::binary | std::ios::in | std::ios::out);
+    std::fstream stream(mFilepath, std::ios::binary | std::ios::in | std::ios::out);
 
     FileStruct newFile;
     file.seekg(0, std::ios::end);

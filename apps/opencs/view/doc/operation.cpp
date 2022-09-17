@@ -63,7 +63,7 @@ void CSVDoc::Operation::initWidgets()
     mLayout->addWidget (mProgressBar);
     mLayout->addWidget (mAbortButton);
 
-    connect (mAbortButton, SIGNAL (clicked()), this, SLOT (abortOperation()));
+    connect (mAbortButton, &QPushButton::clicked, this, qOverload<>(&Operation::abortOperation));
 }
 
 void CSVDoc::Operation::setProgress (int current, int max, int threads)

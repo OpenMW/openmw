@@ -15,21 +15,18 @@ void CSMDoc::OperationHolder::setOperation (Operation *operation)
     mOperation = operation;
     mOperation->moveToThread (&mThread);
 
-    connect (
-        mOperation, SIGNAL (progress (int, int, int)),
-        this, SIGNAL (progress (int, int, int)));
+    connect (mOperation, &Operation::progress,
+        this, &OperationHolder::progress);
 
-    connect (
-        mOperation, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
-        this, SIGNAL (reportMessage (const CSMDoc::Message&, int)));
+    connect (mOperation, &Operation::reportMessage,
+        this, &OperationHolder::reportMessage);
 
-    connect (
-        mOperation, SIGNAL (done (int, bool)),
-        this, SLOT (doneSlot (int, bool)));
+    connect (mOperation, &Operation::done,
+        this, &OperationHolder::doneSlot);
 
-    connect (this, SIGNAL (abortSignal()), mOperation, SLOT (abort()));
+    connect (this, &OperationHolder::abortSignal, mOperation, &Operation::abort);
 
-    connect (&mThread, SIGNAL (started()), mOperation, SLOT (run()));
+    connect (&mThread, &QThread::started, mOperation, &Operation::run);
 }
 
 bool CSMDoc::OperationHolder::isRunning() const

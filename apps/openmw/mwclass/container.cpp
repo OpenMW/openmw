@@ -5,6 +5,7 @@
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/containerstate.hpp>
 #include <components/settings/settings.hpp>
+#include <components/esm3/loadsoun.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -22,6 +23,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/objects.hpp"
@@ -147,8 +149,8 @@ namespace MWClass
             return action;
         }
 
-        const std::string lockedSound = "LockedChest";
-        const std::string trapActivationSound = "Disarm Trap Fail";
+        const std::string_view lockedSound = "LockedChest";
+        const std::string_view trapActivationSound = "Disarm Trap Fail";
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
@@ -156,9 +158,9 @@ namespace MWClass
         bool isLocked = ptr.getCellRef().getLockLevel() > 0;
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
         bool hasKey = false;
-        std::string keyName;
+        std::string_view keyName;
 
-        const std::string keyId = ptr.getCellRef().getKey();
+        const std::string& keyId = ptr.getCellRef().getKey();
         if (!keyId.empty())
         {
             MWWorld::Ptr keyPtr = invStore.search(keyId);
@@ -171,7 +173,7 @@ namespace MWClass
 
         if (isLocked && hasKey)
         {
-            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
+            MWBase::Environment::get().getWindowManager ()->messageBox(std::string{keyName} + " #{sKeyUsed}");
             ptr.getCellRef().unlock();
             // using a key disarms the trap
             if(isTrapped)
@@ -204,7 +206,7 @@ namespace MWClass
         }
         else
         {
-            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string(), ptr);
+            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string_view{}, ptr);
             action->setSound(lockedSound);
             return action;
         }
@@ -246,7 +248,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()});
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();
@@ -288,7 +290,7 @@ namespace MWClass
         return !(ref->mBase->mFlags & ESM::Container::Organic);
     }
 
-    void Container::modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const
+    void Container::modifyBaseInventory(std::string_view containerId, std::string_view itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::Container>(containerId, itemId, amount);
     }

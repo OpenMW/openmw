@@ -12,12 +12,14 @@
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 
-#include "playpage.hpp"
-#include "graphicspage.hpp"
-#include "datafilespage.hpp"
-#include "settingspage.hpp"
 #include "advancedpage.hpp"
+#include "datafilespage.hpp"
+#include "graphicspage.hpp"
+#include "playpage.hpp"
+#include "settingspage.hpp"
 
 using namespace Process;
 
@@ -38,11 +40,11 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     mGameInvoker = new ProcessInvoker();
     mWizardInvoker = new ProcessInvoker();
 
-    connect(mWizardInvoker->getProcess(), SIGNAL(started()),
-            this, SLOT(wizardStarted()));
+    connect(mWizardInvoker->getProcess(), &QProcess::started,
+            this, &MainDialog::wizardStarted);
 
-    connect(mWizardInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(wizardFinished(int,QProcess::ExitStatus)));
+    connect(mWizardInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+            this, &MainDialog::wizardFinished);
 
     iconWidget->setViewMode(QListView::IconMode);
     iconWidget->setWrapping(false);
@@ -60,9 +62,9 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     buttonBox->addButton(helpButton, QDialogButtonBox::HelpRole);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
-    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
+    connect(buttonBox, &QDialogButtonBox::rejected, this, &MainDialog::close);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &MainDialog::play);
+    connect(buttonBox, &QDialogButtonBox::helpRequested, this, &MainDialog::help);
 
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -111,9 +113,7 @@ void Launcher::MainDialog::createIcons()
     advancedButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     advancedButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    connect(iconWidget,
-            SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
-            this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
+    connect(iconWidget, &QListWidget::currentItemChanged, this, &MainDialog::changePage);
 
 }
 
@@ -143,12 +143,12 @@ void Launcher::MainDialog::createPages()
     // Select the first page
     iconWidget->setCurrentItem(iconWidget->item(0), QItemSelectionModel::Select);
 
-    connect(mPlayPage, SIGNAL(playButtonClicked()), this, SLOT(play()));
+    connect(mPlayPage, &PlayPage::playButtonClicked, this, &MainDialog::play);
 
-    connect(mPlayPage, SIGNAL(signalProfileChanged(int)), mDataFilesPage, SLOT(slotProfileChanged(int)));
-    connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
+    connect(mPlayPage, &PlayPage::signalProfileChanged, mDataFilesPage, &DataFilesPage::slotProfileChanged);
+    connect(mDataFilesPage, &DataFilesPage::signalProfileChanged, mPlayPage, &PlayPage::setProfilesIndex);
     // Using Qt::QueuedConnection because signal is emitted in a subthread and slot is in the main thread
-    connect(mDataFilesPage, SIGNAL(signalLoadedCellsChanged(QStringList)), mAdvancedPage, SLOT(slotLoadedCellsChanged(QStringList)), Qt::QueuedConnection);
+    connect(mDataFilesPage, &DataFilesPage::signalLoadedCellsChanged, mAdvancedPage, &AdvancedPage::slotLoadedCellsChanged, Qt::QueuedConnection);
 }
 
 Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
@@ -157,14 +157,14 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         return FirstRunDialogResultFailure;
 
     // Dialog wizard and setup will fail if the config directory does not already exist
-    QDir userConfigDir = QDir(QString::fromStdString(mCfgMgr.getUserConfigPath().string()));
-    if ( ! userConfigDir.exists() ) {
-        if ( ! userConfigDir.mkpath(".") )
+    const auto& userConfigDir = mCfgMgr.getUserConfigPath();
+    if ( ! exists(userConfigDir) ) {
+        if ( ! create_directories(userConfigDir) )
         {
             cfgError(tr("Error opening OpenMW configuration file"),
                      tr("<br><b>Could not create directory %0</b><br><br> \
                         Please make sure you have the right permissions \
-                        and try again.<br>").arg(userConfigDir.canonicalPath())
+                        and try again.<br>").arg(Files::pathToQString(canonical(userConfigDir)))
             );
             return FirstRunDialogResultFailure;
         }
@@ -297,7 +297,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
+    const auto userPath = Files::pathToQString(mCfgMgr.getUserConfigPath());
 
     QStringList paths;
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
@@ -330,9 +330,9 @@ bool Launcher::MainDialog::setupGameSettings()
 {
     mGameSettings.clear();
 
-    QString localPath = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str());
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
-    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
+    const auto localPath = Files::pathToQString(mCfgMgr.getLocalPath());
+    const auto userPath = Files::pathToQString(mCfgMgr.getUserConfigPath());
+    const auto globalPath = Files::pathToQString(mCfgMgr.getGlobalPath());
 
     QFile file;
 
@@ -481,21 +481,24 @@ bool Launcher::MainDialog::writeSettings()
     mSettingsPage->saveSettings();
     mAdvancedPage->saveSettings();
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
-    QDir dir(userPath);
+    const auto& userPath = mCfgMgr.getUserConfigPath();
 
-    if (!dir.exists()) {
-        if (!dir.mkpath(userPath)) {
+    if (!exists(userPath)) {
+        if (!create_directories(userPath)) {
             cfgError(tr("Error creating OpenMW configuration directory"),
                      tr("<br><b>Could not create %0</b><br><br> \
                          Please make sure you have the right permissions \
-                         and try again.<br>").arg(userPath));
+                         and try again.<br>").arg(Files::pathToQString(userPath)));
             return false;
         }
     }
 
     // Game settings
-    QFile file(userPath + QString("openmw.cfg"));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QFile file(userPath / "openmw.cfg");
+#else
+    QFile file(Files::pathToQString(userPath / "openmw.cfg"));
+#endif
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
@@ -511,19 +514,19 @@ bool Launcher::MainDialog::writeSettings()
     file.close();
 
     // Graphics settings
-    const std::string settingsPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
+    const auto settingsPath = mCfgMgr.getUserConfigPath() / "settings.cfg";
     try {
         Settings::Manager::saveUser(settingsPath);
     }
     catch (std::exception& e) {
         std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +
-            settingsPath + "<br><br>" + e.what();
+            Files::pathToUnicodeString(settingsPath) + "<br><br>" + e.what();
         cfgError(tr("Error writing user settings file"), tr(msg.c_str()));
         return false;
     }
 
     // Launcher settings
-    file.setFileName(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
+    file.setFileName(Files::pathToQString(userPath / Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created

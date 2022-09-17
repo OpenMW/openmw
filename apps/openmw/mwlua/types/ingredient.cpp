@@ -8,6 +8,7 @@
 
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/world.hpp>
+#include <components/esm3/loadalch.hpp>
 
 namespace sol
 {

@@ -13,7 +13,6 @@ namespace MWGui
     ItemSelectionDialog::ItemSelectionDialog(const std::string &label)
         : WindowModal("openmw_itemselection_dialog.layout")
         , mSortModel(nullptr)
-        , mModel(nullptr)
     {
         getWidget(mItemView, "ItemView");
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &ItemSelectionDialog::onSelectedItem);
@@ -37,9 +36,9 @@ namespace MWGui
 
     void ItemSelectionDialog::openContainer(const MWWorld::Ptr& container)
     {
-        mModel = new InventoryItemModel(container);
-        mSortModel = new SortFilterItemModel(mModel);
-        mItemView->setModel(mSortModel);
+        auto sortModel = std::make_unique<SortFilterItemModel>(std::make_unique<InventoryItemModel>(container));
+        mSortModel = sortModel.get();
+        mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
     }
 

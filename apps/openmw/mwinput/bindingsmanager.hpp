@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include <components/sdlutil/events.hpp>
 
@@ -15,7 +16,7 @@ namespace MWInput
     class BindingsManager
     {
     public:
-        BindingsManager(const std::string& userFile, bool userFileExists);
+        BindingsManager(const std::filesystem::path &userFile, bool userFileExists);
 
         virtual ~BindingsManager();
 
@@ -70,7 +71,7 @@ namespace MWInput
         std::unique_ptr<InputControlSystem> mInputBinder;
         std::unique_ptr<BindingsListener> mListener;
 
-        std::string mUserFile;
+        std::filesystem::path mUserFile;
 
         bool mDragDrop;
     };

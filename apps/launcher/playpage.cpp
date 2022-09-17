@@ -9,8 +9,8 @@ Launcher::PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 
     profilesComboBox->setView(new QListView());
 
-    connect(profilesComboBox, SIGNAL(activated(int)), this, SIGNAL (signalProfileChanged(int)));
-    connect(playButton, SIGNAL(clicked()), this, SLOT(slotPlayClicked()));
+    connect(profilesComboBox, qOverload<int>(&QComboBox::activated), this, &PlayPage::signalProfileChanged);
+    connect(playButton, &QPushButton::clicked, this, &PlayPage::slotPlayClicked);
 
 }
 

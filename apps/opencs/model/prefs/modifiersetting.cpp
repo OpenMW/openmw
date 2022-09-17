@@ -40,7 +40,7 @@ namespace CSMPrefs
 
         mButton = widget;
 
-        connect(widget, SIGNAL(toggled(bool)), this, SLOT(buttonToggled(bool)));
+        connect (widget, &QPushButton::toggled, this, &ModifierSetting::buttonToggled);
 
         return std::make_pair(label, widget);
     }
@@ -49,7 +49,7 @@ namespace CSMPrefs
     {
         if (mButton)
         {
-            std::string shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
+            const std::string& shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
 
             int modifier;
             State::get().getShortcutManager().convertFromString(shortcut, modifier);

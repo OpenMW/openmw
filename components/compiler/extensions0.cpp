@@ -322,7 +322,8 @@ namespace Compiler
             extensions.registerFunction ("getpctraveling", 'l', "", opcodeGetPcTraveling);
             extensions.registerInstruction ("betacomment", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
             extensions.registerInstruction ("bc", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
-            extensions.registerInstruction ("ori", "/S", opcodeBetaComment, opcodeBetaCommentExplicit); // 'ori' stands for 'ObjectReferenceInfo'
+            extensions.registerInstruction ("ori", "/S", opcodeBetaComment, opcodeBetaCommentExplicit); // 'ori' stands for 'OutputRefInfo'
+            extensions.registerInstruction ("outputrefinfo", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
             extensions.registerInstruction ("showscenegraph", "/l", opcodeShowSceneGraph, opcodeShowSceneGraphExplicit);
             extensions.registerInstruction ("ssg", "/l", opcodeShowSceneGraph, opcodeShowSceneGraphExplicit);
             extensions.registerInstruction ("addtolevcreature", "ccl", opcodeAddToLevCreature);
@@ -537,6 +538,10 @@ namespace Compiler
             extensions.registerInstruction("becomewerewolf", "", opcodeBecomeWerewolf, opcodeBecomeWerewolfExplicit);
             extensions.registerInstruction("undowerewolf", "", opcodeUndoWerewolf, opcodeUndoWerewolfExplicit);
             extensions.registerInstruction("setwerewolfacrobatics", "", opcodeSetWerewolfAcrobatics, opcodeSetWerewolfAcrobaticsExplicit);
+
+            extensions.registerFunction("getpcvisionbonus", 'f', "", opcodeGetPCVisionBonus);
+            extensions.registerInstruction("setpcvisionbonus", "f", opcodeSetPCVisionBonus);
+            extensions.registerInstruction("modpcvisionbonus", "f", opcodeModPCVisionBonus);
         }
     }
 

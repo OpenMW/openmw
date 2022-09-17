@@ -17,24 +17,12 @@ font size
 ---------
 
 :Type:		integer
-:Range:		12 to 20
+:Range:		12 to 18
 :Default:	16
 
 Allows to specify glyph size for in-game fonts.
 Note: default bitmap fonts are supposed to work with 16px size, otherwise glyphs will be blurry.
 TrueType fonts do not have this issue.
-
-This setting can be configured in the Interface section of Advanced tab of the launcher.
-
-ttf resolution
---------------
-
-:Type:		integer
-:Range:		50 to 125
-:Default:	75
-
-Allows to specify resolution for in-game TrueType fonts.
-Note: actual resolution depends on "scaling factor" setting value, this value is for 1.0 scaling factor.
 
 This setting can be configured in the Interface section of Advanced tab of the launcher.
 

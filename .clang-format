@@ -9,15 +9,15 @@ AlignOperands:   false
 AlignTrailingComments: false
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: false
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: All
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
-AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: false
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
 BinPackArguments: true
 BinPackParameters: true
 BraceWrapping:
@@ -33,14 +33,15 @@ BraceWrapping:
   AfterExternBlock: true
   BeforeCatch:     true
   BeforeElse:      true
-  BeforeLambdaBody: true
+  BeforeLambdaBody: false
+  IndentBraces:    false
 BreakBeforeBinaryOperators: All
 BreakBeforeBraces: Custom
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializersBeforeComma: false
+BreakConstructorInitializersBeforeComma: true
 BreakStringLiterals: true
-ColumnLimit:     0
+ColumnLimit: 120
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
@@ -98,3 +99,5 @@ SpacesInSquareBrackets: false
 Standard:        c++20
 TabWidth:        4
 UseTab:          Never
+StatementMacros:
+  - META_Object

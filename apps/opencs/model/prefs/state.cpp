@@ -648,8 +648,7 @@ CSMPrefs::State::~State()
 
 void CSMPrefs::State::save()
 {
-    boost::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
-    Settings::Manager::saveUser (user.string());
+    Settings::Manager::saveUser (mConfigurationManager.getUserConfigPath() / mConfigFile);
 }
 
 CSMPrefs::State::Iterator CSMPrefs::State::begin()
@@ -679,7 +678,7 @@ CSMPrefs::Category& CSMPrefs::State::operator[] (const std::string& key)
 
 void CSMPrefs::State::update (const Setting& setting)
 {
-    emit (settingChanged (&setting));
+    emit settingChanged(&setting);
 }
 
 CSMPrefs::State& CSMPrefs::State::get()

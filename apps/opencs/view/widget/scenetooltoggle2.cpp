@@ -102,7 +102,7 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
 
     mButtons.insert (std::make_pair (button, desc));
 
-    connect (button, SIGNAL (clicked()), this, SLOT (selected()));
+    connect (button, &QPushButton::clicked, this, &SceneToolToggle2::selected);
 
     if (mButtons.size()==1 && !disabled)
         mFirst = button;

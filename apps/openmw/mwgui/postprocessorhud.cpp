@@ -287,16 +287,16 @@ namespace MWGui
         while (mConfigArea->getChildCount() > 0)
             MyGUI::Gui::getInstance().destroyWidget(mConfigArea->getChildAt(0));
 
-        mShaderInfo->setCaption("");
+        mShaderInfo->setCaption({});
 
         std::ostringstream ss;
 
-        const std::string NA = "#{Interface:NotAvailableShort}";
-        const std::string endl = "\n";
+        const std::string_view NA = "#{Interface:NotAvailableShort}";
+        const char endl = '\n';
 
-        std::string author = technique->getAuthor().empty() ? NA : std::string(technique->getAuthor());
-        std::string version = technique->getVersion().empty() ? NA : std::string(technique->getVersion());
-        std::string description = technique->getDescription().empty() ? NA : std::string(technique->getDescription());
+        std::string_view author = technique->getAuthor().empty() ? NA : technique->getAuthor();
+        std::string_view version = technique->getVersion().empty() ? NA : technique->getVersion();
+        std::string_view description = technique->getDescription().empty() ? NA : technique->getDescription();
 
         auto serializeBool = [](bool value) {
             return value ? "#{sYes}" : "#{sNo}";

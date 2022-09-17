@@ -3,6 +3,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include <components/esm3/loadweap.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>
 
@@ -20,6 +21,7 @@
 #include "../mwmechanics/weapontype.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -149,7 +151,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString({name.data(), name.size()}) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -162,7 +164,7 @@ namespace MWClass
             text += "\n#{sType} ";
 
             int skill = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mSkill;
-            const std::string type = ESM::Skill::sSkillNameIds[skill];
+            const std::string& type = ESM::Skill::sSkillNameIds[skill];
             std::string_view oneOrTwoHanded;
             if (weaponType->mWeaponClass == ESM::WeaponType::Melee)
             {
@@ -271,28 +273,28 @@ namespace MWClass
         return record->mId;
     }
 
-    std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string_view> Weapon::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         if (hasItemHealth(ptr) && getItemHealth(ptr) == 0)
-            return std::make_pair(0, "#{sInventoryMessage1}");
+            return {0, "#{sInventoryMessage1}"};
 
         // Do not allow equip weapons from inventory during attack
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
-            return std::make_pair(0, "#{sCantEquipWeapWarning}");
+            return {0, "#{sCantEquipWeapWarning}"};
 
         std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
-            return std::make_pair (0, "");
+            return {0, {}};
 
         int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
         if(MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded)
         {
-            return std::make_pair (2, "");
+            return {2, {}};
         }
 
-        return std::make_pair(1, "");
+        return {1, {}};
     }
 
     std::unique_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr, bool force) const

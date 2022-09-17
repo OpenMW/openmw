@@ -12,13 +12,13 @@ CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     QAbstractItemModel *referenceables =
         mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables);
 
-    connect (referenceables, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (referenceableDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (referenceables, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (referenceableAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (referenceables, &QAbstractItemModel::dataChanged,
+        this, &PreviewWidget::referenceableDataChanged);
+    connect (referenceables, &QAbstractItemModel::rowsAboutToBeRemoved,
+        this, &PreviewWidget::referenceableAboutToBeRemoved);
 
-    connect (&mData, SIGNAL (assetTablesChanged ()),
-        this, SLOT (assetTablesChanged ()));
+    connect (&mData, &CSMWorld::Data::assetTablesChanged,
+        this, &PreviewWidget::assetTablesChanged);
 
     setExterior(false);
 
@@ -27,10 +27,10 @@ CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
         QAbstractItemModel *references =
             mData.getTableModel (CSMWorld::UniversalId::Type_References);
 
-        connect (references, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-            this, SLOT (referenceDataChanged (const QModelIndex&, const QModelIndex&)));
-        connect (references, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-            this, SLOT (referenceAboutToBeRemoved (const QModelIndex&, int, int)));
+        connect (references, &QAbstractItemModel::dataChanged,
+            this, &PreviewWidget::referenceDataChanged);
+        connect (references, &QAbstractItemModel::rowsAboutToBeRemoved,
+            this, &PreviewWidget::referenceAboutToBeRemoved);
     }
 }
 

@@ -168,19 +168,19 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
         setItemDelegateForColumn (mModel->columnCount()-1, new RichTextDelegate (this));
 
     mShowAction = new QAction (tr ("Show"), this);
-    connect (mShowAction, SIGNAL (triggered()), this, SLOT (showSelection()));
+    connect (mShowAction, &QAction::triggered, this, &ReportTable::showSelection);
     addAction (mShowAction);
     CSMPrefs::Shortcut* showShortcut = new CSMPrefs::Shortcut("reporttable-show", this);
     showShortcut->associateAction(mShowAction);
 
     mRemoveAction = new QAction (tr ("Remove from list"), this);
-    connect (mRemoveAction, SIGNAL (triggered()), this, SLOT (removeSelection()));
+    connect (mRemoveAction, &QAction::triggered, this, &ReportTable::removeSelection);
     addAction (mRemoveAction);
     CSMPrefs::Shortcut* removeShortcut = new CSMPrefs::Shortcut("reporttable-remove", this);
     removeShortcut->associateAction(mRemoveAction);
 
     mReplaceAction = new QAction (tr ("Replace"), this);
-    connect (mReplaceAction, SIGNAL (triggered()), this, SIGNAL (replaceRequest()));
+    connect (mReplaceAction, &QAction::triggered, this, &ReportTable::replaceRequest);
     addAction (mReplaceAction);
     CSMPrefs::Shortcut* replaceShortcut = new CSMPrefs::Shortcut("reporttable-replace", this);
     replaceShortcut->associateAction(mReplaceAction);
@@ -189,7 +189,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     {
         mRefreshAction = new QAction (tr ("Refresh"), this);
         mRefreshAction->setEnabled (!(mDocument.getState() & mRefreshState));
-        connect (mRefreshAction, SIGNAL (triggered()), this, SIGNAL (refreshRequest()));
+        connect (mRefreshAction, &QAction::triggered, this, &ReportTable::refreshRequest);
         addAction (mRefreshAction);
         CSMPrefs::Shortcut* refreshShortcut = new CSMPrefs::Shortcut("reporttable-refresh", this);
         refreshShortcut->associateAction(mRefreshAction);
@@ -199,8 +199,8 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_Remove));
     mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_EditAndRemove));
 
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged, 
+        this, &ReportTable::settingChanged);
     CSMPrefs::get()["Reports"].update();
 }
 

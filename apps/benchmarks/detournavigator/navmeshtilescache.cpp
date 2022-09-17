@@ -1,6 +1,7 @@
 #include <benchmark/benchmark.h>
 
 #include <components/detournavigator/navmeshtilescache.hpp>
+#include <components/detournavigator/stats.hpp>
 #include <components/esm3/loadland.hpp>
 
 #include <algorithm>
@@ -139,12 +140,14 @@ namespace
         const CollisionShapeType agentShapeType = CollisionShapeType::Aabb;
         const osg::Vec3f agentHalfExtents = generateAgentHalfExtents(0.5, 1.5, random);
         const TilePosition tilePosition = generateVec2i(10000, random);
-        const std::size_t generation = std::uniform_int_distribution<std::size_t>(0, 100)(random);
-        const std::size_t revision = std::uniform_int_distribution<std::size_t>(0, 10000)(random);
+        const Version version {
+            .mGeneration = std::uniform_int_distribution<std::size_t>(0, 100)(random),
+            .mRevision = std::uniform_int_distribution<std::size_t>(0, 10000)(random),
+        };
         Mesh mesh = generateMesh(triangles, random);
         std::vector<CellWater> water;
         generateWater(std::back_inserter(water), 1, random);
-        RecastMesh recastMesh(generation, revision, std::move(mesh), std::move(water),
+        RecastMesh recastMesh(version, std::move(mesh), std::move(water),
                               {generateHeightfield(random)}, {generateFlatHeightfield(random)}, {});
         return Key {AgentBounds {agentShapeType, agentHalfExtents}, tilePosition, std::move(recastMesh)};
     }

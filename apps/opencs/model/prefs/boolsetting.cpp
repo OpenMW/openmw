@@ -30,7 +30,7 @@ std::pair<QWidget *, QWidget *> CSMPrefs::BoolSetting::makeWidgets (QWidget *par
         mWidget->setToolTip (tooltip);
     }
 
-    connect (mWidget, SIGNAL (stateChanged (int)), this, SLOT (valueChanged (int)));
+    connect (mWidget, &QCheckBox::stateChanged, this, &BoolSetting::valueChanged);
 
     return std::make_pair (static_cast<QWidget *> (nullptr), mWidget);
 }

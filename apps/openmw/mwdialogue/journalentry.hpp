@@ -30,7 +30,7 @@ namespace MWDialogue
 
         Entry (const ESM::JournalEntry& record);
 
-        std::string getText() const;
+        const std::string& getText() const;
 
         void write (ESM::JournalEntry& entry) const;
     };

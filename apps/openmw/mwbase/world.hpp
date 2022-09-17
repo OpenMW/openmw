@@ -160,6 +160,8 @@ namespace MWBase
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
 
+            virtual const std::vector<int>& getESMVersions() const = 0;
+
             virtual MWWorld::LocalScripts& getLocalScripts() = 0;
 
             virtual bool hasCellChanged() const = 0;
@@ -224,7 +226,7 @@ namespace MWBase
             virtual void advanceTime (double hours, bool incremental = false) = 0;
             ///< Advance in-game time.
 
-            virtual std::string getMonthName (int month = -1) const = 0;
+            virtual std::string_view getMonthName(int month = -1) const = 0;
             ///< Return name of month (-1: current month)
 
             virtual MWWorld::TimeStamp getTimeStamp() const = 0;
@@ -514,7 +516,7 @@ namespace MWBase
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise
-            virtual bool findExteriorPosition(const std::string &name, ESM::Position &pos) = 0;
+            virtual bool findExteriorPosition(std::string_view name, ESM::Position& pos) = 0;
 
             /// Find default position inside interior cell specified by name
             /// \return false if interior with given name not exists, true otherwise
@@ -566,8 +568,7 @@ namespace MWBase
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
-            virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                                  const std::string& id) = 0;
+            virtual void teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id) = 0;
 
             enum DetectionType
             {
@@ -597,10 +598,6 @@ namespace MWBase
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
 
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) = 0;
-
-            virtual void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster,
-                                      const MWWorld::Ptr& ignore, ESM::RangeType rangeType, const std::string& id,
-                                      const std::string& sourceName, const bool fromProjectile=false, int slot = 0) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
 
@@ -642,7 +639,7 @@ namespace MWBase
 
             /// Export scene graph to a file and return the filename.
             /// \param ptr object to export scene graph for (if empty, export entire scene graph)
-            virtual std::string exportSceneGraph(const MWWorld::Ptr& ptr) = 0;
+            virtual std::filesystem::path exportSceneGraph(const MWWorld::Ptr& ptr) = 0;
 
             /// Preload VFX associated with this effect list
             virtual void preloadEffects(const ESM::EffectList* effectList) = 0;

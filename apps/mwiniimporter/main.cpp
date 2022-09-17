@@ -1,13 +1,16 @@
 #include "importer.hpp"
 
 #include <iostream>
+#include <filesystem>
+#include <fstream>
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+
+#include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 
 namespace bpo = boost::program_options;
-namespace bfs = boost::filesystem;
+namespace sfs = std::filesystem;
 
 #ifndef _WIN32
 int main(int argc, char *argv[]) {
@@ -52,27 +55,26 @@ private:
 int wmain(int argc, wchar_t *wargv[]) {
     utf8argv converter(argc, wargv);
     char **argv = converter.get();
-    boost::filesystem::path::imbue(boost::locale::generator().generate(""));
 #endif
 
     try
     {
         bpo::options_description desc("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
         bpo::positional_options_description p_desc;
-        desc.add_options()
-            ("help,h", "produce help message")
-            ("verbose,v", "verbose output")
-            ("ini,i", bpo::value<std::string>(), "morrowind.ini file")
-            ("cfg,c", bpo::value<std::string>(), "openmw.cfg file")
-            ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
-            ("game-files,g", "import esm and esp files")
-            ("fonts,f", "import bitmap fonts")
-            ("no-archives,A", "disable bsa archives import")
-            ("encoding,e", bpo::value<std::string>()-> default_value("win1252"),
+        auto addOption = desc.add_options();
+        addOption("help,h", "produce help message");
+        addOption("verbose,v", "verbose output");
+        addOption("ini,i", bpo::value<Files::MaybeQuotedPath>(), "morrowind.ini file");
+        addOption("cfg,c", bpo::value<Files::MaybeQuotedPath>(), "openmw.cfg file");
+        addOption("output,o", bpo::value<Files::MaybeQuotedPath>()->default_value({}), "openmw.cfg file");
+        addOption("game-files,g", "import esm and esp files");
+        addOption("fonts,f", "import bitmap fonts");
+        addOption("no-archives,A", "disable bsa archives import");
+        addOption("encoding,e", bpo::value<std::string>()-> default_value("win1252"),
                 "Character encoding used in OpenMW game messages:\n"
                 "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
                 "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-                "\n\twin1252 - Western European (Latin) alphabet, used by default")
+                "\n\twin1252 - Western European (Latin) alphabet, used by default");
             ;
         p_desc.add("ini", 1).add("cfg", 1);
 
@@ -82,7 +84,6 @@ int wmain(int argc, wchar_t *wargv[]) {
             .options(desc)
             .positional(p_desc)
             .run();
-
         bpo::store(parsed, vm);
 
         if(vm.count("help") || !vm.count("ini") || !vm.count("cfg")) {
@@ -92,20 +93,20 @@ int wmain(int argc, wchar_t *wargv[]) {
 
         bpo::notify(vm);
 
-        boost::filesystem::path iniFile(vm["ini"].as<std::string>());
-        boost::filesystem::path cfgFile(vm["cfg"].as<std::string>());
+        std::filesystem::path iniFile(vm["ini"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+        std::filesystem::path cfgFile(vm["cfg"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
 
         // if no output is given, write back to cfg file
-        std::string outputFile(vm["output"].as<std::string>());
+        std::filesystem::path outputFile = vm["output"].as<Files::MaybeQuotedPath>().u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
         if(vm["output"].defaulted()) {
-            outputFile = vm["cfg"].as<std::string>();
+            outputFile = vm["cfg"].as<Files::MaybeQuotedPath>().u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
         }
 
-        if(!boost::filesystem::exists(iniFile)) {
+        if(!std::filesystem::exists(iniFile)) {
             std::cerr << "ini file does not exist" << std::endl;
             return -3;
         }
-        if(!boost::filesystem::exists(cfgFile))
+        if(!std::filesystem::exists(cfgFile))
             std::cerr << "cfg file does not exist" << std::endl;
 
         MwIniImporter importer;
@@ -136,8 +137,8 @@ int wmain(int argc, wchar_t *wargv[]) {
             importer.importArchives(cfg, ini);
         }
 
-        std::cout << "write to: " << outputFile << std::endl;
-        bfs::ofstream file((bfs::path(outputFile)));
+        std::cout << "write to: " << Files::pathToUnicodeString(outputFile) << std::endl;
+        std::ofstream file(outputFile);
         importer.writeToFile(file, cfg);
     }
     catch (std::exception& e)

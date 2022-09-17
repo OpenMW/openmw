@@ -54,7 +54,8 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Pathgrids, "Pathgrids", ":./pathgrid.png" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_StartScripts, "Start Scripts", ":./start-script.png" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_MetaDatas, "Metadata", ":./metadata.png" },
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
+        // end marker
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 },
     };
 
     static const TypeData sIdArg[] =
@@ -120,8 +121,8 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Pathgrid, "Pathgrid", ":./pathgrid.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_StartScript, "Start Script", ":./start-script.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MetaData, "Metadata", ":./metadata.png" },
-
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
+        // end marker
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 },
     };
 
     static const TypeData sIndexArg[] =
@@ -129,7 +130,8 @@ namespace
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results", ":./menu-verify.png" },
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_LoadErrorLog, "Load Error Log", ":./error-log.png" },
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_Search, "Global Search", ":./menu-search.png" },
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
+        // end marker
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 },
     };
 }
 

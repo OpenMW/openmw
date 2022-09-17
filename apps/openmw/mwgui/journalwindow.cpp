@@ -518,7 +518,7 @@ namespace
             AddNamesToList(Gui::MWList* list) : mList(list) {}
 
             Gui::MWList* mList;
-            void operator () (const std::string& name, bool finished=false)
+            void operator() (std::string_view name, bool finished = false)
             {
                 mList->addItem(name);
             }
@@ -528,7 +528,7 @@ namespace
             SetNamesInactive(Gui::MWList* list) : mList(list) {}
 
             Gui::MWList* mList;
-            void operator () (const std::string& name, bool finished)
+            void operator() (std::string_view name, bool finished)
             {
                 if (finished)
                 {
@@ -648,9 +648,9 @@ namespace
 }
 
 // glue the implementation to the interface
-MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
+std::unique_ptr<MWGui::JournalWindow> MWGui::JournalWindow::create(JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
 {
-    return new JournalWindowImpl (Model, questList, encoding);
+    return std::make_unique<JournalWindowImpl>(Model, questList, encoding);
 }
 
 MWGui::JournalWindow::JournalWindow()

@@ -6,8 +6,8 @@
 ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
     ContentSelectorView::ComboBox(parent)
 {
-    connect(this, SIGNAL(activated(int)), this,
-            SLOT(slotIndexChangedByUser(int)));
+    connect(this, qOverload<int>(&ProfilesComboBox::activated),
+            this, &ProfilesComboBox::slotIndexChangedByUser);
 
     setInsertPolicy(QComboBox::NoInsert);
 }
@@ -18,8 +18,8 @@ void ProfilesComboBox::setEditEnabled(bool editable)
         return;
 
     if (!editable) {
-        disconnect(lineEdit(), SIGNAL(editingFinished()), this, SLOT(slotEditingFinished()));
-        disconnect(lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(slotTextChanged(QString)));
+        disconnect(lineEdit(), &QLineEdit::editingFinished, this, &ProfilesComboBox::slotEditingFinished);
+        disconnect(lineEdit(), &QLineEdit::textChanged, this, &ProfilesComboBox::slotTextChanged);
         return setEditable(false);
     }
 
@@ -32,14 +32,11 @@ void ProfilesComboBox::setEditEnabled(bool editable)
     setLineEdit(edit);
     setCompleter(nullptr);
 
-    connect(lineEdit(), SIGNAL(editingFinished()), this,
-                SLOT(slotEditingFinished()));
+    connect(lineEdit(), &QLineEdit::editingFinished, this, &ProfilesComboBox::slotEditingFinished);
 
-    connect(lineEdit(), SIGNAL(textChanged(QString)), this,
-            SLOT(slotTextChanged(QString)));
+    connect(lineEdit(), &QLineEdit::textChanged, this, &ProfilesComboBox::slotTextChanged);
 
-    connect (lineEdit(), SIGNAL(textChanged(QString)), this,
-             SIGNAL (signalProfileTextChanged (QString)));
+    connect(lineEdit(), &QLineEdit::textChanged, this, &ProfilesComboBox::signalProfileTextChanged);
 }
 
 void ProfilesComboBox::slotTextChanged(const QString &text)
@@ -74,7 +71,7 @@ void ProfilesComboBox::slotEditingFinished()
         return;
 
     setItemText(currentIndex(), current);
-    emit(profileRenamed(previous, current));
+    emit profileRenamed(previous, current);
 }
 
 void ProfilesComboBox::slotIndexChangedByUser(int index)
@@ -82,7 +79,7 @@ void ProfilesComboBox::slotIndexChangedByUser(int index)
     if (index == -1)
         return;
 
-    emit (signalProfileChanged(mOldProfile, currentText()));
+    emit signalProfileChanged(mOldProfile, currentText());
     mOldProfile = currentText();
 }
 

@@ -45,7 +45,7 @@ void CSMDoc::Operation::run()
 
     if (!mConnected)
     {
-        connect (mTimer, SIGNAL (timeout()), this, SLOT (executeStage()));
+        connect (mTimer, &QTimer::timeout, this, &Operation::executeStage);
         mConnected = true;
     }
 

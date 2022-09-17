@@ -5,10 +5,23 @@
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5129: Stuttering animation on Centurion Archer
+    Bug #5714: Touch spells cast using ExplodeSpell don't always explode
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
+    Bug #6427: Enemy health bar disappears before damaging effect ends
+    Bug #6661: Saved games that have no preview screenshot cause issues or crashes
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
+    Bug #6964: Nerasa Dralor Won't Follow
+    Bug #6974: Only harmful effects are reflected
+    Bug #6986: Sound magic effect does not make noise
+    Bug #6987: Set/Mod Blindness should not darken the screen
+    Bug #6992: Crossbow reloading doesn't look the same as in Morrowind
+    Bug #6993: Shooting your last round of ammunition causes the attack animation to cancel
+    Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
+    Feature #6979: Add support of loading and displaying LOD assets purely based on their filename extension
+    Feature #6983: PCVisionBonus script functions
+    Feature #6995: Localize the "show effect duration" option
 
 0.48.0
 ------
@@ -165,6 +178,8 @@
     Bug #6910: Torches should not be extinguished when not being held
     Bug #6913: Constant effect enchanted items don't break invisibility
     Bug #6923: Dispose of corpse prevents respawning after load
+    Bug #6937: Divided by Nix Hounds quest is broken
+    Bug #7008: Race condition on initializing a vector of reserved node names
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
