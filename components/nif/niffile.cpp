@@ -23,11 +23,16 @@
 namespace Nif
 {
 
-    /// Open a NIF stream. The name is used for error messages.
-    NIFFile::NIFFile(Files::IStreamPtr&& stream, const std::filesystem::path& name)
-        : filename(name)
+    Reader::Reader(NIFFile& file)
+        : ver(file.mVersion)
+        , userVer(file.mUserVersion)
+        , bethVer(file.mBethVersion)
+        , filename(file.mPath)
+        , hash(file.mHash)
+        , records(file.mRecords)
+        , roots(file.mRoots)
+        , mUseSkinning(file.mUseSkinning)
     {
-        parse(std::move(stream));
     }
 
     template <typename NodeType, RecordType recordType>
@@ -173,7 +178,7 @@ namespace Nif
     /// Make the factory map used for parsing the file
     static const std::map<std::string, CreateRecord> factories = makeFactory();
 
-    std::string NIFFile::printVersion(unsigned int version)
+    std::string Reader::printVersion(unsigned int version)
     {
         int major = (version >> 24) & 0xFF;
         int minor = (version >> 16) & 0xFF;
@@ -185,12 +190,12 @@ namespace Nif
         return stream.str();
     }
 
-    void NIFFile::parse(Files::IStreamPtr&& stream)
+    void Reader::parse(Files::IStreamPtr&& stream)
     {
         const std::array<std::uint64_t, 2> fileHash = Files::getHash(filename, *stream);
         hash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
 
-        NIFStream nif(this, std::move(stream));
+        NIFStream nif(*this, std::move(stream));
 
         // Check the header string
         std::string head = nif.getVersionString();
@@ -209,7 +214,7 @@ namespace Nif
         // It's not used by Morrowind assets but Morrowind supports it.
         static const std::array<uint32_t, 2> supportedVers = {
             NIFStream::generateVersion(4, 0, 0, 0),
-            VER_MW,
+            NIFFile::VER_MW,
         };
         const bool supportedVersion = std::find(supportedVers.begin(), supportedVers.end(), ver) != supportedVers.end();
         if (!supportedVersion)
@@ -239,19 +244,19 @@ namespace Nif
 
         // Bethesda stream header
         // It contains Bethesda format version and (useless) export information
-        if (ver == VER_OB_OLD
+        if (ver == NIFFile::VER_OB_OLD
             || (userVer >= 3
-                && ((ver == VER_OB || ver == VER_BGS)
+                && ((ver == NIFFile::VER_OB || ver == NIFFile::VER_BGS)
                     || (ver >= NIFStream::generateVersion(10, 1, 0, 0) && ver <= NIFStream::generateVersion(20, 0, 0, 4)
                         && userVer <= 11))))
         {
             bethVer = nif.getUInt();
             nif.getExportString(); // Author
-            if (bethVer > BETHVER_FO4)
+            if (bethVer > NIFFile::BETHVER_FO4)
                 nif.getUInt(); // Unknown
             nif.getExportString(); // Process script
             nif.getExportString(); // Export script
-            if (bethVer == BETHVER_FO4)
+            if (bethVer == NIFFile::BETHVER_FO4)
                 nif.getExportString(); // Max file path
         }
 
@@ -347,29 +352,24 @@ namespace Nif
 
         // Once parsing is done, do post-processing.
         for (const auto& record : records)
-            record->post(this);
+            record->post(*this);
     }
 
-    void NIFFile::setUseSkinning(bool skinning)
+    void Reader::setUseSkinning(bool skinning)
     {
         mUseSkinning = skinning;
     }
 
-    bool NIFFile::getUseSkinning() const
-    {
-        return mUseSkinning;
-    }
+    std::atomic_bool Reader::sLoadUnsupportedFiles = false;
 
-    std::atomic_bool NIFFile::sLoadUnsupportedFiles = false;
-
-    void NIFFile::setLoadUnsupportedFiles(bool load)
+    void Reader::setLoadUnsupportedFiles(bool load)
     {
         sLoadUnsupportedFiles = load;
     }
 
-    std::string NIFFile::getString(uint32_t index) const
+    std::string Reader::getString(std::uint32_t index) const
     {
-        if (index == std::numeric_limits<uint32_t>::max())
+        if (index == std::numeric_limits<std::uint32_t>::max())
             return std::string();
         return strings.at(index);
     }

@@ -22,7 +22,7 @@ namespace Nif
         target.read(nif);
     }
 
-    void Controller::post(NIFFile* nif)
+    void Controller::post(Reader& nif)
     {
         Record::post(nif);
         next.post(nif);
@@ -44,7 +44,7 @@ namespace Nif
             mInterpolator.read(nif);
     }
 
-    void NiSingleInterpController::post(NIFFile* nif)
+    void NiSingleInterpController::post(Reader& nif)
     {
         NiInterpController::post(nif);
         mInterpolator.post(nif);
@@ -104,7 +104,7 @@ namespace Nif
         nif->getChar();
     }
 
-    void NiParticleSystemController::post(NIFFile* nif)
+    void NiParticleSystemController::post(Reader& nif)
     {
         Controller::post(nif);
         emitter.post(nif);
@@ -128,7 +128,7 @@ namespace Nif
             mData.read(nif);
     }
 
-    void NiMaterialColorController::post(NIFFile* nif)
+    void NiMaterialColorController::post(Reader& nif)
     {
         NiPoint3InterpController::post(nif);
         mData.post(nif);
@@ -142,7 +142,7 @@ namespace Nif
         target.read(nif);
     }
 
-    void NiLookAtController::post(NIFFile* nif)
+    void NiLookAtController::post(Reader& nif)
     {
         Controller::post(nif);
         target.post(nif);
@@ -160,7 +160,7 @@ namespace Nif
         floatData.read(nif);
     }
 
-    void NiPathController::post(NIFFile* nif)
+    void NiPathController::post(Reader& nif)
     {
         Controller::post(nif);
 
@@ -176,7 +176,7 @@ namespace Nif
         data.read(nif);
     }
 
-    void NiUVController::post(NIFFile* nif)
+    void NiUVController::post(Reader& nif)
     {
         Controller::post(nif);
         data.post(nif);
@@ -189,7 +189,7 @@ namespace Nif
             mData.read(nif);
     }
 
-    void NiKeyframeController::post(NIFFile* nif)
+    void NiKeyframeController::post(Reader& nif)
     {
         NiSingleInterpController::post(nif);
         mData.post(nif);
@@ -206,7 +206,7 @@ namespace Nif
         mExtraTargets = targets;
     }
 
-    void NiMultiTargetTransformController::post(NIFFile* nif)
+    void NiMultiTargetTransformController::post(Reader& nif)
     {
         NiInterpController::post(nif);
         mExtraTargets.post(nif);
@@ -219,7 +219,7 @@ namespace Nif
             mData.read(nif);
     }
 
-    void NiAlphaController::post(NIFFile* nif)
+    void NiAlphaController::post(Reader& nif)
     {
         NiFloatInterpController::post(nif);
         mData.post(nif);
@@ -232,7 +232,7 @@ namespace Nif
             mData.read(nif);
     }
 
-    void NiRollController::post(NIFFile* nif)
+    void NiRollController::post(Reader& nif)
     {
         NiSingleInterpController::post(nif);
         mData.post(nif);
@@ -275,7 +275,7 @@ namespace Nif
         }
     }
 
-    void NiGeomMorpherController::post(NIFFile* nif)
+    void NiGeomMorpherController::post(Reader& nif)
     {
         NiInterpController::post(nif);
         mData.post(nif);
@@ -289,7 +289,7 @@ namespace Nif
             mData.read(nif);
     }
 
-    void NiVisController::post(NIFFile* nif)
+    void NiVisController::post(Reader& nif)
     {
         NiBoolInterpController::post(nif);
         mData.post(nif);
@@ -307,7 +307,7 @@ namespace Nif
         mSources.read(nif);
     }
 
-    void NiFlipController::post(NIFFile* nif)
+    void NiFlipController::post(Reader& nif)
     {
         NiFloatInterpController::post(nif);
         mSources.post(nif);
@@ -334,7 +334,7 @@ namespace Nif
         data.read(nif);
     }
 
-    void NiPoint3Interpolator::post(NIFFile* nif)
+    void NiPoint3Interpolator::post(Reader& nif)
     {
         data.post(nif);
     }
@@ -345,7 +345,7 @@ namespace Nif
         data.read(nif);
     }
 
-    void NiBoolInterpolator::post(NIFFile* nif)
+    void NiBoolInterpolator::post(Reader& nif)
     {
         data.post(nif);
     }
@@ -356,7 +356,7 @@ namespace Nif
         data.read(nif);
     }
 
-    void NiFloatInterpolator::post(NIFFile* nif)
+    void NiFloatInterpolator::post(Reader& nif)
     {
         data.post(nif);
     }
@@ -378,7 +378,7 @@ namespace Nif
         data.read(nif);
     }
 
-    void NiTransformInterpolator::post(NIFFile* nif)
+    void NiTransformInterpolator::post(Reader& nif)
     {
         data.post(nif);
     }
@@ -389,7 +389,7 @@ namespace Nif
         data.read(nif);
     }
 
-    void NiColorInterpolator::post(NIFFile* nif)
+    void NiColorInterpolator::post(Reader& nif)
     {
         data.post(nif);
     }

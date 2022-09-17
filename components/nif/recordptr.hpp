@@ -44,13 +44,13 @@ namespace Nif
         }
 
         /// Resolve index to pointer
-        void post(NIFFile* nif)
+        void post(Reader& nif)
         {
             if (index < 0)
                 ptr = nullptr;
             else
             {
-                Record* r = nif->getRecord(index);
+                Record* r = nif.getRecord(index);
                 // And cast it
                 ptr = dynamic_cast<X*>(r);
                 assert(ptr != nullptr);
@@ -107,7 +107,7 @@ namespace Nif
                 list[i].read(nif);
         }
 
-        void post(NIFFile* nif)
+        void post(Reader& nif)
         {
             for (size_t i = 0; i < list.size(); i++)
                 list[i].post(nif);

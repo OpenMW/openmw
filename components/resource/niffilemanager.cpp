@@ -45,7 +45,9 @@ namespace Resource
             return static_cast<NifFileHolder*>(obj.get())->mNifFile;
         else
         {
-            Nif::NIFFilePtr file(new Nif::NIFFile(mVFS->get(name), name));
+            auto file = std::make_shared<Nif::NIFFile>(name);
+            Nif::Reader reader(*file);
+            reader.parse(mVFS->get(name));
             obj = new NifFileHolder(file);
             mCache->addEntryToObjectCache(name, obj);
             return file;

@@ -44,7 +44,7 @@ namespace Nif
         NiInterpolatorPtr mInterpolator;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     // Base class for controllers that use a NiFloatInterpolator to animate their target.
@@ -116,7 +116,7 @@ namespace Nif
         NiParticleModifierPtr colliders;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
 
         bool noAutoAdjust() const { return emitFlags & EmitFlag_NoAutoAdjust; }
         bool emitAtVertex() const { return flags & BSPArrayController_AtVertex; }
@@ -129,7 +129,7 @@ namespace Nif
         unsigned int mTargetColor;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiPathController : public Controller
@@ -152,7 +152,7 @@ namespace Nif
         short followAxis;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiLookAtController : public Controller
@@ -161,7 +161,7 @@ namespace Nif
         unsigned short lookAtFlags{ 0 };
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiUVController : public Controller
@@ -170,7 +170,7 @@ namespace Nif
         unsigned int uvSet;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiKeyframeController : public NiSingleInterpController
@@ -178,7 +178,7 @@ namespace Nif
         NiKeyframeDataPtr mData;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiMultiTargetTransformController : public NiInterpController
@@ -186,7 +186,7 @@ namespace Nif
         NodeList mExtraTargets;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiAlphaController : public NiFloatInterpController
@@ -194,7 +194,7 @@ namespace Nif
         NiFloatDataPtr mData;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiRollController : public NiSingleInterpController
@@ -202,7 +202,7 @@ namespace Nif
         NiFloatDataPtr mData;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiGeomMorpherController : public NiInterpController
@@ -214,7 +214,7 @@ namespace Nif
         std::vector<float> mWeights;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiVisController : public NiBoolInterpController
@@ -222,7 +222,7 @@ namespace Nif
         NiVisDataPtr mData;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiFlipController : public NiFloatInterpController
@@ -232,7 +232,7 @@ namespace Nif
         NiSourceTextureList mSources;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct bhkBlendController : public Controller
@@ -255,7 +255,7 @@ namespace Nif
         osg::Vec3f defaultVal;
         NiPosDataPtr data;
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiBoolInterpolator : public NiInterpolator
@@ -263,7 +263,7 @@ namespace Nif
         char defaultVal;
         NiBoolDataPtr data;
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiFloatInterpolator : public NiInterpolator
@@ -271,7 +271,7 @@ namespace Nif
         float defaultVal;
         NiFloatDataPtr data;
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiTransformInterpolator : public NiInterpolator
@@ -282,7 +282,7 @@ namespace Nif
         NiKeyframeDataPtr data;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiColorInterpolator : public NiInterpolator
@@ -290,7 +290,7 @@ namespace Nif
         osg::Vec4f defaultVal;
         NiColorDataPtr data;
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
 } // Namespace

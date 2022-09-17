@@ -16,7 +16,7 @@ namespace Nif
         bones.read(nif);
     }
 
-    void NiSkinInstance::post(NIFFile* nif)
+    void NiSkinInstance::post(Reader& nif)
     {
         data.post(nif);
         partitions.post(nif);
@@ -24,16 +24,16 @@ namespace Nif
         bones.post(nif);
 
         if (data.empty() || root.empty())
-            throw Nif::Exception("NiSkinInstance missing root or data", nif->getFilename());
+            throw Nif::Exception("NiSkinInstance missing root or data", nif.getFilename());
 
         size_t bnum = bones.length();
         if (bnum != data->bones.size())
-            throw Nif::Exception("Mismatch in NiSkinData bone count", nif->getFilename());
+            throw Nif::Exception("Mismatch in NiSkinData bone count", nif.getFilename());
 
         for (size_t i = 0; i < bnum; i++)
         {
             if (bones[i].empty())
-                throw Nif::Exception("Oops: Missing bone! Don't know how to handle this.", nif->getFilename());
+                throw Nif::Exception("Oops: Missing bone! Don't know how to handle this.", nif.getFilename());
             bones[i]->setBone();
         }
     }
@@ -304,7 +304,7 @@ namespace Nif
             nif->getUChars(data, numPixels * numFaces);
     }
 
-    void NiPixelData::post(NIFFile* nif)
+    void NiPixelData::post(Reader& nif)
     {
         palette.post(nif);
     }
@@ -360,7 +360,7 @@ namespace Nif
         }
     }
 
-    void NiSkinData::post(NIFFile* nif)
+    void NiSkinData::post(Reader& nif)
     {
         partitions.post(nif);
     }
@@ -474,7 +474,7 @@ namespace Nif
         palette = nif->getString();
         if (nif->getUInt() != palette.size())
             Log(Debug::Warning) << "NIFFile Warning: Failed size check in NiStringPalette. File: "
-                                << nif->file->getFilename();
+                                << nif->getFile().getFilename();
     }
 
     void NiBoolData::read(NIFStream* nif)

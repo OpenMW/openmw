@@ -62,7 +62,7 @@ namespace Nif
         unsigned int alpha;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct BSShaderTextureSet : public Record
@@ -89,7 +89,7 @@ namespace Nif
         ControllerPtr controller;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiParticleGrowFade : public NiParticleModifier
@@ -105,7 +105,7 @@ namespace Nif
         NiColorDataPtr data;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiGravity : public NiParticleModifier

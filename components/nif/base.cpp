@@ -23,7 +23,7 @@ namespace Nif
         controller.read(nif);
     }
 
-    void Named::post(NIFFile* nif)
+    void Named::post(Reader& nif)
     {
         extra.post(nif);
         extralist.post(nif);

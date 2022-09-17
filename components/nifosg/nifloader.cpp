@@ -963,7 +963,7 @@ namespace NifOsg
                     if (matctrl->mData.empty() && matctrl->mInterpolator.empty())
                         continue;
                     auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->mTargetColor);
-                    if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW
+                    if (mVersion <= Nif::NIFFile::VER_MW
                         && targetColor == MaterialColorController::TargetColor::Specular)
                         continue;
                     if (!matctrl->mInterpolator.empty()
@@ -2398,7 +2398,7 @@ namespace NifOsg
             }
 
             // While NetImmerse and Gamebryo support specular lighting, Morrowind has its support disabled.
-            if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW || !specEnabled)
+            if (mVersion <= Nif::NIFFile::VER_MW || !specEnabled)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
 
             if (lightmode == 0)

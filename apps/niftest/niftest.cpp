@@ -50,7 +50,9 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
             if (isNIF(name))
             {
                 //           std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile temp_nif(myManager.get(name), archivePath / name);
+                Nif::NIFFile file(archivePath / name);
+                Nif::Reader reader(file);
+                reader.parse(myManager.get(name));
             }
             else if (isBSA(name))
             {
@@ -120,7 +122,7 @@ int main(int argc, char** argv)
     if (!parseOptions(argc, argv, files))
         return 1;
 
-    Nif::NIFFile::setLoadUnsupportedFiles(true);
+    Nif::Reader::setLoadUnsupportedFiles(true);
     //     std::cout << "Reading Files" << std::endl;
     for (const auto& path : files)
     {
@@ -129,7 +131,9 @@ int main(int argc, char** argv)
             if (isNIF(path))
             {
                 // std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile temp_nif(Files::openConstrainedFileStream(path), path);
+                Nif::NIFFile file(path);
+                Nif::Reader reader(file);
+                reader.parse(Files::openConstrainedFileStream(path));
             }
             else if (isBSA(path))
             {

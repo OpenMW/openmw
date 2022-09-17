@@ -22,7 +22,7 @@
 namespace Nif
 {
 
-    class NIFFile;
+    class Reader;
 
     template <std::size_t numInstances, typename T>
     inline void readLittleEndianBufferOfType(Files::IStreamPtr& pIStream, T* dest)
@@ -59,17 +59,19 @@ namespace Nif
 
     class NIFStream
     {
+        const Reader& file;
+
         /// Input stream
         Files::IStreamPtr inp;
 
     public:
-        NIFFile* const file;
-
-        NIFStream(NIFFile* file, Files::IStreamPtr&& inp)
-            : inp(std::move(inp))
-            , file(file)
+        explicit NIFStream(const Reader& file, Files::IStreamPtr&& inp)
+            : file(file)
+            , inp(std::move(inp))
         {
         }
+
+        const Reader& getFile() const { return file; }
 
         void skip(size_t size) { inp->ignore(size); }
 

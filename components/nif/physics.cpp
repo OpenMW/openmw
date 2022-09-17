@@ -165,7 +165,7 @@ namespace Nif
         mWorldObjectInfo.read(nif);
     }
 
-    void bhkWorldObject::post(NIFFile* nif)
+    void bhkWorldObject::post(Reader& nif)
     {
         mShape.post(nif);
     }
@@ -181,7 +181,7 @@ namespace Nif
         mShape.read(nif);
     }
 
-    void bhkBvTreeShape::post(NIFFile* nif)
+    void bhkBvTreeShape::post(Reader& nif)
     {
         mShape.post(nif);
     }
@@ -207,7 +207,7 @@ namespace Nif
         nif->getUInts(mFilters, numFilters);
     }
 
-    void bhkNiTriStripsShape::post(NIFFile* nif)
+    void bhkNiTriStripsShape::post(Reader& nif)
     {
         mData.post(nif);
     }
@@ -229,7 +229,7 @@ namespace Nif
         mData.read(nif);
     }
 
-    void bhkPackedNiTriStripsShape::post(NIFFile* nif)
+    void bhkPackedNiTriStripsShape::post(Reader& nif)
     {
         mData.post(nif);
     }

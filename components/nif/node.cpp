@@ -70,7 +70,7 @@ namespace Nif
             default:
             {
                 throw Nif::Exception(
-                    "Unhandled NiBoundingVolume type: " + std::to_string(type), nif->file->getFilename());
+                    "Unhandled NiBoundingVolume type: " + std::to_string(type), nif->getFile().getFilename());
             }
         }
     }
@@ -99,7 +99,7 @@ namespace Nif
         isBone = false;
     }
 
-    void Node::post(NIFFile* nif)
+    void Node::post(Reader& nif)
     {
         Named::post(nif);
         props.post(nif);
@@ -128,7 +128,7 @@ namespace Nif
         }
     }
 
-    void NiNode::post(NIFFile* nif)
+    void NiNode::post(Reader& nif)
     {
         Node::post(nif);
         children.post(nif);
@@ -176,7 +176,7 @@ namespace Nif
         }
     }
 
-    void NiGeometry::post(NIFFile* nif)
+    void NiGeometry::post(Reader& nif)
     {
         Node::post(nif);
         data.post(nif);
@@ -184,7 +184,7 @@ namespace Nif
         shaderprop.post(nif);
         alphaprop.post(nif);
         if (recType != RC_NiParticles && !skin.empty())
-            nif->setUseSkinning(true);
+            nif.setUseSkinning(true);
     }
 
     void BSLODTriShape::read(NIFStream* nif)
@@ -271,7 +271,7 @@ namespace Nif
             mSubSorter.read(nif);
     }
 
-    void NiSortAdjustNode::post(NIFFile* nif)
+    void NiSortAdjustNode::post(Reader& nif)
     {
         NiNode::post(nif);
         mSubSorter.post(nif);

@@ -156,8 +156,10 @@ namespace Resource
             osg::ref_ptr<SceneUtil::KeyframeHolder> loaded(new SceneUtil::KeyframeHolder);
             if (Misc::getFileExtension(normalized) == "kf")
             {
-                NifOsg::Loader::loadKf(
-                    Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), *loaded.get());
+                auto file = std::make_shared<Nif::NIFFile>(normalized);
+                Nif::Reader reader(*file);
+                reader.parse(mVFS->getNormalized(normalized));
+                NifOsg::Loader::loadKf(std::move(file), *loaded.get());
             }
             else
             {

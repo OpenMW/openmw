@@ -113,8 +113,8 @@ namespace Nif
             }
             else if (count != 0)
             {
-                throw Nif::Exception(
-                    "Unhandled interpolation type: " + std::to_string(mInterpolationType), nif->file->getFilename());
+                throw Nif::Exception("Unhandled interpolation type: " + std::to_string(mInterpolationType),
+                    nif->getFile().getFilename());
             }
         }
 

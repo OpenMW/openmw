@@ -86,7 +86,7 @@ namespace Nif
         CoordGenType coordGenType;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
 
         bool wrapT() const { return clamp & 1; }
         bool wrapS() const { return (clamp >> 1) & 1; }

@@ -139,7 +139,7 @@ namespace Nif
         std::vector<unsigned char> data;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiColorData : public Record
@@ -169,7 +169,7 @@ namespace Nif
         NodeList bones;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct BSDismemberSkinInstance : public NiSkinInstance
@@ -198,7 +198,7 @@ namespace Nif
         NiSkinPartitionPtr partitions;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiSkinPartition : public Record
