@@ -1829,10 +1829,10 @@ namespace NifOsg
                 case Nif::BSShaderType::ShaderType_Lighting30:
                 case Nif::BSShaderType::ShaderType_Tile:
                     Log(Debug::Warning) << "Unhandled BSShaderType " << type << " in " << mFilename;
-                    return std::string_view();
+                    return "nv_default";
             }
             Log(Debug::Warning) << "Unknown BSShaderType " << type << " in " << mFilename;
-            return std::string_view();
+            return "nv_default";
         }
 
         std::string_view getBSLightingShaderPrefix(unsigned int type) const
@@ -1861,10 +1861,10 @@ namespace NifOsg
                 case Nif::BSLightingShaderType::ShaderType_MultitexLandLODBlend:
                 case Nif::BSLightingShaderType::ShaderType_Dismemberment:
                     Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename;
-                    return std::string_view();
+                    return "nv_default";
             }
             Log(Debug::Warning) << "Unknown BSLightingShaderType " << type << " in " << mFilename;
-            return std::string_view();
+            return "nv_default";
         }
 
         void handleProperty(const Nif::Property *property,
