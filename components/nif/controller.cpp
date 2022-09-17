@@ -113,7 +113,7 @@ namespace Nif
 
     void NiMaterialColorController::read(NIFStream *nif)
     {
-        NiSingleInterpController::read(nif);
+        NiPoint3InterpController::read(nif);
         // Two bits that correspond to the controlled material color.
         // 00: Ambient
         // 01: Diffuse
@@ -129,7 +129,7 @@ namespace Nif
 
     void NiMaterialColorController::post(NIFFile *nif)
     {
-        NiSingleInterpController::post(nif);
+        NiPoint3InterpController::post(nif);
         mData.post(nif);
     }
 
@@ -241,16 +241,16 @@ namespace Nif
     {
         NiInterpController::read(nif);
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_OB_OLD)
-            /*bool updateNormals = !!*/nif->getUShort();
-        data.read(nif);
+            mUpdateNormals = nif->getUShort() & 1;
+        mData.read(nif);
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW)
         {
-            /*bool alwaysActive = */nif->getChar(); // Always 0
+            mAlwaysActive = nif->getChar();
             if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,106))
             {
                 if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
                 {
-                    interpolators.read(nif);
+                    mInterpolators.read(nif);
                     if (nif->getVersion() >= NIFStream::generateVersion(10,2,0,0) && nif->getBethVersion() > 9)
                     {
                         unsigned int numUnknown = nif->getUInt();
@@ -259,9 +259,16 @@ namespace Nif
                 }
                 else
                 {
-                    // TODO: handle weighted interpolators
-                    unsigned int numInterps = nif->getUInt();
-                    nif->skip(8 * numInterps);
+                    std::vector<NiInterpolatorPtr> interpolators;
+                    size_t numInterps = nif->getUInt();
+                    interpolators.resize(numInterps);
+                    mWeights.resize(numInterps);
+                    for (size_t i = 0; i < numInterps; i++)
+                    {
+                        interpolators[i].read(nif);
+                        mWeights[i] = nif->getFloat();
+                    }
+                    mInterpolators = interpolators;
                 }
             }
         }
@@ -270,8 +277,8 @@ namespace Nif
     void NiGeomMorpherController::post(NIFFile *nif)
     {
         NiInterpController::post(nif);
-        data.post(nif);
-        interpolators.post(nif);
+        mData.post(nif);
+        mInterpolators.post(nif);
     }
 
     void NiVisController::read(NIFStream *nif)

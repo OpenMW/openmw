@@ -47,6 +47,15 @@ struct NiSingleInterpController : public NiInterpController
     void post(NIFFile* nif) override;
 };
 
+// Base class for controllers that use a NiFloatInterpolator to animate their target.
+struct NiFloatInterpController : public NiSingleInterpController { };
+
+// Ditto for NiBoolInterpolator.
+struct NiBoolInterpController : public NiSingleInterpController { };
+
+// Ditto for NiPoint3Interpolator.
+struct NiPoint3InterpController : public NiSingleInterpController { };
+
 struct NiParticleSystemController : public Controller
 {
     enum BSPArrayController {
@@ -106,7 +115,7 @@ struct NiParticleSystemController : public Controller
 };
 using NiBSPArrayController = NiParticleSystemController;
 
-struct NiMaterialColorController : public NiSingleInterpController
+struct NiMaterialColorController : public NiPoint3InterpController
 {
     NiPosDataPtr mData;
     unsigned int mTargetColor;
@@ -172,12 +181,6 @@ struct NiMultiTargetTransformController : public NiInterpController
     void post(NIFFile *nif) override;
 };
 
-// Base class for controllers that use a NiFloatInterpolator to animate their target.
-struct NiFloatInterpController : public NiSingleInterpController { };
-
-// Ditto for NiBoolInterpolator.
-struct NiBoolInterpController : public NiSingleInterpController { };
-
 struct NiAlphaController : public NiFloatInterpController
 {
     NiFloatDataPtr mData;
@@ -196,8 +199,11 @@ struct NiRollController : public NiSingleInterpController
 
 struct NiGeomMorpherController : public NiInterpController
 {
-    NiMorphDataPtr data;
-    NiFloatInterpolatorList interpolators;
+    bool mUpdateNormals{false};
+    bool mAlwaysActive{false};
+    NiMorphDataPtr mData;
+    NiInterpolatorList mInterpolators;
+    std::vector<float> mWeights;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;

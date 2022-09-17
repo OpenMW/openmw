@@ -1357,7 +1357,7 @@ namespace NifOsg
                 if(ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {
                     const Nif::NiGeomMorpherController* nimorphctrl = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
-                    if (nimorphctrl->data.empty())
+                    if (nimorphctrl->mData.empty())
                         continue;
                     drawable = handleMorphGeometry(nimorphctrl, geom, parentNode, composite, boundTextures, animflags);
 
@@ -1378,7 +1378,7 @@ namespace NifOsg
             osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
             morphGeom->setSourceGeometry(sourceGeometry);
 
-            const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
+            const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->mData.getPtr()->mMorphs;
             if (morphs.empty())
                 return morphGeom;
             if (morphs[0].mVertices.size() != static_cast<const osg::Vec3Array*>(sourceGeometry->getVertexArray())->size())
