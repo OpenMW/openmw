@@ -92,6 +92,9 @@ namespace Nif
     {
         const int length = nif->getInt();
 
+        if (length < 0)
+            throw std::runtime_error("Negative NIF record list length: " + std::to_string(length));
+
         list.resize(static_cast<std::size_t>(length));
 
         for (auto& value : list)
