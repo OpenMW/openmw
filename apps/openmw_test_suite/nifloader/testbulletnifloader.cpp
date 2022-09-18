@@ -1,3 +1,5 @@
+#include "../nif/node.hpp"
+
 #include <components/bullethelpers/processtrianglecallback.hpp>
 #include <components/nif/data.hpp>
 #include <components/nif/extra.hpp>
@@ -260,70 +262,8 @@ static bool operator==(const btCollisionShape& lhs, const btCollisionShape& rhs)
 namespace
 {
     using namespace testing;
+    using namespace Nif::Testing;
     using NifBullet::BulletNifLoader;
-
-    void init(Nif::Transformation& value)
-    {
-        value = Nif::Transformation::getIdentity();
-    }
-
-    void init(Nif::Extra& value)
-    {
-        value.next = Nif::ExtraPtr(nullptr);
-    }
-
-    void init(Nif::Named& value)
-    {
-        value.extra = Nif::ExtraPtr(nullptr);
-        value.extralist = Nif::ExtraList();
-        value.controller = Nif::ControllerPtr(nullptr);
-    }
-
-    void init(Nif::Node& value)
-    {
-        init(static_cast<Nif::Named&>(value));
-        value.flags = 0;
-        init(value.trafo);
-        value.hasBounds = false;
-        value.parents.push_back(nullptr);
-        value.isBone = false;
-    }
-
-    void init(Nif::NiGeometry& value)
-    {
-        init(static_cast<Nif::Node&>(value));
-        value.data = Nif::NiGeometryDataPtr(nullptr);
-        value.skin = Nif::NiSkinInstancePtr(nullptr);
-    }
-
-    void init(Nif::NiTriShape& value)
-    {
-        init(static_cast<Nif::NiGeometry&>(value));
-        value.recType = Nif::RC_NiTriShape;
-    }
-
-    void init(Nif::NiTriStrips& value)
-    {
-        init(static_cast<Nif::NiGeometry&>(value));
-        value.recType = Nif::RC_NiTriStrips;
-    }
-
-    void init(Nif::NiSkinInstance& value)
-    {
-        value.data = Nif::NiSkinDataPtr(nullptr);
-        value.root = Nif::NodePtr(nullptr);
-    }
-
-    void init(Nif::Controller& value)
-    {
-        value.next = Nif::ControllerPtr(nullptr);
-        value.flags = 0;
-        value.frequency = 0;
-        value.phase = 0;
-        value.timeStart = 0;
-        value.timeStop = 0;
-        value.target = Nif::NamedPtr(nullptr);
-    }
 
     void copy(const btTransform& src, Nif::Transformation& dst)
     {
