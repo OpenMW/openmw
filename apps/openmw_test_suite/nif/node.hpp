@@ -29,7 +29,6 @@ namespace Nif::Testing
         value.flags = 0;
         init(value.trafo);
         value.hasBounds = false;
-        value.parents.push_back(nullptr);
         value.isBone = false;
     }
 
