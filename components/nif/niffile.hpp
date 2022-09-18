@@ -51,28 +51,40 @@ namespace Nif
             : mPath(path)
         {
         }
+    };
+
+    class FileView
+    {
+    public:
+        FileView(const NIFFile& file)
+            : mFile(&file)
+        {
+        }
 
         /// Get a given root
-        Record* getRoot(size_t index = 0) const { return mRoots.at(index); }
+        const Record* getRoot(std::size_t index) const { return mFile->mRoots.at(index); }
 
         /// Number of roots
-        std::size_t numRoots() const { return mRoots.size(); }
+        std::size_t numRoots() const { return mFile->mRoots.size(); }
 
         /// Get the name of the file
-        const std::filesystem::path& getFilename() const { return mPath; }
+        const std::filesystem::path& getFilename() const { return mFile->mPath; }
 
-        const std::string& getHash() const { return mHash; }
+        const std::string& getHash() const { return mFile->mHash; }
 
         /// Get the version of the NIF format used
-        unsigned int getVersion() const { return mVersion; }
+        unsigned int getVersion() const { return mFile->mVersion; }
 
         /// Get the user version of the NIF format used
-        unsigned int getUserVersion() const { return mUserVersion; }
+        unsigned int getUserVersion() const { return mFile->mUserVersion; }
 
         /// Get the Bethesda version of the NIF format used
-        unsigned int getBethVersion() const { return mBethVersion; }
+        unsigned int getBethVersion() const { return mFile->mBethVersion; }
 
-        bool getUseSkinning() const { return mUseSkinning; }
+        bool getUseSkinning() const { return mFile->mUseSkinning; }
+
+    private:
+        const NIFFile* mFile;
     };
 
     class Reader

@@ -159,7 +159,7 @@ namespace Resource
                 auto file = std::make_shared<Nif::NIFFile>(normalized);
                 Nif::Reader reader(*file);
                 reader.parse(mVFS->getNormalized(normalized));
-                NifOsg::Loader::loadKf(std::move(file), *loaded.get());
+                NifOsg::Loader::loadKf(*file, *loaded.get());
             }
             else
             {

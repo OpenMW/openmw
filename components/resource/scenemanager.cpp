@@ -714,7 +714,7 @@ namespace Resource
     {
         auto ext = Misc::getFileExtension(normalizedFilename);
         if (ext == "nif")
-            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
+            return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager);
         else
             return loadNonNif(normalizedFilename, *vfs->get(normalizedFilename), imageManager);
     }

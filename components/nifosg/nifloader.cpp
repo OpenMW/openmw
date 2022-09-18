@@ -250,13 +250,13 @@ namespace NifOsg
         // This is used to queue emitters that weren't attached to their node yet.
         std::vector<std::pair<size_t, osg::ref_ptr<Emitter>>> mEmitterQueue;
 
-        void loadKf(Nif::NIFFilePtr nif, SceneUtil::KeyframeHolder& target) const
+        void loadKf(Nif::FileView nif, SceneUtil::KeyframeHolder& target) const
         {
             const Nif::NiSequenceStreamHelper* seq = nullptr;
-            const size_t numRoots = nif->numRoots();
+            const size_t numRoots = nif.numRoots();
             for (size_t i = 0; i < numRoots; ++i)
             {
-                const Nif::Record* r = nif->getRoot(i);
+                const Nif::Record* r = nif.getRoot(i);
                 if (r && r->recType == Nif::RC_NiSequenceStreamHelper)
                 {
                     seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
@@ -267,7 +267,7 @@ namespace NifOsg
             if (!seq)
             {
                 Log(Debug::Warning) << "NIFFile Warning: Found no NiSequenceStreamHelper root record. File: "
-                                    << nif->getFilename();
+                                    << nif.getFilename();
                 return;
             }
 
@@ -276,7 +276,7 @@ namespace NifOsg
             {
                 Log(Debug::Warning) << "NIFFile Warning: First extra data was not a NiTextKeyExtraData, but a "
                                     << (extra.empty() ? std::string_view("nil") : std::string_view(extra->recName))
-                                    << ". File: " << nif->getFilename();
+                                    << ". File: " << nif.getFilename();
                 return;
             }
 
@@ -289,7 +289,7 @@ namespace NifOsg
                 if (extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
                 {
                     Log(Debug::Warning) << "NIFFile Warning: Unexpected extra data " << extra->recName
-                                        << " with controller " << ctrl->recName << ". File: " << nif->getFilename();
+                                        << " with controller " << ctrl->recName << ". File: " << nif.getFilename();
                     continue;
                 }
 
@@ -314,17 +314,17 @@ namespace NifOsg
 
                 if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
                     Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in "
-                                        << nif->getFilename() << ", ignoring later version";
+                                        << nif.getFilename() << ", ignoring later version";
             }
         }
 
-        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
+        osg::ref_ptr<osg::Node> load(Nif::FileView nif, Resource::ImageManager* imageManager)
         {
-            const size_t numRoots = nif->numRoots();
+            const size_t numRoots = nif.numRoots();
             std::vector<const Nif::Node*> roots;
             for (size_t i = 0; i < numRoots; ++i)
             {
-                const Nif::Record* r = nif->getRoot(i);
+                const Nif::Record* r = nif.getRoot(i);
                 if (!r)
                     continue;
                 const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
@@ -332,7 +332,7 @@ namespace NifOsg
                     roots.emplace_back(nifNode);
             }
             if (roots.empty())
-                throw Nif::Exception("Found no root nodes", nif->getFilename());
+                throw Nif::Exception("Found no root nodes", nif.getFilename());
 
             osg::ref_ptr<SceneUtil::TextKeyMapHolder> textkeys(new SceneUtil::TextKeyMapHolder);
 
@@ -352,7 +352,7 @@ namespace NifOsg
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
 
-            if (nif->getUseSkinning())
+            if (nif.getUseSkinning())
             {
                 osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
                 skel->setStateSet(created->getStateSet());
@@ -366,7 +366,7 @@ namespace NifOsg
             if (!textkeys->mTextKeys.empty())
                 created->getOrCreateUserDataContainer()->addUserObject(textkeys);
 
-            created->setUserValue(Misc::OsgUserValues::sFileHash, nif->getHash());
+            created->setUserValue(Misc::OsgUserValues::sFileHash, nif.getHash());
 
             return created;
         }
@@ -1192,7 +1192,7 @@ namespace NifOsg
             return emitter;
         }
 
-        void handleQueuedParticleEmitters(osg::Group* rootNode, Nif::NIFFilePtr nif)
+        void handleQueuedParticleEmitters(osg::Group* rootNode, Nif::FileView nif)
         {
             for (const auto& emitterPair : mEmitterQueue)
             {
@@ -1204,7 +1204,7 @@ namespace NifOsg
                 {
                     Log(Debug::Warning)
                         << "NIFFile Warning: Failed to find particle emitter emitter node (node record index "
-                        << recIndex << "). File: " << nif->getFilename();
+                        << recIndex << "). File: " << nif.getFilename();
                     continue;
                 }
 
@@ -2500,15 +2500,15 @@ namespace NifOsg
         }
     };
 
-    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::ImageManager* imageManager)
+    osg::ref_ptr<osg::Node> Loader::load(Nif::FileView file, Resource::ImageManager* imageManager)
     {
-        LoaderImpl impl(file->getFilename(), file->getVersion(), file->getUserVersion(), file->getBethVersion());
+        LoaderImpl impl(file.getFilename(), file.getVersion(), file.getUserVersion(), file.getBethVersion());
         return impl.load(file, imageManager);
     }
 
-    void Loader::loadKf(Nif::NIFFilePtr kf, SceneUtil::KeyframeHolder& target)
+    void Loader::loadKf(Nif::FileView kf, SceneUtil::KeyframeHolder& target)
     {
-        LoaderImpl impl(kf->getFilename(), kf->getVersion(), kf->getUserVersion(), kf->getBethVersion());
+        LoaderImpl impl(kf.getFilename(), kf.getVersion(), kf.getUserVersion(), kf.getBethVersion());
         impl.loadKf(kf, target);
     }
 

@@ -48,7 +48,7 @@ namespace NifBullet
             abort();
         }
 
-        osg::ref_ptr<Resource::BulletShape> load(const Nif::NIFFile& file);
+        osg::ref_ptr<Resource::BulletShape> load(Nif::FileView file);
 
     private:
         bool findBoundingBox(const Nif::Node& node, const std::string& filename);
