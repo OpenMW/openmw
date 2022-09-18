@@ -199,7 +199,7 @@ namespace NifOsg
 
     GeomMorpherController::GeomMorpherController(const Nif::NiGeomMorpherController* ctrl)
     {
-        if (ctrl->mInterpolators.length() == 0)
+        if (ctrl->mInterpolators.size() == 0)
         {
             if (!ctrl->mData.empty())
             {
@@ -209,10 +209,10 @@ namespace NifOsg
             return;
         }
 
-        mKeyFrames.resize(ctrl->mInterpolators.length());
+        mKeyFrames.resize(ctrl->mInterpolators.size());
         mWeights = ctrl->mWeights;
 
-        for (size_t i = 0; i < ctrl->mInterpolators.length(); ++i)
+        for (std::size_t i = 0, n = ctrl->mInterpolators.size(); i < n; ++i)
         {
             if (!ctrl->mInterpolators[i].empty() && ctrl->mInterpolators[i]->recType == Nif::RC_NiFloatInterpolator)
             {

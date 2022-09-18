@@ -76,9 +76,9 @@ namespace
         if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node))
         {
             outIndices.push_back(ninode->recIndex);
-            for (unsigned int i = 0; i < ninode->children.length(); ++i)
-                if (!ninode->children[i].empty())
-                    getAllNiNodes(ninode->children[i].getPtr(), outIndices);
+            for (const auto& child : ninode->children)
+                if (!child.empty())
+                    getAllNiNodes(child.getPtr(), outIndices);
         }
     }
 
@@ -102,18 +102,17 @@ namespace
     {
         if (parent != nullptr)
             collectDrawableProperties(&parent->mNiNode, parent->mParent, out);
-        const Nif::PropertyList& props = nifNode->props;
-        for (size_t i = 0; i < props.length(); ++i)
+        for (const auto& property : nifNode->props)
         {
-            if (!props[i].empty())
+            if (!property.empty())
             {
-                switch (props[i]->recType)
+                switch (property->recType)
                 {
                     case Nif::RC_NiMaterialProperty:
                     case Nif::RC_NiVertexColorProperty:
                     case Nif::RC_NiSpecularProperty:
                     case Nif::RC_NiAlphaProperty:
-                        out.push_back(props[i].getPtr());
+                        out.push_back(property.getPtr());
                         break;
                     default:
                         break;
@@ -375,19 +374,17 @@ namespace NifOsg
             SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
             std::vector<unsigned int>& boundTextures, int animflags)
         {
-            const Nif::PropertyList& props = nifNode->props;
-
             bool hasStencilProperty = false;
 
-            for (size_t i = 0; i < props.length(); ++i)
+            for (const auto& property : nifNode->props)
             {
-                if (props[i].empty())
+                if (property.empty())
                     continue;
 
-                if (props[i].getPtr()->recType == Nif::RC_NiStencilProperty)
+                if (property.getPtr()->recType == Nif::RC_NiStencilProperty)
                 {
                     const Nif::NiStencilProperty* stencilprop
-                        = static_cast<const Nif::NiStencilProperty*>(props[i].getPtr());
+                        = static_cast<const Nif::NiStencilProperty*>(property.getPtr());
                     if (stencilprop->data.enabled != 0)
                     {
                         hasStencilProperty = true;
@@ -396,24 +393,24 @@ namespace NifOsg
                 }
             }
 
-            for (size_t i = 0; i < props.length(); ++i)
+            for (const auto& property : nifNode->props)
             {
-                if (!props[i].empty())
+                if (!property.empty())
                 {
                     // Get the lowest numbered recIndex of the NiTexturingProperty root node.
                     // This is what is overridden when a spell effect "particle texture" is used.
                     if (nifNode->parents.empty() && !mFoundFirstRootTexturingProperty
-                        && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                        && property.getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
-                        mFirstRootTextureIndex = props[i].getPtr()->recIndex;
+                        mFirstRootTextureIndex = property.getPtr()->recIndex;
                         mFoundFirstRootTexturingProperty = true;
                     }
-                    else if (props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    else if (property.getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
-                        if (props[i].getPtr()->recIndex == mFirstRootTextureIndex)
+                        if (property.getPtr()->recIndex == mFirstRootTextureIndex)
                             applyTo->setUserValue("overrideFx", 1);
                     }
-                    handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags,
+                    handleProperty(property.getPtr(), applyTo, composite, imageManager, boundTextures, animflags,
                         hasStencilProperty);
                 }
             }
@@ -463,13 +460,13 @@ namespace NifOsg
             const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
             osg::ref_ptr<osg::Sequence> sequenceNode(new osg::Sequence);
             sequenceNode->setName(niFltAnimationNode->name);
-            if (niFltAnimationNode->children.length() != 0)
+            if (!niFltAnimationNode->children.empty())
             {
                 if (niFltAnimationNode->swing())
                     sequenceNode->setDefaultTime(
-                        niFltAnimationNode->mDuration / (niFltAnimationNode->children.length() * 2));
+                        niFltAnimationNode->mDuration / (niFltAnimationNode->children.size() * 2));
                 else
-                    sequenceNode->setDefaultTime(niFltAnimationNode->mDuration / niFltAnimationNode->children.length());
+                    sequenceNode->setDefaultTime(niFltAnimationNode->mDuration / niFltAnimationNode->children.size());
             }
             return sequenceNode;
         }
@@ -630,12 +627,9 @@ namespace NifOsg
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
                 extraCollection.emplace_back(e);
 
-            for (size_t i = 0; i < nifNode->extralist.length(); ++i)
-            {
-                Nif::ExtraPtr e = nifNode->extralist[i];
-                if (!e.empty())
-                    extraCollection.emplace_back(e);
-            }
+            for (const auto& extraNode : nifNode->extralist)
+                if (!extraNode.empty())
+                    extraCollection.emplace_back(extraNode);
 
             for (const auto& e : extraCollection)
             {
@@ -805,20 +799,16 @@ namespace NifOsg
             if (ninode)
             {
                 const Nif::NodeList& effects = ninode->effects;
-                for (size_t i = 0; i < effects.length(); ++i)
-                {
-                    if (!effects[i].empty())
-                        handleEffect(effects[i].getPtr(), currentNode, imageManager);
-                }
+                for (const auto& effect : effects)
+                    if (!effect.empty())
+                        handleEffect(effect.getPtr(), currentNode, imageManager);
 
                 const Nif::NodeList& children = ninode->children;
                 const Nif::Parent currentParent{ *ninode, parent };
-                for (size_t i = 0; i < children.length(); ++i)
-                {
-                    if (!children[i].empty())
-                        handleNode(children[i].getPtr(), &currentParent, currentNode, imageManager, boundTextures,
-                            animflags, skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
-                }
+                for (const auto& child : children)
+                    if (!child.empty())
+                        handleNode(child.getPtr(), &currentParent, currentNode, imageManager, boundTextures, animflags,
+                            skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
             }
 
             if (nifNode->recType == Nif::RC_NiFltAnimationNode)
@@ -1012,13 +1002,12 @@ namespace NifOsg
                         wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
                     }
 
-                    for (unsigned int i = 0; i < flipctrl->mSources.length(); ++i)
+                    for (const auto& source : flipctrl->mSources)
                     {
-                        Nif::NiSourceTexturePtr st = flipctrl->mSources[i];
-                        if (st.empty())
+                        if (source.empty())
                             continue;
 
-                        osg::ref_ptr<osg::Image> image(handleSourceTexture(st.getPtr(), imageManager));
+                        osg::ref_ptr<osg::Image> image(handleSourceTexture(source.getPtr(), imageManager));
                         osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D(image));
                         if (image)
                             texture->setTextureSize(image->s(), image->t());
@@ -1480,7 +1469,7 @@ namespace NifOsg
             const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
             const Nif::NiSkinData* data = skin->data.getPtr();
             const Nif::NodeList& bones = skin->bones;
-            for (size_t i = 0; i < bones.length(); i++)
+            for (std::size_t i = 0, n = bones.size(); i < n; ++i)
             {
                 std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
 

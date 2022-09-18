@@ -85,39 +85,25 @@ namespace Nif
         implementation.
      */
     template <class X>
-    class RecordListT
+    using RecordListT = std::vector<RecordPtrT<X>>;
+
+    template <class T>
+    void readRecordList(NIFStream* nif, RecordListT<T>& list)
     {
-        typedef RecordPtrT<X> Ptr;
-        std::vector<Ptr> list;
+        const int length = nif->getInt();
 
-    public:
-        RecordListT() = default;
+        list.resize(static_cast<std::size_t>(length));
 
-        RecordListT(std::vector<Ptr> list)
-            : list(std::move(list))
-        {
-        }
+        for (auto& value : list)
+            value.read(nif);
+    }
 
-        void read(NIFStream* nif)
-        {
-            int len = nif->getInt();
-            list.resize(len);
-
-            for (size_t i = 0; i < list.size(); i++)
-                list[i].read(nif);
-        }
-
-        void post(Reader& nif)
-        {
-            for (size_t i = 0; i < list.size(); i++)
-                list[i].post(nif);
-        }
-
-        const Ptr& operator[](size_t index) const { return list.at(index); }
-        Ptr& operator[](size_t index) { return list.at(index); }
-
-        size_t length() const { return list.size(); }
-    };
+    template <class T>
+    void postRecordList(Reader& nif, RecordListT<T>& list)
+    {
+        for (auto& value : list)
+            value.post(nif);
+    }
 
     struct Node;
     struct Extra;

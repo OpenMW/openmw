@@ -209,7 +209,7 @@ namespace Nif
     void NiMultiTargetTransformController::post(Reader& nif)
     {
         NiInterpController::post(nif);
-        mExtraTargets.post(nif);
+        postRecordList(nif, mExtraTargets);
     }
 
     void NiAlphaController::read(NIFStream* nif)
@@ -251,7 +251,7 @@ namespace Nif
             {
                 if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
                 {
-                    mInterpolators.read(nif);
+                    readRecordList(nif, mInterpolators);
                     if (nif->getVersion() >= NIFStream::generateVersion(10, 2, 0, 0) && nif->getBethVersion() > 9)
                     {
                         unsigned int numUnknown = nif->getUInt();
@@ -279,7 +279,7 @@ namespace Nif
     {
         NiInterpController::post(nif);
         mData.post(nif);
-        mInterpolators.post(nif);
+        postRecordList(nif, mInterpolators);
     }
 
     void NiVisController::read(NIFStream* nif)
@@ -304,13 +304,13 @@ namespace Nif
             timeStart = nif->getFloat();
             mDelta = nif->getFloat();
         }
-        mSources.read(nif);
+        readRecordList(nif, mSources);
     }
 
     void NiFlipController::post(Reader& nif)
     {
         NiFloatInterpController::post(nif);
-        mSources.post(nif);
+        postRecordList(nif, mSources);
     }
 
     void bhkBlendController::read(NIFStream* nif)

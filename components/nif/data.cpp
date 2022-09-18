@@ -13,7 +13,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 101))
             partitions.read(nif);
         root.read(nif);
-        bones.read(nif);
+        readRecordList(nif, bones);
     }
 
     void NiSkinInstance::post(Reader& nif)
@@ -21,20 +21,19 @@ namespace Nif
         data.post(nif);
         partitions.post(nif);
         root.post(nif);
-        bones.post(nif);
+        postRecordList(nif, bones);
 
         if (data.empty() || root.empty())
             throw Nif::Exception("NiSkinInstance missing root or data", nif.getFilename());
 
-        size_t bnum = bones.length();
-        if (bnum != data->bones.size())
+        if (bones.size() != data->bones.size())
             throw Nif::Exception("Mismatch in NiSkinData bone count", nif.getFilename());
 
-        for (size_t i = 0; i < bnum; i++)
+        for (auto& bone : bones)
         {
-            if (bones[i].empty())
+            if (bone.empty())
                 throw Nif::Exception("Oops: Missing bone! Don't know how to handle this.", nif.getFilename());
-            bones[i]->setBone();
+            bone->setBone();
         }
     }
 
