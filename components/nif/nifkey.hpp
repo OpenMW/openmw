@@ -5,6 +5,7 @@
 
 #include <map>
 
+#include "exception.hpp"
 #include "niffile.hpp"
 #include "nifstream.hpp"
 
@@ -112,7 +113,8 @@ namespace Nif
             }
             else if (count != 0)
             {
-                nif->file->fail("Unhandled interpolation type: " + std::to_string(mInterpolationType));
+                throw Nif::Exception(
+                    "Unhandled interpolation type: " + std::to_string(mInterpolationType), nif->file->getFilename());
             }
         }
 

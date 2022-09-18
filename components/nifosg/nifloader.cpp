@@ -42,6 +42,7 @@
 
 #include <components/nif/controlled.hpp>
 #include <components/nif/effect.hpp>
+#include <components/nif/exception.hpp>
 #include <components/nif/extra.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/property.hpp>
@@ -265,15 +266,17 @@ namespace NifOsg
 
             if (!seq)
             {
-                nif->warn("Found no NiSequenceStreamHelper root record");
+                Log(Debug::Warning) << "NIFFile Warning: Found no NiSequenceStreamHelper root record. File: "
+                                    << nif->getFilename();
                 return;
             }
 
             Nif::ExtraPtr extra = seq->extra;
             if (extra.empty() || extra->recType != Nif::RC_NiTextKeyExtraData)
             {
-                nif->warn("First extra data was not a NiTextKeyExtraData, but a "
-                    + (extra.empty() ? std::string("nil") : extra->recName) + ".");
+                Log(Debug::Warning) << "NIFFile Warning: First extra data was not a NiTextKeyExtraData, but a "
+                                    << (extra.empty() ? std::string_view("nil") : std::string_view(extra->recName))
+                                    << ". File: " << nif->getFilename();
                 return;
             }
 
@@ -285,7 +288,8 @@ namespace NifOsg
             {
                 if (extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
                 {
-                    nif->warn("Unexpected extra data " + extra->recName + " with controller " + ctrl->recName);
+                    Log(Debug::Warning) << "NIFFile Warning: Unexpected extra data " << extra->recName
+                                        << " with controller " << ctrl->recName << ". File: " << nif->getFilename();
                     continue;
                 }
 
@@ -328,7 +332,7 @@ namespace NifOsg
                     roots.emplace_back(nifNode);
             }
             if (roots.empty())
-                nif->fail("Found no root nodes");
+                throw Nif::Exception("Found no root nodes", nif->getFilename());
 
             osg::ref_ptr<SceneUtil::TextKeyMapHolder> textkeys(new SceneUtil::TextKeyMapHolder);
 
@@ -1198,8 +1202,9 @@ namespace NifOsg
                 osg::Group* emitterNode = findEmitterNode.mFound;
                 if (!emitterNode)
                 {
-                    nif->warn("Failed to find particle emitter emitter node (node record index "
-                        + std::to_string(recIndex) + ")");
+                    Log(Debug::Warning)
+                        << "NIFFile Warning: Failed to find particle emitter emitter node (node record index "
+                        << recIndex << "). File: " << nif->getFilename();
                     continue;
                 }
 

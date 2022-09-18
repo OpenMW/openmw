@@ -15,6 +15,7 @@
 #include "controller.hpp"
 #include "data.hpp"
 #include "effect.hpp"
+#include "exception.hpp"
 #include "extra.hpp"
 #include "physics.hpp"
 #include "property.hpp"
@@ -200,7 +201,7 @@ namespace Nif
         const bool supportedHeader = std::any_of(verStrings.begin(), verStrings.end(),
             [&](const std::string& verString) { return head.compare(0, verString.size(), verString) == 0; });
         if (!supportedHeader)
-            fail("Invalid NIF header: " + head);
+            throw Nif::Exception("Invalid NIF header: " + head, filename);
 
         // Get BCD version
         ver = nif.getUInt();
@@ -214,9 +215,10 @@ namespace Nif
         if (!supportedVersion)
         {
             if (sLoadUnsupportedFiles)
-                warn("Unsupported NIF version: " + printVersion(ver) + ". Proceed with caution!");
+                Log(Debug::Warning) << " NIFFile Warning: Unsupported NIF version: " << printVersion(ver)
+                                    << ". Proceed with caution! File: " << filename;
             else
-                fail("Unsupported NIF version: " + printVersion(ver));
+                throw Nif::Exception("Unsupported NIF version: " + printVersion(ver), filename);
         }
 
         // NIF data endianness
@@ -224,7 +226,7 @@ namespace Nif
         {
             unsigned char endianness = nif.getChar();
             if (endianness == 0)
-                fail("Big endian NIF files are unsupported");
+                throw Nif::Exception("Big endian NIF files are unsupported", filename);
         }
 
         // User version
@@ -296,24 +298,19 @@ namespace Nif
             {
                 std::stringstream error;
                 error << "Record number " << i << " out of " << recNum << " is blank.";
-                fail(error.str());
+                throw Nif::Exception(error.str(), filename);
             }
 
             // Record separator. Some Havok records in Oblivion do not have it.
             if (hasRecordSeparators && rec.compare(0, 3, "bhk"))
-            {
                 if (nif.getInt())
-                {
-                    std::stringstream warning;
-                    warning << "Record number " << i << " out of " << recNum << " is preceded by a non-zero separator.";
-                    warn(warning.str());
-                }
-            }
+                    Log(Debug::Warning) << "NIFFile Warning: Record number " << i << " out of " << recNum
+                                        << " is preceded by a non-zero separator. File: " << filename;
 
             const auto entry = factories.find(rec);
 
             if (entry == factories.end())
-                fail("Unknown record type " + rec);
+                throw Nif::Exception("Unknown record type " + rec, filename);
 
             r = entry->second();
 
@@ -343,7 +340,8 @@ namespace Nif
             else
             {
                 roots[i] = nullptr;
-                warn("Root " + std::to_string(i + 1) + " does not point to a record: index " + std::to_string(idx));
+                Log(Debug::Warning) << "NIFFile Warning: Root " << i + 1 << " does not point to a record: index " << idx
+                                    << ". File: " << filename;
             }
         }
 
@@ -367,16 +365,6 @@ namespace Nif
     void NIFFile::setLoadUnsupportedFiles(bool load)
     {
         sLoadUnsupportedFiles = load;
-    }
-
-    void NIFFile::warn(const std::string& msg) const
-    {
-        Log(Debug::Warning) << " NIFFile Warning: " << msg << "\nFile: " << filename;
-    }
-
-    [[noreturn]] void NIFFile::fail(const std::string& msg) const
-    {
-        throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + Files::pathToUnicodeString(filename));
     }
 
     std::string NIFFile::getString(uint32_t index) const

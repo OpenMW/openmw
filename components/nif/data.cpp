@@ -1,6 +1,9 @@
 #include "data.hpp"
+#include "exception.hpp"
 #include "nifkey.hpp"
 #include "node.hpp"
+
+#include <components/debug/debuglog.hpp>
 
 namespace Nif
 {
@@ -21,16 +24,16 @@ namespace Nif
         bones.post(nif);
 
         if (data.empty() || root.empty())
-            nif->fail("NiSkinInstance missing root or data");
+            throw Nif::Exception("NiSkinInstance missing root or data", nif->getFilename());
 
         size_t bnum = bones.length();
         if (bnum != data->bones.size())
-            nif->fail("Mismatch in NiSkinData bone count");
+            throw Nif::Exception("Mismatch in NiSkinData bone count", nif->getFilename());
 
         for (size_t i = 0; i < bnum; i++)
         {
             if (bones[i].empty())
-                nif->fail("Oops: Missing bone! Don't know how to handle this.");
+                throw Nif::Exception("Oops: Missing bone! Don't know how to handle this.", nif->getFilename());
             bones[i]->setBone();
         }
     }
@@ -470,7 +473,8 @@ namespace Nif
     {
         palette = nif->getString();
         if (nif->getUInt() != palette.size())
-            nif->file->warn("Failed size check in NiStringPalette");
+            Log(Debug::Warning) << "NIFFile Warning: Failed size check in NiStringPalette. File: "
+                                << nif->file->getFilename();
     }
 
     void NiBoolData::read(NIFStream* nif)

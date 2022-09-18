@@ -94,12 +94,6 @@ namespace Nif
             BETHVER_FO4 = 130 // Fallout 4
         };
 
-        /// Used if file parsing fails
-        [[noreturn]] void fail(const std::string& msg) const;
-
-        /// Used when something goes wrong, but not catastrophically so
-        void warn(const std::string& msg) const;
-
         /// Open a NIF stream. The name is used for error messages.
         NIFFile(Files::IStreamPtr&& stream, const std::filesystem::path& name);
 

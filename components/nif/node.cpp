@@ -3,6 +3,7 @@
 #include <components/misc/algorithm.hpp>
 
 #include "data.hpp"
+#include "exception.hpp"
 #include "physics.hpp"
 #include "property.hpp"
 
@@ -68,7 +69,8 @@ namespace Nif
             }
             default:
             {
-                nif->file->fail("Unhandled NiBoundingVolume type: " + std::to_string(type));
+                throw Nif::Exception(
+                    "Unhandled NiBoundingVolume type: " + std::to_string(type), nif->file->getFilename());
             }
         }
     }
