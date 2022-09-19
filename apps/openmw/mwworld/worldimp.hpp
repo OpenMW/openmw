@@ -668,6 +668,9 @@ namespace MWWorld
             // Allow NPCs to use torches?
             bool useTorches() const override;
 
+            float getSunVisibility() const override;
+            float getSunPercentage() const override;
+
             bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) override;
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)

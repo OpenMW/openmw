@@ -13,6 +13,7 @@
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
     Bug #6974: Only harmful effects are reflected
+    Bug #6977: Sun damage implementation does not match research
     Bug #6986: Sound magic effect does not make noise
     Bug #6987: Set/Mod Blindness should not darken the screen
     Bug #6992: Crossbow reloading doesn't look the same as in Morrowind

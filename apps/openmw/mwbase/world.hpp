@@ -564,6 +564,9 @@ namespace MWBase
             // Allow NPCs to use torches?
             virtual bool useTorches() const = 0;
 
+            virtual float getSunVisibility() const = 0;
+            virtual float getSunPercentage() const = 0;
+
             virtual bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)

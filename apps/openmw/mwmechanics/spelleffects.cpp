@@ -664,15 +664,9 @@ void applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster, co
                 // isInCell shouldn't be needed, but updateActor called during game start
                 if (!target.isInCell() || !(target.getCell()->isExterior() || target.getCell()->isQuasiExterior()) || godmode)
                     break;
-                float time = world->getTimeStamp().getHour();
-                float timeDiff = std::clamp(std::abs(time - 13.f), 0.f, 7.f);
-                float damageScale = 1.f - timeDiff / 7.f;
-                // When cloudy, the sun damage effect is halved
+                const float sunRisen = world->getSunPercentage();
                 static float fMagicSunBlockedMult = world->getStore().get<ESM::GameSetting>().find("fMagicSunBlockedMult")->mValue.getFloat();
-
-                int weather = world->getCurrentWeather();
-                if (weather > 1)
-                    damageScale *= fMagicSunBlockedMult;
+                const float damageScale = std::clamp(std::max(world->getSunVisibility() * sunRisen, fMagicSunBlockedMult * sunRisen), 0.f, 1.f);
                 float damage = effect.mMagnitude * damageScale;
                 adjustDynamicStat(target, 0, -damage);
                 if (damage > 0.f)
