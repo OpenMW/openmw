@@ -16,6 +16,14 @@ namespace MWPhysics
     class PtrHolder
     {
     public:
+        explicit PtrHolder(const MWWorld::Ptr& ptr, const osg::Vec3f& position)
+            : mPtr(ptr)
+            , mSimulationPosition(position)
+            , mPosition(position)
+            , mPreviousPosition(position)
+        {
+        }
+
         virtual ~PtrHolder() = default;
 
         void updatePtr(const MWWorld::Ptr& updated)

@@ -188,7 +188,6 @@ namespace MWWorld
 
             void updateObjectRotation(const Ptr& ptr, RotationOrder order);
             void updateObjectScale(const Ptr& ptr);
-            void updateObjectPosition(const Ptr &ptr, const osg::Vec3f &pos, bool movePhysics);
 
             bool isCellActive(const CellStore &cell);
 

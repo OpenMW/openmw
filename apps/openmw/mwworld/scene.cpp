@@ -286,15 +286,6 @@ namespace MWWorld
         }
     }
 
-    void Scene::updateObjectPosition(const Ptr &ptr, const osg::Vec3f &pos, bool movePhysics)
-    {
-        mRendering.moveObject(ptr, pos);
-        if (movePhysics)
-        {
-            mPhysics->updatePosition(ptr);
-        }
-    }
-
     void Scene::updateObjectRotation(const Ptr &ptr, RotationOrder order)
     {
         const auto rot = makeNodeRotation(ptr, order);

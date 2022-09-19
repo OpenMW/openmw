@@ -1260,10 +1260,11 @@ namespace MWWorld
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mWorldScene->updateObjectPosition(newPtr, position, movePhysics);
+            mRendering->moveObject(newPtr, position);
             if (movePhysics)
             {
-                if (const auto object = mPhysics->getObject(ptr))
+                mPhysics->updatePosition(newPtr);
+                if (const MWPhysics::Object* object = mPhysics->getObject(newPtr))
                     updateNavigatorObject(*object);
             }
         }

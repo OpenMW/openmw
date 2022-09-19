@@ -22,7 +22,8 @@ namespace MWPhysics
 
 Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler,
     bool canWaterWalk, DetourNavigator::CollisionShapeType collisionShapeType)
-  : mStandingOnPtr(nullptr), mCanWaterWalk(canWaterWalk), mWalkingOnWater(false)
+  : PtrHolder(ptr, ptr.getRefData().getPosition().asVec3())
+  , mStandingOnPtr(nullptr), mCanWaterWalk(canWaterWalk), mWalkingOnWater(false)
   , mMeshTranslation(shape->mCollisionBox.mCenter), mOriginalHalfExtents(shape->mCollisionBox.mExtents)
   , mStuckFrames(0), mLastStuckPosition{0, 0, 0}
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
@@ -31,8 +32,6 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
   , mActive(false)
   , mTaskScheduler(scheduler)
 {
-    mPtr = ptr;
-
     // We can not create actor without collisions - he will fall through the ground.
     // In this case we should autogenerate collision box based on mesh shape
     // (NPCs have bodyparts and use a different approach)
@@ -94,14 +93,13 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     mCollisionObject->setCollisionShape(mShape.get());
     mCollisionObject->setUserPointer(this);
 
-    updateScale();
+    updateScaleUnsafe();
 
     if(!mRotationallyInvariant)
-        setRotation(mPtr.getRefData().getBaseNode()->getAttitude());
+        mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
 
-    updatePosition();
     addCollisionMask(getCollisionMask());
-    updateCollisionObjectPosition();
+    updateCollisionObjectPositionUnsafe();
 }
 
 Actor::~Actor()
@@ -169,6 +167,11 @@ osg::Vec3f Actor::getScaledMeshTranslation() const
 void Actor::updateCollisionObjectPosition()
 {
     std::scoped_lock lock(mPositionMutex);
+    updateCollisionObjectPositionUnsafe();
+}
+
+void Actor::updateCollisionObjectPositionUnsafe()
+{
     mShape->setLocalScaling(Misc::Convert::toBullet(mScale));
     osg::Vec3f newPosition = getScaledMeshTranslation() + mPosition;
 
@@ -230,6 +233,11 @@ bool Actor::isRotationallyInvariant() const
 void Actor::updateScale()
 {
     std::scoped_lock lock(mPositionMutex);
+    updateScaleUnsafe();
+}
+
+void Actor::updateScaleUnsafe()
+{
     float scale = mPtr.getCellRef().getScale();
     osg::Vec3f scaleVec(scale,scale,scale);
 

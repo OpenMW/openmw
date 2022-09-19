@@ -33,6 +33,10 @@ namespace MWPhysics
             bool canWaterWalk, DetourNavigator::CollisionShapeType collisionShapeType);
         ~Actor() override;
 
+        Actor(const Actor&) = delete;
+
+        Actor& operator=(const Actor&) = delete;
+
         /**
          * Sets the collisionMode for this actor. If disabled, the actor can fly and clip geometry.
          */
@@ -189,8 +193,8 @@ namespace MWPhysics
 
         osg::Vec3f mScale;
         osg::Vec3f mPositionOffset;
-        bool mWorldPositionChanged;
-        bool mSkipSimulation;
+        bool mWorldPositionChanged = false;
+        bool mSkipSimulation = true;
         mutable std::mutex mPositionMutex;
 
         unsigned int mStuckFrames;
@@ -205,8 +209,9 @@ namespace MWPhysics
 
         PhysicsTaskScheduler* mTaskScheduler;
 
-        Actor(const Actor&);
-        Actor& operator=(const Actor&);
+        inline void updateScaleUnsafe();
+
+        inline void updateCollisionObjectPositionUnsafe();
     };
 
 }
