@@ -193,6 +193,8 @@ namespace MWWorld
 
         osg::Vec3f mStormDirection;
 
+        float mCloudsMaximumPercent;
+
         // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
         // is broken in the vanilla game and was disabled.
 
@@ -203,7 +205,6 @@ namespace MWWorld
 
     private:
         float mTransitionDelta;
-        float mCloudsMaximumPercent;
 
         // Note: In MW, only thunderstorms support these attributes, but in the interest of making weather more
         // flexible, these settings are imported for all weather types. Only thunderstorms will normally have any
@@ -315,6 +316,10 @@ namespace MWWorld
 
         bool useTorches(float hour) const;
 
+        float getSunPercentage(float hour) const;
+
+        float getSunVisibility() const;
+
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 
         bool readRecord(ESM::ESMReader& reader, uint32_t type);
@@ -379,7 +384,7 @@ namespace MWWorld
         void updateWeatherTransitions(const float elapsedRealSeconds);
         void forceWeather(const int weatherID);
 
-        bool inTransition();
+        bool inTransition() const;
         void addWeatherTransition(const int weatherID);
 
         void calculateWeatherResult(const float gameHour, const float elapsedSeconds, const bool isPaused);

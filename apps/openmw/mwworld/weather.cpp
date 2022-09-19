@@ -176,8 +176,8 @@ namespace
         , mParticleEffect(particleEffect)
         , mRainEffect(Fallback::Map::getBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
         , mStormDirection(Weather::defaultDirection())
-        , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
         , mCloudsMaximumPercent(Fallback::Map::getFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
+        , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
         , mThunderFrequency(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Frequency"))
         , mThunderThreshold(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Threshold"))
         , mThunderSoundID()
@@ -875,6 +875,27 @@ namespace
         return isDark && !mPrecipitation;
     }
 
+    float WeatherManager::getSunPercentage(float hour) const
+    {
+        if (hour <= mTimeSettings.mNightEnd || hour >= mTimeSettings.mNightStart)
+            return 0.f;
+        else if (hour <= mTimeSettings.mDayStart)
+            return (hour - mTimeSettings.mNightEnd) / mSunriseDuration;
+        else if (hour > mTimeSettings.mDayEnd)
+            return 1.f - ((hour - mTimeSettings.mDayEnd) / mSunsetDuration);
+        return 1.f;
+    }
+
+    float WeatherManager::getSunVisibility() const
+    {
+        if (inTransition() && mTransitionFactor < mWeatherSettings[mNextWeather].mCloudsMaximumPercent)
+        {
+            float t = mTransitionFactor / mWeatherSettings[mNextWeather].mCloudsMaximumPercent;
+            return (1.f - t) * mWeatherSettings[mCurrentWeather].mGlareView + t * mWeatherSettings[mNextWeather].mGlareView;
+        }
+        return mWeatherSettings[mCurrentWeather].mGlareView;
+    }
+
     void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
     {
         ESM::WeatherState state;
@@ -1072,7 +1093,7 @@ namespace
         mQueuedWeather = invalidWeatherID;
     }
 
-    inline bool WeatherManager::inTransition()
+    inline bool WeatherManager::inTransition() const
     {
         return mNextWeather != invalidWeatherID;
     }

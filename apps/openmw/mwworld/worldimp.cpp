@@ -3260,6 +3260,16 @@ namespace MWWorld
         }
     }
 
+    float World::getSunVisibility() const
+    {
+        return mWeatherManager->getSunVisibility();
+    }
+
+    float World::getSunPercentage() const
+    {
+        return mWeatherManager->getSunPercentage(getTimeStamp().getHour());
+    }
+
     bool World::findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result)
     {
         if (cell->isExterior())
