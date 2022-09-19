@@ -1,8 +1,10 @@
 #include <components/to_utf8/to_utf8.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 #include <gtest/gtest.h>
 
 #include <fstream>
+#include <filesystem>
 
 #ifndef OPENMW_TEST_SUITE_SOURCE_DIR
 #define OPENMW_TEST_SUITE_SOURCE_DIR ""
@@ -24,7 +26,7 @@ namespace
     {
         std::ifstream file;
         file.exceptions(std::ios::failbit | std::ios::badbit);
-        file.open(std::string(OPENMW_TEST_SUITE_SOURCE_DIR) + "/toutf8/data/" + fileName);
+        file.open(std::filesystem::path{ OPENMW_TEST_SUITE_SOURCE_DIR } / "toutf8" / "data" / Misc::StringUtils::stringToU8String(fileName));
         std::stringstream buffer;
         buffer << file.rdbuf();
         return buffer.str();
