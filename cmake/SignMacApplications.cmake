@@ -14,7 +14,8 @@ if (APPLE)
         # create a symlink using the original name, which codesign is fine with.
         file(GLOB OSG_PLUGINS_DIR "${FULL_APP_PATH}/Contents/PlugIns/osgPlugins*")
         file(RENAME "${OSG_PLUGINS_DIR}" "${FULL_APP_PATH}/Contents/PlugIns/osgPlugins")
-        execute_process(COMMAND "ln" "-s" "${FULL_APP_PATH}/Contents/PlugIns/osgPlugins" "${OSG_PLUGINS_DIR}")
+        execute_process(COMMAND "ln" "-s" "osgPlugins" "${OSG_PLUGINS_DIR}"
+                        WORKING_DIRECTORY "${FULL_APP_PATH}/Contents/PlugIns/")
         execute_process(COMMAND "codesign" "--force" "--deep" "-s" "-" "${FULL_APP_PATH}")
     endforeach(app_name)
 endif (APPLE)
