@@ -790,8 +790,8 @@ endif()
 
 # Apple bundling
 if (OPENMW_OSX_DEPLOYMENT AND APPLE)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.13 AND CMAKE_VERSION VERSION_LESS 3.13.4)
-        message(FATAL_ERROR "macOS packaging is broken in early CMake 3.13 releases, see https://gitlab.com/OpenMW/openmw/issues/4767. Please use at least 3.13.4 or an older version like 3.12.4")
+    if (CMAKE_VERSION VERSION_LESS 3.19)
+        message(FATAL_ERROR "macOS packaging requires CMake 3.19 or higher to sign macOS app bundles.")
     endif ()
 
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt5::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
@@ -887,6 +887,9 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
         fixup_bundle(\"${INSTALLED_OPENMW_APP}\" \"${PLUGINS}\" \"\")
         fixup_bundle(\"${INSTALLED_OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"\")
         " COMPONENT Runtime)
+
+    set(CPACK_PRE_BUILD_SCRIPTS ${CMAKE_SOURCE_DIR}/cmake/SignMacApplications.cmake)
+
     include(CPack)
 elseif(NOT APPLE)
     get_generator_is_multi_config(multi_config)
