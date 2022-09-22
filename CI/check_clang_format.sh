@@ -14,7 +14,7 @@ check_format_file() {
 
 check_format() {
     local path=$1
-    for item in $(find "$path" -type f -name "*");
+    find "$path" -type f -name "*" | while read item;
     do
         if [[ "$item" =~ .*\.(cpp|hpp|h) ]]; then
             check_format_file "$item" &
