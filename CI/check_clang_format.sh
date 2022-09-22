@@ -5,19 +5,23 @@ HAS_DIFFS=0
 
 check_format() {
     local path=$1
-    local tempfile=$(mktemp)
     for item in $(find $path -type f -name "*");
     do
         if [[ "$item" =~ .*\.(cpp|hpp|h) ]]; then
             echo "Checking code formatting on $item"
-            $CLANG_FORMAT $item > $tempfile
-            git diff --color=always --no-index $item $tempfile
+            $CLANG_FORMAT --dry-run -Werror "$item"
             if [[ $? = 1 ]]; then
+                local tempfile=$(mktemp)
+                # Avoid having different modes in the diff.
+                chmod --reference="$item" "$tempfile"
+                # Generate diff
+                $CLANG_FORMAT "$item" > "$tempfile"
+                git diff --color=always --no-index $item $tempfile
+                rm -f "$tempfile"
                 HAS_DIFFS=1
             fi
         fi;
     done;
-    rm -f $tempfile
 }
 
 check_format "./apps"
