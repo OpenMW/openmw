@@ -127,6 +127,8 @@ Clang_Format:
     key: Ubuntu_Clang_Format.ubuntu_22.04.v1
     paths:
       - apt-cache/
+  variables:
+    CLANG_FORMAT: clang-format-14
   before_script:
     - CI/install_debian_deps.sh openmw-clang-format
   script:
