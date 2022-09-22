@@ -3,19 +3,19 @@
 #include <iomanip>
 
 #include <MyGUI_Button.h>
-#include <MyGUI_ScrollView.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_ScrollView.h>
 
-#include <components/widgets/list.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
+#include <components/widgets/list.hpp>
 
 #include <components/esm3/loadgmst.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -31,7 +31,6 @@
 
 namespace MWGui
 {
-
 
     EnchantingDialog::EnchantingDialog()
         : WindowBase("openmw_enchanting_dialog.layout")
@@ -69,7 +68,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mName);
     }
 
-    void EnchantingDialog::setSoulGem(const MWWorld::Ptr &gem)
+    void EnchantingDialog::setSoulGem(const MWWorld::Ptr& gem)
     {
         if (gem.isEmpty())
         {
@@ -80,13 +79,13 @@ namespace MWGui
         else
         {
             mSoulBox->setItem(gem);
-            mSoulBox->setUserString ("ToolTipType", "ItemPtr");
+            mSoulBox->setUserString("ToolTipType", "ItemPtr");
             mSoulBox->setUserData(MWWorld::Ptr(gem));
             mEnchanting.setSoulGem(gem);
         }
     }
 
-    void EnchantingDialog::setItem(const MWWorld::Ptr &item)
+    void EnchantingDialog::setItem(const MWWorld::Ptr& item)
     {
         if (item.isEmpty())
         {
@@ -99,7 +98,7 @@ namespace MWGui
             std::string_view name = item.getClass().getName(item);
             mName->setCaption(toUString(name));
             mItemBox->setItem(item);
-            mItemBox->setUserString ("ToolTipType", "ItemPtr");
+            mItemBox->setUserString("ToolTipType", "ItemPtr");
             mItemBox->setUserData(MWWorld::Ptr(item));
             mEnchanting.setOldItem(item);
         }
@@ -107,34 +106,39 @@ namespace MWGui
 
     void EnchantingDialog::updateLabels()
     {
-        mEnchantmentPoints->setCaption(std::to_string(static_cast<int>(mEnchanting.getEnchantPoints(false))) + " / " + std::to_string(mEnchanting.getMaxEnchantValue()));
+        mEnchantmentPoints->setCaption(std::to_string(static_cast<int>(mEnchanting.getEnchantPoints(false))) + " / "
+            + std::to_string(mEnchanting.getMaxEnchantValue()));
         mCharge->setCaption(std::to_string(mEnchanting.getGemCharge()));
         mSuccessChance->setCaption(std::to_string(std::clamp(mEnchanting.getEnchantChance(), 0, 100)));
         mCastCost->setCaption(std::to_string(mEnchanting.getEffectiveCastCost()));
         mPrice->setCaption(std::to_string(mEnchanting.getEnchantPrice()));
 
-        switch(mEnchanting.getCastStyle())
+        switch (mEnchanting.getCastStyle())
         {
             case ESM::Enchantment::CastOnce:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce", "Cast Once")));
+                mTypeButton->setCaption(toUString(
+                    MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce", "Cast Once")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenStrikes:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes")));
+                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                    "sItemCastWhenStrikes", "When Strikes")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenUsed:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used")));
+                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                    "sItemCastWhenUsed", "When Used")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::ConstantEffect:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant")));
+                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                    "sItemCastConstant", "Cast Constant")));
                 setConstantEffect(true);
                 break;
         }
     }
 
-    void EnchantingDialog::setPtr (const MWWorld::Ptr& ptr)
+    void EnchantingDialog::setPtr(const MWWorld::Ptr& ptr)
     {
         mName->setCaption("");
 
@@ -154,7 +158,7 @@ namespace MWGui
             mEnchanting.setSelfEnchanting(true);
             mEnchanting.setEnchanter(MWMechanics::getPlayer());
             mBuyButton->setCaptionWithReplacing("#{sCreate}");
-            bool enabled = Settings::Manager::getBool("show enchant chance","Game");
+            bool enabled = Settings::Manager::getBool("show enchant chance", "Game");
             mChanceLayout->setVisible(enabled);
             mPtr = MWMechanics::getPlayer();
             setSoulGem(ptr);
@@ -163,13 +167,13 @@ namespace MWGui
         }
 
         setItem(MWWorld::Ptr());
-        startEditing ();
+        startEditing();
         updateLabels();
     }
 
-    void EnchantingDialog::onReferenceUnavailable ()
+    void EnchantingDialog::onReferenceUnavailable()
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Enchanting);
         resetReference();
     }
 
@@ -187,7 +191,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Enchanting);
     }
 
-    void EnchantingDialog::onSelectItem(MyGUI::Widget *sender)
+    void EnchantingDialog::onSelectItem(MyGUI::Widget* sender)
     {
         if (mEnchanting.getOldItem().isEmpty())
         {
@@ -225,9 +229,9 @@ namespace MWGui
         mItemSelectionDialog->setVisible(false);
 
         mEnchanting.setSoulGem(item);
-        if(mEnchanting.getGemCharge()==0)
+        if (mEnchanting.getGemCharge() == 0)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage32}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage32}");
             return;
         }
 
@@ -241,7 +245,7 @@ namespace MWGui
         mItemSelectionDialog->setVisible(false);
     }
 
-    void EnchantingDialog::onSelectSoul(MyGUI::Widget *sender)
+    void EnchantingDialog::onSelectSoul(MyGUI::Widget* sender)
     {
         if (mEnchanting.getGem().isEmpty())
         {
@@ -252,7 +256,7 @@ namespace MWGui
             mItemSelectionDialog->openContainer(MWMechanics::getPlayer());
             mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyChargedSoulstones);
 
-            //MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
+            // MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
         }
         else
         {
@@ -263,7 +267,7 @@ namespace MWGui
         }
     }
 
-    void EnchantingDialog::notifyEffectsChanged ()
+    void EnchantingDialog::notifyEffectsChanged()
     {
         mEffectList.mList = mEffects;
         mEnchanting.setEffect(mEffectList);
@@ -277,7 +281,7 @@ namespace MWGui
         updateEffectsView();
     }
 
-    void EnchantingDialog::onAccept(MyGUI::EditBox *sender)
+    void EnchantingDialog::onAccept(MyGUI::EditBox* sender)
     {
         onBuyButtonClicked(sender);
 
@@ -289,31 +293,31 @@ namespace MWGui
     {
         if (mEffects.size() <= 0)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu11}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sEnchantmentMenu11}");
             return;
         }
 
-        if (mName->getCaption ().empty())
+        if (mName->getCaption().empty())
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage10}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage10}");
             return;
         }
 
         if (mEnchanting.soulEmpty())
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage52}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage52}");
             return;
         }
 
         if (mEnchanting.itemEmpty())
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage11}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage11}");
             return;
         }
 
         if (static_cast<int>(mEnchanting.getEnchantPoints(false)) > mEnchanting.getMaxEnchantValue())
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage29}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage29}");
             return;
         }
 
@@ -324,25 +328,32 @@ namespace MWGui
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
         if (mPtr != player && mEnchanting.getEnchantPrice() > playerGold)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage18}");
             return;
         }
 
         // check if the player is attempting to use a soulstone or item that was stolen from this actor
         if (mPtr != player)
         {
-            for (int i=0; i<2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
-                if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(item.getCellRef().getRefId(), mPtr))
+                if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(
+                        item.getCellRef().getRefId(), mPtr))
                 {
-                    std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->mValue.getString();
+                    std::string msg = MWBase::Environment::get()
+                                          .getWorld()
+                                          ->getStore()
+                                          .get<ESM::GameSetting>()
+                                          .find("sNotifyMessage49")
+                                          ->mValue.getString();
                     msg = Misc::StringUtils::format(msg, item.getClass().getName(item));
                     MWBase::Environment::get().getWindowManager()->messageBox(msg);
 
-                    MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, item, mPtr, 1);
+                    MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(
+                        player, item, mPtr, 1);
 
-                    MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+                    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Enchanting);
                     MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
                     return;
                 }
@@ -351,16 +362,16 @@ namespace MWGui
 
         int result = mEnchanting.create();
 
-        if(result==1)
+        if (result == 1)
         {
             MWBase::Environment::get().getWindowManager()->playSound("enchant success");
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
-            MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sEnchantmentMenu12}");
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Enchanting);
         }
         else
         {
             MWBase::Environment::get().getWindowManager()->playSound("enchant fail");
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage34}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage34}");
             if (!mEnchanting.getGem().isEmpty() && !mEnchanting.getGem().getRefData().getCount())
             {
                 setSoulGem(MWWorld::Ptr());

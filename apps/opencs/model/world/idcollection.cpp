@@ -2,23 +2,23 @@
 
 namespace CSMWorld
 {
-    template<>
-    int IdCollection<Pathgrid, IdAccessor<Pathgrid> >::load (ESM::ESMReader& reader, bool base)
+    template <>
+    int IdCollection<Pathgrid, IdAccessor<Pathgrid>>::load(ESM::ESMReader& reader, bool base)
     {
         Pathgrid record;
         bool isDeleted = false;
 
-        loadRecord (record, reader, isDeleted);
+        loadRecord(record, reader, isDeleted);
 
-        std::string id = IdAccessor<Pathgrid>().getId (record);
-        int index = this->searchId (id);
+        std::string id = IdAccessor<Pathgrid>().getId(record);
+        int index = this->searchId(id);
 
         if (record.mPoints.empty() || record.mEdges.empty())
             isDeleted = true;
 
         if (isDeleted)
         {
-            if (index==-1)
+            if (index == -1)
             {
                 // deleting a record that does not exist
                 // ignore it for now
@@ -28,7 +28,7 @@ namespace CSMWorld
 
             if (base)
             {
-                this->removeRows (index, 1);
+                this->removeRows(index, 1);
                 return -1;
             }
 
@@ -38,6 +38,6 @@ namespace CSMWorld
             return index;
         }
 
-        return load (record, base, index);
+        return load(record, base, index);
     }
 }

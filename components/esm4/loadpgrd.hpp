@@ -46,9 +46,9 @@ namespace ESM4
             float x;
             float y;
             float z;
-            std::uint8_t  numLinks;
-            std::uint8_t  priority; // probably padding, repurposing
-            std::uint16_t unknown;  // probably padding
+            std::uint8_t numLinks;
+            std::uint8_t priority; // probably padding, repurposing
+            std::uint16_t unknown; // probably padding
         };
 
         struct PGRR
@@ -72,7 +72,7 @@ namespace ESM4
             std::vector<std::int32_t> linkedNodes;
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId; // FIXME: no such record for PGRD, but keep here to avoid extra work for now
@@ -84,9 +84,9 @@ namespace ESM4
         std::vector<PGRL> mObjects;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

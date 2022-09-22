@@ -8,15 +8,18 @@ namespace MWWorld
     template <class Derived, class Base = Class>
     class RegisteredClass : public Base
     {
-        public:
-            static void registerSelf()
-            {
-                static Derived instance;
-                Base::registerClass(instance);
-            }
+    public:
+        static void registerSelf()
+        {
+            static Derived instance;
+            Base::registerClass(instance);
+        }
 
-        protected:
-            explicit RegisteredClass(unsigned type) : Base(type) {}
+    protected:
+        explicit RegisteredClass(unsigned type)
+            : Base(type)
+        {
+        }
     };
 }
 

@@ -1,8 +1,8 @@
 #ifndef OPENMW_LUAUI_WIDGET
 #define OPENMW_LUAUI_WIDGET
 
-#include <map>
 #include <functional>
+#include <map>
 
 #include <MyGUI_Widget.h>
 #include <sol/sol.hpp>
@@ -14,10 +14,10 @@
 namespace LuaUi
 {
     /*
-    * extends MyGUI::Widget and its child classes
-    * memory ownership is controlled by MyGUI
-    * it is important not to call any WidgetExtension methods after destroying the MyGUI::Widget
-    */
+     * extends MyGUI::Widget and its child classes
+     * memory ownership is controlled by MyGUI
+     * it is important not to call any WidgetExtension methods after destroying the MyGUI::Widget
+     */
     class WidgetExtension
     {
     public:
@@ -85,7 +85,7 @@ namespace LuaUi
         virtual MyGUI::IntSize childScalingSize();
         virtual MyGUI::IntSize templateScalingSize();
 
-        template<typename T>
+        template <typename T>
         T propertyValue(std::string_view name, const T& defaultValue)
         {
             return parseProperty(mProperties, mTemplateProperties, name, defaultValue);
@@ -96,12 +96,12 @@ namespace LuaUi
 
         virtual void updateTemplate();
         virtual void updateProperties();
-        virtual void updateChildren() {};
+        virtual void updateChildren(){};
 
         lua_State* lua() const { return mLua; }
 
         void triggerEvent(std::string_view name, sol::object argument) const;
-        template<class ArgFactory>
+        template <class ArgFactory>
         void propagateEvent(std::string_view name, const ArgFactory& argumentFactory) const
         {
             const WidgetExtension* w = this;

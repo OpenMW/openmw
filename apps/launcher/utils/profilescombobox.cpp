@@ -1,13 +1,12 @@
-#include <QString>
 #include <QApplication>
+#include <QString>
 
 #include "profilescombobox.hpp"
 
-ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
-    ContentSelectorView::ComboBox(parent)
+ProfilesComboBox::ProfilesComboBox(QWidget* parent)
+    : ContentSelectorView::ComboBox(parent)
 {
-    connect(this, qOverload<int>(&ProfilesComboBox::activated),
-            this, &ProfilesComboBox::slotIndexChangedByUser);
+    connect(this, qOverload<int>(&ProfilesComboBox::activated), this, &ProfilesComboBox::slotIndexChangedByUser);
 
     setInsertPolicy(QComboBox::NoInsert);
 }
@@ -17,7 +16,8 @@ void ProfilesComboBox::setEditEnabled(bool editable)
     if (isEditable() == editable)
         return;
 
-    if (!editable) {
+    if (!editable)
+    {
         disconnect(lineEdit(), &QLineEdit::editingFinished, this, &ProfilesComboBox::slotEditingFinished);
         disconnect(lineEdit(), &QLineEdit::textChanged, this, &ProfilesComboBox::slotTextChanged);
         return setEditable(false);
@@ -27,7 +27,7 @@ void ProfilesComboBox::setEditEnabled(bool editable)
     setEditable(true);
     setValidator(mValidator);
 
-    auto *edit = new ComboBoxLineEdit(this);
+    auto* edit = new ComboBoxLineEdit(this);
 
     setLineEdit(edit);
     setCompleter(nullptr);
@@ -39,16 +39,19 @@ void ProfilesComboBox::setEditEnabled(bool editable)
     connect(lineEdit(), &QLineEdit::textChanged, this, &ProfilesComboBox::signalProfileTextChanged);
 }
 
-void ProfilesComboBox::slotTextChanged(const QString &text)
+void ProfilesComboBox::slotTextChanged(const QString& text)
 {
     QPalette palette;
-    palette.setColor(QPalette::Text,Qt::red);
+    palette.setColor(QPalette::Text, Qt::red);
 
     int index = findText(text);
 
-    if (text.isEmpty() || (index != -1 && index != currentIndex())) {
+    if (text.isEmpty() || (index != -1 && index != currentIndex()))
+    {
         lineEdit()->setPalette(palette);
-    } else {
+    }
+    else
+    {
         lineEdit()->setPalette(QApplication::palette());
     }
 }
@@ -83,11 +86,12 @@ void ProfilesComboBox::slotIndexChangedByUser(int index)
     mOldProfile = currentText();
 }
 
-ProfilesComboBox::ComboBoxLineEdit::ComboBoxLineEdit (QWidget *parent)
-    : LineEdit (parent)
+ProfilesComboBox::ComboBoxLineEdit::ComboBoxLineEdit(QWidget* parent)
+    : LineEdit(parent)
 {
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
 
     setObjectName(QString("ComboBoxLineEdit"));
-    setStyleSheet(QString("ComboBoxLineEdit { background-color: transparent; padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
+    setStyleSheet(QString("ComboBoxLineEdit { background-color: transparent; padding-right: %1px; } ")
+                      .arg(mClearButton->sizeHint().width() + frameWidth + 1));
 }

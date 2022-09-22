@@ -34,7 +34,7 @@ namespace ESM4
 
     std::string formIdToString(FormId formId);
 
-    bool isFormId(const std::string& str, FormId *id = nullptr);
+    bool isFormId(const std::string& str, FormId* id = nullptr);
 
     FormId stringToFormId(const std::string& str);
 }

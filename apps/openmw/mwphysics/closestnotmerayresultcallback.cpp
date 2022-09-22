@@ -12,13 +12,16 @@
 
 namespace MWPhysics
 {
-    ClosestNotMeRayResultCallback::ClosestNotMeRayResultCallback(const btCollisionObject* me, std::vector<const btCollisionObject*>  targets, const btVector3& from, const btVector3& to)
-    : btCollisionWorld::ClosestRayResultCallback(from, to)
-    , mMe(me), mTargets(std::move(targets))
+    ClosestNotMeRayResultCallback::ClosestNotMeRayResultCallback(const btCollisionObject* me,
+        std::vector<const btCollisionObject*> targets, const btVector3& from, const btVector3& to)
+        : btCollisionWorld::ClosestRayResultCallback(from, to)
+        , mMe(me)
+        , mTargets(std::move(targets))
     {
     }
 
-    btScalar ClosestNotMeRayResultCallback::addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
+    btScalar ClosestNotMeRayResultCallback::addSingleResult(
+        btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
     {
         const auto* hitObject = rayResult.m_collisionObject;
         if (hitObject == mMe)

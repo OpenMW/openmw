@@ -20,11 +20,10 @@ namespace CSMWorld
     class ConstInfoSelectWrapper
     {
     public:
-
         // Order matters
         enum FunctionName
         {
-            Function_RankLow=0,
+            Function_RankLow = 0,
             Function_RankHigh,
             Function_RankRequirement,
             Function_Reputation,
@@ -97,7 +96,7 @@ namespace CSMWorld
             Function_Flee,
             Function_ShouldAttack,
             Function_Werewolf,
-            Function_PcWerewolfKills=73,
+            Function_PcWerewolfKills = 73,
 
             Function_Global,
             Function_Local,
@@ -168,7 +167,6 @@ namespace CSMWorld
         std::string toString() const;
 
     protected:
-
         void readRule();
         void readFunctionName();
         void readRelationType();
@@ -183,22 +181,22 @@ namespace CSMWorld
         std::pair<float, float> getValidFloatRange() const;
 
         template <typename Type1, typename Type2>
-        bool rangeContains(Type1 value, std::pair<Type2,Type2> range) const;
+        bool rangeContains(Type1 value, std::pair<Type2, Type2> range) const;
 
         template <typename Type1, typename Type2>
-        bool rangesOverlap(std::pair<Type1,Type1> range1, std::pair<Type2,Type2> range2) const;
+        bool rangesOverlap(std::pair<Type1, Type1> range1, std::pair<Type2, Type2> range2) const;
 
         template <typename Type1, typename Type2>
-        bool rangeFullyContains(std::pair<Type1,Type1> containing, std::pair<Type2,Type2> test) const;
+        bool rangeFullyContains(std::pair<Type1, Type1> containing, std::pair<Type2, Type2> test) const;
 
         template <typename Type1, typename Type2>
-        bool rangesMatch(std::pair<Type1,Type1> range1, std::pair<Type2,Type2> range2) const;
+        bool rangesMatch(std::pair<Type1, Type1> range1, std::pair<Type2, Type2> range2) const;
 
         template <typename Type1, typename Type2>
-        bool conditionIsAlwaysTrue(std::pair<Type1,Type1> conditionRange, std::pair<Type2,Type2> validRange) const;
+        bool conditionIsAlwaysTrue(std::pair<Type1, Type1> conditionRange, std::pair<Type2, Type2> validRange) const;
 
         template <typename Type1, typename Type2>
-        bool conditionIsNeverTrue(std::pair<Type1,Type1> conditionRange, std::pair<Type2,Type2> validRange) const;
+        bool conditionIsNeverTrue(std::pair<Type1, Type1> conditionRange, std::pair<Type2, Type2> validRange) const;
 
         FunctionName mFunctionName;
         RelationType mRelationType;
@@ -208,7 +206,6 @@ namespace CSMWorld
         std::string mVariableName;
 
     private:
-
         const ESM::DialInfo::SelectStruct& mConstSelect;
     };
 
@@ -216,7 +213,6 @@ namespace CSMWorld
     class InfoSelectWrapper : public ConstInfoSelectWrapper
     {
     public:
-
         InfoSelectWrapper(ESM::DialInfo::SelectStruct& select);
 
         // Wrapped SelectStruct will not be modified until update() is called
@@ -233,7 +229,6 @@ namespace CSMWorld
         ESM::Variant& getVariant();
 
     private:
-
         ESM::DialInfo::SelectStruct& mSelect;
 
         void writeRule();

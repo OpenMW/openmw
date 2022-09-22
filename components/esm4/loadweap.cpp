@@ -35,7 +35,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
@@ -44,11 +44,15 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_DATA:
             {
-                //if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 if (subHdr.dataSize == 10) // FO3 has 15 bytes even though VER_094
                 {
                     reader.get(mData.value);
@@ -76,16 +80,36 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_ICON: reader.getZString(mIcon);  break;
-            case ESM4::SUB_MICO: reader.getZString(mMiniIcon); break; // FO3
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId); break;
-            case ESM4::SUB_ANAM: reader.get(mEnchantmentPoints); break;
-            case ESM4::SUB_ENAM: reader.getFormId(mEnchantment); break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
-            case ESM4::SUB_DESC: reader.getLocalizedString(mText); break;
-            case ESM4::SUB_YNAM: reader.getFormId(mPickUpSound); break;
-            case ESM4::SUB_ZNAM: reader.getFormId(mDropSound); break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mIcon);
+                break;
+            case ESM4::SUB_MICO:
+                reader.getZString(mMiniIcon);
+                break; // FO3
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_ANAM:
+                reader.get(mEnchantmentPoints);
+                break;
+            case ESM4::SUB_ENAM:
+                reader.getFormId(mEnchantment);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
+            case ESM4::SUB_DESC:
+                reader.getLocalizedString(mText);
+                break;
+            case ESM4::SUB_YNAM:
+                reader.getFormId(mPickUpSound);
+                break;
+            case ESM4::SUB_ZNAM:
+                reader.getFormId(mDropSound);
+                break;
             case ESM4::SUB_MODT:
             case ESM4::SUB_BAMT:
             case ESM4::SUB_BIDS:
@@ -125,7 +149,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_MO3T: // FO3
             case ESM4::SUB_MO3S: // FO3
             case ESM4::SUB_MODD: // FO3
-          //case ESM4::SUB_MOSD: // FO3
+                                 // case ESM4::SUB_MOSD: // FO3
             case ESM4::SUB_DEST: // FO3
             case ESM4::SUB_DSTD: // FO3
             case ESM4::SUB_DSTF: // FO3
@@ -154,7 +178,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_WNM7: // FONV
             case ESM4::SUB_EFSD: // FONV DeadMoney
             {
-                //std::cout << "WEAP " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "WEAP " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -164,10 +188,10 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Weapon::save(ESM4::Writer& writer) const
+// void ESM4::Weapon::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Weapon::blank()
+// void ESM4::Weapon::blank()
 //{
-//}
+// }

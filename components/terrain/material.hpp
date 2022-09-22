@@ -24,9 +24,9 @@ namespace Terrain
         bool mSpecular;
     };
 
-    std::vector<osg::ref_ptr<osg::StateSet> > createPasses(bool useShaders, Resource::SceneManager* sceneManager,
-                                                           const std::vector<TextureLayer>& layers,
-                                                           const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize);
+    std::vector<osg::ref_ptr<osg::StateSet>> createPasses(bool useShaders, Resource::SceneManager* sceneManager,
+        const std::vector<TextureLayer>& layers, const std::vector<osg::ref_ptr<osg::Texture2D>>& blendmaps,
+        int blendmapScale, float layerTileSize);
 
 }
 

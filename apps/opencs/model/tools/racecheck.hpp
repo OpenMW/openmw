@@ -12,23 +12,22 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that race records are internally consistent
     class RaceCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Race>& mRaces;
-            bool mPlayable;
-            bool mIgnoreBaseRecords;
+        const CSMWorld::IdCollection<ESM::Race>& mRaces;
+        bool mPlayable;
+        bool mIgnoreBaseRecords;
 
-            void performPerRecord (int stage, CSMDoc::Messages& messages);
+        void performPerRecord(int stage, CSMDoc::Messages& messages);
 
-            void performFinal (CSMDoc::Messages& messages);
+        void performFinal(CSMDoc::Messages& messages);
 
-        public:
+    public:
+        RaceCheckStage(const CSMWorld::IdCollection<ESM::Race>& races);
 
-            RaceCheckStage (const CSMWorld::IdCollection<ESM::Race>& races);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, CSMDoc::Messages& messages) override;
-            ///< Messages resulting from this tage will be appended to \a messages.
+        void perform(int stage, CSMDoc::Messages& messages) override;
+        ///< Messages resulting from this tage will be appended to \a messages.
     };
 }
 

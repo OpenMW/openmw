@@ -3,12 +3,12 @@
 
 #include <array>
 #include <map>
-#include <unordered_set>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 
-#include <QObject>
 #include <QModelIndex>
+#include <QObject>
 
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadbody.hpp>
@@ -32,14 +32,12 @@ namespace CSMWorld
     {
         Q_OBJECT
     public:
-
         /// A list indexed by ESM::PartReferenceType
         using ActorPartList = std::map<ESM::PartReferenceType, std::pair<std::string, int>>;
         /// A list indexed by ESM::BodyPart::MeshPart
         using RacePartList = std::array<std::string, ESM::BodyPart::MP_Count>;
         /// Tracks unique strings
         using StringSet = std::unordered_set<std::string>;
-
 
         /// Contains base race data shared between actors
         class RaceData
@@ -67,7 +65,7 @@ namespace CSMWorld
             /// Marks an additional dependency
             void addOtherDependency(const std::string& id);
             /// Clears parts and dependencies
-            void reset_data(const std::string& raceId, bool isBeast=false);
+            void reset_data(const std::string& raceId, bool isBeast = false);
 
         private:
             bool handles(ESM::PartReferenceType type) const;
@@ -104,7 +102,8 @@ namespace CSMWorld
             /// Marks an additional dependency for the actor
             void addOtherDependency(const std::string& id);
             /// Clears race, parts, and dependencies
-            void reset_data(const std::string& actorId, const std::string& skeleton="", bool isCreature=false, bool female=true, RaceDataPtr raceData=nullptr);
+            void reset_data(const std::string& actorId, const std::string& skeleton = "", bool isCreature = false,
+                bool female = true, RaceDataPtr raceData = nullptr);
 
         private:
             std::string mId;
@@ -116,7 +115,6 @@ namespace CSMWorld
             StringSet mDependencies;
         };
         using ActorDataPtr = std::shared_ptr<ActorData>;
-
 
         ActorAdapter(Data& data);
 
@@ -145,7 +143,6 @@ namespace CSMWorld
         void handleBodyPartsRemoved(const QModelIndex&, int, int);
 
     private:
-
         ActorAdapter(const ActorAdapter&) = delete;
         ActorAdapter& operator=(const ActorAdapter&) = delete;
 

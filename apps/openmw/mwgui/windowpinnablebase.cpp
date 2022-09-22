@@ -5,10 +5,11 @@
 namespace MWGui
 {
     WindowPinnableBase::WindowPinnableBase(const std::string& parLayout)
-      : WindowBase(parLayout), mPinned(false)
+        : WindowBase(parLayout)
+        , mPinned(false)
     {
         Window* window = mMainWidget->castType<Window>();
-        mPinButton = window->getSkinWidget ("Button");
+        mPinButton = window->getSkinWidget("Button");
 
         mPinButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &WindowPinnableBase::onPinButtonPressed);
     }
@@ -21,9 +22,9 @@ namespace MWGui
         mPinned = !mPinned;
 
         if (mPinned)
-            mPinButton->changeWidgetSkin ("PinDown");
+            mPinButton->changeWidgetSkin("PinDown");
         else
-            mPinButton->changeWidgetSkin ("PinUp");
+            mPinButton->changeWidgetSkin("PinUp");
 
         onPinToggled();
     }

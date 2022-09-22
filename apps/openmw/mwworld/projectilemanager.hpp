@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <osg/ref_ptr>
 #include <osg/PositionAttitudeTransform>
+#include <osg/ref_ptr>
 
 #include <components/esm3/effectlist.hpp>
 
@@ -45,14 +45,15 @@ namespace MWWorld
     class ProjectileManager
     {
     public:
-        ProjectileManager (osg::Group* parent, Resource::ResourceSystem* resourceSystem,
-                MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
+        ProjectileManager(osg::Group* parent, Resource::ResourceSystem* resourceSystem,
+            MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
-        void launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot);
+        void launchMagicBolt(
+            const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot);
 
-        void launchProjectile (const MWWorld::Ptr& actor, const MWWorld::ConstPtr& projectile,
-                                       const osg::Vec3f& pos, const osg::Quat& orient, const MWWorld::Ptr& bow, float speed, float attackStrength);
+        void launchProjectile(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& projectile, const osg::Vec3f& pos,
+            const osg::Quat& orient, const MWWorld::Ptr& bow, float speed, float attackStrength);
 
         void updateCasters();
 
@@ -63,8 +64,8 @@ namespace MWWorld
         /// Removes all current projectiles. Should be called when switching to a new worldspace.
         void clear();
 
-        void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
-        bool readRecord (ESM::ESMReader& reader, uint32_t type);
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
+        bool readRecord(ESM::ESMReader& reader, uint32_t type);
         int countSavedGameRecords() const;
 
     private:
@@ -133,9 +134,9 @@ namespace MWWorld
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);
 
-        void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient,
-                            bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture = "");
-        void update (State& state, float duration);
+        void createModel(State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient,
+            bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture = "");
+        void update(State& state, float duration);
 
         void operator=(const ProjectileManager&);
         ProjectileManager(const ProjectileManager&);

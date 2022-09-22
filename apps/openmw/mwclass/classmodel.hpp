@@ -3,8 +3,8 @@
 
 #include "../mwbase/environment.hpp"
 
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/livecellref.hpp"
+#include "../mwworld/ptr.hpp"
 
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -16,11 +16,11 @@ namespace MWClass
     template <class Class>
     std::string getClassModel(const MWWorld::ConstPtr& ptr)
     {
-        const MWWorld::LiveCellRef<Class> *ref = ptr.get<Class>();
+        const MWWorld::LiveCellRef<Class>* ref = ptr.get<Class>();
 
         if (!ref->mBase->mModel.empty())
-            return Misc::ResourceHelpers::correctMeshPath(ref->mBase->mModel,
-                MWBase::Environment::get().getResourceSystem()->getVFS());
+            return Misc::ResourceHelpers::correctMeshPath(
+                ref->mBase->mModel, MWBase::Environment::get().getResourceSystem()->getVFS());
 
         return {};
     }

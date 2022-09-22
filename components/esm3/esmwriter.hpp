@@ -16,8 +16,8 @@ namespace ToUTF8
 namespace ESM
 {
 
-class ESMWriter
-{
+    class ESMWriter
+    {
         struct RecordData
         {
             NAME name;
@@ -26,7 +26,6 @@ class ESMWriter
         };
 
     public:
-
         ESMWriter();
 
         unsigned int getVersion() const;
@@ -35,18 +34,18 @@ class ESMWriter
         // otherwise this data will be left uninitialized.
         void setVersion(unsigned int ver = 0x3fa66666);
         void setType(int type);
-        void setEncoder(ToUTF8::Utf8Encoder *encoding);
+        void setEncoder(ToUTF8::Utf8Encoder* encoding);
         void setAuthor(const std::string& author);
         void setDescription(const std::string& desc);
         void setHeader(const Header& value) { mHeader = value; }
 
         // Set the record count for writing it in the file header
-        void setRecordCount (int count);
+        void setRecordCount(int count);
         // Counts how many records we have actually written.
         // It is a good idea to compare this with the value you wrote into the header (setRecordCount)
         // It should be the record count you set + 1 (1 additional record for the TES3 header)
         int getRecordCount() { return mRecordCount; }
-        void setFormat (int format);
+        void setFormat(int format);
 
         void clearMaster();
 
@@ -77,7 +76,7 @@ class ESMWriter
                 writeHNCString(name, data);
         }
 
-        template<typename T>
+        template <typename T>
         void writeHNT(NAME name, const T& data)
         {
             startSubRecord(name);
@@ -85,7 +84,7 @@ class ESMWriter
             endRecord(name);
         }
 
-        template<typename T, std::size_t size>
+        template <typename T, std::size_t size>
         void writeHNT(NAME name, const T (&data)[size])
         {
             startSubRecord(name);
@@ -100,10 +99,10 @@ class ESMWriter
 
         void writeT(NAME data) = delete;
 
-        template<typename T, std::size_t size>
+        template <typename T, std::size_t size>
         void writeHNT(NAME name, const T (&data)[size], int) = delete;
 
-        template<typename T>
+        template <typename T>
         void writeHNT(NAME name, const T& data, int size)
         {
             startSubRecord(name);
@@ -111,20 +110,20 @@ class ESMWriter
             endRecord(name);
         }
 
-        template<typename T>
+        template <typename T>
         void writeT(const T& data)
         {
             static_assert(!std::is_pointer_v<T>);
             write(reinterpret_cast<const char*>(&data), sizeof(T));
         }
 
-        template<typename T, std::size_t size>
+        template <typename T, std::size_t size>
         void writeT(const T (&data)[size])
         {
             write(reinterpret_cast<const char*>(data), size * sizeof(T));
         }
 
-        template<typename T>
+        template <typename T>
         void writeT(const T& data, size_t size)
         {
             static_assert(!std::is_pointer_v<T>);

@@ -26,8 +26,8 @@
 */
 #include "loadhdpt.hpp"
 
-#include <stdexcept>
 #include <optional>
+#include <stdexcept>
 //#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
@@ -37,7 +37,7 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     std::optional<std::uint32_t> type;
 
@@ -46,11 +46,21 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_DATA: reader.get(mData); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_HNAM: reader.getFormId(mAdditionalPart); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_DATA:
+                reader.get(mData);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_HNAM:
+                reader.getFormId(mAdditionalPart);
+                break;
             case ESM4::SUB_NAM0: // TES5
             {
                 std::uint32_t value;
@@ -65,22 +75,27 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
                 reader.getZString(file);
 
                 if (!type.has_value())
-                    throw std::runtime_error("Failed to read ESM4 HDPT record: subrecord NAM0 does not precede subrecord NAM1: file type is unknown");
+                    throw std::runtime_error(
+                        "Failed to read ESM4 HDPT record: subrecord NAM0 does not precede subrecord NAM1: file type is "
+                        "unknown");
 
                 if (*type >= mTriFile.size())
-                    throw std::runtime_error("Failed to read ESM4 HDPT record: invalid file type: " + std::to_string(*type));
+                    throw std::runtime_error(
+                        "Failed to read ESM4 HDPT record: invalid file type: " + std::to_string(*type));
 
                 mTriFile[*type] = std::move(file);
 
                 break;
             }
-            case ESM4::SUB_TNAM: reader.getFormId(mBaseTexture); break;
+            case ESM4::SUB_TNAM:
+                reader.getFormId(mBaseTexture);
+                break;
             case ESM4::SUB_PNAM:
             case ESM4::SUB_MODS:
             case ESM4::SUB_MODT:
             case ESM4::SUB_RNAM:
             {
-                //std::cout << "HDPT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "HDPT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -90,10 +105,10 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::HeadPart::save(ESM4::Writer& writer) const
+// void ESM4::HeadPart::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::HeadPart::blank()
+// void ESM4::HeadPart::blank()
 //{
-//}
+// }

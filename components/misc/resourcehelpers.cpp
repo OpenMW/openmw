@@ -1,14 +1,14 @@
 #include "resourcehelpers.hpp"
 
+#include <algorithm>
 #include <sstream>
 #include <string_view>
-#include <algorithm>
 
 #include <components/esm/common.hpp>
 
 #include <components/misc/pathhelpers.hpp>
-#include <components/misc/strings/lower.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
@@ -16,30 +16,23 @@
 namespace
 {
 
-
     struct MatchPathSeparator
     {
-        bool operator()( char ch ) const
-        {
-            return ch == '\\' || ch == '/';
-        }
+        bool operator()(char ch) const { return ch == '\\' || ch == '/'; }
     };
 
-    std::string
-    getBasename( std::string const& pathname )
+    std::string getBasename(std::string const& pathname)
     {
         return std::string(
-            std::find_if( pathname.rbegin(), pathname.rend(),
-                          MatchPathSeparator() ).base(),
-            pathname.end() );
+            std::find_if(pathname.rbegin(), pathname.rend(), MatchPathSeparator()).base(), pathname.end());
     }
 
 }
 
-bool changeExtension(std::string &path, std::string_view ext)
+bool changeExtension(std::string& path, std::string_view ext)
 {
     std::string::size_type pos = path.rfind('.');
-    if(pos != std::string::npos && path.compare(pos, path.length() - pos, ext) != 0)
+    if (pos != std::string::npos && path.compare(pos, path.length() - pos, ext) != 0)
     {
         path.replace(pos, path.length(), ext);
         return true;
@@ -47,12 +40,13 @@ bool changeExtension(std::string &path, std::string_view ext)
     return false;
 }
 
-bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
+bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
 {
     return changeExtension(path, ".dds");
 }
 
-std::string Misc::ResourceHelpers::correctResourcePath(std::string_view topLevelDirectory, std::string_view resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctResourcePath(
+    std::string_view topLevelDirectory, std::string_view resPath, const VFS::Manager* vfs)
 {
     /* Bethesda at some point converted all their BSA
      * textures from tga to dds for increased load speed, but all
@@ -65,9 +59,9 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::string_view topLevel
     while (correctedPath.size() && (correctedPath[0] == '/' || correctedPath[0] == '\\'))
         correctedPath.erase(0, 1);
 
-    if(!correctedPath.starts_with(topLevelDirectory) || correctedPath.size() <= topLevelDirectory.size() ||
-        (correctedPath[topLevelDirectory.size()] != '/' && correctedPath[topLevelDirectory.size()] != '\\'))
-        correctedPath = std::string{topLevelDirectory} + '\\' + correctedPath;
+    if (!correctedPath.starts_with(topLevelDirectory) || correctedPath.size() <= topLevelDirectory.size()
+        || (correctedPath[topLevelDirectory.size()] != '/' && correctedPath[topLevelDirectory.size()] != '\\'))
+        correctedPath = std::string{ topLevelDirectory } + '\\' + correctedPath;
 
     std::string origExt = correctedPath;
 
@@ -82,7 +76,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::string_view topLevel
         return origExt;
 
     // fall back to a resource in the top level directory if it exists
-    std::string fallback{topLevelDirectory};
+    std::string fallback{ topLevelDirectory };
     fallback += '\\';
     fallback += getBasename(correctedPath);
     if (vfs->exists(fallback))
@@ -115,7 +109,8 @@ std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, 
     return correctResourcePath("bookart", resPath, vfs);
 }
 
-std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, int width, int height, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctBookartPath(
+    std::string_view resPath, int width, int height, const VFS::Manager* vfs)
 {
     std::string image = correctBookartPath(resPath, vfs);
 
@@ -131,22 +126,22 @@ std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, 
     return image;
 }
 
-std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctActorModelPath(const std::string& resPath, const VFS::Manager* vfs)
 {
     std::string mdlname = resPath;
     std::string::size_type p = mdlname.find_last_of("/\\");
-    if(p != std::string::npos)
-        mdlname.insert(mdlname.begin()+p+1, 'x');
+    if (p != std::string::npos)
+        mdlname.insert(mdlname.begin() + p + 1, 'x');
     else
         mdlname.insert(mdlname.begin(), 'x');
-    if(!vfs->exists(mdlname))
+    if (!vfs->exists(mdlname))
     {
         return resPath;
     }
     return mdlname;
 }
 
-std::string Misc::ResourceHelpers::correctMeshPath(const std::string &resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctMeshPath(const std::string& resPath, const VFS::Manager* vfs)
 {
     return "meshes\\" + resPath;
 }
@@ -156,37 +151,38 @@ std::string Misc::ResourceHelpers::correctSoundPath(std::string_view resPath, co
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
     if (!vfs->exists(resPath))
     {
-        std::string sound{resPath};
+        std::string sound{ resPath };
         changeExtension(sound, ".mp3");
         return vfs->normalizeFilename(sound);
     }
     return vfs->normalizeFilename(resPath);
-
 }
 
 bool Misc::ResourceHelpers::isHiddenMarker(std::string_view id)
 {
-    return Misc::StringUtils::ciEqual(id, "prisonmarker") || Misc::StringUtils::ciEqual(id, "divinemarker") || Misc::StringUtils::ciEqual(id, "templemarker") || Misc::StringUtils::ciEqual(id, "northmarker");
+    return Misc::StringUtils::ciEqual(id, "prisonmarker") || Misc::StringUtils::ciEqual(id, "divinemarker")
+        || Misc::StringUtils::ciEqual(id, "templemarker") || Misc::StringUtils::ciEqual(id, "northmarker");
 }
 
 namespace
 {
-std::string getLODMeshNameImpl(std::string resPath, const VFS::Manager* vfs, std::string_view pattern)
-{
-    if (auto w = Misc::findExtension(resPath); w != std::string::npos)
-        resPath.insert(w, pattern);
-    return vfs->normalizeFilename(resPath);
+    std::string getLODMeshNameImpl(std::string resPath, const VFS::Manager* vfs, std::string_view pattern)
+    {
+        if (auto w = Misc::findExtension(resPath); w != std::string::npos)
+            resPath.insert(w, pattern);
+        return vfs->normalizeFilename(resPath);
+    }
+
+    std::string getBestLODMeshName(std::string const& resPath, const VFS::Manager* vfs, std::string_view pattern)
+    {
+        if (const auto& result = getLODMeshNameImpl(resPath, vfs, pattern); vfs->exists(result))
+            return result;
+        return resPath;
+    }
 }
 
-std::string getBestLODMeshName(std::string const& resPath, const VFS::Manager* vfs, std::string_view pattern)
-{
-    if (const auto& result = getLODMeshNameImpl(resPath, vfs, pattern); vfs->exists(result))
-        return result;
-    return resPath;
-}
-}
-
-std::string Misc::ResourceHelpers::getLODMeshName(int esmVersion, std::string resPath, const VFS::Manager* vfs, unsigned char lod)
+std::string Misc::ResourceHelpers::getLODMeshName(
+    int esmVersion, std::string resPath, const VFS::Manager* vfs, unsigned char lod)
 {
     const std::string distantMeshPattern = [&esmVersion] {
         switch (esmVersion)

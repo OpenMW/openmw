@@ -5,9 +5,9 @@
 
 #include <osg/Vec3f>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <algorithm>
 
 namespace DetourNavigator
 {

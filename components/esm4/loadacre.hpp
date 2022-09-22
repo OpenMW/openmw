@@ -38,16 +38,16 @@ namespace ESM4
 
     struct ActorCreature
     {
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
-        FormId      mBaseObj;
+        FormId mBaseObj;
 
         Placement mPlacement;
-        float    mScale = 1.0f;
-        FormId   mOwner;
-        FormId   mGlobal;
+        float mScale = 1.0f;
+        FormId mOwner;
+        FormId mGlobal;
         std::uint32_t mFactionRank;
 
         bool mInitiallyDisabled; // TODO may need to check mFlags & 0x800 (initially disabled)
@@ -55,9 +55,9 @@ namespace ESM4
         EnableParent mEsp;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

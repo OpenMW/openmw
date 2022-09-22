@@ -4,8 +4,8 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include <components/widgets/imagebutton.hpp>
 
@@ -15,7 +15,7 @@
 using namespace MWGui;
 
 WindowBase::WindowBase(std::string_view parLayout)
-  : Layout(parLayout)
+    : Layout(parLayout)
 {
     mMainWidget->setVisible(false);
 
@@ -41,7 +41,7 @@ void WindowBase::onTitleDoubleClicked()
         MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
 }
 
-void WindowBase::onDoubleClick(MyGUI::Widget *_sender)
+void WindowBase::onDoubleClick(MyGUI::Widget* _sender)
 {
     onTitleDoubleClicked();
 }
@@ -71,8 +71,8 @@ void WindowBase::center()
         layerSize = mMainWidget->getLayer()->getSize();
 
     MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (layerSize.width - coord.width)/2;
-    coord.top = (layerSize.height - coord.height)/2;
+    coord.left = (layerSize.width - coord.width) / 2;
+    coord.top = (layerSize.height - coord.height) / 2;
     mMainWidget->setCoord(coord);
 }
 
@@ -83,10 +83,10 @@ WindowModal::WindowModal(const std::string& parLayout)
 
 void WindowModal::onOpen()
 {
-    MWBase::Environment::get().getWindowManager()->addCurrentModal(this); //Set so we can escape it if needed
+    MWBase::Environment::get().getWindowManager()->addCurrentModal(this); // Set so we can escape it if needed
 
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-    MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
+    MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
     MyGUI::InputManager::getInstance().setKeyFocusWidget(focus);
 }
 
@@ -94,11 +94,13 @@ void WindowModal::onClose()
 {
     MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
 
-    MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
+    MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
 }
 
-NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)
-    : mWidget(widget), mDrag(drag), mTransparent(false)
+NoDrop::NoDrop(DragAndDrop* drag, MyGUI::Widget* widget)
+    : mWidget(widget)
+    , mDrag(drag)
+    , mTransparent(false)
 {
 }
 
@@ -124,12 +126,12 @@ void NoDrop::onFrame(float dt)
     if (mTransparent)
     {
         mWidget->setNeedMouseFocus(false); // Allow click-through
-        setAlpha(std::max(0.13f, mWidget->getAlpha() - dt*5));
+        setAlpha(std::max(0.13f, mWidget->getAlpha() - dt * 5));
     }
     else
     {
         mWidget->setNeedMouseFocus(true);
-        setAlpha(std::min(1.0f, mWidget->getAlpha() + dt*5));
+        setAlpha(std::min(1.0f, mWidget->getAlpha() + dt * 5));
     }
 }
 
@@ -140,14 +142,14 @@ void NoDrop::setAlpha(float alpha)
 }
 
 BookWindowBase::BookWindowBase(std::string_view parLayout)
-  : WindowBase(parLayout)
+    : WindowBase(parLayout)
 {
 }
 
 float BookWindowBase::adjustButton(std::string_view name)
 {
     Gui::ImageButton* button;
-    WindowBase::getWidget (button, name);
+    WindowBase::getWidget(button, name);
     MyGUI::IntSize requested = button->getRequestedSize();
     float scale = float(requested.height) / button->getSize().height;
     MyGUI::IntSize newSize = requested;
@@ -160,7 +162,7 @@ float BookWindowBase::adjustButton(std::string_view name)
         MyGUI::IntSize diff = (button->getSize() - requested);
         diff.width /= scale;
         diff.height /= scale;
-        button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
+        button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width, 0));
     }
 
     return scale;

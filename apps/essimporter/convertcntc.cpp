@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void convertCNTC(const CNTC &cntc, ESM::ContainerState &state)
+    void convertCNTC(const CNTC& cntc, ESM::ContainerState& state)
     {
         convertInventory(cntc.mInventory, state.mInventory);
     }

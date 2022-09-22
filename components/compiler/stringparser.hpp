@@ -14,45 +14,43 @@ namespace Compiler
 
     class StringParser : public Parser
     {
-            Literals& mLiterals;
-            std::vector<Interpreter::Type_Code> mCode;
-            bool mSmashCase;
-            TokenLoc mTokenLoc;
-            bool mDiscard;
+        Literals& mLiterals;
+        std::vector<Interpreter::Type_Code> mCode;
+        bool mSmashCase;
+        TokenLoc mTokenLoc;
+        bool mDiscard;
 
-        public:
+    public:
+        StringParser(ErrorHandler& errorHandler, const Context& context, Literals& literals);
 
-            StringParser (ErrorHandler& errorHandler, const Context& context, Literals& literals);
+        bool parseName(const std::string& name, const TokenLoc& loc, Scanner& scanner) override;
+        ///< Handle a name token.
+        /// \return fetch another token?
 
-            bool parseName (const std::string& name, const TokenLoc& loc,
-                Scanner& scanner) override;
-            ///< Handle a name token.
-            /// \return fetch another token?
+        bool parseKeyword(int keyword, const TokenLoc& loc, Scanner& scanner) override;
+        ///< Handle a keyword token.
+        /// \return fetch another token?
 
-            bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner) override;
-            ///< Handle a keyword token.
-            /// \return fetch another token?
+        bool parseInt(int value, const TokenLoc& loc, Scanner& scanner) override;
+        ///< Handle an int token.
+        /// \return fetch another token?
 
-            bool parseInt (int value, const TokenLoc& loc, Scanner& scanner) override;
-            ///< Handle an int token.
-            /// \return fetch another token?
+        void append(std::vector<Interpreter::Type_Code>& code);
+        ///< Append code for parsed string.
 
-            void append (std::vector<Interpreter::Type_Code>& code);
-            ///< Append code for parsed string.
+        void smashCase();
+        ///< Transform all scanned strings to lower case
 
-            void smashCase();
-            ///< Transform all scanned strings to lower case
+        void reset() override;
+        ///< Reset parser to clean state (this includes the smashCase function).
 
-            void reset() override;
-            ///< Reset parser to clean state (this includes the smashCase function).
+        /// Returns TokenLoc object for string. If no string has been parsed, the TokenLoc
+        /// object will be default initialised.
+        const TokenLoc& getTokenLoc() const;
 
-            /// Returns TokenLoc object for string. If no string has been parsed, the TokenLoc
-            /// object will be default initialised.
-            const TokenLoc& getTokenLoc() const;
-
-            /// If parsing a string, do not add it to the literal table and do not create code
-            /// for it.
-            void discard();
+        /// If parsing a string, do not add it to the literal table and do not create code
+        /// for it.
+        void discard();
     };
 }
 

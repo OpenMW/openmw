@@ -1,15 +1,15 @@
 #ifndef COMPONENTS_STD140_UBO_H
 #define COMPONENTS_STD140_UBO_H
 
+#include <osg/Matrixf>
 #include <osg/Vec2f>
 #include <osg/Vec4f>
-#include <osg/Matrixf>
 
 #include <cstdint>
-#include <tuple>
 #include <cstring>
 #include <string>
 #include <string_view>
+#include <tuple>
 
 namespace std140
 {
@@ -81,9 +81,10 @@ namespace std140
     class UBO
     {
     private:
-
-        template<typename T, typename... Args>
-        struct contains : std::bool_constant<(std::is_base_of_v<Args, T> || ...)> { };
+        template <typename T, typename... Args>
+        struct contains : std::bool_constant<(std::is_base_of_v<Args, T> || ...)>
+        {
+        };
 
         static_assert((contains<CArgs, Mat4, Vec4, Vec3, Vec2, Float, Int, UInt, Bool>() && ...));
 
@@ -100,15 +101,13 @@ namespace std140
         {
             bool found = false;
             std::size_t size = 0;
-            ((
-                found = found || std::is_same_v<T, CArgs>,
-                size += (found ? 0 : sizeof(typename CArgs::Value) + roundUpRemainder(size, CArgs::sAlign))
-            ) , ...);
+            ((found = found || std::is_same_v<T, CArgs>,
+                 size += (found ? 0 : sizeof(typename CArgs::Value) + roundUpRemainder(size, CArgs::sAlign))),
+                ...);
             return size + roundUpRemainder(size, T::sAlign);
         }
 
     public:
-
         static constexpr size_t getGPUSize()
         {
             std::size_t size = 0;
@@ -119,7 +118,8 @@ namespace std140
         static std::string getDefinition(const std::string& name)
         {
             std::string structDefinition = "struct " + name + " {\n";
-            ((structDefinition += ("    " + std::string(CArgs::sTypeName) + " " + std::string(CArgs::sName) + ";\n")), ...);
+            ((structDefinition += ("    " + std::string(CArgs::sTypeName) + " " + std::string(CArgs::sName) + ";\n")),
+                ...);
             return structDefinition + "};";
         }
 
@@ -140,19 +140,16 @@ namespace std140
 
         void copyTo(BufferType& buffer) const
         {
-            const auto copy = [&] (const auto& v) {
+            const auto copy = [&](const auto& v) {
                 static_assert(std::is_standard_layout_v<std::decay_t<decltype(v.mValue)>>);
                 constexpr std::size_t offset = getOffset<std::decay_t<decltype(v)>>();
                 std::memcpy(buffer.data() + offset, &v.mValue, sizeof(v.mValue));
             };
 
-            std::apply([&] (const auto& ... v) { (copy(v) , ...); }, mData);
+            std::apply([&](const auto&... v) { (copy(v), ...); }, mData);
         }
 
-        const auto& getData() const
-        {
-            return mData;
-        }
+        const auto& getData() const { return mData; }
 
     private:
         std::tuple<CArgs...> mData;

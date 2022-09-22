@@ -14,7 +14,7 @@
 namespace SceneUtil
 {
 
-    bool FindByNameVisitor::checkGroup(osg::Group &group)
+    bool FindByNameVisitor::checkGroup(osg::Group& group)
     {
         if (Misc::StringUtils::ciEqual(group.getName(), mNameToFind))
         {
@@ -24,7 +24,7 @@ namespace SceneUtil
         return false;
     }
 
-    void FindByClassVisitor::apply(osg::Node &node)
+    void FindByClassVisitor::apply(osg::Node& node)
     {
         if (Misc::StringUtils::ciEqual(node.className(), mNameToFind))
             mFoundNodes.push_back(&node);
@@ -32,21 +32,19 @@ namespace SceneUtil
         traverse(node);
     }
 
-    void FindByNameVisitor::apply(osg::Group &group)
+    void FindByNameVisitor::apply(osg::Group& group)
     {
         if (!mFoundNode && !checkGroup(group))
             traverse(group);
     }
 
-    void FindByNameVisitor::apply(osg::MatrixTransform &node)
+    void FindByNameVisitor::apply(osg::MatrixTransform& node)
     {
         if (!mFoundNode && !checkGroup(node))
             traverse(node);
     }
 
-    void FindByNameVisitor::apply(osg::Geometry&)
-    {
-    }
+    void FindByNameVisitor::apply(osg::Geometry&) {}
 
     void NodeMapVisitor::apply(osg::MatrixTransform& trans)
     {
@@ -55,7 +53,8 @@ namespace SceneUtil
         if (trans.libraryName() == std::string_view("osgAnimation"))
         {
             std::string nodeName = trans.getName();
-            // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses whitespace-separated names)
+            // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses
+            // whitespace-separated names)
             std::replace(nodeName.begin(), nodeName.end(), '_', ' ');
             mMap.emplace(nodeName, &trans);
         }
@@ -107,7 +106,7 @@ namespace SceneUtil
 
     void CleanObjectRootVisitor::applyDrawable(osg::Node& node)
     {
-        osg::NodePath::iterator parent = getNodePath().end()-2;
+        osg::NodePath::iterator parent = getNodePath().end() - 2;
         // We know that the parent is a Group because only Groups can have children.
         osg::Group* parentGroup = static_cast<osg::Group*>(*parent);
 
@@ -146,7 +145,7 @@ namespace SceneUtil
     {
         if (Misc::StringUtils::ciStartsWith(node.getName(), "tri bip"))
         {
-            osg::Group* parent = static_cast<osg::Group*>(*(getNodePath().end()-2));
+            osg::Group* parent = static_cast<osg::Group*>(*(getNodePath().end() - 2));
             // Not safe to remove in apply(), since the visitor is still iterating the child list
             mToRemove.emplace_back(&node, parent);
         }

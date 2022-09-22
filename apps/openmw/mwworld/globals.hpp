@@ -1,9 +1,9 @@
 #ifndef GAME_MWWORLD_GLOBALS_H
 #define GAME_MWWORLD_GLOBALS_H
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 #include <cstdint>
 
@@ -26,37 +26,34 @@ namespace MWWorld
 
     class Globals
     {
-        private:
+    private:
+        typedef std::map<std::string, ESM::Global> Collection;
 
-            typedef std::map<std::string, ESM::Global> Collection;
+        Collection mVariables; // type, value
 
-            Collection mVariables; // type, value
+        Collection::const_iterator find(std::string_view name) const;
 
-            Collection::const_iterator find (std::string_view name) const;
+        Collection::iterator find(std::string_view name);
 
-            Collection::iterator find (std::string_view name);
+    public:
+        const ESM::Variant& operator[](std::string_view name) const;
 
-        public:
+        ESM::Variant& operator[](std::string_view name);
 
-            const ESM::Variant& operator[] (std::string_view name) const;
+        char getType(std::string_view name) const;
+        ///< If there is no global variable with this name, ' ' is returned.
 
-            ESM::Variant& operator[] (std::string_view name);
+        void fill(const MWWorld::ESMStore& store);
+        ///< Replace variables with variables from \a store with default values.
 
-            char getType (std::string_view name) const;
-            ///< If there is no global variable with this name, ' ' is returned.
+        int countSavedGameRecords() const;
 
-            void fill (const MWWorld::ESMStore& store);
-            ///< Replace variables with variables from \a store with default values.
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            int countSavedGameRecords() const;
-
-            void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
-
-            bool readRecord (ESM::ESMReader& reader, uint32_t type);
-            ///< Records for variables that do not exist are dropped silently.
-            ///
-            /// \return Known type?
-
+        bool readRecord(ESM::ESMReader& reader, uint32_t type);
+        ///< Records for variables that do not exist are dropped silently.
+        ///
+        /// \return Known type?
     };
 }
 

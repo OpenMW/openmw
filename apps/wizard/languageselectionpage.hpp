@@ -11,12 +11,12 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        LanguageSelectionPage(QWidget *parent);
+        LanguageSelectionPage(QWidget* parent);
 
         int nextId() const override;
 
     private:
-        MainWizard *mWizard;
+        MainWizard* mWizard;
 
     protected:
         void initializePage() override;

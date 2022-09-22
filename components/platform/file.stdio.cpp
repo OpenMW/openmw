@@ -1,14 +1,15 @@
 #include "file.hpp"
 
+#include <cassert>
 #include <errno.h>
+#include <stdexcept>
 #include <string.h>
 #include <string>
-#include <stdexcept>
-#include <cassert>
 
 #include <components/files/conversion.hpp>
 
-namespace Platform::File {
+namespace Platform::File
+{
 
     static auto getNativeHandle(Handle handle)
     {
@@ -33,7 +34,8 @@ namespace Platform::File {
         FILE* handle = fopen(filename.c_str(), "rb");
         if (handle == nullptr)
         {
-            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename) + "' for reading: " + strerror(errno));
+            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename)
+                + "' for reading: " + strerror(errno));
         }
         return static_cast<Handle>(reinterpret_cast<intptr_t>(handle));
     }
@@ -57,7 +59,7 @@ namespace Platform::File {
     size_t size(Handle handle)
     {
         auto nativeHandle = getNativeHandle(handle);
-        
+
         const auto oldPos = tell(handle);
         seek(handle, 0, SeekType::End);
         const auto fileSize = tell(handle);
@@ -85,7 +87,8 @@ namespace Platform::File {
         int amount = fread(data, 1, size, nativeHandle);
         if (amount == 0 && ferror(nativeHandle))
         {
-            throw std::runtime_error(std::string("An attempt to read ") + std::to_string(size) + " bytes failed: " + strerror(errno));
+            throw std::runtime_error(
+                std::string("An attempt to read ") + std::to_string(size) + " bytes failed: " + strerror(errno));
         }
         return static_cast<size_t>(amount);
     }

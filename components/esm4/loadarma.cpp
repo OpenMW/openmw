@@ -36,7 +36,7 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
 
@@ -45,22 +45,34 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_MOD2: reader.getZString(mModelMale); break;
-            case ESM4::SUB_MOD3: reader.getZString(mModelFemale); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_MOD2:
+                reader.getZString(mModelMale);
+                break;
+            case ESM4::SUB_MOD3:
+                reader.getZString(mModelFemale);
+                break;
             case ESM4::SUB_MOD4:
             case ESM4::SUB_MOD5:
             {
                 std::string model;
                 reader.getZString(model);
 
-                //std::cout << mEditorId << " " << ESM::printName(subHdr.typeId) << " " << model << std::endl;
+                // std::cout << mEditorId << " " << ESM::printName(subHdr.typeId) << " " << model << std::endl;
 
                 break;
             }
-            case ESM4::SUB_NAM0: reader.getFormId(mTextureMale); break;
-            case ESM4::SUB_NAM1: reader.getFormId(mTextureFemale); break;
-            case ESM4::SUB_RNAM: reader.getFormId(mRacePrimary); break;
+            case ESM4::SUB_NAM0:
+                reader.getFormId(mTextureMale);
+                break;
+            case ESM4::SUB_NAM1:
+                reader.getFormId(mTextureFemale);
+                break;
+            case ESM4::SUB_RNAM:
+                reader.getFormId(mRacePrimary);
+                break;
             case ESM4::SUB_MODL:
             {
                 if ((esmVer == ESM::VER_094 || esmVer == ESM::VER_170) && subHdr.dataSize == 4) // TES5
@@ -119,7 +131,7 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
             case ESM4::SUB_MODD: // FO3 // FIXME: should group with MODL
             case ESM4::SUB_OBND: // FO3
             {
-                //std::cout << "ARMA " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "ARMA " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -129,10 +141,10 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::ArmorAddon::save(ESM4::Writer& writer) const
+// void ESM4::ArmorAddon::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::ArmorAddon::blank()
+// void ESM4::ArmorAddon::blank()
 //{
-//}
+// }

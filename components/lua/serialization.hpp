@@ -20,8 +20,8 @@ namespace LuaUtil
         // Returns false if this type of userdata is not supported by this serializer.
         virtual bool serialize(BinaryData&, const sol::userdata&) const = 0;
 
-        // Deserializes userdata of type "typeName" from binaryData. Should push the result on stack using sol::stack::push.
-        // Returns false if this type is not supported by this serializer.
+        // Deserializes userdata of type "typeName" from binaryData. Should push the result on stack using
+        // sol::stack::push. Returns false if this type is not supported by this serializer.
         virtual bool deserialize(std::string_view typeName, std::string_view binaryData, lua_State*) const = 0;
 
     protected:
@@ -38,8 +38,10 @@ namespace LuaUtil
     {
     public:
         BasicSerializer() = default;
-        explicit BasicSerializer(std::function<int(int)> adjustContentFileIndexFn) :
-            mAdjustContentFilesIndexFn(std::move(adjustContentFileIndexFn)) {}
+        explicit BasicSerializer(std::function<int(int)> adjustContentFileIndexFn)
+            : mAdjustContentFilesIndexFn(std::move(adjustContentFileIndexFn))
+        {
+        }
 
     private:
         bool serialize(LuaUtil::BinaryData& out, const sol::userdata& data) const override;
@@ -50,7 +52,7 @@ namespace LuaUtil
 
     BinaryData serialize(const sol::object&, const UserdataSerializer* customSerializer = nullptr);
     sol::object deserialize(lua_State* lua, std::string_view binaryData,
-                            const UserdataSerializer* customSerializer = nullptr, bool readOnly = false);
+        const UserdataSerializer* customSerializer = nullptr, bool readOnly = false);
 
 }
 

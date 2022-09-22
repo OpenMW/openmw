@@ -8,18 +8,18 @@
 namespace MWWorld
 {
     ActionAlchemy::ActionAlchemy(bool force)
-    : Action (false)
-    , mForce(force)
+        : Action(false)
+        , mForce(force)
     {
     }
 
-    void ActionAlchemy::executeImp (const Ptr& actor)
+    void ActionAlchemy::executeImp(const Ptr& actor)
     {
         if (actor != MWMechanics::getPlayer())
             return;
 
-        if(!mForce && MWMechanics::isPlayerInCombat())
-        { //Ensure we're not in combat
+        if (!mForce && MWMechanics::isPlayerInCombat())
+        { // Ensure we're not in combat
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage3}");
             return;
         }

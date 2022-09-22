@@ -2,9 +2,9 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/esm/luascripts.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/esm/luascripts.hpp>
 
 #include <components/lua/serialization.hpp>
 
@@ -21,7 +21,7 @@ namespace MWLua
     }
 
     void loadEvents(sol::state& lua, ESM::ESMReader& esm, GlobalEventQueue& globalEvents, LocalEventQueue& localEvents,
-                    const std::map<int, int>& contentFileMapping, const LuaUtil::UserdataSerializer* serializer)
+        const std::map<int, int>& contentFileMapping, const LuaUtil::UserdataSerializer* serializer)
     {
         while (esm.isNextSub("LUAE"))
         {
@@ -42,17 +42,17 @@ namespace MWLua
                 auto it = contentFileMapping.find(dest.mContentFile);
                 if (it != contentFileMapping.end())
                     dest.mContentFile = it->second;
-                localEvents.push_back({dest, std::move(name), std::move(data)});
+                localEvents.push_back({ dest, std::move(name), std::move(data) });
             }
             else
-                globalEvents.push_back({std::move(name), std::move(data)});
+                globalEvents.push_back({ std::move(name), std::move(data) });
         }
     }
 
     void saveEvents(ESM::ESMWriter& esm, const GlobalEventQueue& globalEvents, const LocalEventQueue& localEvents)
     {
         ObjectId globalId;
-        globalId.unset();  // Used as a marker of a global event.
+        globalId.unset(); // Used as a marker of a global event.
 
         for (const GlobalEvent& e : globalEvents)
             saveEvent(esm, globalId, e);

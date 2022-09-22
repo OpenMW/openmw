@@ -16,93 +16,89 @@ namespace Compiler
 
     class Parser
     {
-            ErrorHandler& mErrorHandler;
-            const Context& mContext;
-            bool mOptional;
-            bool mEmpty;
+        ErrorHandler& mErrorHandler;
+        const Context& mContext;
+        bool mOptional;
+        bool mEmpty;
 
-        protected:
+    protected:
+        [[noreturn]] void reportSeriousError(const std::string& message, const TokenLoc& loc);
+        ///< Report the error and throw a exception.
 
-            [[noreturn]] void reportSeriousError (const std::string& message, const TokenLoc& loc);
-            ///< Report the error and throw a exception.
+        void reportWarning(const std::string& message, const TokenLoc& loc);
+        ///< Report the warning without throwing an exception.
 
-            void reportWarning (const std::string& message, const TokenLoc& loc);
-            ///< Report the warning without throwing an exception.
+        [[noreturn]] void reportEOF();
+        ///< Report an unexpected EOF condition.
 
-            [[noreturn]] void reportEOF();
-            ///< Report an unexpected EOF condition.
+        ErrorHandler& getErrorHandler();
+        ///< Return error handler
 
-            ErrorHandler& getErrorHandler();
-            ///< Return error handler
+        const Context& getContext() const;
+        ///< Return context
 
-            const Context& getContext() const;
-            ///< Return context
+        static std::string toLower(const std::string& name);
 
-            static std::string toLower (const std::string& name);
+    public:
+        Parser(ErrorHandler& errorHandler, const Context& context);
+        ///< constructor
 
-        public:
+        virtual ~Parser();
+        ///< destructor
 
-            Parser (ErrorHandler& errorHandler, const Context& context);
-            ///< constructor
+        virtual bool parseInt(int value, const TokenLoc& loc, Scanner& scanner);
+        ///< Handle an int token.
+        /// \return fetch another token?
+        ///
+        /// - Default-implementation: Report an error.
 
-            virtual ~Parser();
-            ///< destructor
+        virtual bool parseFloat(float value, const TokenLoc& loc, Scanner& scanner);
+        ///< Handle a float token.
+        /// \return fetch another token?
+        ///
+        /// - Default-implementation: Report an error.
 
-            virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
-            ///< Handle an int token.
-            /// \return fetch another token?
-            ///
-            /// - Default-implementation: Report an error.
+        virtual bool parseName(const std::string& name, const TokenLoc& loc, Scanner& scanner);
+        ///< Handle a name token.
+        /// \return fetch another token?
+        ///
+        /// - Default-implementation: Report an error.
 
-            virtual bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner);
-            ///< Handle a float token.
-            /// \return fetch another token?
-            ///
-            /// - Default-implementation: Report an error.
+        virtual bool parseKeyword(int keyword, const TokenLoc& loc, Scanner& scanner);
+        ///< Handle a keyword token.
+        /// \return fetch another token?
+        ///
+        /// - Default-implementation: Report an error.
 
-            virtual bool parseName (const std::string& name, const TokenLoc& loc,
-                Scanner& scanner);
-            ///< Handle a name token.
-            /// \return fetch another token?
-            ///
-            /// - Default-implementation: Report an error.
+        virtual bool parseSpecial(int code, const TokenLoc& loc, Scanner& scanner);
+        ///< Handle a special character token.
+        /// \return fetch another token?
+        ///
+        /// - Default-implementation: Report an error.
 
-            virtual bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner);
-            ///< Handle a keyword token.
-            /// \return fetch another token?
-            ///
-            /// - Default-implementation: Report an error.
+        virtual bool parseComment(const std::string& comment, const TokenLoc& loc, Scanner& scanner);
+        ///< Handle comment token.
+        /// \return fetch another token?
+        ///
+        /// - Default-implementation: ignored (and return true).
 
-            virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
-            ///< Handle a special character token.
-            /// \return fetch another token?
-            ///
-            /// - Default-implementation: Report an error.
+        virtual void parseEOF(Scanner& scanner);
+        ///< Handle EOF token.
+        ///
+        /// - Default-implementation: Report an error.
 
-            virtual bool parseComment (const std::string& comment, const TokenLoc& loc,
-                Scanner& scanner);
-            ///< Handle comment token.
-            /// \return fetch another token?
-            ///
-            /// - Default-implementation: ignored (and return true).
+        virtual void reset();
+        ///< Reset parser to clean state.
 
-            virtual void parseEOF (Scanner& scanner);
-            ///< Handle EOF token.
-            ///
-            /// - Default-implementation: Report an error.
+        void setOptional(bool optional);
+        ///< Optional mode: If nothign has been parsed yet and an unexpected token is delivered, stop
+        /// parsing without raising an exception (after a reset the parser is in non-optional mode).
 
-            virtual void reset();
-            ///< Reset parser to clean state.
+        void start();
+        ///< Mark parser as non-empty (at least one token has been parser).
 
-            void setOptional (bool optional);
-            ///< Optional mode: If nothign has been parsed yet and an unexpected token is delivered, stop
-            /// parsing without raising an exception (after a reset the parser is in non-optional mode).
-
-            void start();
-            ///< Mark parser as non-empty (at least one token has been parser).
-
-            bool isEmpty() const;
-            ///< Has anything been parsed?
+        bool isEmpty() const;
+        ///< Has anything been parsed?
     };
 }
 

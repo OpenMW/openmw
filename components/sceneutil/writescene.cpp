@@ -1,14 +1,13 @@
 #include "writescene.hpp"
 
-#include <stdexcept>
 #include <fstream>
+#include <stdexcept>
 
 #include <osgDB/Registry>
 
-
 #include "serialize.hpp"
 
-void SceneUtil::writeScene(osg::Node *node, const std::filesystem::path& filename, const std::string& format)
+void SceneUtil::writeScene(osg::Node* node, const std::filesystem::path& filename, const std::string& format)
 {
     registerSerializers();
 

@@ -1,9 +1,9 @@
 #include "scriptmanagerimp.hpp"
 
-#include <cassert>
-#include <sstream>
-#include <exception>
 #include <algorithm>
+#include <cassert>
+#include <exception>
+#include <sstream>
 
 #include <components/debug/debuglog.hpp>
 
@@ -11,10 +11,10 @@
 
 #include <components/misc/strings/lower.hpp>
 
-#include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>
 #include <components/compiler/exception.hpp>
 #include <components/compiler/quickfileparser.hpp>
+#include <components/compiler/scanner.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -23,20 +23,22 @@
 
 namespace MWScript
 {
-    ScriptManager::ScriptManager (const MWWorld::ESMStore& store,
-        Compiler::Context& compilerContext, int warningsMode,
+    ScriptManager::ScriptManager(const MWWorld::ESMStore& store, Compiler::Context& compilerContext, int warningsMode,
         const std::vector<std::string>& scriptBlacklist)
-    : mErrorHandler(), mStore (store),
-      mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
-      mOpcodesInstalled (false), mGlobalScripts (store)
+        : mErrorHandler()
+        , mStore(store)
+        , mCompilerContext(compilerContext)
+        , mParser(mErrorHandler, mCompilerContext)
+        , mOpcodesInstalled(false)
+        , mGlobalScripts(store)
     {
-        mErrorHandler.setWarningsMode (warningsMode);
+        mErrorHandler.setWarningsMode(warningsMode);
 
-        mScriptBlacklist.resize (scriptBlacklist.size());
+        mScriptBlacklist.resize(scriptBlacklist.size());
 
-        std::transform (scriptBlacklist.begin(), scriptBlacklist.end(),
-            mScriptBlacklist.begin(), [](const std::string& s) { return Misc::StringUtils::lowerCase(s); });
-        std::sort (mScriptBlacklist.begin(), mScriptBlacklist.end());
+        std::transform(scriptBlacklist.begin(), scriptBlacklist.end(), mScriptBlacklist.begin(),
+            [](const std::string& s) { return Misc::StringUtils::lowerCase(s); });
+        std::sort(mScriptBlacklist.begin(), mScriptBlacklist.end());
     }
 
     bool ScriptManager::compile(std::string_view name)
@@ -44,18 +46,18 @@ namespace MWScript
         mParser.reset();
         mErrorHandler.reset();
 
-        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+        if (const ESM::Script* script = mStore.get<ESM::Script>().find(name))
         {
             mErrorHandler.setContext(script->mId);
 
             bool Success = true;
             try
             {
-                std::istringstream input (script->mScriptText);
+                std::istringstream input(script->mScriptText);
 
-                Compiler::Scanner scanner (mErrorHandler, input, mCompilerContext.getExtensions());
+                Compiler::Scanner scanner(mErrorHandler, input, mCompilerContext.getExtensions());
 
-                scanner.scan (mParser);
+                scanner.scan(mParser);
 
                 if (!mErrorHandler.isGood())
                     Success = false;
@@ -94,9 +96,9 @@ namespace MWScript
         // compile script
         auto iter = mScripts.find(name);
 
-        if (iter==mScripts.end())
+        if (iter == mScripts.end())
         {
-            if (!compile (name))
+            if (!compile(name))
             {
                 // failed -> ignore script from now on.
                 std::vector<Interpreter::Type_Code> empty;
@@ -104,8 +106,8 @@ namespace MWScript
                 return false;
             }
 
-            iter = mScripts.find (name);
-            assert (iter!=mScripts.end());
+            iter = mScripts.find(name);
+            assert(iter != mScripts.end());
         }
 
         // execute script
@@ -115,20 +117,20 @@ namespace MWScript
             {
                 if (!mOpcodesInstalled)
                 {
-                    installOpcodes (mInterpreter);
+                    installOpcodes(mInterpreter);
                     mOpcodesInstalled = true;
                 }
 
-                mInterpreter.run (&iter->second.mByteCode[0], iter->second.mByteCode.size(), interpreterContext);
+                mInterpreter.run(&iter->second.mByteCode[0], iter->second.mByteCode.size(), interpreterContext);
                 return true;
             }
             catch (const MissingImplicitRefError& e)
             {
-                Log(Debug::Error) << "Execution of script " << name << " failed: "  << e.what();
+                Log(Debug::Error) << "Execution of script " << name << " failed: " << e.what();
             }
             catch (const std::exception& e)
             {
-                Log(Debug::Error) << "Execution of script " << name << " failed: "  << e.what();
+                Log(Debug::Error) << "Execution of script " << name << " failed: " << e.what();
 
                 iter->second.mInactive.insert(target); // don't execute again.
             }
@@ -152,8 +154,8 @@ namespace MWScript
 
         for (auto& script : mStore.get<ESM::Script>())
         {
-            if (!std::binary_search (mScriptBlacklist.begin(), mScriptBlacklist.end(),
-                Misc::StringUtils::lowerCase(script.mId)))
+            if (!std::binary_search(
+                    mScriptBlacklist.begin(), mScriptBlacklist.end(), Misc::StringUtils::lowerCase(script.mId)))
             {
                 ++count;
 
@@ -162,7 +164,7 @@ namespace MWScript
             }
         }
 
-        return std::make_pair (count, success);
+        return std::make_pair(count, success);
     }
 
     const Compiler::Locals& ScriptManager::getLocals(std::string_view name)
@@ -170,14 +172,14 @@ namespace MWScript
         {
             auto iter = mScripts.find(name);
 
-            if (iter!=mScripts.end())
+            if (iter != mScripts.end())
                 return iter->second.mLocals;
         }
 
         {
             auto iter = mOtherLocals.find(name);
 
-            if (iter!=mOtherLocals.end())
+            if (iter != mOtherLocals.end())
                 return iter->second;
         }
 
@@ -185,14 +187,14 @@ namespace MWScript
         {
             Compiler::Locals locals;
 
-            const Compiler::ContextOverride override(mErrorHandler, std::string{name} + "[local variables]");
+            const Compiler::ContextOverride override(mErrorHandler, std::string{ name } + "[local variables]");
 
-            std::istringstream stream (script->mScriptText);
-            Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);
-            Compiler::Scanner scanner (mErrorHandler, stream, mCompilerContext.getExtensions());
+            std::istringstream stream(script->mScriptText);
+            Compiler::QuickFileParser parser(mErrorHandler, mCompilerContext, locals);
+            Compiler::Scanner scanner(mErrorHandler, stream, mCompilerContext.getExtensions());
             try
             {
-                scanner.scan (parser);
+                scanner.scan(parser);
             }
             catch (const Compiler::SourceException&)
             {
@@ -210,7 +212,7 @@ namespace MWScript
             return iter->second;
         }
 
-        throw std::logic_error("script " + std::string{name} + " does not exist");
+        throw std::logic_error("script " + std::string{ name } + " does not exist");
     }
 
     GlobalScripts& ScriptManager::getGlobalScripts()

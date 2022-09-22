@@ -36,8 +36,7 @@ namespace CSVWorld
         insertBeforeButtons(mIndexBox, true);
 
         connect(mNameEdit, &QLineEdit::textChanged, this, &LandTextureCreator::nameChanged);
-        connect(mIndexBox, qOverload<int>(&QSpinBox::valueChanged),
-                this, &LandTextureCreator::indexChanged);
+        connect(mIndexBox, qOverload<int>(&QSpinBox::valueChanged), this, &LandTextureCreator::indexChanged);
     }
 
     void LandTextureCreator::cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type)

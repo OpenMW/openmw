@@ -1,22 +1,22 @@
 #include "alchemywindow.hpp"
 
-#include <MyGUI_Gui.h>
 #include <MyGUI_Button.h>
-#include <MyGUI_EditBox.h>
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ControllerRepeatClick.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_Gui.h>
 
-#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwmechanics/magiceffects.hpp"
-#include "../mwmechanics/alchemy.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/alchemy.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -24,9 +24,9 @@
 #include <MyGUI_Macros.h>
 
 #include "inventoryitemmodel.hpp"
-#include "sortfilteritemmodel.hpp"
 #include "itemview.hpp"
 #include "itemwidget.hpp"
+#include "sortfilteritemmodel.hpp"
 #include "ustring.hpp"
 #include "widgets.hpp"
 
@@ -38,8 +38,8 @@ namespace MWGui
         , mModel(nullptr)
         , mSortModel(nullptr)
         , mAlchemy(std::make_unique<MWMechanics::Alchemy>())
-        , mApparatus (4)
-        , mIngredients (4)
+        , mApparatus(4)
+        , mIngredients(4)
     {
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
@@ -112,35 +112,36 @@ namespace MWGui
     void AlchemyWindow::createPotions(int count)
     {
         MWMechanics::Alchemy::Result result = mAlchemy->create(mNameEdit->getCaption(), count);
-        MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
 
         switch (result)
         {
-        case MWMechanics::Alchemy::Result_NoName:
-            winMgr->messageBox("#{sNotifyMessage37}");
-            break;
-        case MWMechanics::Alchemy::Result_NoMortarAndPestle:
-            winMgr->messageBox("#{sNotifyMessage45}");
-            break;
-        case MWMechanics::Alchemy::Result_LessThanTwoIngredients:
-            winMgr->messageBox("#{sNotifyMessage6a}");
-            break;
-        case MWMechanics::Alchemy::Result_Success:
-            winMgr->playSound("potion success");
-            if (count == 1)
-                winMgr->messageBox("#{sPotionSuccess}");
-            else
-                winMgr->messageBox("#{sPotionSuccess} "+mNameEdit->getCaption().asUTF8()+" ("+std::to_string(count)+")");
-            break;
-        case MWMechanics::Alchemy::Result_NoEffects:
-        case MWMechanics::Alchemy::Result_RandomFailure:
-            winMgr->messageBox("#{sNotifyMessage8}");
-            winMgr->playSound("potion fail");
-            break;
+            case MWMechanics::Alchemy::Result_NoName:
+                winMgr->messageBox("#{sNotifyMessage37}");
+                break;
+            case MWMechanics::Alchemy::Result_NoMortarAndPestle:
+                winMgr->messageBox("#{sNotifyMessage45}");
+                break;
+            case MWMechanics::Alchemy::Result_LessThanTwoIngredients:
+                winMgr->messageBox("#{sNotifyMessage6a}");
+                break;
+            case MWMechanics::Alchemy::Result_Success:
+                winMgr->playSound("potion success");
+                if (count == 1)
+                    winMgr->messageBox("#{sPotionSuccess}");
+                else
+                    winMgr->messageBox(
+                        "#{sPotionSuccess} " + mNameEdit->getCaption().asUTF8() + " (" + std::to_string(count) + ")");
+                break;
+            case MWMechanics::Alchemy::Result_NoEffects:
+            case MWMechanics::Alchemy::Result_RandomFailure:
+                winMgr->messageBox("#{sNotifyMessage8}");
+                winMgr->playSound("potion fail");
+                break;
         }
 
         // remove ingredient slots that have been fully used up
-        for (int i=0; i<4; ++i)
+        for (int i = 0; i < 4; ++i)
             if (mIngredients[i]->isUserString("ToolTipType"))
             {
                 MWWorld::Ptr ingred = *mIngredients[i]->getUserData<MWWorld::Ptr>();
@@ -170,7 +171,7 @@ namespace MWGui
     {
         auto const& wm = MWBase::Environment::get().getWindowManager();
         MyGUI::UString ingredient = toUString(wm->getGameSettingString("sIngredients", "Ingredients"));
-        auto *button = _sender->castType<MyGUI::Button>();
+        auto* button = _sender->castType<MyGUI::Button>();
 
         if (button->getCaption() == ingredient)
         {
@@ -200,7 +201,7 @@ namespace MWGui
 
             itemNames.emplace(item.getClass().getName(item));
 
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             auto const alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
 
             auto const effects = MWMechanics::Alchemy::effectsDescription(item, alchemySkill);
@@ -208,15 +209,18 @@ namespace MWGui
         }
 
         mFilterValue->removeAllItems();
-        auto const addItems = [&](auto const& container)
-        {
+        auto const addItems = [&](auto const& container) {
             for (auto const& item : container)
                 mFilterValue->addItem(item);
         };
         switch (mCurrentFilter)
         {
-            case FilterType::ByName: addItems(itemNames); break;
-            case FilterType::ByEffect: addItems(itemEffects); break;
+            case FilterType::ByName:
+                addItems(itemNames);
+                break;
+            case FilterType::ByEffect:
+                addItems(itemEffects);
+                break;
         }
     }
 
@@ -224,8 +228,12 @@ namespace MWGui
     {
         switch (mCurrentFilter)
         {
-            case FilterType::ByName: mSortModel->setNameFilter(filter); break;
-            case FilterType::ByEffect: mSortModel->setEffectFilter(filter); break;
+            case FilterType::ByName:
+                mSortModel->setNameFilter(filter);
+                break;
+            case FilterType::ByEffect:
+                mSortModel->setEffectFilter(filter);
+                break;
         }
         mItemView->update();
     }
@@ -246,7 +254,7 @@ namespace MWGui
     void AlchemyWindow::onOpen()
     {
         mAlchemy->clear();
-        mAlchemy->setAlchemist (MWMechanics::getPlayer());
+        mAlchemy->setAlchemist(MWMechanics::getPlayer());
 
         auto model = std::make_unique<InventoryItemModel>(MWMechanics::getPlayer());
         mModel = model.get();
@@ -260,15 +268,15 @@ namespace MWGui
         mBrewCountEdit->setValue(1);
 
         int index = 0;
-        for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy->beginTools());
-            iter!=mAlchemy->endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)
+        for (MWMechanics::Alchemy::TToolsIterator iter(mAlchemy->beginTools());
+             iter != mAlchemy->endTools() && index < static_cast<int>(mApparatus.size()); ++iter, ++index)
         {
-            mApparatus.at (index)->setItem(*iter);
-            mApparatus.at (index)->clearUserStrings();
+            mApparatus.at(index)->setItem(*iter);
+            mApparatus.at(index)->clearUserStrings();
             if (!iter->isEmpty())
             {
-                mApparatus.at (index)->setUserString ("ToolTipType", "ItemPtr");
-                mApparatus.at (index)->setUserData (MWWorld::Ptr(*iter));
+                mApparatus.at(index)->setUserString("ToolTipType", "ItemPtr");
+                mApparatus.at(index)->setUserData(MWWorld::Ptr(*iter));
             }
         }
 
@@ -307,13 +315,13 @@ namespace MWGui
 
         mSortModel->clearDragItems();
 
-        MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy->beginIngredients ();
-        for (int i=0; i<4; ++i)
+        MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy->beginIngredients();
+        for (int i = 0; i < 4; ++i)
         {
             ItemWidget* ingredient = mIngredients[i];
 
             MWWorld::Ptr item;
-            if (it != mAlchemy->endIngredients ())
+            if (it != mAlchemy->endIngredients())
             {
                 item = *it;
                 ++it;
@@ -325,11 +333,11 @@ namespace MWGui
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
 
-            ingredient->clearUserStrings ();
+            ingredient->clearUserStrings();
 
             ingredient->setItem(item);
 
-            if (item.isEmpty ())
+            if (item.isEmpty())
                 continue;
 
             ingredient->setUserString("ToolTipType", "ItemPtr");
@@ -342,12 +350,13 @@ namespace MWGui
 
         std::set<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
         Widgets::SpellEffectList list;
-        unsigned int effectIndex=0;
+        unsigned int effectIndex = 0;
         for (const MWMechanics::EffectKey& effectKey : effectIds)
         {
             Widgets::SpellEffectParams params;
             params.mEffectID = effectKey.mId;
-            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectKey.mId);
+            const ESM::MagicEffect* magicEffect
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectKey.mId);
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
                 params.mSkill = effectKey.mArg;
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
@@ -366,8 +375,8 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mEffectsBox->getChildAt(0));
 
         MyGUI::IntCoord coord(0, 0, mEffectsBox->getWidth(), 24);
-        Widgets::MWEffectListPtr effectsWidget = mEffectsBox->createWidget<Widgets::MWEffectList>
-            ("MW_StatName", coord, MyGUI::Align::Left | MyGUI::Align::Top);
+        Widgets::MWEffectListPtr effectsWidget = mEffectsBox->createWidget<Widgets::MWEffectList>(
+            "MW_StatName", coord, MyGUI::Align::Left | MyGUI::Align::Top);
 
         effectsWidget->setEffectList(list);
 
@@ -378,16 +387,17 @@ namespace MWGui
 
     void AlchemyWindow::removeIngredient(MyGUI::Widget* ingredient)
     {
-        for (int i=0; i<4; ++i)
+        for (int i = 0; i < 4; ++i)
             if (mIngredients[i] == ingredient)
-                mAlchemy->removeIngredient (i);
+                mAlchemy->removeIngredient(i);
 
         update();
     }
 
-    void AlchemyWindow::addRepeatController(MyGUI::Widget *widget)
+    void AlchemyWindow::addRepeatController(MyGUI::Widget* widget)
     {
-        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MyGUI::ControllerRepeatClick::getClassTypeName());
+        MyGUI::ControllerItem* item
+            = MyGUI::ControllerManager::getInstance().createItem(MyGUI::ControllerRepeatClick::getClassTypeName());
         MyGUI::ControllerRepeatClick* controller = static_cast<MyGUI::ControllerRepeatClick*>(item);
         controller->eventRepeatClick += newDelegate(this, &AlchemyWindow::onRepeatClick);
         MyGUI::ControllerManager::getInstance().addItem(widget, controller);
@@ -413,7 +423,7 @@ namespace MWGui
             onDecreaseButtonTriggered();
     }
 
-    void AlchemyWindow::onCountButtonReleased(MyGUI::Widget *_sender, int _left, int _top, MyGUI::MouseButton _id)
+    void AlchemyWindow::onCountButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
     {
         MyGUI::ControllerManager::getInstance().removeItem(_sender);
     }
@@ -431,13 +441,13 @@ namespace MWGui
         if (currentCount == std::numeric_limits<int>::max())
             return;
 
-        mBrewCountEdit->setValue(currentCount+1);
+        mBrewCountEdit->setValue(currentCount + 1);
     }
 
     void AlchemyWindow::onDecreaseButtonTriggered()
     {
         int currentCount = mBrewCountEdit->getValue();
         if (currentCount > 1)
-            mBrewCountEdit->setValue(currentCount-1);
+            mBrewCountEdit->setValue(currentCount - 1);
     }
 }

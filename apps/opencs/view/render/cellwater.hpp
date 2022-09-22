@@ -5,8 +5,8 @@
 
 #include <osg/ref_ptr>
 
-#include <QObject>
 #include <QModelIndex>
+#include <QObject>
 
 #include "../../model/world/record.hpp"
 
@@ -30,41 +30,39 @@ namespace CSVRender
     /// adds a large patch of water much larger than the typical size of a cell.
     class CellWater : public QObject
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        CellWater(CSMWorld::Data& data, osg::Group* cellNode, const std::string& id,
+            const CSMWorld::CellCoordinates& cellCoords);
 
-            CellWater(CSMWorld::Data& data, osg::Group* cellNode, const std::string& id,
-                const CSMWorld::CellCoordinates& cellCoords);
+        ~CellWater();
 
-            ~CellWater();
+        void updateCellData(const CSMWorld::Record<CSMWorld::Cell>& cellRecord);
 
-            void updateCellData(const CSMWorld::Record<CSMWorld::Cell>& cellRecord);
+        void reloadAssets();
 
-            void reloadAssets();
+    private slots:
 
-        private slots:
+        void cellDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void cellDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+    private:
+        void recreate();
 
-        private:
+        static const int CellSize;
 
-            void recreate();
+        CSMWorld::Data& mData;
+        std::string mId;
 
-            static const int CellSize;
+        osg::Group* mParentNode;
 
-            CSMWorld::Data& mData;
-            std::string mId;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mWaterTransform;
+        osg::ref_ptr<osg::Group> mWaterGroup;
+        osg::ref_ptr<osg::Geometry> mWaterGeometry;
 
-            osg::Group* mParentNode;
-
-            osg::ref_ptr<osg::PositionAttitudeTransform> mWaterTransform;
-            osg::ref_ptr<osg::Group> mWaterGroup;
-            osg::ref_ptr<osg::Geometry> mWaterGeometry;
-
-            bool mDeleted;
-            bool mExterior;
-            bool mHasWater;
+        bool mDeleted;
+        bool mExterior;
+        bool mHasWater;
     };
 }
 

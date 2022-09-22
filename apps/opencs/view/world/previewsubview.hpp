@@ -17,22 +17,21 @@ namespace CSVWorld
 {
     class PreviewSubView : public CSVDoc::SubView
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSVRender::PreviewWidget *mScene;
-            std::string mTitle;
+        CSVRender::PreviewWidget* mScene;
+        std::string mTitle;
 
-        public:
+    public:
+        PreviewSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
+        void setEditLock(bool locked) override;
 
-            void setEditLock (bool locked) override;
+        std::string getTitle() const override;
 
-            std::string getTitle() const override;
+    private slots:
 
-        private slots:
-
-            void referenceableIdChanged (const std::string& id);
+        void referenceableIdChanged(const std::string& id);
     };
 }
 

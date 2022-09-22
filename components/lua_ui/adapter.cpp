@@ -2,8 +2,8 @@
 
 #include <MyGUI_Gui.h>
 
-#include "element.hpp"
 #include "container.hpp"
+#include "element.hpp"
 
 namespace LuaUi
 {
@@ -19,10 +19,7 @@ namespace LuaUi
         mContainer = MyGUI::Gui::getInstancePtr()->createWidget<LuaContainer>(
             "", MyGUI::IntCoord(), MyGUI::Align::Default, "", "");
         mContainer->initialize(luaState, mContainer);
-        mContainer->onCoordChange([this](WidgetExtension* ext, MyGUI::IntCoord coord)
-        {
-            setSize(coord.size());
-        });
+        mContainer->onCoordChange([this](WidgetExtension* ext, MyGUI::IntCoord coord) { setSize(coord.size()); });
         mContainer->widget()->attachToWidget(this);
     }
 
@@ -58,4 +55,3 @@ namespace LuaUi
         mElement = nullptr;
     }
 }
-

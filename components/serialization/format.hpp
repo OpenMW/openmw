@@ -3,11 +3,11 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <cstdint>
 
 namespace Serialization
 {
@@ -18,13 +18,19 @@ namespace Serialization
     };
 
     template <class>
-    struct IsContiguousContainer : std::false_type {};
+    struct IsContiguousContainer : std::false_type
+    {
+    };
 
-    template <class ... Args>
-    struct IsContiguousContainer<std::vector<Args ...>> : std::true_type {};
+    template <class... Args>
+    struct IsContiguousContainer<std::vector<Args...>> : std::true_type
+    {
+    };
 
     template <class T, std::size_t n>
-    struct IsContiguousContainer<std::array<T, n>> : std::true_type {};
+    struct IsContiguousContainer<std::array<T, n>> : std::true_type
+    {
+    };
 
     template <class T>
     inline constexpr bool isContiguousContainer = IsContiguousContainer<std::decay_t<T>>::value;
@@ -38,18 +44,17 @@ namespace Serialization
             if constexpr (std::is_arithmetic_v<T> || std::is_enum_v<T>)
                 visitor(self(), data, size);
             else
-                std::for_each(data, data + size, [&] (auto& v) { visitor(self(), v); });
+                std::for_each(data, data + size, [&](auto& v) { visitor(self(), v); });
         }
 
         template <class Visitor, class T, std::size_t size>
-        void operator()(Visitor&& visitor, T(& data)[size]) const
+        void operator()(Visitor&& visitor, T (&data)[size]) const
         {
             self()(std::forward<Visitor>(visitor), data, size);
         }
 
         template <class Visitor, class T>
-        auto operator()(Visitor&& visitor, T&& value) const
-            -> std::enable_if_t<isContiguousContainer<T>>
+        auto operator()(Visitor&& visitor, T&& value) const -> std::enable_if_t<isContiguousContainer<T>>
         {
             if constexpr (mode == Mode::Write)
                 visitor(self(), static_cast<std::uint64_t>(value.size()));

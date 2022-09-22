@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Probe::load(ESMReader &esm, bool &isDeleted)
+    void Probe::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -53,7 +53,7 @@ namespace ESM
             esm.fail("Missing PBDT subrecord");
     }
 
-    void Probe::save(ESMWriter &esm, bool isDeleted) const
+    void Probe::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

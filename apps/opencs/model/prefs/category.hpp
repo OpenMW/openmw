@@ -11,34 +11,31 @@ namespace CSMPrefs
 
     class Category
     {
-        public:
+    public:
+        typedef std::vector<Setting*> Container;
+        typedef Container::iterator Iterator;
 
-            typedef std::vector<Setting *> Container;
-            typedef Container::iterator Iterator;
+    private:
+        State* mParent;
+        std::string mKey;
+        Container mSettings;
 
-        private:
+    public:
+        Category(State* parent, const std::string& key);
 
-            State *mParent;
-            std::string mKey;
-            Container mSettings;
+        const std::string& getKey() const;
 
-        public:
+        State* getState() const;
 
-            Category (State *parent, const std::string& key);
+        void addSetting(Setting* setting);
 
-            const std::string& getKey() const;
+        Iterator begin();
 
-            State *getState() const;
+        Iterator end();
 
-            void addSetting (Setting *setting);
+        Setting& operator[](const std::string& key);
 
-            Iterator begin();
-
-            Iterator end();
-
-            Setting& operator[] (const std::string& key);
-
-            void update();
+        void update();
     };
 }
 

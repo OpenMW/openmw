@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESM_SPELLLIST_H
 #define OPENMW_ESM_SPELLLIST_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace ESM
 {
@@ -21,11 +21,10 @@ namespace ESM
         bool exists(const std::string& spell) const;
 
         /// Load one spell, assumes the subrecord name was already read
-        void add(ESMReader &esm);
+        void add(ESMReader& esm);
 
-        void save(ESMWriter &esm) const;
+        void save(ESMWriter& esm) const;
     };
 }
 
 #endif
-

@@ -27,7 +27,7 @@ namespace Misc::Rng
     /// return value in range [0.0f, 1.0f)  <- note open upper range.
     float rollProbability();
     float rollProbability(Generator& prng);
-  
+
     /// return value in range [0.0f, 1.0f]  <- note closed upper range.
     float rollClosedProbability();
     float rollClosedProbability(Generator& prng);
@@ -37,8 +37,14 @@ namespace Misc::Rng
     int rollDice(int max, Generator& prng);
 
     /// return value in range [0, 99]
-    inline int roll0to99(Generator& prng) { return rollDice(100, prng); }
-    inline int roll0to99() { return rollDice(100); }
+    inline int roll0to99(Generator& prng)
+    {
+        return rollDice(100, prng);
+    }
+    inline int roll0to99()
+    {
+        return rollDice(100);
+    }
 
     float deviate(float mean, float deviation);
     float deviate(float mean, float deviation, Generator& prng);

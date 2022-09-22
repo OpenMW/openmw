@@ -26,9 +26,9 @@
 */
 #include "loadinfo.hpp"
 
-#include <stdexcept>
 #include <cstring>
 #include <iostream> // FIXME: for debugging only
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -37,7 +37,7 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     mEditorId = formIdToString(mFormId); // FIXME: quick workaround to use existing code
 
@@ -49,8 +49,12 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_QSTI: reader.getFormId(mQuest); break; // FormId quest id
-            case ESM4::SUB_SNDD: reader.getFormId(mSound); break; // FO3 (not used in FONV?)
+            case ESM4::SUB_QSTI:
+                reader.getFormId(mQuest);
+                break; // FormId quest id
+            case ESM4::SUB_SNDD:
+                reader.getFormId(mSound);
+                break; // FO3 (not used in FONV?)
             case ESM4::SUB_TRDT:
             {
                 if (subHdr.dataSize == 16) // TES4
@@ -66,9 +70,15 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_NAM1: reader.getZString(mResponse); break; // response text
-            case ESM4::SUB_NAM2: reader.getZString(mNotes); break; // actor notes
-            case ESM4::SUB_NAM3: reader.getZString(mEdits); break; // not in TES4
+            case ESM4::SUB_NAM1:
+                reader.getZString(mResponse);
+                break; // response text
+            case ESM4::SUB_NAM2:
+                reader.getZString(mNotes);
+                break; // actor notes
+            case ESM4::SUB_NAM3:
+                reader.getZString(mEdits);
+                break; // not in TES4
             case ESM4::SUB_CTDA: // FIXME: how to detect if 1st/2nd param is a formid?
             {
                 if (subHdr.dataSize == 24) // TES4
@@ -104,9 +114,15 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_SCDA: reader.skipSubRecordData(); break; // compiled script data
-            case ESM4::SUB_SCTX: reader.getString(mScript.scriptSource); break;
-            case ESM4::SUB_SCRO: reader.getFormId(mScript.globReference); break;
+            case ESM4::SUB_SCDA:
+                reader.skipSubRecordData();
+                break; // compiled script data
+            case ESM4::SUB_SCTX:
+                reader.getString(mScript.scriptSource);
+                break;
+            case ESM4::SUB_SCRO:
+                reader.getFormId(mScript.globReference);
+                break;
             case ESM4::SUB_SLSD:
             {
                 localVar.clear();
@@ -180,24 +196,23 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
             case ESM4::SUB_QNAM: // TES5 for mScript
             case ESM4::SUB_RNAM: // TES5
             {
-                //std::cout << "INFO " << ESM::printName(subHdr.typeId) << " skipping..."
-                        //<< subHdr.dataSize << std::endl;
+                // std::cout << "INFO " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
             default:
-                std::cout << "INFO " << ESM::printName(subHdr.typeId) << " skipping..."
-                        << subHdr.dataSize << std::endl;
+                std::cout << "INFO " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
-                //throw std::runtime_error("ESM4::INFO::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
+                // throw std::runtime_error("ESM4::INFO::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }
 
-//void ESM4::DialogInfo::save(ESM4::Writer& writer) const
+// void ESM4::DialogInfo::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::DialogInfo::blank()
+// void ESM4::DialogInfo::blank()
 //{
-//}
+// }

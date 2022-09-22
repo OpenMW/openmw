@@ -17,7 +17,8 @@
 
 namespace SceneUtil
 {
-    LinkVisitor::LinkVisitor() : osg::NodeVisitor( TRAVERSE_ALL_CHILDREN )
+    LinkVisitor::LinkVisitor()
+        : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
     {
         mAnimation = nullptr;
     }
@@ -25,15 +26,16 @@ namespace SceneUtil
     void LinkVisitor::link(osgAnimation::UpdateMatrixTransform* umt)
     {
         const osgAnimation::ChannelList& channels = mAnimation->getChannels();
-        for (const auto& channel: channels)
+        for (const auto& channel : channels)
         {
             const std::string& channelName = channel->getName();
             const std::string& channelTargetName = channel->getTargetName();
 
-            if (channelTargetName != umt->getName()) continue;
+            if (channelTargetName != umt->getName())
+                continue;
 
             // check if we can link a StackedTransformElement to the current Channel
-            for (const auto & stackedTransform : umt->getStackedTransforms())
+            for (const auto& stackedTransform : umt->getStackedTransforms())
             {
                 osgAnimation::StackedTransformElement* element = stackedTransform.get();
                 if (element && !element->getName().empty() && channelName == element->getName())
@@ -60,15 +62,16 @@ namespace SceneUtil
         {
             osgAnimation::UpdateMatrixTransform* umt = dynamic_cast<osgAnimation::UpdateMatrixTransform*>(cb);
             if (umt)
-                if (Misc::StringUtils::lowerCase(node.getName()) != "bip01") link(umt);
+                if (Misc::StringUtils::lowerCase(node.getName()) != "bip01")
+                    link(umt);
             cb = cb->getNestedCallback();
         }
 
         if (node.getNumChildrenRequiringUpdateTraversal())
-            traverse( node );
+            traverse(node);
     }
 
-    OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop)
+    OsgAnimationController::OsgAnimationController(const OsgAnimationController& copy, const osg::CopyOp& copyop)
         : osg::Object(copy, copyop)
         , SceneUtil::KeyframeController(copy)
         , SceneUtil::NodeCallback<OsgAnimationController>(copy, copyop)
@@ -77,7 +80,8 @@ namespace SceneUtil
         mLinker = nullptr;
         for (const auto& mergedAnimationTrack : copy.mMergedAnimationTracks)
         {
-            Resource::Animation* copiedAnimationTrack = static_cast<Resource::Animation*>(mergedAnimationTrack.get()->clone(copyop));
+            Resource::Animation* copiedAnimationTrack
+                = static_cast<Resource::Animation*>(mergedAnimationTrack.get()->clone(copyop));
             mMergedAnimationTracks.emplace_back(copiedAnimationTrack);
         }
     }
@@ -88,7 +92,7 @@ namespace SceneUtil
         std::string animationName;
         float newTime = time;
 
-        //Find the correct animation based on time
+        // Find the correct animation based on time
         for (const EmulatedAnimation& emulatedAnimation : mEmulatedAnimations)
         {
             if (time >= emulatedAnimation.mStartTime && time <= emulatedAnimation.mStopTime)
@@ -98,18 +102,21 @@ namespace SceneUtil
             }
         }
 
-        //Find the root transform track in animation
+        // Find the root transform track in animation
         for (const auto& mergedAnimationTrack : mMergedAnimationTracks)
         {
-            if (mergedAnimationTrack->getName() != animationName) continue;
+            if (mergedAnimationTrack->getName() != animationName)
+                continue;
 
             const osgAnimation::ChannelList& channels = mergedAnimationTrack->getChannels();
 
-            for (const auto& channel: channels)
+            for (const auto& channel : channels)
             {
-                if (channel->getTargetName() != "bip01" || channel->getName() != "transform") continue;
+                if (channel->getTargetName() != "bip01" || channel->getName() != "transform")
+                    continue;
 
-                if ( osgAnimation::MatrixLinearSampler* templateSampler = dynamic_cast<osgAnimation::MatrixLinearSampler*> (channel->getSampler()) )
+                if (osgAnimation::MatrixLinearSampler* templateSampler
+                    = dynamic_cast<osgAnimation::MatrixLinearSampler*>(channel->getSampler()))
                 {
                     osg::Matrixf matrix;
                     templateSampler->getValueAt(newTime, matrix);
@@ -126,11 +133,12 @@ namespace SceneUtil
     {
         for (const auto& mergedAnimationTrack : mMergedAnimationTracks)
         {
-            if (mergedAnimationTrack->getName() == animationName) mergedAnimationTrack->update(time);
+            if (mergedAnimationTrack->getName() == animationName)
+                mergedAnimationTrack->update(time);
         }
     }
 
-    void OsgAnimationController::operator() (osg::Node* node, osg::NodeVisitor* nv)
+    void OsgAnimationController::operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
         if (hasInput())
         {
@@ -138,7 +146,8 @@ namespace SceneUtil
             {
                 for (const auto& mergedAnimationTrack : mMergedAnimationTracks)
                 {
-                    if (!mLinker.valid()) mLinker = new LinkVisitor();
+                    if (!mLinker.valid())
+                        mLinker = new LinkVisitor();
                     mLinker->setAnimation(mergedAnimationTrack);
                     node->accept(*mLinker);
                 }

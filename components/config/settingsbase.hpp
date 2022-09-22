@@ -1,10 +1,10 @@
 #ifndef SETTINGSBASE_HPP
 #define SETTINGSBASE_HPP
 
-#include <QTextStream>
-#include <QStringList>
-#include <QString>
 #include <QRegExp>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
 
 namespace Config
 {
@@ -16,36 +16,27 @@ namespace Config
         SettingsBase() { mMultiValue = false; }
         ~SettingsBase() = default;
 
-        inline QString value(const QString &key, const QString &defaultValue = QString()) const
+        inline QString value(const QString& key, const QString& defaultValue = QString()) const
         {
             return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
         }
 
-        inline void setValue(const QString &key, const QString &value)
-        {
-            mSettings.replace(key, value);
-        }
+        inline void setValue(const QString& key, const QString& value) { mSettings.replace(key, value); }
 
-        inline void setMultiValue(const QString &key, const QString &value)
+        inline void setMultiValue(const QString& key, const QString& value)
         {
             QStringList values = mSettings.values(key);
             if (!values.contains(value))
                 mSettings.insert(key, value);
         }
 
-        inline void setMultiValueEnabled(bool enable)
-        {
-            mMultiValue = enable;
-        }
+        inline void setMultiValueEnabled(bool enable) { mMultiValue = enable; }
 
-        inline void remove(const QString &key)
-        {
-            mSettings.remove(key);
-        }
+        inline void remove(const QString& key) { mSettings.remove(key); }
 
-        Map getSettings() const {return mSettings;} 
+        Map getSettings() const { return mSettings; }
 
-        bool readFile(QTextStream &stream)
+        bool readFile(QTextStream& stream)
         {
             Map cache;
 
@@ -54,19 +45,22 @@ namespace Config
             QRegExp sectionRe("^\\[([^]]+)\\]");
             QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
-            while (!stream.atEnd()) {
+            while (!stream.atEnd())
+            {
                 QString line = stream.readLine();
 
                 if (line.isEmpty() || line.startsWith("#"))
                     continue;
 
-                if (sectionRe.exactMatch(line)) {
+                if (sectionRe.exactMatch(line))
+                {
                     sectionPrefix = sectionRe.cap(1);
                     sectionPrefix.append("/");
                     continue;
                 }
 
-                if (keyRe.indexIn(line) != -1) {
+                if (keyRe.indexIn(line) != -1)
+                {
 
                     QString key = keyRe.cap(1).trimmed();
                     QString value = keyRe.cap(2).trimmed();
@@ -78,10 +72,14 @@ namespace Config
 
                     QStringList values = cache.values(key);
 
-                    if (!values.contains(value)) {
-                        if (mMultiValue) {
+                    if (!values.contains(value))
+                    {
+                        if (mMultiValue)
+                        {
                             cache.insert(key, value);
-                        } else {
+                        }
+                        else
+                        {
                             cache.remove(key);
                             cache.insert(key, value);
                         }
@@ -89,7 +87,8 @@ namespace Config
                 }
             }
 
-            if (mSettings.isEmpty()) {
+            if (mSettings.isEmpty())
+            {
                 mSettings = cache; // This is the first time we read a file
                 return true;
             }
@@ -99,10 +98,7 @@ namespace Config
             return true;
         }
 
-        void clear()
-        {
-            mSettings.clear();
-        }
+        void clear() { mSettings.clear(); }
 
     private:
         Map mSettings;

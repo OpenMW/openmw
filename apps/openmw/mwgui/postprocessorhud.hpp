@@ -44,7 +44,6 @@ namespace MWGui
         static void registerMyGUIComponents();
 
     private:
-
         void notifyWindowResize(MyGUI::Window* sender);
 
         void notifyFilterChanged(MyGUI::EditBox* sender);
@@ -65,7 +64,7 @@ namespace MWGui
 
         void notifyShaderDownPressed(MyGUI::Widget* sender);
 
-        void notifyMouseWheel(MyGUI::Widget *sender, int rel);
+        void notifyMouseWheel(MyGUI::Widget* sender, int rel);
 
         enum class Direction
         {

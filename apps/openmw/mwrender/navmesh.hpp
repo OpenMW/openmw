@@ -3,8 +3,8 @@
 
 #include "navmeshmode.hpp"
 
-#include <components/detournavigator/version.hpp>
 #include <components/detournavigator/tileposition.hpp>
+#include <components/detournavigator/version.hpp>
 #include <components/misc/guarded.hpp>
 
 #include <osg/ref_ptr>
@@ -12,8 +12,8 @@
 #include <cstddef>
 #include <map>
 #include <memory>
-#include <vector>
 #include <string_view>
+#include <vector>
 
 class dtNavMesh;
 
@@ -41,7 +41,7 @@ namespace MWRender
     {
     public:
         explicit NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue,
-                         bool enabled, NavMeshMode mode);
+            bool enabled, NavMeshMode mode);
         ~NavMesh();
 
         bool toggle();
@@ -55,10 +55,7 @@ namespace MWRender
 
         void disable();
 
-        bool isEnabled() const
-        {
-            return mEnabled;
-        }
+        bool isEnabled() const { return mEnabled; }
 
         void setMode(NavMeshMode value);
 

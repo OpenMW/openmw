@@ -2,29 +2,29 @@
 
 #include <cmath>
 
-#include <osg/Transform>
+#include <osg/AlphaFunc>
+#include <osg/BlendFunc>
+#include <osg/ColorMask>
 #include <osg/Depth>
 #include <osg/Geometry>
 #include <osg/Material>
+#include <osg/OcclusionQueryNode>
+#include <osg/PositionAttitudeTransform>
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
-#include <osg/OcclusionQueryNode>
-#include <osg/ColorMask>
-#include <osg/BlendFunc>
-#include <osg/AlphaFunc>
+#include <osg/Transform>
 #include <osg/observer_ptr>
-#include <osg/PositionAttitudeTransform>
 
 #include <osgUtil/CullVisitor>
 
 #include <osgParticle/Particle>
 
 #include <components/misc/rng.hpp>
-#include <components/stereo/stereomanager.hpp>
 #include <components/stereo/multiview.hpp>
+#include <components/stereo/stereomanager.hpp>
 
-#include <components/resource/scenemanager.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/depth.hpp>
 
@@ -37,8 +37,8 @@
 
 #include "../mwworld/weather.hpp"
 
-#include "vismask.hpp"
 #include "renderbin.hpp"
+#include "vismask.hpp"
 
 namespace
 {
@@ -75,20 +75,17 @@ namespace
         colors->push_back(osg::Vec4(1.f, 1.f, 1.f, 1.f));
         geom->setColorArray(colors, osg::Array::BIND_OVERALL);
 
-        for (int i=0; i<numUvSets; ++i)
+        for (int i = 0; i < numUvSets; ++i)
             geom->setTexCoordArray(i, texcoords, osg::Array::BIND_PER_VERTEX);
 
-        geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS,0,4));
+        geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 4));
 
         return geom;
     }
 
     struct DummyComputeBoundCallback : osg::Node::ComputeBoundingSphereCallback
     {
-        osg::BoundingSphere computeBound(const osg::Node& node) const override
-        {
-            return osg::BoundingSphere();
-        }
+        osg::BoundingSphere computeBound(const osg::Node& node) const override { return osg::BoundingSphere(); }
     };
 }
 
@@ -117,27 +114,27 @@ namespace MWRender
 
         SunUpdater()
             : mColor(1.f, 1.f, 1.f, 1.f)
-        { }
-
-        void setDefaults(osg::StateSet* stateset) override
         {
-            stateset->setAttributeAndModes(createUnlitMaterial());
         }
+
+        void setDefaults(osg::StateSet* stateset) override { stateset->setAttributeAndModes(createUnlitMaterial()); }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
         {
             osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mColor.a()));
+            mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, mColor.a()));
             mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(mColor.r(), mColor.g(), mColor.b(), 1));
         }
     };
 
-    OcclusionCallback::OcclusionCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
+    OcclusionCallback::OcclusionCallback(
+        osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
         : mOcclusionQueryVisiblePixels(oqnVisible)
         , mOcclusionQueryTotalPixels(oqnTotal)
-    { }
+    {
+    }
 
-    float OcclusionCallback::getVisibleRatio (osg::Camera* camera)
+    float OcclusionCallback::getVisibleRatio(osg::Camera* camera)
     {
         int visible = mOcclusionQueryVisiblePixels->getQueryGeometry()->getNumPixels(camera);
         int total = mOcclusionQueryTotalPixels->getQueryGeometry()->getNumPixels(camera);
@@ -150,7 +147,7 @@ namespace MWRender
 
         float lastRatio = mLastRatio[osg::observer_ptr<osg::Camera>(camera)];
 
-        float change = dt*10;
+        float change = dt * 10;
 
         if (visibleRatio > lastRatio)
             visibleRatio = std::min(visibleRatio, lastRatio + change);
@@ -162,14 +159,18 @@ namespace MWRender
         return visibleRatio;
     }
 
-    /// SunFlashCallback handles fading/scaling of a node depending on occlusion query result. Must be attached as a cull callback.
-    class SunFlashCallback : public OcclusionCallback, public SceneUtil::NodeCallback<SunFlashCallback, osg::Node*, osgUtil::CullVisitor*>
+    /// SunFlashCallback handles fading/scaling of a node depending on occlusion query result. Must be attached as a
+    /// cull callback.
+    class SunFlashCallback : public OcclusionCallback,
+                             public SceneUtil::NodeCallback<SunFlashCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
-        SunFlashCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
+        SunFlashCallback(
+            osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
             : OcclusionCallback(oqnVisible, oqnTotal)
             , mGlareView(1.f)
-        { }
+        {
+        }
 
         void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
@@ -183,10 +184,10 @@ namespace MWRender
                 if (visibleRatio < fadeThreshold)
                 {
                     float fade = 1.f - (fadeThreshold - visibleRatio) / fadeThreshold;
-                    osg::ref_ptr<osg::Material> mat (createUnlitMaterial());
-                    mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade*mGlareView));
+                    osg::ref_ptr<osg::Material> mat(createUnlitMaterial());
+                    mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, fade * mGlareView));
                     stateset = new osg::StateSet;
-                    stateset->setAttributeAndModes(mat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                    stateset->setAttributeAndModes(mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
                 }
                 else if (visibleRatio < 1.f)
                 {
@@ -224,22 +225,20 @@ namespace MWRender
             }
         }
 
-        void setGlareView(float value)
-        {
-            mGlareView = value;
-        }
+        void setGlareView(float value) { mGlareView = value; }
 
     private:
         float mGlareView;
     };
 
-    /// SunGlareCallback controls a full-screen glare effect depending on occlusion query result and the angle between sun and camera.
-    /// Must be attached as a cull callback to the node above the glare node.
-    class SunGlareCallback : public OcclusionCallback, public SceneUtil::NodeCallback<SunGlareCallback, osg::Node*, osgUtil::CullVisitor*>
+    /// SunGlareCallback controls a full-screen glare effect depending on occlusion query result and the angle between
+    /// sun and camera. Must be attached as a cull callback to the node above the glare node.
+    class SunGlareCallback : public OcclusionCallback,
+                             public SceneUtil::NodeCallback<SunGlareCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
-        SunGlareCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal,
-                        osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform)
+        SunGlareCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible,
+            osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal, osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform)
             : OcclusionCallback(oqnVisible, oqnTotal)
             , mSunTransform(sunTransform)
             , mTimeOfDayFade(1.f)
@@ -249,15 +248,15 @@ namespace MWRender
             mSunGlareFaderMax = Fallback::Map::getFloat("Weather_Sun_Glare_Fader_Max");
             mSunGlareFaderAngleMax = Fallback::Map::getFloat("Weather_Sun_Glare_Fader_Angle_Max");
 
-            // Replicating a design flaw in MW. The color was being set on both ambient and emissive properties, which multiplies the result by two,
-            // then finally gets clamped by the fixed function pipeline. With the default INI settings, only the red component gets clamped,
-            // so the resulting color looks more orange than red.
+            // Replicating a design flaw in MW. The color was being set on both ambient and emissive properties, which
+            // multiplies the result by two, then finally gets clamped by the fixed function pipeline. With the default
+            // INI settings, only the red component gets clamped, so the resulting color looks more orange than red.
             mColor *= 2;
-            for (int i=0; i<3; ++i)
+            for (int i = 0; i < 3; ++i)
                 mColor[i] = std::min(1.f, mColor[i]);
         }
 
-        void operator ()(osg::Node* node, osgUtil::CullVisitor* cv)
+        void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
             float angleRadians = getAngleToSunInRadians(*cv->getCurrentRenderStage()->getInitialViewMatrix());
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
@@ -280,7 +279,7 @@ namespace MWRender
 
                 osg::ref_ptr<osg::Material> mat = createUnlitMaterial();
 
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade));
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, fade));
                 mat->setEmission(osg::Material::FRONT_AND_BACK, mColor);
 
                 stateset->setAttributeAndModes(mat);
@@ -291,15 +290,9 @@ namespace MWRender
             }
         }
 
-        void setTimeOfDayFade(float val)
-        {
-            mTimeOfDayFade = val;
-        }
+        void setTimeOfDayFade(float val) { mTimeOfDayFade = val; }
 
-        void setGlareView(float glareView)
-        {
-            mGlareView = glareView;
-        }
+        void setGlareView(float glareView) { mGlareView = glareView; }
 
     private:
         float getAngleToSunInRadians(const osg::Matrix& viewMatrix) const
@@ -344,7 +337,8 @@ namespace MWRender
             , mAtmosphereColor(1.0f, 1.0f, 1.0f, 1.0f)
             , mMoonColor(1.0f, 1.0f, 1.0f, 1.0f)
             , mForceShaders(forceShaders)
-        { }
+        {
+        }
 
         void setDefaults(osg::StateSet* stateset) override
         {
@@ -353,13 +347,14 @@ namespace MWRender
                 stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Moon)));
                 stateset->setTextureAttributeAndModes(0, mPhaseTex);
                 stateset->setTextureAttributeAndModes(1, mCircleTex);
-                stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-                stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
                 stateset->addUniform(new osg::Uniform("moonBlend", osg::Vec4f{}));
                 stateset->addUniform(new osg::Uniform("atmosphereFade", osg::Vec4f{}));
                 stateset->addUniform(new osg::Uniform("diffuseMap", 0));
                 stateset->addUniform(new osg::Uniform("maskMap", 1));
-                stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                stateset->setAttributeAndModes(
+                    createUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
             }
             else
             {
@@ -381,7 +376,8 @@ namespace MWRender
                 texEnv2->setSource1_RGB(osg::TexEnvCombine::CONSTANT);
                 texEnv2->setConstantColor(osg::Vec4f(0.f, 0.f, 0.f, 1.f)); // mAtmosphereColor.rgb, mTransparency
                 stateset->setTextureAttributeAndModes(1, texEnv2);
-                stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                stateset->setAttributeAndModes(
+                    createUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
             }
         }
 
@@ -389,21 +385,25 @@ namespace MWRender
         {
             if (mForceShaders)
             {
-                stateset->setTextureAttribute(0, mPhaseTex, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-                stateset->setTextureAttribute(1, mCircleTex, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                stateset->setTextureAttribute(0, mPhaseTex, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                stateset->setTextureAttribute(1, mCircleTex, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
                 if (auto* uMoonBlend = stateset->getUniform("moonBlend"))
                     uMoonBlend->set(mMoonColor * mShadowBlend);
                 if (auto* uAtmosphereFade = stateset->getUniform("atmosphereFade"))
-                    uAtmosphereFade->set(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
+                    uAtmosphereFade->set(
+                        osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
             }
             else
             {
-                osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXENV));
+                osg::TexEnvCombine* texEnv
+                    = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXENV));
                 texEnv->setConstantColor(mMoonColor * mShadowBlend);
 
-                osg::TexEnvCombine* texEnv2 = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-                texEnv2->setConstantColor(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
+                osg::TexEnvCombine* texEnv2
+                    = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
+                texEnv2->setConstantColor(
+                    osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
             }
         }
 
@@ -420,10 +420,11 @@ namespace MWRender
         }
     };
 
-    class CameraRelativeTransformCullCallback : public SceneUtil::NodeCallback<CameraRelativeTransformCullCallback, osg::Node*, osgUtil::CullVisitor*>
+    class CameraRelativeTransformCullCallback
+        : public SceneUtil::NodeCallback<CameraRelativeTransformCullCallback, osg::Node*, osgUtil::CullVisitor*>
     {
     public:
-        void operator() (osg::Node* node, osgUtil::CullVisitor* cv)
+        void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
             // XXX have to remove unwanted culling plane of the water reflection camera
 
@@ -436,7 +437,7 @@ namespace MWRender
 
             unsigned int mask = 0x1;
             unsigned int resultMask = cv->getProjectionCullingStack().back().getFrustum().getResultMask();
-            for (unsigned int i=0; i<cv->getProjectionCullingStack().back().getFrustum().getPlaneList().size(); ++i)
+            for (unsigned int i = 0; i < cv->getProjectionCullingStack().back().getFrustum().getPlaneList().size(); ++i)
             {
                 if (i >= numPlanes)
                 {
@@ -467,7 +468,8 @@ namespace MWRender
 
     void AtmosphereUpdater::setDefaults(osg::StateSet* stateset)
     {
-        stateset->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setAttributeAndModes(
+            createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Atmosphere)));
     }
 
@@ -478,10 +480,11 @@ namespace MWRender
     }
 
     AtmosphereNightUpdater::AtmosphereNightUpdater(Resource::ImageManager* imageManager, bool forceShaders)
-        : mColor(osg::Vec4f(0,0,0,0))
+        : mColor(osg::Vec4f(0, 0, 0, 0))
         , mTexture(new osg::Texture2D(imageManager->getWarningImage()))
         , mForceShaders(forceShaders)
-    { }
+    {
+    }
 
     void AtmosphereNightUpdater::setFade(float fade)
     {
@@ -504,8 +507,8 @@ namespace MWRender
             texEnv->setCombine_RGB(osg::TexEnvCombine::REPLACE);
             texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
 
-            stateset->setTextureAttributeAndModes(1, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-            stateset->setTextureAttributeAndModes(1, texEnv, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->setTextureAttributeAndModes(1, mTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->setTextureAttributeAndModes(1, texEnv, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
     }
 
@@ -517,7 +520,8 @@ namespace MWRender
         }
         else
         {
-            osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
+            osg::TexEnvCombine* texEnv
+                = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
             texEnv->setConstantColor(mColor);
         }
     }
@@ -525,7 +529,8 @@ namespace MWRender
     CloudUpdater::CloudUpdater(bool forceShaders)
         : mOpacity(0.f)
         , mForceShaders(forceShaders)
-    { }
+    {
+    }
 
     void CloudUpdater::setTexture(osg::ref_ptr<osg::Texture2D> texture)
     {
@@ -547,16 +552,17 @@ namespace MWRender
         mTexMat = osg::Matrixf::translate(osg::Vec3f(0.f, -timer, 0.f));
     }
 
-    void CloudUpdater::setDefaults(osg::StateSet *stateset)
+    void CloudUpdater::setDefaults(osg::StateSet* stateset)
     {
-        stateset->setAttribute(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setAttribute(
+            createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         osg::ref_ptr<osg::TexMat> texmat = new osg::TexMat;
         stateset->setTextureAttributeAndModes(0, texmat);
 
         if (mForceShaders)
         {
-            stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
             stateset->addUniform(new osg::Uniform("opacity", 1.f));
             stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Clouds)));
@@ -569,20 +575,20 @@ namespace MWRender
             texEnvCombine->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
             texEnvCombine->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
             texEnvCombine->setSource1_Alpha(osg::TexEnvCombine::CONSTANT);
-            texEnvCombine->setConstantColor(osg::Vec4f(1,1,1,1));
+            texEnvCombine->setConstantColor(osg::Vec4f(1, 1, 1, 1));
             texEnvCombine->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
             texEnvCombine->setCombine_RGB(osg::TexEnvCombine::REPLACE);
 
             stateset->setTextureAttributeAndModes(1, texEnvCombine);
 
-            stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-            stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
     }
 
-    void CloudUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
+    void CloudUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
-        stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         mat->setEmission(osg::Material::FRONT_AND_BACK, mEmissionColor);
@@ -596,27 +602,25 @@ namespace MWRender
         }
         else
         {
-            stateset->setTextureAttribute(1, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->setTextureAttribute(1, mTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-            osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-            texEnv->setConstantColor(osg::Vec4f(1,1,1,mOpacity));
+            osg::TexEnvCombine* texEnv
+                = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
+            texEnv->setConstantColor(osg::Vec4f(1, 1, 1, mOpacity));
         }
     }
-
 
     class SkyStereoStatesetUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        SkyStereoStatesetUpdater()
-        {
-        }
+        SkyStereoStatesetUpdater() {}
 
     protected:
         void setDefaults(osg::StateSet* stateset) override
         {
             if (!Stereo::getMultiview())
-                stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrix"), osg::StateAttribute::OVERRIDE);
-
+                stateset->addUniform(
+                    new osg::Uniform(osg::Uniform::FLOAT_MAT4, "projectionMatrix"), osg::StateAttribute::OVERRIDE);
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
@@ -626,11 +630,11 @@ namespace MWRender
                 std::array<osg::Matrix, 2> projectionMatrices;
                 auto& sm = Stereo::Manager::instance();
 
-                for (int view : {0, 1})
+                for (int view : { 0, 1 })
                 {
                     auto projectionMatrix = sm.computeEyeProjection(view, true);
                     auto viewOffsetMatrix = sm.computeEyeViewOffset(view);
-                    for (int col : {0, 1, 2})
+                    for (int col : { 0, 1, 2 })
                         viewOffsetMatrix(3, col) = 0;
 
                     projectionMatrices[view] = viewOffsetMatrix * projectionMatrix;
@@ -645,7 +649,7 @@ namespace MWRender
             auto* projectionMatrixUniform = stateset->getUniform("projectionMatrix");
             auto projectionMatrix = sm.computeEyeProjection(0, true);
             auto viewOffsetMatrix = sm.computeEyeViewOffset(0);
-            for (int col : {0, 1, 2})
+            for (int col : { 0, 1, 2 })
                 viewOffsetMatrix(3, col) = 0;
 
             projectionMatrixUniform->set(viewOffsetMatrix * projectionMatrix);
@@ -656,7 +660,7 @@ namespace MWRender
             auto* projectionMatrixUniform = stateset->getUniform("projectionMatrix");
             auto projectionMatrix = sm.computeEyeProjection(1, true);
             auto viewOffsetMatrix = sm.computeEyeViewOffset(1);
-            for (int col : {0, 1, 2})
+            for (int col : { 0, 1, 2 })
                 viewOffsetMatrix(3, col) = 0;
 
             projectionMatrixUniform->set(viewOffsetMatrix * projectionMatrix);
@@ -679,7 +683,8 @@ namespace MWRender
 
     CameraRelativeTransform::CameraRelativeTransform(const CameraRelativeTransform& copy, const osg::CopyOp& copyop)
         : osg::Transform(copy, copyop)
-    { }
+    {
+    }
 
     const osg::Vec3f& CameraRelativeTransform::getLastViewPoint() const
     {
@@ -693,9 +698,9 @@ namespace MWRender
             mViewPoint = static_cast<osgUtil::CullVisitor*>(nv)->getViewPoint();
         }
 
-        if (_referenceFrame==RELATIVE_RF)
+        if (_referenceFrame == RELATIVE_RF)
         {
-            matrix.setTrans(osg::Vec3f(0.f,0.f,0.f));
+            matrix.setTrans(osg::Vec3f(0.f, 0.f, 0.f));
             return false;
         }
         else // absolute
@@ -714,7 +719,8 @@ namespace MWRender
         : mCameraRelativeTransform(cameraRelativeTransform)
         , mEnabled(true)
         , mWaterLevel(0.f)
-    { }
+    {
+    }
 
     bool UnderwaterSwitchCallback::isUnderwater()
     {
@@ -748,7 +754,7 @@ namespace MWRender
         mGeom->getOrCreateStateSet();
         mTransform = new osg::PositionAttitudeTransform;
         mTransform->setNodeMask(mVisibleMask);
-        mTransform->setScale(osg::Vec3f(450,450,450) * scaleFactor);
+        mTransform->setScale(osg::Vec3f(450, 450, 450) * scaleFactor);
         mTransform->addChild(mGeom);
 
         parentNode->addChild(mTransform);
@@ -780,7 +786,8 @@ namespace MWRender
         osg::StateSet* stateset = queryNode->getOrCreateStateSet();
         stateset->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
         stateset->setNestRenderBins(false);
-        // Set up alpha testing on the occlusion testing subgraph, that way we can get the occlusion tested fragments to match the circular shape of the sun
+        // Set up alpha testing on the occlusion testing subgraph, that way we can get the occlusion tested fragments to
+        // match the circular shape of the sun
         if (!sceneManager.getForceShaders())
         {
             osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
@@ -857,15 +864,15 @@ namespace MWRender
         // With OSG 3.6.5, the method of providing user defined query geometry has been completely replaced
         osg::ref_ptr<osg::QueryGeometry> queryGeom = new osg::QueryGeometry(oqn->getName());
 
-        // Make it fast! A DYNAMIC query geometry means we can't break frame until the flare is rendered (which is rendered after all the other geometry,
-        // so that would be pretty bad). STATIC should be safe, since our node's local bounds are static, thus computeBounds() which modifies the queryGeometry
-        // is only called once.
-        // Note the debug geometry setDebugDisplay(true) is always DYNAMIC and that can't be changed, not a big deal.
+        // Make it fast! A DYNAMIC query geometry means we can't break frame until the flare is rendered (which is
+        // rendered after all the other geometry, so that would be pretty bad). STATIC should be safe, since our node's
+        // local bounds are static, thus computeBounds() which modifies the queryGeometry is only called once. Note the
+        // debug geometry setDebugDisplay(true) is always DYNAMIC and that can't be changed, not a big deal.
         queryGeom->setDataVariance(osg::Object::STATIC);
 
-        // Set up the query geometry to match the actual sun's rendering shape. osg::OcclusionQueryNode wasn't originally intended to allow this,
-        // normally it would automatically adjust the query geometry to match the sub graph's bounding box. The below hack is needed to
-        // circumvent this.
+        // Set up the query geometry to match the actual sun's rendering shape. osg::OcclusionQueryNode wasn't
+        // originally intended to allow this, normally it would automatically adjust the query geometry to match the sub
+        // graph's bounding box. The below hack is needed to circumvent this.
         queryGeom->setVertexArray(mGeom->getVertexArray());
         queryGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
         queryGeom->removePrimitiveSet(0, queryGeom->getNumPrimitiveSets());
@@ -905,12 +912,13 @@ namespace MWRender
 
     void Sun::createSunFlash(Resource::ImageManager& imageManager)
     {
-        osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D(imageManager.getImage("textures/tx_sun_flash_grey_05.dds"));
+        osg::ref_ptr<osg::Texture2D> tex
+            = new osg::Texture2D(imageManager.getImage("textures/tx_sun_flash_grey_05.dds"));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         tex->setName("diffuseMap");
 
-        osg::ref_ptr<osg::Group> group (new osg::Group);
+        osg::ref_ptr<osg::Group> group(new osg::Group);
 
         mTransform->addChild(group);
 
@@ -950,10 +958,12 @@ namespace MWRender
         camera->setClearMask(0);
         camera->setRenderOrder(osg::Camera::NESTED_RENDER);
         camera->setAllowEventFocus(false);
-        camera->getOrCreateStateSet()->addUniform(new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(camera->getProjectionMatrix())));
+        camera->getOrCreateStateSet()->addUniform(
+            new osg::Uniform("projectionMatrix", static_cast<osg::Matrixf>(camera->getProjectionMatrix())));
         SceneUtil::setCameraClearDepth(camera);
 
-        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3f(-1,-1,0), osg::Vec3f(2,0,0), osg::Vec3f(0,2,0));
+        osg::ref_ptr<osg::Geometry> geom
+            = osg::createTexturedQuadGeometry(osg::Vec3f(-1, -1, 0), osg::Vec3f(2, 0, 0), osg::Vec3f(0, 2, 0));
         camera->addChild(geom);
 
         osg::StateSet* stateset = geom->getOrCreateStateSet();
@@ -1066,7 +1076,7 @@ namespace MWRender
 
     void Moon::setPhase(const MoonState::Phase& phase)
     {
-        if(mPhase == phase)
+        if (mPhase == phase)
             return;
 
         mPhase = phase;
@@ -1126,7 +1136,8 @@ namespace MWRender
 
     RainShooter::RainShooter()
         : mAngle(0.f)
-    { }
+    {
+    }
 
     void RainShooter::shoot(osgParticle::Particle* particle) const
     {
@@ -1149,7 +1160,7 @@ namespace MWRender
         return new RainShooter;
     }
 
-    osg::Object* RainShooter::clone(const osg::CopyOp &) const
+    osg::Object* RainShooter::clone(const osg::CopyOp&) const
     {
         return new RainShooter(*this);
     }
@@ -1157,12 +1168,13 @@ namespace MWRender
     ModVertexAlphaVisitor::ModVertexAlphaVisitor(ModVertexAlphaVisitor::MeshType type)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mType(type)
-    { }
+    {
+    }
 
     void ModVertexAlphaVisitor::apply(osg::Geometry& geometry)
     {
         osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(geometry.getVertexArray()->getNumElements());
-        for (unsigned int i=0; i<colors->size(); ++i)
+        for (unsigned int i = 0; i < colors->size(); ++i)
         {
             float alpha = 1.f;
 
@@ -1171,14 +1183,14 @@ namespace MWRender
                 case ModVertexAlphaVisitor::Atmosphere:
                 {
                     // this is a cylinder, so every second vertex belongs to the bottom-most row
-                    alpha = (i%2) ? 0.f : 1.f;
+                    alpha = (i % 2) ? 0.f : 1.f;
                     break;
                 }
                 case ModVertexAlphaVisitor::Clouds:
                 {
-                    if (i>= 49 && i <= 64)
+                    if (i >= 49 && i <= 64)
                         alpha = 0.f; // bottom-most row
-                    else if (i>= 33 && i <= 48)
+                    else if (i >= 33 && i <= 48)
                         alpha = 0.25098; // second row
                     else
                         alpha = 1.f;

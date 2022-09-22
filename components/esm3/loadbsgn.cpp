@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void BirthSign::load(ESMReader &esm, bool &isDeleted)
+    void BirthSign::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -48,7 +48,7 @@ namespace ESM
             esm.fail("Missing NAME subrecord");
     }
 
-    void BirthSign::save(ESMWriter &esm, bool isDeleted) const
+    void BirthSign::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

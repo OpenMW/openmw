@@ -3,45 +3,43 @@
 
 #include <string>
 
-#include "effectlist.hpp"
 #include "components/esm/defs.hpp"
+#include "effectlist.hpp"
 
 namespace ESM
 {
 
-class ESMReader;
-class ESMWriter;
+    class ESMReader;
+    class ESMWriter;
 
-/*
- * Alchemy item (potions)
- */
+    /*
+     * Alchemy item (potions)
+     */
 
-struct Potion
-{
-    constexpr static RecNameInts sRecordId = REC_ALCH;
-
-
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string_view getRecordType() { return "Potion"; }
-
-    struct ALDTstruct
+    struct Potion
     {
-        float mWeight;
-        int mValue;
-        int mAutoCalc;
-    };
-    ALDTstruct mData;
+        constexpr static RecNameInts sRecordId = REC_ALCH;
 
-    unsigned int mRecordFlags;
-    std::string mId, mName, mModel, mIcon, mScript;
-    EffectList mEffects;
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string_view getRecordType() { return "Potion"; }
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        struct ALDTstruct
+        {
+            float mWeight;
+            int mValue;
+            int mAutoCalc;
+        };
+        ALDTstruct mData;
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
+        unsigned int mRecordFlags;
+        std::string mId, mName, mModel, mIcon, mScript;
+        EffectList mEffects;
 
+        void load(ESMReader& esm, bool& isDeleted);
+        void save(ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+        ///< Set record to default state (does not touch the ID).
     };
 }
 #endif

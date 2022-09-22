@@ -39,8 +39,8 @@ namespace EsmLoader
     };
 
     EsmData loadEsmData(const Query& query, const std::vector<std::string>& contentFiles,
-        const Files::Collections& fileCollections, ESM::ReadersCache& readers,
-        ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener = nullptr);
+        const Files::Collections& fileCollections, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder,
+        Loading::Listener* listener = nullptr);
 }
 
 #endif

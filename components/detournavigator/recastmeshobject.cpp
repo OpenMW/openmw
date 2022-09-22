@@ -10,8 +10,8 @@ namespace DetourNavigator
 {
     namespace
     {
-        bool updateCompoundObject(const btCompoundShape& shape, const AreaType areaType,
-            std::vector<ChildRecastMeshObject>& children)
+        bool updateCompoundObject(
+            const btCompoundShape& shape, const AreaType areaType, std::vector<ChildRecastMeshObject>& children)
         {
             assert(static_cast<std::size_t>(shape.getNumChildShapes()) == children.size());
             bool result = false;
@@ -39,8 +39,8 @@ namespace DetourNavigator
         }
     }
 
-    ChildRecastMeshObject::ChildRecastMeshObject(const btCollisionShape& shape, const btTransform& transform,
-            const AreaType areaType)
+    ChildRecastMeshObject::ChildRecastMeshObject(
+        const btCollisionShape& shape, const btTransform& transform, const AreaType areaType)
         : mShape(shape)
         , mTransform(transform)
         , mAreaType(areaType)
@@ -69,12 +69,12 @@ namespace DetourNavigator
         }
         if (mShape.get().isCompound())
             result = updateCompoundObject(static_cast<const btCompoundShape&>(mShape.get()), mAreaType, mChildren)
-                    || result;
+                || result;
         return result;
     }
 
-    RecastMeshObject::RecastMeshObject(const CollisionShape& shape, const btTransform& transform,
-            const AreaType areaType)
+    RecastMeshObject::RecastMeshObject(
+        const CollisionShape& shape, const btTransform& transform, const AreaType areaType)
         : mInstance(shape.getInstance())
         , mObjectTransform(shape.getObjectTransform())
         , mImpl(shape.getShape(), transform, areaType)

@@ -12,18 +12,17 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that region records are internally consistent
     class RegionCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::Region>& mRegions;
-            bool mIgnoreBaseRecords;
+        const CSMWorld::IdCollection<ESM::Region>& mRegions;
+        bool mIgnoreBaseRecords;
 
-        public:
+    public:
+        RegionCheckStage(const CSMWorld::IdCollection<ESM::Region>& regions);
 
-            RegionCheckStage (const CSMWorld::IdCollection<ESM::Region>& regions);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, CSMDoc::Messages& messages) override;
-            ///< Messages resulting from this tage will be appended to \a messages.
+        void perform(int stage, CSMDoc::Messages& messages) override;
+        ///< Messages resulting from this tage will be appended to \a messages.
     };
 }
 

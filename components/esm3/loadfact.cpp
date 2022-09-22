@@ -7,29 +7,29 @@
 
 namespace ESM
 {
-    int& Faction::FADTstruct::getSkill (int index, bool ignored)
+    int& Faction::FADTstruct::getSkill(int index, bool ignored)
     {
-        if (index<0 || index>=7)
-            throw std::logic_error ("skill index out of range");
+        if (index < 0 || index >= 7)
+            throw std::logic_error("skill index out of range");
 
         return mSkills[index];
     }
 
-    int Faction::FADTstruct::getSkill (int index, bool ignored) const
+    int Faction::FADTstruct::getSkill(int index, bool ignored) const
     {
-        if (index<0 || index>=7)
-            throw std::logic_error ("skill index out of range");
+        if (index < 0 || index >= 7)
+            throw std::logic_error("skill index out of range");
 
         return mSkills[index];
     }
 
-    void Faction::load(ESMReader &esm, bool &isDeleted)
+    void Faction::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
 
         mReactions.clear();
-        for (int i=0;i<10;++i)
+        for (int i = 0; i < 10; ++i)
             mRanks[i].clear();
 
         int rankCounter = 0;
@@ -82,7 +82,7 @@ namespace ESM
             esm.fail("Missing FADT subrecord");
     }
 
-    void Faction::save(ESMWriter &esm, bool isDeleted) const
+    void Faction::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -118,7 +118,7 @@ namespace ESM
         mData.mAttribute[0] = mData.mAttribute[1] = 0;
         mData.mIsHidden = 0;
 
-        for (int i=0; i<10; ++i)
+        for (int i = 0; i < 10; ++i)
         {
             mData.mRankData[i].mAttribute1 = mData.mRankData[i].mAttribute2 = 0;
             mData.mRankData[i].mPrimarySkill = mData.mRankData[i].mFavouredSkill = 0;
@@ -127,7 +127,7 @@ namespace ESM
             mRanks[i].clear();
         }
 
-        for (int i=0; i<7; ++i)
+        for (int i = 0; i < 7; ++i)
             mData.mSkills[i] = 0;
 
         mReactions.clear();

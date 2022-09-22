@@ -1,8 +1,8 @@
 #ifndef MWGUI_ITEMCHARGEVIEW_H
 #define MWGUI_ITEMCHARGEVIEW_H
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <MyGUI_Widget.h>
 
@@ -24,54 +24,54 @@ namespace MWGui
     class ItemChargeView final : public MyGUI::Widget
     {
         MYGUI_RTTI_DERIVED(ItemChargeView)
-        public:
-            enum DisplayMode
-            {
-                DisplayMode_Health,
-                DisplayMode_EnchantmentCharge
-            };
+    public:
+        enum DisplayMode
+        {
+            DisplayMode_Health,
+            DisplayMode_EnchantmentCharge
+        };
 
-            ItemChargeView();
+        ItemChargeView();
 
-            /// Register needed components with MyGUI's factory manager
-            static void registerComponents();
+        /// Register needed components with MyGUI's factory manager
+        static void registerComponents();
 
-            void initialiseOverride() override;
+        void initialiseOverride() override;
 
-            /// Takes ownership of \a model
-            void setModel(ItemModel* model);
+        /// Takes ownership of \a model
+        void setModel(ItemModel* model);
 
-            void setDisplayMode(DisplayMode type);
+        void setDisplayMode(DisplayMode type);
 
-            void update();
-            void layoutWidgets();
-            void resetScrollbars();
+        void update();
+        void layoutWidgets();
+        void resetScrollbars();
 
-            void setSize(const MyGUI::IntSize& value) override;
-            void setCoord(const MyGUI::IntCoord& value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
-            MyGUI::delegates::CMultiDelegate2<MyGUI::Widget*, const MWWorld::Ptr&> eventItemClicked;
+        MyGUI::delegates::CMultiDelegate2<MyGUI::Widget*, const MWWorld::Ptr&> eventItemClicked;
 
-        private:
-            struct Line
-            {
-                MWWorld::Ptr mItemPtr;
-                MyGUI::TextBox* mText;
-                ItemWidget* mIcon;
-                Widgets::MWDynamicStatPtr mCharge;
-            };
+    private:
+        struct Line
+        {
+            MWWorld::Ptr mItemPtr;
+            MyGUI::TextBox* mText;
+            ItemWidget* mIcon;
+            Widgets::MWDynamicStatPtr mCharge;
+        };
 
-            void updateLine(const Line& line);
+        void updateLine(const Line& line);
 
-            void onIconClicked(MyGUI::Widget* sender);
-            void onMouseWheelMoved(MyGUI::Widget* sender, int rel);
+        void onIconClicked(MyGUI::Widget* sender);
+        void onMouseWheelMoved(MyGUI::Widget* sender, int rel);
 
-            typedef std::vector<Line> Lines;
-            Lines mLines;
+        typedef std::vector<Line> Lines;
+        Lines mLines;
 
-            std::unique_ptr<ItemModel> mModel;
-            MyGUI::ScrollView* mScrollView;
-            DisplayMode mDisplayMode;
+        std::unique_ptr<ItemModel> mModel;
+        MyGUI::ScrollView* mScrollView;
+        DisplayMode mDisplayMode;
     };
 }
 

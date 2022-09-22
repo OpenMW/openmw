@@ -17,17 +17,18 @@ namespace Misc::StringUtils
 
     inline std::string u8StringToString(std::u8string_view str)
     {
-        return {str.begin(), str.end()};
+        return { str.begin(), str.end() };
     }
 
     inline std::string u8StringToString(std::u8string&& str)
     {
-        return {str.begin(), str.end()};
+        return { str.begin(), str.end() };
     }
 
     inline const char8_t* stringToU8String(const char* str)
     {
-        return reinterpret_cast<const char8_t*>(str);  // Undefined behavior if the contents of "char" aren't UTF8 or ASCII.
+        return reinterpret_cast<const char8_t*>(
+            str); // Undefined behavior if the contents of "char" aren't UTF8 or ASCII.
     }
 
     inline char8_t* stringToU8String(char* str)
@@ -46,4 +47,4 @@ namespace Misc::StringUtils
     }
 }
 
-#endif //COMPONENTS_MISC_STRINGS_CONVERSION_H
+#endif // COMPONENTS_MISC_STRINGS_CONVERSION_H

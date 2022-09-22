@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESSIMPORT_KLST_H
 #define OPENMW_ESSIMPORT_KLST_H
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace ESM
 {

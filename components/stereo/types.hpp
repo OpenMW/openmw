@@ -4,22 +4,21 @@
 #include <osg/Matrix>
 #include <osg/Vec3>
 
-
 namespace Stereo
 {
     enum class Eye
     {
-        Left = 0, 
-        Right = 1, 
+        Left = 0,
+        Right = 1,
         Center = 2
     };
 
     struct Pose
     {
         //! Position in space
-        osg::Vec3 position{ 0,0,0 };
+        osg::Vec3 position{ 0, 0, 0 };
         //! Orientation in space.
-        osg::Quat orientation{ 0,0,0,1 };
+        osg::Quat orientation{ 0, 0, 0, 1 };
 
         //! Add one pose to another
         Pose operator+(const Pose& rhs);
@@ -34,11 +33,12 @@ namespace Stereo
         bool operator==(const Pose& rhs) const;
     };
 
-    struct FieldOfView {
-        float    angleLeft{ 0.f };
-        float    angleRight{ 0.f };
-        float    angleUp{ 0.f };
-        float    angleDown{ 0.f };
+    struct FieldOfView
+    {
+        float angleLeft{ 0.f };
+        float angleRight{ 0.f };
+        float angleUp{ 0.f };
+        float angleDown{ 0.f };
 
         bool operator==(const FieldOfView& rhs) const;
     };
@@ -53,9 +53,9 @@ namespace Stereo
         osg::Matrix perspectiveMatrix(float near, float far, bool reverseZ);
     };
 
-    std::ostream& operator <<(std::ostream& os, const Pose& pose);
-    std::ostream& operator <<(std::ostream& os, const FieldOfView& fov);
-    std::ostream& operator <<(std::ostream& os, const View& view);
+    std::ostream& operator<<(std::ostream& os, const Pose& pose);
+    std::ostream& operator<<(std::ostream& os, const FieldOfView& fov);
+    std::ostream& operator<<(std::ostream& os, const View& view);
 }
 
 #endif

@@ -19,89 +19,94 @@ namespace MWGui
     class MessageBox;
     class MessageBoxManager
     {
-        public:
-            MessageBoxManager (float timePerChar);
-            ~MessageBoxManager ();
-            void onFrame (float frameDuration);
-            void createMessageBox(std::string_view message, bool stat = false);
-            void removeStaticMessageBox ();
-            bool createInteractiveMessageBox(std::string_view message, const std::vector<std::string>& buttons);
-            bool isInteractiveMessageBox ();
+    public:
+        MessageBoxManager(float timePerChar);
+        ~MessageBoxManager();
+        void onFrame(float frameDuration);
+        void createMessageBox(std::string_view message, bool stat = false);
+        void removeStaticMessageBox();
+        bool createInteractiveMessageBox(std::string_view message, const std::vector<std::string>& buttons);
+        bool isInteractiveMessageBox();
 
-            int getMessagesCount();
+        int getMessagesCount();
 
-            const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe.get(); }
+        const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe.get(); }
 
-            /// Remove all message boxes
-            void clear();
+        /// Remove all message boxes
+        void clear();
 
-            bool removeMessageBox (MessageBox *msgbox);
+        bool removeMessageBox(MessageBox* msgbox);
 
-            /// @param reset Reset the pressed button to -1 after reading it.
-            int readPressedButton (bool reset=true);
+        /// @param reset Reset the pressed button to -1 after reading it.
+        int readPressedButton(bool reset = true);
 
-            typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
+        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
 
-            // Note: this delegate unassigns itself after it was fired, i.e. works once.
-            EventHandle_Int eventButtonPressed;
+        // Note: this delegate unassigns itself after it was fired, i.e. works once.
+        EventHandle_Int eventButtonPressed;
 
-            void onButtonPressed(int button) { eventButtonPressed(button); eventButtonPressed.clear(); }
+        void onButtonPressed(int button)
+        {
+            eventButtonPressed(button);
+            eventButtonPressed.clear();
+        }
 
-            void setVisible(bool value);
+        void setVisible(bool value);
 
-            const std::vector<std::unique_ptr<MessageBox>>& getActiveMessageBoxes() const;
+        const std::vector<std::unique_ptr<MessageBox>>& getActiveMessageBoxes() const;
 
-        private:
-            std::vector<std::unique_ptr<MessageBox>> mMessageBoxes;
-            std::unique_ptr<InteractiveMessageBox> mInterMessageBoxe;
-            MessageBox* mStaticMessageBox;
-            float mMessageBoxSpeed;
-            int mLastButtonPressed;
-            bool mVisible = true;
+    private:
+        std::vector<std::unique_ptr<MessageBox>> mMessageBoxes;
+        std::unique_ptr<InteractiveMessageBox> mInterMessageBoxe;
+        MessageBox* mStaticMessageBox;
+        float mMessageBoxSpeed;
+        int mLastButtonPressed;
+        bool mVisible = true;
     };
 
     class MessageBox : public Layout
     {
-        public:
-            MessageBox (MessageBoxManager& parMessageBoxManager, std::string_view message);
-            const std::string& getMessage() { return mMessage; };
-            int getHeight ();
-            void update (int height);
-            void setVisible(bool value);
+    public:
+        MessageBox(MessageBoxManager& parMessageBoxManager, std::string_view message);
+        const std::string& getMessage() { return mMessage; };
+        int getHeight();
+        void update(int height);
+        void setVisible(bool value);
 
-            float mCurrentTime;
-            float mMaxTime;
+        float mCurrentTime;
+        float mMaxTime;
 
-        protected:
-            MessageBoxManager& mMessageBoxManager;
-            std::string mMessage;
-            MyGUI::EditBox* mMessageWidget;
-            int mBottomPadding;
-            int mNextBoxPadding;
+    protected:
+        MessageBoxManager& mMessageBoxManager;
+        std::string mMessage;
+        MyGUI::EditBox* mMessageWidget;
+        int mBottomPadding;
+        int mNextBoxPadding;
     };
 
     class InteractiveMessageBox : public WindowModal
     {
-        public:
-            InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
-            void mousePressed (MyGUI::Widget* _widget);
-            int readPressedButton ();
+    public:
+        InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
+            const std::vector<std::string>& buttons);
+        void mousePressed(MyGUI::Widget* _widget);
+        int readPressedButton();
 
-            MyGUI::Widget* getDefaultKeyFocus() override;
+        MyGUI::Widget* getDefaultKeyFocus() override;
 
-            bool exit() override { return false; }
+        bool exit() override { return false; }
 
-            bool mMarkedToDelete;
+        bool mMarkedToDelete;
 
-        private:
-            void buttonActivated (MyGUI::Widget* _widget);
+    private:
+        void buttonActivated(MyGUI::Widget* _widget);
 
-            MessageBoxManager& mMessageBoxManager;
-            MyGUI::EditBox* mMessageWidget;
-            MyGUI::Widget* mButtonsWidget;
-            std::vector<MyGUI::Button*> mButtons;
+        MessageBoxManager& mMessageBoxManager;
+        MyGUI::EditBox* mMessageWidget;
+        MyGUI::Widget* mButtonsWidget;
+        std::vector<MyGUI::Button*> mButtons;
 
-            int mButtonPressed;
+        int mButtonPressed;
     };
 
 }

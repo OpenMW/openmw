@@ -30,7 +30,6 @@ namespace Gui
          */
         EventHandle_Widget eventWidgetSelected;
 
-
         /**
          * Call after the size of the list changed, or items were inserted/removed
          */
@@ -40,7 +39,8 @@ namespace Gui
         void addSeparator(); ///< add a seperator between the current and the next item.
         void removeItem(const std::string& name);
         unsigned int getItemCount();
-        std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return "" at the place where the separator is
+        std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return ""
+                                                    ///< at the place where the separator is
         void clear();
 
         MyGUI::Button* getItemWidget(std::string_view name);

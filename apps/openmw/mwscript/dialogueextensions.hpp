@@ -16,7 +16,7 @@ namespace MWScript
     /// \brief Dialogue/Journal-related script functionality
     namespace Dialogue
     {
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 

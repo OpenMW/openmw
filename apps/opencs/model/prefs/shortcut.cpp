@@ -7,8 +7,8 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include "state.hpp"
 #include "shortcutmanager.hpp"
+#include "state.hpp"
 
 namespace CSMPrefs
 {
@@ -25,7 +25,7 @@ namespace CSMPrefs
         , mModifierStatus(false)
         , mAction(nullptr)
     {
-        assert (parent);
+        assert(parent);
 
         State::get().getShortcutManager().addShortcut(this);
         State::get().getShortcutManager().getSequence(name, mSequence);
@@ -44,7 +44,7 @@ namespace CSMPrefs
         , mModifierStatus(false)
         , mAction(nullptr)
     {
-        assert (parent);
+        assert(parent);
 
         State::get().getShortcutManager().addShortcut(this);
         State::get().getShortcutManager().getSequence(name, mSequence);
@@ -64,7 +64,7 @@ namespace CSMPrefs
         , mModifierStatus(false)
         , mAction(nullptr)
     {
-        assert (parent);
+        assert(parent);
 
         State::get().getShortcutManager().addShortcut(this);
         State::get().getShortcutManager().getSequence(name, mSequence);
@@ -77,7 +77,7 @@ namespace CSMPrefs
         {
             State::get().getShortcutManager().removeShortcut(this);
         }
-        catch(const std::exception& e)
+        catch (const std::exception& e)
         {
             Log(Debug::Error) << "Error in the destructor: " << e.what();
         }

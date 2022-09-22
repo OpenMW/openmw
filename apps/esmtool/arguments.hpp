@@ -1,9 +1,9 @@
 #ifndef OPENMW_ESMTOOL_ARGUMENTS_H
 #define OPENMW_ESMTOOL_ARGUMENTS_H
 
-#include <vector>
-#include <optional>
 #include <filesystem>
+#include <optional>
+#include <vector>
 
 #include <components/esm/format.hpp>
 

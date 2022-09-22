@@ -1,21 +1,21 @@
 #include "mainmenu.hpp"
 
-#include <MyGUI_TextBox.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_TextBox.h>
 
-#include <components/widgets/imagebutton.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/statemanager.hpp"
 
-#include "savegamedialog.hpp"
-#include "confirmationdialog.hpp"
 #include "backgroundimage.hpp"
+#include "confirmationdialog.hpp"
+#include "savegamedialog.hpp"
 #include "videowidget.hpp"
 
 namespace MWGui
@@ -23,8 +23,10 @@ namespace MWGui
 
     MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription)
         : WindowBase("openmw_mainmenu.layout")
-        , mWidth (w), mHeight (h)
-        , mVFS(vfs), mButtonBox(nullptr)
+        , mWidth(w)
+        , mHeight(h)
+        , mVFS(vfs)
+        , mButtonBox(nullptr)
         , mBackground(nullptr)
         , mVideoBackground(nullptr)
         , mVideo(nullptr)
@@ -45,14 +47,13 @@ namespace MWGui
         updateMenu();
     }
 
-    void MainMenu::setVisible (bool visible)
+    void MainMenu::setVisible(bool visible)
     {
         if (visible)
             updateMenu();
 
-        bool isMainMenu =
-                MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
-                MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
+        bool isMainMenu = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+            && MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
 
         showBackground(isMainMenu);
 
@@ -69,12 +70,12 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mButtons["return"]);
         }
 
-        Layout::setVisible (visible);
+        Layout::setVisible(visible);
     }
 
     void MainMenu::onNewGameConfirmed()
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_MainMenu);
         MWBase::Environment::get().getStateManager()->newGame();
     }
 
@@ -83,18 +84,18 @@ namespace MWGui
         MWBase::Environment::get().getStateManager()->requestQuit();
     }
 
-    void MainMenu::onButtonClicked(MyGUI::Widget *sender)
+    void MainMenu::onButtonClicked(MyGUI::Widget* sender)
     {
-        MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
 
         const std::string& name = *sender->getUserData<std::string>();
         winMgr->playSound("Menu Click");
         if (name == "return")
         {
-            winMgr->removeGuiMode (GM_MainMenu);
+            winMgr->removeGuiMode(GM_MainMenu);
         }
         else if (name == "options")
-            winMgr->pushGuiMode (GM_Settings);
+            winMgr->pushGuiMode(GM_Settings);
         else if (name == "credits")
             winMgr->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
@@ -160,12 +161,12 @@ namespace MWGui
             if (!mVideo)
             {
                 // Use black background to correct aspect ratio
-                mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
-                    MyGUI::Align::Default, "MainMenuBackground");
+                mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>(
+                    "ImageBox", 0, 0, 1, 1, MyGUI::Align::Default, "MainMenuBackground");
                 mVideoBackground->setImageTexture("black");
 
-                mVideo = mVideoBackground->createWidget<VideoWidget>("ImageBox", 0,0,1,1,
-                    MyGUI::Align::Stretch, "MainMenuBackground");
+                mVideo = mVideoBackground->createWidget<VideoWidget>(
+                    "ImageBox", 0, 0, 1, 1, MyGUI::Align::Stretch, "MainMenuBackground");
                 mVideo->setVFS(mVFS);
 
                 mVideo->playVideo("video\\menu_background.bik");
@@ -184,8 +185,8 @@ namespace MWGui
         {
             if (!mBackground)
             {
-                mBackground = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
-                    MyGUI::Align::Stretch, "MainMenuBackground");
+                mBackground = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>(
+                    "ImageBox", 0, 0, 1, 1, MyGUI::Align::Stretch, "MainMenuBackground");
                 mBackground->setBackgroundImage("textures\\menu_morrowind.dds", true, stretch);
             }
             mBackground->setVisible(true);
@@ -211,10 +212,11 @@ namespace MWGui
 
     void MainMenu::updateMenu()
     {
-        setCoord(0,0, mWidth, mHeight);
+        setCoord(0, 0, mWidth, mHeight);
 
         if (!mButtonBox)
-            mButtonBox = mMainWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(0, 0, 0, 0), MyGUI::Align::Default);
+            mButtonBox
+                = mMainWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(0, 0, 0, 0), MyGUI::Align::Default);
 
         int curH = 0;
 
@@ -224,35 +226,36 @@ namespace MWGui
 
         std::vector<std::string> buttons;
 
-        if (state==MWBase::StateManager::State_Running)
+        if (state == MWBase::StateManager::State_Running)
             buttons.emplace_back("return");
 
         buttons.emplace_back("newgame");
 
-        if (state==MWBase::StateManager::State_Running &&
-            MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1 &&
-                MWBase::Environment::get().getWindowManager()->isSavingAllowed())
+        if (state == MWBase::StateManager::State_Running
+            && MWBase::Environment::get().getWorld()->getGlobalInt("chargenstate") == -1
+            && MWBase::Environment::get().getWindowManager()->isSavingAllowed())
             buttons.emplace_back("savegame");
 
-        if (MWBase::Environment::get().getStateManager()->characterBegin()!=
-            MWBase::Environment::get().getStateManager()->characterEnd())
+        if (MWBase::Environment::get().getStateManager()->characterBegin()
+            != MWBase::Environment::get().getStateManager()->characterEnd())
             buttons.emplace_back("loadgame");
 
         buttons.emplace_back("options");
 
-        if (state==MWBase::StateManager::State_NoGame)
+        if (state == MWBase::StateManager::State_NoGame)
             buttons.emplace_back("credits");
 
         buttons.emplace_back("exitgame");
 
         // Create new buttons if needed
-        std::vector<std::string> allButtons { "return", "newgame", "savegame", "loadgame", "options", "credits", "exitgame"};
+        std::vector<std::string> allButtons{ "return", "newgame", "savegame", "loadgame", "options", "credits",
+            "exitgame" };
         for (std::string& buttonId : allButtons)
         {
             if (mButtons.find(buttonId) == mButtons.end())
             {
-                Gui::ImageButton* button = mButtonBox->createWidget<Gui::ImageButton>
-                        ("ImageBox", MyGUI::IntCoord(0, curH, 0, 0), MyGUI::Align::Default);
+                Gui::ImageButton* button = mButtonBox->createWidget<Gui::ImageButton>(
+                    "ImageBox", MyGUI::IntCoord(0, curH, 0, 0), MyGUI::Align::Default);
                 button->setProperty("ImageHighlighted", "textures\\menu_" + buttonId + "_over.dds");
                 button->setProperty("ImageNormal", "textures\\menu_" + buttonId + ".dds");
                 button->setProperty("ImagePushed", "textures\\menu_" + buttonId + "_pressed.dds");
@@ -288,19 +291,19 @@ namespace MWGui
             // Trim off some of the excessive padding
             // TODO: perhaps do this within ImageButton?
             int height = requested.height;
-            button->setImageTile(MyGUI::IntSize(requested.width, requested.height-16*scale));
-            button->setCoord((maxwidth-requested.width/scale) / 2, curH, requested.width/scale, height/scale-16);
-            curH += height/scale-16;
+            button->setImageTile(MyGUI::IntSize(requested.width, requested.height - 16 * scale));
+            button->setCoord(
+                (maxwidth - requested.width / scale) / 2, curH, requested.width / scale, height / scale - 16);
+            curH += height / scale - 16;
         }
 
         if (state == MWBase::StateManager::State_NoGame)
         {
             // Align with the background image
-            int bottomPadding=24;
-            mButtonBox->setCoord (mWidth/2 - maxwidth/2, mHeight - curH - bottomPadding, maxwidth, curH);
+            int bottomPadding = 24;
+            mButtonBox->setCoord(mWidth / 2 - maxwidth / 2, mHeight - curH - bottomPadding, maxwidth, curH);
         }
         else
-            mButtonBox->setCoord (mWidth/2 - maxwidth/2, mHeight/2 - curH/2, maxwidth, curH);
-
+            mButtonBox->setCoord(mWidth / 2 - maxwidth / 2, mHeight / 2 - curH / 2, maxwidth, curH);
     }
 }

@@ -24,10 +24,10 @@ namespace Files
     {
         std::string ext = Misc::StringUtils::lowerCase(extension);
         auto iter = mCollections.find(ext);
-        if (iter==mCollections.end())
+        if (iter == mCollections.end())
         {
-            std::pair<MultiDirCollectionContainer::iterator, bool> result =
-                mCollections.emplace(ext, MultiDirCollection(mDirectories, ext, mFoldCase));
+            std::pair<MultiDirCollectionContainer::iterator, bool> result
+                = mCollections.emplace(ext, MultiDirCollection(mDirectories, ext, mFoldCase));
 
             iter = result.first;
         }
@@ -37,10 +37,9 @@ namespace Files
 
     std::filesystem::path Collections::getPath(const std::string& file) const
     {
-        for (const auto & mDirectorie : mDirectories)
+        for (const auto& mDirectorie : mDirectories)
         {
-            for (const auto& iter2 :
-                std::filesystem::directory_iterator (mDirectorie))
+            for (const auto& iter2 : std::filesystem::directory_iterator(mDirectorie))
             {
                 const auto& path = iter2.path();
                 const auto str = Files::pathToUnicodeString(path.filename());
@@ -55,15 +54,14 @@ namespace Files
             }
         }
 
-        throw std::runtime_error ("file " + file + " not found");
+        throw std::runtime_error("file " + file + " not found");
     }
 
     bool Collections::doesExist(const std::string& file) const
     {
-        for (const auto & mDirectorie : mDirectories)
+        for (const auto& mDirectorie : mDirectories)
         {
-            for (const auto& iter2 :
-                std::filesystem::directory_iterator (mDirectorie))
+            for (const auto& iter2 : std::filesystem::directory_iterator(mDirectorie))
             {
                 const auto& path = iter2.path();
                 const auto str = Files::pathToUnicodeString(path.filename());

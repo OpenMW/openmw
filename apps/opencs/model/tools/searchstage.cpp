@@ -4,26 +4,28 @@
 
 #include "searchoperation.hpp"
 
-CSMTools::SearchStage::SearchStage (const CSMWorld::IdTableBase *model)
-: mModel (model), mOperation (nullptr)
-{}
+CSMTools::SearchStage::SearchStage(const CSMWorld::IdTableBase* model)
+    : mModel(model)
+    , mOperation(nullptr)
+{
+}
 
 int CSMTools::SearchStage::setup()
 {
     if (mOperation)
         mSearch = mOperation->getSearch();
 
-    mSearch.configure (mModel);
-        
+    mSearch.configure(mModel);
+
     return mModel->rowCount();
 }
 
-void CSMTools::SearchStage::perform (int stage, CSMDoc::Messages& messages)
+void CSMTools::SearchStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    mSearch.searchRow (mModel, stage, messages);
+    mSearch.searchRow(mModel, stage, messages);
 }
 
-void CSMTools::SearchStage::setOperation (const SearchOperation *operation)
+void CSMTools::SearchStage::setOperation(const SearchOperation* operation)
 {
     mOperation = operation;
 }

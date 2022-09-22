@@ -12,9 +12,15 @@ namespace Misc
 
         StrongTypedef() = default;
 
-        explicit StrongTypedef(const T& value) : mValue(value) {}
+        explicit StrongTypedef(const T& value)
+            : mValue(value)
+        {
+        }
 
-        explicit StrongTypedef(T&& value) : mValue(std::move(value)) {}
+        explicit StrongTypedef(T&& value)
+            : mValue(std::move(value))
+        {
+        }
 
         operator const T&() const { return mValue; }
 

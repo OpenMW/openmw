@@ -1,9 +1,9 @@
 #include "processinvoker.hpp"
 
-#include <QMessageBox>
-#include <QStringList>
-#include <QString>
 #include <QDir>
+#include <QMessageBox>
+#include <QString>
+#include <QStringList>
 
 #if defined(Q_OS_MAC)
 #include <QCoreApplication>
@@ -14,49 +14,45 @@ Process::ProcessInvoker::ProcessInvoker(QObject* parent)
 {
     mProcess = new QProcess(this);
 
-    connect(mProcess, &QProcess::errorOccurred,
-            this, &ProcessInvoker::processError);
+    connect(mProcess, &QProcess::errorOccurred, this, &ProcessInvoker::processError);
 
-    connect(mProcess, qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
-            this, &ProcessInvoker::processFinished);
-
+    connect(
+        mProcess, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &ProcessInvoker::processFinished);
 
     mName = QString();
     mArguments = QStringList();
 }
 
-Process::ProcessInvoker::~ProcessInvoker()
-{
-}
+Process::ProcessInvoker::~ProcessInvoker() {}
 
-//void Process::ProcessInvoker::setProcessName(const QString &name)
+// void Process::ProcessInvoker::setProcessName(const QString &name)
 //{
-//    mName = name;
-//}
+//     mName = name;
+// }
 
-//void Process::ProcessInvoker::setProcessArguments(const QStringList &arguments)
+// void Process::ProcessInvoker::setProcessArguments(const QStringList &arguments)
 //{
-//    mArguments = arguments;
-//}
+//     mArguments = arguments;
+// }
 
 QProcess* Process::ProcessInvoker::getProcess()
 {
     return mProcess;
 }
 
-//QString Process::ProcessInvoker::getProcessName()
+// QString Process::ProcessInvoker::getProcessName()
 //{
-//    return mName;
-//}
+//     return mName;
+// }
 
-//QStringList Process::ProcessInvoker::getProcessArguments()
+// QStringList Process::ProcessInvoker::getProcessArguments()
 //{
-//    return mArguments;
-//}
+//     return mArguments;
+// }
 
-bool Process::ProcessInvoker::startProcess(const QString &name, const QStringList &arguments, bool detached)
+bool Process::ProcessInvoker::startProcess(const QString& name, const QStringList& arguments, bool detached)
 {
-//    mProcess = new QProcess(this);
+    //    mProcess = new QProcess(this);
     mName = name;
     mArguments = arguments;
     mIgnoreErrors = false;
@@ -73,45 +69,57 @@ bool Process::ProcessInvoker::startProcess(const QString &name, const QStringLis
 
     QFileInfo info(path);
 
-    if (!info.exists()) {
+    if (!info.exists())
+    {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error starting executable"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<html><head/><body><p><b>Could not find %1</b></p> \
+        msgBox.setText(
+            tr("<html><head/><body><p><b>Could not find %1</b></p> \
                           <p>The application is not found.</p> \
-                          <p>Please make sure OpenMW is installed correctly and try again.</p></body></html>").arg(info.fileName()));
+                          <p>Please make sure OpenMW is installed correctly and try again.</p></body></html>")
+                .arg(info.fileName()));
         msgBox.exec();
         return false;
     }
 
-    if (!info.isExecutable()) {
+    if (!info.isExecutable())
+    {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error starting executable"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<html><head/><body><p><b>Could not start %1</b></p> \
+        msgBox.setText(
+            tr("<html><head/><body><p><b>Could not start %1</b></p> \
                           <p>The application is not executable.</p> \
-                          <p>Please make sure you have the right permissions and try again.</p></body></html>").arg(info.fileName()));
+                          <p>Please make sure you have the right permissions and try again.</p></body></html>")
+                .arg(info.fileName()));
         msgBox.exec();
         return false;
     }
 
     // Start the executable
-    if (detached) {
-        if (!mProcess->startDetached(path, arguments)) {
+    if (detached)
+    {
+        if (!mProcess->startDetached(path, arguments))
+        {
             QMessageBox msgBox;
             msgBox.setWindowTitle(tr("Error starting executable"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<html><head/><body><p><b>Could not start %1</b></p> \
+            msgBox.setText(
+                tr("<html><head/><body><p><b>Could not start %1</b></p> \
                               <p>An error occurred while starting %1.</p> \
-                              <p>Press \"Show Details...\" for more information.</p></body></html>").arg(info.fileName()));
+                              <p>Press \"Show Details...\" for more information.</p></body></html>")
+                    .arg(info.fileName()));
             msgBox.setDetailedText(mProcess->errorString());
             msgBox.exec();
             return false;
         }
-    } else {
+    }
+    else
+    {
         mProcess->start(path, arguments);
 
         /*
@@ -122,8 +130,8 @@ bool Process::ProcessInvoker::startProcess(const QString &name, const QStringLis
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(tr("<html><head/><body><p><b>Could not start %1</b></p> \
                               <p>An error occurred while starting %1.</p> \
-                              <p>Press \"Show Details...\" for more information.</p></body></html>").arg(info.fileName()));
-            msgBox.setDetailedText(mProcess->errorString());
+                              <p>Press \"Show Details...\" for more
+        information.</p></body></html>").arg(info.fileName())); msgBox.setDetailedText(mProcess->errorString());
             msgBox.exec();
 
             return false;
@@ -140,9 +148,8 @@ bool Process::ProcessInvoker::startProcess(const QString &name, const QStringLis
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
                               <p>An error occurred while running %1.</p> \
-                              <p>Press \"Show Details...\" for more information.</p></body></html>").arg(info.fileName()));
-            msgBox.setDetailedText(error);
-            msgBox.exec();
+                              <p>Press \"Show Details...\" for more
+        information.</p></body></html>").arg(info.fileName())); msgBox.setDetailedText(error); msgBox.exec();
 
             return false;
         }
@@ -150,7 +157,6 @@ bool Process::ProcessInvoker::startProcess(const QString &name, const QStringLis
     }
 
     return true;
-
 }
 
 void Process::ProcessInvoker::processError(QProcess::ProcessError error)
@@ -161,17 +167,19 @@ void Process::ProcessInvoker::processError(QProcess::ProcessError error)
     msgBox.setWindowTitle(tr("Error running executable"));
     msgBox.setIcon(QMessageBox::Critical);
     msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setText(tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
+    msgBox.setText(
+        tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
                       <p>An error occurred while running %1.</p> \
-                      <p>Press \"Show Details...\" for more information.</p></body></html>").arg(mName));
+                      <p>Press \"Show Details...\" for more information.</p></body></html>")
+            .arg(mName));
     msgBox.setDetailedText(mProcess->errorString());
     msgBox.exec();
-
 }
 
 void Process::ProcessInvoker::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    if (exitCode != 0 || exitStatus == QProcess::CrashExit) {
+    if (exitCode != 0 || exitStatus == QProcess::CrashExit)
+    {
         if (mIgnoreErrors)
             return;
         QString error(mProcess->readAllStandardError());
@@ -182,9 +190,11 @@ void Process::ProcessInvoker::processFinished(int exitCode, QProcess::ExitStatus
         msgBox.setWindowTitle(tr("Error running executable"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
+        msgBox.setText(
+            tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
                           <p>An error occurred while running %1.</p> \
-                          <p>Press \"Show Details...\" for more information.</p></body></html>").arg(mName));
+                          <p>Press \"Show Details...\" for more information.</p></body></html>")
+                .arg(mName));
         msgBox.setDetailedText(error);
         msgBox.exec();
     }

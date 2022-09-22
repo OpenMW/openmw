@@ -1,9 +1,9 @@
 #ifndef OPENMW_MWRENDER_GROUNDCOVER_H
 #define OPENMW_MWRENDER_GROUNDCOVER_H
 
-#include <components/terrain/quadtreeworld.hpp>
-#include <components/resource/scenemanager.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/terrain/quadtreeworld.hpp>
 
 namespace MWWorld
 {
@@ -18,13 +18,16 @@ namespace osg
 namespace MWRender
 {
     typedef std::tuple<osg::Vec2f, float> GroundcoverChunkId; // Center, Size
-    class Groundcover : public Resource::GenericResourceManager<GroundcoverChunkId>, public Terrain::QuadTreeWorld::ChunkManager
+    class Groundcover : public Resource::GenericResourceManager<GroundcoverChunkId>,
+                        public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
-        Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance, const MWWorld::GroundcoverStore& store);
+        Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance,
+            const MWWorld::GroundcoverStore& store);
         ~Groundcover();
 
-        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
+        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags,
+            bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
 
         unsigned int getNodeMask() override;
 
@@ -35,8 +38,11 @@ namespace MWRender
             ESM::Position mPos;
             float mScale;
 
-            GroundcoverEntry(const ESM::CellRef& ref) : mPos(ref.mPos), mScale(ref.mScale)
-            {}
+            GroundcoverEntry(const ESM::CellRef& ref)
+                : mPos(ref.mPos)
+                , mScale(ref.mScale)
+            {
+            }
         };
 
     private:

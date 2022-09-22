@@ -16,12 +16,11 @@ public:
     class ComboBoxLineEdit : public LineEdit
     {
     public:
-        explicit ComboBoxLineEdit (QWidget *parent = nullptr);
+        explicit ComboBoxLineEdit(QWidget* parent = nullptr);
     };
 
 public:
-
-    explicit ProfilesComboBox(QWidget *parent = nullptr);
+    explicit ProfilesComboBox(QWidget* parent = nullptr);
     void setEditEnabled(bool editable);
     void setCurrentProfile(int index)
     {
@@ -30,16 +29,16 @@ public:
     }
 
 signals:
-    void signalProfileTextChanged(const QString &item);
-    void signalProfileChanged(const QString &previous, const QString &current);
+    void signalProfileTextChanged(const QString& item);
+    void signalProfileChanged(const QString& previous, const QString& current);
     void signalProfileChanged(int index);
-    void profileRenamed(const QString &oldName, const QString &newName);
+    void profileRenamed(const QString& oldName, const QString& newName);
 
 private slots:
 
     void slotEditingFinished();
     void slotIndexChangedByUser(int index);
-    void slotTextChanged(const QString &text);
+    void slotTextChanged(const QString& text);
 
 private:
     QString mOldProfile;

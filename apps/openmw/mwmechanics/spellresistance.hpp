@@ -20,18 +20,18 @@ namespace MWMechanics
     /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
     ///                being applied (but not applied yet) that should also be considered.
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                              const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
+        const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
 
     /// Get the effective resistance against an effect casted by the given actor in the given spell (optional).
     /// @return >=100 for fully resisted. can also return negative value for damage amplification.
     /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
     ///                being applied (but not applied yet) that should also be considered.
-    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                               const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
+    float getEffectResistance(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+        const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
 
     /// Get the resistance attribute against an effect for a given actor. This will add together
     /// ResistX and Weakness to X effects relevant against the given effect.
-    float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects);
+    float getEffectResistanceAttribute(short effectId, const MagicEffects* actorEffects);
 }
 
 #endif

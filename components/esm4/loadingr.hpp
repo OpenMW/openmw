@@ -43,7 +43,7 @@ namespace ESM4
         struct Data
         {
             std::uint32_t value;
-            float         weight;
+            float weight;
         };
 
         struct ENIT
@@ -53,7 +53,7 @@ namespace ESM4
         };
 #pragma pack(pop)
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -66,14 +66,14 @@ namespace ESM4
         std::vector<std::string> mScriptEffect; // FIXME: prob. should be in a struct
         FormId mScriptId;
         ScriptEffect mEffect;
-        ENIT   mEnchantment;
+        ENIT mEnchantment;
 
         Data mData;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

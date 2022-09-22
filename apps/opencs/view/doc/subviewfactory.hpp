@@ -16,39 +16,37 @@ namespace CSVDoc
 
     class SubViewFactoryBase
     {
-            // not implemented
-            SubViewFactoryBase (const SubViewFactoryBase&);
-            SubViewFactoryBase& operator= (const SubViewFactoryBase&);
+        // not implemented
+        SubViewFactoryBase(const SubViewFactoryBase&);
+        SubViewFactoryBase& operator=(const SubViewFactoryBase&);
 
-        public:
+    public:
+        SubViewFactoryBase();
 
-            SubViewFactoryBase();
+        virtual ~SubViewFactoryBase();
 
-            virtual ~SubViewFactoryBase();
-
-            virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document) = 0;
-            ///< The ownership of the returned sub view is not transferred.
+        virtual SubView* makeSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document) = 0;
+        ///< The ownership of the returned sub view is not transferred.
     };
 
     class SubViewFactoryManager
     {
-            std::map<CSMWorld::UniversalId::Type, SubViewFactoryBase *> mSubViewFactories;
+        std::map<CSMWorld::UniversalId::Type, SubViewFactoryBase*> mSubViewFactories;
 
-            // not implemented
-            SubViewFactoryManager (const SubViewFactoryManager&);
-            SubViewFactoryManager& operator= (const SubViewFactoryManager&);
+        // not implemented
+        SubViewFactoryManager(const SubViewFactoryManager&);
+        SubViewFactoryManager& operator=(const SubViewFactoryManager&);
 
-        public:
+    public:
+        SubViewFactoryManager();
 
-            SubViewFactoryManager();
+        ~SubViewFactoryManager();
 
-            ~SubViewFactoryManager();
+        void add(const CSMWorld::UniversalId::Type& id, SubViewFactoryBase* factory);
+        ///< The ownership of \a factory is transferred to this.
 
-            void add (const CSMWorld::UniversalId::Type& id, SubViewFactoryBase *factory);
-            ///< The ownership of \a factory is transferred to this.
-
-            SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
-            ///< The ownership of the returned sub view is not transferred.
+        SubView* makeSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document);
+        ///< The ownership of the returned sub view is not transferred.
     };
 }
 

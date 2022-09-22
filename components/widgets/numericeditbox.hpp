@@ -17,8 +17,9 @@ namespace Gui
 
     public:
         NumericEditBox()
-            : mValue(0), mMinValue(std::numeric_limits<int>::min()),
-            mMaxValue(std::numeric_limits<int>::max())
+            : mValue(0)
+            , mMinValue(std::numeric_limits<int>::min())
+            , mMaxValue(std::numeric_limits<int>::max())
         {
         }
 
@@ -29,11 +30,12 @@ namespace Gui
         EventHandle_ValueChanged eventValueChanged;
 
         /// @note Does not trigger eventValueChanged
-        void setValue (int value);
+        void setValue(int value);
         int getValue();
 
         void setMinValue(int minValue);
         void setMaxValue(int maxValue);
+
     private:
         void onEditTextChange(MyGUI::EditBox* sender);
         void onKeyLostFocus(MyGUI::Widget* _new) override;

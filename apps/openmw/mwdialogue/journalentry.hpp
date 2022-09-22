@@ -28,11 +28,11 @@ namespace MWDialogue
         /// actor is optional
         Entry(std::string_view topic, std::string_view infoId, const MWWorld::Ptr& actor);
 
-        Entry (const ESM::JournalEntry& record);
+        Entry(const ESM::JournalEntry& record);
 
         const std::string& getText() const;
 
-        void write (ESM::JournalEntry& entry) const;
+        void write(ESM::JournalEntry& entry) const;
     };
 
     /// \brief A dialogue entry
@@ -46,9 +46,9 @@ namespace MWDialogue
 
         JournalEntry(std::string_view topic, std::string_view infoId, const MWWorld::Ptr& actor);
 
-        JournalEntry (const ESM::JournalEntry& record);
+        JournalEntry(const ESM::JournalEntry& record);
 
-        void write (ESM::JournalEntry& entry) const;
+        void write(ESM::JournalEntry& entry) const;
 
         static JournalEntry makeFromQuest(std::string_view topic, int index);
 
@@ -64,12 +64,12 @@ namespace MWDialogue
 
         StampedJournalEntry();
 
-        StampedJournalEntry(std::string_view topic, std::string_view infoId,
-            int day, int month, int dayOfMonth, const MWWorld::Ptr& actor);
+        StampedJournalEntry(std::string_view topic, std::string_view infoId, int day, int month, int dayOfMonth,
+            const MWWorld::Ptr& actor);
 
-        StampedJournalEntry (const ESM::JournalEntry& record);
+        StampedJournalEntry(const ESM::JournalEntry& record);
 
-        void write (ESM::JournalEntry& entry) const;
+        void write(ESM::JournalEntry& entry) const;
 
         static StampedJournalEntry makeFromQuest(std::string_view topic, int index, const MWWorld::Ptr& actor);
     };

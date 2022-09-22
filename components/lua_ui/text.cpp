@@ -6,7 +6,8 @@ namespace LuaUi
 {
     LuaText::LuaText()
         : mAutoSized(true)
-    {}
+    {
+    }
 
     void LuaText::initialize()
     {

@@ -5,20 +5,20 @@
 
 namespace ESM
 {
-namespace
-{
-    constexpr NAME currentRegionRecord     = "CREG";
-    constexpr NAME timePassedRecord        = "TMPS";
-    constexpr NAME fastForwardRecord       = "FAST";
-    constexpr NAME weatherUpdateTimeRecord = "WUPD";
-    constexpr NAME transitionFactorRecord  = "TRFC";
-    constexpr NAME currentWeatherRecord    = "CWTH";
-    constexpr NAME nextWeatherRecord       = "NWTH";
-    constexpr NAME queuedWeatherRecord     = "QWTH";
-    constexpr NAME regionNameRecord        = "RGNN";
-    constexpr NAME regionWeatherRecord     = "RGNW";
-    constexpr NAME regionChanceRecord      = "RGNC";
-}
+    namespace
+    {
+        constexpr NAME currentRegionRecord = "CREG";
+        constexpr NAME timePassedRecord = "TMPS";
+        constexpr NAME fastForwardRecord = "FAST";
+        constexpr NAME weatherUpdateTimeRecord = "WUPD";
+        constexpr NAME transitionFactorRecord = "TRFC";
+        constexpr NAME currentWeatherRecord = "CWTH";
+        constexpr NAME nextWeatherRecord = "NWTH";
+        constexpr NAME queuedWeatherRecord = "QWTH";
+        constexpr NAME regionNameRecord = "RGNN";
+        constexpr NAME regionWeatherRecord = "RGNW";
+        constexpr NAME regionChanceRecord = "RGNC";
+    }
 }
 
 namespace ESM
@@ -62,11 +62,11 @@ namespace ESM
         esm.writeHNT(queuedWeatherRecord, mQueuedWeather);
 
         std::map<std::string, RegionWeatherState>::const_iterator it = mRegions.begin();
-        for(; it != mRegions.end(); ++it)
+        for (; it != mRegions.end(); ++it)
         {
             esm.writeHNCString(regionNameRecord, it->first.c_str());
             esm.writeHNT(regionWeatherRecord, it->second.mWeather);
-            for(size_t i = 0; i < it->second.mChances.size(); ++i)
+            for (size_t i = 0; i < it->second.mChances.size(); ++i)
             {
                 esm.writeHNT(regionChanceRecord, it->second.mChances[i]);
             }

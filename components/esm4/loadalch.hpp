@@ -50,12 +50,12 @@ namespace ESM4
             std::int32_t value;
             std::uint32_t flags;
             FormId withdrawl;
-            float  chanceAddition;
+            float chanceAddition;
             FormId sound;
         };
 #pragma pack(pop)
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -76,9 +76,9 @@ namespace ESM4
         EnchantedItem mItem;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

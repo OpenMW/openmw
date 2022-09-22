@@ -1,44 +1,44 @@
 #include "charactermanager.hpp"
 
 #include <cctype>
-#include <sstream>
 #include <filesystem>
+#include <sstream>
 #include <utility>
 
 #include <components/misc/utf8stream.hpp>
 
-MWState::CharacterManager::CharacterManager (std::filesystem::path  saves,
-    const std::vector<std::string>& contentFiles)
-: mPath (std::move(saves)), mCurrent (nullptr), mGame (getFirstGameFile(contentFiles))
+MWState::CharacterManager::CharacterManager(std::filesystem::path saves, const std::vector<std::string>& contentFiles)
+    : mPath(std::move(saves))
+    , mCurrent(nullptr)
+    , mGame(getFirstGameFile(contentFiles))
 {
-    if (!std::filesystem::is_directory (mPath))
+    if (!std::filesystem::is_directory(mPath))
     {
-        std::filesystem::create_directories (mPath);
+        std::filesystem::create_directories(mPath);
     }
     else
     {
-        for (std::filesystem::directory_iterator iter (mPath);
-            iter!=std::filesystem::directory_iterator(); ++iter)
+        for (std::filesystem::directory_iterator iter(mPath); iter != std::filesystem::directory_iterator(); ++iter)
         {
             std::filesystem::path characterDir = *iter;
 
-            if (std::filesystem::is_directory (characterDir))
+            if (std::filesystem::is_directory(characterDir))
             {
-                Character character (characterDir, mGame);
+                Character character(characterDir, mGame);
 
-                if (character.begin()!=character.end())
-                    mCharacters.push_back (character);
+                if (character.begin() != character.end())
+                    mCharacters.push_back(character);
             }
         }
     }
 }
 
-MWState::Character *MWState::CharacterManager::getCurrentCharacter ()
+MWState::Character* MWState::CharacterManager::getCurrentCharacter()
 {
     return mCurrent;
 }
 
-void MWState::CharacterManager::deleteSlot(const MWState::Character *character, const MWState::Slot *slot)
+void MWState::CharacterManager::deleteSlot(const MWState::Character* character, const MWState::Slot* slot)
 {
     std::list<Character>::iterator it = findCharacter(character);
 
@@ -60,10 +60,10 @@ MWState::Character* MWState::CharacterManager::createCharacter(const std::string
 
     // The character name is user-supplied, so we need to escape the path
     Utf8Stream nameStream(name);
-    while(!nameStream.eof())
+    while (!nameStream.eof())
     {
         auto c = nameStream.consume();
-        if(c <= 0x7F && std::isalnum(c)) // Ignore multibyte characters and non alphanumeric characters
+        if (c <= 0x7F && std::isalnum(c)) // Ignore multibyte characters and non alphanumeric characters
             stream << static_cast<char>(c);
         else
             stream << '_';
@@ -72,13 +72,13 @@ MWState::Character* MWState::CharacterManager::createCharacter(const std::string
     std::filesystem::path path = mPath / stream.str();
 
     // Append an index if necessary to ensure a unique directory
-    int i=0;
+    int i = 0;
     while (std::filesystem::exists(path))
     {
-           std::ostringstream test;
-           test << stream.str();
-           test << " - " << ++i;
-           path = mPath / test.str();
+        std::ostringstream test;
+        test << stream.str();
+        test << " - " << ++i;
+        path = mPath / test.str();
     }
 
     mCharacters.emplace_back(path, mGame);
@@ -94,11 +94,11 @@ std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter
             break;
     }
     if (it == mCharacters.end())
-        throw std::logic_error ("invalid character");
+        throw std::logic_error("invalid character");
     return it;
 }
 
-void MWState::CharacterManager::setCurrentCharacter (const Character *character)
+void MWState::CharacterManager::setCurrentCharacter(const Character* character)
 {
     if (!character)
         mCurrent = nullptr;
@@ -109,7 +109,6 @@ void MWState::CharacterManager::setCurrentCharacter (const Character *character)
         mCurrent = &*it;
     }
 }
-
 
 std::list<MWState::Character>::const_iterator MWState::CharacterManager::begin() const
 {

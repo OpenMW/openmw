@@ -30,7 +30,8 @@ namespace LuaUi
         {
             sol::object typeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::type);
             std::string type = LuaUtil::getValueOrDefault(typeField, defaultWidgetType);
-            sol::object templateTypeField = LuaUtil::getFieldOrNil(layout, LayoutKeys::templateLayout, LayoutKeys::type);
+            sol::object templateTypeField
+                = LuaUtil::getFieldOrNil(layout, LayoutKeys::templateLayout, LayoutKeys::type);
             if (templateTypeField != sol::nil)
             {
                 std::string templateType = LuaUtil::getValueOrDefault(templateTypeField, defaultWidgetType);
@@ -106,8 +107,7 @@ namespace LuaUi
             if (!eventsObj.is<sol::table>())
                 throw std::logic_error("The \"events\" layout field must be a table of callbacks");
             auto events = eventsObj.as<sol::table>();
-            events.for_each([ext](const sol::object& name, const sol::object& callback)
-            {
+            events.for_each([ext](const sol::object& name, const sol::object& callback) {
                 if (name.is<std::string>() && callback.is<LuaUtil::Callback>())
                     ext->setCallback(name.as<std::string>(), callback.as<LuaUtil::Callback>());
                 else if (!name.is<std::string>())
@@ -127,9 +127,7 @@ namespace LuaUi
 
             std::string name = layout.get_or(LayoutKeys::name, std::string());
             MyGUI::Widget* widget = MyGUI::Gui::getInstancePtr()->createWidgetT(
-                type, "",
-                MyGUI::IntCoord(), MyGUI::Align::Default,
-                std::string(), name);
+                type, "", MyGUI::IntCoord(), MyGUI::Align::Default, std::string(), name);
 
             WidgetExtension* ext = dynamic_cast<WidgetExtension*>(widget);
             if (!ext)
@@ -178,8 +176,8 @@ namespace LuaUi
         , mLayer()
         , mUpdate(false)
         , mDestroy(false)
-    {}
-
+    {
+    }
 
     std::shared_ptr<Element> Element::make(sol::table layout)
     {

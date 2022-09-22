@@ -44,7 +44,7 @@ namespace ESM4
             std::uint32_t attr;
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -54,9 +54,9 @@ namespace ESM4
         Data mData;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& reader) const;
+        // void save(ESM4::Writer& reader) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

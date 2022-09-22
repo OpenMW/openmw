@@ -31,7 +31,7 @@ namespace ESM
             {
                 uint32_t loopcount;
                 esm.getT(loopcount);
-                anim.mLoopCount = (uint64_t) loopcount;
+                anim.mLoopCount = (uint64_t)loopcount;
             }
 
             mScriptedAnims.push_back(anim);

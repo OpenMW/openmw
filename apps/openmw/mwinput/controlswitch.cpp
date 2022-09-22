@@ -1,8 +1,8 @@
 #include "controlswitch.hpp"
 
-#include <components/esm3/esmwriter.hpp>
-#include <components/esm3/esmreader.hpp>
 #include <components/esm3/controlsstate.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -20,13 +20,13 @@ namespace MWInput
 
     void ControlSwitch::clear()
     {
-        mSwitches["playercontrols"]      = true;
-        mSwitches["playerfighting"]      = true;
-        mSwitches["playerjumping"]       = true;
-        mSwitches["playerlooking"]       = true;
-        mSwitches["playermagic"]         = true;
-        mSwitches["playerviewswitch"]    = true;
-        mSwitches["vanitymode"]          = true;
+        mSwitches["playercontrols"] = true;
+        mSwitches["playerfighting"] = true;
+        mSwitches["playerjumping"] = true;
+        mSwitches["playerlooking"] = true;
+        mSwitches["playermagic"] = true;
+        mSwitches["playerviewswitch"] = true;
+        mSwitches["vanitymode"] = true;
     }
 
     bool ControlSwitch::get(std::string_view key)
@@ -75,9 +75,9 @@ namespace MWInput
         controls.mWeaponDrawingDisabled = !mSwitches["playerfighting"];
         controls.mSpellDrawingDisabled = !mSwitches["playermagic"];
 
-        writer.startRecord (ESM::REC_INPU);
+        writer.startRecord(ESM::REC_INPU);
         controls.save(writer);
-        writer.endRecord (ESM::REC_INPU);
+        writer.endRecord(ESM::REC_INPU);
     }
 
     void ControlSwitch::readRecord(ESM::ESMReader& reader, uint32_t type)

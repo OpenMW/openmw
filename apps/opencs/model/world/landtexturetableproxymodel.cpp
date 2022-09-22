@@ -9,7 +9,7 @@ namespace CSMWorld
     {
     }
 
-    bool LandTextureTableProxyModel::filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const
+    bool LandTextureTableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
     {
         return IdTableProxyModel::filterAcceptsRow(sourceRow, sourceParent);
     }

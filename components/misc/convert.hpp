@@ -4,11 +4,11 @@
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadpgrd.hpp>
 
+#include <LinearMath/btQuaternion.h>
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
-#include <LinearMath/btQuaternion.h>
-#include <osg/Vec3f>
 #include <osg/Quat>
+#include <osg/Vec3f>
 
 namespace Misc::Convert
 {
@@ -44,8 +44,7 @@ namespace Misc::Convert
 
     inline osg::Quat makeOsgQuat(const float (&rotation)[3])
     {
-        return osg::Quat(rotation[2], osg::Vec3f(0, 0, -1))
-            * osg::Quat(rotation[1], osg::Vec3f(0, -1, 0))
+        return osg::Quat(rotation[2], osg::Vec3f(0, 0, -1)) * osg::Quat(rotation[1], osg::Vec3f(0, -1, 0))
             * osg::Quat(rotation[0], osg::Vec3f(-1, 0, 0));
     }
 
@@ -56,8 +55,7 @@ namespace Misc::Convert
 
     inline btQuaternion makeBulletQuaternion(const float (&rotation)[3])
     {
-        return btQuaternion(btVector3(0, 0, -1), rotation[2])
-            * btQuaternion(btVector3(0, -1, 0), rotation[1])
+        return btQuaternion(btVector3(0, 0, -1), rotation[2]) * btQuaternion(btVector3(0, -1, 0), rotation[1])
             * btQuaternion(btVector3(-1, 0, 0), rotation[0]);
     }
 

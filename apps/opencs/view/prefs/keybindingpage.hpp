@@ -16,23 +16,21 @@ namespace CSVPrefs
 {
     class KeyBindingPage : public PageBase
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        KeyBindingPage(CSMPrefs::Category& category, QWidget* parent);
 
-            KeyBindingPage(CSMPrefs::Category& category, QWidget* parent);
+        void addSetting(CSMPrefs::Setting* setting);
 
-            void addSetting(CSMPrefs::Setting* setting);
+    private:
+        QStackedLayout* mStackedLayout;
+        QGridLayout* mPageLayout;
+        QComboBox* mPageSelector;
 
-        private:
+    private slots:
 
-            QStackedLayout* mStackedLayout;
-            QGridLayout* mPageLayout;
-            QComboBox* mPageSelector;
-
-        private slots:
-
-            void resetKeyBindings();
+        void resetKeyBindings();
     };
 }
 

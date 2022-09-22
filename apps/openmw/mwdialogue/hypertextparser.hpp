@@ -16,7 +16,11 @@ namespace MWDialogue
                 ImplicitKeyword
             };
 
-            Token(const std::string & text, Type type) : mText(text), mType(type) {}
+            Token(const std::string& text, Type type)
+                : mText(text)
+                , mType(type)
+            {
+            }
 
             bool isExplicitLink() { return mType == ExplicitLink; }
 
@@ -26,9 +30,9 @@ namespace MWDialogue
 
         // In translations (at least Russian) the links are marked with @#, so
         // it should be a function to parse it
-        std::vector<Token> parseHyperText(const std::string & text);
-        void tokenizeKeywords(const std::string & text, std::vector<Token> & tokens);
-        size_t removePseudoAsterisks(std::string & phrase);
+        std::vector<Token> parseHyperText(const std::string& text);
+        void tokenizeKeywords(const std::string& text, std::vector<Token>& tokens);
+        size_t removePseudoAsterisks(std::string& phrase);
     }
 }
 

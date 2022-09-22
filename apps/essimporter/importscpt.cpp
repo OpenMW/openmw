@@ -2,11 +2,10 @@
 
 #include <components/esm3/esmreader.hpp>
 
-
 namespace ESSImport
 {
 
-    void SCPT::load(ESM::ESMReader &esm)
+    void SCPT::load(ESM::ESMReader& esm)
     {
         esm.getHNT(mSCHD, "SCHD");
 

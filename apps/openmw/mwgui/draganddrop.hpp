@@ -27,8 +27,9 @@ namespace MWGui
 
         DragAndDrop();
 
-        void startDrag (int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count);
-        void drop (ItemModel* targetModel, ItemView* targetView);
+        void startDrag(
+            int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count);
+        void drop(ItemModel* targetModel, ItemView* targetView);
         void onFrame();
 
         void finish();

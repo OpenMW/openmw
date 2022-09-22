@@ -13,7 +13,12 @@ namespace Compiler
         int mLine;
         std::string mLiteral;
 
-        TokenLoc() : mColumn (0), mLine (0), mLiteral () {}
+        TokenLoc()
+            : mColumn(0)
+            , mLine(0)
+            , mLiteral()
+        {
+        }
     };
 }
 

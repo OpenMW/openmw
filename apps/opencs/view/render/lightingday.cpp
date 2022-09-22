@@ -2,15 +2,15 @@
 
 #include <osg/LightSource>
 
-CSVRender::LightingDay::LightingDay(){}
+CSVRender::LightingDay::LightingDay() {}
 
-void CSVRender::LightingDay::activate (osg::Group* rootNode, bool /*isExterior*/)
+void CSVRender::LightingDay::activate(osg::Group* rootNode, bool /*isExterior*/)
 {
     mRootNode = rootNode;
 
     mLightSource = new osg::LightSource;
 
-    osg::ref_ptr<osg::Light> light (new osg::Light);
+    osg::ref_ptr<osg::Light> light(new osg::Light);
     light->setPosition(osg::Vec4f(0.f, 0.f, 1.f, 0.f));
     light->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
     light->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
@@ -29,7 +29,7 @@ void CSVRender::LightingDay::deactivate()
         mRootNode->removeChild(mLightSource);
 }
 
-osg::Vec4f CSVRender::LightingDay::getAmbientColour(osg::Vec4f *defaultAmbient)
+osg::Vec4f CSVRender::LightingDay::getAmbientColour(osg::Vec4f* defaultAmbient)
 {
     if (defaultAmbient)
         return *defaultAmbient;

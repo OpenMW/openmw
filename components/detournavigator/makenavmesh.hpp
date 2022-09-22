@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 
-#include "tileposition.hpp"
-#include "sharednavmesh.hpp"
 #include "recastmesh.hpp"
+#include "sharednavmesh.hpp"
+#include "tileposition.hpp"
 
 #include <memory>
 #include <vector>
@@ -38,10 +38,8 @@ namespace DetourNavigator
 
     inline bool isEmpty(const RecastMesh& recastMesh)
     {
-        return recastMesh.getMesh().getIndices().empty()
-                && recastMesh.getWater().empty()
-                && recastMesh.getHeightfields().empty()
-                && recastMesh.getFlatHeightfields().empty();
+        return recastMesh.getMesh().getIndices().empty() && recastMesh.getWater().empty()
+            && recastMesh.getHeightfields().empty() && recastMesh.getFlatHeightfields().empty();
     }
 
     std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,

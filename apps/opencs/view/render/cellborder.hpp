@@ -28,14 +28,12 @@ namespace CSVRender
     class CellBorder
     {
     public:
-
         CellBorder(osg::Group* cellNode, const CSMWorld::CellCoordinates& coords);
         ~CellBorder();
 
         void buildShape(const ESM::Land& esmLand);
 
     private:
-
         static const int CellSize;
         static const int VertexCount;
 

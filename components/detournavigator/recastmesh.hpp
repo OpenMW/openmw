@@ -8,14 +8,14 @@
 #include <components/bullethelpers/operators.hpp>
 #include <components/resource/bulletshape.hpp>
 
-#include <osg/Vec3f>
 #include <osg/Vec2i>
+#include <osg/Vec3f>
 
 #include <memory>
-#include <string>
-#include <vector>
-#include <tuple>
 #include <numeric>
+#include <string>
+#include <tuple>
+#include <vector>
 
 namespace DetourNavigator
 {
@@ -38,13 +38,12 @@ namespace DetourNavigator
         friend inline bool operator<(const Mesh& lhs, const Mesh& rhs) noexcept
         {
             return std::tie(lhs.mIndices, lhs.mVertices, lhs.mAreaTypes)
-                    < std::tie(rhs.mIndices, rhs.mVertices, rhs.mAreaTypes);
+                < std::tie(rhs.mIndices, rhs.mVertices, rhs.mAreaTypes);
         }
 
         friend inline std::size_t getSize(const Mesh& value) noexcept
         {
-            return value.mIndices.size() * sizeof(int)
-                + value.mVertices.size() * sizeof(float)
+            return value.mIndices.size() * sizeof(int) + value.mVertices.size() * sizeof(float)
                 + value.mAreaTypes.size() * sizeof(AreaType);
         }
     };
@@ -57,7 +56,7 @@ namespace DetourNavigator
 
     inline bool operator<(const Water& lhs, const Water& rhs) noexcept
     {
-        const auto tie = [] (const Water& v) { return std::tie(v.mCellSize, v.mLevel); };
+        const auto tie = [](const Water& v) { return std::tie(v.mCellSize, v.mLevel); };
         return tie(lhs) < tie(rhs);
     }
 
@@ -69,7 +68,7 @@ namespace DetourNavigator
 
     inline bool operator<(const CellWater& lhs, const CellWater& rhs) noexcept
     {
-        const auto tie = [] (const CellWater& v) { return std::tie(v.mCellPosition, v.mWater); };
+        const auto tie = [](const CellWater& v) { return std::tie(v.mCellPosition, v.mWater); };
         return tie(lhs) < tie(rhs);
     }
 
@@ -98,8 +97,8 @@ namespace DetourNavigator
 
     inline auto makeTuple(const Heightfield& v) noexcept
     {
-        return std::tie(v.mCellPosition, v.mCellSize, v.mLength, v.mMinHeight, v.mMaxHeight,
-                        v.mHeights, v.mOriginalSize, v.mMinX, v.mMinY);
+        return std::tie(v.mCellPosition, v.mCellSize, v.mLength, v.mMinHeight, v.mMaxHeight, v.mHeights,
+            v.mOriginalSize, v.mMinX, v.mMinY);
     }
 
     inline bool operator<(const Heightfield& lhs, const Heightfield& rhs) noexcept
@@ -116,7 +115,7 @@ namespace DetourNavigator
 
     inline bool operator<(const FlatHeightfield& lhs, const FlatHeightfield& rhs) noexcept
     {
-        const auto tie = [] (const FlatHeightfield& v) { return std::tie(v.mCellPosition, v.mCellSize, v.mHeight); };
+        const auto tie = [](const FlatHeightfield& v) { return std::tie(v.mCellPosition, v.mCellSize, v.mHeight); };
         return tie(lhs) < tie(rhs);
     }
 
@@ -138,20 +137,11 @@ namespace DetourNavigator
 
         const Mesh& getMesh() const noexcept { return mMesh; }
 
-        const std::vector<CellWater>& getWater() const
-        {
-            return mWater;
-        }
+        const std::vector<CellWater>& getWater() const { return mWater; }
 
-        const std::vector<Heightfield>& getHeightfields() const noexcept
-        {
-            return mHeightfields;
-        }
+        const std::vector<Heightfield>& getHeightfields() const noexcept { return mHeightfields; }
 
-        const std::vector<FlatHeightfield>& getFlatHeightfields() const noexcept
-        {
-            return mFlatHeightfields;
-        }
+        const std::vector<FlatHeightfield>& getFlatHeightfields() const noexcept { return mFlatHeightfields; }
 
         const std::vector<MeshSource>& getMeshSources() const noexcept { return mMeshSources; }
 
@@ -167,8 +157,8 @@ namespace DetourNavigator
         {
             return getSize(value.mMesh) + value.mWater.size() * sizeof(CellWater)
                 + value.mHeightfields.size() * sizeof(Heightfield)
-                + std::accumulate(value.mHeightfields.begin(), value.mHeightfields.end(), std::size_t {0},
-                                  [] (std::size_t r, const Heightfield& v) { return r + v.mHeights.size() * sizeof(float); })
+                + std::accumulate(value.mHeightfields.begin(), value.mHeightfields.end(), std::size_t{ 0 },
+                    [](std::size_t r, const Heightfield& v) { return r + v.mHeights.size() * sizeof(float); })
                 + value.mFlatHeightfields.size() * sizeof(FlatHeightfield);
         }
     };

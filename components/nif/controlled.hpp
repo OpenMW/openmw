@@ -29,131 +29,129 @@
 namespace Nif
 {
 
-struct NiSourceTexture : public Named
-{
-    // Is this an external (references a separate texture file) or
-    // internal (data is inside the nif itself) texture?
-    bool external;
-
-    std::string filename; // In case of external textures
-    NiPixelDataPtr data;  // In case of internal textures
-
-    /* Pixel layout
-        0 - Palettised
-        1 - High color 16
-        2 - True color 32
-        3 - Compressed
-        4 - Bumpmap
-        5 - Default */
-    unsigned int pixel;
-
-    /* Mipmap format
-        0 - no
-        1 - yes
-        2 - default */
-    unsigned int mipmap;
-
-    /* Alpha
-        0 - none
-        1 - binary
-        2 - smooth
-        3 - default (use material alpha, or multiply material with texture if present)
-    */
-    unsigned int alpha;
-
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
-
-struct BSShaderTextureSet : public Record
-{
-    enum TextureType
+    struct NiSourceTexture : public Named
     {
-        TextureType_Base = 0,
-        TextureType_Normal = 1,
-        TextureType_Glow = 2,
-        TextureType_Parallax = 3,
-        TextureType_Env = 4,
-        TextureType_EnvMask = 5,
-        TextureType_Subsurface = 6,
-        TextureType_BackLighting = 7
+        // Is this an external (references a separate texture file) or
+        // internal (data is inside the nif itself) texture?
+        bool external;
+
+        std::string filename; // In case of external textures
+        NiPixelDataPtr data; // In case of internal textures
+
+        /* Pixel layout
+            0 - Palettised
+            1 - High color 16
+            2 - True color 32
+            3 - Compressed
+            4 - Bumpmap
+            5 - Default */
+        unsigned int pixel;
+
+        /* Mipmap format
+            0 - no
+            1 - yes
+            2 - default */
+        unsigned int mipmap;
+
+        /* Alpha
+            0 - none
+            1 - binary
+            2 - smooth
+            3 - default (use material alpha, or multiply material with texture if present)
+        */
+        unsigned int alpha;
+
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
     };
-    std::vector<std::string> textures;
 
-    void read(NIFStream *nif) override;
-};
+    struct BSShaderTextureSet : public Record
+    {
+        enum TextureType
+        {
+            TextureType_Base = 0,
+            TextureType_Normal = 1,
+            TextureType_Glow = 2,
+            TextureType_Parallax = 3,
+            TextureType_Env = 4,
+            TextureType_EnvMask = 5,
+            TextureType_Subsurface = 6,
+            TextureType_BackLighting = 7
+        };
+        std::vector<std::string> textures;
 
-struct NiParticleModifier : public Record
-{
-    NiParticleModifierPtr next;
-    ControllerPtr controller;
+        void read(NIFStream* nif) override;
+    };
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+    struct NiParticleModifier : public Record
+    {
+        NiParticleModifierPtr next;
+        ControllerPtr controller;
 
-struct NiParticleGrowFade : public NiParticleModifier
-{
-    float growTime;
-    float fadeTime;
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-    void read(NIFStream *nif) override;
-};
+    struct NiParticleGrowFade : public NiParticleModifier
+    {
+        float growTime;
+        float fadeTime;
 
-struct NiParticleColorModifier : public NiParticleModifier
-{
-    NiColorDataPtr data;
+        void read(NIFStream* nif) override;
+    };
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+    struct NiParticleColorModifier : public NiParticleModifier
+    {
+        NiColorDataPtr data;
 
-struct NiGravity : public NiParticleModifier
-{
-    float mForce;
-    /* 0 - Wind (fixed direction)
-     * 1 - Point (fixed origin)
-     */
-    int mType;
-    float mDecay;
-    osg::Vec3f mPosition;
-    osg::Vec3f mDirection;
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-    void read(NIFStream *nif) override;
-};
+    struct NiGravity : public NiParticleModifier
+    {
+        float mForce;
+        /* 0 - Wind (fixed direction)
+         * 1 - Point (fixed origin)
+         */
+        int mType;
+        float mDecay;
+        osg::Vec3f mPosition;
+        osg::Vec3f mDirection;
 
-struct NiParticleCollider : public NiParticleModifier
-{
-    float mBounceFactor;
-    void read(NIFStream *nif) override;
-};
+        void read(NIFStream* nif) override;
+    };
 
-// NiPinaColada
-struct NiPlanarCollider : public NiParticleCollider
-{
-    osg::Vec2f mExtents;
-    osg::Vec3f mPosition;
-    osg::Vec3f mXVector, mYVector;
-    osg::Vec3f mPlaneNormal;
-    float mPlaneDistance;
+    struct NiParticleCollider : public NiParticleModifier
+    {
+        float mBounceFactor;
+        void read(NIFStream* nif) override;
+    };
 
-    void read(NIFStream *nif) override;
-};
+    // NiPinaColada
+    struct NiPlanarCollider : public NiParticleCollider
+    {
+        osg::Vec2f mExtents;
+        osg::Vec3f mPosition;
+        osg::Vec3f mXVector, mYVector;
+        osg::Vec3f mPlaneNormal;
+        float mPlaneDistance;
 
-struct NiSphericalCollider : public NiParticleCollider
-{
-    float mRadius;
-    osg::Vec3f mCenter;
+        void read(NIFStream* nif) override;
+    };
 
-    void read(NIFStream *nif) override;
-};
+    struct NiSphericalCollider : public NiParticleCollider
+    {
+        float mRadius;
+        osg::Vec3f mCenter;
 
-struct NiParticleRotation : public NiParticleModifier
-{
-    void read(NIFStream *nif) override;
-};
+        void read(NIFStream* nif) override;
+    };
 
-
+    struct NiParticleRotation : public NiParticleModifier
+    {
+        void read(NIFStream* nif) override;
+    };
 
 } // Namespace
 #endif

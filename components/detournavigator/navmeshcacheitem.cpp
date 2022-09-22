@@ -1,8 +1,8 @@
-#include "tileposition.hpp"
-#include "navmeshtilescache.hpp"
-#include "navmeshtileview.hpp"
 #include "navmeshcacheitem.hpp"
 #include "navmeshdata.hpp"
+#include "navmeshtilescache.hpp"
+#include "navmeshtileview.hpp"
+#include "tileposition.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -68,8 +68,8 @@ namespace DetourNavigator
         return navMesh.getTileAt(position.x(), position.y(), layer);
     }
 
-    UpdateNavMeshStatus NavMeshCacheItem::updateTile(const TilePosition& position, NavMeshTilesCache::Value&& cached,
-        NavMeshData&& navMeshData)
+    UpdateNavMeshStatus NavMeshCacheItem::updateTile(
+        const TilePosition& position, NavMeshTilesCache::Value&& cached, NavMeshData&& navMeshData)
     {
         const dtMeshTile* currentTile = getTile(*mImpl, position);
         if (currentTile != nullptr
@@ -86,7 +86,7 @@ namespace DetourNavigator
             if (tile == mUsedTiles.end())
             {
                 mUsedTiles.emplace_hint(tile, position,
-                    Tile {Version {mVersion.mRevision, 1}, std::move(cached), std::move(navMeshData)});
+                    Tile{ Version{ mVersion.mRevision, 1 }, std::move(cached), std::move(navMeshData) });
             }
             else
             {
@@ -104,7 +104,10 @@ namespace DetourNavigator
                 mUsedTiles.erase(position);
                 ++mVersion.mRevision;
             }
-            return UpdateNavMeshStatusBuilder().removed(removed).failed((addStatus & DT_OUT_OF_MEMORY) != 0).getResult();
+            return UpdateNavMeshStatusBuilder()
+                .removed(removed)
+                .failed((addStatus & DT_OUT_OF_MEMORY) != 0)
+                .getResult();
         }
     }
 

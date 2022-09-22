@@ -20,7 +20,8 @@ namespace Gui
 
         static void setDefaultNeedKeyFocus(bool enabled);
 
-        /// Set mImageNormal, mImageHighlighted and mImagePushed based on file convention (image_idle.ext, image_over.ext and image_pressed.ext)
+        /// Set mImageNormal, mImageHighlighted and mImagePushed based on file convention (image_idle.ext,
+        /// image_over.ext and image_pressed.ext)
         void setImage(const std::string& image);
 
         void setTextureRect(MyGUI::IntCoord coord);

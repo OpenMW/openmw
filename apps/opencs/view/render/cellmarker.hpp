@@ -19,49 +19,42 @@ namespace CSVRender
 
     class CellMarkerTag : public TagBase
     {
-        private:
+    private:
+        CellMarker* mMarker;
 
-            CellMarker *mMarker;
+    public:
+        CellMarkerTag(CellMarker* marker);
 
-        public:
-
-            CellMarkerTag(CellMarker *marker);
-
-            CellMarker *getCellMarker() const;
+        CellMarker* getCellMarker() const;
     };
 
     /// \brief Marker to display cell coordinates.
     class CellMarker
     {
-        private:
+    private:
+        osg::Group* mCellNode;
+        osg::ref_ptr<osg::AutoTransform> mMarkerNode;
+        CSMWorld::CellCoordinates mCoordinates;
+        bool mExists;
 
-            osg::Group* mCellNode;
-            osg::ref_ptr<osg::AutoTransform> mMarkerNode;
-            CSMWorld::CellCoordinates mCoordinates;
-            bool mExists;
+        // Not implemented.
+        CellMarker(const CellMarker&);
+        CellMarker& operator=(const CellMarker&);
 
-            // Not implemented.
-            CellMarker(const CellMarker&);
-            CellMarker& operator=(const CellMarker&);
+        /// \brief Build marker containing cell's coordinates.
+        void buildMarker();
 
-            /// \brief Build marker containing cell's coordinates.
-            void buildMarker();
+        /// \brief Position marker at center of cell.
+        void positionMarker();
 
-            /// \brief Position marker at center of cell.
-            void positionMarker();
+    public:
+        /// \brief Constructor.
+        /// \param cellNode Cell to create marker for.
+        /// \param coordinates Coordinates of cell.
+        /// \param cellExists Whether or not cell exists.
+        CellMarker(osg::Group* cellNode, const CSMWorld::CellCoordinates& coordinates, const bool cellExists);
 
-        public:
-
-            /// \brief Constructor.
-            /// \param cellNode Cell to create marker for.
-            /// \param coordinates Coordinates of cell.
-            /// \param cellExists Whether or not cell exists.
-            CellMarker(
-                osg::Group *cellNode,
-                const CSMWorld::CellCoordinates& coordinates,
-                const bool cellExists);
-
-            ~CellMarker();
+        ~CellMarker();
     };
 }
 

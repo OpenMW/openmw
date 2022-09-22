@@ -1,23 +1,28 @@
 #include "filedialog.hpp"
 
-#include <QPushButton>
 #include <QDialogButtonBox>
+#include <QPushButton>
 
 #include "components/contentselector/model/esmfile.hpp"
 #include "components/contentselector/view/contentselector.hpp"
 
-#include "filewidget.hpp"
 #include "adjusterwidget.hpp"
+#include "filewidget.hpp"
 
-CSVDoc::FileDialog::FileDialog(QWidget *parent) :
-    QDialog(parent), mSelector (nullptr), mAction(ContentAction_Undefined), mFileWidget (nullptr), mAdjusterWidget (nullptr), mDialogBuilt(false)
+CSVDoc::FileDialog::FileDialog(QWidget* parent)
+    : QDialog(parent)
+    , mSelector(nullptr)
+    , mAction(ContentAction_Undefined)
+    , mFileWidget(nullptr)
+    , mAdjusterWidget(nullptr)
+    , mDialogBuilt(false)
 {
-    ui.setupUi (this);
+    ui.setupUi(this);
     resize(400, 400);
 
-    setObjectName ("FileDialog");
-    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget, /*showOMWScripts=*/false);
-    mAdjusterWidget = new AdjusterWidget (this);
+    setObjectName("FileDialog");
+    mSelector = new ContentSelectorView::ContentSelector(ui.contentSelectorWidget, /*showOMWScripts=*/false);
+    mAdjusterWidget = new AdjusterWidget(this);
 }
 
 void CSVDoc::FileDialog::addFiles(const std::vector<std::filesystem::path>& dataDirs)
@@ -30,7 +35,7 @@ void CSVDoc::FileDialog::addFiles(const std::vector<std::filesystem::path>& data
     mSelector->sortFiles();
 }
 
-void CSVDoc::FileDialog::setEncoding(const QString &encoding)
+void CSVDoc::FileDialog::setEncoding(const QString& encoding)
 {
     mSelector->setEncoding(encoding);
 }
@@ -44,46 +49,46 @@ QStringList CSVDoc::FileDialog::selectedFilePaths()
 {
     QStringList filePaths;
 
-    for (ContentSelectorModel::EsmFile *file : mSelector->selectedFiles() )
+    for (ContentSelectorModel::EsmFile* file : mSelector->selectedFiles())
         filePaths.append(file->filePath());
 
     return filePaths;
 }
 
-void CSVDoc::FileDialog::setLocalData (const std::filesystem::path& localData)
+void CSVDoc::FileDialog::setLocalData(const std::filesystem::path& localData)
 {
-    mAdjusterWidget->setLocalData (localData);
+    mAdjusterWidget->setLocalData(localData);
 }
 
-void CSVDoc::FileDialog::showDialog (ContentAction action)
+void CSVDoc::FileDialog::showDialog(ContentAction action)
 {
     mAction = action;
 
-    ui.projectGroupBoxLayout->insertWidget (0, mAdjusterWidget);
+    ui.projectGroupBoxLayout->insertWidget(0, mAdjusterWidget);
 
     switch (mAction)
     {
-    case ContentAction_New:
-        buildNewFileView();
-        break;
+        case ContentAction_New:
+            buildNewFileView();
+            break;
 
-    case ContentAction_Edit:
-        buildOpenFileView();
-        break;
+        case ContentAction_Edit:
+            buildOpenFileView();
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
-    mAdjusterWidget->setFilenameCheck (mAction == ContentAction_New);
+    mAdjusterWidget->setFilenameCheck(mAction == ContentAction_New);
 
-    if(!mDialogBuilt)
+    if (!mDialogBuilt)
     {
-        //connections common to both dialog view flavors
-        connect (mSelector, &ContentSelectorView::ContentSelector::signalCurrentGamefileIndexChanged,
-                 this, qOverload<int>(&FileDialog::slotUpdateAcceptButton));
+        // connections common to both dialog view flavors
+        connect(mSelector, &ContentSelectorView::ContentSelector::signalCurrentGamefileIndexChanged, this,
+            qOverload<int>(&FileDialog::slotUpdateAcceptButton));
 
-        connect (ui.projectButtonBox, &QDialogButtonBox::rejected, this, &FileDialog::slotRejected);
+        connect(ui.projectButtonBox, &QDialogButtonBox::rejected, this, &FileDialog::slotRejected);
         mDialogBuilt = true;
     }
 
@@ -96,48 +101,47 @@ void CSVDoc::FileDialog::buildNewFileView()
 {
     setWindowTitle(tr("Create a new addon"));
 
-    QPushButton* createButton = ui.projectButtonBox->button (QDialogButtonBox::Ok);
-    createButton->setText ("Create");
-    createButton->setEnabled (false);
+    QPushButton* createButton = ui.projectButtonBox->button(QDialogButtonBox::Ok);
+    createButton->setText("Create");
+    createButton->setEnabled(false);
 
-    if(!mFileWidget)
+    if (!mFileWidget)
     {
-        mFileWidget = new FileWidget (this);
+        mFileWidget = new FileWidget(this);
 
-        mFileWidget->setType (true);
+        mFileWidget->setType(true);
         mFileWidget->extensionLabelIsVisible(true);
 
-        connect (mFileWidget, &FileWidget::nameChanged,
-            mAdjusterWidget, &AdjusterWidget::setName);
+        connect(mFileWidget, &FileWidget::nameChanged, mAdjusterWidget, &AdjusterWidget::setName);
 
-        connect (mFileWidget, &FileWidget::nameChanged,
-                this, qOverload<const QString &, bool>(&FileDialog::slotUpdateAcceptButton));
+        connect(mFileWidget, &FileWidget::nameChanged, this,
+            qOverload<const QString&, bool>(&FileDialog::slotUpdateAcceptButton));
     }
 
-    ui.projectGroupBoxLayout->insertWidget (0, mFileWidget);
+    ui.projectGroupBoxLayout->insertWidget(0, mFileWidget);
 
-    connect (ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotNewFile);
+    connect(ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotNewFile);
 }
 
 void CSVDoc::FileDialog::buildOpenFileView()
 {
     setWindowTitle(tr("Open"));
-    ui.projectGroupBox->setTitle (QString(""));
-    ui.projectButtonBox->button(QDialogButtonBox::Ok)->setText ("Open");
-    if(mSelector->isGamefileSelected())
-        ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled (true);
+    ui.projectGroupBox->setTitle(QString(""));
+    ui.projectButtonBox->button(QDialogButtonBox::Ok)->setText("Open");
+    if (mSelector->isGamefileSelected())
+        ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
     else
-        ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
+        ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-    if(!mDialogBuilt)
+    if (!mDialogBuilt)
     {
-        connect (mSelector, &ContentSelectorView::ContentSelector::signalAddonDataChanged,
-            this, &FileDialog::slotAddonDataChanged);
+        connect(mSelector, &ContentSelectorView::ContentSelector::signalAddonDataChanged, this,
+            &FileDialog::slotAddonDataChanged);
     }
-        connect (ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotOpenFile);
+    connect(ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotOpenFile);
 }
 
-void CSVDoc::FileDialog::slotAddonDataChanged(const QModelIndex &topleft, const QModelIndex &bottomright)
+void CSVDoc::FileDialog::slotAddonDataChanged(const QModelIndex& topleft, const QModelIndex& bottomright)
 {
     slotUpdateAcceptButton(0);
 }
@@ -149,10 +153,10 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(int)
     if (mFileWidget && mAction == ContentAction_New)
         name = mFileWidget->getName();
 
-    slotUpdateAcceptButton (name, true);
+    slotUpdateAcceptButton(name, true);
 }
 
-void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
+void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString& name, bool)
 {
     bool success = !mSelector->selectedFiles().empty();
 
@@ -162,13 +166,13 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
         success = !name.isEmpty();
     else if (success)
     {
-        ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();
-        mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
+        ContentSelectorModel::EsmFile* file = mSelector->selectedFiles().back();
+        mAdjusterWidget->setName(file->filePath(), !file->isGameFile());
     }
     else
-        mAdjusterWidget->setName ("", true);
+        mAdjusterWidget->setName("", true);
 
-    ui.projectButtonBox->button (QDialogButtonBox::Ok)->setEnabled (success);
+    ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled(success);
 }
 
 QString CSVDoc::FileDialog::filename() const
@@ -182,9 +186,9 @@ QString CSVDoc::FileDialog::filename() const
 void CSVDoc::FileDialog::slotRejected()
 {
     emit rejected();
-    disconnect (ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotNewFile);
-    disconnect (ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotOpenFile);
-    if(mFileWidget)
+    disconnect(ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotNewFile);
+    disconnect(ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotOpenFile);
+    if (mFileWidget)
     {
         delete mFileWidget;
         mFileWidget = nullptr;
@@ -194,23 +198,23 @@ void CSVDoc::FileDialog::slotRejected()
 
 void CSVDoc::FileDialog::slotNewFile()
 {
-    emit signalCreateNewFile (mAdjusterWidget->getPath());
-    if(mFileWidget)
+    emit signalCreateNewFile(mAdjusterWidget->getPath());
+    if (mFileWidget)
     {
         delete mFileWidget;
         mFileWidget = nullptr;
     }
-    disconnect (ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotNewFile);
+    disconnect(ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotNewFile);
     close();
 }
 
 void CSVDoc::FileDialog::slotOpenFile()
 {
-    ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();
+    ContentSelectorModel::EsmFile* file = mSelector->selectedFiles().back();
 
-    mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
+    mAdjusterWidget->setName(file->filePath(), !file->isGameFile());
 
-    emit signalOpenFiles (mAdjusterWidget->getPath());
-    disconnect (ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotOpenFile);
+    emit signalOpenFiles(mAdjusterWidget->getPath());
+    disconnect(ui.projectButtonBox, &QDialogButtonBox::accepted, this, &FileDialog::slotOpenFile);
     close();
 }

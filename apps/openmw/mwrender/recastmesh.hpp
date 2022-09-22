@@ -37,10 +37,7 @@ namespace MWRender
 
         void disable();
 
-        bool isEnabled() const
-        {
-            return mEnabled;
-        }
+        bool isEnabled() const { return mEnabled; }
 
     private:
         struct Group

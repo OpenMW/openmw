@@ -6,11 +6,13 @@
 
 #include <components/misc/constants.hpp>
 
-CSVRender::CellMarkerTag::CellMarkerTag(CellMarker *marker)
-: TagBase(Mask_CellMarker), mMarker(marker)
-{}
+CSVRender::CellMarkerTag::CellMarkerTag(CellMarker* marker)
+    : TagBase(Mask_CellMarker)
+    , mMarker(marker)
+{
+}
 
-CSVRender::CellMarker *CSVRender::CellMarkerTag::getCellMarker() const
+CSVRender::CellMarker* CSVRender::CellMarkerTag::getCellMarker() const
 {
     return mMarker;
 }
@@ -20,7 +22,7 @@ void CSVRender::CellMarker::buildMarker()
     const int characterSize = 20;
 
     // Set up attributes of marker text.
-    osg::ref_ptr<osgText::Text> markerText (new osgText::Text);
+    osg::ref_ptr<osgText::Text> markerText(new osgText::Text);
     markerText->setLayout(osgText::Text::LEFT_TO_RIGHT);
     markerText->setCharacterSize(characterSize);
     markerText->setAlignment(osgText::Text::CENTER_CENTER);
@@ -37,9 +39,7 @@ void CSVRender::CellMarker::buildMarker()
     }
 
     // Add text containing cell's coordinates.
-    std::string coordinatesText =
-        std::to_string(mCoordinates.getX()) + "," +
-        std::to_string(mCoordinates.getY());
+    std::string coordinatesText = std::to_string(mCoordinates.getX()) + "," + std::to_string(mCoordinates.getY());
     markerText->setText(coordinatesText);
 
     // Add text to marker node.
@@ -58,12 +58,10 @@ void CSVRender::CellMarker::positionMarker()
 }
 
 CSVRender::CellMarker::CellMarker(
-    osg::Group *cellNode,
-    const CSMWorld::CellCoordinates& coordinates,
-    const bool cellExists
-) : mCellNode(cellNode),
-    mCoordinates(coordinates),
-    mExists(cellExists)
+    osg::Group* cellNode, const CSMWorld::CellCoordinates& coordinates, const bool cellExists)
+    : mCellNode(cellNode)
+    , mCoordinates(coordinates)
+    , mExists(cellExists)
 {
     // Set up node for cell marker.
     mMarkerNode = new osg::AutoTransform();

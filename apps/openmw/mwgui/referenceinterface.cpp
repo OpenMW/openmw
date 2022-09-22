@@ -2,13 +2,9 @@
 
 namespace MWGui
 {
-    ReferenceInterface::ReferenceInterface()
-    {
-    }
+    ReferenceInterface::ReferenceInterface() {}
 
-    ReferenceInterface::~ReferenceInterface()
-    {
-    }
+    ReferenceInterface::~ReferenceInterface() {}
 
     void ReferenceInterface::checkReferenceAvailable()
     {

@@ -16,15 +16,16 @@ namespace Misc
     // so we have the opportunity to use proper resource handling for content created in OpenMW-CS.
     namespace ResourceHelpers
     {
-        bool changeExtensionToDds(std::string &path);
-        std::string correctResourcePath(std::string_view topLevelDirectory, std::string_view resPath, const VFS::Manager* vfs);
+        bool changeExtensionToDds(std::string& path);
+        std::string correctResourcePath(
+            std::string_view topLevelDirectory, std::string_view resPath, const VFS::Manager* vfs);
         std::string correctTexturePath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctIconPath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctBookartPath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctBookartPath(std::string_view resPath, int width, int height, const VFS::Manager* vfs);
         /// Use "xfoo.nif" instead of "foo.nif" if available
-        std::string correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs);
-        std::string correctMeshPath(const std::string &resPath, const VFS::Manager* vfs);
+        std::string correctActorModelPath(const std::string& resPath, const VFS::Manager* vfs);
+        std::string correctMeshPath(const std::string& resPath, const VFS::Manager* vfs);
 
         std::string correctSoundPath(std::string_view resPath, const VFS::Manager* vfs);
 

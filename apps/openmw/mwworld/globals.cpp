@@ -2,35 +2,35 @@
 
 #include <stdexcept>
 
-#include <components/esm3/esmwriter.hpp>
 #include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "esmstore.hpp"
 
 namespace MWWorld
 {
-    Globals::Collection::const_iterator Globals::find (std::string_view name) const
+    Globals::Collection::const_iterator Globals::find(std::string_view name) const
     {
-        Collection::const_iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
+        Collection::const_iterator iter = mVariables.find(Misc::StringUtils::lowerCase(name));
 
-        if (iter==mVariables.end())
-            throw std::runtime_error ("unknown global variable: " + std::string{name});
+        if (iter == mVariables.end())
+            throw std::runtime_error("unknown global variable: " + std::string{ name });
 
         return iter;
     }
 
-    Globals::Collection::iterator Globals::find (std::string_view name)
+    Globals::Collection::iterator Globals::find(std::string_view name)
     {
-        Collection::iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
+        Collection::iterator iter = mVariables.find(Misc::StringUtils::lowerCase(name));
 
-        if (iter==mVariables.end())
-            throw std::runtime_error ("unknown global variable: " + std::string{name});
+        if (iter == mVariables.end())
+            throw std::runtime_error("unknown global variable: " + std::string{ name });
 
         return iter;
     }
 
-    void Globals::fill (const MWWorld::ESMStore& store)
+    void Globals::fill(const MWWorld::ESMStore& store)
     {
         mVariables.clear();
 
@@ -38,34 +38,38 @@ namespace MWWorld
 
         for (const ESM::Global& esmGlobal : globals)
         {
-            mVariables.insert (std::make_pair (Misc::StringUtils::lowerCase (esmGlobal.mId), esmGlobal));
+            mVariables.insert(std::make_pair(Misc::StringUtils::lowerCase(esmGlobal.mId), esmGlobal));
         }
     }
 
-    const ESM::Variant& Globals::operator[] (std::string_view name) const
+    const ESM::Variant& Globals::operator[](std::string_view name) const
     {
-        return find (Misc::StringUtils::lowerCase (name))->second.mValue;
+        return find(Misc::StringUtils::lowerCase(name))->second.mValue;
     }
 
-    ESM::Variant& Globals::operator[] (std::string_view name)
+    ESM::Variant& Globals::operator[](std::string_view name)
     {
-        return find (Misc::StringUtils::lowerCase (name))->second.mValue;
+        return find(Misc::StringUtils::lowerCase(name))->second.mValue;
     }
 
-    char Globals::getType (std::string_view name) const
+    char Globals::getType(std::string_view name) const
     {
-        Collection::const_iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
+        Collection::const_iterator iter = mVariables.find(Misc::StringUtils::lowerCase(name));
 
-        if (iter==mVariables.end())
+        if (iter == mVariables.end())
             return ' ';
 
         switch (iter->second.mValue.getType())
         {
-            case ESM::VT_Short: return 's';
-            case ESM::VT_Long: return 'l';
-            case ESM::VT_Float: return 'f';
+            case ESM::VT_Short:
+                return 's';
+            case ESM::VT_Long:
+                return 'l';
+            case ESM::VT_Float:
+                return 'f';
 
-            default: return ' ';
+            default:
+                return ' ';
         }
     }
 
@@ -74,19 +78,19 @@ namespace MWWorld
         return mVariables.size();
     }
 
-    void Globals::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
+    void Globals::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        for (Collection::const_iterator iter (mVariables.begin()); iter!=mVariables.end(); ++iter)
+        for (Collection::const_iterator iter(mVariables.begin()); iter != mVariables.end(); ++iter)
         {
-            writer.startRecord (ESM::REC_GLOB);
-            iter->second.save (writer);
-            writer.endRecord (ESM::REC_GLOB);
+            writer.startRecord(ESM::REC_GLOB);
+            iter->second.save(writer);
+            writer.endRecord(ESM::REC_GLOB);
         }
     }
 
-    bool Globals::readRecord (ESM::ESMReader& reader,  uint32_t type)
+    bool Globals::readRecord(ESM::ESMReader& reader, uint32_t type)
     {
-        if (type==ESM::REC_GLOB)
+        if (type == ESM::REC_GLOB)
         {
             ESM::Global global;
             bool isDeleted = false;
@@ -96,8 +100,8 @@ namespace MWWorld
             global.load(reader, isDeleted);
             Misc::StringUtils::lowerCaseInPlace(global.mId);
 
-            Collection::iterator iter = mVariables.find (global.mId);
-            if (iter!=mVariables.end())
+            Collection::iterator iter = mVariables.find(global.mId);
+            if (iter != mVariables.end())
                 iter->second = global;
 
             return true;

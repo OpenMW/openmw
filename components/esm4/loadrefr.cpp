@@ -26,8 +26,8 @@
 */
 #include "loadrefr.hpp"
 
-#include <stdexcept>
 #include <iostream> // FIXME: debug only
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -36,11 +36,11 @@ void ESM4::Reference::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
     mParent = reader.currCell(); // NOTE: only for persistent refs?
 
     // TODO: Let the engine apply this? Saved games?
-    //mInitiallyDisabled = ((mFlags & ESM4::Rec_Disabled) != 0) ? true : false;
+    // mInitiallyDisabled = ((mFlags & ESM4::Rec_Disabled) != 0) ? true : false;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
@@ -52,8 +52,12 @@ void ESM4::Reference::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_NAME:
             {
                 reader.getFormId(mBaseObj);
@@ -63,22 +67,32 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                         " baseobj " << formIdToString(mBaseObj) <<
                         " " << (mEditorId.empty() ? "" : mEditorId) << std::endl; // FIXME
 #endif
-                //if (mBaseObj == 0x20) // e.g. FO3 mFormId == 0x0007E90F
-                //if (mBaseObj == 0x17)
-                    //std::cout << mEditorId << std::endl;
+                // if (mBaseObj == 0x20) // e.g. FO3 mFormId == 0x0007E90F
+                // if (mBaseObj == 0x17)
+                // std::cout << mEditorId << std::endl;
                 break;
             }
-            case ESM4::SUB_DATA: reader.get(mPlacement); break;
-            case ESM4::SUB_XSCL: reader.get(mScale);    break;
-            case ESM4::SUB_XOWN: reader.getFormId(mOwner);    break;
-            case ESM4::SUB_XGLB: reader.getFormId(mGlobal);   break;
-            case ESM4::SUB_XRNK: reader.get(mFactionRank); break;
+            case ESM4::SUB_DATA:
+                reader.get(mPlacement);
+                break;
+            case ESM4::SUB_XSCL:
+                reader.get(mScale);
+                break;
+            case ESM4::SUB_XOWN:
+                reader.getFormId(mOwner);
+                break;
+            case ESM4::SUB_XGLB:
+                reader.getFormId(mGlobal);
+                break;
+            case ESM4::SUB_XRNK:
+                reader.get(mFactionRank);
+                break;
             case ESM4::SUB_XESP:
             {
                 reader.get(mEsp);
                 reader.adjustFormId(mEsp.parent);
-                //std::cout << "REFR  parent: " << formIdToString(mEsp.parent) << " ref " << formIdToString(mFormId)
-                    //<< ", 0x" << std::hex << (mEsp.flags & 0xff) << std::endl;// FIXME
+                // std::cout << "REFR  parent: " << formIdToString(mEsp.parent) << " ref " << formIdToString(mFormId)
+                //<< ", 0x" << std::hex << (mEsp.flags & 0xff) << std::endl;// FIXME
                 break;
             }
             case ESM4::SUB_XTEL:
@@ -87,7 +101,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 reader.get(mDoor.destPos);
                 if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
                     reader.get(mDoor.flags); // not in Obvlivion
-                //std::cout << "REFR  dest door: " << formIdToString(mDoor.destDoor) << std::endl;// FIXME
+                // std::cout << "REFR  dest door: " << formIdToString(mDoor.destDoor) << std::endl;// FIXME
                 break;
             }
             case ESM4::SUB_XSED:
@@ -97,18 +111,18 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 {
                     uint8_t data;
                     reader.get(data);
-                    //std::cout << "REFR XSED " << std::hex << (int)data << std::endl;
+                    // std::cout << "REFR XSED " << std::hex << (int)data << std::endl;
                     break;
                 }
                 else if (subHdr.dataSize == 4)
                 {
                     uint32_t data;
                     reader.get(data);
-                    //std::cout << "REFR XSED " << std::hex << (int)data << std::endl;
+                    // std::cout << "REFR XSED " << std::hex << (int)data << std::endl;
                     break;
                 }
 
-                //std::cout << "REFR XSED dataSize: " << subHdr.dataSize << std::endl;// FIXME
+                // std::cout << "REFR XSED dataSize: " << subHdr.dataSize << std::endl;// FIXME
                 reader.skipSubRecordData();
                 break;
             }
@@ -121,14 +135,15 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                     reader.get(data);
                     reader.get(data2);
                     reader.get(data3);
-                    //bool hasVisibleWhenDistantFlag = (mFlags & 0x00008000) != 0; // currently unused
-                    // some are trees, e.g. 000E03B6, mBaseObj 00022F32, persistent, visible when distant
-                    // some are doors, e.g. 000270F7, mBaseObj 000CD338, persistent, initially disabled
-                    // (this particular one is an Oblivion Gate)
-                    //std::cout << "REFR XLOD " << std::hex << (int)data << " " << (int)data2 << " " << (int)data3 << std::endl;
+                    // bool hasVisibleWhenDistantFlag = (mFlags & 0x00008000) != 0; // currently unused
+                    //  some are trees, e.g. 000E03B6, mBaseObj 00022F32, persistent, visible when distant
+                    //  some are doors, e.g. 000270F7, mBaseObj 000CD338, persistent, initially disabled
+                    //  (this particular one is an Oblivion Gate)
+                    // std::cout << "REFR XLOD " << std::hex << (int)data << " " << (int)data2 << " " << (int)data3 <<
+                    // std::endl;
                     break;
                 }
-                //std::cout << "REFR XLOD dataSize: " << subHdr.dataSize << std::endl;// FIXME
+                // std::cout << "REFR XLOD dataSize: " << subHdr.dataSize << std::endl;// FIXME
                 reader.skipSubRecordData();
                 break;
             }
@@ -138,11 +153,11 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 {
                     uint32_t data;
                     reader.get(data);
-                    //std::cout << "REFR XACT " << std::hex << (int)data << std::endl;
+                    // std::cout << "REFR XACT " << std::hex << (int)data << std::endl;
                     break;
                 }
 
-                //std::cout << "REFR XACT dataSize: " << subHdr.dataSize << std::endl;// FIXME
+                // std::cout << "REFR XACT dataSize: " << subHdr.dataSize << std::endl;// FIXME
                 reader.skipSubRecordData();
                 break;
             }
@@ -160,34 +175,38 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 //    XRTM : 000A4DD7 in OblivionRDCavesMiddleA05 (maybe spawn points?)
                 FormId marker;
                 reader.getFormId(marker);
-                //std::cout << "REFR " << mEditorId << " XRTM : " << formIdToString(marker) << std::endl;// FIXME
+                // std::cout << "REFR " << mEditorId << " XRTM : " << formIdToString(marker) << std::endl;// FIXME
                 break;
             }
-            case ESM4::SUB_TNAM: //reader.get(mMapMarker); break;
+            case ESM4::SUB_TNAM: // reader.get(mMapMarker); break;
             {
                 if (subHdr.dataSize != sizeof(mMapMarker))
-                    //reader.skipSubRecordData(); // FIXME: FO3
+                    // reader.skipSubRecordData(); // FIXME: FO3
                     reader.getFormId(mid);
                 else
                     reader.get(mMapMarker); // TES4
 
                 break;
             }
-            case ESM4::SUB_XMRK: mIsMapMarker = true; break; // all have mBaseObj 0x00000010 "MapMarker"
+            case ESM4::SUB_XMRK:
+                mIsMapMarker = true;
+                break; // all have mBaseObj 0x00000010 "MapMarker"
             case ESM4::SUB_FNAM:
             {
-                //std::cout << "REFR " << ESM::printName(subHdr.typeId) << " skipping..."
-                        //<< subHdr.dataSize << std::endl;
+                // std::cout << "REFR " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
             case ESM4::SUB_XTRG: // formId
             {
                 reader.getFormId(mTargetRef);
-                //std::cout << "REFR XRTG : " << formIdToString(id) << std::endl;// FIXME
+                // std::cout << "REFR XRTG : " << formIdToString(id) << std::endl;// FIXME
                 break;
             }
-            case ESM4::SUB_CNAM: reader.getFormId(mAudioLocation); break; // FONV
+            case ESM4::SUB_CNAM:
+                reader.getFormId(mAudioLocation);
+                break; // FONV
             case ESM4::SUB_XRDO: // FO3
             {
                 reader.get(mRadio.rangeRadius);
@@ -200,8 +219,8 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_SCRO: // FO3
             {
                 reader.getFormId(sid);
-                //if (mFormId == 0x0016b74B)
-                    //std::cout << "REFR SCRO : " << formIdToString(sid) << std::endl;// FIXME
+                // if (mFormId == 0x0016b74B)
+                // std::cout << "REFR SCRO : " << formIdToString(sid) << std::endl;// FIXME
                 break;
             }
             case ESM4::SUB_XLOC:
@@ -220,7 +239,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 reader.get(dummy);
                 if (subHdr.dataSize == 16)
                     reader.skipSubRecordData(4); // Oblivion (sometimes), flag?
-                else if (subHdr.dataSize == 20)  // Skyrim, FO3
+                else if (subHdr.dataSize == 20) // Skyrim, FO3
                     reader.skipSubRecordData(8); // flag?
 
                 break;
@@ -299,9 +318,9 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_WMI1: // FONV
             case ESM4::SUB_XLRL: // Unofficial Skyrim Patch
             {
-                //if (mFormId == 0x0007e90f) // XPRM XPOD
-                //if (mBaseObj == 0x17) //XPRM XOCP occlusion plane data XMBO bound half extents
-                //std::cout << "REFR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // if (mFormId == 0x0007e90f) // XPRM XPOD
+                // if (mBaseObj == 0x17) //XPRM XOCP occlusion plane data XMBO bound half extents
+                // std::cout << "REFR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -309,14 +328,12 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::REFR::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
-    //if (mFormId == 0x0016B74B) // base is TACT vCasinoUltraLuxeRadio in cell ULCasino
-        //std::cout << "REFR SCRO " << formIdToString(sid) << std::endl;
+    // if (mFormId == 0x0016B74B) // base is TACT vCasinoUltraLuxeRadio in cell ULCasino
+    // std::cout << "REFR SCRO " << formIdToString(sid) << std::endl;
 }
 
-//void ESM4::Reference::save(ESM4::Writer& writer) const
+// void ESM4::Reference::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-void ESM4::Reference::blank()
-{
-}
+void ESM4::Reference::blank() {}

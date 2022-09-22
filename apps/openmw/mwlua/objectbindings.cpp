@@ -17,29 +17,49 @@
 namespace sol
 {
     template <>
-    struct is_automagical<MWLua::LObject> : std::false_type {};
+    struct is_automagical<MWLua::LObject> : std::false_type
+    {
+    };
     template <>
-    struct is_automagical<MWLua::GObject> : std::false_type {};
+    struct is_automagical<MWLua::GObject> : std::false_type
+    {
+    };
     template <>
-    struct is_automagical<MWLua::LObjectList> : std::false_type {};
+    struct is_automagical<MWLua::LObjectList> : std::false_type
+    {
+    };
     template <>
-    struct is_automagical<MWLua::GObjectList> : std::false_type {};
+    struct is_automagical<MWLua::GObjectList> : std::false_type
+    {
+    };
     template <>
-    struct is_automagical<MWLua::Inventory<MWLua::LObject>> : std::false_type {};
+    struct is_automagical<MWLua::Inventory<MWLua::LObject>> : std::false_type
+    {
+    };
     template <>
-    struct is_automagical<MWLua::Inventory<MWLua::GObject>> : std::false_type {};
+    struct is_automagical<MWLua::Inventory<MWLua::GObject>> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
 {
 
-    namespace {
+    namespace
+    {
 
         class TeleportAction final : public LuaManager::Action
         {
         public:
-            TeleportAction(LuaUtil::LuaState* state, ObjectId object, std::string cell, const osg::Vec3f& pos, const osg::Vec3f& rot)
-                : Action(state), mObject(object), mCell(std::move(cell)), mPos(pos), mRot(rot) {}
+            TeleportAction(LuaUtil::LuaState* state, ObjectId object, std::string cell, const osg::Vec3f& pos,
+                const osg::Vec3f& rot)
+                : Action(state)
+                , mObject(object)
+                , mCell(std::move(cell))
+                , mPos(pos)
+                , mRot(rot)
+            {
+            }
 
             void apply(WorldView& worldView) const override
             {
@@ -85,7 +105,11 @@ namespace MWLua
         {
         public:
             ActivateAction(LuaUtil::LuaState* state, ObjectId object, ObjectId actor)
-                : Action(state), mObject(object), mActor(actor) {}
+                : Action(state)
+                , mObject(object)
+                , mActor(actor)
+            {
+            }
 
             void apply(WorldView& worldView) const override
             {
@@ -106,15 +130,15 @@ namespace MWLua
 
             std::string toString() const override
             {
-                return std::string("ActivateAction object=") + idToString(mObject) +
-                       std::string(" actor=") + idToString(mActor);
+                return std::string("ActivateAction object=") + idToString(mObject) + std::string(" actor=")
+                    + idToString(mActor);
             }
 
         private:
             ObjectId mObject;
             ObjectId mActor;
         };
-    
+
         template <typename ObjT>
         using Cell = std::conditional_t<std::is_same_v<ObjT, LObject>, LCell, GCell>;
 
@@ -125,11 +149,10 @@ namespace MWLua
             sol::state& lua = context.mLua->sol();
             ObjectRegistry* registry = context.mWorldView->getObjectRegistry();
             sol::usertype<ListT> listT = lua.new_usertype<ListT>(prefix + "ObjectList");
-            listT[sol::meta_function::to_string] =
-                [](const ListT& list) { return "{" + std::to_string(list.mIds->size()) + " objects}"; };
+            listT[sol::meta_function::to_string]
+                = [](const ListT& list) { return "{" + std::to_string(list.mIds->size()) + " objects}"; };
             listT[sol::meta_function::length] = [](const ListT& list) { return list.mIds->size(); };
-            listT[sol::meta_function::index] = [registry](const ListT& list, size_t index)
-            {
+            listT[sol::meta_function::index] = [registry](const ListT& list, size_t index) {
                 if (index > 0 && index <= list.mIds->size())
                     return ObjectT((*list.mIds)[index - 1], registry);
                 else
@@ -143,65 +166,57 @@ namespace MWLua
         void addBasicBindings(sol::usertype<ObjectT>& objectT, const Context& context)
         {
             objectT["isValid"] = [](const ObjectT& o) { return o.isValid(); };
-            objectT["recordId"] = sol::readonly_property([](const ObjectT& o) -> std::string
-            {
-                return o.ptr().getCellRef().getRefId();
-            });
-            objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>>
-            {
+            objectT["recordId"] = sol::readonly_property(
+                [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId(); });
+            objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
                 if (ptr.isInCell())
-                    return Cell<ObjectT>{ptr.getCell()};
+                    return Cell<ObjectT>{ ptr.getCell() };
                 else
                     return sol::nullopt;
             });
-            objectT["position"] = sol::readonly_property([](const ObjectT& o) -> osg::Vec3f
-            {
-                return o.ptr().getRefData().getPosition().asVec3();
-            });
-            objectT["rotation"] = sol::readonly_property([](const ObjectT& o) -> osg::Vec3f
-            {
-                return o.ptr().getRefData().getPosition().asRotationVec3();
-            });
+            objectT["position"] = sol::readonly_property(
+                [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asVec3(); });
+            objectT["rotation"] = sol::readonly_property(
+                [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asRotationVec3(); });
 
-            objectT["type"] = sol::readonly_property([types=getTypeToPackageTable(context.mLua->sol())](const ObjectT& o) mutable
-            {
-                return types[getLiveCellRefType(o.ptr().mRef)];
-            });
+            objectT["type"] = sol::readonly_property(
+                [types = getTypeToPackageTable(context.mLua->sol())](
+                    const ObjectT& o) mutable { return types[getLiveCellRefType(o.ptr().mRef)]; });
 
             objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getRefData().getCount(); });
             objectT[sol::meta_function::equal_to] = [](const ObjectT& a, const ObjectT& b) { return a.id() == b.id(); };
             objectT[sol::meta_function::to_string] = &ObjectT::toString;
-            objectT["sendEvent"] = [context](const ObjectT& dest, std::string eventName, const sol::object& eventData)
-            {
-                context.mLocalEventQueue->push_back({dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
+            objectT["sendEvent"] = [context](const ObjectT& dest, std::string eventName, const sol::object& eventData) {
+                context.mLocalEventQueue->push_back(
+                    { dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
 
-            objectT["activateBy"] = [context](const ObjectT& o, const ObjectT& actor)
-            {
+            objectT["activateBy"] = [context](const ObjectT& o, const ObjectT& actor) {
                 uint32_t esmRecordType = actor.ptr().getType();
                 if (esmRecordType != ESM::REC_CREA && esmRecordType != ESM::REC_NPC_)
-                    throw std::runtime_error("The argument of `activateBy` must be an actor who activates the object. Got: " +
-                                             ptrToString(actor.ptr()));
+                    throw std::runtime_error(
+                        "The argument of `activateBy` must be an actor who activates the object. Got: "
+                        + ptrToString(actor.ptr()));
                 context.mLuaManager->addAction(std::make_unique<ActivateAction>(context.mLua, o.id(), actor.id()));
             };
 
             if constexpr (std::is_same_v<ObjectT, GObject>)
-            {  // Only for global scripts
-                objectT["addScript"] = [lua=context.mLua, luaManager=context.mLuaManager](const GObject& object, std::string_view path)
-                {
+            { // Only for global scripts
+                objectT["addScript"] = [lua = context.mLua, luaManager = context.mLuaManager](
+                                           const GObject& object, std::string_view path) {
                     const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
                     std::optional<int> scriptId = cfg.findId(path);
                     if (!scriptId)
                         throw std::runtime_error("Unknown script: " + std::string(path));
                     if (!(cfg[*scriptId].mFlags & ESM::LuaScriptCfg::sCustom))
-                        throw std::runtime_error("Script without CUSTOM tag can not be added dynamically: " + std::string(path));
+                        throw std::runtime_error(
+                            "Script without CUSTOM tag can not be added dynamically: " + std::string(path));
                     if (object.ptr().getType() == ESM::REC_STAT)
                         throw std::runtime_error("Attaching scripts to Static is not allowed: " + std::string(path));
                     luaManager->addCustomLocalScript(object.ptr(), *scriptId);
                 };
-                objectT["hasScript"] = [lua=context.mLua](const GObject& object, std::string_view path)
-                {
+                objectT["hasScript"] = [lua = context.mLua](const GObject& object, std::string_view path) {
                     const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
                     std::optional<int> scriptId = cfg.findId(path);
                     if (!scriptId)
@@ -213,8 +228,7 @@ namespace MWLua
                     else
                         return false;
                 };
-                objectT["removeScript"] = [lua=context.mLua](const GObject& object, std::string_view path)
-                {
+                objectT["removeScript"] = [lua = context.mLua](const GObject& object, std::string_view path) {
                     const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
                     std::optional<int> scriptId = cfg.findId(path);
                     if (!scriptId)
@@ -228,12 +242,12 @@ namespace MWLua
                     localScripts->removeScript(*scriptId);
                 };
 
-                objectT["teleport"] = [context](const GObject& object, std::string_view cell,
-                                                const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot)
-                {
+                objectT["teleport"] = [context](const GObject& object, std::string_view cell, const osg::Vec3f& pos,
+                                          const sol::optional<osg::Vec3f>& optRot) {
                     MWWorld::Ptr ptr = object.ptr();
                     osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                    auto action = std::make_unique<TeleportAction>(context.mLua, object.id(), std::string(cell), pos, rot);
+                    auto action
+                        = std::make_unique<TeleportAction>(context.mLua, object.id(), std::string(cell), pos, rot);
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         context.mLuaManager->addTeleportPlayerAction(std::move(action));
                     else
@@ -248,12 +262,11 @@ namespace MWLua
             using InventoryT = Inventory<ObjectT>;
             sol::usertype<InventoryT> inventoryT = context.mLua->sol().new_usertype<InventoryT>(prefix + "Inventory");
 
-            inventoryT[sol::meta_function::to_string] =
-                [](const InventoryT& inv) { return "Inventory[" + inv.mObj.toString() + "]"; };
+            inventoryT[sol::meta_function::to_string]
+                = [](const InventoryT& inv) { return "Inventory[" + inv.mObj.toString() + "]"; };
 
-            inventoryT["getAll"] = [worldView=context.mWorldView, ids=getPackageToTypeTable(context.mLua->sol())](
-                const InventoryT& inventory, sol::optional<sol::table> type)
-            {
+            inventoryT["getAll"] = [worldView = context.mWorldView, ids = getPackageToTypeTable(context.mLua->sol())](
+                                       const InventoryT& inventory, sol::optional<sol::table> type) {
                 int mask = -1;
                 sol::optional<uint32_t> typeId = sol::nullopt;
                 if (type.has_value())
@@ -265,24 +278,49 @@ namespace MWLua
                 {
                     switch (*typeId)
                     {
-                        case ESM::REC_ALCH: mask = MWWorld::ContainerStore::Type_Potion; break;
-                        case ESM::REC_ARMO: mask = MWWorld::ContainerStore::Type_Armor; break;
-                        case ESM::REC_BOOK: mask = MWWorld::ContainerStore::Type_Book; break;
-                        case ESM::REC_CLOT: mask = MWWorld::ContainerStore::Type_Clothing; break;
-                        case ESM::REC_INGR: mask = MWWorld::ContainerStore::Type_Ingredient; break;
-                        case ESM::REC_LIGH: mask = MWWorld::ContainerStore::Type_Light; break;
-                        case ESM::REC_MISC: mask = MWWorld::ContainerStore::Type_Miscellaneous; break;
-                        case ESM::REC_WEAP: mask = MWWorld::ContainerStore::Type_Weapon; break;
-                        case ESM::REC_APPA: mask = MWWorld::ContainerStore::Type_Apparatus; break;
-                        case ESM::REC_LOCK: mask = MWWorld::ContainerStore::Type_Lockpick; break;
-                        case ESM::REC_PROB: mask = MWWorld::ContainerStore::Type_Probe; break;
-                        case ESM::REC_REPA: mask = MWWorld::ContainerStore::Type_Repair; break;
+                        case ESM::REC_ALCH:
+                            mask = MWWorld::ContainerStore::Type_Potion;
+                            break;
+                        case ESM::REC_ARMO:
+                            mask = MWWorld::ContainerStore::Type_Armor;
+                            break;
+                        case ESM::REC_BOOK:
+                            mask = MWWorld::ContainerStore::Type_Book;
+                            break;
+                        case ESM::REC_CLOT:
+                            mask = MWWorld::ContainerStore::Type_Clothing;
+                            break;
+                        case ESM::REC_INGR:
+                            mask = MWWorld::ContainerStore::Type_Ingredient;
+                            break;
+                        case ESM::REC_LIGH:
+                            mask = MWWorld::ContainerStore::Type_Light;
+                            break;
+                        case ESM::REC_MISC:
+                            mask = MWWorld::ContainerStore::Type_Miscellaneous;
+                            break;
+                        case ESM::REC_WEAP:
+                            mask = MWWorld::ContainerStore::Type_Weapon;
+                            break;
+                        case ESM::REC_APPA:
+                            mask = MWWorld::ContainerStore::Type_Apparatus;
+                            break;
+                        case ESM::REC_LOCK:
+                            mask = MWWorld::ContainerStore::Type_Lockpick;
+                            break;
+                        case ESM::REC_PROB:
+                            mask = MWWorld::ContainerStore::Type_Probe;
+                            break;
+                        case ESM::REC_REPA:
+                            mask = MWWorld::ContainerStore::Type_Repair;
+                            break;
                         default:;
                     }
                 }
 
                 if (mask == -1)
-                    throw std::runtime_error(std::string("Incorrect type argument in inventory:getAll: " + LuaUtil::toString(*type)));
+                    throw std::runtime_error(
+                        std::string("Incorrect type argument in inventory:getAll: " + LuaUtil::toString(*type)));
 
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
@@ -294,23 +332,22 @@ namespace MWLua
                     worldView->getObjectRegistry()->registerPtr(item);
                     list->push_back(getId(item));
                 }
-                return ObjectList<ObjectT>{list};
+                return ObjectList<ObjectT>{ list };
             };
 
-            inventoryT["countOf"] = [](const InventoryT& inventory, const std::string& recordId)
-            {
+            inventoryT["countOf"] = [](const InventoryT& inventory, const std::string& recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 return store.count(recordId);
             };
 
             if constexpr (std::is_same_v<ObjectT, GObject>)
-            {  // Only for global scripts
-                // TODO
-                // obj.inventory:drop(obj2, [count])
-                // obj.inventory:drop(recordId, [count])
-                // obj.inventory:addNew(recordId, [count])
-                // obj.inventory:remove(obj/recordId, [count])
+            { // Only for global scripts
+              // TODO
+              // obj.inventory:drop(obj2, [count])
+              // obj.inventory:drop(recordId, [count])
+              // obj.inventory:addNew(recordId, [count])
+              // obj.inventory:remove(obj/recordId, [count])
                 /*objectT["moveInto"] = [](const GObject& obj, const InventoryT& inventory) {};
                 inventoryT["drop"] = [](const InventoryT& inventory) {};
                 inventoryT["addNew"] = [](const InventoryT& inventory) {};
@@ -321,14 +358,14 @@ namespace MWLua
         template <class ObjectT>
         void initObjectBindings(const std::string& prefix, const Context& context)
         {
-            sol::usertype<ObjectT> objectT = context.mLua->sol().new_usertype<ObjectT>(
-                prefix + "Object", sol::base_classes, sol::bases<Object>());
+            sol::usertype<ObjectT> objectT
+                = context.mLua->sol().new_usertype<ObjectT>(prefix + "Object", sol::base_classes, sol::bases<Object>());
             addBasicBindings<ObjectT>(objectT, context);
             addInventoryBindings<ObjectT>(objectT, prefix, context);
 
             registerObjectList<ObjectT>(prefix, context);
         }
-    }  // namespace
+    } // namespace
 
     void initObjectBindingsForLocalScripts(const Context& context)
     {

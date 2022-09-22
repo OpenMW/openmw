@@ -7,44 +7,41 @@
 
 namespace CSVDoc
 {
-    template<class SubViewT>
+    template <class SubViewT>
     class SubViewFactory : public SubViewFactoryBase
     {
-        public:
-
-            CSVDoc::SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document) override;
+    public:
+        CSVDoc::SubView* makeSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document) override;
     };
 
-    template<class SubViewT>
-    CSVDoc::SubView *SubViewFactory<SubViewT>::makeSubView (const CSMWorld::UniversalId& id,
-        CSMDoc::Document& document)
+    template <class SubViewT>
+    CSVDoc::SubView* SubViewFactory<SubViewT>::makeSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document)
     {
-        return new SubViewT (id, document);
+        return new SubViewT(id, document);
     }
 
-
-    template<class SubViewT, class CreatorFactoryT>
+    template <class SubViewT, class CreatorFactoryT>
     class SubViewFactoryWithCreator : public SubViewFactoryBase
     {
-            bool mSorting;
+        bool mSorting;
 
-        public:
+    public:
+        SubViewFactoryWithCreator(bool sorting = true);
 
-            SubViewFactoryWithCreator (bool sorting = true);
-
-            CSVDoc::SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document) override;
+        CSVDoc::SubView* makeSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document) override;
     };
 
-    template<class SubViewT, class CreatorFactoryT>
-    SubViewFactoryWithCreator<SubViewT, CreatorFactoryT>::SubViewFactoryWithCreator (bool sorting)
-    : mSorting (sorting)
-    {}
+    template <class SubViewT, class CreatorFactoryT>
+    SubViewFactoryWithCreator<SubViewT, CreatorFactoryT>::SubViewFactoryWithCreator(bool sorting)
+        : mSorting(sorting)
+    {
+    }
 
-    template<class SubViewT, class CreatorFactoryT>
-    CSVDoc::SubView *SubViewFactoryWithCreator<SubViewT, CreatorFactoryT>::makeSubView (
+    template <class SubViewT, class CreatorFactoryT>
+    CSVDoc::SubView* SubViewFactoryWithCreator<SubViewT, CreatorFactoryT>::makeSubView(
         const CSMWorld::UniversalId& id, CSMDoc::Document& document)
     {
-        return new SubViewT (id, document, CreatorFactoryT(), mSorting);
+        return new SubViewT(id, document, CreatorFactoryT(), mSorting);
     }
 }
 

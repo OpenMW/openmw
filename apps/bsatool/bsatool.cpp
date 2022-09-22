@@ -1,15 +1,15 @@
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <vector>
 
 #include <boost/program_options.hpp>
 
 #include <components/bsa/compressedbsafile.hpp>
-#include <components/misc/strings/algorithm.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/conversion.hpp>
 
 #define BSATOOL_VERSION 1.1
@@ -29,7 +29,7 @@ struct Arguments
     bool fullpath;
 };
 
-bool parseOptions (int argc, char** argv, Arguments &info)
+bool parseOptions(int argc, char** argv, Arguments& info)
 {
     bpo::options_description desc(R"(Inspect and extract files from Bethesda BSA archives
 
@@ -61,7 +61,7 @@ Allowed options)");
 
     auto addHiddenOption = hidden.add_options();
     addHiddenOption("mode,m", bpo::value<std::string>(), "bsatool mode");
-    addHiddenOption("input-file,i", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
+    addHiddenOption("input-file,i", bpo::value<Files::MaybeQuotedPathContainer>(), "input file");
 
     bpo::positional_options_description p;
     p.add("mode", 1).add("input-file", 3);
@@ -73,53 +73,50 @@ Allowed options)");
     bpo::variables_map variables;
     try
     {
-        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
-            .options(all).positional(p).run();
+        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(all).positional(p).run();
         bpo::store(valid_opts, variables);
     }
-    catch(std::exception &e)
+    catch (std::exception& e)
     {
-        std::cout << "ERROR parsing arguments: " << e.what() << "\n\n"
-            << desc << std::endl;
+        std::cout << "ERROR parsing arguments: " << e.what() << "\n\n" << desc << std::endl;
         return false;
     }
 
     bpo::notify(variables);
 
-    if (variables.count ("help"))
+    if (variables.count("help"))
     {
         std::cout << desc << std::endl;
         return false;
     }
-    if (variables.count ("version"))
+    if (variables.count("version"))
     {
         std::cout << "BSATool version " << BSATOOL_VERSION << std::endl;
         return false;
     }
     if (!variables.count("mode"))
     {
-        std::cout << "ERROR: no mode specified!\n\n"
-            << desc << std::endl;
+        std::cout << "ERROR: no mode specified!\n\n" << desc << std::endl;
         return false;
     }
 
     info.mode = variables["mode"].as<std::string>();
-    if (!(info.mode == "list" || info.mode == "extract" || info.mode == "extractall" || info.mode == "add" || info.mode == "create"))
+    if (!(info.mode == "list" || info.mode == "extract" || info.mode == "extractall" || info.mode == "add"
+            || info.mode == "create"))
     {
-        std::cout << std::endl << "ERROR: invalid mode \"" << info.mode << "\"\n\n"
-            << desc << std::endl;
+        std::cout << std::endl << "ERROR: invalid mode \"" << info.mode << "\"\n\n" << desc << std::endl;
         return false;
     }
 
     if (!variables.count("input-file"))
     {
-        std::cout << "\nERROR: missing BSA archive\n\n"
-            << desc << std::endl;
+        std::cout << "\nERROR: missing BSA archive\n\n" << desc << std::endl;
         return false;
     }
-    auto inputFiles = variables["input-file"].as< Files::MaybeQuotedPathContainer >();
+    auto inputFiles = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
 
-    info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+    info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26
+                                              // due to implementation bugs.
 
     // Default output to the working directory
     info.outdir = std::filesystem::current_path();
@@ -128,28 +125,30 @@ Allowed options)");
     {
         if (inputFiles.size() < 2)
         {
-            std::cout << "\nERROR: file to extract unspecified\n\n"
-                << desc << std::endl;
+            std::cout << "\nERROR: file to extract unspecified\n\n" << desc << std::endl;
             return false;
         }
         if (inputFiles.size() > 1)
-            info.extractfile = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+            info.extractfile = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on
+                                                         // MSVC 14.26 due to implementation bugs.
         if (inputFiles.size() > 2)
-            info.outdir = inputFiles[2].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+            info.outdir = inputFiles[2].u8string(); // This call to u8string is redundant, but required to build on
+                                                    // MSVC 14.26 due to implementation bugs.
     }
     else if (info.mode == "add")
     {
         if (inputFiles.empty())
         {
-            std::cout << "\nERROR: file to add unspecified\n\n"
-                << desc << std::endl;
+            std::cout << "\nERROR: file to add unspecified\n\n" << desc << std::endl;
             return false;
         }
         if (inputFiles.size() > 1)
-            info.addfile = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+            info.addfile = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on
+                                                     // MSVC 14.26 due to implementation bugs.
     }
     else if (inputFiles.size() > 1)
-        info.outdir = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+        info.outdir = inputFiles[1].u8string(); // This call to u8string is redundant, but required to build on
+                                                // MSVC 14.26 due to implementation bugs.
 
     info.longformat = variables.count("long") != 0;
     info.fullpath = variables.count("full-path") != 0;
@@ -157,14 +156,14 @@ Allowed options)");
     return true;
 }
 
-template<typename File>
+template <typename File>
 int list(std::unique_ptr<File>& bsa, Arguments& info)
 {
     // List all files
-    const auto &files = bsa->getList();
+    const auto& files = bsa->getList();
     for (const auto& file : files)
     {
-        if(info.longformat)
+        if (info.longformat)
         {
             // Long format
             std::ios::fmtflags f(std::cout.flags());
@@ -180,7 +179,7 @@ int list(std::unique_ptr<File>& bsa, Arguments& info)
     return 0;
 }
 
-template<typename File>
+template <typename File>
 int extract(std::unique_ptr<File>& bsa, Arguments& info)
 {
     auto archivePath = info.extractfile.u8string();
@@ -207,7 +206,7 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     }
 
     // Get the target path (the path the file will be extracted to)
-    std::filesystem::path relPath (extractPath);
+    std::filesystem::path relPath(extractPath);
 
     std::filesystem::path target;
     if (info.fullpath)
@@ -221,14 +220,16 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     std::filesystem::file_status s = std::filesystem::status(target.parent_path());
     if (!std::filesystem::is_directory(s))
     {
-        std::cout << "ERROR: " << Files::pathToUnicodeString(target.parent_path()) << " is not a directory." << std::endl;
+        std::cout << "ERROR: " << Files::pathToUnicodeString(target.parent_path()) << " is not a directory."
+                  << std::endl;
         return 3;
     }
 
     std::ofstream out(target, std::ios::binary);
 
     // Write the file to disk
-    std::cout << "Extracting " << Files::pathToUnicodeString(info.extractfile) << " to " << Files::pathToUnicodeString(target) << std::endl;
+    std::cout << "Extracting " << Files::pathToUnicodeString(info.extractfile) << " to "
+              << Files::pathToUnicodeString(target) << std::endl;
 
     out << stream->rdbuf();
     out.close();
@@ -236,10 +237,10 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     return 0;
 }
 
-template<typename File>
+template <typename File>
 int extractAll(std::unique_ptr<File>& bsa, Arguments& info)
 {
-    for (const auto &file : bsa->getList())
+    for (const auto& file : bsa->getList())
     {
         std::string extractPath(file.name());
         Misc::StringUtils::replaceAll(extractPath, "\\", "/");
@@ -271,7 +272,7 @@ int extractAll(std::unique_ptr<File>& bsa, Arguments& info)
     return 0;
 }
 
-template<typename File>
+template <typename File>
 int add(std::unique_ptr<File>& bsa, Arguments& info)
 {
     std::fstream stream(info.addfile, std::ios_base::binary | std::ios_base::out | std::ios_base::in);
@@ -280,7 +281,7 @@ int add(std::unique_ptr<File>& bsa, Arguments& info)
     return 0;
 }
 
-template<typename File>
+template <typename File>
 int call(Arguments& info)
 {
     std::unique_ptr<File> bsa = std::make_unique<File>();

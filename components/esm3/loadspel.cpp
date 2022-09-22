@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Spell::load(ESMReader &esm, bool &isDeleted)
+    void Spell::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -51,7 +51,7 @@ namespace ESM
             esm.fail("Missing SPDT subrecord");
     }
 
-    void Spell::save(ESMWriter &esm, bool isDeleted) const
+    void Spell::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

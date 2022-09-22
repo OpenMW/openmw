@@ -37,17 +37,17 @@ namespace Bsa
     {
         BSAVER_UNKNOWN = 0x0,
         BSAVER_UNCOMPRESSED = 0x100,
-        BSAVER_COMPRESSED = 0x415342 //B, S, A
+        BSAVER_COMPRESSED = 0x415342 // B, S, A
     };
 
     class CompressedBSAFile : private BSAFile
     {
     private:
-        //special marker for invalid records,
-        //equal to max uint32_t value
+        // special marker for invalid records,
+        // equal to max uint32_t value
         static const uint32_t sInvalidOffset;
 
-        //bit marking compression on file size
+        // bit marking compression on file size
         static const uint32_t sCompressedFlag;
 
         struct FileRecord
@@ -60,14 +60,14 @@ namespace Bsa
             bool isValid() const;
             std::uint32_t getSizeWithoutCompressionFlag() const;
         };
-        
-        //if files in BSA  without 30th bit enabled are compressed
+
+        // if files in BSA  without 30th bit enabled are compressed
         bool mCompressedByDefault;
 
-        //if each file record begins with BZ string with file name
+        // if each file record begins with BZ string with file name
         bool mEmbeddedFileNames;
 
-        std::uint32_t mVersion{0u};
+        std::uint32_t mVersion{ 0u };
 
         struct FolderRecord
         {
@@ -78,27 +78,29 @@ namespace Bsa
         std::map<std::uint64_t, FolderRecord> mFolders;
 
         FileRecord getFileRecord(const std::string& str) const;
-        
+
         void getBZString(std::string& str, std::istream& filestream);
-        //mFiles used by OpenMW will contain uncompressed file sizes
+        // mFiles used by OpenMW will contain uncompressed file sizes
         void convertCompressedSizesToUncompressed();
-        /// \brief Normalizes given filename or folder and generates format-compatible hash. See https://en.uesp.net/wiki/Tes4Mod:Hash_Calculation.
-        static std::uint64_t generateHash(const std::filesystem::path& stem, std::string extension) ;
+        /// \brief Normalizes given filename or folder and generates format-compatible hash. See
+        /// https://en.uesp.net/wiki/Tes4Mod:Hash_Calculation.
+        static std::uint64_t generateHash(const std::filesystem::path& stem, std::string extension);
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
+
     public:
-        using BSAFile::open;
-        using BSAFile::getList;
         using BSAFile::getFilename;
+        using BSAFile::getList;
+        using BSAFile::open;
 
         CompressedBSAFile();
         virtual ~CompressedBSAFile();
 
-        //checks version of BSA from file header
-        static BsaVersion detectVersion(const std::filesystem::path &filePath);
+        // checks version of BSA from file header
+        static BsaVersion detectVersion(const std::filesystem::path& filePath);
 
         /// Read header information from the input source
         void readHeader() override;
-       
+
         Files::IStreamPtr getFile(const char* filePath);
         Files::IStreamPtr getFile(const FileStruct* fileStruct);
         void addFile(const std::string& filename, std::istream& file);

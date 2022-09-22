@@ -3,595 +3,586 @@
 #include <chrono>
 #include <thread>
 
-#include <QMouseEvent>
 #include <QLayout>
+#include <QMouseEvent>
 
 #include <extern/osgQt/GraphicsWindowQt>
 #include <osg/GraphicsContext>
-#include <osgViewer/CompositeViewer>
-#include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
 #include <osg/Material>
+#include <osgViewer/CompositeViewer>
+#include <osgViewer/ViewerEventHandlers>
 
 #include <components/debug/debuglog.hpp>
-#include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "../widget/scenetoolmode.hpp"
 
-#include "../../model/prefs/state.hpp"
 #include "../../model/prefs/shortcut.hpp"
+#include "../../model/prefs/state.hpp"
 
+#include "cameracontroller.hpp"
 #include "lighting.hpp"
 #include "mask.hpp"
-#include "cameracontroller.hpp"
 
 namespace CSVRender
 {
 
-RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
-    : QWidget(parent, f)
-    , mRootNode(nullptr)
-{
-
-    osgViewer::CompositeViewer& viewer = CompositeViewer::get();
-
-    osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
-    //ds->setNumMultiSamples(8);
-
-    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
-    traits->windowName.clear();
-    traits->windowDecoration = true;
-    traits->x = 0;
-    traits->y = 0;
-    traits->width = width();
-    traits->height = height();
-    traits->doubleBuffer = true;
-    traits->alpha = ds->getMinimumNumAlphaBits();
-    traits->stencil = ds->getMinimumNumStencilBits();
-    traits->sampleBuffers = ds->getMultiSamples();
-    traits->samples = ds->getNumMultiSamples();
-    // Doesn't make much sense as we're running on demand updates, and there seems to be a bug with the refresh rate when running multiple QGLWidgets
-    traits->vsync = false;
-
-    mView = new osgViewer::View;
-    updateCameraParameters( traits->width / static_cast<double>(traits->height) );
-
-    osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
-    QLayout* layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(window->getGLWidget());
-    setLayout(layout);
-
-    mView->getCamera()->setGraphicsContext(window);
-    mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
-
-    SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
-    lightMgr->setStartLight(1);
-    lightMgr->setLightingMask(Mask_Lighting);
-    mRootNode = lightMgr;
-
-    mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-    mView->getCamera()->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
-    osg::ref_ptr<osg::Material> defaultMat (new osg::Material);
-    defaultMat->setColorMode(osg::Material::OFF);
-    defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-    defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-    defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-    mView->getCamera()->getOrCreateStateSet()->setAttribute(defaultMat);
-
-    mView->setSceneData(mRootNode);
-
-    // Add ability to signal osg to show its statistics for debugging purposes
-    mView->addEventHandler(new osgViewer::StatsHandler);
-
-    viewer.addView(mView);
-    viewer.setDone(false);
-    viewer.realize();
-}
-
-RenderWidget::~RenderWidget()
-{
-    try
+    RenderWidget::RenderWidget(QWidget* parent, Qt::WindowFlags f)
+        : QWidget(parent, f)
+        , mRootNode(nullptr)
     {
-        CompositeViewer::get().removeView(mView);
+
+        osgViewer::CompositeViewer& viewer = CompositeViewer::get();
+
+        osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
+        // ds->setNumMultiSamples(8);
+
+        osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+        traits->windowName.clear();
+        traits->windowDecoration = true;
+        traits->x = 0;
+        traits->y = 0;
+        traits->width = width();
+        traits->height = height();
+        traits->doubleBuffer = true;
+        traits->alpha = ds->getMinimumNumAlphaBits();
+        traits->stencil = ds->getMinimumNumStencilBits();
+        traits->sampleBuffers = ds->getMultiSamples();
+        traits->samples = ds->getNumMultiSamples();
+        // Doesn't make much sense as we're running on demand updates, and there seems to be a bug with the refresh rate
+        // when running multiple QGLWidgets
+        traits->vsync = false;
+
+        mView = new osgViewer::View;
+        updateCameraParameters(traits->width / static_cast<double>(traits->height));
+
+        osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
+        QLayout* layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(window->getGLWidget());
+        setLayout(layout);
+
+        mView->getCamera()->setGraphicsContext(window);
+        mView->getCamera()->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
+
+        SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
+        lightMgr->setStartLight(1);
+        lightMgr->setLightingMask(Mask_Lighting);
+        mRootNode = lightMgr;
+
+        mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+        mView->getCamera()->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+        osg::ref_ptr<osg::Material> defaultMat(new osg::Material);
+        defaultMat->setColorMode(osg::Material::OFF);
+        defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
+        defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
+        defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+        mView->getCamera()->getOrCreateStateSet()->setAttribute(defaultMat);
+
+        mView->setSceneData(mRootNode);
+
+        // Add ability to signal osg to show its statistics for debugging purposes
+        mView->addEventHandler(new osgViewer::StatsHandler);
+
+        viewer.addView(mView);
+        viewer.setDone(false);
+        viewer.realize();
     }
-    catch(const std::exception& e)
+
+    RenderWidget::~RenderWidget()
     {
-        Log(Debug::Error) << "Error in the destructor: " << e.what();
+        try
+        {
+            CompositeViewer::get().removeView(mView);
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Error in the destructor: " << e.what();
+        }
     }
-}
 
-void RenderWidget::flagAsModified()
-{
-    mView->requestRedraw();
-}
-
-void RenderWidget::setVisibilityMask(unsigned int mask)
-{
-    mView->getCamera()->setCullMask(mask | Mask_ParticleSystem | Mask_Lighting);
-}
-
-osg::Camera *RenderWidget::getCamera()
-{
-    return mView->getCamera();
-}
-
-void RenderWidget::toggleRenderStats()
-{
-    osgViewer::GraphicsWindow* window =
-        static_cast<osgViewer::GraphicsWindow*>(mView->getCamera()->getGraphicsContext());
-
-    window->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_S);
-    window->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_S);
-}
-
-
-// --------------------------------------------------
-
-CompositeViewer::CompositeViewer()
-    : mSimulationTime(0.0)
-{
-    // TODO: Upgrade osgQt to support osgViewer::ViewerBase::DrawThreadPerContext
-    // https://gitlab.com/OpenMW/openmw/-/issues/5481
-    setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
-
-    setUseConfigureAffinity(false);
-
-    // disable the default setting of viewer.done() by pressing Escape.
-    setKeyEventSetsDone(0);
-
-    // Only render when the camera position changed, or content flagged dirty
-    //setRunFrameScheme(osgViewer::ViewerBase::ON_DEMAND);
-    setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
-
-    connect(&mTimer, &QTimer::timeout, this, &CompositeViewer::update);
-    mTimer.start( 10 );
-
-    int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
-    setRunMaxFrameRate(frameRateLimit);
-}
-
-CompositeViewer &CompositeViewer::get()
-{
-    static CompositeViewer sThis;
-    return sThis;
-}
-
-void CompositeViewer::update()
-{
-    double dt = mFrameTimer.time_s();
-    mFrameTimer.setStartTick();
-
-    emit simulationUpdated(dt);
-
-    mSimulationTime += dt;
-    frame(mSimulationTime);
-
-    double minFrameTime = _runMaxFrameRate > 0.0 ? 1.0 / _runMaxFrameRate : 0.0;
-    if (dt < minFrameTime)
+    void RenderWidget::flagAsModified()
     {
-        std::this_thread::sleep_for(std::chrono::duration<double>(minFrameTime - dt));
-    }
-}
-
-// ---------------------------------------------------
-
-SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f,
-    bool retrieveInput)
-    : RenderWidget(parent, f)
-    , mResourceSystem(resourceSystem)
-    , mLighting(nullptr)
-    , mHasDefaultAmbient(false)
-    , mIsExterior(true)
-    , mPrevMouseX(0)
-    , mPrevMouseY(0)
-    , mCamPositionSet(false)
-{
-    mFreeCamControl = new FreeCameraController(this);
-    mOrbitCamControl = new OrbitCameraController(this);
-    mCurrentCamControl = mFreeCamControl;
-
-    mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
-
-    mOrbitCamControl->setConstRoll( CSMPrefs::get()["3D Scene Input"]["navi-orbit-const-roll"].isTrue() );
-
-    // set up gradient view or configured clear color
-    QColor bgColour = CSMPrefs::get()["Rendering"]["scene-day-background-colour"].toColor();
-
-    if (CSMPrefs::get()["Rendering"]["scene-use-gradient"].isTrue()) {
-        QColor gradientColour = CSMPrefs::get()["Rendering"]["scene-day-gradient-colour"].toColor();
-        mGradientCamera = createGradientCamera(bgColour, gradientColour);
-
-        mView->getCamera()->setClearMask(0);
-        mView->getCamera()->addChild(mGradientCamera.get());
-    }
-    else {
-        mView->getCamera()->setClearColor(osg::Vec4(
-            bgColour.redF(),
-            bgColour.greenF(),
-            bgColour.blueF(),
-            1.0f
-        ));
+        mView->requestRedraw();
     }
 
-    // we handle lighting manually
-    mView->setLightingMode(osgViewer::View::NO_LIGHT);
-
-    setLighting(&mLightingDay);
-
-    mResourceSystem->getSceneManager()->setParticleSystemMask(Mask_ParticleSystem);
-
-    // Recieve mouse move event even if mouse button is not pressed
-    setMouseTracking(true);
-    setFocusPolicy(Qt::ClickFocus);
-
-    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
-        this, &SceneWidget::settingChanged);
-
-    // TODO update this outside of the constructor where virtual methods can be used
-    if (retrieveInput)
+    void RenderWidget::setVisibilityMask(unsigned int mask)
     {
-        CSMPrefs::get()["3D Scene Input"].update();
-        CSMPrefs::get()["Tooltips"].update();
+        mView->getCamera()->setCullMask(mask | Mask_ParticleSystem | Mask_Lighting);
     }
 
-    connect (&CompositeViewer::get(), &CompositeViewer::simulationUpdated, this, &SceneWidget::update);
-
-    // Shortcuts
-    CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
-    connect(focusToolbarShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
-            this, &SceneWidget::focusToolbarRequest);
-
-    CSMPrefs::Shortcut* renderStatsShortcut = new CSMPrefs::Shortcut("scene-render-stats", this);
-    connect(renderStatsShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
-            this, &SceneWidget::toggleRenderStats);
-}
-
-SceneWidget::~SceneWidget()
-{
-    // Since we're holding on to the resources past the existence of this graphics context, we'll need to manually release the created objects
-    mResourceSystem->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
-}
-
-
-osg::ref_ptr<osg::Geometry> SceneWidget::createGradientRectangle(QColor bgColour, QColor gradientColour)
-{
-    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
-
-    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
-
-    vertices->push_back(osg::Vec3(0.0f, 0.0f, -1.0f));
-    vertices->push_back(osg::Vec3(1.0f, 0.0f, -1.0f));
-    vertices->push_back(osg::Vec3(0.0f, 1.0f, -1.0f));
-    vertices->push_back(osg::Vec3(1.0f, 1.0f, -1.0f));
-
-    geometry->setVertexArray(vertices);
-
-    osg::ref_ptr<osg::DrawElementsUShort> primitives = new osg::DrawElementsUShort (osg::PrimitiveSet::TRIANGLES, 0);
-
-    // triangle 1
-    primitives->push_back (0);
-    primitives->push_back (1);
-    primitives->push_back (2);
-
-    // triangle 2
-    primitives->push_back (2);
-    primitives->push_back (1);
-    primitives->push_back (3);
-
-    geometry->addPrimitiveSet(primitives);
-
-    osg::ref_ptr <osg::Vec4ubArray> colours = new osg::Vec4ubArray;
-    colours->push_back(osg::Vec4ub(gradientColour.red(), gradientColour.green(), gradientColour.blue(), 1.0f));
-    colours->push_back(osg::Vec4ub(gradientColour.red(), gradientColour.green(), gradientColour.blue(), 1.0f));
-    colours->push_back(osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f));
-    colours->push_back(osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f));
-
-    geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
-
-    geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    geometry->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-
-    return geometry;
-}
-
-
-osg::ref_ptr<osg::Camera> SceneWidget::createGradientCamera(QColor bgColour, QColor gradientColour)
-{
-    osg::ref_ptr<osg::Camera> camera = new osg::Camera();
-    camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    camera->setProjectionMatrix(osg::Matrix::ortho2D(0, 1.0f, 0, 1.0f));
-    camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    camera->setViewMatrix(osg::Matrix::identity());
-
-    camera->setClearMask(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    camera->setAllowEventFocus(false);
-
-    // draw subgraph before main camera view.
-    camera->setRenderOrder(osg::Camera::PRE_RENDER);
-
-    camera->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-
-    osg::ref_ptr<osg::Geometry> gradientQuad = createGradientRectangle(bgColour, gradientColour);
-
-    camera->addChild(gradientQuad);
-    return camera;
-}
-
-
-void SceneWidget::updateGradientCamera(QColor bgColour, QColor gradientColour)
-{
-    osg::ref_ptr<osg::Geometry> gradientRect = createGradientRectangle(bgColour, gradientColour);
-    // Replaces previous rectangle
-    mGradientCamera->setChild(0, gradientRect.get());
-}
-
-void SceneWidget::setLighting(Lighting *lighting)
-{
-    if (mLighting)
-        mLighting->deactivate();
-
-    mLighting = lighting;
-    mLighting->activate (mRootNode, mIsExterior);
-
-    osg::Vec4f ambient = mLighting->getAmbientColour(mHasDefaultAmbient ? &mDefaultAmbient : nullptr);
-    setAmbient(ambient);
-
-    flagAsModified();
-}
-
-void SceneWidget::setAmbient(const osg::Vec4f& ambient)
-{
-    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-    osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
-    lightmodel->setAmbientIntensity(ambient);
-    stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
-    stateset->setMode(GL_LIGHT0, osg::StateAttribute::ON);
-    stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON);
-    mRootNode->setStateSet(stateset);
-}
-
-void SceneWidget::selectLightingMode (const std::string& mode)
-{
-    QColor backgroundColour;
-    QColor gradientColour;
-    if (mode == "day")
+    osg::Camera* RenderWidget::getCamera()
     {
-        backgroundColour = CSMPrefs::get()["Rendering"]["scene-day-background-colour"].toColor();
-        gradientColour = CSMPrefs::get()["Rendering"]["scene-day-gradient-colour"].toColor();
-        setLighting(&mLightingDay);
+        return mView->getCamera();
     }
-    else if (mode == "night")
-    {
-        backgroundColour = CSMPrefs::get()["Rendering"]["scene-night-background-colour"].toColor();
-        gradientColour = CSMPrefs::get()["Rendering"]["scene-night-gradient-colour"].toColor();
-        setLighting(&mLightingNight);
-    }
-    else if (mode == "bright")
-    {
-        backgroundColour = CSMPrefs::get()["Rendering"]["scene-bright-background-colour"].toColor();
-        gradientColour = CSMPrefs::get()["Rendering"]["scene-bright-gradient-colour"].toColor();
-        setLighting(&mLightingBright);
-    }
-    if (CSMPrefs::get()["Rendering"]["scene-use-gradient"].isTrue()) {
-        if (mGradientCamera.get() != nullptr) {
-            // we can go ahead and update since this camera still exists
-            updateGradientCamera(backgroundColour, gradientColour);
 
-            if (!mView->getCamera()->containsNode(mGradientCamera.get()))
-            {
-                // need to re-attach the gradient camera
-                mView->getCamera()->setClearMask(0);
-                mView->getCamera()->addChild(mGradientCamera.get());
-            }
-        } 
-        else {
-            // need to create the gradient camera
-            mGradientCamera = createGradientCamera(backgroundColour, gradientColour);
+    void RenderWidget::toggleRenderStats()
+    {
+        osgViewer::GraphicsWindow* window
+            = static_cast<osgViewer::GraphicsWindow*>(mView->getCamera()->getGraphicsContext());
+
+        window->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_S);
+        window->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_S);
+    }
+
+    // --------------------------------------------------
+
+    CompositeViewer::CompositeViewer()
+        : mSimulationTime(0.0)
+    {
+        // TODO: Upgrade osgQt to support osgViewer::ViewerBase::DrawThreadPerContext
+        // https://gitlab.com/OpenMW/openmw/-/issues/5481
+        setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
+
+        setUseConfigureAffinity(false);
+
+        // disable the default setting of viewer.done() by pressing Escape.
+        setKeyEventSetsDone(0);
+
+        // Only render when the camera position changed, or content flagged dirty
+        // setRunFrameScheme(osgViewer::ViewerBase::ON_DEMAND);
+        setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
+
+        connect(&mTimer, &QTimer::timeout, this, &CompositeViewer::update);
+        mTimer.start(10);
+
+        int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
+        setRunMaxFrameRate(frameRateLimit);
+    }
+
+    CompositeViewer& CompositeViewer::get()
+    {
+        static CompositeViewer sThis;
+        return sThis;
+    }
+
+    void CompositeViewer::update()
+    {
+        double dt = mFrameTimer.time_s();
+        mFrameTimer.setStartTick();
+
+        emit simulationUpdated(dt);
+
+        mSimulationTime += dt;
+        frame(mSimulationTime);
+
+        double minFrameTime = _runMaxFrameRate > 0.0 ? 1.0 / _runMaxFrameRate : 0.0;
+        if (dt < minFrameTime)
+        {
+            std::this_thread::sleep_for(std::chrono::duration<double>(minFrameTime - dt));
+        }
+    }
+
+    // ---------------------------------------------------
+
+    SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent,
+        Qt::WindowFlags f, bool retrieveInput)
+        : RenderWidget(parent, f)
+        , mResourceSystem(resourceSystem)
+        , mLighting(nullptr)
+        , mHasDefaultAmbient(false)
+        , mIsExterior(true)
+        , mPrevMouseX(0)
+        , mPrevMouseY(0)
+        , mCamPositionSet(false)
+    {
+        mFreeCamControl = new FreeCameraController(this);
+        mOrbitCamControl = new OrbitCameraController(this);
+        mCurrentCamControl = mFreeCamControl;
+
+        mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
+
+        mOrbitCamControl->setConstRoll(CSMPrefs::get()["3D Scene Input"]["navi-orbit-const-roll"].isTrue());
+
+        // set up gradient view or configured clear color
+        QColor bgColour = CSMPrefs::get()["Rendering"]["scene-day-background-colour"].toColor();
+
+        if (CSMPrefs::get()["Rendering"]["scene-use-gradient"].isTrue())
+        {
+            QColor gradientColour = CSMPrefs::get()["Rendering"]["scene-day-gradient-colour"].toColor();
+            mGradientCamera = createGradientCamera(bgColour, gradientColour);
+
             mView->getCamera()->setClearMask(0);
             mView->getCamera()->addChild(mGradientCamera.get());
         }
-    }
-    else {
-        // Fall back to using the clear color for the camera
-        mView->getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        mView->getCamera()->setClearColor(osg::Vec4(
-            backgroundColour.redF(),
-            backgroundColour.greenF(),
-            backgroundColour.blueF(),
-            1.0f
-        ));
-        if (mGradientCamera.get() != nullptr && mView->getCamera()->containsNode(mGradientCamera.get())) {
-            // Remove the child to prevent the gradient from rendering
-            mView->getCamera()->removeChild(mGradientCamera.get());
+        else
+        {
+            mView->getCamera()->setClearColor(osg::Vec4(bgColour.redF(), bgColour.greenF(), bgColour.blueF(), 1.0f));
         }
-    }
-}
 
-CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)
-{
-    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Lighting Mode");
+        // we handle lighting manually
+        mView->setLightingMode(osgViewer::View::NO_LIGHT);
 
-    /// \todo replace icons
-    tool->addButton (":scenetoolbar/day", "day",
-        "Day"
-        "<ul><li>Cell specific ambient in interiors</li>"
-        "<li>Low ambient in exteriors</li>"
-        "<li>Strong directional light source</li>"
-        "<li>This mode closely resembles day time in-game</li></ul>");
-    tool->addButton (":scenetoolbar/night", "night",
-        "Night"
-        "<ul><li>Cell specific ambient in interiors</li>"
-        "<li>Low ambient in exteriors</li>"
-        "<li>Weak directional light source</li>"
-        "<li>This mode closely resembles night time in-game</li></ul>");
-    tool->addButton (":scenetoolbar/bright", "bright",
-        "Bright"
-        "<ul><li>Maximum ambient</li>"
-        "<li>Strong directional light source</li></ul>");
+        setLighting(&mLightingDay);
 
-    connect (tool, &CSVWidget::SceneToolMode::modeChanged, this, &SceneWidget::selectLightingMode);
+        mResourceSystem->getSceneManager()->setParticleSystemMask(Mask_ParticleSystem);
 
-    return tool;
-}
+        // Recieve mouse move event even if mouse button is not pressed
+        setMouseTracking(true);
+        setFocusPolicy(Qt::ClickFocus);
 
-void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
-{
-    mDefaultAmbient = colour;
-    mHasDefaultAmbient = true;
+        connect(&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged, this, &SceneWidget::settingChanged);
 
-    setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
-}
+        // TODO update this outside of the constructor where virtual methods can be used
+        if (retrieveInput)
+        {
+            CSMPrefs::get()["3D Scene Input"].update();
+            CSMPrefs::get()["Tooltips"].update();
+        }
 
-void SceneWidget::setExterior (bool isExterior)
-{
-    mIsExterior = isExterior;
-}
+        connect(&CompositeViewer::get(), &CompositeViewer::simulationUpdated, this, &SceneWidget::update);
 
-void SceneWidget::mouseMoveEvent (QMouseEvent *event)
-{
-    mCurrentCamControl->handleMouseMoveEvent(event->x() - mPrevMouseX, event->y() - mPrevMouseY);
+        // Shortcuts
+        CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
+        connect(
+            focusToolbarShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &SceneWidget::focusToolbarRequest);
 
-    mPrevMouseX = event->x();
-    mPrevMouseY = event->y();
-}
+        CSMPrefs::Shortcut* renderStatsShortcut = new CSMPrefs::Shortcut("scene-render-stats", this);
+        connect(
+            renderStatsShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &SceneWidget::toggleRenderStats);
+    }
 
-void SceneWidget::wheelEvent(QWheelEvent *event)
-{
-    mCurrentCamControl->handleMouseScrollEvent(event->angleDelta().y());
-}
+    SceneWidget::~SceneWidget()
+    {
+        // Since we're holding on to the resources past the existence of this graphics context, we'll need to manually
+        // release the created objects
+        mResourceSystem->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
+    }
 
-void SceneWidget::update(double dt)
-{
-    if (mCamPositionSet)
+    osg::ref_ptr<osg::Geometry> SceneWidget::createGradientRectangle(QColor bgColour, QColor gradientColour)
     {
-        mCurrentCamControl->update(dt);
-    }
-    else
-    {
-        mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
-        mCamPositionSet = true;
-    }
-}
+        osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
 
-void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
-{
-    if (*setting=="3D Scene Input/p-navi-free-sensitivity")
-    {
-        mFreeCamControl->setCameraSensitivity(setting->toDouble());
+        osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+
+        vertices->push_back(osg::Vec3(0.0f, 0.0f, -1.0f));
+        vertices->push_back(osg::Vec3(1.0f, 0.0f, -1.0f));
+        vertices->push_back(osg::Vec3(0.0f, 1.0f, -1.0f));
+        vertices->push_back(osg::Vec3(1.0f, 1.0f, -1.0f));
+
+        geometry->setVertexArray(vertices);
+
+        osg::ref_ptr<osg::DrawElementsUShort> primitives = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, 0);
+
+        // triangle 1
+        primitives->push_back(0);
+        primitives->push_back(1);
+        primitives->push_back(2);
+
+        // triangle 2
+        primitives->push_back(2);
+        primitives->push_back(1);
+        primitives->push_back(3);
+
+        geometry->addPrimitiveSet(primitives);
+
+        osg::ref_ptr<osg::Vec4ubArray> colours = new osg::Vec4ubArray;
+        colours->push_back(osg::Vec4ub(gradientColour.red(), gradientColour.green(), gradientColour.blue(), 1.0f));
+        colours->push_back(osg::Vec4ub(gradientColour.red(), gradientColour.green(), gradientColour.blue(), 1.0f));
+        colours->push_back(osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f));
+        colours->push_back(osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f));
+
+        geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
+
+        geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+        geometry->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+        return geometry;
     }
-    else if (*setting=="3D Scene Input/p-navi-orbit-sensitivity")
+
+    osg::ref_ptr<osg::Camera> SceneWidget::createGradientCamera(QColor bgColour, QColor gradientColour)
     {
-        mOrbitCamControl->setCameraSensitivity(setting->toDouble());
+        osg::ref_ptr<osg::Camera> camera = new osg::Camera();
+        camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+        camera->setProjectionMatrix(osg::Matrix::ortho2D(0, 1.0f, 0, 1.0f));
+        camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+        camera->setViewMatrix(osg::Matrix::identity());
+
+        camera->setClearMask(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        camera->setAllowEventFocus(false);
+
+        // draw subgraph before main camera view.
+        camera->setRenderOrder(osg::Camera::PRE_RENDER);
+
+        camera->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+        osg::ref_ptr<osg::Geometry> gradientQuad = createGradientRectangle(bgColour, gradientColour);
+
+        camera->addChild(gradientQuad);
+        return camera;
     }
-    else if (*setting=="3D Scene Input/p-navi-free-invert")
+
+    void SceneWidget::updateGradientCamera(QColor bgColour, QColor gradientColour)
     {
-        mFreeCamControl->setInverted(setting->isTrue());
+        osg::ref_ptr<osg::Geometry> gradientRect = createGradientRectangle(bgColour, gradientColour);
+        // Replaces previous rectangle
+        mGradientCamera->setChild(0, gradientRect.get());
     }
-    else if (*setting=="3D Scene Input/p-navi-orbit-invert")
-    {
-        mOrbitCamControl->setInverted(setting->isTrue());
-    }
-    else if (*setting=="3D Scene Input/s-navi-sensitivity")
-    {
-        mFreeCamControl->setSecondaryMovementMultiplier(setting->toDouble());
-        mOrbitCamControl->setSecondaryMovementMultiplier(setting->toDouble());
-    }
-    else if (*setting=="3D Scene Input/navi-wheel-factor")
-    {
-        mFreeCamControl->setWheelMovementMultiplier(setting->toDouble());
-        mOrbitCamControl->setWheelMovementMultiplier(setting->toDouble());
-    }
-    else if (*setting=="3D Scene Input/navi-free-lin-speed")
-    {
-        mFreeCamControl->setLinearSpeed(setting->toDouble());
-    }
-    else if (*setting=="3D Scene Input/navi-free-rot-speed")
-    {
-        mFreeCamControl->setRotationalSpeed(setting->toDouble());
-    }
-    else if (*setting=="3D Scene Input/navi-free-speed-mult")
-    {
-        mFreeCamControl->setSpeedMultiplier(setting->toDouble());
-    }
-    else if (*setting=="3D Scene Input/navi-orbit-rot-speed")
-    {
-        mOrbitCamControl->setOrbitSpeed(setting->toDouble());
-    }
-    else if (*setting=="3D Scene Input/navi-orbit-speed-mult")
-    {
-        mOrbitCamControl->setOrbitSpeedMultiplier(setting->toDouble());
-    }
-    else if (*setting=="3D Scene Input/navi-orbit-const-roll")
-    {
-        mOrbitCamControl->setConstRoll(setting->isTrue());
-    }
-    else if (*setting=="Rendering/framerate-limit")
-    {
-        CompositeViewer::get().setRunMaxFrameRate(setting->toInt());
-    }
-    else if (*setting=="Rendering/camera-fov" ||
-             *setting=="Rendering/camera-ortho" ||
-             *setting=="Rendering/camera-ortho-size")
-    {
-        updateCameraParameters();
-    }
-    else if (*setting == "Rendering/scene-day-night-switch-nodes")
+
+    void SceneWidget::setLighting(Lighting* lighting)
     {
         if (mLighting)
-            setLighting(mLighting);
-    }
-}
+            mLighting->deactivate();
 
-void RenderWidget::updateCameraParameters(double overrideAspect)
-{
-    const float nearDist = 1.0;
-    const float farDist = 1000.0;
+        mLighting = lighting;
+        mLighting->activate(mRootNode, mIsExterior);
 
-    if (CSMPrefs::get()["Rendering"]["camera-ortho"].isTrue())
-    {
-        const float size = CSMPrefs::get()["Rendering"]["camera-ortho-size"].toInt();
-        const float aspect = overrideAspect >= 0.0 ? overrideAspect : (width() / static_cast<double>(height()));
-        const float halfH = size * 10.0;
-        const float halfW = halfH * aspect;
+        osg::Vec4f ambient = mLighting->getAmbientColour(mHasDefaultAmbient ? &mDefaultAmbient : nullptr);
+        setAmbient(ambient);
 
-        mView->getCamera()->setProjectionMatrixAsOrtho(
-            -halfW, halfW, -halfH, halfH, nearDist, farDist);
+        flagAsModified();
     }
-    else
-    { 
-        mView->getCamera()->setProjectionMatrixAsPerspective(
-            CSMPrefs::get()["Rendering"]["camera-fov"].toInt(),
-            static_cast<double>(width())/static_cast<double>(height()),
-            nearDist, farDist);
-    }
-}
 
-void SceneWidget::selectNavigationMode (const std::string& mode)
-{
-    if (mode=="1st")
+    void SceneWidget::setAmbient(const osg::Vec4f& ambient)
     {
-        mCurrentCamControl->setCamera(nullptr);
-        mCurrentCamControl = mFreeCamControl;
-        mFreeCamControl->setCamera(getCamera());
-        mFreeCamControl->fixUpAxis(CameraController::WorldUp);
+        osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+        osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
+        lightmodel->setAmbientIntensity(ambient);
+        stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+        stateset->setMode(GL_LIGHT0, osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON);
+        mRootNode->setStateSet(stateset);
     }
-    else if (mode=="free")
+
+    void SceneWidget::selectLightingMode(const std::string& mode)
     {
-        mCurrentCamControl->setCamera(nullptr);
-        mCurrentCamControl = mFreeCamControl;
-        mFreeCamControl->setCamera(getCamera());
-        mFreeCamControl->unfixUpAxis();
+        QColor backgroundColour;
+        QColor gradientColour;
+        if (mode == "day")
+        {
+            backgroundColour = CSMPrefs::get()["Rendering"]["scene-day-background-colour"].toColor();
+            gradientColour = CSMPrefs::get()["Rendering"]["scene-day-gradient-colour"].toColor();
+            setLighting(&mLightingDay);
+        }
+        else if (mode == "night")
+        {
+            backgroundColour = CSMPrefs::get()["Rendering"]["scene-night-background-colour"].toColor();
+            gradientColour = CSMPrefs::get()["Rendering"]["scene-night-gradient-colour"].toColor();
+            setLighting(&mLightingNight);
+        }
+        else if (mode == "bright")
+        {
+            backgroundColour = CSMPrefs::get()["Rendering"]["scene-bright-background-colour"].toColor();
+            gradientColour = CSMPrefs::get()["Rendering"]["scene-bright-gradient-colour"].toColor();
+            setLighting(&mLightingBright);
+        }
+        if (CSMPrefs::get()["Rendering"]["scene-use-gradient"].isTrue())
+        {
+            if (mGradientCamera.get() != nullptr)
+            {
+                // we can go ahead and update since this camera still exists
+                updateGradientCamera(backgroundColour, gradientColour);
+
+                if (!mView->getCamera()->containsNode(mGradientCamera.get()))
+                {
+                    // need to re-attach the gradient camera
+                    mView->getCamera()->setClearMask(0);
+                    mView->getCamera()->addChild(mGradientCamera.get());
+                }
+            }
+            else
+            {
+                // need to create the gradient camera
+                mGradientCamera = createGradientCamera(backgroundColour, gradientColour);
+                mView->getCamera()->setClearMask(0);
+                mView->getCamera()->addChild(mGradientCamera.get());
+            }
+        }
+        else
+        {
+            // Fall back to using the clear color for the camera
+            mView->getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            mView->getCamera()->setClearColor(
+                osg::Vec4(backgroundColour.redF(), backgroundColour.greenF(), backgroundColour.blueF(), 1.0f));
+            if (mGradientCamera.get() != nullptr && mView->getCamera()->containsNode(mGradientCamera.get()))
+            {
+                // Remove the child to prevent the gradient from rendering
+                mView->getCamera()->removeChild(mGradientCamera.get());
+            }
+        }
     }
-    else if (mode=="orbit")
+
+    CSVWidget::SceneToolMode* SceneWidget::makeLightingSelector(CSVWidget::SceneToolbar* parent)
     {
-        mCurrentCamControl->setCamera(nullptr);
-        mCurrentCamControl = mOrbitCamControl;
-        mOrbitCamControl->setCamera(getCamera());
-        mOrbitCamControl->reset();
+        CSVWidget::SceneToolMode* tool = new CSVWidget::SceneToolMode(parent, "Lighting Mode");
+
+        /// \todo replace icons
+        tool->addButton(":scenetoolbar/day", "day",
+            "Day"
+            "<ul><li>Cell specific ambient in interiors</li>"
+            "<li>Low ambient in exteriors</li>"
+            "<li>Strong directional light source</li>"
+            "<li>This mode closely resembles day time in-game</li></ul>");
+        tool->addButton(":scenetoolbar/night", "night",
+            "Night"
+            "<ul><li>Cell specific ambient in interiors</li>"
+            "<li>Low ambient in exteriors</li>"
+            "<li>Weak directional light source</li>"
+            "<li>This mode closely resembles night time in-game</li></ul>");
+        tool->addButton(":scenetoolbar/bright", "bright",
+            "Bright"
+            "<ul><li>Maximum ambient</li>"
+            "<li>Strong directional light source</li></ul>");
+
+        connect(tool, &CSVWidget::SceneToolMode::modeChanged, this, &SceneWidget::selectLightingMode);
+
+        return tool;
     }
-}
+
+    void SceneWidget::setDefaultAmbient(const osg::Vec4f& colour)
+    {
+        mDefaultAmbient = colour;
+        mHasDefaultAmbient = true;
+
+        setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
+    }
+
+    void SceneWidget::setExterior(bool isExterior)
+    {
+        mIsExterior = isExterior;
+    }
+
+    void SceneWidget::mouseMoveEvent(QMouseEvent* event)
+    {
+        mCurrentCamControl->handleMouseMoveEvent(event->x() - mPrevMouseX, event->y() - mPrevMouseY);
+
+        mPrevMouseX = event->x();
+        mPrevMouseY = event->y();
+    }
+
+    void SceneWidget::wheelEvent(QWheelEvent* event)
+    {
+        mCurrentCamControl->handleMouseScrollEvent(event->angleDelta().y());
+    }
+
+    void SceneWidget::update(double dt)
+    {
+        if (mCamPositionSet)
+        {
+            mCurrentCamControl->update(dt);
+        }
+        else
+        {
+            mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
+            mCamPositionSet = true;
+        }
+    }
+
+    void SceneWidget::settingChanged(const CSMPrefs::Setting* setting)
+    {
+        if (*setting == "3D Scene Input/p-navi-free-sensitivity")
+        {
+            mFreeCamControl->setCameraSensitivity(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/p-navi-orbit-sensitivity")
+        {
+            mOrbitCamControl->setCameraSensitivity(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/p-navi-free-invert")
+        {
+            mFreeCamControl->setInverted(setting->isTrue());
+        }
+        else if (*setting == "3D Scene Input/p-navi-orbit-invert")
+        {
+            mOrbitCamControl->setInverted(setting->isTrue());
+        }
+        else if (*setting == "3D Scene Input/s-navi-sensitivity")
+        {
+            mFreeCamControl->setSecondaryMovementMultiplier(setting->toDouble());
+            mOrbitCamControl->setSecondaryMovementMultiplier(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/navi-wheel-factor")
+        {
+            mFreeCamControl->setWheelMovementMultiplier(setting->toDouble());
+            mOrbitCamControl->setWheelMovementMultiplier(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/navi-free-lin-speed")
+        {
+            mFreeCamControl->setLinearSpeed(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/navi-free-rot-speed")
+        {
+            mFreeCamControl->setRotationalSpeed(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/navi-free-speed-mult")
+        {
+            mFreeCamControl->setSpeedMultiplier(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/navi-orbit-rot-speed")
+        {
+            mOrbitCamControl->setOrbitSpeed(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/navi-orbit-speed-mult")
+        {
+            mOrbitCamControl->setOrbitSpeedMultiplier(setting->toDouble());
+        }
+        else if (*setting == "3D Scene Input/navi-orbit-const-roll")
+        {
+            mOrbitCamControl->setConstRoll(setting->isTrue());
+        }
+        else if (*setting == "Rendering/framerate-limit")
+        {
+            CompositeViewer::get().setRunMaxFrameRate(setting->toInt());
+        }
+        else if (*setting == "Rendering/camera-fov" || *setting == "Rendering/camera-ortho"
+            || *setting == "Rendering/camera-ortho-size")
+        {
+            updateCameraParameters();
+        }
+        else if (*setting == "Rendering/scene-day-night-switch-nodes")
+        {
+            if (mLighting)
+                setLighting(mLighting);
+        }
+    }
+
+    void RenderWidget::updateCameraParameters(double overrideAspect)
+    {
+        const float nearDist = 1.0;
+        const float farDist = 1000.0;
+
+        if (CSMPrefs::get()["Rendering"]["camera-ortho"].isTrue())
+        {
+            const float size = CSMPrefs::get()["Rendering"]["camera-ortho-size"].toInt();
+            const float aspect = overrideAspect >= 0.0 ? overrideAspect : (width() / static_cast<double>(height()));
+            const float halfH = size * 10.0;
+            const float halfW = halfH * aspect;
+
+            mView->getCamera()->setProjectionMatrixAsOrtho(-halfW, halfW, -halfH, halfH, nearDist, farDist);
+        }
+        else
+        {
+            mView->getCamera()->setProjectionMatrixAsPerspective(CSMPrefs::get()["Rendering"]["camera-fov"].toInt(),
+                static_cast<double>(width()) / static_cast<double>(height()), nearDist, farDist);
+        }
+    }
+
+    void SceneWidget::selectNavigationMode(const std::string& mode)
+    {
+        if (mode == "1st")
+        {
+            mCurrentCamControl->setCamera(nullptr);
+            mCurrentCamControl = mFreeCamControl;
+            mFreeCamControl->setCamera(getCamera());
+            mFreeCamControl->fixUpAxis(CameraController::WorldUp);
+        }
+        else if (mode == "free")
+        {
+            mCurrentCamControl->setCamera(nullptr);
+            mCurrentCamControl = mFreeCamControl;
+            mFreeCamControl->setCamera(getCamera());
+            mFreeCamControl->unfixUpAxis();
+        }
+        else if (mode == "orbit")
+        {
+            mCurrentCamControl->setCamera(nullptr);
+            mCurrentCamControl = mOrbitCamControl;
+            mOrbitCamControl->setCamera(getCamera());
+            mOrbitCamControl->reset();
+        }
+    }
 
 }

@@ -24,42 +24,43 @@ namespace MWRender
         Mask_UpdateVisitor = 0x1, // reserved for separating UpdateVisitors from CullVisitors
 
         // child of Scene
-        Mask_Effect = (1<<1),
-        Mask_Debug = (1<<2),
-        Mask_Actor = (1<<3),
-        Mask_Player = (1<<4),
-        Mask_Sky = (1<<5),
-        Mask_Water = (1<<6), // choose Water or SimpleWater depending on detail required
-        Mask_SimpleWater = (1<<7),
-        Mask_Terrain = (1<<8),
-        Mask_FirstPerson = (1<<9),
-        Mask_Object = (1<<10),
-        Mask_Static = (1<<11),
+        Mask_Effect = (1 << 1),
+        Mask_Debug = (1 << 2),
+        Mask_Actor = (1 << 3),
+        Mask_Player = (1 << 4),
+        Mask_Sky = (1 << 5),
+        Mask_Water = (1 << 6), // choose Water or SimpleWater depending on detail required
+        Mask_SimpleWater = (1 << 7),
+        Mask_Terrain = (1 << 8),
+        Mask_FirstPerson = (1 << 9),
+        Mask_Object = (1 << 10),
+        Mask_Static = (1 << 11),
 
         // child of Sky
-        Mask_Sun = (1<<12),
-        Mask_WeatherParticles = (1<<13),
+        Mask_Sun = (1 << 12),
+        Mask_WeatherParticles = (1 << 13),
 
         // top level masks
-        Mask_Scene = (1<<14),
-        Mask_GUI = (1<<15),
+        Mask_Scene = (1 << 14),
+        Mask_GUI = (1 << 15),
 
         // Set on a ParticleSystem Drawable
-        Mask_ParticleSystem = (1<<16),
+        Mask_ParticleSystem = (1 << 16),
 
         // Set on cameras within the main scene graph
-        Mask_RenderToTexture = (1<<17),
+        Mask_RenderToTexture = (1 << 17),
 
-        Mask_PreCompile = (1<<18),
+        Mask_PreCompile = (1 << 18),
 
         // Set on a camera's cull mask to enable the LightManager
-        Mask_Lighting = (1<<19),
+        Mask_Lighting = (1 << 19),
 
-        Mask_Groundcover = (1<<20),
+        Mask_Groundcover = (1 << 20),
     };
 
     // Defines masks to remove when using ToggleWorld command
-    constexpr static unsigned int sToggleWorldMask = Mask_Debug | Mask_Actor | Mask_Terrain | Mask_Object | Mask_Static | Mask_Groundcover;
+    constexpr static unsigned int sToggleWorldMask
+        = Mask_Debug | Mask_Actor | Mask_Terrain | Mask_Object | Mask_Static | Mask_Groundcover;
 
 }
 

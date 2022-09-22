@@ -13,7 +13,7 @@ namespace Misc
     {
         static_assert(sizeof(Seed) >= sizeof(std::size_t), "Resulting hash will be truncated");
         std::hash<T> hasher;
-        seed ^= static_cast<Seed>(hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2));
+        seed ^= static_cast<Seed>(hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
     }
 }
 

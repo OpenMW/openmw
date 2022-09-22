@@ -8,9 +8,9 @@
 
 #include "mainwizard.hpp"
 
-Wizard::InstallationTargetPage::InstallationTargetPage(QWidget *parent, const Files::ConfigurationManager &cfg) :
-    QWizardPage(parent),
-    mCfgMgr(cfg)
+Wizard::InstallationTargetPage::InstallationTargetPage(QWidget* parent, const Files::ConfigurationManager& cfg)
+    : QWizardPage(parent)
+    , mCfgMgr(cfg)
 {
     mWizard = qobject_cast<MainWizard*>(parent);
 
@@ -34,15 +34,18 @@ bool Wizard::InstallationTargetPage::validatePage()
 
     qDebug() << "Validating path: " << path;
 
-    if (!QFile::exists(path)) {
+    if (!QFile::exists(path))
+    {
         QDir dir;
 
-        if (!dir.mkpath(path)) {
+        if (!dir.mkpath(path))
+        {
             QMessageBox msgBox;
             msgBox.setWindowTitle(tr("Error creating destination"));
             msgBox.setIcon(QMessageBox::Warning);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<html><head/><body><p><b>Could not create the destination directory</b></p> \
+            msgBox.setText(
+                tr("<html><head/><body><p><b>Could not create the destination directory</b></p> \
                               <p>Please make sure you have the right permissions \
                               and try again, or specify a different location.</p></body></html>"));
             msgBox.exec();
@@ -52,24 +55,28 @@ bool Wizard::InstallationTargetPage::validatePage()
 
     QFileInfo info(path);
 
-    if (!info.isWritable()) {
+    if (!info.isWritable())
+    {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Insufficient permissions"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<html><head/><body><p><b>Could not write to the destination directory</b></p> \
+        msgBox.setText(
+            tr("<html><head/><body><p><b>Could not write to the destination directory</b></p> \
                           <p>Please make sure you have the right permissions \
                           and try again, or specify a different location.</p></body></html>"));
         msgBox.exec();
         return false;
     }
 
-    if (mWizard->findFiles(QLatin1String("Morrowind"), path)) {
+    if (mWizard->findFiles(QLatin1String("Morrowind"), path))
+    {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Destination not empty"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<html><head/><body><p><b>The destination directory is not empty</b></p> \
+        msgBox.setText(
+            tr("<html><head/><body><p><b>The destination directory is not empty</b></p> \
                           <p>An existing Morrowind installation is present in the specified location.</p> \
                           <p>Please specify a different location, or go back and select the location as an existing installation.</p></body></html>"));
         msgBox.exec();
@@ -81,11 +88,8 @@ bool Wizard::InstallationTargetPage::validatePage()
 
 void Wizard::InstallationTargetPage::on_browseButton_clicked()
 {
-    QString selectedPath = QFileDialog::getExistingDirectory(
-                this,
-                tr("Select where to install Morrowind"),
-                QDir::homePath(),
-                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    QString selectedPath = QFileDialog::getExistingDirectory(this, tr("Select where to install Morrowind"),
+        QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     qDebug() << selectedPath;
     QFileInfo info(selectedPath);
@@ -94,7 +98,6 @@ void Wizard::InstallationTargetPage::on_browseButton_clicked()
 
     if (info.isWritable())
         targetLineEdit->setText(info.absoluteFilePath());
-
 }
 
 int Wizard::InstallationTargetPage::nextId() const

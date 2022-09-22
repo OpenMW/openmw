@@ -11,11 +11,11 @@
 #include <osg/Vec3f>
 #include <osg/io_utils>
 
+#include <functional>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <vector>
-#include <optional>
-#include <functional>
 
 namespace DetourNavigator
 {
@@ -36,14 +36,16 @@ namespace DetourNavigator
     }
 
     GenerateNavMeshTile::GenerateNavMeshTile(std::string worldspace, const TilePosition& tilePosition,
-            RecastMeshProvider recastMeshProvider, const AgentBounds& agentBounds,
-            const DetourNavigator::Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer)
+        RecastMeshProvider recastMeshProvider, const AgentBounds& agentBounds,
+        const DetourNavigator::Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer)
         : mWorldspace(std::move(worldspace))
         , mTilePosition(tilePosition)
         , mRecastMeshProvider(recastMeshProvider)
         , mAgentBounds(agentBounds)
         , mSettings(settings)
-        , mConsumer(std::move(consumer)) {}
+        , mConsumer(std::move(consumer))
+    {
+    }
 
     void GenerateNavMeshTile::doWork()
     {
@@ -59,15 +61,15 @@ namespace DetourNavigator
 
         try
         {
-            Ignore ignore {mWorldspace, mTilePosition, consumer};
+            Ignore ignore{ mWorldspace, mTilePosition, consumer };
 
             const std::shared_ptr<RecastMesh> recastMesh = mRecastMeshProvider.getMesh(mWorldspace, mTilePosition);
 
             if (recastMesh == nullptr || isEmpty(*recastMesh))
                 return;
 
-            const std::vector<DbRefGeometryObject> objects = makeDbRefGeometryObjects(recastMesh->getMeshSources(),
-                [&] (const MeshSource& v) { return consumer->resolveMeshSource(v); });
+            const std::vector<DbRefGeometryObject> objects = makeDbRefGeometryObjects(
+                recastMesh->getMeshSources(), [&](const MeshSource& v) { return consumer->resolveMeshSource(v); });
             std::vector<std::byte> input = serialize(mSettings.mRecast, mAgentBounds, *recastMesh, objects);
             const std::optional<NavMeshTileInfo> info = consumer->find(mWorldspace, mTilePosition, input);
 
@@ -92,8 +94,8 @@ namespace DetourNavigator
         }
         catch (const std::exception& e)
         {
-            Log(Debug::Warning) << "Failed to generate navmesh for worldspace \"" << mWorldspace
-                                << "\" tile " << mTilePosition << ": " << e.what();
+            Log(Debug::Warning) << "Failed to generate navmesh for worldspace \"" << mWorldspace << "\" tile "
+                                << mTilePosition << ": " << e.what();
             consumer->cancel(e.what());
         }
     }

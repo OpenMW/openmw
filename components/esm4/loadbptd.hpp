@@ -61,7 +61,7 @@ namespace ESM4
             std::uint8_t partType;
 
             std::uint8_t healthPercent;
-            std::int8_t  actorValue; //(Actor Values)
+            std::int8_t actorValue; //(Actor Values)
             std::uint8_t toHitChance;
 
             std::uint8_t explExplosionChance; // %
@@ -76,7 +76,7 @@ namespace ESM4
             FormId sevExplosion;
             float sevDebrisScale;
 
-            //Struct - Gore Effects Positioning
+            // Struct - Gore Effects Positioning
             float transX;
             float transY;
             float transZ;
@@ -106,7 +106,7 @@ namespace ESM4
             void clear();
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -116,9 +116,9 @@ namespace ESM4
         std::vector<BodyPart> mBodyParts;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

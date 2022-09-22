@@ -26,9 +26,9 @@
 */
 #include "loadqust.hpp"
 
-#include <stdexcept>
 #include <cstring>
 #include <iostream> // FIXME: for debugging only
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -37,16 +37,22 @@ void ESM4::Quest::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId);  break;
-            case ESM4::SUB_FULL: reader.getZString(mQuestName); break;
-            case ESM4::SUB_ICON: reader.getZString(mFileName); break; // TES4 (none in FO3/FONV)
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getZString(mQuestName);
+                break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mFileName);
+                break; // TES4 (none in FO3/FONV)
             case ESM4::SUB_DATA:
             {
                 if (subHdr.dataSize == 2) // TES4
@@ -54,15 +60,17 @@ void ESM4::Quest::load(ESM4::Reader& reader)
                     reader.get(&mData, 2);
                     mData.questDelay = 0.f; // unused in TES4 but keep it clean
 
-                    //if ((mData.flags & Flag_StartGameEnabled) != 0)
-                        //std::cout << "start quest " << mEditorId << std::endl;
+                    // if ((mData.flags & Flag_StartGameEnabled) != 0)
+                    // std::cout << "start quest " << mEditorId << std::endl;
                 }
                 else
                     reader.get(mData); // FO3
 
                 break;
             }
-            case ESM4::SUB_SCRI: reader.get(mQuestScript); break;
+            case ESM4::SUB_SCRI:
+                reader.get(mQuestScript);
+                break;
             case ESM4::SUB_CTDA: // FIXME: how to detect if 1st/2nd param is a formid?
             {
                 if (subHdr.dataSize == 24) // TES4
@@ -89,10 +97,18 @@ void ESM4::Quest::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_SCHR: reader.get(mScript.scriptHeader); break;
-            case ESM4::SUB_SCDA: reader.skipSubRecordData(); break; // compiled script data
-            case ESM4::SUB_SCTX: reader.getString(mScript.scriptSource); break;
-            case ESM4::SUB_SCRO: reader.getFormId(mScript.globReference); break;
+            case ESM4::SUB_SCHR:
+                reader.get(mScript.scriptHeader);
+                break;
+            case ESM4::SUB_SCDA:
+                reader.skipSubRecordData();
+                break; // compiled script data
+            case ESM4::SUB_SCTX:
+                reader.getString(mScript.scriptSource);
+                break;
+            case ESM4::SUB_SCRO:
+                reader.getFormId(mScript.globReference);
+                break;
             case ESM4::SUB_INDX:
             case ESM4::SUB_QSDT:
             case ESM4::SUB_CNAM:
@@ -142,8 +158,8 @@ void ESM4::Quest::load(ESM4::Reader& reader)
             case ESM4::SUB_VMAD: // TES5
             case ESM4::SUB_VTCK: // TES5
             {
-                //std::cout << "QUST " << ESM::printName(subHdr.typeId) << " skipping..."
-                          //<< subHdr.dataSize << std::endl;
+                // std::cout << "QUST " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -151,14 +167,14 @@ void ESM4::Quest::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::QUST::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
-    //if (mEditorId == "DAConversations")
-        //std::cout << mEditorId << std::endl;
+    // if (mEditorId == "DAConversations")
+    // std::cout << mEditorId << std::endl;
 }
 
-//void ESM4::Quest::save(ESM4::Writer& writer) const
+// void ESM4::Quest::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Quest::blank()
+// void ESM4::Quest::blank()
 //{
-//}
+// }

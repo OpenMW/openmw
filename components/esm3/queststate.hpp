@@ -16,8 +16,8 @@ namespace ESM
         int mState;
         unsigned char mFinished;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 }
 

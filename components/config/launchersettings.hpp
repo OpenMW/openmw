@@ -1,28 +1,29 @@
 #ifndef LAUNCHERSETTINGS_HPP
 #define LAUNCHERSETTINGS_HPP
 
-#include "settingsbase.hpp"
 #include "gamesettings.hpp"
+#include "settingsbase.hpp"
 
 namespace Config
 {
-    class LauncherSettings : public SettingsBase<QMultiMap<QString, QString> >
+    class LauncherSettings : public SettingsBase<QMultiMap<QString, QString>>
     {
     public:
-        bool writeFile(QTextStream &stream);
+        bool writeFile(QTextStream& stream);
 
-        /// \return names of all Content Lists in the launcher's .cfg file. 
+        /// \return names of all Content Lists in the launcher's .cfg file.
         QStringList getContentLists();
 
         /// Set initially selected content list to match values from openmw.cfg, creating if necessary
         void setContentList(const GameSettings& gameSettings);
 
         /// Create a Content List (or replace if it already exists)
-        void setContentList(const QString& contentListName, const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames);
+        void setContentList(const QString& contentListName, const QStringList& dirNames,
+            const QStringList& archiveNames, const QStringList& fileNames);
 
-        void removeContentList(const QString &contentListName);
+        void removeContentList(const QString& contentListName);
 
-        void setCurrentContentListName(const QString &contentListName);
+        void setCurrentContentListName(const QString& contentListName);
 
         QString getCurrentContentListName() const;
 
@@ -36,7 +37,6 @@ namespace Config
         static const char sLauncherConfigFileName[];
 
     private:
-
         /// \return key to use to get/set the files in the specified data Directory List
         static QString makeDirectoryListKey(const QString& contentListName);
 
@@ -51,7 +51,7 @@ namespace Config
 
         static QString makeNewContentListName();
 
-        QStringList subKeys(const QString &key);
+        QStringList subKeys(const QString& key);
 
         /// name of entry in launcher.cfg that holds name of currently selected Content List
         static const char sCurrentContentListKey[];

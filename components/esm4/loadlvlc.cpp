@@ -36,18 +36,28 @@ void ESM4::LevelledCreature::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId);    break;
-            case ESM4::SUB_TNAM: reader.getFormId(mTemplate);  break;
-            case ESM4::SUB_LVLD: reader.get(mChanceNone);      break;
-            case ESM4::SUB_LVLF: reader.get(mLvlCreaFlags);    break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_TNAM:
+                reader.getFormId(mTemplate);
+                break;
+            case ESM4::SUB_LVLD:
+                reader.get(mChanceNone);
+                break;
+            case ESM4::SUB_LVLF:
+                reader.get(mLvlCreaFlags);
+                break;
             case ESM4::SUB_LVLO:
             {
                 static LVLO lvlo;
@@ -58,8 +68,8 @@ void ESM4::LevelledCreature::load(ESM4::Reader& reader)
                         reader.get(lvlo.level);
                         reader.get(lvlo.item);
                         reader.get(lvlo.count);
-                        //std::cout << "LVLC " << mEditorId << " LVLO lev " << lvlo.level << ", item " << lvlo.item
-                                  //<< ", count " << lvlo.count << std::endl;
+                        // std::cout << "LVLC " << mEditorId << " LVLO lev " << lvlo.level << ", item " << lvlo.item
+                        //<< ", count " << lvlo.count << std::endl;
                         // FIXME: seems to happen only once, don't add to mLvlObject
                         // LVLC TesKvatchCreature LVLO lev 1, item 1393819648, count 2
                         // 0x0001, 0x5314 0000, 0x0002
@@ -77,7 +87,7 @@ void ESM4::LevelledCreature::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_OBND: // FO3
             {
-                //std::cout << "LVLC " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "LVLC " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -111,10 +121,10 @@ std::int8_t ESM4::LevelledCreature::chanceNone() const
         return (mChanceNone & 0x7f); // FIXME: 0x80 is just a guess
 }
 
-//void ESM4::LevelledCreature::save(ESM4::Writer& writer) const
+// void ESM4::LevelledCreature::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::LevelledCreature::blank()
+// void ESM4::LevelledCreature::blank()
 //{
-//}
+// }

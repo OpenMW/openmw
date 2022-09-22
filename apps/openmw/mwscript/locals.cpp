@@ -1,11 +1,11 @@
 #include "locals.hpp"
 #include "globalscripts.hpp"
 
-#include <components/esm3/loadscpt.hpp>
-#include <components/esm3/variant.hpp>
-#include <components/esm3/locals.hpp>
-#include <components/debug/debuglog.hpp>
 #include <components/compiler/locals.hpp>
+#include <components/debug/debuglog.hpp>
+#include <components/esm3/loadscpt.hpp>
+#include <components/esm3/locals.hpp>
+#include <components/esm3/variant.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
@@ -19,22 +19,26 @@ namespace MWScript
     {
         if (!mInitialised)
         {
-            const ESM::Script *script = MWBase::Environment::get().getWorld()->getStore().
-                get<ESM::Script>().find (scriptName);
+            const ESM::Script* script
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(scriptName);
 
-            configure (*script);
+            configure(*script);
         }
     }
 
-    Locals::Locals() : mInitialised (false) {}
+    Locals::Locals()
+        : mInitialised(false)
+    {
+    }
 
-    bool Locals::configure (const ESM::Script& script)
+    bool Locals::configure(const ESM::Script& script)
     {
         if (mInitialised)
             return false;
 
-        const Locals* global = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocalsIfPresent(script.mId);
-        if(global)
+        const Locals* global
+            = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocalsIfPresent(script.mId);
+        if (global)
         {
             mShorts = global->mShorts;
             mLongs = global->mLongs;
@@ -42,15 +46,14 @@ namespace MWScript
         }
         else
         {
-            const Compiler::Locals& locals =
-                MWBase::Environment::get().getScriptManager()->getLocals (script.mId);
+            const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script.mId);
 
             mShorts.clear();
-            mShorts.resize (locals.get ('s').size(), 0);
+            mShorts.resize(locals.get('s').size(), 0);
             mLongs.clear();
-            mLongs.resize (locals.get ('l').size(), 0);
+            mLongs.resize(locals.get('l').size(), 0);
             mFloats.clear();
-            mFloats.resize (locals.get ('f').size(), 0);
+            mFloats.resize(locals.get('f').size(), 0);
         }
 
         mInitialised = true;
@@ -64,30 +67,29 @@ namespace MWScript
 
     bool Locals::hasVar(std::string_view script, std::string_view var)
     {
-        ensure (script);
+        ensure(script);
 
-        const Compiler::Locals& locals =
-            MWBase::Environment::get().getScriptManager()->getLocals(script);
+        const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         int index = locals.getIndex(var);
         return (index != -1);
     }
 
     int Locals::getIntVar(std::string_view script, std::string_view var)
     {
-        ensure (script);
+        ensure(script);
 
         const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         int index = locals.getIndex(var);
         char type = locals.getType(var);
-        if(index != -1)
+        if (index != -1)
         {
-            switch(type)
+            switch (type)
             {
                 case 's':
-                    return mShorts.at (index);
+                    return mShorts.at(index);
 
                 case 'l':
-                    return mLongs.at (index);
+                    return mLongs.at(index);
 
                 case 'f':
                     return static_cast<int>(mFloats.at(index));
@@ -100,20 +102,20 @@ namespace MWScript
 
     float Locals::getFloatVar(std::string_view script, std::string_view var)
     {
-        ensure (script);
+        ensure(script);
 
         const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         int index = locals.getIndex(var);
         char type = locals.getType(var);
-        if(index != -1)
+        if (index != -1)
         {
-            switch(type)
+            switch (type)
             {
                 case 's':
-                    return mShorts.at (index);
+                    return mShorts.at(index);
 
                 case 'l':
-                    return mLongs.at (index);
+                    return mLongs.at(index);
 
                 case 'f':
                     return mFloats.at(index);
@@ -126,23 +128,26 @@ namespace MWScript
 
     bool Locals::setVarByInt(std::string_view script, std::string_view var, int val)
     {
-        ensure (script);
+        ensure(script);
 
         const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         int index = locals.getIndex(var);
         char type = locals.getType(var);
-        if(index != -1)
+        if (index != -1)
         {
-            switch(type)
+            switch (type)
             {
                 case 's':
-                    mShorts.at (index) = val; break;
+                    mShorts.at(index) = val;
+                    break;
 
                 case 'l':
-                    mLongs.at (index) = val; break;
+                    mLongs.at(index) = val;
+                    break;
 
                 case 'f':
-                    mFloats.at(index) = static_cast<float>(val); break;
+                    mFloats.at(index) = static_cast<float>(val);
+                    break;
             }
             return true;
         }
@@ -154,34 +159,48 @@ namespace MWScript
         if (!mInitialised)
             return false;
 
-        const Compiler::Locals& declarations =
-            MWBase::Environment::get().getScriptManager()->getLocals(script);
+        const Compiler::Locals& declarations = MWBase::Environment::get().getScriptManager()->getLocals(script);
 
-        for (int i=0; i<3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
             char type = 0;
 
             switch (i)
             {
-                case 0: type = 's'; break;
-                case 1: type = 'l'; break;
-                case 2: type = 'f'; break;
+                case 0:
+                    type = 's';
+                    break;
+                case 1:
+                    type = 'l';
+                    break;
+                case 2:
+                    type = 'f';
+                    break;
             }
 
-            const std::vector<std::string>& names = declarations.get (type);
+            const std::vector<std::string>& names = declarations.get(type);
 
-            for (int i2=0; i2<static_cast<int> (names.size()); ++i2)
+            for (int i2 = 0; i2 < static_cast<int>(names.size()); ++i2)
             {
                 ESM::Variant value;
 
                 switch (i)
                 {
-                    case 0: value.setType (ESM::VT_Int); value.setInteger (mShorts.at (i2)); break;
-                    case 1: value.setType (ESM::VT_Int); value.setInteger (mLongs.at (i2)); break;
-                    case 2: value.setType (ESM::VT_Float); value.setFloat (mFloats.at (i2)); break;
+                    case 0:
+                        value.setType(ESM::VT_Int);
+                        value.setInteger(mShorts.at(i2));
+                        break;
+                    case 1:
+                        value.setType(ESM::VT_Int);
+                        value.setInteger(mLongs.at(i2));
+                        break;
+                    case 2:
+                        value.setType(ESM::VT_Float);
+                        value.setFloat(mFloats.at(i2));
+                        break;
                 }
 
-                locals.mVariables.emplace_back (names[i2], value);
+                locals.mVariables.emplace_back(names[i2], value);
             }
         }
 
@@ -190,13 +209,12 @@ namespace MWScript
 
     void Locals::read(const ESM::Locals& locals, std::string_view script)
     {
-        ensure (script);
+        ensure(script);
 
-        const Compiler::Locals& declarations =
-            MWBase::Environment::get().getScriptManager()->getLocals(script);
+        const Compiler::Locals& declarations = MWBase::Environment::get().getScriptManager()->getLocals(script);
 
         int index = 0, numshorts = 0, numlongs = 0;
-        for (unsigned int v=0; v<locals.mVariables.size();++v)
+        for (unsigned int v = 0; v < locals.mVariables.size(); ++v)
         {
             ESM::VarType type = locals.mVariables[v].second.getType();
             if (type == ESM::VT_Short)
@@ -205,16 +223,16 @@ namespace MWScript
                 ++numlongs;
         }
 
-        for (std::vector<std::pair<std::string, ESM::Variant> >::const_iterator iter
-            = locals.mVariables.begin(); iter!=locals.mVariables.end(); ++iter,++index)
+        for (std::vector<std::pair<std::string, ESM::Variant>>::const_iterator iter = locals.mVariables.begin();
+             iter != locals.mVariables.end(); ++iter, ++index)
         {
             if (iter->first.empty())
             {
                 // no variable names available (this will happen for legacy, i.e. ESS-imported savegames only)
                 try
                 {
-                    if (index >= numshorts+numlongs)
-                        mFloats.at(index - (numshorts+numlongs)) = iter->second.getFloat();
+                    if (index >= numshorts + numlongs)
+                        mFloats.at(index - (numshorts + numlongs)) = iter->second.getFloat();
                     else if (index >= numshorts)
                         mLongs.at(index - numshorts) = iter->second.getInteger();
                     else
@@ -222,16 +240,15 @@ namespace MWScript
                 }
                 catch (std::exception& e)
                 {
-                    Log(Debug::Error) << "Failed to read local variable state for script '"
-                                        << script << "' (legacy format): " << e.what()
-                                        << "\nNum shorts: " << numshorts << " / " << mShorts.size()
-                                        << " Num longs: " << numlongs << " / " << mLongs.size();
+                    Log(Debug::Error) << "Failed to read local variable state for script '" << script
+                                      << "' (legacy format): " << e.what() << "\nNum shorts: " << numshorts << " / "
+                                      << mShorts.size() << " Num longs: " << numlongs << " / " << mLongs.size();
                 }
             }
             else
             {
-                char type =  declarations.getType (iter->first);
-                int index2 = declarations.getIndex (iter->first);
+                char type = declarations.getType(iter->first);
+                int index2 = declarations.getIndex(iter->first);
 
                 // silently ignore locals that don't exist anymore
                 if (type == ' ' || index2 == -1)
@@ -241,9 +258,15 @@ namespace MWScript
                 {
                     switch (type)
                     {
-                        case 's': mShorts.at (index2) = iter->second.getInteger(); break;
-                        case 'l': mLongs.at (index2) = iter->second.getInteger(); break;
-                        case 'f': mFloats.at (index2) = iter->second.getFloat(); break;
+                        case 's':
+                            mShorts.at(index2) = iter->second.getInteger();
+                            break;
+                        case 'l':
+                            mLongs.at(index2) = iter->second.getInteger();
+                            break;
+                        case 'f':
+                            mFloats.at(index2) = iter->second.getFloat();
+                            break;
                     }
                 }
                 catch (...)

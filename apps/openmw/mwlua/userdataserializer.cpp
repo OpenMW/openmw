@@ -12,7 +12,11 @@ namespace MWLua
     {
     public:
         explicit Serializer(bool localSerializer, ObjectRegistry* registry, std::map<int, int>* contentFileMapping)
-            : mLocalSerializer(localSerializer), mObjectRegistry(registry), mContentFileMapping(contentFileMapping) {}
+            : mLocalSerializer(localSerializer)
+            , mObjectRegistry(registry)
+            , mContentFileMapping(contentFileMapping)
+        {
+        }
 
     private:
         // Appends serialized sol::userdata to the end of BinaryData.
@@ -27,8 +31,8 @@ namespace MWLua
             return false;
         }
 
-        // Deserializes userdata of type "typeName" from binaryData. Should push the result on stack using sol::stack::push.
-        // Returns false if this type is not supported by this serializer.
+        // Deserializes userdata of type "typeName" from binaryData. Should push the result on stack using
+        // sol::stack::push. Returns false if this type is not supported by this serializer.
         bool deserialize(std::string_view typeName, std::string_view binaryData, lua_State* lua) const override
         {
             if (typeName == sRefNumTypeName)

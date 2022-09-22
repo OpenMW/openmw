@@ -1,19 +1,19 @@
 #include "fontloader.hpp"
 
+#include <array>
 #include <stdexcept>
 #include <string_view>
-#include <array>
 
 #include <osg/Image>
 
 #include <osgDB/WriteFile>
 
+#include <MyGUI_FactoryManager.h>
+#include <MyGUI_RenderManager.h>
 #include <MyGUI_ResourceManager.h>
 #include <MyGUI_ResourceManualFont.h>
 #include <MyGUI_ResourceTrueTypeFont.h>
 #include <MyGUI_XmlDocument.h>
-#include <MyGUI_FactoryManager.h>
-#include <MyGUI_RenderManager.h>
 
 #include <components/debug/debuglog.hpp>
 
@@ -62,7 +62,8 @@ namespace
             if (name == "JournalBooks")
             {
                 MyGUI::xml::ElementPtr sizeProperty = getProperty(layersIterator.current(), "Size");
-                const std::string& sizeValue = sizeProperty != nullptr ? sizeProperty->findAttribute("value") : std::string();
+                const std::string& sizeValue
+                    = sizeProperty != nullptr ? sizeProperty->findAttribute("value") : std::string();
                 if (!sizeValue.empty())
                     return MyGUI::IntSize::parse(sizeValue);
             }
@@ -90,17 +91,17 @@ namespace
         }
         else if (ch <= 0xDF)
         {
-            unicode = ch&0x1F;
+            unicode = ch & 0x1F;
             numbytes = 1;
         }
         else if (ch <= 0xEF)
         {
-            unicode = ch&0x0F;
+            unicode = ch & 0x0F;
             numbytes = 2;
         }
         else if (ch <= 0xF7)
         {
-            unicode = ch&0x07;
+            unicode = ch & 0x07;
             numbytes = 3;
         }
         else
@@ -124,42 +125,78 @@ namespace
     }
 
     /// This is a hack for Polish font
-    unsigned char mapUtf8Char(unsigned char c) {
-        switch(c){
-            case 0x80: return 0xc6;
-            case 0x81: return 0x9c;
-            case 0x82: return 0xe6;
-            case 0x83: return 0xb3;
-            case 0x84: return 0xf1;
-            case 0x85: return 0xb9;
-            case 0x86: return 0xbf;
-            case 0x87: return 0x9f;
-            case 0x88: return 0xea;
-            case 0x89: return 0xea;
-            case 0x8a: return 0x00; // not contained in win1250
-            case 0x8b: return 0x00; // not contained in win1250
-            case 0x8c: return 0x8f;
-            case 0x8d: return 0xaf;
-            case 0x8e: return 0xa5;
-            case 0x8f: return 0x8c;
-            case 0x90: return 0xca;
-            case 0x93: return 0xa3;
-            case 0x94: return 0xf6;
-            case 0x95: return 0xf3;
-            case 0x96: return 0xaf;
-            case 0x97: return 0x8f;
-            case 0x99: return 0xd3;
-            case 0x9a: return 0xd1;
-            case 0x9c: return 0x00; // not contained in win1250
-            case 0xa0: return 0xb9;
-            case 0xa1: return 0xaf;
-            case 0xa2: return 0xf3;
-            case 0xa3: return 0xbf;
-            case 0xa4: return 0x00; // not contained in win1250
-            case 0xe1: return 0x8c;
-            case 0xe3: return 0x00; // not contained in win1250
-            case 0xf5: return 0x00; // not contained in win1250
-            default: return c;
+    unsigned char mapUtf8Char(unsigned char c)
+    {
+        switch (c)
+        {
+            case 0x80:
+                return 0xc6;
+            case 0x81:
+                return 0x9c;
+            case 0x82:
+                return 0xe6;
+            case 0x83:
+                return 0xb3;
+            case 0x84:
+                return 0xf1;
+            case 0x85:
+                return 0xb9;
+            case 0x86:
+                return 0xbf;
+            case 0x87:
+                return 0x9f;
+            case 0x88:
+                return 0xea;
+            case 0x89:
+                return 0xea;
+            case 0x8a:
+                return 0x00; // not contained in win1250
+            case 0x8b:
+                return 0x00; // not contained in win1250
+            case 0x8c:
+                return 0x8f;
+            case 0x8d:
+                return 0xaf;
+            case 0x8e:
+                return 0xa5;
+            case 0x8f:
+                return 0x8c;
+            case 0x90:
+                return 0xca;
+            case 0x93:
+                return 0xa3;
+            case 0x94:
+                return 0xf6;
+            case 0x95:
+                return 0xf3;
+            case 0x96:
+                return 0xaf;
+            case 0x97:
+                return 0x8f;
+            case 0x99:
+                return 0xd3;
+            case 0x9a:
+                return 0xd1;
+            case 0x9c:
+                return 0x00; // not contained in win1250
+            case 0xa0:
+                return 0xb9;
+            case 0xa1:
+                return 0xaf;
+            case 0xa2:
+                return 0xf3;
+            case 0xa3:
+                return 0xbf;
+            case 0xa4:
+                return 0x00; // not contained in win1250
+            case 0xe1:
+                return 0x8c;
+            case 0xe3:
+                return 0x00; // not contained in win1250
+            case 0xf5:
+                return 0x00; // not contained in win1250
+            default:
+                return c;
         }
     }
 
@@ -170,12 +207,12 @@ namespace
     {
         if (encoding == ToUTF8::WINDOWS_1250) // Hack for polish font
         {
-            const std::array<char, 2> str {static_cast<char>(mapUtf8Char(c)), '\0'};
+            const std::array<char, 2> str{ static_cast<char>(mapUtf8Char(c)), '\0' };
             return utf8ToUnicode(encoder.getUtf8(std::string_view(str.data(), 1)));
         }
         else
         {
-            const std::array<char, 2> str {static_cast<char>(c), '\0'};
+            const std::array<char, 2> str{ static_cast<char>(c), '\0' };
             return utf8ToUnicode(encoder.getUtf8(std::string_view(str.data(), 1)));
         }
     }
@@ -205,23 +242,27 @@ namespace Gui
             mEncoding = encoding;
 
         MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
-        MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = MyGUI::newDelegate(this, &FontLoader::overrideLineHeight);
+        MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource")
+            = MyGUI::newDelegate(this, &FontLoader::overrideLineHeight);
 
         loadFonts();
     }
 
     void FontLoader::loadFonts()
     {
-        std::string defaultFont{Fallback::Map::getString("Fonts_Font_0")};
-        std::string scrollFont{Fallback::Map::getString("Fonts_Font_2")};
+        std::string defaultFont{ Fallback::Map::getString("Fonts_Font_0") };
+        std::string scrollFont{ Fallback::Map::getString("Fonts_Font_2") };
         loadFont(defaultFont, "DefaultFont");
         loadFont(scrollFont, "ScrollFont");
-        loadFont("DejaVuLGCSansMono", "MonoFont"); // We need to use a TrueType monospace font to display debug texts properly.
+        loadFont("DejaVuLGCSansMono",
+            "MonoFont"); // We need to use a TrueType monospace font to display debug texts properly.
 
         // Use our TrueType fonts as a fallback.
-        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont") && !Misc::StringUtils::ciEqual(defaultFont, "MysticCards"))
+        if (!MyGUI::ResourceManager::getInstance().isExist("DefaultFont")
+            && !Misc::StringUtils::ciEqual(defaultFont, "MysticCards"))
             loadFont("MysticCards", "DefaultFont");
-        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont") && !Misc::StringUtils::ciEqual(scrollFont, "DemonicLetters"))
+        if (!MyGUI::ResourceManager::getInstance().isExist("ScrollFont")
+            && !Misc::StringUtils::ciEqual(scrollFont, "DemonicLetters"))
             loadFont("DemonicLetters", "ScrollFont");
     }
 
@@ -239,7 +280,8 @@ namespace Gui
     {
         Log(Debug::Info) << "Loading font file " << fileName;
 
-        osgMyGUI::DataManager* dataManager = dynamic_cast<osgMyGUI::DataManager*>(&osgMyGUI::DataManager::getInstance());
+        osgMyGUI::DataManager* dataManager
+            = dynamic_cast<osgMyGUI::DataManager*>(&osgMyGUI::DataManager::getInstance());
         if (!dataManager)
         {
             Log(Debug::Error) << "Can not load TrueType font " << fontId << ": osgMyGUI::DataManager is not available.";
@@ -291,23 +333,25 @@ namespace Gui
         sizeNode->addAttribute("value", std::to_string(mFontHeight));
 
         MyGUI::ResourceTrueTypeFont* font = static_cast<MyGUI::ResourceTrueTypeFont*>(
-                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceTrueTypeFont"));
-        font->deserialization(resourceNode.current(), MyGUI::Version(3,2,0));
+            MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceTrueTypeFont"));
+        font->deserialization(resourceNode.current(), MyGUI::Version(3, 2, 0));
         font->setResourceName(fontId);
         MyGUI::ResourceManager::getInstance().addResource(font);
 
-        resolutionNode->setAttribute("value", MyGUI::utility::toString(static_cast<int>(resolution * bookScale * mScalingFactor)));
+        resolutionNode->setAttribute(
+            "value", MyGUI::utility::toString(static_cast<int>(resolution * bookScale * mScalingFactor)));
 
         MyGUI::ResourceTrueTypeFont* bookFont = static_cast<MyGUI::ResourceTrueTypeFont*>(
-                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceTrueTypeFont"));
-        bookFont->deserialization(resourceNode.current(), MyGUI::Version(3,2,0));
+            MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceTrueTypeFont"));
+        bookFont->deserialization(resourceNode.current(), MyGUI::Version(3, 2, 0));
         bookFont->setResourceName("Journalbook " + fontId);
         MyGUI::ResourceManager::getInstance().addResource(bookFont);
 
         dataManager->setResourcePath(oldDataPath);
 
         if (resourceNode.next("Resource"))
-            Log(Debug::Warning) << "Font file " << fileName << " contains multiple Resource entries, only first one will be used.";
+            Log(Debug::Warning) << "Font file " << fileName
+                                << " contains multiple Resource entries, only first one will be used.";
     }
 
     typedef struct
@@ -330,7 +374,7 @@ namespace Gui
         float ascent;
     } GlyphInfo;
 
-    void FontLoader::loadBitmapFont(const std::string &fileName, const std::string& fontId)
+    void FontLoader::loadBitmapFont(const std::string& fileName, const std::string& fontId)
     {
         Log(Debug::Info) << "Loading font file " << fileName;
 
@@ -385,8 +429,8 @@ namespace Gui
             fail(*bitmapFile, bitmapFilename, "Width and height must be positive");
 
         std::vector<char> textureData;
-        textureData.resize(width*height*4);
-        bitmapFile->read(textureData.data(), width*height*4);
+        textureData.resize(width * height * 4);
+        bitmapFile->read(textureData.data(), width * height * 4);
         if (!bitmapFile->good())
             fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
         bitmapFile.reset();
@@ -411,28 +455,30 @@ namespace Gui
         source->addAttribute("value", std::string(bitmapFilename));
         MyGUI::xml::ElementPtr codes = root->createChild("Codes");
 
-        for(int i = 0; i < 256; i++)
+        for (int i = 0; i < 256; i++)
         {
-            float x1 = data[i].top_left.x*width;
-            float y1 = data[i].top_left.y*height;
-            float w  = data[i].top_right.x*width - x1;
-            float h  = data[i].bottom_left.y*height - y1;
+            float x1 = data[i].top_left.x * width;
+            float y1 = data[i].top_left.y * height;
+            float w = data[i].top_right.x * width - x1;
+            float h = data[i].bottom_left.y * height - y1;
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
             unsigned long unicodeVal = getUnicode(i, encoder, mEncoding);
 
             MyGUI::xml::ElementPtr code = codes->createChild("Code");
             code->addAttribute("index", unicodeVal);
-            code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
-                                        + MyGUI::utility::toString(y1) + " "
-                                        + MyGUI::utility::toString(w) + " "
-                                        + MyGUI::utility::toString(h));
+            code->addAttribute("coord",
+                MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " " + MyGUI::utility::toString(w)
+                    + " " + MyGUI::utility::toString(h));
             code->addAttribute("advance", data[i].width);
-            code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
-                               + MyGUI::utility::toString((fontSize-data[i].ascent)));
-            code->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
+            code->addAttribute("bearing",
+                MyGUI::utility::toString(data[i].kerning) + " "
+                    + MyGUI::utility::toString((fontSize - data[i].ascent)));
+            code->addAttribute(
+                "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
 
-            // Fall back from unavailable Windows-1252 encoding symbols to similar characters available in the game fonts
+            // Fall back from unavailable Windows-1252 encoding symbols to similar characters available in the game
+            // fonts
             std::multimap<int, int> additional; // fallback glyph index, unicode
             additional.insert(std::make_pair(156, 0x00A2)); // cent sign
             additional.insert(std::make_pair(89, 0x00A5)); // yen sign
@@ -494,14 +540,15 @@ namespace Gui
                     continue;
                 code = codes->createChild("Code");
                 code->addAttribute("index", it->second);
-                code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
-                                            + MyGUI::utility::toString(y1) + " "
-                                            + MyGUI::utility::toString(w) + " "
-                                            + MyGUI::utility::toString(h));
+                code->addAttribute("coord",
+                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
+                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
                 code->addAttribute("advance", data[i].width);
-                code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
-                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
-                code->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
+                code->addAttribute("bearing",
+                    MyGUI::utility::toString(data[i].kerning) + " "
+                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
+                code->addAttribute(
+                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
             }
 
             // ASCII vertical bar, use this as text input cursor
@@ -509,14 +556,15 @@ namespace Gui
             {
                 MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
                 cursorCode->addAttribute("index", MyGUI::FontCodeType::Cursor);
-                cursorCode->addAttribute("coord", MyGUI::utility::toString(x1) + " "
-                                            + MyGUI::utility::toString(y1) + " "
-                                            + MyGUI::utility::toString(w) + " "
-                                            + MyGUI::utility::toString(h));
+                cursorCode->addAttribute("coord",
+                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
+                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
                 cursorCode->addAttribute("advance", data[i].width);
-                cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
-                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
-                cursorCode->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
+                cursorCode->addAttribute("bearing",
+                    MyGUI::utility::toString(data[i].kerning) + " "
+                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
+                cursorCode->addAttribute(
+                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
             }
 
             // Question mark, use for NotDefined marker (used for glyphs not existing in the font)
@@ -524,22 +572,23 @@ namespace Gui
             {
                 MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
                 cursorCode->addAttribute("index", MyGUI::FontCodeType::NotDefined);
-                cursorCode->addAttribute("coord", MyGUI::utility::toString(x1) + " "
-                                            + MyGUI::utility::toString(y1) + " "
-                                            + MyGUI::utility::toString(w) + " "
-                                            + MyGUI::utility::toString(h));
+                cursorCode->addAttribute("coord",
+                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
+                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
                 cursorCode->addAttribute("advance", data[i].width);
-                cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
-                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
-                cursorCode->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
+                cursorCode->addAttribute("bearing",
+                    MyGUI::utility::toString(data[i].kerning) + " "
+                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
+                cursorCode->addAttribute(
+                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
             }
         }
 
         // These are required as well, but the fonts don't provide them
-        for (int i=0; i<2; ++i)
+        for (int i = 0; i < 2; ++i)
         {
             MyGUI::FontCodeType::Enum type;
-            if(i == 0)
+            if (i == 0)
                 type = MyGUI::FontCodeType::Selected;
             else // if (i == 1)
                 type = MyGUI::FontCodeType::SelectedBack;
@@ -554,12 +603,12 @@ namespace Gui
 
         // Register the font with MyGUI
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
-                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
-        font->deserialization(root, MyGUI::Version(3,2,0));
+            MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
+        font->deserialization(root, MyGUI::Version(3, 2, 0));
 
         MyGUI::ResourceManualFont* bookFont = static_cast<MyGUI::ResourceManualFont*>(
-                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
-        bookFont->deserialization(root, MyGUI::Version(3,2,0));
+            MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
+        bookFont->deserialization(root, MyGUI::Version(3, 2, 0));
         bookFont->setResourceName("Journalbook " + fontId);
 
         MyGUI::ResourceManager::getInstance().addResource(font);
@@ -573,13 +622,13 @@ namespace Gui
         {
             std::string type = resourceNode->findAttribute("type");
 
-            if (Misc::StringUtils::ciEqual(type, "ResourceSkin") ||
-                     Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
+            if (Misc::StringUtils::ciEqual(type, "ResourceSkin")
+                || Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
             {
                 // We should adjust line height for MyGUI widgets depending on font size
                 MyGUI::xml::ElementPtr heightNode = resourceNode->createChild("Property");
                 heightNode->addAttribute("key", "HeightLine");
-                heightNode->addAttribute("value", std::to_string(mFontHeight+2));
+                heightNode->addAttribute("value", std::to_string(mFontHeight + 2));
             }
         }
 

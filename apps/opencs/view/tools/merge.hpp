@@ -24,37 +24,36 @@ namespace CSVTools
 {
     class Merge : public QWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMDoc::Document *mDocument;
-            QPushButton *mOkay;
-            QListWidget *mFiles;
-            CSVDoc::FileWidget *mNewFile;
-            CSVDoc::AdjusterWidget *mAdjuster;
-            CSMDoc::DocumentManager& mDocumentManager;
+        CSMDoc::Document* mDocument;
+        QPushButton* mOkay;
+        QListWidget* mFiles;
+        CSVDoc::FileWidget* mNewFile;
+        CSVDoc::AdjusterWidget* mAdjuster;
+        CSMDoc::DocumentManager& mDocumentManager;
 
-            void keyPressEvent (QKeyEvent *event) override;
+        void keyPressEvent(QKeyEvent* event) override;
 
-        public:
+    public:
+        Merge(CSMDoc::DocumentManager& documentManager, QWidget* parent = nullptr);
 
-            Merge (CSMDoc::DocumentManager& documentManager, QWidget *parent = nullptr);
+        /// Configure dialogue for a new merge
+        void configure(CSMDoc::Document* document);
 
-            /// Configure dialogue for a new merge
-            void configure (CSMDoc::Document *document);
+        void setLocalData(const std::filesystem::path& localData);
 
-            void setLocalData (const std::filesystem::path& localData);
+        CSMDoc::Document* getDocument() const;
 
-            CSMDoc::Document *getDocument() const;
+    public slots:
 
-        public slots:
+        void cancel();
 
-            void cancel();
+    private slots:
 
-        private slots:
+        void accept();
 
-            void accept();
-
-            void stateChanged (bool valid);
+        void stateChanged(bool valid);
     };
 }
 

@@ -35,7 +35,7 @@ void ESM4::Light::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
@@ -44,14 +44,18 @@ void ESM4::Light::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_DATA:
             {
                 // FIXME: TES4 might be uint32 as well, need to check
-                if (isFONV || (esmVer == ESM::VER_094 && subHdr.dataSize == 32)/*FO3*/)
+                if (isFONV || (esmVer == ESM::VER_094 && subHdr.dataSize == 32) /*FO3*/)
                 {
-                    reader.get(mData.time);     // uint32
+                    reader.get(mData.time); // uint32
                 }
                 else
                     reader.get(mData.duration); // float
@@ -59,7 +63,7 @@ void ESM4::Light::load(ESM4::Reader& reader)
                 reader.get(mData.radius);
                 reader.get(mData.colour);
                 reader.get(mData.flags);
-                //if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 if (subHdr.dataSize == 48)
                 {
                     reader.get(mData.falloff);
@@ -78,17 +82,29 @@ void ESM4::Light::load(ESM4::Reader& reader)
                 reader.get(mData.weight);
                 break;
             }
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_ICON: reader.getZString(mIcon);  break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId); break;
-            case ESM4::SUB_SNAM: reader.getFormId(mSound);  break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
-            case ESM4::SUB_FNAM: reader.get(mFade);         break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mIcon);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.getFormId(mSound);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
+            case ESM4::SUB_FNAM:
+                reader.get(mFade);
+                break;
             case ESM4::SUB_MODT:
             case ESM4::SUB_OBND:
             case ESM4::SUB_VMAD: // Dragonborn only?
             {
-                //std::cout << "LIGH " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "LIGH " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -98,10 +114,10 @@ void ESM4::Light::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Light::save(ESM4::Writer& writer) const
+// void ESM4::Light::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Light::blank()
+// void ESM4::Light::blank()
 //{
-//}
+// }

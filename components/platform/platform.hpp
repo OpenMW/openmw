@@ -1,7 +1,8 @@
 #ifndef OPENMW_COMPONENTS_PLATFORM_PLATFORM_HPP
 #define OPENMW_COMPONENTS_PLATFORM_PLATFORM_HPP
 
-namespace Platform {
+namespace Platform
+{
 
     void init();
 

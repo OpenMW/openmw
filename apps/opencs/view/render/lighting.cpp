@@ -15,9 +15,10 @@ public:
     DayNightSwitchVisitor(int index)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mIndex(index)
-    { }
+    {
+    }
 
-    void apply(osg::Switch &switchNode) override
+    void apply(osg::Switch& switchNode) override
     {
         constexpr int NoIndex = -1;
 

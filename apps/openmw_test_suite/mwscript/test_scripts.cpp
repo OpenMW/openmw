@@ -7,7 +7,11 @@ namespace
 {
     struct MWScriptTest : public ::testing::Test
     {
-        MWScriptTest() : mErrorHandler(), mParser(mErrorHandler, mCompilerContext) {}
+        MWScriptTest()
+            : mErrorHandler()
+            , mParser(mErrorHandler, mCompilerContext)
+        {
+        }
 
         std::optional<CompiledScript> compile(const std::string& scriptBody, bool shouldFail = false)
         {
@@ -16,23 +20,23 @@ namespace
             std::istringstream input(scriptBody);
             Compiler::Scanner scanner(mErrorHandler, input, mCompilerContext.getExtensions());
             scanner.scan(mParser);
-            if(mErrorHandler.isGood())
+            if (mErrorHandler.isGood())
             {
                 std::vector<Interpreter::Type_Code> code;
                 mParser.getCode(code);
                 return CompiledScript(code, mParser.getLocals());
             }
-            else if(!shouldFail)
+            else if (!shouldFail)
                 logErrors();
             return {};
         }
 
         void logErrors()
         {
-            for(const auto& [error, loc] : mErrorHandler.getErrors())
+            for (const auto& [error, loc] : mErrorHandler.getErrors())
             {
                 std::cout << error;
-                if(loc.mLine)
+                if (loc.mLine)
                     std::cout << " at line" << loc.mLine << " column " << loc.mColumn << " (" << loc.mLiteral << ")";
                 std::cout << "\n";
             }
@@ -49,19 +53,17 @@ namespace
             mInterpreter.run(&script.mByteCode[0], static_cast<int>(script.mByteCode.size()), context);
         }
 
-        template<typename T, typename ...TArgs>
-        void installOpcode(int code, TArgs&& ...args)
+        template <typename T, typename... TArgs>
+        void installOpcode(int code, TArgs&&... args)
         {
             mInterpreter.installSegment5<T>(code, std::forward<TArgs&&>(args)...);
         }
-		
+
     protected:
-        void SetUp() override
-        {
-            Interpreter::installOpcodes(mInterpreter);
-        }
+        void SetUp() override { Interpreter::installOpcodes(mInterpreter); }
 
         void TearDown() override {}
+
     private:
         TestErrorHandler mErrorHandler;
         TestCompilerContext mCompilerContext;
@@ -112,7 +114,7 @@ set e to ( d / a )
 
 End)mwscript";
 
-// https://forum.openmw.org/viewtopic.php?f=6&t=2262
+    // https://forum.openmw.org/viewtopic.php?f=6&t=2262
     const std::string sScript4 = R"mwscript(Begin scripting_once_again
 
 player -> addSpell "fire_bite", 645
@@ -458,13 +460,17 @@ messagebox,"this is a %g",a
     {
         registerExtensions();
         bool failed = true;
-        if(const auto script = compile(sScript2))
+        if (const auto script = compile(sScript2))
         {
             class AddTopic : public Interpreter::Opcode0
             {
                 bool& mFailed;
+
             public:
-                AddTopic(bool& failed) : mFailed(failed) {}
+                AddTopic(bool& failed)
+                    : mFailed(failed)
+                {
+                }
 
                 void execute(Interpreter::Runtime& runtime)
                 {
@@ -478,7 +484,7 @@ messagebox,"this is a %g",a
             TestInterpreterContext context;
             run(*script, context);
         }
-        if(failed)
+        if (failed)
         {
             FAIL();
         }
@@ -486,7 +492,7 @@ messagebox,"this is a %g",a
 
     TEST_F(MWScriptTest, mwscript_test_math)
     {
-        if(const auto script = compile(sScript3))
+        if (const auto script = compile(sScript3))
         {
             struct Algorithm
             {
@@ -515,7 +521,7 @@ messagebox,"this is a %g",a
                 }
             } algorithm;
             TestInterpreterContext context;
-            for(int i = 1; i < 1000; ++i)
+            for (int i = 1; i < 1000; ++i)
             {
                 context.setLocalShort(0, i);
                 run(*script, context);
@@ -558,7 +564,7 @@ messagebox,"this is a %g",a
 
     TEST_F(MWScriptTest, mwscript_test_1062)
     {
-        if(const auto script = compile(sIssue1062))
+        if (const auto script = compile(sIssue1062))
         {
             EXPECT_EQ(script->mLocals.getIndex("end"), 0);
         }
@@ -592,12 +598,12 @@ messagebox,"this is a %g",a
 
     TEST_F(MWScriptTest, mwscript_test_2185)
     {
-        if(const auto script = compile(sIssue2185))
+        if (const auto script = compile(sIssue2185))
         {
             TestInterpreterContext context;
-            for(int a = 0; a < 100; ++a)
+            for (int a = 0; a < 100; ++a)
             {
-                for(int b = 0; b < 100; ++b)
+                for (int b = 0; b < 100; ++b)
                 {
                     context.setLocalShort(0, a);
                     context.setLocalShort(1, b);
@@ -647,7 +653,7 @@ messagebox,"this is a %g",a
 
     TEST_F(MWScriptTest, mwscript_test_3006)
     {
-        if(const auto script = compile(sIssue3006))
+        if (const auto script = compile(sIssue3006))
         {
             TestInterpreterContext context;
             context.setLocalShort(0, 0);
@@ -671,12 +677,12 @@ messagebox,"this is a %g",a
 
     TEST_F(MWScriptTest, mwscript_test_3744)
     {
-        if(const auto script = compile(sIssue3744))
+        if (const auto script = compile(sIssue3744))
         {
             TestInterpreterContext context;
-            for(int a = 0; a < 100; ++a)
+            for (int a = 0; a < 100; ++a)
             {
-                for(int b = 0; b < 100; ++b)
+                for (int b = 0; b < 100; ++b)
                 {
                     context.setLocalShort(0, a);
                     context.setLocalShort(1, b);
@@ -700,14 +706,18 @@ messagebox,"this is a %g",a
     TEST_F(MWScriptTest, mwscript_test_3846)
     {
         registerExtensions();
-        if(const auto script = compile(sIssue3846))
+        if (const auto script = compile(sIssue3846))
         {
             std::vector<std::string> topics = { "-spells...", "-magicka..." };
             class AddTopic : public Interpreter::Opcode0
             {
                 std::vector<std::string>& mTopics;
+
             public:
-                AddTopic(std::vector<std::string>& topics) : mTopics(topics) {}
+                AddTopic(std::vector<std::string>& topics)
+                    : mTopics(topics)
+                {
+                }
 
                 void execute(Interpreter::Runtime& runtime)
                 {
@@ -740,12 +750,12 @@ messagebox,"this is a %g",a
 
     TEST_F(MWScriptTest, mwscript_test_4597)
     {
-        if(const auto script = compile(sIssue4597))
+        if (const auto script = compile(sIssue4597))
         {
             TestInterpreterContext context;
-            for(int a = 0; a < 100; ++a)
+            for (int a = 0; a < 100; ++a)
             {
-                for(int b = 0; b < 100; ++b)
+                for (int b = 0; b < 100; ++b)
                 {
                     context.setLocalShort(0, a);
                     context.setLocalShort(1, b);
@@ -814,18 +824,19 @@ messagebox,"this is a %g",a
     TEST_F(MWScriptTest, mwscript_test_6363)
     {
         registerExtensions();
-        if(const auto script = compile(sIssue6363))
+        if (const auto script = compile(sIssue6363))
         {
             class PositionCell : public Interpreter::Opcode0
             {
                 bool& mRan;
-            public:
-                PositionCell(bool& ran) : mRan(ran) {}
 
-                void execute(Interpreter::Runtime& runtime)
+            public:
+                PositionCell(bool& ran)
+                    : mRan(ran)
                 {
-                    mRan = true;
                 }
+
+                void execute(Interpreter::Runtime& runtime) { mRan = true; }
             };
             bool ran = false;
             installOpcode<PositionCell>(Compiler::Transformation::opcodePositionCell, ran);

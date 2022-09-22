@@ -27,11 +27,11 @@ namespace MWGui
         void onUnassignButtonClicked(MyGUI::Widget* sender);
         void onCancelButtonClicked(MyGUI::Widget* sender);
 
-        void onAssignItem (MWWorld::Ptr item);
-        void onAssignItemCancel ();
-        void onAssignMagicItem (MWWorld::Ptr item);
-        void onAssignMagic (const std::string& spellId);
-        void onAssignMagicCancel ();
+        void onAssignItem(MWWorld::Ptr item);
+        void onAssignItemCancel();
+        void onAssignMagicItem(MWWorld::Ptr item);
+        void onAssignMagic(const std::string& spellId);
+        void onAssignMagicCancel();
         void onOpen() override;
         void onClose() override;
 
@@ -48,20 +48,26 @@ namespace MWGui
             Type_HandToHand
         };
 
-        void write (ESM::ESMWriter& writer);
-        void readRecord (ESM::ESMReader& reader, uint32_t type);
+        void write(ESM::ESMWriter& writer);
+        void readRecord(ESM::ESMReader& reader, uint32_t type);
         void clear() override;
 
-
     private:
-
-        struct keyData {
+        struct keyData
+        {
             int index;
             ItemWidget* button;
             QuickKeysMenu::QuickKeyType type;
             std::string id;
             std::string name;
-            keyData(): index(-1), button(nullptr), type(Type_Unassigned), id(""), name("") {}
+            keyData()
+                : index(-1)
+                , button(nullptr)
+                , type(Type_Unassigned)
+                , id("")
+                , name("")
+            {
+            }
         };
 
         std::vector<keyData> mKey;
@@ -111,10 +117,9 @@ namespace MWGui
 
         QuickKeysMenu* mParent;
 
-        void onCancelButtonClicked (MyGUI::Widget* sender);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
         void onModelIndexSelected(SpellModel::ModelIndex index);
     };
 }
-
 
 #endif

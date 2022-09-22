@@ -1,12 +1,12 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVMESHMANAGER_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVMESHMANAGER_H
 
+#include "agentbounds.hpp"
 #include "asyncnavmeshupdater.hpp"
+#include "heightfieldshape.hpp"
 #include "offmeshconnectionsmanager.hpp"
 #include "recastmeshtiles.hpp"
 #include "waitconditiontype.hpp"
-#include "heightfieldshape.hpp"
-#include "agentbounds.hpp"
 
 #include <osg/Vec3f>
 
@@ -23,7 +23,10 @@ namespace DetourNavigator
         class UpdateGuard
         {
         public:
-            explicit UpdateGuard(NavMeshManager& manager) : mImpl(manager.mRecastMeshManager) {}
+            explicit UpdateGuard(NavMeshManager& manager)
+                : mImpl(manager.mRecastMeshManager)
+            {
+            }
 
             friend const TileCachedRecastMeshManager::UpdateGuard* getImpl(const UpdateGuard* guard)
             {
@@ -43,8 +46,7 @@ namespace DetourNavigator
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
             const AreaType areaType, const UpdateGuard* guard);
 
-        bool updateObject(ObjectId id, const btTransform& transform, AreaType areaType,
-            const UpdateGuard* guard);
+        bool updateObject(ObjectId id, const btTransform& transform, AreaType areaType, const UpdateGuard* guard);
 
         void removeObject(const ObjectId id, const UpdateGuard* guard);
 
@@ -54,14 +56,15 @@ namespace DetourNavigator
 
         void removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
-        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape,
-            const UpdateGuard* guard);
+        void addHeightfield(
+            const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape, const UpdateGuard* guard);
 
         void removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
         bool reset(const AgentBounds& agentBounds);
 
-        void addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end, const AreaType areaType);
+        void addOffMeshConnection(
+            const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end, const AreaType areaType);
 
         void removeOffMeshConnections(const ObjectId id);
 

@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void JOUR::load(ESM::ESMReader &esm)
+    void JOUR::load(ESM::ESMReader& esm)
     {
         mText = esm.getHNString("NAME");
     }

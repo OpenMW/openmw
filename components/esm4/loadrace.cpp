@@ -26,10 +26,10 @@
 */
 #include "loadrace.hpp"
 
-#include <stdexcept>
 #include <cstring>
+#include <iomanip> // FIXME: for debugging only
 #include <iostream> // FIXME: for debugging only
-#include <iomanip>  // FIXME: for debugging only
+#include <stdexcept>
 
 #include "formid.hpp"
 #include "reader.hpp"
@@ -39,7 +39,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
     bool isTES4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
@@ -53,7 +53,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
-        //std::cout << "RACE " << ESM::printName(subHdr.typeId) << std::endl;
+        // std::cout << "RACE " << ESM::printName(subHdr.typeId) << std::endl;
         switch (subHdr.typeId)
         {
             case ESM4::SUB_EDID:
@@ -77,7 +77,9 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 // Imperial    0x00000907
                 break;
             }
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_DESC:
             {
                 if (subHdr.dataSize == 1) // FO3?
@@ -86,14 +88,16 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     break;
                 }
 
-                reader.getLocalizedString(mDesc); break;
+                reader.getLocalizedString(mDesc);
+                break;
             }
             case ESM4::SUB_SPLO: // bonus spell formid (TES5 may have SPCT and multiple SPLO)
             {
                 FormId magic;
                 reader.getFormId(magic);
                 mBonusSpells.push_back(magic);
-//              std::cout << "RACE " << printName(subHdr.typeId) << " " << formIdToString(magic) << std::endl;
+                //              std::cout << "RACE " << printName(subHdr.typeId) << " " << formIdToString(magic) <<
+                //              std::endl;
 
                 break;
             }
@@ -181,18 +185,18 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     reader.get(dummy2); // size
                     reader.get(dummy2); // head biped object
                     reader.get(dummy2); // hair biped object
-                    reader.get(dummy);  // injured health % (0.f..1.f)
+                    reader.get(dummy); // injured health % (0.f..1.f)
                     reader.get(dummy2); // shield biped object
-                    reader.get(dummy);  // health regen
-                    reader.get(dummy);  // magicka regen
-                    reader.get(dummy);  // stamina regen
-                    reader.get(dummy);  // unarmed damage
-                    reader.get(dummy);  // unarmed reach
+                    reader.get(dummy); // health regen
+                    reader.get(dummy); // magicka regen
+                    reader.get(dummy); // stamina regen
+                    reader.get(dummy); // unarmed damage
+                    reader.get(dummy); // unarmed reach
                     reader.get(dummy2); // body biped object
-                    reader.get(dummy);  // aim angle tolerance
+                    reader.get(dummy); // aim angle tolerance
                     reader.get(dummy2); // unknown
-                    reader.get(dummy);  // angular accleration rate
-                    reader.get(dummy);  // angular tolerance
+                    reader.get(dummy); // angular accleration rate
+                    reader.get(dummy); // angular tolerance
                     reader.get(dummy2); // flags
 
                     if (subHdr.dataSize > 128)
@@ -211,8 +215,8 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 else
                 {
                     reader.skipSubRecordData();
-                    std::cout << "RACE " << ESM::printName(subHdr.typeId) << " skipping..."
-                        << subHdr.dataSize << std::endl;
+                    std::cout << "RACE " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize
+                              << std::endl;
                 }
 #endif
                 break;
@@ -225,28 +229,32 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_CNAM: // Only in TES4?
-            //              CNAM       SNAM                     VNAM
-            // Sheogorath   0x0  0000  98 2b  10011000 00101011
-            // Golden Saint 0x3  0011  26 46  00100110 01000110
-            // Dark Seducer 0xC  1100  df 55  11011111 01010101
-            // Vampire Race 0x0  0000  77 44  01110111 10001000
-            // Dremora      0x7  0111  bf 32  10111111 00110010
-            // Argonian     0x0  0000  dc 3c  11011100 00111100
-            // Nord         0x5  0101  b6 03  10110110 00000011
-            // Breton       0x5  0101  48 1d  01001000 00011101 00000000 00000907 (Imperial)
-            // Wood Elf     0xD  1101  2e 4a  00101110 01001010 00019204 00019204 (HighElf)
-            // khajiit      0x5  0101  54 5b  01010100 01011011 00023FE9 00023FE9 (Argonian)
-            // Dark Elf     0x0  0000  72 54  01110010 01010100 00019204 00019204 (HighElf)
-            // Orc          0xC  1100  74 09  01110100 00001001 000224FD 000224FD (Nord)
-            // High Elf     0xF  1111  e6 21  11100110 00100001
-            // Redguard     0xD  1101  a9 61  10101001 01100001
-            // Imperial     0xD  1101  8e 35  10001110 00110101
-            {
-                reader.skipSubRecordData();
-                break;
-            }
-            case ESM4::SUB_PNAM: reader.get(mFaceGenMainClamp); break; // 0x40A00000 = 5.f
-            case ESM4::SUB_UNAM: reader.get(mFaceGenFaceClamp); break; // 0x40400000 = 3.f
+                //              CNAM       SNAM                     VNAM
+                // Sheogorath   0x0  0000  98 2b  10011000 00101011
+                // Golden Saint 0x3  0011  26 46  00100110 01000110
+                // Dark Seducer 0xC  1100  df 55  11011111 01010101
+                // Vampire Race 0x0  0000  77 44  01110111 10001000
+                // Dremora      0x7  0111  bf 32  10111111 00110010
+                // Argonian     0x0  0000  dc 3c  11011100 00111100
+                // Nord         0x5  0101  b6 03  10110110 00000011
+                // Breton       0x5  0101  48 1d  01001000 00011101 00000000 00000907 (Imperial)
+                // Wood Elf     0xD  1101  2e 4a  00101110 01001010 00019204 00019204 (HighElf)
+                // khajiit      0x5  0101  54 5b  01010100 01011011 00023FE9 00023FE9 (Argonian)
+                // Dark Elf     0x0  0000  72 54  01110010 01010100 00019204 00019204 (HighElf)
+                // Orc          0xC  1100  74 09  01110100 00001001 000224FD 000224FD (Nord)
+                // High Elf     0xF  1111  e6 21  11100110 00100001
+                // Redguard     0xD  1101  a9 61  10101001 01100001
+                // Imperial     0xD  1101  8e 35  10001110 00110101
+                {
+                    reader.skipSubRecordData();
+                    break;
+                }
+            case ESM4::SUB_PNAM:
+                reader.get(mFaceGenMainClamp);
+                break; // 0x40A00000 = 5.f
+            case ESM4::SUB_UNAM:
+                reader.get(mFaceGenFaceClamp);
+                break; // 0x40400000 = 3.f
             case ESM4::SUB_ATTR: // Only in TES4?
             {
                 if (subHdr.dataSize == 2) // FO3?
@@ -303,12 +311,12 @@ void ESM4::Race::load(ESM4::Reader& reader)
             {
                 reader.get(currentIndex);
                 // FIXME: below check is rather useless
-                //if (headpart)
+                // if (headpart)
                 //{
                 //    if (currentIndex > 8)
                 //        throw std::runtime_error("ESM4::RACE::load - too many head part " + currentIndex);
                 //}
-                //else // bodypart
+                // else // bodypart
                 //{
                 //    if (currentIndex > 4)
                 //        throw std::runtime_error("ESM4::RACE::load - too many body part " + currentIndex);
@@ -338,18 +346,20 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 }
                 else if (curr_part == 2) // egt
                 {
-                    //std::cout << mEditorId << " egt " << currentIndex << std::endl; // FIXME
-                    reader.skipSubRecordData();  // FIXME TES5 egt
+                    // std::cout << mEditorId << " egt " << currentIndex << std::endl; // FIXME
+                    reader.skipSubRecordData(); // FIXME TES5 egt
                 }
                 else
                 {
-                    //std::cout << mEditorId << " hkx " << currentIndex << std::endl; // FIXME
-                    reader.skipSubRecordData();  // FIXME TES5 hkx
+                    // std::cout << mEditorId << " hkx " << currentIndex << std::endl; // FIXME
+                    reader.skipSubRecordData(); // FIXME TES5 hkx
                 }
 
                 break;
             }
-            case ESM4::SUB_MODB: reader.skipSubRecordData(); break; // always 0x0000?
+            case ESM4::SUB_MODB:
+                reader.skipSubRecordData();
+                break; // always 0x0000?
             case ESM4::SUB_ICON:
             {
                 if (curr_part == 0) // head part
@@ -367,7 +377,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                         reader.getZString(mBodyPartsFemale[currentIndex].texture);
                 }
                 else
-                    reader.skipSubRecordData();  // FIXME TES5
+                    reader.skipSubRecordData(); // FIXME TES5
 
                 break;
             }
@@ -386,7 +396,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 {
                     curr_part = 1; // body part
 
-                    mBodyPartsMale.resize(5);   // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
+                    mBodyPartsMale.resize(5); // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
                     mBodyPartsFemale.resize(5); // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
                 }
                 else // TES5
@@ -399,8 +409,12 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_MNAM: isMale = true; break;  /* 2, 5, 7 */
-            case ESM4::SUB_FNAM: isMale = false; break; /* 3, 6, 8 */
+            case ESM4::SUB_MNAM:
+                isMale = true;
+                break; /* 2, 5, 7 */
+            case ESM4::SUB_FNAM:
+                isMale = false;
+                break; /* 3, 6, 8 */
             //
             case ESM4::SUB_HNAM:
             {
@@ -472,7 +486,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break;
             }
             //
-            case ESM4::SUB_SNAM: //skipping...2 // only in TES4?
+            case ESM4::SUB_SNAM: // skipping...2 // only in TES4?
             {
                 reader.skipSubRecordData();
                 break;
@@ -504,8 +518,8 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 else
                 {
                     reader.skipSubRecordData();
-                    std::cout << "RACE " << ESM::printName(subHdr.typeId) << " skipping..."
-                        << subHdr.dataSize << std::endl;
+                    std::cout << "RACE " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize
+                              << std::endl;
                 }
 
                 break;
@@ -519,7 +533,9 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     reader.getZString(mModelFemale);
                 break;
             }
-            case ESM4::SUB_KSIZ: reader.get(mNumKeywords); break;
+            case ESM4::SUB_KSIZ:
+                reader.get(mNumKeywords);
+                break;
             case ESM4::SUB_KWDA:
             {
                 std::uint32_t formid;
@@ -531,7 +547,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_WNAM: // ARMO FormId
             {
                 reader.getFormId(mSkin);
-                //std::cout << mEditorId << " skin " << formIdToString(mSkin) << std::endl; // FIXME
+                // std::cout << mEditorId << " skin " << formIdToString(mSkin) << std::endl; // FIXME
                 break;
             }
             case ESM4::SUB_BODT: // body template
@@ -567,8 +583,8 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 else
                     mHeadPartIdsFemale[currentIndex] = formId;
 
-                //std::cout << mEditorId << (isMale ? " male head " : " female head ")
-                        //<< formIdToString(formId) << " " << currentIndex << std::endl; // FIXME
+                // std::cout << mEditorId << (isMale ? " male head " : " female head ")
+                //<< formIdToString(formId) << " " << currentIndex << std::endl; // FIXME
 
                 break;
             }
@@ -616,7 +632,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             {
                 std::string name;
                 reader.getZString(name);
-                //std::cout << mEditorId << " " << name << std::endl;
+                // std::cout << mEditorId << " " << name << std::endl;
 
                 break;
             }
@@ -670,7 +686,8 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_ONAM: // FO3
             {
 
-                //std::cout << "RACE " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
+                // std::cout << "RACE " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize <<
+                // std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -680,10 +697,10 @@ void ESM4::Race::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Race::save(ESM4::Writer& writer) const
+// void ESM4::Race::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Race::blank()
+// void ESM4::Race::blank()
 //{
-//}
+// }

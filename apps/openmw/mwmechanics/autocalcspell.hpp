@@ -13,20 +13,23 @@ namespace ESM
 namespace MWMechanics
 {
 
-/// Contains algorithm for calculating an NPC's spells based on stats
-/// @note We might want to move this code to a component later, so the editor can use it for preview purposes
+    /// Contains algorithm for calculating an NPC's spells based on stats
+    /// @note We might want to move this code to a component later, so the editor can use it for preview purposes
 
-std::vector<std::string> autoCalcNpcSpells(const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
+    std::vector<std::string> autoCalcNpcSpells(
+        const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
 
-std::vector<std::string> autoCalcPlayerSpells(const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
+    std::vector<std::string> autoCalcPlayerSpells(
+        const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
 
-// Helpers
+    // Helpers
 
-bool attrSkillCheck (const ESM::Spell* spell, const int* actorSkills, const int* actorAttributes);
+    bool attrSkillCheck(const ESM::Spell* spell, const int* actorSkills, const int* actorAttributes);
 
-void calcWeakestSchool(const ESM::Spell* spell, const int* actorSkills, int& effectiveSchool, float& skillTerm);
+    void calcWeakestSchool(const ESM::Spell* spell, const int* actorSkills, int& effectiveSchool, float& skillTerm);
 
-float calcAutoCastChance(const ESM::Spell* spell, const int* actorSkills, const int* actorAttributes, int effectiveSchool);
+    float calcAutoCastChance(
+        const ESM::Spell* spell, const int* actorSkills, const int* actorAttributes, int effectiveSchool);
 
 }
 

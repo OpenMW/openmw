@@ -2,11 +2,11 @@
 
 #include <sstream>
 
-#include <QStatusBar>
-#include <QStackedLayout>
-#include <QLabel>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QLabel>
+#include <QStackedLayout>
+#include <QStatusBar>
 
 #include "creator.hpp"
 
@@ -30,29 +30,27 @@ void CSVWorld::TableBottomBox::updateStatus()
     {
         if (!mStatusMessage.isEmpty())
         {
-            mStatus->setText (mStatusMessage);
+            mStatus->setText(mStatusMessage);
             return;
         }
 
-        static const char *sLabels[4] = { "record", "deleted", "touched", "selected" };
-        static const char *sLabelsPlural[4] = { "records", "deleted", "touched", "selected" };
+        static const char* sLabels[4] = { "record", "deleted", "touched", "selected" };
+        static const char* sLabelsPlural[4] = { "records", "deleted", "touched", "selected" };
 
         std::ostringstream stream;
 
         bool first = true;
 
-        for (int i=0; i<4; ++i)
+        for (int i = 0; i < 4; ++i)
         {
-            if (mStatusCount[i]>0)
+            if (mStatusCount[i] > 0)
             {
                 if (first)
                     first = false;
                 else
                     stream << ", ";
 
-                stream
-                    << mStatusCount[i] << ' '
-                    << (mStatusCount[i]==1 ? sLabels[i] : sLabelsPlural[i]);
+                stream << mStatusCount[i] << ' ' << (mStatusCount[i] == 1 ? sLabels[i] : sLabelsPlural[i]);
             }
         }
 
@@ -64,71 +62,73 @@ void CSVWorld::TableBottomBox::updateStatus()
             stream << "(" << mRow << ", " << mColumn << ")";
         }
 
-        mStatus->setText (QString::fromUtf8 (stream.str().c_str()));
+        mStatus->setText(QString::fromUtf8(stream.str().c_str()));
     }
 }
 
-void CSVWorld::TableBottomBox::extendedConfigRequest(CSVWorld::ExtendedCommandConfigurator::Mode mode,
-                                                     const std::vector<std::string> &selectedIds)
+void CSVWorld::TableBottomBox::extendedConfigRequest(
+    CSVWorld::ExtendedCommandConfigurator::Mode mode, const std::vector<std::string>& selectedIds)
 {
-    mExtendedConfigurator->configure (mode, selectedIds);
-    mLayout->setCurrentWidget (mExtendedConfigurator);
+    mExtendedConfigurator->configure(mode, selectedIds);
+    mLayout->setCurrentWidget(mExtendedConfigurator);
     mEditMode = EditMode_ExtendedConfig;
-    setVisible (true);
+    setVisible(true);
     mExtendedConfigurator->setFocus();
 }
 
-CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFactory,
-                                          CSMDoc::Document& document,
-                                          const CSMWorld::UniversalId& id,
-                                          QWidget *parent)
-: QWidget (parent), mShowStatusBar (false), mEditMode(EditMode_None), mHasPosition(false), mRow(0), mColumn(0)
+CSVWorld::TableBottomBox::TableBottomBox(const CreatorFactoryBase& creatorFactory, CSMDoc::Document& document,
+    const CSMWorld::UniversalId& id, QWidget* parent)
+    : QWidget(parent)
+    , mShowStatusBar(false)
+    , mEditMode(EditMode_None)
+    , mHasPosition(false)
+    , mRow(0)
+    , mColumn(0)
 {
-    for (int i=0; i<4; ++i)
+    for (int i = 0; i < 4; ++i)
         mStatusCount[i] = 0;
 
-    setVisible (false);
+    setVisible(false);
 
     mLayout = new QStackedLayout;
-    mLayout->setContentsMargins (0, 0, 0, 0);
-    connect (mLayout, &QStackedLayout::currentChanged, this, &TableBottomBox::currentWidgetChanged);
+    mLayout->setContentsMargins(0, 0, 0, 0);
+    connect(mLayout, &QStackedLayout::currentChanged, this, &TableBottomBox::currentWidgetChanged);
 
     mStatus = new QLabel;
 
     mStatusBar = new QStatusBar(this);
 
-    mStatusBar->addWidget (mStatus);
+    mStatusBar->addWidget(mStatus);
 
-    mLayout->addWidget (mStatusBar);
+    mLayout->addWidget(mStatusBar);
 
-    setLayout (mLayout);
+    setLayout(mLayout);
 
-    mCreator = creatorFactory.makeCreator (document, id);
+    mCreator = creatorFactory.makeCreator(document, id);
 
     if (mCreator)
     {
         mCreator->installEventFilter(this);
-        mLayout->addWidget (mCreator);
+        mLayout->addWidget(mCreator);
 
-        connect (mCreator, &Creator::done, this, &TableBottomBox::requestDone);
+        connect(mCreator, &Creator::done, this, &TableBottomBox::requestDone);
 
-        connect (mCreator, &Creator::requestFocus, this, &TableBottomBox::requestFocus);
+        connect(mCreator, &Creator::requestFocus, this, &TableBottomBox::requestFocus);
     }
 
-    mExtendedConfigurator = new ExtendedCommandConfigurator (document, id, this);
+    mExtendedConfigurator = new ExtendedCommandConfigurator(document, id, this);
     mExtendedConfigurator->installEventFilter(this);
-    mLayout->addWidget (mExtendedConfigurator);
-    connect (mExtendedConfigurator, &ExtendedCommandConfigurator::done, 
-        this, &TableBottomBox::requestDone);
+    mLayout->addWidget(mExtendedConfigurator);
+    connect(mExtendedConfigurator, &ExtendedCommandConfigurator::done, this, &TableBottomBox::requestDone);
 
     updateSize();
 }
 
-void CSVWorld::TableBottomBox::setEditLock (bool locked)
+void CSVWorld::TableBottomBox::setEditLock(bool locked)
 {
     if (mCreator)
-        mCreator->setEditLock (locked);
-    mExtendedConfigurator->setEditLock (locked);
+        mCreator->setEditLock(locked);
+    mExtendedConfigurator->setEditLock(locked);
 }
 
 CSVWorld::TableBottomBox::~TableBottomBox()
@@ -136,11 +136,11 @@ CSVWorld::TableBottomBox::~TableBottomBox()
     delete mCreator;
 }
 
-bool CSVWorld::TableBottomBox::eventFilter(QObject *object, QEvent *event)
+bool CSVWorld::TableBottomBox::eventFilter(QObject* object, QEvent* event)
 {
     if (event->type() == QEvent::KeyPress)
     {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Escape)
         {
             requestDone();
@@ -150,11 +150,11 @@ bool CSVWorld::TableBottomBox::eventFilter(QObject *object, QEvent *event)
     return QWidget::eventFilter(object, event);
 }
 
-void CSVWorld::TableBottomBox::setStatusBar (bool show)
+void CSVWorld::TableBottomBox::setStatusBar(bool show)
 {
-    if (show!=mShowStatusBar)
+    if (show != mShowStatusBar)
     {
-        setVisible (show || (mEditMode != EditMode_None));
+        setVisible(show || (mEditMode != EditMode_None));
 
         mShowStatusBar = show;
 
@@ -171,11 +171,11 @@ bool CSVWorld::TableBottomBox::canCreateAndDelete() const
 void CSVWorld::TableBottomBox::requestDone()
 {
     if (!mShowStatusBar)
-        setVisible (false);
+        setVisible(false);
     else
         updateStatus();
 
-    mLayout->setCurrentWidget (mStatusBar);
+    mLayout->setCurrentWidget(mStatusBar);
     mEditMode = EditMode_None;
 }
 
@@ -184,15 +184,15 @@ void CSVWorld::TableBottomBox::currentWidgetChanged(int /*index*/)
     updateSize();
 }
 
-void CSVWorld::TableBottomBox::setStatusMessage (const QString& message)
+void CSVWorld::TableBottomBox::setStatusMessage(const QString& message)
 {
     mStatusMessage = message;
     updateStatus();
 }
 
-void CSVWorld::TableBottomBox::selectionSizeChanged (int size)
+void CSVWorld::TableBottomBox::selectionSizeChanged(int size)
 {
-    if (mStatusCount[3]!=size)
+    if (mStatusCount[3] != size)
     {
         mStatusMessage = "";
         mStatusCount[3] = size;
@@ -200,23 +200,23 @@ void CSVWorld::TableBottomBox::selectionSizeChanged (int size)
     }
 }
 
-void CSVWorld::TableBottomBox::tableSizeChanged (int size, int deleted, int modified)
+void CSVWorld::TableBottomBox::tableSizeChanged(int size, int deleted, int modified)
 {
     bool changed = false;
 
-    if (mStatusCount[0]!=size)
+    if (mStatusCount[0] != size)
     {
         mStatusCount[0] = size;
         changed = true;
     }
 
-    if (mStatusCount[1]!=deleted)
+    if (mStatusCount[1] != deleted)
     {
         mStatusCount[1] = deleted;
         changed = true;
     }
 
-    if (mStatusCount[2]!=modified)
+    if (mStatusCount[2] != modified)
     {
         mStatusCount[2] = modified;
         changed = true;
@@ -229,7 +229,7 @@ void CSVWorld::TableBottomBox::tableSizeChanged (int size, int deleted, int modi
     }
 }
 
-void CSVWorld::TableBottomBox::positionChanged (int row, int column)
+void CSVWorld::TableBottomBox::positionChanged(int row, int column)
 {
     mRow = row;
     mColumn = column;
@@ -247,20 +247,19 @@ void CSVWorld::TableBottomBox::createRequest()
 {
     mCreator->reset();
     mCreator->toggleWidgets(true);
-    mLayout->setCurrentWidget (mCreator);
-    setVisible (true);
+    mLayout->setCurrentWidget(mCreator);
+    setVisible(true);
     mEditMode = EditMode_Creation;
     mCreator->focus();
 }
 
-void CSVWorld::TableBottomBox::cloneRequest(const std::string& id,
-                                            const CSMWorld::UniversalId::Type type)
+void CSVWorld::TableBottomBox::cloneRequest(const std::string& id, const CSMWorld::UniversalId::Type type)
 {
     mCreator->reset();
     mCreator->cloneMode(id, type);
     mLayout->setCurrentWidget(mCreator);
     mCreator->toggleWidgets(false);
-    setVisible (true);
+    setVisible(true);
     mEditMode = EditMode_Creation;
     mCreator->focus();
 }
@@ -270,12 +269,12 @@ void CSVWorld::TableBottomBox::touchRequest(const std::vector<CSMWorld::Universa
     mCreator->touch(ids);
 }
 
-void CSVWorld::TableBottomBox::extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds)
+void CSVWorld::TableBottomBox::extendedDeleteConfigRequest(const std::vector<std::string>& selectedIds)
 {
     extendedConfigRequest(ExtendedCommandConfigurator::Mode_Delete, selectedIds);
 }
 
-void CSVWorld::TableBottomBox::extendedRevertConfigRequest(const std::vector<std::string> &selectedIds)
+void CSVWorld::TableBottomBox::extendedRevertConfigRequest(const std::vector<std::string>& selectedIds)
 {
     extendedConfigRequest(ExtendedCommandConfigurator::Mode_Revert, selectedIds);
 }

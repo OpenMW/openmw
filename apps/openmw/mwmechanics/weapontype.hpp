@@ -18,7 +18,7 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    MWWorld::ContainerStoreIterator getActiveWeapon(const MWWorld::Ptr& actor, int *weaptype);
+    MWWorld::ContainerStoreIterator getActiveWeapon(const MWWorld::Ptr& actor, int* weaptype);
 
     const ESM::WeaponType* getWeaponType(const int weaponType);
 }

@@ -11,51 +11,51 @@ namespace MWGui
 {
     class BookWindow : public BookWindowBase
     {
-        public:
-            BookWindow();
+    public:
+        BookWindow();
 
-            void setPtr(const MWWorld::Ptr& book) override;
-            void setInventoryAllowed(bool allowed);
+        void setPtr(const MWWorld::Ptr& book) override;
+        void setInventoryAllowed(bool allowed);
 
-            void onResChange(int, int) override { center(); }
+        void onResChange(int, int) override { center(); }
 
-        protected:
-            void onNextPageButtonClicked (MyGUI::Widget* sender);
-            void onPrevPageButtonClicked (MyGUI::Widget* sender);
-            void onCloseButtonClicked (MyGUI::Widget* sender);
-            void onTakeButtonClicked (MyGUI::Widget* sender);
-            void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-            void setTakeButtonShow(bool show);
+    protected:
+        void onNextPageButtonClicked(MyGUI::Widget* sender);
+        void onPrevPageButtonClicked(MyGUI::Widget* sender);
+        void onCloseButtonClicked(MyGUI::Widget* sender);
+        void onTakeButtonClicked(MyGUI::Widget* sender);
+        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void setTakeButtonShow(bool show);
 
-            void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
+        void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
 
-            void nextPage();
-            void prevPage();
+        void nextPage();
+        void prevPage();
 
-            void updatePages();
-            void clearPages();
+        void updatePages();
+        void clearPages();
 
-        private:
-            typedef std::pair<int, int> Page;
-            typedef std::vector<Page> Pages;
+    private:
+        typedef std::pair<int, int> Page;
+        typedef std::vector<Page> Pages;
 
-            Gui::ImageButton* mCloseButton;
-            Gui::ImageButton* mTakeButton;
-            Gui::ImageButton* mNextPageButton;
-            Gui::ImageButton* mPrevPageButton;
+        Gui::ImageButton* mCloseButton;
+        Gui::ImageButton* mTakeButton;
+        Gui::ImageButton* mNextPageButton;
+        Gui::ImageButton* mPrevPageButton;
 
-            MyGUI::TextBox* mLeftPageNumber;
-            MyGUI::TextBox* mRightPageNumber;
-            MyGUI::Widget* mLeftPage;
-            MyGUI::Widget* mRightPage;
+        MyGUI::TextBox* mLeftPageNumber;
+        MyGUI::TextBox* mRightPageNumber;
+        MyGUI::Widget* mLeftPage;
+        MyGUI::Widget* mRightPage;
 
-            unsigned int mCurrentPage; // 0 is first page
-            Pages mPages;
+        unsigned int mCurrentPage; // 0 is first page
+        Pages mPages;
 
-            MWWorld::Ptr mBook;
+        MWWorld::Ptr mBook;
 
-            bool mTakeButtonShow;
-            bool mTakeButtonAllowed;
+        bool mTakeButtonShow;
+        bool mTakeButtonAllowed;
     };
 
 }

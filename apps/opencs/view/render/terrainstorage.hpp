@@ -27,24 +27,26 @@ namespace CSVRender
         const CSMWorld::Data& mData;
         std::array<float, ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE> mAlteredHeight;
 
-        osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY) override;
+        osg::ref_ptr<const ESMTerrain::LandObject> getLand(int cellX, int cellY) override;
         const ESM::LandTexture* getLandTexture(int index, short plugin) override;
 
         void getBounds(float& minX, float& maxX, float& minY, float& maxY) override;
 
-        int getThisHeight(int col, int row, const ESM::Land::LandData *heightData) const;
-        int getLeftHeight(int col, int row, const ESM::Land::LandData *heightData) const;
-        int getRightHeight(int col, int row, const ESM::Land::LandData *heightData) const;
-        int getUpHeight(int col, int row, const ESM::Land::LandData *heightData) const;
-        int getDownHeight(int col, int row, const ESM::Land::LandData *heightData) const;
-        int getHeightDifferenceToLeft(int col, int row, const ESM::Land::LandData *heightData) const;
-        int getHeightDifferenceToRight(int col, int row, const ESM::Land::LandData *heightData) const;
-        int getHeightDifferenceToUp(int col, int row, const ESM::Land::LandData *heightData) const;
-        int getHeightDifferenceToDown(int col, int row, const ESM::Land::LandData *heightData) const;
-        bool leftOrUpIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
-        bool rightOrDownIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
+        int getThisHeight(int col, int row, const ESM::Land::LandData* heightData) const;
+        int getLeftHeight(int col, int row, const ESM::Land::LandData* heightData) const;
+        int getRightHeight(int col, int row, const ESM::Land::LandData* heightData) const;
+        int getUpHeight(int col, int row, const ESM::Land::LandData* heightData) const;
+        int getDownHeight(int col, int row, const ESM::Land::LandData* heightData) const;
+        int getHeightDifferenceToLeft(int col, int row, const ESM::Land::LandData* heightData) const;
+        int getHeightDifferenceToRight(int col, int row, const ESM::Land::LandData* heightData) const;
+        int getHeightDifferenceToUp(int col, int row, const ESM::Land::LandData* heightData) const;
+        int getHeightDifferenceToDown(int col, int row, const ESM::Land::LandData* heightData) const;
+        bool leftOrUpIsOverTheLimit(
+            int col, int row, int heightWarningLimit, const ESM::Land::LandData* heightData) const;
+        bool rightOrDownIsOverTheLimit(
+            int col, int row, int heightWarningLimit, const ESM::Land::LandData* heightData) const;
 
-        void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const override;
+        void adjustColor(int col, int row, const ESM::Land::LandData* heightData, osg::Vec4ub& color) const override;
         float getAlteredHeight(int col, int row) const override;
     };
 

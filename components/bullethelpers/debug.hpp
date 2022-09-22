@@ -9,20 +9,21 @@
 
 #include <LinearMath/btVector3.h>
 
-inline std::ostream& operator <<(std::ostream& stream, const btVector3& value)
+inline std::ostream& operator<<(std::ostream& stream, const btVector3& value)
 {
-    return stream << "btVector3(" << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.x()
-                  << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.y()
-                  << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.z()
-                  << ')';
+    return stream << "btVector3(" << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.x() << ", "
+                  << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.y() << ", "
+                  << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.z() << ')';
 }
 
-inline std::ostream& operator <<(std::ostream& stream, BroadphaseNativeTypes value)
+inline std::ostream& operator<<(std::ostream& stream, BroadphaseNativeTypes value)
 {
     switch (value)
     {
 #ifndef SHAPE_NAME
-#define SHAPE_NAME(name) case name: return stream << #name;
+#define SHAPE_NAME(name)                                                                                               \
+    case name:                                                                                                         \
+        return stream << #name;
         SHAPE_NAME(BOX_SHAPE_PROXYTYPE)
         SHAPE_NAME(TRIANGLE_SHAPE_PROXYTYPE)
         SHAPE_NAME(TETRAHEDRAL_SHAPE_PROXYTYPE)

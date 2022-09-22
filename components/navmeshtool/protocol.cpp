@@ -1,9 +1,9 @@
 #include "protocol.hpp"
 
+#include <components/serialization/binaryreader.hpp>
+#include <components/serialization/binarywriter.hpp>
 #include <components/serialization/format.hpp>
 #include <components/serialization/sizeaccumulator.hpp>
-#include <components/serialization/binarywriter.hpp>
-#include <components/serialization/binaryreader.hpp>
 
 #include <stdexcept>
 #include <string>
@@ -83,7 +83,8 @@ namespace NavMeshTool
         std::vector<std::byte> serializeImpl(const T& value)
         {
             const auto data = serializeToVector(value);
-            const Message message {static_cast<std::uint64_t>(T::sMessageType), static_cast<std::uint64_t>(data.size()), data.data()};
+            const Message message{ static_cast<std::uint64_t>(T::sMessageType), static_cast<std::uint64_t>(data.size()),
+                data.data() };
             return serializeToVector(message);
         }
     }

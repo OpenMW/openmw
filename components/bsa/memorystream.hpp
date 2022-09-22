@@ -26,33 +26,32 @@
 #ifndef BSA_MEMORY_STREAM_H
 #define BSA_MEMORY_STREAM_H
 
-#include <vector>
-#include <istream>
 #include <components/files/memorystream.hpp>
+#include <istream>
+#include <vector>
 
 namespace Bsa
 {
-/**
-    Class replaces Ogre memory streams without introducing any new external dependencies
-    beyond standard library.
+    /**
+        Class replaces Ogre memory streams without introducing any new external dependencies
+        beyond standard library.
 
-    Allows to pass memory buffer as Files::IStreamPtr.
+        Allows to pass memory buffer as Files::IStreamPtr.
 
-    Memory buffer is freed once the class instance is destroyed.
- */
-class MemoryInputStream : private std::vector<char>, public Files::MemBuf, public std::istream {
-public:
-    explicit MemoryInputStream(size_t bufferSize)
-        : std::vector<char>(bufferSize)
-        , Files::MemBuf(this->data(), this->size())
-        , std::istream(static_cast<std::streambuf*>(this))
-    {}
-
-    char* getRawData()
+        Memory buffer is freed once the class instance is destroyed.
+     */
+    class MemoryInputStream : private std::vector<char>, public Files::MemBuf, public std::istream
     {
-        return this->data();
-    }
-};
+    public:
+        explicit MemoryInputStream(size_t bufferSize)
+            : std::vector<char>(bufferSize)
+            , Files::MemBuf(this->data(), this->size())
+            , std::istream(static_cast<std::streambuf*>(this))
+        {
+        }
+
+        char* getRawData() { return this->data(); }
+    };
 
 }
 #endif

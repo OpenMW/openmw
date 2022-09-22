@@ -7,7 +7,8 @@ namespace ESM
     ReadersCache::BusyItem::BusyItem(ReadersCache& owner, std::list<Item>::iterator item) noexcept
         : mOwner(owner)
         , mItem(item)
-    {}
+    {
+    }
 
     ReadersCache::BusyItem::~BusyItem() noexcept
     {
@@ -16,7 +17,8 @@ namespace ESM
 
     ReadersCache::ReadersCache(std::size_t capacity)
         : mCapacity(capacity)
-    {}
+    {
+    }
 
     ReadersCache::BusyItem ReadersCache::get(std::size_t index)
     {

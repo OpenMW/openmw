@@ -28,8 +28,8 @@
 #define ESM4_WRLD_H
 
 #include <cstdint>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "common.hpp"
 
@@ -40,21 +40,21 @@ namespace ESM4
 
     struct World
     {
-        enum WorldFlags                 // TES4                 TES5
-        {                               // -------------------- -----------------
-            WLD_Small          = 0x01,  // Small World          Small World
-            WLD_NoFastTravel   = 0x02,  // Can't Fast Travel    Can't Fast Travel
-            WLD_Oblivion       = 0x04,  // Oblivion worldspace
-            WLD_NoLODWater     = 0x08,  //                      No LOD Water
-            WLD_NoLandscpe     = 0x10,  // No LOD Water         No Landscape
-            WLD_NoSky          = 0x20,  //                      No Sky
-            wLD_FixedDimension = 0x40,  //                      Fixed Dimensions
-            WLD_NoGrass        = 0x80   //                      No Grass
+        enum WorldFlags // TES4                 TES5
+        { // -------------------- -----------------
+            WLD_Small = 0x01, // Small World          Small World
+            WLD_NoFastTravel = 0x02, // Can't Fast Travel    Can't Fast Travel
+            WLD_Oblivion = 0x04, // Oblivion worldspace
+            WLD_NoLODWater = 0x08, //                      No LOD Water
+            WLD_NoLandscpe = 0x10, // No LOD Water         No Landscape
+            WLD_NoSky = 0x20, //                      No Sky
+            wLD_FixedDimension = 0x40, //                      Fixed Dimensions
+            WLD_NoGrass = 0x80 //                      No Grass
         };
 
         struct REFRcoord
         {
-            FormId       formId;
+            FormId formId;
             std::int16_t unknown1;
             std::int16_t unknown2;
         };
@@ -66,31 +66,31 @@ namespace ESM4
             std::vector<REFRcoord> refrs;
         };
 
-        //Map size	struct	16 or 28 byte structure
+        // Map size	struct	16 or 28 byte structure
         struct Map
         {
-            std::uint32_t width;  // usable width of the map
+            std::uint32_t width; // usable width of the map
             std::uint32_t height; // usable height of the map
-            std::int16_t  NWcellX;
-            std::int16_t  NWcellY;
-            std::int16_t  SEcellX;
-            std::int16_t  SEcellY;
+            std::int16_t NWcellX;
+            std::int16_t NWcellY;
+            std::int16_t SEcellX;
+            std::int16_t SEcellY;
             float minHeight; // Camera Data (default 50000), new as of Skyrim 1.8, purpose is not yet known.
             float maxHeight; // Camera Data (default 80000)
             float initialPitch;
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
-        std::string  mEditorId;
-        std::string  mFullName;
-        FormId       mParent;       // parent worldspace formid
+        std::string mEditorId;
+        std::string mFullName;
+        FormId mParent; // parent worldspace formid
         std::uint8_t mWorldFlags;
-        FormId       mClimate;
-        FormId       mWater;
-        float        mLandLevel;
-        float        mWaterLevel;
+        FormId mClimate;
+        FormId mWater;
+        float mLandLevel;
+        float mWaterLevel;
 
         Map mMap;
 
@@ -101,7 +101,7 @@ namespace ESM4
 
         // ------ TES4 only -----
 
-        std::int32_t mSound;   // 0 = no record, 1 = Public, 2 = Dungeon
+        std::int32_t mSound; // 0 = no record, 1 = Public, 2 = Dungeon
         std::string mMapFile;
 
         // ------ TES5 only -----
@@ -127,7 +127,7 @@ namespace ESM4
         std::vector<FormId> mRoads;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
     };
 }
 

@@ -10,7 +10,7 @@ namespace MWWorld
     {
         std::string_view mMessage;
 
-        void executeImp(const Ptr &actor) override;
+        void executeImp(const Ptr& actor) override;
 
     public:
         FailedAction(std::string_view message = {}, const Ptr& target = Ptr());

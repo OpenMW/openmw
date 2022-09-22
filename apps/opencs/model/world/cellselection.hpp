@@ -14,44 +14,41 @@ namespace CSMWorld
     /// \note The CellSelection does not specify the worldspace it applies to.
     class CellSelection
     {
-        public:
+    public:
+        typedef std::set<CellCoordinates> Container;
+        typedef Container::const_iterator Iterator;
 
-            typedef std::set<CellCoordinates> Container;
-            typedef Container::const_iterator Iterator;
+    private:
+        Container mCells;
 
-        private:
+    public:
+        Iterator begin() const;
 
-            Container mCells;
+        Iterator end() const;
 
-        public:
+        bool add(const CellCoordinates& coordinates);
+        ///< Ignored if the cell specified by \a coordinates is already part of the selection.
+        ///
+        /// \return Was a cell added to the collection?
 
-            Iterator begin() const;
+        void remove(const CellCoordinates& coordinates);
+        ///< ignored if the cell specified by \a coordinates is not part of the selection.
 
-            Iterator end() const;
+        bool has(const CellCoordinates& coordinates) const;
+        ///< \return Is the cell specified by \a coordinates part of the selection?
 
-            bool add (const CellCoordinates& coordinates);
-            ///< Ignored if the cell specified by \a coordinates is already part of the selection.
-            ///
-            /// \return Was a cell added to the collection?
+        int getSize() const;
+        ///< Return number of cells.
 
-            void remove (const CellCoordinates& coordinates);
-            ///< ignored if the cell specified by \a coordinates is not part of the selection.
+        CellCoordinates getCentre() const;
+        ///< Return the selected cell that is closest to the geometric centre of the selection.
+        ///
+        /// \attention This function must not be called on selections that are empty.
 
-            bool has (const CellCoordinates& coordinates) const;
-            ///< \return Is the cell specified by \a coordinates part of the selection?
-
-            int getSize() const;
-            ///< Return number of cells.
-
-            CellCoordinates getCentre() const;
-            ///< Return the selected cell that is closest to the geometric centre of the selection.
-            ///
-            /// \attention This function must not be called on selections that are empty.
-
-            void move (int x, int y);
+        void move(int x, int y);
     };
 }
 
-Q_DECLARE_METATYPE (CSMWorld::CellSelection)
+Q_DECLARE_METATYPE(CSMWorld::CellSelection)
 
 #endif

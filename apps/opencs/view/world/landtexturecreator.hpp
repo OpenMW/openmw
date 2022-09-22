@@ -12,37 +12,34 @@ namespace CSVWorld
 {
     class LandTextureCreator : public GenericCreator
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        LandTextureCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
-            LandTextureCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
+        void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 
-            void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
+        void focus() override;
 
-            void focus() override;
+        void reset() override;
 
-            void reset() override;
+        std::string getErrors() const override;
 
-            std::string getErrors() const override;
+    protected:
+        void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
 
-        protected:
+        std::string getId() const override;
 
-            void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
+    private slots:
 
-            std::string getId() const override;
+        void nameChanged(const QString& val);
+        void indexChanged(int val);
 
-        private slots:
+    private:
+        QLineEdit* mNameEdit;
+        QSpinBox* mIndexBox;
 
-            void nameChanged(const QString& val);
-            void indexChanged(int val);
-
-        private:
-
-            QLineEdit* mNameEdit;
-            QSpinBox* mIndexBox;
-
-            std::string mName;
+        std::string mName;
     };
 }
 

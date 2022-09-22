@@ -1,17 +1,17 @@
 #ifndef GAME_MWWORLD_SCENE_H
 #define GAME_MWWORLD_SCENE_H
 
-#include <osg/Vec4i>
 #include <osg/Vec2i>
+#include <osg/Vec4i>
 #include <osg/ref_ptr>
 
 #include "ptr.hpp"
 
-#include <set>
 #include <memory>
+#include <optional>
+#include <set>
 #include <unordered_map>
 #include <vector>
-#include <optional>
 
 #include <components/misc/constants.hpp>
 
@@ -72,131 +72,133 @@ namespace MWWorld
 
     class Scene
     {
-        public:
-            using CellStoreCollection = std::set<CellStore *>;
+    public:
+        using CellStoreCollection = std::set<CellStore*>;
 
-        private:
-            struct ChangeCellGridRequest
-            {
-                osg::Vec3f mPosition;
-                osg::Vec2i mCell;
-                bool mChangeEvent;
-            };
+    private:
+        struct ChangeCellGridRequest
+        {
+            osg::Vec3f mPosition;
+            osg::Vec2i mCell;
+            bool mChangeEvent;
+        };
 
-            CellStore* mCurrentCell; // the cell the player is in
-            CellStoreCollection mActiveCells;
-            bool mCellChanged;
-            bool mCellLoaded = false;
-            MWWorld::World& mWorld;
-            MWPhysics::PhysicsSystem *mPhysics;
-            MWRender::RenderingManager& mRendering;
-            DetourNavigator::Navigator& mNavigator;
-            std::unique_ptr<CellPreloader> mPreloader;
-            float mCellLoadingThreshold;
-            float mPreloadDistance;
-            bool mPreloadEnabled;
+        CellStore* mCurrentCell; // the cell the player is in
+        CellStoreCollection mActiveCells;
+        bool mCellChanged;
+        bool mCellLoaded = false;
+        MWWorld::World& mWorld;
+        MWPhysics::PhysicsSystem* mPhysics;
+        MWRender::RenderingManager& mRendering;
+        DetourNavigator::Navigator& mNavigator;
+        std::unique_ptr<CellPreloader> mPreloader;
+        float mCellLoadingThreshold;
+        float mPreloadDistance;
+        bool mPreloadEnabled;
 
-            bool mPreloadExteriorGrid;
-            bool mPreloadDoors;
-            bool mPreloadFastTravel;
-            float mPredictionTime;
+        bool mPreloadExteriorGrid;
+        bool mPreloadDoors;
+        bool mPreloadFastTravel;
+        float mPredictionTime;
 
-            static const int mHalfGridSize = Constants::CellGridRadius;
+        static const int mHalfGridSize = Constants::CellGridRadius;
 
-            osg::Vec3f mLastPlayerPos;
+        osg::Vec3f mLastPlayerPos;
 
-            std::vector<ESM::RefNum> mPagedRefs;
+        std::vector<ESM::RefNum> mPagedRefs;
 
-            std::vector<osg::ref_ptr<SceneUtil::WorkItem>> mWorkItems;
+        std::vector<osg::ref_ptr<SceneUtil::WorkItem>> mWorkItems;
 
-            std::optional<ChangeCellGridRequest> mChangeCellGridRequest;
+        std::optional<ChangeCellGridRequest> mChangeCellGridRequest;
 
-            void insertCell(CellStore &cell, Loading::Listener* loadingListener,
-                const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
+        void insertCell(CellStore& cell, Loading::Listener* loadingListener,
+            const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
 
-            osg::Vec2i mCurrentGridCenter;
+        osg::Vec2i mCurrentGridCenter;
 
-            // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
-            void changeCellGrid (const osg::Vec3f &pos, int playerCellX, int playerCellY, bool changeEvent = true);
+        // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
+        void changeCellGrid(const osg::Vec3f& pos, int playerCellX, int playerCellY, bool changeEvent = true);
 
-            void requestChangeCellGrid(const osg::Vec3f &position, const osg::Vec2i& cell, bool changeEvent = true);
+        void requestChangeCellGrid(const osg::Vec3f& position, const osg::Vec2i& cell, bool changeEvent = true);
 
-            typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
+        typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
 
-            void preloadCells(float dt);
-            void preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<PositionCellGrid>& exteriorPositions);
-            void preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
-            void preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<PositionCellGrid>& exteriorPositions);
+        void preloadCells(float dt);
+        void preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos,
+            std::vector<PositionCellGrid>& exteriorPositions);
+        void preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
+        void preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos,
+            std::vector<PositionCellGrid>& exteriorPositions);
 
-            osg::Vec4i gridCenterToBounds(const osg::Vec2i &centerCell) const;
-            osg::Vec2i getNewGridCenter(const osg::Vec3f &pos, const osg::Vec2i *currentGridCenter = nullptr) const;
+        osg::Vec4i gridCenterToBounds(const osg::Vec2i& centerCell) const;
+        osg::Vec2i getNewGridCenter(const osg::Vec3f& pos, const osg::Vec2i* currentGridCenter = nullptr) const;
 
-            void unloadCell(CellStore* cell, const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
-            void loadCell(CellStore *cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position,
-                const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
+        void unloadCell(CellStore* cell, const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
+        void loadCell(CellStore* cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position,
+            const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
 
-        public:
+    public:
+        Scene(MWWorld::World& world, MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem* physics,
+            DetourNavigator::Navigator& navigator);
 
-            Scene(MWWorld::World& world, MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics,
-                   DetourNavigator::Navigator& navigator);
+        ~Scene();
 
-            ~Scene();
+        void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding = false);
+        void preloadTerrain(const osg::Vec3f& pos, bool sync = false);
+        void reloadTerrain();
 
-            void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
-            void preloadTerrain(const osg::Vec3f& pos, bool sync=false);
-            void reloadTerrain();
+        void playerMoved(const osg::Vec3f& pos);
 
-            void playerMoved (const osg::Vec3f& pos);
+        void changePlayerCell(CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);
 
-            void changePlayerCell(CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);
+        CellStore* getCurrentCell();
 
-            CellStore *getCurrentCell();
+        const CellStoreCollection& getActiveCells() const;
 
-            const CellStoreCollection& getActiveCells () const;
+        bool hasCellChanged() const;
+        ///< Has the set of active cells changed, since the last frame?
 
-            bool hasCellChanged() const;
-            ///< Has the set of active cells changed, since the last frame?
+        bool hasCellLoaded() const { return mCellLoaded; }
 
-            bool hasCellLoaded() const { return mCellLoaded; }
+        void resetCellLoaded() { mCellLoaded = false; }
 
-            void resetCellLoaded() { mCellLoaded = false; }
+        void changeToInteriorCell(
+            const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
+        ///< Move to interior cell.
+        /// @param changeEvent Set cellChanged flag?
 
-            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true);
-            ///< Move to interior cell.
-            /// @param changeEvent Set cellChanged flag?
+        void changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
+        ///< Move to exterior cell.
+        /// @param changeEvent Set cellChanged flag?
 
-            void changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true);
-            ///< Move to exterior cell.
-            /// @param changeEvent Set cellChanged flag?
+        void clear();
+        ///< Change into a void
 
-            void clear();
-            ///< Change into a void
+        void markCellAsUnchanged();
 
-            void markCellAsUnchanged();
+        void update(float duration);
 
-            void update(float duration);
+        void addObjectToScene(const Ptr& ptr);
+        ///< Add an object that already exists in the world model to the scene.
 
-            void addObjectToScene (const Ptr& ptr);
-            ///< Add an object that already exists in the world model to the scene.
+        void removeObjectFromScene(const Ptr& ptr, bool keepActive = false);
+        ///< Remove an object from the scene, but not from the world model.
 
-            void removeObjectFromScene (const Ptr& ptr, bool keepActive = false);
-            ///< Remove an object from the scene, but not from the world model.
+        void addPostponedPhysicsObjects();
 
-            void addPostponedPhysicsObjects();
+        void removeFromPagedRefs(const Ptr& ptr);
 
-            void removeFromPagedRefs(const Ptr &ptr);
+        void updateObjectRotation(const Ptr& ptr, RotationOrder order);
+        void updateObjectScale(const Ptr& ptr);
 
-            void updateObjectRotation(const Ptr& ptr, RotationOrder order);
-            void updateObjectScale(const Ptr& ptr);
+        bool isCellActive(const CellStore& cell);
 
-            bool isCellActive(const CellStore &cell);
+        Ptr searchPtrViaActorId(int actorId);
 
-            Ptr searchPtrViaActorId (int actorId);
+        void preload(const std::string& mesh, bool useAnim = false);
 
-            void preload(const std::string& mesh, bool useAnim=false);
-
-            void testExteriorCells();
-            void testInteriorCells();
+        void testExteriorCells();
+        void testInteriorCells();
     };
 }
 

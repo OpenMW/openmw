@@ -3,7 +3,12 @@
 namespace Compiler
 {
     ErrorHandler::ErrorHandler()
-    : mWarnings (0), mErrors (0), mWarningsMode (1), mDowngradeErrors (false) {}
+        : mWarnings(0)
+        , mErrors(0)
+        , mWarningsMode(1)
+        , mDowngradeErrors(false)
+    {
+    }
 
     ErrorHandler::~ErrorHandler() = default;
 
@@ -11,7 +16,7 @@ namespace Compiler
 
     bool ErrorHandler::isGood() const
     {
-        return mErrors==0;
+        return mErrors == 0;
     }
 
     // Return number of errors
@@ -30,32 +35,32 @@ namespace Compiler
 
     // Generate a warning message.
 
-    void ErrorHandler::warning (const std::string& message, const TokenLoc& loc)
+    void ErrorHandler::warning(const std::string& message, const TokenLoc& loc)
     {
-        if (mWarningsMode==1 ||
+        if (mWarningsMode == 1 ||
             // temporarily change from mode 2 to mode 1 if error downgrading is enabled to
             // avoid infinite recursion
-            (mWarningsMode==2 && mDowngradeErrors))
+            (mWarningsMode == 2 && mDowngradeErrors))
         {
             ++mWarnings;
-            report (message, loc, WarningMessage);
+            report(message, loc, WarningMessage);
         }
-        else if (mWarningsMode==2)
-            error (message, loc);
+        else if (mWarningsMode == 2)
+            error(message, loc);
     }
 
     // Generate an error message.
 
-    void ErrorHandler::error (const std::string& message, const TokenLoc& loc)
+    void ErrorHandler::error(const std::string& message, const TokenLoc& loc)
     {
         if (mDowngradeErrors)
         {
-            warning (message, loc);
+            warning(message, loc);
             return;
         }
 
         ++mErrors;
-        report (message, loc, ErrorMessage);
+        report(message, loc, ErrorMessage);
     }
 
     // Generate an error message for an unexpected EOF.
@@ -63,7 +68,7 @@ namespace Compiler
     void ErrorHandler::endOfFile()
     {
         ++mErrors;
-        report ("unexpected end of file", ErrorMessage);
+        report("unexpected end of file", ErrorMessage);
     }
 
     // Remove all previous error/warning events
@@ -73,25 +78,25 @@ namespace Compiler
         mErrors = mWarnings = 0;
     }
 
-    void ErrorHandler::setWarningsMode (int mode)
+    void ErrorHandler::setWarningsMode(int mode)
     {
         mWarningsMode = mode;
     }
 
-    void ErrorHandler::downgradeErrors (bool downgrade)
+    void ErrorHandler::downgradeErrors(bool downgrade)
     {
         mDowngradeErrors = downgrade;
     }
 
-
-    ErrorDowngrade::ErrorDowngrade (ErrorHandler& handler) : mHandler (handler)
+    ErrorDowngrade::ErrorDowngrade(ErrorHandler& handler)
+        : mHandler(handler)
     {
-        mHandler.downgradeErrors (true);
+        mHandler.downgradeErrors(true);
     }
 
     ErrorDowngrade::~ErrorDowngrade()
     {
-        mHandler.downgradeErrors (false);
+        mHandler.downgradeErrors(false);
     }
 
 }

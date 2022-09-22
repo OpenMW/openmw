@@ -8,41 +8,39 @@ namespace Misc
 {
     class FrameRateLimiter
     {
-        public:
-            template <class Rep, class Ratio>
-            explicit FrameRateLimiter(std::chrono::duration<Rep, Ratio> maxFrameDuration,
-                                      std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now())
-                : mMaxFrameDuration(std::chrono::duration_cast<std::chrono::steady_clock::duration>(maxFrameDuration))
-                , mLastMeasurement(now)
-                , mLastFrameDuration(0)
-            {}
+    public:
+        template <class Rep, class Ratio>
+        explicit FrameRateLimiter(std::chrono::duration<Rep, Ratio> maxFrameDuration,
+            std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now())
+            : mMaxFrameDuration(std::chrono::duration_cast<std::chrono::steady_clock::duration>(maxFrameDuration))
+            , mLastMeasurement(now)
+            , mLastFrameDuration(0)
+        {
+        }
 
-            std::chrono::steady_clock::duration getLastFrameDuration() const
+        std::chrono::steady_clock::duration getLastFrameDuration() const { return mLastFrameDuration; }
+
+        void limit(std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now())
+        {
+            const auto passed = now - mLastMeasurement;
+            const auto left = mMaxFrameDuration - passed;
+            if (left > left.zero())
             {
-                return mLastFrameDuration;
+                std::this_thread::sleep_for(left);
+                mLastMeasurement = now + left;
+                mLastFrameDuration = mMaxFrameDuration;
             }
-
-            void limit(std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now())
+            else
             {
-                const auto passed = now - mLastMeasurement;
-                const auto left = mMaxFrameDuration - passed;
-                if (left > left.zero())
-                {
-                    std::this_thread::sleep_for(left);
-                    mLastMeasurement = now + left;
-                    mLastFrameDuration = mMaxFrameDuration;
-                }
-                else
-                {
-                    mLastMeasurement = now;
-                    mLastFrameDuration = passed;
-                }
+                mLastMeasurement = now;
+                mLastFrameDuration = passed;
             }
+        }
 
-        private:
-            std::chrono::steady_clock::duration mMaxFrameDuration;
-            std::chrono::steady_clock::time_point mLastMeasurement;
-            std::chrono::steady_clock::duration mLastFrameDuration;
+    private:
+        std::chrono::steady_clock::duration mMaxFrameDuration;
+        std::chrono::steady_clock::time_point mLastMeasurement;
+        std::chrono::steady_clock::duration mLastFrameDuration;
     };
 
     inline Misc::FrameRateLimiter makeFrameRateLimiter(float frameRateLimit)

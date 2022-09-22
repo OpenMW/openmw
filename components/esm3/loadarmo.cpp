@@ -6,17 +6,16 @@
 namespace ESM
 {
 
-    void PartReferenceList::add(ESMReader &esm)
+    void PartReferenceList::add(ESMReader& esm)
     {
         PartReference pr;
         esm.getHT(pr.mPart); // The INDX byte
         pr.mMale = esm.getHNOString("BNAM");
         pr.mFemale = esm.getHNOString("CNAM");
         mParts.push_back(pr);
-
     }
 
-    void PartReferenceList::load(ESMReader &esm)
+    void PartReferenceList::load(ESMReader& esm)
     {
         mParts.clear();
         while (esm.isNextSub("INDX"))
@@ -25,7 +24,7 @@ namespace ESM
         }
     }
 
-    void PartReferenceList::save(ESMWriter &esm) const
+    void PartReferenceList::save(ESMWriter& esm) const
     {
         for (std::vector<PartReference>::const_iterator it = mParts.begin(); it != mParts.end(); ++it)
         {
@@ -35,7 +34,7 @@ namespace ESM
         }
     }
 
-    void Armor::load(ESMReader &esm, bool &isDeleted)
+    void Armor::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -91,7 +90,7 @@ namespace ESM
             esm.fail("Missing AODT subrecord");
     }
 
-    void Armor::save(ESMWriter &esm, bool isDeleted) const
+    void Armor::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

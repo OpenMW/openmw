@@ -20,9 +20,9 @@ namespace Terrain
     class CellBorder
     {
     public:
-        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > CellGrid; 
+        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node>> CellGrid;
 
-        CellBorder(Terrain::World *world, osg::Group *root, int borderMask, Resource::SceneManager* sceneManager);
+        CellBorder(Terrain::World* world, osg::Group* root, int borderMask, Resource::SceneManager* sceneManager);
 
         void createCellBorderGeometry(int x, int y);
         void destroyCellBorderGeometry(int x, int y);
@@ -32,12 +32,13 @@ namespace Terrain
         */
         void destroyCellBorderGeometry();
 
-        static osg::ref_ptr<osg::Group> createBorderGeometry(float x, float y, float size, Storage* terrain, Resource::SceneManager* sceneManager, int mask, float offset = 10.0, osg::Vec4f color = { 1,1,0,0 });
+        static osg::ref_ptr<osg::Group> createBorderGeometry(float x, float y, float size, Storage* terrain,
+            Resource::SceneManager* sceneManager, int mask, float offset = 10.0, osg::Vec4f color = { 1, 1, 0, 0 });
 
     protected:
-        Terrain::World *mWorld;
+        Terrain::World* mWorld;
         Resource::SceneManager* mSceneManager;
-        osg::Group *mRoot;
+        osg::Group* mRoot;
 
         CellGrid mCellBorderNodes;
         int mBorderMask;

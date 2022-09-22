@@ -5,18 +5,27 @@
 
 #include <components/process/processinvoker.hpp>
 
-#include <QWidget>
 #include <QDir>
 #include <QStringList>
+#include <QWidget>
 
 class QSortFilterProxyModel;
 class QAbstractItemModel;
 class QMenu;
 
-namespace Files { struct ConfigurationManager; }
-namespace ContentSelectorView { class ContentSelector; }
-namespace Config { class GameSettings;
-                   class LauncherSettings; }
+namespace Files
+{
+    struct ConfigurationManager;
+}
+namespace ContentSelectorView
+{
+    class ContentSelector;
+}
+namespace Config
+{
+    class GameSettings;
+    class LauncherSettings;
+}
 
 namespace Launcher
 {
@@ -28,38 +37,38 @@ namespace Launcher
     {
         Q_OBJECT
 
-        ContentSelectorView::ContentSelector *mSelector;
+        ContentSelectorView::ContentSelector* mSelector;
         Ui::DataFilesPage ui;
 
     public:
-        explicit DataFilesPage (Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
-                                Config::LauncherSettings &launcherSettings, MainDialog *parent = nullptr);
+        explicit DataFilesPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+            Config::LauncherSettings& launcherSettings, MainDialog* parent = nullptr);
 
         QAbstractItemModel* profilesModel() const;
 
         int profilesIndex() const;
 
-        //void writeConfig(QString profile = QString());
-        void saveSettings(const QString &profile = "");
+        // void writeConfig(QString profile = QString());
+        void saveSettings(const QString& profile = "");
         bool loadSettings();
 
     signals:
-        void signalProfileChanged (int index);
+        void signalProfileChanged(int index);
         void signalLoadedCellsChanged(QStringList selectedFiles);
 
     public slots:
-        void slotProfileChanged (int index);
+        void slotProfileChanged(int index);
 
     private slots:
 
-        void slotProfileChangedByUser(const QString &previous, const QString &current);
-        void slotProfileRenamed(const QString &previous, const QString &current);
-        void slotProfileDeleted(const QString &item);
-        void slotAddonDataChanged ();
-        void slotRefreshButtonClicked ();
+        void slotProfileChangedByUser(const QString& previous, const QString& current);
+        void slotProfileRenamed(const QString& previous, const QString& current);
+        void slotProfileDeleted(const QString& item);
+        void slotAddonDataChanged();
+        void slotRefreshButtonClicked();
 
-        void updateNewProfileOkButton(const QString &text);
-        void updateCloneProfileOkButton(const QString &text);
+        void updateNewProfileOkButton(const QString& text);
+        void updateCloneProfileOkButton(const QString& text);
         void addSubdirectories(bool append);
         void sortDirectories();
         void removeDirectory();
@@ -78,7 +87,7 @@ namespace Launcher
 
     public:
         /// Content List that is always present
-        const static char *mDefaultContentListName;
+        const static char* mDefaultContentListName;
 
     private:
         struct NavMeshToolProgress
@@ -90,14 +99,14 @@ namespace Launcher
             int mExpectedMaxProgress = 0;
         };
 
-        MainDialog *mMainDialog;
-        TextInputDialog *mNewProfileDialog;
-        TextInputDialog *mCloneProfileDialog;
+        MainDialog* mMainDialog;
+        TextInputDialog* mNewProfileDialog;
+        TextInputDialog* mCloneProfileDialog;
 
-        Files::ConfigurationManager &mCfgMgr;
+        Files::ConfigurationManager& mCfgMgr;
 
-        Config::GameSettings &mGameSettings;
-        Config::LauncherSettings &mLauncherSettings;
+        Config::GameSettings& mGameSettings;
+        Config::LauncherSettings& mLauncherSettings;
 
         QString mPreviousProfile;
         QStringList previousSelectedFiles;
@@ -111,15 +120,15 @@ namespace Launcher
         void addArchive(const QString& name, Qt::CheckState selected, int row = -1);
         void addArchivesFromDir(const QString& dir);
         void buildView();
-        void setProfile (int index, bool savePrevious);
-        void setProfile (const QString &previous, const QString &current, bool savePrevious);
-        void removeProfile (const QString &profile);
-        bool showDeleteMessageBox (const QString &text);
-        void addProfile (const QString &profile, bool setAsCurrent);
+        void setProfile(int index, bool savePrevious);
+        void setProfile(const QString& previous, const QString& current, bool savePrevious);
+        void removeProfile(const QString& profile);
+        bool showDeleteMessageBox(const QString& text);
+        void addProfile(const QString& profile, bool setAsCurrent);
         void checkForDefaultProfile();
         void populateFileViews(const QString& contentModelName);
         void reloadCells(QStringList selectedFiles);
-        void refreshDataFilesView ();
+        void refreshDataFilesView();
         void updateNavMeshProgress(int minDataSize);
         QString selectDirectory();
 
@@ -128,7 +137,7 @@ namespace Launcher
          * @return the file paths of all selected content files
          */
         QStringList selectedFilePaths() const;
-        QStringList selectedArchivePaths(bool all=false) const;
+        QStringList selectedArchivePaths(bool all = false) const;
         QStringList selectedDirectoriesPaths() const;
 
         class PathIterator
@@ -140,25 +149,24 @@ namespace Launcher
             QString mFilePath;
 
         public:
-            PathIterator (const QStringList &list)
+            PathIterator(const QStringList& list)
             {
                 mCitBegin = list.constBegin();
                 mCitCurrent = mCitBegin;
                 mCitEnd = list.constEnd();
             }
 
-            QString findFirstPath (const QString &file)
+            QString findFirstPath(const QString& file)
             {
                 mCitCurrent = mCitBegin;
                 mFile = file;
                 return path();
             }
 
-            QString findNextPath () { return path(); }
+            QString findNextPath() { return path(); }
 
         private:
-
-            QString path ()
+            QString path()
             {
                 bool success = false;
                 QDir dir;
@@ -169,8 +177,8 @@ namespace Launcher
                     if (mCitCurrent == mCitEnd)
                         break;
 
-                    dir.setPath (*(mCitCurrent++));
-                    file.setFile (dir.absoluteFilePath (mFile));
+                    dir.setPath(*(mCitCurrent++));
+                    file.setFile(dir.absoluteFilePath(mFile));
 
                     success = file.exists();
                 }
@@ -180,7 +188,6 @@ namespace Launcher
 
                 return "";
             }
-
         };
 
         QStringList filesInProfile(const QString& profileName, PathIterator& pathIterator);

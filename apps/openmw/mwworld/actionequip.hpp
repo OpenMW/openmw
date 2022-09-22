@@ -9,11 +9,11 @@ namespace MWWorld
     {
         bool mForce;
 
-        void executeImp (const Ptr& actor) override;
+        void executeImp(const Ptr& actor) override;
 
     public:
         /// @param item to equip
-        ActionEquip (const Ptr& object, bool force=false);
+        ActionEquip(const Ptr& object, bool force = false);
     };
 }
 

@@ -7,8 +7,7 @@
 
 #include "interpretercontext.hpp"
 
-MWWorld::Ptr MWScript::ExplicitRef::operator() (Interpreter::Runtime& runtime, bool required,
-    bool activeOnly) const
+MWWorld::Ptr MWScript::ExplicitRef::operator()(Interpreter::Runtime& runtime, bool required, bool activeOnly) const
 {
     std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
     runtime.pop();
@@ -19,11 +18,9 @@ MWWorld::Ptr MWScript::ExplicitRef::operator() (Interpreter::Runtime& runtime, b
         return MWBase::Environment::get().getWorld()->searchPtr(id, activeOnly);
 }
 
-MWWorld::Ptr MWScript::ImplicitRef::operator() (Interpreter::Runtime& runtime, bool required,
-    bool activeOnly) const
+MWWorld::Ptr MWScript::ImplicitRef::operator()(Interpreter::Runtime& runtime, bool required, bool activeOnly) const
 {
-    MWScript::InterpreterContext& context
-    = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+    MWScript::InterpreterContext& context = static_cast<MWScript::InterpreterContext&>(runtime.getContext());
 
     return context.getReference(required);
 }

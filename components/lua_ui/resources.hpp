@@ -1,10 +1,10 @@
 #ifndef OPENMW_LUAUI_RESOURCES
 #define OPENMW_LUAUI_RESOURCES
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <memory>
 
 #include <osg/Vec2f>
 
@@ -27,18 +27,19 @@ namespace LuaUi
 
     class ResourceManager
     {
-        public:
-            ResourceManager(const VFS::Manager* vfs)
-                : mVfs(vfs)
-            {}
+    public:
+        ResourceManager(const VFS::Manager* vfs)
+            : mVfs(vfs)
+        {
+        }
 
-            std::shared_ptr<TextureResource> registerTexture(TextureData data);
-            void clear();
+        std::shared_ptr<TextureResource> registerTexture(TextureData data);
+        void clear();
 
-        private:
-            const VFS::Manager* mVfs;
-            using TextureResources = std::vector<std::shared_ptr<TextureResource>>;
-            std::unordered_map<std::string, TextureResources> mTextures;
+    private:
+        const VFS::Manager* mVfs;
+        using TextureResources = std::vector<std::shared_ptr<TextureResource>>;
+        std::unordered_map<std::string, TextureResources> mTextures;
     };
 }
 

@@ -14,7 +14,6 @@ namespace CSMWorld
     {
 
     public:
-
         NestedCollection();
         virtual ~NestedCollection();
 
@@ -34,7 +33,7 @@ namespace CSMWorld
 
         virtual int getNestedColumnsCount(int row, int column) const;
 
-        virtual NestableColumn *getNestableColumn(int column) = 0;
+        virtual NestableColumn* getNestableColumn(int column) = 0;
 
         virtual int searchNestedColumnIndex(int parentColumn, Columns::ColumnId id);
         ///< \return the column index or -1 if the requested column wasn't found.

@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void DIAL::load(ESM::ESMReader &esm)
+    void DIAL::load(ESM::ESMReader& esm)
     {
         // See ESM::Dialogue::Type enum, not sure why we would need this here though
         int type = 0;

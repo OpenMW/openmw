@@ -17,11 +17,12 @@ namespace boost
 namespace Fallback
 {
 
-    struct FallbackMap {
+    struct FallbackMap
+    {
         std::map<std::string, std::string> mMap;
     };
 
-    void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int);
+    void validate(boost::any& v, std::vector<std::string> const& tokens, FallbackMap*, int);
 }
 
 #endif

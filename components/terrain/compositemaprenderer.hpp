@@ -3,8 +3,8 @@
 
 #include <osg/Drawable>
 
-#include <set>
 #include <mutex>
+#include <set>
 
 namespace osg
 {
@@ -21,13 +21,14 @@ namespace Terrain
     public:
         CompositeMap();
         ~CompositeMap();
-        std::vector<osg::ref_ptr<osg::Drawable> > mDrawables;
+        std::vector<osg::ref_ptr<osg::Drawable>> mDrawables;
         osg::ref_ptr<osg::Texture2D> mTexture;
         unsigned int mCompiled;
     };
 
     /**
-     * @brief The CompositeMapRenderer is responsible for updating composite map textures in a blocking or non-blocking way.
+     * @brief The CompositeMapRenderer is responsible for updating composite map textures in a blocking or non-blocking
+     * way.
      */
     class CompositeMapRenderer : public osg::Drawable
     {
@@ -46,7 +47,7 @@ namespace Terrain
         void setTargetFrameRate(float framerate);
 
         /// Add a composite map to be rendered
-        void addCompositeMap(CompositeMap* map, bool immediate=false);
+        void addCompositeMap(CompositeMap* map, bool immediate = false);
 
         /// Mark this composite map to be required for the current frame
         void setImmediate(CompositeMap* map);
@@ -58,7 +59,7 @@ namespace Terrain
         double mMinimumTimeAvailable;
         mutable osg::Timer mTimer;
 
-        typedef std::set<osg::ref_ptr<CompositeMap> > CompileSet;
+        typedef std::set<osg::ref_ptr<CompositeMap>> CompileSet;
 
         mutable CompileSet mCompileSet;
         mutable CompileSet mImmediateCompileSet;

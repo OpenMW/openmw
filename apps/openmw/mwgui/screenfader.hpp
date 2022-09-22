@@ -15,7 +15,7 @@ namespace MWGui
     public:
         typedef std::shared_ptr<FadeOp> Ptr;
 
-        FadeOp(ScreenFader * fader, float time, float targetAlpha, float delay);
+        FadeOp(ScreenFader* fader, float time, float targetAlpha, float delay);
 
         bool isRunning();
 
@@ -24,7 +24,7 @@ namespace MWGui
         void finish();
 
     private:
-        ScreenFader * mFader;
+        ScreenFader* mFader;
         float mRemainingTime;
         float mTargetTime;
         float mTargetAlpha;
@@ -36,18 +36,19 @@ namespace MWGui
     class ScreenFader : public WindowBase
     {
     public:
-        ScreenFader(const std::string & texturePath, const std::string& layout = "openmw_screen_fader.layout", const MyGUI::FloatCoord& texCoordOverride = MyGUI::FloatCoord(0,0,1,1));
+        ScreenFader(const std::string& texturePath, const std::string& layout = "openmw_screen_fader.layout",
+            const MyGUI::FloatCoord& texCoordOverride = MyGUI::FloatCoord(0, 0, 1, 1));
         ~ScreenFader();
 
         void onFrameStart(float dt);
 
-        void fadeIn(const float time, float delay=0);
-        void fadeOut(const float time, float delay=0);
-        void fadeTo(const int percent, const float time, float delay=0);
+        void fadeIn(const float time, float delay = 0);
+        void fadeOut(const float time, float delay = 0);
+        void fadeTo(const int percent, const float time, float delay = 0);
 
         void clear() override;
 
-        void setFactor (float factor);
+        void setFactor(float factor);
         void setRepeat(bool repeat);
 
         void queue(float time, float targetAlpha, float delay);

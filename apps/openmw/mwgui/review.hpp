@@ -1,10 +1,10 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
+#include "widgets.hpp"
+#include "windowbase.hpp"
 #include <components/esm/attr.hpp>
 #include <components/esm3/loadclas.hpp>
-#include "windowbase.hpp"
-#include "widgets.hpp"
 
 namespace ESM
 {
@@ -16,7 +16,8 @@ namespace MWGui
     class ReviewDialog : public WindowModal
     {
     public:
-        enum Dialogs {
+        enum Dialogs
+        {
             NAME_DIALOG,
             RACE_DIALOG,
             CLASS_DIALOG,
@@ -28,10 +29,10 @@ namespace MWGui
 
         bool exit() override { return false; }
 
-        void setPlayerName(const std::string &name);
-        void setRace(const std::string &raceId);
+        void setPlayerName(const std::string& name);
+        void setRace(const std::string& raceId);
         void setClass(const ESM::Class& class_);
-        void setBirthSign (const std::string &signId);
+        void setBirthSign(const std::string& signId);
 
         void setHealth(const MWMechanics::DynamicStat<float>& value);
         void setMagicka(const MWMechanics::DynamicStat<float>& value);
@@ -74,12 +75,14 @@ namespace MWGui
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
     private:
-        void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+        void addSkills(const SkillList& skills, const std::string& titleId, const std::string& titleDefault,
+            MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
+        void addSeparator(MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
         void addGroup(std::string_view label, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
-        MyGUI::TextBox* addValueItem(std::string_view text, const std::string& value, const std::string& state, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
-        void addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void addItem(const ESM::Spell* spell, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+        MyGUI::TextBox* addValueItem(std::string_view text, const std::string& value, const std::string& state,
+            MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
+        void addItem(const std::string& text, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
+        void addItem(const ESM::Spell* spell, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
         void updateSkillArea();
 
         MyGUI::TextBox *mNameWidget, *mRaceWidget, *mClassWidget, *mBirthSignWidget;
@@ -90,7 +93,7 @@ namespace MWGui
         std::map<int, Widgets::MWAttributePtr> mAttributeWidgets;
 
         SkillList mMajorSkills, mMinorSkills, mMiscSkills;
-        std::map<int, MWMechanics::SkillValue > mSkillValues;
+        std::map<int, MWMechanics::SkillValue> mSkillValues;
         std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
         std::string mName, mRaceId, mBirthSignId;
         ESM::Class mKlass;

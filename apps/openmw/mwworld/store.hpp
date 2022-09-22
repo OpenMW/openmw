@@ -1,19 +1,19 @@
 #ifndef OPENMW_MWWORLD_STORE_H
 #define OPENMW_MWWORLD_STORE_H
 
-#include <string>
-#include <vector>
-#include <memory>
 #include <map>
-#include <unordered_map>
+#include <memory>
 #include <set>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-#include <components/esm3/loadland.hpp>
-#include <components/esm3/loaddial.hpp>
-#include <components/esm3/loadpgrd.hpp>
 #include <components/esm3/loadcell.hpp>
-#include <components/misc/strings/algorithm.hpp>
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadpgrd.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "../mwdialogue/keywordsearch.hpp"
 
@@ -40,10 +40,12 @@ namespace MWWorld
         std::string mId;
         bool mIsDeleted;
 
-        RecordId(const std::string &id = {}, bool isDeleted = false);
+        RecordId(const std::string& id = {}, bool isDeleted = false);
     };
 
-    class StoreBase {}; //Empty interface to be parent of all store types
+    class StoreBase
+    {
+    }; // Empty interface to be parent of all store types
 
     class DynamicStore : public StoreBase
     {
@@ -52,19 +54,20 @@ namespace MWWorld
 
         virtual void setUp() {}
 
-        /// List identifiers of records contained in this Store (case-smashed). No-op for Stores that don't use string IDs.
-        virtual void listIdentifier(std::vector<std::string> &list) const {}
+        /// List identifiers of records contained in this Store (case-smashed). No-op for Stores that don't use string
+        /// IDs.
+        virtual void listIdentifier(std::vector<std::string>& list) const {}
 
         virtual size_t getSize() const = 0;
         virtual int getDynamicSize() const { return 0; }
-        virtual RecordId load(ESM::ESMReader &esm) = 0;
+        virtual RecordId load(ESM::ESMReader& esm) = 0;
 
         virtual bool eraseStatic(std::string_view id) { return false; }
         virtual void clearDynamic() {}
 
-        virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
+        virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) const {}
 
-        virtual RecordId read (ESM::ESMReader& reader, bool overrideOnly = false) { return RecordId(); }
+        virtual RecordId read(ESM::ESMReader& reader, bool overrideOnly = false) { return RecordId(); }
         ///< Read into dynamic storage
     };
 
@@ -83,18 +86,18 @@ namespace MWWorld
         iterator begin() const;
         iterator end() const;
 
-        void load(ESM::ESMReader &esm);
+        void load(ESM::ESMReader& esm);
 
         int getSize() const;
         void setUp();
 
-        const T *search(int index) const;
+        const T* search(int index) const;
 
         // calls `search` and throws an exception if not found
-        const T *find(int index) const;
+        const T* find(int index) const;
     };
 
-    template <class T, class Container=std::vector<T*>>
+    template <class T, class Container = std::vector<T*>>
     class SharedIterator
     {
         typedef typename Container::const_iterator Iter;
@@ -104,60 +107,59 @@ namespace MWWorld
     public:
         SharedIterator() {}
 
-        SharedIterator(const SharedIterator &orig)
-          : mIter(orig.mIter)
-        {}
+        SharedIterator(const SharedIterator& orig)
+            : mIter(orig.mIter)
+        {
+        }
 
-        SharedIterator(const Iter &iter)
-          : mIter(iter)
-        {}
+        SharedIterator(const Iter& iter)
+            : mIter(iter)
+        {
+        }
 
         SharedIterator& operator=(const SharedIterator&) = default;
 
-        SharedIterator &operator++() {
+        SharedIterator& operator++()
+        {
             ++mIter;
             return *this;
         }
 
-        SharedIterator operator++(int) {
+        SharedIterator operator++(int)
+        {
             SharedIterator iter = *this;
             ++mIter;
 
             return iter;
         }
 
-        SharedIterator &operator+=(int advance) {
+        SharedIterator& operator+=(int advance)
+        {
             mIter += advance;
             return *this;
         }
 
-        SharedIterator &operator--() {
+        SharedIterator& operator--()
+        {
             --mIter;
             return *this;
         }
 
-        SharedIterator operator--(int) {
+        SharedIterator operator--(int)
+        {
             SharedIterator iter = *this;
             --mIter;
 
             return iter;
         }
 
-        bool operator==(const SharedIterator &x) const {
-            return mIter == x.mIter;
-        }
+        bool operator==(const SharedIterator& x) const { return mIter == x.mIter; }
 
-        bool operator!=(const SharedIterator &x) const {
-            return !(*this == x);
-        }
+        bool operator!=(const SharedIterator& x) const { return !(*this == x); }
 
-        const T &operator*() const {
-            return **mIter;
-        }
+        const T& operator*() const { return **mIter; }
 
-        const T *operator->() const {
-            return &(**mIter);
-        }
+        const T* operator->() const { return &(**mIter); }
     };
 
     class ESMStore;
@@ -178,7 +180,7 @@ namespace MWWorld
 
     public:
         Store();
-        Store(const Store<T> &orig);
+        Store(const Store<T>& orig);
 
         typedef SharedIterator<T> iterator;
 
@@ -207,16 +209,16 @@ namespace MWWorld
         int getDynamicSize() const override;
 
         /// @note The record identifiers are listed in the order that the records were defined by the content files.
-        void listIdentifier(std::vector<std::string> &list) const override;
+        void listIdentifier(std::vector<std::string>& list) const override;
 
-        T *insert(const T &item, bool overrideOnly = false);
-        T *insertStatic(const T &item);
+        T* insert(const T& item, bool overrideOnly = false);
+        T* insertStatic(const T& item);
 
         bool eraseStatic(std::string_view id) override;
         bool erase(std::string_view id);
-        bool erase(const T &item);
+        bool erase(const T& item);
 
-        RecordId load(ESM::ESMReader &esm) override;
+        RecordId load(ESM::ESMReader& esm) override;
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const override;
         RecordId read(ESM::ESMReader& reader, bool overrideOnly = false) override;
     };
@@ -235,15 +237,15 @@ namespace MWWorld
 
         // Must be threadsafe! Called from terrain background loading threads.
         // Not a big deal here, since ESM::LandTexture can never be modified or inserted/erased
-        const ESM::LandTexture *search(size_t index, size_t plugin) const;
-        const ESM::LandTexture *find(size_t index, size_t plugin) const;
+        const ESM::LandTexture* search(size_t index, size_t plugin) const;
+        const ESM::LandTexture* find(size_t index, size_t plugin) const;
 
         void resize(std::size_t num);
 
         size_t getSize() const override;
         size_t getSize(size_t plugin) const;
 
-        RecordId load(ESM::ESMReader &esm) override;
+        RecordId load(ESM::ESMReader& esm) override;
 
         iterator begin(size_t plugin) const;
         iterator end(size_t plugin) const;
@@ -283,11 +285,12 @@ namespace MWWorld
 
         // Must be threadsafe! Called from terrain background loading threads.
         // Not a big deal here, since ESM::Land can never be modified or inserted/erased
-        const ESM::Land *search(int x, int y) const;
-        const ESM::Land *find(int x, int y) const;
+        const ESM::Land* search(int x, int y) const;
+        const ESM::Land* find(int x, int y) const;
 
-        RecordId load(ESM::ESMReader &esm) override;
+        RecordId load(ESM::ESMReader& esm) override;
         void setUp() override;
+
     private:
         bool mBuilt = false;
     };
@@ -297,7 +300,8 @@ namespace MWWorld
     {
         struct DynamicExtCmp
         {
-            bool operator()(const std::pair<int, int> &left, const std::pair<int, int> &right) const {
+            bool operator()(const std::pair<int, int>& left, const std::pair<int, int>& right) const
+            {
                 if (left.first == right.first && left.second == right.second)
                     return false;
 
@@ -311,36 +315,37 @@ namespace MWWorld
             }
         };
 
-        typedef std::unordered_map<std::string, ESM::Cell, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> DynamicInt;
-        typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp>    DynamicExt;
+        typedef std::unordered_map<std::string, ESM::Cell, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
+            DynamicInt;
+        typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp> DynamicExt;
 
-        DynamicInt      mInt;
-        DynamicExt      mExt;
+        DynamicInt mInt;
+        DynamicExt mExt;
 
-        std::vector<ESM::Cell *>    mSharedInt;
-        std::vector<ESM::Cell *>    mSharedExt;
+        std::vector<ESM::Cell*> mSharedInt;
+        std::vector<ESM::Cell*> mSharedExt;
 
         DynamicInt mDynamicInt;
         DynamicExt mDynamicExt;
 
-        const ESM::Cell *search(const ESM::Cell &cell) const;
+        const ESM::Cell* search(const ESM::Cell& cell) const;
         void handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell);
 
     public:
         typedef SharedIterator<ESM::Cell> iterator;
 
         const ESM::Cell* search(std::string_view id) const;
-        const ESM::Cell *search(int x, int y) const;
-        const ESM::Cell *searchStatic(int x, int y) const;
-        const ESM::Cell *searchOrCreate(int x, int y);
+        const ESM::Cell* search(int x, int y) const;
+        const ESM::Cell* searchStatic(int x, int y) const;
+        const ESM::Cell* searchOrCreate(int x, int y);
 
         const ESM::Cell* find(std::string_view id) const;
-        const ESM::Cell *find(int x, int y) const;
+        const ESM::Cell* find(int x, int y) const;
 
         void clearDynamic() override;
         void setUp() override;
 
-        RecordId load(ESM::ESMReader &esm) override;
+        RecordId load(ESM::ESMReader& esm) override;
 
         iterator intBegin() const;
         iterator intEnd() const;
@@ -357,11 +362,11 @@ namespace MWWorld
         size_t getExtSize() const;
         size_t getIntSize() const;
 
-        void listIdentifier(std::vector<std::string> &list) const override;
+        void listIdentifier(std::vector<std::string>& list) const override;
 
-        ESM::Cell *insert(const ESM::Cell &cell);
+        ESM::Cell* insert(const ESM::Cell& cell);
 
-        bool erase(const ESM::Cell &cell);
+        bool erase(const ESM::Cell& cell);
         bool erase(std::string_view id);
 
         bool erase(int x, int y);
@@ -371,7 +376,8 @@ namespace MWWorld
     class Store<ESM::Pathgrid> : public DynamicStore
     {
     private:
-        typedef std::unordered_map<std::string, ESM::Pathgrid, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Interior;
+        typedef std::unordered_map<std::string, ESM::Pathgrid, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
+            Interior;
         typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
 
         Interior mInt;
@@ -380,23 +386,21 @@ namespace MWWorld
         Store<ESM::Cell>* mCells;
 
     public:
-
         Store();
 
         void setCells(Store<ESM::Cell>& cells);
-        RecordId load(ESM::ESMReader &esm) override;
+        RecordId load(ESM::ESMReader& esm) override;
         size_t getSize() const override;
 
         void setUp() override;
 
-        const ESM::Pathgrid *search(int x, int y) const;
+        const ESM::Pathgrid* search(int x, int y) const;
         const ESM::Pathgrid* search(std::string_view name) const;
-        const ESM::Pathgrid *find(int x, int y) const;
+        const ESM::Pathgrid* find(int x, int y) const;
         const ESM::Pathgrid* find(std::string_view name) const;
-        const ESM::Pathgrid *search(const ESM::Cell &cell) const;
-        const ESM::Pathgrid *find(const ESM::Cell &cell) const;
+        const ESM::Pathgrid* search(const ESM::Cell& cell) const;
+        const ESM::Pathgrid* find(const ESM::Cell& cell) const;
     };
-
 
     template <>
     class Store<ESM::Skill> : public IndexedStore<ESM::Skill>
@@ -422,10 +426,10 @@ namespace MWWorld
 
         Store();
 
-        const ESM::Attribute *search(size_t index) const;
+        const ESM::Attribute* search(size_t index) const;
 
         // calls `search` and throws an exception if not found
-        const ESM::Attribute *find(size_t index) const;
+        const ESM::Attribute* find(size_t index) const;
 
         void setUp();
 
@@ -444,14 +448,14 @@ namespace MWWorld
 
         Store();
 
-        const ESM::WeaponType *search(const int id) const;
+        const ESM::WeaponType* search(const int id) const;
 
         // calls `search` and throws an exception if not found
-        const ESM::WeaponType *find(const int id) const;
+        const ESM::WeaponType* find(const int id) const;
 
-        RecordId load(ESM::ESMReader &esm) override { return RecordId({}, false); }
+        RecordId load(ESM::ESMReader& esm) override { return RecordId({}, false); }
 
-        ESM::WeaponType* insert(const ESM::WeaponType &weaponType);
+        ESM::WeaponType* insert(const ESM::WeaponType& weaponType);
 
         void setUp() override;
 
@@ -463,7 +467,8 @@ namespace MWWorld
     template <>
     class Store<ESM::Dialogue> : public DynamicStore
     {
-        typedef std::unordered_map<std::string, ESM::Dialogue, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Static;
+        typedef std::unordered_map<std::string, ESM::Dialogue, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
+            Static;
         Static mStatic;
         /// @par mShared usually preserves the record order as it came from the content files (this
         /// is relevant for the spell autocalc code and selection order
@@ -491,13 +496,13 @@ namespace MWWorld
 
         bool eraseStatic(std::string_view id) override;
 
-        RecordId load(ESM::ESMReader &esm) override;
+        RecordId load(ESM::ESMReader& esm) override;
 
-        void listIdentifier(std::vector<std::string> &list) const override;
+        void listIdentifier(std::vector<std::string>& list) const override;
 
         const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() const;
     };
 
-} //end namespace
+} // end namespace
 
 #endif

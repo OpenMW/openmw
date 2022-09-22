@@ -36,66 +36,64 @@ namespace CSVWorld
 
     class ScriptSubView : public CSVDoc::SubView
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            ScriptEdit *mEditor;
-            CSMDoc::Document& mDocument;
-            CSMWorld::IdTable *mModel;
-            int mColumn;
-            int mIdColumn;
-            int mStateColumn;
-            TableBottomBox *mBottom;
-            RecordButtonBar *mButtons;
-            CSMWorld::CommandDispatcher mCommandDispatcher;
-            QVBoxLayout mLayout;
-            QSplitter *mMain;
-            ScriptErrorTable *mErrors;
-            QTimer *mCompileDelay;
-            int mErrorHeight;
+        ScriptEdit* mEditor;
+        CSMDoc::Document& mDocument;
+        CSMWorld::IdTable* mModel;
+        int mColumn;
+        int mIdColumn;
+        int mStateColumn;
+        TableBottomBox* mBottom;
+        RecordButtonBar* mButtons;
+        CSMWorld::CommandDispatcher mCommandDispatcher;
+        QVBoxLayout mLayout;
+        QSplitter* mMain;
+        ScriptErrorTable* mErrors;
+        QTimer* mCompileDelay;
+        int mErrorHeight;
 
-        private:
+    private:
+        void addButtonBar();
 
-            void addButtonBar();
+        void recompile();
 
-            void recompile();
+        bool isDeleted() const;
 
-            bool isDeleted() const;
+        void updateDeletedState();
 
-            void updateDeletedState();
+        void adjustSplitter();
 
-            void adjustSplitter();
+    public:
+        ScriptSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-        public:
+        void setEditLock(bool locked) override;
 
-            ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
+        void useHint(const std::string& hint) override;
 
-            void setEditLock (bool locked) override;
+        void setStatusBar(bool show) override;
 
-            void useHint (const std::string& hint) override;
+    public slots:
 
-            void setStatusBar (bool show) override;
+        void textChanged();
 
-        public slots:
+        void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void textChanged();
+        void rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end);
 
-            void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+    private slots:
 
-            void rowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+        void settingChanged(const CSMPrefs::Setting* setting);
 
-        private slots:
+        void updateStatusBar();
 
-            void settingChanged (const CSMPrefs::Setting *setting);
+        void switchToRow(int row);
 
-            void updateStatusBar();
+        void switchToId(const std::string& id);
 
-            void switchToRow (int row);
+        void highlightError(int line, int column);
 
-            void switchToId (const std::string& id);
-
-            void highlightError (int line, int column);
-
-            void updateRequest();
+        void updateRequest();
     };
 }
 

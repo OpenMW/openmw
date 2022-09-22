@@ -1,8 +1,8 @@
 #include "metadata.hpp"
 
-#include <components/esm3/loadtes3.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/loadtes3.hpp>
 
 void CSMWorld::MetaData::blank()
 {
@@ -13,16 +13,16 @@ void CSMWorld::MetaData::blank()
     mDescription.clear();
 }
 
-void CSMWorld::MetaData::load (ESM::ESMReader& esm)
+void CSMWorld::MetaData::load(ESM::ESMReader& esm)
 {
     mFormat = esm.getHeader().mFormat;
     mAuthor = esm.getHeader().mData.author;
     mDescription = esm.getHeader().mData.desc;
 }
 
-void CSMWorld::MetaData::save (ESM::ESMWriter& esm) const
+void CSMWorld::MetaData::save(ESM::ESMWriter& esm) const
 {
-    esm.setFormat (mFormat);
-    esm.setAuthor (mAuthor);
-    esm.setDescription (mDescription);
+    esm.setFormat(mFormat);
+    esm.setAuthor(mAuthor);
+    esm.setDescription(mDescription);
 }

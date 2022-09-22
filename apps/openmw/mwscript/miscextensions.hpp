@@ -14,11 +14,9 @@ namespace Interpreter
 namespace MWScript
 {
     namespace Misc
-    {        
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+    {
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 
 #endif
-
-

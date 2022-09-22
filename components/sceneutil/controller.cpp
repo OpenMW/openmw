@@ -12,10 +12,7 @@
 namespace SceneUtil
 {
 
-
-    Controller::Controller()
-    {
-    }
+    Controller::Controller() {}
 
     bool Controller::hasInput() const
     {
@@ -50,11 +47,9 @@ namespace SceneUtil
         return mFunction;
     }
 
-    FrameTimeSource::FrameTimeSource()
-    {
-    }
+    FrameTimeSource::FrameTimeSource() {}
 
-    float FrameTimeSource::getValue(osg::NodeVisitor *nv)
+    float FrameTimeSource::getValue(osg::NodeVisitor* nv)
     {
         return nv->getFrameStamp()->getSimulationTime();
     }
@@ -62,25 +57,24 @@ namespace SceneUtil
     ControllerVisitor::ControllerVisitor()
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
     {
-
     }
 
-    void ControllerVisitor::apply(osg::Node &node)
+    void ControllerVisitor::apply(osg::Node& node)
     {
         applyNode(node);
     }
 
-    void ControllerVisitor::apply(osg::MatrixTransform &node)
+    void ControllerVisitor::apply(osg::MatrixTransform& node)
     {
         applyNode(node);
     }
 
-    void ControllerVisitor::apply(osg::Geometry &node)
+    void ControllerVisitor::apply(osg::Geometry& node)
     {
         applyNode(node);
     }
 
-    void ControllerVisitor::applyNode(osg::Node &node)
+    void ControllerVisitor::applyNode(osg::Node& node)
     {
         osg::Callback* callback = node.getUpdateCallback();
         while (callback)
@@ -89,7 +83,7 @@ namespace SceneUtil
                 visit(node, *ctrl);
             if (CompositeStateSetUpdater* composite = dynamic_cast<CompositeStateSetUpdater*>(callback))
             {
-                for (unsigned int i=0; i<composite->getNumControllers(); ++i)
+                for (unsigned int i = 0; i < composite->getNumControllers(); ++i)
                 {
                     StateSetUpdater* statesetcontroller = composite->getController(i);
                     if (Controller* ctrl = dynamic_cast<Controller*>(statesetcontroller))
@@ -115,7 +109,7 @@ namespace SceneUtil
     {
     }
 
-    void AssignControllerSourcesVisitor::visit(osg::Node&, Controller &ctrl)
+    void AssignControllerSourcesVisitor::visit(osg::Node&, Controller& ctrl)
     {
         if (!ctrl.getSource())
             ctrl.setSource(mToAssign);
@@ -131,7 +125,7 @@ namespace SceneUtil
     {
     }
 
-    void ForceControllerSourcesVisitor::visit(osg::Node&, Controller &ctrl)
+    void ForceControllerSourcesVisitor::visit(osg::Node&, Controller& ctrl)
     {
         ctrl.setSource(mToAssign);
     }
@@ -142,7 +136,7 @@ namespace SceneUtil
     {
     }
 
-    void FindMaxControllerLengthVisitor::visit(osg::Node &, Controller &ctrl)
+    void FindMaxControllerLengthVisitor::visit(osg::Node&, Controller& ctrl)
     {
         if (ctrl.getFunction())
             mMaxLength = std::max(mMaxLength, ctrl.getFunction()->getMaximum());

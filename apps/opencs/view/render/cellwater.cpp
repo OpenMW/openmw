@@ -21,8 +21,8 @@ namespace CSVRender
 {
     const int CellWater::CellSize = ESM::Land::REAL_SIZE;
 
-    CellWater::CellWater(CSMWorld::Data& data, osg::Group* cellNode, const std::string& id,
-        const CSMWorld::CellCoordinates& cellCoords)
+    CellWater::CellWater(
+        CSMWorld::Data& data, osg::Group* cellNode, const std::string& id, const CSMWorld::CellCoordinates& cellCoords)
         : mData(data)
         , mId(id)
         , mParentNode(cellNode)
@@ -34,8 +34,8 @@ namespace CSVRender
         , mHasWater(false)
     {
         mWaterTransform = new osg::PositionAttitudeTransform();
-        mWaterTransform->setPosition(osg::Vec3f(cellCoords.getX() * CellSize + CellSize / 2.f,
-            cellCoords.getY() * CellSize + CellSize / 2.f, 0));
+        mWaterTransform->setPosition(osg::Vec3f(
+            cellCoords.getX() * CellSize + CellSize / 2.f, cellCoords.getY() * CellSize + CellSize / 2.f, 0));
 
         mWaterTransform->setNodeMask(Mask_Water);
         mParentNode->addChild(mWaterTransform);
@@ -174,7 +174,6 @@ namespace CSVRender
         waterTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 
         mWaterGeometry->getStateSet()->setTextureAttributeAndModes(0, waterTexture, osg::StateAttribute::ON);
-
 
         mWaterGroup->addChild(mWaterGeometry);
     }

@@ -5,7 +5,10 @@
 
 #include <components/settings/settings.hpp>
 
-namespace Files { struct ConfigurationManager; }
+namespace Files
+{
+    struct ConfigurationManager;
+}
 
 namespace Launcher
 {
@@ -16,7 +19,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        explicit GraphicsPage(QWidget *parent = nullptr);
+        explicit GraphicsPage(QWidget* parent = nullptr);
 
         void saveSettings();
         bool loadSettings();

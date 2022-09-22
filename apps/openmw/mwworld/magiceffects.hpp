@@ -10,8 +10,8 @@ namespace ESM
 
 namespace MWWorld
 {
-    void convertMagicEffects(ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory,
-        ESM::NpcStats* npcStats = nullptr);
+    void convertMagicEffects(
+        ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory, ESM::NpcStats* npcStats = nullptr);
 
     void convertStats(ESM::CreatureStats& creatureStats);
 }

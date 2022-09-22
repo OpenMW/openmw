@@ -15,24 +15,25 @@ namespace ESM
         // <Effect Id, Base value, Modifier>
         std::map<int, std::pair<int, float>> mEffects;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 
     struct SummonKey
     {
-        SummonKey(int effectId, const std::string& sourceId, int index):
-            mEffectId(effectId), mSourceId(sourceId), mEffectIndex(index)
-        {}
-
-        bool operator==(const SummonKey &other) const
+        SummonKey(int effectId, const std::string& sourceId, int index)
+            : mEffectId(effectId)
+            , mSourceId(sourceId)
+            , mEffectIndex(index)
         {
-            return mEffectId == other.mEffectId &&
-                    mSourceId == other.mSourceId &&
-                    mEffectIndex == other.mEffectIndex;
         }
 
-        bool operator<(const SummonKey &other) const
+        bool operator==(const SummonKey& other) const
+        {
+            return mEffectId == other.mEffectId && mSourceId == other.mSourceId && mEffectIndex == other.mEffectIndex;
+        }
+
+        bool operator<(const SummonKey& other) const
         {
             if (mEffectId < other.mEffectId)
                 return true;

@@ -26,14 +26,14 @@ namespace SceneUtil
         mType = type;
     }
 
-    void LightController::operator ()(SceneUtil::LightSource* node, osg::NodeVisitor* nv)
+    void LightController::operator()(SceneUtil::LightSource* node, osg::NodeVisitor* nv)
     {
         double time = nv->getFrameStamp()->getSimulationTime();
         if (mStartTime == 0)
             mStartTime = time;
 
         // disabled early out, light state needs to be set every frame regardless of change, due to the double buffering
-        //if (time == mLastTime)
+        // if (time == mLastTime)
         //    return;
 
         if (mType == LT_Normal)
@@ -45,7 +45,8 @@ namespace SceneUtil
 
         // Updating flickering at 15 FPS like vanilla.
         constexpr float updateRate = 15.f;
-        mTicksToAdvance = static_cast<float>(time - mStartTime - mLastTime) * updateRate * 0.25f + mTicksToAdvance * 0.75f;
+        mTicksToAdvance
+            = static_cast<float>(time - mStartTime - mLastTime) * updateRate * 0.25f + mTicksToAdvance * 0.75f;
         mLastTime = time - mStartTime;
 
         float speed = (mType == LT_Flicker || mType == LT_Pulse) ? 0.1f : 0.05f;

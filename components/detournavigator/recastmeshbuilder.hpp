@@ -72,7 +72,8 @@ namespace DetourNavigator
 
         void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 
-        void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform, btTriangleCallback&& callback);
+        void addObject(
+            const btHeightfieldTerrainShape& shape, const btTransform& transform, btTriangleCallback&& callback);
     };
 
     Mesh makeMesh(std::vector<RecastMeshTriangle>&& triangles, const osg::Vec3f& shift = osg::Vec3f());

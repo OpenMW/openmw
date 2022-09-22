@@ -19,55 +19,49 @@ namespace CSVRender
 
     class CellArrowTag : public TagBase
     {
-            CellArrow *mArrow;
+        CellArrow* mArrow;
 
-        public:
+    public:
+        CellArrowTag(CellArrow* arrow);
 
-            CellArrowTag (CellArrow *arrow);
+        CellArrow* getCellArrow() const;
 
-            CellArrow *getCellArrow() const;
-
-            QString getToolTip(bool hideBasics, const WorldspaceHitResult& hit) const override;
+        QString getToolTip(bool hideBasics, const WorldspaceHitResult& hit) const override;
     };
-
 
     class CellArrow
     {
-        public:
+    public:
+        enum Direction
+        {
+            Direction_North = 1,
+            Direction_West = 2,
+            Direction_South = 4,
+            Direction_East = 8
+        };
 
-            enum Direction
-            {
-                Direction_North = 1,
-                Direction_West = 2,
-                Direction_South = 4,
-                Direction_East = 8
-            };
+    private:
+        // not implemented
+        CellArrow(const CellArrow&);
+        CellArrow& operator=(const CellArrow&);
 
-        private:
+        Direction mDirection;
+        osg::Group* mParentNode;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
+        CSMWorld::CellCoordinates mCoordinates;
 
-            // not implemented
-            CellArrow (const CellArrow&);
-            CellArrow& operator= (const CellArrow&);
+        void adjustTransform();
 
-            Direction mDirection;
-            osg::Group* mParentNode;
-            osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
-            CSMWorld::CellCoordinates mCoordinates;
+        void buildShape();
 
-            void adjustTransform();
+    public:
+        CellArrow(osg::Group* cellNode, Direction direction, const CSMWorld::CellCoordinates& coordinates);
 
-            void buildShape();
+        ~CellArrow();
 
-        public:
+        CSMWorld::CellCoordinates getCoordinates() const;
 
-            CellArrow (osg::Group *cellNode, Direction direction,
-                const CSMWorld::CellCoordinates& coordinates);
-
-            ~CellArrow();
-
-            CSMWorld::CellCoordinates getCoordinates() const;
-
-            Direction getDirection() const;
+        Direction getDirection() const;
     };
 }
 

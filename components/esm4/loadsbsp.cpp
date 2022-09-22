@@ -35,14 +35,16 @@ void ESM4::SubSpace::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
             case ESM4::SUB_DNAM:
             {
                 reader.get(mDimension.x);
@@ -56,10 +58,10 @@ void ESM4::SubSpace::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::SubSpace::save(ESM4::Writer& writer) const
+// void ESM4::SubSpace::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::SubSpace::blank()
+// void ESM4::SubSpace::blank()
 //{
-//}
+// }

@@ -14,15 +14,14 @@ namespace CSVPrefs
 {
     class Page : public PageBase
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QGridLayout *mGrid;
+        QGridLayout* mGrid;
 
-        public:
+    public:
+        Page(CSMPrefs::Category& category, QWidget* parent);
 
-            Page (CSMPrefs::Category& category, QWidget *parent);
-
-            void addSetting (CSMPrefs::Setting *setting);
+        void addSetting(CSMPrefs::Setting* setting);
     };
 }
 

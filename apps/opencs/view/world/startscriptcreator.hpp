@@ -21,55 +21,45 @@ namespace CSVWorld
     {
         Q_OBJECT
 
-        CSVWidget::DropLineEdit *mScript;
+        CSVWidget::DropLineEdit* mScript;
 
-        private:
+    private:
+        /// \return script ID entered by user.
+        std::string getId() const override;
 
-            /// \return script ID entered by user.
-            std::string getId() const override;
+        /// \return reference to table containing start scripts.
+        CSMWorld::IdTable& getStartScriptsTable() const;
 
-            /// \return reference to table containing start scripts.
-            CSMWorld::IdTable& getStartScriptsTable() const;
+    public:
+        StartScriptCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
+            CSMWorld::IdCompletionManager& completionManager);
 
-        public:
+        /// \brief Set script ID input widget to ID of record to be cloned.
+        /// \param originId Script ID to be cloned.
+        /// \param type Type of record to be cloned.
+        void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 
-            StartScriptCreator(
-                CSMWorld::Data& data,
-                QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id,
-                CSMWorld::IdCompletionManager& completionManager);
+        /// \return Error description for current user input.
+        std::string getErrors() const override;
 
-            /// \brief Set script ID input widget to ID of record to be cloned.
-            /// \param originId Script ID to be cloned.
-            /// \param type Type of record to be cloned.
-            void cloneMode(
-                const std::string& originId,
-                const CSMWorld::UniversalId::Type type) override;
+        /// \brief Set focus to script ID input widget.
+        void focus() override;
 
-            /// \return Error description for current user input.
-            std::string getErrors() const override;
+        /// \brief Clear script ID input widget.
+        void reset() override;
 
-            /// \brief Set focus to script ID input widget.
-            void focus() override;
+    private slots:
 
-            /// \brief Clear script ID input widget.
-            void reset() override;
+        /// \brief Check user input for any errors.
+        void scriptChanged();
+    };
 
-        private slots:
-
-            /// \brief Check user input for any errors.
-            void scriptChanged();
-     };
-
-     /// \brief Creator factory for start script record creator.
-     class StartScriptCreatorFactory : public CreatorFactoryBase
-     {
-        public:
-
-            Creator *makeCreator(
-                CSMDoc::Document& document,
-                const CSMWorld::UniversalId& id) const override;
-     };
+    /// \brief Creator factory for start script record creator.
+    class StartScriptCreatorFactory : public CreatorFactoryBase
+    {
+    public:
+        Creator* makeCreator(CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
+    };
 }
 
 #endif // STARTSCRIPTCREATOR_HPP

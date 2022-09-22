@@ -1,11 +1,13 @@
 #include <components/debug/debugging.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/esm3/readerscache.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/load.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/platform/platform.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/foreachbulletobject.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -15,8 +17,6 @@
 #include <components/version/version.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
-#include <components/esm3/readerscache.hpp>
-#include <components/platform/platform.hpp>
 
 #include <boost/program_options.hpp>
 
@@ -26,7 +26,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
 
 namespace
 {
@@ -44,33 +43,41 @@ namespace
 
         addOption("version", "print version information and quit");
 
-        addOption("data", bpo::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")
-                ->multitoken()->composing(), "set data directories (later directories have higher priority)");
+        addOption("data",
+            bpo::value<Files::MaybeQuotedPathContainer>()
+                ->default_value(Files::MaybeQuotedPathContainer(), "data")
+                ->multitoken()
+                ->composing(),
+            "set data directories (later directories have higher priority)");
 
-        addOption("data-local", bpo::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""),
-                "set local data directory (highest priority)");
+        addOption("data-local",
+            bpo::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(
+                Files::MaybeQuotedPathContainer::value_type(), ""),
+            "set local data directory (highest priority)");
 
-        addOption("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
-                ->multitoken()->composing(), "set fallback BSA archives (later archives have higher priority)");
+        addOption("fallback-archive",
+            bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")->multitoken()->composing(),
+            "set fallback BSA archives (later archives have higher priority)");
 
-        addOption("resources", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
-                "set resources directory");
+        addOption("resources",
+            bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
+            "set resources directory");
 
-        addOption("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
-                ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon/omwscripts");
+        addOption("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),
+            "content file(s): esm/esp, or omwgame/omwaddon/omwscripts");
 
-        addOption("fs-strict", bpo::value<bool>()->implicit_value(true)
-                ->default_value(false), "strict file system handling (no case folding)");
+        addOption("fs-strict", bpo::value<bool>()->implicit_value(true)->default_value(false),
+            "strict file system handling (no case folding)");
 
-        addOption("encoding", bpo::value<std::string>()->
-                default_value("win1252"),
-                "Character encoding used in OpenMW game messages:\n"
-                "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
-                "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-                "\n\twin1252 - Western European (Latin) alphabet, used by default");
+        addOption("encoding", bpo::value<std::string>()->default_value("win1252"),
+            "Character encoding used in OpenMW game messages:\n"
+            "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
+            "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+            "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+            "\n\twin1252 - Western European (Latin) alphabet, used by default");
 
-        addOption("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
-                ->multitoken()->composing(), "fallback values");
+        addOption("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")->multitoken()->composing(),
+            "fallback values");
         ;
         Files::ConfigurationManager::addCommonOptions(result);
 
@@ -81,7 +88,7 @@ namespace
     {
         const float (&mValue)[3];
 
-        friend std::ostream& operator <<(std::ostream& stream, const WriteArray& value)
+        friend std::ostream& operator<<(std::ostream& stream, const WriteArray& value)
         {
             for (std::size_t i = 0; i < 2; ++i)
                 stream << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.mValue[i] << ", ";
@@ -104,14 +111,13 @@ namespace
         return buffer;
     }
 
-    int runBulletObjectTool(int argc, char *argv[])
+    int runBulletObjectTool(int argc, char* argv[])
     {
         Platform::init();
 
         bpo::options_description desc = makeOptionsDescription();
 
-        bpo::parsed_options options = bpo::command_line_parser(argc, argv)
-            .options(desc).allow_unregistered().run();
+        bpo::parsed_options options = bpo::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
         bpo::variables_map variables;
 
         bpo::store(options, variables);
@@ -168,25 +174,28 @@ namespace
         query.mLoadGameSettings = true;
         query.mLoadLands = true;
         query.mLoadStatics = true;
-        const EsmLoader::EsmData esmData = EsmLoader::loadEsmData(query, contentFiles, fileCollections, readers, &encoder);
+        const EsmLoader::EsmData esmData
+            = EsmLoader::loadEsmData(query, contentFiles, fileCollections, readers, &encoder);
 
         Resource::ImageManager imageManager(&vfs);
         Resource::NifFileManager nifFileManager(&vfs);
         Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager);
         Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager);
 
-        Resource::forEachBulletObject(readers, vfs, bulletShapeManager, esmData,
-            [] (const ESM::Cell& cell, const Resource::BulletObject& object)
-            {
+        Resource::forEachBulletObject(
+            readers, vfs, bulletShapeManager, esmData, [](const ESM::Cell& cell, const Resource::BulletObject& object) {
                 Log(Debug::Verbose) << "Found bullet object in " << (cell.isExterior() ? "exterior" : "interior")
-                    << " cell \"" << cell.getDescription() << "\":"
-                    << " fileName=\"" << object.mShape->mFileName << '"'
-                    << " fileHash=" << toHex(object.mShape->mFileHash)
-                    << " collisionShape=" << std::boolalpha << (object.mShape->mCollisionShape == nullptr)
-                    << " avoidCollisionShape=" << std::boolalpha << (object.mShape->mAvoidCollisionShape == nullptr)
-                    << " position=(" << WriteArray {object.mPosition.pos} << ')'
-                    << " rotation=(" << WriteArray {object.mPosition.rot} << ')'
-                    << " scale=" << std::setprecision(std::numeric_limits<float>::max_exponent10) << object.mScale;
+                                    << " cell \"" << cell.getDescription() << "\":"
+                                    << " fileName=\"" << object.mShape->mFileName << '"'
+                                    << " fileHash=" << toHex(object.mShape->mFileHash)
+                                    << " collisionShape=" << std::boolalpha
+                                    << (object.mShape->mCollisionShape == nullptr)
+                                    << " avoidCollisionShape=" << std::boolalpha
+                                    << (object.mShape->mAvoidCollisionShape == nullptr) << " position=("
+                                    << WriteArray{ object.mPosition.pos } << ')' << " rotation=("
+                                    << WriteArray{ object.mPosition.rot } << ')'
+                                    << " scale=" << std::setprecision(std::numeric_limits<float>::max_exponent10)
+                                    << object.mScale;
             });
 
         Log(Debug::Info) << "Done";
@@ -195,7 +204,7 @@ namespace
     }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     return wrapApplication(runBulletObjectTool, argc, argv, "BulletObjectTool");
 }

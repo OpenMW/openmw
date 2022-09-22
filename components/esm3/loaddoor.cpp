@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Door::load(ESMReader &esm, bool &isDeleted)
+    void Door::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -49,7 +49,7 @@ namespace ESM
             esm.fail("Missing NAME subrecord");
     }
 
-    void Door::save(ESMWriter &esm, bool isDeleted) const
+    void Door::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

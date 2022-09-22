@@ -5,12 +5,12 @@
 
 namespace MWGui
 {
-    class WindowPinnableBase: public WindowBase
+    class WindowPinnableBase : public WindowBase
     {
     public:
         WindowPinnableBase(const std::string& parLayout);
         bool pinned() { return mPinned; }
-        void setPinned (bool pinned);
+        void setPinned(bool pinned);
         void setPinButtonVisible(bool visible);
 
     private:

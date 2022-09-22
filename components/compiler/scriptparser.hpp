@@ -1,10 +1,10 @@
 #ifndef COMPILER_SCRIPTPARSER_H_INCLUDED
 #define COMPILER_SCRIPTPARSER_H_INCLUDED
 
-#include "parser.hpp"
-#include "lineparser.hpp"
 #include "controlparser.hpp"
+#include "lineparser.hpp"
 #include "output.hpp"
+#include "parser.hpp"
 
 namespace Compiler
 {
@@ -14,40 +14,36 @@ namespace Compiler
 
     class ScriptParser : public Parser
     {
-            Output mOutput;
-            LineParser mLineParser;
-            ControlParser mControlParser;
-            bool mEnd;
+        Output mOutput;
+        LineParser mLineParser;
+        ControlParser mControlParser;
+        bool mEnd;
 
-        public:
+    public:
+        /// \param end of script is marked by end keyword.
+        ScriptParser(ErrorHandler& errorHandler, const Context& context, Locals& locals, bool end = false);
 
-            /// \param end of script is marked by end keyword.
-            ScriptParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
-                bool end = false);
+        void getCode(std::vector<Interpreter::Type_Code>& code) const;
+        ///< store generated code in \a code.
 
-            void getCode (std::vector<Interpreter::Type_Code>& code) const;
-            ///< store generated code in \a code.
+        bool parseName(const std::string& name, const TokenLoc& loc, Scanner& scanner) override;
+        ///< Handle a name token.
+        /// \return fetch another token?
 
-            bool parseName (const std::string& name, const TokenLoc& loc,
-                Scanner& scanner) override;
-            ///< Handle a name token.
-            /// \return fetch another token?
+        bool parseKeyword(int keyword, const TokenLoc& loc, Scanner& scanner) override;
+        ///< Handle a keyword token.
+        /// \return fetch another token?
 
-            bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner) override;
-            ///< Handle a keyword token.
-            /// \return fetch another token?
+        bool parseSpecial(int code, const TokenLoc& loc, Scanner& scanner) override;
+        ///< Handle a special character token.
+        /// \return fetch another token?
 
-            bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner) override;
-            ///< Handle a special character token.
-            /// \return fetch another token?
+        void parseEOF(Scanner& scanner) override;
+        ///< Handle EOF token.
 
-            void parseEOF (Scanner& scanner) override;
-            ///< Handle EOF token.
-
-            void reset() override;
-            ///< Reset parser to clean state.
+        void reset() override;
+        ///< Reset parser to clean state.
     };
 }
 
 #endif
-

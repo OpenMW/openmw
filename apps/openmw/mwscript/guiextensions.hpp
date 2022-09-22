@@ -15,10 +15,9 @@ namespace MWScript
 {
     /// \brief GUI-related script functionality
     namespace Gui
-    {        
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+    {
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 
 #endif
-

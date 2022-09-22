@@ -6,112 +6,113 @@
 #include <QVariant>
 
 #include <components/esm3/loadalch.hpp>
-#include <components/esm3/loadench.hpp>
 #include <components/esm3/loadappa.hpp>
-#include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "columnbase.hpp"
+#include "nestedtablewrapper.hpp"
 #include "record.hpp"
+#include "refidadapter.hpp"
 #include "refiddata.hpp"
 #include "universalid.hpp"
-#include "refidadapter.hpp"
-#include "nestedtablewrapper.hpp"
 
 namespace CSMWorld
 {
     struct BaseColumns
     {
-        const RefIdColumn *mId;
-        const RefIdColumn *mModified;
-        const RefIdColumn *mType;
-        const RefIdColumn *mBlocked;
+        const RefIdColumn* mId;
+        const RefIdColumn* mModified;
+        const RefIdColumn* mType;
+        const RefIdColumn* mBlocked;
 
-        BaseColumns () : mId(nullptr)
-        , mModified(nullptr)
-        , mType(nullptr)
-        , mBlocked(nullptr) {}
+        BaseColumns()
+            : mId(nullptr)
+            , mModified(nullptr)
+            , mType(nullptr)
+            , mBlocked(nullptr)
+        {
+        }
     };
 
     /// \brief Base adapter for all refereceable record types
     /// Adapters that can handle nested tables, needs to return valid qvariant for parent columns
-    template<typename RecordT>
+    template <typename RecordT>
     class BaseRefIdAdapter : public RefIdAdapter
     {
-            UniversalId::Type mType;
-            BaseColumns mBase;
+        UniversalId::Type mType;
+        BaseColumns mBase;
 
-        public:
+    public:
+        BaseRefIdAdapter(UniversalId::Type type, const BaseColumns& base);
 
-            BaseRefIdAdapter (UniversalId::Type type, const BaseColumns& base);
+        std::string getId(const RecordBase& record) const override;
 
-            std::string getId (const RecordBase& record) const override;
+        void setId(RecordBase& record, const std::string& id) override;
 
-            void setId (RecordBase& record, const std::string& id) override;
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index) const override;
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
 
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
-
-            UniversalId::Type getType() const;
+        UniversalId::Type getType() const;
     };
 
-    template<typename RecordT>
-    BaseRefIdAdapter<RecordT>::BaseRefIdAdapter (UniversalId::Type type, const BaseColumns& base)
-    : mType (type), mBase (base)
-    {}
-
-    template<typename RecordT>
-    void BaseRefIdAdapter<RecordT>::setId (RecordBase& record, const std::string& id)
+    template <typename RecordT>
+    BaseRefIdAdapter<RecordT>::BaseRefIdAdapter(UniversalId::Type type, const BaseColumns& base)
+        : mType(type)
+        , mBase(base)
     {
-        (dynamic_cast<Record<RecordT>&> (record).get().mId) = id;
     }
 
-    template<typename RecordT>
-    std::string BaseRefIdAdapter<RecordT>::getId (const RecordBase& record) const
+    template <typename RecordT>
+    void BaseRefIdAdapter<RecordT>::setId(RecordBase& record, const std::string& id)
     {
-        return dynamic_cast<const Record<RecordT>&> (record).get().mId;
+        (dynamic_cast<Record<RecordT>&>(record).get().mId) = id;
     }
 
-    template<typename RecordT>
-    QVariant BaseRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
+    template <typename RecordT>
+    std::string BaseRefIdAdapter<RecordT>::getId(const RecordBase& record) const
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, mType)));
+        return dynamic_cast<const Record<RecordT>&>(record).get().mId;
+    }
 
-        if (column==mBase.mId)
-            return QString::fromUtf8 (record.get().mId.c_str());
+    template <typename RecordT>
+    QVariant BaseRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
+    {
+        const Record<RecordT>& record
+            = static_cast<const Record<RecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
-        if (column==mBase.mModified)
+        if (column == mBase.mId)
+            return QString::fromUtf8(record.get().mId.c_str());
+
+        if (column == mBase.mModified)
         {
-            if (record.mState==Record<RecordT>::State_Erased)
-                return static_cast<int> (Record<RecordT>::State_Deleted);
+            if (record.mState == Record<RecordT>::State_Erased)
+                return static_cast<int>(Record<RecordT>::State_Deleted);
 
-            return static_cast<int> (record.mState);
+            return static_cast<int>(record.mState);
         }
 
-        if (column==mBase.mType)
-            return static_cast<int> (mType);
+        if (column == mBase.mType)
+            return static_cast<int>(mType);
 
-        if (column==mBase.mBlocked)
+        if (column == mBase.mBlocked)
             return (record.get().mRecordFlags & ESM::FLAG_Blocked) != 0;
 
         return QVariant();
     }
 
-    template<typename RecordT>
-    void BaseRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
-        const QVariant& value) const
+    template <typename RecordT>
+    void BaseRefIdAdapter<RecordT>::setData(
+        const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, mType)));
+        Record<RecordT>& record = static_cast<Record<RecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
-        if (column==mBase.mModified)
-            record.mState = static_cast<RecordBase::State> (value.toInt());
-        else if (column==mBase.mBlocked)
+        if (column == mBase.mModified)
+            record.mState = static_cast<RecordBase::State>(value.toInt());
+        else if (column == mBase.mBlocked)
         {
             RecordT record2 = record.get();
 
@@ -124,7 +125,7 @@ namespace CSMWorld
         }
     }
 
-    template<typename RecordT>
+    template <typename RecordT>
     UniversalId::Type BaseRefIdAdapter<RecordT>::getType() const
     {
         return mType;
@@ -141,62 +142,65 @@ namespace CSMWorld
 
     struct ModelColumns : public BaseColumns
     {
-        const RefIdColumn *mModel;
-        const RefIdColumn *mPersistence;
+        const RefIdColumn* mModel;
+        const RefIdColumn* mPersistence;
 
-        ModelColumns (const BaseColumns& base) : BaseColumns (base), mModel(nullptr), mPersistence(nullptr) {}
+        ModelColumns(const BaseColumns& base)
+            : BaseColumns(base)
+            , mModel(nullptr)
+            , mPersistence(nullptr)
+        {
+        }
     };
 
     /// \brief Adapter for IDs with models (all but levelled lists)
-    template<typename RecordT>
+    template <typename RecordT>
     class ModelRefIdAdapter : public BaseRefIdAdapter<RecordT>
     {
-            ModelColumns mModel;
+        ModelColumns mModel;
 
-        public:
+    public:
+        ModelRefIdAdapter(UniversalId::Type type, const ModelColumns& columns);
 
-            ModelRefIdAdapter (UniversalId::Type type, const ModelColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
-    template<typename RecordT>
-    ModelRefIdAdapter<RecordT>::ModelRefIdAdapter (UniversalId::Type type, const ModelColumns& columns)
-    : BaseRefIdAdapter<RecordT> (type, columns), mModel (columns)
-    {}
-
-    template<typename RecordT>
-    QVariant ModelRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
+    template <typename RecordT>
+    ModelRefIdAdapter<RecordT>::ModelRefIdAdapter(UniversalId::Type type, const ModelColumns& columns)
+        : BaseRefIdAdapter<RecordT>(type, columns)
+        , mModel(columns)
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
-
-        if (column==mModel.mModel)
-            return QString::fromUtf8 (record.get().mModel.c_str());
-
-        if (column==mModel.mPersistence)
-            return (record.get().mRecordFlags & ESM::FLAG_Persistent) != 0;
-
-        return BaseRefIdAdapter<RecordT>::getData (column, data, index);
     }
 
-    template<typename RecordT>
-    void ModelRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
-        const QVariant& value) const
+    template <typename RecordT>
+    QVariant ModelRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column == mModel.mModel)
+            return QString::fromUtf8(record.get().mModel.c_str());
+
+        if (column == mModel.mPersistence)
+            return (record.get().mRecordFlags & ESM::FLAG_Persistent) != 0;
+
+        return BaseRefIdAdapter<RecordT>::getData(column, data, index);
+    }
+
+    template <typename RecordT>
+    void ModelRefIdAdapter<RecordT>::setData(
+        const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mModel.mModel)
+        if (column == mModel.mModel)
             record2.mModel = value.toString().toUtf8().constData();
-        else if (column==mModel.mPersistence)
+        else if (column == mModel.mPersistence)
         {
             if (value.toInt() != 0)
                 record2.mRecordFlags |= ESM::FLAG_Persistent;
@@ -205,7 +209,7 @@ namespace CSMWorld
         }
         else
         {
-            BaseRefIdAdapter<RecordT>::setData (column, data, index, value);
+            BaseRefIdAdapter<RecordT>::setData(column, data, index, value);
             return;
         }
 
@@ -214,70 +218,69 @@ namespace CSMWorld
 
     struct NameColumns : public ModelColumns
     {
-        const RefIdColumn *mName;
-        const RefIdColumn *mScript;
+        const RefIdColumn* mName;
+        const RefIdColumn* mScript;
 
-        NameColumns (const ModelColumns& base)
-        : ModelColumns (base)
-        , mName(nullptr)
-        , mScript(nullptr)
-        {}
+        NameColumns(const ModelColumns& base)
+            : ModelColumns(base)
+            , mName(nullptr)
+            , mScript(nullptr)
+        {
+        }
     };
 
     /// \brief Adapter for IDs with names (all but levelled lists and statics)
-    template<typename RecordT>
+    template <typename RecordT>
     class NameRefIdAdapter : public ModelRefIdAdapter<RecordT>
     {
-            NameColumns mName;
+        NameColumns mName;
 
-        public:
+    public:
+        NameRefIdAdapter(UniversalId::Type type, const NameColumns& columns);
 
-            NameRefIdAdapter (UniversalId::Type type, const NameColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
-    template<typename RecordT>
-    NameRefIdAdapter<RecordT>::NameRefIdAdapter (UniversalId::Type type, const NameColumns& columns)
-    : ModelRefIdAdapter<RecordT> (type, columns), mName (columns)
-    {}
-
-    template<typename RecordT>
-    QVariant NameRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
+    template <typename RecordT>
+    NameRefIdAdapter<RecordT>::NameRefIdAdapter(UniversalId::Type type, const NameColumns& columns)
+        : ModelRefIdAdapter<RecordT>(type, columns)
+        , mName(columns)
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
-
-        if (column==mName.mName)
-            return QString::fromUtf8 (record.get().mName.c_str());
-
-        if (column==mName.mScript)
-            return QString::fromUtf8 (record.get().mScript.c_str());
-
-        return ModelRefIdAdapter<RecordT>::getData (column, data, index);
     }
 
-    template<typename RecordT>
-    void NameRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
-        const QVariant& value) const
+    template <typename RecordT>
+    QVariant NameRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column == mName.mName)
+            return QString::fromUtf8(record.get().mName.c_str());
+
+        if (column == mName.mScript)
+            return QString::fromUtf8(record.get().mScript.c_str());
+
+        return ModelRefIdAdapter<RecordT>::getData(column, data, index);
+    }
+
+    template <typename RecordT>
+    void NameRefIdAdapter<RecordT>::setData(
+        const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mName.mName)
+        if (column == mName.mName)
             record2.mName = value.toString().toUtf8().constData();
-        else if (column==mName.mScript)
+        else if (column == mName.mScript)
             record2.mScript = value.toString().toUtf8().constData();
         else
         {
-            ModelRefIdAdapter<RecordT>::setData (column, data, index, value);
+            ModelRefIdAdapter<RecordT>::setData(column, data, index, value);
             return;
         }
 
@@ -286,78 +289,76 @@ namespace CSMWorld
 
     struct InventoryColumns : public NameColumns
     {
-        const RefIdColumn *mIcon;
-        const RefIdColumn *mWeight;
-        const RefIdColumn *mValue;
+        const RefIdColumn* mIcon;
+        const RefIdColumn* mWeight;
+        const RefIdColumn* mValue;
 
-        InventoryColumns (const NameColumns& base)
-        : NameColumns (base)
-        , mIcon(nullptr)
-        , mWeight(nullptr)
-        , mValue(nullptr)
-        {}
+        InventoryColumns(const NameColumns& base)
+            : NameColumns(base)
+            , mIcon(nullptr)
+            , mWeight(nullptr)
+            , mValue(nullptr)
+        {
+        }
     };
 
     /// \brief Adapter for IDs that can go into an inventory
-    template<typename RecordT>
+    template <typename RecordT>
     class InventoryRefIdAdapter : public NameRefIdAdapter<RecordT>
     {
-            InventoryColumns mInventory;
+        InventoryColumns mInventory;
 
-        public:
+    public:
+        InventoryRefIdAdapter(UniversalId::Type type, const InventoryColumns& columns);
 
-            InventoryRefIdAdapter (UniversalId::Type type, const InventoryColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
-    template<typename RecordT>
-    InventoryRefIdAdapter<RecordT>::InventoryRefIdAdapter (UniversalId::Type type,
-        const InventoryColumns& columns)
-    : NameRefIdAdapter<RecordT> (type, columns), mInventory (columns)
-    {}
-
-    template<typename RecordT>
-    QVariant InventoryRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
+    template <typename RecordT>
+    InventoryRefIdAdapter<RecordT>::InventoryRefIdAdapter(UniversalId::Type type, const InventoryColumns& columns)
+        : NameRefIdAdapter<RecordT>(type, columns)
+        , mInventory(columns)
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
-
-        if (column==mInventory.mIcon)
-            return QString::fromUtf8 (record.get().mIcon.c_str());
-
-        if (column==mInventory.mWeight)
-            return record.get().mData.mWeight;
-
-        if (column==mInventory.mValue)
-            return record.get().mData.mValue;
-
-        return NameRefIdAdapter<RecordT>::getData (column, data, index);
     }
 
-    template<typename RecordT>
-    void InventoryRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
-        const QVariant& value) const
+    template <typename RecordT>
+    QVariant InventoryRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column == mInventory.mIcon)
+            return QString::fromUtf8(record.get().mIcon.c_str());
+
+        if (column == mInventory.mWeight)
+            return record.get().mData.mWeight;
+
+        if (column == mInventory.mValue)
+            return record.get().mData.mValue;
+
+        return NameRefIdAdapter<RecordT>::getData(column, data, index);
+    }
+
+    template <typename RecordT>
+    void InventoryRefIdAdapter<RecordT>::setData(
+        const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mInventory.mIcon)
+        if (column == mInventory.mIcon)
             record2.mIcon = value.toString().toUtf8().constData();
-        else if (column==mInventory.mWeight)
+        else if (column == mInventory.mWeight)
             record2.mData.mWeight = value.toFloat();
-        else if (column==mInventory.mValue)
+        else if (column == mInventory.mValue)
             record2.mData.mValue = value.toInt();
         else
         {
-            NameRefIdAdapter<RecordT>::setData (column, data, index, value);
+            NameRefIdAdapter<RecordT>::setData(column, data, index, value);
             return;
         }
 
@@ -366,49 +367,43 @@ namespace CSMWorld
 
     struct PotionColumns : public InventoryColumns
     {
-        const RefIdColumn *mEffects;
+        const RefIdColumn* mEffects;
 
-        PotionColumns (const InventoryColumns& columns);
+        PotionColumns(const InventoryColumns& columns);
     };
 
     class PotionRefIdAdapter : public InventoryRefIdAdapter<ESM::Potion>
     {
-            PotionColumns mColumns;
-            const RefIdColumn *mAutoCalc;
+        PotionColumns mColumns;
+        const RefIdColumn* mAutoCalc;
 
-        public:
+    public:
+        PotionRefIdAdapter(const PotionColumns& columns, const RefIdColumn* autoCalc);
 
-            PotionRefIdAdapter (const PotionColumns& columns, const RefIdColumn *autoCalc);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     struct IngredientColumns : public InventoryColumns
     {
-        const RefIdColumn *mEffects;
+        const RefIdColumn* mEffects;
 
-        IngredientColumns (const InventoryColumns& columns);
+        IngredientColumns(const InventoryColumns& columns);
     };
 
     class IngredientRefIdAdapter : public InventoryRefIdAdapter<ESM::Ingredient>
     {
-            IngredientColumns mColumns;
+        IngredientColumns mColumns;
 
-        public:
+    public:
+        IngredientRefIdAdapter(const IngredientColumns& columns);
 
-            IngredientRefIdAdapter (const IngredientColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     class IngredEffectRefIdAdapter : public NestedRefIdAdapterBase
@@ -416,105 +411,100 @@ namespace CSMWorld
         UniversalId::Type mType;
 
         // not implemented
-        IngredEffectRefIdAdapter (const IngredEffectRefIdAdapter&);
-        IngredEffectRefIdAdapter& operator= (const IngredEffectRefIdAdapter&);
+        IngredEffectRefIdAdapter(const IngredEffectRefIdAdapter&);
+        IngredEffectRefIdAdapter& operator=(const IngredEffectRefIdAdapter&);
 
     public:
-
         IngredEffectRefIdAdapter();
 
         ~IngredEffectRefIdAdapter() override;
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override;
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override;
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override;
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override;
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override;
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override;
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override;
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override;
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override;
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override;
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override;
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override;
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override;
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override;
     };
 
     struct EnchantableColumns : public InventoryColumns
     {
-        const RefIdColumn *mEnchantment;
-        const RefIdColumn *mEnchantmentPoints;
+        const RefIdColumn* mEnchantment;
+        const RefIdColumn* mEnchantmentPoints;
 
-        EnchantableColumns (const InventoryColumns& base)
-        : InventoryColumns (base)
-        , mEnchantment(nullptr)
-        , mEnchantmentPoints(nullptr)
-        {}
+        EnchantableColumns(const InventoryColumns& base)
+            : InventoryColumns(base)
+            , mEnchantment(nullptr)
+            , mEnchantmentPoints(nullptr)
+        {
+        }
     };
 
     /// \brief Adapter for enchantable IDs
-    template<typename RecordT>
+    template <typename RecordT>
     class EnchantableRefIdAdapter : public InventoryRefIdAdapter<RecordT>
     {
-            EnchantableColumns mEnchantable;
+        EnchantableColumns mEnchantable;
 
-        public:
+    public:
+        EnchantableRefIdAdapter(UniversalId::Type type, const EnchantableColumns& columns);
 
-            EnchantableRefIdAdapter (UniversalId::Type type, const EnchantableColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
-    template<typename RecordT>
-    EnchantableRefIdAdapter<RecordT>::EnchantableRefIdAdapter (UniversalId::Type type,
-        const EnchantableColumns& columns)
-    : InventoryRefIdAdapter<RecordT> (type, columns), mEnchantable (columns)
-    {}
-
-    template<typename RecordT>
-    QVariant EnchantableRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
+    template <typename RecordT>
+    EnchantableRefIdAdapter<RecordT>::EnchantableRefIdAdapter(UniversalId::Type type, const EnchantableColumns& columns)
+        : InventoryRefIdAdapter<RecordT>(type, columns)
+        , mEnchantable(columns)
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
-
-        if (column==mEnchantable.mEnchantment)
-            return QString::fromUtf8 (record.get().mEnchant.c_str());
-
-        if (column==mEnchantable.mEnchantmentPoints)
-            return static_cast<int> (record.get().mData.mEnchant);
-
-        return InventoryRefIdAdapter<RecordT>::getData (column, data, index);
     }
 
-    template<typename RecordT>
-    void EnchantableRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data,
-        int index, const QVariant& value) const
+    template <typename RecordT>
+    QVariant EnchantableRefIdAdapter<RecordT>::getData(
+        const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column == mEnchantable.mEnchantment)
+            return QString::fromUtf8(record.get().mEnchant.c_str());
+
+        if (column == mEnchantable.mEnchantmentPoints)
+            return static_cast<int>(record.get().mData.mEnchant);
+
+        return InventoryRefIdAdapter<RecordT>::getData(column, data, index);
+    }
+
+    template <typename RecordT>
+    void EnchantableRefIdAdapter<RecordT>::setData(
+        const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mEnchantable.mEnchantment)
+        if (column == mEnchantable.mEnchantment)
             record2.mEnchant = value.toString().toUtf8().constData();
-        else if (column==mEnchantable.mEnchantmentPoints)
+        else if (column == mEnchantable.mEnchantmentPoints)
             record2.mData.mEnchant = value.toInt();
         else
         {
-            InventoryRefIdAdapter<RecordT>::setData (column, data, index, value);
+            InventoryRefIdAdapter<RecordT>::setData(column, data, index, value);
             return;
         }
 
@@ -523,70 +513,69 @@ namespace CSMWorld
 
     struct ToolColumns : public InventoryColumns
     {
-        const RefIdColumn *mQuality;
-        const RefIdColumn *mUses;
+        const RefIdColumn* mQuality;
+        const RefIdColumn* mUses;
 
-        ToolColumns (const InventoryColumns& base)
-        : InventoryColumns (base)
-        , mQuality(nullptr)
-        , mUses(nullptr)
-        {}
+        ToolColumns(const InventoryColumns& base)
+            : InventoryColumns(base)
+            , mQuality(nullptr)
+            , mUses(nullptr)
+        {
+        }
     };
 
     /// \brief Adapter for tools with limited uses IDs (lockpick, repair, probes)
-    template<typename RecordT>
+    template <typename RecordT>
     class ToolRefIdAdapter : public InventoryRefIdAdapter<RecordT>
     {
-            ToolColumns mTools;
+        ToolColumns mTools;
 
-        public:
+    public:
+        ToolRefIdAdapter(UniversalId::Type type, const ToolColumns& columns);
 
-            ToolRefIdAdapter (UniversalId::Type type, const ToolColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
-    template<typename RecordT>
-    ToolRefIdAdapter<RecordT>::ToolRefIdAdapter (UniversalId::Type type, const ToolColumns& columns)
-    : InventoryRefIdAdapter<RecordT> (type, columns), mTools (columns)
-    {}
-
-    template<typename RecordT>
-    QVariant ToolRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
+    template <typename RecordT>
+    ToolRefIdAdapter<RecordT>::ToolRefIdAdapter(UniversalId::Type type, const ToolColumns& columns)
+        : InventoryRefIdAdapter<RecordT>(type, columns)
+        , mTools(columns)
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
-
-        if (column==mTools.mQuality)
-            return record.get().mData.mQuality;
-
-        if (column==mTools.mUses)
-            return record.get().mData.mUses;
-
-        return InventoryRefIdAdapter<RecordT>::getData (column, data, index);
     }
 
-    template<typename RecordT>
-    void ToolRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data,
-        int index, const QVariant& value) const
+    template <typename RecordT>
+    QVariant ToolRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column == mTools.mQuality)
+            return record.get().mData.mQuality;
+
+        if (column == mTools.mUses)
+            return record.get().mData.mUses;
+
+        return InventoryRefIdAdapter<RecordT>::getData(column, data, index);
+    }
+
+    template <typename RecordT>
+    void ToolRefIdAdapter<RecordT>::setData(
+        const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mTools.mQuality)
+        if (column == mTools.mQuality)
             record2.mData.mQuality = value.toFloat();
-        else if (column==mTools.mUses)
+        else if (column == mTools.mUses)
             record2.mData.mUses = value.toInt();
         else
         {
-            InventoryRefIdAdapter<RecordT>::setData (column, data, index, value);
+            InventoryRefIdAdapter<RecordT>::setData(column, data, index, value);
             return;
         }
 
@@ -595,18 +584,18 @@ namespace CSMWorld
 
     struct ActorColumns : public NameColumns
     {
-        const RefIdColumn *mHello;
-        const RefIdColumn *mFlee;
-        const RefIdColumn *mFight;
-        const RefIdColumn *mAlarm;
-        const RefIdColumn *mInventory;
-        const RefIdColumn *mSpells;
-        const RefIdColumn *mDestinations;
-        const RefIdColumn *mAiPackages;
-        std::map<const RefIdColumn *, unsigned int> mServices;
+        const RefIdColumn* mHello;
+        const RefIdColumn* mFlee;
+        const RefIdColumn* mFight;
+        const RefIdColumn* mAlarm;
+        const RefIdColumn* mInventory;
+        const RefIdColumn* mSpells;
+        const RefIdColumn* mDestinations;
+        const RefIdColumn* mAiPackages;
+        std::map<const RefIdColumn*, unsigned int> mServices;
 
-        ActorColumns (const NameColumns& base)
-            : NameColumns (base)
+        ActorColumns(const NameColumns& base)
+            : NameColumns(base)
             , mHello(nullptr)
             , mFlee(nullptr)
             , mFight(nullptr)
@@ -615,103 +604,99 @@ namespace CSMWorld
             , mSpells(nullptr)
             , mDestinations(nullptr)
             , mAiPackages(nullptr)
-            {}
+        {
+        }
     };
 
     /// \brief Adapter for actor IDs (handles common AI functionality)
-    template<typename RecordT>
+    template <typename RecordT>
     class ActorRefIdAdapter : public NameRefIdAdapter<RecordT>
     {
-            ActorColumns mActors;
+        ActorColumns mActors;
 
-        public:
+    public:
+        ActorRefIdAdapter(UniversalId::Type type, const ActorColumns& columns);
 
-            ActorRefIdAdapter (UniversalId::Type type, const ActorColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
-    template<typename RecordT>
-    ActorRefIdAdapter<RecordT>::ActorRefIdAdapter (UniversalId::Type type,
-        const ActorColumns& columns)
-    : NameRefIdAdapter<RecordT> (type, columns), mActors (columns)
-    {}
-
-    template<typename RecordT>
-    QVariant ActorRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
+    template <typename RecordT>
+    ActorRefIdAdapter<RecordT>::ActorRefIdAdapter(UniversalId::Type type, const ActorColumns& columns)
+        : NameRefIdAdapter<RecordT>(type, columns)
+        , mActors(columns)
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
-
-        if (column==mActors.mHello)
-            return record.get().mAiData.mHello;
-
-        if (column==mActors.mFlee)
-            return record.get().mAiData.mFlee;
-
-        if (column==mActors.mFight)
-            return record.get().mAiData.mFight;
-
-        if (column==mActors.mAlarm)
-            return record.get().mAiData.mAlarm;
-
-        if (column==mActors.mInventory)
-            return QVariant::fromValue(ColumnBase::TableEdit_Full);
-
-        if (column==mActors.mSpells)
-            return QVariant::fromValue(ColumnBase::TableEdit_Full);
-
-        if (column==mActors.mDestinations)
-            return QVariant::fromValue(ColumnBase::TableEdit_Full);
-
-        if (column==mActors.mAiPackages)
-            return QVariant::fromValue(ColumnBase::TableEdit_Full);
-
-        std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
-            mActors.mServices.find (column);
-
-        if (iter!=mActors.mServices.end())
-            return (record.get().mAiData.mServices & iter->second)!=0;
-
-        return NameRefIdAdapter<RecordT>::getData (column, data, index);
     }
 
-    template<typename RecordT>
-    void ActorRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
-        const QVariant& value) const
+    template <typename RecordT>
+    QVariant ActorRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column == mActors.mHello)
+            return record.get().mAiData.mHello;
+
+        if (column == mActors.mFlee)
+            return record.get().mAiData.mFlee;
+
+        if (column == mActors.mFight)
+            return record.get().mAiData.mFight;
+
+        if (column == mActors.mAlarm)
+            return record.get().mAiData.mAlarm;
+
+        if (column == mActors.mInventory)
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+        if (column == mActors.mSpells)
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+        if (column == mActors.mDestinations)
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+        if (column == mActors.mAiPackages)
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+        std::map<const RefIdColumn*, unsigned int>::const_iterator iter = mActors.mServices.find(column);
+
+        if (iter != mActors.mServices.end())
+            return (record.get().mAiData.mServices & iter->second) != 0;
+
+        return NameRefIdAdapter<RecordT>::getData(column, data, index);
+    }
+
+    template <typename RecordT>
+    void ActorRefIdAdapter<RecordT>::setData(
+        const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&>(
+            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mActors.mHello)
+        if (column == mActors.mHello)
             record2.mAiData.mHello = value.toInt();
-        else if (column==mActors.mFlee) // Flee, Fight and Alarm ratings are probabilities.
+        else if (column == mActors.mFlee) // Flee, Fight and Alarm ratings are probabilities.
             record2.mAiData.mFlee = std::min(100, value.toInt());
-        else if (column==mActors.mFight)
+        else if (column == mActors.mFight)
             record2.mAiData.mFight = std::min(100, value.toInt());
-        else if (column==mActors.mAlarm)
+        else if (column == mActors.mAlarm)
             record2.mAiData.mAlarm = std::min(100, value.toInt());
         else
         {
-            typename std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
-                mActors.mServices.find (column);
-            if (iter!=mActors.mServices.end())
+            typename std::map<const RefIdColumn*, unsigned int>::const_iterator iter = mActors.mServices.find(column);
+            if (iter != mActors.mServices.end())
             {
-                if (value.toInt()!=0)
+                if (value.toInt() != 0)
                     record2.mAiData.mServices |= iter->second;
                 else
                     record2.mAiData.mServices &= ~iter->second;
             }
             else
             {
-                NameRefIdAdapter<RecordT>::setData (column, data, index, value);
+                NameRefIdAdapter<RecordT>::setData(column, data, index, value);
                 return;
             }
         }
@@ -721,514 +706,453 @@ namespace CSMWorld
 
     class ApparatusRefIdAdapter : public InventoryRefIdAdapter<ESM::Apparatus>
     {
-            const RefIdColumn *mType;
-            const RefIdColumn *mQuality;
+        const RefIdColumn* mType;
+        const RefIdColumn* mQuality;
 
-        public:
+    public:
+        ApparatusRefIdAdapter(const InventoryColumns& columns, const RefIdColumn* type, const RefIdColumn* quality);
 
-            ApparatusRefIdAdapter (const InventoryColumns& columns, const RefIdColumn *type,
-                const RefIdColumn *quality);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     class ArmorRefIdAdapter : public EnchantableRefIdAdapter<ESM::Armor>
     {
-            const RefIdColumn *mType;
-            const RefIdColumn *mHealth;
-            const RefIdColumn *mArmor;
-            const RefIdColumn *mPartRef;
+        const RefIdColumn* mType;
+        const RefIdColumn* mHealth;
+        const RefIdColumn* mArmor;
+        const RefIdColumn* mPartRef;
 
-        public:
+    public:
+        ArmorRefIdAdapter(const EnchantableColumns& columns, const RefIdColumn* type, const RefIdColumn* health,
+            const RefIdColumn* armor, const RefIdColumn* partRef);
 
-            ArmorRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *type,
-                const RefIdColumn *health, const RefIdColumn *armor, const RefIdColumn *partRef);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     class BookRefIdAdapter : public EnchantableRefIdAdapter<ESM::Book>
     {
-            const RefIdColumn *mBookType;
-            const RefIdColumn *mSkill;
-            const RefIdColumn *mText;
+        const RefIdColumn* mBookType;
+        const RefIdColumn* mSkill;
+        const RefIdColumn* mText;
 
-        public:
+    public:
+        BookRefIdAdapter(const EnchantableColumns& columns, const RefIdColumn* bookType, const RefIdColumn* skill,
+            const RefIdColumn* text);
 
-            BookRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *bookType,
-                const RefIdColumn *skill, const RefIdColumn *text);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     class ClothingRefIdAdapter : public EnchantableRefIdAdapter<ESM::Clothing>
     {
-            const RefIdColumn *mType;
-            const RefIdColumn *mPartRef;
+        const RefIdColumn* mType;
+        const RefIdColumn* mPartRef;
 
-        public:
+    public:
+        ClothingRefIdAdapter(const EnchantableColumns& columns, const RefIdColumn* type, const RefIdColumn* partRef);
 
-            ClothingRefIdAdapter (const EnchantableColumns& columns,
-                    const RefIdColumn *type, const RefIdColumn *partRef);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     class ContainerRefIdAdapter : public NameRefIdAdapter<ESM::Container>
     {
-            const RefIdColumn *mWeight;
-            const RefIdColumn *mOrganic;
-            const RefIdColumn *mRespawn;
-            const RefIdColumn *mContent;
+        const RefIdColumn* mWeight;
+        const RefIdColumn* mOrganic;
+        const RefIdColumn* mRespawn;
+        const RefIdColumn* mContent;
 
-        public:
+    public:
+        ContainerRefIdAdapter(const NameColumns& columns, const RefIdColumn* weight, const RefIdColumn* organic,
+            const RefIdColumn* respawn, const RefIdColumn* content);
 
-            ContainerRefIdAdapter (const NameColumns& columns, const RefIdColumn *weight,
-                                   const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index) const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                                  const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     struct CreatureColumns : public ActorColumns
     {
-        std::map<const RefIdColumn *, unsigned int> mFlags;
-        const RefIdColumn *mType;
-        const RefIdColumn *mScale;
-        const RefIdColumn *mOriginal;
-        const RefIdColumn *mAttributes;
-        const RefIdColumn *mAttacks;
-        const RefIdColumn *mMisc;
-        const RefIdColumn *mBloodType;
+        std::map<const RefIdColumn*, unsigned int> mFlags;
+        const RefIdColumn* mType;
+        const RefIdColumn* mScale;
+        const RefIdColumn* mOriginal;
+        const RefIdColumn* mAttributes;
+        const RefIdColumn* mAttacks;
+        const RefIdColumn* mMisc;
+        const RefIdColumn* mBloodType;
 
-        CreatureColumns (const ActorColumns& actorColumns);
+        CreatureColumns(const ActorColumns& actorColumns);
     };
 
     class CreatureRefIdAdapter : public ActorRefIdAdapter<ESM::Creature>
     {
-            CreatureColumns mColumns;
+        CreatureColumns mColumns;
 
-        public:
+    public:
+        CreatureRefIdAdapter(const CreatureColumns& columns);
 
-            CreatureRefIdAdapter (const CreatureColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     class DoorRefIdAdapter : public NameRefIdAdapter<ESM::Door>
     {
-            const RefIdColumn *mOpenSound;
-            const RefIdColumn *mCloseSound;
+        const RefIdColumn* mOpenSound;
+        const RefIdColumn* mCloseSound;
 
-        public:
+    public:
+        DoorRefIdAdapter(const NameColumns& columns, const RefIdColumn* openSound, const RefIdColumn* closeSound);
 
-            DoorRefIdAdapter (const NameColumns& columns, const RefIdColumn *openSound,
-                const RefIdColumn *closeSound);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     struct LightColumns : public InventoryColumns
     {
-        const RefIdColumn *mTime;
-        const RefIdColumn *mRadius;
-        const RefIdColumn *mColor;
-        const RefIdColumn *mSound;
-        const RefIdColumn *mEmitterType;
-        std::map<const RefIdColumn *, unsigned int> mFlags;
+        const RefIdColumn* mTime;
+        const RefIdColumn* mRadius;
+        const RefIdColumn* mColor;
+        const RefIdColumn* mSound;
+        const RefIdColumn* mEmitterType;
+        std::map<const RefIdColumn*, unsigned int> mFlags;
 
-        LightColumns (const InventoryColumns& columns);
+        LightColumns(const InventoryColumns& columns);
     };
 
     class LightRefIdAdapter : public InventoryRefIdAdapter<ESM::Light>
     {
-            LightColumns mColumns;
+        LightColumns mColumns;
 
-        public:
+    public:
+        LightRefIdAdapter(const LightColumns& columns);
 
-            LightRefIdAdapter (const LightColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     class MiscRefIdAdapter : public InventoryRefIdAdapter<ESM::Miscellaneous>
     {
-            const RefIdColumn *mKey;
+        const RefIdColumn* mKey;
 
-        public:
+    public:
+        MiscRefIdAdapter(const InventoryColumns& columns, const RefIdColumn* key);
 
-            MiscRefIdAdapter (const InventoryColumns& columns, const RefIdColumn *key);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     struct NpcColumns : public ActorColumns
     {
-        std::map<const RefIdColumn *, unsigned int> mFlags;
-        const RefIdColumn *mRace;
-        const RefIdColumn *mClass;
-        const RefIdColumn *mFaction;
-        const RefIdColumn *mHair;
-        const RefIdColumn *mHead;
-        const RefIdColumn *mAttributes; // depends on npc type
-        const RefIdColumn *mSkills;     // depends on npc type
-        const RefIdColumn *mMisc;       // may depend on npc type, e.g. FactionID
-        const RefIdColumn *mBloodType;
-        const RefIdColumn *mGender;
+        std::map<const RefIdColumn*, unsigned int> mFlags;
+        const RefIdColumn* mRace;
+        const RefIdColumn* mClass;
+        const RefIdColumn* mFaction;
+        const RefIdColumn* mHair;
+        const RefIdColumn* mHead;
+        const RefIdColumn* mAttributes; // depends on npc type
+        const RefIdColumn* mSkills; // depends on npc type
+        const RefIdColumn* mMisc; // may depend on npc type, e.g. FactionID
+        const RefIdColumn* mBloodType;
+        const RefIdColumn* mGender;
 
-        NpcColumns (const ActorColumns& actorColumns);
+        NpcColumns(const ActorColumns& actorColumns);
     };
 
     class NpcRefIdAdapter : public ActorRefIdAdapter<ESM::NPC>
     {
-            NpcColumns mColumns;
+        NpcColumns mColumns;
 
-        public:
+    public:
+        NpcRefIdAdapter(const NpcColumns& columns);
 
-            NpcRefIdAdapter (const NpcColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
     struct WeaponColumns : public EnchantableColumns
     {
-        const RefIdColumn *mType;
-        const RefIdColumn *mHealth;
-        const RefIdColumn *mSpeed;
-        const RefIdColumn *mReach;
-        const RefIdColumn *mChop[2];
-        const RefIdColumn *mSlash[2];
-        const RefIdColumn *mThrust[2];
-        std::map<const RefIdColumn *, unsigned int> mFlags;
+        const RefIdColumn* mType;
+        const RefIdColumn* mHealth;
+        const RefIdColumn* mSpeed;
+        const RefIdColumn* mReach;
+        const RefIdColumn* mChop[2];
+        const RefIdColumn* mSlash[2];
+        const RefIdColumn* mThrust[2];
+        std::map<const RefIdColumn*, unsigned int> mFlags;
 
-        WeaponColumns (const EnchantableColumns& columns);
+        WeaponColumns(const EnchantableColumns& columns);
     };
 
     class WeaponRefIdAdapter : public EnchantableRefIdAdapter<ESM::Weapon>
     {
-            WeaponColumns mColumns;
+        WeaponColumns mColumns;
 
-        public:
+    public:
+        WeaponRefIdAdapter(const WeaponColumns& columns);
 
-            WeaponRefIdAdapter (const WeaponColumns& columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
-
 
     class NestedRefIdAdapterBase;
 
     class NpcAttributesRefIdAdapter : public NestedRefIdAdapterBase
     {
     public:
+        NpcAttributesRefIdAdapter();
 
-        NpcAttributesRefIdAdapter ();
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override;
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override;
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override;
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override;
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override;
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override;
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override;
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override;
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override;
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override;
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override;
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override;
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override;
-
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override;
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override;
     };
 
     class NpcSkillsRefIdAdapter : public NestedRefIdAdapterBase
     {
     public:
+        NpcSkillsRefIdAdapter();
 
-        NpcSkillsRefIdAdapter ();
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override;
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override;
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override;
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override;
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override;
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override;
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override;
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override;
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override;
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override;
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override;
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override;
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override;
-
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override;
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override;
     };
 
     class NpcMiscRefIdAdapter : public NestedRefIdAdapterBase
     {
-        NpcMiscRefIdAdapter (const NpcMiscRefIdAdapter&);
-        NpcMiscRefIdAdapter& operator= (const NpcMiscRefIdAdapter&);
+        NpcMiscRefIdAdapter(const NpcMiscRefIdAdapter&);
+        NpcMiscRefIdAdapter& operator=(const NpcMiscRefIdAdapter&);
 
     public:
-
-        NpcMiscRefIdAdapter ();
+        NpcMiscRefIdAdapter();
         ~NpcMiscRefIdAdapter() override;
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override;
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override;
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override;
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override;
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override;
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override;
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override;
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override;
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override;
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override;
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override;
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override;
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override;
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override;
     };
 
     class CreatureAttributesRefIdAdapter : public NestedRefIdAdapterBase
     {
     public:
+        CreatureAttributesRefIdAdapter();
 
-        CreatureAttributesRefIdAdapter ();
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override;
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override;
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override;
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override;
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override;
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override;
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override;
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override;
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override;
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override;
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override;
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override;
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override;
-
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override;
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override;
     };
 
     class CreatureAttackRefIdAdapter : public NestedRefIdAdapterBase
     {
     public:
+        CreatureAttackRefIdAdapter();
 
-        CreatureAttackRefIdAdapter ();
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override;
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override;
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override;
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override;
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override;
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override;
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override;
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override;
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override;
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override;
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override;
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override;
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override;
-
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override;
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override;
     };
 
     class CreatureMiscRefIdAdapter : public NestedRefIdAdapterBase
     {
-        CreatureMiscRefIdAdapter (const CreatureMiscRefIdAdapter&);
-        CreatureMiscRefIdAdapter& operator= (const CreatureMiscRefIdAdapter&);
+        CreatureMiscRefIdAdapter(const CreatureMiscRefIdAdapter&);
+        CreatureMiscRefIdAdapter& operator=(const CreatureMiscRefIdAdapter&);
 
     public:
-
-        CreatureMiscRefIdAdapter ();
+        CreatureMiscRefIdAdapter();
         ~CreatureMiscRefIdAdapter() override;
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override;
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override;
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override;
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override;
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override;
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override;
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override;
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override;
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override;
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override;
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override;
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override;
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override;
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override;
     };
 
-    template<typename ESXRecordT>
+    template <typename ESXRecordT>
     class EffectsListAdapter;
 
-    template<typename ESXRecordT>
+    template <typename ESXRecordT>
     class EffectsRefIdAdapter : public EffectsListAdapter<ESXRecordT>, public NestedRefIdAdapterBase
     {
         UniversalId::Type mType;
 
         // not implemented
-        EffectsRefIdAdapter (const EffectsRefIdAdapter&);
-        EffectsRefIdAdapter& operator= (const EffectsRefIdAdapter&);
+        EffectsRefIdAdapter(const EffectsRefIdAdapter&);
+        EffectsRefIdAdapter& operator=(const EffectsRefIdAdapter&);
 
     public:
-
-        EffectsRefIdAdapter(UniversalId::Type type) :mType(type) {}
+        EffectsRefIdAdapter(UniversalId::Type type)
+            : mType(type)
+        {
+        }
 
         virtual ~EffectsRefIdAdapter() {}
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             EffectsListAdapter<ESXRecordT>::addRow(record, position);
         }
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             EffectsListAdapter<ESXRecordT>::removeRow(record, rowToRemove);
         }
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             EffectsListAdapter<ESXRecordT>::setTable(record, nestedTable);
         }
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             return EffectsListAdapter<ESXRecordT>::table(record);
         }
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             return EffectsListAdapter<ESXRecordT>::getData(record, subRowIndex, subColIndex);
         }
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
             EffectsListAdapter<ESXRecordT>::setData(record, value, subRowIndex, subColIndex);
         }
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override
         {
             const Record<ESXRecordT> record; // not used, just a dummy
             return EffectsListAdapter<ESXRecordT>::getColumnsCount(record);
         }
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             return EffectsListAdapter<ESXRecordT>::getRowsCount(record);
         }
     };
@@ -1239,20 +1163,21 @@ namespace CSMWorld
         UniversalId::Type mType;
 
         // not implemented
-        NestedInventoryRefIdAdapter (const NestedInventoryRefIdAdapter&);
-        NestedInventoryRefIdAdapter& operator= (const NestedInventoryRefIdAdapter&);
+        NestedInventoryRefIdAdapter(const NestedInventoryRefIdAdapter&);
+        NestedInventoryRefIdAdapter& operator=(const NestedInventoryRefIdAdapter&);
 
     public:
-
-        NestedInventoryRefIdAdapter(UniversalId::Type type) :mType(type) {}
+        NestedInventoryRefIdAdapter(UniversalId::Type type)
+            : mType(type)
+        {
+        }
 
         virtual ~NestedInventoryRefIdAdapter() {}
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT container = record.get();
 
             std::vector<ESM::ContItem>& list = container.mInventory.mList;
@@ -1262,85 +1187,85 @@ namespace CSMWorld
             if (position >= (int)list.size())
                 list.push_back(newRow);
             else
-                list.insert(list.begin()+position, newRow);
+                list.insert(list.begin() + position, newRow);
 
-            record.setModified (container);
+            record.setModified(container);
         }
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT container = record.get();
 
             std::vector<ESM::ContItem>& list = container.mInventory.mList;
 
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            list.erase (list.begin () + rowToRemove);
+            list.erase(list.begin() + rowToRemove);
 
-            record.setModified (container);
+            record.setModified(container);
         }
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT container = record.get();
 
-            container.mInventory.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::ContItem> >&>(nestedTable).mNestedTable;
+            container.mInventory.mList
+                = static_cast<const NestedTableWrapper<std::vector<typename ESM::ContItem>>&>(nestedTable).mNestedTable;
 
-            record.setModified (container);
+            record.setModified(container);
         }
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::ContItem> >(record.get().mInventory.mList);
+            return new NestedTableWrapper<std::vector<typename ESM::ContItem>>(record.get().mInventory.mList);
         }
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             const std::vector<ESM::ContItem>& list = record.get().mInventory.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
             const ESM::ContItem& content = list.at(subRowIndex);
 
             switch (subColIndex)
             {
-                case 0: return QString::fromUtf8(content.mItem.c_str());
-                case 1: return content.mCount;
+                case 0:
+                    return QString::fromUtf8(content.mItem.c_str());
+                case 1:
+                    return content.mCount;
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
         }
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
             ESXRecordT container = record.get();
             std::vector<ESM::ContItem>& list = container.mInventory.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            switch(subColIndex)
+            switch (subColIndex)
             {
                 case 0:
                     list.at(subRowIndex).mItem.assign(std::string(value.toString().toUtf8().constData()));
@@ -1354,18 +1279,15 @@ namespace CSMWorld
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
 
-            record.setModified (container);
+            record.setModified(container);
         }
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override
-        {
-            return 2;
-        }
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override { return 2; }
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             return static_cast<int>(record.get().mInventory.mList.size());
         }
@@ -1377,20 +1299,21 @@ namespace CSMWorld
         UniversalId::Type mType;
 
         // not implemented
-        NestedSpellRefIdAdapter (const NestedSpellRefIdAdapter&);
-        NestedSpellRefIdAdapter& operator= (const NestedSpellRefIdAdapter&);
+        NestedSpellRefIdAdapter(const NestedSpellRefIdAdapter&);
+        NestedSpellRefIdAdapter& operator=(const NestedSpellRefIdAdapter&);
 
     public:
-
-        NestedSpellRefIdAdapter(UniversalId::Type type) :mType(type) {}
+        NestedSpellRefIdAdapter(UniversalId::Type type)
+            : mType(type)
+        {
+        }
 
         virtual ~NestedSpellRefIdAdapter() {}
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT caster = record.get();
 
             std::vector<std::string>& list = caster.mSpells.mList;
@@ -1400,61 +1323,59 @@ namespace CSMWorld
             if (position >= (int)list.size())
                 list.push_back(newString);
             else
-                list.insert(list.begin()+position, newString);
+                list.insert(list.begin() + position, newString);
 
-            record.setModified (caster);
+            record.setModified(caster);
         }
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT caster = record.get();
 
             std::vector<std::string>& list = caster.mSpells.mList;
 
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            list.erase (list.begin () + rowToRemove);
+            list.erase(list.begin() + rowToRemove);
 
-            record.setModified (caster);
+            record.setModified(caster);
         }
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT caster = record.get();
 
-            caster.mSpells.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename std::string> >&>(nestedTable).mNestedTable;
+            caster.mSpells.mList
+                = static_cast<const NestedTableWrapper<std::vector<typename std::string>>&>(nestedTable).mNestedTable;
 
-            record.setModified (caster);
+            record.setModified(caster);
         }
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename std::string> >(record.get().mSpells.mList);
+            return new NestedTableWrapper<std::vector<typename std::string>>(record.get().mSpells.mList);
         }
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             const std::vector<std::string>& list = record.get().mSpells.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
             const std::string& content = list.at(subRowIndex);
 
@@ -1464,34 +1385,31 @@ namespace CSMWorld
                 throw std::runtime_error("Trying to access non-existing column in the nested table!");
         }
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
             ESXRecordT caster = record.get();
             std::vector<std::string>& list = caster.mSpells.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
             if (subColIndex == 0)
                 list.at(subRowIndex) = std::string(value.toString().toUtf8());
             else
                 throw std::runtime_error("Trying to access non-existing column in the nested table!");
 
-            record.setModified (caster);
+            record.setModified(caster);
         }
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override
-        {
-            return 1;
-        }
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override { return 1; }
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             return static_cast<int>(record.get().mSpells.mList.size());
         }
@@ -1503,20 +1421,21 @@ namespace CSMWorld
         UniversalId::Type mType;
 
         // not implemented
-        NestedTravelRefIdAdapter (const NestedTravelRefIdAdapter&);
-        NestedTravelRefIdAdapter& operator= (const NestedTravelRefIdAdapter&);
+        NestedTravelRefIdAdapter(const NestedTravelRefIdAdapter&);
+        NestedTravelRefIdAdapter& operator=(const NestedTravelRefIdAdapter&);
 
     public:
-
-        NestedTravelRefIdAdapter(UniversalId::Type type) :mType(type) {}
+        NestedTravelRefIdAdapter(UniversalId::Type type)
+            : mType(type)
+        {
+        }
 
         virtual ~NestedTravelRefIdAdapter() {}
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT traveller = record.get();
 
             std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
@@ -1535,114 +1454,131 @@ namespace CSMWorld
             if (position >= (int)list.size())
                 list.push_back(newRow);
             else
-                list.insert(list.begin()+position, newRow);
+                list.insert(list.begin() + position, newRow);
 
-            record.setModified (traveller);
+            record.setModified(traveller);
         }
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT traveller = record.get();
 
             std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
 
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            list.erase (list.begin () + rowToRemove);
+            list.erase(list.begin() + rowToRemove);
 
-            record.setModified (traveller);
+            record.setModified(traveller);
         }
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT traveller = record.get();
 
-            traveller.mTransport.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::Transport::Dest> >&>(nestedTable).mNestedTable;
+            traveller.mTransport.mList
+                = static_cast<const NestedTableWrapper<std::vector<typename ESM::Transport::Dest>>&>(nestedTable)
+                      .mNestedTable;
 
-            record.setModified (traveller);
+            record.setModified(traveller);
         }
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::Transport::Dest> >(record.get().mTransport.mList);
+            return new NestedTableWrapper<std::vector<typename ESM::Transport::Dest>>(record.get().mTransport.mList);
         }
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             const std::vector<ESM::Transport::Dest>& list = record.get().mTransport.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
             const ESM::Transport::Dest& content = list.at(subRowIndex);
 
             switch (subColIndex)
             {
-                case 0: return QString::fromUtf8(content.mCellName.c_str());
-                case 1: return content.mPos.pos[0];
-                case 2: return content.mPos.pos[1];
-                case 3: return content.mPos.pos[2];
-                case 4: return content.mPos.rot[0];
-                case 5: return content.mPos.rot[1];
-                case 6: return content.mPos.rot[2];
+                case 0:
+                    return QString::fromUtf8(content.mCellName.c_str());
+                case 1:
+                    return content.mPos.pos[0];
+                case 2:
+                    return content.mPos.pos[1];
+                case 3:
+                    return content.mPos.pos[2];
+                case 4:
+                    return content.mPos.rot[0];
+                case 5:
+                    return content.mPos.rot[1];
+                case 6:
+                    return content.mPos.rot[2];
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
         }
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
             ESXRecordT traveller = record.get();
             std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            switch(subColIndex)
+            switch (subColIndex)
             {
-                case 0: list.at(subRowIndex).mCellName = std::string(value.toString().toUtf8().constData()); break;
-                case 1: list.at(subRowIndex).mPos.pos[0] = value.toFloat(); break;
-                case 2: list.at(subRowIndex).mPos.pos[1] = value.toFloat(); break;
-                case 3: list.at(subRowIndex).mPos.pos[2] = value.toFloat(); break;
-                case 4: list.at(subRowIndex).mPos.rot[0] = value.toFloat(); break;
-                case 5: list.at(subRowIndex).mPos.rot[1] = value.toFloat(); break;
-                case 6: list.at(subRowIndex).mPos.rot[2] = value.toFloat(); break;
+                case 0:
+                    list.at(subRowIndex).mCellName = std::string(value.toString().toUtf8().constData());
+                    break;
+                case 1:
+                    list.at(subRowIndex).mPos.pos[0] = value.toFloat();
+                    break;
+                case 2:
+                    list.at(subRowIndex).mPos.pos[1] = value.toFloat();
+                    break;
+                case 3:
+                    list.at(subRowIndex).mPos.pos[2] = value.toFloat();
+                    break;
+                case 4:
+                    list.at(subRowIndex).mPos.rot[0] = value.toFloat();
+                    break;
+                case 5:
+                    list.at(subRowIndex).mPos.rot[1] = value.toFloat();
+                    break;
+                case 6:
+                    list.at(subRowIndex).mPos.rot[2] = value.toFloat();
+                    break;
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
 
-            record.setModified (traveller);
+            record.setModified(traveller);
         }
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override
-        {
-            return 7;
-        }
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override { return 7; }
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             return static_cast<int>(record.get().mTransport.mList.size());
         }
@@ -1654,22 +1590,23 @@ namespace CSMWorld
         UniversalId::Type mType;
 
         // not implemented
-        ActorAiRefIdAdapter (const ActorAiRefIdAdapter&);
-        ActorAiRefIdAdapter& operator= (const ActorAiRefIdAdapter&);
+        ActorAiRefIdAdapter(const ActorAiRefIdAdapter&);
+        ActorAiRefIdAdapter& operator=(const ActorAiRefIdAdapter&);
 
     public:
-
-        ActorAiRefIdAdapter(UniversalId::Type type) :mType(type) {}
+        ActorAiRefIdAdapter(UniversalId::Type type)
+            : mType(type)
+        {
+        }
 
         virtual ~ActorAiRefIdAdapter() {}
 
         // FIXME: should check if the AI package type is already in the list and use a default
         //        that wasn't used already (in extreme case do not add anything at all?
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT actor = record.get();
 
             std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
@@ -1687,61 +1624,60 @@ namespace CSMWorld
             if (position >= (int)list.size())
                 list.push_back(newRow);
             else
-                list.insert(list.begin()+position, newRow);
+                list.insert(list.begin() + position, newRow);
 
-            record.setModified (actor);
+            record.setModified(actor);
         }
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT actor = record.get();
 
             std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
 
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            list.erase (list.begin () + rowToRemove);
+            list.erase(list.begin() + rowToRemove);
 
-            record.setModified (actor);
+            record.setModified(actor);
         }
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT actor = record.get();
 
-            actor.mAiPackage.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::AIPackage> >&>(nestedTable).mNestedTable;
+            actor.mAiPackage.mList
+                = static_cast<const NestedTableWrapper<std::vector<typename ESM::AIPackage>>&>(nestedTable)
+                      .mNestedTable;
 
-            record.setModified (actor);
+            record.setModified(actor);
         }
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::AIPackage> >(record.get().mAiPackage.mList);
+            return new NestedTableWrapper<std::vector<typename ESM::AIPackage>>(record.get().mAiPackage.mList);
         }
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             const std::vector<ESM::AIPackage>& list = record.get().mAiPackage.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
             const ESM::AIPackage& content = list.at(subRowIndex);
 
@@ -1751,12 +1687,18 @@ namespace CSMWorld
                     // FIXME: should more than one AI package type be allowed?  Check vanilla
                     switch (content.mType)
                     {
-                        case ESM::AI_Wander: return 0;
-                        case ESM::AI_Travel: return 1;
-                        case ESM::AI_Follow: return 2;
-                        case ESM::AI_Escort: return 3;
-                        case ESM::AI_Activate: return 4;
-                        default: return QVariant();
+                        case ESM::AI_Wander:
+                            return 0;
+                        case ESM::AI_Travel:
+                            return 1;
+                        case ESM::AI_Follow:
+                            return 2;
+                        case ESM::AI_Escort:
+                            return 3;
+                        case ESM::AI_Activate:
+                            return 4;
+                        default:
+                            return QVariant();
                     }
                 case 1: // wander dist
                     if (content.mType == ESM::AI_Wander)
@@ -1784,7 +1726,7 @@ namespace CSMWorld
                 case 10:
                 case 11:
                     if (content.mType == ESM::AI_Wander)
-                        return static_cast<int>(content.mWander.mIdle[subColIndex-4]);
+                        return static_cast<int>(content.mWander.mIdle[subColIndex - 4]);
                     else
                         return QVariant();
                 case 12: // repeat
@@ -1839,30 +1781,41 @@ namespace CSMWorld
             }
         }
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
             ESXRecordT actor = record.get();
             std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
             ESM::AIPackage& content = list.at(subRowIndex);
 
-            switch(subColIndex)
+            switch (subColIndex)
             {
                 case 0: // ai package type
                     switch (value.toInt())
                     {
-                        case 0: content.mType = ESM::AI_Wander; break;
-                        case 1: content.mType = ESM::AI_Travel; break;
-                        case 2: content.mType = ESM::AI_Follow; break;
-                        case 3: content.mType = ESM::AI_Escort; break;
-                        case 4: content.mType = ESM::AI_Activate; break;
-                        default: return; // return without saving
+                        case 0:
+                            content.mType = ESM::AI_Wander;
+                            break;
+                        case 1:
+                            content.mType = ESM::AI_Travel;
+                            break;
+                        case 2:
+                            content.mType = ESM::AI_Follow;
+                            break;
+                        case 3:
+                            content.mType = ESM::AI_Escort;
+                            break;
+                        case 4:
+                            content.mType = ESM::AI_Activate;
+                            break;
+                        default:
+                            return; // return without saving
                     }
                     break; // always save
 
@@ -1897,7 +1850,7 @@ namespace CSMWorld
                 case 10:
                 case 11:
                     if (content.mType == ESM::AI_Wander)
-                        content.mWander.mIdle[subColIndex-4] = static_cast<unsigned char>(value.toInt());
+                        content.mWander.mIdle[subColIndex - 4] = static_cast<unsigned char>(value.toInt());
                     else
                         return; // return without saving
 
@@ -1973,23 +1926,19 @@ namespace CSMWorld
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
 
-            record.setModified (actor);
+            record.setModified(actor);
         }
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override
-        {
-            return 19;
-        }
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override { return 19; }
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             return static_cast<int>(record.get().mAiPackage.mList.size());
         }
     };
-
 
     template <typename ESXRecordT>
     class BodyPartRefIdAdapter : public NestedRefIdAdapterBase
@@ -1997,20 +1946,21 @@ namespace CSMWorld
         UniversalId::Type mType;
 
         // not implemented
-        BodyPartRefIdAdapter (const BodyPartRefIdAdapter&);
-        BodyPartRefIdAdapter& operator= (const BodyPartRefIdAdapter&);
+        BodyPartRefIdAdapter(const BodyPartRefIdAdapter&);
+        BodyPartRefIdAdapter& operator=(const BodyPartRefIdAdapter&);
 
     public:
-
-        BodyPartRefIdAdapter(UniversalId::Type type) :mType(type) {}
+        BodyPartRefIdAdapter(UniversalId::Type type)
+            : mType(type)
+        {
+        }
 
         virtual ~BodyPartRefIdAdapter() {}
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT apparel = record.get();
 
             std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
@@ -2023,61 +1973,60 @@ namespace CSMWorld
             if (position >= (int)list.size())
                 list.push_back(newPart);
             else
-                list.insert(list.begin()+position, newPart);
+                list.insert(list.begin() + position, newPart);
 
-            record.setModified (apparel);
+            record.setModified(apparel);
         }
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT apparel = record.get();
 
             std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
 
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            list.erase (list.begin () + rowToRemove);
+            list.erase(list.begin() + rowToRemove);
 
-            record.setModified (apparel);
+            record.setModified(apparel);
         }
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT apparel = record.get();
 
-            apparel.mParts.mParts =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::PartReference> >&>(nestedTable).mNestedTable;
+            apparel.mParts.mParts
+                = static_cast<const NestedTableWrapper<std::vector<typename ESM::PartReference>>&>(nestedTable)
+                      .mNestedTable;
 
-            record.setModified (apparel);
+            record.setModified(apparel);
         }
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::PartReference> >(record.get().mParts.mParts);
+            return new NestedTableWrapper<std::vector<typename ESM::PartReference>>(record.get().mParts.mParts);
         }
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             const std::vector<ESM::PartReference>& list = record.get().mParts.mParts;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
             const ESM::PartReference& content = list.at(subRowIndex);
 
@@ -2090,104 +2039,106 @@ namespace CSMWorld
                     else
                         throw std::runtime_error("Part Reference Type unexpected value");
                 }
-                case 1: return QString(content.mMale.c_str());
-                case 2: return QString(content.mFemale.c_str());
+                case 1:
+                    return QString(content.mMale.c_str());
+                case 2:
+                    return QString(content.mFemale.c_str());
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
         }
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
             ESXRecordT apparel = record.get();
             std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            switch(subColIndex)
+            switch (subColIndex)
             {
-                case 0: list.at(subRowIndex).mPart = static_cast<unsigned char>(value.toInt()); break;
-                case 1: list.at(subRowIndex).mMale = value.toString().toStdString(); break;
-                case 2: list.at(subRowIndex).mFemale = value.toString().toStdString(); break;
+                case 0:
+                    list.at(subRowIndex).mPart = static_cast<unsigned char>(value.toInt());
+                    break;
+                case 1:
+                    list.at(subRowIndex).mMale = value.toString().toStdString();
+                    break;
+                case 2:
+                    list.at(subRowIndex).mFemale = value.toString().toStdString();
+                    break;
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
 
-            record.setModified (apparel);
+            record.setModified(apparel);
         }
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override
-        {
-            return 3;
-        }
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override { return 3; }
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             return static_cast<int>(record.get().mParts.mParts.size());
         }
     };
 
-
     struct LevListColumns : public BaseColumns
     {
-        const RefIdColumn *mLevList;
-        const RefIdColumn *mNestedListLevList;
+        const RefIdColumn* mLevList;
+        const RefIdColumn* mNestedListLevList;
 
-        LevListColumns (const BaseColumns& base)
-        : BaseColumns (base)
-        , mLevList(nullptr)
-        , mNestedListLevList(nullptr)
-        {}
+        LevListColumns(const BaseColumns& base)
+            : BaseColumns(base)
+            , mLevList(nullptr)
+            , mNestedListLevList(nullptr)
+        {
+        }
     };
 
-    template<typename RecordT>
+    template <typename RecordT>
     class LevelledListRefIdAdapter : public BaseRefIdAdapter<RecordT>
     {
-            LevListColumns mLevList;
+        LevListColumns mLevList;
 
-        public:
+    public:
+        LevelledListRefIdAdapter(UniversalId::Type type, const LevListColumns& columns);
 
-            LevelledListRefIdAdapter (UniversalId::Type type, const LevListColumns &columns);
+        QVariant getData(const RefIdColumn* column, const RefIdData& data, int index) const override;
 
-            QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
-                const override;
-
-            void setData (const RefIdColumn *column, RefIdData& data, int index,
-                const QVariant& value) const override;
-            ///< If the data type does not match an exception is thrown.
+        void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
+        ///< If the data type does not match an exception is thrown.
     };
 
-    template<typename RecordT>
-    LevelledListRefIdAdapter<RecordT>::LevelledListRefIdAdapter (UniversalId::Type type,
-            const LevListColumns &columns)
-    : BaseRefIdAdapter<RecordT> (type, columns), mLevList (columns)
-    {}
-
-    template<typename RecordT>
-    QVariant LevelledListRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
+    template <typename RecordT>
+    LevelledListRefIdAdapter<RecordT>::LevelledListRefIdAdapter(UniversalId::Type type, const LevListColumns& columns)
+        : BaseRefIdAdapter<RecordT>(type, columns)
+        , mLevList(columns)
     {
-        if (column==mLevList.mLevList || column == mLevList.mNestedListLevList)
+    }
+
+    template <typename RecordT>
+    QVariant LevelledListRefIdAdapter<RecordT>::getData(
+        const RefIdColumn* column, const RefIdData& data, int index) const
+    {
+        if (column == mLevList.mLevList || column == mLevList.mNestedListLevList)
             return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
-        return BaseRefIdAdapter<RecordT>::getData (column, data, index);
+        return BaseRefIdAdapter<RecordT>::getData(column, data, index);
     }
 
-    template<typename RecordT>
-    void LevelledListRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
-        const QVariant& value) const
+    template <typename RecordT>
+    void LevelledListRefIdAdapter<RecordT>::setData(
+        const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        BaseRefIdAdapter<RecordT>::setData (column, data, index, value);
+        BaseRefIdAdapter<RecordT>::setData(column, data, index, value);
         return;
     }
-
 
     // for non-tables
     template <typename ESXRecordT>
@@ -2196,53 +2147,54 @@ namespace CSMWorld
         UniversalId::Type mType;
 
         // not implemented
-        NestedListLevListRefIdAdapter (const NestedListLevListRefIdAdapter&);
-        NestedListLevListRefIdAdapter& operator= (const NestedListLevListRefIdAdapter&);
+        NestedListLevListRefIdAdapter(const NestedListLevListRefIdAdapter&);
+        NestedListLevListRefIdAdapter& operator=(const NestedListLevListRefIdAdapter&);
 
     public:
-
         NestedListLevListRefIdAdapter(UniversalId::Type type)
-                :mType(type) {}
+            : mType(type)
+        {
+        }
 
         virtual ~NestedListLevListRefIdAdapter() {}
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            throw std::logic_error ("cannot add a row to a fixed table");
+            throw std::logic_error("cannot add a row to a fixed table");
         }
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            throw std::logic_error ("cannot remove a row to a fixed table");
+            throw std::logic_error("cannot remove a row to a fixed table");
         }
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override
         {
-            throw std::logic_error ("table operation not supported");
+            throw std::logic_error("table operation not supported");
         }
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            throw std::logic_error ("table operation not supported");
+            throw std::logic_error("table operation not supported");
         }
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             if (mType == UniversalId::Type_CreatureLevelledList)
             {
                 switch (subColIndex)
                 {
-                    case 0: return QVariant(); // disable the checkbox editor
-                    case 1: return record.get().mFlags & ESM::CreatureLevList::AllLevels;
-                    case 2: return static_cast<int> (record.get().mChanceNone);
+                    case 0:
+                        return QVariant(); // disable the checkbox editor
+                    case 1:
+                        return record.get().mFlags & ESM::CreatureLevList::AllLevels;
+                    case 2:
+                        return static_cast<int>(record.get().mChanceNone);
                     default:
                         throw std::runtime_error("Trying to access non-existing column in levelled creatues!");
                 }
@@ -2251,30 +2203,34 @@ namespace CSMWorld
             {
                 switch (subColIndex)
                 {
-                    case 0: return record.get().mFlags & ESM::ItemLevList::Each;
-                    case 1: return record.get().mFlags & ESM::ItemLevList::AllLevels;
-                    case 2: return static_cast<int> (record.get().mChanceNone);
+                    case 0:
+                        return record.get().mFlags & ESM::ItemLevList::Each;
+                    case 1:
+                        return record.get().mFlags & ESM::ItemLevList::AllLevels;
+                    case 2:
+                        return static_cast<int>(record.get().mChanceNone);
                     default:
                         throw std::runtime_error("Trying to access non-existing column in levelled items!");
                 }
             }
         }
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
             ESXRecordT leveled = record.get();
 
             if (mType == UniversalId::Type_CreatureLevelledList)
             {
-                switch(subColIndex)
+                switch (subColIndex)
                 {
-                    case 0: return; // return without saving
+                    case 0:
+                        return; // return without saving
                     case 1:
                     {
-                        if(value.toBool())
+                        if (value.toBool())
                         {
                             leveled.mFlags |= ESM::CreatureLevList::AllLevels;
                             break;
@@ -2285,18 +2241,20 @@ namespace CSMWorld
                             break;
                         }
                     }
-                    case 2: leveled.mChanceNone = static_cast<unsigned char>(value.toInt()); break;
+                    case 2:
+                        leveled.mChanceNone = static_cast<unsigned char>(value.toInt());
+                        break;
                     default:
                         throw std::runtime_error("Trying to set non-existing column in levelled creatures!");
                 }
             }
             else
             {
-                switch(subColIndex)
+                switch (subColIndex)
                 {
                     case 0:
                     {
-                        if(value.toBool())
+                        if (value.toBool())
                         {
                             leveled.mFlags |= ESM::ItemLevList::Each;
                             break;
@@ -2309,7 +2267,7 @@ namespace CSMWorld
                     }
                     case 1:
                     {
-                        if(value.toBool())
+                        if (value.toBool())
                         {
                             leveled.mFlags |= ESM::ItemLevList::AllLevels;
                             break;
@@ -2320,21 +2278,20 @@ namespace CSMWorld
                             break;
                         }
                     }
-                    case 2: leveled.mChanceNone = static_cast<unsigned char>(value.toInt()); break;
+                    case 2:
+                        leveled.mChanceNone = static_cast<unsigned char>(value.toInt());
+                        break;
                     default:
                         throw std::runtime_error("Trying to set non-existing column in levelled items!");
                 }
             }
 
-            record.setModified (leveled);
+            record.setModified(leveled);
         }
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override
-        {
-            return 3;
-        }
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override { return 3; }
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
             return 1; // fixed at size 1
         }
@@ -2347,20 +2304,21 @@ namespace CSMWorld
         UniversalId::Type mType;
 
         // not implemented
-        NestedLevListRefIdAdapter (const NestedLevListRefIdAdapter&);
-        NestedLevListRefIdAdapter& operator= (const NestedLevListRefIdAdapter&);
+        NestedLevListRefIdAdapter(const NestedLevListRefIdAdapter&);
+        NestedLevListRefIdAdapter& operator=(const NestedLevListRefIdAdapter&);
 
     public:
-
-        NestedLevListRefIdAdapter(UniversalId::Type type) :mType(type) {}
+        NestedLevListRefIdAdapter(UniversalId::Type type)
+            : mType(type)
+        {
+        }
 
         virtual ~NestedLevListRefIdAdapter() {}
 
-        void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const override
+        void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT leveled = record.get();
 
             std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
@@ -2372,104 +2330,107 @@ namespace CSMWorld
             if (position >= (int)list.size())
                 list.push_back(newItem);
             else
-                list.insert(list.begin()+position, newItem);
+                list.insert(list.begin() + position, newItem);
 
-            record.setModified (leveled);
+            record.setModified(leveled);
         }
 
-        void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const override
+        void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT leveled = record.get();
 
             std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
 
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            list.erase (list.begin () + rowToRemove);
+            list.erase(list.begin() + rowToRemove);
 
-            record.setModified (leveled);
+            record.setModified(leveled);
         }
 
-        void setNestedTable (const RefIdColumn* column,
-                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const override
+        void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
+            const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
             ESXRecordT leveled = record.get();
 
-            leveled.mList =
-                static_cast<const NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem> >&>(nestedTable).mNestedTable;
+            leveled.mList
+                = static_cast<const NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem>>&>(
+                    nestedTable)
+                      .mNestedTable;
 
-            record.setModified (leveled);
+            record.setModified(leveled);
         }
 
-        NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
-                const RefIdData& data, int index) const override
+        NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem> >(record.get().mList);
+            return new NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem>>(record.get().mList);
         }
 
-        QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const override
+        QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
+            int subColIndex) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             const std::vector<ESM::LevelledListBase::LevelItem>& list = record.get().mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
             const ESM::LevelledListBase::LevelItem& content = list.at(subRowIndex);
 
             switch (subColIndex)
             {
-                case 0: return QString(content.mId.c_str());
-                case 1: return content.mLevel;
+                case 0:
+                    return QString(content.mId.c_str());
+                case 1:
+                    return content.mLevel;
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
         }
 
-        void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const override
+        void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
+            int subColIndex) const override
         {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            Record<ESXRecordT>& record
+                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
             ESXRecordT leveled = record.get();
             std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(list.size()))
+                throw std::runtime_error("index out of range");
 
-            switch(subColIndex)
+            switch (subColIndex)
             {
-                case 0: list.at(subRowIndex).mId = value.toString().toStdString(); break;
-                case 1: list.at(subRowIndex).mLevel = static_cast<short>(value.toInt()); break;
+                case 0:
+                    list.at(subRowIndex).mId = value.toString().toStdString();
+                    break;
+                case 1:
+                    list.at(subRowIndex).mLevel = static_cast<short>(value.toInt());
+                    break;
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
 
-            record.setModified (leveled);
+            record.setModified(leveled);
         }
 
-        int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const override
-        {
-            return 2;
-        }
+        int getNestedColumnsCount(const RefIdColumn* column, const RefIdData& data) const override { return 2; }
 
-        int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const override
+        int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            const Record<ESXRecordT>& record
+                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
             return static_cast<int>(record.get().mList.size());
         }

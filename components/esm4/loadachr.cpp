@@ -36,7 +36,7 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
     mParent = reader.currCell(); // NOTE: only for persistent achr? (aren't they all persistent?)
 
     while (reader.getSubRecordHeader())
@@ -44,12 +44,24 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getZString(mFullName); break;
-            case ESM4::SUB_NAME: reader.getFormId(mBaseObj);   break;
-            case ESM4::SUB_DATA: reader.get(mPlacement); break;
-            case ESM4::SUB_XSCL: reader.get(mScale);     break;
-            case ESM4::SUB_XOWN: reader.get(mOwner);     break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getZString(mFullName);
+                break;
+            case ESM4::SUB_NAME:
+                reader.getFormId(mBaseObj);
+                break;
+            case ESM4::SUB_DATA:
+                reader.get(mPlacement);
+                break;
+            case ESM4::SUB_XSCL:
+                reader.get(mScale);
+                break;
+            case ESM4::SUB_XOWN:
+                reader.get(mOwner);
+                break;
             case ESM4::SUB_XESP:
             {
                 reader.get(mEsp);
@@ -59,7 +71,7 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
             case ESM4::SUB_XRGD: // ragdoll
             case ESM4::SUB_XRGB: // ragdoll biped
             {
-                //std::cout << "ACHR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "ACHR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -91,7 +103,7 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
             case ESM4::SUB_TNAM: // FO3
             case ESM4::SUB_XATO: // FONV
             {
-                //std::cout << "ACHR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "ACHR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -101,10 +113,10 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::ActorCharacter::save(ESM4::Writer& writer) const
+// void ESM4::ActorCharacter::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::ActorCharacter::blank()
+// void ESM4::ActorCharacter::blank()
 //{
-//}
+// }

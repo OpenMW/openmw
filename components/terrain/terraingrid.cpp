@@ -2,131 +2,135 @@
 
 #include <memory>
 
-#include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
+#include <osg/Group>
 
-#include <components/sceneutil/positionattitudetransform.hpp>
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
-#include "view.hpp"
-#include "storage.hpp"
 #include "heightcull.hpp"
+#include "storage.hpp"
+#include "view.hpp"
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 namespace Terrain
 {
 
-class MyView : public View
-{
-public:
-    osg::ref_ptr<osg::Node> mLoaded;
-
-    void reset() override {}
-};
-
-TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask)
-    : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
-    , mNumSplits(4)
-{
-}
-
-TerrainGrid::TerrainGrid(osg::Group* parent, Storage* storage, unsigned int nodeMask)
-    : Terrain::World(parent, storage, nodeMask)
-    , mNumSplits(4)
-{
-}
-
-TerrainGrid::~TerrainGrid()
-{
-    while (!mGrid.empty())
+    class MyView : public View
     {
-        TerrainGrid::unloadCell(mGrid.begin()->first.first, mGrid.begin()->first.second);
-    }
-}
+    public:
+        osg::ref_ptr<osg::Node> mLoaded;
 
-void TerrainGrid::cacheCell(View* view, int x, int y)
-{
-    osg::Vec2f center(x+0.5f, y+0.5f);
-    static_cast<MyView*>(view)->mLoaded =  buildTerrain(nullptr, 1.f, center);
-}
+        void reset() override {}
+    };
 
-osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
-{
-    if (chunkSize * mNumSplits > 1.f)
+    TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
+        Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask)
+        : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
+        , mNumSplits(4)
     {
-        // keep splitting
-        osg::ref_ptr<osg::Group> group (new osg::Group);
-        if (parent)
-            parent->addChild(group);
-
-        float newChunkSize = chunkSize/2.f;
-        buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(newChunkSize/2.f, newChunkSize/2.f));
-        buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(newChunkSize/2.f, -newChunkSize/2.f));
-        buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(-newChunkSize/2.f, newChunkSize/2.f));
-        buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(-newChunkSize/2.f, -newChunkSize/2.f));
-        return group;
     }
-    else
+
+    TerrainGrid::TerrainGrid(osg::Group* parent, Storage* storage, unsigned int nodeMask)
+        : Terrain::World(parent, storage, nodeMask)
+        , mNumSplits(4)
     {
-        osg::ref_ptr<osg::Node> node = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0, false, osg::Vec3f(), true);
-        if (!node)
-            return nullptr;
-
-        const float cellWorldSize = mStorage->getCellWorldSize();
-        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
-        pat->setPosition(osg::Vec3f(chunkCenter.x()*cellWorldSize, chunkCenter.y()*cellWorldSize, 0.f));
-        pat->addChild(node);
-        if (parent)
-            parent->addChild(pat);
-        return pat;
     }
-}
 
-void TerrainGrid::loadCell(int x, int y)
-{
-    if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
-        return; // already loaded
+    TerrainGrid::~TerrainGrid()
+    {
+        while (!mGrid.empty())
+        {
+            TerrainGrid::unloadCell(mGrid.begin()->first.first, mGrid.begin()->first.second);
+        }
+    }
 
-    osg::Vec2f center(x+0.5f, y+0.5f);
-    osg::ref_ptr<osg::Node> terrainNode = buildTerrain(nullptr, 1.f, center);
-    if (!terrainNode)
-        return; // no terrain defined
+    void TerrainGrid::cacheCell(View* view, int x, int y)
+    {
+        osg::Vec2f center(x + 0.5f, y + 0.5f);
+        static_cast<MyView*>(view)->mLoaded = buildTerrain(nullptr, 1.f, center);
+    }
 
-    TerrainGrid::World::loadCell(x,y);
+    osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain(
+        osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
+    {
+        if (chunkSize * mNumSplits > 1.f)
+        {
+            // keep splitting
+            osg::ref_ptr<osg::Group> group(new osg::Group);
+            if (parent)
+                parent->addChild(group);
 
-    mTerrainRoot->addChild(terrainNode);
+            float newChunkSize = chunkSize / 2.f;
+            buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(newChunkSize / 2.f, newChunkSize / 2.f));
+            buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(newChunkSize / 2.f, -newChunkSize / 2.f));
+            buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(-newChunkSize / 2.f, newChunkSize / 2.f));
+            buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(-newChunkSize / 2.f, -newChunkSize / 2.f));
+            return group;
+        }
+        else
+        {
+            osg::ref_ptr<osg::Node> node
+                = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0, false, osg::Vec3f(), true);
+            if (!node)
+                return nullptr;
 
-    mGrid[std::make_pair(x,y)] = terrainNode;
-    updateWaterCulling();
-}
+            const float cellWorldSize = mStorage->getCellWorldSize();
+            osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
+            pat->setPosition(osg::Vec3f(chunkCenter.x() * cellWorldSize, chunkCenter.y() * cellWorldSize, 0.f));
+            pat->addChild(node);
+            if (parent)
+                parent->addChild(pat);
+            return pat;
+        }
+    }
 
-void TerrainGrid::unloadCell(int x, int y)
-{
-    CellBorder::CellGrid::iterator it = mGrid.find(std::make_pair(x,y));
-    if (it == mGrid.end())
-        return;
+    void TerrainGrid::loadCell(int x, int y)
+    {
+        if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
+            return; // already loaded
 
-    Terrain::World::unloadCell(x,y);
+        osg::Vec2f center(x + 0.5f, y + 0.5f);
+        osg::ref_ptr<osg::Node> terrainNode = buildTerrain(nullptr, 1.f, center);
+        if (!terrainNode)
+            return; // no terrain defined
 
-    osg::ref_ptr<osg::Node> terrainNode = it->second;
-    mTerrainRoot->removeChild(terrainNode);
+        TerrainGrid::World::loadCell(x, y);
 
-    mGrid.erase(it);
-    updateWaterCulling();
-}
+        mTerrainRoot->addChild(terrainNode);
 
-void TerrainGrid::updateWaterCulling()
-{
-    if (!mHeightCullCallback) return;
+        mGrid[std::make_pair(x, y)] = terrainNode;
+        updateWaterCulling();
+    }
 
-    osg::ComputeBoundsVisitor computeBoundsVisitor;
-    mTerrainRoot->accept(computeBoundsVisitor);
-    float lowZ = computeBoundsVisitor.getBoundingBox()._min.z();
-    mHeightCullCallback->setLowZ(lowZ);
-}
+    void TerrainGrid::unloadCell(int x, int y)
+    {
+        CellBorder::CellGrid::iterator it = mGrid.find(std::make_pair(x, y));
+        if (it == mGrid.end())
+            return;
 
-View *TerrainGrid::createView()
-{
-    return new MyView;
-}
+        Terrain::World::unloadCell(x, y);
+
+        osg::ref_ptr<osg::Node> terrainNode = it->second;
+        mTerrainRoot->removeChild(terrainNode);
+
+        mGrid.erase(it);
+        updateWaterCulling();
+    }
+
+    void TerrainGrid::updateWaterCulling()
+    {
+        if (!mHeightCullCallback)
+            return;
+
+        osg::ComputeBoundsVisitor computeBoundsVisitor;
+        mTerrainRoot->accept(computeBoundsVisitor);
+        float lowZ = computeBoundsVisitor.getBoundingBox()._min.z();
+        mHeightCullCallback->setLowZ(lowZ);
+    }
+
+    View* TerrainGrid::createView()
+    {
+        return new MyView;
+    }
 
 }

@@ -1,19 +1,20 @@
 #include "registerarchives.hpp"
 
-#include <set>
 #include <filesystem>
+#include <set>
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
+#include <components/vfs/manager.hpp>
 
 namespace VFS
 {
 
-    void registerArchives(VFS::Manager *vfs, const Files::Collections &collections, const std::vector<std::string> &archives, bool useLooseFiles)
+    void registerArchives(VFS::Manager* vfs, const Files::Collections& collections,
+        const std::vector<std::string>& archives, bool useLooseFiles)
     {
         const Files::PathContainer& dataDirs = collections.getPaths();
 
@@ -40,7 +41,7 @@ namespace VFS
         if (useLooseFiles)
         {
             std::set<std::filesystem::path> seen;
-            for (const auto &dataDir : dataDirs)
+            for (const auto& dataDir : dataDirs)
             {
                 if (seen.insert(dataDir).second)
                 {

@@ -1,7 +1,7 @@
 #include "statswatcher.hpp"
 
-#include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadrace.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -21,7 +21,9 @@ namespace MWGui
     // mWatchedTimeToStartDrowning = -1 for correct drowning state check,
     // if stats.getTimeToStartDrowning() == 0 already on game start
     StatsWatcher::StatsWatcher()
-      : mWatchedLevel(-1), mWatchedTimeToStartDrowning(-1), mWatchedStatsEmpty(true)
+        : mWatchedLevel(-1)
+        , mWatchedTimeToStartDrowning(-1)
+        , mWatchedStatsEmpty(true)
     {
     }
 
@@ -35,9 +37,9 @@ namespace MWGui
         if (mWatched.isEmpty())
             return;
 
-        MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
-        const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
-        for (int i = 0;i < ESM::Attribute::Length;++i)
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        const MWMechanics::NpcStats& stats = mWatched.getClass().getNpcStats(mWatched);
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
             if (stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
             {
@@ -69,12 +71,16 @@ namespace MWGui
 
         if (timeToDrown != mWatchedTimeToStartDrowning)
         {
-            static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("fHoldBreathTime")->mValue.getFloat();
+            static const float fHoldBreathTime = MWBase::Environment::get()
+                                                     .getWorld()
+                                                     ->getStore()
+                                                     .get<ESM::GameSetting>()
+                                                     .find("fHoldBreathTime")
+                                                     ->mValue.getFloat();
 
             mWatchedTimeToStartDrowning = timeToDrown;
 
-            if(timeToDrown >= fHoldBreathTime || timeToDrown == -1.0) // -1.0 is a special value during initialization
+            if (timeToDrown >= fHoldBreathTime || timeToDrown == -1.0) // -1.0 is a special value during initialization
                 winMgr->setDrowningBarVisibility(false);
             else
             {
@@ -83,10 +89,10 @@ namespace MWGui
             }
         }
 
-        //Loop over ESM::Skill::SkillEnum
+        // Loop over ESM::Skill::SkillEnum
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            if(stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
+            if (stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
             {
                 mWatchedSkills[i] = stats.getSkill(i);
                 setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
@@ -101,7 +107,7 @@ namespace MWGui
 
         if (mWatched.getClass().isNpc())
         {
-            const ESM::NPC *watchedRecord = mWatched.get<ESM::NPC>()->mBase;
+            const ESM::NPC* watchedRecord = mWatched.get<ESM::NPC>()->mBase;
 
             if (watchedRecord->mName != mWatchedName || mWatchedStatsEmpty)
             {
@@ -112,22 +118,22 @@ namespace MWGui
             if (watchedRecord->mRace != mWatchedRace || mWatchedStatsEmpty)
             {
                 mWatchedRace = watchedRecord->mRace;
-                const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore()
-                    .get<ESM::Race>().find(watchedRecord->mRace);
+                const ESM::Race* race
+                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(watchedRecord->mRace);
                 setValue("race", race->mName);
             }
 
             if (watchedRecord->mClass != mWatchedClass || mWatchedStatsEmpty)
             {
                 mWatchedClass = watchedRecord->mClass;
-                const ESM::Class *cls = MWBase::Environment::get().getWorld()->getStore()
-                    .get<ESM::Class>().find(watchedRecord->mClass);
+                const ESM::Class* cls
+                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(watchedRecord->mClass);
                 setValue("class", cls->mName);
 
-                MWBase::WindowManager::SkillList majorSkills (5);
-                MWBase::WindowManager::SkillList minorSkills (5);
+                MWBase::WindowManager::SkillList majorSkills(5);
+                MWBase::WindowManager::SkillList minorSkills(5);
 
-                for (int i=0; i<5; ++i)
+                for (int i = 0; i < 5; ++i)
                 {
                     minorSkills[i] = cls->mData.mSkills[i][0];
                     majorSkills[i] = cls->mData.mSkills[i][1];

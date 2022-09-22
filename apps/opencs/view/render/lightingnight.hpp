@@ -7,14 +7,13 @@ namespace CSVRender
 {
     class LightingNight : public Lighting
     {
-        public:
+    public:
+        LightingNight();
 
-            LightingNight();
+        void activate(osg::Group* rootNode, bool isExterior) override;
+        void deactivate() override;
 
-            void activate (osg::Group* rootNode, bool isExterior) override;
-            void deactivate() override;
-
-            osg::Vec4f getAmbientColour(osg::Vec4f *defaultAmbient) override;
+        osg::Vec4f getAmbientColour(osg::Vec4f* defaultAmbient) override;
     };
 }
 

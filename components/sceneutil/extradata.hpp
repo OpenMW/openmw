@@ -21,7 +21,11 @@ namespace SceneUtil
     class ProcessExtraDataVisitor : public osg::NodeVisitor
     {
     public:
-        ProcessExtraDataVisitor(Resource::SceneManager* sceneMgr) : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mSceneMgr(sceneMgr) {}
+        ProcessExtraDataVisitor(Resource::SceneManager* sceneMgr)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mSceneMgr(sceneMgr)
+        {
+        }
 
         void apply(osg::Node& node) override;
 

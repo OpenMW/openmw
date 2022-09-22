@@ -2,15 +2,15 @@
 
 #include <stdexcept>
 
-#include <SDL_mouse.h>
 #include <SDL_endian.h>
-#include <SDL_render.h>
 #include <SDL_hints.h>
+#include <SDL_mouse.h>
+#include <SDL_render.h>
 
-#include <osg/GraphicsContext>
 #include <osg/Geometry>
-#include <osg/Texture2D>
+#include <osg/GraphicsContext>
 #include <osg/TexMat>
+#include <osg/Texture2D>
 #include <osg/Version>
 #include <osgViewer/GraphicsWindow>
 
@@ -27,9 +27,9 @@ USE_GRAPHICSWINDOW()
 namespace SDLUtil
 {
 
-    SDLCursorManager::SDLCursorManager() :
-        mEnabled(false),
-        mInitialized(false)
+    SDLCursorManager::SDLCursorManager()
+        : mEnabled(false)
+        , mInitialized(false)
     {
     }
 
@@ -37,7 +37,7 @@ namespace SDLUtil
     {
         CursorMap::const_iterator curs_iter = mCursorMap.begin();
 
-        while(curs_iter != mCursorMap.end())
+        while (curs_iter != mCursorMap.end())
         {
             SDL_FreeCursor(curs_iter->second);
             ++curs_iter;
@@ -48,18 +48,18 @@ namespace SDLUtil
 
     void SDLCursorManager::setEnabled(bool enabled)
     {
-        if(mInitialized && enabled == mEnabled)
+        if (mInitialized && enabled == mEnabled)
             return;
 
         mInitialized = true;
         mEnabled = enabled;
 
-        //turn on hardware cursors
-        if(enabled)
+        // turn on hardware cursors
+        if (enabled)
         {
             _setGUICursor(mCurrentCursor);
         }
-        //turn off hardware cursors
+        // turn off hardware cursors
         else
         {
             SDL_ShowCursor(SDL_FALSE);
@@ -72,21 +72,23 @@ namespace SDLUtil
         _setGUICursor(name);
     }
 
-    void SDLCursorManager::_setGUICursor(const std::string &name)
+    void SDLCursorManager::_setGUICursor(const std::string& name)
     {
         auto it = mCursorMap.find(name);
         if (it != mCursorMap.end())
             SDL_SetCursor(it->second);
     }
 
-    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y, int cursorWidth, int cursorHeight)
+    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x,
+        Uint8 hotspot_y, int cursorWidth, int cursorHeight)
     {
 #ifndef ANDROID
         _createCursorFromResource(name, rotDegrees, image, hotspot_x, hotspot_y, cursorWidth, cursorHeight);
 #endif
     }
 
-    SDLUtil::SurfaceUniquePtr decompress(osg::ref_ptr<osg::Image> source, float rotDegrees, int cursorWidth, int cursorHeight)
+    SDLUtil::SurfaceUniquePtr decompress(
+        osg::ref_ptr<osg::Image> source, float rotDegrees, int cursorWidth, int cursorHeight)
     {
         int width = source->s();
         int height = source->t();
@@ -95,32 +97,27 @@ namespace SDLUtil
         osg::ref_ptr<osg::Image> decompressedImage = new osg::Image;
         decompressedImage->setFileName(source->getFileName());
         decompressedImage->allocateImage(width, height, 1, useAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE);
-        for (int s=0; s<width; ++s)
-            for (int t=0; t<height; ++t)
-                decompressedImage->setColor(source->getColor(s,t,0), s,t,0);
+        for (int s = 0; s < width; ++s)
+            for (int t = 0; t < height; ++t)
+                decompressedImage->setColor(source->getColor(s, t, 0), s, t, 0);
 
         Uint32 redMask = 0x000000ff;
         Uint32 greenMask = 0x0000ff00;
         Uint32 blueMask = 0x00ff0000;
         Uint32 alphaMask = useAlpha ? 0xff000000 : 0;
 
-        SDL_Surface *cursorSurface = SDL_CreateRGBSurfaceFrom(decompressedImage->data(),
-                                                              width,
-                                                              height,
-                                                              decompressedImage->getPixelSizeInBits(),
-                                                              decompressedImage->getRowSizeInBytes(),
-                                                              redMask,
-                                                              greenMask,
-                                                              blueMask,
-                                                              alphaMask);
+        SDL_Surface* cursorSurface = SDL_CreateRGBSurfaceFrom(decompressedImage->data(), width, height,
+            decompressedImage->getPixelSizeInBits(), decompressedImage->getRowSizeInBytes(), redMask, greenMask,
+            blueMask, alphaMask);
 
-        SDL_Surface *targetSurface = SDL_CreateRGBSurface(0, cursorWidth, cursorHeight, 32, redMask, greenMask, blueMask, alphaMask);
-        SDL_Renderer *renderer = SDL_CreateSoftwareRenderer(targetSurface);
+        SDL_Surface* targetSurface
+            = SDL_CreateRGBSurface(0, cursorWidth, cursorHeight, 32, redMask, greenMask, blueMask, alphaMask);
+        SDL_Renderer* renderer = SDL_CreateSoftwareRenderer(targetSurface);
 
         SDL_RenderClear(renderer);
 
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-        SDL_Texture *cursorTexture = SDL_CreateTextureFromSurface(renderer, cursorSurface);
+        SDL_Texture* cursorTexture = SDL_CreateTextureFromSurface(renderer, cursorSurface);
 
         SDL_RenderCopyEx(renderer, cursorTexture, nullptr, nullptr, -rotDegrees, nullptr, SDL_FLIP_VERTICAL);
 
@@ -131,19 +128,23 @@ namespace SDLUtil
         return SDLUtil::SurfaceUniquePtr(targetSurface, SDL_FreeSurface);
     }
 
-    void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y, int cursorWidth, int cursorHeight)
+    void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image,
+        Uint8 hotspot_x, Uint8 hotspot_y, int cursorWidth, int cursorHeight)
     {
         if (mCursorMap.find(name) != mCursorMap.end())
             return;
 
-        try {
+        try
+        {
             auto surface = decompress(image, static_cast<float>(rotDegrees), cursorWidth, cursorHeight);
 
-            //set the cursor and store it for later
+            // set the cursor and store it for later
             SDL_Cursor* curs = SDL_CreateColorCursor(surface.get(), hotspot_x, hotspot_y);
 
             mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
-        } catch (std::exception& e) {
+        }
+        catch (std::exception& e)
+        {
             Log(Debug::Warning) << e.what();
             Log(Debug::Warning) << "Using default cursor.";
             return;

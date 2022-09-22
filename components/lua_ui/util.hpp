@@ -1,8 +1,8 @@
 #ifndef OPENMW_LUAUI_WIDGETLIST
 #define OPENMW_LUAUI_WIDGETLIST
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 namespace LuaUi
 {

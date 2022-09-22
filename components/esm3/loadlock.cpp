@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Lockpick::load(ESMReader &esm, bool &isDeleted)
+    void Lockpick::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -53,7 +53,7 @@ namespace ESM
             esm.fail("Missing LKDT subrecord");
     }
 
-    void Lockpick::save(ESMWriter &esm, bool isDeleted) const
+    void Lockpick::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

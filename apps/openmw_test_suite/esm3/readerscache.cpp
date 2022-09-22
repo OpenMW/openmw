@@ -39,8 +39,8 @@ namespace
     {
         static constexpr std::size_t sInitialOffset = 324;
         static constexpr std::size_t sSkip = 100;
-        const Files::PathContainer mDataDirs {{std::filesystem::path{OPENMW_DATA_DIR}}};
-        const Files::Collections mFileCollections {mDataDirs, true};
+        const Files::PathContainer mDataDirs{ { std::filesystem::path{ OPENMW_DATA_DIR } } };
+        const Files::Collections mFileCollections{ mDataDirs, true };
         const std::string mContentFile = "template.omwgame";
         const std::filesystem::path mContentFilePath = mFileCollections.getCollection(".omwgame").getPath(mContentFile);
     };

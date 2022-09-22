@@ -15,11 +15,14 @@ namespace LuaUtil
     public:
         static void initLuaBindings(lua_State*);
 
-        explicit LuaStorage(lua_State* lua) : mLua(lua) {}
+        explicit LuaStorage(lua_State* lua)
+            : mLua(lua)
+        {
+        }
 
         void clearTemporaryAndRemoveCallbacks();
-        void load(const std::filesystem::path &path);
-        void save(const std::filesystem::path &path) const;
+        void load(const std::filesystem::path& path);
+        void save(const std::filesystem::path& path) const;
 
         sol::object getSection(std::string_view sectionName, bool readOnly);
         sol::object getMutableSection(std::string_view sectionName) { return getSection(sectionName, false); }
@@ -27,15 +30,20 @@ namespace LuaUtil
         sol::table getAllSections(bool readOnly = false);
 
         void setSingleValue(std::string_view section, std::string_view key, const sol::object& value)
-            { getSection(section)->set(key, value); }
+        {
+            getSection(section)->set(key, value);
+        }
 
         void setSectionValues(std::string_view section, const sol::optional<sol::table>& values)
-            { getSection(section)->setAll(values); }
+        {
+            getSection(section)->setAll(values);
+        }
 
         class Listener
         {
         public:
-            virtual void valueChanged(std::string_view section, std::string_view key, const sol::object& value) const = 0;
+            virtual void valueChanged(
+                std::string_view section, std::string_view key, const sol::object& value) const = 0;
             virtual void sectionReplaced(std::string_view section, const sol::optional<sol::table>& values) const = 0;
         };
         void setListener(const Listener* listener) { mListener = listener; }
@@ -45,7 +53,10 @@ namespace LuaUtil
         {
         public:
             Value() {}
-            Value(const sol::object& value) : mSerializedValue(serialize(value)) {}
+            Value(const sol::object& value)
+                : mSerializedValue(serialize(value))
+            {
+            }
             sol::object getCopy(lua_State* L) const;
             sol::object getReadOnly(lua_State* L) const;
 
@@ -56,7 +67,11 @@ namespace LuaUtil
 
         struct Section
         {
-            explicit Section(LuaStorage* storage, std::string name) : mStorage(storage), mSectionName(std::move(name)) {}
+            explicit Section(LuaStorage* storage, std::string name)
+                : mStorage(storage)
+                , mSectionName(std::move(name))
+            {
+            }
             const Value& get(std::string_view key) const;
             void set(std::string_view key, const sol::object& value);
             void setAll(const sol::optional<sol::table>& values);

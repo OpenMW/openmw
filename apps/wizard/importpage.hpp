@@ -11,13 +11,12 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        ImportPage(QWidget *parent);
+        ImportPage(QWidget* parent);
 
         int nextId() const override;
 
     private:
-        MainWizard *mWizard;
-
+        MainWizard* mWizard;
     };
 
 }

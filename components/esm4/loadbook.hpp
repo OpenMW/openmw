@@ -47,41 +47,41 @@ namespace ESM4
 
         enum BookSkill // for TES4 only
         {
-            BookSkill_None        = -1,
-            BookSkill_Armorer     =  0,
-            BookSkill_Athletics   =  1,
-            BookSkill_Blade       =  2,
-            BookSkill_Block       =  3,
-            BookSkill_Blunt       =  4,
-            BookSkill_HandToHand  =  5,
-            BookSkill_HeavyArmor  =  6,
-            BookSkill_Alchemy     =  7,
-            BookSkill_Alteration  =  8,
-            BookSkill_Conjuration =  9,
+            BookSkill_None = -1,
+            BookSkill_Armorer = 0,
+            BookSkill_Athletics = 1,
+            BookSkill_Blade = 2,
+            BookSkill_Block = 3,
+            BookSkill_Blunt = 4,
+            BookSkill_HandToHand = 5,
+            BookSkill_HeavyArmor = 6,
+            BookSkill_Alchemy = 7,
+            BookSkill_Alteration = 8,
+            BookSkill_Conjuration = 9,
             BookSkill_Destruction = 10,
-            BookSkill_Illusion    = 11,
-            BookSkill_Mysticism   = 12,
+            BookSkill_Illusion = 11,
+            BookSkill_Mysticism = 12,
             BookSkill_Restoration = 13,
-            BookSkill_Acrobatics  = 14,
-            BookSkill_LightArmor  = 15,
-            BookSkill_Marksman    = 16,
-            BookSkill_Mercantile  = 17,
-            BookSkill_Security    = 18,
-            BookSkill_Sneak       = 19,
+            BookSkill_Acrobatics = 14,
+            BookSkill_LightArmor = 15,
+            BookSkill_Marksman = 16,
+            BookSkill_Mercantile = 17,
+            BookSkill_Security = 18,
+            BookSkill_Sneak = 19,
             BookSkill_Speechcraft = 20
         };
 
         struct Data
         {
-            std::uint8_t  flags;
-            std::uint8_t  type;    // TES5 only
+            std::uint8_t flags;
+            std::uint8_t type; // TES5 only
             std::uint32_t teaches; // TES5 only
             std::int8_t bookSkill; // not in TES5
             std::uint32_t value;
-            float         weight;
+            float weight;
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -91,10 +91,10 @@ namespace ESM4
         float mBoundRadius;
 
         std::string mText;
-        FormId      mScriptId;
+        FormId mScriptId;
         std::string mIcon;
         std::uint16_t mEnchantmentPoints;
-        FormId      mEnchantment;
+        FormId mEnchantment;
 
         Data mData;
 
@@ -102,9 +102,9 @@ namespace ESM4
         FormId mDropSound;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

@@ -26,9 +26,11 @@ namespace Sqlite3
         StatementHandle mHandle;
         Query mQuery;
 
-        explicit Statement(sqlite3& db, Query query = Query {})
-            : mHandle(makeStatementHandle(db, query.text())),
-              mQuery(std::move(query)) {}
+        explicit Statement(sqlite3& db, Query query = Query{})
+            : mHandle(makeStatementHandle(db, query.text()))
+            , mQuery(std::move(query))
+        {
+        }
     };
 }
 

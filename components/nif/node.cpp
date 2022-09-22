@@ -39,7 +39,7 @@ namespace Nif
             case LOZENGE_BV:
             {
                 lozenge.radius = nif->getFloat();
-                if (nif->getVersion() >= NIFStream::generateVersion(4,2,1,0))
+                if (nif->getVersion() >= NIFStream::generateVersion(4, 2, 1, 0))
                 {
                     lozenge.extent0 = nif->getFloat();
                     lozenge.extent1 = nif->getFloat();
@@ -62,7 +62,7 @@ namespace Nif
             case HALFSPACE_BV:
             {
                 halfSpace.plane = osg::Plane(nif->getVector4());
-                if (nif->getVersion() >= NIFStream::generateVersion(4,2,1,0))
+                if (nif->getVersion() >= NIFStream::generateVersion(4, 2, 1, 0))
                     halfSpace.origin = nif->getVector3();
                 break;
             }
@@ -73,23 +73,23 @@ namespace Nif
         }
     }
 
-    void Node::read(NIFStream *nif)
+    void Node::read(NIFStream* nif)
     {
         Named::read(nif);
 
         flags = nif->getBethVersion() <= 26 ? nif->getUShort() : nif->getUInt();
         trafo = nif->getTrafo();
-        if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0))
+        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
             velocity = nif->getVector3();
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
             props.read(nif);
 
-        if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0))
+        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
             hasBounds = nif->getBoolean();
         if (hasBounds)
             bounds.read(nif);
         // Reference to the collision object in Gamebryo files.
-        if (nif->getVersion() >= NIFStream::generateVersion(10,0,1,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
             collision.read(nif);
 
         parents.clear();
@@ -97,7 +97,7 @@ namespace Nif
         isBone = false;
     }
 
-    void Node::post(NIFFile *nif)
+    void Node::post(NIFFile* nif)
     {
         Named::post(nif);
         props.post(nif);
@@ -109,7 +109,7 @@ namespace Nif
         isBone = true;
     }
 
-    void NiNode::read(NIFStream *nif)
+    void NiNode::read(NIFStream* nif)
     {
         Node::read(nif);
         children.read(nif);
@@ -126,7 +126,7 @@ namespace Nif
         }
     }
 
-    void NiNode::post(NIFFile *nif)
+    void NiNode::post(NIFFile* nif)
     {
         Node::post(nif);
         children.post(nif);
@@ -140,40 +140,41 @@ namespace Nif
         }
     }
 
-    void NiGeometry::MaterialData::read(NIFStream *nif)
+    void NiGeometry::MaterialData::read(NIFStream* nif)
     {
-        if (nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 0))
             return;
         unsigned int num = 0;
-        if (nif->getVersion() <= NIFStream::generateVersion(20,1,0,3))
+        if (nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 3))
             num = nif->getBoolean(); // Has Shader
-        else if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
+        else if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
             num = nif->getUInt();
         if (num)
         {
             nif->getStrings(names, num);
             nif->getInts(extra, num);
         }
-        if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
+        if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
             active = nif->getUInt();
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
             needsUpdate = nif->getBoolean();
     }
 
-    void NiGeometry::read(NIFStream *nif)
+    void NiGeometry::read(NIFStream* nif)
     {
         Node::read(nif);
         data.read(nif);
         skin.read(nif);
         material.read(nif);
-        if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
+        if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
+            && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
         {
             shaderprop.read(nif);
             alphaprop.read(nif);
         }
     }
 
-    void NiGeometry::post(NIFFile *nif)
+    void NiGeometry::post(NIFFile* nif)
     {
         Node::post(nif);
         data.post(nif);
@@ -184,7 +185,7 @@ namespace Nif
             nif->setUseSkinning(true);
     }
 
-    void BSLODTriShape::read(NIFStream *nif)
+    void BSLODTriShape::read(NIFStream* nif)
     {
         NiTriShape::read(nif);
         lod0 = nif->getUInt();
@@ -192,9 +193,9 @@ namespace Nif
         lod2 = nif->getUInt();
     }
 
-    void NiCamera::Camera::read(NIFStream *nif)
+    void NiCamera::Camera::read(NIFStream* nif)
     {
-        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             cameraFlags = nif->getUShort();
         left = nif->getFloat();
         right = nif->getFloat();
@@ -202,7 +203,7 @@ namespace Nif
         bottom = nif->getFloat();
         nearDist = nif->getFloat();
         farDist = nif->getFloat();
-        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             orthographic = nif->getBoolean();
         vleft = nif->getFloat();
         vright = nif->getFloat();
@@ -212,7 +213,7 @@ namespace Nif
         LOD = nif->getFloat();
     }
 
-    void NiCamera::read(NIFStream *nif)
+    void NiCamera::read(NIFStream* nif)
     {
         Node::read(nif);
 
@@ -220,31 +221,32 @@ namespace Nif
 
         nif->getInt(); // -1
         nif->getInt(); // 0
-        if (nif->getVersion() >= NIFStream::generateVersion(4,2,1,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(4, 2, 1, 0))
             nif->getInt(); // 0
     }
 
-    void NiSwitchNode::read(NIFStream *nif)
+    void NiSwitchNode::read(NIFStream* nif)
     {
         NiNode::read(nif);
-        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             switchFlags = nif->getUShort();
         initialIndex = nif->getUInt();
     }
 
-    void NiLODNode::read(NIFStream *nif)
+    void NiLODNode::read(NIFStream* nif)
     {
         NiSwitchNode::read(nif);
-        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW
+            && nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 0))
             lodCenter = nif->getVector3();
-        else if (nif->getVersion() > NIFStream::generateVersion(10,0,1,0))
+        else if (nif->getVersion() > NIFStream::generateVersion(10, 0, 1, 0))
         {
             nif->skip(4); // NiLODData, unsupported at the moment
             return;
         }
 
         unsigned int numLodLevels = nif->getUInt();
-        for (unsigned int i=0; i<numLodLevels; ++i)
+        for (unsigned int i = 0; i < numLodLevels; ++i)
         {
             LODRange r;
             r.minRange = nif->getFloat();
@@ -253,30 +255,30 @@ namespace Nif
         }
     }
 
-    void NiFltAnimationNode::read(NIFStream *nif)
+    void NiFltAnimationNode::read(NIFStream* nif)
     {
         NiSwitchNode::read(nif);
         mDuration = nif->getFloat();
     }
 
-    void NiSortAdjustNode::read(NIFStream *nif)
+    void NiSortAdjustNode::read(NIFStream* nif)
     {
         NiNode::read(nif);
         mMode = nif->getInt();
-        if (nif->getVersion() <= NIFStream::generateVersion(20,0,0,3))
+        if (nif->getVersion() <= NIFStream::generateVersion(20, 0, 0, 3))
             mSubSorter.read(nif);
     }
 
-    void NiSortAdjustNode::post(NIFFile *nif)
+    void NiSortAdjustNode::post(NIFFile* nif)
     {
         NiNode::post(nif);
         mSubSorter.post(nif);
     }
 
-    void NiBillboardNode::read(NIFStream *nif)
+    void NiBillboardNode::read(NIFStream* nif)
     {
         NiNode::read(nif);
-        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             mMode = nif->getUShort() & 0x7;
         else
             mMode = (flags >> 5) & 0x3;

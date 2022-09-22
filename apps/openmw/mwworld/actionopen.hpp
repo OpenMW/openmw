@@ -7,12 +7,11 @@ namespace MWWorld
 {
     class ActionOpen : public Action
     {
-            void executeImp (const MWWorld::Ptr& actor) override;
+        void executeImp(const MWWorld::Ptr& actor) override;
 
-        public:
-            ActionOpen (const Ptr& container);
-            ///< \param container The Container the Player has activated.
-
+    public:
+        ActionOpen(const Ptr& container);
+        ///< \param container The Container the Player has activated.
     };
 }
 

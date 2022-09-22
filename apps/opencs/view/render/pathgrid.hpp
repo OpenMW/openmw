@@ -4,8 +4,8 @@
 #include <vector>
 
 #include <QString>
-#include <osg/ref_ptr>
 #include <osg/Vec3d>
+#include <osg/ref_ptr>
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/subcellcollection.hpp"
@@ -32,103 +32,99 @@ namespace CSVRender
 
     class PathgridTag : public TagBase
     {
-        public:
+    public:
+        PathgridTag(Pathgrid* pathgrid);
 
-            PathgridTag (Pathgrid* pathgrid);
+        Pathgrid* getPathgrid() const;
 
-            Pathgrid* getPathgrid () const;
+        QString getToolTip(bool hideBasics, const WorldspaceHitResult& hit) const override;
 
-            QString getToolTip (bool hideBasics, const WorldspaceHitResult& hit) const override;
-
-        private:
-
-            Pathgrid* mPathgrid;
+    private:
+        Pathgrid* mPathgrid;
     };
 
     class Pathgrid
     {
-        public:
+    public:
+        typedef std::vector<unsigned short> NodeList;
 
-            typedef std::vector<unsigned short> NodeList;
+        Pathgrid(CSMWorld::Data& data, osg::Group* parent, const std::string& pathgridId,
+            const CSMWorld::CellCoordinates& coordinates);
 
-            Pathgrid(CSMWorld::Data& data, osg::Group* parent, const std::string& pathgridId,
-                const CSMWorld::CellCoordinates& coordinates);
+        ~Pathgrid();
 
-            ~Pathgrid();
+        const CSMWorld::CellCoordinates& getCoordinates() const;
+        const std::string& getId() const;
 
-            const CSMWorld::CellCoordinates& getCoordinates() const;
-            const std::string& getId() const;
+        bool isSelected() const;
+        const NodeList& getSelected() const;
+        void selectAll();
+        void toggleSelected(unsigned short node); // Adds to end of vector
+        void invertSelected();
+        void clearSelected();
 
-            bool isSelected() const;
-            const NodeList& getSelected() const;
-            void selectAll();
-            void toggleSelected(unsigned short node); // Adds to end of vector
-            void invertSelected();
-            void clearSelected();
+        void moveSelected(const osg::Vec3d& offset);
+        void setDragOrigin(unsigned short node);
+        void setDragEndpoint(unsigned short node);
+        void setDragEndpoint(const osg::Vec3d& pos);
 
-            void moveSelected(const osg::Vec3d& offset);
-            void setDragOrigin(unsigned short node);
-            void setDragEndpoint(unsigned short node);
-            void setDragEndpoint(const osg::Vec3d& pos);
+        void resetIndicators();
 
-            void resetIndicators();
+        void applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos);
+        void applyPosition(CSMWorld::CommandMacro& commands);
+        void applyEdge(CSMWorld::CommandMacro& commands, unsigned short node1, unsigned short node2);
+        void applyEdges(CSMWorld::CommandMacro& commands, unsigned short node);
+        void applyRemoveNodes(CSMWorld::CommandMacro& commands);
+        void applyRemoveEdges(CSMWorld::CommandMacro& commands);
 
-            void applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos);
-            void applyPosition(CSMWorld::CommandMacro& commands);
-            void applyEdge(CSMWorld::CommandMacro& commands, unsigned short node1, unsigned short node2);
-            void applyEdges(CSMWorld::CommandMacro& commands, unsigned short node);
-            void applyRemoveNodes(CSMWorld::CommandMacro& commands);
-            void applyRemoveEdges(CSMWorld::CommandMacro& commands);
+        osg::ref_ptr<PathgridTag> getTag() const;
 
-            osg::ref_ptr<PathgridTag> getTag() const;
+        void recreateGeometry();
+        void removeGeometry();
 
-            void recreateGeometry();
-            void removeGeometry();
+        void update();
 
-            void update();
+    private:
+        CSMWorld::Data& mData;
+        CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& mPathgridCollection;
+        std::string mId;
+        CSMWorld::CellCoordinates mCoords;
+        bool mInterior;
 
-        private:
+        NodeList mSelected;
+        osg::Vec3d mMoveOffset;
+        unsigned short mDragOrigin;
 
-            CSMWorld::Data& mData;
-            CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& mPathgridCollection;
-            std::string mId;
-            CSMWorld::CellCoordinates mCoords;
-            bool mInterior;
+        bool mChangeGeometry;
+        bool mRemoveGeometry;
+        bool mUseOffset;
 
-            NodeList mSelected;
-            osg::Vec3d mMoveOffset;
-            unsigned short mDragOrigin;
+        osg::Group* mParent;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
+        osg::ref_ptr<osg::Group> mPathgridGroup;
+        osg::ref_ptr<osg::Geometry> mPathgridGeometry;
+        osg::ref_ptr<osg::Geometry> mSelectedGeometry;
+        osg::ref_ptr<osg::Geometry> mDragGeometry;
 
-            bool mChangeGeometry;
-            bool mRemoveGeometry;
-            bool mUseOffset;
+        osg::ref_ptr<PathgridTag> mTag;
 
-            osg::Group* mParent;
-            osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
-            osg::ref_ptr<osg::Group> mPathgridGroup;
-            osg::ref_ptr<osg::Geometry> mPathgridGeometry;
-            osg::ref_ptr<osg::Geometry> mSelectedGeometry;
-            osg::ref_ptr<osg::Geometry> mDragGeometry;
+        void createGeometry();
+        void createSelectedGeometry();
+        void createSelectedGeometry(const CSMWorld::Pathgrid& source);
+        void removePathgridGeometry();
+        void removeSelectedGeometry();
 
-            osg::ref_ptr<PathgridTag> mTag;
+        void createDragGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid);
 
-            void createGeometry();
-            void createSelectedGeometry();
-            void createSelectedGeometry(const CSMWorld::Pathgrid& source);
-            void removePathgridGeometry();
-            void removeSelectedGeometry();
+        const CSMWorld::Pathgrid* getPathgridSource();
 
-            void createDragGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid);
+        int edgeExists(const CSMWorld::Pathgrid& source, unsigned short node1, unsigned short node2);
+        void addEdge(CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1,
+            unsigned short node2);
+        void removeEdge(CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1,
+            unsigned short node2);
 
-            const CSMWorld::Pathgrid* getPathgridSource();
-
-            int edgeExists(const CSMWorld::Pathgrid& source, unsigned short node1, unsigned short node2);
-            void addEdge(CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1,
-                unsigned short node2);
-            void removeEdge(CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1,
-                unsigned short node2);
-
-            int clampToCell(int v);
+        int clampToCell(int v);
     };
 }
 

@@ -29,259 +29,269 @@
 namespace Nif
 {
 
-// Base class for controllers that use NiInterpolators to animate objects.
-struct NiInterpController : public Controller
-{
-    // Usually one of the flags.
-    bool mManagerControlled{false};
+    // Base class for controllers that use NiInterpolators to animate objects.
+    struct NiInterpController : public Controller
+    {
+        // Usually one of the flags.
+        bool mManagerControlled{ false };
 
-    void read(NIFStream* nif) override;
-};
-
-// Base class for controllers that use one NiInterpolator.
-struct NiSingleInterpController : public NiInterpController
-{
-    NiInterpolatorPtr mInterpolator;
-
-    void read(NIFStream* nif) override;
-    void post(NIFFile* nif) override;
-};
-
-// Base class for controllers that use a NiFloatInterpolator to animate their target.
-struct NiFloatInterpController : public NiSingleInterpController { };
-
-// Ditto for NiBoolInterpolator.
-struct NiBoolInterpController : public NiSingleInterpController { };
-
-// Ditto for NiPoint3Interpolator.
-struct NiPoint3InterpController : public NiSingleInterpController { };
-
-struct NiParticleSystemController : public Controller
-{
-    enum BSPArrayController {
-        BSPArrayController_AtNode = 0x8,
-        BSPArrayController_AtVertex = 0x10
+        void read(NIFStream* nif) override;
     };
 
-    struct Particle {
-        osg::Vec3f velocity;
+    // Base class for controllers that use one NiInterpolator.
+    struct NiSingleInterpController : public NiInterpController
+    {
+        NiInterpolatorPtr mInterpolator;
+
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
+
+    // Base class for controllers that use a NiFloatInterpolator to animate their target.
+    struct NiFloatInterpController : public NiSingleInterpController
+    {
+    };
+
+    // Ditto for NiBoolInterpolator.
+    struct NiBoolInterpController : public NiSingleInterpController
+    {
+    };
+
+    // Ditto for NiPoint3Interpolator.
+    struct NiPoint3InterpController : public NiSingleInterpController
+    {
+    };
+
+    struct NiParticleSystemController : public Controller
+    {
+        enum BSPArrayController
+        {
+            BSPArrayController_AtNode = 0x8,
+            BSPArrayController_AtVertex = 0x10
+        };
+
+        struct Particle
+        {
+            osg::Vec3f velocity;
+            float lifetime;
+            float lifespan;
+            float timestamp;
+            unsigned short vertex;
+        };
+
+        float velocity;
+        float velocityRandom;
+
+        float verticalDir; // 0=up, pi/2=horizontal, pi=down
+        float verticalAngle;
+        float horizontalDir;
+        float horizontalAngle;
+
+        osg::Vec4f color;
+        float size;
+        float startTime;
+        float stopTime;
+
+        float emitRate;
         float lifetime;
-        float lifespan;
-        float timestamp;
-        unsigned short vertex;
+        float lifetimeRandom;
+
+        enum EmitFlags
+        {
+            EmitFlag_NoAutoAdjust = 0x1 // If this flag is set, we use the emitRate value. Otherwise,
+                                        // we calculate an emit rate so that the maximum number of particles
+                                        // in the system (numParticles) is never exceeded.
+        };
+        int emitFlags;
+
+        osg::Vec3f offsetRandom;
+
+        NodePtr emitter;
+
+        int numParticles;
+        int activeCount;
+        std::vector<Particle> particles;
+
+        NiParticleModifierPtr affectors;
+        NiParticleModifierPtr colliders;
+
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+
+        bool noAutoAdjust() const { return emitFlags & EmitFlag_NoAutoAdjust; }
+        bool emitAtVertex() const { return flags & BSPArrayController_AtVertex; }
     };
+    using NiBSPArrayController = NiParticleSystemController;
 
-    float velocity;
-    float velocityRandom;
-
-    float verticalDir; // 0=up, pi/2=horizontal, pi=down
-    float verticalAngle;
-    float horizontalDir;
-    float horizontalAngle;
-
-    osg::Vec4f color;
-    float size;
-    float startTime;
-    float stopTime;
-
-    float emitRate;
-    float lifetime;
-    float lifetimeRandom;
-
-    enum EmitFlags
+    struct NiMaterialColorController : public NiPoint3InterpController
     {
-        EmitFlag_NoAutoAdjust = 0x1 // If this flag is set, we use the emitRate value. Otherwise,
-                                    // we calculate an emit rate so that the maximum number of particles
-                                    // in the system (numParticles) is never exceeded.
+        NiPosDataPtr mData;
+        unsigned int mTargetColor;
+
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
     };
-    int emitFlags;
 
-    osg::Vec3f offsetRandom;
-
-    NodePtr emitter;
-
-    int numParticles;
-    int activeCount;
-    std::vector<Particle> particles;
-
-    NiParticleModifierPtr affectors;
-    NiParticleModifierPtr colliders;
-
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-
-    bool noAutoAdjust() const { return emitFlags & EmitFlag_NoAutoAdjust; }
-    bool emitAtVertex() const { return flags & BSPArrayController_AtVertex; }
-};
-using NiBSPArrayController = NiParticleSystemController;
-
-struct NiMaterialColorController : public NiPoint3InterpController
-{
-    NiPosDataPtr mData;
-    unsigned int mTargetColor;
-
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
-
-struct NiPathController : public Controller
-{
-    NiPosDataPtr posData;
-    NiFloatDataPtr floatData;
-
-    enum Flags
+    struct NiPathController : public Controller
     {
-        Flag_OpenCurve      = 0x020,
-        Flag_AllowFlip      = 0x040,
-        Flag_Bank           = 0x080,
-        Flag_ConstVelocity  = 0x100,
-        Flag_Follow         = 0x200,
-        Flag_FlipFollowAxis = 0x400
+        NiPosDataPtr posData;
+        NiFloatDataPtr floatData;
+
+        enum Flags
+        {
+            Flag_OpenCurve = 0x020,
+            Flag_AllowFlip = 0x040,
+            Flag_Bank = 0x080,
+            Flag_ConstVelocity = 0x100,
+            Flag_Follow = 0x200,
+            Flag_FlipFollowAxis = 0x400
+        };
+
+        int bankDir;
+        float maxBankAngle, smoothing;
+        short followAxis;
+
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
     };
 
-    int bankDir;
-    float maxBankAngle, smoothing;
-    short followAxis;
+    struct NiLookAtController : public Controller
+    {
+        NodePtr target;
+        unsigned short lookAtFlags{ 0 };
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiLookAtController : public Controller
-{
-    NodePtr target;
-    unsigned short lookAtFlags{0};
+    struct NiUVController : public Controller
+    {
+        NiUVDataPtr data;
+        unsigned int uvSet;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiUVController : public Controller
-{
-    NiUVDataPtr data;
-    unsigned int uvSet;
+    struct NiKeyframeController : public NiSingleInterpController
+    {
+        NiKeyframeDataPtr mData;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiKeyframeController : public NiSingleInterpController
-{
-    NiKeyframeDataPtr mData;
+    struct NiMultiTargetTransformController : public NiInterpController
+    {
+        NodeList mExtraTargets;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiMultiTargetTransformController : public NiInterpController
-{
-    NodeList mExtraTargets;
+    struct NiAlphaController : public NiFloatInterpController
+    {
+        NiFloatDataPtr mData;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiAlphaController : public NiFloatInterpController
-{
-    NiFloatDataPtr mData;
+    struct NiRollController : public NiSingleInterpController
+    {
+        NiFloatDataPtr mData;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiRollController : public NiSingleInterpController
-{
-    NiFloatDataPtr mData;
+    struct NiGeomMorpherController : public NiInterpController
+    {
+        bool mUpdateNormals{ false };
+        bool mAlwaysActive{ false };
+        NiMorphDataPtr mData;
+        NiInterpolatorList mInterpolators;
+        std::vector<float> mWeights;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiGeomMorpherController : public NiInterpController
-{
-    bool mUpdateNormals{false};
-    bool mAlwaysActive{false};
-    NiMorphDataPtr mData;
-    NiInterpolatorList mInterpolators;
-    std::vector<float> mWeights;
+    struct NiVisController : public NiBoolInterpController
+    {
+        NiVisDataPtr mData;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiVisController : public NiBoolInterpController
-{
-    NiVisDataPtr mData;
+    struct NiFlipController : public NiFloatInterpController
+    {
+        int mTexSlot; // NiTexturingProperty::TextureType
+        float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
+        NiSourceTextureList mSources;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiFlipController : public NiFloatInterpController
-{
-    int mTexSlot; // NiTexturingProperty::TextureType
-    float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
-    NiSourceTextureList mSources;
+    struct bhkBlendController : public Controller
+    {
+        void read(NIFStream* nif) override;
+    };
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+    struct NiControllerManager : public Controller
+    {
+        bool mCumulative;
+        void read(NIFStream* nif) override;
+    };
 
-struct bhkBlendController : public Controller
-{
-    void read(NIFStream *nif) override;
-};
+    struct NiInterpolator : public Record
+    {
+    };
 
-struct NiControllerManager : public Controller
-{
-    bool mCumulative;
-    void read(NIFStream *nif) override;
-};
+    struct NiPoint3Interpolator : public NiInterpolator
+    {
+        osg::Vec3f defaultVal;
+        NiPosDataPtr data;
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiInterpolator : public Record { };
+    struct NiBoolInterpolator : public NiInterpolator
+    {
+        char defaultVal;
+        NiBoolDataPtr data;
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiPoint3Interpolator : public NiInterpolator
-{
-    osg::Vec3f defaultVal;
-    NiPosDataPtr data;
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+    struct NiFloatInterpolator : public NiInterpolator
+    {
+        float defaultVal;
+        NiFloatDataPtr data;
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiBoolInterpolator : public NiInterpolator
-{
-    char defaultVal;
-    NiBoolDataPtr data;
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+    struct NiTransformInterpolator : public NiInterpolator
+    {
+        osg::Vec3f defaultPos;
+        osg::Quat defaultRot;
+        float defaultScale;
+        NiKeyframeDataPtr data;
 
-struct NiFloatInterpolator : public NiInterpolator
-{
-    float defaultVal;
-    NiFloatDataPtr data;
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
-struct NiTransformInterpolator : public NiInterpolator
-{
-    osg::Vec3f defaultPos;
-    osg::Quat defaultRot;
-    float defaultScale;
-    NiKeyframeDataPtr data;
-
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
-
-struct NiColorInterpolator : public NiInterpolator
-{
-    osg::Vec4f defaultVal;
-    NiColorDataPtr data;
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
+    struct NiColorInterpolator : public NiInterpolator
+    {
+        osg::Vec4f defaultVal;
+        NiColorDataPtr data;
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
 
 } // Namespace
 #endif

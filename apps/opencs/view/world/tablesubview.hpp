@@ -29,43 +29,40 @@ namespace CSVWorld
 
     class TableSubView : public CSVDoc::SubView
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            Table *mTable;
-            TableBottomBox *mBottom;
-            CSVFilter::FilterBox *mFilterBox;
-            bool mShowOptions;
-            QWidget *mOptions;
+        Table* mTable;
+        TableBottomBox* mBottom;
+        CSVFilter::FilterBox* mFilterBox;
+        bool mShowOptions;
+        QWidget* mOptions;
 
-        public:
+    public:
+        TableSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document,
+            const CreatorFactoryBase& creatorFactory, bool sorting);
 
-            TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
-                const CreatorFactoryBase& creatorFactory, bool sorting);
+        void setEditLock(bool locked) override;
 
-            void setEditLock (bool locked) override;
+        void setStatusBar(bool show) override;
 
-            void setStatusBar (bool show) override;
+        void useHint(const std::string& hint) override;
 
-            void useHint (const std::string& hint) override;
+    protected:
+        bool eventFilter(QObject* object, QEvent* event) override;
 
-        protected:
-            bool eventFilter(QObject* object, QEvent *event) override;
+    signals:
+        void cloneRequest(const std::string&, const CSMWorld::UniversalId::Type);
 
-        signals:
-            void cloneRequest(const std::string&,
-                              const CSMWorld::UniversalId::Type);
+    private slots:
 
-        private slots:
+        void editRequest(const CSMWorld::UniversalId& id, const std::string& hint);
+        void cloneRequest(const CSMWorld::UniversalId& toClone);
+        void createFilterRequest(std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action);
+        void toggleOptions();
 
-            void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
-            void cloneRequest (const CSMWorld::UniversalId& toClone);
-            void createFilterRequest(std::vector< CSMWorld::UniversalId >& types,
-                                     Qt::DropAction action);
-            void toggleOptions ();
+    public slots:
 
-        public slots:
-
-            void requestFocus (const std::string& id);
+        void requestFocus(const std::string& id);
     };
 }
 

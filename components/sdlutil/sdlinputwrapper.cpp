@@ -8,30 +8,30 @@
 namespace SDLUtil
 {
 
-InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer, bool grab) :
-        mSDLWindow(window),
-        mViewer(viewer),
-        mMouseListener(nullptr),
-        mSensorListener(nullptr),
-        mKeyboardListener(nullptr),
-        mWindowListener(nullptr),
-        mConListener(nullptr),
-        mWarpX(0),
-        mWarpY(0),
-        mWarpCompensate(false),
-        mWrapPointer(false),
-        mAllowGrab(grab),
-        mWantMouseVisible(false),
-        mWantGrab(false),
-        mWantRelative(false),
-        mGrabPointer(false),
-        mMouseRelative(false),
-        mFirstMouseMove(true),
-        mMouseZ(0),
-        mMouseX(0),
-        mMouseY(0),
-        mWindowHasFocus(true),
-        mMouseInWindow(true)
+    InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer, bool grab)
+        : mSDLWindow(window)
+        , mViewer(viewer)
+        , mMouseListener(nullptr)
+        , mSensorListener(nullptr)
+        , mKeyboardListener(nullptr)
+        , mWindowListener(nullptr)
+        , mConListener(nullptr)
+        , mWarpX(0)
+        , mWarpY(0)
+        , mWarpCompensate(false)
+        , mWrapPointer(false)
+        , mAllowGrab(grab)
+        , mWantMouseVisible(false)
+        , mWantGrab(false)
+        , mWantRelative(false)
+        , mGrabPointer(false)
+        , mMouseRelative(false)
+        , mFirstMouseMove(true)
+        , mMouseZ(0)
+        , mMouseX(0)
+        , mMouseY(0)
+        , mWindowHasFocus(true)
+        , mMouseInWindow(true)
     {
         Uint32 flags = SDL_GetWindowFlags(mSDLWindow);
         mWindowHasFocus = (flags & SDL_WINDOW_INPUT_FOCUS);
@@ -39,15 +39,13 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         _setWindowScale();
     }
 
-    InputWrapper::~InputWrapper()
-    {
-    }
+    InputWrapper::~InputWrapper() {}
 
     void InputWrapper::_setWindowScale()
     {
-        int w,h;
+        int w, h;
         SDL_GetWindowSize(mSDLWindow, &w, &h);
-        int dw,dh;
+        int dw, dh;
         SDL_GL_GetDrawableSize(mSDLWindow, &dw, &dh);
         mScaleX = dw / w;
         mScaleY = dh / h;
@@ -76,13 +74,13 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
             return;
         }
 
-        while(SDL_PollEvent(&evt))
+        while (SDL_PollEvent(&evt))
         {
-            switch(evt.type)
+            switch (evt.type)
             {
                 case SDL_MOUSEMOTION:
                     // Ignore this if it happened due to a warp
-                    if(!_handleWarpMotion(evt.motion))
+                    if (!_handleWarpMotion(evt.motion))
                     {
                         // If in relative mode, don't trigger events unless window has focus
                         if (!mWantRelative || mWindowHasFocus)
@@ -111,7 +109,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
                     if (!isModifierHeld(KMOD_ALT) && evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
                     {
-                        mViewer->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
+                        mViewer->getEventQueue()->keyPress(
+                            osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
                     }
 
                     break;
@@ -120,8 +119,10 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     {
                         mKeyboardListener->keyReleased(evt.key);
 
-                        if (!isModifierHeld(KMOD_ALT) && evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
-                            mViewer->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
+                        if (!isModifierHeld(KMOD_ALT) && evt.key.keysym.sym >= SDLK_F1
+                            && evt.key.keysym.sym <= SDLK_F12)
+                            mViewer->getEventQueue()->keyRelease(
+                                osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
                     }
 
                     break;
@@ -132,7 +133,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     break;
                 case SDL_KEYMAPCHANGED:
                     break;
-                case SDL_JOYHATMOTION: //As we manage everything with GameController, don't even bother with these.
+                case SDL_JOYHATMOTION: // As we manage everything with GameController, don't even bother with these.
                 case SDL_JOYAXISMOTION:
                 case SDL_JOYBUTTONDOWN:
                 case SDL_JOYBUTTONUP:
@@ -140,26 +141,27 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                 case SDL_JOYDEVICEREMOVED:
                     break;
                 case SDL_CONTROLLERDEVICEADDED:
-                    if(mConListener)
-                        mConListener->controllerAdded(1, evt.cdevice); //We only support one joystick, so give everything a generic deviceID
+                    if (mConListener)
+                        mConListener->controllerAdded(
+                            1, evt.cdevice); // We only support one joystick, so give everything a generic deviceID
                     break;
                 case SDL_CONTROLLERDEVICEREMOVED:
-                    if(mConListener)
+                    if (mConListener)
                         mConListener->controllerRemoved(evt.cdevice);
                     break;
                 case SDL_CONTROLLERBUTTONDOWN:
-                    if(mConListener)
+                    if (mConListener)
                         mConListener->buttonPressed(1, evt.cbutton);
                     break;
                 case SDL_CONTROLLERBUTTONUP:
-                    if(mConListener)
+                    if (mConListener)
                         mConListener->buttonReleased(1, evt.cbutton);
                     break;
                 case SDL_CONTROLLERAXISMOTION:
-                    if(mConListener)
+                    if (mConListener)
                         mConListener->axisMoved(1, evt.caxis);
                     break;
-                #if SDL_VERSION_ATLEAST(2, 0, 14)
+#if SDL_VERSION_ATLEAST(2, 0, 14)
                 case SDL_CONTROLLERSENSORUPDATE:
                     // controller sensor data is received on demand
                     break;
@@ -172,7 +174,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                 case SDL_CONTROLLERTOUCHPADUP:
                     mConListener->touchpadReleased(1, TouchEvent(evt.ctouchpad));
                     break;
-                #endif
+#endif
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);
                     break;
@@ -184,7 +186,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     switch (evt.display.event)
                     {
                         case SDL_DISPLAYEVENT_ORIENTATION:
-                            if (mSensorListener && evt.display.display == (unsigned int) Settings::Manager::getInt("screen", "Video"))
+                            if (mSensorListener
+                                && evt.display.display == (unsigned int)Settings::Manager::getInt("screen", "Video"))
                                 mSensorListener->displayOrientationChanged();
                             break;
                         default:
@@ -215,7 +218,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     break;
 
                 case SDL_APP_LOWMEMORY:
-                    Log(Debug::Warning) << "System reports that free RAM on device is running low. You may encounter an unexpected behaviour.";
+                    Log(Debug::Warning) << "System reports that free RAM on device is running low. You may encounter "
+                                           "an unexpected behaviour.";
                     break;
 
                 default:
@@ -227,7 +231,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
     void InputWrapper::handleWindowEvent(const SDL_Event& evt)
     {
-        switch (evt.window.event) {
+        switch (evt.window.event)
+        {
             case SDL_WINDOWEVENT_ENTER:
                 mMouseInWindow = true;
                 updateMouseSettings();
@@ -241,13 +246,13 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                 // so we ignore window moved events (improves window movement performance)
                 break;
             case SDL_WINDOWEVENT_SIZE_CHANGED:
-                int w,h;
+                int w, h;
                 SDL_GL_GetDrawableSize(mSDLWindow, &w, &h);
-                int x,y;
-                SDL_GetWindowPosition(mSDLWindow, &x,&y);
-                mViewer->getCamera()->getGraphicsContext()->resized(x,y,w,h);
+                int x, y;
+                SDL_GetWindowPosition(mSDLWindow, &x, &y);
+                mViewer->getCamera()->getGraphicsContext()->resized(x, y, w, h);
 
-                mViewer->getEventQueue()->windowResize(x,y,w,h);
+                mViewer->getEventQueue()->windowResize(x, y, w, h);
 
                 if (mWindowListener)
                     mWindowListener->windowResized(w, h);
@@ -331,7 +336,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         SDL_ShowCursor(mWantMouseVisible || !mWindowHasFocus);
 
         bool relative = mWantRelative && mMouseInWindow && mWindowHasFocus;
-        if(mMouseRelative == relative)
+        if (mMouseRelative == relative)
             return;
 
         mMouseRelative = relative;
@@ -343,10 +348,10 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         // also use wrapping if no-grab was specified in options (SDL_SetRelativeMouseMode
         // appears to eat the mouse cursor when pausing in a debugger)
         bool success = mAllowGrab && SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
-        if(relative && !success)
+        if (relative && !success)
             mWrapPointer = true;
 
-        //now remove all mouse events using the old setting from the queue
+        // now remove all mouse events using the old setting from the queue
         SDL_PumpEvents();
         SDL_FlushEvent(SDL_MOUSEMOTION);
     }
@@ -355,11 +360,11 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
     ///        of warpMouse()
     bool InputWrapper::_handleWarpMotion(const SDL_MouseMotionEvent& evt)
     {
-        if(!mWarpCompensate)
+        if (!mWarpCompensate)
             return false;
 
-        //this was a warp event, signal the caller to eat it.
-        if(evt.x == mWarpX && evt.y == mWarpY)
+        // this was a warp event, signal the caller to eat it.
+        if (evt.x == mWarpX && evt.y == mWarpY)
         {
             mWarpCompensate = false;
             return true;
@@ -371,9 +376,9 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
     /// \brief Wrap the mouse to the viewport
     void InputWrapper::_wrapMousePointer(const SDL_MouseMotionEvent& evt)
     {
-        //don't wrap if we don't want relative movements, support relative
-        //movements natively, or aren't grabbing anyways
-        if(!mMouseRelative || !mWrapPointer || !mGrabPointer)
+        // don't wrap if we don't want relative movements, support relative
+        // movements natively, or aren't grabbing anyways
+        if (!mMouseRelative || !mWrapPointer || !mGrabPointer)
             return;
 
         int width = 0;
@@ -381,26 +386,26 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
         SDL_GetWindowSize(mSDLWindow, &width, &height);
 
-        const int FUDGE_FACTOR_X = width/4;
-        const int FUDGE_FACTOR_Y = height/4;
+        const int FUDGE_FACTOR_X = width / 4;
+        const int FUDGE_FACTOR_Y = height / 4;
 
-        //warp the mouse if it's about to go outside the window
-        if(evt.x - FUDGE_FACTOR_X < 0  || evt.x + FUDGE_FACTOR_X > width
-                || evt.y - FUDGE_FACTOR_Y < 0 || evt.y + FUDGE_FACTOR_Y > height)
+        // warp the mouse if it's about to go outside the window
+        if (evt.x - FUDGE_FACTOR_X < 0 || evt.x + FUDGE_FACTOR_X > width || evt.y - FUDGE_FACTOR_Y < 0
+            || evt.y + FUDGE_FACTOR_Y > height)
         {
             warpMouse(width / 2, height / 2);
         }
     }
 
     /// \brief Package mouse and mousewheel motions into a single event
-    MouseMotionEvent InputWrapper::_packageMouseMotion(const SDL_Event &evt)
+    MouseMotionEvent InputWrapper::_packageMouseMotion(const SDL_Event& evt)
     {
         MouseMotionEvent pack_evt = {};
         pack_evt.x = mMouseX * mScaleX;
         pack_evt.y = mMouseY * mScaleY;
         pack_evt.z = mMouseZ;
 
-        if(evt.type == SDL_MOUSEMOTION)
+        if (evt.type == SDL_MOUSEMOTION)
         {
             pack_evt.x = mMouseX = evt.motion.x * mScaleX;
             pack_evt.y = mMouseY = evt.motion.y * mScaleY;
@@ -415,7 +420,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                 mFirstMouseMove = false;
             }
         }
-        else if(evt.type == SDL_MOUSEWHEEL)
+        else if (evt.type == SDL_MOUSEWHEEL)
         {
             mMouseZ += pack_evt.zrel = (evt.wheel.y * 120);
             pack_evt.z = mMouseZ;

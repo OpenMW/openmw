@@ -2,21 +2,21 @@
 
 #include <MyGUI_TextIterator.h>
 
+#include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
-#include <components/esm3/loadcrea.hpp>
 
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
+#include "../mwworld/actionsoulgem.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/nullaction.hpp"
-#include "../mwworld/actionsoulgem.hpp"
 
 #include "../mwgui/tooltips.hpp"
 #include "../mwgui/ustring.hpp"
@@ -33,51 +33,52 @@ namespace MWClass
     {
     }
 
-    bool Miscellaneous::isGold (const MWWorld::ConstPtr& ptr) const
+    bool Miscellaneous::isGold(const MWWorld::ConstPtr& ptr) const
     {
         return Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
-                        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
-                        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
-                        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
-                        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100");
+            || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
+            || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
+            || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
+            || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100");
     }
 
-    void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    void Miscellaneous::insertObjectRendering(
+        const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        if (!model.empty()) {
+        if (!model.empty())
+        {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    std::string Miscellaneous::getModel(const MWWorld::ConstPtr &ptr) const
+    std::string Miscellaneous::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Miscellaneous>(ptr);
     }
 
     std::string_view Miscellaneous::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::unique_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor) const
+    std::unique_ptr<MWWorld::Action> Miscellaneous::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
     }
 
     std::string_view Miscellaneous::getScript(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
         return ref->mBase->mScript;
     }
 
-    int Miscellaneous::getValue (const MWWorld::ConstPtr& ptr) const
+    int Miscellaneous::getValue(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
         int value = ref->mBase->mData.mValue;
         if (ptr.getCellRef().getGoldValue() > 1 && ptr.getRefData().getCount() == 1)
@@ -85,15 +86,16 @@ namespace MWClass
 
         if (!ptr.getCellRef().getSoul().empty())
         {
-            const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
+            const ESM::Creature* creature
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
             if (creature)
             {
                 int soul = creature->mData.mSoul;
                 if (Settings::Manager::getBool("rebalance soul gem values", "Game"))
                 {
-                    // use the 'soul gem value rebalance' formula from the Morrowind Code Patch 
+                    // use the 'soul gem value rebalance' formula from the Morrowind Code Patch
                     float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
-                    
+
                     // for Azura's star add the unfilled value
                     if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "Misc_SoulGem_Azura"))
                         value += soulValue;
@@ -124,14 +126,14 @@ namespace MWClass
 
     const std::string& Miscellaneous::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
         return ref->mBase->mIcon;
     }
 
-    MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
+    MWGui::ToolTipInfo Miscellaneous::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
         MWGui::ToolTipInfo info;
 
@@ -146,7 +148,8 @@ namespace MWClass
             countString = " (" + std::to_string(count) + ")";
 
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count) + MWGui::ToolTips::getSoulString(ptr.getCellRef());
+        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name))
+            + MWGui::ToolTips::getCountString(count) + MWGui::ToolTips::getSoulString(ptr.getCellRef());
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -155,7 +158,8 @@ namespace MWClass
         if (!gold && !ref->mBase->mData.mIsKey)
             text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
-        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+        {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
@@ -165,14 +169,14 @@ namespace MWClass
         return info;
     }
 
-    MWWorld::Ptr Miscellaneous::copyToCell(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell, int count) const
+    MWWorld::Ptr Miscellaneous::copyToCell(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell, int count) const
     {
         MWWorld::Ptr newPtr;
 
-        const MWWorld::ESMStore &store =
-            MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
-        if (isGold(ptr)) {
+        if (isGold(ptr))
+        {
             int goldAmount = getValue(ptr) * count;
 
             std::string_view base = "Gold_001";
@@ -188,15 +192,15 @@ namespace MWClass
             // Really, I have no idea why moving ref out of conditional
             // scope causes list::push_back throwing std::bad_alloc
             MWWorld::ManualRef newRef(store, base);
-            const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-                newRef.getPtr().get<ESM::Miscellaneous>();
+            const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
 
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
             newPtr.getCellRef().setGoldValue(goldAmount);
             newPtr.getRefData().setCount(1);
-        } else {
-            const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-                ptr.get<ESM::Miscellaneous>();
+        }
+        else
+        {
+            const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
             newPtr.getRefData().setCount(count);
         }
@@ -205,7 +209,7 @@ namespace MWClass
         return newPtr;
     }
 
-    std::unique_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Miscellaneous::use(const MWWorld::Ptr& ptr, bool force) const
     {
         if (isSoulGem(ptr))
             return std::make_unique<MWWorld::ActionSoulgem>(ptr);
@@ -213,22 +217,22 @@ namespace MWClass
         return std::make_unique<MWWorld::NullAction>();
     }
 
-    bool Miscellaneous::canSell (const MWWorld::ConstPtr& item, int npcServices) const
+    bool Miscellaneous::canSell(const MWWorld::ConstPtr& item, int npcServices) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = item.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = item.get<ESM::Miscellaneous>();
 
         return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc) && !isGold(item);
     }
 
-    float Miscellaneous::getWeight(const MWWorld::ConstPtr &ptr) const
+    float Miscellaneous::getWeight(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
         return ref->mBase->mData.mWeight;
     }
 
-    bool Miscellaneous::isKey(const MWWorld::ConstPtr &ptr) const
+    bool Miscellaneous::isKey(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
         return ref->mBase->mData.mIsKey != 0;
     }
 

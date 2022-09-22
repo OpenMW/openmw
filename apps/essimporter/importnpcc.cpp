@@ -5,12 +5,12 @@
 namespace ESSImport
 {
 
-    void NPCC::load(ESM::ESMReader &esm)
+    void NPCC::load(ESM::ESMReader& esm)
     {
         esm.getHNT(mNPDT, "NPDT");
 
         while (esm.isNextSub("AI_W") || esm.isNextSub("AI_E") || esm.isNextSub("AI_T") || esm.isNextSub("AI_F")
-               || esm.isNextSub("AI_A"))
+            || esm.isNextSub("AI_A"))
             mAiPackages.add(esm);
 
         mInventory.load(esm);

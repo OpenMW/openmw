@@ -1,7 +1,7 @@
 #include <components/misc/progressreporter.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <chrono>
 
@@ -19,17 +19,14 @@ namespace
     {
         StrictMock<ReportMock>* mImpl;
 
-        void operator()(std::size_t provided, std::size_t expected)
-        {
-            mImpl->call(provided, expected);
-        }
+        void operator()(std::size_t provided, std::size_t expected) { mImpl->call(provided, expected); }
     };
 
     TEST(MiscProgressReporterTest, shouldCallReportWhenPassedInterval)
     {
         StrictMock<ReportMock> report;
         EXPECT_CALL(report, call(13, 42)).WillOnce(Return());
-        ProgressReporter reporter(std::chrono::steady_clock::duration(0), Report {&report});
+        ProgressReporter reporter(std::chrono::steady_clock::duration(0), Report{ &report });
         reporter(13, 42);
     }
 
@@ -37,7 +34,7 @@ namespace
     {
         StrictMock<ReportMock> report;
         EXPECT_CALL(report, call(13, 42)).Times(0);
-        ProgressReporter reporter(std::chrono::seconds(1000), Report {&report});
+        ProgressReporter reporter(std::chrono::seconds(1000), Report{ &report });
         reporter(13, 42);
     }
 }

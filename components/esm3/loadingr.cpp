@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Ingredient::load(ESMReader &esm, bool &isDeleted)
+    void Ingredient::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -53,30 +53,24 @@ namespace ESM
             esm.fail("Missing IRDT subrecord");
 
         // horrible hack to fix broken data in records
-        for (int i=0; i<4; ++i)
+        for (int i = 0; i < 4; ++i)
         {
-            if (mData.mEffectID[i] != 85 &&
-                mData.mEffectID[i] != 22 &&
-                mData.mEffectID[i] != 17 &&
-                mData.mEffectID[i] != 79 &&
-                mData.mEffectID[i] != 74)
+            if (mData.mEffectID[i] != 85 && mData.mEffectID[i] != 22 && mData.mEffectID[i] != 17
+                && mData.mEffectID[i] != 79 && mData.mEffectID[i] != 74)
             {
                 mData.mAttributes[i] = -1;
             }
 
             // is this relevant in cycle from 0 to 4?
-            if (mData.mEffectID[i] != 89 &&
-                mData.mEffectID[i] != 26 &&
-                mData.mEffectID[i] != 21 &&
-                mData.mEffectID[i] != 83 &&
-                mData.mEffectID[i] != 78)
+            if (mData.mEffectID[i] != 89 && mData.mEffectID[i] != 26 && mData.mEffectID[i] != 21
+                && mData.mEffectID[i] != 83 && mData.mEffectID[i] != 78)
             {
                 mData.mSkills[i] = -1;
             }
         }
     }
 
-    void Ingredient::save(ESMWriter &esm, bool isDeleted) const
+    void Ingredient::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -98,7 +92,7 @@ namespace ESM
         mRecordFlags = 0;
         mData.mWeight = 0;
         mData.mValue = 0;
-        for (int i=0; i<4; ++i)
+        for (int i = 0; i < 4; ++i)
         {
             mData.mEffectID[i] = 0;
             mData.mSkills[i] = 0;

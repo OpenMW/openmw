@@ -17,7 +17,7 @@ namespace osgMyGUI
     class AdditiveLayer final : public MyGUI::OverlappedLayer
     {
     public:
-        MYGUI_RTTI_DERIVED( AdditiveLayer )
+        MYGUI_RTTI_DERIVED(AdditiveLayer)
 
         AdditiveLayer();
         ~AdditiveLayer() override;

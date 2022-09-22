@@ -50,9 +50,20 @@ namespace Debug
 
         DrawShape mDrawShape;
 
-        static DrawCall cube(osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite) { return { pos, dims, color, DrawShape::Cube }; }
-        static DrawCall wireCube(osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite) { return { pos, dims, color, DrawShape::WireCube }; }
-        static DrawCall cylinder(osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite) { return { pos, dims, color, DrawShape::Cylinder }; }
+        static DrawCall cube(osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite)
+        {
+            return { pos, dims, color, DrawShape::Cube };
+        }
+        static DrawCall wireCube(
+            osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite)
+        {
+            return { pos, dims, color, DrawShape::WireCube };
+        }
+        static DrawCall cylinder(
+            osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite)
+        {
+            return { pos, dims, color, DrawShape::Cylinder };
+        }
     };
 
     class DebugCustomDraw : public osg::Drawable
@@ -77,7 +88,8 @@ namespace Debug
         DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode);
         ~DebugDrawer();
 
-        void drawCube(osg::Vec3f mPosition, osg::Vec3f mDims = osg::Vec3(50., 50., 50.), osg::Vec3f mColor = colorWhite);
+        void drawCube(
+            osg::Vec3f mPosition, osg::Vec3f mDims = osg::Vec3(50., 50., 50.), osg::Vec3f mColor = colorWhite);
         void drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f mColor = colorWhite);
         void addDrawCall(const DrawCall& draw);
         void addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color = colorWhite);

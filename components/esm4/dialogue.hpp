@@ -31,15 +31,15 @@ namespace ESM4
 {
     enum DialType
     {
-        DTYP_Topic         = 0,
-        DTYP_Conversation  = 1,
-        DTYP_Combat        = 2,
-        DTYP_Persuation    = 3,
-        DTYP_Detection     = 4,
-        DTYP_Service       = 5,
+        DTYP_Topic = 0,
+        DTYP_Conversation = 1,
+        DTYP_Combat = 2,
+        DTYP_Persuation = 3,
+        DTYP_Detection = 4,
+        DTYP_Service = 5,
         DTYP_Miscellaneous = 6,
         // below FO3/FONV
-        DTYP_Radio         = 7
+        DTYP_Radio = 7
     };
 }
 

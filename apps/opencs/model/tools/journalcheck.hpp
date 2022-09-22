@@ -14,9 +14,8 @@ namespace CSMTools
     class JournalCheckStage : public CSMDoc::Stage
     {
     public:
-
-        JournalCheckStage(const CSMWorld::IdCollection<ESM::Dialogue>& journals,
-            const CSMWorld::InfoCollection& journalInfos);
+        JournalCheckStage(
+            const CSMWorld::IdCollection<ESM::Dialogue>& journals, const CSMWorld::InfoCollection& journalInfos);
 
         int setup() override;
         ///< \return number of steps
@@ -25,11 +24,9 @@ namespace CSMTools
         ///< Messages resulting from this stage will be appended to \a messages
 
     private:
-
         const CSMWorld::IdCollection<ESM::Dialogue>& mJournals;
         const CSMWorld::InfoCollection& mJournalInfos;
         bool mIgnoreBaseRecords;
-
     };
 }
 

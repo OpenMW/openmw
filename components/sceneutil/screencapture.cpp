@@ -1,70 +1,65 @@
 #include "screencapture.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/sceneutil/workqueue.hpp>
 #include <components/files/conversion.hpp>
+#include <components/sceneutil/workqueue.hpp>
 
-#include <osg/ref_ptr>
 #include <osg/Image>
+#include <osg/ref_ptr>
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 
-
+#include <atomic>
 #include <cassert>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <string>
-#include <atomic>
 
 namespace
 {
     class ScreenCaptureWorkItem : public SceneUtil::WorkItem
     {
-        public:
-            ScreenCaptureWorkItem(const osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation>& impl,
-                                  const osg::Image& image, unsigned int contextId)
-                : mImpl(impl),
-                  mImage(new osg::Image(image)),
-                  mContextId(contextId)
+    public:
+        ScreenCaptureWorkItem(const osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation>& impl,
+            const osg::Image& image, unsigned int contextId)
+            : mImpl(impl)
+            , mImage(new osg::Image(image))
+            , mContextId(contextId)
+        {
+            assert(mImpl != nullptr);
+        }
+
+        void doWork() override
+        {
+            if (mAborted)
+                return;
+
+            try
             {
-                assert(mImpl != nullptr);
+                (*mImpl)(*mImage, mContextId);
             }
-
-            void doWork() override
+            catch (const std::exception& e)
             {
-                if (mAborted)
-                    return;
-
-                try
-                {
-                    (*mImpl)(*mImage, mContextId);
-                }
-                catch (const std::exception& e)
-                {
-                    Log(Debug::Error) << "ScreenCaptureWorkItem exception: " << e.what();
-                }
+                Log(Debug::Error) << "ScreenCaptureWorkItem exception: " << e.what();
             }
+        }
 
-            void abort() override
-            {
-                mAborted = true;
-            }
+        void abort() override { mAborted = true; }
 
-        private:
-            const osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation> mImpl;
-            const osg::ref_ptr<const osg::Image> mImage;
-            const unsigned int mContextId;
-            std::atomic_bool mAborted {false};
+    private:
+        const osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation> mImpl;
+        const osg::ref_ptr<const osg::Image> mImage;
+        const unsigned int mContextId;
+        std::atomic_bool mAborted{ false };
     };
 }
 
 namespace SceneUtil
 {
-    std::filesystem::path writeScreenshotToFile(const std::filesystem::path& screenshotPath,
-                                                const std::string& screenshotFormat,
-                                                const osg::Image& image)
+    std::filesystem::path writeScreenshotToFile(
+        const std::filesystem::path& screenshotPath, const std::string& screenshotFormat, const osg::Image& image)
     {
         // Count screenshots.
         int shotCount = 0;
@@ -106,9 +101,8 @@ namespace SceneUtil
         return lastFileName;
     }
 
-    WriteScreenshotToFileOperation::WriteScreenshotToFileOperation(const std::filesystem::path &screenshotPath,
-                                                                   const std::string& screenshotFormat,
-                                                                   std::function<void (std::string)> callback)
+    WriteScreenshotToFileOperation::WriteScreenshotToFileOperation(const std::filesystem::path& screenshotPath,
+        const std::string& screenshotFormat, std::function<void(std::string)> callback)
         : mScreenshotPath(screenshotPath)
         , mScreenshotFormat(screenshotFormat)
         , mCallback(callback)
@@ -124,8 +118,8 @@ namespace SceneUtil
         }
         catch (const std::exception& e)
         {
-            Log(Debug::Error) << "Failed to write screenshot to file with path=\"" << mScreenshotPath
-                              << "\", format=\"" << mScreenshotFormat << "\": " << e.what();
+            Log(Debug::Error) << "Failed to write screenshot to file with path=\"" << mScreenshotPath << "\", format=\""
+                              << mScreenshotFormat << "\": " << e.what();
         }
         if (fileName.empty())
             mCallback("Failed to save screenshot");
@@ -133,10 +127,10 @@ namespace SceneUtil
             mCallback(Files::pathToUnicodeString(fileName) + " has been saved");
     }
 
-    AsyncScreenCaptureOperation::AsyncScreenCaptureOperation(osg::ref_ptr<WorkQueue> queue,
-                                                             osg::ref_ptr<CaptureOperation> impl)
-        : mQueue(std::move(queue)),
-          mImpl(std::move(impl))
+    AsyncScreenCaptureOperation::AsyncScreenCaptureOperation(
+        osg::ref_ptr<WorkQueue> queue, osg::ref_ptr<CaptureOperation> impl)
+        : mQueue(std::move(queue))
+        , mImpl(std::move(impl))
     {
         assert(mQueue != nullptr);
         assert(mImpl != nullptr);
@@ -160,7 +154,7 @@ namespace SceneUtil
     {
         osg::ref_ptr<SceneUtil::WorkItem> item(new ScreenCaptureWorkItem(mImpl, image, context_id));
         mQueue->addWorkItem(item);
-        const auto isDone = [] (const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
+        const auto isDone = [](const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
         const auto workItems = mWorkItems.lock();
         workItems->erase(std::remove_if(workItems->begin(), workItems->end(), isDone), workItems->end());
         workItems->emplace_back(std::move(item));

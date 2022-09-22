@@ -13,18 +13,18 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaAdapter)
 
-        public:
-            LuaAdapter();
+    public:
+        LuaAdapter();
 
-            void attach(const std::shared_ptr<Element>& element);
-            void detach();
+        void attach(const std::shared_ptr<Element>& element);
+        void detach();
 
-        private:
-            std::shared_ptr<Element> mElement;
-            LuaContainer* mContainer;
+    private:
+        std::shared_ptr<Element> mElement;
+        LuaContainer* mContainer;
 
-            void attachElement();
-            void detachElement();
+        void attachElement();
+        void detachElement();
     };
 }
 

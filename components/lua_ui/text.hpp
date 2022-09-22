@@ -11,17 +11,17 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaText)
 
-        public:
-            LuaText();
-            void initialize() override;
-            void updateProperties() override;
-            void setCaption(const MyGUI::UString& caption) override;
+    public:
+        LuaText();
+        void initialize() override;
+        void updateProperties() override;
+        void setCaption(const MyGUI::UString& caption) override;
 
-        private:
-            bool mAutoSized;
+    private:
+        bool mAutoSized;
 
-        protected:
-            MyGUI::IntSize calculateSize() override;
+    protected:
+        MyGUI::IntSize calculateSize() override;
     };
 }
 

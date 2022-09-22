@@ -4,8 +4,8 @@
 #include <array>
 
 #include <osg/FrameBufferObject>
-#include <osg/Texture2D>
 #include <osg/Program>
+#include <osg/Texture2D>
 
 namespace Shader
 {
@@ -20,12 +20,12 @@ namespace MWRender
     {
 
     public:
-
         LuminanceCalculator() = default;
 
         LuminanceCalculator(Shader::ShaderManager& shaderManager);
 
-        void draw(const PingPongCanvas& canvas, osg::RenderInfo& renderInfo, osg::State& state, osg::GLExtensions* ext, size_t frameId);
+        void draw(const PingPongCanvas& canvas, osg::RenderInfo& renderInfo, osg::State& state, osg::GLExtensions* ext,
+            size_t frameId);
 
         bool isEnabled() const { return mEnabled; }
 
@@ -43,7 +43,6 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> getLuminanceTexture(size_t frameId) const;
 
     private:
-
         void compile();
 
         struct Container

@@ -18,7 +18,6 @@ namespace Debug
 
     bool shouldDebugOpenGL();
 
-
     /*
         Debug groups allow rendering to be annotated, making debugging via APITrace/CodeXL/NSight etc. much clearer.
 
@@ -29,9 +28,9 @@ namespace Debug
         You'll need OPENMW_DEBUG_OPENGL set to true, or shouldDebugOpenGL() redefined to just return true as otherwise
         the extension function pointers won't get set up. That can maybe be cleaned up in the future.
 
-        Beware that consecutive identical debug groups (i.e. pointers match) won't always get applied due to OSG thinking
-        it's already applied them. Either avoid nesting the same object, add dummy groups so they're not consecutive, or
-        ensure the leaf group isn't identical to its parent.
+        Beware that consecutive identical debug groups (i.e. pointers match) won't always get applied due to OSG
+       thinking it's already applied them. Either avoid nesting the same object, add dummy groups so they're not
+       consecutive, or ensure the leaf group isn't identical to its parent.
     */
     class DebugGroup : public osg::StateAttribute
     {
@@ -40,13 +39,15 @@ namespace Debug
             : mSource(0)
             , mId(0)
             , mMessage("")
-        {}
+        {
+        }
 
         DebugGroup(GLenum source, GLuint id, const std::string& message)
             : mSource(source)
             , mId(id)
             , mMessage(message)
-        {}
+        {
+        }
 
         DebugGroup(const std::string& message, GLuint id = 0);
 
@@ -73,7 +74,7 @@ namespace Debug
         GLuint mId;
         std::string mMessage;
 
-        static std::map<unsigned int, std::vector<const DebugGroup *>> sLastAppliedStack;
+        static std::map<unsigned int, std::vector<const DebugGroup*>> sLastAppliedStack;
 
         friend EnableGLDebugOperation;
     };

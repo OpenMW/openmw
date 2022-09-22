@@ -36,31 +36,45 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_NAME: reader.getFormId(mBaseObj);   break;
-            case ESM4::SUB_DATA: reader.get(mPlacement);       break;
-            case ESM4::SUB_XSCL: reader.get(mScale);           break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_NAME:
+                reader.getFormId(mBaseObj);
+                break;
+            case ESM4::SUB_DATA:
+                reader.get(mPlacement);
+                break;
+            case ESM4::SUB_XSCL:
+                reader.get(mScale);
+                break;
             case ESM4::SUB_XESP:
             {
                 reader.get(mEsp);
                 reader.adjustFormId(mEsp.parent);
                 break;
             }
-            case ESM4::SUB_XOWN: reader.getFormId(mOwner);     break;
-            case ESM4::SUB_XGLB: reader.get(mGlobal);          break; // FIXME: formId?
-            case ESM4::SUB_XRNK: reader.get(mFactionRank);     break;
+            case ESM4::SUB_XOWN:
+                reader.getFormId(mOwner);
+                break;
+            case ESM4::SUB_XGLB:
+                reader.get(mGlobal);
+                break; // FIXME: formId?
+            case ESM4::SUB_XRNK:
+                reader.get(mFactionRank);
+                break;
             case ESM4::SUB_XRGD: // ragdoll
             case ESM4::SUB_XRGB: // ragdoll biped
             {
                 // seems to occur only for dead bodies, e.g. DeadMuffy, DeadDogVicious
-                //std::cout << "ACRE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "ACRE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -74,7 +88,7 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
             case ESM4::SUB_XPRD: // FO3
             case ESM4::SUB_XATO: // FONV
             {
-                //std::cout << "ACRE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "ACRE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -84,10 +98,10 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::ActorCreature::save(ESM4::Writer& writer) const
+// void ESM4::ActorCreature::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::ActorCreature::blank()
+// void ESM4::ActorCreature::blank()
 //{
-//}
+// }

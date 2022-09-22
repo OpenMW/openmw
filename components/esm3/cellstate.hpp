@@ -23,8 +23,8 @@ namespace ESM
 
         TimeStamp mLastRespawn;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 }
 

@@ -49,20 +49,30 @@ namespace ESM4
             // 4 = Staff
             // 5 = Bow
             std::uint32_t type;
-            float         speed;
-            float         reach;
+            float speed;
+            float reach;
             std::uint32_t flags;
             std::uint32_t value; // gold
             std::uint32_t health;
-            float         weight;
+            float weight;
             std::uint16_t damage;
-            std::uint8_t  clipSize; // FO3/FONV only
+            std::uint8_t clipSize; // FO3/FONV only
 
-            Data() : type(0), speed(0.f), reach(0.f), flags(0), value(0),
-                     health(0), weight(0.f), damage(0), clipSize(0) {}
+            Data()
+                : type(0)
+                , speed(0.f)
+                , reach(0.f)
+                , flags(0)
+                , value(0)
+                , health(0)
+                , weight(0.f)
+                , damage(0)
+                , clipSize(0)
+            {
+            }
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -79,14 +89,14 @@ namespace ESM4
 
         FormId mScriptId;
         std::uint16_t mEnchantmentPoints;
-        FormId      mEnchantment;
+        FormId mEnchantment;
 
         Data mData;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

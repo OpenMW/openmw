@@ -11,19 +11,19 @@ namespace CSVWidget
     {
         Q_OBJECT
 
-        QColorDialog *mColorPicker;
+        QColorDialog* mColorPicker;
 
     public:
-        explicit ColorPickerPopup(QWidget *parent);
-    
-        void showPicker(const QPoint &position, const QColor &initialColor);
+        explicit ColorPickerPopup(QWidget* parent);
+
+        void showPicker(const QPoint& position, const QColor& initialColor);
 
     protected:
-        void mousePressEvent(QMouseEvent *event) override;
-        bool eventFilter(QObject *object, QEvent *event) override;
+        void mousePressEvent(QMouseEvent* event) override;
+        bool eventFilter(QObject* object, QEvent* event) override;
 
     signals:
-        void colorChanged(const QColor &color);
+        void colorChanged(const QColor& color);
     };
 }
 

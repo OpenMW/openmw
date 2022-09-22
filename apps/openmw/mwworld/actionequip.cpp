@@ -7,19 +7,19 @@
 
 #include <components/compiler/locals.hpp>
 
+#include "class.hpp"
 #include "inventorystore.hpp"
 #include "player.hpp"
-#include "class.hpp"
 
 namespace MWWorld
 {
-    ActionEquip::ActionEquip (const MWWorld::Ptr& object, bool force)
-    : Action (false, object)
-    , mForce(force)
+    ActionEquip::ActionEquip(const MWWorld::Ptr& object, bool force)
+        : Action(false, object)
+        , mForce(force)
     {
     }
 
-    void ActionEquip::executeImp (const Ptr& actor)
+    void ActionEquip::executeImp(const Ptr& actor)
     {
         MWWorld::Ptr object = getTarget();
         MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
@@ -34,13 +34,13 @@ namespace MWWorld
 
         if (!mForce)
         {
-            auto result = object.getClass().canBeEquipped (object, actor);
+            auto result = object.getClass().canBeEquipped(object, actor);
 
             // display error message if the player tried to equip something
             if (!result.second.empty() && actor == MWMechanics::getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox(result.second);
 
-            switch(result.first)
+            switch (result.first)
             {
                 case 0:
                     return;
@@ -68,8 +68,8 @@ namespace MWWorld
             throw std::runtime_error("ActionEquip can't find item " + object.getCellRef().getRefId());
 
         // equip the item in the first free slot
-        std::vector<int>::const_iterator slot=slots_.first.begin();
-        for (;slot!=slots_.first.end(); ++slot)
+        std::vector<int>::const_iterator slot = slots_.first.begin();
+        for (; slot != slots_.first.end(); ++slot)
         {
             // if the item is equipped already, nothing to do
             if (invStore.getSlot(*slot) == it)
@@ -101,7 +101,7 @@ namespace MWWorld
                     invStore.equip(*slot, it, actor);
                 }
 
-                //Fix for issue of selected enchated item getting remmoved on cycle
+                // Fix for issue of selected enchated item getting remmoved on cycle
                 if (invStore.getSlot(*slot) == enchItem)
                 {
                     reEquip = true;

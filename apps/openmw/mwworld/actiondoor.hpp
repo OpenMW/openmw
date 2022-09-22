@@ -8,10 +8,10 @@ namespace MWWorld
 {
     class ActionDoor : public Action
     {
-            void executeImp (const MWWorld::Ptr& actor) override;
+        void executeImp(const MWWorld::Ptr& actor) override;
 
-        public:
-            ActionDoor (const Ptr& object);
+    public:
+        ActionDoor(const Ptr& object);
     };
 }
 

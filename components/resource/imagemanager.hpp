@@ -1,12 +1,12 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_IMAGEMANAGER_H
 #define OPENMW_COMPONENTS_RESOURCE_IMAGEMANAGER_H
 
-#include <string>
 #include <map>
+#include <string>
 
-#include <osg/ref_ptr>
 #include <osg/Image>
 #include <osg/Texture2D>
+#include <osg/ref_ptr>
 
 #include "resourcemanager.hpp"
 
@@ -40,7 +40,7 @@ namespace Resource
         osg::ref_ptr<osgDB::Options> mOptionsNoFlip;
 
         ImageManager(const ImageManager&);
-        void operator = (const ImageManager&);
+        void operator=(const ImageManager&);
     };
 
 }

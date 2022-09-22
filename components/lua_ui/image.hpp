@@ -1,8 +1,8 @@
 #ifndef OPENMW_LUAUI_IMAGE
 #define OPENMW_LUAUI_IMAGE
 
-#include <MyGUI_TileRect.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_TileRect.h>
 
 #include "widget.hpp"
 
@@ -12,23 +12,23 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaTileRect)
 
-        public:
-            void _setAlign(const MyGUI::IntSize& _oldsize) override;
+    public:
+        void _setAlign(const MyGUI::IntSize& _oldsize) override;
 
-            void updateSize(MyGUI::IntSize tileSize) { mSetTileSize = tileSize; }
+        void updateSize(MyGUI::IntSize tileSize) { mSetTileSize = tileSize; }
 
-        protected:
-            MyGUI::IntSize mSetTileSize;
+    protected:
+        MyGUI::IntSize mSetTileSize;
     };
 
     class LuaImage : public MyGUI::ImageBox, public WidgetExtension
     {
         MYGUI_RTTI_DERIVED(LuaImage)
 
-        protected:
-            void initialize() override;
-            void updateProperties() override;
-            LuaTileRect* mTileRect;
+    protected:
+        void initialize() override;
+        void updateProperties() override;
+        LuaTileRect* mTileRect;
     };
 }
 

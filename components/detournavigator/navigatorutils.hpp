@@ -3,9 +3,9 @@
 
 #include "findsmoothpath.hpp"
 #include "flags.hpp"
-#include "settings.hpp"
 #include "navigator.hpp"
 #include "navmeshcacheitem.hpp"
+#include "settings.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -29,18 +29,15 @@ namespace DetourNavigator
         const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts,
         float endTolerance, OutputIterator out)
     {
-        static_assert(
-            std::is_same<
-                typename std::iterator_traits<OutputIterator>::iterator_category,
-                std::output_iterator_tag
-            >::value,
-            "out is not an OutputIterator"
-        );
+        static_assert(std::is_same<typename std::iterator_traits<OutputIterator>::iterator_category,
+                          std::output_iterator_tag>::value,
+            "out is not an OutputIterator");
         const auto navMesh = navigator.getNavMesh(agentBounds);
         if (navMesh == nullptr)
             return Status::NavMeshNotFound;
         const auto settings = navigator.getSettings();
-        return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings.mRecast, agentBounds.mHalfExtents),
+        return findSmoothPath(navMesh->lockConst()->getImpl(),
+            toNavMeshCoordinates(settings.mRecast, agentBounds.mHalfExtents),
             toNavMeshCoordinates(settings.mRecast, stepSize), toNavMeshCoordinates(settings.mRecast, start),
             toNavMeshCoordinates(settings.mRecast, end), includeFlags, areaCosts, settings, endTolerance, out);
     }
@@ -54,7 +51,7 @@ namespace DetourNavigator
      * @return not empty optional with position if point is found and empty optional if point is not found.
      */
     std::optional<osg::Vec3f> findRandomPointAroundCircle(const Navigator& navigator, const AgentBounds& agentBounds,
-        const osg::Vec3f& start, const float maxRadius, const Flags includeFlags, float(*prng)());
+        const osg::Vec3f& start, const float maxRadius, const Flags includeFlags, float (*prng)());
 
     /**
      * @brief raycast finds farest navmesh point from start on a line from start to end that has path from start.
@@ -64,8 +61,8 @@ namespace DetourNavigator
      * @param includeFlags setup allowed surfaces for actor to walk.
      * @return not empty optional with position if point is found and empty optional if point is not found.
      */
-    std::optional<osg::Vec3f> raycast(const Navigator& navigator, const AgentBounds& agentBounds, const osg::Vec3f& start,
-        const osg::Vec3f& end, const Flags includeFlags);
+    std::optional<osg::Vec3f> raycast(const Navigator& navigator, const AgentBounds& agentBounds,
+        const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags);
 }
 
 #endif

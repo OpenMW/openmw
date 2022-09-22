@@ -1,10 +1,10 @@
 #include "pushbutton.hpp"
 
-#include <QMouseEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
 
-#include "../../model/prefs/state.hpp"
 #include "../../model/prefs/shortcutmanager.hpp"
+#include "../../model/prefs/state.hpp"
 
 void CSVWidget::PushButton::processShortcuts()
 {
@@ -22,8 +22,7 @@ void CSVWidget::PushButton::setExtendedToolTip()
     {
         case Type_TopMode:
 
-            tooltip +=
-                "<p>(left click to change mode)";
+            tooltip += "<p>(left click to change mode)";
 
             break;
 
@@ -50,52 +49,56 @@ void CSVWidget::PushButton::setExtendedToolTip()
             break;
     }
 
-    setToolTip (tooltip);
+    setToolTip(tooltip);
 }
 
-void CSVWidget::PushButton::keyPressEvent (QKeyEvent *event)
+void CSVWidget::PushButton::keyPressEvent(QKeyEvent* event)
 {
-    if (event->key()!=Qt::Key_Shift)
+    if (event->key() != Qt::Key_Shift)
         mKeepOpen = false;
 
-    QPushButton::keyPressEvent (event);
+    QPushButton::keyPressEvent(event);
 }
 
-void CSVWidget::PushButton::keyReleaseEvent (QKeyEvent *event)
+void CSVWidget::PushButton::keyReleaseEvent(QKeyEvent* event)
 {
-    if (event->key()==Qt::Key_Space)
+    if (event->key() == Qt::Key_Space)
         mKeepOpen = event->modifiers() & Qt::ShiftModifier;
 
-    QPushButton::keyReleaseEvent (event);
+    QPushButton::keyReleaseEvent(event);
 }
 
-void CSVWidget::PushButton::mouseReleaseEvent (QMouseEvent *event)
+void CSVWidget::PushButton::mouseReleaseEvent(QMouseEvent* event)
 {
-    mKeepOpen = event->button()==Qt::LeftButton && (event->modifiers() & Qt::ShiftModifier);
-    QPushButton::mouseReleaseEvent (event);
+    mKeepOpen = event->button() == Qt::LeftButton && (event->modifiers() & Qt::ShiftModifier);
+    QPushButton::mouseReleaseEvent(event);
 }
 
-CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const QString& tooltip,
-    QWidget *parent)
-: QPushButton (icon, "", parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
+CSVWidget::PushButton::PushButton(const QIcon& icon, Type type, const QString& tooltip, QWidget* parent)
+    : QPushButton(icon, "", parent)
+    , mKeepOpen(false)
+    , mType(type)
+    , mToolTip(tooltip)
 {
-    if (type==Type_Mode || type==Type_Toggle)
+    if (type == Type_Mode || type == Type_Toggle)
     {
-        setCheckable (true);
-        connect (this, &PushButton::toggled, this, &PushButton::checkedStateChanged);
+        setCheckable(true);
+        connect(this, &PushButton::toggled, this, &PushButton::checkedStateChanged);
     }
-    setCheckable (type==Type_Mode || type==Type_Toggle);
+    setCheckable(type == Type_Mode || type == Type_Toggle);
     processShortcuts();
     setExtendedToolTip();
 
-    connect (&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged,
-        this, &PushButton::settingChanged);
+    connect(&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged, this, &PushButton::settingChanged);
 }
 
-CSVWidget::PushButton::PushButton (Type type, const QString& tooltip, QWidget *parent)
-: QPushButton (parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
+CSVWidget::PushButton::PushButton(Type type, const QString& tooltip, QWidget* parent)
+    : QPushButton(parent)
+    , mKeepOpen(false)
+    , mType(type)
+    , mToolTip(tooltip)
 {
-    setCheckable (type==Type_Mode || type==Type_Toggle);
+    setCheckable(type == Type_Mode || type == Type_Toggle);
     processShortcuts();
     setExtendedToolTip();
 }
@@ -115,12 +118,12 @@ CSVWidget::PushButton::Type CSVWidget::PushButton::getType() const
     return mType;
 }
 
-void CSVWidget::PushButton::checkedStateChanged (bool checked)
+void CSVWidget::PushButton::checkedStateChanged(bool checked)
 {
     setExtendedToolTip();
 }
 
-void CSVWidget::PushButton::settingChanged (const CSMPrefs::Setting *setting)
+void CSVWidget::PushButton::settingChanged(const CSMPrefs::Setting* setting)
 {
     if (setting->getParent()->getKey() == "Key Bindings")
     {

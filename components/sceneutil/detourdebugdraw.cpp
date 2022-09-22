@@ -20,16 +20,16 @@ namespace
             case DU_DRAW_QUADS:
                 return osg::PrimitiveSet::QUADS;
         }
-        throw std::logic_error("Can't convert duDebugDrawPrimitives to osg::PrimitiveSet::Mode, value="
-                               + std::to_string(value));
+        throw std::logic_error(
+            "Can't convert duDebugDrawPrimitives to osg::PrimitiveSet::Mode, value=" + std::to_string(value));
     }
 
 }
 
 namespace SceneUtil
 {
-    DebugDraw::DebugDraw(osg::Group& group, const osg::ref_ptr<osg::StateSet>& stateSet,
-        const osg::Vec3f& shift, float recastInvertedScaleFactor)
+    DebugDraw::DebugDraw(osg::Group& group, const osg::ref_ptr<osg::StateSet>& stateSet, const osg::Vec3f& shift,
+        float recastInvertedScaleFactor)
         : mGroup(group)
         , mStateSet(stateSet)
         , mShift(shift)
@@ -39,13 +39,9 @@ namespace SceneUtil
     {
     }
 
-    void DebugDraw::depthMask(bool)
-    {
-    }
+    void DebugDraw::depthMask(bool) {}
 
-    void DebugDraw::texture(bool)
-    {
-    }
+    void DebugDraw::texture(bool) {}
 
     void DebugDraw::begin(osg::PrimitiveSet::Mode mode, float size)
     {

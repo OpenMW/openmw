@@ -1,13 +1,13 @@
 #include "loadcont.hpp"
 
+#include "components/esm/defs.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
 
-    void InventoryList::add(ESMReader &esm)
+    void InventoryList::add(ESMReader& esm)
     {
         esm.getSubHeader();
         ContItem ci;
@@ -16,7 +16,7 @@ namespace ESM
         mList.push_back(ci);
     }
 
-    void InventoryList::save(ESMWriter &esm) const
+    void InventoryList::save(ESMWriter& esm) const
     {
         for (std::vector<ContItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
         {
@@ -27,7 +27,7 @@ namespace ESM
         }
     }
 
-    void Container::load(ESMReader &esm, bool &isDeleted)
+    void Container::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -88,7 +88,7 @@ namespace ESM
             esm.fail("Missing FLAG subrecord");
     }
 
-    void Container::save(ESMWriter &esm, bool isDeleted) const
+    void Container::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

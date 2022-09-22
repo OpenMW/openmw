@@ -35,7 +35,7 @@ namespace Serialization
 namespace YAML
 {
 
-    template<>
+    template <>
     struct convert<osg::Vec2f>
     {
         static Node encode(const osg::Vec2f& rhs) { return Serialization::encodeOSGVec(rhs); }
@@ -43,7 +43,7 @@ namespace YAML
         static bool decode(const Node& node, osg::Vec2f& rhs) { return Serialization::decodeOSGVec(node, rhs); }
     };
 
-    template<>
+    template <>
     struct convert<osg::Vec3f>
     {
         static Node encode(const osg::Vec3f& rhs) { return Serialization::encodeOSGVec(rhs); }
@@ -51,7 +51,7 @@ namespace YAML
         static bool decode(const Node& node, osg::Vec3f& rhs) { return Serialization::decodeOSGVec(node, rhs); }
     };
 
-    template<>
+    template <>
     struct convert<osg::Vec4f>
     {
         static Node encode(const osg::Vec4f& rhs) { return Serialization::encodeOSGVec(rhs); }

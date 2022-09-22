@@ -1,8 +1,8 @@
 #ifndef OPENMW_MWGUI_KEYBOARDNAVIGATION_H
 #define OPENMW_MWGUI_KEYBOARDNAVIGATION_H
 
-#include <MyGUI_KeyCode.h>
 #include <MyGUI_IUnlinkWidget.h>
+#include <MyGUI_KeyCode.h>
 
 namespace MWGui
 {

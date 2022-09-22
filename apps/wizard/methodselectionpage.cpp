@@ -1,11 +1,11 @@
 #include "methodselectionpage.hpp"
 #include "mainwizard.hpp"
 
-#include <QUrl>
 #include <QDesktopServices>
+#include <QUrl>
 
-Wizard::MethodSelectionPage::MethodSelectionPage(QWidget *parent) :
-    QWizardPage(parent)
+Wizard::MethodSelectionPage::MethodSelectionPage(QWidget* parent)
+    : QWizardPage(parent)
 {
     mWizard = qobject_cast<MainWizard*>(parent);
 
@@ -16,17 +16,20 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget *parent) :
     existingLocationRadioButton->setChecked(true);
     buyLinkButton->released();
 #endif
-    
+
     registerField(QLatin1String("installation.retailDisc"), retailDiscRadioButton);
-    
+
     connect(buyLinkButton, &QCommandLinkButton::released, this, &MethodSelectionPage::handleBuyButton);
 }
 
 int Wizard::MethodSelectionPage::nextId() const
 {
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true) {
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
+    {
         return MainWizard::Page_InstallationTarget;
-    } else {
+    }
+    else
+    {
         return MainWizard::Page_ExistingInstallation;
     }
 }

@@ -15,7 +15,7 @@ namespace MWWorld
             // Generated RefNums have negative mContentFile
             assert(lastAssignedRefNum.mContentFile < 0);
             lastAssignedRefNum.mIndex++;
-            if (lastAssignedRefNum.mIndex == 0)  // mIndex overflow, so mContentFile should be changed
+            if (lastAssignedRefNum.mIndex == 0) // mIndex overflow, so mContentFile should be changed
             {
                 if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
                     lastAssignedRefNum.mContentFile--;
@@ -42,7 +42,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setPosition(const ESM::Position &position)
+    void CellRef::setPosition(const ESM::Position& position)
     {
         mChanged = true;
         mCellRef.mPos = position;
@@ -127,7 +127,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setOwner(const std::string &owner)
+    void CellRef::setOwner(const std::string& owner)
     {
         if (owner != mCellRef.mOwner)
         {
@@ -145,7 +145,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setFaction(const std::string &faction)
+    void CellRef::setFaction(const std::string& faction)
     {
         if (faction != mCellRef.mFaction)
         {
@@ -165,15 +165,15 @@ namespace MWWorld
 
     void CellRef::lock(int lockLevel)
     {
-        if(lockLevel != 0)
-            setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
+        if (lockLevel != 0)
+            setLockLevel(abs(lockLevel)); // Changes lock to locklevel, if positive
         else
             setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
     }
 
     void CellRef::unlock()
     {
-        setLockLevel(-abs(mCellRef.mLockLevel)); //Makes lockLevel negative
+        setLockLevel(-abs(mCellRef.mLockLevel)); // Makes lockLevel negative
     }
 
     void CellRef::setTrap(const std::string& trap)
@@ -194,7 +194,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::writeState(ESM::ObjectState &state) const
+    void CellRef::writeState(ESM::ObjectState& state) const
     {
         state.mRef = mCellRef;
     }

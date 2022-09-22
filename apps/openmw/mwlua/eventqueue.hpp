@@ -36,7 +36,7 @@ namespace MWLua
     using LocalEventQueue = std::vector<LocalEvent>;
 
     void loadEvents(sol::state& lua, ESM::ESMReader& esm, GlobalEventQueue&, LocalEventQueue&,
-                    const std::map<int, int>& contentFileMapping, const LuaUtil::UserdataSerializer* serializer);
+        const std::map<int, int>& contentFileMapping, const LuaUtil::UserdataSerializer* serializer);
     void saveEvents(ESM::ESMWriter& esm, const GlobalEventQueue&, const LocalEventQueue&);
 }
 

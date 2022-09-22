@@ -8,14 +8,12 @@ namespace CSMWorld
     /// \brief Removes base records from filtered results.
     class LandTextureTableProxyModel : public IdTableProxyModel
     {
-            Q_OBJECT
-        public:
+        Q_OBJECT
+    public:
+        LandTextureTableProxyModel(QObject* parent = nullptr);
 
-            LandTextureTableProxyModel(QObject* parent = nullptr);
-
-        protected:
-
-            bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const override;
+    protected:
+        bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
     };
 }
 

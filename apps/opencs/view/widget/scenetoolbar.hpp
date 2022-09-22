@@ -11,33 +11,31 @@ namespace CSVWidget
 
     class SceneToolbar : public QWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QVBoxLayout *mLayout;
-            int mButtonSize;
-            int mIconSize;
+        QVBoxLayout* mLayout;
+        int mButtonSize;
+        int mIconSize;
 
-        protected:
+    protected:
+        void focusInEvent(QFocusEvent* event) override;
 
-            void focusInEvent (QFocusEvent *event) override;
+    public:
+        SceneToolbar(int buttonSize, QWidget* parent = nullptr);
 
-        public:
+        /// If insertPoint==0, insert \a tool at the end of the scrollbar. Otherwise
+        /// insert tool after \a insertPoint.
+        void addTool(SceneTool* tool, SceneTool* insertPoint = nullptr);
 
-            SceneToolbar (int buttonSize, QWidget *parent = nullptr);
+        void removeTool(SceneTool* tool);
 
-            /// If insertPoint==0, insert \a tool at the end of the scrollbar. Otherwise
-            /// insert tool after \a insertPoint.
-            void addTool (SceneTool *tool, SceneTool *insertPoint = nullptr);
+        int getButtonSize() const;
 
-            void removeTool (SceneTool *tool);
+        int getIconSize() const;
 
-            int getButtonSize() const;
+    signals:
 
-            int getIconSize() const;
-
-        signals:
-
-            void focusSceneRequest();
+        void focusSceneRequest();
     };
 }
 

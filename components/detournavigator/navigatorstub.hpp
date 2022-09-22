@@ -26,26 +26,38 @@ namespace DetourNavigator
         void setWorldspace(std::string_view /*worldspace*/, const UpdateGuard* /*guard*/) override {}
 
         void addObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/,
-            const UpdateGuard* /*guard*/) override {}
+            const UpdateGuard* /*guard*/) override
+        {
+        }
 
         void addObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/,
-            const UpdateGuard* /*guard*/) override {}
+            const UpdateGuard* /*guard*/) override
+        {
+        }
 
         void updateObject(const ObjectId /*id*/, const ObjectShapes& /*shapes*/, const btTransform& /*transform*/,
-            const UpdateGuard* /*guard*/) override {}
+            const UpdateGuard* /*guard*/) override
+        {
+        }
 
         void updateObject(const ObjectId /*id*/, const DoorShapes& /*shapes*/, const btTransform& /*transform*/,
-            const UpdateGuard* /*guard*/) override {}
+            const UpdateGuard* /*guard*/) override
+        {
+        }
 
         void removeObject(const ObjectId /*id*/, const UpdateGuard* /*guard*/) override {}
 
         void addWater(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, float /*level*/,
-            const UpdateGuard* /*guard*/) override {}
+            const UpdateGuard* /*guard*/) override
+        {
+        }
 
         void removeWater(const osg::Vec2i& /*cellPosition*/, const UpdateGuard* /*guard*/) override {}
 
         void addHeightfield(const osg::Vec2i& /*cellPosition*/, int /*cellSize*/, const HeightfieldShape& /*height*/,
-            const UpdateGuard* /*guard*/) override {}
+            const UpdateGuard* /*guard*/) override
+        {
+        }
 
         void removeHeightfield(const osg::Vec2i& /*cellPosition*/, const UpdateGuard* /*guard*/) override {}
 
@@ -64,30 +76,18 @@ namespace DetourNavigator
             return mEmptyNavMeshCacheItem;
         }
 
-        std::map<AgentBounds, SharedNavMeshCacheItem> getNavMeshes() const override
-        {
-            return {};
-        }
+        std::map<AgentBounds, SharedNavMeshCacheItem> getNavMeshes() const override { return {}; }
 
-        const Settings& getSettings() const override
-        {
-            return mDefaultSettings;
-        }
+        const Settings& getSettings() const override { return mDefaultSettings; }
 
-        Stats getStats() const override { return Stats {}; }
+        Stats getStats() const override { return Stats{}; }
 
-        RecastMeshTiles getRecastMeshTiles() const override
-        {
-            return {};
-        }
+        RecastMeshTiles getRecastMeshTiles() const override { return {}; }
 
-        float getMaxNavmeshAreaRealRadius() const override
-        {
-            return std::numeric_limits<float>::max();
-        }
+        float getMaxNavmeshAreaRealRadius() const override { return std::numeric_limits<float>::max(); }
 
     private:
-        Settings mDefaultSettings {};
+        Settings mDefaultSettings{};
         SharedNavMeshCacheItem mEmptyNavMeshCacheItem;
     };
 }

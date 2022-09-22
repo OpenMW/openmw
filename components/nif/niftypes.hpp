@@ -24,67 +24,61 @@
 #ifndef OPENMW_COMPONENTS_NIF_NIFTYPES_HPP
 #define OPENMW_COMPONENTS_NIF_NIFTYPES_HPP
 
-#include <osg/Vec3f>
 #include <osg/Matrixf>
+#include <osg/Vec3f>
 
 // Common types used in NIF files
 
 namespace Nif
 {
 
-struct Matrix3
-{
-    float mValues[3][3];
-
-    Matrix3()
+    struct Matrix3
     {
-        for (int i=0;i<3;++i)
-            for (int j=0;j<3;++j)
-                mValues[i][j] = (i==j) ? 1.f : 0.f;
-    }
+        float mValues[3][3];
 
-    bool isIdentity() const
+        Matrix3()
+        {
+            for (int i = 0; i < 3; ++i)
+                for (int j = 0; j < 3; ++j)
+                    mValues[i][j] = (i == j) ? 1.f : 0.f;
+        }
+
+        bool isIdentity() const
+        {
+            for (int i = 0; i < 3; ++i)
+                for (int j = 0; j < 3; ++j)
+                    if ((i == j) != (mValues[i][j] == 1))
+                        return false;
+            return true;
+        }
+    };
+
+    struct Transformation
     {
-        for (int i=0;i<3;++i)
-            for (int j=0;j<3;++j)
-                if ((i==j) != (mValues[i][j] == 1))
-                    return false;
-        return true;
-    }
-};
+        osg::Vec3f pos;
+        Matrix3 rotation; // this can contain scale components too, including negative and nonuniform scales
+        float scale;
 
-struct Transformation
-{
-    osg::Vec3f pos;
-    Matrix3 rotation; // this can contain scale components too, including negative and nonuniform scales
-    float scale;
+        osg::Matrixf toMatrix() const
+        {
+            osg::Matrixf transform;
+            transform.setTrans(pos);
 
-    osg::Matrixf toMatrix() const
-    {
-        osg::Matrixf transform;
-        transform.setTrans(pos);
+            for (int i = 0; i < 3; ++i)
+                for (int j = 0; j < 3; ++j)
+                    transform(j, i) = rotation.mValues[i][j] * scale; // NB column/row major difference
 
-        for (int i=0;i<3;++i)
-            for (int j=0;j<3;++j)
-                transform(j,i) = rotation.mValues[i][j] * scale; // NB column/row major difference
+            return transform;
+        }
 
-        return transform;
-    }
+        bool isIdentity() const { return pos == osg::Vec3f(0, 0, 0) && rotation.isIdentity() && scale == 1.f; }
 
-    bool isIdentity() const
-    {
-        return pos == osg::Vec3f(0,0,0)
-                && rotation.isIdentity() && scale == 1.f;
-    }
-
-    static const Transformation& getIdentity()
-    {
-        static const Transformation identity = {
-            osg::Vec3f(), Matrix3(), 1.0f
-        };
-        return identity;
-    }
-};
+        static const Transformation& getIdentity()
+        {
+            static const Transformation identity = { osg::Vec3f(), Matrix3(), 1.0f };
+            return identity;
+        }
+    };
 
 } // Namespace
 #endif

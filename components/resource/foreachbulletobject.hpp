@@ -42,7 +42,7 @@ namespace Resource
 
     void forEachBulletObject(ESM::ReadersCache& readers, const VFS::Manager& vfs,
         Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
-        std::function<void (const ESM::Cell&, const BulletObject& object)> callback);
+        std::function<void(const ESM::Cell&, const BulletObject& object)> callback);
 }
 
 #endif

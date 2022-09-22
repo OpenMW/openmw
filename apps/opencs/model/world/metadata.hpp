@@ -21,8 +21,8 @@ namespace CSMWorld
 
         void blank();
 
-        void load (ESM::ESMReader& esm);
-        void save (ESM::ESMWriter& esm) const;
+        void load(ESM::ESMReader& esm);
+        void save(ESM::ESMWriter& esm) const;
     };
 }
 

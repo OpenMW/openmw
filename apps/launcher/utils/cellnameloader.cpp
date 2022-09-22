@@ -1,28 +1,31 @@
 #include "cellnameloader.hpp"
 
-#include <components/esm3/loadcell.hpp>
 #include <components/contentselector/view/contentselector.hpp>
+#include <components/esm3/loadcell.hpp>
 
-QSet<QString> CellNameLoader::getCellNames(QStringList &contentPaths)
+QSet<QString> CellNameLoader::getCellNames(QStringList& contentPaths)
 {
     QSet<QString> cellNames;
     ESM::ESMReader esmReader;
 
     // Loop through all content files
-    for (auto &contentPath : contentPaths) {
+    for (auto& contentPath : contentPaths)
+    {
         if (contentPath.endsWith(".omwscripts", Qt::CaseInsensitive))
             continue;
         esmReader.open(contentPath.toStdString());
 
         // Loop through all records
-        while(esmReader.hasMoreRecs())
+        while (esmReader.hasMoreRecs())
         {
             ESM::NAME recordName = esmReader.getRecName();
             esmReader.getRecHeader();
 
-            if (isCellRecord(recordName)) {
+            if (isCellRecord(recordName))
+            {
                 QString cellName = getCellName(esmReader);
-                if (!cellName.isEmpty()) {
+                if (!cellName.isEmpty())
+                {
                     cellNames.insert(cellName);
                 }
             }
@@ -35,12 +38,12 @@ QSet<QString> CellNameLoader::getCellNames(QStringList &contentPaths)
     return cellNames;
 }
 
-bool CellNameLoader::isCellRecord(ESM::NAME &recordName)
+bool CellNameLoader::isCellRecord(ESM::NAME& recordName)
 {
     return recordName.toInt() == ESM::REC_CELL;
 }
 
-QString CellNameLoader::getCellName(ESM::ESMReader &esmReader)
+QString CellNameLoader::getCellName(ESM::ESMReader& esmReader)
 {
     ESM::Cell cell;
     bool isDeleted = false;
@@ -48,4 +51,3 @@ QString CellNameLoader::getCellName(ESM::ESMReader &esmReader)
 
     return QString::fromStdString(cell.mName);
 }
-

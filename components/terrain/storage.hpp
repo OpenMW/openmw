@@ -3,10 +3,10 @@
 
 #include <vector>
 
+#include <osg/Array>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 #include <osg/ref_ptr>
-#include <osg/Array>
 
 #include "defs.hpp"
 
@@ -33,7 +33,7 @@ namespace Terrain
         virtual bool hasData(int cellX, int cellY)
         {
             float dummy;
-            return getMinMaxHeights(1, osg::Vec2f(cellX+0.5, cellY+0.5), dummy, dummy);
+            return getMinMaxHeights(1, osg::Vec2f(cellX + 0.5, cellY + 0.5), dummy, dummy);
         }
 
         /// Get the minimum and maximum heights of a terrain region.
@@ -44,7 +44,7 @@ namespace Terrain
         /// @param min min height will be stored here
         /// @param max max height will be stored here
         /// @return true if there was data available for this terrain chunk
-        virtual bool getMinMaxHeights (float size, const osg::Vec2f& center, float& min, float& max) = 0;
+        virtual bool getMinMaxHeights(float size, const osg::Vec2f& center, float& min, float& max) = 0;
 
         /// Fill vertex buffers for a terrain chunk.
         /// @note May be called from background threads. Make sure to only call thread-safe functions from here!
@@ -57,12 +57,12 @@ namespace Terrain
         /// @param positions buffer to write vertices
         /// @param normals buffer to write vertex normals
         /// @param colours buffer to write vertex colours
-        virtual void fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
-                                osg::ref_ptr<osg::Vec3Array> positions,
-                                osg::ref_ptr<osg::Vec3Array> normals,
-                                osg::ref_ptr<osg::Vec4ubArray> colours) = 0;
+        virtual void fillVertexBuffers(int lodLevel, float size, const osg::Vec2f& center,
+            osg::ref_ptr<osg::Vec3Array> positions, osg::ref_ptr<osg::Vec3Array> normals,
+            osg::ref_ptr<osg::Vec4ubArray> colours)
+            = 0;
 
-        typedef std::vector<osg::ref_ptr<osg::Image> > ImageVector;
+        typedef std::vector<osg::ref_ptr<osg::Image>> ImageVector;
         /// Create textures holding layer blend values for a terrain chunk.
         /// @note The terrain chunk shouldn't be larger than one cell since otherwise we might
         ///       have to do a ridiculous amount of different layers. For larger chunks, composite maps should be used.
@@ -71,10 +71,11 @@ namespace Terrain
         /// @param chunkCenter center of the chunk in cell units
         /// @param blendmaps created blendmaps will be written here
         /// @param layerList names of the layer textures used will be written here
-        virtual void getBlendmaps (float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
-                               std::vector<LayerInfo>& layerList) = 0;
+        virtual void getBlendmaps(
+            float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps, std::vector<LayerInfo>& layerList)
+            = 0;
 
-        virtual float getHeightAt (const osg::Vec3f& worldPos) = 0;
+        virtual float getHeightAt(const osg::Vec3f& worldPos) = 0;
 
         /// Get the transformation factor for mapping cell units to world units.
         virtual float getCellWorldSize() = 0;

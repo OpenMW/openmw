@@ -10,7 +10,8 @@
 
 namespace MWPhysics
 {
-    ProjectileConvexCallback::ProjectileConvexCallback(const btCollisionObject* caster, const btCollisionObject* me, const btVector3& from, const btVector3& to, Projectile* proj)
+    ProjectileConvexCallback::ProjectileConvexCallback(const btCollisionObject* caster, const btCollisionObject* me,
+        const btVector3& from, const btVector3& to, Projectile* proj)
         : btCollisionWorld::ClosestConvexResultCallback(from, to)
         , mCaster(caster)
         , mMe(me)
@@ -19,7 +20,8 @@ namespace MWPhysics
         assert(mProjectile);
     }
 
-    btScalar ProjectileConvexCallback::addSingleResult(btCollisionWorld::LocalConvexResult& result, bool normalInWorldSpace)
+    btScalar ProjectileConvexCallback::addSingleResult(
+        btCollisionWorld::LocalConvexResult& result, bool normalInWorldSpace)
     {
         const auto* hitObject = result.m_hitCollisionObject;
         // don't hit the caster
@@ -34,24 +36,24 @@ namespace MWPhysics
         switch (hitObject->getBroadphaseHandle()->m_collisionFilterGroup)
         {
             case CollisionType_Actor:
-                {
-                    if (!mProjectile->isValidTarget(hitObject))
-                        return 1.f;
-                    break;
-                }
+            {
+                if (!mProjectile->isValidTarget(hitObject))
+                    return 1.f;
+                break;
+            }
             case CollisionType_Projectile:
-                {
-                    auto* target = static_cast<Projectile*>(hitObject->getUserPointer());
-                    if (!mProjectile->isValidTarget(target->getCasterCollisionObject()))
-                        return 1.f;
-                    target->hit(mMe, m_hitPointWorld, m_hitNormalWorld);
-                    break;
-                }
+            {
+                auto* target = static_cast<Projectile*>(hitObject->getUserPointer());
+                if (!mProjectile->isValidTarget(target->getCasterCollisionObject()))
+                    return 1.f;
+                target->hit(mMe, m_hitPointWorld, m_hitNormalWorld);
+                break;
+            }
             case CollisionType_Water:
-                {
-                    mProjectile->setHitWater();
-                    break;
-                }
+            {
+                mProjectile->setHitWater();
+                break;
+            }
         }
         mProjectile->hit(hitObject, m_hitPointWorld, m_hitNormalWorld);
 
@@ -59,4 +61,3 @@ namespace MWPhysics
     }
 
 }
-

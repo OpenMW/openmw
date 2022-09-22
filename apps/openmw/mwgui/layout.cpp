@@ -1,9 +1,9 @@
 #include "layout.hpp"
 
-#include <MyGUI_LayoutManager.h>
-#include <MyGUI_Widget.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_LayoutManager.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_Widget.h>
 #include <MyGUI_Window.h>
 
 #include "ustring.hpp"
@@ -27,7 +27,8 @@ namespace MWGui
             // Force the alignment to update immediately
             widget->_setAlign(widget->getSize(), widget->getParentSize());
         }
-        MYGUI_ASSERT(mMainWidget, "root widget name '" << MAIN_WINDOW << "' in layout '" << mLayoutName << "' not found.");
+        MYGUI_ASSERT(
+            mMainWidget, "root widget name '" << MAIN_WINDOW << "' in layout '" << mLayoutName << "' not found.");
     }
 
     void Layout::shutdown()
@@ -39,7 +40,7 @@ namespace MWGui
 
     void Layout::setCoord(int x, int y, int w, int h)
     {
-        mMainWidget->setCoord(x,y,w,h);
+        mMainWidget->setCoord(x, y, w, h);
     }
 
     void Layout::setVisible(bool b)

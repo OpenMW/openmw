@@ -3,7 +3,8 @@
 
 #include <filesystem>
 
-namespace Files {
+namespace Files
+{
     std::string pathToUnicodeString(const std::filesystem::path& path);
 
     std::string pathToUnicodeString(std::filesystem::path&& path);
@@ -15,4 +16,4 @@ namespace Files {
     std::filesystem::path pathFromUnicodeString(const char* path);
 }
 
-#endif //COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
+#endif // COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP

@@ -1,8 +1,8 @@
 #ifndef OPENMW_CONSTRAINEDFILESTREAMBUF_H
 #define OPENMW_CONSTRAINEDFILESTREAMBUF_H
 
-#include <streambuf>
 #include <filesystem>
+#include <streambuf>
 
 #include <components/platform/file.hpp>
 
@@ -12,7 +12,7 @@ namespace Files
     class ConstrainedFileStreamBuf final : public std::streambuf
     {
     public:
-        ConstrainedFileStreamBuf(const std::filesystem::path &fname, std::size_t start, std::size_t length);
+        ConstrainedFileStreamBuf(const std::filesystem::path& fname, std::size_t start, std::size_t length);
 
         int_type underflow() final;
 

@@ -5,9 +5,9 @@
 
 #include <osg/ref_ptr>
 
-#include <unordered_map>
 #include <deque>
 #include <map>
+#include <unordered_map>
 
 namespace osg
 {
@@ -31,8 +31,8 @@ namespace MWRender
         bool toggle();
 
         void update(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
-                const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
-                const DetourNavigator::Settings& settings);
+            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
+            const DetourNavigator::Settings& settings);
 
         void remove(const MWWorld::ConstPtr& actor);
 

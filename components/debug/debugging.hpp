@@ -34,9 +34,10 @@ std::ostream& getRawStderr();
 
 Misc::Locked<std::ostream&> getLockedRawStderr();
 
-void setupLogging(const std::filesystem::path &logDir, const std::string& appName, std::ios_base::openmode mode = std::ios::out);
+void setupLogging(
+    const std::filesystem::path& logDir, const std::string& appName, std::ios_base::openmode mode = std::ios::out);
 
-int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[],
-                    const std::string& appName, bool autoSetupLogging = true);
+int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], const std::string& appName,
+    bool autoSetupLogging = true);
 
 #endif

@@ -1,17 +1,17 @@
-#include <stdio.h>
 #include <cstring>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/param.h>
-#include <sys/utsname.h>
-#include <string.h>
 #include <errno.h>
-#include <limits.h>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utsname.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include <pthread.h>
 #include <stdbool.h>
@@ -27,14 +27,14 @@
 #ifndef PR_SET_PTRACER
 #define PR_SET_PTRACER 0x59616d61
 #endif
-#elif defined (__APPLE__) || defined (__FreeBSD__) || defined(__OpenBSD__)
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <signal.h>
 #endif
 
 #if defined(__APPLE__)
-#include <sys/sysctl.h>
-#include <libproc.h>
 #include <cassert>
+#include <libproc.h>
+#include <sys/sysctl.h>
 #endif
 
 #if defined(__FreeBSD__)
@@ -50,13 +50,13 @@ static const char fork_err[] = "!!! Failed to fork debug process\n";
 static const char exec_err[] = "!!! Failed to exec debug process\n";
 
 #ifndef PATH_MAX /* Not all platforms (GNU Hurd) have this. */
-#   define PATH_MAX 256
+#define PATH_MAX 256
 #endif
 
 static char argv0[PATH_MAX];
 
-
-static struct {
+static struct
+{
     int signum;
     pid_t pid;
     int has_siginfo;
@@ -64,80 +64,64 @@ static struct {
     char buf[1024];
 } crash_info;
 
-
-static const struct {
-    const char *name;
+static const struct
+{
+    const char* name;
     int signum;
-} signals[] = {
-{ "Segmentation fault", SIGSEGV },
-{ "Illegal instruction", SIGILL },
-{ "FPU exception", SIGFPE },
-{ "System BUS error", SIGBUS },
-{ nullptr, 0 }
-};
+} signals[] = { { "Segmentation fault", SIGSEGV }, { "Illegal instruction", SIGILL }, { "FPU exception", SIGFPE },
+    { "System BUS error", SIGBUS }, { nullptr, 0 } };
 
-static const struct {
+static const struct
+{
     int code;
-    const char *name;
+    const char* name;
 } sigill_codes[] = {
-    #if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
-    { ILL_ILLOPC, "Illegal opcode" },
-    { ILL_ILLOPN, "Illegal operand" },
-    { ILL_ILLADR, "Illegal addressing mode" },
-    { ILL_ILLTRP, "Illegal trap" },
-    { ILL_PRVOPC, "Privileged opcode" },
-    { ILL_PRVREG, "Privileged register" },
-    { ILL_COPROC, "Coprocessor error" },
-    { ILL_BADSTK, "Internal stack error" },
-    #endif
+#if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
+    { ILL_ILLOPC, "Illegal opcode" }, { ILL_ILLOPN, "Illegal operand" }, { ILL_ILLADR, "Illegal addressing mode" },
+    { ILL_ILLTRP, "Illegal trap" }, { ILL_PRVOPC, "Privileged opcode" }, { ILL_PRVREG, "Privileged register" },
+    { ILL_COPROC, "Coprocessor error" }, { ILL_BADSTK, "Internal stack error" },
+#endif
     { 0, nullptr }
 };
 
-static const struct {
+static const struct
+{
     int code;
-    const char *name;
-} sigfpe_codes[] = {
-    { FPE_INTDIV, "Integer divide by zero" },
-    { FPE_INTOVF, "Integer overflow" },
-    { FPE_FLTDIV, "Floating point divide by zero" },
-    { FPE_FLTOVF, "Floating point overflow" },
-    { FPE_FLTUND, "Floating point underflow" },
-    { FPE_FLTRES, "Floating point inexact result" },
-    { FPE_FLTINV, "Floating point invalid operation" },
-    { FPE_FLTSUB, "Subscript out of range" },
-    { 0, nullptr }
-};
+    const char* name;
+} sigfpe_codes[] = { { FPE_INTDIV, "Integer divide by zero" }, { FPE_INTOVF, "Integer overflow" },
+    { FPE_FLTDIV, "Floating point divide by zero" }, { FPE_FLTOVF, "Floating point overflow" },
+    { FPE_FLTUND, "Floating point underflow" }, { FPE_FLTRES, "Floating point inexact result" },
+    { FPE_FLTINV, "Floating point invalid operation" }, { FPE_FLTSUB, "Subscript out of range" }, { 0, nullptr } };
 
-static const struct {
+static const struct
+{
     int code;
-    const char *name;
+    const char* name;
 } sigsegv_codes[] = {
-    #ifndef __FreeBSD__
-    { SEGV_MAPERR, "Address not mapped to object" },
-    { SEGV_ACCERR, "Invalid permissions for mapped object" },
-    #endif
+#ifndef __FreeBSD__
+    { SEGV_MAPERR, "Address not mapped to object" }, { SEGV_ACCERR, "Invalid permissions for mapped object" },
+#endif
     { 0, nullptr }
 };
 
-static const struct {
+static const struct
+{
     int code;
-    const char *name;
+    const char* name;
 } sigbus_codes[] = {
-    #ifndef __FreeBSD__
-    { BUS_ADRALN, "Invalid address alignment" },
-    { BUS_ADRERR, "Non-existent physical address" },
+#ifndef __FreeBSD__
+    { BUS_ADRALN, "Invalid address alignment" }, { BUS_ADRERR, "Non-existent physical address" },
     { BUS_OBJERR, "Object specific hardware error" },
-    #endif
+#endif
     { 0, nullptr }
 };
 
 static int (*cc_user_info)(char*, char*);
 
-
 static void gdb_info(pid_t pid)
 {
     char respfile[64];
-    FILE *f;
+    FILE* f;
     int fd;
 
     /*
@@ -145,31 +129,33 @@ static void gdb_info(pid_t pid)
      * Note: POSIX.1-2008 declares that the file should be already created with mode 0600 by default.
      * Modern systems implement it and suggest to do not touch masks in multithreaded applications.
      * So CoverityScan warning is valid only for ancient versions of stdlib.
-    */
+     */
     strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
 #ifdef __COVERITY__
     umask(0600);
 #endif
-    if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != nullptr)
+    if ((fd = mkstemp(respfile)) >= 0 && (f = fdopen(fd, "w")) != nullptr)
     {
-        fprintf(f, "attach %d\n"
-                "shell echo \"\"\n"
-                "shell echo \"* Loaded Libraries\"\n"
-                "info sharedlibrary\n"
-                "shell echo \"\"\n"
-                "shell echo \"* Threads\"\n"
-                "info threads\n"
-                "shell echo \"\"\n"
-                "shell echo \"* FPU Status\"\n"
-                "info float\n"
-                "shell echo \"\"\n"
-                "shell echo \"* Registers\"\n"
-                "info registers\n"
-                "shell echo \"\"\n"
-                "shell echo \"* Backtrace\"\n"
-                "thread apply all backtrace full 1000\n"
-                "detach\n"
-                "quit\n", pid);
+        fprintf(f,
+            "attach %d\n"
+            "shell echo \"\"\n"
+            "shell echo \"* Loaded Libraries\"\n"
+            "info sharedlibrary\n"
+            "shell echo \"\"\n"
+            "shell echo \"* Threads\"\n"
+            "info threads\n"
+            "shell echo \"\"\n"
+            "shell echo \"* FPU Status\"\n"
+            "info float\n"
+            "shell echo \"\"\n"
+            "shell echo \"* Registers\"\n"
+            "info registers\n"
+            "shell echo \"\"\n"
+            "shell echo \"* Backtrace\"\n"
+            "thread apply all backtrace full 1000\n"
+            "detach\n"
+            "quit\n",
+            pid);
         fclose(f);
 
         /* Run gdb and print process info. */
@@ -181,8 +167,11 @@ static void gdb_info(pid_t pid)
         int ret = system(cmd_buf);
 
         if (ret != 0)
-            printf("\nFailed to create a crash report. Please make sure that 'gdb' is installed and present in PATH then crash again."
-                   "\nCurrent PATH: %s\n", getenv("PATH"));
+            printf(
+                "\nFailed to create a crash report. Please make sure that 'gdb' is installed and present in PATH then "
+                "crash again."
+                "\nCurrent PATH: %s\n",
+                getenv("PATH"));
         fflush(stdout);
 
         /* Clean up */
@@ -192,7 +181,7 @@ static void gdb_info(pid_t pid)
     else
     {
         /* Error creating temp file */
-        if(fd >= 0)
+        if (fd >= 0)
         {
             if (close(fd) != 0)
                 Log(Debug::Warning) << "Warning: can not close file '" << respfile << "': " << std::strerror(errno);
@@ -208,25 +197,24 @@ static void sys_info(void)
 {
 #ifdef __unix__
     struct utsname info;
-    if(uname(&info))
+    if (uname(&info))
         printf("!!! Failed to get system information\n");
     else
-        printf("System: %s %s %s %s %s\n",
-               info.sysname, info.nodename, info.release, info.version, info.machine);
+        printf("System: %s %s %s %s %s\n", info.sysname, info.nodename, info.release, info.version, info.machine);
 
     fflush(stdout);
 #endif
 }
 
-static size_t safe_write(int fd, const void *buf, size_t len)
+static size_t safe_write(int fd, const void* buf, size_t len)
 {
     size_t ret = 0;
-    while(ret < len)
+    while (ret < len)
     {
         ssize_t rem;
-        if((rem=write(fd, (const char*)buf+ret, len-ret)) == -1)
+        if ((rem = write(fd, (const char*)buf + ret, len - ret)) == -1)
         {
-            if(errno == EINTR)
+            if (errno == EINTR)
                 continue;
             break;
         }
@@ -235,23 +223,23 @@ static size_t safe_write(int fd, const void *buf, size_t len)
     return ret;
 }
 
-static void crash_catcher(int signum, siginfo_t *siginfo, void *context)
+static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
 {
-    //ucontext_t *ucontext = (ucontext_t*)context;
+    // ucontext_t *ucontext = (ucontext_t*)context;
     pid_t dbg_pid;
     int fd[2];
 
     /* Make sure the effective uid is the real uid */
-    if(getuid() != geteuid())
+    if (getuid() != geteuid())
     {
         raise(signum);
         return;
     }
 
-    safe_write(STDERR_FILENO, fatal_err, sizeof(fatal_err)-1);
-    if(pipe(fd) == -1)
+    safe_write(STDERR_FILENO, fatal_err, sizeof(fatal_err) - 1);
+    if (pipe(fd) == -1)
     {
-        safe_write(STDERR_FILENO, pipe_err, sizeof(pipe_err)-1);
+        safe_write(STDERR_FILENO, pipe_err, sizeof(pipe_err) - 1);
         raise(signum);
         return;
     }
@@ -259,140 +247,142 @@ static void crash_catcher(int signum, siginfo_t *siginfo, void *context)
     crash_info.signum = signum;
     crash_info.pid = getpid();
     crash_info.has_siginfo = !!siginfo;
-    if(siginfo)
+    if (siginfo)
         crash_info.siginfo = *siginfo;
-    if(cc_user_info)
-        cc_user_info(crash_info.buf, crash_info.buf+sizeof(crash_info.buf));
+    if (cc_user_info)
+        cc_user_info(crash_info.buf, crash_info.buf + sizeof(crash_info.buf));
 
     /* Fork off to start a crash handler */
-    switch((dbg_pid=fork()))
+    switch ((dbg_pid = fork()))
     {
-    /* Error */
-    case -1:
-        safe_write(STDERR_FILENO, fork_err, sizeof(fork_err)-1);
-        raise(signum);
-        return;
+        /* Error */
+        case -1:
+            safe_write(STDERR_FILENO, fork_err, sizeof(fork_err) - 1);
+            raise(signum);
+            return;
 
-    case 0:
-        dup2(fd[0], STDIN_FILENO);
-        close(fd[0]);
-        close(fd[1]);
+        case 0:
+            dup2(fd[0], STDIN_FILENO);
+            close(fd[0]);
+            close(fd[1]);
 
-        execl(argv0, argv0, crash_switch, nullptr);
+            execl(argv0, argv0, crash_switch, nullptr);
 
-        safe_write(STDERR_FILENO, exec_err, sizeof(exec_err)-1);
-        _exit(1);
+            safe_write(STDERR_FILENO, exec_err, sizeof(exec_err) - 1);
+            _exit(1);
 
-    default:
+        default:
 #ifdef __linux__
-        prctl(PR_SET_PTRACER, dbg_pid, 0, 0, 0);
+            prctl(PR_SET_PTRACER, dbg_pid, 0, 0, 0);
 #endif
-        safe_write(fd[1], &crash_info, sizeof(crash_info));
-        close(fd[0]);
-        close(fd[1]);
+            safe_write(fd[1], &crash_info, sizeof(crash_info));
+            close(fd[0]);
+            close(fd[1]);
 
-        /* Wait; we'll be killed when gdb is done */
-        do {
-            int status;
-            if(waitpid(dbg_pid, &status, 0) == dbg_pid &&
-                    (WIFEXITED(status) || WIFSIGNALED(status)))
+            /* Wait; we'll be killed when gdb is done */
+            do
             {
-                /* The debug process died before it could kill us */
-                raise(signum);
-                break;
-            }
-        } while(1);
+                int status;
+                if (waitpid(dbg_pid, &status, 0) == dbg_pid && (WIFEXITED(status) || WIFSIGNALED(status)))
+                {
+                    /* The debug process died before it could kill us */
+                    raise(signum);
+                    break;
+                }
+            } while (1);
     }
 }
 
-static void crash_handler(const char *logfile)
+static void crash_handler(const char* logfile)
 {
-    const char *sigdesc = "";
+    const char* sigdesc = "";
     int i;
 
-    if(fread(&crash_info, sizeof(crash_info), 1, stdin) != 1)
+    if (fread(&crash_info, sizeof(crash_info), 1, stdin) != 1)
     {
         fprintf(stderr, "!!! Failed to retrieve info from crashed process\n");
         exit(1);
     }
 
     /* Get the signal description */
-    for(i = 0;signals[i].name;++i)
+    for (i = 0; signals[i].name; ++i)
     {
-        if(signals[i].signum == crash_info.signum)
+        if (signals[i].signum == crash_info.signum)
         {
             sigdesc = signals[i].name;
             break;
         }
     }
 
-    if(crash_info.has_siginfo)
+    if (crash_info.has_siginfo)
     {
-        switch(crash_info.signum)
+        switch (crash_info.signum)
         {
-        case SIGSEGV:
-            for(i = 0;sigsegv_codes[i].name;++i)
-            {
-                if(sigsegv_codes[i].code == crash_info.siginfo.si_code)
+            case SIGSEGV:
+                for (i = 0; sigsegv_codes[i].name; ++i)
                 {
-                    sigdesc = sigsegv_codes[i].name;
-                    break;
+                    if (sigsegv_codes[i].code == crash_info.siginfo.si_code)
+                    {
+                        sigdesc = sigsegv_codes[i].name;
+                        break;
+                    }
                 }
-            }
-            break;
+                break;
 
-        case SIGFPE:
-            for(i = 0;sigfpe_codes[i].name;++i)
-            {
-                if(sigfpe_codes[i].code == crash_info.siginfo.si_code)
+            case SIGFPE:
+                for (i = 0; sigfpe_codes[i].name; ++i)
                 {
-                    sigdesc = sigfpe_codes[i].name;
-                    break;
+                    if (sigfpe_codes[i].code == crash_info.siginfo.si_code)
+                    {
+                        sigdesc = sigfpe_codes[i].name;
+                        break;
+                    }
                 }
-            }
-            break;
+                break;
 
-        case SIGILL:
-            for(i = 0;sigill_codes[i].name;++i)
-            {
-                if(sigill_codes[i].code == crash_info.siginfo.si_code)
+            case SIGILL:
+                for (i = 0; sigill_codes[i].name; ++i)
                 {
-                    sigdesc = sigill_codes[i].name;
-                    break;
+                    if (sigill_codes[i].code == crash_info.siginfo.si_code)
+                    {
+                        sigdesc = sigill_codes[i].name;
+                        break;
+                    }
                 }
-            }
-            break;
+                break;
 
-        case SIGBUS:
-            for(i = 0;sigbus_codes[i].name;++i)
-            {
-                if(sigbus_codes[i].code == crash_info.siginfo.si_code)
+            case SIGBUS:
+                for (i = 0; sigbus_codes[i].name; ++i)
                 {
-                    sigdesc = sigbus_codes[i].name;
-                    break;
+                    if (sigbus_codes[i].code == crash_info.siginfo.si_code)
+                    {
+                        sigdesc = sigbus_codes[i].name;
+                        break;
+                    }
                 }
-            }
-            break;
+                break;
         }
     }
     fprintf(stderr, "%s (signal %i)\n", sigdesc, crash_info.signum);
-    if(crash_info.has_siginfo)
+    if (crash_info.has_siginfo)
         fprintf(stderr, "Address: %p\n", crash_info.siginfo.si_addr);
     fputc('\n', stderr);
 
-    if(logfile)
+    if (logfile)
     {
         /* Create crash log file and redirect shell output to it */
-        if(freopen(logfile, "wa", stdout) != stdout)
+        if (freopen(logfile, "wa", stdout) != stdout)
         {
             fprintf(stderr, "!!! Could not create %s following signal\n", logfile);
             exit(1);
         }
         fprintf(stderr, "Generating %s and killing process %d, please wait... ", logfile, crash_info.pid);
 
-        printf("*** Fatal Error ***\n"
-               "%s (signal %i)\n", sigdesc, crash_info.signum);
-        if(crash_info.has_siginfo)
+        printf(
+            "*** Fatal Error ***\n"
+            "%s (signal %i)\n",
+            sigdesc, crash_info.signum);
+        if (crash_info.has_siginfo)
             printf("Address: %p\n", crash_info.siginfo.si_addr);
         fputc('\n', stdout);
         fflush(stdout);
@@ -400,11 +390,11 @@ static void crash_handler(const char *logfile)
 
     sys_info();
 
-    crash_info.buf[sizeof(crash_info.buf)-1] = '\0';
+    crash_info.buf[sizeof(crash_info.buf) - 1] = '\0';
     printf("%s\n", crash_info.buf);
     fflush(stdout);
 
-    if(crash_info.pid > 0)
+    if (crash_info.pid > 0)
     {
         gdb_info(crash_info.pid);
         kill(crash_info.pid, SIGKILL);
@@ -415,18 +405,19 @@ static void crash_handler(const char *logfile)
     // even faulty applications shouldn't be able to freeze the X server.
     usleep(100000);
 
-    if(logfile)
+    if (logfile)
     {
-        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile) + "'.\n Please report this to https://gitlab.com/OpenMW/openmw/issues !";
+        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile)
+            + "'.\n Please report this to https://gitlab.com/OpenMW/openmw/issues !";
         SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
     }
 
     exit(0);
 }
 
-static void getExecPath(char **argv)
+static void getExecPath(char** argv)
 {
-#if defined (__FreeBSD__)
+#if defined(__FreeBSD__)
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
     size_t size = sizeof(argv0);
 
@@ -434,36 +425,37 @@ static void getExecPath(char **argv)
         return;
 #endif
 
-#if defined (__APPLE__)
-    if(proc_pidpath(getpid(), argv0, sizeof(argv0)) > 0)
+#if defined(__APPLE__)
+    if (proc_pidpath(getpid(), argv0, sizeof(argv0)) > 0)
         return;
 #endif
     int cwdlen;
-    const char *statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
+    const char* statusPaths[] = { "/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file" };
     memset(argv0, 0, sizeof(argv0));
 
-    for(const char *path : statusPaths)
+    for (const char* path : statusPaths)
     {
         if (readlink(path, argv0, sizeof(argv0)) != -1)
             return;
     }
 
-    if(argv[0][0] == '/')
+    if (argv[0][0] == '/')
         snprintf(argv0, sizeof(argv0), "%s", argv[0]);
     else if (getcwd(argv0, sizeof(argv0)) != nullptr)
     {
         cwdlen = strlen(argv0);
-        snprintf(argv0+cwdlen, sizeof(argv0)-cwdlen, "/%s", argv[0]);
+        snprintf(argv0 + cwdlen, sizeof(argv0) - cwdlen, "/%s", argv[0]);
     }
 }
 
-int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
+int crashCatcherInstallHandlers(
+    int argc, char** argv, int num_signals, int* signals, const char* logfile, int (*user_info)(char*, char*))
 {
     struct sigaction sa;
     stack_t altss;
     int retval;
 
-    if(argc == 2 && strcmp(argv[1], crash_switch) == 0)
+    if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
         crash_handler(logfile);
 
     cc_user_info = user_info;
@@ -472,7 +464,7 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
 
     /* Set an alternate signal stack so SIGSEGVs caused by stack overflows
      * still run */
-    static char* altstack = new char [SIGSTKSZ];
+    static char* altstack = new char[SIGSTKSZ];
     altss.ss_sp = altstack;
     altss.ss_flags = 0;
     altss.ss_size = SIGSTKSZ;
@@ -484,10 +476,11 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
     sigemptyset(&sa.sa_mask);
 
     retval = 0;
-    while(num_signals--)
+    while (num_signals--)
     {
-        if((*signals != SIGSEGV && *signals != SIGILL && *signals != SIGFPE && *signals != SIGABRT &&
-            *signals != SIGBUS) || sigaction(*signals, &sa, nullptr) == -1)
+        if ((*signals != SIGSEGV && *signals != SIGILL && *signals != SIGFPE && *signals != SIGABRT
+                && *signals != SIGBUS)
+            || sigaction(*signals, &sa, nullptr) == -1)
         {
             *signals = 0;
             retval = -1;
@@ -499,7 +492,7 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
 
 static bool is_debugger_present()
 {
-#if defined (__linux__)
+#if defined(__linux__)
     std::filesystem::path procstatus = std::filesystem::path("/proc/self/status");
     if (std::filesystem::exists(procstatus))
     {
@@ -559,7 +552,7 @@ static bool is_debugger_present()
 #endif
 }
 
-void crashCatcherInstall(int argc, char **argv, const std::filesystem::path &crashLogPath)
+void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& crashLogPath)
 {
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {

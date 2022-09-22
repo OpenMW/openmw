@@ -5,26 +5,26 @@
 #include <QEvent>
 #include <QKeyEvent>
 
-bool CSVDoc::SubView::event (QEvent *event)
+bool CSVDoc::SubView::event(QEvent* event)
 {
-    if (event->type()==QEvent::ShortcutOverride)
+    if (event->type() == QEvent::ShortcutOverride)
     {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *> (event);
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
-        if (keyEvent->key()==Qt::Key_W && keyEvent->modifiers()==(Qt::ShiftModifier | Qt::ControlModifier))
+        if (keyEvent->key() == Qt::Key_W && keyEvent->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier))
             emit closeRequest();
-            return true;
+        return true;
     }
 
-    return QDockWidget::event (event);
+    return QDockWidget::event(event);
 }
 
-CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id)
- : mUniversalId (id)
+CSVDoc::SubView::SubView(const CSMWorld::UniversalId& id)
+    : mUniversalId(id)
 {
     /// \todo  add a button to the title bar that clones this sub view
 
-    setWindowTitle (QString::fromUtf8 (mUniversalId.toString().c_str()));
+    setWindowTitle(QString::fromUtf8(mUniversalId.toString().c_str()));
     setAttribute(Qt::WA_DeleteOnClose);
 }
 
@@ -33,20 +33,20 @@ CSMWorld::UniversalId CSVDoc::SubView::getUniversalId() const
     return mUniversalId;
 }
 
-void CSVDoc::SubView::setStatusBar (bool show) {}
+void CSVDoc::SubView::setStatusBar(bool show) {}
 
-void CSVDoc::SubView::useHint (const std::string& hint) {}
+void CSVDoc::SubView::useHint(const std::string& hint) {}
 
-void CSVDoc::SubView::setUniversalId (const CSMWorld::UniversalId& id)
+void CSVDoc::SubView::setUniversalId(const CSMWorld::UniversalId& id)
 {
     mUniversalId = id;
-    setWindowTitle (QString::fromUtf8(mUniversalId.toString().c_str()));
-    emit universalIdChanged (mUniversalId);
+    setWindowTitle(QString::fromUtf8(mUniversalId.toString().c_str()));
+    emit universalIdChanged(mUniversalId);
 }
 
-void CSVDoc::SubView::closeEvent (QCloseEvent *event)
+void CSVDoc::SubView::closeEvent(QCloseEvent* event)
 {
-    emit updateSubViewIndices (this);
+    emit updateSubViewIndices(this);
 }
 
 std::string CSVDoc::SubView::getTitle() const
@@ -56,5 +56,5 @@ std::string CSVDoc::SubView::getTitle() const
 
 void CSVDoc::SubView::closeRequest()
 {
-    emit closeRequest (this);
+    emit closeRequest(this);
 }

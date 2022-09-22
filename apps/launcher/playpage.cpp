@@ -2,19 +2,19 @@
 
 #include <QListView>
 
-Launcher::PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
+Launcher::PlayPage::PlayPage(QWidget* parent)
+    : QWidget(parent)
 {
-    setObjectName ("PlayPage");
+    setObjectName("PlayPage");
     setupUi(this);
 
     profilesComboBox->setView(new QListView());
 
     connect(profilesComboBox, qOverload<int>(&QComboBox::activated), this, &PlayPage::signalProfileChanged);
     connect(playButton, &QPushButton::clicked, this, &PlayPage::slotPlayClicked);
-
 }
 
-void Launcher::PlayPage::setProfilesModel(QAbstractItemModel *model)
+void Launcher::PlayPage::setProfilesModel(QAbstractItemModel* model)
 {
     profilesComboBox->setModel(model);
 }

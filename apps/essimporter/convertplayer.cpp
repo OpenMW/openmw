@@ -8,13 +8,15 @@
 namespace ESSImport
 {
 
-    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam, bool& teleportingEnabled, bool& levitationEnabled, ESM::ControlsState& controls)
+    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics,
+        bool& firstPersonCam, bool& teleportingEnabled, bool& levitationEnabled, ESM::ControlsState& controls)
     {
-        out.mObject.mPosition.rot[0] = -atan2(pcdt.mPNAM.mVerticalRotation.mData[2][1], pcdt.mPNAM.mVerticalRotation.mData[2][2]);
+        out.mObject.mPosition.rot[0]
+            = -atan2(pcdt.mPNAM.mVerticalRotation.mData[2][1], pcdt.mPNAM.mVerticalRotation.mData[2][2]);
 
         out.mBirthsign = pcdt.mBirthsign;
         out.mObject.mNpcStats.mBounty = pcdt.mBounty;
-        for (const auto & essFaction : pcdt.mFactions)
+        for (const auto& essFaction : pcdt.mFactions)
         {
             ESM::NpcStats::Faction faction;
             faction.mExpelled = (essFaction.mFlags & 0x2) != 0;
@@ -22,11 +24,11 @@ namespace ESSImport
             faction.mReputation = essFaction.mReputation;
             out.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(essFaction.mFactionName.toString())] = faction;
         }
-        for (int i=0; i<3; ++i)
+        for (int i = 0; i < 3; ++i)
             out.mObject.mNpcStats.mSpecIncreases[i] = pcdt.mPNAM.mSpecIncreases[i];
-        for (int i=0; i<8; ++i)
+        for (int i = 0; i < 8; ++i)
             out.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
-        for (int i=0; i<27; ++i)
+        for (int i = 0; i < 27; ++i)
             out.mObject.mNpcStats.mSkills[i].mProgress = pcdt.mPNAM.mSkillProgress[i];
         out.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
 
@@ -39,7 +41,7 @@ namespace ESSImport
         teleportingEnabled = !(pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_TeleportingDisabled);
         levitationEnabled = !(pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_LevitationDisabled);
 
-        for (const auto & knownDialogueTopic : pcdt.mKnownDialogueTopics)
+        for (const auto& knownDialogueTopic : pcdt.mKnownDialogueTopics)
         {
             outDialogueTopics.push_back(Misc::StringUtils::lowerCase(knownDialogueTopic));
         }

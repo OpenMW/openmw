@@ -34,10 +34,12 @@
 
 namespace ESM
 {
-    template<std::size_t len>
-    constexpr unsigned int fourCC(const char(&name)[len]) {
+    template <std::size_t len>
+    constexpr unsigned int fourCC(const char (&name)[len])
+    {
         static_assert(len == 5, "Constant must be 4 characters long. (Plus null terminator)");
-        return static_cast<unsigned char>(name[0]) | (static_cast<unsigned char>(name[1]) << 8) | (static_cast<unsigned char>(name[2]) << 16) | (static_cast<unsigned char>(name[3]) << 24);
+        return static_cast<unsigned char>(name[0]) | (static_cast<unsigned char>(name[1]) << 8)
+            | (static_cast<unsigned char>(name[2]) << 16) | (static_cast<unsigned char>(name[3]) << 24);
     }
 }
 
@@ -186,7 +188,7 @@ namespace ESM4
         REC_CCRD = fourCC("CCRD"), // Caravan Card
         REC_CMNY = fourCC("CMNY"), // Caravan Money
         REC_ALOC = fourCC("ALOC"), // Audio Location Controller
-        REC_MSET = fourCC("MSET")  // Media Set
+        REC_MSET = fourCC("MSET") // Media Set
     };
 
     enum SubRecordTypes
@@ -808,100 +810,100 @@ namespace ESM4
         EFI_SUDG = fourCC("SUDG"), // Sun Damage
         EFI_VAMP = fourCC("VAMP"), // Vampirism
         EFI_DARK = fourCC("DARK"), // Darkness
-        EFI_RSWD = fourCC("RSWD")  // Resist Water Damage
+        EFI_RSWD = fourCC("RSWD") // Resist Water Damage
     };
 
     // Based on http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format#Groups
     enum GroupType
     {
-        Grp_RecordType           = 0,
-        Grp_WorldChild           = 1,
-        Grp_InteriorCell         = 2,
-        Grp_InteriorSubCell      = 3,
-        Grp_ExteriorCell         = 4,
-        Grp_ExteriorSubCell      = 5,
-        Grp_CellChild            = 6,
-        Grp_TopicChild           = 7,
-        Grp_CellPersistentChild  = 8,
-        Grp_CellTemporaryChild   = 9,
+        Grp_RecordType = 0,
+        Grp_WorldChild = 1,
+        Grp_InteriorCell = 2,
+        Grp_InteriorSubCell = 3,
+        Grp_ExteriorCell = 4,
+        Grp_ExteriorSubCell = 5,
+        Grp_CellChild = 6,
+        Grp_TopicChild = 7,
+        Grp_CellPersistentChild = 8,
+        Grp_CellTemporaryChild = 9,
         Grp_CellVisibleDistChild = 10
     };
 
     // Based on http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format#Records
     enum RecordFlag
     {
-        Rec_ESM        = 0x00000001, // (TES4 record only) Master (ESM) file.
-        Rec_Deleted    = 0x00000020, // Deleted
-        Rec_Constant   = 0x00000040, // Constant
+        Rec_ESM = 0x00000001, // (TES4 record only) Master (ESM) file.
+        Rec_Deleted = 0x00000020, // Deleted
+        Rec_Constant = 0x00000040, // Constant
         Rec_HiddenLMap = 0x00000040, // (REFR) Hidden From Local Map (Needs Confirmation: Related to shields)
-        Rec_Localized  = 0x00000080, // (TES4 record only) Is localized. This will make Skyrim load the
-                                     //   .STRINGS, .DLSTRINGS, and .ILSTRINGS files associated with the mod.
-                                     //   If this flag is not set, lstrings are treated as zstrings.
-        Rec_FireOff    = 0x00000080, // (PHZD) Turn off fire
+        Rec_Localized = 0x00000080, // (TES4 record only) Is localized. This will make Skyrim load the
+                                    //   .STRINGS, .DLSTRINGS, and .ILSTRINGS files associated with the mod.
+                                    //   If this flag is not set, lstrings are treated as zstrings.
+        Rec_FireOff = 0x00000080, // (PHZD) Turn off fire
         Rec_UpdateAnim = 0x00000100, // Must Update Anims
-        Rec_NoAccess   = 0x00000100, // (REFR) Inaccessible
-        Rec_Hidden     = 0x00000200, // (REFR) Hidden from local map
-        Rec_StartDead  = 0x00000200, // (ACHR) Starts dead /(REFR) MotionBlurCastsShadows
+        Rec_NoAccess = 0x00000100, // (REFR) Inaccessible
+        Rec_Hidden = 0x00000200, // (REFR) Hidden from local map
+        Rec_StartDead = 0x00000200, // (ACHR) Starts dead /(REFR) MotionBlurCastsShadows
         Rec_Persistent = 0x00000400, // Quest item / Persistent reference
-        Rec_DispMenu   = 0x00000400, // (LSCR) Displays in Main Menu
-        Rec_Disabled   = 0x00000800, // Initially disabled
-        Rec_Ignored    = 0x00001000, // Ignored
+        Rec_DispMenu = 0x00000400, // (LSCR) Displays in Main Menu
+        Rec_Disabled = 0x00000800, // Initially disabled
+        Rec_Ignored = 0x00001000, // Ignored
         Rec_VisDistant = 0x00008000, // Visible when distant
-        Rec_RandAnim   = 0x00010000, // (ACTI) Random Animation Start
-        Rec_Danger     = 0x00020000, // (ACTI) Dangerous / Off limits (Interior cell)
-                                     //   Dangerous Can't be set withough Ignore Object Interaction
+        Rec_RandAnim = 0x00010000, // (ACTI) Random Animation Start
+        Rec_Danger = 0x00020000, // (ACTI) Dangerous / Off limits (Interior cell)
+                                 //   Dangerous Can't be set withough Ignore Object Interaction
         Rec_Compressed = 0x00040000, // Data is compressed
         Rec_CanNotWait = 0x00080000, // Can't wait
-        Rec_IgnoreObj  = 0x00100000, // (ACTI) Ignore Object Interaction
-                                     //   Ignore Object Interaction Sets Dangerous Automatically
-        Rec_Marker     = 0x00800000, // Is Marker
-        Rec_Obstacle   = 0x02000000, // (ACTI) Obstacle / (REFR) No AI Acquire
+        Rec_IgnoreObj = 0x00100000, // (ACTI) Ignore Object Interaction
+                                    //   Ignore Object Interaction Sets Dangerous Automatically
+        Rec_Marker = 0x00800000, // Is Marker
+        Rec_Obstacle = 0x02000000, // (ACTI) Obstacle / (REFR) No AI Acquire
         Rec_NavMFilter = 0x04000000, // NavMesh Gen - Filter
-        Rec_NavMBBox   = 0x08000000, // NavMesh Gen - Bounding Box
+        Rec_NavMBBox = 0x08000000, // NavMesh Gen - Bounding Box
         Rec_ExitToTalk = 0x10000000, // (FURN) Must Exit to Talk
-        Rec_Refected   = 0x10000000, // (REFR) Reflected By Auto Water
-        Rec_ChildUse   = 0x20000000, // (FURN/IDLM) Child Can Use
-        Rec_NoHavok    = 0x20000000, // (REFR) Don't Havok Settle
+        Rec_Refected = 0x10000000, // (REFR) Reflected By Auto Water
+        Rec_ChildUse = 0x20000000, // (FURN/IDLM) Child Can Use
+        Rec_NoHavok = 0x20000000, // (REFR) Don't Havok Settle
         Rec_NavMGround = 0x40000000, // NavMesh Gen - Ground
-        Rec_NoRespawn  = 0x40000000, // (REFR) NoRespawn
-        Rec_MultiBound = 0x80000000  // (REFR) MultiBound
+        Rec_NoRespawn = 0x40000000, // (REFR) NoRespawn
+        Rec_MultiBound = 0x80000000 // (REFR) MultiBound
     };
 
 #pragma pack(push, 1)
     // NOTE: the label field of a group is not reliable (http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format)
     union GroupLabel
     {
-        std::uint32_t value;     // formId, blockNo or raw int representation of type
-        char recordType[4];      // record type in ascii
-        std::int16_t grid[2];    // grid y, x (note the reverse order)
+        std::uint32_t value; // formId, blockNo or raw int representation of type
+        char recordType[4]; // record type in ascii
+        std::int16_t grid[2]; // grid y, x (note the reverse order)
     };
 
     struct GroupTypeHeader
     {
         std::uint32_t typeId;
         std::uint32_t groupSize; // includes the 24 bytes (20 for TES4) of header (i.e. this struct)
-        GroupLabel    label;     // format based on type
-        std::int32_t  type;
-        std::uint16_t stamp;     // & 0xff for day, & 0xff00 for months since Dec 2002 (i.e. 1 = Jan 2003)
+        GroupLabel label; // format based on type
+        std::int32_t type;
+        std::uint16_t stamp; // & 0xff for day, & 0xff00 for months since Dec 2002 (i.e. 1 = Jan 2003)
         std::uint16_t unknown;
-        std::uint16_t version;   // not in TES4
-        std::uint16_t unknown2;  // not in TES4
+        std::uint16_t version; // not in TES4
+        std::uint16_t unknown2; // not in TES4
     };
 
     struct RecordTypeHeader
     {
         std::uint32_t typeId;
-        std::uint32_t dataSize;  // does *not* include 24 bytes (20 for TES4) of header
+        std::uint32_t dataSize; // does *not* include 24 bytes (20 for TES4) of header
         std::uint32_t flags;
-        FormId        id;
+        FormId id;
         std::uint32_t revision;
-        std::uint16_t version;  // not in TES4
-        std::uint16_t unknown;  // not in TES4
+        std::uint16_t version; // not in TES4
+        std::uint16_t unknown; // not in TES4
     };
 
     union RecordHeader
     {
-        struct GroupTypeHeader  group;
+        struct GroupTypeHeader group;
         struct RecordTypeHeader record;
     };
 
@@ -922,7 +924,7 @@ namespace ESM4
     union CellGrid
     {
         FormId cellId;
-        Grid   grid;
+        Grid grid;
     };
 
     struct Vertex

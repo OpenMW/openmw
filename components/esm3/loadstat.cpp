@@ -5,12 +5,12 @@
 
 namespace ESM
 {
-    void Static::load(ESMReader &esm, bool &isDeleted)
+    void Static::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
-        //bool isBlocked = (mRecordFlags & FLAG_Blocked) != 0;
-        //bool isPersistent = (mRecordFlags & FLAG_Persistent) != 0;
+        // bool isBlocked = (mRecordFlags & FLAG_Blocked) != 0;
+        // bool isPersistent = (mRecordFlags & FLAG_Persistent) != 0;
 
         bool hasName = false;
         while (esm.hasMoreSubs())
@@ -38,7 +38,7 @@ namespace ESM
         if (!hasName)
             esm.fail("Missing NAME subrecord");
     }
-    void Static::save(ESMWriter &esm, bool isDeleted) const
+    void Static::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
         if (isDeleted)

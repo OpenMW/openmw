@@ -18,16 +18,16 @@ namespace MWPhysics
         btVector3 mOrigin;
 
     public:
-        const btCollisionObject *mObject{nullptr};
-        btVector3 mContactPoint{0,0,0};
-        btVector3 mContactNormal{0,0,0};
+        const btCollisionObject* mObject{ nullptr };
+        btVector3 mContactPoint{ 0, 0, 0 };
+        btVector3 mContactNormal{ 0, 0, 0 };
         btScalar mLeastDistSqr;
 
-        DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3 &origin);
+        DeepestNotMeContactTestResultCallback(
+            const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3& origin);
 
-        btScalar addSingleResult(btManifoldPoint& cp,
-                                         const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
-                                         const btCollisionObjectWrapper* col1Wrap,int partId1,int index1) override;
+        btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* col0Wrap, int partId0, int index0,
+            const btCollisionObjectWrapper* col1Wrap, int partId1, int index1) override;
     };
 }
 

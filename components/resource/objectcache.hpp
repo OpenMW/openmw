@@ -15,18 +15,18 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * OpenSceneGraph Public License for more details.
-*/
+ */
 
 #ifndef OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
 #define OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
 
+#include <osg/Node>
 #include <osg/Referenced>
 #include <osg/ref_ptr>
-#include <osg/Node>
 
-#include <string>
 #include <map>
 #include <mutex>
+#include <string>
 
 namespace osg
 {
@@ -35,49 +35,51 @@ namespace osg
     class NodeVisitor;
 }
 
-namespace Resource {
-
-template <typename KeyType>
-class GenericObjectCache : public osg::Referenced
+namespace Resource
 {
-    public:
 
+    template <typename KeyType>
+    class GenericObjectCache : public osg::Referenced
+    {
+    public:
         GenericObjectCache()
-            : osg::Referenced(true) {}
+            : osg::Referenced(true)
+        {
+        }
 
         /** For each object in the cache which has an reference count greater than 1
-          * (and therefore referenced by elsewhere in the application) set the time stamp
-          * for that object in the cache to specified time.
-          * This would typically be called once per frame by applications which are doing database paging,
-          * and need to prune objects that are no longer required.
-          * The time used should be taken from the FrameStamp::getReferenceTime().*/
+         * (and therefore referenced by elsewhere in the application) set the time stamp
+         * for that object in the cache to specified time.
+         * This would typically be called once per frame by applications which are doing database paging,
+         * and need to prune objects that are no longer required.
+         * The time used should be taken from the FrameStamp::getReferenceTime().*/
         void updateTimeStampOfObjectsInCacheWithExternalReferences(double referenceTime)
         {
             // look for objects with external references and update their time stamp.
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for(typename ObjectCacheMap::iterator itr=_objectCache.begin(); itr!=_objectCache.end(); ++itr)
+            for (typename ObjectCacheMap::iterator itr = _objectCache.begin(); itr != _objectCache.end(); ++itr)
             {
                 // If ref count is greater than 1, the object has an external reference.
                 // If the timestamp is yet to be initialized, it needs to be updated too.
-                if (itr->second.first->referenceCount()>1 || itr->second.second == 0.0)
+                if (itr->second.first->referenceCount() > 1 || itr->second.second == 0.0)
                     itr->second.second = referenceTime;
             }
         }
 
         /** Removed object in the cache which have a time stamp at or before the specified expiry time.
-          * This would typically be called once per frame by applications which are doing database paging,
-          * and need to prune objects that are no longer required, and called after the a called
-          * after the call to updateTimeStampOfObjectsInCacheWithExternalReferences(expirtyTime).*/
+         * This would typically be called once per frame by applications which are doing database paging,
+         * and need to prune objects that are no longer required, and called after the a called
+         * after the call to updateTimeStampOfObjectsInCacheWithExternalReferences(expirtyTime).*/
         void removeExpiredObjectsInCache(double expiryTime)
         {
-            std::vector<osg::ref_ptr<osg::Object> > objectsToRemove;
+            std::vector<osg::ref_ptr<osg::Object>> objectsToRemove;
             {
                 std::lock_guard<std::mutex> lock(_objectCacheMutex);
                 // Remove expired entries from object cache
                 typename ObjectCacheMap::iterator oitr = _objectCache.begin();
-                while(oitr != _objectCache.end())
+                while (oitr != _objectCache.end())
                 {
-                    if (oitr->second.second<=expiryTime)
+                    if (oitr->second.second <= expiryTime)
                     {
                         objectsToRemove.push_back(oitr->second.first);
                         _objectCache.erase(oitr++);
@@ -101,7 +103,7 @@ class GenericObjectCache : public osg::Referenced
         void addEntryToObjectCache(const KeyType& key, osg::Object* object, double timestamp = 0.0)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            _objectCache[key]=ObjectTimeStampPair(object,timestamp);
+            _objectCache[key] = ObjectTimeStampPair(object, timestamp);
         }
 
         /** Remove Object from cache.*/
@@ -109,7 +111,8 @@ class GenericObjectCache : public osg::Referenced
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
             typename ObjectCacheMap::iterator itr = _objectCache.find(key);
-            if (itr!=_objectCache.end()) _objectCache.erase(itr);
+            if (itr != _objectCache.end())
+                _objectCache.erase(itr);
         }
 
         /** Get an ref_ptr<Object> from the object cache*/
@@ -117,9 +120,10 @@ class GenericObjectCache : public osg::Referenced
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
             typename ObjectCacheMap::iterator itr = _objectCache.find(key);
-            if (itr!=_objectCache.end())
+            if (itr != _objectCache.end())
                 return itr->second.first;
-            else return nullptr;
+            else
+                return nullptr;
         }
 
         /** Check if an object is in the cache, and if it is, update its usage time stamp. */
@@ -127,19 +131,20 @@ class GenericObjectCache : public osg::Referenced
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
             typename ObjectCacheMap::iterator itr = _objectCache.find(key);
-            if (itr!=_objectCache.end())
+            if (itr != _objectCache.end())
             {
                 itr->second.second = timeStamp;
                 return true;
             }
-            else return false;
+            else
+                return false;
         }
 
         /** call releaseGLObjects on all objects attached to the object cache.*/
         void releaseGLObjects(osg::State* state)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for(typename ObjectCacheMap::iterator itr = _objectCache.begin(); itr != _objectCache.end(); ++itr)
+            for (typename ObjectCacheMap::iterator itr = _objectCache.begin(); itr != _objectCache.end(); ++itr)
             {
                 osg::Object* object = itr->second.first.get();
                 object->releaseGLObjects(state);
@@ -150,7 +155,7 @@ class GenericObjectCache : public osg::Referenced
         void accept(osg::NodeVisitor& nv)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for(typename ObjectCacheMap::iterator itr = _objectCache.begin(); itr != _objectCache.end(); ++itr)
+            for (typename ObjectCacheMap::iterator itr = _objectCache.begin(); itr != _objectCache.end(); ++itr)
             {
                 osg::Object* object = itr->second.first.get();
                 if (object)
@@ -179,20 +184,18 @@ class GenericObjectCache : public osg::Referenced
         }
 
     protected:
-
         virtual ~GenericObjectCache() {}
 
-        typedef std::pair<osg::ref_ptr<osg::Object>, double >           ObjectTimeStampPair;
-        typedef std::map<KeyType, ObjectTimeStampPair >             ObjectCacheMap;
+        typedef std::pair<osg::ref_ptr<osg::Object>, double> ObjectTimeStampPair;
+        typedef std::map<KeyType, ObjectTimeStampPair> ObjectCacheMap;
 
-        ObjectCacheMap                          _objectCache;
-        mutable std::mutex                      _objectCacheMutex;
+        ObjectCacheMap _objectCache;
+        mutable std::mutex _objectCacheMutex;
+    };
 
-};
-
-class ObjectCache : public GenericObjectCache<std::string>
-{
-};
+    class ObjectCache : public GenericObjectCache<std::string>
+    {
+    };
 
 }
 

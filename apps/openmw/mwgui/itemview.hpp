@@ -10,12 +10,12 @@ namespace MWGui
 
     class ItemView final : public MyGUI::Widget
     {
-    MYGUI_RTTI_DERIVED(ItemView)
+        MYGUI_RTTI_DERIVED(ItemView)
     public:
         ItemView();
 
         /// Register needed components with MyGUI's factory manager
-        static void registerComponents ();
+        static void registerComponents();
 
         /// Takes ownership of \a model
         void setModel(std::unique_ptr<ItemModel> model);
@@ -39,13 +39,12 @@ namespace MWGui
         void setSize(const MyGUI::IntSize& _value) override;
         void setCoord(const MyGUI::IntCoord& _value) override;
 
-        void onSelectedItem (MyGUI::Widget* sender);
-        void onSelectedBackground (MyGUI::Widget* sender);
+        void onSelectedItem(MyGUI::Widget* sender);
+        void onSelectedBackground(MyGUI::Widget* sender);
         void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
 
         std::unique_ptr<ItemModel> mModel;
         MyGUI::ScrollView* mScrollView;
-
     };
 
 }

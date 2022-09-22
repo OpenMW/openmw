@@ -35,7 +35,7 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
@@ -44,11 +44,15 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_DATA:
             {
-                //if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 if (subHdr.dataSize == 16) // FO3 has 13 bytes even though VER_094
                 {
                     FormId projectile;
@@ -81,15 +85,33 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_ICON: reader.getZString(mIcon);  break;
-            case ESM4::SUB_MICO: reader.getZString(mMiniIcon); break; // FO3
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_ANAM: reader.get(mEnchantmentPoints); break;
-            case ESM4::SUB_ENAM: reader.getFormId(mEnchantment); break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
-            case ESM4::SUB_DESC: reader.getLocalizedString(mText); break;
-            case ESM4::SUB_YNAM: reader.getFormId(mPickUpSound); break;
-            case ESM4::SUB_ZNAM: reader.getFormId(mDropSound); break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mIcon);
+                break;
+            case ESM4::SUB_MICO:
+                reader.getZString(mMiniIcon);
+                break; // FO3
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_ANAM:
+                reader.get(mEnchantmentPoints);
+                break;
+            case ESM4::SUB_ENAM:
+                reader.getFormId(mEnchantment);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
+            case ESM4::SUB_DESC:
+                reader.getLocalizedString(mText);
+                break;
+            case ESM4::SUB_YNAM:
+                reader.getFormId(mPickUpSound);
+                break;
+            case ESM4::SUB_ZNAM:
+                reader.getFormId(mDropSound);
+                break;
             case ESM4::SUB_MODT:
             case ESM4::SUB_OBND:
             case ESM4::SUB_KSIZ:
@@ -100,7 +122,7 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
             case ESM4::SUB_RCIL: // FONV
             case ESM4::SUB_SCRI: // FONV
             {
-                //std::cout << "AMMO " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "AMMO " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -110,10 +132,10 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Ammunition::save(ESM4::Writer& writer) const
+// void ESM4::Ammunition::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Ammunition::blank()
+// void ESM4::Ammunition::blank()
 //{
-//}
+// }

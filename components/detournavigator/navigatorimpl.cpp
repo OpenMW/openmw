@@ -4,8 +4,8 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadpgrd.hpp>
-#include <components/misc/coordinateconverter.hpp>
 #include <components/misc/convert.hpp>
+#include <components/misc/coordinateconverter.hpp>
 
 namespace DetourNavigator
 {
@@ -17,7 +17,7 @@ namespace DetourNavigator
 
     void NavigatorImpl::addAgent(const AgentBounds& agentBounds)
     {
-        if(agentBounds.mHalfExtents.length2() <= 0)
+        if (agentBounds.mHalfExtents.length2() <= 0)
             return;
         ++mAgents[agentBounds];
         mNavMeshManager.addAgent(agentBounds);
@@ -42,16 +42,17 @@ namespace DetourNavigator
         mNavMeshManager.updateBounds(playerPosition, getImpl(guard));
     }
 
-    void NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
-        const UpdateGuard* guard)
+    void NavigatorImpl::addObject(
+        const ObjectId id, const ObjectShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
     {
         addObjectImpl(id, shapes, transform, guard);
     }
 
-    bool NavigatorImpl::addObjectImpl(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
-        const UpdateGuard* guard)
+    bool NavigatorImpl::addObjectImpl(
+        const ObjectId id, const ObjectShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
     {
-        const CollisionShape collisionShape(shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
+        const CollisionShape collisionShape(
+            shapes.mShapeInstance, *shapes.mShapeInstance->mCollisionShape, shapes.mTransform);
         bool result = mNavMeshManager.addObject(id, collisionShape, transform, AreaType_ground, getImpl(guard));
         if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
         {
@@ -66,8 +67,8 @@ namespace DetourNavigator
         return result;
     }
 
-    void NavigatorImpl::addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform,
-        const UpdateGuard* guard)
+    void NavigatorImpl::addObject(
+        const ObjectId id, const DoorShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
     {
         if (addObjectImpl(id, static_cast<const ObjectShapes&>(shapes), transform, guard))
         {
@@ -78,8 +79,8 @@ namespace DetourNavigator
         }
     }
 
-    void NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
-        const UpdateGuard* guard)
+    void NavigatorImpl::updateObject(
+        const ObjectId id, const ObjectShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
     {
         mNavMeshManager.updateObject(id, transform, AreaType_ground, getImpl(guard));
         if (const btCollisionShape* const avoidShape = shapes.mShapeInstance->mAvoidCollisionShape.get())
@@ -90,8 +91,8 @@ namespace DetourNavigator
         }
     }
 
-    void NavigatorImpl::updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform,
-        const UpdateGuard* guard)
+    void NavigatorImpl::updateObject(
+        const ObjectId id, const DoorShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
     {
         return updateObject(id, static_cast<const ObjectShapes&>(shapes), transform, guard);
     }
@@ -118,8 +119,8 @@ namespace DetourNavigator
         mNavMeshManager.removeWater(cellPosition, getImpl(guard));
     }
 
-    void NavigatorImpl::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape,
-        const UpdateGuard* guard)
+    void NavigatorImpl::addHeightfield(
+        const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape, const UpdateGuard* guard)
     {
         mNavMeshManager.addHeightfield(cellPosition, cellSize, shape, getImpl(guard));
     }
@@ -136,12 +137,8 @@ namespace DetourNavigator
         {
             const auto src = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV0]));
             const auto dst = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV1]));
-            mNavMeshManager.addOffMeshConnection(
-                ObjectId(&pathgrid),
-                toNavMeshCoordinates(mSettings.mRecast, src),
-                toNavMeshCoordinates(mSettings.mRecast, dst),
-                AreaType_pathgrid
-            );
+            mNavMeshManager.addOffMeshConnection(ObjectId(&pathgrid), toNavMeshCoordinates(mSettings.mRecast, src),
+                toNavMeshCoordinates(mSettings.mRecast, dst), AreaType_pathgrid);
         }
     }
 

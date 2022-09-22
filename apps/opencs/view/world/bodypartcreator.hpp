@@ -18,29 +18,24 @@ namespace CSVWorld
     {
         Q_OBJECT
 
-        QCheckBox *mFirstPerson;
+        QCheckBox* mFirstPerson;
 
-        private:
+    private:
+        /// \return ID entered by user.
+        std::string getId() const override;
 
-            /// \return ID entered by user.
-            std::string getId() const override;
+    public:
+        BodyPartCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
-        public:
+        /// \return Error description for current user input.
+        std::string getErrors() const override;
 
-            BodyPartCreator(
-                CSMWorld::Data& data,
-                QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id);
+        /// \brief Clear ID and checkbox input widgets.
+        void reset() override;
 
-            /// \return Error description for current user input.
-            std::string getErrors() const override;
+    private slots:
 
-            /// \brief Clear ID and checkbox input widgets.
-            void reset() override;
-
-        private slots:
-
-            void checkboxClicked();
+        void checkboxClicked();
     };
 }
 

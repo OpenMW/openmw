@@ -3,26 +3,28 @@
 #include <components/esm3/loadcell.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/class.hpp"
 #include "../mwworld/cellutils.hpp"
+#include "../mwworld/class.hpp"
 
 #include "player.hpp"
 
 namespace MWWorld
 {
-    ActionTeleport::ActionTeleport(std::string_view cellName,
-        const ESM::Position& position, bool teleportFollowers)
-    : Action (true), mCellName (cellName), mPosition (position), mTeleportFollowers(teleportFollowers)
+    ActionTeleport::ActionTeleport(std::string_view cellName, const ESM::Position& position, bool teleportFollowers)
+        : Action(true)
+        , mCellName(cellName)
+        , mPosition(position)
+        , mTeleportFollowers(teleportFollowers)
     {
     }
 
-    void ActionTeleport::executeImp (const Ptr& actor)
+    void ActionTeleport::executeImp(const Ptr& actor)
     {
         if (mTeleportFollowers)
         {
@@ -37,17 +39,17 @@ namespace MWWorld
         teleport(actor);
     }
 
-    void ActionTeleport::teleport(const Ptr &actor)
+    void ActionTeleport::teleport(const Ptr& actor)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         actor.getClass().getCreatureStats(actor).land(actor == world->getPlayerPtr());
-        if(actor == world->getPlayerPtr())
+        if (actor == world->getPlayerPtr())
         {
             world->getPlayer().setTeleported(true);
             if (mCellName.empty())
-                world->changeToExteriorCell (mPosition, true);
+                world->changeToExteriorCell(mPosition, true);
             else
-                world->changeToInteriorCell (mCellName, mPosition, true);
+                world->changeToInteriorCell(mCellName, mPosition, true);
         }
         else
         {
@@ -59,15 +61,17 @@ namespace MWWorld
                 world->moveObject(actor, world->getExterior(index.x(), index.y()), mPosition.asVec3(), true, true);
             }
             else
-                world->moveObject(actor,world->getInterior(mCellName),mPosition.asVec3(), true, true);
+                world->moveObject(actor, world->getInterior(mCellName), mPosition.asVec3(), true, true);
         }
     }
 
-    void ActionTeleport::getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out, bool toExterior, bool includeHostiles) {
+    void ActionTeleport::getFollowers(
+        const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out, bool toExterior, bool includeHostiles)
+    {
         std::set<MWWorld::Ptr> followers;
         MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor, followers);
 
-        for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+        for (std::set<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
         {
             MWWorld::Ptr follower = *it;
 
@@ -76,10 +80,13 @@ namespace MWWorld
             if (!includeHostiles && follower.getClass().getCreatureStats(follower).getAiSequence().isInCombat(actor))
                 continue;
 
-            if (!toExterior && !script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1 && follower.getCell()->getCell()->isExterior())
+            if (!toExterior && !script.empty()
+                && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1
+                && follower.getCell()->getCell()->isExterior())
                 continue;
 
-            if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2() > 800 * 800)
+            if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2()
+                > 800 * 800)
                 continue;
 
             out.emplace(follower);

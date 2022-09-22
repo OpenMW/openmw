@@ -36,27 +36,55 @@ void ESM4::Clothing::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getZString(mFullName); break;
-            case ESM4::SUB_DATA: reader.get(mData);            break;
-            case ESM4::SUB_BMDT: reader.get(mClothingFlags);   break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId);      break;
-            case ESM4::SUB_ENAM: reader.getFormId(mEnchantment); break;
-            case ESM4::SUB_ANAM: reader.get(mEnchantmentPoints); break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);     break;
-            case ESM4::SUB_MODL: reader.getZString(mModelMale); break;
-            case ESM4::SUB_MOD2: reader.getZString(mModelMaleWorld); break;
-            case ESM4::SUB_MOD3: reader.getZString(mModelFemale); break;
-            case ESM4::SUB_MOD4: reader.getZString(mModelFemaleWorld); break;
-            case ESM4::SUB_ICON: reader.getZString(mIconMale); break;
-            case ESM4::SUB_ICO2: reader.getZString(mIconFemale); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getZString(mFullName);
+                break;
+            case ESM4::SUB_DATA:
+                reader.get(mData);
+                break;
+            case ESM4::SUB_BMDT:
+                reader.get(mClothingFlags);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_ENAM:
+                reader.getFormId(mEnchantment);
+                break;
+            case ESM4::SUB_ANAM:
+                reader.get(mEnchantmentPoints);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModelMale);
+                break;
+            case ESM4::SUB_MOD2:
+                reader.getZString(mModelMaleWorld);
+                break;
+            case ESM4::SUB_MOD3:
+                reader.getZString(mModelFemale);
+                break;
+            case ESM4::SUB_MOD4:
+                reader.getZString(mModelFemaleWorld);
+                break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mIconMale);
+                break;
+            case ESM4::SUB_ICO2:
+                reader.getZString(mIconFemale);
+                break;
             case ESM4::SUB_MODT:
             case ESM4::SUB_MO2B:
             case ESM4::SUB_MO3B:
@@ -65,7 +93,7 @@ void ESM4::Clothing::load(ESM4::Reader& reader)
             case ESM4::SUB_MO3T:
             case ESM4::SUB_MO4T:
             {
-                //std::cout << "CLOT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "CLOT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -73,14 +101,14 @@ void ESM4::Clothing::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::CLOT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
-    //if ((mClothingFlags&0xffff) == 0x02) // only hair
-        //std::cout << "only hair " << mEditorId << std::endl;
+    // if ((mClothingFlags&0xffff) == 0x02) // only hair
+    // std::cout << "only hair " << mEditorId << std::endl;
 }
 
-//void ESM4::Clothing::save(ESM4::Writer& writer) const
+// void ESM4::Clothing::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Clothing::blank()
+// void ESM4::Clothing::blank()
 //{
-//}
+// }

@@ -26,8 +26,8 @@
 */
 #include "common.hpp"
 
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 #include <stdexcept>
 
 #include <string>
@@ -36,12 +36,9 @@
 
 namespace ESM4
 {
-    const char *sGroupType[] =
-    {
-        "Record Type", "World Child", "Interior Cell", "Interior Sub Cell", "Exterior Cell",
-        "Exterior Sub Cell", "Cell Child", "Topic Child", "Cell Persistent Child",
-        "Cell Temporary Child", "Cell Visible Dist Child", "Unknown"
-    };
+    const char* sGroupType[] = { "Record Type", "World Child", "Interior Cell", "Interior Sub Cell", "Exterior Cell",
+        "Exterior Sub Cell", "Cell Child", "Topic Child", "Cell Persistent Child", "Cell Temporary Child",
+        "Cell Visible Dist Child", "Unknown" };
 
     std::string printLabel(const GroupLabel& label, const std::uint32_t type)
     {
@@ -58,9 +55,9 @@ namespace ESM4
             case ESM4::Grp_ExteriorCell:
             case ESM4::Grp_ExteriorSubCell:
             {
-                //short x, y;
-                //y = label & 0xff;
-                //x = (label >> 16) & 0xff;
+                // short x, y;
+                // y = label & 0xff;
+                // x = (label >> 16) & 0xff;
                 ss << ": grid (x, y) " << std::dec << label.grid[1] << ", " << label.grid[0];
 
                 break;
@@ -90,9 +87,9 @@ namespace ESM4
 
     void gridToString(std::int16_t x, std::int16_t y, std::string& str)
     {
-        char buf[6+6+2+1]; // longest signed 16 bit number is 6 characters (-32768)
-        int res = snprintf(buf, 6+6+2+1, "#%d %d", x, y);
-        if (res > 0 && res < 6+6+2+1)
+        char buf[6 + 6 + 2 + 1]; // longest signed 16 bit number is 6 characters (-32768)
+        int res = snprintf(buf, 6 + 6 + 2 + 1, "#%d %d", x, y);
+        if (res > 0 && res < 6 + 6 + 2 + 1)
             str.assign(buf);
         else
             throw std::runtime_error("possible buffer overflow while converting grid");

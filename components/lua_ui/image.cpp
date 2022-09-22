@@ -41,11 +41,9 @@ namespace LuaUi
         MyGUI::IntCoord atlasCoord;
         if (resource)
         {
-            atlasCoord = MyGUI::IntCoord(
-                static_cast<int>(resource->mOffset.x()),
-                static_cast<int>(resource->mOffset.y()),
-                static_cast<int>(resource->mSize.x()),
-                static_cast<int>(resource->mSize.y()));
+            atlasCoord
+                = MyGUI::IntCoord(static_cast<int>(resource->mOffset.x()), static_cast<int>(resource->mOffset.y()),
+                    static_cast<int>(resource->mSize.x()), static_cast<int>(resource->mSize.y()));
             setImageTexture(resource->mPath);
         }
 
@@ -57,10 +55,7 @@ namespace LuaUi
         if (texture != nullptr)
             textureSize = MyGUI::IntSize(texture->getWidth(), texture->getHeight());
 
-        mTileRect->updateSize(MyGUI::IntSize(
-            tileH ? textureSize.width : 0,
-            tileV ? textureSize.height : 0
-        ));
+        mTileRect->updateSize(MyGUI::IntSize(tileH ? textureSize.width : 0, tileV ? textureSize.height : 0));
         setImageTile(textureSize);
 
         if (atlasCoord.width == 0)
@@ -69,7 +64,7 @@ namespace LuaUi
             atlasCoord.height = textureSize.height;
         setImageCoord(atlasCoord);
 
-        setColour(propertyValue("color", MyGUI::Colour(1,1,1,1)));
+        setColour(propertyValue("color", MyGUI::Colour(1, 1, 1, 1)));
 
         WidgetExtension::updateProperties();
     }

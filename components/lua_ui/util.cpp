@@ -3,13 +3,13 @@
 #include <MyGUI_FactoryManager.h>
 
 #include "adapter.hpp"
-#include "widget.hpp"
-#include "text.hpp"
-#include "textedit.hpp"
-#include "window.hpp"
-#include "image.hpp"
 #include "container.hpp"
 #include "flex.hpp"
+#include "image.hpp"
+#include "text.hpp"
+#include "textedit.hpp"
+#include "widget.hpp"
+#include "window.hpp"
 
 #include "element.hpp"
 #include "registerscriptsettings.hpp"

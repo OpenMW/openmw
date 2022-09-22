@@ -4,8 +4,8 @@
 #include <QLineEdit>
 #include <QPalette>
 
-#include "../../model/filter/parser.hpp"
 #include "../../model/filter/node.hpp"
+#include "../../model/filter/parser.hpp"
 
 class QModelIndex;
 
@@ -18,43 +18,40 @@ namespace CSVFilter
 {
     class EditWidget : public QLineEdit
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMFilter::Parser mParser;
-            QPalette mPalette;
-            bool mIsEmpty;
-            int mStateColumnIndex;
-            int mDescColumnIndex;
-            QAction *mHelpAction;
+        CSMFilter::Parser mParser;
+        QPalette mPalette;
+        bool mIsEmpty;
+        int mStateColumnIndex;
+        int mDescColumnIndex;
+        QAction* mHelpAction;
 
-        public:
+    public:
+        EditWidget(CSMWorld::Data& data, QWidget* parent = nullptr);
 
-            EditWidget (CSMWorld::Data& data, QWidget *parent = nullptr);
+        void createFilterRequest(
+            std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action);
 
-            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource,
-                                     Qt::DropAction action);
+    signals:
 
-        signals:
-
-            void filterChanged (std::shared_ptr<CSMFilter::Node> filter);
+        void filterChanged(std::shared_ptr<CSMFilter::Node> filter);
 
     private:
-            std::string generateFilter(std::pair<std::string, std::vector<std::string> >& seekedString) const;
-            void contextMenuEvent (QContextMenuEvent *event) override;
+        std::string generateFilter(std::pair<std::string, std::vector<std::string>>& seekedString) const;
+        void contextMenuEvent(QContextMenuEvent* event) override;
 
-        private slots:
+    private slots:
 
-            void textChanged (const QString& text);
+        void textChanged(const QString& text);
 
-            void filterDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+        void filterDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void filterRowsRemoved (const QModelIndex& parent, int start, int end);
+        void filterRowsRemoved(const QModelIndex& parent, int start, int end);
 
-            void filterRowsInserted (const QModelIndex& parent, int start, int end);
+        void filterRowsInserted(const QModelIndex& parent, int start, int end);
 
-            static void openHelp();
-
-
+        static void openHelp();
     };
 }
 

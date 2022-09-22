@@ -22,7 +22,8 @@ namespace LuaUi
         , mExternal(sol::nil)
         , mParent(nullptr)
         , mTemplateChild(false)
-    {}
+    {
+    }
 
     void WidgetExtension::initialize(lua_State* lua, MyGUI::Widget* self)
     {
@@ -87,7 +88,7 @@ namespace LuaUi
     void WidgetExtension::reset()
     {
         // detach all children from the slot widget, in case it gets destroyed
-        for (auto& w: mChildren)
+        for (auto& w : mChildren)
             w->widget()->detachFromWidget();
     }
 
@@ -167,7 +168,8 @@ namespace LuaUi
         return sol::make_object(lua(), keySym);
     }
 
-    sol::object WidgetExtension::mouseEvent(int left, int top, MyGUI::MouseButton button = MyGUI::MouseButton::None) const
+    sol::object WidgetExtension::mouseEvent(
+        int left, int top, MyGUI::MouseButton button = MyGUI::MouseButton::None) const
     {
         osg::Vec2f position(left, top);
         MyGUI::IntPoint absolutePosition = mWidget->getAbsolutePosition();
@@ -246,7 +248,8 @@ namespace LuaUi
         mForcedCoord = size;
     }
 
-    void WidgetExtension::clearForced() {
+    void WidgetExtension::clearForced()
+    {
         mForcePosition = false;
         mForceSize = false;
     }
@@ -362,7 +365,7 @@ namespace LuaUi
             });
         }
         else
-            propagateEvent("keyPress", [code](auto w){ return w->keyEvent(code); });
+            propagateEvent("keyPress", [code](auto w) { return w->keyEvent(code); });
     }
 
     void WidgetExtension::keyRelease(MyGUI::Widget*, MyGUI::KeyCode code)
@@ -382,12 +385,12 @@ namespace LuaUi
 
     void WidgetExtension::mouseClick(MyGUI::Widget* _widget)
     {
-        propagateEvent("mouseClick", [](auto){ return sol::nil; });
+        propagateEvent("mouseClick", [](auto) { return sol::nil; });
     }
 
     void WidgetExtension::mouseDoubleClick(MyGUI::Widget* _widget)
     {
-        propagateEvent("mouseDoubleClick", [](auto){ return sol::nil; });
+        propagateEvent("mouseDoubleClick", [](auto) { return sol::nil; });
     }
 
     void WidgetExtension::mousePress(MyGUI::Widget*, int left, int top, MyGUI::MouseButton button)
@@ -402,11 +405,11 @@ namespace LuaUi
 
     void WidgetExtension::focusGain(MyGUI::Widget*, MyGUI::Widget*)
     {
-        propagateEvent("focusGain", [](auto){ return sol::nil; });
+        propagateEvent("focusGain", [](auto) { return sol::nil; });
     }
 
     void WidgetExtension::focusLoss(MyGUI::Widget*, MyGUI::Widget*)
     {
-        propagateEvent("focusLoss", [](auto){ return sol::nil; });
+        propagateEvent("focusLoss", [](auto) { return sol::nil; });
     }
 }

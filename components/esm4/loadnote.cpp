@@ -36,17 +36,25 @@ void ESM4::Note::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_ICON: reader.getZString(mIcon); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mIcon);
+                break;
             case ESM4::SUB_DATA:
             case ESM4::SUB_MODB:
             case ESM4::SUB_ONAM:
@@ -55,7 +63,7 @@ void ESM4::Note::load(ESM4::Reader& reader)
             case ESM4::SUB_XNAM:
             case ESM4::SUB_OBND:
             {
-                //std::cout << "NOTE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "NOTE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -65,10 +73,10 @@ void ESM4::Note::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Note::save(ESM4::Writer& writer) const
+// void ESM4::Note::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Note::blank()
+// void ESM4::Note::blank()
 //{
-//}
+// }

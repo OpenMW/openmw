@@ -1,14 +1,14 @@
 #include "pathgridselectionmode.hpp"
 
-#include <QMenu>
 #include <QAction>
+#include <QMenu>
 
-#include "../../model/world/idtable.hpp"
-#include "../../model/world/commands.hpp"
 #include "../../model/world/commandmacro.hpp"
+#include "../../model/world/commands.hpp"
+#include "../../model/world/idtable.hpp"
 
-#include "worldspacewidget.hpp"
 #include "pathgrid.hpp"
+#include "worldspacewidget.hpp"
 
 namespace CSVRender
 {
@@ -37,9 +37,9 @@ namespace CSVRender
 
     void PathgridSelectionMode::removeSelectedNodes()
     {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+        std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Pathgrid);
 
-        for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
+        for (std::vector<osg::ref_ptr<TagBase>>::iterator it = selection.begin(); it != selection.end(); ++it)
         {
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
             {
@@ -54,9 +54,9 @@ namespace CSVRender
 
     void PathgridSelectionMode::removeSelectedEdges()
     {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+        std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Pathgrid);
 
-        for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
+        for (std::vector<osg::ref_ptr<TagBase>>::iterator it = selection.begin(); it != selection.end(); ++it)
         {
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
             {

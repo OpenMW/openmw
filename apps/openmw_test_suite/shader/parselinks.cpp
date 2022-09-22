@@ -1,7 +1,7 @@
 #include <components/shader/shadermanager.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <vector>
 
 namespace
@@ -18,10 +18,7 @@ namespace
         ShaderManager::DefineMap mDefines;
         const std::string mName = "my_shader.glsl";
 
-        bool parseLinks()
-        {
-            return parseDirectives(mSource, mLinkTargets, mDefines, {}, mName);
-        }
+        bool parseLinks() { return parseDirectives(mSource, mLinkTargets, mDefines, {}, mName); }
     };
 
     TEST_F(ShaderParseLinksTest, empty_should_succeed)
@@ -83,14 +80,14 @@ namespace
 
     TEST_F(ShaderParseLinksTest, should_only_accept_on_true_condition)
     {
-        mSource = 
-R"glsl(
+        mSource =
+            R"glsl(
 $link "foo.glsl" if 1
 $link "bar.glsl" if 0
 )glsl";
         ASSERT_TRUE(parseLinks());
-        EXPECT_EQ(mSource, 
-R"glsl(
+        EXPECT_EQ(mSource,
+            R"glsl(
 
 
 )glsl");

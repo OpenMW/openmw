@@ -3,9 +3,9 @@
 #include <map>
 #include <sol/sol.hpp>
 
-#include "registerscriptsettings.hpp"
-#include "element.hpp"
 #include "adapter.hpp"
+#include "element.hpp"
+#include "registerscriptsettings.hpp"
 
 namespace LuaUi
 {
@@ -21,9 +21,7 @@ namespace LuaUi
                 Log(Debug::Warning) << "A script settings page has an empty name";
             if (!element.get())
                 Log(Debug::Warning) << "A script settings page has no UI element assigned";
-            return {
-                name, searchHints, element
-            };
+            return { name, searchHints, element };
         }
     }
 

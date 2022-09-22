@@ -11,48 +11,48 @@
 namespace Files
 {
 
-/**
- * \struct LinuxPath
- */
-struct LinuxPath
-{
-    LinuxPath(const std::string& application_name);
-
     /**
-     * \brief Return path to the user directory.
+     * \struct LinuxPath
      */
-    std::filesystem::path getUserConfigPath() const;
+    struct LinuxPath
+    {
+        LinuxPath(const std::string& application_name);
 
-    std::filesystem::path getUserDataPath() const;
+        /**
+         * \brief Return path to the user directory.
+         */
+        std::filesystem::path getUserConfigPath() const;
 
-    /**
-     * \brief Return path to the global (system) directory where config files can be placed.
-     */
-    std::filesystem::path getGlobalConfigPath() const;
+        std::filesystem::path getUserDataPath() const;
 
-    /**
-     * \brief Return path to the runtime configuration directory which is the
-     * place where an application was started.
-     */
-    std::filesystem::path getLocalPath() const;
+        /**
+         * \brief Return path to the global (system) directory where config files can be placed.
+         */
+        std::filesystem::path getGlobalConfigPath() const;
 
-    /**
-     * \brief Return path to the global (system) directory where game files can be placed.
-     */
-    std::filesystem::path getGlobalDataPath() const;
+        /**
+         * \brief Return path to the runtime configuration directory which is the
+         * place where an application was started.
+         */
+        std::filesystem::path getLocalPath() const;
 
-    /**
-     * \brief
-     */
-    std::filesystem::path getCachePath() const;
+        /**
+         * \brief Return path to the global (system) directory where game files can be placed.
+         */
+        std::filesystem::path getGlobalDataPath() const;
 
-    /**
-     * \brief Gets the path of the installed Morrowind version if there is one.
-     */
-    std::filesystem::path getInstallPath() const;
+        /**
+         * \brief
+         */
+        std::filesystem::path getCachePath() const;
 
-    std::string mName;
-};
+        /**
+         * \brief Gets the path of the installed Morrowind version if there is one.
+         */
+        std::filesystem::path getInstallPath() const;
+
+        std::string mName;
+    };
 
 } /* namespace Files */
 

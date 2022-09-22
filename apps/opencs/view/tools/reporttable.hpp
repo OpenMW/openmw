@@ -27,76 +27,74 @@ namespace CSVTools
 {
     class ReportTable : public CSVWorld::DragRecordTable
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            enum DoubleClickAction
-            {
-                Action_None,
-                Action_Edit,
-                Action_Remove,
-                Action_EditAndRemove
-            };
+        enum DoubleClickAction
+        {
+            Action_None,
+            Action_Edit,
+            Action_Remove,
+            Action_EditAndRemove
+        };
 
-            QSortFilterProxyModel *mProxyModel;
-            CSMTools::ReportModel *mModel;
-            CSVWorld::CommandDelegate *mIdTypeDelegate;
-            QAction *mShowAction;
-            QAction *mRemoveAction;
-            QAction *mReplaceAction;
-            QAction *mRefreshAction;
-            std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
-            int mRefreshState;
+        QSortFilterProxyModel* mProxyModel;
+        CSMTools::ReportModel* mModel;
+        CSVWorld::CommandDelegate* mIdTypeDelegate;
+        QAction* mShowAction;
+        QAction* mRemoveAction;
+        QAction* mReplaceAction;
+        QAction* mRefreshAction;
+        std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
+        int mRefreshState;
 
-        private:
+    private:
+        void contextMenuEvent(QContextMenuEvent* event) override;
 
-            void contextMenuEvent (QContextMenuEvent *event) override;
+        void mouseMoveEvent(QMouseEvent* event) override;
 
-            void mouseMoveEvent (QMouseEvent *event) override;
+        void mouseDoubleClickEvent(QMouseEvent* event) override;
 
-            void mouseDoubleClickEvent (QMouseEvent *event) override;
+    public:
+        /// \param richTextDescription Use rich text in the description column.
+        /// \param refreshState Document state to check for refresh function. If value is
+        /// 0 no refresh function exists. If the document current has the specified state
+        /// the refresh function is disabled.
+        ReportTable(CSMDoc::Document& document, const CSMWorld::UniversalId& id, bool richTextDescription,
+            int refreshState = 0, QWidget* parent = nullptr);
 
-        public:
+        std::vector<CSMWorld::UniversalId> getDraggedRecords() const override;
 
-            /// \param richTextDescription Use rich text in the description column.
-            /// \param refreshState Document state to check for refresh function. If value is
-            /// 0 no refresh function exists. If the document current has the specified state
-            /// the refresh function is disabled.
-            ReportTable (CSMDoc::Document& document, const CSMWorld::UniversalId& id,
-                bool richTextDescription, int refreshState = 0, QWidget *parent = nullptr);
+        void clear();
 
-            std::vector<CSMWorld::UniversalId> getDraggedRecords() const override;
+        /// Return indices of rows that are suitable for replacement.
+        ///
+        /// \param selection Only list selected rows.
+        ///
+        /// \return rows in the original model
+        std::vector<int> getReplaceIndices(bool selection) const;
 
-            void clear();
+        /// \param index row in the original model
+        void flagAsReplaced(int index);
 
-            /// Return indices of rows that are suitable for replacement.
-            ///
-            /// \param selection Only list selected rows.
-            ///
-            /// \return rows in the original model
-            std::vector<int> getReplaceIndices (bool selection) const;
+    private slots:
 
-            /// \param index row in the original model
-            void flagAsReplaced (int index);
+        void settingChanged(const CSMPrefs::Setting* setting);
 
-        private slots:
+        void showSelection();
 
-            void settingChanged (const CSMPrefs::Setting *setting);
+        void removeSelection();
 
-            void showSelection();
+    public slots:
 
-            void removeSelection();
+        void stateChanged(int state, CSMDoc::Document* document);
 
-        public slots:
+    signals:
 
-            void stateChanged (int state, CSMDoc::Document *document);
+        void editRequest(const CSMWorld::UniversalId& id, const std::string& hint);
 
-        signals:
+        void replaceRequest();
 
-            void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
-
-            void replaceRequest();
-
-            void refreshRequest();
+        void refreshRequest();
     };
 }
 

@@ -34,7 +34,7 @@ namespace Gui
         updateImage();
     }
 
-    void ImageButton::setPropertyOverride(const std::string &_key, const std::string &_value)
+    void ImageButton::setPropertyOverride(const std::string& _key, const std::string& _value)
     {
         if (_key == "ImageHighlighted")
             mImageHighlighted = _value;
@@ -99,8 +99,7 @@ namespace Gui
             const int height = static_cast<int>(std::round(mTextureRect.height * scale));
             setImageTile(MyGUI::IntSize(width, height));
             MyGUI::IntCoord scaledSize(static_cast<int>(std::round(mTextureRect.left * scale)),
-                                       static_cast<int>(std::round(mTextureRect.top * scale)),
-                                       width, height);
+                static_cast<int>(std::round(mTextureRect.top * scale)), width, height);
             setImageCoord(scaledSize);
         }
 
@@ -113,7 +112,7 @@ namespace Gui
         if (!texture)
         {
             Log(Debug::Error) << "ImageButton: can't find image " << mImageNormal;
-            return MyGUI::IntSize(0,0);
+            return MyGUI::IntSize(0, 0);
         }
 
         if (mUseWholeTexture)
@@ -122,7 +121,7 @@ namespace Gui
         return MyGUI::IntSize(mTextureRect.width, mTextureRect.height);
     }
 
-    void ImageButton::setImage(const std::string &image)
+    void ImageButton::setImage(const std::string& image)
     {
         size_t extpos = image.find_last_of('.');
         std::string imageNoExt = image.substr(0, extpos);
@@ -147,13 +146,13 @@ namespace Gui
         Base::onMouseButtonReleased(_left, _top, _id);
     }
 
-    void ImageButton::onKeySetFocus(MyGUI::Widget *_old)
+    void ImageButton::onKeySetFocus(MyGUI::Widget* _old)
     {
         mKeyFocus = true;
         updateImage();
     }
 
-    void ImageButton::onKeyLostFocus(MyGUI::Widget *_new)
+    void ImageButton::onKeyLostFocus(MyGUI::Widget* _new)
     {
         mKeyFocus = false;
         updateImage();

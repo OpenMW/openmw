@@ -8,7 +8,8 @@ namespace MWGui
     /// \brief this class is intended for GUI interfaces that access an MW-Reference
     /// for example dialogue window accesses an NPC, or Container window accesses a Container
     /// these classes have to be automatically closed if the reference becomes unavailable
-    /// make sure that checkReferenceAvailable() is called every frame and that onReferenceUnavailable() has been overridden
+    /// make sure that checkReferenceAvailable() is called every frame and that onReferenceUnavailable() has been
+    /// overridden
     class ReferenceInterface
     {
     public:

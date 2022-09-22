@@ -6,9 +6,6 @@ namespace MWScript
 {
     namespace Console
     {
-        void installOpcodes (Interpreter::Interpreter& interpreter)
-        {
-
-        }
+        void installOpcodes(Interpreter::Interpreter& interpreter) {}
     }
 }

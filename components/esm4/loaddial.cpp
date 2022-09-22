@@ -26,9 +26,9 @@
 */
 #include "loaddial.hpp"
 
-#include <stdexcept>
 #include <cstring>
 #include <iostream> // FIXME: for debugging only
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -37,15 +37,19 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId);  break;
-            case ESM4::SUB_FULL: reader.getZString(mTopicName); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getZString(mTopicName);
+                break;
             case ESM4::SUB_QSTI:
             {
                 FormId questId;
@@ -82,8 +86,12 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PNAM: reader.get(mPriority); break; // FO3/FONV
-            case ESM4::SUB_TDUM: reader.getZString(mTextDumb); break; // FONV
+            case ESM4::SUB_PNAM:
+                reader.get(mPriority);
+                break; // FO3/FONV
+            case ESM4::SUB_TDUM:
+                reader.getZString(mTextDumb);
+                break; // FONV
             case ESM4::SUB_SCRI:
             case ESM4::SUB_INFC: // FONV info connection
             case ESM4::SUB_INFX: // FONV info index
@@ -92,8 +100,8 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
             case ESM4::SUB_SNAM: // TES5
             case ESM4::SUB_TIFC: // TES5
             {
-                //std::cout << "DIAL " << ESM::printName(subHdr.typeId) << " skipping..."
-                        //<< subHdr.dataSize << std::endl;
+                // std::cout << "DIAL " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -103,10 +111,10 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Dialogue::save(ESM4::Writer& writer) const
+// void ESM4::Dialogue::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Dialogue::blank()
+// void ESM4::Dialogue::blank()
 //{
-//}
+// }

@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void PCDT::load(ESM::ESMReader &esm)
+    void PCDT::load(ESM::ESMReader& esm)
     {
         while (esm.isNextSub("DNAM"))
         {

@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_BULLETHELPERS_AABB_H
 #define OPENMW_COMPONENTS_BULLETHELPERS_AABB_H
 
-#include <LinearMath/btTransform.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/Gimpact/btBoxCollision.h>
+#include <LinearMath/btTransform.h>
 
 inline bool operator==(const btAABB& lhs, const btAABB& rhs)
 {

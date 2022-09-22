@@ -5,12 +5,12 @@ namespace MWRender
 {
     class Objects;
     class Actors;
-      
+
     class RenderingInterface
     {
     public:
         virtual MWRender::Objects& getObjects() = 0;
-        virtual ~RenderingInterface(){}
+        virtual ~RenderingInterface() {}
     };
 }
 #endif

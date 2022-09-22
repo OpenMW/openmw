@@ -10,66 +10,58 @@ namespace Interpreter
 {
     class OpReturn : public Opcode0
     {
-        public:
-
-            void execute (Runtime& runtime) override
-            {
-                runtime.setPC (-1);
-            }
+    public:
+        void execute(Runtime& runtime) override { runtime.setPC(-1); }
     };
 
     class OpSkipZero : public Opcode0
     {
-        public:
+    public:
+        void execute(Runtime& runtime) override
+        {
+            Type_Integer data = runtime[0].mInteger;
+            runtime.pop();
 
-            void execute (Runtime& runtime) override
-            {
-                Type_Integer data = runtime[0].mInteger;
-                runtime.pop();
-
-                if (data==0)
-                    runtime.setPC (runtime.getPC()+1);
-            }
+            if (data == 0)
+                runtime.setPC(runtime.getPC() + 1);
+        }
     };
 
     class OpSkipNonZero : public Opcode0
     {
-        public:
+    public:
+        void execute(Runtime& runtime) override
+        {
+            Type_Integer data = runtime[0].mInteger;
+            runtime.pop();
 
-            void execute (Runtime& runtime) override
-            {
-                Type_Integer data = runtime[0].mInteger;
-                runtime.pop();
-
-                if (data!=0)
-                    runtime.setPC (runtime.getPC()+1);
-            }
+            if (data != 0)
+                runtime.setPC(runtime.getPC() + 1);
+        }
     };
 
     class OpJumpForward : public Opcode1
     {
-        public:
+    public:
+        void execute(Runtime& runtime, unsigned int arg0) override
+        {
+            if (arg0 == 0)
+                throw std::logic_error("infinite loop");
 
-            void execute (Runtime& runtime, unsigned int arg0) override
-            {
-                if (arg0==0)
-                    throw std::logic_error ("infinite loop");
-
-                runtime.setPC (runtime.getPC()+arg0-1);
-            }
+            runtime.setPC(runtime.getPC() + arg0 - 1);
+        }
     };
 
     class OpJumpBackward : public Opcode1
     {
-        public:
+    public:
+        void execute(Runtime& runtime, unsigned int arg0) override
+        {
+            if (arg0 == 0)
+                throw std::logic_error("infinite loop");
 
-            void execute (Runtime& runtime, unsigned int arg0) override
-            {
-                if (arg0==0)
-                    throw std::logic_error ("infinite loop");
-
-                runtime.setPC (runtime.getPC()-arg0-1);
-            }
+            runtime.setPC(runtime.getPC() - arg0 - 1);
+        }
     };
 }
 

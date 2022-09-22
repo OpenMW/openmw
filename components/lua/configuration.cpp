@@ -15,29 +15,29 @@ namespace LuaUtil
     namespace
     {
         const std::map<std::string, ESM::LuaScriptCfg::Flags, std::less<>> flagsByName{
-            {"GLOBAL", ESM::LuaScriptCfg::sGlobal},
-            {"CUSTOM", ESM::LuaScriptCfg::sCustom},
-            {"PLAYER", ESM::LuaScriptCfg::sPlayer},
+            { "GLOBAL", ESM::LuaScriptCfg::sGlobal },
+            { "CUSTOM", ESM::LuaScriptCfg::sCustom },
+            { "PLAYER", ESM::LuaScriptCfg::sPlayer },
         };
 
         const std::map<std::string, ESM::RecNameInts, std::less<>> typeTagsByName{
-            {"ACTIVATOR", ESM::REC_ACTI},
-            {"ARMOR", ESM::REC_ARMO},
-            {"BOOK", ESM::REC_BOOK},
-            {"CLOTHING", ESM::REC_CLOT},
-            {"CONTAINER", ESM::REC_CONT},
-            {"CREATURE", ESM::REC_CREA},
-            {"DOOR", ESM::REC_DOOR},
-            {"INGREDIENT", ESM::REC_INGR},
-            {"LIGHT", ESM::REC_LIGH},
-            {"MISC_ITEM", ESM::REC_MISC},
-            {"NPC", ESM::REC_NPC_},
-            {"POTION", ESM::REC_ALCH},
-            {"WEAPON", ESM::REC_WEAP},
-            {"APPARATUS", ESM::REC_APPA},
-            {"LOCKPICK", ESM::REC_LOCK},
-            {"PROBE", ESM::REC_PROB},
-            {"REPAIR", ESM::REC_REPA},
+            { "ACTIVATOR", ESM::REC_ACTI },
+            { "ARMOR", ESM::REC_ARMO },
+            { "BOOK", ESM::REC_BOOK },
+            { "CLOTHING", ESM::REC_CLOT },
+            { "CONTAINER", ESM::REC_CONT },
+            { "CREATURE", ESM::REC_CREA },
+            { "DOOR", ESM::REC_DOOR },
+            { "INGREDIENT", ESM::REC_INGR },
+            { "LIGHT", ESM::REC_LIGH },
+            { "MISC_ITEM", ESM::REC_MISC },
+            { "NPC", ESM::REC_NPC_ },
+            { "POTION", ESM::REC_ALCH },
+            { "WEAPON", ESM::REC_WEAP },
+            { "APPARATUS", ESM::REC_APPA },
+            { "LOCKPICK", ESM::REC_LOCK },
+            { "PROBE", ESM::REC_PROB },
+            { "REPAIR", ESM::REC_REPA },
         };
 
         bool isSpace(char c)
@@ -61,10 +61,9 @@ namespace LuaUtil
             if (global && (script.mFlags & ~ESM::LuaScriptCfg::sMerge) != ESM::LuaScriptCfg::sGlobal)
                 throw std::runtime_error(std::string("Global script can not have local flags: ") + script.mScriptPath);
             if (global && (!script.mTypes.empty() || !script.mRecords.empty() || !script.mRefs.empty()))
-                throw std::runtime_error(std::string(
-                    "Global script can not have per-type and per-object configuration") + script.mScriptPath);
-            auto [it, inserted] = mPathToIndex.emplace(
-                Misc::StringUtils::lowerCase(script.mScriptPath), i);
+                throw std::runtime_error(std::string("Global script can not have per-type and per-object configuration")
+                    + script.mScriptPath);
+            auto [it, inserted] = mPathToIndex.emplace(Misc::StringUtils::lowerCase(script.mScriptPath), i);
             if (inserted)
                 continue;
             ESM::LuaScriptCfg& oldScript = cfg.mScripts[it->second];
@@ -96,18 +95,19 @@ namespace LuaUtil
         for (int i = 0; i < static_cast<int>(mScripts.size()); ++i)
         {
             const ESM::LuaScriptCfg& s = mScripts[i];
-            mPathToIndex[s.mScriptPath] = i;  // Stored paths are case sensitive.
+            mPathToIndex[s.mScriptPath] = i; // Stored paths are case sensitive.
             for (uint32_t t : s.mTypes)
                 mScriptsPerType[t].push_back(i);
             for (const ESM::LuaScriptCfg::PerRecordCfg& r : s.mRecords)
             {
                 std::string_view data = r.mInitializationData.empty() ? s.mInitializationData : r.mInitializationData;
-                mScriptsPerRecordId[r.mRecordId].push_back(DetailedConf{i, r.mAttach, data});
+                mScriptsPerRecordId[r.mRecordId].push_back(DetailedConf{ i, r.mAttach, data });
             }
             for (const ESM::LuaScriptCfg::PerRefCfg& r : s.mRefs)
             {
                 std::string_view data = r.mInitializationData.empty() ? s.mInitializationData : r.mInitializationData;
-                mScriptsPerRefNum[ESM::RefNum{r.mRefnumIndex, r.mRefnumContentFile}].push_back(DetailedConf{i, r.mAttach, data});
+                mScriptsPerRefNum[ESM::RefNum{ r.mRefnumIndex, r.mRefnumContentFile }].push_back(
+                    DetailedConf{ i, r.mAttach, data });
             }
         }
     }
@@ -179,7 +179,7 @@ namespace LuaUtil
 
             while (!line.empty() && isSpace(line[0]))
                 line = line.substr(1);
-            if (line.empty() || line[0] == '#')  // Skip empty lines and comments
+            if (line.empty() || line[0] == '#') // Skip empty lines and comments
                 continue;
             while (!line.empty() && isSpace(line.back()))
                 line = line.substr(0, line.size() - 1);
@@ -220,8 +220,8 @@ namespace LuaUtil
                 else if (typesIt != typeTagsByName.end())
                     script.mTypes.push_back(typesIt->second);
                 else
-                    throw std::runtime_error(Misc::StringUtils::format("Unknown tag '%s' in: %s",
-                                                                       std::string(tagName), std::string(line)));
+                    throw std::runtime_error(
+                        Misc::StringUtils::format("Unknown tag '%s' in: %s", std::string(tagName), std::string(line)));
             }
         }
     }

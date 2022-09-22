@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_FONTLOADER_H
 #define OPENMW_COMPONENTS_FONTLOADER_H
 
-#include <MyGUI_XmlDocument.h>
 #include <MyGUI_Version.h>
+#include <MyGUI_XmlDocument.h>
 
 #include <components/myguiplatform/myguidatamanager.hpp>
 #include <components/to_utf8/to_utf8.hpp>
@@ -25,7 +25,7 @@ namespace Gui
     class FontLoader
     {
     public:
-        FontLoader (ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor);
+        FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor);
 
         void overrideLineHeight(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
 
@@ -42,7 +42,7 @@ namespace Gui
         void loadFonts();
         void loadFont(const std::string& fontName, const std::string& fontId);
 
-        void loadBitmapFont (const std::string& fileName, const std::string& fontId);
+        void loadBitmapFont(const std::string& fileName, const std::string& fontId);
         void loadTrueTypeFont(const std::string& fileName, const std::string& fontId);
 
         FontLoader(const FontLoader&);

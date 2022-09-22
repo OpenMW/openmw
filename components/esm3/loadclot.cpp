@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Clothing::load(ESMReader &esm, bool &isDeleted)
+    void Clothing::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -61,7 +61,7 @@ namespace ESM
             esm.fail("Missing CTDT subrecord");
     }
 
-    void Clothing::save(ESMWriter &esm, bool isDeleted) const
+    void Clothing::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

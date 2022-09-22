@@ -4,20 +4,20 @@
 #include <string>
 #include <utility>
 
+#include <osg/CullStack>
 #include <osg/Texture1D>
 #include <osg/Texture2D>
 #include <osg/Texture3D>
-#include <osg/CullStack>
 
 #include <SDL_opengl_glext.h>
 
-#include <components/vfs/manager.hpp>
-#include <components/stereo/multiview.hpp>
-#include <components/misc/strings/algorithm.hpp>
-#include <components/sceneutil/util.hpp>
-#include <components/resource/imagemanager.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/resource/imagemanager.hpp>
+#include <components/sceneutil/util.hpp>
+#include <components/stereo/multiview.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "parse_constants.hpp"
 
@@ -29,7 +29,7 @@ namespace
         osg::Texture::WrapMode wrap_t = osg::Texture::CLAMP_TO_EDGE;
         osg::Texture::WrapMode wrap_r = osg::Texture::CLAMP_TO_EDGE;
         osg::Texture::FilterMode min_filter = osg::Texture::LINEAR_MIPMAP_LINEAR;
-        osg::Texture::FilterMode mag_filter =osg::Texture::LINEAR;
+        osg::Texture::FilterMode mag_filter = osg::Texture::LINEAR;
         osg::Texture::InternalFormatMode compression = osg::Texture::USE_IMAGE_DATA_FORMAT;
         std::optional<int> source_format;
         std::optional<int> source_type;
@@ -39,9 +39,11 @@ namespace
 
 namespace fx
 {
-    Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string  name, int width, int height, bool ubo, bool supportsNormals)
+    Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string name, int width,
+        int height, bool ubo, bool supportsNormals)
         : mName(std::move(name))
-        , mFileName(Files::pathToUnicodeString((Files::pathFromUnicodeString(Technique::sSubdir) / (mName + Technique::sExt))))
+        , mFileName(Files::pathToUnicodeString(
+              (Files::pathFromUnicodeString(Technique::sSubdir) / (mName + Technique::sExt))))
         , mLastModificationTime(std::filesystem::file_time_type())
         , mWidth(width)
         , mHeight(height)
@@ -84,16 +86,14 @@ namespace fx
         auto block = mLexer->getLastJumpBlock();
         std::string content = std::string(block.content);
 
-        content = "\n#line " + std::to_string(block.line + 1) + "\n"  + std::string(block.content) + "\n";
+        content = "\n#line " + std::to_string(block.line + 1) + "\n" + std::string(block.content) + "\n";
         return content;
     }
 
     Technique::UniformMap::iterator Technique::findUniform(const std::string& name)
     {
-        return std::find_if(mDefinedUniforms.begin(), mDefinedUniforms.end(), [&name](const auto& uniform)
-        {
-            return uniform->mName == name;
-        });
+        return std::find_if(mDefinedUniforms.begin(), mDefinedUniforms.end(),
+            [&name](const auto& uniform) { return uniform->mName == name; });
     }
 
     bool Technique::compile()
@@ -124,13 +124,17 @@ namespace fx
                 auto it = mPassMap.find(name);
 
                 if (it == mPassMap.end())
-                    error(Misc::StringUtils::format("pass '%s' was found in the pass list, but there was no matching 'fragment', 'vertex' or 'compute' block", std::string(name)));
+                    error(
+                        Misc::StringUtils::format("pass '%s' was found in the pass list, but there was no matching "
+                                                  "'fragment', 'vertex' or 'compute' block",
+                            std::string(name)));
 
                 if (mLastAppliedType != Pass::Type::None && mLastAppliedType != it->second->mType)
                 {
                     swaps++;
                     if (swaps == 2)
-                        Log(Debug::Warning) << "compute and pixel shaders are being swapped multiple times in shader chain, this can lead to serious performance drain.";
+                        Log(Debug::Warning) << "compute and pixel shaders are being swapped multiple times in shader "
+                                               "chain, this can lead to serious performance drain.";
                 }
                 else
                     mLastAppliedType = it->second->mType;
@@ -159,12 +163,13 @@ namespace fx
 
             mValid = true;
         }
-        catch(const std::runtime_error& e)
+        catch (const std::runtime_error& e)
         {
             clear();
             mStatus = Status::Parse_Error;
 
-            mLastError = "Failed parsing technique '" + getName() + "' "  + e.what();;
+            mLastError = "Failed parsing technique '" + getName() + "' " + e.what();
+            ;
             Log(Debug::Error) << mLastError;
         }
 
@@ -193,7 +198,7 @@ namespace fx
         mLexer->error(msg);
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Shared>()
     {
         if (!mLexer->jump())
@@ -205,7 +210,7 @@ namespace fx
         mShared = getBlockWithLineDirective();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Technique>()
     {
         if (!mPassKeys.empty())
@@ -254,16 +259,16 @@ namespace fx
             else if (key == "dynamic")
                 mDynamic = parseBool();
             else
-                error(Misc::StringUtils::format("unexpected key '%s'", std::string{key}));
+                error(Misc::StringUtils::format("unexpected key '%s'", std::string{ key }));
 
             expect<Lexer::SemiColon>();
-    }
+        }
 
         if (mPassKeys.empty())
             error("pass list in 'technique' block cannot be empty.");
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Render_Target>()
     {
         if (mRenderTargets.count(mBlockName))
@@ -316,7 +321,7 @@ namespace fx
         mRenderTargets.emplace(mBlockName, std::move(rt));
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Vertex>()
     {
         if (!mLexer->jump())
@@ -339,7 +344,7 @@ namespace fx
         pass->mType = Pass::Type::Pixel;
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Fragment>()
     {
         if (!mLexer->jump())
@@ -363,7 +368,7 @@ namespace fx
         pass->mType = Pass::Type::Pixel;
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Compute>()
     {
         if (!mLexer->jump())
@@ -431,7 +436,7 @@ namespace fx
             else if (key == "source")
             {
                 expect<Lexer::String>();
-                auto image = mImageManager.getImage(std::string{std::get<Lexer::String>(mToken).value}, is3D);
+                auto image = mImageManager.getImage(std::string{ std::get<Lexer::String>(mToken).value }, is3D);
                 if constexpr (is1D)
                 {
                     type = Types::SamplerType::Texture_1D;
@@ -449,12 +454,13 @@ namespace fx
                 }
             }
             else
-                error(Misc::StringUtils::format("unexpected key '%s'", std::string{key}));
+                error(Misc::StringUtils::format("unexpected key '%s'", std::string{ key }));
 
             expect<Lexer::SemiColon>();
         }
         if (!sampler)
-            error(Misc::StringUtils::format("%s '%s' requires a filename", std::string(T::repr), std::string{mBlockName}));
+            error(Misc::StringUtils::format(
+                "%s '%s' requires a filename", std::string(T::repr), std::string{ mBlockName }));
 
         if (!is1D)
         {
@@ -472,7 +478,7 @@ namespace fx
             sampler->setSourceType(proxy.source_type.value());
         if (proxy.internal_format.has_value())
             sampler->setSourceFormat(proxy.internal_format.value());
-        sampler->setName(std::string{mBlockName});
+        sampler->setName(std::string{ mBlockName });
         sampler->setResizeNonPowerOfTwoHint(false);
 
         mTextures.emplace_back(sampler);
@@ -500,7 +506,8 @@ namespace fx
 
             expect<Lexer::Equal>("error parsing config for uniform block");
 
-            constexpr bool isVec = std::is_same_v<osg::Vec2f, SrcT> || std::is_same_v<osg::Vec3f, SrcT> || std::is_same_v<osg::Vec4f, SrcT>;
+            constexpr bool isVec = std::is_same_v<osg::Vec2f,
+                                       SrcT> || std::is_same_v<osg::Vec3f, SrcT> || std::is_same_v<osg::Vec4f, SrcT>;
             constexpr bool isFloat = std::is_same_v<float, SrcT>;
             constexpr bool isInt = std::is_same_v<int, SrcT>;
             constexpr bool isBool = std::is_same_v<bool, SrcT>;
@@ -569,7 +576,7 @@ namespace fx
                 uniform->mDisplayName = std::get<Lexer::String>(mToken).value;
             }
             else
-                error(Misc::StringUtils::format("unexpected key '%s'", std::string{key}));
+                error(Misc::StringUtils::format("unexpected key '%s'", std::string{ key }));
 
             expect<Lexer::SemiColon>();
         }
@@ -597,61 +604,61 @@ namespace fx
         mDefinedUniforms.emplace_back(std::move(uniform));
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Sampler_1D>()
     {
         parseSampler<Lexer::Sampler_1D>();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Sampler_2D>()
     {
         parseSampler<Lexer::Sampler_2D>();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Sampler_3D>()
     {
         parseSampler<Lexer::Sampler_3D>();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Uniform_Bool>()
     {
         parseUniform<bool, bool>();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Uniform_Float>()
     {
         parseUniform<float, float>();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Uniform_Int>()
     {
         parseUniform<int, int>();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Uniform_Vec2>()
     {
         parseUniform<osg::Vec2f, Lexer::Vec2>();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Uniform_Vec3>()
     {
         parseUniform<osg::Vec3f, Lexer::Vec3>();
     }
 
-    template<>
+    template <>
     void Technique::parseBlockImp<Lexer::Uniform_Vec4>()
     {
         parseUniform<osg::Vec4f, Lexer::Vec4>();
     }
 
-    template<class T>
+    template <class T>
     void Technique::expect(const std::string& err)
     {
         mToken = mLexer->next();
@@ -664,14 +671,15 @@ namespace fx
         }
     }
 
-    template<class T, class T2>
+    template <class T, class T2>
     void Technique::expect(const std::string& err)
     {
         mToken = mLexer->next();
         if (!std::holds_alternative<T>(mToken) && !std::holds_alternative<T2>(mToken))
         {
             if (err.empty())
-                error(Misc::StringUtils::format("%s. Expected %s or %s", err, std::string(T::repr), std::string(T2::repr)));
+                error(Misc::StringUtils::format(
+                    "%s. Expected %s or %s", err, std::string(T::repr), std::string(T2::repr)));
             else
                 error(Misc::StringUtils::format("Expected %s or %s", std::string(T::repr), std::string(T2::repr)));
         }
@@ -691,43 +699,44 @@ namespace fx
 
         for (auto t = mLexer->next(); !std::holds_alternative<Lexer::Eof>(t); t = mLexer->next())
         {
-            std::visit([this](auto&& arg) {
-                using T = std::decay_t<decltype(arg)>;
+            std::visit(
+                [this](auto&& arg) {
+                    using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<Lexer::Shared, T>)
-                    parseBlock<Lexer::Shared>(false);
-                else if constexpr (std::is_same_v<Lexer::Technique, T>)
-                    parseBlock<Lexer::Technique>(false);
-                else if constexpr (std::is_same_v<Lexer::Render_Target, T>)
-                    parseBlock<Lexer::Render_Target>();
-                else if constexpr (std::is_same_v<Lexer::Vertex, T>)
-                    parseBlock<Lexer::Vertex>();
-                else if constexpr (std::is_same_v<Lexer::Fragment, T>)
-                    parseBlock<Lexer::Fragment>();
-                else if constexpr (std::is_same_v<Lexer::Compute, T>)
-                    parseBlock<Lexer::Compute>();
-                else if constexpr (std::is_same_v<Lexer::Sampler_1D, T>)
-                    parseBlock<Lexer::Sampler_1D>();
-                else if constexpr (std::is_same_v<Lexer::Sampler_2D, T>)
-                    parseBlock<Lexer::Sampler_2D>();
-                else if constexpr (std::is_same_v<Lexer::Sampler_3D, T>)
-                    parseBlock<Lexer::Sampler_3D>();
-                else if constexpr (std::is_same_v<Lexer::Uniform_Bool, T>)
-                    parseBlock<Lexer::Uniform_Bool>();
-                else if constexpr (std::is_same_v<Lexer::Uniform_Float, T>)
-                    parseBlock<Lexer::Uniform_Float>();
-                else if constexpr (std::is_same_v<Lexer::Uniform_Int, T>)
-                    parseBlock<Lexer::Uniform_Int>();
-                else if constexpr (std::is_same_v<Lexer::Uniform_Vec2, T>)
-                    parseBlock<Lexer::Uniform_Vec2>();
-                else if constexpr (std::is_same_v<Lexer::Uniform_Vec3, T>)
-                    parseBlock<Lexer::Uniform_Vec3>();
-                else if constexpr (std::is_same_v<Lexer::Uniform_Vec4, T>)
-                    parseBlock<Lexer::Uniform_Vec4>();
-                else
-                    error("invalid top level block");
-            }
-            , t);
+                    if constexpr (std::is_same_v<Lexer::Shared, T>)
+                        parseBlock<Lexer::Shared>(false);
+                    else if constexpr (std::is_same_v<Lexer::Technique, T>)
+                        parseBlock<Lexer::Technique>(false);
+                    else if constexpr (std::is_same_v<Lexer::Render_Target, T>)
+                        parseBlock<Lexer::Render_Target>();
+                    else if constexpr (std::is_same_v<Lexer::Vertex, T>)
+                        parseBlock<Lexer::Vertex>();
+                    else if constexpr (std::is_same_v<Lexer::Fragment, T>)
+                        parseBlock<Lexer::Fragment>();
+                    else if constexpr (std::is_same_v<Lexer::Compute, T>)
+                        parseBlock<Lexer::Compute>();
+                    else if constexpr (std::is_same_v<Lexer::Sampler_1D, T>)
+                        parseBlock<Lexer::Sampler_1D>();
+                    else if constexpr (std::is_same_v<Lexer::Sampler_2D, T>)
+                        parseBlock<Lexer::Sampler_2D>();
+                    else if constexpr (std::is_same_v<Lexer::Sampler_3D, T>)
+                        parseBlock<Lexer::Sampler_3D>();
+                    else if constexpr (std::is_same_v<Lexer::Uniform_Bool, T>)
+                        parseBlock<Lexer::Uniform_Bool>();
+                    else if constexpr (std::is_same_v<Lexer::Uniform_Float, T>)
+                        parseBlock<Lexer::Uniform_Float>();
+                    else if constexpr (std::is_same_v<Lexer::Uniform_Int, T>)
+                        parseBlock<Lexer::Uniform_Int>();
+                    else if constexpr (std::is_same_v<Lexer::Uniform_Vec2, T>)
+                        parseBlock<Lexer::Uniform_Vec2>();
+                    else if constexpr (std::is_same_v<Lexer::Uniform_Vec3, T>)
+                        parseBlock<Lexer::Uniform_Vec3>();
+                    else if constexpr (std::is_same_v<Lexer::Uniform_Vec4, T>)
+                        parseBlock<Lexer::Uniform_Vec4>();
+                    else
+                        error("invalid top level block");
+                },
+                t);
         }
     }
 
@@ -789,7 +798,7 @@ namespace fx
             pass = std::make_shared<fx::Pass>();
 
         bool clear = true;
-        osg::Vec4f clearColor = {1,1,1,1};
+        osg::Vec4f clearColor = { 1, 1, 1, 1 };
 
         while (!isNext<Lexer::Eof>())
         {
@@ -817,7 +826,7 @@ namespace fx
             else if (key == "rt3")
             {
                 expect<Lexer::Literal>();
-                pass->mRenderTargets[2] =std::get<Lexer::Literal>(mToken).value;
+                pass->mRenderTargets[2] = std::get<Lexer::Literal>(mToken).value;
             }
             else if (key == "blend")
             {
@@ -868,8 +877,8 @@ namespace fx
 
     FlagsType Technique::parseFlags()
     {
-        auto parseBit = [this] (std::string_view term) {
-            for (const auto& [identifer, bit]: constants::TechniqueFlag)
+        auto parseBit = [this](std::string_view term) {
+            for (const auto& [identifer, bit] : constants::TechniqueFlag)
             {
                 if (Misc::StringUtils::ciEqual(term, identifer))
                     return bit;
@@ -888,104 +897,104 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode]: constants::FilterMode)
+        for (const auto& [identifer, mode] : constants::FilterMode)
         {
             if (asLiteral() == identifer)
                 return mode;
         }
 
-        error(Misc::StringUtils::format("unrecognized filter mode '%s'", std::string{asLiteral()}));
+        error(Misc::StringUtils::format("unrecognized filter mode '%s'", std::string{ asLiteral() }));
     }
 
     osg::Texture::WrapMode Technique::parseWrapMode()
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode]: constants::WrapMode)
+        for (const auto& [identifer, mode] : constants::WrapMode)
         {
             if (asLiteral() == identifer)
                 return mode;
         }
 
-        error(Misc::StringUtils::format("unrecognized wrap mode '%s'", std::string{asLiteral()}));
+        error(Misc::StringUtils::format("unrecognized wrap mode '%s'", std::string{ asLiteral() }));
     }
 
     osg::Texture::InternalFormatMode Technique::parseCompression()
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode]: constants::Compression)
+        for (const auto& [identifer, mode] : constants::Compression)
         {
             if (asLiteral() == identifer)
                 return mode;
         }
 
-        error(Misc::StringUtils::format("unrecognized compression '%s'", std::string{asLiteral()}));
+        error(Misc::StringUtils::format("unrecognized compression '%s'", std::string{ asLiteral() }));
     }
 
     int Technique::parseInternalFormat()
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode]: constants::InternalFormat)
+        for (const auto& [identifer, mode] : constants::InternalFormat)
         {
             if (asLiteral() == identifer)
                 return mode;
         }
 
-        error(Misc::StringUtils::format("unrecognized internal format '%s'", std::string{asLiteral()}));
+        error(Misc::StringUtils::format("unrecognized internal format '%s'", std::string{ asLiteral() }));
     }
 
     int Technique::parseSourceType()
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode]: constants::SourceType)
+        for (const auto& [identifer, mode] : constants::SourceType)
         {
             if (asLiteral() == identifer)
                 return mode;
         }
 
-        error(Misc::StringUtils::format("unrecognized source type '%s'", std::string{asLiteral()}));
+        error(Misc::StringUtils::format("unrecognized source type '%s'", std::string{ asLiteral() }));
     }
 
     int Technique::parseSourceFormat()
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode]: constants::SourceFormat)
+        for (const auto& [identifer, mode] : constants::SourceFormat)
         {
             if (asLiteral() == identifer)
                 return mode;
         }
 
-        error(Misc::StringUtils::format("unrecognized source format '%s'", std::string{asLiteral()}));
+        error(Misc::StringUtils::format("unrecognized source format '%s'", std::string{ asLiteral() }));
     }
 
     osg::BlendEquation::Equation Technique::parseBlendEquation()
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode]: constants::BlendEquation)
+        for (const auto& [identifer, mode] : constants::BlendEquation)
         {
             if (asLiteral() == identifer)
                 return mode;
         }
 
-        error(Misc::StringUtils::format("unrecognized blend equation '%s'", std::string{asLiteral()}));
+        error(Misc::StringUtils::format("unrecognized blend equation '%s'", std::string{ asLiteral() }));
     }
 
     osg::BlendFunc::BlendFuncMode Technique::parseBlendFuncMode()
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode]: constants::BlendFunc)
+        for (const auto& [identifer, mode] : constants::BlendFunc)
         {
             if (asLiteral() == identifer)
                 return mode;
         }
 
-        error(Misc::StringUtils::format("unrecognized blend function '%s'", std::string{asLiteral()}));
+        error(Misc::StringUtils::format("unrecognized blend function '%s'", std::string{ asLiteral() }));
     }
 
     bool Technique::parseBool()

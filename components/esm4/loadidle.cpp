@@ -35,16 +35,22 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId);  break;
-            case ESM4::SUB_DNAM: reader.getZString(mCollision); break;
-            case ESM4::SUB_ENAM: reader.getZString(mEvent);     break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_DNAM:
+                reader.getZString(mCollision);
+                break;
+            case ESM4::SUB_ENAM:
+                reader.getZString(mEvent);
+                break;
             case ESM4::SUB_ANAM:
             {
                 reader.get(mParent);
@@ -54,7 +60,7 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
             case ESM4::SUB_CTDA: // formId
             case ESM4::SUB_DATA: // formId
             {
-                //std::cout << "IDLE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "IDLE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -64,10 +70,10 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::IdleAnimation::save(ESM4::Writer& writer) const
+// void ESM4::IdleAnimation::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::IdleAnimation::blank()
+// void ESM4::IdleAnimation::blank()
 //{
-//}
+// }

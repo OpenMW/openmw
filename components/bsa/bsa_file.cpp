@@ -33,32 +33,34 @@
 
 using namespace Bsa;
 
-
 /// Error handling
-[[noreturn]] void BSAFile::fail(const std::string &msg) const
+[[noreturn]] void BSAFile::fail(const std::string& msg) const
 {
     throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + Files::pathToUnicodeString(mFilepath));
 }
 
-//the getHash code is from bsapack from ghostwheel
-//the code is also the same as in https://github.com/arviceblot/bsatool_rs/commit/67cb59ec3aaeedc0849222ea387f031c33e48c81
+// the getHash code is from bsapack from ghostwheel
+// the code is also the same as in
+// https://github.com/arviceblot/bsatool_rs/commit/67cb59ec3aaeedc0849222ea387f031c33e48c81
 BSAFile::Hash getHash(const std::string& name)
 {
     BSAFile::Hash hash;
     unsigned l = (static_cast<unsigned>(name.size()) >> 1);
     unsigned sum, off, temp, i, n;
 
-    for (sum = off = i = 0; i < l; i++) {
+    for (sum = off = i = 0; i < l; i++)
+    {
         sum ^= (((unsigned)(name[i])) << (off & 0x1F));
         off += 8;
     }
     hash.low = sum;
 
-    for (sum = off = 0; i < name.size(); i++) {
+    for (sum = off = 0; i < name.size(); i++)
+    {
         temp = (((unsigned)(name[i])) << (off & 0x1F));
         sum ^= temp;
         n = temp & 0x1F;
-        sum = (sum << (32 - n)) | (sum >> n);  // binary "rotate right"
+        sum = (sum << (32 - n)) | (sum >> n); // binary "rotate right"
         off += 8;
     }
     hash.high = sum;
@@ -104,13 +106,13 @@ void BSAFile::readHeader()
 
     // Total archive size
     std::streamoff fsize = 0;
-    if(input.seekg(0, std::ios_base::end))
+    if (input.seekg(0, std::ios_base::end))
     {
         fsize = input.tellg();
         input.seekg(0);
     }
 
-    if(fsize < 12)
+    if (fsize < 12)
         fail("File too small to be a valid BSA archive");
 
     // Get essential header numbers
@@ -121,7 +123,7 @@ void BSAFile::readHeader()
 
         input.read(reinterpret_cast<char*>(head), 12);
 
-        if(head[0] != 0x100)
+        if (head[0] != 0x100)
             fail("Unrecognized BSA header");
 
         // Total number of bytes used in size/offset-table + filename
@@ -135,60 +137,60 @@ void BSAFile::readHeader()
     // Each file must take up at least 21 bytes of data in the bsa. So
     // if files*21 overflows the file size then we are guaranteed that
     // the archive is corrupt.
-    if((filenum*21 > unsigned(fsize -12)) || (dirsize+8*filenum > unsigned(fsize -12)) )
+    if ((filenum * 21 > unsigned(fsize - 12)) || (dirsize + 8 * filenum > unsigned(fsize - 12)))
         fail("Directory information larger than entire archive");
 
     // Read the offset info into a temporary buffer
-    std::vector<uint32_t> offsets(3*filenum);
-    input.read(reinterpret_cast<char*>(offsets.data()), 12*filenum);
+    std::vector<uint32_t> offsets(3 * filenum);
+    input.read(reinterpret_cast<char*>(offsets.data()), 12 * filenum);
 
     // Read the string table
-    mStringBuf.resize(dirsize-12*filenum);
+    mStringBuf.resize(dirsize - 12 * filenum);
     input.read(mStringBuf.data(), mStringBuf.size());
 
     // Check our position
-    assert(input.tellg() == std::streampos(12+dirsize));
+    assert(input.tellg() == std::streampos(12 + dirsize));
     std::vector<Hash> hashes(filenum);
     static_assert(sizeof(Hash) == 8);
-    input.read(reinterpret_cast<char*>(hashes.data()), 8*filenum);
+    input.read(reinterpret_cast<char*>(hashes.data()), 8 * filenum);
 
     // Calculate the offset of the data buffer. All file offsets are
     // relative to this. 12 header bytes + directory + hash table
     // (skipped)
-    size_t fileDataOffset = 12 + dirsize + 8*filenum;
+    size_t fileDataOffset = 12 + dirsize + 8 * filenum;
 
     // Set up the the FileStruct table
     mFiles.resize(filenum);
     size_t endOfNameBuffer = 0;
-    for(size_t i=0;i<filenum;i++)
+    for (size_t i = 0; i < filenum; i++)
     {
-        FileStruct &fs = mFiles[i];
-        fs.fileSize = offsets[i*2];
-        fs.offset = static_cast<uint32_t>(offsets[i*2+1] + fileDataOffset);
-        auto namesOffset = offsets[2*filenum+i];
+        FileStruct& fs = mFiles[i];
+        fs.fileSize = offsets[i * 2];
+        fs.offset = static_cast<uint32_t>(offsets[i * 2 + 1] + fileDataOffset);
+        auto namesOffset = offsets[2 * filenum + i];
         fs.setNameInfos(namesOffset, &mStringBuf);
         fs.hash = hashes[i];
 
-        if (namesOffset >= mStringBuf.size()) {
+        if (namesOffset >= mStringBuf.size())
+        {
             fail("Archive contains names offset outside itself");
         }
-        const void* end = std::memchr(fs.name(), '\0', mStringBuf.size()-namesOffset);
-        if (!end) {
+        const void* end = std::memchr(fs.name(), '\0', mStringBuf.size() - namesOffset);
+        if (!end)
+        {
             fail("Archive contains non-zero terminated string");
         }
 
-        endOfNameBuffer = std::max(endOfNameBuffer, namesOffset + std::strlen(fs.name())+1);
+        endOfNameBuffer = std::max(endOfNameBuffer, namesOffset + std::strlen(fs.name()) + 1);
         assert(endOfNameBuffer <= mStringBuf.size());
 
-        if(fs.offset + fs.fileSize > fsize)
+        if (fs.offset + fs.fileSize > fsize)
             fail("Archive contains offsets outside itself");
-
     }
     mStringBuf.resize(endOfNameBuffer);
 
-    std::sort(mFiles.begin(), mFiles.end(), [](const FileStruct& left, const FileStruct& right) {
-        return left.offset < right.offset;
-    });
+    std::sort(mFiles.begin(), mFiles.end(),
+        [](const FileStruct& left, const FileStruct& right) { return left.offset < right.offset; });
 
     mIsLoaded = true;
 }
@@ -201,7 +203,7 @@ void Bsa::BSAFile::writeHeader()
     uint32_t head[3];
     head[0] = 0x100;
     auto fileDataOffset = mFiles.empty() ? 12 : mFiles.front().offset;
-    head[1] = static_cast<uint32_t>(fileDataOffset - 12 - 8*mFiles.size());
+    head[1] = static_cast<uint32_t>(fileDataOffset - 12 - 8 * mFiles.size());
 
     output.seekp(0, std::ios_base::end);
 
@@ -214,34 +216,36 @@ void Bsa::BSAFile::writeHeader()
     });
 
     size_t filenum = mFiles.size();
-    std::vector<uint32_t> offsets(3* filenum);
+    std::vector<uint32_t> offsets(3 * filenum);
     std::vector<Hash> hashes(filenum);
-    for(size_t i=0;i<filenum;i++)
+    for (size_t i = 0; i < filenum; i++)
     {
         auto& f = mFiles[i];
-        offsets[i*2] = f.fileSize;
-        offsets[i*2+1] = f.offset - fileDataOffset;
-        offsets[2*filenum+i] = f.namesOffset;
+        offsets[i * 2] = f.fileSize;
+        offsets[i * 2 + 1] = f.offset - fileDataOffset;
+        offsets[2 * filenum + i] = f.namesOffset;
         hashes[i] = f.hash;
     }
-    output.write(reinterpret_cast<char*>(offsets.data()), sizeof(uint32_t)*offsets.size());
+    output.write(reinterpret_cast<char*>(offsets.data()), sizeof(uint32_t) * offsets.size());
     output.write(reinterpret_cast<char*>(mStringBuf.data()), mStringBuf.size());
-    output.seekp(fileDataOffset - 8*mFiles.size(), std::ios_base::beg);
-    output.write(reinterpret_cast<char*>(hashes.data()), sizeof(Hash)*hashes.size());
+    output.seekp(fileDataOffset - 8 * mFiles.size(), std::ios_base::beg);
+    output.write(reinterpret_cast<char*>(hashes.data()), sizeof(Hash) * hashes.size());
 }
 
 /// Open an archive file.
-void BSAFile::open(const std::filesystem::path &file)
+void BSAFile::open(const std::filesystem::path& file)
 {
     if (mIsLoaded)
         close();
 
     mFilepath = file;
-    if(std::filesystem::exists(file))
+    if (std::filesystem::exists(file))
         readHeader();
     else
     {
-        { std::fstream(mFilepath, std::ios::binary | std::ios::out); }
+        {
+            std::fstream(mFilepath, std::ios::binary | std::ios::out);
+        }
         writeHeader();
         mIsLoaded = true;
     }
@@ -258,7 +262,7 @@ void Bsa::BSAFile::close()
     mIsLoaded = false;
 }
 
-Files::IStreamPtr Bsa::BSAFile::getFile(const FileStruct *file)
+Files::IStreamPtr Bsa::BSAFile::getFile(const FileStruct* file)
 {
     return Files::openConstrainedFileStream(mFilepath, file->offset, file->fileSize);
 }
@@ -280,12 +284,13 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
     newFile.setNameInfos(mStringBuf.size(), &mStringBuf);
     newFile.hash = getHash(filename);
 
-    if(mFiles.empty())
+    if (mFiles.empty())
         newFile.offset = static_cast<uint32_t>(newStartOfDataBuffer);
     else
     {
         std::vector<char> buffer;
-        while (mFiles.front().offset < newStartOfDataBuffer) {
+        while (mFiles.front().offset < newStartOfDataBuffer)
+        {
             FileStruct& firstFile = mFiles.front();
             buffer.resize(firstFile.fileSize);
 
@@ -297,7 +302,7 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
 
             stream.write(buffer.data(), firstFile.fileSize);
 
-            //ensure sort order is preserved
+            // ensure sort order is preserved
             std::rotate(mFiles.begin(), mFiles.begin() + 1, mFiles.end());
         }
         stream.seekp(0, std::ios::end);

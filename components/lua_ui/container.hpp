@@ -12,15 +12,15 @@ namespace LuaUi
         MyGUI::IntSize calculateSize() override;
         void updateCoord() override;
 
-        protected:
-            void updateChildren() override;
-            MyGUI::IntSize childScalingSize() override;
-            MyGUI::IntSize templateScalingSize() override;
+    protected:
+        void updateChildren() override;
+        MyGUI::IntSize childScalingSize() override;
+        MyGUI::IntSize templateScalingSize() override;
 
-        private:
-            void updateSizeToFit();
-            MyGUI::IntSize mInnerSize;
-            MyGUI::IntSize mOuterSize;
+    private:
+        void updateSizeToFit();
+        MyGUI::IntSize mInnerSize;
+        MyGUI::IntSize mOuterSize;
     };
 }
 

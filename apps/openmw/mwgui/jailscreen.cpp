@@ -3,27 +3,27 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/format.hpp>
 
-#include "../mwbase/windowmanager.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
+#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/store.hpp"
-#include "../mwworld/class.hpp"
 
 #include "jailscreen.hpp"
 
 namespace MWGui
 {
     JailScreen::JailScreen()
-        : WindowBase("openmw_jail_screen.layout"),
-          mDays(1),
-          mFadeTimeRemaining(0),
-          mTimeAdvancer(0.01f)
+        : WindowBase("openmw_jail_screen.layout")
+        , mDays(1)
+        , mFadeTimeRemaining(0)
+        , mTimeAdvancer(0.01f)
     {
         getWidget(mProgressBar, "ProgressBar");
 
@@ -41,7 +41,7 @@ namespace MWGui
         mFadeTimeRemaining = 0.5;
 
         setVisible(false);
-        mProgressBar->setScrollRange(100+1);
+        mProgressBar->setScrollRange(100 + 1);
         mProgressBar->setScrollPosition(0);
         mProgressBar->setTrackSize(0);
     }
@@ -59,7 +59,8 @@ namespace MWGui
         {
             MWWorld::Ptr player = MWMechanics::getPlayer();
             MWBase::Environment::get().getWorld()->teleportToClosestMarker(player, "prisonmarker");
-            MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.f); // override fade-in caused by cell transition
+            MWBase::Environment::get().getWindowManager()->fadeScreenOut(
+                0.f); // override fade-in caused by cell transition
 
             setVisible(true);
             mTimeAdvancer.run(100);
@@ -69,7 +70,8 @@ namespace MWGui
     void JailScreen::onJailProgressChanged(int cur, int /*total*/)
     {
         mProgressBar->setScrollPosition(0);
-        mProgressBar->setTrackSize(static_cast<int>(cur / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
+        mProgressBar->setTrackSize(
+            static_cast<int>(cur / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
     }
 
     void JailScreen::onJailFinished()
@@ -86,7 +88,7 @@ namespace MWGui
         player.getClass().getCreatureStats(player).getActiveSpells().skipWorsenings(mDays * 24);
 
         std::set<int> skills;
-        for (int day=0; day<mDays; ++day)
+        for (int day = 0; day < mDays; ++day)
         {
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             int skill = Misc::Rng::rollDice(ESM::Skill::Length, prng);
@@ -94,12 +96,13 @@ namespace MWGui
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);
             if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
-                value.setBase(std::min(100.f, value.getBase()+1));
+                value.setBase(std::min(100.f, value.getBase() + 1));
             else
-                value.setBase(std::max(0.f, value.getBase()-1));
+                value.setBase(std::max(0.f, value.getBase() - 1));
         }
 
-        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM::GameSetting>& gmst
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         std::string message;
         if (mDays == 1)

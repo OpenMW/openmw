@@ -12,12 +12,12 @@ namespace DetourNavigator
     {
         T& mRef;
 
-        constexpr explicit Ref(T& ref) noexcept : mRef(ref) {}
-
-        friend bool operator==(const Ref& lhs, const Ref& rhs)
+        constexpr explicit Ref(T& ref) noexcept
+            : mRef(ref)
         {
-            return lhs.mRef == rhs.mRef;
         }
+
+        friend bool operator==(const Ref& lhs, const Ref& rhs) { return lhs.mRef == rhs.mRef; }
     };
 
     template <typename T, std::size_t size>
@@ -25,7 +25,10 @@ namespace DetourNavigator
     {
         T (&mRef)[size];
 
-        constexpr explicit ArrayRef(T (&ref)[size]) noexcept : mRef(ref) {}
+        constexpr explicit ArrayRef(T (&ref)[size]) noexcept
+            : mRef(ref)
+        {
+        }
 
         friend bool operator==(const ArrayRef& lhs, const ArrayRef& rhs)
         {
@@ -42,7 +45,8 @@ namespace DetourNavigator
         constexpr explicit Span(T* data, int size) noexcept
             : mBegin(data)
             , mEnd(data + static_cast<std::size_t>(size))
-        {}
+        {
+        }
 
         friend bool operator==(const Span& lhs, const Span& rhs)
         {

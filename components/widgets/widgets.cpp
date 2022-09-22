@@ -2,10 +2,10 @@
 
 #include <MyGUI_FactoryManager.h>
 
-#include "list.hpp"
-#include "numericeditbox.hpp"
 #include "box.hpp"
 #include "imagebutton.hpp"
+#include "list.hpp"
+#include "numericeditbox.hpp"
 #include "sharedstatebutton.hpp"
 #include "windowcaption.hpp"
 

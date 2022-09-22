@@ -2,73 +2,69 @@
 
 #include <sstream>
 
-#include <components/compiler/scanner.hpp>
 #include <components/compiler/extensions0.hpp>
+#include <components/compiler/scanner.hpp>
 
-#include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
+#include "../../model/prefs/setting.hpp"
 
-bool CSVWorld::ScriptHighlighter::parseInt (int value, const Compiler::TokenLoc& loc,
-    Compiler::Scanner& scanner)
+bool CSVWorld::ScriptHighlighter::parseInt(int value, const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
 {
-    highlight (loc, Type_Int);
+    highlight(loc, Type_Int);
     return true;
 }
 
-bool CSVWorld::ScriptHighlighter::parseFloat (float value, const Compiler::TokenLoc& loc,
-    Compiler::Scanner& scanner)
+bool CSVWorld::ScriptHighlighter::parseFloat(float value, const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
 {
-    highlight (loc, Type_Float);
+    highlight(loc, Type_Float);
     return true;
 }
 
-bool CSVWorld::ScriptHighlighter::parseName (const std::string& name, const Compiler::TokenLoc& loc,
-    Compiler::Scanner& scanner)
+bool CSVWorld::ScriptHighlighter::parseName(
+    const std::string& name, const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
 {
-    highlight (loc, mContext.isId (name) ? Type_Id : Type_Name);
+    highlight(loc, mContext.isId(name) ? Type_Id : Type_Name);
     return true;
 }
 
-bool CSVWorld::ScriptHighlighter::parseKeyword (int keyword, const Compiler::TokenLoc& loc,
-    Compiler::Scanner& scanner)
+bool CSVWorld::ScriptHighlighter::parseKeyword(int keyword, const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
 {
-    if (((mMode==Mode_Console || mMode==Mode_Dialogue) &&
-        (keyword==Compiler::Scanner::K_begin || keyword==Compiler::Scanner::K_end ||
-        keyword==Compiler::Scanner::K_short || keyword==Compiler::Scanner::K_long ||
-        keyword==Compiler::Scanner::K_float))
-        || (mMode==Mode_Console && (keyword==Compiler::Scanner::K_if ||
-        keyword==Compiler::Scanner::K_endif || keyword==Compiler::Scanner::K_else ||
-        keyword==Compiler::Scanner::K_elseif || keyword==Compiler::Scanner::K_while ||
-        keyword==Compiler::Scanner::K_endwhile)))
-        return parseName (loc.mLiteral, loc, scanner);
+    if (((mMode == Mode_Console || mMode == Mode_Dialogue)
+            && (keyword == Compiler::Scanner::K_begin || keyword == Compiler::Scanner::K_end
+                || keyword == Compiler::Scanner::K_short || keyword == Compiler::Scanner::K_long
+                || keyword == Compiler::Scanner::K_float))
+        || (mMode == Mode_Console
+            && (keyword == Compiler::Scanner::K_if || keyword == Compiler::Scanner::K_endif
+                || keyword == Compiler::Scanner::K_else || keyword == Compiler::Scanner::K_elseif
+                || keyword == Compiler::Scanner::K_while || keyword == Compiler::Scanner::K_endwhile)))
+        return parseName(loc.mLiteral, loc, scanner);
 
-    highlight (loc, Type_Keyword);
+    highlight(loc, Type_Keyword);
     return true;
 }
 
-bool CSVWorld::ScriptHighlighter::parseSpecial (int code, const Compiler::TokenLoc& loc,
-    Compiler::Scanner& scanner)
+bool CSVWorld::ScriptHighlighter::parseSpecial(int code, const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
 {
-    highlight (loc, Type_Special);
+    highlight(loc, Type_Special);
     return true;
 }
 
-bool CSVWorld::ScriptHighlighter::parseComment (const std::string& comment,
-    const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
+bool CSVWorld::ScriptHighlighter::parseComment(
+    const std::string& comment, const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
 {
-    highlight (loc, Type_Comment);
+    highlight(loc, Type_Comment);
     return true;
 }
 
-void CSVWorld::ScriptHighlighter::parseEOF (Compiler::Scanner& scanner)
-{}
+void CSVWorld::ScriptHighlighter::parseEOF(Compiler::Scanner& scanner) {}
 
-void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type type)
+void CSVWorld::ScriptHighlighter::highlight(const Compiler::TokenLoc& loc, Type type)
 {
     // We should take in account multibyte characters
     int length = 0;
     const char* token = loc.mLiteral.c_str();
-    while (*token) length += (*token++ & 0xc0) != 0x80;
+    while (*token)
+        length += (*token++ & 0xc0) != 0x80;
 
     int index = loc.mColumn;
 
@@ -79,40 +75,41 @@ void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type
     if (mMarkOccurrences && type == Type_Name && loc.mLiteral == mMarkedWord)
         scheme.merge(mScheme[Type_Highlight]);
 
-    setFormat (index, length, scheme);
+    setFormat(index, length, scheme);
 }
 
-CSVWorld::ScriptHighlighter::ScriptHighlighter (const CSMWorld::Data& data, Mode mode,
-    QTextDocument *parent)
-    : QSyntaxHighlighter (parent)
-    , Compiler::Parser (mErrorHandler, mContext)
-    , mContext (data)
-    , mMode (mode)
-    , mMarkOccurrences (false)
+CSVWorld::ScriptHighlighter::ScriptHighlighter(const CSMWorld::Data& data, Mode mode, QTextDocument* parent)
+    : QSyntaxHighlighter(parent)
+    , Compiler::Parser(mErrorHandler, mContext)
+    , mContext(data)
+    , mMode(mode)
+    , mMarkOccurrences(false)
 {
-    QColor color ("black");
+    QColor color("black");
     QTextCharFormat format;
-    format.setForeground (color);
+    format.setForeground(color);
 
-    for (int i=0; i<=Type_Id; ++i)
-        mScheme.insert (std::make_pair (static_cast<Type> (i), format));
+    for (int i = 0; i <= Type_Id; ++i)
+        mScheme.insert(std::make_pair(static_cast<Type>(i), format));
 
     // configure compiler
-    Compiler::registerExtensions (mExtensions);
-    mContext.setExtensions (&mExtensions);
+    Compiler::registerExtensions(mExtensions);
+    mContext.setExtensions(&mExtensions);
 }
 
-void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)
+void CSVWorld::ScriptHighlighter::highlightBlock(const QString& text)
 {
-    std::istringstream stream (text.toUtf8().constData());
+    std::istringstream stream(text.toUtf8().constData());
 
-    Compiler::Scanner scanner (mErrorHandler, stream, mContext.getExtensions());
+    Compiler::Scanner scanner(mErrorHandler, stream, mContext.getExtensions());
 
     try
     {
-        scanner.scan (*this);
+        scanner.scan(*this);
     }
-    catch (...) {} // ignore syntax errors
+    catch (...)
+    {
+    } // ignore syntax errors
 }
 
 void CSVWorld::ScriptHighlighter::setMarkOccurrences(bool flag)
@@ -130,26 +127,22 @@ void CSVWorld::ScriptHighlighter::invalidateIds()
     mContext.invalidateIds();
 }
 
-bool CSVWorld::ScriptHighlighter::settingChanged (const CSMPrefs::Setting *setting)
+bool CSVWorld::ScriptHighlighter::settingChanged(const CSMPrefs::Setting* setting)
 {
-    if (setting->getParent()->getKey()=="Scripts")
+    if (setting->getParent()->getKey() == "Scripts")
     {
-        static const char *const colours[Type_Id+2] =
-        {
-            "colour-int", "colour-float", "colour-name", "colour-keyword",
-            "colour-special", "colour-comment", "colour-highlight", "colour-id",
-            0
-        };
+        static const char* const colours[Type_Id + 2] = { "colour-int", "colour-float", "colour-name", "colour-keyword",
+            "colour-special", "colour-comment", "colour-highlight", "colour-id", 0 };
 
-        for (int i=0; colours[i]; ++i)
-            if (setting->getKey()==colours[i])
+        for (int i = 0; colours[i]; ++i)
+            if (setting->getKey() == colours[i])
             {
                 QTextCharFormat format;
                 if (i == Type_Highlight)
-                    format.setBackground (setting->toColor());
+                    format.setBackground(setting->toColor());
                 else
-                    format.setForeground (setting->toColor());
-                mScheme[static_cast<Type> (i)] = format;
+                    format.setForeground(setting->toColor());
+                mScheme[static_cast<Type>(i)] = format;
                 return true;
             }
     }

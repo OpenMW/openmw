@@ -8,7 +8,7 @@
 namespace ESM
 {
 
-    void Transport::add(ESMReader &esm)
+    void Transport::add(ESMReader& esm)
     {
         if (esm.retSubName().toInt() == fourCC("DODT"))
         {
@@ -26,7 +26,7 @@ namespace ESM
         }
     }
 
-    void Transport::save(ESMWriter &esm) const
+    void Transport::save(ESMWriter& esm) const
     {
         typedef std::vector<Dest>::const_iterator DestIter;
         for (DestIter it = mList.begin(); it != mList.end(); ++it)

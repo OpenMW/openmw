@@ -22,43 +22,43 @@ namespace Sqlite3
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, int value)
     {
         if (const int ec = sqlite3_bind_int(&stmt, index, value); ec != SQLITE_OK)
-            throw std::runtime_error("Failed to bind int to parameter " + std::to_string(index)
-                                     + ": " + std::string(sqlite3_errmsg(&db)));
+            throw std::runtime_error(
+                "Failed to bind int to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, std::int64_t value)
     {
         if (const int ec = sqlite3_bind_int64(&stmt, index, value); ec != SQLITE_OK)
-            throw std::runtime_error("Failed to bind int64 to parameter " + std::to_string(index)
-                                     + ": " + std::string(sqlite3_errmsg(&db)));
+            throw std::runtime_error(
+                "Failed to bind int64 to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, double value)
     {
         if (const int ec = sqlite3_bind_double(&stmt, index, value); ec != SQLITE_OK)
-            throw std::runtime_error("Failed to bind double to parameter " + std::to_string(index)
-                                     + ": " + std::string(sqlite3_errmsg(&db)));
+            throw std::runtime_error("Failed to bind double to parameter " + std::to_string(index) + ": "
+                + std::string(sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, std::string_view value)
     {
         if (sqlite3_bind_text(&stmt, index, value.data(), static_cast<int>(value.size()), SQLITE_STATIC) != SQLITE_OK)
-            throw std::runtime_error("Failed to bind text to parameter " + std::to_string(index)
-                                     + ": " + std::string(sqlite3_errmsg(&db)));
+            throw std::runtime_error(
+                "Failed to bind text to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, const std::vector<std::byte>& value)
     {
         if (sqlite3_bind_blob(&stmt, index, value.data(), static_cast<int>(value.size()), SQLITE_STATIC) != SQLITE_OK)
-            throw std::runtime_error("Failed to bind blob to parameter " + std::to_string(index)
-                                     + ": " + std::string(sqlite3_errmsg(&db)));
+            throw std::runtime_error(
+                "Failed to bind blob to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, const ConstBlob& value)
     {
         if (sqlite3_bind_blob(&stmt, index, value.mData, value.mSize, SQLITE_STATIC) != SQLITE_OK)
-            throw std::runtime_error("Failed to bind blob to parameter " + std::to_string(index)
-                                     + ": " + std::string(sqlite3_errmsg(&db)));
+            throw std::runtime_error(
+                "Failed to bind blob to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
     }
 
     template <typename T>
@@ -74,11 +74,16 @@ namespace Sqlite3
     {
         switch (value)
         {
-            case SQLITE_INTEGER: return "SQLITE_INTEGER";
-            case SQLITE_FLOAT: return "SQLITE_FLOAT";
-            case SQLITE_TEXT: return "SQLITE_TEXT";
-            case SQLITE_BLOB: return "SQLITE_BLOB";
-            case SQLITE_NULL: return "SQLITE_NULL";
+            case SQLITE_INTEGER:
+                return "SQLITE_INTEGER";
+            case SQLITE_FLOAT:
+                return "SQLITE_FLOAT";
+            case SQLITE_TEXT:
+                return "SQLITE_TEXT";
+            case SQLITE_BLOB:
+                return "SQLITE_BLOB";
+            case SQLITE_NULL:
+                return "SQLITE_NULL";
         }
         return "unsupported(" + std::to_string(value) + ")";
     }
@@ -88,7 +93,7 @@ namespace Sqlite3
     {
         if (type != SQLITE_NULL)
             throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                                   + " that does not match expected output type: SQLITE_INTEGER or SQLITE_FLOAT");
+                + " that does not match expected output type: SQLITE_INTEGER or SQLITE_FLOAT");
         value = nullptr;
     }
 
@@ -108,20 +113,20 @@ namespace Sqlite3
                 return;
         }
         throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                               + " that does not match expected output type: SQLITE_INTEGER or SQLITE_FLOAT or SQLITE_NULL");
+            + " that does not match expected output type: SQLITE_INTEGER or SQLITE_FLOAT or SQLITE_NULL");
     }
 
     inline void copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, std::string& value)
     {
         if (type != SQLITE_TEXT)
             throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                                   + " that does not match expected output type: SQLITE_TEXT");
+                + " that does not match expected output type: SQLITE_TEXT");
         const unsigned char* const text = sqlite3_column_text(&statement, index);
         if (text == nullptr)
         {
             if (const int ec = sqlite3_errcode(&db); ec != SQLITE_OK)
-                throw std::runtime_error("Failed to read text from column " + std::to_string(index)
-                                         + ": " + sqlite3_errmsg(&db));
+                throw std::runtime_error(
+                    "Failed to read text from column " + std::to_string(index) + ": " + sqlite3_errmsg(&db));
             value.clear();
             return;
         }
@@ -129,8 +134,8 @@ namespace Sqlite3
         if (size <= 0)
         {
             if (const int ec = sqlite3_errcode(&db); ec != SQLITE_OK)
-                throw std::runtime_error("Failed to get column bytes " + std::to_string(index)
-                                         + ": " + sqlite3_errmsg(&db));
+                throw std::runtime_error(
+                    "Failed to get column bytes " + std::to_string(index) + ": " + sqlite3_errmsg(&db));
             value.clear();
             return;
         }
@@ -142,13 +147,13 @@ namespace Sqlite3
     {
         if (type != SQLITE_BLOB)
             throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                                   + " that does not match expected output type: SQLITE_BLOB");
+                + " that does not match expected output type: SQLITE_BLOB");
         const void* const blob = sqlite3_column_blob(&statement, index);
         if (blob == nullptr)
         {
             if (const int ec = sqlite3_errcode(&db); ec != SQLITE_OK)
-                throw std::runtime_error("Failed to read blob from column " + std::to_string(index)
-                                         + ": " + sqlite3_errmsg(&db));
+                throw std::runtime_error(
+                    "Failed to read blob from column " + std::to_string(index) + ": " + sqlite3_errmsg(&db));
             value.clear();
             return;
         }
@@ -156,8 +161,8 @@ namespace Sqlite3
         if (size <= 0)
         {
             if (const int ec = sqlite3_errcode(&db); ec != SQLITE_OK)
-                throw std::runtime_error("Failed to get column bytes " + std::to_string(index)
-                                         + ": " + sqlite3_errmsg(&db));
+                throw std::runtime_error(
+                    "Failed to get column bytes " + std::to_string(index) + ": " + sqlite3_errmsg(&db));
             value.clear();
             return;
         }
@@ -172,8 +177,8 @@ namespace Sqlite3
         {
             const int column = index - 1;
             if (const int number = sqlite3_column_count(&statement); column >= number)
-                throw std::out_of_range("Column number is out of range: " + std::to_string(column)
-                                        + " >= " + std::to_string(number));
+                throw std::out_of_range(
+                    "Column number is out of range: " + std::to_string(column) + " >= " + std::to_string(number));
             const int type = sqlite3_column_type(&statement, column);
             switch (type)
             {
@@ -186,7 +191,7 @@ namespace Sqlite3
                     break;
                 default:
                     throw std::runtime_error("Column " + std::to_string(column)
-                                             + " has unnsupported column type: " + sqliteTypeToString(type));
+                        + " has unnsupported column type: " + sqliteTypeToString(type));
             }
             getColumnsImpl<index - 1>(db, statement, row);
         }
@@ -205,8 +210,8 @@ namespace Sqlite3
         getColumns(db, statement, tuple);
     }
 
-    template <class ... Args>
-    inline void getRow(sqlite3& db, sqlite3_stmt& statement, std::tuple<Args ...>& row)
+    template <class... Args>
+    inline void getRow(sqlite3& db, sqlite3_stmt& statement, std::tuple<Args...>& row)
     {
         getColumns(db, statement, row);
     }
@@ -219,18 +224,18 @@ namespace Sqlite3
         it = std::move(row);
     }
 
-    template <class T, class ... Args>
-    inline void prepare(sqlite3& db, Statement<T>& statement, Args&& ... args)
+    template <class T, class... Args>
+    inline void prepare(sqlite3& db, Statement<T>& statement, Args&&... args)
     {
         if (statement.mNeedReset)
         {
             if (sqlite3_reset(statement.mHandle.get()) == SQLITE_OK
-                    && sqlite3_clear_bindings(statement.mHandle.get()) == SQLITE_OK)
+                && sqlite3_clear_bindings(statement.mHandle.get()) == SQLITE_OK)
                 statement.mNeedReset = false;
             else
                 statement.mHandle = makeStatementHandle(db, statement.mQuery.text());
         }
-        statement.mQuery.bind(db, *statement.mHandle, std::forward<Args>(args) ...);
+        statement.mQuery.bind(db, *statement.mHandle, std::forward<Args>(args)...);
     }
 
     template <class T>
@@ -238,37 +243,39 @@ namespace Sqlite3
     {
         switch (sqlite3_step(statement.mHandle.get()))
         {
-            case SQLITE_ROW: return true;
-            case SQLITE_DONE: return false;
+            case SQLITE_ROW:
+                return true;
+            case SQLITE_DONE:
+                return false;
         }
         throw std::runtime_error("Failed to execute statement step: " + std::string(sqlite3_errmsg(&db)));
     }
 
-    template <class T, class I, class ... Args>
-    inline I request(sqlite3& db, Statement<T>& statement, I out, std::size_t max, Args&& ... args)
+    template <class T, class I, class... Args>
+    inline I request(sqlite3& db, Statement<T>& statement, I out, std::size_t max, Args&&... args)
     {
         try
         {
             statement.mNeedReset = true;
-            prepare(db, statement, std::forward<Args>(args) ...);
+            prepare(db, statement, std::forward<Args>(args)...);
             for (std::size_t i = 0; executeStep(db, statement) && i < max; ++i)
                 getRow(db, *statement.mHandle, *out++);
             return out;
         }
         catch (const std::exception& e)
         {
-            throw std::runtime_error("Failed perform request \"" + std::string(statement.mQuery.text())
-                                    + "\": " + std::string(e.what()));
+            throw std::runtime_error(
+                "Failed perform request \"" + std::string(statement.mQuery.text()) + "\": " + std::string(e.what()));
         }
     }
 
-    template <class T, class ... Args>
-    inline int execute(sqlite3& db, Statement<T>& statement, Args&& ... args)
+    template <class T, class... Args>
+    inline int execute(sqlite3& db, Statement<T>& statement, Args&&... args)
     {
         try
         {
             statement.mNeedReset = true;
-            prepare(db, statement, std::forward<Args>(args) ...);
+            prepare(db, statement, std::forward<Args>(args)...);
             if (executeStep(db, statement))
                 throw std::logic_error("Execute cannot return rows");
             return sqlite3_changes(&db);
@@ -276,7 +283,7 @@ namespace Sqlite3
         catch (const std::exception& e)
         {
             throw std::runtime_error("Failed to execute statement \"" + std::string(statement.mQuery.text())
-                                     + "\": " + std::string(e.what()));
+                + "\": " + std::string(e.what()));
         }
     }
 }

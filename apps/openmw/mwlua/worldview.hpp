@@ -21,8 +21,8 @@ namespace MWLua
     class WorldView
     {
     public:
-        void update();  // Should be called every frame.
-        void clear();  // Should be called every time before starting or loading a new game.
+        void update(); // Should be called every frame.
+        void clear(); // Should be called every time before starting or loading a new game.
 
         // Whether the world is paused (i.e. game time is not changing and actors don't move).
         bool isPaused() const { return mPaused; }

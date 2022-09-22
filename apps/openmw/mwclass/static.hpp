@@ -7,27 +7,29 @@ namespace MWClass
 {
     class Static : public MWWorld::RegisteredClass<Static>
     {
-            friend MWWorld::RegisteredClass<Static>;
+        friend MWWorld::RegisteredClass<Static>;
 
-            Static();
+        Static();
 
-            MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
+        MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const override;
 
-        public:
+    public:
+        void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
+            MWRender::RenderingInterface& renderingInterface) const override;
+        ///< Add reference into a cell for rendering
 
-            void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
-            ///< Add reference into a cell for rendering
+        void insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
+            MWPhysics::PhysicsSystem& physics) const override;
+        void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
+            MWPhysics::PhysicsSystem& physics) const override;
 
-            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
-            void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
+        std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
+        ///< \return name or ID; can return an empty string.
 
-            std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
-            ///< \return name or ID; can return an empty string.
+        bool hasToolTip(const MWWorld::ConstPtr& ptr) const override;
+        ///< @return true if this object has a tooltip when focused (default implementation: true)
 
-            bool hasToolTip (const MWWorld::ConstPtr& ptr) const override;
-            ///< @return true if this object has a tooltip when focused (default implementation: true)
-
-            std::string getModel(const MWWorld::ConstPtr &ptr) const override;
+        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
     };
 }
 

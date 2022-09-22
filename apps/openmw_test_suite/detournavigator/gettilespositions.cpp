@@ -1,9 +1,9 @@
-#include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/debug.hpp>
+#include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/settings.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 namespace
 {
@@ -14,17 +14,14 @@ namespace
     {
         std::vector<TilePosition>& mTilesPositions;
 
-        void operator ()(const TilePosition& value)
-        {
-            mTilesPositions.push_back(value);
-        }
+        void operator()(const TilePosition& value) { mTilesPositions.push_back(value); }
     };
 
     struct DetourNavigatorGetTilesPositionsTest : Test
     {
         RecastSettings mSettings;
         std::vector<TilePosition> mTilesPositions;
-        CollectTilesPositions mCollect {mTilesPositions};
+        CollectTilesPositions mCollect{ mTilesPositions };
 
         DetourNavigatorGetTilesPositionsTest()
         {
@@ -67,12 +64,8 @@ namespace
     {
         getTilesPositions(makeTilesPositionsRange(osg::Vec2f(-31, -31), osg::Vec2f(31, 31), mSettings), mCollect);
 
-        EXPECT_THAT(mTilesPositions, ElementsAre(
-            TilePosition(-1, -1),
-            TilePosition(-1, 0),
-            TilePosition(0, -1),
-            TilePosition(0, 0)
-        ));
+        EXPECT_THAT(mTilesPositions,
+            ElementsAre(TilePosition(-1, -1), TilePosition(-1, 0), TilePosition(0, -1), TilePosition(0, 0)));
     }
 
     TEST_F(DetourNavigatorGetTilesPositionsTest, border_size_should_extend_tile_bounds)
@@ -81,17 +74,9 @@ namespace
 
         getTilesPositions(makeTilesPositionsRange(osg::Vec2f(0, 0), osg::Vec2f(31.5, 31.5), mSettings), mCollect);
 
-        EXPECT_THAT(mTilesPositions, ElementsAre(
-            TilePosition(-1, -1),
-            TilePosition(-1, 0),
-            TilePosition(-1, 1),
-            TilePosition(0, -1),
-            TilePosition(0, 0),
-            TilePosition(0, 1),
-            TilePosition(1, -1),
-            TilePosition(1, 0),
-            TilePosition(1, 1)
-        ));
+        EXPECT_THAT(mTilesPositions,
+            ElementsAre(TilePosition(-1, -1), TilePosition(-1, 0), TilePosition(-1, 1), TilePosition(0, -1),
+                TilePosition(0, 0), TilePosition(0, 1), TilePosition(1, -1), TilePosition(1, 0), TilePosition(1, 1)));
     }
 
     TEST_F(DetourNavigatorGetTilesPositionsTest, should_apply_recast_scale_factor)

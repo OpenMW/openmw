@@ -21,34 +21,31 @@ namespace CSVRender
 {
     class PreviewWidget : public SceneWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMWorld::Data& mData;
-            CSVRender::Object mObject;
+        CSMWorld::Data& mData;
+        CSVRender::Object mObject;
 
-        public:
+    public:
+        PreviewWidget(CSMWorld::Data& data, const std::string& id, bool referenceable, QWidget* parent = nullptr);
 
-            PreviewWidget (CSMWorld::Data& data, const std::string& id, bool referenceable,
-                QWidget *parent = nullptr);
+    signals:
 
-        signals:
+        void closeRequest();
 
-            void closeRequest();
+        void referenceableIdChanged(const std::string& id);
 
-            void referenceableIdChanged (const std::string& id);
+    private slots:
 
-        private slots:
+        void referenceableDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void referenceableDataChanged (const QModelIndex& topLeft,
-                const QModelIndex& bottomRight);
+        void referenceableAboutToBeRemoved(const QModelIndex& parent, int start, int end);
 
-            void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+        void referenceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+        void referenceAboutToBeRemoved(const QModelIndex& parent, int start, int end);
 
-            void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
-
-            void assetTablesChanged ();
+        void assetTablesChanged();
     };
 }
 

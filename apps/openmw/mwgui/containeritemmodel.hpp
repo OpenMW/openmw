@@ -16,23 +16,24 @@ namespace MWGui
     class ContainerItemModel : public ItemModel
     {
     public:
-        ContainerItemModel (const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems);
-        ///< @note The order of elements \a itemSources matters here. The first element has the highest priority for removal,
+        ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems);
+        ///< @note The order of elements \a itemSources matters here. The first element has the highest priority for
+        ///< removal,
         ///  while the last element will be used to add new items to.
 
-        ContainerItemModel (const MWWorld::Ptr& source);
+        ContainerItemModel(const MWWorld::Ptr& source);
 
         bool allowedToUseItems() const override;
 
-        bool onDropItem(const MWWorld::Ptr &item, int count) override;
-        bool onTakeItem(const MWWorld::Ptr &item, int count) override;
+        bool onDropItem(const MWWorld::Ptr& item, int count) override;
+        bool onTakeItem(const MWWorld::Ptr& item, int count) override;
 
-        ItemStack getItem (ModelIndex index) override;
-        ModelIndex getIndex (const ItemStack &item) override;
+        ItemStack getItem(ModelIndex index) override;
+        ModelIndex getIndex(const ItemStack& item) override;
         size_t getItemCount() override;
 
-        MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
-        void removeItem (const ItemStack& item, size_t count) override;
+        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
+        void removeItem(const ItemStack& item, size_t count) override;
 
         void update() override;
 

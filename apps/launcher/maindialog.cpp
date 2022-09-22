@@ -1,14 +1,14 @@
 #include "maindialog.hpp"
 
-#include <components/version/version.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/version/version.hpp>
 
-#include <QTime>
-#include <QDir>
-#include <QDebug>
-#include <QMessageBox>
 #include <QCloseEvent>
+#include <QDebug>
+#include <QDir>
+#include <QMessageBox>
 #include <QTextCodec>
+#include <QTime>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -23,7 +23,8 @@
 
 using namespace Process;
 
-void cfgError(const QString& title, const QString& msg) {
+void cfgError(const QString& title, const QString& msg)
+{
     QMessageBox msgBox;
     msgBox.setWindowTitle(title);
     msgBox.setIcon(QMessageBox::Critical);
@@ -32,19 +33,19 @@ void cfgError(const QString& title, const QString& msg) {
     msgBox.exec();
 }
 
-Launcher::MainDialog::MainDialog(QWidget *parent)
-    : QMainWindow(parent), mGameSettings (mCfgMgr)
+Launcher::MainDialog::MainDialog(QWidget* parent)
+    : QMainWindow(parent)
+    , mGameSettings(mCfgMgr)
 {
     setupUi(this);
 
     mGameInvoker = new ProcessInvoker();
     mWizardInvoker = new ProcessInvoker();
 
-    connect(mWizardInvoker->getProcess(), &QProcess::started,
-            this, &MainDialog::wizardStarted);
+    connect(mWizardInvoker->getProcess(), &QProcess::started, this, &MainDialog::wizardStarted);
 
-    connect(mWizardInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
-            this, &MainDialog::wizardFinished);
+    connect(mWizardInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
+        &MainDialog::wizardFinished);
 
     iconWidget->setViewMode(QListView::IconMode);
     iconWidget->setWrapping(false);
@@ -56,8 +57,8 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     iconWidget->setCurrentRow(0);
     iconWidget->setFlow(QListView::LeftToRight);
 
-    auto *helpButton = new QPushButton(tr("Help"));
-    auto *playButton = new QPushButton(tr("Play"));
+    auto* helpButton = new QPushButton(tr("Help"));
+    auto* playButton = new QPushButton(tr("Play"));
     buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
     buttonBox->addButton(helpButton, QDialogButtonBox::HelpRole);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
@@ -83,38 +84,37 @@ void Launcher::MainDialog::createIcons()
     if (!QIcon::hasThemeIcon("document-new"))
         QIcon::setThemeName("tango");
 
-    auto *playButton = new QListWidgetItem(iconWidget);
+    auto* playButton = new QListWidgetItem(iconWidget);
     playButton->setIcon(QIcon(":/images/openmw.png"));
     playButton->setText(tr("Play"));
     playButton->setTextAlignment(Qt::AlignCenter);
     playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    auto *dataFilesButton = new QListWidgetItem(iconWidget);
+    auto* dataFilesButton = new QListWidgetItem(iconWidget);
     dataFilesButton->setIcon(QIcon(":/images/openmw-plugin.png"));
     dataFilesButton->setText(tr("Data Files"));
     dataFilesButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    auto *graphicsButton = new QListWidgetItem(iconWidget);
+    auto* graphicsButton = new QListWidgetItem(iconWidget);
     graphicsButton->setIcon(QIcon(":/images/preferences-video.png"));
     graphicsButton->setText(tr("Graphics"));
     graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
     graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    auto *settingsButton = new QListWidgetItem(iconWidget);
+    auto* settingsButton = new QListWidgetItem(iconWidget);
     settingsButton->setIcon(QIcon(":/images/preferences.png"));
     settingsButton->setText(tr("Settings"));
     settingsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     settingsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    auto *advancedButton = new QListWidgetItem(iconWidget);
+    auto* advancedButton = new QListWidgetItem(iconWidget);
     advancedButton->setIcon(QIcon(":/images/preferences-advanced.png"));
     advancedButton->setText(tr("Advanced"));
     advancedButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     advancedButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     connect(iconWidget, &QListWidget::currentItemChanged, this, &MainDialog::changePage);
-
 }
 
 void Launcher::MainDialog::createPages()
@@ -148,7 +148,8 @@ void Launcher::MainDialog::createPages()
     connect(mPlayPage, &PlayPage::signalProfileChanged, mDataFilesPage, &DataFilesPage::slotProfileChanged);
     connect(mDataFilesPage, &DataFilesPage::signalProfileChanged, mPlayPage, &PlayPage::setProfilesIndex);
     // Using Qt::QueuedConnection because signal is emitted in a subthread and slot is in the main thread
-    connect(mDataFilesPage, &DataFilesPage::signalLoadedCellsChanged, mAdvancedPage, &AdvancedPage::slotLoadedCellsChanged, Qt::QueuedConnection);
+    connect(mDataFilesPage, &DataFilesPage::signalLoadedCellsChanged, mAdvancedPage,
+        &AdvancedPage::slotLoadedCellsChanged, Qt::QueuedConnection);
 }
 
 Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
@@ -158,14 +159,15 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
 
     // Dialog wizard and setup will fail if the config directory does not already exist
     const auto& userConfigDir = mCfgMgr.getUserConfigPath();
-    if ( ! exists(userConfigDir) ) {
-        if ( ! create_directories(userConfigDir) )
+    if (!exists(userConfigDir))
+    {
+        if (!create_directories(userConfigDir))
         {
             cfgError(tr("Error opening OpenMW configuration file"),
-                     tr("<br><b>Could not create directory %0</b><br><br> \
+                tr("<br><b>Could not create directory %0</b><br><br> \
                         Please make sure you have the right permissions \
-                        and try again.<br>").arg(Files::pathToQString(canonical(userConfigDir)))
-            );
+                        and try again.<br>")
+                    .arg(Files::pathToQString(canonical(userConfigDir))));
             return FirstRunDialogResultFailure;
         }
     }
@@ -176,15 +178,15 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         msgBox.setWindowTitle(tr("First run"));
         msgBox.setIcon(QMessageBox::Question);
         msgBox.setStandardButtons(QMessageBox::NoButton);
-        msgBox.setText(tr("<html><head/><body><p><b>Welcome to OpenMW!</b></p> \
+        msgBox.setText(
+            tr("<html><head/><body><p><b>Welcome to OpenMW!</b></p> \
                           <p>It is recommended to run the Installation Wizard.</p> \
                           <p>The Wizard will let you select an existing Morrowind installation, \
                           or install Morrowind for OpenMW to use.</p></body></html>"));
 
-        QAbstractButton *wizardButton =
-                msgBox.addButton(tr("Run &Installation Wizard"), QMessageBox::AcceptRole); // ActionRole doesn't work?!
-        QAbstractButton *skipButton =
-                msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
+        QAbstractButton* wizardButton
+            = msgBox.addButton(tr("Run &Installation Wizard"), QMessageBox::AcceptRole); // ActionRole doesn't work?!
+        QAbstractButton* skipButton = msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
 
         msgBox.exec();
 
@@ -202,7 +204,8 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         return FirstRunDialogResultFailure;
     }
 
-    if (!setup() || !setupGameData()) {
+    if (!setup() || !setupGameData())
+    {
         return FirstRunDialogResultFailure;
     }
     return FirstRunDialogResultContinue;
@@ -225,8 +228,9 @@ void Launcher::MainDialog::setVersionLabel()
     // Add the compile date and time
     auto compileDate = QLocale(QLocale::C).toDate(QString(__DATE__).simplified(), QLatin1String("MMM d yyyy"));
     auto compileTime = QLocale(QLocale::C).toTime(QString(__TIME__).simplified(), QLatin1String("hh:mm:ss"));
-    versionLabel->setToolTip(tr("Compiled on %1 %2").arg(QLocale::system().toString(compileDate, QLocale::LongFormat),
-                                                         QLocale::system().toString(compileTime, QLocale::ShortFormat)));
+    versionLabel->setToolTip(tr("Compiled on %1 %2")
+                                 .arg(QLocale::system().toString(compileDate, QLocale::LongFormat),
+                                     QLocale::system().toString(compileTime, QLocale::ShortFormat)));
 }
 
 bool Launcher::MainDialog::setup()
@@ -281,7 +285,7 @@ bool Launcher::MainDialog::reloadSettings()
     return true;
 }
 
-void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
+void Launcher::MainDialog::changePage(QListWidgetItem* current, QListWidgetItem* previous)
 {
     if (!current)
         current = previous;
@@ -303,16 +307,19 @@ bool Launcher::MainDialog::setupLauncherSettings()
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
     paths.append(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
-    for (const QString &path : paths)
+    for (const QString& path : paths)
     {
         qDebug() << "Loading config file:" << path.toUtf8().constData();
         QFile file(path);
-        if (file.exists()) {
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (file.exists())
+        {
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
                 cfgError(tr("Error opening OpenMW configuration file"),
-                         tr("<br><b>Could not open %0 for reading</b><br><br> \
+                    tr("<br><b>Could not open %0 for reading</b><br><br> \
                              Please make sure you have the right permissions \
-                             and try again.<br>").arg(file.fileName()));
+                             and try again.<br>")
+                        .arg(file.fileName()));
                 return false;
             }
             QTextStream stream(&file);
@@ -336,16 +343,19 @@ bool Launcher::MainDialog::setupGameSettings()
 
     QFile file;
 
-    auto loadFile = [&] (const QString& path, bool(Config::GameSettings::*reader)(QTextStream&, bool), bool ignoreContent = false) -> std::optional<bool>
-    {
+    auto loadFile = [&](const QString& path, bool (Config::GameSettings::*reader)(QTextStream&, bool),
+                        bool ignoreContent = false) -> std::optional<bool> {
         qDebug() << "Loading config file:" << path.toUtf8().constData();
         file.setFileName(path);
-        if (file.exists()) {
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (file.exists())
+        {
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
                 cfgError(tr("Error opening OpenMW configuration file"),
-                        tr("<br><b>Could not open %0 for reading</b><br><br> \
+                    tr("<br><b>Could not open %0 for reading</b><br><br> \
                             Please make sure you have the right permissions \
-                            and try again.<br>").arg(file.fileName()));
+                            and try again.<br>")
+                        .arg(file.fileName()));
                 return {};
             }
             QTextStream stream(&file);
@@ -360,19 +370,19 @@ bool Launcher::MainDialog::setupGameSettings()
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
-    if(!loadFile(userPath + QLatin1String("openmw.cfg"), &Config::GameSettings::readUserFile))
+    if (!loadFile(userPath + QLatin1String("openmw.cfg"), &Config::GameSettings::readUserFile))
         return false;
 
     // Now the rest - priority: user > local > global
-    if(auto result = loadFile(localPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+    if (auto result = loadFile(localPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
     {
         // Load global if local wasn't found
-        if(!*result && !loadFile(globalPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+        if (!*result && !loadFile(globalPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
             return false;
     }
     else
         return false;
-    if(!loadFile(userPath + QString("openmw.cfg"), &Config::GameSettings::readFile))
+    if (!loadFile(userPath + QString("openmw.cfg"), &Config::GameSettings::readFile))
         return false;
 
     return true;
@@ -387,7 +397,10 @@ bool Launcher::MainDialog::setupGameData()
     {
         QDir dir(path3);
         QStringList filters;
-        filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
+        filters << "*.esp"
+                << "*.esm"
+                << "*.omwgame"
+                << "*.omwaddon";
 
         if (!dir.entryList(filters).isEmpty())
             dataDirs.append(path3);
@@ -399,13 +412,12 @@ bool Launcher::MainDialog::setupGameData()
         msgBox.setWindowTitle(tr("Error detecting Morrowind installation"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::NoButton);
-        msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
+        msgBox.setText(
+            tr("<br><b>Could not find the Data Files location</b><br><br> \
                                    The directory containing the data files was not found."));
 
-        QAbstractButton *wizardButton =
-                msgBox.addButton(tr("Run &Installation Wizard..."), QMessageBox::ActionRole);
-        QAbstractButton *skipButton =
-                msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
+        QAbstractButton* wizardButton = msgBox.addButton(tr("Run &Installation Wizard..."), QMessageBox::ActionRole);
+        QAbstractButton* skipButton = msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
 
         Q_UNUSED(skipButton); // Suppress compiler unused warning
 
@@ -423,7 +435,7 @@ bool Launcher::MainDialog::setupGameData()
 
 bool Launcher::MainDialog::setupGraphicsSettings()
 {
-    Settings::Manager::clear();  // Ensure to clear previous settings in case we had already loaded settings.
+    Settings::Manager::clear(); // Ensure to clear previous settings in case we had already loaded settings.
     try
     {
         boost::program_options::variables_map variables;
@@ -436,8 +448,9 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     catch (std::exception& e)
     {
         cfgError(tr("Error reading OpenMW configuration files"),
-                 tr("<br>The problem may be due to an incomplete installation of OpenMW.<br> \
-                     Reinstalling OpenMW may resolve the problem.<br>") + e.what());
+            tr("<br>The problem may be due to an incomplete installation of OpenMW.<br> \
+                     Reinstalling OpenMW may resolve the problem.<br>")
+                + e.what());
         return false;
     }
 }
@@ -469,7 +482,6 @@ void Launcher::MainDialog::saveSettings()
     mLauncherSettings.setValue(QString("General/MainWindow/posy"), posY);
 
     mLauncherSettings.setValue(QString("General/firstrun"), QString("false"));
-
 }
 
 bool Launcher::MainDialog::writeSettings()
@@ -483,12 +495,15 @@ bool Launcher::MainDialog::writeSettings()
 
     const auto& userPath = mCfgMgr.getUserConfigPath();
 
-    if (!exists(userPath)) {
-        if (!create_directories(userPath)) {
+    if (!exists(userPath))
+    {
+        if (!create_directories(userPath))
+        {
             cfgError(tr("Error creating OpenMW configuration directory"),
-                     tr("<br><b>Could not create %0</b><br><br> \
+                tr("<br><b>Could not create %0</b><br><br> \
                          Please make sure you have the right permissions \
-                         and try again.<br>").arg(Files::pathToQString(userPath)));
+                         and try again.<br>")
+                    .arg(Files::pathToQString(userPath)));
             return false;
         }
     }
@@ -500,27 +515,30 @@ bool Launcher::MainDialog::writeSettings()
     QFile file(Files::pathToQString(userPath / "openmw.cfg"));
 #endif
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
         // File cannot be opened or created
         cfgError(tr("Error writing OpenMW configuration file"),
-                 tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+            tr("<br><b>Could not open or create %0 for writing</b><br><br> \
                      Please make sure you have the right permissions \
-                     and try again.<br>").arg(file.fileName()));
+                     and try again.<br>")
+                .arg(file.fileName()));
         return false;
     }
-
 
     mGameSettings.writeFileWithComments(file);
     file.close();
 
     // Graphics settings
     const auto settingsPath = mCfgMgr.getUserConfigPath() / "settings.cfg";
-    try {
+    try
+    {
         Settings::Manager::saveUser(settingsPath);
     }
-    catch (std::exception& e) {
-        std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +
-            Files::pathToUnicodeString(settingsPath) + "<br><br>" + e.what();
+    catch (std::exception& e)
+    {
+        std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" + Files::pathToUnicodeString(settingsPath)
+            + "<br><br>" + e.what();
         cfgError(tr("Error writing user settings file"), tr(msg.c_str()));
         return false;
     }
@@ -528,12 +546,14 @@ bool Launcher::MainDialog::writeSettings()
     // Launcher settings
     file.setFileName(Files::pathToQString(userPath / Config::LauncherSettings::sLauncherConfigFileName));
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
+    {
         // File cannot be opened or created
         cfgError(tr("Error writing Launcher configuration file"),
-                 tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+            tr("<br><b>Could not open or create %0 for writing</b><br><br> \
                      Please make sure you have the right permissions \
-                     and try again.<br>").arg(file.fileName()));
+                     and try again.<br>")
+                .arg(file.fileName()));
         return false;
     }
 
@@ -547,7 +567,7 @@ bool Launcher::MainDialog::writeSettings()
     return true;
 }
 
-void Launcher::MainDialog::closeEvent(QCloseEvent *event)
+void Launcher::MainDialog::closeEvent(QCloseEvent* event)
 {
     writeSettings();
     event->accept();
@@ -575,12 +595,14 @@ void Launcher::MainDialog::play()
     if (!writeSettings())
         return qApp->quit();
 
-    if (!mGameSettings.hasMaster()) {
+    if (!mGameSettings.hasMaster())
+    {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("No game file selected"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>You do not have a game file selected.</b><br><br> \
+        msgBox.setText(
+            tr("<br><b>You do not have a game file selected.</b><br><br> \
                           OpenMW will not start without a game file selected.<br>"));
         msgBox.exec();
         return;

@@ -5,18 +5,17 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QPushButton>
-#include <QWidget>
 #include <QString>
+#include <QWidget>
 
 #include <components/settings/settings.hpp>
 
-#include "state.hpp"
 #include "shortcutmanager.hpp"
+#include "state.hpp"
 
 namespace CSMPrefs
 {
-    ShortcutSetting::ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key,
-        const std::string& label)
+    ShortcutSetting::ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label)
         : Setting(parent, mutex, key, label)
         , mButton(nullptr)
         , mEditorActive(false)
@@ -115,14 +114,7 @@ namespace CSMPrefs
     bool ShortcutSetting::handleEvent(QObject* target, int mod, int value, bool active)
     {
         // Modifiers are handled differently
-        const int Blacklist[] =
-        {
-            Qt::Key_Shift,
-            Qt::Key_Control,
-            Qt::Key_Meta,
-            Qt::Key_Alt,
-            Qt::Key_AltGr
-        };
+        const int Blacklist[] = { Qt::Key_Shift, Qt::Key_Control, Qt::Key_Meta, Qt::Key_Alt, Qt::Key_AltGr };
 
         const size_t BlacklistSize = sizeof(Blacklist) / sizeof(int);
 

@@ -62,15 +62,15 @@ namespace Resource
     private:
         osg::ref_ptr<osg::Switch> _switch;
         int _key;
-        osg::ref_ptr<osg::Camera>  _camera;
+        osg::ref_ptr<osg::Camera> _camera;
         bool _initialized;
         bool _statsType;
         bool _offlineCollect;
 
-        float                               _statsWidth;
-        float                               _statsHeight;
+        float _statsWidth;
+        float _statsHeight;
 
-        float                               _characterSize;
+        float _characterSize;
 
         int _resourceStatsChildNum;
 

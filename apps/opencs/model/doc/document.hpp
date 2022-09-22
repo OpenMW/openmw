@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <QUndoStack>
 #include <QObject>
+#include <QUndoStack>
 
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>
@@ -14,10 +14,10 @@
 
 #include "../tools/tools.hpp"
 
-#include "saving.hpp"
 #include "blacklist.hpp"
-#include "runner.hpp"
 #include "operationholder.hpp"
+#include "runner.hpp"
+#include "saving.hpp"
 
 class QAbstractItemModel;
 
@@ -52,133 +52,130 @@ namespace CSMDoc
 {
     class Document : public QObject
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        private:
+    private:
+        std::filesystem::path mSavePath;
+        std::vector<std::filesystem::path> mContentFiles;
+        bool mNew;
+        CSMWorld::Data mData;
+        CSMTools::Tools mTools;
+        std::filesystem::path mProjectPath;
+        Saving mSavingOperation;
+        OperationHolder mSaving;
+        std::filesystem::path mResDir;
+        Blacklist mBlacklist;
+        Runner mRunner;
+        bool mDirty;
 
-            std::filesystem::path mSavePath;
-            std::vector<std::filesystem::path> mContentFiles;
-            bool mNew;
-            CSMWorld::Data mData;
-            CSMTools::Tools mTools;
-            std::filesystem::path mProjectPath;
-            Saving mSavingOperation;
-            OperationHolder mSaving;
-            std::filesystem::path mResDir;
-            Blacklist mBlacklist;
-            Runner mRunner;
-            bool mDirty;
+        CSMWorld::IdCompletionManager mIdCompletionManager;
 
-            CSMWorld::IdCompletionManager mIdCompletionManager;
+        // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is
+        // connected to a slot, that is using other member variables.  Unfortunately this connection is cut only in the
+        // QObject destructor, which is way too late.
+        QUndoStack mUndoStack;
 
-            // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
-            // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
-            QUndoStack mUndoStack;
+        // not implemented
+        Document(const Document&);
+        Document& operator=(const Document&);
 
-            // not implemented
-            Document (const Document&);
-            Document& operator= (const Document&);
+        void createBase();
 
-            void createBase();
+        void addGmsts();
 
-            void addGmsts();
+        void addOptionalGmsts();
 
-            void addOptionalGmsts();
+        void addOptionalGlobals();
 
-            void addOptionalGlobals();
+        void addOptionalMagicEffects();
 
-            void addOptionalMagicEffects();
+        void addOptionalGmst(const ESM::GameSetting& gmst);
 
-            void addOptionalGmst (const ESM::GameSetting& gmst);
+        void addOptionalGlobal(const ESM::Global& global);
 
-            void addOptionalGlobal (const ESM::Global& global);
+        void addOptionalMagicEffect(const ESM::MagicEffect& effect);
 
-            void addOptionalMagicEffect (const ESM::MagicEffect& effect);
+    public:
+        Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files, bool new_,
+            const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
+            const std::vector<std::string>& blacklistedScripts, bool fsStrict, const Files::PathContainer& dataPaths,
+            const std::vector<std::string>& archives);
 
-        public:
+        ~Document();
 
-            Document (const Files::ConfigurationManager& configuration,
-                std::vector< std::filesystem::path >  files, bool new_,
-                const std::filesystem::path& savePath, const std::filesystem::path& resDir,
-                ToUTF8::FromType encoding, const std::vector<std::string>& blacklistedScripts,
-                bool fsStrict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
+        QUndoStack& getUndoStack();
 
-            ~Document();
+        int getState() const;
 
-            QUndoStack& getUndoStack();
+        const std::filesystem::path& getResourceDir() const;
 
-            int getState() const;
+        const std::filesystem::path& getSavePath() const;
 
-            const std::filesystem::path& getResourceDir() const;
+        const std::filesystem::path& getProjectPath() const;
 
-            const std::filesystem::path& getSavePath() const;
+        const std::vector<std::filesystem::path>& getContentFiles() const;
+        ///< \attention The last element in this collection is the file that is being edited,
+        /// but with its original path instead of the save path.
 
-            const std::filesystem::path& getProjectPath() const;
+        bool isNew() const;
+        ///< Is this a newly created content file?
 
-            const std::vector<std::filesystem::path>& getContentFiles() const;
-            ///< \attention The last element in this collection is the file that is being edited,
-            /// but with its original path instead of the save path.
+        void save();
 
-            bool isNew() const;
-            ///< Is this a newly created content file?
+        CSMWorld::UniversalId verify(const CSMWorld::UniversalId& reportId = CSMWorld::UniversalId());
 
-            void save();
+        CSMWorld::UniversalId newSearch();
 
-            CSMWorld::UniversalId verify (const CSMWorld::UniversalId& reportId = CSMWorld::UniversalId());
+        void runSearch(const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
 
-            CSMWorld::UniversalId newSearch();
+        void runMerge(std::unique_ptr<CSMDoc::Document> target);
 
-            void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
+        void abortOperation(int type);
 
-            void runMerge (std::unique_ptr<CSMDoc::Document> target);
+        const CSMWorld::Data& getData() const;
 
-            void abortOperation (int type);
+        CSMWorld::Data& getData();
 
-            const CSMWorld::Data& getData() const;
+        CSMTools::ReportModel* getReport(const CSMWorld::UniversalId& id);
+        ///< The ownership of the returned report is not transferred.
 
-            CSMWorld::Data& getData();
+        bool isBlacklisted(const CSMWorld::UniversalId& id) const;
 
-            CSMTools::ReportModel *getReport (const CSMWorld::UniversalId& id);
-            ///< The ownership of the returned report is not transferred.
+        void startRunning(const std::string& profile, const std::string& startupInstruction = "");
 
-            bool isBlacklisted (const CSMWorld::UniversalId& id) const;
+        void stopRunning();
 
-            void startRunning (const std::string& profile,
-                const std::string& startupInstruction = "");
+        QTextDocument* getRunLog();
 
-            void stopRunning();
+        CSMWorld::IdCompletionManager& getIdCompletionManager();
 
-            QTextDocument *getRunLog();
+        void flagAsDirty();
 
-            CSMWorld::IdCompletionManager &getIdCompletionManager();
+    signals:
 
-            void flagAsDirty();
+        void stateChanged(int state, CSMDoc::Document* document);
 
-        signals:
+        void progress(int current, int max, int type, int threads, CSMDoc::Document* document);
 
-            void stateChanged (int state, CSMDoc::Document *document);
+        /// \attention When this signal is emitted, *this hands over the ownership of the
+        /// document. This signal must be handled to avoid a leak.
+        void mergeDone(CSMDoc::Document* document);
 
-            void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
+        void operationDone(int type, bool failed);
 
-            /// \attention When this signal is emitted, *this hands over the ownership of the
-            /// document. This signal must be handled to avoid a leak.
-            void mergeDone (CSMDoc::Document *document);
+    private slots:
 
-            void operationDone (int type, bool failed);
+        void modificationStateChanged(bool clean);
 
-        private slots:
+        void reportMessage(const CSMDoc::Message& message, int type);
 
-            void modificationStateChanged (bool clean);
+        void operationDone2(int type, bool failed);
 
-            void reportMessage (const CSMDoc::Message& message, int type);
+        void runStateChanged();
 
-            void operationDone2 (int type, bool failed);
+    public slots:
 
-            void runStateChanged();
-
-        public slots:
-
-            void progress (int current, int max, int type);
+        void progress(int current, int max, int type);
     };
 }
 

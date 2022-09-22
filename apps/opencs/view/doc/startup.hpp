@@ -15,31 +15,29 @@ namespace CSVDoc
     {
         Q_OBJECT
 
-        private:
+    private:
+        int mWidth;
+        int mColumn;
+        QGridLayout* mLayout;
 
-            int mWidth;
-            int mColumn;
-            QGridLayout *mLayout;
+        QPushButton* addButton(const QString& label, const QIcon& icon);
 
-            QPushButton *addButton (const QString& label, const QIcon& icon);
+        QWidget* createButtons();
 
-            QWidget *createButtons();
+        QWidget* createTools();
 
-            QWidget *createTools();
+    public:
+        StartupDialogue();
 
-        public:
+    signals:
 
-            StartupDialogue();
+        void createGame();
 
-        signals:
+        void createAddon();
 
-            void createGame();
+        void loadDocument();
 
-            void createAddon();
-
-            void loadDocument();
-
-            void editConfig();
+        void editConfig();
     };
 }
 

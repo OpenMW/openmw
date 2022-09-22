@@ -5,7 +5,7 @@
 
 namespace CSMWorld
 {
-    void Land::load(ESM::ESMReader &esm, bool &isDeleted)
+    void Land::load(ESM::ESMReader& esm, bool& isDeleted)
     {
         ESM::Land::load(esm, isDeleted);
     }

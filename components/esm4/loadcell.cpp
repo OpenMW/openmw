@@ -31,8 +31,8 @@
 #endif
 
 #include <cassert>
-#include <stdexcept>
 #include <cfloat> // FLT_MAX for gcc
+#include <stdexcept>
 
 #include <iostream> // FIXME: debug only
 
@@ -50,7 +50,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
     mParent = reader.currWorld();
 
     reader.clearCellGrid(); // clear until XCLC FIXME: somehow do this automatically?
@@ -59,13 +59,13 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     // To workaround this issue put a default value if group is "exterior sub cell" and its
     // grid from label is "0 0".  Note the reversed X/Y order (no matter since they're both 0
     // anyway).
-    if (reader.grp().type == ESM4::Grp_ExteriorSubCell
-            && reader.grp().label.grid[1] == 0 && reader.grp().label.grid[0] == 0)
+    if (reader.grp().type == ESM4::Grp_ExteriorSubCell && reader.grp().label.grid[1] == 0
+        && reader.grp().label.grid[0] == 0)
     {
         ESM4::CellGrid currCellGrid;
         currCellGrid.grid.x = 0;
         currCellGrid.grid.y = 0;
-        reader.setCurrCellGrid(currCellGrid);  // side effect: sets mCellGridValid  true
+        reader.setCurrCellGrid(currCellGrid); // side effect: sets mCellGridValid  true
     }
 
     // WARN: we need to call setCurrCell (and maybe setCurrCellGrid?) again before loading
@@ -83,7 +83,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             case ESM4::SUB_EDID:
             {
                 if (!reader.getZString(mEditorId))
-                    throw std::runtime_error ("CELL EDID data read error");
+                    throw std::runtime_error("CELL EDID data read error");
 #if 0
                 std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
@@ -94,7 +94,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             case ESM4::SUB_XCLC:
             {
                 //(X, Y) grid location of the cell followed by flags. Always in
-                //exterior cells and never in interior cells.
+                // exterior cells and never in interior cells.
                 //
                 //    int32 - X
                 //    int32 - Y
@@ -127,7 +127,9 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_DATA:
             {
                 if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
@@ -151,7 +153,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_XCLR: // for exterior cells
             {
-                mRegions.resize(subHdr.dataSize/sizeof(FormId));
+                mRegions.resize(subHdr.dataSize / sizeof(FormId));
                 for (std::vector<FormId>::iterator it = mRegions.begin(); it != mRegions.end(); ++it)
                 {
                     reader.getFormId(*it);
@@ -163,11 +165,21 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_XOWN: reader.getFormId(mOwner);   break;
-            case ESM4::SUB_XGLB: reader.getFormId(mGlobal);  break; // Oblivion only?
-            case ESM4::SUB_XCCM: reader.getFormId(mClimate); break;
-            case ESM4::SUB_XCWT: reader.getFormId(mWater);   break;
-            case ESM4::SUB_XCLW: reader.get(mWaterHeight);   break;
+            case ESM4::SUB_XOWN:
+                reader.getFormId(mOwner);
+                break;
+            case ESM4::SUB_XGLB:
+                reader.getFormId(mGlobal);
+                break; // Oblivion only?
+            case ESM4::SUB_XCCM:
+                reader.getFormId(mClimate);
+                break;
+            case ESM4::SUB_XCWT:
+                reader.getFormId(mWater);
+                break;
+            case ESM4::SUB_XCLW:
+                reader.get(mWaterHeight);
+                break;
             case ESM4::SUB_XCLL:
             {
                 if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
@@ -187,11 +199,21 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_XCMT: reader.get(mMusicType); break; // Oblivion only?
-            case ESM4::SUB_LTMP: reader.getFormId(mLightingTemplate); break;
-            case ESM4::SUB_LNAM: reader.get(mLightingTemplateFlags); break; // seems to always follow LTMP
-            case ESM4::SUB_XCMO: reader.getFormId(mMusic); break;
-            case ESM4::SUB_XCAS: reader.getFormId(mAcousticSpace); break;
+            case ESM4::SUB_XCMT:
+                reader.get(mMusicType);
+                break; // Oblivion only?
+            case ESM4::SUB_LTMP:
+                reader.getFormId(mLightingTemplate);
+                break;
+            case ESM4::SUB_LNAM:
+                reader.get(mLightingTemplateFlags);
+                break; // seems to always follow LTMP
+            case ESM4::SUB_XCMO:
+                reader.getFormId(mMusic);
+                break;
+            case ESM4::SUB_XCAS:
+                reader.getFormId(mAcousticSpace);
+                break;
             case ESM4::SUB_TVDT:
             case ESM4::SUB_MHDT:
             case ESM4::SUB_XCGD:
@@ -208,7 +230,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             case ESM4::SUB_XCET: // FO3
             case ESM4::SUB_IMPF: // FO3 Zeta
             {
-                //std::cout << "CELL " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "CELL " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -218,10 +240,8 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Cell::save(ESM4::Writer& writer) const
+// void ESM4::Cell::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-void ESM4::Cell::blank()
-{
-}
+void ESM4::Cell::blank() {}

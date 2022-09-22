@@ -5,17 +5,17 @@
 
 namespace ESM
 {
-    int Race::MaleFemale::getValue (bool male) const
+    int Race::MaleFemale::getValue(bool male) const
     {
         return male ? mMale : mFemale;
     }
 
-    float Race::MaleFemaleF::getValue (bool male) const
+    float Race::MaleFemaleF::getValue(bool male) const
     {
         return male ? mMale : mFemale;
     }
 
-    void Race::load(ESMReader &esm, bool &isDeleted)
+    void Race::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -60,7 +60,7 @@ namespace ESM
         if (!hasData && !isDeleted)
             esm.fail("Missing RADT subrecord");
     }
-    void Race::save(ESMWriter &esm, bool isDeleted) const
+    void Race::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -84,13 +84,13 @@ namespace ESM
 
         mPowers.mList.clear();
 
-        for (int i=0; i<7; ++i)
+        for (int i = 0; i < 7; ++i)
         {
             mData.mBonus[i].mSkill = -1;
             mData.mBonus[i].mBonus = 0;
         }
 
-        for (int i=0; i<8; ++i)
+        for (int i = 0; i < 8; ++i)
             mData.mAttributeValues[i].mMale = mData.mAttributeValues[i].mFemale = 1;
 
         mData.mHeight.mMale = mData.mHeight.mFemale = 1;

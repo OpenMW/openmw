@@ -15,12 +15,12 @@ namespace
 
     struct DetourNavigatorRecastMeshObjectTest : Test
     {
-        btBoxShape mBoxShapeImpl {btVector3(1, 2, 3)};
-        const ObjectTransform mObjectTransform {ESM::Position {{1, 2, 3}, {1, 2, 3}}, 0.5f};
-        CollisionShape mBoxShape {nullptr, mBoxShapeImpl, mObjectTransform};
-        btCompoundShape mCompoundShapeImpl {true};
-        CollisionShape mCompoundShape {nullptr, mCompoundShapeImpl, mObjectTransform};
-        btTransform mTransform {Misc::Convert::makeBulletTransform(mObjectTransform.mPosition)};
+        btBoxShape mBoxShapeImpl{ btVector3(1, 2, 3) };
+        const ObjectTransform mObjectTransform{ ESM::Position{ { 1, 2, 3 }, { 1, 2, 3 } }, 0.5f };
+        CollisionShape mBoxShape{ nullptr, mBoxShapeImpl, mObjectTransform };
+        btCompoundShape mCompoundShapeImpl{ true };
+        CollisionShape mCompoundShape{ nullptr, mCompoundShapeImpl, mObjectTransform };
+        btTransform mTransform{ Misc::Convert::makeBulletTransform(mObjectTransform.mPosition) };
 
         DetourNavigatorRecastMeshObjectTest()
         {
@@ -53,13 +53,15 @@ namespace
         EXPECT_TRUE(object.update(mTransform, AreaType_null));
     }
 
-    TEST_F(DetourNavigatorRecastMeshObjectTest, update_for_compound_shape_with_same_transform_and_not_changed_child_transform_should_return_false)
+    TEST_F(DetourNavigatorRecastMeshObjectTest,
+        update_for_compound_shape_with_same_transform_and_not_changed_child_transform_should_return_false)
     {
         RecastMeshObject object(mCompoundShape, mTransform, AreaType_ground);
         EXPECT_FALSE(object.update(mTransform, AreaType_ground));
     }
 
-    TEST_F(DetourNavigatorRecastMeshObjectTest, update_for_compound_shape_with_same_transform_and_changed_child_transform_should_return_true)
+    TEST_F(DetourNavigatorRecastMeshObjectTest,
+        update_for_compound_shape_with_same_transform_and_changed_child_transform_should_return_true)
     {
         RecastMeshObject object(mCompoundShape, mTransform, AreaType_ground);
         mCompoundShapeImpl.updateChildTransform(0, btTransform::getIdentity());

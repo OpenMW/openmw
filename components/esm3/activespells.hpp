@@ -64,8 +64,8 @@ namespace ESM
         std::vector<ActiveSpellParams> mSpells;
         std::vector<ActiveSpellParams> mQueue;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 }
 

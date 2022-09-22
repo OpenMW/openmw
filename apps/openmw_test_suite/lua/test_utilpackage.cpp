@@ -39,7 +39,8 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "util.vector2(1, 2) * 2 == util.vector2(2, 4)"));
         EXPECT_FLOAT_EQ(get<float>(lua, "util.vector2(3, 2) * v"), 17);
         EXPECT_FLOAT_EQ(get<float>(lua, "util.vector2(3, 2):dot(v)"), 17);
-        EXPECT_ERROR(lua.safe_script("v2, len = v.normalize()"), "value is not a valid userdata");  // checks that it doesn't segfault
+        EXPECT_ERROR(lua.safe_script("v2, len = v.normalize()"),
+            "value is not a valid userdata"); // checks that it doesn't segfault
         lua.safe_script("v2, len = v:normalize()");
         EXPECT_FLOAT_EQ(get<float>(lua, "len"), 5);
         EXPECT_TRUE(get<bool>(lua, "v2 == util.vector2(3/5, 4/5)"));
@@ -69,8 +70,8 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "util.vector3(1, 2, 3) - util.vector3(2, 5, 1) == -util.vector3(1, 3, -2)"));
         EXPECT_TRUE(get<bool>(lua, "util.vector3(1, 2, 3) == util.vector3(2, 4, 6) / 2"));
         EXPECT_TRUE(get<bool>(lua, "util.vector3(1, 2, 3) * 2 == util.vector3(2, 4, 6)"));
-        EXPECT_FLOAT_EQ(get<float>(lua, "util.vector3(3, 2, 1) * v"), 5*3 + 12*2 + 13*1);
-        EXPECT_FLOAT_EQ(get<float>(lua, "util.vector3(3, 2, 1):dot(v)"), 5*3 + 12*2 + 13*1);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.vector3(3, 2, 1) * v"), 5 * 3 + 12 * 2 + 13 * 1);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.vector3(3, 2, 1):dot(v)"), 5 * 3 + 12 * 2 + 13 * 1);
         EXPECT_TRUE(get<bool>(lua, "util.vector3(1, 0, 0) ^ util.vector3(0, 1, 0) == util.vector3(0, 0, 1)"));
         EXPECT_ERROR(lua.safe_script("v2, len = util.vector3(3, 4, 0).normalize()"), "value is not a valid userdata");
         lua.safe_script("v2, len = util.vector3(3, 4, 0):normalize()");
@@ -99,7 +100,8 @@ namespace
         EXPECT_FLOAT_EQ(get<float>(lua, "util.vector4(4, 0, 0, 3):length2()"), 25);
         EXPECT_FALSE(get<bool>(lua, "util.vector4(1, 2, 3, 4) == util.vector4(1, 3, 2, 4)"));
         EXPECT_TRUE(get<bool>(lua, "util.vector4(1, 2, 3, 4) + util.vector4(2, 5, 1, 2) == util.vector4(3, 7, 4, 6)"));
-        EXPECT_TRUE(get<bool>(lua, "util.vector4(1, 2, 3, 4) - util.vector4(2, 5, 1, 7) == -util.vector4(1, 3, -2, 3)"));
+        EXPECT_TRUE(
+            get<bool>(lua, "util.vector4(1, 2, 3, 4) - util.vector4(2, 5, 1, 7) == -util.vector4(1, 3, -2, 3)"));
         EXPECT_TRUE(get<bool>(lua, "util.vector4(1, 2, 3, 4) == util.vector4(2, 4, 6, 8) / 2"));
         EXPECT_TRUE(get<bool>(lua, "util.vector4(1, 2, 3, 4) * 2 == util.vector4(2, 4, 6, 8)"));
         EXPECT_FLOAT_EQ(get<float>(lua, "util.vector4(3, 2, 1, 4) * v"), 5 * 3 + 12 * 2 + 13 * 1 + 15 * 4);
@@ -111,8 +113,10 @@ namespace
         EXPECT_FLOAT_EQ(get<float>(lua, "len"), 0);
         lua.safe_script("ediv0 = util.vector4(1, 1, 1, -1):ediv(util.vector4(0, 0, 0, 0))");
         EXPECT_TRUE(get<bool>(lua, "ediv0.w == -math.huge"));
-        EXPECT_TRUE(get<bool>(lua, "util.vector4(1, 2, 3, 4):emul(util.vector4(3, 4, 5, 6)) == util.vector4(3, 8, 15, 24)"));
-        EXPECT_TRUE(get<bool>(lua, "util.vector4(4, 6, 8, 9):ediv(util.vector4(2, 3, 4, 3)) == util.vector4(2, 2, 2, 3)"));
+        EXPECT_TRUE(
+            get<bool>(lua, "util.vector4(1, 2, 3, 4):emul(util.vector4(3, 4, 5, 6)) == util.vector4(3, 8, 15, 24)"));
+        EXPECT_TRUE(
+            get<bool>(lua, "util.vector4(4, 6, 8, 9):ediv(util.vector4(2, 3, 4, 3)) == util.vector4(2, 2, 2, 3)"));
     }
 
     TEST(LuaUtilPackageTest, Color)
@@ -149,7 +153,8 @@ namespace
         lua.safe_script("moveAndScale = T.move(v(1, 2, 3)) * T.scale(0.5, 1, 0.5) * T.move(10, 20, 30)");
         EXPECT_EQ(getAsString(lua, "moveAndScale * v(0, 0, 0)"), "(6, 22, 18)");
         EXPECT_EQ(getAsString(lua, "moveAndScale * v(300, 200, 100)"), "(156, 222, 68)");
-        EXPECT_THAT(getAsString(lua, "moveAndScale"), AllOf(StartsWith("TransformM{ move(6, 22, 18) scale(0.5, 1, 0.5) "), EndsWith(" }")));
+        EXPECT_THAT(getAsString(lua, "moveAndScale"),
+            AllOf(StartsWith("TransformM{ move(6, 22, 18) scale(0.5, 1, 0.5) "), EndsWith(" }")));
         EXPECT_EQ(getAsString(lua, "T.identity"), "TransformM{ }");
         lua.safe_script("rx = T.rotateX(-math.pi / 2)");
         lua.safe_script("ry = T.rotateY(-math.pi / 2)");

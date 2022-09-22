@@ -8,9 +8,9 @@ namespace MWWorld
     /// \brief Action: do nothing
     class NullAction : public Action
     {
-            void executeImp (const Ptr& actor) override {}
+        void executeImp(const Ptr& actor) override {}
 
-            bool isNullAction() override { return true; }
+        bool isNullAction() override { return true; }
     };
 }
 

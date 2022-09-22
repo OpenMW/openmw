@@ -13,19 +13,19 @@ namespace MWSound
 {
     class RegionSoundSelector
     {
-        public:
-            std::optional<std::string> getNextRandom(float duration, const std::string& regionName,
-                                                       const MWBase::World& world);
+    public:
+        std::optional<std::string> getNextRandom(
+            float duration, const std::string& regionName, const MWBase::World& world);
 
-            RegionSoundSelector();
+        RegionSoundSelector();
 
-        private:
-            float mTimeToNextEnvSound = 0.0f;
-            int mSumChance = 0;
-            std::string mLastRegionName;
-            float mTimePassed = 0.0;
-            float mMinTimeBetweenSounds;
-            float mMaxTimeBetweenSounds;
+    private:
+        float mTimeToNextEnvSound = 0.0f;
+        int mSumChance = 0;
+        std::string mLastRegionName;
+        float mTimePassed = 0.0;
+        float mMinTimeBetweenSounds;
+        float mMaxTimeBetweenSounds;
     };
 }
 

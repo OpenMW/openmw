@@ -16,15 +16,11 @@ namespace MWLua
     class GlobalScripts : public LuaUtil::ScriptsContainer
     {
     public:
-        GlobalScripts(LuaUtil::LuaState* lua) : LuaUtil::ScriptsContainer(lua, "Global")
+        GlobalScripts(LuaUtil::LuaState* lua)
+            : LuaUtil::ScriptsContainer(lua, "Global")
         {
-            registerEngineHandlers({
-                &mObjectActiveHandlers,
-                &mActorActiveHandlers,
-                &mItemActiveHandlers,
-                &mNewGameHandlers,
-                &mPlayerAddedHandlers
-            });
+            registerEngineHandlers({ &mObjectActiveHandlers, &mActorActiveHandlers, &mItemActiveHandlers,
+                &mNewGameHandlers, &mPlayerAddedHandlers });
         }
 
         void newGameStarted() { callEngineHandlers(mNewGameHandlers); }
@@ -34,11 +30,11 @@ namespace MWLua
         void playerAdded(const GObject& obj) { callEngineHandlers(mPlayerAddedHandlers, obj); }
 
     private:
-        EngineHandlerList mObjectActiveHandlers{"onObjectActive"};
-        EngineHandlerList mActorActiveHandlers{"onActorActive"};
-        EngineHandlerList mItemActiveHandlers{"onItemActive"};
-        EngineHandlerList mNewGameHandlers{"onNewGame"};
-        EngineHandlerList mPlayerAddedHandlers{"onPlayerAdded"};
+        EngineHandlerList mObjectActiveHandlers{ "onObjectActive" };
+        EngineHandlerList mActorActiveHandlers{ "onActorActive" };
+        EngineHandlerList mItemActiveHandlers{ "onItemActive" };
+        EngineHandlerList mNewGameHandlers{ "onNewGame" };
+        EngineHandlerList mPlayerAddedHandlers{ "onPlayerAdded" };
     };
 
 }

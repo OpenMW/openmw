@@ -3,22 +3,22 @@
 
 #include <osg/Material>
 
-#include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/recastparams.hpp>
+#include <components/detournavigator/settings.hpp>
 
 #include <algorithm>
 
 namespace
 {
     void drawAgent(duDebugDraw& debugDraw, const osg::Vec3f& pos, const float radius, const float height,
-            const float climb, const unsigned color)
+        const float climb, const unsigned color)
     {
         debugDraw.depthMask(false);
 
         duDebugDrawCylinderWire(&debugDraw, pos.x() - radius, pos.z() + 0.02f, pos.y() - radius, pos.x() + radius,
             pos.z() + height, pos.y() + radius, color, radius * 0.2f);
 
-        duDebugDrawCircle(&debugDraw, pos.x(), pos.z() + climb, pos.y(), radius, duRGBA(0, 0 , 0, 64), radius * 0.1f);
+        duDebugDrawCircle(&debugDraw, pos.x(), pos.z() + climb, pos.y(), radius, duRGBA(0, 0, 0, 64), radius * 0.1f);
 
         const auto colb = duRGBA(0, 0, 0, 196);
         debugDraw.begin(DU_DRAW_LINES);
@@ -37,8 +37,8 @@ namespace
 namespace SceneUtil
 {
     osg::ref_ptr<osg::Group> createAgentPathGroup(const std::deque<osg::Vec3f>& path,
-            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
-            const DetourNavigator::RecastSettings& settings)
+        const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
+        const DetourNavigator::RecastSettings& settings)
     {
         using namespace DetourNavigator;
 
@@ -61,8 +61,9 @@ namespace SceneUtil
 
         debugDraw.begin(osg::PrimitiveSet::LINE_STRIP, agentRadius * 0.5f);
         debugDraw.vertex(osg::Vec3f(start.x(), start.z() + agentClimb, start.y()).ptr(), startColor);
-        std::for_each(path.begin(), path.end(),
-            [&] (const osg::Vec3f& v) { debugDraw.vertex(osg::Vec3f(v.x(), v.z() + agentClimb, v.y()).ptr(), pathColor); });
+        std::for_each(path.begin(), path.end(), [&](const osg::Vec3f& v) {
+            debugDraw.vertex(osg::Vec3f(v.x(), v.z() + agentClimb, v.y()).ptr(), pathColor);
+        });
         debugDraw.vertex(osg::Vec3f(end.x(), end.z() + agentClimb, end.y()).ptr(), endColor);
         debugDraw.end();
 

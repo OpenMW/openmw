@@ -5,9 +5,11 @@
 #include "terrainshapemode.hpp"
 #include "worldspacewidget.hpp"
 
-CSVRender::DrawTerrainSelectionCommand::DrawTerrainSelectionCommand(WorldspaceWidget* worldspaceWidget, QUndoCommand* parent)
+CSVRender::DrawTerrainSelectionCommand::DrawTerrainSelectionCommand(
+    WorldspaceWidget* worldspaceWidget, QUndoCommand* parent)
     : mWorldspaceWidget(worldspaceWidget)
-{ }
+{
+}
 
 void CSVRender::DrawTerrainSelectionCommand::redo()
 {

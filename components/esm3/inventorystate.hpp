@@ -22,16 +22,19 @@ namespace ESM
 
         std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
 
-        typedef std::map<std::string, std::vector<std::pair<float, float> > > TEffectMagnitudes;
+        typedef std::map<std::string, std::vector<std::pair<float, float>>> TEffectMagnitudes;
         TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 
         int mSelectedEnchantItem; // For inventories only
 
-        InventoryState() : mSelectedEnchantItem(-1) {}
+        InventoryState()
+            : mSelectedEnchantItem(-1)
+        {
+        }
         virtual ~InventoryState() {}
 
-        virtual void load (ESMReader &esm);
-        virtual void save (ESMWriter &esm) const;
+        virtual void load(ESMReader& esm);
+        virtual void save(ESMWriter& esm) const;
     };
 }
 

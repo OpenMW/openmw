@@ -36,7 +36,7 @@ namespace osgMyGUI
         int mHeight;
 
     public:
-        OSGTexture(const std::string &name, Resource::ImageManager* imageManager);
+        OSGTexture(const std::string& name, Resource::ImageManager* imageManager);
         OSGTexture(osg::Texture2D* texture, osg::StateSet* injectState = nullptr);
         ~OSGTexture() override;
 
@@ -45,8 +45,8 @@ namespace osgMyGUI
         const std::string& getName() const override { return mName; }
 
         void createManual(int width, int height, MyGUI::TextureUsage usage, MyGUI::PixelFormat format) override;
-        void loadFromFile(const std::string &fname) override;
-        void saveToFile(const std::string &fname) override;
+        void loadFromFile(const std::string& fname) override;
+        void saveToFile(const std::string& fname) override;
 
         void destroy() override;
 
@@ -61,12 +61,12 @@ namespace osgMyGUI
         MyGUI::TextureUsage getUsage() const override { return mUsage; }
         size_t getNumElemBytes() const override { return mNumElemBytes; }
 
-        MyGUI::IRenderTarget *getRenderTarget() override;
+        MyGUI::IRenderTarget* getRenderTarget() override;
 
         void setShader(const std::string& _shaderName) override;
 
-    /*internal:*/
-        osg::Texture2D *getTexture() const { return mTexture.get(); }
+        /*internal:*/
+        osg::Texture2D* getTexture() const { return mTexture.get(); }
     };
 
 }

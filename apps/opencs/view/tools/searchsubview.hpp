@@ -26,44 +26,41 @@ namespace CSVTools
 
     class SearchSubView : public CSVDoc::SubView
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            ReportTable *mTable;
-            SearchBox mSearchBox;
-            CSMDoc::Document& mDocument;
-            CSMTools::Search mSearch;
-            bool mLocked;
-            CSVWorld::TableBottomBox *mBottom;
+        ReportTable* mTable;
+        SearchBox mSearchBox;
+        CSMDoc::Document& mDocument;
+        CSMTools::Search mSearch;
+        bool mLocked;
+        CSVWorld::TableBottomBox* mBottom;
 
-        private:
+    private:
+        void replace(bool selection);
 
-            void replace (bool selection);
+    protected:
+        void showEvent(QShowEvent* event) override;
 
-        protected:
+    public:
+        SearchSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            void showEvent (QShowEvent *event) override;
+        void setEditLock(bool locked) override;
 
-        public:
+        void setStatusBar(bool show) override;
 
-            SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
+    private slots:
 
-            void setEditLock (bool locked) override;
+        void stateChanged(int state, CSMDoc::Document* document);
 
-            void setStatusBar (bool show) override;
+        void startSearch(const CSMTools::Search& search);
 
-        private slots:
+        void replaceRequest();
 
-            void stateChanged (int state, CSMDoc::Document *document);
+        void replaceAllRequest();
 
-            void startSearch (const CSMTools::Search& search);
+        void tableSizeUpdate();
 
-            void replaceRequest();
-
-            void replaceAllRequest();
-
-            void tableSizeUpdate();
-
-            void operationDone (int type, bool failed);
+        void operationDone(int type, bool failed);
     };
 }
 

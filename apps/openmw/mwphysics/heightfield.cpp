@@ -5,8 +5,8 @@
 
 #include <osg/Object>
 
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 #include <LinearMath/btTransform.h>
 
@@ -53,7 +53,7 @@ namespace
 namespace MWPhysics
 {
     HeightField::HeightField(const float* heights, int x, int y, int size, int verts, float minH, float maxH,
-                             const osg::Object* holdObject, PhysicsTaskScheduler* scheduler)
+        const osg::Object* holdObject, PhysicsTaskScheduler* scheduler)
         : mHoldObject(holdObject)
 #if BT_BULLET_VERSION < 310
         , mHeights(makeHeights(heights, verts))
@@ -62,15 +62,9 @@ namespace MWPhysics
     {
 #if BT_BULLET_VERSION < 310
         mShape = std::make_unique<btHeightfieldTerrainShape>(
-            verts, verts,
-            getHeights(heights, mHeights),
-            1,
-            minH, maxH, 2,
-            PHY_FLOAT, false
-        );
+            verts, verts, getHeights(heights, mHeights), 1, minH, maxH, 2, PHY_FLOAT, false);
 #else
-        mShape = std::make_unique<btHeightfieldTerrainShape>(
-            verts, verts, heights, minH, maxH, 2, false);
+        mShape = std::make_unique<btHeightfieldTerrainShape>(verts, verts, heights, minH, maxH, 2, false);
 #endif
         mShape->setUseDiamondSubdivision(true);
 
@@ -86,13 +80,14 @@ namespace MWPhysics
         mShape->buildAccelerator();
 #endif
 
-        const btTransform transform(btQuaternion::getIdentity(),
-                                    BulletHelpers::getHeightfieldShift(x, y, size, minH, maxH));
+        const btTransform transform(
+            btQuaternion::getIdentity(), BulletHelpers::getHeightfieldShift(x, y, size, minH, maxH));
 
         mCollisionObject = std::make_unique<btCollisionObject>();
         mCollisionObject->setCollisionShape(mShape.get());
         mCollisionObject->setWorldTransform(transform);
-        mTaskScheduler->addCollisionObject(mCollisionObject.get(), CollisionType_HeightMap, CollisionType_Actor|CollisionType_Projectile);
+        mTaskScheduler->addCollisionObject(
+            mCollisionObject.get(), CollisionType_HeightMap, CollisionType_Actor | CollisionType_Projectile);
     }
 
     HeightField::~HeightField()

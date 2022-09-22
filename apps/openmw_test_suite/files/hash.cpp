@@ -1,9 +1,9 @@
-#include <components/files/hash.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
+#include <components/files/hash.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <algorithm>
 #include <fstream>
@@ -24,7 +24,9 @@ namespace
         std::array<std::uint64_t, 2> mHash;
     };
 
-    struct FilesGetHash : TestWithParam<Params> {};
+    struct FilesGetHash : TestWithParam<Params>
+    {
+    };
 
     TEST(FilesGetHash, shouldClearErrors)
     {
@@ -58,13 +60,11 @@ namespace
         EXPECT_EQ(getHash(file, *stream), GetParam().mHash);
     }
 
-    INSTANTIATE_TEST_SUITE_P(Params, FilesGetHash, Values(
-        Params {0, {0, 0}},
-        Params {1, {9607679276477937801ull, 16624257681780017498ull}},
-        Params {128, {15287858148353394424ull, 16818615825966581310ull}},
-        Params {1000, {11018119256083894017ull, 6631144854802791578ull}},
-        Params {4096, {11972283295181039100ull, 16027670129106775155ull}},
-        Params {4097, {16717956291025443060ull, 12856404199748778153ull}},
-        Params {5000, {15775925571142117787ull, 10322955217889622896ull}}
-    ));
+    INSTANTIATE_TEST_SUITE_P(Params, FilesGetHash,
+        Values(Params{ 0, { 0, 0 } }, Params{ 1, { 9607679276477937801ull, 16624257681780017498ull } },
+            Params{ 128, { 15287858148353394424ull, 16818615825966581310ull } },
+            Params{ 1000, { 11018119256083894017ull, 6631144854802791578ull } },
+            Params{ 4096, { 11972283295181039100ull, 16027670129106775155ull } },
+            Params{ 4097, { 16717956291025443060ull, 12856404199748778153ull } },
+            Params{ 5000, { 15775925571142117787ull, 10322955217889622896ull } }));
 }

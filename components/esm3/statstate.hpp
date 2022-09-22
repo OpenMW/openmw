@@ -8,7 +8,7 @@ namespace ESM
 
     // format 0, saved games only
 
-    template<typename T>
+    template <typename T>
     struct StatState
     {
         T mBase;
@@ -20,8 +20,8 @@ namespace ESM
 
         StatState();
 
-        void load (ESMReader &esm, bool intFallback = false);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm, bool intFallback = false);
+        void save(ESMWriter& esm) const;
     };
 }
 

@@ -43,7 +43,8 @@ namespace SceneUtil
     osg::Matrix getReversedZProjectionMatrixAsPerspective(double fov, double aspect, double near, double far);
 
     // Returns an orthographic projection matrix for use with a reversed z-buffer.
-    osg::Matrix getReversedZProjectionMatrixAsOrtho(double left, double right, double bottom, double top, double near, double far);
+    osg::Matrix getReversedZProjectionMatrixAsOrtho(
+        double left, double right, double bottom, double top, double near, double far);
 
     // Returns true if the GL format is a depth format
     bool isDepthFormat(GLenum format);
@@ -57,11 +58,13 @@ namespace SceneUtil
     // Converts depth-stencil formats to their corresponding depth formats.
     GLenum getDepthFormatOfDepthStencilFormat(GLenum internalFormat);
 
-    // Brief wrapper around an osg::Depth that applies the reversed depth function when a reversed depth buffer is in use
+    // Brief wrapper around an osg::Depth that applies the reversed depth function when a reversed depth buffer is in
+    // use
     class AutoDepth : public osg::Depth
     {
     public:
-        AutoDepth(osg::Depth::Function func=osg::Depth::LESS, double zNear=0.0, double zFar=1.0, bool writeMask=true)
+        AutoDepth(
+            osg::Depth::Function func = osg::Depth::LESS, double zNear = 0.0, double zFar = 1.0, bool writeMask = true)
         {
             setFunction(func);
             setZNear(zNear);
@@ -69,20 +72,23 @@ namespace SceneUtil
             setWriteMask(writeMask);
         }
 
-        AutoDepth(const osg::Depth& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) : osg::Depth(copy, copyop) {}
+        AutoDepth(const osg::Depth& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
+            : osg::Depth(copy, copyop)
+        {
+        }
 
         osg::Object* cloneType() const override { return new AutoDepth; }
-        osg::Object* clone(const osg::CopyOp& copyop) const override { return new AutoDepth(*this,copyop); }
+        osg::Object* clone(const osg::CopyOp& copyop) const override { return new AutoDepth(*this, copyop); }
 
         void apply(osg::State& state) const override
         {
             glDepthFunc(static_cast<GLenum>(AutoDepth::isReversed() ? getReversedDepthFunction() : getFunction()));
             glDepthMask(static_cast<GLboolean>(getWriteMask()));
-        #if defined(OSG_GLES1_AVAILABLE) || defined(OSG_GLES2_AVAILABLE) || defined(OSG_GLES3_AVAILABLE)
-            glDepthRangef(getZNear(),getZFar());
-        #else
-            glDepthRange(getZNear(),getZFar());
-        #endif
+#if defined(OSG_GLES1_AVAILABLE) || defined(OSG_GLES2_AVAILABLE) || defined(OSG_GLES3_AVAILABLE)
+            glDepthRangef(getZNear(), getZFar());
+#else
+            glDepthRange(getZNear(), getZFar());
+#endif
         }
 
         static void setReversed(bool reverseZ)
@@ -119,7 +125,6 @@ namespace SceneUtil
         }
 
     private:
-
         static inline bool sReversed = false;
         static inline GLenum sDepthSourceFormat = GL_DEPTH_COMPONENT;
         static inline GLenum sDepthInternalFormat = GL_DEPTH_COMPONENT24;
@@ -131,26 +136,28 @@ namespace SceneUtil
 
             switch (func)
             {
-            case osg::Depth::LESS:
-                return osg::Depth::GREATER;
-            case osg::Depth::LEQUAL:
-                return osg::Depth::GEQUAL;
-            case osg::Depth::GREATER:
-                return osg::Depth::LESS;
-            case osg::Depth::GEQUAL:
-                return osg::Depth::LEQUAL;
-            default:
-                return func;
+                case osg::Depth::LESS:
+                    return osg::Depth::GREATER;
+                case osg::Depth::LEQUAL:
+                    return osg::Depth::GEQUAL;
+                case osg::Depth::GREATER:
+                    return osg::Depth::LESS;
+                case osg::Depth::GEQUAL:
+                    return osg::Depth::LEQUAL;
+                default:
+                    return func;
             }
         }
-
     };
 
     // Replaces all nodes osg::Depth state attributes with SceneUtil::AutoDepth.
     class ReplaceDepthVisitor : public osg::NodeVisitor
     {
     public:
-        ReplaceDepthVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN) {}
+        ReplaceDepthVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
 
         void apply(osg::Node& node) override
         {
@@ -169,15 +176,14 @@ namespace SceneUtil
     class SelectDepthFormatOperation : public osg::GraphicsOperation
     {
     public:
-        SelectDepthFormatOperation() : GraphicsOperation("SelectDepthFormatOperation", false)
-        {}
+        SelectDepthFormatOperation()
+            : GraphicsOperation("SelectDepthFormatOperation", false)
+        {
+        }
 
         void operator()(osg::GraphicsContext* graphicsContext) override;
 
-        void setSupportedFormats(const std::vector<GLenum>& supportedFormats)
-        {
-            mSupportedFormats = supportedFormats;
-        }
+        void setSupportedFormats(const std::vector<GLenum>& supportedFormats) { mSupportedFormats = supportedFormats; }
 
     private:
         std::vector<GLenum> mSupportedFormats;

@@ -2,7 +2,8 @@
 
 #include <stdio.h>
 
-namespace Platform {
+namespace Platform
+{
 
     static void increaseFileHandleLimit()
     {

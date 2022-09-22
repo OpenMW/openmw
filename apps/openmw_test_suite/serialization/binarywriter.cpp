@@ -2,8 +2,8 @@
 
 #include <components/serialization/binarywriter.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <array>
 #include <cstdint>
@@ -28,12 +28,18 @@ namespace
     {
         std::vector<std::byte> result(8);
         BinaryWriter binaryWriter(result.data(), result.data() + result.size());
-        std::vector<std::uint32_t> values({42, 13});
+        std::vector<std::uint32_t> values({ 42, 13 });
         const TestFormat<Mode::Write> format;
         binaryWriter(format, values.data(), values.size());
-        constexpr std::array<std::byte, 8> expected {
-            std::byte(42), std::byte(0), std::byte(0), std::byte(0),
-            std::byte(13), std::byte(0), std::byte(0), std::byte(0),
+        constexpr std::array<std::byte, 8> expected{
+            std::byte(42),
+            std::byte(0),
+            std::byte(0),
+            std::byte(0),
+            std::byte(13),
+            std::byte(0),
+            std::byte(0),
+            std::byte(0),
         };
         EXPECT_THAT(result, ElementsAreArray(expected));
     }
@@ -50,7 +56,7 @@ namespace
     {
         std::vector<std::byte> result(7);
         BinaryWriter binaryWriter(result.data(), result.data() + result.size());
-        std::vector<std::uint32_t> values({42, 13});
+        std::vector<std::uint32_t> values({ 42, 13 });
         const TestFormat<Mode::Write> format;
         EXPECT_THROW(binaryWriter(format, values.data(), values.size()), std::runtime_error);
     }

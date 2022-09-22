@@ -1,9 +1,9 @@
 #ifndef COMPONENTS_TERRAIN_WORLD_H
 #define COMPONENTS_TERRAIN_WORLD_H
 
-#include <osg/ref_ptr>
 #include <osg/Referenced>
 #include <osg/Vec3f>
+#include <osg/ref_ptr>
 
 #include <memory>
 #include <set>
@@ -37,7 +37,7 @@ namespace Terrain
     class CompositeMapRenderer;
     class View;
     class HeightCullCallback;
-    
+
     /**
      * @brief The basic interface for a terrain world. How the terrain chunks are paged and displayed
      *  is up to the implementation.
@@ -49,7 +49,8 @@ namespace Terrain
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param nodeMask mask for the terrain root
         /// @param preCompileMask mask for pre compiling textures
-        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask);
+        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
+            unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask);
         World(osg::Group* parent, Storage* storage, unsigned int nodeMask);
         virtual ~World();
 
@@ -60,7 +61,7 @@ namespace Terrain
         /// @note Thread safe.
         void updateTextureFiltering();
 
-        float getHeightAt (const osg::Vec3f& worldPos);
+        float getHeightAt(const osg::Vec3f& worldPos);
 
         /// Clears the cached land and landtexture data.
         /// @note Thread safe.
@@ -89,7 +90,10 @@ namespace Terrain
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
 
-        virtual void preload(View* view, const osg::Vec3f& viewPoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, Loading::Reporter& reporter) {}
+        virtual void preload(View* view, const osg::Vec3f& viewPoint, const osg::Vec4i& cellgrid,
+            std::atomic<bool>& abort, Loading::Reporter& reporter)
+        {
+        }
 
         virtual void rebuildViews() {}
 
@@ -101,7 +105,7 @@ namespace Terrain
 
         osg::Callback* getHeightCullCallback(float highz, unsigned int mask);
 
-        void setActiveGrid(const osg::Vec4i &grid) { mActiveGrid = grid; }
+        void setActiveGrid(const osg::Vec4i& grid) { mActiveGrid = grid; }
 
     protected:
         Storage* mStorage;
@@ -121,7 +125,7 @@ namespace Terrain
 
         bool mBorderVisible;
 
-        std::set<std::pair<int,int>> mLoadedCells;
+        std::set<std::pair<int, int>> mLoadedCells;
         osg::ref_ptr<HeightCullCallback> mHeightCullCallback;
 
         osg::Vec4i mActiveGrid;

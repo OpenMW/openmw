@@ -28,10 +28,11 @@ namespace SceneUtil
 namespace MWRender
 {
 
-class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
-{
+    class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
+    {
     public:
-        ActorAnimation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
+        ActorAnimation(
+            const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
         virtual ~ActorAnimation();
 
         void itemAdded(const MWWorld::ConstPtr& item, int count) override;
@@ -50,13 +51,15 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
         std::string getShieldMesh(const MWWorld::ConstPtr& shield, bool female) const;
         virtual std::string getSheathedShieldMesh(const MWWorld::ConstPtr& shield) const;
         virtual std::string_view getHolsteredWeaponBoneName(const MWWorld::ConstPtr& weapon);
-        virtual PartHolderPtr attachMesh(const std::string& model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor);
+        virtual PartHolderPtr attachMesh(
+            const std::string& model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor);
         virtual PartHolderPtr attachMesh(const std::string& model, std::string_view bonename)
         {
-            osg::Vec4f stubColor = osg::Vec4f(0,0,0,0);
+            osg::Vec4f stubColor = osg::Vec4f(0, 0, 0, 0);
             return attachMesh(model, bonename, false, &stubColor);
         };
-        osg::ref_ptr<osg::Node> attach(const std::string& model, std::string_view bonename, std::string_view bonefilter, bool isLight);
+        osg::ref_ptr<osg::Node> attach(
+            const std::string& model, std::string_view bonename, std::string_view bonefilter, bool isLight);
 
         PartHolderPtr mScabbard;
         PartHolderPtr mHolsteredShield;
@@ -66,9 +69,9 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
         void removeHiddenItemLight(const MWWorld::ConstPtr& item);
         void resetControllers(osg::Node* node);
 
-        typedef std::map<MWWorld::ConstPtr, osg::ref_ptr<SceneUtil::LightSource> > ItemLightMap;
+        typedef std::map<MWWorld::ConstPtr, osg::ref_ptr<SceneUtil::LightSource>> ItemLightMap;
         ItemLightMap mItemLights;
-};
+    };
 
 }
 

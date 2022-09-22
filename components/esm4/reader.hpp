@@ -23,11 +23,11 @@
 #ifndef ESM4_READER_H
 #define ESM4_READER_H
 
-#include <map>
 #include <cstddef>
-#include <memory>
-#include <istream>
 #include <filesystem>
+#include <istream>
+#include <map>
+#include <memory>
 
 #include "common.hpp"
 #include "loadtes4.hpp"
@@ -39,42 +39,43 @@ namespace ToUTF8
     class StatelessUtf8Encoder;
 }
 
-namespace ESM4 {
+namespace ESM4
+{
     //                                                   bytes read from group, updated by
     //                                                   getRecordHeader() in advance
     //                                                     |
     //                                                     v
-    typedef std::vector<std::pair<ESM4::GroupTypeHeader, std::uint32_t> > GroupStack;
+    typedef std::vector<std::pair<ESM4::GroupTypeHeader, std::uint32_t>> GroupStack;
 
     struct ReaderContext
     {
-        std::filesystem::path filename;         // in case we need to reopen to restore the context
-        std::uint32_t modIndex;         // the sequential position of this file in the load order:
+        std::filesystem::path filename; // in case we need to reopen to restore the context
+        std::uint32_t modIndex; // the sequential position of this file in the load order:
         //  0x00 reserved, 0xFF in-game (see notes below)
 
         // position in the vector = mod index of master files above
         // value = adjusted mod index based on all the files loaded so far
         std::vector<std::uint32_t> parentFileIndices;
 
-        std::size_t recHeaderSize;    // normally should be already set correctly, but just in
+        std::size_t recHeaderSize; // normally should be already set correctly, but just in
         //  case the file was re-opened.  default = TES5 size,
         //  can be reduced for TES4 by setRecHeaderSize()
 
-        std::size_t filePos;          // assume that the record header will be re-read once
+        std::size_t filePos; // assume that the record header will be re-read once
         //  the context is restored
 
         // for keeping track of things
-        std::size_t fileRead;         // number of bytes read, incl. the current record
+        std::size_t fileRead; // number of bytes read, incl. the current record
 
-        GroupStack groupStack;       // keep track of bytes left to find when a group is done
-        RecordHeader recordHeader;     // header of the current record or group being processed
-        SubRecordHeader subRecordHeader;  // header of the current sub record being processed
-        std::uint32_t recordRead;       // bytes read from the sub records, incl. the current one
+        GroupStack groupStack; // keep track of bytes left to find when a group is done
+        RecordHeader recordHeader; // header of the current record or group being processed
+        SubRecordHeader subRecordHeader; // header of the current sub record being processed
+        std::uint32_t recordRead; // bytes read from the sub records, incl. the current one
 
-        FormId currWorld;        // formId of current world - for grouping CELL records
-        FormId currCell;         // formId of current cell
+        FormId currWorld; // formId of current world - for grouping CELL records
+        FormId currCell; // formId of current cell
         // FIXME: try to get rid of these two members, seem like massive hacks
-        CellGrid currCellGrid;     // TODO: should keep a map of cell formids
+        CellGrid currCellGrid; // TODO: should keep a map of cell formids
         bool cellGridValid;
 
         ReaderContext();
@@ -82,24 +83,24 @@ namespace ESM4 {
 
     class Reader
     {
-        Header               mHeader;     // ESM4 header
+        Header mHeader; // ESM4 header
 
-        ReaderContext        mCtx;
+        ReaderContext mCtx;
 
         const ToUTF8::StatelessUtf8Encoder* mEncoder;
 
-        std::size_t          mFileSize;
+        std::size_t mFileSize;
 
-        Files::IStreamPtr    mStream;
-        Files::IStreamPtr    mSavedStream; // mStream is saved here while using deflated memory stream
+        Files::IStreamPtr mStream;
+        Files::IStreamPtr mSavedStream; // mStream is saved here while using deflated memory stream
 
-        Files::IStreamPtr    mStrings;
-        Files::IStreamPtr    mILStrings;
-        Files::IStreamPtr    mDLStrings;
+        Files::IStreamPtr mStrings;
+        Files::IStreamPtr mILStrings;
+        Files::IStreamPtr mDLStrings;
 
         enum LocalizedStringType
         {
-            Type_Strings   = 0,
+            Type_Strings = 0,
             Type_ILStrings = 1,
             Type_DLStrings = 2
         };
@@ -122,7 +123,7 @@ namespace ESM4 {
 
         // Close the file, resets all information.
         // After calling close() the structure may be reused to load a new file.
-        //void close();
+        // void close();
 
         // Raw opening. Opens the file and sets everything up but doesn't parse the header.
         void openRaw(Files::IStreamPtr&& stream, const std::filesystem::path& filename);
@@ -133,15 +134,12 @@ namespace ESM4 {
 
         Reader() = default;
 
-        bool getStringImpl(std::string& str, std::size_t size,
-                std::istream& stream, const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull = false);
+        bool getStringImpl(std::string& str, std::size_t size, std::istream& stream,
+            const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull = false);
 
     public:
-
         Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename);
         ~Reader();
-
-
 
         void open(const std::filesystem::path& filename);
 
@@ -171,17 +169,22 @@ namespace ESM4 {
 
         bool restoreContext(const ReaderContext& ctx); // returns the result of re-reading the header
 
-        template<typename T>
-        inline void get(T& t) { mStream->read((char*)&t, sizeof(T)); }
+        template <typename T>
+        inline void get(T& t)
+        {
+            mStream->read((char*)&t, sizeof(T));
+        }
 
-        template<typename T>
-        bool getExact(T& t) {
+        template <typename T>
+        bool getExact(T& t)
+        {
             mStream->read((char*)&t, sizeof(T));
             return mStream->gcount() == sizeof(T); // FIXME: try/catch block needed?
         }
 
         // for arrays
-        inline bool get(void* p, std::size_t size) {
+        inline bool get(void* p, std::size_t size)
+        {
             mStream->read((char*)p, size);
             return mStream->gcount() == (std::streamsize)size; // FIXME: try/catch block needed?
         }
@@ -214,7 +217,8 @@ namespace ESM4 {
 
         // This is set while loading a CELL record (XCLC sub record) and invalidated
         // each time loading a CELL (see clearCellGrid())
-        inline void setCurrCellGrid(const CellGrid& currCell) {
+        inline void setCurrCellGrid(const CellGrid& currCell)
+        {
             mCtx.cellGridValid = true;
             mCtx.currCellGrid = currCell;
         }
@@ -268,7 +272,7 @@ namespace ESM4 {
         void skipSubRecordData(std::uint32_t size);
 
         // Get a subrecord of a particular type and data type
-        template<typename T>
+        template <typename T>
         bool getSubRecord(const ESM4::SubRecordTypes type, T& t)
         {
             ESM4::SubRecordHeader hdr;
@@ -286,10 +290,12 @@ namespace ESM4 {
         void adjustGRUPFormId();
 
         // Note: uses the string size from the subrecord header rather than checking null termination
-        bool getZString(std::string& str) {
+        bool getZString(std::string& str)
+        {
             return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, mEncoder, true);
         }
-        bool getString(std::string& str) {
+        bool getString(std::string& str)
+        {
             return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, mEncoder);
         }
 
@@ -304,9 +310,9 @@ namespace ESM4 {
         // Used for error handling
         [[noreturn]] void fail(const std::string& msg);
 
-        void setGlobalReaderList(std::vector<Reader*> *list) { mGlobalReaderList = list; }
+        void setGlobalReaderList(std::vector<Reader*>* list) { mGlobalReaderList = list; }
 
-        std::vector<Reader*> *getGlobalReaderList() { return mGlobalReaderList; }
+        std::vector<Reader*>* getGlobalReaderList() { return mGlobalReaderList; }
     };
 }
 

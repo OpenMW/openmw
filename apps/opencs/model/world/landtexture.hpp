@@ -12,7 +12,7 @@ namespace CSMWorld
     {
         int mPluginIndex;
 
-        void load (ESM::ESMReader &esm, bool &isDeleted);
+        void load(ESM::ESMReader& esm, bool& isDeleted);
 
         /// Returns a string identifier that will be unique to any LandTexture.
         static std::string createUniqueRecordId(int plugin, int index);

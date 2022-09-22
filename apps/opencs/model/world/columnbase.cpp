@@ -2,9 +2,12 @@
 
 #include "columns.hpp"
 
-CSMWorld::ColumnBase::ColumnBase (int columnId, Display displayType, int flags)
-    : mColumnId (columnId), mFlags (flags), mDisplayType (displayType)
-{}
+CSMWorld::ColumnBase::ColumnBase(int columnId, Display displayType, int flags)
+    : mColumnId(columnId)
+    , mFlags(flags)
+    , mDisplayType(displayType)
+{
+}
 
 CSMWorld::ColumnBase::~ColumnBase() {}
 
@@ -15,18 +18,17 @@ bool CSMWorld::ColumnBase::isUserEditable() const
 
 std::string CSMWorld::ColumnBase::getTitle() const
 {
-    return Columns::getName (static_cast<Columns::ColumnId> (mColumnId));
+    return Columns::getName(static_cast<Columns::ColumnId>(mColumnId));
 }
 
-int  CSMWorld::ColumnBase::getId() const
+int CSMWorld::ColumnBase::getId() const
 {
     return mColumnId;
 }
 
-bool CSMWorld::ColumnBase::isId (Display display)
+bool CSMWorld::ColumnBase::isId(Display display)
 {
-    static const Display ids[] =
-    {
+    static const Display ids[] = {
         Display_Skill,
         Display_Class,
         Display_Faction,
@@ -94,26 +96,25 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_None,
     };
 
-    for (int i=0; ids[i]!=Display_None; ++i)
-        if (ids[i]==display)
+    for (int i = 0; ids[i] != Display_None; ++i)
+        if (ids[i] == display)
             return true;
 
     return false;
 }
 
-bool CSMWorld::ColumnBase::isText (Display display)
+bool CSMWorld::ColumnBase::isText(Display display)
 {
-    return display==Display_String || display==Display_LongString ||
-        display==Display_String32 || display==Display_String64 ||
-        display==Display_LongString256;
+    return display == Display_String || display == Display_LongString || display == Display_String32
+        || display == Display_String64 || display == Display_LongString256;
 }
 
-bool CSMWorld::ColumnBase::isScript (Display display)
+bool CSMWorld::ColumnBase::isScript(Display display)
 {
-    return display==Display_ScriptFile || display==Display_ScriptLines;
+    return display == Display_ScriptFile || display == Display_ScriptLines;
 }
 
-void CSMWorld::NestableColumn::addColumn(CSMWorld::NestableColumn *column)
+void CSMWorld::NestableColumn::addColumn(CSMWorld::NestableColumn* column)
 {
     mNestedColumns.push_back(column);
 }
@@ -126,10 +127,10 @@ const CSMWorld::ColumnBase& CSMWorld::NestableColumn::nestedColumn(int subColumn
     return *mNestedColumns.at(subColumn);
 }
 
-CSMWorld::NestableColumn::NestableColumn(int columnId, CSMWorld::ColumnBase::Display displayType,
-    int flag)
+CSMWorld::NestableColumn::NestableColumn(int columnId, CSMWorld::ColumnBase::Display displayType, int flag)
     : CSMWorld::ColumnBase(columnId, displayType, flag)
-{}
+{
+}
 
 CSMWorld::NestableColumn::~NestableColumn()
 {
@@ -144,12 +145,14 @@ bool CSMWorld::NestableColumn::hasChildren() const
     return !mNestedColumns.empty();
 }
 
-CSMWorld::NestedChildColumn::NestedChildColumn (int id,
-    CSMWorld::ColumnBase::Display display, int flags, bool isEditable)
-    : NestableColumn (id, display, flags) , mIsEditable(isEditable)
-{}
+CSMWorld::NestedChildColumn::NestedChildColumn(
+    int id, CSMWorld::ColumnBase::Display display, int flags, bool isEditable)
+    : NestableColumn(id, display, flags)
+    , mIsEditable(isEditable)
+{
+}
 
-bool CSMWorld::NestedChildColumn::isEditable () const
+bool CSMWorld::NestedChildColumn::isEditable() const
 {
     return mIsEditable;
 }

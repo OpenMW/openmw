@@ -35,15 +35,19 @@ void ESM4::Container::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_DATA:
             {
                 reader.get(mDataFlags);
@@ -58,11 +62,21 @@ void ESM4::Container::load(ESM4::Reader& reader)
                 mInventory.push_back(inv);
                 break;
             }
-            case ESM4::SUB_MODL: reader.getZString(mModel);     break;
-            case ESM4::SUB_SNAM: reader.getFormId(mOpenSound);  break;
-            case ESM4::SUB_QNAM: reader.getFormId(mCloseSound); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId);     break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);      break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.getFormId(mOpenSound);
+                break;
+            case ESM4::SUB_QNAM:
+                reader.getFormId(mCloseSound);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
             case ESM4::SUB_MODT:
             case ESM4::SUB_MODS: // TES5 only
             case ESM4::SUB_VMAD: // TES5 only
@@ -76,7 +90,7 @@ void ESM4::Container::load(ESM4::Reader& reader)
             case ESM4::SUB_DMDT: // FONV
             case ESM4::SUB_RNAM: // FONV
             {
-                //std::cout << "CONT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "CONT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -86,10 +100,10 @@ void ESM4::Container::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Container::save(ESM4::Writer& writer) const
+// void ESM4::Container::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Container::blank()
+// void ESM4::Container::blank()
 //{
-//}
+// }

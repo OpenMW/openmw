@@ -21,81 +21,77 @@ namespace CSVDoc
 {
     class LoadingDocument : public QWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMDoc::Document *mDocument;
-            QLabel *mTotalRecordsLabel;
-            QLabel *mRecordsLabel;
-            QProgressBar *mTotalProgress;
-            QProgressBar *mRecordProgress;
-            bool mAborted;
-            QDialogButtonBox *mButtons;
-            QLabel *mError;
-            QListWidget *mMessages;
-            QVBoxLayout *mLayout;
-            int mRecords;
-            int mTotalRecords;
-            int mFilesLoaded;
+        CSMDoc::Document* mDocument;
+        QLabel* mTotalRecordsLabel;
+        QLabel* mRecordsLabel;
+        QProgressBar* mTotalProgress;
+        QProgressBar* mRecordProgress;
+        bool mAborted;
+        QDialogButtonBox* mButtons;
+        QLabel* mError;
+        QListWidget* mMessages;
+        QVBoxLayout* mLayout;
+        int mRecords;
+        int mTotalRecords;
+        int mFilesLoaded;
 
-        private:
+    private:
+        void closeEvent(QCloseEvent* event) override;
 
-            void closeEvent (QCloseEvent *event) override;
+    public:
+        LoadingDocument(CSMDoc::Document* document);
 
-        public:
+        void nextStage(const std::string& name, int totalRecords);
 
-            LoadingDocument (CSMDoc::Document *document);
+        void nextRecord(int records);
 
-            void nextStage (const std::string& name, int totalRecords);
+        void abort(const std::string& error);
 
-            void nextRecord (int records);
+        void addMessage(const std::string& message);
 
-            void abort (const std::string& error);
+    private slots:
 
-            void addMessage (const std::string& message);
+        void cancel();
 
-        private slots:
+    signals:
 
-            void cancel();
+        void cancel(CSMDoc::Document* document);
+        ///< Stop loading process.
 
-        signals:
-
-            void cancel (CSMDoc::Document *document);
-            ///< Stop loading process.
-
-            void close (CSMDoc::Document *document);
-            ///< Close stopped loading process.
+        void close(CSMDoc::Document* document);
+        ///< Close stopped loading process.
     };
 
     class Loader : public QObject
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            std::map<CSMDoc::Document *, LoadingDocument *> mDocuments;
+        std::map<CSMDoc::Document*, LoadingDocument*> mDocuments;
 
-        public:
+    public:
+        Loader();
 
-            Loader();
+        ~Loader() override;
 
-            ~Loader() override;
+    signals:
 
-        signals:
+        void cancel(CSMDoc::Document* document);
 
-            void cancel (CSMDoc::Document *document);
+        void close(CSMDoc::Document* document);
 
-            void close (CSMDoc::Document *document);
+    public slots:
 
-        public slots:
+        void add(CSMDoc::Document* document);
 
-            void add (CSMDoc::Document *document);
+        void loadingStopped(CSMDoc::Document* document, bool completed, const std::string& error);
 
-            void loadingStopped (CSMDoc::Document *document, bool completed,
-                const std::string& error);
+        void nextStage(CSMDoc::Document* document, const std::string& name, int totalRecords);
 
-            void nextStage (CSMDoc::Document *document, const std::string& name, int totalRecords);
+        void nextRecord(CSMDoc::Document* document, int records);
 
-            void nextRecord (CSMDoc::Document *document, int records);
-
-            void loadMessage (CSMDoc::Document *document, const std::string& message);
+        void loadMessage(CSMDoc::Document* document, const std::string& message);
     };
 }
 

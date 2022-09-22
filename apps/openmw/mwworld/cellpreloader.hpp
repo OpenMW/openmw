@@ -1,11 +1,11 @@
 #ifndef OPENMW_MWWORLD_CELLPRELOADER_H
 #define OPENMW_MWWORLD_CELLPRELOADER_H
 
+#include <components/sceneutil/workqueue.hpp>
 #include <map>
-#include <osg/ref_ptr>
 #include <osg/Vec3f>
 #include <osg/Vec4i>
-#include <components/sceneutil/workqueue.hpp>
+#include <osg/ref_ptr>
 
 namespace Resource
 {
@@ -37,7 +37,8 @@ namespace MWWorld
     class CellPreloader
     {
     public:
-        CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager, Terrain::World* terrain, MWRender::LandManager* landManager);
+        CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager,
+            Terrain::World* terrain, MWRender::LandManager* landManager);
         ~CellPreloader();
 
         /// Ask a background thread to preload rendering meshes and collision shapes for objects in this cell.
@@ -70,9 +71,10 @@ namespace MWWorld
         typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
         void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
 
-        bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, double timestamp, Loading::Listener& listener);
-        void abortTerrainPreloadExcept(const PositionCellGrid *exceptPos);
-        bool isTerrainLoaded(const CellPreloader::PositionCellGrid &position, double referenceTime) const;
+        bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid>& positions, double timestamp,
+            Loading::Listener& listener);
+        void abortTerrainPreloadExcept(const PositionCellGrid* exceptPos);
+        bool isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const;
 
     private:
         Resource::ResourceSystem* mResourceSystem;
@@ -107,7 +109,7 @@ namespace MWWorld
         // Cells that are currently being preloaded, or have already finished preloading
         PreloadMap mPreloadCells;
 
-        std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
+        std::vector<osg::ref_ptr<Terrain::View>> mTerrainViews;
         std::vector<PositionCellGrid> mTerrainPreloadPositions;
         osg::ref_ptr<TerrainPreloadItem> mTerrainPreloadItem;
         osg::ref_ptr<SceneUtil::WorkItem> mUpdateCacheItem;

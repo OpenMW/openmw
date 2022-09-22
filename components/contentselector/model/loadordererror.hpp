@@ -11,15 +11,21 @@ namespace ContentSelectorModel
     public:
         enum ErrorCode
         {
-            ErrorCode_None               = 0,
-            ErrorCode_MissingDependency  = 1,
+            ErrorCode_None = 0,
+            ErrorCode_MissingDependency = 1,
             ErrorCode_InactiveDependency = 2,
-            ErrorCode_LoadOrder          = 3
+            ErrorCode_LoadOrder = 3
         };
 
-        inline LoadOrderError() : mErrorCode(ErrorCode_None) {}
+        inline LoadOrderError()
+            : mErrorCode(ErrorCode_None)
+        {
+        }
         inline LoadOrderError(ErrorCode errorCode, QString fileName)
-            : mErrorCode(errorCode), mFileName(fileName) {}
+            : mErrorCode(errorCode)
+            , mFileName(fileName)
+        {
+        }
         inline ErrorCode errorCode() const { return mErrorCode; }
         inline QString fileName() const { return mFileName; }
         QString toolTip() const;

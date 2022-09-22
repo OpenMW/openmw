@@ -1,63 +1,63 @@
 #include "loadcell.hpp"
 
-#include <string>
 #include <limits>
 #include <list>
+#include <string>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
+#include "cellid.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "cellid.hpp"
 
 namespace ESM
 {
-namespace
-{
-    ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
-    void adjustRefNum (RefNum& refNum, const ESMReader& reader)
+    namespace
     {
-        unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
+        ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
+        void adjustRefNum(RefNum& refNum, const ESMReader& reader)
+        {
+            unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
 
-        // If we have an index value that does not make sense, assume that it was an addition
-        // by the present plugin (but a faulty one)
-        if (local && local <= reader.getParentFileIndices().size())
-        {
-            // If the most significant 8 bits are used, then this reference already exists.
-            // In this case, do not spawn a new reference, but overwrite the old one.
-            refNum.mIndex &= 0x00ffffff; // delete old plugin ID
-            refNum.mContentFile = reader.getParentFileIndices()[local-1];
-        }
-        else
-        {
-            // This is an addition by the present plugin. Set the corresponding plugin index.
-            refNum.mContentFile = reader.getIndex();
+            // If we have an index value that does not make sense, assume that it was an addition
+            // by the present plugin (but a faulty one)
+            if (local && local <= reader.getParentFileIndices().size())
+            {
+                // If the most significant 8 bits are used, then this reference already exists.
+                // In this case, do not spawn a new reference, but overwrite the old one.
+                refNum.mIndex &= 0x00ffffff; // delete old plugin ID
+                refNum.mContentFile = reader.getParentFileIndices()[local - 1];
+            }
+            else
+            {
+                // This is an addition by the present plugin. Set the corresponding plugin index.
+                refNum.mContentFile = reader.getIndex();
+            }
         }
     }
-}
 }
 
 namespace ESM
 {
     // Some overloaded compare operators.
-    bool operator== (const MovedCellRef& ref, const RefNum& refNum)
+    bool operator==(const MovedCellRef& ref, const RefNum& refNum)
     {
         return ref.mRefNum == refNum;
     }
 
-    bool operator== (const CellRef& ref, const RefNum& refNum)
+    bool operator==(const CellRef& ref, const RefNum& refNum)
     {
         return ref.mRefNum == refNum;
     }
 
-    void Cell::load(ESMReader &esm, bool &isDeleted, bool saveContext)
+    void Cell::load(ESMReader& esm, bool& isDeleted, bool saveContext)
     {
         loadNameAndData(esm, isDeleted);
         loadCell(esm, saveContext);
     }
 
-    void Cell::loadNameAndData(ESMReader &esm, bool &isDeleted)
+    void Cell::loadNameAndData(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -101,13 +101,13 @@ namespace ESM
         }
         else
         {
-            mCellId.mWorldspace = Misc::StringUtils::lowerCase (mName);
+            mCellId.mWorldspace = Misc::StringUtils::lowerCase(mName);
             mCellId.mIndex.mX = 0;
             mCellId.mIndex.mY = 0;
         }
     }
 
-    void Cell::loadCell(ESMReader &esm, bool saveContext)
+    void Cell::loadCell(ESMReader& esm, bool saveContext)
     {
         bool overriding = !mName.empty();
         bool isLoaded = false;
@@ -127,11 +127,12 @@ namespace ESM
                     float waterLevel;
                     esm.getHT(waterLevel);
                     mWaterInt = false;
-                    if(!std::isfinite(waterLevel))
+                    if (!std::isfinite(waterLevel))
                     {
-                        if(!overriding)
+                        if (!overriding)
                             mWater = std::numeric_limits<float>::max();
-                        Log(Debug::Warning) << "Warning: Encountered invalid water level in cell " << mName << " defined in " << esm.getContext().filename;
+                        Log(Debug::Warning) << "Warning: Encountered invalid water level in cell " << mName
+                                            << " defined in " << esm.getContext().filename;
                     }
                     else
                         mWater = waterLevel;
@@ -163,14 +164,14 @@ namespace ESM
         }
     }
 
-    void Cell::postLoad(ESMReader &esm)
+    void Cell::postLoad(ESMReader& esm)
     {
         // Save position of the cell references and move on
         mContextList.push_back(esm.getContext());
         esm.skipRecord();
     }
 
-    void Cell::save(ESMWriter &esm, bool isDeleted) const
+    void Cell::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mName);
         esm.writeHNT("DATA", mData, 12);
@@ -183,11 +184,13 @@ namespace ESM
 
         if (mData.mFlags & Interior)
         {
-            if (mWaterInt) {
-                int water =
-                    (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
+            if (mWaterInt)
+            {
+                int water = (mWater >= 0) ? (int)(mWater + 0.5) : (int)(mWater - 0.5);
                 esm.writeHNT("INTV", water);
-            } else {
+            }
+            else
+            {
                 esm.writeHNT("WHGT", mWater);
             }
 
@@ -209,15 +212,15 @@ namespace ESM
         }
     }
 
-    void Cell::saveTempMarker(ESMWriter &esm, int tempCount) const
+    void Cell::saveTempMarker(ESMWriter& esm, int tempCount) const
     {
         if (tempCount != 0)
             esm.writeHNT("NAM0", tempCount);
     }
 
-    void Cell::restore(ESMReader &esm, int iCtx) const
+    void Cell::restore(ESMReader& esm, int iCtx) const
     {
-        esm.restoreContext(mContextList.at (iCtx));
+        esm.restoreContext(mContextList.at(iCtx));
     }
 
     std::string Cell::getDescription() const
@@ -258,19 +261,19 @@ namespace ESM
 
         if (esm.peekNextSub("FRMR"))
         {
-            ref.load (esm, isDeleted);
+            ref.load(esm, isDeleted);
 
             // TODO: should count the number of temp refs and validate the number
 
             // Identify references belonging to a parent file and adapt the ID accordingly.
-            adjustRefNum (ref.mRefNum, esm);
+            adjustRefNum(ref.mRefNum, esm);
             return true;
         }
         return false;
     }
 
-    bool Cell::getNextRef(ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved,
-        GetNextRefMode mode)
+    bool Cell::getNextRef(
+        ESMReader& esm, CellRef& cellRef, bool& deleted, MovedCellRef& movedCellRef, bool& moved, GetNextRefMode mode)
     {
         deleted = false;
         moved = false;
@@ -287,8 +290,7 @@ namespace ESM
         if (!esm.peekNextSub("FRMR"))
             return false;
 
-        if ((!moved && mode == GetNextRefMode::LoadOnlyMoved)
-                || (moved && mode == GetNextRefMode::LoadOnlyNotMoved))
+        if ((!moved && mode == GetNextRefMode::LoadOnlyMoved) || (moved && mode == GetNextRefMode::LoadOnlyNotMoved))
         {
             skipLoadCellRef(esm);
             return true;
@@ -300,12 +302,12 @@ namespace ESM
         return true;
     }
 
-    bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
+    bool Cell::getNextMVRF(ESMReader& esm, MovedCellRef& mref)
     {
         esm.getHT(mref.mRefNum.mIndex);
         esm.getHNOT(mref.mTarget, "CNDT");
 
-        adjustRefNum (mref.mRefNum, esm);
+        adjustRefNum(mref.mRefNum, esm);
 
         return true;
     }

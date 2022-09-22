@@ -32,12 +32,13 @@ namespace DetourNavigator
 
     inline btVector3 getHeightfieldShift(const HeightfieldSurface& v, const osg::Vec2i& cellPosition, int cellSize)
     {
-        return BulletHelpers::getHeightfieldShift(cellPosition.x(), cellPosition.y(), cellSize, v.mMinHeight, v.mMaxHeight);
+        return BulletHelpers::getHeightfieldShift(
+            cellPosition.x(), cellPosition.y(), cellSize, v.mMinHeight, v.mMaxHeight);
     }
 
     inline btVector3 getHeightfieldShift(const HeightfieldShape& v, const osg::Vec2i& cellPosition, int cellSize)
     {
-        return std::visit([&] (const auto& w) { return getHeightfieldShift(w, cellPosition, cellSize); }, v);
+        return std::visit([&](const auto& w) { return getHeightfieldShift(w, cellPosition, cellSize); }, v);
     }
 }
 

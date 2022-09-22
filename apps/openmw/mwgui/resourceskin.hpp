@@ -7,7 +7,7 @@ namespace MWGui
 {
     class AutoSizedResourceSkin final : public MyGUI::ResourceSkin
     {
-        MYGUI_RTTI_DERIVED( AutoSizedResourceSkin )
+        MYGUI_RTTI_DERIVED(AutoSizedResourceSkin)
 
     public:
         void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) override;

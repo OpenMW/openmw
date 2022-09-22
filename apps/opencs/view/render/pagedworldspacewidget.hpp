@@ -5,14 +5,14 @@
 
 #include "../../model/world/cellselection.hpp"
 
-#include "worldspacewidget.hpp"
 #include "cell.hpp"
 #include "instancedragmodes.hpp"
+#include "worldspacewidget.hpp"
 
 namespace CSVWidget
 {
-   class SceneToolToggle;
-   class SceneToolToggle2;
+    class SceneToolToggle;
+    class SceneToolToggle2;
 }
 
 namespace CSVRender
@@ -22,172 +22,163 @@ namespace CSVRender
 
     class PagedWorldspaceWidget : public WorldspaceWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMDoc::Document& mDocument;
-            CSMWorld::CellSelection mSelection;
-            std::map<CSMWorld::CellCoordinates, Cell *> mCells;
-            std::string mWorldspace;
-            CSVWidget::SceneToolToggle2 *mControlElements;
-            bool mDisplayCellCoord;
+        CSMDoc::Document& mDocument;
+        CSMWorld::CellSelection mSelection;
+        std::map<CSMWorld::CellCoordinates, Cell*> mCells;
+        std::string mWorldspace;
+        CSVWidget::SceneToolToggle2* mControlElements;
+        bool mDisplayCellCoord;
 
-        private:
+    private:
+        std::pair<int, int> getCoordinatesFromId(const std::string& record) const;
 
-            std::pair<int, int> getCoordinatesFromId(const std::string& record) const;
+        /// Bring mCells into sync with mSelection again.
+        ///
+        /// \return Any cells added or removed?
+        bool adjustCells();
 
-            /// Bring mCells into sync with mSelection again.
-            ///
-            /// \return Any cells added or removed?
-            bool adjustCells();
+        void referenceableDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) override;
 
-            void referenceableDataChanged (const QModelIndex& topLeft,
-                const QModelIndex& bottomRight) override;
+        void referenceableAboutToBeRemoved(const QModelIndex& parent, int start, int end) override;
 
-            void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end) override;
+        void referenceableAdded(const QModelIndex& index, int start, int end) override;
 
-            void referenceableAdded (const QModelIndex& index, int start, int end) override;
+        void referenceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) override;
 
-            void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) override;
+        void referenceAboutToBeRemoved(const QModelIndex& parent, int start, int end) override;
 
-            void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end) override;
+        void referenceAdded(const QModelIndex& index, int start, int end) override;
 
-            void referenceAdded (const QModelIndex& index, int start, int end) override;
+        void pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) override;
 
-            void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) override;
+        void pathgridAboutToBeRemoved(const QModelIndex& parent, int start, int end) override;
 
-            void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end) override;
+        void pathgridAdded(const QModelIndex& parent, int start, int end) override;
 
-            void pathgridAdded (const QModelIndex& parent, int start, int end) override;
+        std::string getStartupInstruction() override;
 
-            std::string getStartupInstruction() override;
+        /// \note Does not update the view or any cell marker
+        void addCellToScene(const CSMWorld::CellCoordinates& coordinates);
 
-            /// \note Does not update the view or any cell marker
-            void addCellToScene (const CSMWorld::CellCoordinates& coordinates);
+        /// \note Does not update the view or any cell marker
+        ///
+        /// \note Calling this function for a cell that is not in the selection is a no-op.
+        void removeCellFromScene(const CSMWorld::CellCoordinates& coordinates);
 
-            /// \note Does not update the view or any cell marker
-            ///
-            /// \note Calling this function for a cell that is not in the selection is a no-op.
-            void removeCellFromScene (const CSMWorld::CellCoordinates& coordinates);
+        /// \note Does not update the view or any cell marker
+        void addCellSelection(int x, int y);
 
-            /// \note Does not update the view or any cell marker
-            void addCellSelection (int x, int y);
+        /// \note Does not update the view or any cell marker
+        void moveCellSelection(int x, int y);
 
-            /// \note Does not update the view or any cell marker
-            void moveCellSelection (int x, int y);
+        void addCellToSceneFromCamera(int offsetX, int offsetY);
 
-            void addCellToSceneFromCamera (int offsetX, int offsetY);
+    public:
+        PagedWorldspaceWidget(QWidget* parent, CSMDoc::Document& document);
+        ///< \note Sets the cell area selection to an invalid value to indicate that currently
+        /// no cells are displayed. The cells to be displayed will be specified later through
+        /// hint system.
 
-        public:
+        virtual ~PagedWorldspaceWidget();
 
-            PagedWorldspaceWidget (QWidget *parent, CSMDoc::Document& document);
-            ///< \note Sets the cell area selection to an invalid value to indicate that currently
-            /// no cells are displayed. The cells to be displayed will be specified later through
-            /// hint system.
+        /// Decodes the the hint string to set of cell that are rendered.
+        void useViewHint(const std::string& hint) override;
 
-            virtual ~PagedWorldspaceWidget();
+        void setCellSelection(const CSMWorld::CellSelection& selection);
 
-            /// Decodes the the hint string to set of cell that are rendered.
-            void useViewHint (const std::string& hint) override;
+        const CSMWorld::CellSelection& getCellSelection() const;
 
-            void setCellSelection(const CSMWorld::CellSelection& selection);
+        /// \return Drop handled?
+        bool handleDrop(const std::vector<CSMWorld::UniversalId>& data, DropType type) override;
 
-            const CSMWorld::CellSelection& getCellSelection() const;
+        dropRequirments getDropRequirements(DropType type) const override;
 
-            /// \return Drop handled?
-            bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
-                DropType type) override;
+        /// \attention The created tool is not added to the toolbar (via addTool). Doing
+        /// that is the responsibility of the calling function.
+        virtual CSVWidget::SceneToolToggle2* makeControlVisibilitySelector(CSVWidget::SceneToolbar* parent);
 
-            dropRequirments getDropRequirements(DropType type) const override;
+        unsigned int getVisibilityMask() const override;
 
-            /// \attention The created tool is not added to the toolbar (via addTool). Doing
-            /// that is the responsibility of the calling function.
-            virtual CSVWidget::SceneToolToggle2 *makeControlVisibilitySelector (
-                CSVWidget::SceneToolbar *parent);
+        /// \param elementMask Elements to be affected by the clear operation
+        void clearSelection(int elementMask) override;
 
-            unsigned int getVisibilityMask() const override;
+        /// \param elementMask Elements to be affected by the select operation
+        void invertSelection(int elementMask) override;
 
-            /// \param elementMask Elements to be affected by the clear operation
-            void clearSelection (int elementMask) override;
+        /// \param elementMask Elements to be affected by the select operation
+        void selectAll(int elementMask) override;
 
-            /// \param elementMask Elements to be affected by the select operation
-            void invertSelection (int elementMask) override;
+        // Select everything that references the same ID as at least one of the elements
+        // already selected
+        //
+        /// \param elementMask Elements to be affected by the select operation
+        void selectAllWithSameParentId(int elementMask) override;
 
-            /// \param elementMask Elements to be affected by the select operation
-            void selectAll (int elementMask) override;
+        void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode) override;
 
-            // Select everything that references the same ID as at least one of the elements
-            // already selected
-            //
-            /// \param elementMask Elements to be affected by the select operation
-            void selectAllWithSameParentId (int elementMask) override;
+        void selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode) override;
 
-            void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode) override;
+        std::string getCellId(const osg::Vec3f& point) const override;
 
-            void selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode) override;
+        Cell* getCell(const osg::Vec3d& point) const override;
 
-            std::string getCellId (const osg::Vec3f& point) const override;
+        Cell* getCell(const CSMWorld::CellCoordinates& coords) const override;
 
-            Cell* getCell(const osg::Vec3d& point) const override;
+        void setCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY, float height);
 
-            Cell* getCell(const CSMWorld::CellCoordinates& coords) const override;
+        float* getCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY);
 
-            void setCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY, float height);
+        void resetAllAlteredHeights();
 
-            float* getCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY);
+        std::vector<osg::ref_ptr<TagBase>> getSelection(unsigned int elementMask) const override;
 
-            void resetAllAlteredHeights();
+        std::vector<osg::ref_ptr<TagBase>> getEdited(unsigned int elementMask) const override;
 
-            std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
-                const override;
+        void setSubMode(int subMode, unsigned int elementMask) override;
 
-            std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
-                const override;
+        /// Erase all overrides and restore the visual representation to its true state.
+        void reset(unsigned int elementMask) override;
 
-            void setSubMode (int subMode, unsigned int elementMask) override;
+    protected:
+        void addVisibilitySelectorButtons(CSVWidget::SceneToolToggle2* tool) override;
 
-            /// Erase all overrides and restore the visual representation to its true state.
-            void reset (unsigned int elementMask) override;
+        void addEditModeSelectorButtons(CSVWidget::SceneToolMode* tool) override;
 
-        protected:
+        void handleInteractionPress(const WorldspaceHitResult& hit, InteractionType type) override;
 
-            void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool) override;
+    signals:
 
-            void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool) override;
+        void cellSelectionChanged(const CSMWorld::CellSelection& selection);
 
-            void handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type) override;
+    private slots:
 
-        signals:
+        virtual void cellDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void cellSelectionChanged (const CSMWorld::CellSelection& selection);
+        virtual void cellRemoved(const QModelIndex& parent, int start, int end);
 
-        private slots:
+        virtual void cellAdded(const QModelIndex& index, int start, int end);
 
-            virtual void cellDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+        virtual void landDataChanged(const QModelIndex& topLeft, const QModelIndex& botomRight);
+        virtual void landAboutToBeRemoved(const QModelIndex& parent, int start, int end);
+        virtual void landAdded(const QModelIndex& parent, int start, int end);
 
-            virtual void cellRemoved (const QModelIndex& parent, int start, int end);
+        virtual void landTextureDataChanged(const QModelIndex& topLeft, const QModelIndex& botomRight);
+        virtual void landTextureAboutToBeRemoved(const QModelIndex& parent, int start, int end);
+        virtual void landTextureAdded(const QModelIndex& parent, int start, int end);
 
-            virtual void cellAdded (const QModelIndex& index, int start, int end);
+        void assetTablesChanged();
 
-            virtual void landDataChanged (const QModelIndex& topLeft, const QModelIndex& botomRight);
-            virtual void landAboutToBeRemoved (const QModelIndex& parent, int start, int end);
-            virtual void landAdded (const QModelIndex& parent, int start, int end);
+        void loadCameraCell();
 
-            virtual void landTextureDataChanged (const QModelIndex& topLeft, const QModelIndex& botomRight);
-            virtual void landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end);
-            virtual void landTextureAdded (const QModelIndex& parent, int start, int end);
+        void loadEastCell();
 
-            void assetTablesChanged ();
+        void loadNorthCell();
 
-            void loadCameraCell();
+        void loadWestCell();
 
-            void loadEastCell();
-
-            void loadNorthCell();
-
-            void loadWestCell();
-
-            void loadSouthCell();
-
+        void loadSouthCell();
     };
 }
 

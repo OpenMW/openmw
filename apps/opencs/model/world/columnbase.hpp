@@ -1,9 +1,9 @@
 #ifndef CSM_WOLRD_COLUMNBASE_H
 #define CSM_WOLRD_COLUMNBASE_H
 
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 #include <QVariant>
 
@@ -15,16 +15,16 @@ namespace CSMWorld
     {
         enum TableEditModes
         {
-            TableEdit_None,      // no editing
-            TableEdit_Full,      // edit cells and add/remove rows
-            TableEdit_FixedRows  // edit cells only
+            TableEdit_None, // no editing
+            TableEdit_Full, // edit cells and add/remove rows
+            TableEdit_FixedRows // edit cells only
         };
 
         enum Roles
         {
             Role_Flags = Qt::UserRole,
-            Role_Display = Qt::UserRole+1,
-            Role_ColumnId = Qt::UserRole+2
+            Role_Display = Qt::UserRole + 1,
+            Role_ColumnId = Qt::UserRole + 2
         };
 
         enum Flags
@@ -37,11 +37,11 @@ namespace CSMWorld
 
         enum Display
         {
-            Display_None, //Do not use
+            Display_None, // Do not use
             Display_String,
             Display_LongString,
 
-            //CONCRETE TYPES STARTS HERE (for drag and drop)
+            // CONCRETE TYPES STARTS HERE (for drag and drop)
             Display_Skill,
             Display_Class,
             Display_Faction,
@@ -83,7 +83,7 @@ namespace CSMWorld
             Display_GlobalVariable,
             Display_BodyPart,
             Display_Enchantment,
-            //CONCRETE TYPES ENDS HERE
+            // CONCRETE TYPES ENDS HERE
 
             Display_SignedInteger8,
             Display_SignedInteger16,
@@ -140,12 +140,12 @@ namespace CSMWorld
             Display_BloodType,
             Display_EmitterType,
 
-            Display_EffectSkill,     // must display at least one, unlike Display_Skill
+            Display_EffectSkill, // must display at least one, unlike Display_Skill
             Display_EffectAttribute, // must display at least one, unlike Display_Attribute
-            Display_IngredEffectId,  // display none allowed, unlike Display_EffectId
-            Display_GenderNpc,       // must display at least one, unlike Display_Gender
+            Display_IngredEffectId, // display none allowed, unlike Display_EffectId
+            Display_GenderNpc, // must display at least one, unlike Display_Gender
 
-            //top level columns that nest other columns
+            // top level columns that nest other columns
             Display_NestedHeader
         };
 
@@ -153,7 +153,7 @@ namespace CSMWorld
         int mFlags;
         Display mDisplayType;
 
-        ColumnBase (int columnId, Display displayType, int flag);
+        ColumnBase(int columnId, Display displayType, int flag);
 
         virtual ~ColumnBase();
 
@@ -166,58 +166,61 @@ namespace CSMWorld
 
         virtual int getId() const;
 
-        static bool isId (Display display);
+        static bool isId(Display display);
 
-        static bool isText (Display display);
+        static bool isText(Display display);
 
-        static bool isScript (Display display);
+        static bool isScript(Display display);
     };
 
     class NestableColumn : public ColumnBase
     {
-        std::vector<NestableColumn *> mNestedColumns;
+        std::vector<NestableColumn*> mNestedColumns;
 
     public:
-
         NestableColumn(int columnId, Display displayType, int flag);
 
         ~NestableColumn();
 
-        void addColumn(CSMWorld::NestableColumn *column);
+        void addColumn(CSMWorld::NestableColumn* column);
 
         const ColumnBase& nestedColumn(int subColumn) const;
 
         bool hasChildren() const;
     };
 
-    template<typename ESXRecordT>
+    template <typename ESXRecordT>
     struct Column : public NestableColumn
     {
-        Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
-        : NestableColumn (columnId, displayType, flags) {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        Column(int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
+            : NestableColumn(columnId, displayType, flags)
         {
-            throw std::logic_error ("Column " + getTitle() + " is not editable");
+        }
+
+        virtual QVariant get(const Record<ESXRecordT>& record) const = 0;
+
+        virtual void set(Record<ESXRecordT>& record, const QVariant& data)
+        {
+            throw std::logic_error("Column " + getTitle() + " is not editable");
         }
     };
 
-    template<typename ESXRecordT>
+    template <typename ESXRecordT>
     struct NestedParentColumn : public Column<ESXRecordT>
     {
-        NestedParentColumn (int id, int flags = ColumnBase::Flag_Dialogue, bool fixedRows = false)
-            : Column<ESXRecordT> (id, ColumnBase::Display_NestedHeader, flags), mFixedRows(fixedRows)
-        {}
+        NestedParentColumn(int id, int flags = ColumnBase::Flag_Dialogue, bool fixedRows = false)
+            : Column<ESXRecordT>(id, ColumnBase::Display_NestedHeader, flags)
+            , mFixedRows(fixedRows)
+        {
+        }
 
-        void set (Record<ESXRecordT>& record, const QVariant& data) override
+        void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             // There is nothing to do here.
             // This prevents exceptions from parent's implementation
         }
 
-        QVariant get (const Record<ESXRecordT>& record) const override
+        QVariant get(const Record<ESXRecordT>& record) const override
         {
             // by default editable; also see IdTree::hasChildren()
             if (mFixedRows)
@@ -226,10 +229,7 @@ namespace CSMWorld
                 return QVariant::fromValue(ColumnBase::TableEdit_Full);
         }
 
-        bool isEditable() const override
-        {
-            return true;
-        }
+        bool isEditable() const override { return true; }
 
     private:
         bool mFixedRows;
@@ -237,8 +237,7 @@ namespace CSMWorld
 
     struct NestedChildColumn : public NestableColumn
     {
-        NestedChildColumn (int id,
-                Display display, int flags = ColumnBase::Flag_Dialogue, bool isEditable = true);
+        NestedChildColumn(int id, Display display, int flags = ColumnBase::Flag_Dialogue, bool isEditable = true);
 
         bool isEditable() const override;
 

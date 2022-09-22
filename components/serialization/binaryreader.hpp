@@ -14,14 +14,18 @@ namespace Serialization
 {
     struct NotEnoughData : std::runtime_error
     {
-        NotEnoughData() : std::runtime_error("Not enough data") {}
+        NotEnoughData()
+            : std::runtime_error("Not enough data")
+        {
+        }
     };
 
     class BinaryReader
     {
     public:
         explicit BinaryReader(const std::byte* pos, const std::byte* end)
-            : mPos(pos), mEnd(end)
+            : mPos(pos)
+            , mEnd(end)
         {
             assert(mPos <= mEnd);
         }
@@ -62,7 +66,7 @@ namespace Serialization
                 std::memcpy(data, mPos, size);
                 mPos += size;
                 if constexpr (!Misc::IS_LITTLE_ENDIAN)
-                    std::for_each(data, data + count, [&] (T& v) { v = Misc::fromLittleEndian(v); });
+                    std::for_each(data, data + count, [&](T& v) { v = Misc::fromLittleEndian(v); });
             }
             else
             {

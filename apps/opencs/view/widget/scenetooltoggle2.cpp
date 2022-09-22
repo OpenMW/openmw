@@ -1,14 +1,14 @@
 #include "scenetooltoggle2.hpp"
 
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
-#include <QHBoxLayout>
 #include <QFrame>
+#include <QHBoxLayout>
 #include <QIcon>
 
-#include "scenetoolbar.hpp"
 #include "pushbutton.hpp"
+#include "scenetoolbar.hpp"
 
 void CSVWidget::SceneToolToggle2::adjustToolTip()
 {
@@ -18,8 +18,7 @@ void CSVWidget::SceneToolToggle2::adjustToolTip()
 
     bool first = true;
 
-    for (std::map<PushButton *, ButtonDesc>::const_iterator iter (mButtons.begin());
-        iter!=mButtons.end(); ++iter)
+    for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
         if (iter->first->isChecked())
         {
             if (!first)
@@ -35,64 +34,67 @@ void CSVWidget::SceneToolToggle2::adjustToolTip()
 
     toolTip += "<p>(left click to alter selection)";
 
-    setToolTip (toolTip);
+    setToolTip(toolTip);
 }
 
 void CSVWidget::SceneToolToggle2::adjustIcon()
 {
     unsigned int buttonIds = 0;
 
-    for (std::map<PushButton *, ButtonDesc>::const_iterator iter (mButtons.begin());
-        iter!=mButtons.end(); ++iter)
+    for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
         if (iter->first->isChecked())
             buttonIds |= iter->second.mButtonId;
 
     std::ostringstream stream;
     stream << mCompositeIcon << buttonIds;
-    setIcon (QIcon (QString::fromUtf8 (stream.str().c_str())));
+    setIcon(QIcon(QString::fromUtf8(stream.str().c_str())));
 }
 
-CSVWidget::SceneToolToggle2::SceneToolToggle2 (SceneToolbar *parent, const QString& toolTip,
-    const std::string& compositeIcon, const std::string& singleIcon)
-: SceneTool (parent), mCompositeIcon (compositeIcon), mSingleIcon (singleIcon),
-  mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize()), mToolTip (toolTip),
-  mFirst (nullptr)
+CSVWidget::SceneToolToggle2::SceneToolToggle2(
+    SceneToolbar* parent, const QString& toolTip, const std::string& compositeIcon, const std::string& singleIcon)
+    : SceneTool(parent)
+    , mCompositeIcon(compositeIcon)
+    , mSingleIcon(singleIcon)
+    , mButtonSize(parent->getButtonSize())
+    , mIconSize(parent->getIconSize())
+    , mToolTip(toolTip)
+    , mFirst(nullptr)
 {
-    mPanel = new QFrame (this, Qt::Popup);
+    mPanel = new QFrame(this, Qt::Popup);
 
-    mLayout = new QHBoxLayout (mPanel);
+    mLayout = new QHBoxLayout(mPanel);
 
-    mLayout->setContentsMargins (QMargins (0, 0, 0, 0));
+    mLayout->setContentsMargins(QMargins(0, 0, 0, 0));
 
-    mPanel->setLayout (mLayout);
+    mPanel->setLayout(mLayout);
 }
 
-void CSVWidget::SceneToolToggle2::showPanel (const QPoint& position)
+void CSVWidget::SceneToolToggle2::showPanel(const QPoint& position)
 {
-    mPanel->move (position);
+    mPanel->move(position);
     mPanel->show();
 
     if (mFirst)
-        mFirst->setFocus (Qt::OtherFocusReason);
+        mFirst->setFocus(Qt::OtherFocusReason);
 }
 
-void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
-    const QString& name, const QString& tooltip, bool disabled)
+void CSVWidget::SceneToolToggle2::addButton(
+    unsigned int id, unsigned int mask, const QString& name, const QString& tooltip, bool disabled)
 {
     std::ostringstream stream;
     stream << mSingleIcon << id;
 
-    PushButton *button = new PushButton (QIcon (QPixmap (stream.str().c_str())),
-        PushButton::Type_Toggle, tooltip.isEmpty() ? name: tooltip, mPanel);
+    PushButton* button = new PushButton(
+        QIcon(QPixmap(stream.str().c_str())), PushButton::Type_Toggle, tooltip.isEmpty() ? name : tooltip, mPanel);
 
-    button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
-    button->setIconSize (QSize (mIconSize, mIconSize));
-    button->setFixedSize (mButtonSize, mButtonSize);
+    button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    button->setIconSize(QSize(mIconSize, mIconSize));
+    button->setFixedSize(mButtonSize, mButtonSize);
 
     if (disabled)
-        button->setDisabled (true);
+        button->setDisabled(true);
 
-    mLayout->addWidget (button);
+    mLayout->addWidget(button);
 
     ButtonDesc desc;
     desc.mButtonId = id;
@@ -100,11 +102,11 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
     desc.mName = name;
     desc.mIndex = static_cast<int>(mButtons.size());
 
-    mButtons.insert (std::make_pair (button, desc));
+    mButtons.insert(std::make_pair(button, desc));
 
-    connect (button, &QPushButton::clicked, this, &SceneToolToggle2::selected);
+    connect(button, &QPushButton::clicked, this, &SceneToolToggle2::selected);
 
-    if (mButtons.size()==1 && !disabled)
+    if (mButtons.size() == 1 && !disabled)
         mFirst = button;
 }
 
@@ -112,19 +114,17 @@ unsigned int CSVWidget::SceneToolToggle2::getSelectionMask() const
 {
     unsigned int selection = 0;
 
-    for (std::map<PushButton *, ButtonDesc>::const_iterator iter (mButtons.begin());
-        iter!=mButtons.end(); ++iter)
+    for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
         if (iter->first->isChecked())
             selection |= iter->second.mMask;
 
     return selection;
 }
 
-void CSVWidget::SceneToolToggle2::setSelectionMask (unsigned int selection)
+void CSVWidget::SceneToolToggle2::setSelectionMask(unsigned int selection)
 {
-    for (std::map<PushButton *, ButtonDesc>::iterator iter (mButtons.begin());
-        iter!=mButtons.end(); ++iter)
-        iter->first->setChecked (selection & iter->second.mMask);
+    for (std::map<PushButton*, ButtonDesc>::iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
+        iter->first->setChecked(selection & iter->second.mMask);
 
     adjustToolTip();
     adjustIcon();
@@ -132,10 +132,9 @@ void CSVWidget::SceneToolToggle2::setSelectionMask (unsigned int selection)
 
 void CSVWidget::SceneToolToggle2::selected()
 {
-    std::map<PushButton *, ButtonDesc>::const_iterator iter =
-        mButtons.find (dynamic_cast<PushButton *> (sender()));
+    std::map<PushButton*, ButtonDesc>::const_iterator iter = mButtons.find(dynamic_cast<PushButton*>(sender()));
 
-    if (iter!=mButtons.end())
+    if (iter != mButtons.end())
     {
         if (!iter->first->hasKeepOpen())
             mPanel->hide();

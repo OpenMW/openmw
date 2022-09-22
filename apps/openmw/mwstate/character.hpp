@@ -14,58 +14,55 @@ namespace MWState
         std::filesystem::file_time_type mTimeStamp;
     };
 
-    bool operator< (const Slot& left, const Slot& right);
+    bool operator<(const Slot& left, const Slot& right);
 
     std::string getFirstGameFile(const std::vector<std::string>& contentFiles);
 
     class Character
     {
-        public:
+    public:
+        typedef std::vector<Slot>::const_reverse_iterator SlotIterator;
 
-            typedef std::vector<Slot>::const_reverse_iterator SlotIterator;
+    private:
+        std::filesystem::path mPath;
+        std::vector<Slot> mSlots;
 
-        private:
+        void addSlot(const std::filesystem::path& path, const std::string& game);
 
-            std::filesystem::path mPath;
-            std::vector<Slot> mSlots;
+        void addSlot(const ESM::SavedGame& profile);
 
-            void addSlot (const std::filesystem::path& path, const std::string& game);
+    public:
+        Character(std::filesystem::path saves, const std::string& game);
 
-            void addSlot (const ESM::SavedGame& profile);
+        void cleanup();
+        ///< Delete the directory we used, if it is empty
 
-        public:
+        const Slot* createSlot(const ESM::SavedGame& profile);
+        ///< Create new slot.
+        ///
+        /// \attention The ownership of the slot is not transferred.
 
-            Character (std::filesystem::path  saves, const std::string& game);
+        /// \note Slot must belong to this character.
+        ///
+        /// \attention The \a slot pointer will be invalidated by this call.
+        void deleteSlot(const Slot* slot);
 
-            void cleanup();
-            ///< Delete the directory we used, if it is empty
+        const Slot* updateSlot(const Slot* slot, const ESM::SavedGame& profile);
+        /// \note Slot must belong to this character.
+        ///
+        /// \attention The \a slot pointer will be invalidated by this call.
 
-            const Slot *createSlot (const ESM::SavedGame& profile);
-            ///< Create new slot.
-            ///
-            /// \attention The ownership of the slot is not transferred.
+        SlotIterator begin() const;
+        ///<  Any call to createSlot and updateSlot can invalidate the returned iterator.
 
-            /// \note Slot must belong to this character.
-            ///
-            /// \attention The \a slot pointer will be invalidated by this call.
-            void deleteSlot (const Slot *slot);
+        SlotIterator end() const;
 
-            const Slot *updateSlot (const Slot *slot, const ESM::SavedGame& profile);
-            /// \note Slot must belong to this character.
-            ///
-            /// \attention The \a slot pointer will be invalidated by this call.
+        const std::filesystem::path& getPath() const;
 
-            SlotIterator begin() const;
-            ///<  Any call to createSlot and updateSlot can invalidate the returned iterator.
-
-            SlotIterator end() const;
-
-            const std::filesystem::path& getPath() const;
-
-            const ESM::SavedGame& getSignature() const;
-            ///< Return signature information for this character.
-            ///
-            /// \attention This function must not be called if there are no slots.
+        const ESM::SavedGame& getSignature() const;
+        ///< Return signature information for this character.
+        ///
+        /// \attention This function must not be called if there are no slots.
     };
 }
 

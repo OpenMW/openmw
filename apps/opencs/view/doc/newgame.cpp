@@ -1,72 +1,72 @@
 #include "newgame.hpp"
 
-#include <QGuiApplication>
-#include <QVBoxLayout>
 #include <QDialogButtonBox>
+#include <QGuiApplication>
 #include <QPushButton>
 #include <QScreen>
+#include <QVBoxLayout>
 
-#include "filewidget.hpp"
 #include "adjusterwidget.hpp"
+#include "filewidget.hpp"
 
 CSVDoc::NewGameDialogue::NewGameDialogue()
 {
-    setWindowTitle ("Create New Game");
+    setWindowTitle("Create New Game");
 
-    QVBoxLayout *layout = new QVBoxLayout (this);
+    QVBoxLayout* layout = new QVBoxLayout(this);
 
-    mFileWidget = new FileWidget (this);
-    mFileWidget->setType (false);
+    mFileWidget = new FileWidget(this);
+    mFileWidget->setType(false);
 
-    layout->addWidget (mFileWidget, 1);
+    layout->addWidget(mFileWidget, 1);
 
-    mAdjusterWidget = new AdjusterWidget (this);
+    mAdjusterWidget = new AdjusterWidget(this);
 
-    layout->addWidget (mAdjusterWidget, 1);
+    layout->addWidget(mAdjusterWidget, 1);
 
-    QDialogButtonBox *buttons = new QDialogButtonBox (this);
+    QDialogButtonBox* buttons = new QDialogButtonBox(this);
 
-    mCreate = new QPushButton ("Create", this);
-    mCreate->setDefault (true);
-    mCreate->setEnabled (false);
+    mCreate = new QPushButton("Create", this);
+    mCreate->setDefault(true);
+    mCreate->setEnabled(false);
 
-    buttons->addButton (mCreate, QDialogButtonBox::AcceptRole);
+    buttons->addButton(mCreate, QDialogButtonBox::AcceptRole);
 
-    QPushButton *cancel = new QPushButton ("Cancel", this);
+    QPushButton* cancel = new QPushButton("Cancel", this);
 
-    buttons->addButton (cancel, QDialogButtonBox::RejectRole);
+    buttons->addButton(cancel, QDialogButtonBox::RejectRole);
 
-    layout->addWidget (buttons);
+    layout->addWidget(buttons);
 
-    setLayout (layout);
+    setLayout(layout);
 
-    connect (mAdjusterWidget, &AdjusterWidget::stateChanged, this, &NewGameDialogue::stateChanged);
-    connect (mCreate, &QPushButton::clicked, this, &NewGameDialogue::create);
-    connect (cancel, &QPushButton::clicked, this, &NewGameDialogue::reject);
-    connect (mFileWidget, &FileWidget::nameChanged, mAdjusterWidget, &AdjusterWidget::setName);
+    connect(mAdjusterWidget, &AdjusterWidget::stateChanged, this, &NewGameDialogue::stateChanged);
+    connect(mCreate, &QPushButton::clicked, this, &NewGameDialogue::create);
+    connect(cancel, &QPushButton::clicked, this, &NewGameDialogue::reject);
+    connect(mFileWidget, &FileWidget::nameChanged, mAdjusterWidget, &AdjusterWidget::setName);
 
     QRect scr = QGuiApplication::primaryScreen()->geometry();
     QRect rect = geometry();
-    move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
+    move(scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
 }
 
-void CSVDoc::NewGameDialogue::setLocalData (const std::filesystem::path& localData)
+void CSVDoc::NewGameDialogue::setLocalData(const std::filesystem::path& localData)
 {
-    mAdjusterWidget->setLocalData (localData);
+    mAdjusterWidget->setLocalData(localData);
 }
 
-void CSVDoc::NewGameDialogue::stateChanged (bool valid)
+void CSVDoc::NewGameDialogue::stateChanged(bool valid)
 {
-    mCreate->setEnabled (valid);
+    mCreate->setEnabled(valid);
 }
 
 void CSVDoc::NewGameDialogue::create()
 {
-    emit createRequest (mAdjusterWidget->getPath());
+    emit createRequest(mAdjusterWidget->getPath());
 }
 
 void CSVDoc::NewGameDialogue::reject()
 {
-    emit cancelCreateGame ();
+    emit cancelCreateGame();
     QDialog::reject();
 }

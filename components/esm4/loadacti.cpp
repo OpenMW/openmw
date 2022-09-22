@@ -26,8 +26,8 @@
 */
 #include "loadacti.hpp"
 
-#include <stdexcept>
 #include <iostream> // FIXME
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -36,23 +36,43 @@ void ESM4::Activator::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId); break;
-            case ESM4::SUB_SNAM: reader.getFormId(mLoopingSound);  break;
-            case ESM4::SUB_VNAM: reader.getFormId(mActivationSound);  break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
-            case ESM4::SUB_INAM: reader.getFormId(mRadioTemplate); break; // FONV
-            case ESM4::SUB_RNAM: reader.getFormId(mRadioStation); break;
-            case ESM4::SUB_XATO: reader.getZString(mActivationPrompt); break; // FONV
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.getFormId(mLoopingSound);
+                break;
+            case ESM4::SUB_VNAM:
+                reader.getFormId(mActivationSound);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
+            case ESM4::SUB_INAM:
+                reader.getFormId(mRadioTemplate);
+                break; // FONV
+            case ESM4::SUB_RNAM:
+                reader.getFormId(mRadioStation);
+                break;
+            case ESM4::SUB_XATO:
+                reader.getZString(mActivationPrompt);
+                break; // FONV
             case ESM4::SUB_MODT:
             case ESM4::SUB_MODS:
             case ESM4::SUB_DEST:
@@ -70,7 +90,7 @@ void ESM4::Activator::load(ESM4::Reader& reader)
             case ESM4::SUB_VMAD:
             case ESM4::SUB_WNAM:
             {
-                //std::cout << "ACTI " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "ACTI " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -80,10 +100,10 @@ void ESM4::Activator::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Activator::save(ESM4::Writer& writer) const
+// void ESM4::Activator::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Activator::blank()
+// void ESM4::Activator::blank()
 //{
-//}
+// }

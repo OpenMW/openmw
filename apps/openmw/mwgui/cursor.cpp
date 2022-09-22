@@ -1,13 +1,12 @@
 #include "cursor.hpp"
 
-#include <MyGUI_PointerManager.h>
-#include <MyGUI_InputManager.h>
-#include <MyGUI_RotatingSkin.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_PointerManager.h>
+#include <MyGUI_RotatingSkin.h>
 
 namespace MWGui
 {
-
 
     ResourceImageSetPointerFix::ResourceImageSetPointerFix()
         : mImageSet(nullptr)
@@ -15,9 +14,7 @@ namespace MWGui
     {
     }
 
-    ResourceImageSetPointerFix::~ResourceImageSetPointerFix()
-    {
-    }
+    ResourceImageSetPointerFix::~ResourceImageSetPointerFix() {}
 
     void ResourceImageSetPointerFix::deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version)
     {
@@ -56,7 +53,7 @@ namespace MWGui
         _image->setCoord(_point.left - mPoint.left, _point.top - mPoint.top, mSize.width, mSize.height);
     }
 
-    MyGUI::ResourceImageSetPtr ResourceImageSetPointerFix:: getImageSet()
+    MyGUI::ResourceImageSetPtr ResourceImageSetPointerFix::getImageSet()
     {
         return mImageSet;
     }

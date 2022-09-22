@@ -1,8 +1,8 @@
 #ifndef OPENMW_MWPHYSICS_PTRHOLDER_H
 #define OPENMW_MWPHYSICS_PTRHOLDER_H
 
-#include <mutex>
 #include <memory>
+#include <mutex>
 #include <utility>
 
 #include <osg/Vec3d>
@@ -26,40 +26,19 @@ namespace MWPhysics
 
         virtual ~PtrHolder() = default;
 
-        void updatePtr(const MWWorld::Ptr& updated)
-        {
-            mPtr = updated;
-        }
+        void updatePtr(const MWWorld::Ptr& updated) { mPtr = updated; }
 
-        MWWorld::Ptr getPtr() const
-        {
-            return mPtr;
-        }
+        MWWorld::Ptr getPtr() const { return mPtr; }
 
-        btCollisionObject* getCollisionObject() const
-        {
-            return mCollisionObject.get();
-        }
+        btCollisionObject* getCollisionObject() const { return mCollisionObject.get(); }
 
-        void setVelocity(osg::Vec3f velocity)
-        {
-            mVelocity = velocity;
-        }
+        void setVelocity(osg::Vec3f velocity) { mVelocity = velocity; }
 
-        osg::Vec3f velocity()
-        {
-            return std::exchange(mVelocity, osg::Vec3f());
-        }
+        osg::Vec3f velocity() { return std::exchange(mVelocity, osg::Vec3f()); }
 
-        void setSimulationPosition(const osg::Vec3f& position)
-        {
-            mSimulationPosition = position;
-        }
+        void setSimulationPosition(const osg::Vec3f& position) { mSimulationPosition = position; }
 
-        osg::Vec3f getSimulationPosition() const
-        {
-            return mSimulationPosition;
-        }
+        osg::Vec3f getSimulationPosition() const { return mSimulationPosition; }
 
         void setPosition(const osg::Vec3f& position)
         {
@@ -67,15 +46,9 @@ namespace MWPhysics
             mPosition = position;
         }
 
-        osg::Vec3d getPosition() const
-        {
-            return mPosition;
-        }
+        osg::Vec3d getPosition() const { return mPosition; }
 
-        osg::Vec3d getPreviousPosition() const
-        {
-            return mPreviousPosition;
-        }
+        osg::Vec3d getPreviousPosition() const { return mPreviousPosition; }
 
     protected:
         MWWorld::Ptr mPtr;

@@ -7,21 +7,20 @@
 
 namespace MWDialogue
 {
-    Topic::Topic()
-    {}
+    Topic::Topic() {}
 
-    Topic::Topic (const std::string& topic)
-    : mTopic (topic), mName (
-      MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic)->mId)
-    {}
-
-    Topic::~Topic()
-    {}
-
-    bool Topic::addEntry (const JournalEntry& entry)
+    Topic::Topic(const std::string& topic)
+        : mTopic(topic)
+        , mName(MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic)->mId)
     {
-        if (entry.mTopic!=mTopic)
-            throw std::runtime_error ("topic does not match: " + mTopic);
+    }
+
+    Topic::~Topic() {}
+
+    bool Topic::addEntry(const JournalEntry& entry)
+    {
+        if (entry.mTopic != mTopic)
+            throw std::runtime_error("topic does not match: " + mTopic);
 
         // bail out if we already have heard this
         for (Topic::TEntryIter it = mEntries.begin(); it != mEntries.end(); ++it)
@@ -30,13 +29,13 @@ namespace MWDialogue
                 return false;
         }
 
-        mEntries.push_back (entry); // we want slicing here
+        mEntries.push_back(entry); // we want slicing here
         return false;
     }
 
-    void Topic::insertEntry (const ESM::JournalEntry& entry)
+    void Topic::insertEntry(const ESM::JournalEntry& entry)
     {
-        mEntries.push_back (entry);
+        mEntries.push_back(entry);
     }
 
     std::string Topic::getTopic() const
@@ -61,12 +60,11 @@ namespace MWDialogue
 
     void Topic::removeLastAddedResponse(std::string_view actorName)
     {
-        for (std::vector<MWDialogue::Entry>::reverse_iterator it = mEntries.rbegin();
-             it != mEntries.rend(); ++it)
+        for (std::vector<MWDialogue::Entry>::reverse_iterator it = mEntries.rbegin(); it != mEntries.rend(); ++it)
         {
             if (it->mActorName == actorName)
             {
-                mEntries.erase( (++it).base() ); // erase doesn't take a reverse_iterator
+                mEntries.erase((++it).base()); // erase doesn't take a reverse_iterator
                 return;
             }
         }

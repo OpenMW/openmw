@@ -7,9 +7,9 @@
 
 #include "../mwmechanics/drawstate.hpp"
 
-#include <components/esm3/loadskil.hpp>
 #include <components/esm/attr.hpp>
 #include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {
@@ -30,22 +30,22 @@ namespace MWWorld
     /// \brief NPC object representing the player and additional player data
     class Player
     {
-        LiveCellRef<ESM::NPC>   mPlayer;
-        MWWorld::CellStore      *mCellStore;
-        std::string             mSign;
+        LiveCellRef<ESM::NPC> mPlayer;
+        MWWorld::CellStore* mCellStore;
+        std::string mSign;
 
         osg::Vec3f mLastKnownExteriorPosition;
 
-        ESM::Position           mMarkedPosition;
+        ESM::Position mMarkedPosition;
         // If no position was marked, this is nullptr
-        CellStore*              mMarkedCell;
+        CellStore* mMarkedCell;
 
-        bool                    mAutoMove;
-        float                   mForwardBackward;
-        bool                    mTeleported;
+        bool mAutoMove;
+        float mForwardBackward;
+        bool mTeleported;
 
-        int                     mCurrentCrimeId;    // the id assigned witnesses
-        int                     mPaidCrimeId;      // the last id paid off (0 bounty)
+        int mCurrentCrimeId; // the id assigned witnesses
+        int mPaidCrimeId; // the last id paid off (0 bounty)
 
         typedef std::map<std::string, std::string> PreviousItems; // previous equipped items, needed for bound spells
         PreviousItems mPreviousItems;
@@ -57,45 +57,44 @@ namespace MWWorld
         bool mJumping;
 
     public:
-
-        Player(const ESM::NPC *player);
+        Player(const ESM::NPC* player);
 
         void saveStats();
         void restoreStats();
         void setWerewolfStats();
 
         // For mark/recall magic effects
-        void markPosition (CellStore* markedCell, const ESM::Position& markedPosition);
-        void getMarkedPosition (CellStore*& markedCell, ESM::Position& markedPosition) const;
+        void markPosition(CellStore* markedCell, const ESM::Position& markedPosition);
+        void getMarkedPosition(CellStore*& markedCell, ESM::Position& markedPosition) const;
 
         /// Interiors can not always be mapped to a world position. However
         /// world position is still required for divine / almsivi magic effects
         /// and the player arrow on the global map.
-        void setLastKnownExteriorPosition (const osg::Vec3f& position) { mLastKnownExteriorPosition = position; }
+        void setLastKnownExteriorPosition(const osg::Vec3f& position) { mLastKnownExteriorPosition = position; }
         osg::Vec3f getLastKnownExteriorPosition() const { return mLastKnownExteriorPosition; }
 
-        void set (const ESM::NPC *player);
+        void set(const ESM::NPC* player);
 
-        void setCell (MWWorld::CellStore *cellStore);
+        void setCell(MWWorld::CellStore* cellStore);
 
         MWWorld::Ptr getPlayer();
         MWWorld::ConstPtr getConstPlayer() const;
 
-        void setBirthSign(const std::string &sign);
-        const std::string &getBirthSign() const;
+        void setBirthSign(const std::string& sign);
+        const std::string& getBirthSign() const;
 
-        void setDrawState (MWMechanics::DrawState state);
+        void setDrawState(MWMechanics::DrawState state);
         MWMechanics::DrawState getDrawState(); /// \todo constness
 
         /// Activate the object under the crosshair, if any
         void activate();
 
         bool getAutoMove() const;
-        void setAutoMove (bool enable);
+        void setAutoMove(bool enable);
 
-        void setLeftRight (float value);
+        void setLeftRight(float value);
 
-        void setForwardBackward (float value);
+        void setForwardBackward(float value);
         void setUpDown(int value);
 
         void setRunState(bool run);
@@ -113,20 +112,20 @@ namespace MWWorld
         void setJumping(bool jumping);
         bool getJumping() const;
 
-        ///Checks all nearby actors to see if anyone has an aipackage against you
+        /// Checks all nearby actors to see if anyone has an aipackage against you
         bool isInCombat();
 
         bool enemiesNearby();
 
         void clear();
 
-        void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-        bool readRecord (ESM::ESMReader& reader, uint32_t type);
+        bool readRecord(ESM::ESMReader& reader, uint32_t type);
 
-        int getNewCrimeId();  // get new id for witnesses
+        int getNewCrimeId(); // get new id for witnesses
         void recordCrimeId(); // record the paid crime id when bounty is 0
-        int getCrimeId() const;     // get the last paid crime id
+        int getCrimeId() const; // get the last paid crime id
 
         void setPreviousItem(const std::string& boundItemId, const std::string& previousItemId);
         std::string getPreviousItem(const std::string& boundItemId);

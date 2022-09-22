@@ -1,8 +1,8 @@
 #ifndef VERSION_HPP
 #define VERSION_HPP
 
-#include <string>
 #include <filesystem>
+#include <string>
 
 namespace Version
 {
@@ -17,13 +17,11 @@ namespace Version
     };
 
     /// Read OpenMW version from the version file located in resourcePath.
-    Version getOpenmwVersion(const std::filesystem::path &resourcePath);
+    Version getOpenmwVersion(const std::filesystem::path& resourcePath);
 
     /// Helper function to getOpenmwVersion and describe() it
-    std::string getOpenmwVersionDescription(const std::filesystem::path &resourcePath);
+    std::string getOpenmwVersionDescription(const std::filesystem::path& resourcePath);
 
 }
 
-
 #endif // VERSION_HPP
-

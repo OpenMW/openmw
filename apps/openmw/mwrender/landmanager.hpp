@@ -3,8 +3,8 @@
 
 #include <osg/Object>
 
-#include <components/resource/resourcemanager.hpp>
 #include <components/esm3terrain/storage.hpp>
+#include <components/resource/resourcemanager.hpp>
 
 namespace ESM
 {
@@ -14,7 +14,7 @@ namespace ESM
 namespace MWRender
 {
 
-    class LandManager : public Resource::GenericResourceManager<std::pair<int, int> >
+    class LandManager : public Resource::GenericResourceManager<std::pair<int, int>>
     {
     public:
         LandManager(int loadFlags);

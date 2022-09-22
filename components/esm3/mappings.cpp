@@ -6,7 +6,7 @@ namespace ESM
 {
     BodyPart::MeshPart getMeshPart(PartReferenceType type)
     {
-        switch(type)
+        switch (type)
         {
             case PRT_Head:
                 return BodyPart::MP_Head;
@@ -53,14 +53,14 @@ namespace ESM
             case PRT_Tail:
                 return BodyPart::MP_Tail;
             default:
-                throw std::runtime_error("PartReferenceType " +
-                    std::to_string(type) + " not associated with a mesh part");
+                throw std::runtime_error(
+                    "PartReferenceType " + std::to_string(type) + " not associated with a mesh part");
         }
     }
 
     std::string getBoneName(PartReferenceType type)
     {
-        switch(type)
+        switch (type)
         {
             case PRT_Head:
                 return "head";
@@ -123,7 +123,7 @@ namespace ESM
 
     std::string getMeshFilter(PartReferenceType type)
     {
-        switch(type)
+        switch (type)
         {
             case PRT_Hair:
                 return "hair";

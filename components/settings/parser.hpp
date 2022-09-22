@@ -3,18 +3,18 @@
 
 #include "categories.hpp"
 
-#include <string>
 #include <filesystem>
+#include <string>
 
 namespace Settings
 {
     class SettingsFileParser
     {
     public:
-        void loadSettingsFile(const std::filesystem::path &file, CategorySettingValueMap& settings,
-                              bool base64Encoded = false, bool overrideExisting = false);
+        void loadSettingsFile(const std::filesystem::path& file, CategorySettingValueMap& settings,
+            bool base64Encoded = false, bool overrideExisting = false);
 
-        void saveSettingsFile(const std::filesystem::path &file, const CategorySettingValueMap& settings);
+        void saveSettingsFile(const std::filesystem::path& file, const CategorySettingValueMap& settings);
 
     private:
         /// Increment i until it longer points to a whitespace character

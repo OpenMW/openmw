@@ -31,11 +31,11 @@
 #endif
 
 #include <cassert>
-#include <stdexcept>
 #include <cstring>
-#include <string>
-#include <sstream>
 #include <iostream> // FIXME
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -44,16 +44,22 @@ void ESM4::Creature::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getZString(mFullName); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel);    break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getZString(mFullName);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
             case ESM4::SUB_CNTO:
             {
                 static InventoryItem inv; // FIXME: use unique_ptr here?
@@ -82,8 +88,12 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                 reader.adjustFormId(mFaction.faction);
                 break;
             }
-            case ESM4::SUB_INAM: reader.getFormId(mDeathItem);   break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId);      break;
+            case ESM4::SUB_INAM:
+                reader.getFormId(mDeathItem);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
             case ESM4::SUB_AIDT:
             {
                 if (subHdr.dataSize == 20) // FO3
@@ -94,7 +104,7 @@ void ESM4::Creature::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_ACBS:
             {
-                //if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || mIsFONV)
+                // if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || mIsFONV)
                 if (subHdr.dataSize == 24)
                     reader.get(mBaseConfig);
                 else
@@ -109,20 +119,40 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                     reader.get(mData);
                 break;
             }
-            case ESM4::SUB_ZNAM: reader.getFormId(mCombatStyle); break;
-            case ESM4::SUB_CSCR: reader.getFormId(mSoundBase);   break;
-            case ESM4::SUB_CSDI: reader.getFormId(mSound);       break;
-            case ESM4::SUB_CSDC: reader.get(mSoundChance);  break;
-            case ESM4::SUB_BNAM: reader.get(mBaseScale);    break;
-            case ESM4::SUB_TNAM: reader.get(mTurningSpeed); break;
-            case ESM4::SUB_WNAM: reader.get(mFootWeight);   break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
-            case ESM4::SUB_NAM0: reader.getZString(mBloodSpray); break;
-            case ESM4::SUB_NAM1: reader.getZString(mBloodDecal); break;
+            case ESM4::SUB_ZNAM:
+                reader.getFormId(mCombatStyle);
+                break;
+            case ESM4::SUB_CSCR:
+                reader.getFormId(mSoundBase);
+                break;
+            case ESM4::SUB_CSDI:
+                reader.getFormId(mSound);
+                break;
+            case ESM4::SUB_CSDC:
+                reader.get(mSoundChance);
+                break;
+            case ESM4::SUB_BNAM:
+                reader.get(mBaseScale);
+                break;
+            case ESM4::SUB_TNAM:
+                reader.get(mTurningSpeed);
+                break;
+            case ESM4::SUB_WNAM:
+                reader.get(mFootWeight);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
+            case ESM4::SUB_NAM0:
+                reader.getZString(mBloodSpray);
+                break;
+            case ESM4::SUB_NAM1:
+                reader.getZString(mBloodDecal);
+                break;
             case ESM4::SUB_NIFZ:
             {
                 if (!reader.getZeroTerminatedStringArray(mNif))
-                    throw std::runtime_error ("CREA NIFZ data read error");
+                    throw std::runtime_error("CREA NIFZ data read error");
                 break;
             }
             case ESM4::SUB_NIFT:
@@ -143,10 +173,12 @@ void ESM4::Creature::load(ESM4::Reader& reader)
             case ESM4::SUB_KFFZ:
             {
                 if (!reader.getZeroTerminatedStringArray(mKf))
-                    throw std::runtime_error ("CREA KFFZ data read error");
+                    throw std::runtime_error("CREA KFFZ data read error");
                 break;
             }
-            case ESM4::SUB_TPLT: reader.get(mBaseTemplate); break; // FO3
+            case ESM4::SUB_TPLT:
+                reader.get(mBaseTemplate);
+                break; // FO3
             case ESM4::SUB_PNAM: // FO3/FONV/TES5
             {
                 FormId bodyPart;
@@ -173,7 +205,7 @@ void ESM4::Creature::load(ESM4::Reader& reader)
             case ESM4::SUB_DMDT: // FO3
             case ESM4::SUB_COED: // FO3
             {
-                //std::cout << "CREA " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "CREA " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -183,10 +215,10 @@ void ESM4::Creature::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Creature::save(ESM4::Writer& writer) const
+// void ESM4::Creature::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Creature::blank()
+// void ESM4::Creature::blank()
 //{
-//}
+// }

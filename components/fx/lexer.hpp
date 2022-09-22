@@ -1,12 +1,12 @@
 #ifndef OPENMW_COMPONENTS_FX_LEXER_H
 #define OPENMW_COMPONENTS_FX_LEXER_H
 
-#include <string_view>
-#include <string>
-#include <variant>
-#include <optional>
 #include <cstdint>
+#include <optional>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <variant>
 
 #include <osg/Vec2f>
 #include <osg/Vec3f>
@@ -20,8 +20,14 @@ namespace fx
     {
         struct LexerException : std::runtime_error
         {
-            LexerException(const std::string& message) : std::runtime_error(message) {}
-            LexerException(const char* message) : std::runtime_error(message) {}
+            LexerException(const std::string& message)
+                : std::runtime_error(message)
+            {
+            }
+            LexerException(const char* message)
+                : std::runtime_error(message)
+            {
+            }
         };
 
         class Lexer

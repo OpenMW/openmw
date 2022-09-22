@@ -10,11 +10,10 @@ namespace CSMWorld
     template <typename ESXRecordT>
     struct Record;
 
-    template<typename ESXRecordT>
+    template <typename ESXRecordT>
     class NestedColumnAdapter
     {
     public:
-
         NestedColumnAdapter() {}
 
         virtual ~NestedColumnAdapter() {}
@@ -29,7 +28,8 @@ namespace CSMWorld
 
         virtual QVariant getData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const = 0;
 
-        virtual void setData(Record<ESXRecordT>& record, const QVariant& value, int subRowIndex, int subColIndex) const = 0;
+        virtual void setData(
+            Record<ESXRecordT>& record, const QVariant& value, int subRowIndex, int subColIndex) const = 0;
 
         virtual int getColumnsCount(const Record<ESXRecordT>& record) const = 0;
 

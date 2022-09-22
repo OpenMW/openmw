@@ -36,35 +36,41 @@ namespace MWMechanics
     public:
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
-        osg::Vec3f mHitPosition{0,0,0}; // Used for spawning area orb
-        bool mAlwaysSucceed{false}; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
+        osg::Vec3f mHitPosition{ 0, 0, 0 }; // Used for spawning area orb
+        bool mAlwaysSucceed{
+            false
+        }; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
         bool mFromProjectile; // True if spell is cast by enchantment of some projectile (arrow, bolt or thrown weapon)
-        bool mManualSpell; // True if spell is casted from script and ignores some checks (mana level, success chance, etc.)
-        int mSlot{0};
-        ESM::ActiveSpells::EffectType mType{ESM::ActiveSpells::Type_Temporary};
+        bool mManualSpell; // True if spell is casted from script and ignores some checks (mana level, success chance,
+                           // etc.)
+        int mSlot{ 0 };
+        ESM::ActiveSpells::EffectType mType{ ESM::ActiveSpells::Type_Temporary };
 
-        CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false, const bool manualSpell=false);
+        CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile = false,
+            const bool manualSpell = false);
 
-        bool cast (const ESM::Spell* spell);
+        bool cast(const ESM::Spell* spell);
 
         /// @note mCaster must be an actor
-        /// @param launchProjectile If set to false, "on target" effects are directly applied instead of being launched as projectile originating from the caster.
-        bool cast (const MWWorld::Ptr& item, int slot, bool launchProjectile=true);
+        /// @param launchProjectile If set to false, "on target" effects are directly applied instead of being launched
+        /// as projectile originating from the caster.
+        bool cast(const MWWorld::Ptr& item, int slot, bool launchProjectile = true);
 
         /// @note mCaster must be an NPC
-        bool cast (const ESM::Ingredient* ingredient);
+        bool cast(const ESM::Ingredient* ingredient);
 
-        bool cast (const ESM::Potion* potion);
+        bool cast(const ESM::Potion* potion);
 
         /// @note Auto detects if spell, ingredient or potion
-        bool cast (const std::string& id);
+        bool cast(const std::string& id);
 
         void playSpellCastingEffects(const ESM::Enchantment* enchantment) const;
 
         void playSpellCastingEffects(const ESM::Spell* spell) const;
 
         /// @note \a target can be any type of object, not just actors.
-        void inflict(const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range, bool exploded = false) const;
+        void inflict(const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range,
+            bool exploded = false) const;
     };
 
     void playEffects(const MWWorld::Ptr& target, const ESM::MagicEffect& magicEffect, bool playNonLooping = true);

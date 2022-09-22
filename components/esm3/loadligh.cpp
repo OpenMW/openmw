@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Light::load(ESMReader &esm, bool &isDeleted)
+    void Light::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -55,7 +55,7 @@ namespace ESM
         if (!hasData && !isDeleted)
             esm.fail("Missing LHDT subrecord");
     }
-    void Light::save(ESMWriter &esm, bool isDeleted) const
+    void Light::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

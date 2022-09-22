@@ -10,37 +10,34 @@ namespace CSVWorld
 {
     class LandCreator : public GenericCreator
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QLabel* mXLabel;
-            QLabel* mYLabel;
-            QSpinBox* mX;
-            QSpinBox* mY;
+        QLabel* mXLabel;
+        QLabel* mYLabel;
+        QSpinBox* mX;
+        QSpinBox* mY;
 
-        public:
+    public:
+        LandCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
-            LandCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
+        void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 
-            void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
+        void touch(const std::vector<CSMWorld::UniversalId>& ids) override;
 
-            void touch(const std::vector<CSMWorld::UniversalId>& ids) override;
+        void focus() override;
 
-            void focus() override;
+        void reset() override;
 
-            void reset() override;
+        std::string getErrors() const override;
 
-            std::string getErrors() const override;
+    protected:
+        std::string getId() const override;
 
-        protected:
+        void pushCommand(std::unique_ptr<CSMWorld::CreateCommand> command, const std::string& id) override;
 
-            std::string getId() const override;
+    private slots:
 
-            void pushCommand(std::unique_ptr<CSMWorld::CreateCommand> command,
-                const std::string& id) override;
-
-        private slots:
-
-            void coordChanged(int value);
+        void coordChanged(int value);
     };
 }
 

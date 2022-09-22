@@ -7,19 +7,19 @@ namespace MWSound
 {
     class VolumeSettings
     {
-        public:
-            VolumeSettings();
+    public:
+        VolumeSettings();
 
-            float getVolumeFromType(Type type) const;
+        float getVolumeFromType(Type type) const;
 
-            void update();
+        void update();
 
-        private:
-            float mMasterVolume;
-            float mSFXVolume;
-            float mMusicVolume;
-            float mVoiceVolume;
-            float mFootstepsVolume;
+    private:
+        float mMasterVolume;
+        float mSFXVolume;
+        float mMusicVolume;
+        float mVoiceVolume;
+        float mFootstepsVolume;
     };
 }
 

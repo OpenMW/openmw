@@ -9,7 +9,7 @@ namespace ESM
 #pragma pack(push, 1)
     union ESMVersion
     {
-        float         f;
+        float f;
         std::uint32_t ui;
     };
 
@@ -30,13 +30,13 @@ namespace ESM
         VER_133 = 0x3faa3d71, // FONV HonestHearts
         VER_134 = 0x3fab851f, // FONV, GunRunnersArsenal, LonesomeRoad, OldWorldBlues
         VER_094 = 0x3f70a3d7, // TES5/FO3
-        VER_170 = 0x3fd9999a  // TES5
+        VER_170 = 0x3fd9999a // TES5
     };
 
     // Defines another files (esm or esp) that this file depends upon.
     struct MasterData
     {
-        std::string   name;
+        std::string name;
         std::uint64_t size;
     };
 

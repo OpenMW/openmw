@@ -29,7 +29,7 @@ namespace ESSImport
         Inventory mInventory;
         ESM::AIPackageList mAiPackages;
 
-        void load(ESM::ESMReader &esm);
+        void load(ESM::ESMReader& esm);
     };
 
 }

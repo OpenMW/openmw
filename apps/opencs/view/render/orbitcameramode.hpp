@@ -16,27 +16,25 @@ namespace CSVRender
 
     class OrbitCameraMode : public CSVWidget::ModeButton
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        OrbitCameraMode(WorldspaceWidget* worldspaceWidget, const QIcon& icon, const QString& tooltip = "",
+            QWidget* parent = nullptr);
+        ~OrbitCameraMode();
 
-            OrbitCameraMode(WorldspaceWidget* worldspaceWidget, const QIcon& icon, const QString& tooltip = "",
-                QWidget* parent = nullptr);
-            ~OrbitCameraMode();
+        void activate(CSVWidget::SceneToolbar* toolbar) override;
+        void deactivate(CSVWidget::SceneToolbar* toolbar) override;
+        bool createContextMenu(QMenu* menu) override;
 
-            void activate(CSVWidget::SceneToolbar* toolbar) override;
-            void deactivate(CSVWidget::SceneToolbar* toolbar) override;
-            bool createContextMenu(QMenu* menu) override;
+    private:
+        WorldspaceWidget* mWorldspaceWidget;
+        QAction* mCenterOnSelection;
+        CSMPrefs::Shortcut* mCenterShortcut;
 
-        private:
+    private slots:
 
-            WorldspaceWidget* mWorldspaceWidget;
-            QAction* mCenterOnSelection;
-            CSMPrefs::Shortcut* mCenterShortcut;
-
-        private slots:
-
-            void centerSelection();
+        void centerSelection();
     };
 }
 

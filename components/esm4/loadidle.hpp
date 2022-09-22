@@ -39,20 +39,20 @@ namespace ESM4
 
     struct IdleAnimation
     {
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::string mCollision;
         std::string mEvent;
 
-        FormId      mParent;  // IDLE or AACT
-        FormId      mPrevious;
+        FormId mParent; // IDLE or AACT
+        FormId mPrevious;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

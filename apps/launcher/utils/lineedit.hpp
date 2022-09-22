@@ -23,19 +23,18 @@ class LineEdit : public QLineEdit
     QString mPlaceholderText;
 
 public:
-    LineEdit(QWidget *parent = nullptr);
+    LineEdit(QWidget* parent = nullptr);
 
 protected:
-    void resizeEvent(QResizeEvent *) override;
+    void resizeEvent(QResizeEvent*) override;
 
 private slots:
-    void updateClearButton(const QString &text);
+    void updateClearButton(const QString& text);
 
 protected:
-    QToolButton *mClearButton;
+    QToolButton* mClearButton;
 
     void setupClearButton();
 };
 
 #endif // LIENEDIT_H
-

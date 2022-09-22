@@ -3,8 +3,8 @@
 
 #include <array>
 #include <cstdint>
-#include <iosfwd>
 #include <filesystem>
+#include <iosfwd>
 
 namespace Files
 {

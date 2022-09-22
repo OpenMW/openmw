@@ -24,35 +24,34 @@ namespace CSVWorld
     {
         Q_OBJECT
 
-        protected:
-            CSMDoc::Document& mDocument;
-            bool mEditLock;
+    protected:
+        CSMDoc::Document& mDocument;
+        bool mEditLock;
 
-        public:
-            DragRecordTable(CSMDoc::Document& document, QWidget* parent = nullptr);
+    public:
+        DragRecordTable(CSMDoc::Document& document, QWidget* parent = nullptr);
 
-            virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const = 0;
+        virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const = 0;
 
-            void setEditLock(bool locked);
+        void setEditLock(bool locked);
 
-        protected:
-            void startDragFromTable(const DragRecordTable& table);
+    protected:
+        void startDragFromTable(const DragRecordTable& table);
 
-            void dragEnterEvent(QDragEnterEvent *event) override;
+        void dragEnterEvent(QDragEnterEvent* event) override;
 
-            void dragMoveEvent(QDragMoveEvent *event) override;
+        void dragMoveEvent(QDragMoveEvent* event) override;
 
-            void dropEvent(QDropEvent *event) override;
+        void dropEvent(QDropEvent* event) override;
 
-            int sizeHintForColumn(int column) const override;
+        int sizeHintForColumn(int column) const override;
 
-        private:
-            CSMWorld::ColumnBase::Display getIndexDisplayType(const QModelIndex &index) const;
+    private:
+        CSMWorld::ColumnBase::Display getIndexDisplayType(const QModelIndex& index) const;
 
-        signals:
-            void moveRecordsFromSameTable(QDropEvent *event);
+    signals:
+        void moveRecordsFromSameTable(QDropEvent* event);
     };
 }
 
 #endif
-

@@ -17,53 +17,54 @@ namespace MWDialogue
 
     class Filter
     {
-            MWWorld::Ptr mActor;
-            int mChoice;
-            bool mTalkedToPlayer;
+        MWWorld::Ptr mActor;
+        int mChoice;
+        bool mTalkedToPlayer;
 
-            bool testActor (const ESM::DialInfo& info) const;
-            ///< Is this the right actor for this \a info?
+        bool testActor(const ESM::DialInfo& info) const;
+        ///< Is this the right actor for this \a info?
 
-            bool testPlayer (const ESM::DialInfo& info) const;
-            ///< Do the player and the cell the player is currently in match \a info?
+        bool testPlayer(const ESM::DialInfo& info) const;
+        ///< Do the player and the cell the player is currently in match \a info?
 
-            bool testSelectStructs (const ESM::DialInfo& info) const;
-            ///< Are all select structs matching?
+        bool testSelectStructs(const ESM::DialInfo& info) const;
+        ///< Are all select structs matching?
 
-            bool testDisposition (const ESM::DialInfo& info, bool invert=false) const;
-            ///< Is the actor disposition toward the player high enough (or low enough, if \a invert is true)?
+        bool testDisposition(const ESM::DialInfo& info, bool invert = false) const;
+        ///< Is the actor disposition toward the player high enough (or low enough, if \a invert is true)?
 
-            bool testFunctionLocal(const SelectWrapper& select) const;
+        bool testFunctionLocal(const SelectWrapper& select) const;
 
-            bool testSelectStruct (const SelectWrapper& select) const;
+        bool testSelectStruct(const SelectWrapper& select) const;
 
-            bool testSelectStructNumeric (const SelectWrapper& select) const;
+        bool testSelectStructNumeric(const SelectWrapper& select) const;
 
-            int getSelectStructInteger (const SelectWrapper& select) const;
+        int getSelectStructInteger(const SelectWrapper& select) const;
 
-            bool getSelectStructBoolean (const SelectWrapper& select) const;
+        bool getSelectStructBoolean(const SelectWrapper& select) const;
 
-            int getFactionRank(const MWWorld::Ptr& actor, std::string_view factionId) const;
+        int getFactionRank(const MWWorld::Ptr& actor, std::string_view factionId) const;
 
-            bool hasFactionRankSkillRequirements(const MWWorld::Ptr& actor, std::string_view factionId, int rank) const;
+        bool hasFactionRankSkillRequirements(const MWWorld::Ptr& actor, std::string_view factionId, int rank) const;
 
-            bool hasFactionRankReputationRequirements(const MWWorld::Ptr& actor, std::string_view factionId, int rank) const;
+        bool hasFactionRankReputationRequirements(
+            const MWWorld::Ptr& actor, std::string_view factionId, int rank) const;
 
-        public:
+    public:
+        Filter(const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);
 
-            Filter (const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);
+        std::vector<const ESM::DialInfo*> list(const ESM::Dialogue& dialogue, bool fallbackToInfoRefusal,
+            bool searchAll, bool invertDisposition = false) const;
+        ///< List all infos that could be used on the given actor, using the current runtime state of the actor.
+        /// \note If fallbackToInfoRefusal is used, the returned DialInfo might not be from the supplied ESM::Dialogue.
 
-            std::vector<const ESM::DialInfo *> list (const ESM::Dialogue& dialogue,
-                bool fallbackToInfoRefusal, bool searchAll, bool invertDisposition=false) const;
-            ///< List all infos that could be used on the given actor, using the current runtime state of the actor.
-            /// \note If fallbackToInfoRefusal is used, the returned DialInfo might not be from the supplied ESM::Dialogue.
+        std::vector<const ESM::DialInfo*> listAll(const ESM::Dialogue& dialogue) const;
+        ///< List all infos that could possibly be used on the given actor, ignoring runtime state filters and ignoring
+        ///< player filters.
 
-            std::vector<const ESM::DialInfo *> listAll (const ESM::Dialogue& dialogue) const;
-            ///< List all infos that could possibly be used on the given actor, ignoring runtime state filters and ignoring player filters.
-
-            const ESM::DialInfo* search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
-            ///< Get a matching response for the requested dialogue.
-            ///  Redirect to "Info Refusal" topic if a response fulfills all conditions but disposition.
+        const ESM::DialInfo* search(const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
+        ///< Get a matching response for the requested dialogue.
+        ///  Redirect to "Info Refusal" topic if a response fulfills all conditions but disposition.
     };
 }
 

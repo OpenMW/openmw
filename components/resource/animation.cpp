@@ -5,12 +5,13 @@
 
 namespace Resource
 {
-    Animation::Animation(const Animation& anim, const osg::CopyOp& copyop): osg::Object(anim, copyop),
-        mDuration(0.0f),
-        mStartTime(0.0f)
+    Animation::Animation(const Animation& anim, const osg::CopyOp& copyop)
+        : osg::Object(anim, copyop)
+        , mDuration(0.0f)
+        , mStartTime(0.0f)
     {
         const osgAnimation::ChannelList& channels = anim.getChannels();
-        for (const auto& channel: channels)
+        for (const auto& channel : channels)
             addChannel(channel.get()->clone());
     }
 
@@ -29,9 +30,9 @@ namespace Resource
         return mChannels;
     }
 
-    bool Animation::update (double time)
+    bool Animation::update(double time)
     {
-        for (const auto& channel: mChannels)
+        for (const auto& channel : mChannels)
         {
             channel->update(time, 1.0f, 0);
         }

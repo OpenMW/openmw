@@ -1,109 +1,108 @@
 #include "locals.hpp"
 
-#include <stdexcept>
 #include <algorithm>
-#include <ostream>
 #include <iterator>
+#include <ostream>
+#include <stdexcept>
 
 #include <components/misc/strings/lower.hpp>
 
 namespace Compiler
 {
-    const std::vector<std::string>& Locals::get (char type) const
+    const std::vector<std::string>& Locals::get(char type) const
     {
         switch (type)
         {
-            case 's': return mShorts;
-            case 'l': return mLongs;
-            case 'f': return mFloats;
+            case 's':
+                return mShorts;
+            case 'l':
+                return mLongs;
+            case 'f':
+                return mFloats;
         }
 
-        throw std::logic_error ("Unknown variable type");
+        throw std::logic_error("Unknown variable type");
     }
 
-    int Locals::searchIndex (char type, std::string_view name) const
+    int Locals::searchIndex(char type, std::string_view name) const
     {
-        const std::vector<std::string>& collection = get (type);
+        const std::vector<std::string>& collection = get(type);
 
-        auto iter = std::find (collection.begin(), collection.end(), name);
+        auto iter = std::find(collection.begin(), collection.end(), name);
 
-        if (iter==collection.end())
+        if (iter == collection.end())
             return -1;
 
-        return static_cast<int>(iter-collection.begin());
+        return static_cast<int>(iter - collection.begin());
     }
 
-    bool Locals::search (char type, std::string_view name) const
+    bool Locals::search(char type, std::string_view name) const
     {
-        return searchIndex (type, name)!=-1;
+        return searchIndex(type, name) != -1;
     }
 
-    std::vector<std::string>& Locals::get (char type)
+    std::vector<std::string>& Locals::get(char type)
     {
         switch (type)
         {
-            case 's': return mShorts;
-            case 'l': return mLongs;
-            case 'f': return mFloats;
+            case 's':
+                return mShorts;
+            case 'l':
+                return mLongs;
+            case 'f':
+                return mFloats;
         }
 
-        throw std::logic_error ("Unknown variable type");
+        throw std::logic_error("Unknown variable type");
     }
 
-    char Locals::getType (std::string_view name) const
+    char Locals::getType(std::string_view name) const
     {
-        if (search ('s', name))
+        if (search('s', name))
             return 's';
 
-        if (search ('l', name))
+        if (search('l', name))
             return 'l';
 
-        if (search ('f', name))
+        if (search('f', name))
             return 'f';
 
         return ' ';
     }
 
-    int Locals::getIndex (std::string_view name) const
+    int Locals::getIndex(std::string_view name) const
     {
-        int index = searchIndex ('s', name);
+        int index = searchIndex('s', name);
 
-        if (index!=-1)
+        if (index != -1)
             return index;
 
-        index = searchIndex ('l', name);
+        index = searchIndex('l', name);
 
-        if (index!=-1)
+        if (index != -1)
             return index;
 
-        return searchIndex ('f', name);
+        return searchIndex('f', name);
     }
 
-    void Locals::write (std::ostream& localFile) const
+    void Locals::write(std::ostream& localFile) const
     {
-        localFile
-            << get ('s').size() << ' '
-            << get ('l').size() << ' '
-            << get ('f').size() << std::endl;
+        localFile << get('s').size() << ' ' << get('l').size() << ' ' << get('f').size() << std::endl;
 
-        std::copy (get ('s').begin(), get ('s').end(),
-            std::ostream_iterator<std::string> (localFile, " "));
-        std::copy (get ('l').begin(), get ('l').end(),
-            std::ostream_iterator<std::string> (localFile, " "));
-        std::copy (get ('f').begin(), get ('f').end(),
-            std::ostream_iterator<std::string> (localFile, " "));
+        std::copy(get('s').begin(), get('s').end(), std::ostream_iterator<std::string>(localFile, " "));
+        std::copy(get('l').begin(), get('l').end(), std::ostream_iterator<std::string>(localFile, " "));
+        std::copy(get('f').begin(), get('f').end(), std::ostream_iterator<std::string>(localFile, " "));
     }
 
-    void Locals::declare (char type, std::string_view name)
+    void Locals::declare(char type, std::string_view name)
     {
-        get (type).push_back (Misc::StringUtils::lowerCase (name));
+        get(type).push_back(Misc::StringUtils::lowerCase(name));
     }
 
     void Locals::clear()
     {
-        get ('s').clear();
-        get ('l').clear();
-        get ('f').clear();
+        get('s').clear();
+        get('l').clear();
+        get('f').clear();
     }
 }
-

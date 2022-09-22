@@ -44,17 +44,19 @@ namespace SceneUtil
         {
         }
 
-        void apply(osg::Node &node) override;
+        void apply(osg::Node& node) override;
 
         std::string_view mNameToFind;
-        std::vector<osg::Node *> mFoundNodes;
+        std::vector<osg::Node*> mFoundNodes;
     };
 
     /// Maps names to nodes
     class NodeMapVisitor : public osg::NodeVisitor
     {
     public:
-        typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> NodeMap;
+        typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash,
+            Misc::StringUtils::CiEqual>
+            NodeMap;
 
         NodeMapVisitor(NodeMap& map)
             : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
@@ -83,8 +85,8 @@ namespace SceneUtil
 
     protected:
         // <node to remove, parent node to remove it from>
-        typedef std::vector<std::pair<osg::Node*, osg::Group*> > RemoveVec;
-        std::vector<std::pair<osg::Node*, osg::Group*> > mToRemove;
+        typedef std::vector<std::pair<osg::Node*, osg::Group*>> RemoveVec;
+        std::vector<std::pair<osg::Node*, osg::Group*>> mToRemove;
     };
 
     // Removes all drawables from a graph.

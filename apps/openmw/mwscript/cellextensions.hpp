@@ -15,11 +15,9 @@ namespace MWScript
 {
     /// \brief cell-related script functionality
     namespace Cell
-    {        
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+    {
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 
 #endif
-
-

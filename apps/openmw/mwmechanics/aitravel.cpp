@@ -2,43 +2,54 @@
 
 #include <algorithm>
 
-#include <components/esm3/aisequence.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
 
-#include "movement.hpp"
 #include "creaturestats.hpp"
+#include "movement.hpp"
 
 namespace
 {
 
     constexpr float TRAVEL_FINISH_TIME = 2.f;
 
-bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
-{
-    // Maximum travel distance for vanilla compatibility.
-    // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
-    // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
-    return (pos1 - pos2).length2() <= 7168*7168;
-}
+    bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
+    {
+        // Maximum travel distance for vanilla compatibility.
+        // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in
+        // interior cells as well. We can make this configurable at some point, but the default *must* be the below
+        // value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
+        return (pos1 - pos2).length2() <= 7168 * 7168;
+    }
 
 }
 
 namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z, bool repeat, AiTravel*)
-        : TypedAiPackage<AiTravel>(repeat), mX(x), mY(y), mZ(z), mHidden(false), mDestinationTimer(TRAVEL_FINISH_TIME)
+        : TypedAiPackage<AiTravel>(repeat)
+        , mX(x)
+        , mY(y)
+        , mZ(z)
+        , mHidden(false)
+        , mDestinationTimer(TRAVEL_FINISH_TIME)
     {
     }
 
     AiTravel::AiTravel(float x, float y, float z, AiInternalTravel* derived)
-        : TypedAiPackage<AiTravel>(derived), mX(x), mY(y), mZ(z), mHidden(true), mDestinationTimer(TRAVEL_FINISH_TIME)
+        : TypedAiPackage<AiTravel>(derived)
+        , mX(x)
+        , mY(y)
+        , mZ(z)
+        , mHidden(true)
+        , mDestinationTimer(TRAVEL_FINISH_TIME)
     {
     }
 
@@ -47,21 +58,27 @@ namespace MWMechanics
     {
     }
 
-    AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
-        : TypedAiPackage<AiTravel>(travel->mRepeat), mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
+    AiTravel::AiTravel(const ESM::AiSequence::AiTravel* travel)
+        : TypedAiPackage<AiTravel>(travel->mRepeat)
+        , mX(travel->mData.mX)
+        , mY(travel->mData.mY)
+        , mZ(travel->mData.mZ)
+        , mHidden(false)
         , mDestinationTimer(TRAVEL_FINISH_TIME)
     {
         // Hidden ESM::AiSequence::AiTravel package should be converted into MWMechanics::AiInternalTravel type
         assert(!travel->mHidden);
     }
 
-    bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
+    bool AiTravel::execute(
+        const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
         auto& stats = actor.getClass().getCreatureStats(actor);
 
-        if (!stats.getMovementFlag(CreatureStats::Flag_ForceJump) && !stats.getMovementFlag(CreatureStats::Flag_ForceSneak)
-                && (mechMgr->isTurningToPlayer(actor) || mechMgr->getGreetingState(actor) == Greet_InProgress))
+        if (!stats.getMovementFlag(CreatureStats::Flag_ForceJump)
+            && !stats.getMovementFlag(CreatureStats::Flag_ForceSneak)
+            && (mechMgr->isTurningToPlayer(actor) || mechMgr->getGreetingState(actor) == Greet_InProgress))
             return false;
 
         const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
@@ -86,10 +103,12 @@ namespace MWMechanics
         // but Morrowind might stop the actor prematurely under unclear conditions.
 
         // Note Morrowind uses the halved eye level, but this is close enough.
-        float dist = distanceIgnoreZ(actorPos, targetPos) - MWBase::Environment::get().getWorld()->getHalfExtents(actor).z();
+        float dist
+            = distanceIgnoreZ(actorPos, targetPos) - MWBase::Environment::get().getWorld()->getHalfExtents(actor).z();
         const float endTolerance = std::max(64.f, actor.getClass().getCurrentSpeed(actor) * duration);
 
-        // Even if we have entered the threshold, we might have been pushed away. Reset the timer if we're currently too far.
+        // Even if we have entered the threshold, we might have been pushed away. Reset the timer if we're currently too
+        // far.
         if (dist > endTolerance)
         {
             mDestinationTimer = TRAVEL_FINISH_TIME;
@@ -116,7 +135,7 @@ namespace MWMechanics
         reset();
     }
 
-    void AiTravel::writeState(ESM::AiSequence::AiSequence &sequence) const
+    void AiTravel::writeState(ESM::AiSequence::AiSequence& sequence) const
     {
         auto travel = std::make_unique<ESM::AiSequence::AiTravel>();
         travel->mData.mX = mX;
@@ -146,4 +165,3 @@ namespace MWMechanics
         return std::make_unique<AiInternalTravel>(*this);
     }
 }
-

@@ -73,7 +73,8 @@ namespace CSMWorld
 
     void ActorAdapter::RaceData::addOtherDependency(const std::string& id)
     {
-        if (!id.empty()) mDependencies.emplace(id);
+        if (!id.empty())
+            mDependencies.emplace(id);
     }
 
     void ActorAdapter::RaceData::reset_data(const std::string& id, bool isBeast)
@@ -89,7 +90,6 @@ namespace CSMWorld
         // Mark self as a dependency
         addOtherDependency(id);
     }
-
 
     ActorAdapter::ActorData::ActorData()
     {
@@ -168,10 +168,12 @@ namespace CSMWorld
 
     void ActorAdapter::ActorData::addOtherDependency(const std::string& id)
     {
-        if (!id.empty()) mDependencies.emplace(id);
+        if (!id.empty())
+            mDependencies.emplace(id);
     }
 
-    void ActorAdapter::ActorData::reset_data(const std::string& id, const std::string& skeleton, bool isCreature, bool isFemale, RaceDataPtr raceData)
+    void ActorAdapter::ActorData::reset_data(
+        const std::string& id, const std::string& skeleton, bool isCreature, bool isFemale, RaceDataPtr raceData)
     {
         mId = id;
         mCreature = isCreature;
@@ -183,9 +185,9 @@ namespace CSMWorld
 
         // Mark self and race as a dependency
         addOtherDependency(id);
-        if (raceData) addOtherDependency(raceData->getId());
+        if (raceData)
+            addOtherDependency(raceData->getId());
     }
-
 
     ActorAdapter::ActorAdapter(Data& data)
         : mReferenceables(data.getReferenceables())
@@ -194,28 +196,21 @@ namespace CSMWorld
     {
         // Setup qt slots and signals
         QAbstractItemModel* refModel = data.getTableModel(UniversalId::Type_Referenceable);
-        connect(refModel, &QAbstractItemModel::rowsInserted,
-                this, &ActorAdapter::handleReferenceablesInserted);
-        connect(refModel, &QAbstractItemModel::dataChanged,
-                this, &ActorAdapter::handleReferenceableChanged);
-        connect(refModel, &QAbstractItemModel::rowsAboutToBeRemoved,
-                this, &ActorAdapter::handleReferenceablesAboutToBeRemoved);
+        connect(refModel, &QAbstractItemModel::rowsInserted, this, &ActorAdapter::handleReferenceablesInserted);
+        connect(refModel, &QAbstractItemModel::dataChanged, this, &ActorAdapter::handleReferenceableChanged);
+        connect(refModel, &QAbstractItemModel::rowsAboutToBeRemoved, this,
+            &ActorAdapter::handleReferenceablesAboutToBeRemoved);
 
         QAbstractItemModel* raceModel = data.getTableModel(UniversalId::Type_Race);
-        connect(raceModel, &QAbstractItemModel::rowsInserted,
-                this, &ActorAdapter::handleRacesAboutToBeRemoved);
-        connect(raceModel, &QAbstractItemModel::dataChanged,
-                this, &ActorAdapter::handleRaceChanged);
-        connect(raceModel, &QAbstractItemModel::rowsAboutToBeRemoved,
-                this, &ActorAdapter::handleRacesAboutToBeRemoved);
+        connect(raceModel, &QAbstractItemModel::rowsInserted, this, &ActorAdapter::handleRacesAboutToBeRemoved);
+        connect(raceModel, &QAbstractItemModel::dataChanged, this, &ActorAdapter::handleRaceChanged);
+        connect(raceModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, &ActorAdapter::handleRacesAboutToBeRemoved);
 
         QAbstractItemModel* partModel = data.getTableModel(UniversalId::Type_BodyPart);
-        connect(partModel, &QAbstractItemModel::rowsInserted,
-                this, &ActorAdapter::handleBodyPartsInserted);
-        connect(partModel, &QAbstractItemModel::dataChanged,
-                this, &ActorAdapter::handleBodyPartChanged);
-        connect(partModel, &QAbstractItemModel::rowsAboutToBeRemoved,
-                this, &ActorAdapter::handleBodyPartsAboutToBeRemoved);
+        connect(partModel, &QAbstractItemModel::rowsInserted, this, &ActorAdapter::handleBodyPartsInserted);
+        connect(partModel, &QAbstractItemModel::dataChanged, this, &ActorAdapter::handleBodyPartChanged);
+        connect(
+            partModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, &ActorAdapter::handleBodyPartsAboutToBeRemoved);
     }
 
     ActorAdapter::ActorDataPtr ActorAdapter::getActorData(const std::string& id)
@@ -428,7 +423,8 @@ namespace CSMWorld
     {
         // Return cached race data if it exists
         RaceDataPtr data = mCachedRaces.get(id);
-        if (data) return data;
+        if (data)
+            return data;
 
         // Create the race data
         data = std::make_shared<RaceData>();
@@ -515,10 +511,12 @@ namespace CSMWorld
             auto& part = partRecord.get();
             if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin && !is1stPersonPart(part.mId))
             {
-                auto type = (ESM::BodyPart::MeshPart) part.mData.mPart;
+                auto type = (ESM::BodyPart::MeshPart)part.mData.mPart;
                 bool female = part.mData.mFlags & ESM::BodyPart::BPF_Female;
-                if (female) data->setFemalePart(type, part.mId);
-                else data->setMalePart(type, part.mId);
+                if (female)
+                    data->setFemalePart(type, part.mId);
+                else
+                    data->setMalePart(type, part.mId);
             }
         }
     }
@@ -539,7 +537,8 @@ namespace CSMWorld
         // Add inventory items
         for (auto& item : npc.mInventory.mList)
         {
-            if (item.mCount <= 0) continue;
+            if (item.mCount <= 0)
+                continue;
             std::string itemId = item.mItem;
             addNpcItem(itemId, data);
         }
@@ -568,7 +567,7 @@ namespace CSMWorld
             for (auto& part : list)
             {
                 std::string partId;
-                auto partType = (ESM::PartReferenceType) part.mPart;
+                auto partType = (ESM::PartReferenceType)part.mPart;
 
                 if (data->isFemale())
                     partId = part.mFemale;
@@ -600,15 +599,13 @@ namespace CSMWorld
             std::vector<ESM::PartReferenceType> parts;
             if (clothing.mData.mType == ESM::Clothing::Robe)
             {
-                parts = {
-                    ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
-                    ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
-                    ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_Cuirass
-                };
+                parts = { ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg, ESM::PRT_RUpperarm,
+                    ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee, ESM::PRT_RForearm, ESM::PRT_LForearm,
+                    ESM::PRT_Cuirass };
             }
             else if (clothing.mData.mType == ESM::Clothing::Skirt)
             {
-                parts = {ESM::PRT_Groin, ESM::PRT_RLeg, ESM::PRT_LLeg};
+                parts = { ESM::PRT_Groin, ESM::PRT_RLeg, ESM::PRT_LLeg };
             }
 
             std::vector<ESM::PartReference> reservedList;

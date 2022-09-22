@@ -47,7 +47,8 @@ namespace MWInput
 
         float angle = 0;
 
-        SDL_DisplayOrientation currentOrientation = SDL_GetDisplayOrientation(Settings::Manager::getInt("screen", "Video"));
+        SDL_DisplayOrientation currentOrientation
+            = SDL_GetDisplayOrientation(Settings::Manager::getInt("screen", "Video"));
         switch (currentOrientation)
         {
             case SDL_ORIENTATION_UNKNOWN:
@@ -84,7 +85,8 @@ namespace MWInput
                 if (SDL_SensorGetDeviceType(i) == SDL_SENSOR_GYRO)
                 {
                     // It is unclear how to handle several enabled gyroscopes, so use the first one.
-                    // Note: Android registers some gyroscope as two separate sensors, for non-wake-up mode and for wake-up mode.
+                    // Note: Android registers some gyroscope as two separate sensors, for non-wake-up mode and for
+                    // wake-up mode.
                     if (mGyroscope != nullptr)
                     {
                         SDL_SensorClose(mGyroscope);
@@ -93,9 +95,10 @@ namespace MWInput
                     }
 
                     // FIXME: SDL2 does not provide a way to configure a sensor update frequency so far.
-                    SDL_Sensor *sensor = SDL_SensorOpen(i);
+                    SDL_Sensor* sensor = SDL_SensorOpen(i);
                     if (sensor == nullptr)
-                        Log(Debug::Error) << "Couldn't open sensor " << SDL_SensorGetDeviceName(i) << ": " << SDL_GetError();
+                        Log(Debug::Error)
+                            << "Couldn't open sensor " << SDL_SensorGetDeviceName(i) << ": " << SDL_GetError();
                     else
                     {
                         mGyroscope = sensor;
@@ -129,12 +132,12 @@ namespace MWInput
         correctGyroscopeAxes();
     }
 
-    void SensorManager::sensorUpdated(const SDL_SensorEvent &arg)
+    void SensorManager::sensorUpdated(const SDL_SensorEvent& arg)
     {
         if (!Settings::Manager::getBool("enable gyroscope", "Input"))
             return;
 
-        SDL_Sensor *sensor = SDL_SensorFromInstanceID(arg.which);
+        SDL_Sensor* sensor = SDL_SensorFromInstanceID(arg.which);
         if (!sensor)
         {
             Log(Debug::Info) << "Couldn't get sensor for sensor event";
@@ -151,9 +154,9 @@ namespace MWInput
                 mGyroValues = mRotation * gyro;
                 mGyroUpdateTimer = 0.f;
                 break;
-        }
-        default:
-            break;
+            }
+            default:
+                break;
         }
     }
 

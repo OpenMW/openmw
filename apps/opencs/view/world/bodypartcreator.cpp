@@ -17,11 +17,8 @@ std::string CSVWorld::BodyPartCreator::getId() const
     return id;
 }
 
-CSVWorld::BodyPartCreator::BodyPartCreator(
-    CSMWorld::Data& data,
-    QUndoStack& undoStack,
-    const CSMWorld::UniversalId& id
-) : GenericCreator(data, undoStack, id)
+CSVWorld::BodyPartCreator::BodyPartCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
+    : GenericCreator(data, undoStack, id)
 {
     mFirstPerson = new QCheckBox("First Person", this);
     insertBeforeButtons(mFirstPerson, false);

@@ -1,8 +1,8 @@
 #ifndef CSV_DOC_VIEW_H
 #define CSV_DOC_VIEW_H
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include <QMainWindow>
 
@@ -35,241 +35,240 @@ namespace CSVDoc
 
     class View : public QMainWindow
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            ViewManager& mViewManager;
-            CSMDoc::Document *mDocument;
-            int mViewIndex;
-            int mViewTotal;
-            QList<SubView *> mSubViews;
-            QAction *mUndo;
-            QAction *mRedo;
-            QAction *mSave;
-            QAction *mVerify;
-            QAction *mShowStatusBar;
-            QAction *mStopDebug;
-            QAction *mMerge;
-            std::vector<QAction *> mEditingActions;
-            Operations *mOperations;
-            SubViewFactoryManager mSubViewFactory;
-            QMainWindow mSubViewWindow;
-            GlobalDebugProfileMenu *mGlobalDebugProfileMenu;
-            QScrollArea *mScroll;
-            bool mScrollbarOnly;
+        ViewManager& mViewManager;
+        CSMDoc::Document* mDocument;
+        int mViewIndex;
+        int mViewTotal;
+        QList<SubView*> mSubViews;
+        QAction* mUndo;
+        QAction* mRedo;
+        QAction* mSave;
+        QAction* mVerify;
+        QAction* mShowStatusBar;
+        QAction* mStopDebug;
+        QAction* mMerge;
+        std::vector<QAction*> mEditingActions;
+        Operations* mOperations;
+        SubViewFactoryManager mSubViewFactory;
+        QMainWindow mSubViewWindow;
+        GlobalDebugProfileMenu* mGlobalDebugProfileMenu;
+        QScrollArea* mScroll;
+        bool mScrollbarOnly;
 
+        // not implemented
+        View(const View&);
+        View& operator=(const View&);
 
-            // not implemented
-            View (const View&);
-            View& operator= (const View&);
+    private:
+        void closeEvent(QCloseEvent* event) override;
 
-        private:
+        QAction* createMenuEntry(CSMWorld::UniversalId::Type type, QMenu* menu, const char* shortcutName);
+        QAction* createMenuEntry(
+            const std::string& title, const std::string& iconName, QMenu* menu, const char* shortcutName);
 
-            void closeEvent (QCloseEvent *event) override;
+        void setupFileMenu();
 
-            QAction* createMenuEntry(CSMWorld::UniversalId::Type type, QMenu* menu, const char* shortcutName);
-            QAction* createMenuEntry(const std::string& title, const std::string& iconName, QMenu* menu, const char* shortcutName);
+        void setupEditMenu();
 
-            void setupFileMenu();
+        void setupViewMenu();
 
-            void setupEditMenu();
+        void setupWorldMenu();
 
-            void setupViewMenu();
+        void setupMechanicsMenu();
 
-            void setupWorldMenu();
+        void setupCharacterMenu();
 
-            void setupMechanicsMenu();
+        void setupAssetsMenu();
 
-            void setupCharacterMenu();
+        void setupDebugMenu();
 
-            void setupAssetsMenu();
+        void setupHelpMenu();
 
-            void setupDebugMenu();
+        void setupUi();
 
-            void setupHelpMenu();
+        void setupShortcut(const char* name, QAction* action);
 
-            void setupUi();
+        void updateActions();
 
-            void setupShortcut(const char* name, QAction* action);
+        void exitApplication();
 
-            void updateActions();
+        /// User preference function
+        void resizeViewWidth(int width);
 
-            void exitApplication();
+        /// User preference function
+        void resizeViewHeight(int height);
 
-            /// User preference function
-            void resizeViewWidth (int width);
+        void updateScrollbar();
+        void updateWidth(bool isGrowLimit, int minSubViewWidth);
+        void createScrollArea();
 
-            /// User preference function
-            void resizeViewHeight (int height);
+    public:
+        View(ViewManager& viewManager, CSMDoc::Document* document, int totalViews);
 
-            void updateScrollbar();
-            void updateWidth(bool isGrowLimit, int minSubViewWidth);
-            void createScrollArea();
-        public:
+        ///< The ownership of \a document is not transferred to *this.
 
-            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
+        ~View() override;
 
-            ///< The ownership of \a document is not transferred to *this.
+        const CSMDoc::Document* getDocument() const;
 
-            ~View() override;
+        CSMDoc::Document* getDocument();
 
-            const CSMDoc::Document *getDocument() const;
+        void setIndex(int viewIndex, int totalViews);
 
-            CSMDoc::Document *getDocument();
+        void updateDocumentState();
 
-            void setIndex (int viewIndex, int totalViews);
+        void updateProgress(int current, int max, int type, int threads);
 
-            void updateDocumentState();
+        void toggleStatusBar(bool checked);
 
-            void updateProgress (int current, int max, int type, int threads);
+        Operations* getOperations() const;
 
-            void toggleStatusBar(bool checked);
+    signals:
 
-            Operations *getOperations() const;
+        void newGameRequest();
 
-        signals:
+        void newAddonRequest();
 
-            void newGameRequest();
+        void loadDocumentRequest();
 
-            void newAddonRequest();
+        void exitApplicationRequest(CSVDoc::View* view);
 
-            void loadDocumentRequest();
+        void editSettingsRequest();
 
-            void exitApplicationRequest (CSVDoc::View *view);
+        void mergeDocument(CSMDoc::Document* document);
 
-            void editSettingsRequest();
+        void requestFocus(const std::string& id);
 
-            void mergeDocument (CSMDoc::Document *document);
+    public slots:
 
-            void requestFocus (const std::string& id);
+        void addSubView(const CSMWorld::UniversalId& id, const std::string& hint = "");
+        ///< \param hint Suggested view point (e.g. coordinates in a 3D scene or a line number
+        /// in a script).
 
-        public slots:
+        void abortOperation(int type);
 
-            void addSubView (const CSMWorld::UniversalId& id, const std::string& hint = "");
-            ///< \param hint Suggested view point (e.g. coordinates in a 3D scene or a line number
-            /// in a script).
+        void updateTitle();
 
-            void abortOperation (int type);
+        // called when subviews are added or removed
+        void updateSubViewIndices(SubView* view = nullptr);
 
-            void updateTitle();
+    private slots:
 
-            // called when subviews are added or removed
-            void updateSubViewIndices (SubView *view = nullptr);
+        void settingChanged(const CSMPrefs::Setting* setting);
 
-        private slots:
+        void undoActionChanged();
 
-            void settingChanged (const CSMPrefs::Setting *setting);
+        void redoActionChanged();
 
-            void undoActionChanged();
+        void newView();
 
-            void redoActionChanged();
+        void save();
 
-            void newView();
+        void exit();
 
-            void save();
+        static void openHelp();
 
-            void exit();
+        static void tutorial();
 
-            static void openHelp();
+        void infoAbout();
 
-            static void tutorial();
+        void infoAboutQt();
 
-            void infoAbout();
+        void verify();
 
-            void infoAboutQt();
+        void addGlobalsSubView();
 
-            void verify();
+        void addGmstsSubView();
 
-            void addGlobalsSubView();
+        void addSkillsSubView();
 
-            void addGmstsSubView();
+        void addClassesSubView();
 
-            void addSkillsSubView();
+        void addFactionsSubView();
 
-            void addClassesSubView();
+        void addRacesSubView();
 
-            void addFactionsSubView();
+        void addSoundsSubView();
 
-            void addRacesSubView();
+        void addScriptsSubView();
 
-            void addSoundsSubView();
+        void addRegionsSubView();
 
-            void addScriptsSubView();
+        void addBirthsignsSubView();
 
-            void addRegionsSubView();
+        void addSpellsSubView();
 
-            void addBirthsignsSubView();
+        void addCellsSubView();
 
-            void addSpellsSubView();
+        void addReferenceablesSubView();
 
-            void addCellsSubView();
+        void addReferencesSubView();
 
-            void addReferenceablesSubView();
+        void addRegionMapSubView();
 
-            void addReferencesSubView();
+        void addFiltersSubView();
 
-            void addRegionMapSubView();
+        void addTopicsSubView();
 
-            void addFiltersSubView();
+        void addJournalsSubView();
 
-            void addTopicsSubView();
+        void addTopicInfosSubView();
 
-            void addJournalsSubView();
+        void addJournalInfosSubView();
 
-            void addTopicInfosSubView();
+        void addEnchantmentsSubView();
 
-            void addJournalInfosSubView();
+        void addBodyPartsSubView();
 
-            void addEnchantmentsSubView();
+        void addSoundGensSubView();
 
-            void addBodyPartsSubView();
+        void addMagicEffectsSubView();
 
-            void addSoundGensSubView();
+        void addMeshesSubView();
 
-            void addMagicEffectsSubView();
+        void addIconsSubView();
 
-            void addMeshesSubView();
+        void addMusicsSubView();
 
-            void addIconsSubView();
+        void addSoundsResSubView();
 
-            void addMusicsSubView();
+        void addTexturesSubView();
 
-            void addSoundsResSubView();
+        void addVideosSubView();
 
-            void addTexturesSubView();
+        void addDebugProfilesSubView();
 
-            void addVideosSubView();
+        void addRunLogSubView();
 
-            void addDebugProfilesSubView();
+        void addLandsSubView();
 
-            void addRunLogSubView();
+        void addLandTexturesSubView();
 
-            void addLandsSubView();
+        void addPathgridSubView();
 
-            void addLandTexturesSubView();
+        void addStartScriptsSubView();
 
-            void addPathgridSubView();
+        void addSearchSubView();
 
-            void addStartScriptsSubView();
+        void addMetaDataSubView();
 
-            void addSearchSubView();
+        void toggleShowStatusBar(bool show);
 
-            void addMetaDataSubView();
+        void loadErrorLog();
 
-            void toggleShowStatusBar (bool show);
+        void run(const std::string& profile, const std::string& startupInstruction = "");
 
-            void loadErrorLog();
+        void stop();
 
-            void run (const std::string& profile, const std::string& startupInstruction = "");
+        void closeRequest(SubView* subView);
 
-            void stop();
+        void moveScrollBarToEnd(int min, int max);
 
-            void closeRequest (SubView *subView);
+        void merge();
 
-            void moveScrollBarToEnd(int min, int max);
-
-            void merge();
-
-            void onRequestFocus (const std::string& id);
+        void onRequestFocus(const std::string& id);
     };
 }
 

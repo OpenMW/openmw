@@ -11,36 +11,35 @@
 namespace MWRender
 {
 
-LandManager::LandManager(int loadFlags)
-    : GenericResourceManager<std::pair<int, int> >(nullptr)
-    , mLoadFlags(loadFlags)
-{
-    mCache = new CacheType;
-}
-
-osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
-{
-    osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(std::make_pair(x,y));
-    if (obj)
-        return static_cast<ESMTerrain::LandObject*>(obj.get());
-    else
+    LandManager::LandManager(int loadFlags)
+        : GenericResourceManager<std::pair<int, int>>(nullptr)
+        , mLoadFlags(loadFlags)
     {
-        const auto world = MWBase::Environment::get().getWorld();
-        if (!world)
-            return nullptr;
-        const ESM::Land* land = world->getStore().get<ESM::Land>().search(x,y);
-        if (!land)
-            return nullptr;
-        osg::ref_ptr<ESMTerrain::LandObject> landObj (new ESMTerrain::LandObject(land, mLoadFlags));
-        mCache->addEntryToObjectCache(std::make_pair(x,y), landObj.get());
-        return landObj;
+        mCache = new CacheType;
     }
-}
 
-void LandManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
-{
-    stats->setAttribute(frameNumber, "Land", mCache->getCacheSize());
-}
+    osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
+    {
+        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(std::make_pair(x, y));
+        if (obj)
+            return static_cast<ESMTerrain::LandObject*>(obj.get());
+        else
+        {
+            const auto world = MWBase::Environment::get().getWorld();
+            if (!world)
+                return nullptr;
+            const ESM::Land* land = world->getStore().get<ESM::Land>().search(x, y);
+            if (!land)
+                return nullptr;
+            osg::ref_ptr<ESMTerrain::LandObject> landObj(new ESMTerrain::LandObject(land, mLoadFlags));
+            mCache->addEntryToObjectCache(std::make_pair(x, y), landObj.get());
+            return landObj;
+        }
+    }
 
+    void LandManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
+    {
+        stats->setAttribute(frameNumber, "Land", mCache->getCacheSize());
+    }
 
 }

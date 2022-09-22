@@ -9,13 +9,12 @@
 
 #include <components/settings/settings.hpp>
 
-#include "state.hpp"
 #include "shortcutmanager.hpp"
+#include "state.hpp"
 
 namespace CSMPrefs
 {
-    ModifierSetting::ModifierSetting(Category* parent, QMutex* mutex, const std::string& key,
-        const std::string& label)
+    ModifierSetting::ModifierSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label)
         : Setting(parent, mutex, key, label)
         , mButton(nullptr)
         , mEditorActive(false)
@@ -40,7 +39,7 @@ namespace CSMPrefs
 
         mButton = widget;
 
-        connect (widget, &QPushButton::toggled, this, &ModifierSetting::buttonToggled);
+        connect(widget, &QPushButton::toggled, this, &ModifierSetting::buttonToggled);
 
         return std::make_pair(label, widget);
     }
@@ -90,10 +89,7 @@ namespace CSMPrefs
     bool ModifierSetting::handleEvent(QObject* target, int mod, int value)
     {
         // For potential future exceptions
-        const int Blacklist[] =
-        {
-            0
-        };
+        const int Blacklist[] = { 0 };
 
         const size_t BlacklistSize = sizeof(Blacklist) / sizeof(int);
 
@@ -117,7 +113,6 @@ namespace CSMPrefs
             if (value == Blacklist[i])
                 return true;
         }
-
 
         // Update modifier
         int modifier = value;

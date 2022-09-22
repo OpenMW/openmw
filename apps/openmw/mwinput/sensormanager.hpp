@@ -6,8 +6,8 @@
 #include <osg/Matrixf>
 #include <osg/Vec3f>
 
-#include <components/settings/settings.hpp>
 #include <components/sdlutil/events.hpp>
+#include <components/settings/settings.hpp>
 
 namespace SDLUtil
 {
@@ -32,7 +32,7 @@ namespace MWInput
 
         void update(float dt);
 
-        void sensorUpdated(const SDL_SensorEvent &arg) override;
+        void sensorUpdated(const SDL_SensorEvent& arg) override;
         void displayOrientationChanged() override;
         void processChangedSettings(const Settings::CategorySettingVector& changed);
 
@@ -40,7 +40,6 @@ namespace MWInput
         std::array<float, 3> getGyroValues() const;
 
     private:
-
         void updateSensors();
         void correctGyroscopeAxes();
 

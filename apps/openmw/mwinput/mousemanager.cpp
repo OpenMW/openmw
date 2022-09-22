@@ -20,7 +20,8 @@
 
 namespace MWInput
 {
-    MouseManager::MouseManager(BindingsManager* bindingsManager, SDLUtil::InputWrapper* inputWrapper, SDL_Window* window)
+    MouseManager::MouseManager(
+        BindingsManager* bindingsManager, SDLUtil::InputWrapper* inputWrapper, SDL_Window* window)
         : mInvertX(Settings::Manager::getBool("invert x axis", "Input"))
         , mInvertY(Settings::Manager::getBool("invert y axis", "Input"))
         , mGrabCursor(Settings::Manager::getBool("grab cursor", "Input"))
@@ -36,7 +37,7 @@ namespace MWInput
         , mMouseMoveX(0)
         , mMouseMoveY(0)
     {
-        int w,h;
+        int w, h;
         SDL_GetWindowSize(window, &w, &h);
 
         float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
@@ -62,7 +63,7 @@ namespace MWInput
         }
     }
 
-    void MouseManager::mouseMoved(const SDLUtil::MouseMotionEvent &arg)
+    void MouseManager::mouseMoved(const SDLUtil::MouseMotionEvent& arg)
     {
         mBindingsManager->mouseMoved(arg);
 
@@ -82,9 +83,12 @@ namespace MWInput
 
             mMouseWheel = static_cast<int>(arg.z);
 
-            MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
-            // FIXME: inject twice to force updating focused widget states (tooltips) resulting from changing the viewport by scroll wheel
-            MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+            MyGUI::InputManager::getInstance().injectMouseMove(
+                static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+            // FIXME: inject twice to force updating focused widget states (tooltips) resulting from changing the
+            // viewport by scroll wheel
+            MyGUI::InputManager::getInstance().injectMouseMove(
+                static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
 
             MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
@@ -113,7 +117,7 @@ namespace MWInput
         }
     }
 
-    void MouseManager::mouseReleased(const SDL_MouseButtonEvent &arg, Uint8 id)
+    void MouseManager::mouseReleased(const SDL_MouseButtonEvent& arg, Uint8 id)
     {
         MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
 
@@ -124,11 +128,9 @@ namespace MWInput
         else
         {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(
-                static_cast<int>(mGuiCursorX),
-                static_cast<int>(mGuiCursorY),
-                SDLUtil::sdlMouseButtonToMyGui(id)
-            ) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX),
+                          static_cast<int>(mGuiCursorY), SDLUtil::sdlMouseButtonToMyGui(id))
+                && guiMode;
 
             if (mBindingsManager->isDetectingBindingState())
                 return; // don't allow same mouseup to bind as initiated bind
@@ -138,7 +140,7 @@ namespace MWInput
         }
     }
 
-    void MouseManager::mouseWheelMoved(const SDL_MouseWheelEvent &arg)
+    void MouseManager::mouseWheelMoved(const SDL_MouseWheelEvent& arg)
     {
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         if (mBindingsManager->isDetectingBindingState() || !input->controlsDisabled())
@@ -147,7 +149,7 @@ namespace MWInput
         input->setJoystickLastUsed(false);
     }
 
-    void MouseManager::mousePressed(const SDL_MouseButtonEvent &arg, Uint8 id)
+    void MouseManager::mousePressed(const SDL_MouseButtonEvent& arg, Uint8 id)
     {
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         input->setJoystickLastUsed(false);
@@ -156,14 +158,13 @@ namespace MWInput
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMousePress(
-                static_cast<int>(mGuiCursorX),
-                static_cast<int>(mGuiCursorY),
-                SDLUtil::sdlMouseButtonToMyGui(id)
-            ) && guiMode;
-            if (MyGUI::InputManager::getInstance().getMouseFocusWidget () != nullptr)
+            guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX),
+                          static_cast<int>(mGuiCursorY), SDLUtil::sdlMouseButtonToMyGui(id))
+                && guiMode;
+            if (MyGUI::InputManager::getInstance().getMouseFocusWidget() != nullptr)
             {
-                MyGUI::Button* b = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
+                MyGUI::Button* b
+                    = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
                 if (b && b->getEnabled() && id == SDL_BUTTON_LEFT)
                 {
                     MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
@@ -176,14 +177,15 @@ namespace MWInput
 
         // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
         // Also do not trigger bindings when input controls are disabled, e.g. during save loading
-        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings && !input->controlsDisabled())
+        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
+            && !input->controlsDisabled())
             mBindingsManager->mousePressed(arg, id);
     }
 
     void MouseManager::updateCursorMode()
     {
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
-             && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
+            && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
 
         bool wasRelative = mInputWrapper->getMouseRelative();
         bool isRelative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
@@ -192,11 +194,11 @@ namespace MWInput
         // stop using raw mouse motions and switch to system cursor movements
         mInputWrapper->setMouseRelative(isRelative);
 
-        //we let the mouse escape in the main menu
+        // we let the mouse escape in the main menu
         mInputWrapper->setGrabPointer(grab && (mGrabCursor || isRelative));
 
-        //we switched to non-relative mode, move our cursor to where the in-game
-        //cursor is
+        // we switched to non-relative mode, move our cursor to where the in-game
+        // cursor is
         if (!isRelative && wasRelative != isRelative)
         {
             warpMouse();
@@ -237,17 +239,13 @@ namespace MWInput
     bool MouseManager::injectMouseButtonPress(Uint8 button)
     {
         return MyGUI::InputManager::getInstance().injectMousePress(
-            static_cast<int>(mGuiCursorX),
-            static_cast<int>(mGuiCursorY),
-            SDLUtil::sdlMouseButtonToMyGui(button));
+            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), SDLUtil::sdlMouseButtonToMyGui(button));
     }
 
     bool MouseManager::injectMouseButtonRelease(Uint8 button)
     {
         return MyGUI::InputManager::getInstance().injectMouseRelease(
-            static_cast<int>(mGuiCursorX),
-            static_cast<int>(mGuiCursorY),
-            SDLUtil::sdlMouseButtonToMyGui(button));
+            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), SDLUtil::sdlMouseButtonToMyGui(button));
     }
 
     void MouseManager::injectMouseMove(float xMove, float yMove, float mouseWheelMove)
@@ -260,12 +258,13 @@ namespace MWInput
         mGuiCursorX = std::clamp<float>(mGuiCursorX, 0.f, viewSize.width - 1);
         mGuiCursorY = std::clamp<float>(mGuiCursorY, 0.f, viewSize.height - 1);
 
-        MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), static_cast<int>(mMouseWheel));
+        MyGUI::InputManager::getInstance().injectMouseMove(
+            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), static_cast<int>(mMouseWheel));
     }
 
     void MouseManager::warpMouse()
     {
         float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-        mInputWrapper->warpMouse(static_cast<int>(mGuiCursorX*uiScale), static_cast<int>(mGuiCursorY*uiScale));
+        mInputWrapper->warpMouse(static_cast<int>(mGuiCursorX * uiScale), static_cast<int>(mGuiCursorY * uiScale));
     }
 }

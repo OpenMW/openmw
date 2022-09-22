@@ -15,9 +15,9 @@ namespace MWScript
 {
     namespace Animation
     {
-        void registerExtensions (Compiler::Extensions& extensions);
+        void registerExtensions(Compiler::Extensions& extensions);
 
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 

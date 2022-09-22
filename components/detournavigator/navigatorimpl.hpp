@@ -4,8 +4,8 @@
 #include "navigator.hpp"
 #include "navmeshmanager.hpp"
 
-#include <set>
 #include <memory>
+#include <set>
 
 namespace DetourNavigator
 {
@@ -82,8 +82,8 @@ namespace DetourNavigator
         std::unordered_map<ObjectId, ObjectId> mAvoidIds;
         std::unordered_map<ObjectId, ObjectId> mWaterIds;
 
-        inline bool addObjectImpl(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
-            const UpdateGuard* guard);
+        inline bool addObjectImpl(
+            const ObjectId id, const ObjectShapes& shapes, const btTransform& transform, const UpdateGuard* guard);
 
         inline void updateAvoidShapeId(const ObjectId id, const ObjectId avoidId, const UpdateGuard* guard);
 
@@ -98,7 +98,10 @@ namespace DetourNavigator
     class UpdateGuard
     {
     public:
-        explicit UpdateGuard(NavigatorImpl& navigator) : mImpl(navigator.mNavMeshManager) {}
+        explicit UpdateGuard(NavigatorImpl& navigator)
+            : mImpl(navigator.mNavMeshManager)
+        {
+        }
 
     private:
         NavMeshManager::UpdateGuard mImpl;

@@ -8,8 +8,8 @@
 
 namespace MWGui
 {
-    ConfirmationDialog::ConfirmationDialog() :
-        WindowModal("openmw_confirmation_dialog.layout")
+    ConfirmationDialog::ConfirmationDialog()
+        : WindowModal("openmw_confirmation_dialog.layout")
     {
         getWidget(mMessage, "Message");
         getWidget(mOkButton, "OkButton");

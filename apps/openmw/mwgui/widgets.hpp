@@ -31,7 +31,7 @@ namespace MWGui
     {
         class MWEffectList;
 
-        void fixTexturePath(std::string &path);
+        void fixTexturePath(std::string& path);
 
         struct SpellEffectParams
         {
@@ -71,20 +71,21 @@ namespace MWGui
 
             bool operator==(const SpellEffectParams& other) const
             {
-                if (mEffectID !=  other.mEffectID)
+                if (mEffectID != other.mEffectID)
                     return false;
 
                 bool involvesAttribute = (mEffectID == 74 // restore attribute
-                                        || mEffectID == 85 // absorb attribute
-                                        || mEffectID == 17 // drain attribute
-                                        || mEffectID == 79 // fortify attribute
-                                        || mEffectID == 22); // damage attribute
+                    || mEffectID == 85 // absorb attribute
+                    || mEffectID == 17 // drain attribute
+                    || mEffectID == 79 // fortify attribute
+                    || mEffectID == 22); // damage attribute
                 bool involvesSkill = (mEffectID == 78 // restore skill
-                                        || mEffectID == 89 // absorb skill
-                                        || mEffectID == 21 // drain skill
-                                        || mEffectID == 83 // fortify skill
-                                        || mEffectID == 26); // damage skill
-                return ((other.mSkill == mSkill) || !involvesSkill) && ((other.mAttribute == mAttribute) && !involvesAttribute) && (other.mArea == mArea);
+                    || mEffectID == 89 // absorb skill
+                    || mEffectID == 21 // drain skill
+                    || mEffectID == 83 // fortify skill
+                    || mEffectID == 26); // damage skill
+                return ((other.mSkill == mSkill) || !involvesSkill)
+                    && ((other.mAttribute == mAttribute) && !involvesAttribute) && (other.mArea == mArea);
             }
         };
 
@@ -92,7 +93,7 @@ namespace MWGui
 
         class MWSkill final : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSkill )
+            MYGUI_RTTI_DERIVED(MWSkill)
         public:
             MWSkill();
 
@@ -121,7 +122,6 @@ namespace MWGui
             void onClicked(MyGUI::Widget* _sender);
 
         private:
-
             void updateWidgets();
 
             ESM::Skill::SkillEnum mSkillId;
@@ -133,7 +133,7 @@ namespace MWGui
 
         class MWAttribute final : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWAttribute )
+            MYGUI_RTTI_DERIVED(MWAttribute)
         public:
             MWAttribute();
 
@@ -161,7 +161,6 @@ namespace MWGui
             void onClicked(MyGUI::Widget* _sender);
 
         private:
-
             void updateWidgets();
 
             int mId;
@@ -177,22 +176,24 @@ namespace MWGui
         class MWSpellEffect;
         class MWSpell final : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSpell )
+            MYGUI_RTTI_DERIVED(MWSpell)
         public:
             MWSpell();
 
-            void setSpellId(const std::string &id);
+            void setSpellId(const std::string& id);
 
             /**
              * @param vector to store the created effect widgets
              * @param parent widget
              * @param coordinates to use, will be expanded if more space is needed
-             * @param spell category, if this is 0, this means the spell effects are permanent and won't display e.g. duration
+             * @param spell category, if this is 0, this means the spell effects are permanent and won't display e.g.
+             * duration
              * @param various flags, see MWEffectList::EffectFlags
              */
-            void createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyGUI::Widget* creator, MyGUI::IntCoord &coord, int flags);
+            void createEffectWidgets(
+                std::vector<MyGUI::Widget*>& effects, MyGUI::Widget* creator, MyGUI::IntCoord& coord, int flags);
 
-            const std::string &getSpellId() const { return mId; }
+            const std::string& getSpellId() const { return mId; }
 
         protected:
             virtual ~MWSpell();
@@ -209,7 +210,7 @@ namespace MWGui
 
         class MWEffectList final : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWEffectList )
+            MYGUI_RTTI_DERIVED(MWEffectList)
         public:
             MWEffectList();
 
@@ -232,7 +233,8 @@ namespace MWGui
              * @param center the effect widgets horizontally
              * @param various flags, see MWEffectList::EffectFlags
              */
-            void createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyGUI::Widget* creator, MyGUI::IntCoord &coord, bool center, int flags);
+            void createEffectWidgets(std::vector<MyGUI::Widget*>& effects, MyGUI::Widget* creator,
+                MyGUI::IntCoord& coord, bool center, int flags);
 
         protected:
             virtual ~MWEffectList();
@@ -248,7 +250,7 @@ namespace MWGui
 
         class MWSpellEffect final : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSpellEffect )
+            MYGUI_RTTI_DERIVED(MWSpellEffect)
         public:
             MWSpellEffect();
 
@@ -265,7 +267,7 @@ namespace MWGui
 
         private:
             static constexpr int sIconOffset = 24;
-            
+
             void updateWidgets();
 
             SpellEffectParams mEffectParams;
@@ -277,7 +279,7 @@ namespace MWGui
 
         class MWDynamicStat final : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWDynamicStat )
+            MYGUI_RTTI_DERIVED(MWDynamicStat)
         public:
             MWDynamicStat();
 
@@ -293,7 +295,6 @@ namespace MWGui
             void initialiseOverride() override;
 
         private:
-
             int mValue, mMax;
             MyGUI::TextBox* mTextWidget;
             MyGUI::ProgressBar* mBarWidget;

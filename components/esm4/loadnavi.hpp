@@ -28,8 +28,8 @@
 #define ESM4_NAVI_H
 
 #include <cstdint>
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "common.hpp" // CellGrid, Vertex
 
@@ -40,7 +40,7 @@ namespace ESM4
 
     struct Navigation
     {
-#pragma pack(push,1)
+#pragma pack(push, 1)
         struct DoorRef
         {
             std::uint32_t unknown;
@@ -71,9 +71,9 @@ namespace ESM4
 
         enum Flags // NVMI island flags (not certain)
         {
-            FLG_Island     = 0x00000020,
-            FLG_Modified   = 0x00000000, // not island
-            FLG_Unmodified = 0x00000040  // not island
+            FLG_Island = 0x00000020,
+            FLG_Modified = 0x00000000, // not island
+            FLG_Unmodified = 0x00000040 // not island
         };
 
         struct NavMeshInfo
@@ -100,14 +100,14 @@ namespace ESM4
 
         std::vector<NavMeshInfo> mNavMeshInfo;
 
-        std::vector<std::pair<std::uint32_t, std::vector<FormId> > > mPreferredPaths;
+        std::vector<std::pair<std::uint32_t, std::vector<FormId>>> mPreferredPaths;
 
         std::map<FormId, std::uint32_t> mPathIndexMap;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

@@ -4,17 +4,17 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/disease.hpp"
 
 namespace MWWorld
 {
-    ActionOpen::ActionOpen (const MWWorld::Ptr& container)
-        : Action (false, container)
+    ActionOpen::ActionOpen(const MWWorld::Ptr& container)
+        : Action(false, container)
     {
     }
 
-    void ActionOpen::executeImp (const MWWorld::Ptr& actor)
+    void ActionOpen::executeImp(const MWWorld::Ptr& actor)
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return;

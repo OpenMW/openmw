@@ -58,7 +58,7 @@ namespace Stereo
         {
             // When applied as an offset to an existing view matrix,
             // that view matrix will already convert points to a camera space
-            // with opengl conventions. So we need to convert offsets to opengl 
+            // with opengl conventions. So we need to convert offsets to opengl
             // conventions.
             float y = position.y();
             float z = position.z();
@@ -108,13 +108,15 @@ namespace Stereo
         matrix[9] = (tanUp + tanDown) / tanHeight;
         matrix[13] = 0;
 
-        if (reverseZ) {
+        if (reverseZ)
+        {
             matrix[2] = 0;
             matrix[6] = 0;
             matrix[10] = (2.f * near) / (far - near);
             matrix[14] = ((2.f * near) * far) / (far - near);
         }
-        else {
+        else
+        {
             matrix[2] = 0;
             matrix[6] = 0;
             matrix[10] = -(far + near) / (far - near);
@@ -131,9 +133,7 @@ namespace Stereo
 
     bool FieldOfView::operator==(const FieldOfView& rhs) const
     {
-        return angleDown == rhs.angleDown
-            && angleUp == rhs.angleUp
-            && angleLeft == rhs.angleLeft
+        return angleDown == rhs.angleDown && angleUp == rhs.angleUp && angleLeft == rhs.angleLeft
             && angleRight == rhs.angleRight;
     }
 
@@ -142,25 +142,20 @@ namespace Stereo
         return pose == rhs.pose && fov == rhs.fov;
     }
 
-    std::ostream& operator <<(
-        std::ostream& os,
-        const Pose& pose)
+    std::ostream& operator<<(std::ostream& os, const Pose& pose)
     {
         os << "position=" << pose.position << ", orientation=" << pose.orientation;
         return os;
     }
 
-    std::ostream& operator <<(
-        std::ostream& os,
-        const FieldOfView& fov)
+    std::ostream& operator<<(std::ostream& os, const FieldOfView& fov)
     {
-        os << "left=" << fov.angleLeft << ", right=" << fov.angleRight << ", down=" << fov.angleDown << ", up=" << fov.angleUp;
+        os << "left=" << fov.angleLeft << ", right=" << fov.angleRight << ", down=" << fov.angleDown
+           << ", up=" << fov.angleUp;
         return os;
     }
 
-    std::ostream& operator <<(
-        std::ostream& os,
-        const View& view)
+    std::ostream& operator<<(std::ostream& os, const View& view)
     {
         os << "pose=< " << view.pose << " >, fov=< " << view.fov << " >";
         return os;

@@ -1,31 +1,31 @@
 #include "textinputdialog.hpp"
 
-#include <QDialogButtonBox>
 #include <QApplication>
+#include <QDialogButtonBox>
+#include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QValidator>
-#include <QLabel>
 
-Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWidget *parent) :
-    QDialog(parent)
+Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString& text, QWidget* parent)
+    : QDialog(parent)
 {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     mButtonBox = new QDialogButtonBox(this);
     mButtonBox->addButton(QDialogButtonBox::Ok);
     mButtonBox->addButton(QDialogButtonBox::Cancel);
-    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
+    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-    auto *label = new QLabel(this);
+    auto* label = new QLabel(this);
     label->setText(text);
 
     // Line edit
-    QValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
+    QValidator* validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
     mLineEdit = new LineEdit(this);
     mLineEdit->setValidator(validator);
     mLineEdit->setCompleter(nullptr);
 
-    auto *dialogLayout = new QVBoxLayout(this);
+    auto* dialogLayout = new QVBoxLayout(this);
     dialogLayout->addWidget(label);
     dialogLayout->addWidget(mLineEdit);
     dialogLayout->addWidget(mButtonBox);
@@ -43,9 +43,7 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
     connect(mButtonBox, &QDialogButtonBox::rejected, this, &TextInputDialog::reject);
 }
 
-Launcher::TextInputDialog::~TextInputDialog()
-{
-}
+Launcher::TextInputDialog::~TextInputDialog() {}
 
 int Launcher::TextInputDialog::exec()
 {
@@ -56,15 +54,18 @@ int Launcher::TextInputDialog::exec()
 
 void Launcher::TextInputDialog::setOkButtonEnabled(bool enabled)
 {
-    QPushButton *okButton = mButtonBox->button(QDialogButtonBox::Ok);
+    QPushButton* okButton = mButtonBox->button(QDialogButtonBox::Ok);
     okButton->setEnabled(enabled);
 
     QPalette palette;
     palette.setColor(QPalette::Text, Qt::red);
 
-    if (enabled) {
+    if (enabled)
+    {
         mLineEdit->setPalette(QApplication::palette());
-    } else {
+    }
+    else
+    {
         // Existing profile name, make the text red
         mLineEdit->setPalette(palette);
     }

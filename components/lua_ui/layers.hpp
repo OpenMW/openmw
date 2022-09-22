@@ -14,54 +14,52 @@ namespace LuaUi
     // stores layers in a vector and their indices could change
     class Layer
     {
-        public:
-            Layer(size_t index)
-                : mName(at(index)->getName())
-                , mCachedIndex(index)
-            {}
+    public:
+        Layer(size_t index)
+            : mName(at(index)->getName())
+            , mCachedIndex(index)
+        {
+        }
 
-            const std::string& name() const noexcept { return mName; };
-            const osg::Vec2f size()
+        const std::string& name() const noexcept { return mName; };
+        const osg::Vec2f size()
+        {
+            MyGUI::ILayer* p = refresh();
+            MyGUI::IntSize size = p->getSize();
+            return osg::Vec2f(size.width, size.height);
+        }
+
+        struct Options
+        {
+            bool mInteractive;
+        };
+
+        static size_t count() { return MyGUI::LayerManager::getInstance().getLayerCount(); }
+
+        static size_t indexOf(std::string_view name);
+
+        static void insert(size_t index, std::string_view name, Options options);
+
+    private:
+        static MyGUI::ILayer* at(size_t index)
+        {
+            if (index >= count())
+                throw std::logic_error("Invalid layer index");
+            return MyGUI::LayerManager::getInstance().getLayer(index);
+        }
+
+        MyGUI::ILayer* refresh()
+        {
+            MyGUI::ILayer* p = at(mCachedIndex);
+            if (p->getName() != mName)
             {
-                MyGUI::ILayer* p = refresh();
-                MyGUI::IntSize size = p->getSize();
-                return osg::Vec2f(size.width, size.height);
+                mCachedIndex = indexOf(mName);
+                p = at(mCachedIndex);
             }
-
-            struct Options
-            {
-                bool mInteractive;
-            };
-
-            static size_t count()
-            {
-                return MyGUI::LayerManager::getInstance().getLayerCount();
-            }
-
-            static size_t indexOf(std::string_view name);
-
-            static void insert(size_t index, std::string_view name, Options options);
-
-        private:
-            static MyGUI::ILayer* at(size_t index)
-            {
-                if (index >= count())
-                    throw std::logic_error("Invalid layer index");
-                return MyGUI::LayerManager::getInstance().getLayer(index);
-            }
-
-            MyGUI::ILayer* refresh()
-            {
-                MyGUI::ILayer* p = at(mCachedIndex);
-                if (p->getName() != mName)
-                {
-                    mCachedIndex = indexOf(mName);
-                    p = at(mCachedIndex);
-                }
-                return p;
-            }
-            std::string mName;
-            size_t mCachedIndex;
+            return p;
+        }
+        std::string mName;
+        size_t mCachedIndex;
     };
 }
 

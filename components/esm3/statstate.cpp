@@ -5,11 +5,18 @@
 
 namespace ESM
 {
-    template<typename T>
-    StatState<T>::StatState() : mBase(0), mMod(0), mCurrent(0), mDamage(0), mProgress(0) {}
+    template <typename T>
+    StatState<T>::StatState()
+        : mBase(0)
+        , mMod(0)
+        , mCurrent(0)
+        , mDamage(0)
+        , mProgress(0)
+    {
+    }
 
-    template<typename T>
-    void StatState<T>::load(ESMReader &esm, bool intFallback)
+    template <typename T>
+    void StatState<T>::load(ESMReader& esm, bool intFallback)
     {
         // We changed stats values from integers to floats; ensure backwards compatibility
         if (intFallback)
@@ -53,8 +60,8 @@ namespace ESM
         esm.getHNOT(mProgress, "STPR");
     }
 
-    template<typename T>
-    void StatState<T>::save(ESMWriter &esm) const
+    template <typename T>
+    void StatState<T>::save(ESMWriter& esm) const
     {
         esm.writeHNT("STBA", mBase);
 

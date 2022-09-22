@@ -34,15 +34,14 @@ namespace VFS
         Bsa::CompressedBSAFile* mCompressedFile;
     };
 
-
     class BsaArchive : public Archive
     {
     public:
-        BsaArchive(const std::filesystem::path &filename);
+        BsaArchive(const std::filesystem::path& filename);
         BsaArchive();
         virtual ~BsaArchive();
-        void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
-        bool contains(const std::string& file, char (*normalize_function) (char)) const override;
+        void listResources(std::map<std::string, File*>& out, char (*normalize_function)(char)) override;
+        bool contains(const std::string& file, char (*normalize_function)(char)) const override;
         std::string getDescription() const override;
 
     protected:
@@ -53,10 +52,10 @@ namespace VFS
     class CompressedBsaArchive : public Archive
     {
     public:
-        CompressedBsaArchive(const std::filesystem::path &filename);
+        CompressedBsaArchive(const std::filesystem::path& filename);
         virtual ~CompressedBsaArchive() {}
-        void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
-        bool contains(const std::string& file, char (*normalize_function) (char)) const override;
+        void listResources(std::map<std::string, File*>& out, char (*normalize_function)(char)) override;
+        bool contains(const std::string& file, char (*normalize_function)(char)) const override;
         std::string getDescription() const override;
 
     private:

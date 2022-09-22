@@ -3,16 +3,16 @@
 
 #include <map>
 #include <set>
-#include <string>
 #include <stdexcept>
+#include <string>
 
-#include "stat.hpp"
-#include "magiceffects.hpp"
-#include "spells.hpp"
 #include "activespells.hpp"
 #include "aisequence.hpp"
-#include "drawstate.hpp"
 #include "aisetting.hpp"
+#include "drawstate.hpp"
+#include "magiceffects.hpp"
+#include "spells.hpp"
+#include "stat.hpp"
 
 #include <components/esm/attr.hpp>
 #include <components/esm3/magiceffects.hpp>
@@ -108,56 +108,56 @@ namespace MWMechanics
 
         /// Reset the fall height
         /// @return total fall height
-        float land(bool isPlayer=false);
+        float land(bool isPlayer = false);
 
-        const AttributeValue & getAttribute(int index) const;
+        const AttributeValue& getAttribute(int index) const;
 
-        const DynamicStat<float> & getHealth() const;
+        const DynamicStat<float>& getHealth() const;
 
-        const DynamicStat<float> & getMagicka() const;
+        const DynamicStat<float>& getMagicka() const;
 
-        const DynamicStat<float> & getFatigue() const;
+        const DynamicStat<float>& getFatigue() const;
 
-        const DynamicStat<float> & getDynamic (int index) const;
+        const DynamicStat<float>& getDynamic(int index) const;
 
-        const Spells & getSpells() const;
+        const Spells& getSpells() const;
 
-        const ActiveSpells & getActiveSpells() const;
+        const ActiveSpells& getActiveSpells() const;
 
-        const MagicEffects & getMagicEffects() const;
+        const MagicEffects& getMagicEffects() const;
 
         bool getAttackingOrSpell() const { return mAttackingOrSpell; }
 
         int getLevel() const;
 
-        Spells & getSpells();
+        Spells& getSpells();
 
-        ActiveSpells & getActiveSpells();
+        ActiveSpells& getActiveSpells();
 
-        MagicEffects & getMagicEffects();
+        MagicEffects& getMagicEffects();
 
-        void setAttribute(int index, const AttributeValue &value);
+        void setAttribute(int index, const AttributeValue& value);
         // Shortcut to set only the base
         void setAttribute(int index, float base);
 
-        void setHealth(const DynamicStat<float> &value);
+        void setHealth(const DynamicStat<float>& value);
 
-        void setMagicka(const DynamicStat<float> &value);
+        void setMagicka(const DynamicStat<float>& value);
 
-        void setFatigue(const DynamicStat<float> &value);
+        void setFatigue(const DynamicStat<float>& value);
 
-        void setDynamic (int index, const DynamicStat<float> &value);
+        void setDynamic(int index, const DynamicStat<float>& value);
 
         /// Set Modifier for each magic effect according to \a effects. Does not touch Base values.
-        void modifyMagicEffects(const MagicEffects &effects);
+        void modifyMagicEffects(const MagicEffects& effects);
 
         void setAttackingOrSpell(bool attackingOrSpell) { mAttackingOrSpell = attackingOrSpell; }
 
         void setLevel(int level);
 
-        void setAiSetting (AiSetting index, Stat<int> value);
-        void setAiSetting (AiSetting index, int base);
-        Stat<int> getAiSetting (AiSetting index) const;
+        void setAiSetting(AiSetting index, Stat<int> value);
+        void setAiSetting(AiSetting index, int base);
+        Stat<int> getAiSetting(AiSetting index) const;
 
         const AiSequence& getAiSequence() const;
 
@@ -203,10 +203,10 @@ namespace MWMechanics
         void talkedToPlayer();
 
         bool isAlarmed() const;
-        void setAlarmed (bool alarmed);
+        void setAlarmed(bool alarmed);
 
         bool getAttacked() const;
-        void setAttacked (bool attacked);
+        void setAttacked(bool attacked);
 
         float getEvasion() const;
 
@@ -215,10 +215,11 @@ namespace MWMechanics
         /// including transition animations (falling down & standing up)
         bool getKnockedDown() const;
         void setKnockedDownOneFrame(bool value);
-        ///Returns true only for the first frame of the actor being knocked out; used for "onKnockedOut" command
+        /// Returns true only for the first frame of the actor being knocked out; used for "onKnockedOut" command
         bool getKnockedDownOneFrame() const;
         void setKnockedDownOverOneFrame(bool value);
-        ///Returns true for all but the first frame of being knocked out; used to know to not reset mKnockedDownOneFrame
+        /// Returns true for all but the first frame of being knocked out; used to know to not reset
+        /// mKnockedDownOneFrame
         bool getKnockedDownOverOneFrame() const;
         void setHitRecovery(bool value);
         bool getHitRecovery() const;
@@ -243,26 +244,26 @@ namespace MWMechanics
             Stance_Sneak
         };
 
-        bool getMovementFlag (Flag flag) const;
-        void setMovementFlag (Flag flag, bool state);
+        bool getMovementFlag(Flag flag) const;
+        void setMovementFlag(Flag flag, bool state);
         /// Like getMovementFlag, but also takes into account if the flag is Forced
-        bool getStance (Stance flag) const;
+        bool getStance(Stance flag) const;
 
-        void setLastHitObject(const std::string &objectid);
+        void setLastHitObject(const std::string& objectid);
         void clearLastHitObject();
-        const std::string &getLastHitObject() const;
-        void setLastHitAttemptObject(const std::string &objectid);
+        const std::string& getLastHitObject() const;
+        void setLastHitAttemptObject(const std::string& objectid);
         void clearLastHitAttemptObject();
-        const std::string &getLastHitAttemptObject() const;
+        const std::string& getLastHitAttemptObject() const;
         void setHitAttemptActorId(const int actorId);
         int getHitAttemptActorId() const;
 
-        void writeState (ESM::CreatureStats& state) const;
+        void writeState(ESM::CreatureStats& state) const;
 
-        void readState (const ESM::CreatureStats& state);
+        void readState(const ESM::CreatureStats& state);
 
-        static void writeActorIdCounter (ESM::ESMWriter& esm);
-        static void readActorIdCounter (ESM::ESMReader& esm);
+        static void writeActorIdCounter(ESM::ESMWriter& esm);
+        static void readActorIdCounter(ESM::ESMReader& esm);
 
         void setLastRestockTime(MWWorld::TimeStamp tradeTime);
         MWWorld::TimeStamp getLastRestockTime() const;
@@ -278,7 +279,7 @@ namespace MWMechanics
         int getActorId();
         ///< Will generate an actor ID, if the actor does not have one yet.
 
-        bool matchesActorId (int id) const;
+        bool matchesActorId(int id) const;
         ///< Check if \a id matches the actor ID of *this (if the actor does not have an ID
         /// assigned this function will return false).
 

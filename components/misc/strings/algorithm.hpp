@@ -24,15 +24,15 @@ namespace Misc::StringUtils
     {
         if (std::size(x) != std::size(y))
             return false;
-        return std::equal(std::begin(x), std::end(x), std::begin(y),
-                          [] (char l, char r) { return toLower(l) == toLower(r); });
+        return std::equal(
+            std::begin(x), std::end(x), std::begin(y), [](char l, char r) { return toLower(l) == toLower(r); });
     }
     inline bool ciEqual(std::u8string_view x, std::u8string_view y)
     {
         if (std::size(x) != std::size(y))
             return false;
-        return std::equal(std::begin(x), std::end(x), std::begin(y),
-            [](char l, char r) { return toLower(l) == toLower(r); });
+        return std::equal(
+            std::begin(x), std::end(x), std::begin(y), [](char l, char r) { return toLower(l) == toLower(r); });
     }
 
     inline bool ciStartsWith(std::string_view value, std::string_view prefix)
@@ -44,7 +44,7 @@ namespace Misc::StringUtils
     {
         std::string_view::const_iterator xit = x.begin();
         std::string_view::const_iterator yit = y.begin();
-        for(; xit != x.end() && yit != y.end() && len > 0; ++xit, ++yit, --len)
+        for (; xit != x.end() && yit != y.end() && len > 0; ++xit, ++yit, --len)
         {
             char left = *xit;
             char right = *yit;
@@ -54,14 +54,14 @@ namespace Misc::StringUtils
             left = toLower(left);
             right = toLower(right);
             int res = left - right;
-            if(res != 0)
+            if (res != 0)
                 return (res > 0) ? 1 : -1;
         }
-        if(len > 0)
+        if (len > 0)
         {
-            if(xit != x.end())
+            if (xit != x.end())
                 return 1;
-            if(yit != y.end())
+            if (yit != y.end())
                 return -1;
         }
         return 0;
@@ -71,10 +71,7 @@ namespace Misc::StringUtils
     {
         using is_transparent = void;
 
-        bool operator()(std::string_view left, std::string_view right) const
-        {
-            return ciEqual(left, right);
-        }
+        bool operator()(std::string_view left, std::string_view right) const { return ciEqual(left, right); }
     };
 
     struct CiHash
@@ -84,9 +81,9 @@ namespace Misc::StringUtils
         constexpr std::size_t operator()(std::string_view str) const
         {
             // FNV-1a
-            std::size_t hash{0xcbf29ce484222325ull};
-            constexpr std::size_t prime{0x00000100000001B3ull};
-            for(char c : str)
+            std::size_t hash{ 0xcbf29ce484222325ull };
+            constexpr std::size_t prime{ 0x00000100000001B3ull };
+            for (char c : str)
             {
                 hash ^= static_cast<std::size_t>(toLower(c));
                 hash *= prime;
@@ -97,10 +94,7 @@ namespace Misc::StringUtils
 
     struct CiComp
     {
-        bool operator()(std::string_view left, std::string_view right) const
-        {
-            return ciLess(left, right);
-        }
+        bool operator()(std::string_view left, std::string_view right) const { return ciLess(left, right); }
     };
 
     /** @brief Replaces all occurrences of a string in another string.
@@ -135,19 +129,20 @@ namespace Misc::StringUtils
 
     inline bool ciEndsWith(std::string_view s, std::string_view suffix)
     {
-        return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(),
-                                                       [](char l, char r) { return toLower(l) == toLower(r); });
+        return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(), [](char l, char r) {
+            return toLower(l) == toLower(r);
+        });
     }
     inline bool ciEndsWith(std::u8string_view s, std::u8string_view suffix)
     {
-        return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(),
-            [](char l, char r) { return toLower(l) == toLower(r); });
+        return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(), [](char l, char r) {
+            return toLower(l) == toLower(r);
+        });
     }
 
     inline void trim(std::string& s)
     {
-        const auto notSpace = [](char ch)
-        {
+        const auto notSpace = [](char ch) {
             // TODO Do we care about multibyte whitespace?
             return !std::isspace(static_cast<unsigned char>(ch));
         };

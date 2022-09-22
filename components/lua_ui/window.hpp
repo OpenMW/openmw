@@ -3,8 +3,8 @@
 
 #include <optional>
 
-#include "widget.hpp"
 #include "text.hpp"
+#include "widget.hpp"
 
 namespace LuaUi
 {
@@ -12,22 +12,22 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaWindow)
 
-        public:
-            LuaWindow();
-            void updateTemplate() override;
-            void updateProperties() override;
+    public:
+        LuaWindow();
+        void updateTemplate() override;
+        void updateProperties() override;
 
-        private:
-            LuaText* mCaption;
-            std::map<MyGUI::Widget*, WidgetExtension*> mActionWidgets;
-            MyGUI::IntPoint mPreviousMouse;
-            MyGUI::IntCoord mChangeScale;
+    private:
+        LuaText* mCaption;
+        std::map<MyGUI::Widget*, WidgetExtension*> mActionWidgets;
+        MyGUI::IntPoint mPreviousMouse;
+        MyGUI::IntCoord mChangeScale;
 
-            MyGUI::IntCoord mMoveResize;
+        MyGUI::IntCoord mMoveResize;
 
-        protected:
-            void notifyMousePress(MyGUI::Widget*, int, int, MyGUI::MouseButton);
-            void notifyMouseDrag(MyGUI::Widget*, int, int, MyGUI::MouseButton);
+    protected:
+        void notifyMousePress(MyGUI::Widget*, int, int, MyGUI::MouseButton);
+        void notifyMouseDrag(MyGUI::Widget*, int, int, MyGUI::MouseButton);
     };
 }
 

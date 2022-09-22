@@ -19,32 +19,30 @@ namespace CSVFilter
 
     class FilterBox : public QWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            RecordFilterBox *mRecordFilterBox;
+        RecordFilterBox* mRecordFilterBox;
 
-        public:
-            FilterBox (CSMWorld::Data& data, QWidget *parent = nullptr);
+    public:
+        FilterBox(CSMWorld::Data& data, QWidget* parent = nullptr);
 
-            void setRecordFilter (const std::string& filter);
+        void setRecordFilter(const std::string& filter);
 
-            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource,
-                                     Qt::DropAction action);
+        void createFilterRequest(
+            std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action);
 
+    private:
+        void dragEnterEvent(QDragEnterEvent* event) override;
 
-        private:
-            void dragEnterEvent (QDragEnterEvent* event) override;
+        void dropEvent(QDropEvent* event) override;
 
-            void dropEvent (QDropEvent* event) override;
+        void dragMoveEvent(QDragMoveEvent* event) override;
 
-            void dragMoveEvent(QDragMoveEvent *event) override;
-
-        signals:
-            void recordFilterChanged (std::shared_ptr<CSMFilter::Node> filter);
-            void recordDropped (std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action);
+    signals:
+        void recordFilterChanged(std::shared_ptr<CSMFilter::Node> filter);
+        void recordDropped(std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action);
     };
 
 }
 
 #endif
-

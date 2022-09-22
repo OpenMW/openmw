@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include <osg/ref_ptr>
-#include <osg/Vec3f>
 #include <osg/Vec3d>
+#include <osg/Vec3f>
+#include <osg/ref_ptr>
 
 #include <components/settings/settings.hpp>
 
@@ -88,9 +88,8 @@ namespace MWRender
         void updateWaterMaterial();
 
     public:
-        Water(osg::Group* parent, osg::Group* sceneRoot,
-              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-              const std::filesystem::path& resourcePath);
+        Water(osg::Group* parent, osg::Group* sceneRoot, Resource::ResourceSystem* resourceSystem,
+            osgUtil::IncrementalCompileOperation* ico, const std::filesystem::path& resourcePath);
         ~Water();
 
         void setCullCallback(osg::Callback* callback);
@@ -104,9 +103,9 @@ namespace MWRender
         bool isUnderwater(const osg::Vec3f& pos) const;
 
         /// adds an emitter, position will be tracked automatically using its scene node
-        void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
-        void removeEmitter (const MWWorld::Ptr& ptr);
-        void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
+        void addEmitter(const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
+        void removeEmitter(const MWWorld::Ptr& ptr);
+        void updateEmitterPtr(const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
         void emitRipple(const osg::Vec3f& pos);
 
         void removeCell(const MWWorld::CellStore* store); ///< remove all emitters in this cell

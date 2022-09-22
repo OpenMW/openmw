@@ -1,36 +1,31 @@
 #include "inisettings.hpp"
 
-#include <QTextStream>
-#include <QFile>
-#include <QStringList>
-#include <QString>
-#include <QRegExp>
 #include <QDebug>
+#include <QFile>
+#include <QRegExp>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
 
-Wizard::IniSettings::IniSettings()
-{
-}
+Wizard::IniSettings::IniSettings() {}
 
-Wizard::IniSettings::~IniSettings()
-{
-}
+Wizard::IniSettings::~IniSettings() {}
 
-QStringList Wizard::IniSettings::findKeys(const QString &text)
+QStringList Wizard::IniSettings::findKeys(const QString& text)
 {
     QStringList result;
 
-    for (const QString &key : mSettings.keys())
+    for (const QString& key : mSettings.keys())
     {
 
         if (key.startsWith(text))
             result << key;
-
     }
 
     return result;
 }
 
-bool Wizard::IniSettings::readFile(QTextStream &stream)
+bool Wizard::IniSettings::readFile(QTextStream& stream)
 {
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
@@ -71,7 +66,7 @@ bool Wizard::IniSettings::readFile(QTextStream &stream)
     return true;
 }
 
-bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
+bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
 {
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
@@ -88,19 +83,24 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
     QString currentSection;
     QString buffer;
 
-    while (!stream.atEnd()) {
+    while (!stream.atEnd())
+    {
 
         const QString line(stream.readLine());
 
-        if (line.isEmpty() || line.startsWith(QLatin1Char(';'))) {
+        if (line.isEmpty() || line.startsWith(QLatin1Char(';')))
+        {
             buffer.append(line + QLatin1String("\n"));
             continue;
         }
 
-        if (sectionRe.exactMatch(line)) {
+        if (sectionRe.exactMatch(line))
+        {
             buffer.append(line + QLatin1String("\n"));
             currentSection = sectionRe.cap(1);
-        } else  if (keyRe.indexIn(line) != -1) {
+        }
+        else if (keyRe.indexIn(line) != -1)
+        {
             QString key(keyRe.cap(1).trimmed());
             QString lookupKey(key);
 
@@ -115,7 +115,8 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
 
     // Add the new settings to the buffer
     QHashIterator<QString, QVariant> i(mSettings);
-    while (i.hasNext()) {
+    while (i.hasNext())
+    {
         i.next();
 
         QStringList fullKey(i.key().split(QLatin1Char('/')));
@@ -125,7 +126,8 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
         const QString& key(fullKey.at(1));
 
         int index = buffer.lastIndexOf(section);
-        if (index == -1) {
+        if (index == -1)
+        {
             // Add the section to the end of the file, because it's not found
             buffer.append(QString("\n%1\n").arg(section));
             index = buffer.lastIndexOf(section);
@@ -134,12 +136,15 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
         // Look for the next section
         index = buffer.indexOf(QLatin1Char('['), index + 1);
 
-        if (index == -1 ) {
+        if (index == -1)
+        {
             // We are at the last section, append it to the bottom of the file
             buffer.append(QString("\n%1=%2").arg(key, i.value().toString()));
             mSettings.remove(i.key());
             continue;
-        } else {
+        }
+        else
+        {
             // Not at last section, add the key at the index
             buffer.insert(index - 1, QString("\n%1=%2").arg(key, i.value().toString()));
             mSettings.remove(i.key());
@@ -149,7 +154,8 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
     // Now we reopen the file, this time we write
     QFile file(path);
 
-    if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)) {
+    if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+    {
         QTextStream in(&file);
         in.setCodec(stream.codec());
 
@@ -157,14 +163,16 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
         in << buffer;
         file.flush();
         file.close();
-    } else {
+    }
+    else
+    {
         return false;
     }
 
     return true;
 }
 
-bool Wizard::IniSettings::parseInx(const QString &path)
+bool Wizard::IniSettings::parseInx(const QString& path)
 {
     QFile file(path);
 
@@ -175,7 +183,8 @@ bool Wizard::IniSettings::parseInx(const QString &path)
         const QByteArray pattern("\x21\x00\x1A\x01\x04\x00\x04\x97\xFF\x06", 10);
 
         int i = 0;
-        while ((i = data.indexOf(pattern, i)) != -1) {
+        while ((i = data.indexOf(pattern, i)) != -1)
+        {
 
             int next = data.indexOf(pattern, i + 1);
             if (next == -1)
@@ -184,7 +193,8 @@ bool Wizard::IniSettings::parseInx(const QString &path)
             QByteArray array(data.mid(i, (next - i)));
 
             // Skip some invalid entries
-            if (array.contains("\x04\x96\xFF")) {
+            if (array.contains("\x04\x96\xFF"))
+            {
                 ++i;
                 continue;
             }
@@ -208,7 +218,9 @@ bool Wizard::IniSettings::parseInx(const QString &path)
         }
 
         file.close();
-    } else {
+    }
+    else
+    {
         qDebug() << "Failed to open INX file: " << path;
         return false;
     }

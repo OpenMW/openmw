@@ -52,7 +52,7 @@ void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
     if (count)
     {
         triangles.resize(count);
-        //std::cout << "NVMI island triangles " << std::dec << count << std::endl; // FIXME
+        // std::cout << "NVMI island triangles " << std::dec << count << std::endl; // FIXME
         for (std::vector<Navigation::Triangle>::iterator it = triangles.begin(); it != triangles.end(); ++it)
         {
             reader.get(*it);
@@ -105,7 +105,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.get(count); // countMerged;
     if (count)
     {
-        //std::cout << "NVMI countMerged " << std::dec << count << std::endl;
+        // std::cout << "NVMI countMerged " << std::dec << count << std::endl;
         formIdMerged.resize(count);
         for (std::vector<FormId>::iterator it = formIdMerged.begin(); it != formIdMerged.end(); ++it)
         {
@@ -116,7 +116,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.get(count); // countPrefMerged;
     if (count)
     {
-        //std::cout << "NVMI countPrefMerged " << std::dec << count << std::endl;
+        // std::cout << "NVMI countPrefMerged " << std::dec << count << std::endl;
         formIdPrefMerged.resize(count);
         for (std::vector<FormId>::iterator it = formIdPrefMerged.begin(); it != formIdPrefMerged.end(); ++it)
         {
@@ -127,7 +127,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.get(count); // countLinkedDoors;
     if (count)
     {
-        //std::cout << "NVMI countLinkedDoors " << std::dec << count << std::endl;
+        // std::cout << "NVMI countLinkedDoors " << std::dec << count << std::endl;
         linkedDoors.resize(count);
         for (std::vector<DoorRef>::iterator it = linkedDoors.begin(); it != linkedDoors.end(); ++it)
         {
@@ -149,8 +149,8 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.get(locationMarker);
 
     reader.get(worldSpaceId);
-    //FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
-    //FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
+    // FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
+    // FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
     if (worldSpaceId == 0x0000003c || worldSpaceId == 0x01380000)
     {
         reader.get(cellGrid.grid.y); // NOTE: reverse order
@@ -237,8 +237,8 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
 //
 void ESM4::Navigation::load(ESM4::Reader& reader)
 {
-    //mFormId = reader.hdr().record.id;
-    //mFlags  = reader.hdr().record.flags;
+    // mFormId = reader.hdr().record.id;
+    // mFlags  = reader.hdr().record.flags;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
@@ -250,7 +250,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             case ESM4::SUB_EDID: // seems to be unused?
             {
                 if (!reader.getZString(mEditorId))
-                    throw std::runtime_error ("NAVI EDID data read error");
+                    throw std::runtime_error("NAVI EDID data read error");
                 break;
             }
             case ESM4::SUB_NVPP:
@@ -278,8 +278,8 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     if (count)
                     {
                         preferredPaths.resize(count);
-                        for (std::vector<FormId>::iterator it = preferredPaths.begin();
-                                it != preferredPaths.end(); ++it)
+                        for (std::vector<FormId>::iterator it = preferredPaths.begin(); it != preferredPaths.end();
+                             ++it)
                         {
                             reader.get(*it);
                         }
@@ -312,11 +312,11 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     std::cout << "node " << std::hex << node // FIXME: debugging only
                         << ", index " << index << ", i " << std::dec << total+i << std::endl;
 #endif
-                    //std::pair<std::map<FormId, std::uint32_t>::iterator, bool> res =
-                        mPathIndexMap.insert(std::make_pair(node, index));
+                    // std::pair<std::map<FormId, std::uint32_t>::iterator, bool> res =
+                    mPathIndexMap.insert(std::make_pair(node, index));
                     // FIXME: this throws if more than one file is being loaded
-                    //if (!res.second)
-                        //throw std::runtime_error ("node already exists in the preferred path index map");
+                    // if (!res.second)
+                    // throw std::runtime_error ("node already exists in the preferred path index map");
                 }
                 break;
             }
@@ -324,7 +324,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             {
                 std::uint32_t version; // always the same? (0x0c)
                 reader.get(version); // TODO: store this or use it for merging?
-                //std::cout << "NAVI version " << std::dec << version << std::endl;
+                // std::cout << "NAVI version " << std::dec << version << std::endl;
                 break;
             }
             case ESM4::SUB_NVMI: // multiple
@@ -335,10 +335,10 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     break;
                 }
 
-                //std::cout << "\nNVMI start" << std::endl;
+                // std::cout << "\nNVMI start" << std::endl;
                 NavMeshInfo nvmi;
                 nvmi.load(reader);
-                mNavMeshInfo.push_back (nvmi);
+                mNavMeshInfo.push_back(nvmi);
                 break;
             }
             case ESM4::SUB_NVSI: // from Dawnguard onwards
@@ -355,10 +355,10 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Navigation::save(ESM4::Writer& writer) const
+// void ESM4::Navigation::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Navigation::blank()
+// void ESM4::Navigation::blank()
 //{
-//}
+// }

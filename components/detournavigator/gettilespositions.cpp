@@ -1,8 +1,8 @@
 #include "gettilespositions.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
-#include "tileposition.hpp"
 #include "tilebounds.hpp"
+#include "tileposition.hpp"
 
 #include <components/misc/convert.hpp>
 
@@ -10,8 +10,8 @@
 
 namespace DetourNavigator
 {
-    TilesPositionsRange makeTilesPositionsRange(const osg::Vec2f& aabbMin, const osg::Vec2f& aabbMax,
-        const RecastSettings& settings)
+    TilesPositionsRange makeTilesPositionsRange(
+        const osg::Vec2f& aabbMin, const osg::Vec2f& aabbMax, const RecastSettings& settings)
     {
         osg::Vec2f min = toNavMeshCoordinates(settings, aabbMin);
         osg::Vec2f max = toNavMeshCoordinates(settings, aabbMax);
@@ -29,11 +29,11 @@ namespace DetourNavigator
         if (minTile.y() > maxTile.y())
             std::swap(minTile.y(), maxTile.y());
 
-        return {minTile, maxTile + osg::Vec2i(1, 1)};
+        return { minTile, maxTile + osg::Vec2i(1, 1) };
     }
 
-    TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape, const btTransform& transform,
-        const RecastSettings& settings)
+    TilesPositionsRange makeTilesPositionsRange(
+        const btCollisionShape& shape, const btTransform& transform, const RecastSettings& settings)
     {
         const TileBounds bounds = makeObjectTileBounds(shape, transform);
         return makeTilesPositionsRange(bounds.mMin, bounds.mMax, settings);
@@ -47,8 +47,8 @@ namespace DetourNavigator
         return {};
     }
 
-    TilesPositionsRange makeTilesPositionsRange(const int cellSize, const btVector3& shift,
-        const RecastSettings& settings)
+    TilesPositionsRange makeTilesPositionsRange(
+        const int cellSize, const btVector3& shift, const RecastSettings& settings)
     {
         const int halfCellSize = cellSize / 2;
         const btTransform transform(btMatrix3x3::getIdentity(), shift);
@@ -74,6 +74,6 @@ namespace DetourNavigator
         const int endY = std::min(a.mEnd.y(), b.mEnd.y());
         if (beginY > endY)
             return {};
-        return TilesPositionsRange {TilePosition(beginX, beginY), TilePosition(endX, endY)};
+        return TilesPositionsRange{ TilePosition(beginX, beginY), TilePosition(endX, endY) };
     }
 }

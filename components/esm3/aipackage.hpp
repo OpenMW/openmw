@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESM_AIPACKAGE_H
 #define OPENMW_ESM_AIPACKAGE_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "components/esm/esmcommon.hpp"
 
@@ -11,8 +11,8 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
-    #pragma pack(push)
-    #pragma pack(1)
+#pragma pack(push)
+#pragma pack(1)
 
     struct AIData
     {
@@ -27,8 +27,8 @@ namespace ESM
 
     struct AIWander
     {
-        short   mDistance;
-        short   mDuration;
+        short mDistance;
+        short mDuration;
         unsigned char mTimeOfDay;
         unsigned char mIdle[8];
         unsigned char mShouldRepeat;
@@ -36,16 +36,16 @@ namespace ESM
 
     struct AITravel
     {
-        float   mX, mY, mZ;
+        float mX, mY, mZ;
         unsigned char mShouldRepeat;
         unsigned char mPadding[3];
     };
 
     struct AITarget
     {
-        float   mX, mY, mZ;
-        short   mDuration;
-        NAME32  mId;
+        float mX, mY, mZ;
+        short mDuration;
+        NAME32 mId;
         unsigned char mShouldRepeat;
         unsigned char mPadding;
     };
@@ -56,7 +56,7 @@ namespace ESM
         unsigned char mShouldRepeat;
     };
 
-    #pragma pack(pop)
+#pragma pack(pop)
 
     enum AiPackageType : std::uint32_t
     {
@@ -94,11 +94,10 @@ namespace ESM
         std::vector<AIPackage> mList;
 
         /// Add a single AIPackage, assumes subrecord name was already read
-        void add(ESMReader &esm);
+        void add(ESMReader& esm);
 
-        void save(ESMWriter &esm) const;
+        void save(ESMWriter& esm) const;
     };
 }
 
 #endif
-

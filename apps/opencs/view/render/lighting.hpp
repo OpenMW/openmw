@@ -14,23 +14,24 @@ namespace CSVRender
 {
     class Lighting
     {
-        public:
+    public:
+        Lighting()
+            : mRootNode(nullptr)
+        {
+        }
+        virtual ~Lighting();
 
-            Lighting() : mRootNode(nullptr) {}
-            virtual ~Lighting();
+        virtual void activate(osg::Group* rootNode, bool isExterior) = 0;
 
-            virtual void activate (osg::Group* rootNode, bool isExterior) = 0;
+        virtual void deactivate() = 0;
 
-            virtual void deactivate() = 0;
+        virtual osg::Vec4f getAmbientColour(osg::Vec4f* defaultAmbient) = 0;
 
-            virtual osg::Vec4f getAmbientColour(osg::Vec4f* defaultAmbient) = 0;
+    protected:
+        void updateDayNightMode(int index);
 
-        protected:
-
-            void updateDayNightMode(int index);
-
-            osg::ref_ptr<osg::LightSource> mLightSource;
-            osg::Group* mRootNode;
+        osg::ref_ptr<osg::LightSource> mLightSource;
+        osg::Group* mRootNode;
     };
 }
 

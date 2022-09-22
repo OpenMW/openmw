@@ -1,16 +1,12 @@
-#include <gtest/gtest.h>
 #include "apps/openmw/mwdialogue/keywordsearch.hpp"
+#include <gtest/gtest.h>
 
 struct KeywordSearchTest : public ::testing::Test
 {
-  protected:
-    void SetUp() override
-    {
-    }
+protected:
+    void SetUp() override {}
 
-    void TearDown() override
-    {
-    }
+    void TearDown() override {}
 };
 
 TEST_F(KeywordSearchTest, keyword_test_conflict_resolution)
@@ -27,9 +23,9 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution)
     search.highlightKeywords(text.begin(), text.end(), matches);
 
     // Should contain: "foo bar", "lock switch"
-    EXPECT_EQ (matches.size() , 2);
-    EXPECT_EQ (std::string(matches.front().mBeg, matches.front().mEnd) , "foo bar");
-    EXPECT_EQ (std::string(matches.rbegin()->mBeg, matches.rbegin()->mEnd) , "lock switch");
+    EXPECT_EQ(matches.size(), 2);
+    EXPECT_EQ(std::string(matches.front().mBeg, matches.front().mEnd), "foo bar");
+    EXPECT_EQ(std::string(matches.rbegin()->mBeg, matches.rbegin()->mEnd), "lock switch");
 }
 
 TEST_F(KeywordSearchTest, keyword_test_conflict_resolution2)
@@ -43,10 +39,9 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution2)
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
 
-    EXPECT_EQ (matches.size() , 1);
-    EXPECT_EQ (std::string(matches.front().mBeg, matches.front().mEnd) , "dwemer language");
+    EXPECT_EQ(matches.size(), 1);
+    EXPECT_EQ(std::string(matches.front().mBeg, matches.front().mEnd), "dwemer language");
 }
-
 
 TEST_F(KeywordSearchTest, keyword_test_conflict_resolution3)
 {
@@ -62,10 +57,9 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution3)
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
 
-    EXPECT_EQ (matches.size() , 1);
-    EXPECT_EQ (std::string(matches.front().mBeg, matches.front().mEnd) , "bar lock");
+    EXPECT_EQ(matches.size(), 1);
+    EXPECT_EQ(std::string(matches.front().mBeg, matches.front().mEnd), "bar lock");
 }
-
 
 TEST_F(KeywordSearchTest, keyword_test_utf8_word_begin)
 {
@@ -76,15 +70,17 @@ TEST_F(KeywordSearchTest, keyword_test_utf8_word_begin)
     search.seed("ça nous déçois", 0);
     search.seed("ois", 0);
 
-    std::string text = "les nations unis ont réunis le monde entier, états units inclus pour parler du problème des gens ïrradiés et ça nous déçois";
+    std::string text
+        = "les nations unis ont réunis le monde entier, états units inclus pour parler du problème des gens ïrradiés "
+          "et ça nous déçois";
 
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
 
-    EXPECT_EQ (matches.size() , 3);
-    EXPECT_EQ (std::string( matches[0].mBeg, matches[0].mEnd) , "états");
-    EXPECT_EQ (std::string( matches[1].mBeg, matches[1].mEnd) , "ïrradiés");
-    EXPECT_EQ (std::string( matches[2].mBeg, matches[2].mEnd) , "ça nous déçois");
+    EXPECT_EQ(matches.size(), 3);
+    EXPECT_EQ(std::string(matches[0].mBeg, matches[0].mEnd), "états");
+    EXPECT_EQ(std::string(matches[1].mBeg, matches[1].mEnd), "ïrradiés");
+    EXPECT_EQ(std::string(matches[2].mBeg, matches[2].mEnd), "ça nous déçois");
 }
 
 TEST_F(KeywordSearchTest, keyword_test_non_alpha_non_whitespace_word_begin)
@@ -92,8 +88,6 @@ TEST_F(KeywordSearchTest, keyword_test_non_alpha_non_whitespace_word_begin)
     // We make sure that the search works well even if the separator is not a whitespace
     MWDialogue::KeywordSearch<std::string, int> search;
     search.seed("Report to caius cosades", 0);
-
-
 
     std::string text = "I was told to \"Report to caius cosades\"";
 
@@ -110,7 +104,8 @@ TEST_F(KeywordSearchTest, keyword_test_russian_non_ascii_before)
     MWDialogue::KeywordSearch<std::string, int> search;
     search.seed("Доложить Каю Косадесу", 0);
 
-    std::string text = "Что? Да. Я Кай Косадес. То есть как это, вам велели «Доложить Каю Косадесу»? О чем вы говорите?";
+    std::string text
+        = "Что? Да. Я Кай Косадес. То есть как это, вам велели «Доложить Каю Косадесу»? О чем вы говорите?";
 
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
@@ -125,7 +120,8 @@ TEST_F(KeywordSearchTest, keyword_test_russian_ascii_before)
     MWDialogue::KeywordSearch<std::string, int> search;
     search.seed("Доложить Каю Косадесу", 0);
 
-    std::string text = "Что? Да. Я Кай Косадес. То есть как это, вам велели 'Доложить Каю Косадесу'? О чем вы говорите?";
+    std::string text
+        = "Что? Да. Я Кай Косадес. То есть как это, вам велели 'Доложить Каю Косадесу'? О чем вы говорите?";
 
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
@@ -133,4 +129,3 @@ TEST_F(KeywordSearchTest, keyword_test_russian_ascii_before)
     EXPECT_EQ(matches.size(), 1);
     EXPECT_EQ(std::string(matches[0].mBeg, matches[0].mEnd), "Доложить Каю Косадесу");
 }
-

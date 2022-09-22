@@ -2,18 +2,18 @@
 
 #include <stdexcept>
 
-#include <osg/NodeVisitor>
-#include <osg/Group>
-#include <osg/Geometry>
 #include <osg/FrontFace>
-#include <osg/PositionAttitudeTransform>
+#include <osg/Geometry>
+#include <osg/Group>
 #include <osg/MatrixTransform>
+#include <osg/NodeVisitor>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/lower.hpp>
 
-#include <components/sceneutil/skeleton.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/skeleton.hpp>
 
 #include "visitor.hpp"
 
@@ -30,18 +30,9 @@ namespace SceneUtil
         {
         }
 
-        void apply(osg::MatrixTransform& node) override
-        {
-            traverse(node);
-        }
-        void apply(osg::Node& node) override
-        {
-            traverse(node);
-        }
-        void apply(osg::Group& node) override
-        {
-            traverse(node);
-        }
+        void apply(osg::MatrixTransform& node) override { traverse(node); }
+        void apply(osg::Node& node) override { traverse(node); }
+        void apply(osg::Group& node) override { traverse(node); }
 
         void apply(osg::Drawable& drawable) override
         {
@@ -49,7 +40,7 @@ namespace SceneUtil
                 return;
 
             const osg::Node* node = &drawable;
-            for (auto it = getNodePath().rbegin()+1; it != getNodePath().rend(); ++it)
+            for (auto it = getNodePath().rbegin() + 1; it != getNodePath().rend(); ++it)
             {
                 const osg::Node* parent = *it;
                 if (!filterMatches(parent->getName()))
@@ -69,7 +60,6 @@ namespace SceneUtil
         }
 
     private:
-
         bool filterMatches(std::string_view name) const
         {
             if (Misc::StringUtils::ciStartsWith(name, mFilter))
@@ -91,17 +81,19 @@ namespace SceneUtil
     {
         if (!source)
             return;
-    
+
         if (!target->getUserDataContainer())
             target->setUserDataContainer(osg::clone(source, osg::CopyOp::SHALLOW_COPY));
         else
         {
-            for (unsigned int i=0; i<source->getNumUserObjects(); ++i)
-                target->getUserDataContainer()->addUserObject(osg::clone(source->getUserObject(i), osg::CopyOp::SHALLOW_COPY));
+            for (unsigned int i = 0; i < source->getNumUserObjects(); ++i)
+                target->getUserDataContainer()->addUserObject(
+                    osg::clone(source->getUserObject(i), osg::CopyOp::SHALLOW_COPY));
         }
     }
 
-    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node* master, std::string_view filter, osg::Group* attachNode, Resource::SceneManager* sceneManager, const osg::Quat* attitude)
+    osg::ref_ptr<osg::Node> attach(osg::ref_ptr<const osg::Node> toAttach, osg::Node* master, std::string_view filter,
+        osg::Group* attachNode, Resource::SceneManager* sceneManager, const osg::Quat* attitude)
     {
         if (dynamic_cast<const SceneUtil::Skeleton*>(toAttach.get()))
         {
@@ -110,7 +102,8 @@ namespace SceneUtil
             CopyRigVisitor copyVisitor(handle, filter);
             const_cast<osg::Node*>(toAttach.get())->accept(copyVisitor);
             copyVisitor.doCopy(sceneManager);
-            // add a ref to the original template to hint to the cache that it is still being used and should be kept in cache.
+            // add a ref to the original template to hint to the cache that it is still being used and should be kept in
+            // cache.
             handle->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(toAttach));
 
             if (handle->getNumChildren() == 1)
@@ -158,8 +151,9 @@ namespace SceneUtil
                 trans->setScale(osg::Vec3f(-1.f, 1.f, 1.f));
 
                 // Need to invert culling because of the negative scale
-                // Note: for absolute correctness we would need to check the current front face for every mesh then invert it
-                // However MW isn't doing this either, so don't. Assuming all meshes are using backface culling is more efficient.
+                // Note: for absolute correctness we would need to check the current front face for every mesh then
+                // invert it However MW isn't doing this either, so don't. Assuming all meshes are using backface
+                // culling is more efficient.
                 static osg::ref_ptr<osg::StateSet> frontFaceStateSet;
                 if (!frontFaceStateSet)
                 {
@@ -171,7 +165,7 @@ namespace SceneUtil
                 trans->setStateSet(frontFaceStateSet);
             }
 
-            if(attitude)
+            if (attitude)
             {
                 if (!trans)
                     trans = new osg::PositionAttitudeTransform;

@@ -1,7 +1,6 @@
 #ifndef MAINDIALOG_H
 #define MAINDIALOG_H
 
-
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 
@@ -44,7 +43,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        explicit MainDialog(QWidget *parent = nullptr);
+        explicit MainDialog(QWidget* parent = nullptr);
         ~MainDialog() override;
 
         FirstRunDialogResult showFirstRunDialog();
@@ -53,7 +52,7 @@ namespace Launcher
         bool writeSettings();
 
     public slots:
-        void changePage(QListWidgetItem *current, QListWidgetItem *previous);
+        void changePage(QListWidgetItem* current, QListWidgetItem* previous);
         void play();
         void help();
 
@@ -77,25 +76,27 @@ namespace Launcher
         void loadSettings();
         void saveSettings();
 
-        inline bool startProgram(const QString &name, bool detached = false) { return startProgram(name, QStringList(), detached); }
-        bool startProgram(const QString &name, const QStringList &arguments, bool detached = false);
+        inline bool startProgram(const QString& name, bool detached = false)
+        {
+            return startProgram(name, QStringList(), detached);
+        }
+        bool startProgram(const QString& name, const QStringList& arguments, bool detached = false);
 
-        void closeEvent(QCloseEvent *event) override;
+        void closeEvent(QCloseEvent* event) override;
 
-        PlayPage *mPlayPage;
-        GraphicsPage *mGraphicsPage;
-        DataFilesPage *mDataFilesPage;
-        SettingsPage *mSettingsPage;
-        AdvancedPage *mAdvancedPage;
+        PlayPage* mPlayPage;
+        GraphicsPage* mGraphicsPage;
+        DataFilesPage* mDataFilesPage;
+        SettingsPage* mSettingsPage;
+        AdvancedPage* mAdvancedPage;
 
-        Process::ProcessInvoker *mGameInvoker;
-        Process::ProcessInvoker *mWizardInvoker;
+        Process::ProcessInvoker* mGameInvoker;
+        Process::ProcessInvoker* mWizardInvoker;
 
         Files::ConfigurationManager mCfgMgr;
 
         Config::GameSettings mGameSettings;
         Config::LauncherSettings mLauncherSettings;
-
     };
 }
 #endif

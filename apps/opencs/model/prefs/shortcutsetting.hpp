@@ -12,39 +12,35 @@ namespace CSMPrefs
 {
     class ShortcutSetting : public Setting
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label);
 
-            ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key,
-                const std::string& label);
+        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
 
-            std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        void updateWidget() override;
 
-            void updateWidget() override;
+    protected:
+        bool eventFilter(QObject* target, QEvent* event) override;
 
-        protected:
+    private:
+        bool handleEvent(QObject* target, int mod, int value, bool active);
 
-            bool eventFilter(QObject* target, QEvent* event) override;
+        void storeValue(const QKeySequence& sequence);
+        void resetState();
 
-        private:
+        static constexpr int MaxKeys = 4;
 
-            bool handleEvent(QObject* target, int mod, int value, bool active);
+        QPushButton* mButton;
 
-            void storeValue(const QKeySequence& sequence);
-            void resetState();
+        bool mEditorActive;
+        int mEditorPos;
+        int mEditorKeys[MaxKeys];
 
-            static constexpr int MaxKeys = 4;
+    private slots:
 
-            QPushButton* mButton;
-
-            bool mEditorActive;
-            int mEditorPos;
-            int mEditorKeys[MaxKeys];
-
-        private slots:
-
-            void buttonToggled(bool checked);
+        void buttonToggled(bool checked);
     };
 }
 

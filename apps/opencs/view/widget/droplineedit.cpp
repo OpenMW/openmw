@@ -7,14 +7,14 @@
 
 #include "../world/dragdroputils.hpp"
 
-CSVWidget::DropLineEdit::DropLineEdit(CSMWorld::ColumnBase::Display type, QWidget *parent)
-    : QLineEdit(parent),
-      mDropType(type)
+CSVWidget::DropLineEdit::DropLineEdit(CSMWorld::ColumnBase::Display type, QWidget* parent)
+    : QLineEdit(parent)
+    , mDropType(type)
 {
     setAcceptDrops(true);
 }
 
-void CSVWidget::DropLineEdit::dragEnterEvent(QDragEnterEvent *event)
+void CSVWidget::DropLineEdit::dragEnterEvent(QDragEnterEvent* event)
 {
     if (CSVWorld::DragDropUtils::canAcceptData(*event, mDropType))
     {
@@ -22,7 +22,7 @@ void CSVWidget::DropLineEdit::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void CSVWidget::DropLineEdit::dragMoveEvent(QDragMoveEvent *event)
+void CSVWidget::DropLineEdit::dragMoveEvent(QDragMoveEvent* event)
 {
     if (CSVWorld::DragDropUtils::canAcceptData(*event, mDropType))
     {
@@ -30,7 +30,7 @@ void CSVWidget::DropLineEdit::dragMoveEvent(QDragMoveEvent *event)
     }
 }
 
-void CSVWidget::DropLineEdit::dropEvent(QDropEvent *event)
+void CSVWidget::DropLineEdit::dropEvent(QDropEvent* event)
 {
     if (CSVWorld::DragDropUtils::canAcceptData(*event, mDropType))
     {

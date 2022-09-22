@@ -1,38 +1,40 @@
 #include "filewidget.hpp"
 
 #include <QHBoxLayout>
-#include <QLineEdit>
 #include <QLabel>
-#include <QRegExpValidator>
+#include <QLineEdit>
 #include <QRegExp>
+#include <QRegExpValidator>
 
 QString CSVDoc::FileWidget::getExtension() const
 {
     return mAddon ? ".omwaddon" : ".omwgame";
 }
 
-CSVDoc::FileWidget::FileWidget (QWidget *parent) : QWidget (parent), mAddon (false)
+CSVDoc::FileWidget::FileWidget(QWidget* parent)
+    : QWidget(parent)
+    , mAddon(false)
 {
-    QHBoxLayout *layout = new QHBoxLayout (this);
+    QHBoxLayout* layout = new QHBoxLayout(this);
 
-    mInput = new QLineEdit (this);
+    mInput = new QLineEdit(this);
 
-    layout->addWidget (mInput, 1);
+    layout->addWidget(mInput, 1);
 
-    mType = new QLabel (this);
+    mType = new QLabel(this);
 
-    layout ->addWidget (mType);
+    layout->addWidget(mType);
 
-    connect (mInput, &QLineEdit::textChanged, this, &FileWidget::textChanged);
+    connect(mInput, &QLineEdit::textChanged, this, &FileWidget::textChanged);
 
-    setLayout (layout);
+    setLayout(layout);
 }
 
-void CSVDoc::FileWidget::setType (bool addon)
+void CSVDoc::FileWidget::setType(bool addon)
 {
     mAddon = addon;
 
-    mType->setText (getExtension());
+    mType->setText(getExtension());
 }
 
 QString CSVDoc::FileWidget::getName() const
@@ -45,9 +47,9 @@ QString CSVDoc::FileWidget::getName() const
     return text + getExtension();
 }
 
-void CSVDoc::FileWidget::textChanged (const QString& text)
+void CSVDoc::FileWidget::textChanged(const QString& text)
 {
-    emit nameChanged (getName(), mAddon);
+    emit nameChanged(getName(), mAddon);
 }
 
 void CSVDoc::FileWidget::extensionLabelIsVisible(bool visible)
@@ -55,10 +57,10 @@ void CSVDoc::FileWidget::extensionLabelIsVisible(bool visible)
     mType->setVisible(visible);
 }
 
-void CSVDoc::FileWidget::setName (const std::string& text)
+void CSVDoc::FileWidget::setName(const std::string& text)
 {
-    QString text2 = QString::fromUtf8 (text.c_str());
+    QString text2 = QString::fromUtf8(text.c_str());
 
-    mInput->setText (text2);
-    textChanged (text2);
+    mInput->setText(text2);
+    textChanged(text2);
 }

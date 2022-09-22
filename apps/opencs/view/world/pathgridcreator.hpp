@@ -28,54 +28,44 @@ namespace CSVWorld
     {
         Q_OBJECT
 
-        CSVWidget::DropLineEdit *mCell;
+        CSVWidget::DropLineEdit* mCell;
 
-        private:
+    private:
+        /// \return Cell ID entered by user.
+        std::string getId() const override;
 
-            /// \return Cell ID entered by user.
-            std::string getId() const override;
+        /// \return reference to table containing pathgrids.
+        CSMWorld::IdTable& getPathgridsTable() const;
 
-            /// \return reference to table containing pathgrids.
-            CSMWorld::IdTable& getPathgridsTable() const;
+    public:
+        PathgridCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
+            CSMWorld::IdCompletionManager& completionManager);
 
-        public:
+        /// \brief Set cell ID input widget to ID of record to be cloned.
+        /// \param originId Cell ID to be cloned.
+        /// \param type Type of record to be cloned.
+        void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 
-            PathgridCreator(
-                CSMWorld::Data& data,
-                QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id,
-                CSMWorld::IdCompletionManager& completionManager);
+        /// \return Error description for current user input.
+        std::string getErrors() const override;
 
-            /// \brief Set cell ID input widget to ID of record to be cloned.
-            /// \param originId Cell ID to be cloned.
-            /// \param type Type of record to be cloned.
-            void cloneMode(
-                const std::string& originId,
-                const CSMWorld::UniversalId::Type type) override;
+        /// \brief Set focus to cell ID input widget.
+        void focus() override;
 
-            /// \return Error description for current user input.
-            std::string getErrors() const override;
+        /// \brief Clear cell ID input widget.
+        void reset() override;
 
-            /// \brief Set focus to cell ID input widget.
-            void focus() override;
+    private slots:
 
-            /// \brief Clear cell ID input widget.
-            void reset() override;
-
-        private slots:
-
-            /// \brief Check user input for errors.
-            void cellChanged();
+        /// \brief Check user input for errors.
+        void cellChanged();
     };
 
     /// \brief Creator factory for pathgrid record creator.
     class PathgridCreatorFactory : public CreatorFactoryBase
     {
-        public:
-
-            Creator *makeCreator(
-                CSMDoc::Document& document,
-                const CSMWorld::UniversalId& id) const override;
+    public:
+        Creator* makeCreator(CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
     };
 }
 

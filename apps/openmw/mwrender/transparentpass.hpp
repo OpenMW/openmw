@@ -26,7 +26,8 @@ namespace MWRender
     public:
         TransparentDepthBinCallback(Shader::ShaderManager& shaderManager, bool postPass);
 
-        void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override;
+        void drawImplementation(
+            osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override;
         void dirtyFrame(int frameId);
 
         std::array<osg::ref_ptr<osg::FrameBufferObject>, 2> mFbo;

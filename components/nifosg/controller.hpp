@@ -1,10 +1,10 @@
 #ifndef COMPONENTS_NIFOSG_CONTROLLER_H
 #define COMPONENTS_NIFOSG_CONTROLLER_H
 
-#include <components/nif/niffile.hpp>
-#include <components/nif/nifkey.hpp>
 #include <components/nif/controller.hpp>
 #include <components/nif/data.hpp>
+#include <components/nif/niffile.hpp>
+#include <components/nif/nifkey.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/nodecallback.hpp>
@@ -64,23 +64,15 @@ namespace NifOsg
 
         ValueInterpolator() = default;
 
-        template<
-            class T,
-            typename = std::enable_if_t<
-                std::conjunction_v<
-                    std::disjunction<
-                        std::is_same<ValueT, float>,
-                        std::is_same<ValueT, osg::Vec3f>,
-                        std::is_same<ValueT, bool>,
-                        std::is_same<ValueT, osg::Vec4f>,
-                        std::is_same<ValueT, char>
-                    >,
-                    std::is_same<decltype(T::defaultVal), ValueT>
-                >,
-                T
-            >
-        >
-        ValueInterpolator(const T* interpolator) : mDefaultVal(interpolator->defaultVal)
+        template <class T,
+            typename
+            = std::enable_if_t<std::conjunction_v<std::disjunction<std::is_same<ValueT, float>,
+                                                      std::is_same<ValueT, osg::Vec3f>, std::is_same<ValueT, bool>,
+                                                      std::is_same<ValueT, osg::Vec4f>, std::is_same<ValueT, char>>,
+                                   std::is_same<decltype(T::defaultVal), ValueT>>,
+                T>>
+        ValueInterpolator(const T* interpolator)
+            : mDefaultVal(interpolator->defaultVal)
         {
             if (interpolator->data.empty())
                 return;
@@ -108,9 +100,9 @@ namespace NifOsg
             if (empty())
                 return mDefaultVal;
 
-            const typename MapT::MapType & keys = mKeys->mKeys;
+            const typename MapT::MapType& keys = mKeys->mKeys;
 
-            if(time <= keys.begin()->first)
+            if (time <= keys.begin()->first)
                 return keys.begin()->second.mValue;
 
             typename MapT::MapType::const_iterator it = retrieveKey(time);
@@ -130,14 +122,12 @@ namespace NifOsg
             return keys.rbegin()->second.mValue;
         }
 
-        bool empty() const
-        {
-            return !mKeys || mKeys->mKeys.empty();
-        }
+        bool empty() const { return !mKeys || mKeys->mKeys.empty(); }
 
     private:
         template <typename ValueType>
-        ValueType interpolate(const Nif::KeyT<ValueType>& a, const Nif::KeyT<ValueType>& b, float fraction, unsigned int type) const
+        ValueType interpolate(
+            const Nif::KeyT<ValueType>& a, const Nif::KeyT<ValueType>& b, float fraction, unsigned int type) const
         {
             switch (type)
             {
@@ -165,7 +155,8 @@ namespace NifOsg
                     return a.mValue + ((b.mValue - a.mValue) * fraction);
             }
         }
-        osg::Quat interpolate(const Nif::KeyT<osg::Quat>& a, const Nif::KeyT<osg::Quat>& b, float fraction, unsigned int type) const
+        osg::Quat interpolate(
+            const Nif::KeyT<osg::Quat>& a, const Nif::KeyT<osg::Quat>& b, float fraction, unsigned int type) const
         {
             switch (type)
             {
@@ -205,14 +196,15 @@ namespace NifOsg
         Nif::Controller::ExtrapolationMode mExtrapolationMode;
 
     public:
-        ControllerFunction(const Nif::Controller *ctrl);
+        ControllerFunction(const Nif::Controller* ctrl);
 
         float calculate(float value) const override;
 
         float getMaximum() const override;
     };
 
-    class GeomMorpherController : public SceneUtil::Controller, public SceneUtil::NodeCallback<GeomMorpherController, SceneUtil::MorphGeometry*>
+    class GeomMorpherController : public SceneUtil::Controller,
+                                  public SceneUtil::NodeCallback<GeomMorpherController, SceneUtil::MorphGeometry*>
     {
     public:
         GeomMorpherController(const Nif::NiGeomMorpherController* ctrl);
@@ -229,26 +221,27 @@ namespace NifOsg
     };
 
 #ifdef _MSC_VER
-#pragma warning( push )
- /*
-  * Warning C4250: 'NifOsg::KeyframeController': inherits 'osg::Callback::osg::Callback::asCallback' via dominance,
-  * there is no way to solved this if an object must inherit from both osg::Object and osg::Callback
-  */
-#pragma warning( disable : 4250 )
+#pragma warning(push)
+    /*
+     * Warning C4250: 'NifOsg::KeyframeController': inherits 'osg::Callback::osg::Callback::asCallback' via dominance,
+     * there is no way to solved this if an object must inherit from both osg::Object and osg::Callback
+     */
+#pragma warning(disable : 4250)
 #endif
-    class KeyframeController : public SceneUtil::KeyframeController, public SceneUtil::NodeCallback<KeyframeController, NifOsg::MatrixTransform*>
+    class KeyframeController : public SceneUtil::KeyframeController,
+                               public SceneUtil::NodeCallback<KeyframeController, NifOsg::MatrixTransform*>
     {
     public:
         KeyframeController();
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
-        KeyframeController(const Nif::NiKeyframeController *keyctrl);
+        KeyframeController(const Nif::NiKeyframeController* keyctrl);
 
         META_Object(NifOsg, KeyframeController)
 
         osg::Vec3f getTranslation(float time) const override;
         osg::Callback* getAsCallback() override { return this; }
 
-        void operator() (NifOsg::MatrixTransform*, osg::NodeVisitor*);
+        void operator()(NifOsg::MatrixTransform*, osg::NodeVisitor*);
 
     private:
         QuaternionInterpolator mRotations;
@@ -260,25 +253,25 @@ namespace NifOsg
         Vec3Interpolator mTranslations;
         FloatInterpolator mScales;
 
-        Nif::NiKeyframeData::AxisOrder mAxisOrder{Nif::NiKeyframeData::AxisOrder::Order_XYZ};
+        Nif::NiKeyframeData::AxisOrder mAxisOrder{ Nif::NiKeyframeData::AxisOrder::Order_XYZ };
 
         osg::Quat getXYZRotation(float time) const;
     };
 #ifdef _MSC_VER
-#pragma warning( pop )
+#pragma warning(pop)
 #endif
 
     class UVController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     public:
         UVController();
-        UVController(const UVController&,const osg::CopyOp&);
-        UVController(const Nif::NiUVData *data, const std::set<int>& textureUnits);
+        UVController(const UVController&, const osg::CopyOp&);
+        UVController(const Nif::NiUVData* data, const std::set<int>& textureUnits);
 
-        META_Object(NifOsg,UVController)
+        META_Object(NifOsg, UVController)
 
         void setDefaults(osg::StateSet* stateset) override;
-        void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
 
     private:
         FloatInterpolator mUTrans;
@@ -293,7 +286,7 @@ namespace NifOsg
     private:
         std::vector<Nif::NiVisData::VisData> mData;
         ByteInterpolator mInterpolator;
-        unsigned int mMask{0u};
+        unsigned int mMask{ 0u };
 
         bool calculate(float time) const;
 
@@ -304,21 +297,22 @@ namespace NifOsg
 
         META_Object(NifOsg, VisController)
 
-        void operator() (osg::Node* node, osg::NodeVisitor* nv);
+        void operator()(osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class RollController : public SceneUtil::NodeCallback<RollController, osg::MatrixTransform*>, public SceneUtil::Controller
+    class RollController : public SceneUtil::NodeCallback<RollController, osg::MatrixTransform*>,
+                           public SceneUtil::Controller
     {
     private:
         FloatInterpolator mData;
-        double mStartingTime{0};
+        double mStartingTime{ 0 };
 
     public:
         RollController(const Nif::NiRollController* interpolator);
         RollController() = default;
         RollController(const RollController& copy, const osg::CopyOp& copyop);
 
-        void operator() (osg::MatrixTransform* node, osg::NodeVisitor* nv);
+        void operator()(osg::MatrixTransform* node, osg::NodeVisitor* nv);
 
         META_Object(NifOsg, RollController)
     };
@@ -328,6 +322,7 @@ namespace NifOsg
     private:
         FloatInterpolator mData;
         osg::ref_ptr<const osg::Material> mBaseMaterial;
+
     public:
         AlphaController(const Nif::NiAlphaController* ctrl, const osg::Material* baseMaterial);
         AlphaController();
@@ -345,8 +340,8 @@ namespace NifOsg
     public:
         enum TargetColor
         {
-            Ambient  = 0,
-            Diffuse  = 1,
+            Ambient = 0,
+            Diffuse = 1,
             Specular = 2,
             Emissive = 3
         };
@@ -369,25 +364,27 @@ namespace NifOsg
     class FlipController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     private:
-        int mTexSlot{0};
-        float mDelta{0.f};
-        std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
+        int mTexSlot{ 0 };
+        float mDelta{ 0.f };
+        std::vector<osg::ref_ptr<osg::Texture2D>> mTextures;
         FloatInterpolator mData;
 
     public:
-        FlipController(const Nif::NiFlipController* ctrl, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);
-        FlipController(int texSlot, float delta, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);
+        FlipController(const Nif::NiFlipController* ctrl, const std::vector<osg::ref_ptr<osg::Texture2D>>& textures);
+        FlipController(int texSlot, float delta, const std::vector<osg::ref_ptr<osg::Texture2D>>& textures);
         FlipController() = default;
         FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 
         META_Object(NifOsg, FlipController)
 
-        std::vector<osg::ref_ptr<osg::Texture2D> >& getTextures() { return mTextures; }
+        std::vector<osg::ref_ptr<osg::Texture2D>>& getTextures() { return mTextures; }
 
-        void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
     };
 
-    class ParticleSystemController : public SceneUtil::NodeCallback<ParticleSystemController, osgParticle::ParticleProcessor*>, public SceneUtil::Controller
+    class ParticleSystemController
+        : public SceneUtil::NodeCallback<ParticleSystemController, osgParticle::ParticleProcessor*>,
+          public SceneUtil::Controller
     {
     public:
         ParticleSystemController(const Nif::NiParticleSystemController* ctrl);
@@ -396,14 +393,15 @@ namespace NifOsg
 
         META_Object(NifOsg, ParticleSystemController)
 
-        void operator() (osgParticle::ParticleProcessor* node, osg::NodeVisitor* nv);
+        void operator()(osgParticle::ParticleProcessor* node, osg::NodeVisitor* nv);
 
     private:
         float mEmitStart;
         float mEmitStop;
     };
 
-    class PathController : public SceneUtil::NodeCallback<PathController, NifOsg::MatrixTransform*>, public SceneUtil::Controller
+    class PathController : public SceneUtil::NodeCallback<PathController, NifOsg::MatrixTransform*>,
+                           public SceneUtil::Controller
     {
     public:
         PathController(const Nif::NiPathController* ctrl);
@@ -412,12 +410,12 @@ namespace NifOsg
 
         META_Object(NifOsg, PathController)
 
-        void operator() (NifOsg::MatrixTransform*, osg::NodeVisitor*);
+        void operator()(NifOsg::MatrixTransform*, osg::NodeVisitor*);
 
     private:
         Vec3Interpolator mPath;
         FloatInterpolator mPercent;
-        int mFlags{0};
+        int mFlags{ 0 };
 
         float getPercent(float time) const;
     };

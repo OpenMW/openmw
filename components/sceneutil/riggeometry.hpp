@@ -14,13 +14,15 @@ namespace SceneUtil
     // - mSourceGeometry should be const, but can not be const because of a use case in shadervisitor.cpp.
     // - We create useless mGeometry clones in template RigGeometries.
     // - We do not support compileGLObjects.
-    // - We duplicate some code in MorphGeometry. 
+    // - We duplicate some code in MorphGeometry.
 
     /// @brief Mesh skinning implementation.
     /// @note A RigGeometry may be attached directly to a Skeleton, or somewhere below a Skeleton.
-    /// Note though that the RigGeometry ignores any transforms below the Skeleton, so the attachment point is not that important.
-    /// @note The internal Geometry used for rendering is double buffered, this allows updates to be done in a thread safe way while
-    /// not compromising rendering performance. This is crucial when using osg's default threading model of DrawThreadPerContext.
+    /// Note though that the RigGeometry ignores any transforms below the Skeleton, so the attachment point is not that
+    /// important.
+    /// @note The internal Geometry used for rendering is double buffered, this allows updates to be done in a thread
+    /// safe way while not compromising rendering performance. This is crucial when using osg's default threading model
+    /// of DrawThreadPerContext.
     class RigGeometry : public osg::Drawable
     {
     public:
@@ -29,7 +31,9 @@ namespace SceneUtil
 
         META_Object(SceneUtil, RigGeometry)
 
-        // Currently empty as this is difficult to implement. Technically we would need to compile both internal geometries in separate frames but this method is only called once. Alternatively we could compile just the static parts of the model.
+        // Currently empty as this is difficult to implement. Technically we would need to compile both internal
+        // geometries in separate frames but this method is only called once. Alternatively we could compile just the
+        // static parts of the model.
         void compileGLObjects(osg::RenderInfo& renderInfo) const override {}
 
         struct BoneInfluence
@@ -53,8 +57,8 @@ namespace SceneUtil
 
         osg::ref_ptr<osg::Geometry> getSourceGeometry() const;
 
-        void accept(osg::NodeVisitor &nv) override;
-        bool supports(const osg::PrimitiveFunctor&) const override{ return true; }
+        void accept(osg::NodeVisitor& nv) override;
+        bool supports(const osg::PrimitiveFunctor&) const override { return true; }
         void accept(osg::PrimitiveFunctor&) const override;
 
         struct CopyBoundingBoxCallback : osg::Drawable::ComputeBoundingBoxCallback

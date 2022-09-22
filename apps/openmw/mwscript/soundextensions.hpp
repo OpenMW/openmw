@@ -15,10 +15,9 @@ namespace MWScript
 {
     namespace Sound
     {
-        // Script-extensions related to sound        
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+        // Script-extensions related to sound
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 
 #endif
-

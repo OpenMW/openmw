@@ -29,17 +29,14 @@ namespace DetourNavigator
 
     inline constexpr std::size_t getSize(const rcPolyMesh& value) noexcept
     {
-        return getVertsLength(value) * sizeof(*value.verts)
-            + getPolysLength(value) * sizeof(*value.polys)
-            + getRegsLength(value) * sizeof(*value.regs)
-            + getFlagsLength(value) * sizeof(*value.flags)
+        return getVertsLength(value) * sizeof(*value.verts) + getPolysLength(value) * sizeof(*value.polys)
+            + getRegsLength(value) * sizeof(*value.regs) + getFlagsLength(value) * sizeof(*value.flags)
             + getAreasLength(value) * sizeof(*value.areas);
     }
 
     inline constexpr std::size_t getSize(const rcPolyMeshDetail& value) noexcept
     {
-        return getMeshesLength(value) * sizeof(*value.meshes)
-            + getVertsLength(value) * sizeof(*value.verts)
+        return getMeshesLength(value) * sizeof(*value.meshes) + getVertsLength(value) * sizeof(*value.verts)
             + getTrisLength(value) * sizeof(*value.tris);
     }
 

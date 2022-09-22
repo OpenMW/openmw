@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESM_SAVEDGAME_H
 #define OPENMW_ESM_SAVEDGAME_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "components/esm/defs.hpp"
 
@@ -35,8 +35,8 @@ namespace ESM
         std::string mDescription;
         std::vector<char> mScreenshot; // raw jpg-encoded data
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 }
 

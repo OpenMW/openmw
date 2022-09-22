@@ -1,23 +1,21 @@
 #ifndef OPENMW_LUAUI_PROPERTIES
 #define OPENMW_LUAUI_PROPERTIES
 
-#include <sol/sol.hpp>
-#include <MyGUI_Types.h>
 #include <MyGUI_Colour.h>
+#include <MyGUI_Types.h>
 #include <osg/Vec2>
+#include <sol/sol.hpp>
 
 #include <components/lua/luastate.hpp>
 #include <components/misc/color.hpp>
 
 namespace LuaUi
 {
-    template<typename T>
-    constexpr bool isMyGuiVector() {
-        return
-            std::is_same<T, MyGUI::IntPoint>() ||
-            std::is_same<T, MyGUI::IntSize>() ||
-            std::is_same<T, MyGUI::FloatPoint>() ||
-            std::is_same<T, MyGUI::FloatSize>();
+    template <typename T>
+    constexpr bool isMyGuiVector()
+    {
+        return std::is_same<T, MyGUI::IntPoint>() || std::is_same<T, MyGUI::IntSize>()
+            || std::is_same<T, MyGUI::FloatPoint>() || std::is_same<T, MyGUI::FloatSize>();
     }
 
     template <typename T>
@@ -27,10 +25,7 @@ namespace LuaUi
     }
 
     template <typename T, typename LuaT>
-    sol::optional<T> parseValue(
-        sol::object table,
-        std::string_view field,
-        std::string_view errorPrefix)
+    sol::optional<T> parseValue(sol::object table, std::string_view field, std::string_view errorPrefix)
     {
         sol::object opt = LuaUtil::getFieldOrNil(table, field);
         if (opt != sol::nil && !opt.is<LuaT>())
@@ -56,10 +51,7 @@ namespace LuaUi
     }
 
     template <typename T>
-    sol::optional<T> parseValue(
-        sol::object table,
-        std::string_view field,
-        std::string_view errorPrefix)
+    sol::optional<T> parseValue(sol::object table, std::string_view field, std::string_view errorPrefix)
     {
         if constexpr (isMyGuiVector<T>())
             return parseValue<T, osg::Vec2f>(table, field, errorPrefix);
@@ -70,11 +62,7 @@ namespace LuaUi
     }
 
     template <typename T>
-    T parseProperty(
-        sol::object props,
-        sol::object templateProps,
-        std::string_view field,
-        const T& defaultValue)
+    T parseProperty(sol::object props, sol::object templateProps, std::string_view field, const T& defaultValue)
     {
         auto propOptional = parseValue<T>(props, field, "Property");
         auto templateOptional = parseValue<T>(templateProps, field, "Template property");
@@ -88,10 +76,7 @@ namespace LuaUi
     }
 
     template <typename T>
-    T parseExternal(
-        sol::object external,
-        std::string_view field,
-        const T& defaultValue)
+    T parseExternal(sol::object external, std::string_view field, const T& defaultValue)
     {
         auto optional = parseValue<T>(external, field, "External value");
 

@@ -1,13 +1,13 @@
 #ifndef CSV_TOOLS_SEARCHBOX_H
 #define CSV_TOOLS_SEARCHBOX_H
 
-#include <QWidget>
-#include <QLineEdit>
-#include <QComboBox>
 #include <QCheckBox>
-#include <QStackedWidget>
-#include <QPushButton>
+#include <QComboBox>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QWidget>
 
 class QGridLayout;
 
@@ -20,54 +20,52 @@ namespace CSVTools
 {
     class SearchBox : public QWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QStackedWidget mInput;
-            QLineEdit mText;
-            QComboBox mRecordState;
-            QCheckBox mCaseSensitive;
-            QPushButton mSearch;
-            QGridLayout *mLayout;
-            QComboBox mMode;
-            bool mSearchEnabled;
-            QStackedWidget mReplaceInput;
-            QLineEdit mReplaceText;
-            QLabel mReplacePlaceholder;
-            QPushButton mReplace;
+        QStackedWidget mInput;
+        QLineEdit mText;
+        QComboBox mRecordState;
+        QCheckBox mCaseSensitive;
+        QPushButton mSearch;
+        QGridLayout* mLayout;
+        QComboBox mMode;
+        bool mSearchEnabled;
+        QStackedWidget mReplaceInput;
+        QLineEdit mReplaceText;
+        QLabel mReplacePlaceholder;
+        QPushButton mReplace;
 
-        private:
+    private:
+        void updateSearchButton();
 
-            void updateSearchButton();
-            
-        public:
+    public:
+        SearchBox(QWidget* parent = nullptr);
 
-            SearchBox (QWidget *parent = nullptr);
+        void setSearchMode(bool enabled);
 
-            void setSearchMode (bool enabled);
+        CSMTools::Search getSearch() const;
 
-            CSMTools::Search getSearch() const;
+        std::string getReplaceText() const;
 
-            std::string getReplaceText() const;
+        void setEditLock(bool locked);
 
-            void setEditLock (bool locked);
+        void focus();
 
-            void focus();
+    private slots:
 
-        private slots:
+        void modeSelected(int index);
 
-            void modeSelected (int index);
+        void textChanged(const QString& text);
 
-            void textChanged (const QString& text);
+        void startSearch(bool checked = true);
 
-            void startSearch (bool checked = true);
+        void replaceAll(bool checked);
 
-            void replaceAll (bool checked);
+    signals:
 
-        signals:
+        void startSearch(const CSMTools::Search& search);
 
-            void startSearch (const CSMTools::Search& search);
-
-            void replaceAll();
+        void replaceAll();
     };
 }
 

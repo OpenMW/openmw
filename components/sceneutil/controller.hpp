@@ -10,7 +10,7 @@ namespace SceneUtil
     class ControllerSource
     {
     public:
-        virtual ~ControllerSource() { }
+        virtual ~ControllerSource() {}
         virtual float getValue(osg::NodeVisitor* nv) = 0;
     };
 
@@ -21,7 +21,8 @@ namespace SceneUtil
         float getValue(osg::NodeVisitor* nv) override;
     };
 
-    /// @note ControllerFunctions may be shared - you should not hold any state in it. That is why all its methods are declared const.
+    /// @note ControllerFunctions may be shared - you should not hold any state in it. That is why all its methods are
+    /// declared const.
     class ControllerFunction
     {
     public:
@@ -82,7 +83,8 @@ namespace SceneUtil
         AssignControllerSourcesVisitor(std::shared_ptr<ControllerSource> toAssign);
 
         /// Assign the wanted ControllerSource. May be overridden in derived classes.
-        /// By default assigns the ControllerSource passed to the constructor of this class if no ControllerSource is assigned to that controller yet.
+        /// By default assigns the ControllerSource passed to the constructor of this class if no ControllerSource is
+        /// assigned to that controller yet.
         void visit(osg::Node& node, Controller& ctrl) override;
 
     protected:
@@ -105,7 +107,7 @@ namespace SceneUtil
     public:
         FindMaxControllerLengthVisitor();
 
-        void visit(osg::Node& , Controller& ctrl) override;
+        void visit(osg::Node&, Controller& ctrl) override;
 
         float getMaxLength() const;
 

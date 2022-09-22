@@ -1,26 +1,26 @@
 #include "importer.hpp"
 
-#include <iomanip>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 
-#include <osgDB/ReadFile>
 #include <osg/ImageUtils>
+#include <osgDB/ReadFile>
 
+#include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/esm/defs.hpp>
 
-#include <components/esm3/savedgame.hpp>
 #include <components/esm3/player.hpp>
+#include <components/esm3/savedgame.hpp>
 
 #include <components/esm3/loadalch.hpp>
-#include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadarmo.hpp>
-#include <components/esm3/loadweap.hpp>
 #include <components/esm3/loadclot.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadweap.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -35,25 +35,25 @@ namespace
 
     void writeScreenshot(const ESM::Header& fileHeader, ESM::SavedGame& out)
     {
-        if (fileHeader.mSCRS.size() != 128*128*4)
+        if (fileHeader.mSCRS.size() != 128 * 128 * 4)
         {
             std::cerr << "Error: unexpected screenshot size " << std::endl;
             return;
         }
 
-        osg::ref_ptr<osg::Image> image (new osg::Image);
+        osg::ref_ptr<osg::Image> image(new osg::Image);
         image->allocateImage(128, 128, 1, GL_RGB, GL_UNSIGNED_BYTE);
 
         // need to convert pixel format from BGRA to RGB as the jpg readerwriter doesn't support it otherwise
         auto it = fileHeader.mSCRS.begin();
-        for (int y=0; y<128; ++y)
+        for (int y = 0; y < 128; ++y)
         {
-            for (int x=0; x<128; ++x)
+            for (int x = 0; x < 128; ++x)
             {
-                assert(image->data(x,y));
-                *(image->data(x,y)+2) = *it++;
-                *(image->data(x,y)+1) = *it++;
-                *image->data(x,y) = *it++;
+                assert(image->data(x, y));
+                *(image->data(x, y) + 2) = *it++;
+                *(image->data(x, y) + 1) = *it++;
+                *image->data(x, y) = *it++;
                 ++it; // skip alpha
             }
         }
@@ -72,7 +72,8 @@ namespace
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*image, ostream);
         if (!result.success())
         {
-            std::cerr << "Error: can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
+            std::cerr << "Error: can't write screenshot: " << result.message() << " code " << result.status()
+                      << std::endl;
             return;
         }
 
@@ -85,12 +86,12 @@ namespace
 namespace ESSImport
 {
 
-    Importer::Importer(const std::filesystem::path &essfile, const std::filesystem::path &outfile, const std::string &encoding)
+    Importer::Importer(
+        const std::filesystem::path& essfile, const std::filesystem::path& outfile, const std::string& encoding)
         : mEssFile(essfile)
         , mOutFile(outfile)
         , mEncoding(encoding)
     {
-
     }
 
     struct File
@@ -112,7 +113,7 @@ namespace ESSImport
         std::vector<Record> mRecords;
     };
 
-    void read(const std::filesystem::path &filename, File& file)
+    void read(const std::filesystem::path& filename, File& file)
     {
         ESM::ESMReader esm;
         esm.open(filename);
@@ -143,14 +144,14 @@ namespace ESSImport
     void Importer::compare()
     {
         // data that always changes (and/or is already fully decoded) should be blacklisted
-        std::set<std::pair<std::string, std::string> > blacklist;
+        std::set<std::pair<std::string, std::string>> blacklist;
         blacklist.insert(std::make_pair("GLOB", "FLTV")); // gamehour
         blacklist.insert(std::make_pair("REFR", "DATA")); // player position
         blacklist.insert(std::make_pair("CELL", "NAM8")); // fog of war
         blacklist.insert(std::make_pair("GAME", "GMDT")); // weather data, current time always changes
         blacklist.insert(std::make_pair("CELL", "DELE")); // first 3 bytes are uninitialized
 
-         // this changes way too often, name suggests some renderer internal data?
+        // this changes way too often, name suggests some renderer internal data?
         blacklist.insert(std::make_pair("CELL", "ND3D"));
         blacklist.insert(std::make_pair("REFR", "ND3D"));
 
@@ -160,7 +161,7 @@ namespace ESSImport
         read(mOutFile, file2); // todo rename variable
 
         // FIXME: use max(size1, size2)
-        for (unsigned int i=0; i<file1.mRecords.size(); ++i)
+        for (unsigned int i = 0; i < file1.mRecords.size(); ++i)
         {
             File::Record rec = file1.mRecords[i];
 
@@ -183,14 +184,15 @@ namespace ESSImport
             }
 
             // FIXME: use max(size1, size2)
-            for (unsigned int j=0; j<rec.mSubrecords.size(); ++j)
+            for (unsigned int j = 0; j < rec.mSubrecords.size(); ++j)
             {
                 File::Subrecord sub = rec.mSubrecords[j];
 
                 if (j >= rec2.mSubrecords.size())
                 {
                     std::ios::fmtflags f(std::cout.flags());
-                    std::cout << "Subrecord in file1 not present in file2: (1) 0x" << std::hex << sub.mFileOffset << std::endl;
+                    std::cout << "Subrecord in file1 not present in file2: (1) 0x" << std::hex << sub.mFileOffset
+                              << std::endl;
                     std::cout.flags(f);
                     return;
                 }
@@ -200,8 +202,9 @@ namespace ESSImport
                 if (sub.mName != sub2.mName)
                 {
                     std::ios::fmtflags f(std::cout.flags());
-                    std::cout << "Different subrecord name (" << rec.mName << "." << sub.mName << " vs. " << sub2.mName << ") at (1) 0x" << std::hex << sub.mFileOffset
-                              << " (2) 0x" << sub2.mFileOffset << std::endl;
+                    std::cout << "Different subrecord name (" << rec.mName << "." << sub.mName << " vs. " << sub2.mName
+                              << ") at (1) 0x" << std::hex << sub.mFileOffset << " (2) 0x" << sub2.mFileOffset
+                              << std::endl;
                     std::cout.flags(f);
                     break; // TODO: try to recover
                 }
@@ -213,11 +216,11 @@ namespace ESSImport
 
                     std::ios::fmtflags f(std::cout.flags());
 
-                    std::cout << "Different subrecord data for " << rec.mName << "." << sub.mName << " at (1) 0x" << std::hex << sub.mFileOffset
-                              << " (2) 0x" << sub2.mFileOffset << std::endl;
+                    std::cout << "Different subrecord data for " << rec.mName << "." << sub.mName << " at (1) 0x"
+                              << std::hex << sub.mFileOffset << " (2) 0x" << sub2.mFileOffset << std::endl;
 
                     std::cout << "Data 1:" << std::endl;
-                    for (unsigned int k=0; k<sub.mData.size(); ++k)
+                    for (unsigned int k = 0; k < sub.mData.size(); ++k)
                     {
                         bool different = false;
                         if (k >= sub2.mData.size() || sub2.mData[k] != sub.mData[k])
@@ -232,7 +235,7 @@ namespace ESSImport
                     std::cout << std::endl;
 
                     std::cout << "Data 2:" << std::endl;
-                    for (unsigned int k=0; k<sub2.mData.size(); ++k)
+                    for (unsigned int k = 0; k < sub2.mData.size(); ++k)
                     {
                         bool different = false;
                         if (k >= sub.mData.size() || sub.mData[k] != sub2.mData[k])
@@ -279,12 +282,12 @@ namespace ESSImport
         converters[ESM::REC_CREA] = std::make_unique<ConvertCREA>();
         converters[ESM::REC_NPCC] = std::make_unique<ConvertNPCC>();
         converters[ESM::REC_CREC] = std::make_unique<ConvertCREC>();
-        converters[recREFR      ] = std::make_unique<ConvertREFR>();
-        converters[recPCDT      ] = std::make_unique<ConvertPCDT>();
-        converters[recFMAP      ] = std::make_unique<ConvertFMAP>();
-        converters[recKLST      ] = std::make_unique<ConvertKLST>();
-        converters[recSTLN      ] = std::make_unique<ConvertSTLN>();
-        converters[recGAME      ] = std::make_unique<ConvertGAME>();
+        converters[recREFR] = std::make_unique<ConvertREFR>();
+        converters[recPCDT] = std::make_unique<ConvertPCDT>();
+        converters[recFMAP] = std::make_unique<ConvertFMAP>();
+        converters[recKLST] = std::make_unique<ConvertKLST>();
+        converters[recSTLN] = std::make_unique<ConvertSTLN>();
+        converters[recGAME] = std::make_unique<ConvertGAME>();
         converters[ESM::REC_CELL] = std::make_unique<ConvertCell>();
         converters[ESM::REC_ALCH] = std::make_unique<DefaultConverter<ESM::Potion>>();
         converters[ESM::REC_CLAS] = std::make_unique<ConvertClass>();
@@ -301,7 +304,7 @@ namespace ESSImport
         converters[ESM::REC_INFO] = std::make_unique<ConvertINFO>();
         converters[ESM::REC_DIAL] = std::make_unique<ConvertDIAL>();
         converters[ESM::REC_QUES] = std::make_unique<ConvertQUES>();
-        converters[recJOUR      ] = std::make_unique<ConvertJOUR>();
+        converters[recJOUR] = std::make_unique<ConvertJOUR>();
         converters[ESM::REC_SCPT] = std::make_unique<ConvertSCPT>();
         converters[ESM::REC_PROJ] = std::make_unique<ConvertPROJ>();
         converters[recSPLM] = std::make_unique<ConvertSPLM>();
@@ -313,7 +316,7 @@ namespace ESSImport
 
         std::set<unsigned int> unknownRecords;
 
-        for (const auto & converter : converters)
+        for (const auto& converter : converters)
         {
             converter.second->setContext(context);
         }
@@ -333,7 +336,8 @@ namespace ESSImport
                 if (unknownRecords.insert(n.toInt()).second)
                 {
                     std::ios::fmtflags f(std::cerr.flags());
-                    std::cerr << "Error: unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
+                    std::cerr << "Error: unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset()
+                              << ")" << std::endl;
                     std::cerr.flags(f);
                 }
 
@@ -343,7 +347,7 @@ namespace ESSImport
 
         ESM::ESMWriter writer;
 
-        writer.setFormat (ESM::SavedGame::sCurrentFormat);
+        writer.setFormat(ESM::SavedGame::sCurrentFormat);
 
         std::ofstream stream(mOutFile, std::ios::out | std::ios::binary);
         // all unused
@@ -351,15 +355,15 @@ namespace ESSImport
         writer.setType(0);
         writer.setAuthor("");
         writer.setDescription("");
-        writer.setRecordCount (0);
+        writer.setRecordCount(0);
 
-        for (const auto & master : header.mMaster)
+        for (const auto& master : header.mMaster)
             writer.addMaster(master.name, 0); // not using the size information anyway -> use value of 0
 
-        writer.save (stream);
+        writer.save(stream);
 
         ESM::SavedGame profile;
-        for (const auto & master : header.mMaster)
+        for (const auto& master : header.mMaster)
         {
             profile.mContentFiles.push_back(master.name);
         }
@@ -379,14 +383,13 @@ namespace ESSImport
 
         writeScreenshot(header, profile);
 
-        writer.startRecord (ESM::REC_SAVE);
-        profile.save (writer);
-        writer.endRecord (ESM::REC_SAVE);
+        writer.startRecord(ESM::REC_SAVE);
+        profile.save(writer);
+        writer.endRecord(ESM::REC_SAVE);
 
         // Writing order should be Dynamic Store -> Cells -> Player,
         // so that references to dynamic records can be recognized when loading
-        for (auto it = converters.begin();
-             it != converters.end(); ++it)
+        for (auto it = converters.begin(); it != converters.end(); ++it)
         {
             if (it->second->getStage() != 0)
                 continue;
@@ -398,8 +401,7 @@ namespace ESSImport
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 
-        for (auto it = converters.begin();
-             it != converters.end(); ++it)
+        for (auto it = converters.begin(); it != converters.end(); ++it)
         {
             if (it->second->getStage() != 1)
                 continue;
@@ -410,8 +412,10 @@ namespace ESSImport
         if (context.mPlayer.mCellId.mPaged)
         {
             // exterior cell -> determine cell coordinates based on position
-            int cellX = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0] / Constants::CellSizeInUnits));
-            int cellY = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
+            int cellX
+                = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0] / Constants::CellSizeInUnits));
+            int cellY
+                = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
             context.mPlayer.mCellId.mIndex.mX = cellX;
             context.mPlayer.mCellId.mIndex.mY = cellY;
         }
@@ -423,15 +427,14 @@ namespace ESSImport
         writer.endRecord(ESM::REC_ACTC);
 
         // Stage 2 requires cell references to be written / actors IDs assigned
-        for (auto it = converters.begin();
-             it != converters.end(); ++it)
+        for (auto it = converters.begin(); it != converters.end(); ++it)
         {
             if (it->second->getStage() != 2)
                 continue;
             it->second->write(writer);
         }
 
-        writer.startRecord (ESM::REC_DIAS);
+        writer.startRecord(ESM::REC_DIAS);
         context.mDialogueState.save(writer);
         writer.endRecord(ESM::REC_DIAS);
 
@@ -439,6 +442,5 @@ namespace ESSImport
         context.mControlsState.save(writer);
         writer.endRecord(ESM::REC_INPU);
     }
-
 
 }

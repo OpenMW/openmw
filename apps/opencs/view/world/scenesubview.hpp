@@ -37,54 +37,52 @@ namespace CSVWorld
 
     class SceneSubView : public CSVDoc::SubView
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            TableBottomBox *mBottom;
-            CSVRender::WorldspaceWidget *mScene;
-            QHBoxLayout* mLayout;
-            CSMDoc::Document& mDocument;
-            CSVWidget::SceneToolbar* mToolbar;
-            std::string mTitle;
+        TableBottomBox* mBottom;
+        CSVRender::WorldspaceWidget* mScene;
+        QHBoxLayout* mLayout;
+        CSMDoc::Document& mDocument;
+        CSVWidget::SceneToolbar* mToolbar;
+        std::string mTitle;
 
-        public:
+    public:
+        SceneSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
+        void setEditLock(bool locked) override;
 
-            void setEditLock (bool locked) override;
+        void setStatusBar(bool show) override;
 
-            void setStatusBar (bool show) override;
+        void useHint(const std::string& hint) override;
 
-            void useHint (const std::string& hint) override;
+        std::string getTitle() const override;
 
-            std::string getTitle() const override;
+    private:
+        void makeConnections(CSVRender::PagedWorldspaceWidget* widget);
 
-        private:
+        void makeConnections(CSVRender::UnpagedWorldspaceWidget* widget);
 
-            void makeConnections(CSVRender::PagedWorldspaceWidget* widget);
+        void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, CSVWidget::SceneToolbar* toolbar);
 
-            void makeConnections(CSVRender::UnpagedWorldspaceWidget* widget);
+        enum widgetType
+        {
+            widget_Paged,
+            widget_Unpaged
+        };
 
-            void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, CSVWidget::SceneToolbar* toolbar);
+        CSVWidget::SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, widgetType type);
 
-            enum widgetType
-            {
-                widget_Paged,
-                widget_Unpaged
-            };
+    private slots:
 
-            CSVWidget::SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, widgetType type);
+        void cellSelectionChanged(const CSMWorld::CellSelection& selection);
 
-        private slots:
+        void cellSelectionChanged(const CSMWorld::UniversalId& id);
 
-            void cellSelectionChanged (const CSMWorld::CellSelection& selection);
+        void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 
-            void cellSelectionChanged (const CSMWorld::UniversalId& id);
+    signals:
 
-            void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
-
-        signals:
-
-            void requestFocus (const std::string& id);
+        void requestFocus(const std::string& id);
     };
 }
 

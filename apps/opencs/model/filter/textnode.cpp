@@ -8,43 +8,44 @@
 #include "../world/columns.hpp"
 #include "../world/idtablebase.hpp"
 
-CSMFilter::TextNode::TextNode (int columnId, const std::string& text)
-: mColumnId (columnId), mText (text)
-{}
-
-bool CSMFilter::TextNode::test (const CSMWorld::IdTableBase& table, int row,
-    const std::map<int, int>& columns) const
+CSMFilter::TextNode::TextNode(int columnId, const std::string& text)
+    : mColumnId(columnId)
+    , mText(text)
 {
-    const std::map<int, int>::const_iterator iter = columns.find (mColumnId);
+}
 
-    if (iter==columns.end())
-        throw std::logic_error ("invalid column in text node test");
+bool CSMFilter::TextNode::test(const CSMWorld::IdTableBase& table, int row, const std::map<int, int>& columns) const
+{
+    const std::map<int, int>::const_iterator iter = columns.find(mColumnId);
 
-    if (iter->second==-1)
+    if (iter == columns.end())
+        throw std::logic_error("invalid column in text node test");
+
+    if (iter->second == -1)
         return true;
 
-    QModelIndex index = table.index (row, iter->second);
+    QModelIndex index = table.index(row, iter->second);
 
-    QVariant data = table.data (index);
+    QVariant data = table.data(index);
 
     QString string;
 
-    if (data.type()==QVariant::String)
+    if (data.type() == QVariant::String)
     {
         string = data.toString();
     }
-    else if ((data.type()==QVariant::Int || data.type()==QVariant::UInt) &&
-        CSMWorld::Columns::hasEnums (static_cast<CSMWorld::Columns::ColumnId> (mColumnId)))
+    else if ((data.type() == QVariant::Int || data.type() == QVariant::UInt)
+        && CSMWorld::Columns::hasEnums(static_cast<CSMWorld::Columns::ColumnId>(mColumnId)))
     {
         int value = data.toInt();
 
-        std::vector<std::pair<int,std::string>> enums =
-            CSMWorld::Columns::getEnums (static_cast<CSMWorld::Columns::ColumnId> (mColumnId));
+        std::vector<std::pair<int, std::string>> enums
+            = CSMWorld::Columns::getEnums(static_cast<CSMWorld::Columns::ColumnId>(mColumnId));
 
-        if (value>=0 && value<static_cast<int> (enums.size()))
-            string = QString::fromUtf8 (enums[value].second.c_str());
+        if (value >= 0 && value < static_cast<int>(enums.size()))
+            string = QString::fromUtf8(enums[value].second.c_str());
     }
-    else if (data.type()==QVariant::Bool)
+    else if (data.type() == QVariant::Bool)
     {
         string = data.toBool() ? "true" : "false";
     }
@@ -54,17 +55,17 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTableBase& table, int row,
         return false;
 
     /// \todo make pattern syntax configurable
-    QRegExp regExp (QString::fromUtf8 (mText.c_str()), Qt::CaseInsensitive);
+    QRegExp regExp(QString::fromUtf8(mText.c_str()), Qt::CaseInsensitive);
 
-    return regExp.exactMatch (string);
+    return regExp.exactMatch(string);
 }
 
 std::vector<int> CSMFilter::TextNode::getReferencedColumns() const
 {
-    return std::vector<int> (1, mColumnId);
+    return std::vector<int>(1, mColumnId);
 }
 
-std::string CSMFilter::TextNode::toString (bool numericColumns) const
+std::string CSMFilter::TextNode::toString(bool numericColumns) const
 {
     std::ostringstream stream;
 
@@ -73,10 +74,7 @@ std::string CSMFilter::TextNode::toString (bool numericColumns) const
     if (numericColumns)
         stream << mColumnId;
     else
-        stream
-            << "\""
-            << CSMWorld::Columns::getName (static_cast<CSMWorld::Columns::ColumnId> (mColumnId))
-            << "\"";
+        stream << "\"" << CSMWorld::Columns::getName(static_cast<CSMWorld::Columns::ColumnId>(mColumnId)) << "\"";
 
     stream << ", \"" << mText << "\")";
 

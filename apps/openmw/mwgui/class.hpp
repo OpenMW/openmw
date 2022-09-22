@@ -22,9 +22,9 @@ namespace MWGui
 
         typedef std::vector<std::string> ButtonList;
 
-        void setText(const std::string &str);
+        void setText(const std::string& str);
         std::string getText() const;
-        void setButtons(ButtonList &buttons);
+        void setButtons(ButtonList& buttons);
 
         void onOpen() override;
 
@@ -42,7 +42,6 @@ namespace MWGui
         void onButtonClicked(MyGUI::Widget* _sender);
 
     private:
-
         void fitToText(MyGUI::TextBox* widget);
         void layoutVertically(MyGUI::Widget* widget, int margin);
         MyGUI::Widget* mTextBox;
@@ -71,7 +70,7 @@ namespace MWGui
     public:
         GenerateClassResultDialog();
 
-        void setClassId(const std::string &classId);
+        void setClassId(const std::string& classId);
 
         bool exit() override { return false; }
 
@@ -94,7 +93,7 @@ namespace MWGui
 
     private:
         MyGUI::ImageBox* mClassImage;
-        MyGUI::TextBox*  mClassName;
+        MyGUI::TextBox* mClassName;
 
         std::string mCurrentClassId;
     };
@@ -104,8 +103,8 @@ namespace MWGui
     public:
         PickClassDialog();
 
-        const std::string &getClassId() const { return mCurrentClassId; }
-        void setClassId(const std::string &classId);
+        const std::string& getClassId() const { return mCurrentClassId; }
+        void setClassId(const std::string& classId);
 
         void setNextButtonShow(bool shown);
         void onOpen() override;
@@ -137,11 +136,11 @@ namespace MWGui
         void updateStats();
 
         MyGUI::ImageBox* mClassImage;
-        MyGUI::ListBox*  mClassList;
-        MyGUI::TextBox*  mSpecializationName;
+        MyGUI::ListBox* mClassList;
+        MyGUI::TextBox* mSpecializationName;
         Widgets::MWAttributePtr mFavoriteAttribute[2];
-        Widgets::MWSkillPtr   mMajorSkill[5];
-        Widgets::MWSkillPtr   mMinorSkill[5];
+        Widgets::MWSkillPtr mMajorSkill[5];
+        Widgets::MWSkillPtr mMinorSkill[5];
 
         std::string mCurrentClassId;
     };
@@ -252,7 +251,7 @@ namespace MWGui
         ~DescriptionDialog();
 
         std::string getTextInput() const { return mTextEdit->getCaption(); }
-        void setTextInput(const std::string &text) { mTextEdit->setCaption(text); }
+        void setTextInput(const std::string& text) { mTextEdit->setCaption(text); }
 
         /** Event : Dialog finished, OK button clicked.\n
             signature : void method()\n
@@ -315,23 +314,23 @@ namespace MWGui
         void update();
 
     private:
-        MyGUI::EditBox*                   mEditName;
-        MyGUI::TextBox*                  mSpecializationName;
-        Widgets::MWAttributePtr          mFavoriteAttribute0, mFavoriteAttribute1;
-        Widgets::MWSkillPtr              mMajorSkill[5];
-        Widgets::MWSkillPtr              mMinorSkill[5];
+        MyGUI::EditBox* mEditName;
+        MyGUI::TextBox* mSpecializationName;
+        Widgets::MWAttributePtr mFavoriteAttribute0, mFavoriteAttribute1;
+        Widgets::MWSkillPtr mMajorSkill[5];
+        Widgets::MWSkillPtr mMinorSkill[5];
         std::vector<Widgets::MWSkillPtr> mSkills;
-        std::string                      mDescription;
+        std::string mDescription;
 
         std::unique_ptr<SelectSpecializationDialog> mSpecDialog;
         std::unique_ptr<SelectAttributeDialog> mAttribDialog;
         std::unique_ptr<SelectSkillDialog> mSkillDialog;
         std::unique_ptr<DescriptionDialog> mDescDialog;
 
-        ESM::Class::Specialization       mSpecializationId;
+        ESM::Class::Specialization mSpecializationId;
 
-        Widgets::MWAttributePtr              mAffectedAttribute;
-        Widgets::MWSkillPtr              mAffectedSkill;
+        Widgets::MWAttributePtr mAffectedAttribute;
+        Widgets::MWSkillPtr mAffectedSkill;
     };
 }
 #endif

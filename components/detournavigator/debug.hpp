@@ -1,18 +1,18 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_H
 
-#include "tilebounds.hpp"
-#include "status.hpp"
-#include "recastmesh.hpp"
 #include "agentbounds.hpp"
-#include "flags.hpp"
 #include "areatype.hpp"
 #include "changetype.hpp"
+#include "flags.hpp"
+#include "recastmesh.hpp"
+#include "status.hpp"
+#include "tilebounds.hpp"
 
 #include <DetourStatus.h>
 
-#include <string>
 #include <iosfwd>
+#include <string>
 
 class dtNavMesh;
 
@@ -64,8 +64,8 @@ namespace DetourNavigator
     class RecastMesh;
     struct RecastSettings;
 
-    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix,
-        const std::string& revision, const RecastSettings& settings);
+    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision,
+        const RecastSettings& settings);
     void writeToFile(const dtNavMesh& navMesh, const std::string& pathPrefix, const std::string& revision);
 }
 
