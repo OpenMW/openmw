@@ -4,6 +4,7 @@ default:
 # Note: We set `needs` on each job to control the job DAG.
 # See https://docs.gitlab.com/ee/ci/yaml/#needs
 stages:
+  - checks
   - build
   - test
 
@@ -118,6 +119,20 @@ Ubuntu_GCC:
     CCACHE_SIZE: 4G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
+  
+Clang_Format:
+  extends: .Ubuntu_Image
+  stage: checks
+  # TODO: Remove this once the entire project is formatted.
+  allow_failure: true
+  cache:
+    key: Ubuntu_Clang_Format.ubuntu_22.04.v1
+    paths:
+      - apt-cache/
+  before_script:
+    - CI/install_debian_deps.sh openmw-clang-format
+  script:
+    - CI/check_clang_format.sh
 
 Ubuntu_GCC_Debug:
   extends: .Ubuntu

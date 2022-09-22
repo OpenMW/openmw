@@ -77,6 +77,11 @@ declare -rA GROUPED_DEPS=(
   "
 
   [android]="binutils build-essential cmake ccache curl unzip git pkg-config"
+  
+  [openmw-clang-format]="
+    clang-format-14
+    git-core
+  "
 )
 
 if [[ $# -eq 0 ]]; then
