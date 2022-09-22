@@ -459,7 +459,7 @@ if(USE_LUAJIT)
    set(LUA_INCLUDE_DIR ${LuaJit_INCLUDE_DIR})
    set(LUA_LIBRARIES ${LuaJit_LIBRARIES})
 else(USE_LUAJIT)
-   find_package(Lua REQUIRED)
+   find_package(Lua 5.1 EXACT REQUIRED)
    add_compile_definitions(NO_LUAJIT)
 endif(USE_LUAJIT)
 
