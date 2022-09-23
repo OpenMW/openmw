@@ -18,8 +18,6 @@ variables:
 
 .Ubuntu_Image:
   tags:
-    - docker
-    - linux
     - saas-linux-large-amd64
   image: ubuntu:22.04
   rules:
@@ -66,8 +64,6 @@ variables:
 
 Coverity:
   tags:
-    - docker
-    - linux
     - saas-linux-large-amd64
   image: ubuntu:22.04
   stage: build
@@ -612,7 +608,6 @@ Windows_MSBuild_RelWithDebInfo:
 
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
-    - linux
     - saas-linux-large-amd64
   image: psi29a/android-ndk:focal-ndk22
   rules:
