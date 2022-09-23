@@ -20,6 +20,7 @@ variables:
   tags:
     - docker
     - linux
+    - saas-linux-large-amd64
   image: ubuntu:22.04
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
@@ -67,6 +68,7 @@ Coverity:
   tags:
     - docker
     - linux
+    - saas-linux-large-amd64
   image: ubuntu:22.04
   stage: build
   rules:
@@ -611,6 +613,7 @@ Windows_MSBuild_RelWithDebInfo:
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
     - linux
+    - saas-linux-large-amd64
   image: psi29a/android-ndk:focal-ndk22
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
