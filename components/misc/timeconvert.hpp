@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_MISC_TIMECONVERT_H
 
 #include <chrono>
+#include <sstream>
 
 namespace Misc
 {
