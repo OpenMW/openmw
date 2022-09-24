@@ -639,14 +639,13 @@ std::time_t MwIniImporter::lastWriteTime(const std::filesystem::path& filename, 
     if (std::filesystem::exists(filename))
     {
         std::filesystem::path resolved = std::filesystem::canonical(filename);
-        writeTime = Misc::to_time_t(std::filesystem::last_write_time(resolved));
+        const auto time = std::filesystem::last_write_time(resolved);
+        writeTime = Misc::toTimeT(time);
 
         // print timestamp
-        const int size = 1024;
-        char timeStrBuffer[size];
-        if (std::strftime(timeStrBuffer, size, "%x %X", localtime(&writeTime)) > 0)
-            std::cout << "content file: " << resolved << " timestamp = (" << writeTime << ") " << timeStrBuffer
-                      << std::endl;
+        const auto str = Misc::fileTimeToString(time, "%x %X");
+        if (!str.empty())
+            std::cout << "content file: " << resolved << " timestamp = (" << writeTime << ") " << str << std::endl;
     }
     return writeTime;
 }
