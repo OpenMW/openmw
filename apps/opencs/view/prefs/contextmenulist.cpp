@@ -1,13 +1,13 @@
 #include "contextmenulist.hpp"
 
-#include <QMenu>
 #include <QContextMenuEvent>
+#include <QMenu>
 #include <QMouseEvent>
 
 #include "../../model/prefs/state.hpp"
 
 CSVPrefs::ContextMenuList::ContextMenuList(QWidget* parent)
-    :QListWidget(parent)
+    : QListWidget(parent)
 {
 }
 

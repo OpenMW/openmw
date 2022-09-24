@@ -3,11 +3,11 @@
 
 #include <vector>
 
-#include <QtCore/QMimeData>
 #include <QStringList>
+#include <QtCore/QMimeData>
 
-#include "universalid.hpp"
 #include "columnbase.hpp"
+#include "universalid.hpp"
 
 namespace CSMDoc
 {
@@ -17,51 +17,52 @@ namespace CSMDoc
 namespace CSMWorld
 {
 
-/// \brief Subclass of QmimeData, augmented to contain and transport UniversalIds.
-///
-/// This class provides way to construct mimedata object holding the universalid copy
-/// Universalid is used in the majority of the tables to store type, id, argument types.
-/// This way universalid grants a way to retrieve record from the concrete table.
-/// Please note, that tablemimedata object can hold multiple universalIds in the vector.
+    /// \brief Subclass of QmimeData, augmented to contain and transport UniversalIds.
+    ///
+    /// This class provides way to construct mimedata object holding the universalid copy
+    /// Universalid is used in the majority of the tables to store type, id, argument types.
+    /// This way universalid grants a way to retrieve record from the concrete table.
+    /// Please note, that tablemimedata object can hold multiple universalIds in the vector.
 
     class TableMimeData : public QMimeData
     {
-            std::vector<UniversalId> mUniversalId;
-            QStringList mObjectsFormats;
-            const CSMDoc::Document& mDocument;
-        public:
-            TableMimeData(UniversalId id, const CSMDoc::Document& document);
+        std::vector<UniversalId> mUniversalId;
+        QStringList mObjectsFormats;
+        const CSMDoc::Document& mDocument;
 
-            TableMimeData(const std::vector<UniversalId>& id, const CSMDoc::Document& document);
+    public:
+        TableMimeData(UniversalId id, const CSMDoc::Document& document);
 
-            ~TableMimeData();
+        TableMimeData(const std::vector<UniversalId>& id, const CSMDoc::Document& document);
 
-            QStringList formats() const override;
+        ~TableMimeData();
 
-            std::string getIcon() const;
+        QStringList formats() const override;
 
-            std::vector<UniversalId> getData() const;
+        std::string getIcon() const;
 
-            bool holdsType(UniversalId::Type type) const;
+        std::vector<UniversalId> getData() const;
 
-            bool holdsType(CSMWorld::ColumnBase::Display type) const;
+        bool holdsType(UniversalId::Type type) const;
 
-            bool fromDocument(const CSMDoc::Document& document) const;
+        bool holdsType(CSMWorld::ColumnBase::Display type) const;
 
-            UniversalId returnMatching(UniversalId::Type type) const;
+        bool fromDocument(const CSMDoc::Document& document) const;
 
-            const CSMDoc::Document* getDocumentPtr() const;
+        UniversalId returnMatching(UniversalId::Type type) const;
 
-            UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
+        const CSMDoc::Document* getDocumentPtr() const;
 
-            static CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type);
+        UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
 
-            static CSMWorld::ColumnBase::Display convertEnums(CSMWorld::UniversalId::Type type);
+        static CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type);
 
-            static bool isReferencable(CSMWorld::UniversalId::Type type);
-        private:
-            bool isReferencable(CSMWorld::ColumnBase::Display type) const;
+        static CSMWorld::ColumnBase::Display convertEnums(CSMWorld::UniversalId::Type type);
 
+        static bool isReferencable(CSMWorld::UniversalId::Type type);
+
+    private:
+        bool isReferencable(CSMWorld::ColumnBase::Display type) const;
     };
 }
 #endif // TABLEMIMEDATA_H

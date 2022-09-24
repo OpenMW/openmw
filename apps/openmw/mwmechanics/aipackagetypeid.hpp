@@ -3,7 +3,7 @@
 
 namespace MWMechanics
 {
-    ///Enumerates the various AITypes available
+    /// Enumerates the various AITypes available
     enum class AiPackageTypeId
     {
         None = -1,

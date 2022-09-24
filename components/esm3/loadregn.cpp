@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Region::load(ESMReader &esm, bool &isDeleted)
+    void Region::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -72,7 +72,7 @@ namespace ESM
             esm.fail("Missing NAME subrecord");
     }
 
-    void Region::save(ESMWriter &esm, bool isDeleted) const
+    void Region::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -104,8 +104,8 @@ namespace ESM
     void Region::blank()
     {
         mRecordFlags = 0;
-        mData.mClear = mData.mCloudy = mData.mFoggy = mData.mOvercast = mData.mRain =
-            mData.mThunder = mData.mAsh = mData.mBlight = mData.mSnow = mData.mBlizzard = 0;
+        mData.mClear = mData.mCloudy = mData.mFoggy = mData.mOvercast = mData.mRain = mData.mThunder = mData.mAsh
+            = mData.mBlight = mData.mSnow = mData.mBlizzard = 0;
 
         mMapColor = 0;
 

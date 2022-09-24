@@ -11,7 +11,7 @@ namespace SDLUtil
 {
     std::string sdlControllerButtonToString(int button)
     {
-        switch(button)
+        switch (button)
         {
             case SDL_CONTROLLER_BUTTON_A:
                 return "A Button";
@@ -50,7 +50,7 @@ namespace SDLUtil
 
     std::string sdlControllerAxisToString(int axis)
     {
-        switch(axis)
+        switch (axis)
         {
             case SDL_CONTROLLER_AXIS_LEFTX:
                 return "Left Stick X";
@@ -71,13 +71,13 @@ namespace SDLUtil
 
     MyGUI::MouseButton sdlMouseButtonToMyGui(Uint8 button)
     {
-        //The right button is the second button, according to MyGUI
-        if(button == SDL_BUTTON_RIGHT)
+        // The right button is the second button, according to MyGUI
+        if (button == SDL_BUTTON_RIGHT)
             button = SDL_BUTTON_MIDDLE;
-        else if(button == SDL_BUTTON_MIDDLE)
+        else if (button == SDL_BUTTON_MIDDLE)
             button = SDL_BUTTON_RIGHT;
 
-        //MyGUI's buttons are 0 indexed
+        // MyGUI's buttons are 0 indexed
         return MyGUI::MouseButton::Enum(button - 1);
     }
 
@@ -200,19 +200,19 @@ namespace SDLUtil
             keyMap[SDLK_DELETE] = MyGUI::KeyCode::Delete;
             keyMap[SDLK_APPLICATION] = MyGUI::KeyCode::AppMenu;
 
-            //The function of the Ctrl and Meta keys are switched on macOS compared to other platforms.
-            //For instance] = Cmd+C versus Ctrl+C to copy from the system clipboard
-            #if defined(__APPLE__)
+// The function of the Ctrl and Meta keys are switched on macOS compared to other platforms.
+// For instance] = Cmd+C versus Ctrl+C to copy from the system clipboard
+#if defined(__APPLE__)
             keyMap[SDLK_LGUI] = MyGUI::KeyCode::LeftControl;
             keyMap[SDLK_RGUI] = MyGUI::KeyCode::RightControl;
             keyMap[SDLK_LCTRL] = MyGUI::KeyCode::LeftWindows;
             keyMap[SDLK_RCTRL] = MyGUI::KeyCode::RightWindows;
-            #else
+#else
             keyMap[SDLK_LGUI] = MyGUI::KeyCode::LeftWindows;
             keyMap[SDLK_RGUI] = MyGUI::KeyCode::RightWindows;
             keyMap[SDLK_LCTRL] = MyGUI::KeyCode::LeftControl;
             keyMap[SDLK_RCTRL] = MyGUI::KeyCode::RightControl;
-            #endif
+#endif
             return keyMap;
         }
 

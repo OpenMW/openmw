@@ -16,7 +16,7 @@ namespace MWScript
     /// \brief player controls-related script functionality
     namespace Control
     {
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 

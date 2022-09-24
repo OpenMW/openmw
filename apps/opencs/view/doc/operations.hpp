@@ -13,28 +13,27 @@ namespace CSVDoc
 
     class Operations : public QDockWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QVBoxLayout *mLayout;
-            std::vector<Operation *> mOperations;
+        QVBoxLayout* mLayout;
+        std::vector<Operation*> mOperations;
 
-            // not implemented
-            Operations (const Operations&);
-            Operations& operator= (const Operations&);
+        // not implemented
+        Operations(const Operations&);
+        Operations& operator=(const Operations&);
 
-        public:
+    public:
+        Operations();
 
-            Operations();
+        void setProgress(int current, int max, int type, int threads);
+        ///< Implicitly starts the operation, if it is not running already.
 
-            void setProgress (int current, int max, int type, int threads);
-            ///< Implicitly starts the operation, if it is not running already.
+        void quitOperation(int type);
+        ///< Calling this function for an operation that is not running is a no-op.
 
-            void quitOperation (int type);
-            ///< Calling this function for an operation that is not running is a no-op.
+    signals:
 
-        signals:
-
-            void abortOperation (int type);
+        void abortOperation(int type);
     };
 }
 

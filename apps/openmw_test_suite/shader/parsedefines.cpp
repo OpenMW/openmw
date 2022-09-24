@@ -1,7 +1,7 @@
 #include <components/shader/shadermanager.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 namespace
 {
@@ -58,7 +58,9 @@ namespace
 
     namespace SupportedTerminals
     {
-        struct ShaderParseDefinesTest : ::ShaderParseDefinesTest, WithParamInterface<char> {};
+        struct ShaderParseDefinesTest : ::ShaderParseDefinesTest, WithParamInterface<char>
+        {
+        };
 
         TEST_P(ShaderParseDefinesTest, support_defines_terminated_by)
         {
@@ -69,10 +71,7 @@ namespace
         }
 
         INSTANTIATE_TEST_SUITE_P(
-            SupportedTerminals,
-            ShaderParseDefinesTest,
-            Values(' ', '\n', '\r', '(', ')', '[', ']', '.', ';', ',')
-        );
+            SupportedTerminals, ShaderParseDefinesTest, Values(' ', '\n', '\r', '(', ')', '[', ']', '.', ';', ','));
     }
 
     TEST_F(ShaderParseDefinesTest, should_not_support_define_ending_with_source)

@@ -10,17 +10,17 @@ namespace Compiler
 {
     // Report the error and throw an exception.
 
-    [[noreturn]] void Parser::reportSeriousError (const std::string& message, const TokenLoc& loc)
+    [[noreturn]] void Parser::reportSeriousError(const std::string& message, const TokenLoc& loc)
     {
-        mErrorHandler.error (message, loc);
+        mErrorHandler.error(message, loc);
         throw SourceException();
     }
 
     // Report the warning without throwing an exception.
 
-    void Parser::reportWarning (const std::string& message, const TokenLoc& loc)
+    void Parser::reportWarning(const std::string& message, const TokenLoc& loc)
     {
-        mErrorHandler.warning (message, loc);
+        mErrorHandler.warning(message, loc);
     }
 
     // Report an unexpected EOF condition.
@@ -45,16 +45,20 @@ namespace Compiler
         return mContext;
     }
 
-    std::string Parser::toLower (const std::string& name)
+    std::string Parser::toLower(const std::string& name)
     {
         std::string lowerCase = Misc::StringUtils::lowerCase(name);
 
         return lowerCase;
     }
 
-    Parser::Parser (ErrorHandler& errorHandler, const Context& context)
-    : mErrorHandler (errorHandler), mContext (context), mOptional (false), mEmpty (true)
-    {}
+    Parser::Parser(ErrorHandler& errorHandler, const Context& context)
+        : mErrorHandler(errorHandler)
+        , mContext(context)
+        , mOptional(false)
+        , mEmpty(true)
+    {
+    }
 
     // destructor
 
@@ -65,12 +69,12 @@ namespace Compiler
     //
     // - Default-implementation: Report an error.
 
-    bool Parser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
+    bool Parser::parseInt(int value, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected numeric value", loc);
+            reportSeriousError("Unexpected numeric value", loc);
         else
-            scanner.putbackInt (value, loc);
+            scanner.putbackInt(value, loc);
 
         return false;
     }
@@ -80,12 +84,12 @@ namespace Compiler
     //
     // - Default-implementation: Report an error.
 
-    bool Parser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
+    bool Parser::parseFloat(float value, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected floating point value", loc);
+            reportSeriousError("Unexpected floating point value", loc);
         else
-            scanner.putbackFloat (value, loc);
+            scanner.putbackFloat(value, loc);
 
         return false;
     }
@@ -95,13 +99,12 @@ namespace Compiler
     //
     // - Default-implementation: Report an error.
 
-    bool Parser::parseName (const std::string& name, const TokenLoc& loc,
-        Scanner& scanner)
+    bool Parser::parseName(const std::string& name, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected name", loc);
+            reportSeriousError("Unexpected name", loc);
         else
-            scanner.putbackName (name, loc);
+            scanner.putbackName(name, loc);
 
         return false;
     }
@@ -111,12 +114,12 @@ namespace Compiler
     //
     // - Default-implementation: Report an error.
 
-    bool Parser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
+    bool Parser::parseKeyword(int keyword, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected keyword", loc);
+            reportSeriousError("Unexpected keyword", loc);
         else
-            scanner.putbackKeyword (keyword, loc);
+            scanner.putbackKeyword(keyword, loc);
 
         return false;
     }
@@ -126,17 +129,17 @@ namespace Compiler
     //
     // - Default-implementation: Report an error.
 
-    bool Parser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
+    bool Parser::parseSpecial(int code, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected special token", loc);
+            reportSeriousError("Unexpected special token", loc);
         else
-            scanner.putbackSpecial (code, loc);
+            scanner.putbackSpecial(code, loc);
 
         return false;
     }
 
-    bool Parser::parseComment (const std::string& comment, const TokenLoc& loc, Scanner& scanner)
+    bool Parser::parseComment(const std::string& comment, const TokenLoc& loc, Scanner& scanner)
     {
         return true;
     }
@@ -145,7 +148,7 @@ namespace Compiler
     //
     // - Default-implementation: Report an error.
 
-    void Parser::parseEOF (Scanner& scanner)
+    void Parser::parseEOF(Scanner& scanner)
     {
         reportEOF();
     }
@@ -156,7 +159,7 @@ namespace Compiler
         mEmpty = true;
     }
 
-    void Parser::setOptional (bool optional)
+    void Parser::setOptional(bool optional)
     {
         mOptional = optional;
     }

@@ -9,10 +9,10 @@
 #include <yaml-cpp/yaml.h>
 
 #include <components/misc/osguservalues.hpp>
-#include <components/sceneutil/depth.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/shader/shadermanager.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/serialization/osgyaml.hpp>
+#include <components/shader/shadermanager.hpp>
 
 #include <components/debug/debuglog.hpp>
 
@@ -23,7 +23,8 @@ namespace SceneUtil
         if (!mSceneMgr->getSoftParticles())
             return;
 
-        const int unitSoftEffect = mSceneMgr->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
+        const int unitSoftEffect
+            = mSceneMgr->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
         static const osg::ref_ptr<SceneUtil::AutoDepth> depth = new SceneUtil::AutoDepth(osg::Depth::LESS, 0, 1, false);
 
         osg::StateSet* stateset = node.getOrCreateStateSet();

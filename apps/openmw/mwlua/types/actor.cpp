@@ -1,12 +1,12 @@
 #include "types.hpp"
 
-#include <components/lua/luastate.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/lua/luastate.hpp>
 
-#include <apps/openmw/mwmechanics/drawstate.hpp>
 #include <apps/openmw/mwmechanics/creaturestats.hpp>
-#include <apps/openmw/mwworld/inventorystore.hpp>
+#include <apps/openmw/mwmechanics/drawstate.hpp>
 #include <apps/openmw/mwworld/class.hpp>
+#include <apps/openmw/mwworld/inventorystore.hpp>
 
 #include "../localscripts.hpp"
 #include "../luamanagerimp.hpp"
@@ -19,11 +19,15 @@ namespace MWLua
         class SetEquipmentAction final : public LuaManager::Action
         {
         public:
-            using Item = std::variant<std::string, ObjectId>;  // recordId or ObjectId
-            using Equipment = std::map<int, Item>;  // slot to item
+            using Item = std::variant<std::string, ObjectId>; // recordId or ObjectId
+            using Equipment = std::map<int, Item>; // slot to item
 
             SetEquipmentAction(LuaUtil::LuaState* state, ObjectId actor, Equipment equipment)
-                : Action(state), mActor(actor), mEquipment(std::move(equipment)) {}
+                : Action(state)
+                , mActor(actor)
+                , mEquipment(std::move(equipment))
+            {
+            }
 
             void apply(WorldView& worldView) const override
             {
@@ -33,19 +37,19 @@ namespace MWLua
                 std::fill(usedSlots.begin(), usedSlots.end(), false);
 
                 static constexpr int anySlot = -1;
-                auto tryEquipToSlot = [&actor, &store, &usedSlots, &worldView](int slot, const Item& item) -> bool
-                {
+                auto tryEquipToSlot = [&actor, &store, &usedSlots, &worldView](int slot, const Item& item) -> bool {
                     auto old_it = slot != anySlot ? store.getSlot(slot) : store.end();
                     MWWorld::Ptr itemPtr;
                     if (std::holds_alternative<ObjectId>(item))
                     {
                         itemPtr = worldView.getObjectRegistry()->getPtr(std::get<ObjectId>(item), false);
                         if (old_it != store.end() && *old_it == itemPtr)
-                            return true;  // already equipped
-                        if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0 ||
-                            itemPtr.getContainerStore() != static_cast<const MWWorld::ContainerStore*>(&store))
+                            return true; // already equipped
+                        if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0
+                            || itemPtr.getContainerStore() != static_cast<const MWWorld::ContainerStore*>(&store))
                         {
-                            Log(Debug::Warning) << "Object" << idToString(std::get<ObjectId>(item)) << " is not in inventory";
+                            Log(Debug::Warning)
+                                << "Object" << idToString(std::get<ObjectId>(item)) << " is not in inventory";
                             return false;
                         }
                     }
@@ -53,7 +57,7 @@ namespace MWLua
                     {
                         const std::string& recordId = std::get<std::string>(item);
                         if (old_it != store.end() && old_it->getCellRef().getRefId() == recordId)
-                            return true;  // already equipped
+                            return true; // already equipped
                         itemPtr = store.search(recordId);
                         if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0)
                         {
@@ -63,10 +67,12 @@ namespace MWLua
                     }
 
                     auto [allowedSlots, _] = itemPtr.getClass().getEquipmentSlots(itemPtr);
-                    bool requestedSlotIsAllowed = std::find(allowedSlots.begin(), allowedSlots.end(), slot) != allowedSlots.end();
+                    bool requestedSlotIsAllowed
+                        = std::find(allowedSlots.begin(), allowedSlots.end(), slot) != allowedSlots.end();
                     if (!requestedSlotIsAllowed)
                     {
-                        auto firstAllowed = std::find_if(allowedSlots.begin(), allowedSlots.end(), [&](int s) { return !usedSlots[s]; });
+                        auto firstAllowed = std::find_if(
+                            allowedSlots.begin(), allowedSlots.end(), [&](int s) { return !usedSlots[s]; });
                         if (firstAllowed == allowedSlots.end())
                         {
                             Log(Debug::Warning) << "No suitable slot for " << ptrToString(itemPtr);
@@ -77,11 +83,12 @@ namespace MWLua
 
                     // TODO: Refactor InventoryStore to accept Ptr and get rid of this linear search.
                     MWWorld::ContainerStoreIterator it = std::find(store.begin(), store.end(), itemPtr);
-                    if (it == store.end())  // should never happen
+                    if (it == store.end()) // should never happen
                         throw std::logic_error("Item not found in container");
 
                     store.equip(slot, it, actor);
-                    return requestedSlotIsAllowed;  // return true if equipped to requested slot and false if slot was changed
+                    return requestedSlotIsAllowed; // return true if equipped to requested slot and false if slot was
+                                                   // changed
                 };
 
                 for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
@@ -109,40 +116,34 @@ namespace MWLua
             Equipment mEquipment;
         };
     }
-    
+
     using SelfObject = LocalScripts::SelfObject;
 
     void addActorBindings(sol::table actor, const Context& context)
     {
-        actor["STANCE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWMechanics::DrawState>({
-            {"Nothing", MWMechanics::DrawState::Nothing},
-            {"Weapon", MWMechanics::DrawState::Weapon},
-            {"Spell", MWMechanics::DrawState::Spell},
-        }));
-        actor["EQUIPMENT_SLOT"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            {"Helmet", MWWorld::InventoryStore::Slot_Helmet},
-            {"Cuirass", MWWorld::InventoryStore::Slot_Cuirass},
-            {"Greaves", MWWorld::InventoryStore::Slot_Greaves},
-            {"LeftPauldron", MWWorld::InventoryStore::Slot_LeftPauldron},
-            {"RightPauldron", MWWorld::InventoryStore::Slot_RightPauldron},
-            {"LeftGauntlet", MWWorld::InventoryStore::Slot_LeftGauntlet},
-            {"RightGauntlet", MWWorld::InventoryStore::Slot_RightGauntlet},
-            {"Boots", MWWorld::InventoryStore::Slot_Boots},
-            {"Shirt", MWWorld::InventoryStore::Slot_Shirt},
-            {"Pants", MWWorld::InventoryStore::Slot_Pants},
-            {"Skirt", MWWorld::InventoryStore::Slot_Skirt},
-            {"Robe", MWWorld::InventoryStore::Slot_Robe},
-            {"LeftRing", MWWorld::InventoryStore::Slot_LeftRing},
-            {"RightRing", MWWorld::InventoryStore::Slot_RightRing},
-            {"Amulet", MWWorld::InventoryStore::Slot_Amulet},
-            {"Belt", MWWorld::InventoryStore::Slot_Belt},
-            {"CarriedRight", MWWorld::InventoryStore::Slot_CarriedRight},
-            {"CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft},
-            {"Ammunition", MWWorld::InventoryStore::Slot_Ammunition}
-        }));
+        actor["STANCE"]
+            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWMechanics::DrawState>({
+                { "Nothing", MWMechanics::DrawState::Nothing },
+                { "Weapon", MWMechanics::DrawState::Weapon },
+                { "Spell", MWMechanics::DrawState::Spell },
+            }));
+        actor["EQUIPMENT_SLOT"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>(
+            { { "Helmet", MWWorld::InventoryStore::Slot_Helmet }, { "Cuirass", MWWorld::InventoryStore::Slot_Cuirass },
+                { "Greaves", MWWorld::InventoryStore::Slot_Greaves },
+                { "LeftPauldron", MWWorld::InventoryStore::Slot_LeftPauldron },
+                { "RightPauldron", MWWorld::InventoryStore::Slot_RightPauldron },
+                { "LeftGauntlet", MWWorld::InventoryStore::Slot_LeftGauntlet },
+                { "RightGauntlet", MWWorld::InventoryStore::Slot_RightGauntlet },
+                { "Boots", MWWorld::InventoryStore::Slot_Boots }, { "Shirt", MWWorld::InventoryStore::Slot_Shirt },
+                { "Pants", MWWorld::InventoryStore::Slot_Pants }, { "Skirt", MWWorld::InventoryStore::Slot_Skirt },
+                { "Robe", MWWorld::InventoryStore::Slot_Robe }, { "LeftRing", MWWorld::InventoryStore::Slot_LeftRing },
+                { "RightRing", MWWorld::InventoryStore::Slot_RightRing },
+                { "Amulet", MWWorld::InventoryStore::Slot_Amulet }, { "Belt", MWWorld::InventoryStore::Slot_Belt },
+                { "CarriedRight", MWWorld::InventoryStore::Slot_CarriedRight },
+                { "CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft },
+                { "Ammunition", MWWorld::InventoryStore::Slot_Ammunition } }));
 
-        actor["stance"] = [](const Object& o)
-        {
+        actor["stance"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             if (cls.isActor())
                 return cls.getCreatureStats(o.ptr()).getDrawState();
@@ -150,42 +151,31 @@ namespace MWLua
                 throw std::runtime_error("Actor expected");
         };
 
-        actor["canMove"] = [](const Object& o)
-        {
+        actor["canMove"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getMaxSpeed(o.ptr()) > 0;
         };
-        actor["runSpeed"] = [](const Object& o)
-        {
+        actor["runSpeed"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getRunSpeed(o.ptr());
         };
-        actor["walkSpeed"] = [](const Object& o)
-        {
+        actor["walkSpeed"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getWalkSpeed(o.ptr());
         };
-        actor["currentSpeed"] = [](const Object& o)
-        {
+        actor["currentSpeed"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getCurrentSpeed(o.ptr());
         };
 
-        actor["isOnGround"] = [](const LObject& o)
-        {
-            return MWBase::Environment::get().getWorld()->isOnGround(o.ptr());
-        };
-        actor["isSwimming"] = [](const LObject& o)
-        {
-            return MWBase::Environment::get().getWorld()->isSwimming(o.ptr());
-        };
+        actor["isOnGround"]
+            = [](const LObject& o) { return MWBase::Environment::get().getWorld()->isOnGround(o.ptr()); };
+        actor["isSwimming"]
+            = [](const LObject& o) { return MWBase::Environment::get().getWorld()->isSwimming(o.ptr()); };
 
-        actor["inventory"] = sol::overload(
-            [](const LObject& o) { return Inventory<LObject>{o}; },
-            [](const GObject& o) { return Inventory<GObject>{o}; }
-        );
-        auto getAllEquipment = [context](const Object& o)
-        {
+        actor["inventory"] = sol::overload([](const LObject& o) { return Inventory<LObject>{ o }; },
+            [](const GObject& o) { return Inventory<GObject>{ o }; });
+        auto getAllEquipment = [context](const Object& o) {
             const MWWorld::Ptr& ptr = o.ptr();
             sol::table equipment(context.mLua->sol(), sol::create);
             if (!ptr.getClass().hasInventoryStore(ptr))
@@ -202,8 +192,7 @@ namespace MWLua
             }
             return equipment;
         };
-        auto getEquipmentFromSlot = [context](const Object& o, int slot) -> sol::object
-        {
+        auto getEquipmentFromSlot = [context](const Object& o, int slot) -> sol::object {
             const MWWorld::Ptr& ptr = o.ptr();
             sol::table equipment(context.mLua->sol(), sol::create);
             if (!ptr.getClass().hasInventoryStore(ptr))
@@ -216,16 +205,14 @@ namespace MWLua
             return o.getObject(context.mLua->sol(), getId(*it));
         };
         actor["equipment"] = sol::overload(getAllEquipment, getEquipmentFromSlot);
-        actor["hasEquipped"] = [](const Object& o, const Object& item)
-        {
+        actor["hasEquipped"] = [](const Object& o, const Object& item) {
             const MWWorld::Ptr& ptr = o.ptr();
             if (!ptr.getClass().hasInventoryStore(ptr))
                 return false;
             MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
             return store.isEquipped(item.ptr());
         };
-        actor["setEquipment"] = [context](const SelfObject& obj, const sol::table& equipment)
-        {
+        actor["setEquipment"] = [context](const SelfObject& obj, const sol::table& equipment) {
             if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
             {
                 if (!equipment.empty())
@@ -241,11 +228,12 @@ namespace MWLua
                 else
                     eqp[slot] = value.as<std::string>();
             }
-            context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
+            context.mLuaManager->addAction(
+                std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
         };
-        actor["getPathfindingAgentBounds"] = [context](const LObject& o)
-        {
-            const DetourNavigator::AgentBounds agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(o.ptr());
+        actor["getPathfindingAgentBounds"] = [context](const LObject& o) {
+            const DetourNavigator::AgentBounds agentBounds
+                = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(o.ptr());
             sol::table result = context.mLua->newTable();
             result["shapeType"] = agentBounds.mShapeType;
             result["halfExtents"] = agentBounds.mHalfExtents;

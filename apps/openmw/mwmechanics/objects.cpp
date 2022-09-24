@@ -13,123 +13,125 @@
 namespace MWMechanics
 {
 
-void Objects::addObject(const MWWorld::Ptr& ptr)
-{
-    removeObject(ptr);
-
-    MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-    if (anim == nullptr)
-        return;
-
-    const auto it = mObjects.emplace(mObjects.end(), ptr, anim);
-    mIndex.emplace(ptr.mRef, it);
-}
-
-void Objects::removeObject(const MWWorld::Ptr& ptr)
-{
-    const auto iter = mIndex.find(ptr.mRef);
-    if (iter != mIndex.end())
+    void Objects::addObject(const MWWorld::Ptr& ptr)
     {
-        mObjects.erase(iter->second);
-        mIndex.erase(iter);
-    }
-}
+        removeObject(ptr);
 
-void Objects::updateObject(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
-{
-    const auto iter = mIndex.find(old.mRef);
-    if (iter != mIndex.end())
-        iter->second->updatePtr(ptr);
-}
-
-void Objects::dropObjects (const MWWorld::CellStore *cellStore)
-{
-    for (auto iter = mObjects.begin(); iter != mObjects.end();)
-    {
-        if (iter->getPtr().getCell() == cellStore)
-        {
-            mIndex.erase(iter->getPtr().mRef);
-            iter = mObjects.erase(iter);
-        }
-        else
-            ++iter;
-    }
-}
-
-void Objects::update(float duration, bool paused)
-{
-    if(!paused)
-    {
-        for (CharacterController& object : mObjects)
-            object.update(duration);
-    }
-    else
-    {
-        // We still should play container opening animation in the Container GUI mode.
-        MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
-        if(mode != MWGui::GM_Container)
+        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+        if (anim == nullptr)
             return;
 
-        for (CharacterController& object : mObjects)
-        {
-            if (object.getPtr().getType() != ESM::Container::sRecordId)
-                continue;
+        const auto it = mObjects.emplace(mObjects.end(), ptr, anim);
+        mIndex.emplace(ptr.mRef, it);
+    }
 
-            if (object.isAnimPlaying("containeropen"))
+    void Objects::removeObject(const MWWorld::Ptr& ptr)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+        {
+            mObjects.erase(iter->second);
+            mIndex.erase(iter);
+        }
+    }
+
+    void Objects::updateObject(const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
+    {
+        const auto iter = mIndex.find(old.mRef);
+        if (iter != mIndex.end())
+            iter->second->updatePtr(ptr);
+    }
+
+    void Objects::dropObjects(const MWWorld::CellStore* cellStore)
+    {
+        for (auto iter = mObjects.begin(); iter != mObjects.end();)
+        {
+            if (iter->getPtr().getCell() == cellStore)
             {
+                mIndex.erase(iter->getPtr().mRef);
+                iter = mObjects.erase(iter);
+            }
+            else
+                ++iter;
+        }
+    }
+
+    void Objects::update(float duration, bool paused)
+    {
+        if (!paused)
+        {
+            for (CharacterController& object : mObjects)
                 object.update(duration);
-                MWBase::Environment::get().getWorld()->updateAnimatedCollisionShape(object.getPtr());
+        }
+        else
+        {
+            // We still should play container opening animation in the Container GUI mode.
+            MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+            if (mode != MWGui::GM_Container)
+                return;
+
+            for (CharacterController& object : mObjects)
+            {
+                if (object.getPtr().getType() != ESM::Container::sRecordId)
+                    continue;
+
+                if (object.isAnimPlaying("containeropen"))
+                {
+                    object.update(duration);
+                    MWBase::Environment::get().getWorld()->updateAnimatedCollisionShape(object.getPtr());
+                }
             }
         }
     }
-}
 
-bool Objects::onOpen(const MWWorld::Ptr& ptr)
-{
-    const auto iter = mIndex.find(ptr.mRef);
-    if (iter != mIndex.end())
-        return iter->second->onOpen();
-    return true;
-}
-
-void Objects::onClose(const MWWorld::Ptr& ptr)
-{
-    const auto iter = mIndex.find(ptr.mRef);
-    if (iter != mIndex.end())
-        iter->second->onClose();
-}
-
-bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist)
-{
-    const auto iter = mIndex.find(ptr.mRef);
-    if (iter != mIndex.end())
+    bool Objects::onOpen(const MWWorld::Ptr& ptr)
     {
-        return iter->second->playGroup(groupName, mode, number, persist);
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            return iter->second->onOpen();
+        return true;
     }
-    else
+
+    void Objects::onClose(const MWWorld::Ptr& ptr)
     {
-        Log(Debug::Warning) << "Warning: Objects::playAnimationGroup: Unable to find " << ptr.getCellRef().getRefId();
-        return false;
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            iter->second->onClose();
     }
-}
-void Objects::skipAnimation(const MWWorld::Ptr& ptr)
-{
-    const auto iter = mIndex.find(ptr.mRef);
-    if (iter != mIndex.end())
-        iter->second->skipAnim();
-}
 
-void Objects::persistAnimationStates()
-{
-    for (CharacterController& object : mObjects)
-        object.persistAnimationState();
-}
+    bool Objects::playAnimationGroup(
+        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+        {
+            return iter->second->playGroup(groupName, mode, number, persist);
+        }
+        else
+        {
+            Log(Debug::Warning) << "Warning: Objects::playAnimationGroup: Unable to find "
+                                << ptr.getCellRef().getRefId();
+            return false;
+        }
+    }
+    void Objects::skipAnimation(const MWWorld::Ptr& ptr)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            iter->second->skipAnim();
+    }
 
-void Objects::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const
-{
-    for (const CharacterController& object : mObjects)
-        if ((position - object.getPtr().getRefData().getPosition().asVec3()).length2() <= radius * radius)
-            out.push_back(object.getPtr());
-}
+    void Objects::persistAnimationStates()
+    {
+        for (CharacterController& object : mObjects)
+            object.persistAnimationState();
+    }
+
+    void Objects::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const
+    {
+        for (const CharacterController& object : mObjects)
+            if ((position - object.getPtr().getRefData().getPosition().asVec3()).length2() <= radius * radius)
+                out.push_back(object.getPtr());
+    }
 
 }

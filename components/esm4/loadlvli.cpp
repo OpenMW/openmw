@@ -26,8 +26,8 @@
 */
 #include "loadlvli.hpp"
 
-#include <stdexcept>
 #include <iostream> // FIXME: for debugging
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -36,17 +36,26 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_LVLD: reader.get(mChanceNone); break;
-            case ESM4::SUB_LVLF: reader.get(mLvlItemFlags); mHasLvlItemFlags = true; break;
-            case ESM4::SUB_DATA: reader.get(mData); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_LVLD:
+                reader.get(mChanceNone);
+                break;
+            case ESM4::SUB_LVLF:
+                reader.get(mLvlItemFlags);
+                mHasLvlItemFlags = true;
+                break;
+            case ESM4::SUB_DATA:
+                reader.get(mData);
+                break;
             case ESM4::SUB_LVLO:
             {
                 static LVLO lvlo;
@@ -57,8 +66,9 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
                         reader.get(lvlo.level);
                         reader.get(lvlo.item);
                         reader.get(lvlo.count);
-//                        std::cout << "LVLI " << mEditorId << " LVLO lev " << lvlo.level << ", item " << lvlo.item
-//                                  << ", count " << lvlo.count << std::endl;
+                        //                        std::cout << "LVLI " << mEditorId << " LVLO lev " << lvlo.level << ",
+                        //                        item " << lvlo.item
+                        //                                  << ", count " << lvlo.count << std::endl;
                         break;
                     }
                     else
@@ -77,7 +87,8 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
             case ESM4::SUB_LVLG: // FO3/FONV
             {
 
-                //std::cout << "LVLI " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
+                // std::cout << "LVLI " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize <<
+                // std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -87,8 +98,8 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
     }
 
     // FIXME: testing
-    //if (mHasLvlItemFlags && mChanceNone >= 90)
-        //std::cout << "LVLI " << mEditorId << " chance none " << int(mChanceNone) << std::endl;
+    // if (mHasLvlItemFlags && mChanceNone >= 90)
+    // std::cout << "LVLI " << mEditorId << " chance none " << int(mChanceNone) << std::endl;
 }
 
 bool ESM4::LevelledItem::calcAllLvlLessThanPlayer() const
@@ -123,10 +134,10 @@ bool ESM4::LevelledItem::useAll() const
         return false;
 }
 
-//void ESM4::LevelledItem::save(ESM4::Writer& writer) const
+// void ESM4::LevelledItem::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::LevelledItem::blank()
+// void ESM4::LevelledItem::blank()
 //{
-//}
+// }

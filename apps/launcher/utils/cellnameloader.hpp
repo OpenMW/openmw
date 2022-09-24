@@ -6,19 +6,26 @@
 
 #include <components/esm3/esmreader.hpp>
 
-namespace ESM {class ESMReader; struct Cell;}
-namespace ContentSelectorView {class ContentSelector;}
+namespace ESM
+{
+    class ESMReader;
+    struct Cell;
+}
+namespace ContentSelectorView
+{
+    class ContentSelector;
+}
 
-class CellNameLoader {
+class CellNameLoader
+{
 
 public:
-
     /**
      * Returns the names of all cells contained within the given content files
      * @param contentPaths the file paths of each content file to be examined
      * @return the names of all cells
      */
-    QSet<QString> getCellNames(QStringList &contentPaths);
+    QSet<QString> getCellNames(QStringList& contentPaths);
 
 private:
     /**
@@ -26,15 +33,14 @@ private:
      * @param name The name associated with the record
      * @return whether or not the given record is of type "Cell"
      */
-    bool isCellRecord(ESM::NAME &name);
+    bool isCellRecord(ESM::NAME& name);
 
     /**
      * Returns the name of the cell
      * @param esmReader the reader currently pointed to a loaded cell
      * @return the name of the cell
      */
-    QString getCellName(ESM::ESMReader &esmReader);
+    QString getCellName(ESM::ESMReader& esmReader);
 };
 
-
-#endif //OPENMW_CELLNAMELOADER_H
+#endif // OPENMW_CELLNAMELOADER_H

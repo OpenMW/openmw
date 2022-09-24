@@ -1,25 +1,25 @@
 #include "messagebundles.hpp"
 
 #include <cstring>
-#include <unicode/errorcode.h>
 #include <unicode/calendar.h>
+#include <unicode/errorcode.h>
 #include <yaml-cpp/yaml.h>
 
 #include <components/debug/debuglog.hpp>
 
 namespace l10n
 {
-    MessageBundles::MessageBundles(const std::vector<icu::Locale> &preferredLocales, icu::Locale &fallbackLocale) :
-            mFallbackLocale(fallbackLocale)
+    MessageBundles::MessageBundles(const std::vector<icu::Locale>& preferredLocales, icu::Locale& fallbackLocale)
+        : mFallbackLocale(fallbackLocale)
     {
         setPreferredLocales(preferredLocales);
     }
 
-    void MessageBundles::setPreferredLocales(const std::vector<icu::Locale> &preferredLocales)
+    void MessageBundles::setPreferredLocales(const std::vector<icu::Locale>& preferredLocales)
     {
         mPreferredLocales.clear();
         mPreferredLocaleStrings.clear();
-        for (const icu::Locale &loc: preferredLocales)
+        for (const icu::Locale& loc : preferredLocales)
         {
             mPreferredLocales.push_back(loc);
             mPreferredLocaleStrings.emplace_back(loc.getName());
@@ -39,7 +39,7 @@ namespace l10n
         }
     }
 
-    std::string getErrorText(const UParseError &parseError)
+    std::string getErrorText(const UParseError& parseError)
     {
         icu::UnicodeString preContext(parseError.preContext), postContext(parseError.postContext);
         std::string parseErrorString;
@@ -48,7 +48,8 @@ namespace l10n
         return parseErrorString;
     }
 
-    static bool checkSuccess(const icu::ErrorCode &status, const std::string &message, const UParseError parseError = UParseError())
+    static bool checkSuccess(
+        const icu::ErrorCode& status, const std::string& message, const UParseError parseError = UParseError())
     {
         if (status.isFailure())
         {
@@ -65,13 +66,13 @@ namespace l10n
         return status.isSuccess();
     }
 
-    void MessageBundles::load(std::istream &input, const icu::Locale& lang, const std::string &path)
+    void MessageBundles::load(std::istream& input, const icu::Locale& lang, const std::string& path)
     {
         try
         {
             YAML::Node data = YAML::Load(input);
             std::string localeName = lang.getName();
-            for (const auto& it: data)
+            for (const auto& it : data)
             {
                 const auto key = it.first.as<std::string>();
                 const auto value = it.second.as<std::string>();
@@ -79,8 +80,8 @@ namespace l10n
                 icu::ErrorCode status;
                 UParseError parseError;
                 icu::MessageFormat message(pattern, lang, parseError, status);
-                if (checkSuccess(status, std::string("Failed to create message ")
-                            + key + " for locale " + lang.getName(), parseError))
+                if (checkSuccess(status,
+                        std::string("Failed to create message ") + key + " for locale " + lang.getName(), parseError))
                 {
                     mBundles[localeName].insert(std::make_pair(key, message));
                 }
@@ -92,7 +93,7 @@ namespace l10n
         }
     }
 
-    const icu::MessageFormat * MessageBundles::findMessage(std::string_view key, const std::string &localeName) const
+    const icu::MessageFormat* MessageBundles::findMessage(std::string_view key, const std::string& localeName) const
     {
         auto iter = mBundles.find(localeName);
         if (iter != mBundles.end())
@@ -106,7 +107,8 @@ namespace l10n
         return nullptr;
     }
 
-    std::string MessageBundles::formatMessage(std::string_view key, const std::map<std::string, icu::Formattable> &args) const
+    std::string MessageBundles::formatMessage(
+        std::string_view key, const std::map<std::string, icu::Formattable>& args) const
     {
         std::vector<icu::UnicodeString> argNames;
         std::vector<icu::Formattable> argValues;
@@ -118,14 +120,15 @@ namespace l10n
         return formatMessage(key, argNames, argValues);
     }
 
-    std::string MessageBundles::formatMessage(std::string_view key, const std::vector<icu::UnicodeString> &argNames, const std::vector<icu::Formattable> &args) const
+    std::string MessageBundles::formatMessage(std::string_view key, const std::vector<icu::UnicodeString>& argNames,
+        const std::vector<icu::Formattable>& args) const
     {
         icu::UnicodeString result;
         std::string resultString;
         icu::ErrorCode success;
 
-        const icu::MessageFormat *message = nullptr;
-        for (auto &loc: mPreferredLocaleStrings)
+        const icu::MessageFormat* message = nullptr;
+        for (auto& loc : mPreferredLocaleStrings)
         {
             message = findMessage(key, loc);
             if (message)
@@ -148,11 +151,11 @@ namespace l10n
         icu::Locale defaultLocale(nullptr);
         if (!mPreferredLocales.empty())
         {
-             defaultLocale = mPreferredLocales[0];
+            defaultLocale = mPreferredLocales[0];
         }
         UParseError parseError;
-        icu::MessageFormat defaultMessage(icu::UnicodeString::fromUTF8(icu::StringPiece(key.data(), key.size())),
-                                          defaultLocale, parseError, success);
+        icu::MessageFormat defaultMessage(
+            icu::UnicodeString::fromUTF8(icu::StringPiece(key.data(), key.size())), defaultLocale, parseError, success);
         if (!checkSuccess(success, std::string("Failed to create message ") + key.data(), parseError))
             // If we can't parse the key as a pattern, just return the key
             return std::string(key);

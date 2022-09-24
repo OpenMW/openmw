@@ -16,7 +16,7 @@ namespace MWScript
     /// \brief Container-related script functionality (chests, NPCs, creatures)
     namespace Container
     {
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 

@@ -16,7 +16,11 @@ namespace LuaUtil
     class L10nManager
     {
     public:
-        L10nManager(const VFS::Manager* vfs, LuaState* lua) : mVFS(vfs), mLua(lua) {}
+        L10nManager(const VFS::Manager* vfs, LuaState* lua)
+            : mVFS(vfs)
+            , mLua(lua)
+        {
+        }
         void init();
         void clear() { mContexts.clear(); }
 

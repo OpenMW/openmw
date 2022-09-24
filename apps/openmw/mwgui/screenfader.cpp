@@ -1,19 +1,19 @@
 #include "screenfader.hpp"
 
-#include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ImageBox.h>
 
 namespace MWGui
 {
 
-    FadeOp::FadeOp(ScreenFader * fader, float time, float targetAlpha, float delay)
-        : mFader(fader),
-          mRemainingTime(time+delay),
-          mTargetTime(time),
-          mTargetAlpha(targetAlpha),
-          mStartAlpha(0.f),
-          mDelay(delay),
-          mRunning(false)
+    FadeOp::FadeOp(ScreenFader* fader, float time, float targetAlpha, float delay)
+        : mFader(fader)
+        , mRemainingTime(time + delay)
+        , mTargetTime(time)
+        , mTargetAlpha(targetAlpha)
+        , mStartAlpha(0.f)
+        , mDelay(delay)
+        , mRunning(false)
     {
     }
 
@@ -60,13 +60,13 @@ namespace MWGui
         float currentAlpha = mFader->getCurrentAlpha();
         if (mStartAlpha > mTargetAlpha)
         {
-            currentAlpha -= dt/mTargetTime * (mStartAlpha-mTargetAlpha);
+            currentAlpha -= dt / mTargetTime * (mStartAlpha - mTargetAlpha);
             if (currentAlpha < mTargetAlpha)
                 currentAlpha = mTargetAlpha;
         }
         else
         {
-            currentAlpha += dt/mTargetTime * (mTargetAlpha-mStartAlpha);
+            currentAlpha += dt / mTargetTime * (mTargetAlpha - mStartAlpha);
             if (currentAlpha > mTargetAlpha)
                 currentAlpha = mTargetAlpha;
         }
@@ -82,7 +82,8 @@ namespace MWGui
         mFader->notifyOperationFinished();
     }
 
-    ScreenFader::ScreenFader(const std::string & texturePath, const std::string& layout, const MyGUI::FloatCoord& texCoordOverride)
+    ScreenFader::ScreenFader(
+        const std::string& texturePath, const std::string& layout, const MyGUI::FloatCoord& texCoordOverride)
         : WindowBase(layout)
         , mCurrentAlpha(0.f)
         , mFactor(1.f)
@@ -95,10 +96,9 @@ namespace MWGui
         {
             imageBox->setImageTexture(texturePath);
             const MyGUI::IntSize imageSize = imageBox->getImageSize();
-            imageBox->setImageCoord(MyGUI::IntCoord(texCoordOverride.left * imageSize.width,
-                                                    texCoordOverride.top * imageSize.height,
-                                                    texCoordOverride.width * imageSize.width,
-                                                    texCoordOverride.height * imageSize.height));
+            imageBox->setImageCoord(
+                MyGUI::IntCoord(texCoordOverride.left * imageSize.width, texCoordOverride.top * imageSize.height,
+                    texCoordOverride.width * imageSize.width, texCoordOverride.height * imageSize.height));
         }
     }
 
@@ -108,7 +108,7 @@ namespace MWGui
         {
             MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate(this, &ScreenFader::onFrameStart);
         }
-        catch(const MyGUI::Exception& e)
+        catch (const MyGUI::Exception& e)
         {
             Log(Debug::Error) << "Error in the destructor: " << e.what();
         }
@@ -127,7 +127,7 @@ namespace MWGui
     void ScreenFader::applyAlpha()
     {
         setVisible(true);
-        mMainWidget->setAlpha(1.f-((1.f-mCurrentAlpha) * mFactor));
+        mMainWidget->setAlpha(1.f - ((1.f - mCurrentAlpha) * mFactor));
     }
 
     void ScreenFader::fadeIn(float time, float delay)
@@ -142,7 +142,7 @@ namespace MWGui
 
     void ScreenFader::fadeTo(const int percent, const float time, float delay)
     {
-        queue(time, percent/100.f, delay);
+        queue(time, percent / 100.f, delay);
     }
 
     void ScreenFader::clear()
@@ -194,7 +194,7 @@ namespace MWGui
 
         mCurrentAlpha = alpha;
 
-        if (1.f-((1.f-mCurrentAlpha) * mFactor) == 0.f)
+        if (1.f - ((1.f - mCurrentAlpha) * mFactor) == 0.f)
             mMainWidget->setVisible(false);
         else
             applyAlpha();

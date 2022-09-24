@@ -1,10 +1,10 @@
 #ifndef MWGUI_TRAININGWINDOW_H
 #define MWGUI_TRAININGWINDOW_H
 
-#include "windowbase.hpp"
 #include "referenceinterface.hpp"
 #include "timeadvancer.hpp"
 #include "waitdialog.hpp"
+#include "windowbase.hpp"
 
 namespace MWMechanics
 {
@@ -34,7 +34,7 @@ namespace MWGui
     protected:
         void onReferenceUnavailable() override;
 
-        void onCancelButtonClicked (MyGUI::Widget* sender);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
         void onTrainingSelected(MyGUI::Widget* sender);
 
         void onTrainingProgressChanged(int cur, int total);
@@ -50,7 +50,7 @@ namespace MWGui
 
         WaitDialogProgressBar mProgressBar;
         TimeAdvancer mTimeAdvancer;
-        bool mTrainingSkillBasedOnBaseSkill;    //corresponds to the setting 'training skills based on base skill'
+        bool mTrainingSkillBasedOnBaseSkill; // corresponds to the setting 'training skills based on base skill'
     };
 
 }

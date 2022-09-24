@@ -1,10 +1,10 @@
 #ifndef OPENMW_ESM_NPCSTATE_H
 #define OPENMW_ESM_NPCSTATE_H
 
-#include "objectstate.hpp"
+#include "creaturestats.hpp"
 #include "inventorystate.hpp"
 #include "npcstats.hpp"
-#include "creaturestats.hpp"
+#include "objectstate.hpp"
 
 namespace ESM
 {
@@ -19,17 +19,11 @@ namespace ESM
         /// Initialize to default state
         void blank() override;
 
-        void load (ESMReader &esm) override;
-        void save (ESMWriter &esm, bool inInventory = false) const override;
+        void load(ESMReader& esm) override;
+        void save(ESMWriter& esm, bool inInventory = false) const override;
 
-        NpcState& asNpcState() override
-        {
-            return *this;
-        }
-        const NpcState& asNpcState() const override
-        {
-            return *this;
-        }
+        NpcState& asNpcState() override { return *this; }
+        const NpcState& asNpcState() const override { return *this; }
     };
 }
 

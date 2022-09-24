@@ -20,13 +20,13 @@ namespace fx
             mData.get<InvProjectionMatrix>() = osg::Matrixf::inverse(matrix);
         }
 
-        void setViewMatrix(const osg::Matrixf& matrix) 
-        { 
+        void setViewMatrix(const osg::Matrixf& matrix)
+        {
             mData.get<ViewMatrix>() = matrix;
             mData.get<InvViewMatrix>() = osg::Matrixf::inverse(matrix);
         }
 
-        void setPrevViewMatrix(const osg::Matrixf& matrix) { mData.get<PrevViewMatrix>() = matrix;}
+        void setPrevViewMatrix(const osg::Matrixf& matrix) { mData.get<PrevViewMatrix>() = matrix; }
 
         void setEyePos(const osg::Vec3f& pos) { mData.get<EyePos>() = osg::Vec4f(pos, 0.f); }
 
@@ -47,13 +47,10 @@ namespace fx
         void setResolution(const osg::Vec2f& size)
         {
             mData.get<Resolution>() = size;
-            mData.get<RcpResolution>() = {1.f / size.x(), 1.f / size.y()};
+            mData.get<RcpResolution>() = { 1.f / size.x(), 1.f / size.y() };
         }
 
-        void setSunVis(float vis)
-        {
-            mData.get<SunVis>() = vis;
-        }
+        void setSunVis(float vis) { mData.get<SunVis>() = vis; }
 
         void setFogRange(float near, float far)
         {
@@ -89,12 +86,12 @@ namespace fx
 
         void setWindSpeed(float speed) { mData.get<WindSpeed>() = speed; }
 
-        void setWeatherTransition(float transition) { mData.get<WeatherTransition>() = transition > 0 ? 1 - transition : 0; }
-
-        void bindPointLights(std::shared_ptr<SceneUtil::PPLightBuffer> buffer)
+        void setWeatherTransition(float transition)
         {
-            mPointLightBuffer = buffer;
+            mData.get<WeatherTransition>() = transition > 0 ? 1 - transition : 0;
         }
+
+        void bindPointLights(std::shared_ptr<SceneUtil::PPLightBuffer> buffer) { mPointLightBuffer = buffer; }
 
         static std::string getStructDefinition()
         {
@@ -107,95 +104,155 @@ namespace fx
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
 
     private:
-        struct ProjectionMatrix : std140::Mat4 { static constexpr std::string_view sName = "projectionMatrix"; };
+        struct ProjectionMatrix : std140::Mat4
+        {
+            static constexpr std::string_view sName = "projectionMatrix";
+        };
 
-        struct InvProjectionMatrix : std140::Mat4 { static constexpr std::string_view sName = "invProjectionMatrix"; };
+        struct InvProjectionMatrix : std140::Mat4
+        {
+            static constexpr std::string_view sName = "invProjectionMatrix";
+        };
 
-        struct ViewMatrix : std140::Mat4 { static constexpr std::string_view sName = "viewMatrix"; };
+        struct ViewMatrix : std140::Mat4
+        {
+            static constexpr std::string_view sName = "viewMatrix";
+        };
 
-        struct PrevViewMatrix : std140::Mat4 { static constexpr std::string_view sName = "prevViewMatrix"; };
+        struct PrevViewMatrix : std140::Mat4
+        {
+            static constexpr std::string_view sName = "prevViewMatrix";
+        };
 
-        struct InvViewMatrix : std140::Mat4 { static constexpr std::string_view sName = "invViewMatrix"; };
+        struct InvViewMatrix : std140::Mat4
+        {
+            static constexpr std::string_view sName = "invViewMatrix";
+        };
 
-        struct EyePos : std140::Vec4 { static constexpr std::string_view sName = "eyePos"; };
+        struct EyePos : std140::Vec4
+        {
+            static constexpr std::string_view sName = "eyePos";
+        };
 
-        struct EyeVec : std140::Vec4 { static constexpr std::string_view sName = "eyeVec"; };
+        struct EyeVec : std140::Vec4
+        {
+            static constexpr std::string_view sName = "eyeVec";
+        };
 
-        struct FogColor : std140::Vec4 { static constexpr std::string_view sName = "fogColor"; };
+        struct FogColor : std140::Vec4
+        {
+            static constexpr std::string_view sName = "fogColor";
+        };
 
-        struct SunColor : std140::Vec4 { static constexpr std::string_view sName = "sunColor"; };
+        struct SunColor : std140::Vec4
+        {
+            static constexpr std::string_view sName = "sunColor";
+        };
 
-        struct SunPos : std140::Vec4 { static constexpr std::string_view sName = "sunPos"; };
+        struct SunPos : std140::Vec4
+        {
+            static constexpr std::string_view sName = "sunPos";
+        };
 
-        struct Resolution : std140::Vec2 { static constexpr std::string_view sName = "resolution"; };
+        struct Resolution : std140::Vec2
+        {
+            static constexpr std::string_view sName = "resolution";
+        };
 
-        struct RcpResolution : std140::Vec2 { static constexpr std::string_view sName = "rcpResolution"; };
+        struct RcpResolution : std140::Vec2
+        {
+            static constexpr std::string_view sName = "rcpResolution";
+        };
 
-        struct FogNear : std140::Float { static constexpr std::string_view sName = "fogNear"; };
+        struct FogNear : std140::Float
+        {
+            static constexpr std::string_view sName = "fogNear";
+        };
 
-        struct FogFar : std140::Float { static constexpr std::string_view sName = "fogFar"; };
+        struct FogFar : std140::Float
+        {
+            static constexpr std::string_view sName = "fogFar";
+        };
 
-        struct Near : std140::Float { static constexpr std::string_view sName = "near"; };
+        struct Near : std140::Float
+        {
+            static constexpr std::string_view sName = "near";
+        };
 
-        struct Far : std140::Float { static constexpr std::string_view sName = "far"; };
+        struct Far : std140::Float
+        {
+            static constexpr std::string_view sName = "far";
+        };
 
-        struct Fov : std140::Float { static constexpr std::string_view sName = "fov"; };
+        struct Fov : std140::Float
+        {
+            static constexpr std::string_view sName = "fov";
+        };
 
-        struct GameHour : std140::Float { static constexpr std::string_view sName = "gameHour"; };
+        struct GameHour : std140::Float
+        {
+            static constexpr std::string_view sName = "gameHour";
+        };
 
-        struct SunVis : std140::Float { static constexpr std::string_view sName = "sunVis"; };
+        struct SunVis : std140::Float
+        {
+            static constexpr std::string_view sName = "sunVis";
+        };
 
-        struct WaterHeight : std140::Float { static constexpr std::string_view sName = "waterHeight"; };
+        struct WaterHeight : std140::Float
+        {
+            static constexpr std::string_view sName = "waterHeight";
+        };
 
-        struct IsWaterEnabled : std140::Bool { static constexpr std::string_view sName = "isWaterEnabled"; };
+        struct IsWaterEnabled : std140::Bool
+        {
+            static constexpr std::string_view sName = "isWaterEnabled";
+        };
 
-        struct SimulationTime : std140::Float { static constexpr std::string_view sName = "simulationTime"; };
+        struct SimulationTime : std140::Float
+        {
+            static constexpr std::string_view sName = "simulationTime";
+        };
 
-        struct DeltaSimulationTime : std140::Float { static constexpr std::string_view sName = "deltaSimulationTime"; };
+        struct DeltaSimulationTime : std140::Float
+        {
+            static constexpr std::string_view sName = "deltaSimulationTime";
+        };
 
-        struct WindSpeed : std140::Float { static constexpr std::string_view sName = "windSpeed"; };
+        struct WindSpeed : std140::Float
+        {
+            static constexpr std::string_view sName = "windSpeed";
+        };
 
-        struct WeatherTransition : std140::Float { static constexpr std::string_view sName = "weatherTransition"; };
+        struct WeatherTransition : std140::Float
+        {
+            static constexpr std::string_view sName = "weatherTransition";
+        };
 
-        struct WeatherID : std140::Int { static constexpr std::string_view sName = "weatherID"; };
+        struct WeatherID : std140::Int
+        {
+            static constexpr std::string_view sName = "weatherID";
+        };
 
-        struct NextWeatherID : std140::Int { static constexpr std::string_view sName = "nextWeatherID"; };
+        struct NextWeatherID : std140::Int
+        {
+            static constexpr std::string_view sName = "nextWeatherID";
+        };
 
-        struct IsUnderwater : std140::Bool { static constexpr std::string_view sName = "isUnderwater"; };
+        struct IsUnderwater : std140::Bool
+        {
+            static constexpr std::string_view sName = "isUnderwater";
+        };
 
-        struct IsInterior : std140::Bool { static constexpr std::string_view sName = "isInterior"; };
+        struct IsInterior : std140::Bool
+        {
+            static constexpr std::string_view sName = "isInterior";
+        };
 
-        using UniformData = std140::UBO<
-            ProjectionMatrix,
-            InvProjectionMatrix,
-            ViewMatrix,
-            PrevViewMatrix,
-            InvViewMatrix,
-            EyePos,
-            EyeVec,
-            FogColor,
-            SunColor,
-            SunPos,
-            Resolution,
-            RcpResolution,
-            FogNear,
-            FogFar,
-            Near,
-            Far,
-            Fov,
-            GameHour,
-            SunVis,
-            WaterHeight,
-            IsWaterEnabled,
-            SimulationTime,
-            DeltaSimulationTime,
-            WindSpeed,
-            WeatherTransition,
-            WeatherID,
-            NextWeatherID,
-            IsUnderwater,
-            IsInterior
-        >;
+        using UniformData = std140::UBO<ProjectionMatrix, InvProjectionMatrix, ViewMatrix, PrevViewMatrix,
+            InvViewMatrix, EyePos, EyeVec, FogColor, SunColor, SunPos, Resolution, RcpResolution, FogNear, FogFar, Near,
+            Far, Fov, GameHour, SunVis, WaterHeight, IsWaterEnabled, SimulationTime, DeltaSimulationTime, WindSpeed,
+            WeatherTransition, WeatherID, NextWeatherID, IsUnderwater, IsInterior>;
 
         UniformData mData;
         bool mUseUBO;

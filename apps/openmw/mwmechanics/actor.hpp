@@ -29,7 +29,8 @@ namespace MWMechanics
         Actor(const MWWorld::Ptr& ptr, MWRender::Animation* animation)
             : mCharacterController(ptr, animation)
             , mPositionAdjusted(false)
-        {}
+        {
+        }
 
         const MWWorld::Ptr& getPtr() const { return mCharacterController.getPtr(); }
 
@@ -61,11 +62,12 @@ namespace MWMechanics
 
     private:
         CharacterController mCharacterController;
-        int mGreetingTimer{0};
-        float mTargetAngleRadians{0.f};
-        GreetingState mGreetingState{Greet_None};
-        bool mIsTurningToPlayer{false};
-        Misc::DeviatingPeriodicTimer mEngageCombat{1.0f, 0.25f, Misc::Rng::deviate(0, 0.25f, MWBase::Environment::get().getWorld()->getPrng())};
+        int mGreetingTimer{ 0 };
+        float mTargetAngleRadians{ 0.f };
+        GreetingState mGreetingState{ Greet_None };
+        bool mIsTurningToPlayer{ false };
+        Misc::DeviatingPeriodicTimer mEngageCombat{ 1.0f, 0.25f,
+            Misc::Rng::deviate(0, 0.25f, MWBase::Environment::get().getWorld()->getPrng()) };
         bool mPositionAdjusted;
     };
 

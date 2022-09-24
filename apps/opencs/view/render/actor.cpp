@@ -23,8 +23,7 @@ namespace CSVRender
         , mSkeleton(nullptr)
     {
         mActorData = mData.getActorAdapter()->getActorData(mId);
-        connect(mData.getActorAdapter(), &CSMWorld::ActorAdapter::actorChanged,
-                this, &Actor::handleActorChanged);
+        connect(mData.getActorAdapter(), &CSMWorld::ActorAdapter::actorChanged, this, &Actor::handleActorChanged);
     }
 
     osg::Group* Actor::getBaseNode()
@@ -38,7 +37,8 @@ namespace CSVRender
 
         // Load skeleton
         std::string skeletonModel = mActorData->getSkeleton();
-        skeletonModel = Misc::ResourceHelpers::correctActorModelPath(skeletonModel, mData.getResourceSystem()->getVFS());
+        skeletonModel
+            = Misc::ResourceHelpers::correctActorModelPath(skeletonModel, mData.getResourceSystem()->getVFS());
         loadSkeleton(skeletonModel);
 
         if (!mActorData->isCreature())
@@ -88,14 +88,13 @@ namespace CSVRender
         mNodeMap.clear();
         SceneUtil::NodeMapVisitor nmVisitor(mNodeMap);
         mSkeleton->accept(nmVisitor);
-
     }
 
     void Actor::loadBodyParts()
     {
         for (int i = 0; i < ESM::PRT_Count; ++i)
         {
-            auto type = (ESM::PartReferenceType) i;
+            auto type = (ESM::PartReferenceType)i;
             const std::string_view partId = mActorData->getPart(type);
             attachBodyPart(type, getBodyPartMesh(partId));
         }

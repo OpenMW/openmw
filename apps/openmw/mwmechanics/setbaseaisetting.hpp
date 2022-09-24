@@ -12,7 +12,7 @@
 
 namespace MWMechanics
 {
-    template<class T>
+    template <class T>
     void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value)
     {
         T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(id);

@@ -1,9 +1,9 @@
 #ifndef GAME_RENDER_CREATUREANIMATION_H
 #define GAME_RENDER_CREATUREANIMATION_H
 
+#include "../mwworld/inventorystore.hpp"
 #include "actoranimation.hpp"
 #include "weaponanimation.hpp"
-#include "../mwworld/inventorystore.hpp"
 
 namespace MWWorld
 {
@@ -15,17 +15,20 @@ namespace MWRender
     class CreatureAnimation : public ActorAnimation
     {
     public:
-        CreatureAnimation(const MWWorld::Ptr &ptr, const std::string& model, Resource::ResourceSystem* resourceSystem);
+        CreatureAnimation(const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem);
         virtual ~CreatureAnimation() {}
     };
 
     // For creatures with weapons and shields
     // Animation is already virtual anyway, so might as well make a separate class.
     // Most creatures don't need weapons/shields, so this will save some memory.
-    class CreatureWeaponAnimation : public ActorAnimation, public WeaponAnimation, public MWWorld::InventoryStoreListener
+    class CreatureWeaponAnimation : public ActorAnimation,
+                                    public WeaponAnimation,
+                                    public MWWorld::InventoryStoreListener
     {
     public:
-        CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const std::string& model, Resource::ResourceSystem* resourceSystem);
+        CreatureWeaponAnimation(
+            const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem);
         virtual ~CreatureWeaponAnimation() {}
 
         void equipmentChanged() override { updateParts(); }
@@ -48,7 +51,10 @@ namespace MWRender
         osg::Node* getWeaponNode() override;
         Resource::ResourceSystem* getResourceSystem() override;
         void showWeapon(bool show) override { showWeapons(show); }
-        void setWeaponGroup(const std::string& group, bool relativeDuration) override { mWeaponAnimationTime->setGroup(group, relativeDuration); }
+        void setWeaponGroup(const std::string& group, bool relativeDuration) override
+        {
+            mWeaponAnimationTime->setGroup(group, relativeDuration);
+        }
 
         void addControllers() override;
 

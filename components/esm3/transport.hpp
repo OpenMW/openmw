@@ -18,17 +18,16 @@ namespace ESM
 
         struct Dest
         {
-            Position    mPos;
+            Position mPos;
             std::string mCellName;
         };
 
         std::vector<Dest> mList;
 
         /// Load one destination, assumes the subrecord name was already read
-        void add(ESMReader &esm);
+        void add(ESMReader& esm);
 
-        void save(ESMWriter &esm) const;
-
+        void save(ESMWriter& esm) const;
     };
 
 }

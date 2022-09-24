@@ -7,11 +7,10 @@ namespace MWWorld
 {
     class ActionEat : public Action
     {
-            void executeImp (const Ptr& actor) override;
+        void executeImp(const Ptr& actor) override;
 
-        public:
-
-            ActionEat (const MWWorld::Ptr& object);
+    public:
+        ActionEat(const MWWorld::Ptr& object);
     };
 }
 

@@ -13,7 +13,8 @@ namespace SceneUtil
     class LightController : public SceneUtil::NodeCallback<LightController, SceneUtil::LightSource*>
     {
     public:
-        enum LightType {
+        enum LightType
+        {
             LT_Normal,
             LT_Flicker,
             LT_FlickerSlow,

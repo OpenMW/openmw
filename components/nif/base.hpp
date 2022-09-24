@@ -1,4 +1,4 @@
-///This file holds the main classes of NIF Records used by everything else.
+/// This file holds the main classes of NIF Records used by everything else.
 #ifndef OPENMW_COMPONENTS_NIF_BASE_HPP
 #define OPENMW_COMPONENTS_NIF_BASE_HPP
 
@@ -6,60 +6,61 @@
 
 namespace Nif
 {
-struct File;
-struct Record;
-struct Stream;
+    struct File;
+    struct Record;
+    struct Stream;
 
-// An extra data record. All the extra data connected to an object form a linked list.
-struct Extra : public Record
-{
-    std::string name;
-    ExtraPtr next; // Next extra data record in the list
-    unsigned int recordSize{0u};
-
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override { next.post(nif); }
-};
-
-struct Controller : public Record
-{
-    enum Flags {
-        Flag_Active = 0x8
-    };
-
-    enum ExtrapolationMode
+    // An extra data record. All the extra data connected to an object form a linked list.
+    struct Extra : public Record
     {
-        Cycle = 0,
-        Reverse = 2,
-        Constant = 4,
-        Mask = 6
+        std::string name;
+        ExtraPtr next; // Next extra data record in the list
+        unsigned int recordSize{ 0u };
+
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override { next.post(nif); }
     };
 
-    ControllerPtr next;
-    int flags;
-    float frequency, phase;
-    float timeStart, timeStop;
-    NamedPtr target;
+    struct Controller : public Record
+    {
+        enum Flags
+        {
+            Flag_Active = 0x8
+        };
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
+        enum ExtrapolationMode
+        {
+            Cycle = 0,
+            Reverse = 2,
+            Constant = 4,
+            Mask = 6
+        };
 
-    bool isActive() const { return flags & Flag_Active; }
-    ExtrapolationMode extrapolationMode() const { return static_cast<ExtrapolationMode>(flags & Mask); }
-};
+        ControllerPtr next;
+        int flags;
+        float frequency, phase;
+        float timeStart, timeStop;
+        NamedPtr target;
 
-/// Has name, extra-data and controller
-struct Named : public Record
-{
-    std::string name;
-    ExtraPtr extra;
-    ExtraList extralist;
-    ControllerPtr controller;
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
 
-    void read(NIFStream *nif) override;
-    void post(NIFFile *nif) override;
-};
-using NiSequenceStreamHelper = Named;
+        bool isActive() const { return flags & Flag_Active; }
+        ExtrapolationMode extrapolationMode() const { return static_cast<ExtrapolationMode>(flags & Mask); }
+    };
+
+    /// Has name, extra-data and controller
+    struct Named : public Record
+    {
+        std::string name;
+        ExtraPtr extra;
+        ExtraList extralist;
+        ControllerPtr controller;
+
+        void read(NIFStream* nif) override;
+        void post(NIFFile* nif) override;
+    };
+    using NiSequenceStreamHelper = Named;
 
 } // Namespace
 #endif

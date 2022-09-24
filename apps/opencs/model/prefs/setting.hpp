@@ -16,56 +16,54 @@ namespace CSMPrefs
 
     class Setting : public QObject
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            Category *mParent;
-            QMutex *mMutex;
-            std::string mKey;
-            std::string mLabel;
+        Category* mParent;
+        QMutex* mMutex;
+        std::string mKey;
+        std::string mLabel;
 
-        protected:
+    protected:
+        QMutex* getMutex();
 
-            QMutex *getMutex();
+    public:
+        Setting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label);
 
-        public:
+        virtual ~Setting();
 
-            Setting (Category *parent, QMutex *mutex, const std::string& key, const std::string& label);
+        /// Return label, input widget.
+        ///
+        /// \note first can be a 0-pointer, which means that the label is part of the input
+        /// widget.
+        virtual std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent);
 
-            virtual ~Setting();
+        /// Updates the widget returned by makeWidgets() to the current setting.
+        ///
+        /// \note If make_widgets() has not been called yet then nothing happens.
+        virtual void updateWidget();
 
-            /// Return label, input widget.
-            ///
-            /// \note first can be a 0-pointer, which means that the label is part of the input
-            /// widget.
-            virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
+        const Category* getParent() const;
 
-            /// Updates the widget returned by makeWidgets() to the current setting.
-            ///
-            /// \note If make_widgets() has not been called yet then nothing happens.
-            virtual void updateWidget();
+        const std::string& getKey() const;
 
-            const Category *getParent() const;
+        const std::string& getLabel() const;
 
-            const std::string& getKey() const;
+        int toInt() const;
 
-            const std::string& getLabel() const;
+        double toDouble() const;
 
-            int toInt() const;
+        std::string toString() const;
 
-            double toDouble() const;
+        bool isTrue() const;
 
-            std::string toString() const;
-
-            bool isTrue() const;
-
-            QColor toColor() const;
+        QColor toColor() const;
     };
 
     // note: fullKeys have the format categoryKey/settingKey
-    bool operator== (const Setting& setting, const std::string& fullKey);
-    bool operator== (const std::string& fullKey, const Setting& setting);
-    bool operator!= (const Setting& setting, const std::string& fullKey);
-    bool operator!= (const std::string& fullKey, const Setting& setting);
+    bool operator==(const Setting& setting, const std::string& fullKey);
+    bool operator==(const std::string& fullKey, const Setting& setting);
+    bool operator!=(const Setting& setting, const std::string& fullKey);
+    bool operator!=(const std::string& fullKey, const Setting& setting);
 }
 
 #endif

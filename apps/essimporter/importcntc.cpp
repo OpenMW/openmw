@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void CNTC::load(ESM::ESMReader &esm)
+    void CNTC::load(ESM::ESMReader& esm)
     {
         mIndex = 0;
         esm.getHNT(mIndex, "INDX");

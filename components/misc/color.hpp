@@ -7,27 +7,27 @@ namespace Misc
 {
     class Color
     {
-        public:
-            Color(float r, float g, float b, float a);
+    public:
+        Color(float r, float g, float b, float a);
 
-            float r() const { return mR; }
-            float g() const { return mG; }
-            float b() const { return mB; }
-            float a() const { return mA; }
+        float r() const { return mR; }
+        float g() const { return mG; }
+        float b() const { return mB; }
+        float a() const { return mA; }
 
-            std::string toString() const;
+        std::string toString() const;
 
-            static Color fromHex(std::string_view hex);
+        static Color fromHex(std::string_view hex);
 
-            std::string toHex() const;
+        std::string toHex() const;
 
-            friend bool operator==(const Color& l, const Color& r);
+        friend bool operator==(const Color& l, const Color& r);
 
-        private:
-            float mR;
-            float mG;
-            float mB;
-            float mA;
+    private:
+        float mR;
+        float mG;
+        float mB;
+        float mA;
     };
 }
 

@@ -1,8 +1,8 @@
 #ifndef GAME_STATE_STATEMANAGER_H
 #define GAME_STATE_STATEMANAGER_H
 
-#include <map>
 #include <filesystem>
+#include <map>
 
 #include "../mwbase/statemanager.hpp"
 
@@ -12,78 +12,77 @@ namespace MWState
 {
     class StateManager : public MWBase::StateManager
     {
-            bool mQuitRequest;
-            bool mAskLoadRecent;
-            State mState;
-            CharacterManager mCharacterManager;
-            double mTimePlayed;
+        bool mQuitRequest;
+        bool mAskLoadRecent;
+        State mState;
+        CharacterManager mCharacterManager;
+        double mTimePlayed;
 
-        private:
+    private:
+        void cleanup(bool force = false);
 
-            void cleanup (bool force = false);
+        bool verifyProfile(const ESM::SavedGame& profile) const;
 
-            bool verifyProfile (const ESM::SavedGame& profile) const;
+        void writeScreenshot(std::vector<char>& imageData) const;
 
-            void writeScreenshot (std::vector<char>& imageData) const;
+        std::map<int, int> buildContentFileIndexMap(const ESM::ESMReader& reader) const;
 
-            std::map<int, int> buildContentFileIndexMap (const ESM::ESMReader& reader) const;
+    public:
+        StateManager(const std::filesystem::path& saves, const std::vector<std::string>& contentFiles);
 
-        public:
+        void requestQuit() override;
 
-            StateManager (const std::filesystem::path& saves, const std::vector<std::string>& contentFiles);
+        bool hasQuitRequest() const override;
 
-            void requestQuit() override;
+        void askLoadRecent() override;
 
-            bool hasQuitRequest() const override;
+        State getState() const override;
 
-            void askLoadRecent() override;
+        void newGame(bool bypass = false) override;
+        ///< Start a new game.
+        ///
+        /// \param bypass Skip new game mechanics.
 
-            State getState() const override;
+        void endGame();
 
-            void newGame (bool bypass = false) override;
-            ///< Start a new game.
-            ///
-            /// \param bypass Skip new game mechanics.
+        void resumeGame() override;
 
-            void endGame();
+        void deleteGame(const MWState::Character* character, const MWState::Slot* slot) override;
+        ///< Delete a saved game slot from this character. If all save slots are deleted, the character will be deleted
+        ///< too.
 
-            void resumeGame() override;
+        void saveGame(const std::string& description, const Slot* slot = nullptr) override;
+        ///< Write a saved game to \a slot or create a new slot if \a slot == 0.
+        ///
+        /// \note Slot must belong to the current character.
 
-            void deleteGame (const MWState::Character *character, const MWState::Slot *slot) override;
-            ///< Delete a saved game slot from this character. If all save slots are deleted, the character will be deleted too.
+        /// Saves a file, using supplied filename, overwritting if needed
+        /** This is mostly used for quicksaving and autosaving, for they use the same name over and over again
+            \param name Name of save, defaults to "Quicksave"**/
+        void quickSave(std::string name = "Quicksave") override;
 
-            void saveGame (const std::string& description, const Slot *slot = nullptr) override;
-            ///< Write a saved game to \a slot or create a new slot if \a slot == 0.
-            ///
-            /// \note Slot must belong to the current character.
+        /// Loads the last saved file
+        /** Used for quickload **/
+        void quickLoad() override;
 
-            ///Saves a file, using supplied filename, overwritting if needed
-            /** This is mostly used for quicksaving and autosaving, for they use the same name over and over again
-                \param name Name of save, defaults to "Quicksave"**/
-            void quickSave(std::string name = "Quicksave") override;
+        void loadGame(const std::filesystem::path& filepath) override;
+        ///< Load a saved game directly from the given file path. This will search the CharacterManager
+        /// for a Character containing this save file, and set this Character current if one was found.
+        /// Otherwise, a new Character will be created.
 
-            ///Loads the last saved file
-            /** Used for quickload **/
-            void quickLoad() override;
+        void loadGame(const Character* character, const std::filesystem::path& filepath) override;
+        ///< Load a saved game file belonging to the given character.
 
-            void loadGame (const std::filesystem::path &filepath) override;
-            ///< Load a saved game directly from the given file path. This will search the CharacterManager
-            /// for a Character containing this save file, and set this Character current if one was found.
-            /// Otherwise, a new Character will be created.
+        Character* getCurrentCharacter() override;
+        ///< @note May return null.
 
-            void loadGame (const Character *character, const std::filesystem::path &filepath) override;
-            ///< Load a saved game file belonging to the given character.
+        CharacterIterator characterBegin() override;
+        ///< Any call to SaveGame and getCurrentCharacter can invalidate the returned
+        /// iterator.
 
-            Character *getCurrentCharacter () override;
-            ///< @note May return null.
+        CharacterIterator characterEnd() override;
 
-            CharacterIterator characterBegin() override;
-            ///< Any call to SaveGame and getCurrentCharacter can invalidate the returned
-            /// iterator.
-
-            CharacterIterator characterEnd() override;
-
-            void update(float duration);
+        void update(float duration);
     };
 }
 

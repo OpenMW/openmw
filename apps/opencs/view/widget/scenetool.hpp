@@ -10,25 +10,23 @@ namespace CSVWidget
     ///< \brief Tool base class
     class SceneTool : public PushButton
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        SceneTool(SceneToolbar* parent, Type type = Type_TopMode);
 
-            SceneTool (SceneToolbar *parent, Type type = Type_TopMode);
+        virtual void showPanel(const QPoint& position) = 0;
 
-            virtual void showPanel (const QPoint& position) = 0;
+        /// This function will only called for buttons of type Type_TopAction. The default
+        /// implementation is empty.
+        virtual void activate();
 
-            /// This function will only called for buttons of type Type_TopAction. The default
-            /// implementation is empty.
-            virtual void activate();
+    protected:
+        void mouseReleaseEvent(QMouseEvent* event) override;
 
-        protected:
+    private slots:
 
-            void mouseReleaseEvent (QMouseEvent *event) override;
-
-        private slots:
-
-            void openRequest();
+        void openRequest();
     };
 }
 

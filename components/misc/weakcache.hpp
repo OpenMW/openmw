@@ -25,6 +25,7 @@ namespace Misc
             bool operator==(const iterator& other) const;
             bool operator!=(const iterator& other) const;
             StrongPtr operator*();
+
         private:
             WeakCache* mCache;
             typename Map::iterator mCurrent, mEnd;
@@ -32,7 +33,7 @@ namespace Misc
         };
 
         /// Stores a weak pointer to the item.
-        void insert(Key key, StrongPtr value, bool prune=true);
+        void insert(Key key, StrongPtr value, bool prune = true);
 
         /// Retrieves the item associated with the key.
         /// \return An item or null.
@@ -49,7 +50,6 @@ namespace Misc
         std::vector<Key> mDirty;
     };
 
-
     template <typename Key, typename T>
     WeakCache<Key, T>::iterator::iterator(WeakCache* cache, typename Map::iterator current, typename Map::iterator end)
         : mCache(cache)
@@ -57,11 +57,13 @@ namespace Misc
         , mEnd(end)
     {
         // Move to 1st available valid item
-        for ( ; mCurrent != mEnd; ++mCurrent)
+        for (; mCurrent != mEnd; ++mCurrent)
         {
             mPtr = mCurrent->second.lock();
-            if (mPtr) break;
-            else mCache->mDirty.push_back(mCurrent->first);
+            if (mPtr)
+                break;
+            else
+                mCache->mDirty.push_back(mCurrent->first);
         }
     }
 
@@ -91,12 +93,12 @@ namespace Misc
         return mPtr;
     }
 
-
     template <typename Key, typename T>
     void WeakCache<Key, T>::insert(Key key, StrongPtr value, bool shouldPrune)
     {
         mData[key] = WeakPtr(value);
-        if (shouldPrune) prune();
+        if (shouldPrune)
+            prune();
     }
 
     template <typename Key, typename T>

@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Activator::load(ESMReader &esm, bool &isDeleted)
+    void Activator::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -42,7 +42,7 @@ namespace ESM
         if (!hasName)
             esm.fail("Missing NAME subrecord");
     }
-    void Activator::save(ESMWriter &esm, bool isDeleted) const
+    void Activator::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

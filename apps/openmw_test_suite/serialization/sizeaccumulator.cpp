@@ -37,7 +37,7 @@ namespace
     {
         SizeAccumulator sizeAccumulator;
         const TestFormat<Mode::Write> format;
-        sizeAccumulator(format, Pod {});
+        sizeAccumulator(format, Pod{});
         EXPECT_EQ(sizeAccumulator.value(), 12);
     }
 }

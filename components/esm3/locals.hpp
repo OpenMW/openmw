@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESM_LOCALS_H
 #define OPENMW_ESM_LOCALS_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "variant.hpp"
 
@@ -17,10 +17,10 @@ namespace ESM
 
     struct Locals
     {
-        std::vector<std::pair<std::string, Variant> > mVariables;
+        std::vector<std::pair<std::string, Variant>> mVariables;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 }
 

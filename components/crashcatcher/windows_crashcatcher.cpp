@@ -17,9 +17,8 @@ namespace Crash
     HANDLE duplicateHandle(HANDLE handle)
     {
         HANDLE duplicate;
-        if (!DuplicateHandle(GetCurrentProcess(), handle,
-                             GetCurrentProcess(), &duplicate,
-                             0, TRUE, DUPLICATE_SAME_ACCESS))
+        if (!DuplicateHandle(
+                GetCurrentProcess(), handle, GetCurrentProcess(), &duplicate, 0, TRUE, DUPLICATE_SAME_ACCESS))
         {
             throw std::runtime_error("Crash monitor could not duplicate handle");
         }
@@ -28,14 +27,14 @@ namespace Crash
 
     CrashCatcher* CrashCatcher::sInstance = nullptr;
 
-    CrashCatcher::CrashCatcher(int argc, char **argv, const std::filesystem::path& crashLogPath)
+    CrashCatcher::CrashCatcher(int argc, char** argv, const std::filesystem::path& crashLogPath)
     {
         assert(sInstance == nullptr); // don't allow two instances
 
         sInstance = this;
 
         HANDLE shmHandle = nullptr;
-        for (int i=0; i<argc; ++i)
+        for (int i = 0; i < argc; ++i)
         {
             if (strcmp(argv[i], "--crash-monitor"))
                 continue;
@@ -86,7 +85,8 @@ namespace Crash
         mSignalAppEvent = CreateEventW(&attributes, FALSE, FALSE, NULL);
         mSignalMonitorEvent = CreateEventW(&attributes, FALSE, FALSE, NULL);
 
-        mShmHandle = CreateFileMappingW(INVALID_HANDLE_VALUE, &attributes, PAGE_READWRITE, HIWORD(sizeof(CrashSHM)), LOWORD(sizeof(CrashSHM)), NULL);
+        mShmHandle = CreateFileMappingW(INVALID_HANDLE_VALUE, &attributes, PAGE_READWRITE, HIWORD(sizeof(CrashSHM)),
+            LOWORD(sizeof(CrashSHM)), NULL);
         if (mShmHandle == nullptr)
             throw std::runtime_error("Failed to allocate crash catcher shared memory");
 
@@ -130,7 +130,8 @@ namespace Crash
     {
         std::wstring executablePath;
         DWORD copied = 0;
-        do {
+        do
+        {
             executablePath.resize(executablePath.size() + MAX_PATH);
             copied = GetModuleFileNameW(nullptr, executablePath.data(), static_cast<DWORD>(executablePath.size()));
         } while (copied >= executablePath.size());
@@ -139,8 +140,10 @@ namespace Crash
         memset(mShm->mStartup.mLogFilePath, 0, sizeof(mShm->mStartup.mLogFilePath));
         const auto str = crashLogPath.u8string();
         size_t length = str.length();
-        if (length >= MAX_LONG_PATH) length = MAX_LONG_PATH - 1;
-        strncpy_s(mShm->mStartup.mLogFilePath, sizeof mShm->mStartup.mLogFilePath, Misc::StringUtils::u8StringToString(str).c_str(), length);
+        if (length >= MAX_LONG_PATH)
+            length = MAX_LONG_PATH - 1;
+        strncpy_s(mShm->mStartup.mLogFilePath, sizeof mShm->mStartup.mLogFilePath,
+            Misc::StringUtils::u8StringToString(str).c_str(), length);
         mShm->mStartup.mLogFilePath[length] = '\0';
 
         // note that we don't need to lock the SHM here, the other process has not started yet
@@ -171,10 +174,10 @@ namespace Crash
     {
         switch (info->ExceptionRecord->ExceptionCode)
         {
-        case EXCEPTION_SINGLE_STEP:
-        case EXCEPTION_BREAKPOINT:
-        case DBG_PRINTEXCEPTION_C:
-            return EXCEPTION_EXECUTE_HANDLER;
+            case EXCEPTION_SINGLE_STEP:
+            case EXCEPTION_BREAKPOINT:
+            case DBG_PRINTEXCEPTION_C:
+                return EXCEPTION_EXECUTE_HANDLER;
         }
         if (!sInstance)
             return EXCEPTION_EXECUTE_HANDLER;
@@ -200,7 +203,9 @@ namespace Crash
         // must remain until monitor has finished
         waitMonitor();
 
-        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(mShm->mStartup.mLogFilePath) + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
+        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '"
+            + std::string(mShm->mStartup.mLogFilePath)
+            + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
         SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
     }
 

@@ -23,6 +23,7 @@ namespace MWRender
         ~PingPongCull();
 
         void operator()(osg::Node* node, osgUtil::CullVisitor* nv);
+
     private:
         std::array<osg::Matrixf, 2> mLastViewMatrix;
         osg::ref_ptr<osg::StateSet> mViewportStateset;

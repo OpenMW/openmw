@@ -1,8 +1,8 @@
 #include "debugging.hpp"
 
 #include <chrono>
-#include <memory>
 #include <fstream>
+#include <memory>
 
 #include <boost/iostreams/stream.hpp>
 
@@ -11,8 +11,8 @@
 #include <components/files/conversion.hpp>
 #ifdef _WIN32
 #include <components/crashcatcher/windows_crashcatcher.hpp>
-#include <components/windows.hpp>
 #include <components/files/conversion.hpp>
+#include <components/windows.hpp>
 #endif
 
 #include <SDL_messagebox.h>
@@ -68,7 +68,10 @@ namespace Debug
 #endif
 
     static LogListener logListener;
-    void setLogListener(LogListener listener) { logListener = std::move(listener); }
+    void setLogListener(LogListener listener)
+    {
+        logListener = std::move(listener);
+    }
 
     class DebugOutputBase : public boost::iostreams::sink
     {
@@ -99,8 +102,8 @@ namespace Debug
                 prefixSize = std::strftime(prefix + 1, sizeof(prefix) - 1, "%T", std::localtime(&time)) + 1;
                 char levelLetter = " EWIVD*"[int(level)];
                 const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-                prefixSize += snprintf(prefix + prefixSize, sizeof(prefix) - prefixSize,
-                    ".%03u %c] ", static_cast<unsigned>(ms % 1000), levelLetter);
+                prefixSize += snprintf(prefix + prefixSize, sizeof(prefix) - prefixSize, ".%03u %c] ",
+                    static_cast<unsigned>(ms % 1000), levelLetter);
             }
 
             while (!msg.empty())
@@ -156,10 +159,7 @@ namespace Debug
             CurrentDebugLevel = Verbose;
         }
 
-        virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
-        {
-            return size;
-        }
+        virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel) { return size; }
     };
 
 #if defined _WIN32 && defined _DEBUG
@@ -183,7 +183,8 @@ namespace Debug
     {
     public:
         Tee(std::ostream& stream, std::ostream& stream2)
-            : out(stream), out2(stream2)
+            : out(stream)
+            , out2(stream2)
         {
             // TODO: check which stream is stderr?
             mUseColor = useColoredOutput();
@@ -219,7 +220,6 @@ namespace Debug
         virtual ~Tee() = default;
 
     private:
-
         static bool useColoredOutput()
         {
             // Note: cmd.exe in Win10 should support ANSI colors, but in its own way.
@@ -271,7 +271,7 @@ Misc::Locked<std::ostream&> getLockedRawStderr()
 }
 
 // Redirect cout and cerr to the log file
-void setupLogging(const std::filesystem::path &logDir, const std::string& appName, std::ios_base::openmode mode)
+void setupLogging(const std::filesystem::path& logDir, const std::string& appName, std::ios_base::openmode mode)
 {
 #if defined(_WIN32) && defined(_DEBUG)
     // Redirect cout and cerr to VS debug output when running in debug mode
@@ -290,8 +290,8 @@ void setupLogging(const std::filesystem::path &logDir, const std::string& appNam
 #endif
 }
 
-int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[],
-                    const std::string& appName, bool autoSetupLogging)
+int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], const std::string& appName,
+    bool autoSetupLogging)
 {
 #if defined _WIN32
     (void)Debug::attachParentConsole();

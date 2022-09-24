@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Apparatus::load(ESMReader &esm, bool &isDeleted)
+    void Apparatus::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -53,7 +53,7 @@ namespace ESM
             esm.fail("Missing AADT subrecord");
     }
 
-    void Apparatus::save(ESMWriter &esm, bool isDeleted) const
+    void Apparatus::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

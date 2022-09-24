@@ -3,8 +3,8 @@
 #include <components/fallback/fallback.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
-#include "universalid.hpp"
 #include "infoselectwrapper.hpp"
+#include "universalid.hpp"
 
 namespace CSMWorld
 {
@@ -13,11 +13,10 @@ namespace CSMWorld
         struct ColumnDesc
         {
             int mId;
-            const char *mName;
+            const char* mName;
         };
 
-        const ColumnDesc sNames[] =
-        {
+        const ColumnDesc sNames[] = {
             { ColumnId_Value, "Value" },
             { ColumnId_Id, "ID" },
             { ColumnId_Modification, "Modified" },
@@ -175,7 +174,7 @@ namespace CSMWorld
 
             { ColumnId_ContainerContent, "Content" },
             { ColumnId_ItemCount, "Count" },
-            { ColumnId_InventoryItemId, "Item ID"},
+            { ColumnId_InventoryItemId, "Item ID" },
 
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
@@ -187,16 +186,16 @@ namespace CSMWorld
 
             { ColumnId_ActorInventory, "Inventory" },
             { ColumnId_SpellList, "Spells" },
-            { ColumnId_SpellId, "Spell ID"},
+            { ColumnId_SpellId, "Spell ID" },
 
             { ColumnId_NpcDestinations, "Destinations" },
-            { ColumnId_DestinationCell, "Dest Cell"},
-            { ColumnId_PosX, "Dest X"},
-            { ColumnId_PosY, "Dest Y"},
-            { ColumnId_PosZ, "Dest Z"},
-            { ColumnId_RotX, "Rotation X"},
-            { ColumnId_RotY, "Rotation Y"},
-            { ColumnId_RotZ, "Rotation Z"},
+            { ColumnId_DestinationCell, "Dest Cell" },
+            { ColumnId_PosX, "Dest X" },
+            { ColumnId_PosY, "Dest Y" },
+            { ColumnId_PosZ, "Dest Z" },
+            { ColumnId_RotX, "Rotation X" },
+            { ColumnId_RotY, "Rotation Y" },
+            { ColumnId_RotZ, "Rotation Z" },
 
             { ColumnId_OwnerGlobal, "Owner Global" },
             { ColumnId_DefaultProfile, "Default Profile" },
@@ -265,9 +264,9 @@ namespace CSMWorld
             { ColumnId_PartRefMale, "Male Part" },
             { ColumnId_PartRefFemale, "Female Part" },
 
-            { ColumnId_LevelledList,"Levelled List" },
-            { ColumnId_LevelledItemId,"Levelled Item" },
-            { ColumnId_LevelledItemLevel,"PC Level" },
+            { ColumnId_LevelledList, "Levelled List" },
+            { ColumnId_LevelledItemId, "Levelled Item" },
+            { ColumnId_LevelledItemLevel, "PC Level" },
             { ColumnId_LevelledItemType, "Calculate all levels <= player" },
             { ColumnId_LevelledItemTypeEach, "Select a new item for each instance" },
             { ColumnId_LevelledItemChanceNone, "Chance None" },
@@ -373,7 +372,7 @@ namespace CSMWorld
             { ColumnId_Persistent, "Persistent" },
             { ColumnId_Blocked, "Blocked" },
 
-            { ColumnId_LevelledCreatureId,"Levelled Creature" },
+            { ColumnId_LevelledCreatureId, "Levelled Creature" },
 
             // end marker
             { -1, 0 },
@@ -381,18 +380,18 @@ namespace CSMWorld
     }
 }
 
-std::string CSMWorld::Columns::getName (ColumnId column)
+std::string CSMWorld::Columns::getName(ColumnId column)
 {
-    for (int i=0; sNames[i].mName; ++i)
-        if (column==sNames[i].mId)
+    for (int i = 0; sNames[i].mName; ++i)
+        if (column == sNames[i].mId)
             return sNames[i].mName;
 
     return "";
 }
 
-int CSMWorld::Columns::getId (const std::string& name)
+int CSMWorld::Columns::getId(const std::string& name)
 {
-    for (int i=0; sNames[i].mName; ++i)
+    for (int i = 0; sNames[i].mName; ++i)
         if (Misc::StringUtils::ciEqual(std::string_view(sNames[i].mName), name))
             return sNames[i].mId;
 
@@ -401,246 +400,191 @@ int CSMWorld::Columns::getId (const std::string& name)
 
 namespace
 {
-    static const char *sSpecialisations[] =
-    {
-        "Combat", "Magic", "Stealth", 0
-    };
+    static const char* sSpecialisations[] = { "Combat", "Magic", "Stealth", 0 };
 
     // see ESM::Attribute::AttributeID in <component/esm3/attr.hpp>
-    static const char *sAttributes[] =
-    {
-        "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality",
-        "Luck", 0
-    };
+    static const char* sAttributes[]
+        = { "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality", "Luck", 0 };
 
-    static const char *sSpellTypes[] =
-    {
-        "Spell", "Ability", "Blight", "Disease", "Curse", "Power", 0
-    };
+    static const char* sSpellTypes[] = { "Spell", "Ability", "Blight", "Disease", "Curse", "Power", 0 };
 
-    static const char *sApparatusTypes[] =
-    {
-        "Mortar & Pestle", "Alembic", "Calcinator", "Retort", 0
-    };
+    static const char* sApparatusTypes[] = { "Mortar & Pestle", "Alembic", "Calcinator", "Retort", 0 };
 
-    static const char *sArmorTypes[] =
-    {
-        "Helmet", "Cuirass", "Left Pauldron", "Right Pauldron", "Greaves", "Boots", "Left Gauntlet",
-        "Right Gauntlet", "Shield", "Left Bracer", "Right Bracer", 0
-    };
+    static const char* sArmorTypes[] = { "Helmet", "Cuirass", "Left Pauldron", "Right Pauldron", "Greaves", "Boots",
+        "Left Gauntlet", "Right Gauntlet", "Shield", "Left Bracer", "Right Bracer", 0 };
 
-    static const char *sClothingTypes[] =
-    {
-        "Pants", "Shoes", "Shirt", "Belt", "Robe", "Right Glove", "Left Glove", "Skirt", "Ring",
-        "Amulet", 0
-    };
+    static const char* sClothingTypes[]
+        = { "Pants", "Shoes", "Shirt", "Belt", "Robe", "Right Glove", "Left Glove", "Skirt", "Ring", "Amulet", 0 };
 
-    static const char *sCreatureTypes[] =
-    {
-        "Creature", "Daedra", "Undead", "Humanoid", 0
-    };
+    static const char* sCreatureTypes[] = { "Creature", "Daedra", "Undead", "Humanoid", 0 };
 
-    static const char *sWeaponTypes[] =
-    {
-        "Short Blade 1H", "Long Blade 1H", "Long Blade 2H", "Blunt 1H", "Blunt 2H Close",
-        "Blunt 2H Wide", "Spear 2H", "Axe 1H", "Axe 2H", "Bow", "Crossbow", "Thrown", "Arrow",
-        "Bolt", 0
-    };
+    static const char* sWeaponTypes[]
+        = { "Short Blade 1H", "Long Blade 1H", "Long Blade 2H", "Blunt 1H", "Blunt 2H Close", "Blunt 2H Wide",
+              "Spear 2H", "Axe 1H", "Axe 2H", "Bow", "Crossbow", "Thrown", "Arrow", "Bolt", 0 };
 
-    static const char *sModificationEnums[] =
-    {
-        "Base", "Modified", "Added", "Deleted", "Deleted", 0
-    };
+    static const char* sModificationEnums[] = { "Base", "Modified", "Added", "Deleted", "Deleted", 0 };
 
-    static const char *sVarTypeEnums[] =
-    {
-        "unknown", "none", "short", "integer", "long", "float", "string", 0
-    };
+    static const char* sVarTypeEnums[] = { "unknown", "none", "short", "integer", "long", "float", "string", 0 };
 
-    static const char *sDialogueTypeEnums[] =
-    {
-        "Topic", "Voice", "Greeting", "Persuasion", 0
-    };
+    static const char* sDialogueTypeEnums[] = { "Topic", "Voice", "Greeting", "Persuasion", 0 };
 
-    static const char *sQuestStatusTypes[] =
-    {
-        "None", "Name", "Finished", "Restart", 0
-    };
+    static const char* sQuestStatusTypes[] = { "None", "Name", "Finished", "Restart", 0 };
 
-    static const char *sGenderEnums[] =
-    {
-        "Male", "Female", 0
-    };
+    static const char* sGenderEnums[] = { "Male", "Female", 0 };
 
-    static const char *sEnchantmentTypes[] =
-    {
-        "Cast Once", "When Strikes", "When Used", "Constant Effect", 0
-    };
+    static const char* sEnchantmentTypes[] = { "Cast Once", "When Strikes", "When Used", "Constant Effect", 0 };
 
-    static const char *sBodyPartTypes[] =
-    {
-        "Head", "Hair", "Neck", "Chest", "Groin", "Hand", "Wrist", "Forearm", "Upper Arm",
-        "Foot", "Ankle", "Knee", "Upper Leg", "Clavicle", "Tail", 0
-    };
+    static const char* sBodyPartTypes[] = { "Head", "Hair", "Neck", "Chest", "Groin", "Hand", "Wrist", "Forearm",
+        "Upper Arm", "Foot", "Ankle", "Knee", "Upper Leg", "Clavicle", "Tail", 0 };
 
-    static const char *sMeshTypes[] =
-    {
-        "Skin", "Clothing", "Armour", 0
-    };
+    static const char* sMeshTypes[] = { "Skin", "Clothing", "Armour", 0 };
 
-    static const char *sSoundGeneratorType[] =
-    {
-        "Left Foot", "Right Foot", "Swim Left", "Swim Right", "Moan", "Roar", "Scream",
-        "Land", 0
-    };
+    static const char* sSoundGeneratorType[]
+        = { "Left Foot", "Right Foot", "Swim Left", "Swim Right", "Moan", "Roar", "Scream", "Land", 0 };
 
-    static const char *sSchools[] =
-    {
-        "Alteration", "Conjuration", "Destruction", "Illusion", "Mysticism", "Restoration", 0
-    };
+    static const char* sSchools[]
+        = { "Alteration", "Conjuration", "Destruction", "Illusion", "Mysticism", "Restoration", 0 };
 
     // impact from magic effects, see ESM::Skill::SkillEnum in <component/esm3/loadskil.hpp>
-    static const char *sSkills[] =
-    {
-        "Block", "Armorer", "MediumArmor", "HeavyArmor", "BluntWeapon",
-        "LongBlade", "Axe", "Spear", "Athletics", "Enchant",
-        "Destruction", "Alteration", "Illusion", "Conjuration", "Mysticism",
-        "Restoration", "Alchemy", "Unarmored", "Security", "Sneak",
-        "Acrobatics", "LightArmor", "ShortBlade", "Marksman", "Mercantile",
-        "Speechcraft", "HandToHand", 0
-    };
+    static const char* sSkills[] = { "Block", "Armorer", "MediumArmor", "HeavyArmor", "BluntWeapon", "LongBlade", "Axe",
+        "Spear", "Athletics", "Enchant", "Destruction", "Alteration", "Illusion", "Conjuration", "Mysticism",
+        "Restoration", "Alchemy", "Unarmored", "Security", "Sneak", "Acrobatics", "LightArmor", "ShortBlade",
+        "Marksman", "Mercantile", "Speechcraft", "HandToHand", 0 };
 
     // range of magic effects, see ESM::RangeType in <component/esm3/defs.hpp>
-    static const char *sEffectRange[] =
-    {
-        "Self", "Touch", "Target", 0
-    };
+    static const char* sEffectRange[] = { "Self", "Touch", "Target", 0 };
 
     // magic effect names, see ESM::MagicEffect::Effects in <component/esm3/loadmgef.hpp>
-    static const char *sEffectId[] =
-    {
-        "WaterBreathing", "SwiftSwim", "WaterWalking", "Shield", "FireShield",
-        "LightningShield", "FrostShield", "Burden", "Feather", "Jump",
-        "Levitate", "SlowFall", "Lock", "Open", "FireDamage",
-        "ShockDamage", "FrostDamage", "DrainAttribute", "DrainHealth", "DrainMagicka",
-        "DrainFatigue", "DrainSkill", "DamageAttribute", "DamageHealth", "DamageMagicka",
-        "DamageFatigue", "DamageSkill", "Poison", "WeaknessToFire", "WeaknessToFrost",
-        "WeaknessToShock", "WeaknessToMagicka", "WeaknessToCommonDisease", "WeaknessToBlightDisease", "WeaknessToCorprusDisease",
-        "WeaknessToPoison", "WeaknessToNormalWeapons", "DisintegrateWeapon", "DisintegrateArmor", "Invisibility",
-        "Chameleon", "Light", "Sanctuary", "NightEye", "Charm",
-        "Paralyze", "Silence", "Blind", "Sound", "CalmHumanoid",
-        "CalmCreature", "FrenzyHumanoid", "FrenzyCreature", "DemoralizeHumanoid", "DemoralizeCreature",
-        "RallyHumanoid", "RallyCreature", "Dispel", "Soultrap", "Telekinesis",
-        "Mark", "Recall", "DivineIntervention", "AlmsiviIntervention", "DetectAnimal",
-        "DetectEnchantment", "DetectKey", "SpellAbsorption", "Reflect", "CureCommonDisease",
-        "CureBlightDisease", "CureCorprusDisease", "CurePoison", "CureParalyzation", "RestoreAttribute",
-        "RestoreHealth", "RestoreMagicka", "RestoreFatigue", "RestoreSkill", "FortifyAttribute",
-        "FortifyHealth", "FortifyMagicka", "FortifyFatigue", "FortifySkill", "FortifyMaximumMagicka",
-        "AbsorbAttribute", "AbsorbHealth", "AbsorbMagicka", "AbsorbFatigue", "AbsorbSkill",
-        "ResistFire", "ResistFrost", "ResistShock", "ResistMagicka", "ResistCommonDisease",
+    static const char* sEffectId[] = { "WaterBreathing", "SwiftSwim", "WaterWalking", "Shield", "FireShield",
+        "LightningShield", "FrostShield", "Burden", "Feather", "Jump", "Levitate", "SlowFall", "Lock", "Open",
+        "FireDamage", "ShockDamage", "FrostDamage", "DrainAttribute", "DrainHealth", "DrainMagicka", "DrainFatigue",
+        "DrainSkill", "DamageAttribute", "DamageHealth", "DamageMagicka", "DamageFatigue", "DamageSkill", "Poison",
+        "WeaknessToFire", "WeaknessToFrost", "WeaknessToShock", "WeaknessToMagicka", "WeaknessToCommonDisease",
+        "WeaknessToBlightDisease", "WeaknessToCorprusDisease", "WeaknessToPoison", "WeaknessToNormalWeapons",
+        "DisintegrateWeapon", "DisintegrateArmor", "Invisibility", "Chameleon", "Light", "Sanctuary", "NightEye",
+        "Charm", "Paralyze", "Silence", "Blind", "Sound", "CalmHumanoid", "CalmCreature", "FrenzyHumanoid",
+        "FrenzyCreature", "DemoralizeHumanoid", "DemoralizeCreature", "RallyHumanoid", "RallyCreature", "Dispel",
+        "Soultrap", "Telekinesis", "Mark", "Recall", "DivineIntervention", "AlmsiviIntervention", "DetectAnimal",
+        "DetectEnchantment", "DetectKey", "SpellAbsorption", "Reflect", "CureCommonDisease", "CureBlightDisease",
+        "CureCorprusDisease", "CurePoison", "CureParalyzation", "RestoreAttribute", "RestoreHealth", "RestoreMagicka",
+        "RestoreFatigue", "RestoreSkill", "FortifyAttribute", "FortifyHealth", "FortifyMagicka", "FortifyFatigue",
+        "FortifySkill", "FortifyMaximumMagicka", "AbsorbAttribute", "AbsorbHealth", "AbsorbMagicka", "AbsorbFatigue",
+        "AbsorbSkill", "ResistFire", "ResistFrost", "ResistShock", "ResistMagicka", "ResistCommonDisease",
         "ResistBlightDisease", "ResistCorprusDisease", "ResistPoison", "ResistNormalWeapons", "ResistParalysis",
-        "RemoveCurse", "TurnUndead", "SummonScamp", "SummonClannfear", "SummonDaedroth",
-        "SummonDremora", "SummonAncestralGhost", "SummonSkeletalMinion", "SummonBonewalker", "SummonGreaterBonewalker",
-        "SummonBonelord", "SummonWingedTwilight", "SummonHunger", "SummonGoldenSaint", "SummonFlameAtronach",
-        "SummonFrostAtronach", "SummonStormAtronach", "FortifyAttack", "CommandCreature", "CommandHumanoid",
-        "BoundDagger", "BoundLongsword", "BoundMace", "BoundBattleAxe", "BoundSpear",
-        "BoundLongbow", "ExtraSpell", "BoundCuirass", "BoundHelm", "BoundBoots",
-        "BoundShield", "BoundGloves", "Corprus", "Vampirism", "SummonCenturionSphere",
-        "SunDamage", "StuntedMagicka", "SummonFabricant", "SummonWolf", "SummonBear",
-        "SummonBonewolf", "SummonCreature04", "SummonCreature05", 0
-    };
+        "RemoveCurse", "TurnUndead", "SummonScamp", "SummonClannfear", "SummonDaedroth", "SummonDremora",
+        "SummonAncestralGhost", "SummonSkeletalMinion", "SummonBonewalker", "SummonGreaterBonewalker", "SummonBonelord",
+        "SummonWingedTwilight", "SummonHunger", "SummonGoldenSaint", "SummonFlameAtronach", "SummonFrostAtronach",
+        "SummonStormAtronach", "FortifyAttack", "CommandCreature", "CommandHumanoid", "BoundDagger", "BoundLongsword",
+        "BoundMace", "BoundBattleAxe", "BoundSpear", "BoundLongbow", "ExtraSpell", "BoundCuirass", "BoundHelm",
+        "BoundBoots", "BoundShield", "BoundGloves", "Corprus", "Vampirism", "SummonCenturionSphere", "SunDamage",
+        "StuntedMagicka", "SummonFabricant", "SummonWolf", "SummonBear", "SummonBonewolf", "SummonCreature04",
+        "SummonCreature05", 0 };
 
     // see ESM::PartReferenceType in <component/esm3/loadarmo.hpp>
-    static const char *sPartRefType[] =
-    {
-        "Head", "Hair", "Neck", "Cuirass", "Groin",
-        "Skirt", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist",
-        "Shield", "Right Forearm", "Left Forearm", "Right Upperarm", "Left Upperarm",
-        "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee",
-        "Left Knee", "Right Leg", "Left Leg", "Right Pauldron", "Left Pauldron",
-        "Weapon", "Tail", 0
-    };
+    static const char* sPartRefType[] = { "Head", "Hair", "Neck", "Cuirass", "Groin", "Skirt", "Right Hand",
+        "Left Hand", "Right Wrist", "Left Wrist", "Shield", "Right Forearm", "Left Forearm", "Right Upperarm",
+        "Left Upperarm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Leg",
+        "Left Leg", "Right Pauldron", "Left Pauldron", "Weapon", "Tail", 0 };
 
     // see the enums in <component/esm3/aipackage.hpp>
-    static const char *sAiPackageType[] =
-    {
-        "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0
-    };
+    static const char* sAiPackageType[] = { "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0 };
 
-    static const char *sBookType[] =
-    {
-        "Book", "Scroll", 0
-    };
+    static const char* sBookType[] = { "Book", "Scroll", 0 };
 
-    static const char *sEmitterType[] =
-    {
-        "<None>", "Flickering", "Flickering (Slow)", "Pulsing", "Pulsing (Slow)", 0
-    };
+    static const char* sEmitterType[] = { "<None>", "Flickering", "Flickering (Slow)", "Pulsing", "Pulsing (Slow)", 0 };
 
-    const char **getEnumNames (CSMWorld::Columns::ColumnId column)
+    const char** getEnumNames(CSMWorld::Columns::ColumnId column)
     {
         switch (column)
         {
-            case CSMWorld::Columns::ColumnId_Specialisation: return sSpecialisations;
-            case CSMWorld::Columns::ColumnId_Attribute: return sAttributes;
-            case CSMWorld::Columns::ColumnId_SpellType: return sSpellTypes;
-            case CSMWorld::Columns::ColumnId_ApparatusType: return sApparatusTypes;
-            case CSMWorld::Columns::ColumnId_ArmorType: return sArmorTypes;
-            case CSMWorld::Columns::ColumnId_ClothingType: return sClothingTypes;
-            case CSMWorld::Columns::ColumnId_CreatureType: return sCreatureTypes;
-            case CSMWorld::Columns::ColumnId_WeaponType: return sWeaponTypes;
-            case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
-            case CSMWorld::Columns::ColumnId_ValueType: return sVarTypeEnums;
-            case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
-            case CSMWorld::Columns::ColumnId_QuestStatusType: return sQuestStatusTypes;
-            case CSMWorld::Columns::ColumnId_Gender: return sGenderEnums;
-            case CSMWorld::Columns::ColumnId_EnchantmentType: return sEnchantmentTypes;
-            case CSMWorld::Columns::ColumnId_BodyPartType: return sBodyPartTypes;
-            case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
-            case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
-            case CSMWorld::Columns::ColumnId_School: return sSchools;
-            case CSMWorld::Columns::ColumnId_Skill: return sSkills;
-            case CSMWorld::Columns::ColumnId_EffectRange: return sEffectRange;
-            case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
-            case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
-            case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
-            case CSMWorld::Columns::ColumnId_InfoCondFunc: return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings;
-            case CSMWorld::Columns::ColumnId_InfoCondComp: return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings;
-            case CSMWorld::Columns::ColumnId_BookType: return sBookType;
-            case CSMWorld::Columns::ColumnId_EmitterType: return sEmitterType;
+            case CSMWorld::Columns::ColumnId_Specialisation:
+                return sSpecialisations;
+            case CSMWorld::Columns::ColumnId_Attribute:
+                return sAttributes;
+            case CSMWorld::Columns::ColumnId_SpellType:
+                return sSpellTypes;
+            case CSMWorld::Columns::ColumnId_ApparatusType:
+                return sApparatusTypes;
+            case CSMWorld::Columns::ColumnId_ArmorType:
+                return sArmorTypes;
+            case CSMWorld::Columns::ColumnId_ClothingType:
+                return sClothingTypes;
+            case CSMWorld::Columns::ColumnId_CreatureType:
+                return sCreatureTypes;
+            case CSMWorld::Columns::ColumnId_WeaponType:
+                return sWeaponTypes;
+            case CSMWorld::Columns::ColumnId_Modification:
+                return sModificationEnums;
+            case CSMWorld::Columns::ColumnId_ValueType:
+                return sVarTypeEnums;
+            case CSMWorld::Columns::ColumnId_DialogueType:
+                return sDialogueTypeEnums;
+            case CSMWorld::Columns::ColumnId_QuestStatusType:
+                return sQuestStatusTypes;
+            case CSMWorld::Columns::ColumnId_Gender:
+                return sGenderEnums;
+            case CSMWorld::Columns::ColumnId_EnchantmentType:
+                return sEnchantmentTypes;
+            case CSMWorld::Columns::ColumnId_BodyPartType:
+                return sBodyPartTypes;
+            case CSMWorld::Columns::ColumnId_MeshType:
+                return sMeshTypes;
+            case CSMWorld::Columns::ColumnId_SoundGeneratorType:
+                return sSoundGeneratorType;
+            case CSMWorld::Columns::ColumnId_School:
+                return sSchools;
+            case CSMWorld::Columns::ColumnId_Skill:
+                return sSkills;
+            case CSMWorld::Columns::ColumnId_EffectRange:
+                return sEffectRange;
+            case CSMWorld::Columns::ColumnId_EffectId:
+                return sEffectId;
+            case CSMWorld::Columns::ColumnId_PartRefType:
+                return sPartRefType;
+            case CSMWorld::Columns::ColumnId_AiPackageType:
+                return sAiPackageType;
+            case CSMWorld::Columns::ColumnId_InfoCondFunc:
+                return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings;
+            case CSMWorld::Columns::ColumnId_InfoCondComp:
+                return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings;
+            case CSMWorld::Columns::ColumnId_BookType:
+                return sBookType;
+            case CSMWorld::Columns::ColumnId_EmitterType:
+                return sEmitterType;
 
-            default: return 0;
+            default:
+                return 0;
         }
     }
 }
 
-bool CSMWorld::Columns::hasEnums (ColumnId column)
+bool CSMWorld::Columns::hasEnums(ColumnId column)
 {
-    return getEnumNames (column)!=0 || column==ColumnId_RecordType;
+    return getEnumNames(column) != 0 || column == ColumnId_RecordType;
 }
 
-std::vector<std::pair<int,std::string>>CSMWorld::Columns::getEnums (ColumnId column)
+std::vector<std::pair<int, std::string>> CSMWorld::Columns::getEnums(ColumnId column)
 {
-    std::vector<std::pair<int,std::string>> enums;
+    std::vector<std::pair<int, std::string>> enums;
 
-    if (const char **table = getEnumNames (column))
-        for (int i=0; table[i]; ++i)
+    if (const char** table = getEnumNames(column))
+        for (int i = 0; table[i]; ++i)
             enums.emplace_back(i, table[i]);
-    else if (column==ColumnId_BloodType)
+    else if (column == ColumnId_BloodType)
     {
-        for (int i=0; i<8; i++)
+        for (int i = 0; i < 8; i++)
         {
             std::string_view bloodName = Fallback::Map::getString("Blood_Texture_Name_" + std::to_string(i));
             if (!bloodName.empty())
                 enums.emplace_back(i, bloodName);
         }
     }
-    else if (column==ColumnId_RecordType)
+    else if (column == ColumnId_RecordType)
     {
         enums.emplace_back(UniversalId::Type_None, ""); // none
 
-        for (int i=UniversalId::Type_None+1; i<UniversalId::NumberOfTypes; ++i)
-            enums.emplace_back (i, UniversalId (static_cast<UniversalId::Type> (i)).getTypeName());
+        for (int i = UniversalId::Type_None + 1; i < UniversalId::NumberOfTypes; ++i)
+            enums.emplace_back(i, UniversalId(static_cast<UniversalId::Type>(i)).getTypeName());
     }
 
     return enums;

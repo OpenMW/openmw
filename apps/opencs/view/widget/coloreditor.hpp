@@ -13,42 +13,42 @@ namespace CSVWidget
 
     class ColorEditor : public QPushButton
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QColor mColor;
-            ColorPickerPopup *mColorPicker;
-            bool mPopupOnStart;
+        QColor mColor;
+        ColorPickerPopup* mColorPicker;
+        bool mPopupOnStart;
 
-            QPoint calculatePopupPosition();
+        QPoint calculatePopupPosition();
 
-        public:
-            ColorEditor(const QColor &color, QWidget *parent = nullptr, const bool popupOnStart = false);
-            ColorEditor(const int colorInt, QWidget *parent = nullptr, const bool popupOnStart = false);
+    public:
+        ColorEditor(const QColor& color, QWidget* parent = nullptr, const bool popupOnStart = false);
+        ColorEditor(const int colorInt, QWidget* parent = nullptr, const bool popupOnStart = false);
 
-            QColor color() const;
+        QColor color() const;
 
-            /// \return Color RGB value encoded in an int.
-            int colorInt() const;
+        /// \return Color RGB value encoded in an int.
+        int colorInt() const;
 
-            void setColor(const QColor &color);
+        void setColor(const QColor& color);
 
-            /// \brief Set color using given int value.
-            /// \param colorInt RGB color value encoded as an integer.
-            void setColor(const int colorInt);
+        /// \brief Set color using given int value.
+        /// \param colorInt RGB color value encoded as an integer.
+        void setColor(const int colorInt);
 
-        protected:
-            void paintEvent(QPaintEvent *event) override;
-            void showEvent(QShowEvent *event) override;
+    protected:
+        void paintEvent(QPaintEvent* event) override;
+        void showEvent(QShowEvent* event) override;
 
-        private:
-            ColorEditor(QWidget *parent = nullptr, const bool popupOnStart = false);
+    private:
+        ColorEditor(QWidget* parent = nullptr, const bool popupOnStart = false);
 
-        private slots:
-            void showPicker();
-            void pickerColorChanged(const QColor &color);
+    private slots:
+        void showPicker();
+        void pickerColorChanged(const QColor& color);
 
-        signals:
-            void pickingFinished();
+    signals:
+        void pickingFinished();
     };
 }
 

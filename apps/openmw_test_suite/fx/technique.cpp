@@ -1,17 +1,17 @@
 #include "gmock/gmock.h"
 #include <gtest/gtest.h>
 
-#include <components/settings/settings.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/fx/technique.hpp>
 #include <components/resource/imagemanager.hpp>
-#include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../testing_util.hpp"
 
 namespace
 {
 
-TestingOpenMW::VFSTestFile technique_properties(R"(
+    TestingOpenMW::VFSTestFile technique_properties(R"(
     fragment main {}
     vertex main {}
     technique {
@@ -27,7 +27,7 @@ TestingOpenMW::VFSTestFile technique_properties(R"(
     }
 )");
 
-TestingOpenMW::VFSTestFile rendertarget_properties{R"(
+    TestingOpenMW::VFSTestFile rendertarget_properties{ R"(
     render_target rendertarget {
         width_ratio = 0.5;
         height_ratio = 0.5;
@@ -51,10 +51,9 @@ TestingOpenMW::VFSTestFile rendertarget_properties{R"(
     }
     fragment main { }
     technique { passes = downsample2x, main; }
-)"};
+)" };
 
-
-TestingOpenMW::VFSTestFile uniform_properties{R"(
+    TestingOpenMW::VFSTestFile uniform_properties{ R"(
     uniform_vec4 uVec4 {
         default = vec4(0,0,0,0);
         min = vec4(0,1,0,0);
@@ -66,24 +65,22 @@ TestingOpenMW::VFSTestFile uniform_properties{R"(
     }
     fragment main { }
     technique { passes = main; }
-)"};
+)" };
 
-
-TestingOpenMW::VFSTestFile missing_sampler_source{R"(
+    TestingOpenMW::VFSTestFile missing_sampler_source{ R"(
     sampler_1d mysampler1d { }
     fragment main { }
     technique { passes = main; }
-)"};
+)" };
 
-TestingOpenMW::VFSTestFile repeated_shared_block{R"(
+    TestingOpenMW::VFSTestFile repeated_shared_block{ R"(
     shared {
         float myfloat = 1.0;
     }
     shared {}
     fragment main { }
     technique { passes = main; }
-)"};
-
+)" };
 
     using namespace testing;
     using namespace fx;
@@ -96,11 +93,11 @@ TestingOpenMW::VFSTestFile repeated_shared_block{R"(
 
         TechniqueTest()
             : mVFS(TestingOpenMW::createTestVFS({
-                {"shaders/technique_properties.omwfx", &technique_properties},
-                {"shaders/rendertarget_properties.omwfx", &rendertarget_properties},
-                {"shaders/uniform_properties.omwfx", &uniform_properties},
-                {"shaders/missing_sampler_source.omwfx", &missing_sampler_source},
-                {"shaders/repeated_shared_block.omwfx", &repeated_shared_block},
+                { "shaders/technique_properties.omwfx", &technique_properties },
+                { "shaders/rendertarget_properties.omwfx", &rendertarget_properties },
+                { "shaders/uniform_properties.omwfx", &uniform_properties },
+                { "shaders/missing_sampler_source.omwfx", &missing_sampler_source },
+                { "shaders/repeated_shared_block.omwfx", &repeated_shared_block },
             }))
             , mImageManager(mVFS.get())
         {
@@ -118,10 +115,7 @@ TestingOpenMW::VFSTestFile repeated_shared_block{R"(
 
     TEST_F(TechniqueTest, technique_properties)
     {
-        std::unordered_set<std::string> targetExtensions = {
-            "GL_EXT_gpu_shader4",
-            "GL_ARB_uniform_buffer_object"
-        };
+        std::unordered_set<std::string> targetExtensions = { "GL_EXT_gpu_shader4", "GL_ARB_uniform_buffer_object" };
 
         compile("technique_properties");
 
@@ -173,9 +167,9 @@ TestingOpenMW::VFSTestFile repeated_shared_block{R"(
 
         EXPECT_TRUE(uniform->mStatic);
         EXPECT_DOUBLE_EQ(uniform->mStep, 0.5);
-        EXPECT_EQ(uniform->getDefault<osg::Vec4f>(), osg::Vec4f(0,0,0,0));
-        EXPECT_EQ(uniform->getMin<osg::Vec4f>(), osg::Vec4f(0,1,0,0));
-        EXPECT_EQ(uniform->getMax<osg::Vec4f>(), osg::Vec4f(0,0,1,0));
+        EXPECT_EQ(uniform->getDefault<osg::Vec4f>(), osg::Vec4f(0, 0, 0, 0));
+        EXPECT_EQ(uniform->getMin<osg::Vec4f>(), osg::Vec4f(0, 1, 0, 0));
+        EXPECT_EQ(uniform->getMax<osg::Vec4f>(), osg::Vec4f(0, 0, 1, 0));
         EXPECT_EQ(uniform->mHeader, "header");
         EXPECT_EQ(uniform->mDescription, "description");
         EXPECT_EQ(uniform->mName, "uVec4");

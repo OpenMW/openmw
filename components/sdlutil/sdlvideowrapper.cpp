@@ -10,7 +10,7 @@
 namespace SDLUtil
 {
 
-    VideoWrapper::VideoWrapper(SDL_Window *window, osg::ref_ptr<osgViewer::Viewer> viewer)
+    VideoWrapper::VideoWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer)
         : mWindow(window)
         , mViewer(viewer)
         , mGamma(1.f)
@@ -55,13 +55,15 @@ namespace SDLUtil
         Uint16 red[256], green[256], blue[256];
         for (int i = 0; i < 256; i++)
         {
-            float k = i/256.0f;
+            float k = i / 256.0f;
             k = (k - 0.5f) * contrast + 0.5f;
-            k = pow(k, 1.f/gamma);
+            k = pow(k, 1.f / gamma);
             k *= 256;
-            float value = k*256;
-            if (value > 65535)  value = 65535;
-            else if (value < 0) value = 0;
+            float value = k * 256;
+            if (value > 65535)
+                value = 65535;
+            else if (value < 0)
+                value = 0;
 
             red[i] = green[i] = blue[i] = static_cast<Uint16>(value);
         }
@@ -76,9 +78,9 @@ namespace SDLUtil
         if (SDL_GetWindowFlags(mWindow) & SDL_WINDOW_MAXIMIZED)
             SDL_RestoreWindow(mWindow);
 
-        int w,h;
+        int w, h;
         SDL_GetWindowSize(mWindow, &w, &h);
-        int dw,dh;
+        int dw, dh;
         SDL_GL_GetDrawableSize(mWindow, &dw, &dh);
 
         if (windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::WindowedFullscreen)
@@ -88,7 +90,8 @@ namespace SDLUtil
             mode.w = width / (dw / w);
             mode.h = height / (dh / h);
             SDL_SetWindowDisplayMode(mWindow, &mode);
-            SDL_SetWindowFullscreen(mWindow, windowMode == Settings::WindowMode::Fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP);
+            SDL_SetWindowFullscreen(mWindow,
+                windowMode == Settings::WindowMode::Fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP);
         }
         else
         {

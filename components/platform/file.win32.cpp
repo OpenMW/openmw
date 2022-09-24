@@ -1,14 +1,15 @@
 #include "file.hpp"
 
-#include <components/windows.hpp>
-#include <string>
-#include <stdexcept>
 #include <boost/locale.hpp>
 #include <cassert>
+#include <components/windows.hpp>
+#include <stdexcept>
+#include <string>
 
 #include <components/files/conversion.hpp>
 
-namespace Platform::File {
+namespace Platform::File
+{
 
     static auto getNativeHandle(Handle handle)
     {
@@ -33,7 +34,8 @@ namespace Platform::File {
         HANDLE handle = CreateFileW(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
         if (handle == INVALID_HANDLE_VALUE)
         {
-            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename) + "' for reading: " + std::to_string(GetLastError()));
+            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename)
+                + "' for reading: " + std::to_string(GetLastError()));
         }
         return static_cast<Handle>(reinterpret_cast<intptr_t>(handle));
     }
@@ -49,7 +51,8 @@ namespace Platform::File {
         const auto nativeHandle = getNativeHandle(handle);
         const auto nativeSeekType = getNativeSeekType(type);
 
-        if (SetFilePointer(nativeHandle, static_cast<LONG>(position), nullptr, nativeSeekType) == INVALID_SET_FILE_POINTER)
+        if (SetFilePointer(nativeHandle, static_cast<LONG>(position), nullptr, nativeSeekType)
+            == INVALID_SET_FILE_POINTER)
         {
             if (auto errCode = GetLastError(); errCode != ERROR_SUCCESS)
             {
@@ -91,7 +94,8 @@ namespace Platform::File {
         DWORD bytesRead{};
 
         if (!ReadFile(nativeHandle, data, static_cast<DWORD>(size), &bytesRead, nullptr))
-            throw std::runtime_error(std::string("A read operation on a file failed: ") + std::to_string(GetLastError()));
+            throw std::runtime_error(
+                std::string("A read operation on a file failed: ") + std::to_string(GetLastError()));
 
         return bytesRead;
     }

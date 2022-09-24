@@ -38,7 +38,8 @@ namespace ESSImport
         float mDynamic[3][2];
         unsigned char mUnknown3[16];
         float mAttributes[8][2];
-        float mMagicEffects[27]; // Effect attributes: https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attributes
+        float mMagicEffects[27]; // Effect attributes:
+                                 // https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attributes
         unsigned char mUnknown4[4];
         unsigned int mGoldPool;
         unsigned char mCountDown; // seen the same value as in ACSC.mCorpseClearCountdown, maybe

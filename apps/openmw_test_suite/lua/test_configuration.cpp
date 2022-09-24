@@ -60,7 +60,8 @@ namespace
         EXPECT_THAT(asVector(conf.getPlayerConf()), ElementsAre(Pair(1, "")));
         EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, "something", ESM::RefNum())), ElementsAre());
         EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "something", ESM::RefNum())), ElementsAre(Pair(1, "")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, "something", ESM::RefNum())), ElementsAre(Pair(1, ""), Pair(3, "")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, "something", ESM::RefNum())),
+            ElementsAre(Pair(1, ""), Pair(3, "")));
 
         // Check that initialization cleans old data
         cfg = ESM::LuaScriptsCfg();
@@ -72,9 +73,8 @@ namespace
     {
         ESM::LuaScriptsCfg cfg;
         EXPECT_ERROR(LuaUtil::parseOMWScripts(cfg, "GLOBAL: something"),
-                     "Lua script should have suffix '.lua', got: GLOBAL: something");
-        EXPECT_ERROR(LuaUtil::parseOMWScripts(cfg, "something.lua"),
-                     "No flags found in: something.lua");
+            "Lua script should have suffix '.lua', got: GLOBAL: something");
+        EXPECT_ERROR(LuaUtil::parseOMWScripts(cfg, "something.lua"), "No flags found in: something.lua");
 
         cfg.mScripts.clear();
         EXPECT_NO_THROW(LuaUtil::parseOMWScripts(cfg, "GLOBAL, PLAYER: something.lua"));
@@ -90,9 +90,9 @@ namespace
         script1.mInitializationData = "data1";
         script1.mFlags = ESM::LuaScriptCfg::sPlayer;
         script1.mTypes.push_back(ESM::REC_CREA);
-        script1.mRecords.push_back({true, "record1", "dataRecord1"});
-        script1.mRefs.push_back({true, 2, 3, ""});
-        script1.mRefs.push_back({true, 2, 4, ""});
+        script1.mRecords.push_back({ true, "record1", "dataRecord1" });
+        script1.mRefs.push_back({ true, 2, 3, "" });
+        script1.mRefs.push_back({ true, 2, 4, "" });
 
         ESM::LuaScriptCfg& script2 = cfg.mScripts.emplace_back();
         script2.mScriptPath = "Script2.lua";
@@ -103,28 +103,31 @@ namespace
         script1Extra.mScriptPath = "script1.LUA";
         script1Extra.mFlags = ESM::LuaScriptCfg::sCustom | ESM::LuaScriptCfg::sMerge;
         script1Extra.mTypes.push_back(ESM::REC_NPC_);
-        script1Extra.mRecords.push_back({false, "rat", ""});
-        script1Extra.mRecords.push_back({true, "record2", ""});
-        script1Extra.mRefs.push_back({true, 3, 5, "dataRef35"});
-        script1Extra.mRefs.push_back({false, 2, 3, ""});
+        script1Extra.mRecords.push_back({ false, "rat", "" });
+        script1Extra.mRecords.push_back({ true, "record2", "" });
+        script1Extra.mRefs.push_back({ true, 3, 5, "dataRef35" });
+        script1Extra.mRefs.push_back({ false, 2, 3, "" });
 
         LuaUtil::ScriptsConfiguration conf;
         conf.init(cfg);
         ASSERT_EQ(conf.size(), 2);
         EXPECT_EQ(LuaUtil::scriptCfgToString(conf[0]),
-                  "CUSTOM PLAYER CREATURE NPC : Script1.lua ; data 5 bytes ; 3 records ; 4 objects");
+            "CUSTOM PLAYER CREATURE NPC : Script1.lua ; data 5 bytes ; 3 records ; 4 objects");
         EXPECT_EQ(LuaUtil::scriptCfgToString(conf[1]), "CUSTOM CONTAINER : Script2.lua");
 
         EXPECT_THAT(asVector(conf.getPlayerConf()), ElementsAre(Pair(0, "data1")));
         EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, "something", ESM::RefNum())), ElementsAre(Pair(1, "")));
         EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, "guar", ESM::RefNum())), ElementsAre(Pair(0, "data1")));
         EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, "rat", ESM::RefNum())), ElementsAre());
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_DOOR, "record1", ESM::RefNum())), ElementsAre(Pair(0, "dataRecord1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_DOOR, "record2", ESM::RefNum())), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", {1, 1})), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", {2, 3})), ElementsAre());
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", {3, 5})), ElementsAre(Pair(0, "dataRef35")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, "record4", {2, 4})), ElementsAre(Pair(0, "data1"), Pair(1, "")));
+        EXPECT_THAT(
+            asVector(conf.getLocalConf(ESM::REC_DOOR, "record1", ESM::RefNum())), ElementsAre(Pair(0, "dataRecord1")));
+        EXPECT_THAT(
+            asVector(conf.getLocalConf(ESM::REC_DOOR, "record2", ESM::RefNum())), ElementsAre(Pair(0, "data1")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", { 1, 1 })), ElementsAre(Pair(0, "data1")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", { 2, 3 })), ElementsAre());
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", { 3, 5 })), ElementsAre(Pair(0, "dataRef35")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, "record4", { 2, 4 })),
+            ElementsAre(Pair(0, "data1"), Pair(1, "")));
 
         ESM::LuaScriptCfg& script3 = cfg.mScripts.emplace_back();
         script3.mScriptPath = "script1.lua";
@@ -151,7 +154,7 @@ namespace
             sol::table data(lua, sol::create);
             data["number"] = 5;
             data["string"] = "some value";
-            data["fargoth"] = ESM::RefNum{128964, 1};
+            data["fargoth"] = ESM::RefNum{ 128964, 1 };
             luaData = LuaUtil::serialize(data, &serializer);
         }
         {
@@ -166,10 +169,10 @@ namespace
             script.mFlags = ESM::LuaScriptCfg::sMerge;
             script.mTypes.push_back(ESM::REC_DOOR);
             script.mTypes.push_back(ESM::REC_MISC);
-            script.mRecords.push_back({true, "rat", luaData});
-            script.mRecords.push_back({false, "chargendoorjournal", ""});
-            script.mRefs.push_back({true, 128964, 1, ""});
-            script.mRefs.push_back({true, 128962, 1, luaData});
+            script.mRecords.push_back({ true, "rat", luaData });
+            script.mRecords.push_back({ false, "chargendoorjournal", "" });
+            script.mRefs.push_back({ true, 128964, 1, "" });
+            script.mRefs.push_back({ true, 128962, 1, luaData });
         }
 
         std::stringstream stream;
@@ -209,15 +212,18 @@ namespace
             {
                 EXPECT_EQ(loadedCfg.mScripts[i].mRecords[j].mAttach, cfg.mScripts[i].mRecords[j].mAttach);
                 EXPECT_EQ(loadedCfg.mScripts[i].mRecords[j].mRecordId, cfg.mScripts[i].mRecords[j].mRecordId);
-                EXPECT_EQ(loadedCfg.mScripts[i].mRecords[j].mInitializationData, cfg.mScripts[i].mRecords[j].mInitializationData);
+                EXPECT_EQ(loadedCfg.mScripts[i].mRecords[j].mInitializationData,
+                    cfg.mScripts[i].mRecords[j].mInitializationData);
             }
             ASSERT_EQ(loadedCfg.mScripts[i].mRefs.size(), cfg.mScripts[i].mRefs.size());
             for (size_t j = 0; j < cfg.mScripts[i].mRefs.size(); ++j)
             {
                 EXPECT_EQ(loadedCfg.mScripts[i].mRefs[j].mAttach, cfg.mScripts[i].mRefs[j].mAttach);
                 EXPECT_EQ(loadedCfg.mScripts[i].mRefs[j].mRefnumIndex, cfg.mScripts[i].mRefs[j].mRefnumIndex);
-                EXPECT_EQ(loadedCfg.mScripts[i].mRefs[j].mRefnumContentFile, cfg.mScripts[i].mRefs[j].mRefnumContentFile);
-                EXPECT_EQ(loadedCfg.mScripts[i].mRefs[j].mInitializationData, cfg.mScripts[i].mRefs[j].mInitializationData);
+                EXPECT_EQ(
+                    loadedCfg.mScripts[i].mRefs[j].mRefnumContentFile, cfg.mScripts[i].mRefs[j].mRefnumContentFile);
+                EXPECT_EQ(
+                    loadedCfg.mScripts[i].mRefs[j].mInitializationData, cfg.mScripts[i].mRefs[j].mInitializationData);
             }
         }
 
@@ -234,7 +240,8 @@ namespace
         EXPECT_EQ(loadedCfg.mScripts[1].mRefs[0].mRefnumIndex, cfg.mScripts[1].mRefs[0].mRefnumIndex);
         EXPECT_EQ(loadedCfg.mScripts[1].mRefs[0].mRefnumContentFile, 2);
         {
-            sol::table data = LuaUtil::deserialize(lua.lua_state(), loadedCfg.mScripts[1].mRefs[1].mInitializationData, &serializer);
+            sol::table data = LuaUtil::deserialize(
+                lua.lua_state(), loadedCfg.mScripts[1].mRefs[1].mInitializationData, &serializer);
             ESM::RefNum adjustedRef = data["fargoth"].get<ESM::RefNum>();
             EXPECT_EQ(adjustedRef.mIndex, 128964u);
             EXPECT_EQ(adjustedRef.mContentFile, 2);

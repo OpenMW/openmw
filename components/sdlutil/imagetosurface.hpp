@@ -12,10 +12,10 @@ namespace osg
 
 namespace SDLUtil
 {
-    typedef std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> SurfaceUniquePtr;
+    typedef std::unique_ptr<SDL_Surface, void (*)(SDL_Surface*)> SurfaceUniquePtr;
 
     /// Convert an osg::Image to an SDL_Surface.
-    SurfaceUniquePtr imageToSurface(osg::Image* image, bool flip=false);
+    SurfaceUniquePtr imageToSurface(osg::Image* image, bool flip = false);
 
 }
 

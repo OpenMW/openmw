@@ -6,8 +6,8 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>
 
-#include "windowbase.hpp"
 #include "referenceinterface.hpp"
+#include "windowbase.hpp"
 
 namespace Gui
 {
@@ -33,8 +33,8 @@ namespace MWGui
         void setSkill(int skill);
         void setAttribute(int attribute);
 
-        void newEffect (const ESM::MagicEffect* effect);
-        void editEffect (ESM::ENAMstruct effect);
+        void newEffect(const ESM::MagicEffect* effect);
+        void editEffect(ESM::ENAMstruct effect);
         typedef MyGUI::delegates::CMultiDelegate1<ESM::ENAMstruct> EventHandle_Effect;
 
         EventHandle_Effect eventEffectAdded;
@@ -70,15 +70,15 @@ namespace MWGui
         bool mEditing;
 
     protected:
-        void onRangeButtonClicked (MyGUI::Widget* sender);
-        void onDeleteButtonClicked (MyGUI::Widget* sender);
-        void onOkButtonClicked (MyGUI::Widget* sender);
-        void onCancelButtonClicked (MyGUI::Widget* sender);
+        void onRangeButtonClicked(MyGUI::Widget* sender);
+        void onDeleteButtonClicked(MyGUI::Widget* sender);
+        void onOkButtonClicked(MyGUI::Widget* sender);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
 
-        void onMagnitudeMinChanged (MyGUI::ScrollBar* sender, size_t pos);
-        void onMagnitudeMaxChanged (MyGUI::ScrollBar* sender, size_t pos);
-        void onDurationChanged (MyGUI::ScrollBar* sender, size_t pos);
-        void onAreaChanged (MyGUI::ScrollBar* sender, size_t pos);
+        void onMagnitudeMinChanged(MyGUI::ScrollBar* sender, size_t pos);
+        void onMagnitudeMaxChanged(MyGUI::ScrollBar* sender, size_t pos);
+        void onDurationChanged(MyGUI::ScrollBar* sender, size_t pos);
+        void onAreaChanged(MyGUI::ScrollBar* sender, size_t pos);
         void setMagicEffect(const ESM::MagicEffect* effect);
 
         void updateBoxes();
@@ -91,7 +91,6 @@ namespace MWGui
 
         bool mConstantEffect;
     };
-
 
     class EffectEditorBase
     {
@@ -128,7 +127,7 @@ namespace MWGui
         void onEffectModified(ESM::ENAMstruct effect);
         void onEffectRemoved(ESM::ENAMstruct effect);
 
-        void onAvailableEffectClicked (MyGUI::Widget* sender);
+        void onAvailableEffectClicked(MyGUI::Widget* sender);
 
         void onAttributeOrSkillCancel();
         void onSelectAttribute();
@@ -139,9 +138,9 @@ namespace MWGui
         void updateEffectsView();
 
         void startEditing();
-        void setWidgets (Gui::MWList* availableEffectsList, MyGUI::ScrollView* usedEffectsView);
+        void setWidgets(Gui::MWList* availableEffectsList, MyGUI::ScrollView* usedEffectsView);
 
-        virtual void notifyEffectsChanged () {}
+        virtual void notifyEffectsChanged() {}
 
     private:
         Type mType;
@@ -162,8 +161,8 @@ namespace MWGui
     protected:
         void onReferenceUnavailable() override;
 
-        void onCancelButtonClicked (MyGUI::Widget* sender);
-        void onBuyButtonClicked (MyGUI::Widget* sender);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onBuyButtonClicked(MyGUI::Widget* sender);
         void onAccept(MyGUI::EditBox* sender);
 
         void notifyEffectsChanged() override;
@@ -176,7 +175,6 @@ namespace MWGui
         MyGUI::TextBox* mPriceLabel;
 
         ESM::Spell mSpell;
-
     };
 
 }

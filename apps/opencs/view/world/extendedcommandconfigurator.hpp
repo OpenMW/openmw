@@ -28,50 +28,54 @@ namespace CSVWorld
 {
     class ExtendedCommandConfigurator : public QWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
-            enum Mode { Mode_None, Mode_Delete, Mode_Revert };
-        
-        private:
-            typedef std::map<QCheckBox *, CSMWorld::UniversalId> CheckBoxMap;
+    public:
+        enum Mode
+        {
+            Mode_None,
+            Mode_Delete,
+            Mode_Revert
+        };
 
-            QPushButton *mPerformButton;
-            QPushButton *mCancelButton;
-            QGroupBox *mTypeGroup;
-            CheckBoxMap mTypeCheckBoxes;
-            int mNumUsedCheckBoxes;
-            int mNumChecked;
+    private:
+        typedef std::map<QCheckBox*, CSMWorld::UniversalId> CheckBoxMap;
 
-            Mode mMode;
-            CSMWorld::CommandDispatcher *mCommandDispatcher;
-            CSMWorld::Data &mData;
-            std::vector<std::string> mSelectedIds;
-            
-            bool mEditLock;
+        QPushButton* mPerformButton;
+        QPushButton* mCancelButton;
+        QGroupBox* mTypeGroup;
+        CheckBoxMap mTypeCheckBoxes;
+        int mNumUsedCheckBoxes;
+        int mNumChecked;
 
-            void setupGroupLayout();
-            void setupCheckBoxes(const std::vector<CSMWorld::UniversalId> &types);
-            void lockWidgets(bool locked);
+        Mode mMode;
+        CSMWorld::CommandDispatcher* mCommandDispatcher;
+        CSMWorld::Data& mData;
+        std::vector<std::string> mSelectedIds;
 
-        public:
-            ExtendedCommandConfigurator(CSMDoc::Document &document,
-                                        const CSMWorld::UniversalId &id,
-                                        QWidget *parent = nullptr);
+        bool mEditLock;
 
-            void configure(Mode mode, const std::vector<std::string> &selectedIds);
-            void setEditLock(bool locked);
+        void setupGroupLayout();
+        void setupCheckBoxes(const std::vector<CSMWorld::UniversalId>& types);
+        void lockWidgets(bool locked);
 
-        protected:
-            void resizeEvent(QResizeEvent *event) override;
+    public:
+        ExtendedCommandConfigurator(
+            CSMDoc::Document& document, const CSMWorld::UniversalId& id, QWidget* parent = nullptr);
 
-        private slots:
-            void performExtendedCommand();
-            void checkBoxStateChanged(int state);
-            void dataIdListChanged();
+        void configure(Mode mode, const std::vector<std::string>& selectedIds);
+        void setEditLock(bool locked);
 
-        signals:
-            void done();
+    protected:
+        void resizeEvent(QResizeEvent* event) override;
+
+    private slots:
+        void performExtendedCommand();
+        void checkBoxStateChanged(int state);
+        void dataIdListChanged();
+
+    signals:
+        void done();
     };
 }
 

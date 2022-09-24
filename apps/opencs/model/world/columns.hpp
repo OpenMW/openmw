@@ -383,14 +383,14 @@ namespace CSMWorld
             ColumnId_Skill7 = 0x50006
         };
 
-        std::string getName (ColumnId column);
+        std::string getName(ColumnId column);
 
-        int getId (const std::string& name);
+        int getId(const std::string& name);
         ///< Will return -1 for an invalid name.
 
-        bool hasEnums (ColumnId column);
+        bool hasEnums(ColumnId column);
 
-        std::vector<std::pair<int,std::string>> getEnums (ColumnId column);
+        std::vector<std::pair<int, std::string>> getEnums(ColumnId column);
         ///< Returns an empty vector, if \a column isn't an enum type column.
     }
 }

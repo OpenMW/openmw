@@ -26,9 +26,9 @@
 */
 #include "loadscpt.hpp"
 
-#include <stdexcept>
-#include <iostream> // FIXME: debugging only
 #include <iomanip>
+#include <iostream> // FIXME: debugging only
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -37,7 +37,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     static ScriptLocalVariableData localVar;
 
@@ -53,7 +53,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_SCHR:
             {
-    // For debugging only
+                // For debugging only
 #if 0
                 unsigned char mDataBuf[256/*bufSize*/];
                 reader.get(mDataBuf, subHdr.dataSize);
@@ -76,13 +76,14 @@ void ESM4::Script::load(ESM4::Reader& reader)
 #endif
                 break;
             }
-            case ESM4::SUB_SCTX: reader.getString(mScript.scriptSource);
-                //if (mEditorId == "CTrapLogs01SCRIPT")
-                    //std::cout << mScript.scriptSource << std::endl;
+            case ESM4::SUB_SCTX:
+                reader.getString(mScript.scriptSource);
+                // if (mEditorId == "CTrapLogs01SCRIPT")
+                // std::cout << mScript.scriptSource << std::endl;
                 break;
             case ESM4::SUB_SCDA: // compiled script data
             {
-    // For debugging only
+                // For debugging only
 #if 0
                 if (subHdr.dataSize >= 4096)
                 {
@@ -114,7 +115,9 @@ void ESM4::Script::load(ESM4::Reader& reader)
 #endif
                 break;
             }
-            case ESM4::SUB_SCRO: reader.getFormId(mScript.globReference); break;
+            case ESM4::SUB_SCRO:
+                reader.getFormId(mScript.globReference);
+                break;
             case ESM4::SUB_SLSD:
             {
                 localVar.clear();
@@ -146,19 +149,19 @@ void ESM4::Script::load(ESM4::Reader& reader)
                 break;
             }
             default:
-                //std::cout << "SCPT " << ESM::printName(subHdr.typeId) << " skipping..."
-                          //<< subHdr.dataSize << std::endl;
-                //reader.skipSubRecordData();
-                //break;
+                // std::cout << "SCPT " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
+                // reader.skipSubRecordData();
+                // break;
                 throw std::runtime_error("ESM4::SCPT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }
 
-//void ESM4::Script::save(ESM4::Writer& writer) const
+// void ESM4::Script::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Script::blank()
+// void ESM4::Script::blank()
 //{
-//}
+// }

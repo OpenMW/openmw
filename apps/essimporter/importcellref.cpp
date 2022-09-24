@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void CellRef::load(ESM::ESMReader &esm)
+    void CellRef::load(ESM::ESMReader& esm)
     {
         blank();
 
@@ -13,7 +13,7 @@ namespace ESSImport
 
         // this is required since openmw supports more than 255 content files
         int pluginIndex = (mRefNum.mIndex & 0xff000000) >> 24;
-        mRefNum.mContentFile = pluginIndex-1;
+        mRefNum.mContentFile = pluginIndex - 1;
         mRefNum.mIndex &= 0x00ffffff;
 
         mIndexedRefId = esm.getHNString("NAME");
@@ -39,7 +39,7 @@ namespace ESSImport
             esm.skipHSub();
 
         if (esm.isNextSub("MNAM"))
-           esm.skipHSub();
+            esm.skipHSub();
 
         bool isDeleted = false;
         ESM::CellRef::loadData(esm, isDeleted);
@@ -123,10 +123,10 @@ namespace ESSImport
 
         // FIXME: not all actors have this, add flag
         if (esm.isNextSub("CHRD")) // npc only
-            esm.getHExact(mActorData.mSkills, 27*2*sizeof(int));
+            esm.getHExact(mActorData.mSkills, 27 * 2 * sizeof(int));
 
         if (esm.isNextSub("CRED")) // creature only
-            esm.getHExact(mActorData.mCombatStats, 3*2*sizeof(int));
+            esm.getHExact(mActorData.mCombatStats, 3 * 2 * sizeof(int));
 
         mActorData.mSCRI.load(esm);
 
@@ -146,7 +146,7 @@ namespace ESSImport
             // probably some identifier for the creature that has been spawned?
             unsigned char lvcr;
             esm.getHT(lvcr);
-            //std::cout << "LVCR: " << (int)lvcr << std::endl;
+            // std::cout << "LVCR: " << (int)lvcr << std::endl;
         }
 
         mEnabled = true;

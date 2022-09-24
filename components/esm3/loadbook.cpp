@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Book::load(ESMReader &esm, bool &isDeleted)
+    void Book::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -58,7 +58,7 @@ namespace ESM
         if (!hasData && !isDeleted)
             esm.fail("Missing BKDT subrecord");
     }
-    void Book::save(ESMWriter &esm, bool isDeleted) const
+    void Book::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

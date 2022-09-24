@@ -15,11 +15,11 @@ namespace MWSound
     }
 
     VolumeSettings::VolumeSettings()
-        : mMasterVolume(clamp(Settings::Manager::getFloat("master volume", "Sound"))),
-          mSFXVolume(clamp(Settings::Manager::getFloat("sfx volume", "Sound"))),
-          mMusicVolume(clamp(Settings::Manager::getFloat("music volume", "Sound"))),
-          mVoiceVolume(clamp(Settings::Manager::getFloat("voice volume", "Sound"))),
-          mFootstepsVolume(clamp(Settings::Manager::getFloat("footsteps volume", "Sound")))
+        : mMasterVolume(clamp(Settings::Manager::getFloat("master volume", "Sound")))
+        , mSFXVolume(clamp(Settings::Manager::getFloat("sfx volume", "Sound")))
+        , mMusicVolume(clamp(Settings::Manager::getFloat("music volume", "Sound")))
+        , mVoiceVolume(clamp(Settings::Manager::getFloat("voice volume", "Sound")))
+        , mFootstepsVolume(clamp(Settings::Manager::getFloat("footsteps volume", "Sound")))
     {
     }
 
@@ -27,7 +27,7 @@ namespace MWSound
     {
         float volume = mMasterVolume;
 
-        switch(type)
+        switch (type)
         {
             case Type::Sfx:
                 volume *= mSFXVolume;

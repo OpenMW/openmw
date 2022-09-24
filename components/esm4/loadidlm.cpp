@@ -36,7 +36,7 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
 
@@ -45,8 +45,12 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_IDLF: reader.get(mIdleFlags);       break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_IDLF:
+                reader.get(mIdleFlags);
+                break;
             case ESM4::SUB_IDLC:
             {
                 if (subHdr.dataSize != 1) // FO3 can have 4?
@@ -58,7 +62,9 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                 reader.get(mIdleCount);
                 break;
             }
-            case ESM4::SUB_IDLT: reader.get(mIdleTimer);       break;
+            case ESM4::SUB_IDLT:
+                reader.get(mIdleTimer);
+                break;
             case ESM4::SUB_IDLA:
             {
                 bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
@@ -75,7 +81,7 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_OBND: // object bounds
             {
-                //std::cout << "IDLM " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "IDLM " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -85,10 +91,10 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::IdleMarker::save(ESM4::Writer& writer) const
+// void ESM4::IdleMarker::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::IdleMarker::blank()
+// void ESM4::IdleMarker::blank()
 //{
-//}
+// }

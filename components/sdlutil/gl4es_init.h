@@ -7,7 +7,7 @@
 // which creates a context.
 //
 // GL4ES can then query the context for features and extensions.
-extern "C" void openmw_gl4es_init(SDL_Window *window);
+extern "C" void openmw_gl4es_init(SDL_Window* window);
 
-#endif  // OPENMW_GL4ES_MANUAL_INIT
-#endif  // OPENMW_COMPONENTS_SDLUTIL_GL4ES_INIT_H
+#endif // OPENMW_GL4ES_MANUAL_INIT
+#endif // OPENMW_COMPONENTS_SDLUTIL_GL4ES_INIT_H

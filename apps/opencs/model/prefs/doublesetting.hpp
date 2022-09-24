@@ -9,40 +9,38 @@ namespace CSMPrefs
 {
     class DoubleSetting : public Setting
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            int mPrecision;
-            double mMin;
-            double mMax;
-            std::string mTooltip;
-            double mDefault;
-            QDoubleSpinBox* mWidget;
+        int mPrecision;
+        double mMin;
+        double mMax;
+        std::string mTooltip;
+        double mDefault;
+        QDoubleSpinBox* mWidget;
 
-        public:
+    public:
+        DoubleSetting(
+            Category* parent, QMutex* mutex, const std::string& key, const std::string& label, double default_);
 
-            DoubleSetting (Category *parent,
-                QMutex *mutex, const std::string& key, const std::string& label,
-                double default_);
+        DoubleSetting& setPrecision(int precision);
 
-            DoubleSetting& setPrecision (int precision);
+        // defaults to [0, std::numeric_limits<double>::max()]
+        DoubleSetting& setRange(double min, double max);
 
-            // defaults to [0, std::numeric_limits<double>::max()]
-            DoubleSetting& setRange (double min, double max);
+        DoubleSetting& setMin(double min);
 
-            DoubleSetting& setMin (double min);
+        DoubleSetting& setMax(double max);
 
-            DoubleSetting& setMax (double max);
+        DoubleSetting& setTooltip(const std::string& tooltip);
 
-            DoubleSetting& setTooltip (const std::string& tooltip);
+        /// Return label, input widget.
+        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
 
-            /// Return label, input widget.
-            std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent) override;
+        void updateWidget() override;
 
-            void updateWidget() override;
+    private slots:
 
-        private slots:
-
-            void valueChanged (double value);
+        void valueChanged(double value);
     };
 }
 

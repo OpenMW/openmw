@@ -36,14 +36,16 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId);  break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
             case ESM4::SUB_CTDA:
             {
                 reader.get(&mTargetCondition, 20);
@@ -55,17 +57,29 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_GNAM: reader.getFormId(mSoundCategory); break;
-            case ESM4::SUB_SNAM: reader.getFormId(mSoundId); break;
-            case ESM4::SUB_ONAM: reader.getFormId(mOutputModel); break;
-            case ESM4::SUB_ANAM: reader.getZString(mSoundFile);  break;
-            case ESM4::SUB_LNAM: reader.get(mLoopInfo); break;
-            case ESM4::SUB_BNAM: reader.get(mData); break;
+            case ESM4::SUB_GNAM:
+                reader.getFormId(mSoundCategory);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.getFormId(mSoundId);
+                break;
+            case ESM4::SUB_ONAM:
+                reader.getFormId(mOutputModel);
+                break;
+            case ESM4::SUB_ANAM:
+                reader.getZString(mSoundFile);
+                break;
+            case ESM4::SUB_LNAM:
+                reader.get(mLoopInfo);
+                break;
+            case ESM4::SUB_BNAM:
+                reader.get(mData);
+                break;
             case ESM4::SUB_CNAM: // CRC32 hash
             case ESM4::SUB_FNAM: // unknown
             {
-                //std::cout << "SNDR " << ESM::printName(subHdr.typeId) << " skipping..."
-                          //<< subHdr.dataSize << std::endl;
+                // std::cout << "SNDR " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -75,10 +89,10 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::SoundReference::save(ESM4::Writer& writer) const
+// void ESM4::SoundReference::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::SoundReference::blank()
+// void ESM4::SoundReference::blank()
 //{
-//}
+// }

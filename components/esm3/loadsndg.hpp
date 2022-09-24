@@ -8,42 +8,42 @@
 namespace ESM
 {
 
-class ESMReader;
-class ESMWriter;
+    class ESMReader;
+    class ESMWriter;
 
-/*
- * Sound generator. This describes the sounds a creature make.
- */
+    /*
+     * Sound generator. This describes the sounds a creature make.
+     */
 
-struct SoundGenerator
-{
-    constexpr static RecNameInts sRecordId = REC_SNDG;
-
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string_view getRecordType() { return "SoundGenerator"; }
-
-    enum Type
+    struct SoundGenerator
     {
-        LeftFoot = 0,
-        RightFoot = 1,
-        SwimLeft = 2,
-        SwimRight = 3,
-        Moan = 4,
-        Roar = 5,
-        Scream = 6,
-        Land = 7
+        constexpr static RecNameInts sRecordId = REC_SNDG;
+
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string_view getRecordType() { return "SoundGenerator"; }
+
+        enum Type
+        {
+            LeftFoot = 0,
+            RightFoot = 1,
+            SwimLeft = 2,
+            SwimRight = 3,
+            Moan = 4,
+            Roar = 5,
+            Scream = 6,
+            Land = 7
+        };
+
+        // Type
+        int mType;
+
+        unsigned int mRecordFlags;
+        std::string mId, mCreature, mSound;
+
+        void load(ESMReader& esm, bool& isDeleted);
+        void save(ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
     };
-
-    // Type
-    int mType;
-
-    unsigned int mRecordFlags;
-    std::string mId, mCreature, mSound;
-
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
-
-    void blank();
-};
 }
 #endif

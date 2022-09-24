@@ -5,8 +5,8 @@
 #include <set>
 #include <string>
 
-#include <components/compiler/streamerrorhandler.hpp>
 #include <components/compiler/fileparser.hpp>
+#include <components/compiler/streamerrorhandler.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/types.hpp>
@@ -35,54 +35,56 @@ namespace MWScript
 {
     class ScriptManager : public MWBase::ScriptManager
     {
-            Compiler::StreamErrorHandler mErrorHandler;
-            const MWWorld::ESMStore& mStore;
-            Compiler::Context& mCompilerContext;
-            Compiler::FileParser mParser;
-            Interpreter::Interpreter mInterpreter;
-            bool mOpcodesInstalled;
+        Compiler::StreamErrorHandler mErrorHandler;
+        const MWWorld::ESMStore& mStore;
+        Compiler::Context& mCompilerContext;
+        Compiler::FileParser mParser;
+        Interpreter::Interpreter mInterpreter;
+        bool mOpcodesInstalled;
 
-            struct CompiledScript
+        struct CompiledScript
+        {
+            std::vector<Interpreter::Type_Code> mByteCode;
+            Compiler::Locals mLocals;
+            std::set<std::string> mInactive;
+
+            CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
+                : mByteCode(code)
+                , mLocals(locals)
             {
-                std::vector<Interpreter::Type_Code> mByteCode;
-                Compiler::Locals mLocals;
-                std::set<std::string> mInactive;
+            }
+        };
 
-                CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals):
-                    mByteCode(code), mLocals(locals)
-                {}
-            };
+        std::unordered_map<std::string, CompiledScript, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual>
+            mScripts;
+        GlobalScripts mGlobalScripts;
+        std::unordered_map<std::string, Compiler::Locals, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual>
+            mOtherLocals;
+        std::vector<std::string> mScriptBlacklist;
 
-            std::unordered_map<std::string, CompiledScript, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual> mScripts;
-            GlobalScripts mGlobalScripts;
-            std::unordered_map<std::string, Compiler::Locals, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual> mOtherLocals;
-            std::vector<std::string> mScriptBlacklist;
+    public:
+        ScriptManager(const MWWorld::ESMStore& store, Compiler::Context& compilerContext, int warningsMode,
+            const std::vector<std::string>& scriptBlacklist);
 
-        public:
+        void clear() override;
 
-            ScriptManager (const MWWorld::ESMStore& store,
-                Compiler::Context& compilerContext, int warningsMode,
-                const std::vector<std::string>& scriptBlacklist);
+        bool run(std::string_view name, Interpreter::Context& interpreterContext) override;
+        ///< Run the script with the given name (compile first, if not compiled yet)
 
-            void clear() override;
+        bool compile(std::string_view name) override;
+        ///< Compile script with the given namen
+        /// \return Success?
 
-            bool run(std::string_view name, Interpreter::Context& interpreterContext) override;
-            ///< Run the script with the given name (compile first, if not compiled yet)
+        std::pair<int, int> compileAll() override;
+        ///< Compile all scripts
+        /// \return count, success
 
-            bool compile(std::string_view name) override;
-            ///< Compile script with the given namen
-            /// \return Success?
+        const Compiler::Locals& getLocals(std::string_view name) override;
+        ///< Return locals for script \a name.
 
-            std::pair<int, int> compileAll() override;
-            ///< Compile all scripts
-            /// \return count, success
+        GlobalScripts& getGlobalScripts() override;
 
-            const Compiler::Locals& getLocals(std::string_view name) override;
-            ///< Return locals for script \a name.
-
-            GlobalScripts& getGlobalScripts() override;
-
-            const Compiler::Extensions& getExtensions() const override;
+        const Compiler::Extensions& getExtensions() const override;
     };
 }
 

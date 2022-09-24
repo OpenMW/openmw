@@ -23,7 +23,7 @@ namespace MWGui
     public:
         HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
         virtual ~HUD();
-        void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
+        void setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
 
         /// Set time left for the player to start drowning
         /// @param time time left to start drowning
@@ -66,8 +66,8 @@ namespace MWGui
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
         MyGUI::Widget* mHealthFrame;
         MyGUI::Widget *mWeapBox, *mSpellBox, *mSneakBox;
-        ItemWidget *mWeapImage;
-        SpellWidget *mSpellImage;
+        ItemWidget* mWeapImage;
+        SpellWidget* mSpellImage;
         MyGUI::ProgressBar *mWeapStatus, *mSpellStatus;
         MyGUI::Widget *mEffectBox, *mMinimapBox;
         MyGUI::Button* mMinimapButton;
@@ -102,7 +102,7 @@ namespace MWGui
         int mEnemyActorId;
         float mEnemyHealthTimer;
 
-        bool  mIsDrowning;
+        bool mIsDrowning;
         float mDrowningFlashTheta;
 
         void onWorldClicked(MyGUI::Widget* _sender);

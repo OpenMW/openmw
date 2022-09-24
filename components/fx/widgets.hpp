@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_FX_WIDGETS_H
 #define OPENMW_COMPONENTS_FX_WIDGETS_H
 
-#include <MyGUI_Gui.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_Gui.h>
 #include <MyGUI_InputManager.h>
 
 #include <osg/Vec2f>
@@ -65,8 +65,8 @@ namespace fx
             void initialiseOverride() override;
             void notifyMouseButtonClick(MyGUI::Widget* sender);
 
-            MyGUI::Button* mCheckbutton{nullptr};
-            MyGUI::Widget* mFill{nullptr};
+            MyGUI::Button* mCheckbutton{ nullptr };
+            MyGUI::Widget* mFill{ nullptr };
         };
 
         template <class T, class UType>
@@ -135,7 +135,6 @@ namespace fx
             }
 
         private:
-
             void initialiseOverride() override
             {
                 Base::initialiseOverride();
@@ -181,7 +180,8 @@ namespace fx
 
                 // allow finer tuning when shift is pressed
                 constexpr double scaling = 20.0;
-                T step = MyGUI::InputManager::getInstance().isShiftPressed() ? uniform->mStep / scaling : uniform->mStep;
+                T step
+                    = MyGUI::InputManager::getInstance().isShiftPressed() ? uniform->mStep / scaling : uniform->mStep;
 
                 if (step == 0)
                 {
@@ -215,9 +215,11 @@ namespace fx
                     return;
 
                 if constexpr (std::is_fundamental_v<UType>)
-                    setValue(std::clamp<T>(uniform->template getValue<UType>() + step, uniform->template getMin<UType>(), uniform->template getMax<T>()));
+                    setValue(std::clamp<T>(uniform->template getValue<UType>() + step,
+                        uniform->template getMin<UType>(), uniform->template getMax<T>()));
                 else
-                    setValue(std::clamp<T>(uniform->template getValue<UType>()[mIndex] + step, uniform->template getMin<UType>()[mIndex], uniform->template getMax<UType>()[mIndex]));
+                    setValue(std::clamp<T>(uniform->template getValue<UType>()[mIndex] + step,
+                        uniform->template getMin<UType>()[mIndex], uniform->template getMax<UType>()[mIndex]));
             }
 
             void notifyButtonClicked(MyGUI::Widget* sender)
@@ -233,21 +235,36 @@ namespace fx
                     increment(uniform->mStep);
             }
 
-            MyGUI::Button* mButtonDecrease{nullptr};
-            MyGUI::Button* mButtonIncrease{nullptr};
-            MyGUI::Widget* mDragger{nullptr};
-            MyGUI::Widget* mFill{nullptr};
-            MyGUI::TextBox* mValueLabel{nullptr};
+            MyGUI::Button* mButtonDecrease{ nullptr };
+            MyGUI::Button* mButtonIncrease{ nullptr };
+            MyGUI::Widget* mDragger{ nullptr };
+            MyGUI::Widget* mFill{ nullptr };
+            MyGUI::TextBox* mValueLabel{ nullptr };
             T mValue{};
 
-            int mLastPointerX{0};
+            int mLastPointerX{ 0 };
         };
 
-        class EditNumberFloat4 : public EditNumber<float, osg::Vec4f> { MYGUI_RTTI_DERIVED(EditNumberFloat4) };
-        class EditNumberFloat3 : public EditNumber<float, osg::Vec3f> { MYGUI_RTTI_DERIVED(EditNumberFloat3) };
-        class EditNumberFloat2 : public EditNumber<float, osg::Vec2f> { MYGUI_RTTI_DERIVED(EditNumberFloat2) };
-        class EditNumberFloat : public EditNumber<float, float> { MYGUI_RTTI_DERIVED(EditNumberFloat) };
-        class EditNumberInt : public EditNumber<int, int> { MYGUI_RTTI_DERIVED(EditNumberInt) };
+        class EditNumberFloat4 : public EditNumber<float, osg::Vec4f>
+        {
+            MYGUI_RTTI_DERIVED(EditNumberFloat4)
+        };
+        class EditNumberFloat3 : public EditNumber<float, osg::Vec3f>
+        {
+            MYGUI_RTTI_DERIVED(EditNumberFloat3)
+        };
+        class EditNumberFloat2 : public EditNumber<float, osg::Vec2f>
+        {
+            MYGUI_RTTI_DERIVED(EditNumberFloat2)
+        };
+        class EditNumberFloat : public EditNumber<float, float>
+        {
+            MYGUI_RTTI_DERIVED(EditNumberFloat)
+        };
+        class EditNumberInt : public EditNumber<int, int>
+        {
+            MYGUI_RTTI_DERIVED(EditNumberInt)
+        };
 
         class UniformBase final : public MyGUI::Widget
         {
@@ -263,14 +280,13 @@ namespace fx
             Gui::AutoSizedTextBox* getLabel() { return mLabel; }
 
         private:
-
             void notifyResetClicked(MyGUI::Widget* sender);
 
             void initialiseOverride() override;
 
-            Gui::AutoSizedButton* mReset{nullptr};
-            Gui::AutoSizedTextBox* mLabel{nullptr};
-            MyGUI::Widget* mClient{nullptr};
+            Gui::AutoSizedButton* mReset{ nullptr };
+            Gui::AutoSizedTextBox* mLabel{ nullptr };
+            MyGUI::Widget* mClient{ nullptr };
             std::vector<EditBase*> mBases;
         };
     }

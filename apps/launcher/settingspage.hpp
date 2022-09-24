@@ -7,9 +7,15 @@
 
 #include "maindialog.hpp"
 
-namespace Files { struct ConfigurationManager; }
-namespace Config { class GameSettings;
-                   class LauncherSettings; }
+namespace Files
+{
+    struct ConfigurationManager;
+}
+namespace Config
+{
+    class GameSettings;
+    class LauncherSettings;
+}
 
 namespace Launcher
 {
@@ -20,13 +26,13 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        SettingsPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
-                      Config::LauncherSettings &launcherSettings, MainDialog *parent = nullptr);
+        SettingsPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+            Config::LauncherSettings& launcherSettings, MainDialog* parent = nullptr);
         ~SettingsPage() override;
 
         void saveSettings();
         bool loadSettings();
-        
+
         /// set progress bar on page to 0%
         void resetProgressBar();
 
@@ -42,21 +48,19 @@ namespace Launcher
         void importerStarted();
         void importerFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
-        void updateOkButton(const QString &text);
+        void updateOkButton(const QString& text);
 
     private:
+        Process::ProcessInvoker* mWizardInvoker;
+        Process::ProcessInvoker* mImporterInvoker;
 
-        Process::ProcessInvoker *mWizardInvoker;
-        Process::ProcessInvoker *mImporterInvoker;
+        Files::ConfigurationManager& mCfgMgr;
 
-        Files::ConfigurationManager &mCfgMgr;
+        Config::GameSettings& mGameSettings;
+        Config::LauncherSettings& mLauncherSettings;
 
-        Config::GameSettings &mGameSettings;
-        Config::LauncherSettings &mLauncherSettings;
-
-        MainDialog *mMain;
-        TextInputDialog *mProfileDialog;
-
+        MainDialog* mMain;
+        TextInputDialog* mProfileDialog;
     };
 }
 

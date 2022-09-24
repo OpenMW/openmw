@@ -10,24 +10,23 @@ namespace CSMWorld
 {
     class CommandMacro
     {
-            QUndoStack& mUndoStack;
-            QString mDescription;
-            bool mStarted;
+        QUndoStack& mUndoStack;
+        QString mDescription;
+        bool mStarted;
 
-            /// not implemented
-            CommandMacro (const CommandMacro&);
+        /// not implemented
+        CommandMacro(const CommandMacro&);
 
-            /// not implemented
-            CommandMacro& operator= (const CommandMacro&);
+        /// not implemented
+        CommandMacro& operator=(const CommandMacro&);
 
-        public:
+    public:
+        /// If \a description is empty, the description of the first command is used.
+        CommandMacro(QUndoStack& undoStack, const QString& description = "");
 
-            /// If \a description is empty, the description of the first command is used.
-            CommandMacro (QUndoStack& undoStack, const QString& description = "");
+        ~CommandMacro();
 
-            ~CommandMacro();
-
-            void push (QUndoCommand *command);
+        void push(QUndoCommand* command);
     };
 }
 

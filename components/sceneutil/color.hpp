@@ -19,8 +19,10 @@ namespace SceneUtil
         class SelectColorFormatOperation final : public osg::GraphicsOperation
         {
         public:
-            SelectColorFormatOperation() : GraphicsOperation("SelectColorFormatOperation", false)
-            {}
+            SelectColorFormatOperation()
+                : GraphicsOperation("SelectColorFormatOperation", false)
+            {
+            }
 
             void operator()(osg::GraphicsContext* graphicsContext) override;
 
@@ -99,8 +101,8 @@ namespace SceneUtil
 #define GL_RGB10_A2 0x906F
 #endif
 
-#ifndef GL_RGB10_A2UI 
-#define GL_RGB10_A2UI  0x906F
+#ifndef GL_RGB10_A2UI
+#define GL_RGB10_A2UI 0x906F
 #endif
 
 #ifndef GL_RGBA12
@@ -150,7 +152,6 @@ namespace SceneUtil
 #ifndef GL_R11F_G11F_B10F
 #define GL_R11F_G11F_B10F 0x8C3A
 #endif
-
 
 #ifndef GL_RGB8I
 #define GL_RGB8I 0x8D8F

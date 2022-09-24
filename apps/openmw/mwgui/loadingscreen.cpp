@@ -6,22 +6,22 @@
 
 #include <osg/Texture2D>
 
-#include <MyGUI_ScrollBar.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ScrollBar.h>
 #include <MyGUI_TextBox.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/rng.hpp>
-#include <components/debug/debuglog.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
-#include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/inputmanager.hpp"
 
 #include "backgroundimage.hpp"
 
@@ -53,15 +53,16 @@ namespace MWGui
         findSplashScreens();
     }
 
-    LoadingScreen::~LoadingScreen()
-    {
-    }
+    LoadingScreen::~LoadingScreen() {}
 
     void LoadingScreen::findSplashScreens()
     {
         auto isSupportedExtension = [](const std::string_view& ext) {
-            static const std::array<std::string, 7> supported_extensions{ {"tga", "dds", "ktx", "png", "bmp", "jpeg", "jpg"} };
-            return !ext.empty() && std::find(supported_extensions.begin(), supported_extensions.end(), ext) != supported_extensions.end();
+            static const std::array<std::string, 7> supported_extensions{ { "tga", "dds", "ktx", "png", "bmp", "jpeg",
+                "jpg" } };
+            return !ext.empty()
+                && std::find(supported_extensions.begin(), supported_extensions.end(), ext)
+                != supported_extensions.end();
         };
 
         for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator("Splash/"))
@@ -73,20 +74,22 @@ namespace MWGui
             Log(Debug::Warning) << "Warning: no splash screens found!";
     }
 
-    void LoadingScreen::setLabel(const std::string &label, bool important)
+    void LoadingScreen::setLabel(const std::string& label, bool important)
     {
         mImportantLabel = important;
 
         mLoadingText->setCaptionWithReplacing(label);
         int padding = mLoadingBox->getWidth() - mLoadingText->getWidth();
-        MyGUI::IntSize size(mLoadingText->getTextSize().width+padding, mLoadingBox->getHeight());
+        MyGUI::IntSize size(mLoadingText->getTextSize().width + padding, mLoadingBox->getHeight());
         size.width = std::max(300, size.width);
         mLoadingBox->setSize(size);
 
         if (MWBase::Environment::get().getWindowManager()->getMessagesCount() > 0)
-            mLoadingBox->setPosition(mMainWidget->getWidth()/2 - mLoadingBox->getWidth()/2, mMainWidget->getHeight()/2 - mLoadingBox->getHeight()/2);
+            mLoadingBox->setPosition(mMainWidget->getWidth() / 2 - mLoadingBox->getWidth() / 2,
+                mMainWidget->getHeight() / 2 - mLoadingBox->getHeight() / 2);
         else
-            mLoadingBox->setPosition(mMainWidget->getWidth()/2 - mLoadingBox->getWidth()/2, mMainWidget->getHeight() - mLoadingBox->getHeight() - 8);
+            mLoadingBox->setPosition(mMainWidget->getWidth() / 2 - mLoadingBox->getWidth() / 2,
+                mMainWidget->getHeight() - mLoadingBox->getHeight() - 8);
     }
 
     void LoadingScreen::setVisible(bool visible)
@@ -114,7 +117,7 @@ namespace MWGui
         {
         }
 
-        void operator () (osg::RenderInfo& renderInfo) const override
+        void operator()(osg::RenderInfo& renderInfo) const override
         {
             int w = renderInfo.getCurrentCamera()->getViewport()->width();
             int h = renderInfo.getCurrentCamera()->getViewport()->height();
@@ -123,10 +126,7 @@ namespace MWGui
             mOneshot = false;
         }
 
-        void reset()
-        {
-            mOneshot = true;
-        }
+        void reset() { mOneshot = true; }
 
     private:
         mutable bool mOneshot;
@@ -147,11 +147,13 @@ namespace MWGui
 
         mLoadingOnTime = mTimer.time_m();
 
-        // Assign dummy bounding sphere callback to avoid the bounding sphere of the entire scene being recomputed after each frame of loading
-        // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
+        // Assign dummy bounding sphere callback to avoid the bounding sphere of the entire scene being recomputed after
+        // each frame of loading We are already using node masks to avoid the scene from being updated/rendered, but
+        // node masks don't work for computeBound()
         mViewer->getSceneData()->setComputeBoundingSphereCallback(new DontComputeBoundCallback);
 
-        if (const osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation()) {
+        if (const osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation())
+        {
             mOldIcoMin = ico->getMinimumTimeAvailableForGLCompileAndDeletePerFrame();
             mOldIcoMax = ico->getMaximumNumOfObjectsToCompilePerFrame();
         }
@@ -181,7 +183,7 @@ namespace MWGui
     {
         if (--mNestedLoadingCount > 0)
             return;
-        mLoadingBox->setVisible(true);   // restore
+        mLoadingBox->setVisible(true); // restore
 
         if (mLastRenderTime < mLoadingOnTime)
         {
@@ -211,14 +213,15 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_LoadingWallpaper);
     }
 
-    void LoadingScreen::changeWallpaper ()
+    void LoadingScreen::changeWallpaper()
     {
         if (!mSplashScreens.empty())
         {
-            std::string const & randomSplash = mSplashScreens.at(Misc::Rng::rollDice(mSplashScreens.size()));
+            std::string const& randomSplash = mSplashScreens.at(Misc::Rng::rollDice(mSplashScreens.size()));
 
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
-            // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed as 4:3
+            // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed
+            // as 4:3
             bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
             mSplashImage->setVisible(true);
             mSplashImage->setBackgroundImage(randomSplash, true, stretch);
@@ -227,39 +230,42 @@ namespace MWGui
         mSceneImage->setVisible(false);
     }
 
-    void LoadingScreen::setProgressRange (size_t range)
+    void LoadingScreen::setProgressRange(size_t range)
     {
-        mProgressBar->setScrollRange(range+1);
+        mProgressBar->setScrollRange(range + 1);
         mProgressBar->setScrollPosition(0);
         mProgressBar->setTrackSize(0);
         mProgress = 0;
     }
 
-    void LoadingScreen::setProgress (size_t value)
+    void LoadingScreen::setProgress(size_t value)
     {
         // skip expensive update if there isn't enough visible progress
-        if (mProgressBar->getWidth() <= 0 || value - mProgress < mProgressBar->getScrollRange()/mProgressBar->getWidth())
+        if (mProgressBar->getWidth() <= 0
+            || value - mProgress < mProgressBar->getScrollRange() / mProgressBar->getWidth())
             return;
-        value = std::min(value, mProgressBar->getScrollRange()-1);
+        value = std::min(value, mProgressBar->getScrollRange() - 1);
         mProgress = value;
         mProgressBar->setScrollPosition(0);
-        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
+        mProgressBar->setTrackSize(
+            static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
-    void LoadingScreen::increaseProgress (size_t increase)
+    void LoadingScreen::increaseProgress(size_t increase)
     {
         mProgressBar->setScrollPosition(0);
         size_t value = mProgress + increase;
-        value = std::min(value, mProgressBar->getScrollRange()-1);
+        value = std::min(value, mProgressBar->getScrollRange() - 1);
         mProgress = value;
-        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
+        mProgressBar->setTrackSize(
+            static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
     bool LoadingScreen::needToDrawLoadingScreen()
     {
-        if ( mTimer.time_m() <= mLastRenderTime + (1.0/getTargetFrameRate()) * 1000.0)
+        if (mTimer.time_m() <= mLastRenderTime + (1.0 / getTargetFrameRate()) * 1000.0)
             return false;
 
         // the minimal delay before a loading screen shows
@@ -275,7 +281,7 @@ namespace MWGui
             diff -= mProgress / static_cast<float>(mProgressBar->getScrollRange()) * 100.f;
         }
 
-        if (!mShowWallpaper && diff < initialDelay*1000)
+        if (!mShowWallpaper && diff < initialDelay * 1000)
             return false;
         return true;
     }
@@ -320,7 +326,7 @@ namespace MWGui
         if (mVisible && !needToDrawLoadingScreen())
             return;
 
-        if (mShowWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000*1)
+        if (mShowWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000 * 1)
         {
             mLastWallpaperChangeTime = mTimer.time_m();
             changeWallpaper();
@@ -336,7 +342,7 @@ namespace MWGui
         mResourceSystem->reportStats(mViewer->getFrameStamp()->getFrameNumber(), mViewer->getViewerStats());
         if (osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation())
         {
-            ico->setMinimumTimeAvailableForGLCompileAndDeletePerFrame(1.f/getTargetFrameRate());
+            ico->setMinimumTimeAvailableForGLCompileAndDeletePerFrame(1.f / getTargetFrameRate());
             ico->setMaximumNumOfObjectsToCompilePerFrame(1000);
         }
 

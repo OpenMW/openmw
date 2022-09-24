@@ -3,9 +3,9 @@
 
 #include <components/serialization/format.hpp>
 
-#include <utility>
-#include <type_traits>
 #include <cstdint>
+#include <type_traits>
+#include <utility>
 
 namespace SerializationTesting
 {
@@ -16,7 +16,7 @@ namespace SerializationTesting
 
         friend bool operator==(const Pod& l, const Pod& r)
         {
-            const auto tuple = [] (const Pod& v) { return std::tuple(v.mInt, v.mDouble); };
+            const auto tuple = [](const Pod& v) { return std::tuple(v.mInt, v.mDouble); };
             return tuple(l) == tuple(r);
         }
     };
@@ -30,7 +30,7 @@ namespace SerializationTesting
 
     struct Composite
     {
-        short mFloatArray[3] = {0};
+        short mFloatArray[3] = { 0 };
         std::vector<std::int32_t> mIntVector;
         std::vector<Enum> mEnumVector;
         std::vector<Pod> mPodVector;
@@ -46,8 +46,7 @@ namespace SerializationTesting
         using Serialization::Format<mode, TestFormat<mode>>::operator();
 
         template <class Visitor, class T>
-        auto operator()(Visitor&& visitor, T& value) const
-            -> std::enable_if_t<std::is_same_v<std::decay_t<T>, Pod>>
+        auto operator()(Visitor&& visitor, T& value) const -> std::enable_if_t<std::is_same_v<std::decay_t<T>, Pod>>
         {
             visitor(*this, value.mInt);
             visitor(*this, value.mDouble);

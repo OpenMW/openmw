@@ -1,13 +1,13 @@
 #include "bookwindow.hpp"
 
-#include <MyGUI_TextBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_TextBox.h>
 
 #include <components/esm3/loadbook.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -19,7 +19,7 @@
 namespace MWGui
 {
 
-    BookWindow::BookWindow ()
+    BookWindow::BookWindow()
         : BookWindowBase("openmw_book.layout")
         , mCurrentPage(0)
         , mTakeButtonShow(true)
@@ -61,14 +61,15 @@ namespace MWGui
         if (mNextPageButton->getSize().width == 64)
         {
             // english button has a 7 pixel wide strip of garbage on its right edge
-            mNextPageButton->setSize(64-7, mNextPageButton->getSize().height);
-            mNextPageButton->setImageCoord(MyGUI::IntCoord(0,0,(64-7)*scale,mNextPageButton->getSize().height*scale));
+            mNextPageButton->setSize(64 - 7, mNextPageButton->getSize().height);
+            mNextPageButton->setImageCoord(
+                MyGUI::IntCoord(0, 0, (64 - 7) * scale, mNextPageButton->getSize().height * scale));
         }
 
         center();
     }
 
-    void BookWindow::onMouseWheel(MyGUI::Widget *_sender, int _rel)
+    void BookWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
         if (_rel < 0)
             nextPage();
@@ -81,7 +82,7 @@ namespace MWGui
         mPages.clear();
     }
 
-    void BookWindow::setPtr (const MWWorld::Ptr& book)
+    void BookWindow::setPtr(const MWWorld::Ptr& book)
     {
         mBook = book;
 
@@ -91,7 +92,7 @@ namespace MWGui
         clearPages();
         mCurrentPage = 0;
 
-        MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
+        MWWorld::LiveCellRef<ESM::Book>* ref = mBook.get<ESM::Book>();
 
         Formatting::BookFormatter formatter;
         mPages = formatter.markupToWidget(mLeftPage, ref->mBase->mText);
@@ -110,7 +111,7 @@ namespace MWGui
         mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
     }
 
-    void BookWindow::onKeyButtonPressed(MyGUI::Widget *sender, MyGUI::KeyCode key, MyGUI::Char character)
+    void BookWindow::onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character)
     {
         if (key == MyGUI::KeyCode::ArrowUp)
             prevPage();
@@ -124,38 +125,38 @@ namespace MWGui
         mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
     }
 
-    void BookWindow::onCloseButtonClicked (MyGUI::Widget* sender)
+    void BookWindow::onCloseButtonClicked(MyGUI::Widget* sender)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
     }
 
-    void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)
+    void BookWindow::onTakeButtonClicked(MyGUI::Widget* sender)
     {
         MWBase::Environment::get().getWindowManager()->playSound("Item Book Up");
 
         MWWorld::ActionTake take(mBook);
-        take.execute (MWMechanics::getPlayer());
+        take.execute(MWMechanics::getPlayer());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
     }
 
-    void BookWindow::onNextPageButtonClicked (MyGUI::Widget* sender)
+    void BookWindow::onNextPageButtonClicked(MyGUI::Widget* sender)
     {
         nextPage();
     }
 
-    void BookWindow::onPrevPageButtonClicked (MyGUI::Widget* sender)
+    void BookWindow::onPrevPageButtonClicked(MyGUI::Widget* sender)
     {
         prevPage();
     }
 
     void BookWindow::updatePages()
     {
-        mLeftPageNumber->setCaption( MyGUI::utility::toString(mCurrentPage*2 + 1) );
-        mRightPageNumber->setCaption( MyGUI::utility::toString(mCurrentPage*2 + 2) );
+        mLeftPageNumber->setCaption(MyGUI::utility::toString(mCurrentPage * 2 + 1));
+        mRightPageNumber->setCaption(MyGUI::utility::toString(mCurrentPage * 2 + 2));
 
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        bool nextPageVisible = (mCurrentPage+1)*2 < mPages.size();
+        bool nextPageVisible = (mCurrentPage + 1) * 2 < mPages.size();
         mNextPageButton->setVisible(nextPageVisible);
         bool prevPageVisible = mCurrentPage != 0;
         mPrevPageButton->setVisible(prevPageVisible);
@@ -168,17 +169,17 @@ namespace MWGui
         if (mPages.empty())
             return;
 
-        MyGUI::Widget * paper;
+        MyGUI::Widget* paper;
 
         paper = mLeftPage->getChildAt(0);
-        paper->setCoord(paper->getPosition().left, -mPages[mCurrentPage*2].first,
-                paper->getWidth(), mPages[mCurrentPage*2].second);
+        paper->setCoord(paper->getPosition().left, -mPages[mCurrentPage * 2].first, paper->getWidth(),
+            mPages[mCurrentPage * 2].second);
 
         paper = mRightPage->getChildAt(0);
-        if ((mCurrentPage+1)*2 <= mPages.size())
+        if ((mCurrentPage + 1) * 2 <= mPages.size())
         {
-            paper->setCoord(paper->getPosition().left, -mPages[mCurrentPage*2+1].first,
-                    paper->getWidth(), mPages[mCurrentPage*2+1].second);
+            paper->setCoord(paper->getPosition().left, -mPages[mCurrentPage * 2 + 1].first, paper->getWidth(),
+                mPages[mCurrentPage * 2 + 1].second);
             paper->setVisible(true);
         }
         else
@@ -189,7 +190,7 @@ namespace MWGui
 
     void BookWindow::nextPage()
     {
-        if ((mCurrentPage+1)*2 < mPages.size())
+        if ((mCurrentPage + 1) * 2 < mPages.size())
         {
             MWBase::Environment::get().getWindowManager()->playSound("book page2");
 

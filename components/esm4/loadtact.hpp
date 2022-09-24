@@ -39,18 +39,18 @@ namespace ESM4
 
     enum TalkingActivatorFlags
     {
-         TACT_OnLocalMap      = 0x00000200,
-         TACT_QuestItem       = 0x00000400,
-         TACT_NoVoiceFilter   = 0x00002000,
-         TACT_RandomAnimStart = 0x00010000,
-         TACT_RadioStation    = 0x00020000,
-         TACT_NonProxy        = 0x10000000, // only valid if Radio Station
-         TACT_ContBroadcast   = 0x40000000  // only valid if Radio Station
+        TACT_OnLocalMap = 0x00000200,
+        TACT_QuestItem = 0x00000400,
+        TACT_NoVoiceFilter = 0x00002000,
+        TACT_RandomAnimStart = 0x00010000,
+        TACT_RadioStation = 0x00020000,
+        TACT_NonProxy = 0x10000000, // only valid if Radio Station
+        TACT_ContBroadcast = 0x40000000 // only valid if Radio Station
     };
 
     struct TalkingActivator
     {
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see above for details
 
         std::string mEditorId;
@@ -59,14 +59,14 @@ namespace ESM4
         std::string mModel;
 
         FormId mScriptId;
-        FormId mVoiceType;     // VTYP
-        FormId mLoopSound;     // SOUN
+        FormId mVoiceType; // VTYP
+        FormId mLoopSound; // SOUN
         FormId mRadioTemplate; // SOUN
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

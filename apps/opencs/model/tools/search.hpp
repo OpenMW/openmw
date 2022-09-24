@@ -1,11 +1,11 @@
 #ifndef CSM_TOOLS_SEARCH_H
 #define CSM_TOOLS_SEARCH_H
 
-#include <string>
 #include <set>
+#include <string>
 
-#include <QRegExp>
 #include <QMetaType>
+#include <QRegExp>
 
 class QModelIndex;
 
@@ -25,77 +25,71 @@ namespace CSMTools
 {
     class Search
     {
-        public:
+    public:
+        enum Type
+        {
+            Type_Text = 0,
+            Type_TextRegEx = 1,
+            Type_Id = 2,
+            Type_IdRegEx = 3,
+            Type_RecordState = 4,
+            Type_None
+        };
 
-            enum Type
-            {
-                Type_Text = 0,
-                Type_TextRegEx = 1,
-                Type_Id = 2,
-                Type_IdRegEx = 3,
-                Type_RecordState = 4,
-                Type_None
-            };
+    private:
+        Type mType;
+        std::string mText;
+        QRegExp mRegExp;
+        int mValue;
+        bool mCase;
+        std::set<int> mColumns;
+        int mIdColumn;
+        int mTypeColumn;
+        int mPaddingBefore;
+        int mPaddingAfter;
 
-        private:
+        void searchTextCell(const CSMWorld::IdTableBase* model, const QModelIndex& index,
+            const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const;
 
-            Type mType;
-            std::string mText;
-            QRegExp mRegExp;
-            int mValue;
-            bool mCase;
-            std::set<int> mColumns;
-            int mIdColumn;
-            int mTypeColumn;
-            int mPaddingBefore;
-            int mPaddingAfter;
+        void searchRegExCell(const CSMWorld::IdTableBase* model, const QModelIndex& index,
+            const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const;
 
-            void searchTextCell (const CSMWorld::IdTableBase *model, const QModelIndex& index,
-                const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const;
+        void searchRecordStateCell(const CSMWorld::IdTableBase* model, const QModelIndex& index,
+            const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const;
 
-            void searchRegExCell (const CSMWorld::IdTableBase *model, const QModelIndex& index,
-                const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const;
+        QString formatDescription(const QString& description, int pos, int length) const;
 
-            void searchRecordStateCell (const CSMWorld::IdTableBase *model,
-                const QModelIndex& index, const CSMWorld::UniversalId& id, bool writable,
-                CSMDoc::Messages& messages) const;
+        QString flatten(const QString& text) const;
 
-            QString formatDescription (const QString& description, int pos, int length) const;
+    public:
+        Search();
 
-            QString flatten (const QString& text) const;
-            
-        public:
+        Search(Type type, bool caseSensitive, const std::string& value);
 
-            Search();
-        
-            Search (Type type, bool caseSensitive, const std::string& value);
+        Search(Type type, bool caseSensitive, const QRegExp& value);
 
-            Search (Type type, bool caseSensitive, const QRegExp& value);
+        Search(Type type, bool caseSensitive, int value);
 
-            Search (Type type, bool caseSensitive, int value);
+        // Configure search for the specified model.
+        void configure(const CSMWorld::IdTableBase* model);
 
-            // Configure search for the specified model.
-            void configure (const CSMWorld::IdTableBase *model);
+        // Search row in \a model and store results in \a messages.
+        //
+        // \attention *this needs to be configured for \a model.
+        void searchRow(const CSMWorld::IdTableBase* model, int row, CSMDoc::Messages& messages) const;
 
-            // Search row in \a model and store results in \a messages.
-            //
-            // \attention *this needs to be configured for \a model.
-            void searchRow (const CSMWorld::IdTableBase *model, int row,
-                CSMDoc::Messages& messages) const;
+        void setPadding(int before, int after);
 
-            void setPadding (int before, int after);
+        // Configuring *this for the model is not necessary when calling this function.
+        void replace(CSMDoc::Document& document, CSMWorld::IdTableBase* model, const CSMWorld::UniversalId& id,
+            const std::string& messageHint, const std::string& replaceText) const;
 
-            // Configuring *this for the model is not necessary when calling this function.
-            void replace (CSMDoc::Document& document, CSMWorld::IdTableBase *model,
-                const CSMWorld::UniversalId& id, const std::string& messageHint,
-                const std::string& replaceText) const;
-
-            // Check if model still matches search results.
-            bool verify (CSMDoc::Document& document, CSMWorld::IdTableBase *model,
-                const CSMWorld::UniversalId& id, const std::string& messageHint) const;
+        // Check if model still matches search results.
+        bool verify(CSMDoc::Document& document, CSMWorld::IdTableBase* model, const CSMWorld::UniversalId& id,
+            const std::string& messageHint) const;
     };
 }
 
-Q_DECLARE_METATYPE (CSMTools::Search)
+Q_DECLARE_METATYPE(CSMTools::Search)
 
 #endif

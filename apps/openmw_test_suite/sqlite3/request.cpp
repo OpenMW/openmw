@@ -2,8 +2,8 @@
 #include <components/sqlite3/request.hpp>
 #include <components/sqlite3/statement.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <limits>
 #include <tuple>
@@ -59,7 +59,10 @@ namespace
     {
         std::string mQuery;
 
-        explicit GetAll(const std::string& table) : mQuery("SELECT value FROM " + table + " ORDER BY value") {}
+        explicit GetAll(const std::string& table)
+            : mQuery("SELECT value FROM " + table + " ORDER BY value")
+        {
+        }
 
         std::string_view text() noexcept { return mQuery; }
         static void bind(sqlite3&, sqlite3_stmt&) {}
@@ -70,7 +73,10 @@ namespace
     {
         std::string mQuery;
 
-        explicit GetExact(const std::string& table) : mQuery("SELECT value FROM " + table + " WHERE value = :value") {}
+        explicit GetExact(const std::string& table)
+            : mQuery("SELECT value FROM " + table + " WHERE value = :value")
+        {
+        }
 
         std::string_view text() noexcept { return mQuery; }
 
@@ -102,7 +108,10 @@ namespace
 
         Int() = default;
 
-        explicit Int(int value) : mValue(value) {}
+        explicit Int(int value)
+            : mValue(value)
+        {
+        }
 
         Int& operator=(int value)
         {
@@ -110,10 +119,7 @@ namespace
             return *this;
         }
 
-        friend bool operator==(const Int& l, const Int& r)
-        {
-            return l.mValue == r.mValue;
-        }
+        friend bool operator==(const Int& l, const Int& r) { return l.mValue == r.mValue; }
     };
 
     constexpr const char schema[] = R"(
@@ -130,7 +136,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, executeShouldSupportInt)
     {
-        Statement insert(*mDb, InsertInt<int> {});
+        Statement insert(*mDb, InsertInt<int>{});
         EXPECT_EQ(execute(*mDb, insert, 13), 1);
         EXPECT_EQ(execute(*mDb, insert, 42), 1);
         Statement select(*mDb, GetAll("ints"));
@@ -141,7 +147,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, executeShouldSupportInt64)
     {
-        Statement insert(*mDb, InsertInt<std::int64_t> {});
+        Statement insert(*mDb, InsertInt<std::int64_t>{});
         const std::int64_t value = 1099511627776;
         EXPECT_EQ(execute(*mDb, insert, value), 1);
         Statement select(*mDb, GetAll("ints"));
@@ -152,7 +158,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, executeShouldSupportReal)
     {
-        Statement insert(*mDb, InsertReal {});
+        Statement insert(*mDb, InsertReal{});
         EXPECT_EQ(execute(*mDb, insert, 3.14), 1);
         Statement select(*mDb, GetAll("reals"));
         std::vector<std::tuple<double>> result;
@@ -162,7 +168,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, executeShouldSupportText)
     {
-        Statement insert(*mDb, InsertText {});
+        Statement insert(*mDb, InsertText{});
         const std::string text = "foo";
         EXPECT_EQ(execute(*mDb, insert, text), 1);
         Statement select(*mDb, GetAll("texts"));
@@ -173,8 +179,8 @@ namespace
 
     TEST_F(Sqlite3RequestTest, executeShouldSupportBlob)
     {
-        Statement insert(*mDb, InsertBlob {});
-        const std::vector<std::byte> blob({std::byte(42), std::byte(13)});
+        Statement insert(*mDb, InsertBlob{});
+        const std::vector<std::byte> blob({ std::byte(42), std::byte(13) });
         EXPECT_EQ(execute(*mDb, insert, blob), 1);
         Statement select(*mDb, GetAll("blobs"));
         std::vector<std::tuple<std::vector<std::byte>>> result;
@@ -184,7 +190,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, requestShouldSupportInt)
     {
-        Statement insert(*mDb, InsertInt<int> {});
+        Statement insert(*mDb, InsertInt<int>{});
         const int value = 42;
         EXPECT_EQ(execute(*mDb, insert, value), 1);
         Statement select(*mDb, GetExact<int>("ints"));
@@ -195,7 +201,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, requestShouldSupportInt64)
     {
-        Statement insert(*mDb, InsertInt<std::int64_t> {});
+        Statement insert(*mDb, InsertInt<std::int64_t>{});
         const std::int64_t value = 1099511627776;
         EXPECT_EQ(execute(*mDb, insert, value), 1);
         Statement select(*mDb, GetExact<std::int64_t>("ints"));
@@ -206,7 +212,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, requestShouldSupportReal)
     {
-        Statement insert(*mDb, InsertReal {});
+        Statement insert(*mDb, InsertReal{});
         const double value = 3.14;
         EXPECT_EQ(execute(*mDb, insert, value), 1);
         Statement select(*mDb, GetExact<double>("reals"));
@@ -217,7 +223,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, requestShouldSupportText)
     {
-        Statement insert(*mDb, InsertText {});
+        Statement insert(*mDb, InsertText{});
         const std::string text = "foo";
         EXPECT_EQ(execute(*mDb, insert, text), 1);
         Statement select(*mDb, GetExact<std::string>("texts"));
@@ -228,8 +234,8 @@ namespace
 
     TEST_F(Sqlite3RequestTest, requestShouldSupportBlob)
     {
-        Statement insert(*mDb, InsertBlob {});
-        const std::vector<std::byte> blob({std::byte(42), std::byte(13)});
+        Statement insert(*mDb, InsertBlob{});
+        const std::vector<std::byte> blob({ std::byte(42), std::byte(13) });
         EXPECT_EQ(execute(*mDb, insert, blob), 1);
         Statement select(*mDb, GetExact<std::vector<std::byte>>("blobs"));
         std::vector<std::tuple<std::vector<std::byte>>> result;
@@ -239,7 +245,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, requestResultShouldSupportNull)
     {
-        Statement select(*mDb, GetNull {});
+        Statement select(*mDb, GetNull{});
         std::vector<std::tuple<void*>> result;
         request(*mDb, select, std::back_inserter(result), std::numeric_limits<std::size_t>::max());
         EXPECT_THAT(result, ElementsAre(std::tuple(nullptr)));
@@ -247,7 +253,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, requestResultShouldSupportConstructibleFromInt)
     {
-        Statement insert(*mDb, InsertInt<int> {});
+        Statement insert(*mDb, InsertInt<int>{});
         const int value = 42;
         EXPECT_EQ(execute(*mDb, insert, value), 1);
         Statement select(*mDb, GetExact<int>("ints"));
@@ -258,7 +264,7 @@ namespace
 
     TEST_F(Sqlite3RequestTest, requestShouldLimitOutput)
     {
-        Statement insert(*mDb, InsertInt<int> {});
+        Statement insert(*mDb, InsertInt<int>{});
         EXPECT_EQ(execute(*mDb, insert, 13), 1);
         EXPECT_EQ(execute(*mDb, insert, 42), 1);
         Statement select(*mDb, GetAll("ints"));

@@ -4,8 +4,8 @@
 #include "record.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm3/cellref.hpp>
 #include <components/esm/defs.hpp>
+#include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -14,25 +14,25 @@
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadstat.hpp>
+#include <components/esm3/readerscache.hpp>
 #include <components/files/collections.hpp>
+#include <components/files/conversion.hpp>
 #include <components/files/multidircollection.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/lower.hpp>
-#include <components/esm3/readerscache.hpp>
-#include <components/loadinglistener/loadinglistener.hpp>
-#include <components/files/conversion.hpp>
 
 #include <algorithm>
-#include <filesystem>
 #include <cstddef>
+#include <filesystem>
 #include <map>
 #include <set>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <sstream>
 
 namespace EsmLoader
 {
@@ -46,15 +46,9 @@ namespace EsmLoader
                 return (v.mId);
             }
 
-            const ESM::CellId& operator()(const ESM::Cell& v) const
-            {
-                return v.mCellId;
-            }
+            const ESM::CellId& operator()(const ESM::Cell& v) const { return v.mCellId; }
 
-            std::pair<int, int> operator()(const ESM::Land& v) const
-            {
-                return std::pair(v.mX, v.mY);
-            }
+            std::pair<int, int> operator()(const ESM::Land& v) const { return std::pair(v.mX, v.mY); }
 
             template <class T>
             decltype(auto) operator()(const Record<T>& v) const
@@ -71,17 +65,20 @@ namespace EsmLoader
         };
 
         template <class T, class = std::void_t<>>
-        struct HasId : std::false_type {};
+        struct HasId : std::false_type
+        {
+        };
 
         template <class T>
-        struct HasId<T, std::void_t<decltype(T::mId)>> : std::true_type {};
+        struct HasId<T, std::void_t<decltype(T::mId)>> : std::true_type
+        {
+        };
 
         template <class T>
         constexpr bool hasId = HasId<T>::value;
 
         template <class T>
-        auto loadRecord(ESM::ESMReader& reader, Records<T>& records)
-            -> std::enable_if_t<hasId<T>>
+        auto loadRecord(ESM::ESMReader& reader, Records<T>& records) -> std::enable_if_t<hasId<T>>
         {
             T record;
             bool deleted = false;
@@ -93,8 +90,7 @@ namespace EsmLoader
         }
 
         template <class T>
-        auto loadRecord(ESM::ESMReader& reader, Records<T>& records)
-            -> std::enable_if_t<!hasId<T>>
+        auto loadRecord(ESM::ESMReader& reader, Records<T>& records) -> std::enable_if_t<!hasId<T>>
         {
             T record;
             bool deleted = false;
@@ -213,12 +209,12 @@ namespace EsmLoader
         }
 
         ShallowContent shallowLoad(const Query& query, const std::vector<std::string>& contentFiles,
-            const Files::Collections& fileCollections, ESM::ReadersCache& readers,
-            ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
+            const Files::Collections& fileCollections, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder,
+            Loading::Listener* listener)
         {
             ShallowContent result;
 
-            const std::set<std::string> supportedFormats {
+            const std::set<std::string> supportedFormats{
                 ".esm",
                 ".esp",
                 ".omwgame",
@@ -228,8 +224,9 @@ namespace EsmLoader
 
             for (std::size_t i = 0; i < contentFiles.size(); ++i)
             {
-                const std::string &file = contentFiles[i];
-                const std::string extension = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(std::filesystem::path(file).extension()));
+                const std::string& file = contentFiles[i];
+                const std::string extension
+                    = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(std::filesystem::path(file).extension()));
 
                 if (supportedFormats.find(extension) == supportedFormats.end())
                 {
@@ -263,31 +260,30 @@ namespace EsmLoader
             ESM::RecNameInts mType;
 
             template <class T>
-            RefIdWithType operator()(const T& v) const { return {v.mId, mType}; }
+            RefIdWithType operator()(const T& v) const
+            {
+                return { v.mId, mType };
+            }
         };
 
         template <class T>
         void addRefIdsTypes(const std::vector<T>& values, std::vector<RefIdWithType>& refIdsTypes)
         {
             std::transform(values.begin(), values.end(), std::back_inserter(refIdsTypes),
-                           WithType {static_cast<ESM::RecNameInts>(T::sRecordId)});
+                WithType{ static_cast<ESM::RecNameInts>(T::sRecordId) });
         }
 
         void addRefIdsTypes(EsmData& content)
         {
-            content.mRefIdTypes.reserve(
-                content.mActivators.size()
-                + content.mContainers.size()
-                + content.mDoors.size()
-                + content.mStatics.size()
-            );
+            content.mRefIdTypes.reserve(content.mActivators.size() + content.mContainers.size() + content.mDoors.size()
+                + content.mStatics.size());
 
             addRefIdsTypes(content.mActivators, content.mRefIdTypes);
             addRefIdsTypes(content.mContainers, content.mRefIdTypes);
             addRefIdsTypes(content.mDoors, content.mRefIdTypes);
             addRefIdsTypes(content.mStatics, content.mRefIdTypes);
 
-            std::sort(content.mRefIdTypes.begin(), content.mRefIdTypes.end(), LessById {});
+            std::sort(content.mRefIdTypes.begin(), content.mRefIdTypes.end(), LessById{});
         }
 
         std::vector<ESM::Cell> prepareCellRecords(Records<ESM::Cell>& records)
@@ -330,19 +326,19 @@ namespace EsmLoader
         EsmData result;
 
         if (query.mLoadActivators)
-            result.mActivators = prepareRecords(content.mActivators, GetKey {});
+            result.mActivators = prepareRecords(content.mActivators, GetKey{});
         if (query.mLoadCells)
             result.mCells = prepareCellRecords(content.mCells.mValues);
         if (query.mLoadContainers)
-            result.mContainers = prepareRecords(content.mContainers, GetKey {});
+            result.mContainers = prepareRecords(content.mContainers, GetKey{});
         if (query.mLoadDoors)
-            result.mDoors = prepareRecords(content.mDoors, GetKey {});
+            result.mDoors = prepareRecords(content.mDoors, GetKey{});
         if (query.mLoadGameSettings)
-            result.mGameSettings = prepareRecords(content.mGameSettings, GetKey {});
+            result.mGameSettings = prepareRecords(content.mGameSettings, GetKey{});
         if (query.mLoadLands)
-            result.mLands = prepareRecords(content.mLands, GetKey {});
+            result.mLands = prepareRecords(content.mLands, GetKey{});
         if (query.mLoadStatics)
-            result.mStatics = prepareRecords(content.mStatics, GetKey {});
+            result.mStatics = prepareRecords(content.mStatics, GetKey{});
 
         addRefIdsTypes(result);
 

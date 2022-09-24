@@ -1,9 +1,9 @@
 #ifndef OPENMW_ESM_NPCSTATS_H
 #define OPENMW_ESM_NPCSTATS_H
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 #include "statstate.hpp"
 
@@ -45,8 +45,8 @@ namespace ESM
         /// Initialize to default state
         void blank();
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 }
 

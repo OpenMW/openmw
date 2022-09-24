@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include <QTranslator>
 #include <QDir>
+#include <QTranslator>
 
 #include <components/debug/debugging.hpp>
 #include <components/platform/platform.hpp>
@@ -14,7 +14,7 @@
 
 #include "maindialog.hpp"
 
-int runLauncher(int argc, char *argv[])
+int runLauncher(int argc, char* argv[])
 {
     Platform::init();
 
@@ -22,7 +22,7 @@ int runLauncher(int argc, char *argv[])
     {
         QApplication app(argc, argv);
 
-        // Internationalization 
+        // Internationalization
         QString locale = QLocale::system().name().section('_', 0, 0);
 
         QTranslator appTranslator;
@@ -54,7 +54,7 @@ int runLauncher(int argc, char *argv[])
     }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     return wrapApplication(runLauncher, argc, argv, "Launcher");
 }

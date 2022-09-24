@@ -56,11 +56,16 @@ namespace
     {
         switch (index)
         {
-            case 0: return AreaType_null;
-            case 1: return AreaType_water;
-            case 2: return AreaType_door;
-            case 3: return AreaType_pathgrid;
-            case 4: return AreaType_ground;
+            case 0:
+                return AreaType_null;
+            case 1:
+                return AreaType_water;
+            case 2:
+                return AreaType_door;
+            case 3:
+                return AreaType_pathgrid;
+            case 4:
+                return AreaType_ground;
         }
         return AreaType_null;
     }
@@ -83,7 +88,7 @@ namespace
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         std::generate_n(out, count, [&] {
-            return CellWater {generateVec2i(1000, random), Water {ESM::Land::REAL_SIZE, distribution(random)}};
+            return CellWater{ generateVec2i(1000, random), Water{ ESM::Land::REAL_SIZE, distribution(random) } };
         });
     }
 
@@ -97,7 +102,8 @@ namespace
         if (distribution(random) < 0.939)
         {
             generateVertices(std::back_inserter(vertices), triangles * 2.467, random);
-            generateIndices(std::back_inserter(indices), static_cast<int>(vertices.size() / 3) - 1, vertices.size() * 1.279, random);
+            generateIndices(std::back_inserter(indices), static_cast<int>(vertices.size() / 3) - 1,
+                vertices.size() * 1.279, random);
             generateAreaTypes(std::back_inserter(areaTypes), indices.size() / 3, random);
         }
         return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
@@ -113,10 +119,8 @@ namespace
         result.mMinHeight = distribution(random);
         result.mMaxHeight = result.mMinHeight + 1.0;
         result.mLength = static_cast<std::uint8_t>(ESM::Land::LAND_SIZE);
-        std::generate_n(std::back_inserter(result.mHeights), ESM::Land::LAND_NUM_VERTS, [&]
-        {
-            return distribution(random);
-        });
+        std::generate_n(
+            std::back_inserter(result.mHeights), ESM::Land::LAND_NUM_VERTS, [&] { return distribution(random); });
         result.mOriginalSize = ESM::Land::LAND_SIZE;
         result.mMinX = 0;
         result.mMinY = 0;
@@ -140,16 +144,16 @@ namespace
         const CollisionShapeType agentShapeType = CollisionShapeType::Aabb;
         const osg::Vec3f agentHalfExtents = generateAgentHalfExtents(0.5, 1.5, random);
         const TilePosition tilePosition = generateVec2i(10000, random);
-        const Version version {
+        const Version version{
             .mGeneration = std::uniform_int_distribution<std::size_t>(0, 100)(random),
             .mRevision = std::uniform_int_distribution<std::size_t>(0, 10000)(random),
         };
         Mesh mesh = generateMesh(triangles, random);
         std::vector<CellWater> water;
         generateWater(std::back_inserter(water), 1, random);
-        RecastMesh recastMesh(version, std::move(mesh), std::move(water),
-                              {generateHeightfield(random)}, {generateFlatHeightfield(random)}, {});
-        return Key {AgentBounds {agentShapeType, agentHalfExtents}, tilePosition, std::move(recastMesh)};
+        RecastMesh recastMesh(version, std::move(mesh), std::move(water), { generateHeightfield(random) },
+            { generateFlatHeightfield(random) }, {});
+        return Key{ AgentBounds{ agentShapeType, agentHalfExtents }, tilePosition, std::move(recastMesh) };
     }
 
     constexpr std::size_t trianglesPerTile = 239;
@@ -168,8 +172,7 @@ namespace
         while (true)
         {
             Key key = generateKey(trianglesPerTile, random);
-            cache.set(key.mAgentBounds, key.mTilePosition, key.mRecastMesh,
-                      std::make_unique<PreparedNavMeshData>());
+            cache.set(key.mAgentBounds, key.mTilePosition, key.mRecastMesh, std::make_unique<PreparedNavMeshData>());
             *out++ = std::move(key);
             const std::size_t newSize = cache.getStats().mNavMeshCacheSize;
             if (size >= newSize)
@@ -250,8 +253,8 @@ namespace
         while (state.KeepRunning())
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.set(key.mAgentBounds, key.mTilePosition, key.mRecastMesh,
-                                          std::make_unique<PreparedNavMeshData>());
+            const auto result = cache.set(
+                key.mAgentBounds, key.mTilePosition, key.mRecastMesh, std::make_unique<PreparedNavMeshData>());
             benchmark::DoNotOptimize(result);
         }
     }

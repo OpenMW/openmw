@@ -18,7 +18,7 @@ namespace Gui
         }
     }
 
-    void SharedStateButton::shareStateWith(const ButtonGroup &shared)
+    void SharedStateButton::shareStateWith(const ButtonGroup& shared)
     {
         mSharedWith = shared;
     }
@@ -37,14 +37,14 @@ namespace Gui
         updateButtonState();
     }
 
-    void SharedStateButton::onMouseSetFocus(MyGUI::Widget *_old)
+    void SharedStateButton::onMouseSetFocus(MyGUI::Widget* _old)
     {
         mIsMouseFocus = true;
         Base::onMouseSetFocus(_old);
         updateButtonState();
     }
 
-    void SharedStateButton::onMouseLostFocus(MyGUI::Widget *_new)
+    void SharedStateButton::onMouseLostFocus(MyGUI::Widget* _new)
     {
         mIsMouseFocus = false;
         Base::onMouseLostFocus(_new);
@@ -68,7 +68,7 @@ namespace Gui
         }
     }
 
-    bool SharedStateButton::_setState(const std::string &_value)
+    bool SharedStateButton::_setState(const std::string& _value)
     {
         bool ret = _setWidgetState(_value);
         if (ret)

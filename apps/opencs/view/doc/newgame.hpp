@@ -8,7 +8,7 @@
 
 #ifndef CS_QT_STD_FILESYSTEM_PATH_DECLARED
 #define CS_QT_STD_FILESYSTEM_PATH_DECLARED
-Q_DECLARE_METATYPE (std::filesystem::path)
+Q_DECLARE_METATYPE(std::filesystem::path)
 #endif
 
 class QPushButton;
@@ -20,31 +20,30 @@ namespace CSVDoc
 
     class NewGameDialogue : public QDialog
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QPushButton *mCreate;
-            FileWidget *mFileWidget;
-            AdjusterWidget *mAdjusterWidget;
+        QPushButton* mCreate;
+        FileWidget* mFileWidget;
+        AdjusterWidget* mAdjusterWidget;
 
-        public:
+    public:
+        NewGameDialogue();
 
-            NewGameDialogue();
+        void setLocalData(const std::filesystem::path& localData);
 
-            void setLocalData (const std::filesystem::path& localData);
+    signals:
 
-        signals:
+        void createRequest(const std::filesystem::path& file);
 
-            void createRequest (const std::filesystem::path& file);
+        void cancelCreateGame();
 
-            void cancelCreateGame ();
+    private slots:
 
-        private slots:
+        void stateChanged(bool valid);
 
-            void stateChanged (bool valid);
+        void create();
 
-            void create();
-
-            void reject() override;
+        void reject() override;
     };
 }
 

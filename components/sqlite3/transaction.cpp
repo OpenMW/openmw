@@ -15,12 +15,17 @@ namespace Sqlite3
         {
             switch (mode)
             {
-                case TransactionMode::Default: return "BEGIN";
-                case TransactionMode::Deferred: return "BEGIN DEFERRED";
-                case TransactionMode::Immediate: return "BEGIN IMMEDIATE";
-                case TransactionMode::Exclusive: return "BEGIN EXCLUSIVE";
+                case TransactionMode::Default:
+                    return "BEGIN";
+                case TransactionMode::Deferred:
+                    return "BEGIN DEFERRED";
+                case TransactionMode::Immediate:
+                    return "BEGIN IMMEDIATE";
+                case TransactionMode::Exclusive:
+                    return "BEGIN EXCLUSIVE";
             }
-            throw std::logic_error("Invalid transaction mode: " + std::to_string(static_cast<std::underlying_type_t<TransactionMode>>(mode)));
+            throw std::logic_error("Invalid transaction mode: "
+                + std::to_string(static_cast<std::underlying_type_t<TransactionMode>>(mode)));
         }
     }
 
@@ -37,15 +42,17 @@ namespace Sqlite3
     {
         if (const int ec = sqlite3_exec(&db, getBeginStatement(mode), nullptr, nullptr, nullptr); ec != SQLITE_OK)
         {
-            (void) mDb.release();
-            throw std::runtime_error("Failed to start transaction: " + std::string(sqlite3_errmsg(&db)) + " (" + std::to_string(ec) + ")");
+            (void)mDb.release();
+            throw std::runtime_error(
+                "Failed to start transaction: " + std::string(sqlite3_errmsg(&db)) + " (" + std::to_string(ec) + ")");
         }
     }
 
     void Transaction::commit()
     {
         if (const int ec = sqlite3_exec(mDb.get(), "COMMIT", nullptr, nullptr, nullptr); ec != SQLITE_OK)
-            throw std::runtime_error("Failed to commit transaction: " + std::string(sqlite3_errmsg(mDb.get())) + " (" + std::to_string(ec) + ")");
-        (void) mDb.release();
+            throw std::runtime_error("Failed to commit transaction: " + std::string(sqlite3_errmsg(mDb.get())) + " ("
+                + std::to_string(ec) + ")");
+        (void)mDb.release();
     }
 }

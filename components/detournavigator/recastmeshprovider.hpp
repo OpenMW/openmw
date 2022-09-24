@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESHPROVIDER_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESHPROVIDER_H
 
-#include "tileposition.hpp"
 #include "recastmesh.hpp"
 #include "tilecachedrecastmeshmanager.hpp"
+#include "tileposition.hpp"
 
 #include <functional>
 #include <memory>
@@ -17,7 +17,8 @@ namespace DetourNavigator
     public:
         RecastMeshProvider(TileCachedRecastMeshManager& impl)
             : mImpl(impl)
-        {}
+        {
+        }
 
         std::shared_ptr<RecastMesh> getMesh(std::string_view worldspace, const TilePosition& tilePosition) const
         {

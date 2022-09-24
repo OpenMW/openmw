@@ -24,7 +24,7 @@ namespace MWPhysics
     {
     public:
         HeightField(const float* heights, int x, int y, int size, int verts, float minH, float maxH,
-                    const osg::Object* holdObject, PhysicsTaskScheduler* scheduler);
+            const osg::Object* holdObject, PhysicsTaskScheduler* scheduler);
         ~HeightField();
 
         btCollisionObject* getCollisionObject();

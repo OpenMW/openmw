@@ -18,8 +18,14 @@ namespace MWRender
         std::string mWeaponGroup;
         float mStartTime;
         bool mRelativeTime;
+
     public:
-        WeaponAnimationTime(Animation* animation) : mAnimation(animation), mStartTime(0), mRelativeTime(false) {}
+        WeaponAnimationTime(Animation* animation)
+            : mAnimation(animation)
+            , mStartTime(0)
+            , mRelativeTime(false)
+        {
+        }
         void setGroup(const std::string& group, bool relativeTime);
         void updateStartTime();
 
@@ -34,7 +40,7 @@ namespace MWRender
         virtual ~WeaponAnimation();
 
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
-        void attachArrow(const MWWorld::Ptr &actor);
+        void attachArrow(const MWWorld::Ptr& actor);
 
         void detachArrow(MWWorld::Ptr actor);
 
@@ -42,7 +48,8 @@ namespace MWRender
         void releaseArrow(MWWorld::Ptr actor, float attackStrength);
 
         /// Add WeaponAnimation-related controllers to \a nodes and store the added controllers in \a map.
-        void addControllers(const Animation::NodeMap& nodes, std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>>& map, osg::Node* objectRoot);
+        void addControllers(const Animation::NodeMap& nodes,
+            std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>>& map, osg::Node* objectRoot);
 
         void deleteControllers();
 

@@ -19,22 +19,17 @@ std::string CSVWorld::StartScriptCreator::getId() const
 
 CSMWorld::IdTable& CSVWorld::StartScriptCreator::getStartScriptsTable() const
 {
-    return dynamic_cast<CSMWorld::IdTable&> (
-        *getData().getTableModel(getCollectionId())
-    );
+    return dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
 }
 
-CSVWorld::StartScriptCreator::StartScriptCreator(
-    CSMWorld::Data &data,
-    QUndoStack &undoStack,
-    const CSMWorld::UniversalId &id,
-    CSMWorld::IdCompletionManager& completionManager
-) : GenericCreator(data, undoStack, id)
+CSVWorld::StartScriptCreator::StartScriptCreator(CSMWorld::Data& data, QUndoStack& undoStack,
+    const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager)
+    : GenericCreator(data, undoStack, id)
 {
     setManualEditing(false);
 
     // Add script ID input label.
-    QLabel *label = new QLabel("Script", this);
+    QLabel* label = new QLabel("Script", this);
     insertBeforeButtons(label, false);
 
     // Add script ID input with auto-completion.
@@ -48,9 +43,7 @@ CSVWorld::StartScriptCreator::StartScriptCreator(
     connect(mScript, &CSVWidget::DropLineEdit::returnPressed, this, &StartScriptCreator::inputReturnPressed);
 }
 
-void CSVWorld::StartScriptCreator::cloneMode(
-    const std::string& originId,
-    const CSMWorld::UniversalId::Type type)
+void CSVWorld::StartScriptCreator::cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type)
 {
     CSVWorld::GenericCreator::cloneMode(originId, type);
 
@@ -98,14 +91,8 @@ void CSVWorld::StartScriptCreator::scriptChanged()
     update();
 }
 
-CSVWorld::Creator *CSVWorld::StartScriptCreatorFactory::makeCreator(
-    CSMDoc::Document& document,
-    const CSMWorld::UniversalId& id) const
+CSVWorld::Creator* CSVWorld::StartScriptCreatorFactory::makeCreator(
+    CSMDoc::Document& document, const CSMWorld::UniversalId& id) const
 {
-    return new StartScriptCreator(
-        document.getData(),
-        document.getUndoStack(),
-        id,
-        document.getIdCompletionManager()
-    );
+    return new StartScriptCreator(document.getData(), document.getUndoStack(), id, document.getIdCompletionManager());
 }

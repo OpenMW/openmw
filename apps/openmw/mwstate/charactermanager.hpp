@@ -10,42 +10,40 @@ namespace MWState
 {
     class CharacterManager
     {
-            std::filesystem::path mPath;
+        std::filesystem::path mPath;
 
-            // Uses std::list, so that mCurrent stays valid when characters are deleted
-            std::list<Character> mCharacters;
+        // Uses std::list, so that mCurrent stays valid when characters are deleted
+        std::list<Character> mCharacters;
 
-            Character *mCurrent;
-            std::string mGame;
+        Character* mCurrent;
+        std::string mGame;
 
-        private:
+    private:
+        CharacterManager(const CharacterManager&);
+        ///< Not implemented
 
-            CharacterManager (const CharacterManager&);
-            ///< Not implemented
+        CharacterManager& operator=(const CharacterManager&);
+        ///< Not implemented
 
-            CharacterManager& operator= (const CharacterManager&);
-            ///< Not implemented
+        std::list<Character>::iterator findCharacter(const MWState::Character* character);
 
-            std::list<Character>::iterator findCharacter(const MWState::Character* character);
+    public:
+        CharacterManager(std::filesystem::path saves, const std::vector<std::string>& contentFiles);
 
-        public:
+        Character* getCurrentCharacter();
+        ///< @note May return null
 
-            CharacterManager (std::filesystem::path  saves, const std::vector<std::string>& contentFiles);
+        void deleteSlot(const MWState::Character* character, const MWState::Slot* slot);
 
-            Character *getCurrentCharacter ();
-            ///< @note May return null
+        Character* createCharacter(const std::string& name);
+        ///< Create new character within saved game management
+        /// \param name Name for the character (does not need to be unique)
 
-            void deleteSlot(const MWState::Character *character, const MWState::Slot *slot);
+        void setCurrentCharacter(const Character* character);
 
-            Character* createCharacter(const std::string& name);
-            ///< Create new character within saved game management
-            /// \param name Name for the character (does not need to be unique)
+        std::list<Character>::const_iterator begin() const;
 
-            void setCurrentCharacter (const Character *character);
-
-            std::list<Character>::const_iterator begin() const;
-
-            std::list<Character>::const_iterator end() const;
+        std::list<Character>::const_iterator end() const;
     };
 }
 

@@ -24,8 +24,8 @@ namespace MWGui
         void onFrame(float dt) override { checkReferenceAvailable(); }
         void clear() override { resetReference(); }
 
-        void setSoulGem (const MWWorld::Ptr& gem);
-        void setItem (const MWWorld::Ptr& item);
+        void setSoulGem(const MWWorld::Ptr& gem);
+        void setItem(const MWWorld::Ptr& item);
 
         /// Actor Ptr: buy enchantment from this actor
         /// Soulgem Ptr: player self-enchant
@@ -38,8 +38,8 @@ namespace MWGui
         void notifyEffectsChanged() override;
 
         void onCancelButtonClicked(MyGUI::Widget* sender);
-        void onSelectItem (MyGUI::Widget* sender);
-        void onSelectSoul (MyGUI::Widget* sender);
+        void onSelectItem(MyGUI::Widget* sender);
+        void onSelectSoul(MyGUI::Widget* sender);
 
         void onItemSelected(MWWorld::Ptr item);
         void onItemCancel();

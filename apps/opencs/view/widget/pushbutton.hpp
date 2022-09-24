@@ -12,59 +12,52 @@ namespace CSVWidget
 {
     class PushButton : public QPushButton
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        enum Type
+        {
+            Type_TopMode, // top level button for mode selector panel
+            Type_TopAction, // top level button that triggers an action
+            Type_Mode, // mode button
+            Type_Toggle
+        };
 
-            enum Type
-            {
-                Type_TopMode, // top level button for mode selector panel
-                Type_TopAction, // top level button that triggers an action
-                Type_Mode, // mode button
-                Type_Toggle
-            };
+    private:
+        bool mKeepOpen;
+        Type mType;
+        QString mToolTip;
+        QString mProcessedToolTip;
 
-        private:
+    private:
+        void processShortcuts();
+        void setExtendedToolTip();
 
-            bool mKeepOpen;
-            Type mType;
-            QString mToolTip;
-            QString mProcessedToolTip;
+    protected:
+        void keyPressEvent(QKeyEvent* event) override;
 
-        private:
+        void keyReleaseEvent(QKeyEvent* event) override;
 
-            void processShortcuts();
-            void setExtendedToolTip();
+        void mouseReleaseEvent(QMouseEvent* event) override;
 
-        protected:
+    public:
+        /// \param push Do not maintain a toggle state
+        PushButton(const QIcon& icon, Type type, const QString& tooltip = "", QWidget* parent = nullptr);
 
-            void keyPressEvent (QKeyEvent *event) override;
+        /// \param push Do not maintain a toggle state
+        PushButton(Type type, const QString& tooltip = "", QWidget* parent = nullptr);
 
-            void keyReleaseEvent (QKeyEvent *event) override;
+        bool hasKeepOpen() const;
 
-            void mouseReleaseEvent (QMouseEvent *event) override;
+        /// Return tooltip used at construction (without any button-specific modifications)
+        QString getBaseToolTip() const;
 
-        public:
+        Type getType() const;
 
-            /// \param push Do not maintain a toggle state
-            PushButton (const QIcon& icon, Type type, const QString& tooltip = "",
-                QWidget *parent = nullptr);
+    private slots:
 
-            /// \param push Do not maintain a toggle state
-            PushButton (Type type, const QString& tooltip = "",
-                QWidget *parent = nullptr);
-
-            bool hasKeepOpen() const;
-
-            /// Return tooltip used at construction (without any button-specific modifications)
-            QString getBaseToolTip() const;
-
-            Type getType() const;
-
-        private slots:
-
-            void checkedStateChanged (bool checked);
-            void settingChanged (const CSMPrefs::Setting *setting);
+        void checkedStateChanged(bool checked);
+        void settingChanged(const CSMPrefs::Setting* setting);
     };
 }
 

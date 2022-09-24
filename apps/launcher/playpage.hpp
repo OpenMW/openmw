@@ -14,8 +14,8 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        PlayPage(QWidget *parent = nullptr);
-        void setProfilesModel(QAbstractItemModel *model);
+        PlayPage(QWidget* parent = nullptr);
+        void setProfilesModel(QAbstractItemModel* model);
 
     signals:
         void signalProfileChanged(int index);
@@ -26,9 +26,6 @@ namespace Launcher
 
     private slots:
         void slotPlayClicked();
-
-
-
     };
 }
 #endif

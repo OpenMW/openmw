@@ -4,19 +4,19 @@
 #include <optional>
 #include <variant>
 
-#include <osg/Camera>
-#include <osg/Uniform>
-#include <osg/Texture2D>
-#include <osg/FrameBufferObject>
-#include <osg/BlendFunc>
 #include <osg/BlendEquation>
+#include <osg/BlendFunc>
+#include <osg/Camera>
+#include <osg/FrameBufferObject>
+#include <osg/Texture2D>
+#include <osg/Uniform>
 
 #include <MyGUI_Widget.h>
 
+#include <components/debug/debuglog.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/settings/shadermanager.hpp>
-#include <components/misc/strings/format.hpp>
-#include <components/debug/debuglog.hpp>
 
 namespace fx
 {
@@ -29,7 +29,7 @@ namespace fx
             std::optional<int> mWidth;
             std::optional<int> mHeight;
 
-            std::tuple<int,int> get(int width, int height) const
+            std::tuple<int, int> get(int width, int height) const
             {
                 int scaledWidth = width;
                 int scaledHeight = height;
@@ -67,30 +67,15 @@ namespace fx
 
             using value_type = T;
 
-            bool isArray() const
-            {
-                return mArray.has_value();
-            }
+            bool isArray() const { return mArray.has_value(); }
 
-            const std::vector<T>& getArray() const
-            {
-                return *mArray;
-            }
+            const std::vector<T>& getArray() const { return *mArray; }
 
-            T getValue() const
-            {
-                return mValue.value_or(mDefault);
-            }
+            T getValue() const { return mValue.value_or(mDefault); }
         };
 
-        using Uniform_t = std::variant<
-            Uniform<osg::Vec2f>,
-            Uniform<osg::Vec3f>,
-            Uniform<osg::Vec4f>,
-            Uniform<bool>,
-            Uniform<float>,
-            Uniform<int>
-        >;
+        using Uniform_t = std::variant<Uniform<osg::Vec2f>, Uniform<osg::Vec3f>, Uniform<osg::Vec4f>, Uniform<bool>,
+            Uniform<float>, Uniform<int>>;
 
         enum SamplerType
         {
@@ -123,7 +108,12 @@ namespace fx
 
             size_t getNumElements() const
             {
-                return std::visit([&](auto&& arg) { ;return arg.isArray() ? arg.getArray().size() : 1; }, mData);
+                return std::visit(
+                    [&](auto&& arg) {
+                        ;
+                        return arg.isArray() ? arg.getArray().size() : 1;
+                    },
+                    mData);
             }
 
             template <class T>
@@ -147,42 +137,47 @@ namespace fx
             template <class T>
             void setValue(const T& value)
             {
-                std::visit([&, value](auto&& arg){
-                    using U = typename std::decay_t<decltype(arg)>::value_type;
+                std::visit(
+                    [&, value](auto&& arg) {
+                        using U = typename std::decay_t<decltype(arg)>::value_type;
 
-                    if constexpr (std::is_same_v<T, U>)
-                    {
-                        arg.mValue = value;
+                        if constexpr (std::is_same_v<T, U>)
+                        {
+                            arg.mValue = value;
 
-                        Settings::ShaderManager::get().setValue(mTechniqueName, mName, value);
-                    }
-                    else
-                    {
-                        Log(Debug::Warning) << "Attempting to set uniform '" << mName << "' with wrong type";
-                    }
-                }, mData);
+                            Settings::ShaderManager::get().setValue(mTechniqueName, mName, value);
+                        }
+                        else
+                        {
+                            Log(Debug::Warning) << "Attempting to set uniform '" << mName << "' with wrong type";
+                        }
+                    },
+                    mData);
             }
 
             template <class T, class A>
             void setValue(const std::vector<T, A>& value)
             {
-                std::visit([&, value](auto&& arg) {
-                    using U = typename std::decay_t<decltype(arg)>::value_type;
+                std::visit(
+                    [&, value](auto&& arg) {
+                        using U = typename std::decay_t<decltype(arg)>::value_type;
 
-                    if (!arg.isArray() || arg.getArray().size() != value.size())
-                    {
-                        Log(Debug::Error) << "Attempting to set uniform array '" << mName << "' with mismatching array sizes";
-                        return;
-                    }
+                        if (!arg.isArray() || arg.getArray().size() != value.size())
+                        {
+                            Log(Debug::Error)
+                                << "Attempting to set uniform array '" << mName << "' with mismatching array sizes";
+                            return;
+                        }
 
-                    if constexpr (std::is_same_v<T, U>)
-                    {
-                        arg.mArray = value;
-                        Settings::ShaderManager::get().setValue(mTechniqueName, mName, value);
-                    }
-                    else
-                        Log(Debug::Warning) << "Attempting to set uniform array '" << mName << "' with wrong type";
-                }, mData);
+                        if constexpr (std::is_same_v<T, U>)
+                        {
+                            arg.mArray = value;
+                            Settings::ShaderManager::get().setValue(mTechniqueName, mName, value);
+                        }
+                        else
+                            Log(Debug::Warning) << "Attempting to set uniform array '" << mName << "' with wrong type";
+                    },
+                    mData);
             }
 
             void setUniform(osg::Uniform* uniform)
@@ -191,39 +186,42 @@ namespace fx
                 if (!type || type.value() != uniform->getType())
                     return;
 
-                std::visit([&](auto&& arg)
-                {
-                    if (arg.isArray())
-                    {
-                        for (size_t i = 0; i < arg.getArray().size(); ++i)
-                            uniform->setElement(i, arg.getArray()[i]);
-                        uniform->dirty();
-                    }
-                    else
-                        uniform->set(arg.getValue());
-                }, mData);
+                std::visit(
+                    [&](auto&& arg) {
+                        if (arg.isArray())
+                        {
+                            for (size_t i = 0; i < arg.getArray().size(); ++i)
+                                uniform->setElement(i, arg.getArray()[i]);
+                            uniform->dirty();
+                        }
+                        else
+                            uniform->set(arg.getValue());
+                    },
+                    mData);
             }
 
             std::optional<osg::Uniform::Type> getType() const
             {
-                return std::visit([](auto&& arg) -> std::optional<osg::Uniform::Type> {
-                    using T = typename std::decay_t<decltype(arg)>::value_type;
+                return std::visit(
+                    [](auto&& arg) -> std::optional<osg::Uniform::Type> {
+                        using T = typename std::decay_t<decltype(arg)>::value_type;
 
-                    if constexpr (std::is_same_v<T, osg::Vec2f>)
-                        return osg::Uniform::FLOAT_VEC2;
-                    else if constexpr (std::is_same_v<T, osg::Vec3f>)
-                        return osg::Uniform::FLOAT_VEC3;
-                    else if constexpr (std::is_same_v<T, osg::Vec4f>)
-                        return osg::Uniform::FLOAT_VEC4;
-                    else if constexpr (std::is_same_v<T, float>)
-                        return osg::Uniform::FLOAT;
-                    else if constexpr (std::is_same_v<T, int>)
-                        return osg::Uniform::INT;
-                    else if constexpr (std::is_same_v<T, bool>)
-                        return osg::Uniform::BOOL;
+                        if constexpr (std::is_same_v<T, osg::Vec2f>)
+                            return osg::Uniform::FLOAT_VEC2;
+                        else if constexpr (std::is_same_v<T, osg::Vec3f>)
+                            return osg::Uniform::FLOAT_VEC3;
+                        else if constexpr (std::is_same_v<T, osg::Vec4f>)
+                            return osg::Uniform::FLOAT_VEC4;
+                        else if constexpr (std::is_same_v<T, float>)
+                            return osg::Uniform::FLOAT;
+                        else if constexpr (std::is_same_v<T, int>)
+                            return osg::Uniform::INT;
+                        else if constexpr (std::is_same_v<T, bool>)
+                            return osg::Uniform::BOOL;
 
-                    return std::nullopt;
-                }, mData);
+                        return std::nullopt;
+                    },
+                    mData);
             }
 
             std::optional<std::string> getGLSL()
@@ -241,62 +239,68 @@ namespace fx
                     }
                 }
 
-                return std::visit([&](auto&& arg) -> std::optional<std::string> {
-                    using T = typename std::decay_t<decltype(arg)>::value_type;
+                return std::visit(
+                    [&](auto&& arg) -> std::optional<std::string> {
+                        using T = typename std::decay_t<decltype(arg)>::value_type;
 
-                    auto value = arg.getValue();
+                        auto value = arg.getValue();
 
-                    const bool useUniform = arg.isArray() || (Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug || mStatic == false);
-                    const std::string uname = arg.isArray() ? Misc::StringUtils::format("%s[%zu]", mName, arg.getArray().size()) : mName;
+                        const bool useUniform = arg.isArray()
+                            || (Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug
+                                || mStatic == false);
+                        const std::string uname = arg.isArray()
+                            ? Misc::StringUtils::format("%s[%zu]", mName, arg.getArray().size())
+                            : mName;
 
-                    if constexpr (std::is_same_v<T, osg::Vec2f>)
-                    {
-                        if (useUniform)
-                            return Misc::StringUtils::format("uniform vec2 %s;", uname);
+                        if constexpr (std::is_same_v<T, osg::Vec2f>)
+                        {
+                            if (useUniform)
+                                return Misc::StringUtils::format("uniform vec2 %s;", uname);
 
-                        return Misc::StringUtils::format("const vec2 %s=vec2(%f,%f);", mName, value[0], value[1]);
-                    }
-                    else if constexpr (std::is_same_v<T, osg::Vec3f>)
-                    {
-                        if (useUniform)
-                            return Misc::StringUtils::format("uniform vec3 %s;", uname);
+                            return Misc::StringUtils::format("const vec2 %s=vec2(%f,%f);", mName, value[0], value[1]);
+                        }
+                        else if constexpr (std::is_same_v<T, osg::Vec3f>)
+                        {
+                            if (useUniform)
+                                return Misc::StringUtils::format("uniform vec3 %s;", uname);
 
-                        return Misc::StringUtils::format("const vec3 %s=vec3(%f,%f,%f);", mName, value[0], value[1], value[2]);
-                    }
-                    else if constexpr (std::is_same_v<T, osg::Vec4f>)
-                    {
-                        if (useUniform)
-                            return Misc::StringUtils::format("uniform vec4 %s;", uname);
+                            return Misc::StringUtils::format(
+                                "const vec3 %s=vec3(%f,%f,%f);", mName, value[0], value[1], value[2]);
+                        }
+                        else if constexpr (std::is_same_v<T, osg::Vec4f>)
+                        {
+                            if (useUniform)
+                                return Misc::StringUtils::format("uniform vec4 %s;", uname);
 
-                        return Misc::StringUtils::format("const vec4 %s=vec4(%f,%f,%f,%f);", mName, value[0], value[1], value[2], value[3]);
-                    }
-                    else if constexpr (std::is_same_v<T, float>)
-                    {
-                        if (useUniform)
-                            return Misc::StringUtils::format("uniform float %s;", uname);
+                            return Misc::StringUtils::format(
+                                "const vec4 %s=vec4(%f,%f,%f,%f);", mName, value[0], value[1], value[2], value[3]);
+                        }
+                        else if constexpr (std::is_same_v<T, float>)
+                        {
+                            if (useUniform)
+                                return Misc::StringUtils::format("uniform float %s;", uname);
 
-                        return Misc::StringUtils::format("const float %s=%f;", mName, value);
-                    }
-                    else if constexpr (std::is_same_v<T, int>)
-                    {
-                        if (useUniform)
-                            return Misc::StringUtils::format("uniform int %s;", uname);
+                            return Misc::StringUtils::format("const float %s=%f;", mName, value);
+                        }
+                        else if constexpr (std::is_same_v<T, int>)
+                        {
+                            if (useUniform)
+                                return Misc::StringUtils::format("uniform int %s;", uname);
 
-                        return Misc::StringUtils::format("const int %s=%i;", mName, value);
-                    }
-                    else if constexpr (std::is_same_v<T, bool>)
-                    {
-                        if (useUniform)
-                            return Misc::StringUtils::format("uniform bool %s;", uname);
+                            return Misc::StringUtils::format("const int %s=%i;", mName, value);
+                        }
+                        else if constexpr (std::is_same_v<T, bool>)
+                        {
+                            if (useUniform)
+                                return Misc::StringUtils::format("uniform bool %s;", uname);
 
-                        return Misc::StringUtils::format("const bool %s=%s;", mName, value ? "true" : "false");
-                    }
+                            return Misc::StringUtils::format("const bool %s=%s;", mName, value ? "true" : "false");
+                        }
 
-                    return std::nullopt;
-
-                }, mData);
+                        return std::nullopt;
+                    },
+                    mData);
             }
-
         };
     }
 }

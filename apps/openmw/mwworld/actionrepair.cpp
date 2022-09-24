@@ -8,17 +8,17 @@
 namespace MWWorld
 {
     ActionRepair::ActionRepair(const Ptr& item, bool force)
-        : Action (false, item)
+        : Action(false, item)
         , mForce(force)
     {
     }
 
-    void ActionRepair::executeImp (const Ptr& actor)
+    void ActionRepair::executeImp(const Ptr& actor)
     {
         if (actor != MWMechanics::getPlayer())
             return;
 
-        if(!mForce && MWMechanics::isPlayerInCombat())
+        if (!mForce && MWMechanics::isPlayerInCombat())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage2}");
             return;

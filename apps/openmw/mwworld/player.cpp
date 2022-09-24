@@ -4,29 +4,29 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/esm3/player.hpp>
-#include <components/esm/defs.hpp>
 #include <components/esm3/loadbsgn.hpp>
-#include <components/fallback/fallback.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/player.hpp>
+#include <components/fallback/fallback.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/magiceffects.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellutil.hpp"
 
-#include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/camera.hpp"
+#include "../mwrender/renderingmanager.hpp"
 
 #include "cellstore.hpp"
 #include "class.hpp"
@@ -34,17 +34,17 @@
 
 namespace MWWorld
 {
-    Player::Player (const ESM::NPC *player)
-      : mCellStore(nullptr),
-        mLastKnownExteriorPosition(0,0,0),
-        mMarkedPosition(ESM::Position()),
-        mMarkedCell(nullptr),
-        mAutoMove(false),
-        mForwardBackward(0),
-        mTeleported(false),
-        mCurrentCrimeId(-1),
-        mPaidCrimeId(-1),
-        mJumping(false)
+    Player::Player(const ESM::NPC* player)
+        : mCellStore(nullptr)
+        , mLastKnownExteriorPosition(0, 0, 0)
+        , mMarkedPosition(ESM::Position())
+        , mMarkedCell(nullptr)
+        , mAutoMove(false)
+        , mForwardBackward(0)
+        , mTeleported(false)
+        , mCurrentCrimeId(-1)
+        , mPaidCrimeId(-1)
+        , mJumping(false)
     {
         ESM::CellRef cellRef;
         cellRef.blank();
@@ -60,26 +60,27 @@ namespace MWWorld
     {
         MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
 
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        for (int i = 0; i < ESM::Skill::Length; ++i)
             mSaveSkills[i] = stats.getSkill(i).getModified();
-        for (int i=0; i<ESM::Attribute::Length; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
             mSaveAttributes[i] = stats.getAttribute(i).getModified();
     }
 
     void Player::restoreStats()
     {
-        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM::GameSetting>& gmst
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
         creatureStats.setHealth(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat());
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             auto& skill = npcStats.getSkill(i);
             skill.restore(skill.getDamage());
             skill.setModifier(mSaveSkills[i] - skill.getBase());
         }
-        for (int i=0; i<ESM::Attribute::Length; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
             auto attribute = npcStats.getAttribute(i);
             attribute.restore(attribute.getDamage());
@@ -90,60 +91,62 @@ namespace MWWorld
 
     void Player::setWerewolfStats()
     {
-        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM::GameSetting>& gmst
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
         creatureStats.setHealth(health.getBase() * gmst.find("fWereWolfHealth")->mValue.getFloat());
-        for(size_t i = 0;i < ESM::Attribute::Length;++i)
+        for (size_t i = 0; i < ESM::Attribute::Length; ++i)
         {
             // Oh, Bethesda. It's "Intelligence".
-            std::string name = "fWerewolf"+((i==ESM::Attribute::Intelligence) ? std::string("Intellegence") :
-                                            ESM::Attribute::sAttributeNames[i]);
+            std::string name = "fWerewolf"
+                + ((i == ESM::Attribute::Intelligence) ? std::string("Intellegence")
+                                                       : ESM::Attribute::sAttributeNames[i]);
 
             MWMechanics::AttributeValue value = npcStats.getAttribute(i);
             value.setModifier(gmst.find(name)->mValue.getFloat() - value.getModified());
             npcStats.setAttribute(i, value);
         }
 
-        for(size_t i = 0;i < ESM::Skill::Length;i++)
+        for (size_t i = 0; i < ESM::Skill::Length; i++)
         {
             // Acrobatics is set separately for some reason.
-            if(i == ESM::Skill::Acrobatics)
+            if (i == ESM::Skill::Acrobatics)
                 continue;
 
             // "Mercantile"! >_<
-            std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
-                                            ESM::Skill::sSkillNames[i]);
+            std::string name = "fWerewolf"
+                + ((i == ESM::Skill::Mercantile) ? std::string("Merchantile") : ESM::Skill::sSkillNames[i]);
 
             MWMechanics::SkillValue& value = npcStats.getSkill(i);
             value.setModifier(gmst.find(name)->mValue.getFloat() - value.getModified());
         }
     }
 
-    void Player::set(const ESM::NPC *player)
+    void Player::set(const ESM::NPC* player)
     {
         mPlayer.mBase = player;
     }
 
-    void Player::setCell (MWWorld::CellStore *cellStore)
+    void Player::setCell(MWWorld::CellStore* cellStore)
     {
         mCellStore = cellStore;
     }
 
     MWWorld::Ptr Player::getPlayer()
     {
-        MWWorld::Ptr ptr (&mPlayer, mCellStore);
+        MWWorld::Ptr ptr(&mPlayer, mCellStore);
         return ptr;
     }
 
     MWWorld::ConstPtr Player::getConstPlayer() const
     {
-        MWWorld::ConstPtr ptr (&mPlayer, mCellStore);
+        MWWorld::ConstPtr ptr(&mPlayer, mCellStore);
         return ptr;
     }
 
-    void Player::setBirthSign (const std::string &sign)
+    void Player::setBirthSign(const std::string& sign)
     {
         mSign = sign;
     }
@@ -153,10 +156,10 @@ namespace MWWorld
         return mSign;
     }
 
-    void Player::setDrawState (MWMechanics::DrawState state)
+    void Player::setDrawState(MWMechanics::DrawState state)
     {
-         MWWorld::Ptr ptr = getPlayer();
-         ptr.getClass().getNpcStats(ptr).setDrawState (state);
+        MWWorld::Ptr ptr = getPlayer();
+        ptr.getClass().getNpcStats(ptr).setDrawState(state);
     }
 
     bool Player::getAutoMove() const
@@ -164,7 +167,7 @@ namespace MWWorld
         return mAutoMove;
     }
 
-    void Player::setAutoMove (bool enable)
+    void Player::setAutoMove(bool enable)
     {
         MWWorld::Ptr ptr = getPlayer();
 
@@ -178,13 +181,13 @@ namespace MWWorld
         ptr.getClass().getMovementSettings(ptr).mPosition[1] = value;
     }
 
-    void Player::setLeftRight (float value)
+    void Player::setLeftRight(float value)
     {
         MWWorld::Ptr ptr = getPlayer();
         ptr.getClass().getMovementSettings(ptr).mPosition[0] = value;
     }
 
-    void Player::setForwardBackward (float value)
+    void Player::setForwardBackward(float value)
     {
         MWWorld::Ptr ptr = getPlayer();
 
@@ -232,8 +235,8 @@ namespace MWWorld
 
     MWMechanics::DrawState Player::getDrawState()
     {
-         MWWorld::Ptr ptr = getPlayer();
-         return ptr.getClass().getNpcStats(ptr).getDrawState();
+        MWWorld::Ptr ptr = getPlayer();
+        return ptr.getClass().getNpcStats(ptr).getDrawState();
     }
 
     void Player::activate()
@@ -242,7 +245,7 @@ namespace MWWorld
             return;
 
         MWWorld::Ptr player = getPlayer();
-        const MWMechanics::NpcStats &playerStats = player.getClass().getNpcStats(player);
+        const MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats(player);
         bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
         if ((!godmode && playerStats.isParalyzed()) || playerStats.getKnockedDown() || playerStats.isDead())
             return;
@@ -283,7 +286,8 @@ namespace MWWorld
         return mJumping;
     }
 
-    bool Player::isInCombat() {
+    bool Player::isInCombat()
+    {
         return MWBase::Environment::get().getMechanicsManager()->getActorsFighting(getPlayer()).size() != 0;
     }
 
@@ -292,13 +296,13 @@ namespace MWWorld
         return MWBase::Environment::get().getMechanicsManager()->getEnemiesNearby(getPlayer()).size() != 0;
     }
 
-    void Player::markPosition(CellStore *markedCell, const ESM::Position& markedPosition)
+    void Player::markPosition(CellStore* markedCell, const ESM::Position& markedPosition)
     {
         mMarkedCell = markedCell;
         mMarkedPosition = markedPosition;
     }
 
-    void Player::getMarkedPosition(CellStore*& markedCell, ESM::Position &markedPosition) const
+    void Player::getMarkedPosition(CellStore*& markedCell, ESM::Position& markedPosition) const
     {
         markedCell = mMarkedCell;
         if (mMarkedCell)
@@ -317,14 +321,14 @@ namespace MWWorld
         mCurrentCrimeId = -1;
         mPaidCrimeId = -1;
         mPreviousItems.clear();
-        mLastKnownExteriorPosition = osg::Vec3f(0,0,0);
+        mLastKnownExteriorPosition = osg::Vec3f(0, 0, 0);
 
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             mSaveSkills[i] = 0.f;
         }
 
-        for (int i=0; i<ESM::Attribute::Length; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
             mSaveAttributes[i] = 0.f;
         }
@@ -337,11 +341,11 @@ namespace MWWorld
         mMarkedPosition.rot[2] = 0;
     }
 
-    void Player::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
+    void Player::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         ESM::Player player;
 
-        mPlayer.save (player.mObject);
+        mPlayer.save(player.mObject);
         player.mCellId = mCellStore->getCell()->getCellId();
 
         player.mCurrentCrimeId = mCurrentCrimeId;
@@ -362,33 +366,34 @@ namespace MWWorld
         else
             player.mHasMark = false;
 
-        for (int i=0; i<ESM::Attribute::Length; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
             player.mSaveAttributes[i] = mSaveAttributes[i];
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        for (int i = 0; i < ESM::Skill::Length; ++i)
             player.mSaveSkills[i] = mSaveSkills[i];
 
         player.mPreviousItems = mPreviousItems;
 
-        writer.startRecord (ESM::REC_PLAY);
-        player.save (writer);
-        writer.endRecord (ESM::REC_PLAY);
+        writer.startRecord(ESM::REC_PLAY);
+        player.save(writer);
+        writer.endRecord(ESM::REC_PLAY);
     }
 
-    bool Player::readRecord (ESM::ESMReader& reader, uint32_t type)
+    bool Player::readRecord(ESM::ESMReader& reader, uint32_t type)
     {
-        if (type==ESM::REC_PLAY)
+        if (type == ESM::REC_PLAY)
         {
             ESM::Player player;
-            player.load (reader);
+            player.load(reader);
 
-            if (!mPlayer.checkState (player.mObject))
+            if (!mPlayer.checkState(player.mObject))
             {
                 // this is the one object we can not silently drop.
-                throw std::runtime_error ("invalid player state record (object state)");
+                throw std::runtime_error("invalid player state record (object state)");
             }
             if (reader.getFormat() < 17)
-                convertMagicEffects(player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
-            else if(reader.getFormat() < 20)
+                convertMagicEffects(
+                    player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
+            else if (reader.getFormat() < 20)
                 convertStats(player.mObject.mCreatureStats);
 
             if (!player.mObject.mEnabled)
@@ -397,11 +402,11 @@ namespace MWWorld
                 player.mObject.mEnabled = true;
             }
 
-            mPlayer.load (player.mObject);
+            mPlayer.load(player.mObject);
 
-            for (int i=0; i<ESM::Attribute::Length; ++i)
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
                 mSaveAttributes[i] = player.mSaveAttributes[i];
-            for (int i=0; i<ESM::Skill::Length; ++i)
+            for (int i = 0; i < ESM::Skill::Length; ++i)
                 mSaveSkills[i] = player.mSaveSkills[i];
 
             if (player.mObject.mNpcStats.mIsWerewolf)
@@ -425,7 +430,7 @@ namespace MWWorld
 
             try
             {
-                mCellStore = world.getCell (player.mCellId);
+                mCellStore = world.getCell(player.mCellId);
             }
             catch (...)
             {
@@ -436,9 +441,9 @@ namespace MWWorld
 
             if (!player.mBirthsign.empty())
             {
-                const ESM::BirthSign* sign = world.getStore().get<ESM::BirthSign>().search (player.mBirthsign);
+                const ESM::BirthSign* sign = world.getStore().get<ESM::BirthSign>().search(player.mBirthsign);
                 if (!sign)
-                    throw std::runtime_error ("invalid player state record (birthsign does not exist)");
+                    throw std::runtime_error("invalid player state record (birthsign does not exist)");
             }
 
             mCurrentCrimeId = player.mCurrentCrimeId;
@@ -455,14 +460,14 @@ namespace MWWorld
                 // interior cell -> need to check if it exists (exterior cell will be
                 // generated on the fly)
 
-                if (!world.getStore().get<ESM::Cell>().search (player.mMarkedCell.mWorldspace))
+                if (!world.getStore().get<ESM::Cell>().search(player.mMarkedCell.mWorldspace))
                     player.mHasMark = false; // drop mark silently
             }
 
             if (player.mHasMark)
             {
                 mMarkedPosition = player.mMarkedPosition;
-                mMarkedCell = world.getCell (player.mMarkedCell);
+                mMarkedCell = world.getCell(player.mMarkedCell);
             }
             else
             {
@@ -555,7 +560,8 @@ namespace MWWorld
         bool swimming = world->isSwimming(player);
         bool flying = world->isFlying(player);
 
-        static const float i1stPersonSneakDelta = store.get<ESM::GameSetting>().find("i1stPersonSneakDelta")->mValue.getFloat();
+        static const float i1stPersonSneakDelta
+            = store.get<ESM::GameSetting>().find("i1stPersonSneakDelta")->mValue.getFloat();
         if (sneaking && !swimming && !flying)
             rendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
         else

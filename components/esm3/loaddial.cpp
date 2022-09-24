@@ -8,18 +8,18 @@
 namespace ESM
 {
 
-    void Dialogue::load(ESMReader &esm, bool &isDeleted)
+    void Dialogue::load(ESMReader& esm, bool& isDeleted)
     {
         loadId(esm);
         loadData(esm, isDeleted);
     }
 
-    void Dialogue::loadId(ESMReader &esm)
+    void Dialogue::loadId(ESMReader& esm)
     {
         mId = esm.getHNString("NAME");
     }
 
-    void Dialogue::loadData(ESMReader &esm, bool &isDeleted)
+    void Dialogue::loadData(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
 
@@ -54,7 +54,7 @@ namespace ESM
         }
     }
 
-    void Dialogue::save(ESMWriter &esm, bool isDeleted) const
+    void Dialogue::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
         if (isDeleted)
@@ -72,7 +72,7 @@ namespace ESM
         mInfo.clear();
     }
 
-    void Dialogue::readInfo(ESMReader &esm, bool merge)
+    void Dialogue::readInfo(ESMReader& esm, bool merge)
     {
         DialInfo info;
         bool isDeleted = false;
@@ -89,7 +89,8 @@ namespace ESM
         if (lookup != mLookup.end())
         {
             auto it = lookup->second.first;
-            // Since the new version of this record may have changed the next/prev linked list connection, we need to re-insert the record
+            // Since the new version of this record may have changed the next/prev linked list connection, we need to
+            // re-insert the record
             mInfo.erase(it);
             mLookup.erase(lookup);
         }

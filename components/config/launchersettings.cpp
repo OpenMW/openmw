@@ -1,9 +1,9 @@
 #include "launchersettings.hpp"
 
-#include <QTextStream>
-#include <QString>
-#include <QRegExp>
 #include <QMultiMap>
+#include <QRegExp>
+#include <QString>
+#include <QTextStream>
 
 #include <QDebug>
 
@@ -18,7 +18,7 @@ const char Config::LauncherSettings::sDirectoryListSuffix[] = "/data";
 const char Config::LauncherSettings::sArchiveListSuffix[] = "/fallback-archive";
 const char Config::LauncherSettings::sContentListSuffix[] = "/content";
 
-QStringList Config::LauncherSettings::subKeys(const QString &key)
+QStringList Config::LauncherSettings::subKeys(const QString& key)
 {
     QMultiMap<QString, QString> settings = SettingsBase::getSettings();
     QStringList keys = settings.uniqueKeys();
@@ -27,14 +27,14 @@ QStringList Config::LauncherSettings::subKeys(const QString &key)
 
     QStringList result;
 
-    for (const QString &currentKey : keys)
+    for (const QString& currentKey : keys)
     {
 
         if (keyRe.indexIn(currentKey) != -1)
         {
             QString prefixedKey = keyRe.cap(1);
 
-            if(prefixedKey.startsWith(key))
+            if (prefixedKey.startsWith(key))
             {
                 QString subKey = prefixedKey.remove(key);
                 if (!subKey.isEmpty())
@@ -47,8 +47,7 @@ QStringList Config::LauncherSettings::subKeys(const QString &key)
     return result;
 }
 
-
-bool Config::LauncherSettings::writeFile(QTextStream &stream)
+bool Config::LauncherSettings::writeFile(QTextStream& stream)
 {
     QString sectionPrefix;
     QRegExp sectionRe("([^/]+)/(.+)$");
@@ -57,15 +56,17 @@ bool Config::LauncherSettings::writeFile(QTextStream &stream)
     QMapIterator<QString, QString> i(settings);
     i.toBack();
 
-    while (i.hasPrevious()) {
+    while (i.hasPrevious())
+    {
         i.previous();
 
         QString prefix;
         QString key;
 
-        if (sectionRe.exactMatch(i.key())) {
-             prefix = sectionRe.cap(1);
-             key = sectionRe.cap(2);
+        if (sectionRe.exactMatch(i.key()))
+        {
+            prefix = sectionRe.cap(1);
+            key = sectionRe.cap(2);
         }
 
         // Get rid of legacy settings
@@ -75,7 +76,8 @@ bool Config::LauncherSettings::writeFile(QTextStream &stream)
         if (key == QLatin1String("CurrentProfile"))
             continue;
 
-        if (sectionPrefix != prefix) {
+        if (sectionPrefix != prefix)
+        {
             sectionPrefix = prefix;
             stream << "\n[" << prefix << "]\n";
         }
@@ -84,7 +86,6 @@ bool Config::LauncherSettings::writeFile(QTextStream &stream)
     }
 
     return true;
-
 }
 
 QStringList Config::LauncherSettings::getContentLists()
@@ -127,11 +128,10 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     dirs.removeAll(dataLocal);
 
     // if any existing profile in launcher matches the content list, make that profile the default
-    for (const QString &listName : getContentLists())
+    for (const QString& listName : getContentLists())
     {
-        if (isEqual(files, getContentListFiles(listName)) &&
-            isEqual(archives, getArchiveList(listName)) &&
-            isEqual(dirs, getDataDirectoryList(listName)))
+        if (isEqual(files, getContentListFiles(listName)) && isEqual(archives, getArchiveList(listName))
+            && isEqual(dirs, getDataDirectoryList(listName)))
         {
             setCurrentContentListName(listName);
             return;
@@ -144,23 +144,23 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     setContentList(newContentListName, dirs, archives, files);
 }
 
-void Config::LauncherSettings::removeContentList(const QString &contentListName)
+void Config::LauncherSettings::removeContentList(const QString& contentListName)
 {
     remove(makeDirectoryListKey(contentListName));
     remove(makeArchiveListKey(contentListName));
     remove(makeContentListKey(contentListName));
 }
 
-void Config::LauncherSettings::setCurrentContentListName(const QString &contentListName)
+void Config::LauncherSettings::setCurrentContentListName(const QString& contentListName)
 {
     remove(QString(sCurrentContentListKey));
     setValue(QString(sCurrentContentListKey), contentListName);
 }
 
-void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames)
+void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& dirNames,
+    const QStringList& archiveNames, const QStringList& fileNames)
 {
-    auto const assign = [this](const QString key, const QStringList& list)
-    {
+    auto const assign = [this](const QString key, const QStringList& list) {
         for (auto const& item : list)
             setMultiValue(key, item);
     };
@@ -224,15 +224,17 @@ QString Config::LauncherSettings::makeNewContentListName()
 {
     // basically, use date and time as the name  e.g. YYYY-MM-DDThh:mm:ss
     time_t rawtime;
-    struct tm * timeinfo;
+    struct tm* timeinfo;
 
     time(&rawtime);
     timeinfo = localtime(&rawtime);
     int base = 10;
     QChar zeroPad('0');
     return QString("%1-%2-%3T%4:%5:%6")
-        .arg(timeinfo->tm_year + 1900, 4).arg(timeinfo->tm_mon + 1, 2, base, zeroPad).arg(timeinfo->tm_mday, 2, base, zeroPad)
-        .arg(timeinfo->tm_hour, 2, base, zeroPad).arg(timeinfo->tm_min, 2, base, zeroPad).arg(timeinfo->tm_sec, 2, base, zeroPad);
+        .arg(timeinfo->tm_year + 1900, 4)
+        .arg(timeinfo->tm_mon + 1, 2, base, zeroPad)
+        .arg(timeinfo->tm_mday, 2, base, zeroPad)
+        .arg(timeinfo->tm_hour, 2, base, zeroPad)
+        .arg(timeinfo->tm_min, 2, base, zeroPad)
+        .arg(timeinfo->tm_sec, 2, base, zeroPad);
 }
-
-

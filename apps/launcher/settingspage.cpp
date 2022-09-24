@@ -1,21 +1,20 @@
 #include "settingspage.hpp"
 
-#include <QFileDialog>
-#include <QMessageBox>
 #include <QDebug>
 #include <QDir>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 
-#include "utils/textinputdialog.hpp"
 #include "datafilespage.hpp"
+#include "utils/textinputdialog.hpp"
 
 using namespace Process;
 
-Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
-                                     Config::GameSettings &gameSettings,
-                                     Config::LauncherSettings &launcherSettings, MainDialog *parent)
+Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+    Config::LauncherSettings& launcherSettings, MainDialog* parent)
     : QWidget(parent)
     , mCfgMgr(cfg)
     , mGameSettings(gameSettings)
@@ -25,12 +24,7 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     setupUi(this);
 
     QStringList languages;
-    languages << tr("English")
-              << tr("French")
-              << tr("German")
-              << tr("Italian")
-              << tr("Polish")
-              << tr("Russian")
+    languages << tr("English") << tr("French") << tr("German") << tr("Italian") << tr("Polish") << tr("Russian")
               << tr("Spanish");
 
     languageComboBox->addItems(languages);
@@ -39,27 +33,24 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     mImporterInvoker = new ProcessInvoker();
     resetProgressBar();
 
-    connect(mWizardInvoker->getProcess(), &QProcess::started,
-            this, &SettingsPage::wizardStarted);
+    connect(mWizardInvoker->getProcess(), &QProcess::started, this, &SettingsPage::wizardStarted);
 
-    connect(mWizardInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
-            this, &SettingsPage::wizardFinished);
+    connect(mWizardInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
+        &SettingsPage::wizardFinished);
 
-    connect(mImporterInvoker->getProcess(), &QProcess::started,
-            this, &SettingsPage::importerStarted);
+    connect(mImporterInvoker->getProcess(), &QProcess::started, this, &SettingsPage::importerStarted);
 
-    connect(mImporterInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
-            this, &SettingsPage::importerFinished);
+    connect(mImporterInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
+        &SettingsPage::importerFinished);
 
     mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
 
-    connect(mProfileDialog->lineEdit(), &LineEdit::textChanged,
-            this, &SettingsPage::updateOkButton);
+    connect(mProfileDialog->lineEdit(), &LineEdit::textChanged, this, &SettingsPage::updateOkButton);
 
     // Detect Morrowind configuration files
     QStringList iniPaths;
 
-    for (const QString &path : mGameSettings.getDataDirs())
+    for (const QString& path : mGameSettings.getDataDirs())
     {
         QDir dir(path);
         dir.setPath(dir.canonicalPath()); // Resolve symlinks
@@ -76,10 +67,13 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
         }
     }
 
-    if (!iniPaths.isEmpty()) {
+    if (!iniPaths.isEmpty())
+    {
         settingsComboBox->addItems(iniPaths);
         importerButton->setEnabled(true);
-    } else {
+    }
+    else
+    {
         importerButton->setEnabled(false);
     }
 
@@ -113,16 +107,20 @@ void Launcher::SettingsPage::on_importerButton_clicked()
     QFile file(Files::pathToQString(path));
 #endif
 
-    if (!file.exists()) {
-        if (!file.open(QIODevice::ReadWrite)) {
+    if (!file.exists())
+    {
+        if (!file.open(QIODevice::ReadWrite))
+        {
             // File cannot be created
             QMessageBox msgBox;
             msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<html><head/><body><p><b>Could not open or create %1 for writing </b></p> \
+            msgBox.setText(
+                tr("<html><head/><body><p><b>Could not open or create %1 for writing </b></p> \
                               <p>Please make sure you have the right permissions \
-                              and try again.</p></body></html>").arg(file.fileName()));
+                              and try again.</p></body></html>")
+                    .arg(file.fileName()));
             msgBox.exec();
             return;
         }
@@ -159,12 +157,8 @@ void Launcher::SettingsPage::on_importerButton_clicked()
 
 void Launcher::SettingsPage::on_browseButton_clicked()
 {
-    QString iniFile = QFileDialog::getOpenFileName(
-                this,
-                QObject::tr("Select configuration file"),
-                QDir::currentPath(),
-                QString(tr("Morrowind configuration file (*.ini)")));
-
+    QString iniFile = QFileDialog::getOpenFileName(this, QObject::tr("Select configuration file"), QDir::currentPath(),
+        QString(tr("Morrowind configuration file (*.ini)")));
 
     if (iniFile.isEmpty())
         return;
@@ -176,7 +170,8 @@ void Launcher::SettingsPage::on_browseButton_clicked()
 
     const QString path(QDir::toNativeSeparators(info.absoluteFilePath()));
 
-    if (settingsComboBox->findText(path) == -1) {
+    if (settingsComboBox->findText(path) == -1)
+    {
         settingsComboBox->addItem(path);
         settingsComboBox->setCurrentIndex(settingsComboBox->findText(path));
         importerButton->setEnabled(true);
@@ -238,19 +233,18 @@ void Launcher::SettingsPage::resetProgressBar()
     progressBar->reset();
 }
 
-void Launcher::SettingsPage::updateOkButton(const QString &text)
+void Launcher::SettingsPage::updateOkButton(const QString& text)
 {
     // We do this here because we need to access the profiles
-    if (text.isEmpty()) {
-         mProfileDialog->setOkButtonEnabled(false);
-         return;
+    if (text.isEmpty())
+    {
+        mProfileDialog->setOkButtonEnabled(false);
+        return;
     }
 
     const QStringList profiles(mLauncherSettings.getContentLists());
 
-    (profiles.contains(text))
-            ? mProfileDialog->setOkButtonEnabled(false)
-            : mProfileDialog->setOkButtonEnabled(true);
+    (profiles.contains(text)) ? mProfileDialog->setOkButtonEnabled(false) : mProfileDialog->setOkButtonEnabled(true);
 }
 
 void Launcher::SettingsPage::saveSettings()
@@ -259,11 +253,16 @@ void Launcher::SettingsPage::saveSettings()
 
     mLauncherSettings.setValue(QLatin1String("Settings/language"), language);
 
-    if (language == QLatin1String("Polish")) {
+    if (language == QLatin1String("Polish"))
+    {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1250"));
-    } else if (language == QLatin1String("Russian")) {
+    }
+    else if (language == QLatin1String("Russian"))
+    {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
-    }  else {
+    }
+    else
+    {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
     }
 }

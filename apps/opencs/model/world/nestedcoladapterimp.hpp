@@ -3,16 +3,16 @@
 
 #include <QVariant>
 
-#include <components/esm3/loadpgrd.hpp>
+#include <components/esm/attr.hpp> // for converting attributes
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadmgef.hpp> // for converting magic effect id to string & back
-#include <components/esm3/loadskil.hpp> // for converting skill names
-#include <components/esm/attr.hpp>     // for converting attributes
+#include <components/esm3/loadpgrd.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadskil.hpp> // for converting skill names
 
+#include "cell.hpp"
 #include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"
-#include "cell.hpp"
 
 namespace ESM
 {
@@ -28,22 +28,19 @@ namespace CSMWorld
     class PathgridPointListAdapter : public NestedColumnAdapter<Pathgrid>
     {
     public:
-        PathgridPointListAdapter ();
+        PathgridPointListAdapter();
 
         void addRow(Record<Pathgrid>& record, int position) const override;
 
         void removeRow(Record<Pathgrid>& record, int rowToRemove) const override;
 
-        void setTable(Record<Pathgrid>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<Pathgrid>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<Pathgrid>& record) const override;
 
-        QVariant getData(const Record<Pathgrid>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<Pathgrid>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<Pathgrid>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(Record<Pathgrid>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<Pathgrid>& record) const override;
 
@@ -53,22 +50,19 @@ namespace CSMWorld
     class PathgridEdgeListAdapter : public NestedColumnAdapter<Pathgrid>
     {
     public:
-        PathgridEdgeListAdapter ();
+        PathgridEdgeListAdapter();
 
         void addRow(Record<Pathgrid>& record, int position) const override;
 
         void removeRow(Record<Pathgrid>& record, int rowToRemove) const override;
 
-        void setTable(Record<Pathgrid>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<Pathgrid>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<Pathgrid>& record) const override;
 
-        QVariant getData(const Record<Pathgrid>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<Pathgrid>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<Pathgrid>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(Record<Pathgrid>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<Pathgrid>& record) const override;
 
@@ -78,22 +72,20 @@ namespace CSMWorld
     class FactionReactionsAdapter : public NestedColumnAdapter<ESM::Faction>
     {
     public:
-        FactionReactionsAdapter ();
+        FactionReactionsAdapter();
 
         void addRow(Record<ESM::Faction>& record, int position) const override;
 
         void removeRow(Record<ESM::Faction>& record, int rowToRemove) const override;
 
-        void setTable(Record<ESM::Faction>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<ESM::Faction>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<ESM::Faction>& record) const override;
 
-        QVariant getData(const Record<ESM::Faction>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<ESM::Faction>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<ESM::Faction>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(
+            Record<ESM::Faction>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<ESM::Faction>& record) const override;
 
@@ -103,22 +95,20 @@ namespace CSMWorld
     class FactionRanksAdapter : public NestedColumnAdapter<ESM::Faction>
     {
     public:
-        FactionRanksAdapter ();
+        FactionRanksAdapter();
 
         void addRow(Record<ESM::Faction>& record, int position) const override;
 
         void removeRow(Record<ESM::Faction>& record, int rowToRemove) const override;
 
-        void setTable(Record<ESM::Faction>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<ESM::Faction>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<ESM::Faction>& record) const override;
 
-        QVariant getData(const Record<ESM::Faction>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<ESM::Faction>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<ESM::Faction>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(
+            Record<ESM::Faction>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<ESM::Faction>& record) const override;
 
@@ -128,33 +118,31 @@ namespace CSMWorld
     class RegionSoundListAdapter : public NestedColumnAdapter<ESM::Region>
     {
     public:
-        RegionSoundListAdapter ();
+        RegionSoundListAdapter();
 
         void addRow(Record<ESM::Region>& record, int position) const override;
 
         void removeRow(Record<ESM::Region>& record, int rowToRemove) const override;
 
-        void setTable(Record<ESM::Region>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<ESM::Region>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<ESM::Region>& record) const override;
 
-        QVariant getData(const Record<ESM::Region>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<ESM::Region>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<ESM::Region>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(
+            Record<ESM::Region>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<ESM::Region>& record) const override;
 
         int getRowsCount(const Record<ESM::Region>& record) const override;
     };
 
-    template<typename ESXRecordT>
+    template <typename ESXRecordT>
     class SpellListAdapter : public NestedColumnAdapter<ESXRecordT>
     {
     public:
-        SpellListAdapter () {}
+        SpellListAdapter() {}
 
         void addRow(Record<ESXRecordT>& record, int position) const override
         {
@@ -165,9 +153,9 @@ namespace CSMWorld
             // blank row
             std::string spell;
 
-            spells.insert(spells.begin()+position, spell);
+            spells.insert(spells.begin() + position, spell);
 
-            record.setModified (raceOrBthSgn);
+            record.setModified(raceOrBthSgn);
         }
 
         void removeRow(Record<ESXRecordT>& record, int rowToRemove) const override
@@ -176,28 +164,28 @@ namespace CSMWorld
 
             std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
 
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (spells.size()))
-                throw std::runtime_error ("index out of range");
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int>(spells.size()))
+                throw std::runtime_error("index out of range");
 
-            spells.erase(spells.begin()+rowToRemove);
+            spells.erase(spells.begin() + rowToRemove);
 
-            record.setModified (raceOrBthSgn);
+            record.setModified(raceOrBthSgn);
         }
 
         void setTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const override
         {
             ESXRecordT raceOrBthSgn = record.get();
 
-            raceOrBthSgn.mPowers.mList =
-                static_cast<const NestedTableWrapper<std::vector<std::string> >&>(nestedTable).mNestedTable;
+            raceOrBthSgn.mPowers.mList
+                = static_cast<const NestedTableWrapper<std::vector<std::string>>&>(nestedTable).mNestedTable;
 
-            record.setModified (raceOrBthSgn);
+            record.setModified(raceOrBthSgn);
         }
 
         NestedTableWrapperBase* table(const Record<ESXRecordT>& record) const override
         {
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<std::string> >(record.get().mPowers.mList);
+            return new NestedTableWrapper<std::vector<std::string>>(record.get().mPowers.mList);
         }
 
         QVariant getData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const override
@@ -206,43 +194,44 @@ namespace CSMWorld
 
             std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (spells.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(spells.size()))
+                throw std::runtime_error("index out of range");
 
             std::string spell = spells[subRowIndex];
             switch (subColIndex)
             {
-                case 0: return QString(spell.c_str());
-                default: throw std::runtime_error("Spells subcolumn index out of range");
+                case 0:
+                    return QString(spell.c_str());
+                default:
+                    throw std::runtime_error("Spells subcolumn index out of range");
             }
         }
 
-        void setData(Record<ESXRecordT>& record, const QVariant& value,
-                                    int subRowIndex, int subColIndex) const override
+        void setData(Record<ESXRecordT>& record, const QVariant& value, int subRowIndex, int subColIndex) const override
         {
             ESXRecordT raceOrBthSgn = record.get();
 
             std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (spells.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(spells.size()))
+                throw std::runtime_error("index out of range");
 
             std::string spell = spells[subRowIndex];
             switch (subColIndex)
             {
-                case 0: spell = value.toString().toUtf8().constData(); break;
-                default: throw std::runtime_error("Spells subcolumn index out of range");
+                case 0:
+                    spell = value.toString().toUtf8().constData();
+                    break;
+                default:
+                    throw std::runtime_error("Spells subcolumn index out of range");
             }
 
             raceOrBthSgn.mPowers.mList[subRowIndex] = spell;
 
-            record.setModified (raceOrBthSgn);
+            record.setModified(raceOrBthSgn);
         }
 
-        int getColumnsCount(const Record<ESXRecordT>& record) const override
-        {
-            return 1;
-        }
+        int getColumnsCount(const Record<ESXRecordT>& record) const override { return 1; }
 
         int getRowsCount(const Record<ESXRecordT>& record) const override
         {
@@ -250,11 +239,11 @@ namespace CSMWorld
         }
     };
 
-    template<typename ESXRecordT>
+    template <typename ESXRecordT>
     class EffectsListAdapter : public NestedColumnAdapter<ESXRecordT>
     {
     public:
-        EffectsListAdapter () {}
+        EffectsListAdapter() {}
 
         void addRow(Record<ESXRecordT>& record, int position) const override
         {
@@ -273,9 +262,9 @@ namespace CSMWorld
             effect.mMagnMin = 0;
             effect.mMagnMax = 0;
 
-            effectsList.insert(effectsList.begin()+position, effect);
+            effectsList.insert(effectsList.begin() + position, effect);
 
-            record.setModified (magic);
+            record.setModified(magic);
         }
 
         void removeRow(Record<ESXRecordT>& record, int rowToRemove) const override
@@ -284,28 +273,28 @@ namespace CSMWorld
 
             std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
 
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (effectsList.size()))
-                throw std::runtime_error ("index out of range");
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int>(effectsList.size()))
+                throw std::runtime_error("index out of range");
 
-            effectsList.erase(effectsList.begin()+rowToRemove);
+            effectsList.erase(effectsList.begin() + rowToRemove);
 
-            record.setModified (magic);
+            record.setModified(magic);
         }
 
         void setTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const override
         {
             ESXRecordT magic = record.get();
 
-            magic.mEffects.mList =
-                static_cast<const NestedTableWrapper<std::vector<ESM::ENAMstruct> >&>(nestedTable).mNestedTable;
+            magic.mEffects.mList
+                = static_cast<const NestedTableWrapper<std::vector<ESM::ENAMstruct>>&>(nestedTable).mNestedTable;
 
-            record.setModified (magic);
+            record.setModified(magic);
         }
 
         NestedTableWrapperBase* table(const Record<ESXRecordT>& record) const override
         {
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<ESM::ENAMstruct> >(record.get().mEffects.mList);
+            return new NestedTableWrapper<std::vector<ESM::ENAMstruct>>(record.get().mEffects.mList);
         }
 
         QVariant getData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const override
@@ -314,15 +303,15 @@ namespace CSMWorld
 
             std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (effectsList.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(effectsList.size()))
+                throw std::runtime_error("index out of range");
 
             ESM::ENAMstruct effect = effectsList[subRowIndex];
             switch (subColIndex)
             {
                 case 0:
                 {
-                    if (effect.mEffectID >=0 && effect.mEffectID < ESM::MagicEffect::Length)
+                    if (effect.mEffectID >= 0 && effect.mEffectID < ESM::MagicEffect::Length)
                         return effect.mEffectID;
                     else
                         throw std::runtime_error("Magic effects ID unexpected value");
@@ -336,7 +325,7 @@ namespace CSMWorld
                         case ESM::MagicEffect::RestoreSkill:
                         case ESM::MagicEffect::FortifySkill:
                         case ESM::MagicEffect::AbsorbSkill:
-                             return effect.mSkill;
+                            return effect.mSkill;
                         default:
                             return QVariant();
                     }
@@ -350,35 +339,39 @@ namespace CSMWorld
                         case ESM::MagicEffect::RestoreAttribute:
                         case ESM::MagicEffect::FortifyAttribute:
                         case ESM::MagicEffect::AbsorbAttribute:
-                             return effect.mAttribute;
+                            return effect.mAttribute;
                         default:
                             return QVariant();
                     }
                 }
                 case 3:
                 {
-                    if (effect.mRange >=0 && effect.mRange <=2)
+                    if (effect.mRange >= 0 && effect.mRange <= 2)
                         return effect.mRange;
                     else
                         throw std::runtime_error("Magic effects range unexpected value");
                 }
-                case 4: return effect.mArea;
-                case 5: return effect.mDuration;
-                case 6: return effect.mMagnMin;
-                case 7: return effect.mMagnMax;
-                default: throw std::runtime_error("Magic Effects subcolumn index out of range");
+                case 4:
+                    return effect.mArea;
+                case 5:
+                    return effect.mDuration;
+                case 6:
+                    return effect.mMagnMin;
+                case 7:
+                    return effect.mMagnMax;
+                default:
+                    throw std::runtime_error("Magic Effects subcolumn index out of range");
             }
         }
 
-        void setData(Record<ESXRecordT>& record, const QVariant& value,
-                                    int subRowIndex, int subColIndex) const override
+        void setData(Record<ESXRecordT>& record, const QVariant& value, int subRowIndex, int subColIndex) const override
         {
             ESXRecordT magic = record.get();
 
             std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (effectsList.size()))
-                throw std::runtime_error ("index out of range");
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int>(effectsList.size()))
+                throw std::runtime_error("index out of range");
 
             ESM::ENAMstruct effect = effectsList[subRowIndex];
             switch (subColIndex)
@@ -403,22 +396,28 @@ namespace CSMWorld
                     effect.mRange = value.toInt();
                     break;
                 }
-                case 4: effect.mArea = value.toInt(); break;
-                case 5: effect.mDuration = value.toInt(); break;
-                case 6: effect.mMagnMin = value.toInt(); break;
-                case 7: effect.mMagnMax = value.toInt(); break;
-                default: throw std::runtime_error("Magic Effects subcolumn index out of range");
+                case 4:
+                    effect.mArea = value.toInt();
+                    break;
+                case 5:
+                    effect.mDuration = value.toInt();
+                    break;
+                case 6:
+                    effect.mMagnMin = value.toInt();
+                    break;
+                case 7:
+                    effect.mMagnMax = value.toInt();
+                    break;
+                default:
+                    throw std::runtime_error("Magic Effects subcolumn index out of range");
             }
 
             magic.mEffects.mList[subRowIndex] = effect;
 
-            record.setModified (magic);
+            record.setModified(magic);
         }
 
-        int getColumnsCount(const Record<ESXRecordT>& record) const override
-        {
-            return 8;
-        }
+        int getColumnsCount(const Record<ESXRecordT>& record) const override { return 8; }
 
         int getRowsCount(const Record<ESXRecordT>& record) const override
         {
@@ -429,22 +428,19 @@ namespace CSMWorld
     class InfoListAdapter : public NestedColumnAdapter<Info>
     {
     public:
-        InfoListAdapter ();
+        InfoListAdapter();
 
         void addRow(Record<Info>& record, int position) const override;
 
         void removeRow(Record<Info>& record, int rowToRemove) const override;
 
-        void setTable(Record<Info>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<Info>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<Info>& record) const override;
 
-        QVariant getData(const Record<Info>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<Info>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<Info>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(Record<Info>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<Info>& record) const override;
 
@@ -454,22 +450,19 @@ namespace CSMWorld
     class InfoConditionAdapter : public NestedColumnAdapter<Info>
     {
     public:
-        InfoConditionAdapter ();
+        InfoConditionAdapter();
 
         void addRow(Record<Info>& record, int position) const override;
 
         void removeRow(Record<Info>& record, int rowToRemove) const override;
 
-        void setTable(Record<Info>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<Info>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<Info>& record) const override;
 
-        QVariant getData(const Record<Info>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<Info>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<Info>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(Record<Info>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<Info>& record) const override;
 
@@ -479,22 +472,19 @@ namespace CSMWorld
     class RaceAttributeAdapter : public NestedColumnAdapter<ESM::Race>
     {
     public:
-        RaceAttributeAdapter ();
+        RaceAttributeAdapter();
 
         void addRow(Record<ESM::Race>& record, int position) const override;
 
         void removeRow(Record<ESM::Race>& record, int rowToRemove) const override;
 
-        void setTable(Record<ESM::Race>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<ESM::Race>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<ESM::Race>& record) const override;
 
-        QVariant getData(const Record<ESM::Race>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<ESM::Race>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<ESM::Race>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(Record<ESM::Race>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<ESM::Race>& record) const override;
 
@@ -504,22 +494,19 @@ namespace CSMWorld
     class RaceSkillsBonusAdapter : public NestedColumnAdapter<ESM::Race>
     {
     public:
-        RaceSkillsBonusAdapter ();
+        RaceSkillsBonusAdapter();
 
         void addRow(Record<ESM::Race>& record, int position) const override;
 
         void removeRow(Record<ESM::Race>& record, int rowToRemove) const override;
 
-        void setTable(Record<ESM::Race>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<ESM::Race>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<ESM::Race>& record) const override;
 
-        QVariant getData(const Record<ESM::Race>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<ESM::Race>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<ESM::Race>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(Record<ESM::Race>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<ESM::Race>& record) const override;
 
@@ -529,22 +516,20 @@ namespace CSMWorld
     class CellListAdapter : public NestedColumnAdapter<CSMWorld::Cell>
     {
     public:
-        CellListAdapter ();
+        CellListAdapter();
 
         void addRow(Record<CSMWorld::Cell>& record, int position) const override;
 
         void removeRow(Record<CSMWorld::Cell>& record, int rowToRemove) const override;
 
-        void setTable(Record<CSMWorld::Cell>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<CSMWorld::Cell>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<CSMWorld::Cell>& record) const override;
 
-        QVariant getData(const Record<CSMWorld::Cell>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<CSMWorld::Cell>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<CSMWorld::Cell>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(
+            Record<CSMWorld::Cell>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<CSMWorld::Cell>& record) const override;
 
@@ -554,22 +539,20 @@ namespace CSMWorld
     class RegionWeatherAdapter : public NestedColumnAdapter<ESM::Region>
     {
     public:
-        RegionWeatherAdapter ();
+        RegionWeatherAdapter();
 
         void addRow(Record<ESM::Region>& record, int position) const override;
 
         void removeRow(Record<ESM::Region>& record, int rowToRemove) const override;
 
-        void setTable(Record<ESM::Region>& record,
-                const NestedTableWrapperBase& nestedTable) const override;
+        void setTable(Record<ESM::Region>& record, const NestedTableWrapperBase& nestedTable) const override;
 
         NestedTableWrapperBase* table(const Record<ESM::Region>& record) const override;
 
-        QVariant getData(const Record<ESM::Region>& record,
-                int subRowIndex, int subColIndex) const override;
+        QVariant getData(const Record<ESM::Region>& record, int subRowIndex, int subColIndex) const override;
 
-        void setData(Record<ESM::Region>& record,
-                const QVariant& value, int subRowIndex, int subColIndex) const override;
+        void setData(
+            Record<ESM::Region>& record, const QVariant& value, int subRowIndex, int subColIndex) const override;
 
         int getColumnsCount(const Record<ESM::Region>& record) const override;
 

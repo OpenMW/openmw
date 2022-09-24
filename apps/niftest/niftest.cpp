@@ -1,38 +1,38 @@
-///Program to test .nif files both on the FileSystem and in BSA archives.
+/// Program to test .nif files both on the FileSystem and in BSA archives.
 
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 
+#include <components/files/configurationmanager.hpp>
+#include <components/files/constrainedfilestream.hpp>
+#include <components/files/conversion.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/nif/niffile.hpp>
-#include <components/files/constrainedfilestream.hpp>
-#include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
-#include <components/files/configurationmanager.hpp>
-#include <components/files/conversion.hpp>
+#include <components/vfs/manager.hpp>
 
 #include <boost/program_options.hpp>
 
 // Create local aliases for brevity
 namespace bpo = boost::program_options;
 
-///See if the file has the named extension
+/// See if the file has the named extension
 bool hasExtension(const std::filesystem::path& filename, const std::string& extensionToFind)
 {
     const auto extension = Files::pathToUnicodeString(filename.extension());
     return Misc::StringUtils::ciEqual(extension, extensionToFind);
 }
 
-///See if the file has the "nif" extension.
-bool isNIF(const std::filesystem::path &filename)
+/// See if the file has the "nif" extension.
+bool isNIF(const std::filesystem::path& filename)
 {
-    return hasExtension(filename,"nif");
+    return hasExtension(filename, "nif");
 }
-///See if the file has the "bsa" extension.
-bool isBSA(const std::filesystem::path &filename)
+/// See if the file has the "bsa" extension.
+bool isBSA(const std::filesystem::path& filename)
 {
-    return hasExtension(filename,"bsa");
+    return hasExtension(filename, "bsa");
 }
 
 /// Check all the nif files in a given VFS::Archive
@@ -43,21 +43,22 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
     myManager.addArchive(std::move(anArchive));
     myManager.buildIndex();
 
-    for(const auto& name : myManager.getRecursiveDirectoryIterator(""))
+    for (const auto& name : myManager.getRecursiveDirectoryIterator(""))
     {
-        try{
-            if(isNIF(name))
+        try
+        {
+            if (isNIF(name))
             {
-            //           std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile temp_nif(myManager.get(name),archivePath / name);
+                //           std::cout << "Decoding: " << name << std::endl;
+                Nif::NIFFile temp_nif(myManager.get(name), archivePath / name);
             }
-            else if(isBSA(name))
+            else if (isBSA(name))
             {
-                if(!archivePath.empty() && !isBSA(archivePath))
+                if (!archivePath.empty() && !isBSA(archivePath))
                 {
-//                     std::cout << "Reading BSA File: " << name << std::endl;
+                    //                     std::cout << "Reading BSA File: " << name << std::endl;
                     readVFS(std::make_unique<VFS::BsaArchive>(archivePath / name), archivePath / name);
-//                     std::cout << "Done with BSA File: " << name << std::endl;
+                    //                     std::cout << "Done with BSA File: " << name << std::endl;
                 }
             }
         }
@@ -68,7 +69,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
     }
 }
 
-bool parseOptions (int argc, char** argv, std::vector<Files::MaybeQuotedPath> &files)
+bool parseOptions(int argc, char** argv, std::vector<Files::MaybeQuotedPath>& files)
 {
     bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF and BSA files
 
@@ -79,34 +80,32 @@ Usages:
 Allowed options)");
     auto addOption = desc.add_options();
     addOption("help,h", "print help message.");
-    addOption("input-file", bpo::value< Files::MaybeQuotedPathContainer >(), "input file");
+    addOption("input-file", bpo::value<Files::MaybeQuotedPathContainer>(), "input file");
 
-    //Default option if none provided
+    // Default option if none provided
     bpo::positional_options_description p;
     p.add("input-file", -1);
 
     bpo::variables_map variables;
     try
     {
-        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).
-            options(desc).positional(p).run();
+        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(desc).positional(p).run();
         bpo::store(valid_opts, variables);
         bpo::notify(variables);
-        if (variables.count ("help"))
+        if (variables.count("help"))
         {
             std::cout << desc << std::endl;
             return false;
         }
         if (variables.count("input-file"))
         {
-            files = variables["input-file"].as< Files::MaybeQuotedPathContainer >();
+            files = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
             return true;
         }
     }
-    catch(std::exception &e)
+    catch (std::exception& e)
     {
-        std::cout << "ERROR parsing arguments: " << e.what() << "\n\n"
-            << desc << std::endl;
+        std::cout << "ERROR parsing arguments: " << e.what() << "\n\n" << desc << std::endl;
         return false;
     }
 
@@ -115,42 +114,43 @@ Allowed options)");
     return false;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     std::vector<Files::MaybeQuotedPath> files;
-    if(!parseOptions (argc, argv, files))
+    if (!parseOptions(argc, argv, files))
         return 1;
 
     Nif::NIFFile::setLoadUnsupportedFiles(true);
-//     std::cout << "Reading Files" << std::endl;
-    for(const auto& path : files)
+    //     std::cout << "Reading Files" << std::endl;
+    for (const auto& path : files)
     {
         try
         {
-            if(isNIF(path))
+            if (isNIF(path))
             {
-                //std::cout << "Decoding: " << name << std::endl;
+                // std::cout << "Decoding: " << name << std::endl;
                 Nif::NIFFile temp_nif(Files::openConstrainedFileStream(path), path);
-             }
-             else if(isBSA(path))
-             {
-//                 std::cout << "Reading BSA File: " << name << std::endl;
+            }
+            else if (isBSA(path))
+            {
+                //                 std::cout << "Reading BSA File: " << name << std::endl;
                 readVFS(std::make_unique<VFS::BsaArchive>(path));
-             }
-             else if(std::filesystem::is_directory(path))
-             {
-//                 std::cout << "Reading All Files in: " << name << std::endl;
+            }
+            else if (std::filesystem::is_directory(path))
+            {
+                //                 std::cout << "Reading All Files in: " << name << std::endl;
                 readVFS(std::make_unique<VFS::FileSystemArchive>(path), path);
-             }
-             else
-             {
-                 std::cerr << "ERROR:  \"" << Files::pathToUnicodeString(path) << "\" is not a nif file, bsa file, or directory!" << std::endl;
-             }
+            }
+            else
+            {
+                std::cerr << "ERROR:  \"" << Files::pathToUnicodeString(path)
+                          << "\" is not a nif file, bsa file, or directory!" << std::endl;
+            }
         }
         catch (std::exception& e)
         {
             std::cerr << "ERROR, an exception has occurred:  " << e.what() << std::endl;
         }
-     }
-     return 0;
+    }
+    return 0;
 }

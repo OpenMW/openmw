@@ -8,7 +8,7 @@ namespace CSVDoc
 
 namespace CSVWorld
 {
-    void addSubViewFactories (CSVDoc::SubViewFactoryManager& manager);
+    void addSubViewFactories(CSVDoc::SubViewFactoryManager& manager);
 }
 
 #endif

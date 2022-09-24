@@ -10,15 +10,16 @@ namespace MWPhysics
     class ActorConvexCallback : public btCollisionWorld::ClosestConvexResultCallback
     {
     public:
-        ActorConvexCallback(const btCollisionObject *me, const btVector3 &motion, btScalar minCollisionDot, const btCollisionWorld * world);
+        ActorConvexCallback(const btCollisionObject* me, const btVector3& motion, btScalar minCollisionDot,
+            const btCollisionWorld* world);
 
-        btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace) override;
+        btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace) override;
 
     protected:
-        const btCollisionObject *mMe;
+        const btCollisionObject* mMe;
         const btVector3 mMotion;
         const btScalar mMinCollisionDot;
-        const btCollisionWorld * mWorld;
+        const btCollisionWorld* mWorld;
     };
 }
 

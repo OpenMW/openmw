@@ -2,11 +2,9 @@
 
 #include "columnbase.hpp"
 
-CSMWorld::NestedCollection::NestedCollection()
-{}
+CSMWorld::NestedCollection::NestedCollection() {}
 
-CSMWorld::NestedCollection::~NestedCollection()
-{}
+CSMWorld::NestedCollection::~NestedCollection() {}
 
 int CSMWorld::NestedCollection::getNestedRowsCount(int row, int column) const
 {
@@ -21,7 +19,7 @@ int CSMWorld::NestedCollection::getNestedColumnsCount(int row, int column) const
 int CSMWorld::NestedCollection::searchNestedColumnIndex(int parentColumn, Columns::ColumnId id)
 {
     // Assumed that the parentColumn is always a valid index
-    const NestableColumn *parent = getNestableColumn(parentColumn);
+    const NestableColumn* parent = getNestableColumn(parentColumn);
     int nestedColumnCount = getNestedColumnsCount(0, parentColumn);
     for (int i = 0; i < nestedColumnCount; ++i)
     {

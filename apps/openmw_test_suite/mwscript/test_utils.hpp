@@ -29,7 +29,10 @@ namespace
     public:
         bool canDeclareLocals() const override { return true; }
         char getGlobalType(const std::string& name) const override { return ' '; }
-        std::pair<char, bool> getMemberType(const std::string& name, const std::string& id) const override { return {' ', false}; }
+        std::pair<char, bool> getMemberType(const std::string& name, const std::string& id) const override
+        {
+            return { ' ', false };
+        }
         bool isId(const std::string& name) const override { return Misc::StringUtils::ciEqual(name, "player"); }
     };
 
@@ -37,9 +40,10 @@ namespace
     {
         std::vector<std::pair<std::string, Compiler::TokenLoc>> mErrors;
 
-        void report(const std::string& message, const Compiler::TokenLoc& loc, Compiler::ErrorHandler::Type type) override
+        void report(
+            const std::string& message, const Compiler::TokenLoc& loc, Compiler::ErrorHandler::Type type) override
         {
-            if(type == Compiler::ErrorHandler::ErrorMessage)
+            if (type == Compiler::ErrorHandler::ErrorMessage)
                 mErrors.emplace_back(message, loc);
         }
 
@@ -64,21 +68,22 @@ namespace
         std::vector<int> mLongs;
         std::vector<float> mFloats;
 
-        template<class T>
+        template <class T>
         T getLocal(std::size_t index, const std::vector<T>& vector) const
         {
-            if(index < vector.size())
+            if (index < vector.size())
                 return vector[index];
             return {};
         }
 
-        template<class T>
+        template <class T>
         void setLocal(T value, std::size_t index, std::vector<T>& vector)
         {
-            if(index >= vector.size())
+            if (index >= vector.size())
                 vector.resize(index + 1);
             vector[index] = value;
         }
+
     public:
         void clear()
         {
@@ -106,14 +111,15 @@ namespace
         std::map<std::string, int, std::less<>> mLongs;
         std::map<std::string, float, std::less<>> mFloats;
 
-        template<class T>
+        template <class T>
         T getGlobal(std::string_view name, const std::map<std::string, T, std::less<>>& map) const
         {
             auto it = map.find(name);
-            if(it != map.end())
+            if (it != map.end())
                 return it->second;
             return {};
         }
+
     public:
         void clear()
         {
@@ -139,6 +145,7 @@ namespace
     {
         LocalVariables mLocals;
         std::map<std::string, GlobalVariables, std::less<>> mMembers;
+
     public:
         std::string_view getTarget() const override { return {}; };
 
@@ -154,9 +161,9 @@ namespace
 
         void setLocalFloat(int index, float value) override { mLocals.setFloat(index, value); };
 
-        void messageBox(std::string_view message, const std::vector<std::string>& buttons) override {};
+        void messageBox(std::string_view message, const std::vector<std::string>& buttons) override{};
 
-        void report(const std::string& message) override {};
+        void report(const std::string& message) override{};
 
         int getGlobalShort(std::string_view name) const override { return {}; };
 
@@ -164,11 +171,11 @@ namespace
 
         float getGlobalFloat(std::string_view name) const override { return {}; };
 
-        void setGlobalShort(std::string_view name, int value) override {};
+        void setGlobalShort(std::string_view name, int value) override{};
 
-        void setGlobalLong(std::string_view name, int value) override {};
+        void setGlobalLong(std::string_view name, int value) override{};
 
-        void setGlobalFloat(std::string_view name, float value) override {};
+        void setGlobalFloat(std::string_view name, float value) override{};
 
         std::vector<std::string> getGlobals() const override { return {}; };
 
@@ -203,7 +210,7 @@ namespace
         int getMemberShort(std::string_view id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id);
-            if(it != mMembers.end())
+            if (it != mMembers.end())
                 return it->second.getShort(name);
             return {};
         };
@@ -211,7 +218,7 @@ namespace
         int getMemberLong(std::string_view id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id);
-            if(it != mMembers.end())
+            if (it != mMembers.end())
                 return it->second.getLong(name);
             return {};
         };
@@ -219,16 +226,25 @@ namespace
         float getMemberFloat(std::string_view id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id);
-            if(it != mMembers.end())
+            if (it != mMembers.end())
                 return it->second.getFloat(name);
             return {};
         };
 
-        void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override { mMembers[std::string(id)].setShort(name, value); };
+        void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override
+        {
+            mMembers[std::string(id)].setShort(name, value);
+        };
 
-        void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override { mMembers[std::string(id)].setLong(name, value); };
+        void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override
+        {
+            mMembers[std::string(id)].setLong(name, value);
+        };
 
-        void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override { mMembers[std::string(id)].setFloat(name, value); };
+        void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override
+        {
+            mMembers[std::string(id)].setFloat(name, value);
+        };
     };
 
     struct CompiledScript
@@ -236,7 +252,11 @@ namespace
         std::vector<Interpreter::Type_Code> mByteCode;
         Compiler::Locals mLocals;
 
-        CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals) : mByteCode(code), mLocals(locals) {}
+        CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
+            : mByteCode(code)
+            , mLocals(locals)
+        {
+        }
     };
 }
 

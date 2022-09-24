@@ -17,45 +17,42 @@ namespace MWDialogue
     /// \brief Collection of seen responses for a topic
     class Topic
     {
-        public:
+    public:
+        typedef std::vector<Entry> TEntryContainer;
+        typedef TEntryContainer::const_iterator TEntryIter;
 
-            typedef std::vector<Entry> TEntryContainer;
-            typedef TEntryContainer::const_iterator TEntryIter;
+    protected:
+        std::string mTopic;
+        std::string mName;
+        TEntryContainer mEntries;
 
-        protected:
+    public:
+        Topic();
 
-            std::string mTopic;
-            std::string mName;
-            TEntryContainer mEntries;
+        Topic(const std::string& topic);
 
-        public:
+        virtual ~Topic();
 
-            Topic();
+        virtual bool addEntry(const JournalEntry& entry);
+        ///< Add entry
+        ///
+        /// \note Redundant entries are ignored.
 
-            Topic (const std::string& topic);
+        void insertEntry(const ESM::JournalEntry& entry);
+        ///< Add entry without checking for redundant entries or modifying the state of the
+        /// topic otherwise
 
-            virtual ~Topic();
+        std::string getTopic() const;
 
-            virtual bool addEntry (const JournalEntry& entry);
-            ///< Add entry
-            ///
-            /// \note Redundant entries are ignored.
+        virtual std::string_view getName() const;
 
-            void insertEntry (const ESM::JournalEntry& entry);
-            ///< Add entry without checking for redundant entries or modifying the state of the
-            /// topic otherwise
+        void removeLastAddedResponse(std::string_view actorName);
 
-            std::string getTopic() const;
+        TEntryIter begin() const;
+        ///< Iterator pointing to the begin of the journal for this topic.
 
-            virtual std::string_view getName() const;
-
-            void removeLastAddedResponse(std::string_view actorName);
-
-            TEntryIter begin() const;
-            ///< Iterator pointing to the begin of the journal for this topic.
-
-            TEntryIter end() const;
-            ///< Iterator pointing past the end of the journal for this topic.
+        TEntryIter end() const;
+        ///< Iterator pointing past the end of the journal for this topic.
     };
 }
 

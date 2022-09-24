@@ -40,7 +40,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     mEditorId = formIdToString(mFormId); // FIXME: quick workaround to use existing code
 
@@ -49,7 +49,9 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_DATA: reader.get(mData); break;
+            case ESM4::SUB_DATA:
+                reader.get(mData);
+                break;
             case ESM4::SUB_PGRP:
             {
                 std::size_t numNodes = subHdr.dataSize / sizeof(PGRP);
@@ -86,8 +88,8 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                         // ICMarketDistrictTheBestDefenseBasement doesn't have a PGRR sub-record
                         // CELL formId 00049E2A
                         // PGRD formId 000304B7
-                        //if (mFormId == 0x0001C2C8)
-                            //std::cout << link.startNode << "," << link.endNode << std::endl;
+                        // if (mFormId == 0x0001C2C8)
+                        // std::cout << link.startNode << "," << link.endNode << std::endl;
                         mLinks.push_back(link);
                     }
                 }
@@ -142,8 +144,8 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                 }
                 std::cout << ss.str() << std::endl;
 #else
-                //std::cout << "PGRD " << ESM::printName(subHdr.typeId) << " skipping..."
-                        //<< subHdr.dataSize << std::endl;
+                // std::cout << "PGRD " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
 #endif
                 break;
@@ -154,10 +156,10 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Pathgrid::save(ESM4::Writer& writer) const
+// void ESM4::Pathgrid::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Pathgrid::blank()
+// void ESM4::Pathgrid::blank()
 //{
-//}
+// }

@@ -1,11 +1,11 @@
 #include "format.hpp"
 
-#include <components/serialization/sizeaccumulator.hpp>
-#include <components/serialization/binarywriter.hpp>
 #include <components/serialization/binaryreader.hpp>
+#include <components/serialization/binarywriter.hpp>
+#include <components/serialization/sizeaccumulator.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <vector>
 
@@ -21,13 +21,13 @@ namespace
 
         DetourNavigatorSerializationIntegrationTest()
         {
-            mComposite.mIntVector = {4, 5, 6};
-            mComposite.mEnumVector = {Enum::A, Enum::B, Enum::C};
-            mComposite.mPodVector = {Pod {4, 23.87}, Pod {5, -31.76}, Pod {6, 65.12}};
-            mComposite.mPodBuffer = {Pod {7, 456.123}, Pod {8, -628.346}};
+            mComposite.mIntVector = { 4, 5, 6 };
+            mComposite.mEnumVector = { Enum::A, Enum::B, Enum::C };
+            mComposite.mPodVector = { Pod{ 4, 23.87 }, Pod{ 5, -31.76 }, Pod{ 6, 65.12 } };
+            mComposite.mPodBuffer = { Pod{ 7, 456.123 }, Pod{ 8, -628.346 } };
             mComposite.mPodDataSize = mComposite.mPodBuffer.size();
             std::string charData = "serialization";
-            mComposite.mCharBuffer = {charData.begin(), charData.end()};
+            mComposite.mCharBuffer = { charData.begin(), charData.end() };
             mComposite.mCharDataSize = charData.size();
         }
     };

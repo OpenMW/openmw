@@ -2,18 +2,18 @@
 #define OPENMW_COMPONENTS_FX_PASS_H
 
 #include <array>
-#include <string>
 #include <cstdint>
-#include <unordered_set>
 #include <optional>
+#include <string>
+#include <unordered_set>
 
-#include <osg/Timer>
+#include <osg/BlendEquation>
+#include <osg/BlendFunc>
 #include <osg/Program>
 #include <osg/Shader>
 #include <osg/State>
 #include <osg/Texture2D>
-#include <osg/BlendEquation>
-#include <osg/BlendFunc>
+#include <osg/Timer>
 
 namespace fx
 {
@@ -22,7 +22,6 @@ namespace fx
     class Pass
     {
     public:
-
         enum class Order
         {
             Forward,
@@ -38,7 +37,7 @@ namespace fx
 
         friend class Technique;
 
-        Pass(Type type=Type::Pixel, Order order=Order::Post, bool ubo = false);
+        Pass(Type type = Type::Pixel, Order order = Order::Post, bool ubo = false);
 
         void compile(Technique& technique, std::string_view preamble);
 

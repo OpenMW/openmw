@@ -12,7 +12,7 @@ namespace Files
 {
     std::array<std::uint64_t, 2> getHash(const std::filesystem::path& fileName, std::istream& stream)
     {
-        std::array<std::uint64_t, 2> hash {0, 0};
+        std::array<std::uint64_t, 2> hash{ 0, 0 };
         try
         {
             const auto start = stream.tellg();
@@ -25,7 +25,7 @@ namespace Files
                 const std::streamsize read = stream.gcount();
                 if (read == 0)
                     break;
-                std::array<std::uint64_t, 2> blockHash {0, 0};
+                std::array<std::uint64_t, 2> blockHash{ 0, 0 };
                 MurmurHash3_x64_128(value.data(), static_cast<int>(read), hash.data(), blockHash.data());
                 hash = blockHash;
             }
@@ -35,7 +35,8 @@ namespace Files
         }
         catch (const std::exception& e)
         {
-            throw std::runtime_error("Error while reading \"" + Files::pathToUnicodeString(fileName) + "\" to get hash: " + e.what());
+            throw std::runtime_error(
+                "Error while reading \"" + Files::pathToUnicodeString(fileName) + "\" to get hash: " + e.what());
         }
         return hash;
     }

@@ -9,92 +9,91 @@
 class Utf8Stream
 {
 public:
-
     typedef uint32_t UnicodeChar;
-    typedef unsigned char const * Point;
+    typedef unsigned char const* Point;
 
-    //static const unicode_char sBadChar = 0xFFFFFFFF; gcc can't handle this
-    static UnicodeChar sBadChar () { return UnicodeChar (0xFFFFFFFF); }
+    // static const unicode_char sBadChar = 0xFFFFFFFF; gcc can't handle this
+    static UnicodeChar sBadChar() { return UnicodeChar(0xFFFFFFFF); }
 
-    Utf8Stream (Point begin, Point end) :
-        cur (begin), nxt (begin), end (end), val(Utf8Stream::sBadChar())
+    Utf8Stream(Point begin, Point end)
+        : cur(begin)
+        , nxt(begin)
+        , end(end)
+        , val(Utf8Stream::sBadChar())
     {
     }
 
-    Utf8Stream (const char * str) :
-        cur (reinterpret_cast<const unsigned char*>(str)),
-        nxt (reinterpret_cast<const unsigned char*>(str)),
-        end (reinterpret_cast<const unsigned char*>(str) + strlen(str)),
-        val(Utf8Stream::sBadChar())
+    Utf8Stream(const char* str)
+        : cur(reinterpret_cast<const unsigned char*>(str))
+        , nxt(reinterpret_cast<const unsigned char*>(str))
+        , end(reinterpret_cast<const unsigned char*>(str) + strlen(str))
+        , val(Utf8Stream::sBadChar())
     {
     }
 
-    Utf8Stream (std::pair <Point, Point> range) :
-        cur (range.first), nxt (range.first), end (range.second), val(Utf8Stream::sBadChar())
+    Utf8Stream(std::pair<Point, Point> range)
+        : cur(range.first)
+        , nxt(range.first)
+        , end(range.second)
+        , val(Utf8Stream::sBadChar())
     {
     }
 
-    Utf8Stream (std::string_view str) :
-        Utf8Stream (reinterpret_cast<Point>(str.data()), reinterpret_cast<Point>(str.data() + str.size()))
+    Utf8Stream(std::string_view str)
+        : Utf8Stream(reinterpret_cast<Point>(str.data()), reinterpret_cast<Point>(str.data() + str.size()))
     {
     }
 
-    bool eof () const
-    {
-        return cur == end;
-    }
+    bool eof() const { return cur == end; }
 
-    Point current () const
-    {
-        return cur;
-    }
+    Point current() const { return cur; }
 
-    UnicodeChar peek ()
+    UnicodeChar peek()
     {
         if (cur == nxt)
-            next ();
+            next();
         return val;
     }
 
-    UnicodeChar consume ()
+    UnicodeChar consume()
     {
         if (cur == nxt)
-            next ();
+            next();
         cur = nxt;
         return val;
     }
 
-    static std::pair <UnicodeChar, Point> decode (Point cur, Point end)
+    static std::pair<UnicodeChar, Point> decode(Point cur, Point end)
     {
         if ((*cur & 0x80) == 0)
         {
             UnicodeChar chr = *cur++;
 
-            return std::make_pair (chr, cur);
+            return std::make_pair(chr, cur);
         }
 
         int octets;
         UnicodeChar chr;
 
-        std::tie (octets, chr) = octet_count (*cur++);
+        std::tie(octets, chr) = octet_count(*cur++);
 
         if (octets > 5)
-            return std::make_pair (sBadChar(), cur);
+            return std::make_pair(sBadChar(), cur);
 
         Point eoc = cur + octets;
 
         if (eoc > end)
-            return std::make_pair (sBadChar(), cur);
+            return std::make_pair(sBadChar(), cur);
 
         while (cur != eoc)
         {
             if ((*cur & 0xC0) != 0x80) // check continuation mark
-                return std::make_pair (sBadChar(), cur);
+                return std::make_pair(sBadChar(), cur);
 
-            chr = (chr << 6) | UnicodeChar ((*cur++) & 0x3F);
+            chr = (chr << 6) | UnicodeChar((*cur++) & 0x3F);
         }
 
-        return std::make_pair (chr, cur);
+        return std::make_pair(chr, cur);
     }
 
     static UnicodeChar toLowerUtf8(UnicodeChar ch)
@@ -125,13 +124,13 @@ public:
     static std::string lowerCaseUtf8(std::string_view str)
     {
         if (str.empty())
-            return std::string{str};
+            return std::string{ str };
 
         // Decode string as utf8 characters, convert to lower case and pack them to string
         std::string out;
         out.reserve(str.length());
-        Utf8Stream stream (str);
-        while (!stream.eof ())
+        Utf8Stream stream(str);
+        while (!stream.eof())
         {
             UnicodeChar character = toLowerUtf8(stream.peek());
 
@@ -163,8 +162,7 @@ public:
     }
 
 private:
-
-    static std::pair <int, UnicodeChar> octet_count (unsigned char octet)
+    static std::pair<int, UnicodeChar> octet_count(unsigned char octet)
     {
         int octets;
 
@@ -180,13 +178,10 @@ private:
             mask = (mask >> 1) | 0x80;
         }
 
-        return std::make_pair (octets, octet & ~mask);
+        return std::make_pair(octets, octet & ~mask);
     }
 
-    void next ()
-    {
-        std::tie (val, nxt) = decode (nxt, end);
-    }
+    void next() { std::tie(val, nxt) = decode(nxt, end); }
 
     Point cur;
     Point nxt;

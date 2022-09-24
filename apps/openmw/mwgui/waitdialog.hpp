@@ -27,7 +27,7 @@ namespace MWGui
     public:
         WaitDialog();
 
-        void setPtr(const MWWorld::Ptr &ptr) override;
+        void setPtr(const MWWorld::Ptr& ptr) override;
 
         void onOpen() override;
 

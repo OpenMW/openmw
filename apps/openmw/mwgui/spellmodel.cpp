@@ -3,19 +3,19 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/utf8stream.hpp>
 
-#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellutil.hpp"
 
+#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/class.hpp"
 
 namespace
 {
@@ -32,21 +32,21 @@ namespace
 namespace MWGui
 {
 
-    SpellModel::SpellModel(const MWWorld::Ptr &actor, const std::string& filter)
-        : mActor(actor), mFilter(filter)
+    SpellModel::SpellModel(const MWWorld::Ptr& actor, const std::string& filter)
+        : mActor(actor)
+        , mFilter(filter)
     {
     }
 
-    SpellModel::SpellModel(const MWWorld::Ptr &actor)
+    SpellModel::SpellModel(const MWWorld::Ptr& actor)
         : mActor(actor)
     {
     }
 
-    bool SpellModel::matchingEffectExists(std::string filter, const ESM::EffectList &effects)
+    bool SpellModel::matchingEffectExists(std::string filter, const ESM::EffectList& effects)
     {
         auto wm = MWBase::Environment::get().getWindowManager();
-        const MWWorld::ESMStore &store =
-            MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         for (const auto& effect : effects.mList)
         {
@@ -54,10 +54,9 @@ namespace MWGui
 
             if (effectId != -1)
             {
-                const ESM::MagicEffect *magicEffect =
-                    store.get<ESM::MagicEffect>().find(effectId);
+                const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(effectId);
                 const std::string& effectIDStr = ESM::MagicEffect::effectIdToString(effectId);
-                std::string fullEffectName{wm->getGameSettingString(effectIDStr, {})};
+                std::string fullEffectName{ wm->getGameSettingString(effectIDStr, {}) };
 
                 if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && effect.mSkill != -1)
                 {
@@ -68,7 +67,8 @@ namespace MWGui
                 if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && effect.mAttribute != -1)
                 {
                     fullEffectName += ' ';
-                    fullEffectName += wm->getGameSettingString(ESM::Attribute::sGmstAttributeIds[effect.mAttribute], {});
+                    fullEffectName
+                        += wm->getGameSettingString(ESM::Attribute::sGmstAttributeIds[effect.mAttribute], {});
                 }
 
                 std::string convert = Utf8Stream::lowerCaseUtf8(fullEffectName);
@@ -89,8 +89,7 @@ namespace MWGui
         MWMechanics::CreatureStats& stats = mActor.getClass().getCreatureStats(mActor);
         const MWMechanics::Spells& spells = stats.getSpells();
 
-        const MWWorld::ESMStore &esmStore =
-            MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
         std::string filter = Utf8Stream::lowerCaseUtf8(mFilter);
 
@@ -100,9 +99,8 @@ namespace MWGui
                 continue;
 
             std::string name = Utf8Stream::lowerCaseUtf8(spell->mName);
- 
-            if (name.find(filter) == std::string::npos 
-                && !matchingEffectExists(filter, spell->mEffects))
+
+            if (name.find(filter) == std::string::npos && !matchingEffectExists(filter, spell->mEffects))
                 continue;
 
             Spell newSpell;
@@ -134,17 +132,18 @@ namespace MWGui
             const ESM::Enchantment* enchant = esmStore.get<ESM::Enchantment>().search(enchantId);
             if (!enchant)
             {
-                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId();
+                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantId << "' on item "
+                                    << item.getCellRef().getRefId();
                 continue;
             }
 
-            if (enchant->mData.mType != ESM::Enchantment::WhenUsed && enchant->mData.mType != ESM::Enchantment::CastOnce)
+            if (enchant->mData.mType != ESM::Enchantment::WhenUsed
+                && enchant->mData.mType != ESM::Enchantment::CastOnce)
                 continue;
 
             std::string name = Utf8Stream::lowerCaseUtf8(item.getClass().getName(item));
 
-            if (name.find(filter) == std::string::npos
-                && !matchingEffectExists(filter, enchant->mEffects))
+            if (name.find(filter) == std::string::npos && !matchingEffectExists(filter, enchant->mEffects))
                 continue;
 
             Spell newSpell;
@@ -164,14 +163,15 @@ namespace MWGui
             else
             {
                 if (!item.getClass().getEquipmentSlots(item).first.empty()
-                        && item.getClass().canBeEquipped(item, mActor).first == 0)
+                    && item.getClass().canBeEquipped(item, mActor).first == 0)
                     continue;
 
-                int castCost = MWMechanics::getEffectiveEnchantmentCastCost(static_cast<float>(enchant->mData.mCost), mActor);
+                int castCost
+                    = MWMechanics::getEffectiveEnchantmentCastCost(static_cast<float>(enchant->mData.mCost), mActor);
 
                 std::string cost = std::to_string(castCost);
                 int currentCharge = int(item.getCellRef().getEnchantmentCharge());
-                if (currentCharge ==  -1)
+                if (currentCharge == -1)
                     currentCharge = enchant->mData.mCharge;
                 std::string charge = std::to_string(currentCharge);
                 newSpell.mCostColumn = cost + "/" + charge;
@@ -192,9 +192,10 @@ namespace MWGui
     SpellModel::ModelIndex SpellModel::getSelectedIndex() const
     {
         ModelIndex selected = -1;
-        for (SpellModel::ModelIndex i = 0; i<int(getItemCount()); ++i)
+        for (SpellModel::ModelIndex i = 0; i < int(getItemCount()); ++i)
         {
-            if (getItem(i).mSelected) {
+            if (getItem(i).mSelected)
+            {
                 selected = i;
                 break;
             }

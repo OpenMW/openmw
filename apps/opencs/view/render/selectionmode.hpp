@@ -11,38 +11,35 @@ namespace CSVRender
 
     class SelectionMode : public CSVWidget::SceneToolMode
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        SelectionMode(
+            CSVWidget::SceneToolbar* parent, WorldspaceWidget& worldspaceWidget, unsigned int interactionMask);
 
-            SelectionMode(CSVWidget::SceneToolbar* parent, WorldspaceWidget& worldspaceWidget,
-                unsigned int interactionMask);
+    protected:
+        WorldspaceWidget& getWorldspaceWidget();
 
-        protected:
+        /// Add context menu items to \a menu.
+        ///
+        /// \attention menu can be a 0-pointer
+        ///
+        /// \return Have there been any menu items to be added (if menu is 0 and there
+        /// items to be added, the function must return true anyway.
+        bool createContextMenu(QMenu* menu) override;
 
-            WorldspaceWidget& getWorldspaceWidget();
+    private:
+        WorldspaceWidget& mWorldspaceWidget;
+        unsigned int mInteractionMask;
+        QAction* mSelectAll;
+        QAction* mDeselectAll;
+        QAction* mInvertSelection;
 
-            /// Add context menu items to \a menu.
-            ///
-            /// \attention menu can be a 0-pointer
-            ///
-            /// \return Have there been any menu items to be added (if menu is 0 and there
-            /// items to be added, the function must return true anyway.
-            bool createContextMenu (QMenu* menu) override;
+    protected slots:
 
-        private:
-
-            WorldspaceWidget& mWorldspaceWidget;
-            unsigned int mInteractionMask;
-            QAction* mSelectAll;
-            QAction* mDeselectAll;
-            QAction* mInvertSelection;
-
-        protected slots:
-
-            virtual void selectAll();
-            virtual void clearSelection();
-            virtual void invertSelection();
+        virtual void selectAll();
+        virtual void clearSelection();
+        virtual void invertSelection();
     };
 }
 

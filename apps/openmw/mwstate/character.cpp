@@ -1,11 +1,11 @@
 #include "character.hpp"
 
+#include <algorithm>
 #include <cctype>
 #include <filesystem>
 #include <sstream>
-#include <utility>
-#include <algorithm>
 #include <tuple>
+#include <utility>
 
 #include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -13,9 +13,9 @@
 
 #include <components/misc/strings/algorithm.hpp>
 
-bool MWState::operator< (const Slot& left, const Slot& right)
+bool MWState::operator<(const Slot& left, const Slot& right)
 {
-    return left.mTimeStamp<right.mTimeStamp;
+    return left.mTimeStamp < right.mTimeStamp;
 }
 
 std::string MWState::getFirstGameFile(const std::vector<std::string>& contentFiles)
@@ -28,29 +28,29 @@ std::string MWState::getFirstGameFile(const std::vector<std::string>& contentFil
     return "";
 }
 
-void MWState::Character::addSlot (const std::filesystem::path& path, const std::string& game)
+void MWState::Character::addSlot(const std::filesystem::path& path, const std::string& game)
 {
     Slot slot;
     slot.mPath = path;
-    slot.mTimeStamp = std::filesystem::last_write_time (path);
+    slot.mTimeStamp = std::filesystem::last_write_time(path);
 
     ESM::ESMReader reader;
-    reader.open (slot.mPath);
+    reader.open(slot.mPath);
 
-    if (reader.getRecName()!=ESM::REC_SAVE)
+    if (reader.getRecName() != ESM::REC_SAVE)
         return; // invalid save file -> ignore
 
     reader.getRecHeader();
 
-    slot.mProfile.load (reader);
+    slot.mProfile.load(reader);
 
     if (!Misc::StringUtils::ciEqual(getFirstGameFile(slot.mProfile.mContentFiles), game))
         return; // this file is for a different game -> ignore
 
-    mSlots.push_back (slot);
+    mSlots.push_back(slot);
 }
 
-void MWState::Character::addSlot (const ESM::SavedGame& profile)
+void MWState::Character::addSlot(const ESM::SavedGame& profile)
 {
     Slot slot;
 
@@ -58,10 +58,10 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
 
     // The profile description is user-supplied, so we need to escape the path
     Utf8Stream description(profile.mDescription);
-    while(!description.eof())
+    while (!description.eof())
     {
         auto c = description.consume();
-        if(c <= 0x7F && std::isalnum(c)) // Ignore multibyte characters and non alphanumeric characters
+        if (c <= 0x7F && std::isalnum(c)) // Ignore multibyte characters and non alphanumeric characters
             stream << static_cast<char>(c);
         else
             stream << '_';
@@ -71,7 +71,7 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     slot.mPath = mPath / (stream.str() + ext);
 
     // Append an index if necessary to ensure a unique file
-    int i=0;
+    int i = 0;
     while (std::filesystem::exists(slot.mPath))
     {
         const std::string test = stream.str() + " - " + std::to_string(++i);
@@ -79,30 +79,32 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     }
 
     slot.mProfile = profile;
-    slot.mTimeStamp = std::filesystem::file_time_type ();
+    slot.mTimeStamp = std::filesystem::file_time_type();
 
-    mSlots.push_back (slot);
+    mSlots.push_back(slot);
 }
 
-MWState::Character::Character (std::filesystem::path saves, const std::string& game)
-: mPath (std::move(saves))
+MWState::Character::Character(std::filesystem::path saves, const std::string& game)
+    : mPath(std::move(saves))
 {
-    if (!std::filesystem::is_directory (mPath))
+    if (!std::filesystem::is_directory(mPath))
     {
-        std::filesystem::create_directories (mPath);
+        std::filesystem::create_directories(mPath);
     }
     else
     {
-        for (const auto& iter : std::filesystem::directory_iterator (mPath))
+        for (const auto& iter : std::filesystem::directory_iterator(mPath))
         {
             try
             {
-                addSlot (iter, game);
+                addSlot(iter, game);
             }
-            catch (...) {} // ignoring bad saved game files for now
+            catch (...)
+            {
+            } // ignoring bad saved game files for now
         }
 
-        std::sort (mSlots.begin(), mSlots.end());
+        std::sort(mSlots.begin(), mSlots.end());
     }
 }
 
@@ -111,7 +113,7 @@ void MWState::Character::cleanup()
     if (mSlots.empty())
     {
         // All slots are gone, no need to keep the empty directory
-        if (std::filesystem::is_directory (mPath))
+        if (std::filesystem::is_directory(mPath))
         {
             // Extra safety check to make sure the directory is empty (e.g. slots failed to parse header)
             std::filesystem::directory_iterator it(mPath);
@@ -121,45 +123,45 @@ void MWState::Character::cleanup()
     }
 }
 
-const MWState::Slot *MWState::Character::createSlot (const ESM::SavedGame& profile)
+const MWState::Slot* MWState::Character::createSlot(const ESM::SavedGame& profile)
 {
-    addSlot (profile);
+    addSlot(profile);
 
     return &mSlots.back();
 }
 
-void MWState::Character::deleteSlot (const Slot *slot)
+void MWState::Character::deleteSlot(const Slot* slot)
 {
     int index = slot - mSlots.data();
 
-    if (index<0 || index>=static_cast<int> (mSlots.size()))
+    if (index < 0 || index >= static_cast<int>(mSlots.size()))
     {
         // sanity check; not entirely reliable
-        throw std::logic_error ("slot not found");
+        throw std::logic_error("slot not found");
     }
 
     std::filesystem::remove(slot->mPath);
 
-    mSlots.erase (mSlots.begin()+index);
+    mSlots.erase(mSlots.begin() + index);
 }
 
-const MWState::Slot *MWState::Character::updateSlot (const Slot *slot, const ESM::SavedGame& profile)
+const MWState::Slot* MWState::Character::updateSlot(const Slot* slot, const ESM::SavedGame& profile)
 {
     int index = slot - mSlots.data();
 
-    if (index<0 || index>=static_cast<int> (mSlots.size()))
+    if (index < 0 || index >= static_cast<int>(mSlots.size()))
     {
         // sanity check; not entirely reliable
-        throw std::logic_error ("slot not found");
+        throw std::logic_error("slot not found");
     }
 
     Slot newSlot = *slot;
     newSlot.mProfile = profile;
-    newSlot.mTimeStamp = std::filesystem::file_time_type ();
+    newSlot.mTimeStamp = std::filesystem::file_time_type();
 
-    mSlots.erase (mSlots.begin()+index);
+    mSlots.erase(mSlots.begin() + index);
 
-    mSlots.push_back (newSlot);
+    mSlots.push_back(newSlot);
 
     return &mSlots.back();
 }
@@ -177,17 +179,13 @@ MWState::Character::SlotIterator MWState::Character::end() const
 const ESM::SavedGame& MWState::Character::getSignature() const
 {
     if (mSlots.empty())
-        throw std::logic_error ("character signature not available");
+        throw std::logic_error("character signature not available");
 
-    const auto tiePlayerLevelAndTimeStamp = [] (const Slot& v)
-    {
-        return std::tie(v.mProfile.mPlayerLevel, v.mTimeStamp);
-    };
+    const auto tiePlayerLevelAndTimeStamp
+        = [](const Slot& v) { return std::tie(v.mProfile.mPlayerLevel, v.mTimeStamp); };
 
-    const auto lessByPlayerLevelAndTimeStamp = [&] (const Slot& l, const Slot& r)
-    {
-        return tiePlayerLevelAndTimeStamp(l) < tiePlayerLevelAndTimeStamp(r);
-    };
+    const auto lessByPlayerLevelAndTimeStamp
+        = [&](const Slot& l, const Slot& r) { return tiePlayerLevelAndTimeStamp(l) < tiePlayerLevelAndTimeStamp(r); };
 
     return std::max_element(mSlots.begin(), mSlots.end(), lessByPlayerLevelAndTimeStamp)->mProfile;
 }

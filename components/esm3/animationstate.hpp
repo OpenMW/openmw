@@ -1,9 +1,9 @@
 #ifndef OPENMW_ESM_ANIMATIONSTATE_H
 #define OPENMW_ESM_ANIMATIONSTATE_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 namespace ESM
 {
@@ -16,7 +16,11 @@ namespace ESM
         struct ScriptedAnimation
         {
             ScriptedAnimation()
-                : mTime(0.f), mAbsolute(false), mLoopCount(0) {}
+                : mTime(0.f)
+                , mAbsolute(false)
+                , mLoopCount(0)
+            {
+            }
 
             std::string mGroup;
             float mTime;

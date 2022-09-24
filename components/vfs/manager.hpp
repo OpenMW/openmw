@@ -3,11 +3,11 @@
 
 #include <components/files/istreamptr.hpp>
 
-#include <vector>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <string>
-#include <filesystem>
+#include <vector>
 
 namespace VFS
 {
@@ -19,7 +19,11 @@ namespace VFS
     class IteratorPair
     {
     public:
-        IteratorPair(Iterator first, Iterator last) : mFirst(first), mLast(last) {}
+        IteratorPair(Iterator first, Iterator last)
+            : mFirst(first)
+            , mLast(last)
+        {
+        }
         Iterator begin() const { return mFirst; }
         Iterator end() const { return mLast; }
 
@@ -38,11 +42,18 @@ namespace VFS
         class RecursiveDirectoryIterator
         {
         public:
-            RecursiveDirectoryIterator(std::map<std::string, File*>::const_iterator it) : mIt(it) {}
+            RecursiveDirectoryIterator(std::map<std::string, File*>::const_iterator it)
+                : mIt(it)
+            {
+            }
             const std::string& operator*() const { return mIt->first; }
             const std::string* operator->() const { return &mIt->first; }
             bool operator!=(const RecursiveDirectoryIterator& other) { return mIt != other.mIt; }
-            RecursiveDirectoryIterator& operator++() { ++mIt; return *this; }
+            RecursiveDirectoryIterator& operator++()
+            {
+                ++mIt;
+                return *this;
+            }
 
         private:
             std::map<std::string, File*>::const_iterator mIt;
@@ -60,7 +71,8 @@ namespace VFS
         // Empty the file index and unregister archives.
         void reset();
 
-        /// Register the given archive. All files contained in it will be added to the index on the next buildIndex() call.
+        /// Register the given archive. All files contained in it will be added to the index on the next buildIndex()
+        /// call.
         void addArchive(std::unique_ptr<Archive>&& archive);
 
         /// Build the file index. Should be called when all archives have been registered.
@@ -95,7 +107,7 @@ namespace VFS
         /// Retrieve the absolute path to the file
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
-        std::filesystem::path getAbsoluteFileName(const std::filesystem::path &name) const;
+        std::filesystem::path getAbsoluteFileName(const std::filesystem::path& name) const;
 
     private:
         bool mStrict;

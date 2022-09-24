@@ -2,11 +2,11 @@
 #define OPENMW_COMPONENTS_MULTIOBJECTCACHE_H
 
 #include <map>
-#include <string>
 #include <mutex>
+#include <string>
 
-#include <osg/ref_ptr>
 #include <osg/Referenced>
+#include <osg/ref_ptr>
 
 namespace osg
 {
@@ -40,12 +40,10 @@ namespace Resource
         unsigned int getCacheSize() const;
 
     protected:
+        typedef std::multimap<std::string, osg::ref_ptr<osg::Object>> ObjectCacheMap;
 
-        typedef std::multimap<std::string, osg::ref_ptr<osg::Object> >             ObjectCacheMap;
-
-        ObjectCacheMap                          _objectCache;
-        mutable std::mutex                      _objectCacheMutex;
-
+        ObjectCacheMap _objectCache;
+        mutable std::mutex _objectCacheMutex;
     };
 
 }

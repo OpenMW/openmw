@@ -2,14 +2,14 @@
 
 #include <MyGUI_TextIterator.h>
 
-#include <components/esm3/loadappa.hpp>
-#include <components/esm3/loadnpc.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadnpc.hpp>
 
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/actionalchemy.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/ptr.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -26,42 +26,43 @@ namespace MWClass
     {
     }
 
-    void Apparatus::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    void Apparatus::insertObjectRendering(
+        const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        if (!model.empty()) {
+        if (!model.empty())
+        {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    std::string Apparatus::getModel(const MWWorld::ConstPtr &ptr) const
+    std::string Apparatus::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Apparatus>(ptr);
     }
 
     std::string_view Apparatus::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
         const std::string& name = ref->mBase->mName;
 
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    std::unique_ptr<MWWorld::Action> Apparatus::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor) const
+    std::unique_ptr<MWWorld::Action> Apparatus::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
     }
 
     std::string_view Apparatus::getScript(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
 
         return ref->mBase->mScript;
     }
 
-    int Apparatus::getValue (const MWWorld::ConstPtr& ptr) const
+    int Apparatus::getValue(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
 
         return ref->mBase->mData.mValue;
     }
@@ -78,18 +79,19 @@ namespace MWClass
 
     const std::string& Apparatus::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
 
         return ref->mBase->mIcon;
     }
 
-    MWGui::ToolTipInfo Apparatus::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
+    MWGui::ToolTipInfo Apparatus::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption
+            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -107,26 +109,26 @@ namespace MWClass
         return info;
     }
 
-    std::unique_ptr<MWWorld::Action> Apparatus::use (const MWWorld::Ptr& ptr, bool force) const
+    std::unique_ptr<MWWorld::Action> Apparatus::use(const MWWorld::Ptr& ptr, bool force) const
     {
         return std::make_unique<MWWorld::ActionAlchemy>(force);
     }
 
-    MWWorld::Ptr Apparatus::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Apparatus::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    bool Apparatus::canSell (const MWWorld::ConstPtr& item, int npcServices) const
+    bool Apparatus::canSell(const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Apparatus) != 0;
     }
 
-    float Apparatus::getWeight(const MWWorld::ConstPtr &ptr) const
+    float Apparatus::getWeight(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
         return ref->mBase->mData.mWeight;
     }
 }

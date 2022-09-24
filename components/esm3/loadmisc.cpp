@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Miscellaneous::load(ESMReader &esm, bool &isDeleted)
+    void Miscellaneous::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -53,7 +53,7 @@ namespace ESM
             esm.fail("Missing MCDT subrecord");
     }
 
-    void Miscellaneous::save(ESMWriter &esm, bool isDeleted) const
+    void Miscellaneous::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

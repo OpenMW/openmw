@@ -17,21 +17,20 @@ namespace CSVTools
 
     class ReportSubView : public CSVDoc::SubView
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            ReportTable *mTable;
-            CSMDoc::Document& mDocument;
-            int mRefreshState;
+        ReportTable* mTable;
+        CSMDoc::Document& mDocument;
+        int mRefreshState;
 
-        public:
+    public:
+        ReportSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            ReportSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
+        void setEditLock(bool locked) override;
 
-            void setEditLock (bool locked) override;
+    private slots:
 
-        private slots:
-
-            void refreshRequest();
+        void refreshRequest();
     };
 }
 

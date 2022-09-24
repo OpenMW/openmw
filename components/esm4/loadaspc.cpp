@@ -36,15 +36,19 @@ void ESM4::AcousticSpace::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId);  break;
-            case ESM4::SUB_ANAM: reader.get(mEnvironmentType); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_ANAM:
+                reader.get(mEnvironmentType);
+                break;
             case ESM4::SUB_SNAM:
             {
                 FormId id;
@@ -52,20 +56,24 @@ void ESM4::AcousticSpace::load(ESM4::Reader& reader)
                 mAmbientLoopSounds.push_back(id);
                 break;
             }
-            case ESM4::SUB_RDAT: reader.getFormId(mSoundRegion); break;
-            case ESM4::SUB_INAM: reader.get(mIsInterior); break;
+            case ESM4::SUB_RDAT:
+                reader.getFormId(mSoundRegion);
+                break;
+            case ESM4::SUB_INAM:
+                reader.get(mIsInterior);
+                break;
             case ESM4::SUB_WNAM: // usually 0 for FONV (maybe # of close Actors for Walla to trigger)
             {
                 std::uint32_t dummy;
                 reader.get(dummy);
-                //std::cout << "WNAM " << mEditorId << " " << dummy << std::endl;
+                // std::cout << "WNAM " << mEditorId << " " << dummy << std::endl;
                 break;
             }
             case ESM4::SUB_BNAM: // TES5 reverb formid
             case ESM4::SUB_OBND:
             {
-                //std::cout << "ASPC " << ESM::printName(subHdr.typeId) << " skipping..."
-                          //<< subHdr.dataSize << std::endl;
+                // std::cout << "ASPC " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -75,10 +83,10 @@ void ESM4::AcousticSpace::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::AcousticSpace::save(ESM4::Writer& writer) const
+// void ESM4::AcousticSpace::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::AcousticSpace::blank()
+// void ESM4::AcousticSpace::blank()
 //{
-//}
+// }

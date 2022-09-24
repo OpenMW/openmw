@@ -8,7 +8,10 @@
 
 #include <components/settings/settings.hpp>
 
-namespace Config { class GameSettings; }
+namespace Config
+{
+    class GameSettings;
+}
 
 namespace Launcher
 {
@@ -17,7 +20,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        explicit AdvancedPage(Config::GameSettings &gameSettings, QWidget *parent = nullptr);
+        explicit AdvancedPage(Config::GameSettings& gameSettings, QWidget* parent = nullptr);
 
         bool loadSettings();
         void saveSettings();
@@ -33,7 +36,7 @@ namespace Launcher
         void slotSkyBlendingToggled(bool checked);
 
     private:
-        Config::GameSettings &mGameSettings;
+        Config::GameSettings& mGameSettings;
         QCompleter mCellNameCompleter;
         QStringListModel mCellNameCompleterModel;
 
@@ -42,12 +45,12 @@ namespace Launcher
          * @param filePaths the file paths of the content files to be examined
          */
         void loadCellsForAutocomplete(QStringList filePaths);
-        static void loadSettingBool(QCheckBox *checkbox, const std::string& setting, const std::string& group);
-        static void saveSettingBool(QCheckBox *checkbox, const std::string& setting, const std::string& group);
-        static void loadSettingInt(QComboBox *comboBox, const std::string& setting, const std::string& group);
-        static void saveSettingInt(QComboBox *comboBox, const std::string& setting, const std::string& group);
-        static void loadSettingInt(QSpinBox *spinBox, const std::string& setting, const std::string& group);
-        static void saveSettingInt(QSpinBox *spinBox, const std::string& setting, const std::string& group);
+        static void loadSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group);
+        static void saveSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group);
+        static void loadSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group);
+        static void saveSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group);
+        static void loadSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group);
+        static void saveSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group);
     };
 }
 #endif

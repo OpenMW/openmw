@@ -5,9 +5,9 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/loadsoun.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
-#include <components/esm3/loadsoun.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -36,11 +36,14 @@ namespace MWSound
         }
     }
 
-    SoundBufferPool::SoundBufferPool(const VFS::Manager& vfs, Sound_Output& output) :
-        mVfs(&vfs),
-        mOutput(&output),
-        mBufferCacheMax(std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1) * 1024 * 1024),
-        mBufferCacheMin(std::min(static_cast<std::size_t>(std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1)) * 1024 * 1024, mBufferCacheMax))
+    SoundBufferPool::SoundBufferPool(const VFS::Manager& vfs, Sound_Output& output)
+        : mVfs(&vfs)
+        , mOutput(&output)
+        , mBufferCacheMax(std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1) * 1024 * 1024)
+        , mBufferCacheMin(
+              std::min(static_cast<std::size_t>(std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1))
+                      * 1024 * 1024,
+                  mBufferCacheMax))
     {
     }
 
@@ -75,7 +78,8 @@ namespace MWSound
             sfx = it->second;
         else
         {
-            const ESM::Sound *sound = MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>().search(soundId);
+            const ESM::Sound* sound
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>().search(soundId);
             if (sound == nullptr)
                 return {};
             sfx = insertSound(soundId, *sound);
@@ -104,9 +108,9 @@ namespace MWSound
 
     void SoundBufferPool::clear()
     {
-        for (auto &sfx : mSoundBuffers)
+        for (auto& sfx : mSoundBuffers)
         {
-            if(sfx.mHandle)
+            if (sfx.mHandle)
                 mOutput->unloadSound(sfx.mHandle);
             sfx.mHandle = nullptr;
         }

@@ -42,27 +42,27 @@ namespace ESM4
         enum Flags
         {
             Flag_RandomFreqShift = 0x0001,
-            Flag_PlayAtRandom    = 0x0002,
-            Flag_EnvIgnored      = 0x0004,
-            Flag_RandomLocation  = 0x0008,
-            Flag_Loop            = 0x0010,
-            Flag_MenuSound       = 0x0020,
-            Flag_2D              = 0x0040,
-            Flag_360LFE          = 0x0080
+            Flag_PlayAtRandom = 0x0002,
+            Flag_EnvIgnored = 0x0004,
+            Flag_RandomLocation = 0x0008,
+            Flag_Loop = 0x0010,
+            Flag_MenuSound = 0x0020,
+            Flag_2D = 0x0040,
+            Flag_360LFE = 0x0080
         };
 
 #pragma pack(push, 1)
         struct SNDX
         {
-            std::uint8_t  minAttenuation; // distance?
-            std::uint8_t  maxAttenuation; // distance?
-            std::int8_t   freqAdjustment; // %, signed
-            std::uint8_t  unknown; // probably padding
+            std::uint8_t minAttenuation; // distance?
+            std::uint8_t maxAttenuation; // distance?
+            std::int8_t freqAdjustment; // %, signed
+            std::uint8_t unknown; // probably padding
             std::uint16_t flags;
             std::uint16_t unknown2; // probably padding
             std::uint16_t staticAttenuation; // divide by 100 to get value in dB
-            std::uint8_t  stopTime;  // multiply by 1440/256 to get value in minutes
-            std::uint8_t  startTime; // multiply by 1440/256 to get value in minutes
+            std::uint8_t stopTime; // multiply by 1440/256 to get value in minutes
+            std::uint8_t startTime; // multiply by 1440/256 to get value in minutes
         };
 
         struct SoundData
@@ -79,7 +79,7 @@ namespace ESM4
         };
 #pragma pack(pop)
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -89,9 +89,9 @@ namespace ESM4
         SoundData mExtra;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

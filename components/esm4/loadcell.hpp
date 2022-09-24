@@ -42,26 +42,26 @@ namespace ESM4
     struct CellGroup;
     typedef std::uint32_t FormId;
 
-    enum CellFlags               // TES4                     TES5
-    {                            // -----------------------  ------------------------------------
-        CELL_Interior = 0x0001,  // Can't travel from here   Interior
-        CELL_HasWater = 0x0002,  // Has water (Int)          Has Water (Int)
-        CELL_NoTravel = 0x0004,  //                          not Can't Travel From Here(Int only)
-        CELL_HideLand = 0x0008,  // Force hide land (Ext)    No LOD Water
-                                 // Oblivion interior (Int)
-        CELL_Public   = 0x0020,  // Public place             Public Area
-        CELL_HandChgd = 0x0040,  // Hand changed             Hand Changed
-        CELL_QuasiExt = 0x0080,  // Behave like exterior     Show Sky
-        CELL_SkyLight = 0x0100   //                          Use Sky Lighting
+    enum CellFlags // TES4                     TES5
+    { // -----------------------  ------------------------------------
+        CELL_Interior = 0x0001, // Can't travel from here   Interior
+        CELL_HasWater = 0x0002, // Has water (Int)          Has Water (Int)
+        CELL_NoTravel = 0x0004, //                          not Can't Travel From Here(Int only)
+        CELL_HideLand = 0x0008, // Force hide land (Ext)    No LOD Water
+                                // Oblivion interior (Int)
+        CELL_Public = 0x0020, // Public place             Public Area
+        CELL_HandChgd = 0x0040, // Hand changed             Hand Changed
+        CELL_QuasiExt = 0x0080, // Behave like exterior     Show Sky
+        CELL_SkyLight = 0x0100 //                          Use Sky Lighting
     };
 
     // Unlike TES3, multiple cells can have the same exterior co-ordinates.
     // The cells need to be organised under world spaces.
     struct Cell
     {
-        FormId mParent;       // world formId (for grouping cells), from the loading sequence
+        FormId mParent; // world formId (for grouping cells), from the loading sequence
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -75,24 +75,24 @@ namespace ESM4
         FormId mGlobal;
         FormId mClimate;
         FormId mWater;
-        float  mWaterHeight;
+        float mWaterHeight;
 
         std::vector<FormId> mRegions;
         Lighting mLighting;
 
-        FormId mLightingTemplate;             // FO3/FONV
+        FormId mLightingTemplate; // FO3/FONV
         std::uint32_t mLightingTemplateFlags; // FO3/FONV
 
-        FormId mMusic;         // FO3/FONV
+        FormId mMusic; // FO3/FONV
         FormId mAcousticSpace; // FO3/FONV
         // TES4: 0 = default, 1 = public, 2 = dungeon
         // FO3/FONV have more types (not sure how they are used, however)
         std::uint8_t mMusicType;
 
-        CellGroup *mCellGroup;
+        CellGroup* mCellGroup;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
         void blank();
     };

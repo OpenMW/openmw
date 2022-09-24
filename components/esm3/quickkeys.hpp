@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_ESM_QUICKKEYS_H
 #define OPENMW_COMPONENTS_ESM_QUICKKEYS_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace ESM
 {
@@ -19,8 +19,8 @@ namespace ESM
 
         std::vector<QuickKey> mKeys;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 
 }

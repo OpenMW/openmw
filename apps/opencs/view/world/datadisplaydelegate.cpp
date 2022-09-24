@@ -5,25 +5,24 @@
 #include <QApplication>
 #include <QPainter>
 
-CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList &values,
-                                                   const IconList &icons,
-                                                   CSMWorld::CommandDispatcher *dispatcher,
-                                                   CSMDoc::Document& document,
-                                                   const std::string &pageName,
-                                                   const std::string &settingName,
-                                                   QObject *parent)
-    : EnumDelegate (values, dispatcher, document, parent), mDisplayMode (Mode_TextOnly),
-      mIcons (icons), mIconSize (QSize(16, 16)),
-      mHorizontalMargin(QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1),
-      mTextLeftOffset(8), mSettingKey (pageName + '/' + settingName)
+CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList& values, const IconList& icons,
+    CSMWorld::CommandDispatcher* dispatcher, CSMDoc::Document& document, const std::string& pageName,
+    const std::string& settingName, QObject* parent)
+    : EnumDelegate(values, dispatcher, document, parent)
+    , mDisplayMode(Mode_TextOnly)
+    , mIcons(icons)
+    , mIconSize(QSize(16, 16))
+    , mHorizontalMargin(QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1)
+    , mTextLeftOffset(8)
+    , mSettingKey(pageName + '/' + settingName)
 {
     buildPixmaps();
 
     if (!pageName.empty())
-        updateDisplayMode (CSMPrefs::get()[pageName][settingName].toString());
+        updateDisplayMode(CSMPrefs::get()[pageName][settingName].toString());
 }
 
-void CSVWorld::DataDisplayDelegate::buildPixmaps ()
+void CSVWorld::DataDisplayDelegate::buildPixmaps()
 {
     if (!mPixmaps.empty())
         mPixmaps.clear();
@@ -32,7 +31,7 @@ void CSVWorld::DataDisplayDelegate::buildPixmaps ()
 
     while (it != mIcons.end())
     {
-        mPixmaps.emplace_back (it->mValue, it->mIcon.pixmap (mIconSize) );
+        mPixmaps.emplace_back(it->mValue, it->mIcon.pixmap(mIconSize));
         ++it;
     }
 }
@@ -48,7 +47,7 @@ void CSVWorld::DataDisplayDelegate::setTextLeftOffset(int offset)
     mTextLeftOffset = offset;
 }
 
-QSize CSVWorld::DataDisplayDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize CSVWorld::DataDisplayDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QSize size = EnumDelegate::sizeHint(option, index);
 
@@ -72,11 +71,12 @@ QSize CSVWorld::DataDisplayDelegate::sizeHint(const QStyleOptionViewItem &option
     return size;
 }
 
-void CSVWorld::DataDisplayDelegate::paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void CSVWorld::DataDisplayDelegate::paint(
+    QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     painter->save();
 
-    //default to enum delegate's paint method for text-only conditions
+    // default to enum delegate's paint method for text-only conditions
     if (mDisplayMode == Mode_TextOnly)
         EnumDelegate::paint(painter, option, index);
     else
@@ -91,7 +91,7 @@ void CSVWorld::DataDisplayDelegate::paint (QPainter *painter, const QStyleOption
     painter->restore();
 }
 
-void CSVWorld::DataDisplayDelegate::paintIcon (QPainter *painter, const QStyleOptionViewItem &option, int index) const
+void CSVWorld::DataDisplayDelegate::paintIcon(QPainter* painter, const QStyleOptionViewItem& option, int index) const
 {
     QRect iconRect = option.rect;
     QRect textRect = iconRect;
@@ -104,20 +104,14 @@ void CSVWorld::DataDisplayDelegate::paintIcon (QPainter *painter, const QStyleOp
         textRect.setLeft(iconRect.right() + mTextLeftOffset);
         textRect.setRight(option.rect.right() - mHorizontalMargin);
 
-        QString text = option.fontMetrics.elidedText(mValues.at(index).second,
-                                                     option.textElideMode,
-                                                     textRect.width());
-        QApplication::style()->drawItemText(painter,
-                                            textRect,
-                                            Qt::AlignLeft | Qt::AlignVCenter,
-                                            option.palette,
-                                            true,
-                                            text);
+        QString text = option.fontMetrics.elidedText(mValues.at(index).second, option.textElideMode, textRect.width());
+        QApplication::style()->drawItemText(
+            painter, textRect, Qt::AlignLeft | Qt::AlignVCenter, option.palette, true, text);
     }
     QApplication::style()->drawItemPixmap(painter, iconRect, Qt::AlignCenter, mPixmaps.at(index).second);
 }
 
-void CSVWorld::DataDisplayDelegate::updateDisplayMode (const std::string &mode)
+void CSVWorld::DataDisplayDelegate::updateDisplayMode(const std::string& mode)
 {
     if (mode == "Icon and Text")
         mDisplayMode = Mode_IconAndText;
@@ -129,18 +123,15 @@ void CSVWorld::DataDisplayDelegate::updateDisplayMode (const std::string &mode)
         mDisplayMode = Mode_TextOnly;
 }
 
-CSVWorld::DataDisplayDelegate::~DataDisplayDelegate()
+CSVWorld::DataDisplayDelegate::~DataDisplayDelegate() {}
+
+void CSVWorld::DataDisplayDelegate::settingChanged(const CSMPrefs::Setting* setting)
 {
+    if (*setting == mSettingKey)
+        updateDisplayMode(setting->toString());
 }
 
-void CSVWorld::DataDisplayDelegate::settingChanged (const CSMPrefs::Setting *setting)
-{
-    if (*setting==mSettingKey)
-        updateDisplayMode (setting->toString());
-}
-
-
-void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, const QString& enumName, const QString& iconFilename)
+void CSVWorld::DataDisplayDelegateFactory::add(int enumValue, const QString& enumName, const QString& iconFilename)
 {
     EnumDelegateFactory::add(enumValue, enumName);
 
@@ -149,7 +140,7 @@ void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, const QString& en
     icon.mName = enumName;
     icon.mIcon = QIcon(iconFilename);
 
-    for (auto it=mIcons.begin(); it!=mIcons.end(); ++it)
+    for (auto it = mIcons.begin(); it != mIcons.end(); ++it)
     {
         if (it->mName > enumName)
         {
@@ -161,8 +152,8 @@ void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, const QString& en
     mIcons.push_back(icon);
 }
 
-CSVWorld::CommandDelegate *CSVWorld::DataDisplayDelegateFactory::makeDelegate (
-    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const
+CSVWorld::CommandDelegate* CSVWorld::DataDisplayDelegateFactory::makeDelegate(
+    CSMWorld::CommandDispatcher* dispatcher, CSMDoc::Document& document, QObject* parent) const
 {
-    return new DataDisplayDelegate (mValues, mIcons, dispatcher, document, "", "", parent);
+    return new DataDisplayDelegate(mValues, mIcons, dispatcher, document, "", "", parent);
 }

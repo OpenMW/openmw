@@ -9,27 +9,24 @@ namespace MWWorld
 {
     class ActionApply : public Action
     {
-            std::string mId;
+        std::string mId;
 
-            void executeImp (const Ptr& actor) override;
+        void executeImp(const Ptr& actor) override;
 
-        public:
-
-            ActionApply (const Ptr& object, const std::string& id);
+    public:
+        ActionApply(const Ptr& object, const std::string& id);
     };
 
     class ActionApplyWithSkill : public Action
     {
-            std::string mId;
-            int mSkillIndex;
-            int mUsageType;
+        std::string mId;
+        int mSkillIndex;
+        int mUsageType;
 
-            void executeImp (const Ptr& actor) override;
+        void executeImp(const Ptr& actor) override;
 
-        public:
-
-            ActionApplyWithSkill (const Ptr& object, const std::string& id,
-                int skillIndex, int usageType);
+    public:
+        ActionApplyWithSkill(const Ptr& object, const std::string& id, int skillIndex, int usageType);
     };
 }
 

@@ -7,24 +7,24 @@
 #include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 
-#include "textinput.hpp"
-#include "race.hpp"
-#include "class.hpp"
 #include "birth.hpp"
-#include "review.hpp"
+#include "class.hpp"
 #include "inventorywindow.hpp"
+#include "race.hpp"
+#include "review.hpp"
+#include "textinput.hpp"
 
 namespace
 {
@@ -45,15 +45,16 @@ namespace
     {
         number++;
 
-        std::string question{Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_Question")};
-        std::string answer0{Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerOne")};
-        std::string answer1{Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerTwo")};
-        std::string answer2{Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerThree")};
+        std::string question{ Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_Question") };
+        std::string answer0{ Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerOne") };
+        std::string answer1{ Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerTwo") };
+        std::string answer2{ Fallback::Map::getString(
+            "Question_" + MyGUI::utility::toString(number) + "_AnswerThree") };
         std::string sound = "vo\\misc\\chargen qa" + MyGUI::utility::toString(number) + ".wav";
 
-        Response r0 = {answer0, ESM::Class::Combat};
-        Response r1 = {answer1, ESM::Class::Magic};
-        Response r2 = {answer2, ESM::Class::Stealth};
+        Response r0 = { answer0, ESM::Class::Combat };
+        Response r1 = { answer1, ESM::Class::Magic };
+        Response r2 = { answer2, ESM::Class::Stealth };
 
         // randomize order in which responses are displayed
         int order = Misc::Rng::rollDice(6);
@@ -61,17 +62,17 @@ namespace
         switch (order)
         {
             case 0:
-                return {question, {r0, r1, r2}, sound};
+                return { question, { r0, r1, r2 }, sound };
             case 1:
-                return {question, {r0, r2, r1}, sound};
+                return { question, { r0, r2, r1 }, sound };
             case 2:
-                return {question, {r1, r0, r2}, sound};
+                return { question, { r1, r0, r2 }, sound };
             case 3:
-                return {question, {r1, r2, r0}, sound};
+                return { question, { r1, r2, r0 }, sound };
             case 4:
-                return {question, {r2, r0, r1}, sound};
+                return { question, { r2, r0, r1 }, sound };
             default:
-                return {question, {r2, r1, r0}, sound};
+                return { question, { r2, r1, r0 }, sound };
         }
     }
 }
@@ -100,17 +101,23 @@ namespace MWGui
             mPlayerSkillValues.emplace(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue());
     }
 
-    void CharacterCreation::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
+    void CharacterCreation::setValue(const std::string& id, const MWMechanics::AttributeValue& value)
     {
-        static const char *ids[] =
-        {
-            "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4",
-            "AttribVal5", "AttribVal6", "AttribVal7", "AttribVal8", nullptr,
+        static const char* ids[] = {
+            "AttribVal1",
+            "AttribVal2",
+            "AttribVal3",
+            "AttribVal4",
+            "AttribVal5",
+            "AttribVal6",
+            "AttribVal7",
+            "AttribVal8",
+            nullptr,
         };
 
-        for (int i=0; ids[i]; ++i)
+        for (int i = 0; ids[i]; ++i)
         {
-            if (ids[i]==id)
+            if (ids[i] == id)
             {
                 mPlayerAttributes[static_cast<ESM::Attribute::AttributeID>(i)] = value;
                 if (mReviewDialog)
@@ -121,21 +128,21 @@ namespace MWGui
         }
     }
 
-    void CharacterCreation::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
+    void CharacterCreation::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
         if (mReviewDialog)
         {
             if (id == "HBar")
             {
-                mReviewDialog->setHealth (value);
+                mReviewDialog->setHealth(value);
             }
             else if (id == "MBar")
             {
-                mReviewDialog->setMagicka (value);
+                mReviewDialog->setMagicka(value);
             }
             else if (id == "FBar")
             {
-                mReviewDialog->setFatigue (value);
+                mReviewDialog->setFatigue(value);
             }
         }
     }
@@ -147,7 +154,7 @@ namespace MWGui
             mReviewDialog->setSkillValue(parSkill, value);
     }
 
-    void CharacterCreation::configureSkills (const SkillList& major, const SkillList& minor)
+    void CharacterCreation::configureSkills(const SkillList& major, const SkillList& minor)
     {
         if (mReviewDialog)
             mReviewDialog->configureSkills(major, minor);
@@ -171,7 +178,8 @@ namespace MWGui
                 case GM_Name:
                     MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mNameDialog));
                     mNameDialog = std::make_unique<TextInputDialog>();
-                    mNameDialog->setTextLabel(MWBase::Environment::get().getWindowManager()->getGameSettingString("sName", "Name"));
+                    mNameDialog->setTextLabel(
+                        MWBase::Environment::get().getWindowManager()->getGameSettingString("sName", "Name"));
                     mNameDialog->setTextInput(mPlayerName);
                     mNameDialog->setNextButtonShow(mCreationStage >= CSE_NameChosen);
                     mNameDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onNameDialogDone);
@@ -193,7 +201,8 @@ namespace MWGui
                 case GM_Class:
                     MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mClassChoiceDialog));
                     mClassChoiceDialog = std::make_unique<ClassChoiceDialog>();
-                    mClassChoiceDialog->eventButtonSelected += MyGUI::newDelegate(this, &CharacterCreation::onClassChoice);
+                    mClassChoiceDialog->eventButtonSelected
+                        += MyGUI::newDelegate(this, &CharacterCreation::onClassChoice);
                     mClassChoiceDialog->setVisible(true);
                     if (mCreationStage < CSE_RaceChosen)
                         mCreationStage = CSE_RaceChosen;
@@ -227,8 +236,10 @@ namespace MWGui
                     if (mCreateClassDialog == nullptr)
                     {
                         mCreateClassDialog = std::make_unique<CreateClassDialog>();
-                        mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
-                        mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
+                        mCreateClassDialog->eventDone
+                            += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
+                        mCreateClassDialog->eventBack
+                            += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
                     }
                     mCreateClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
                     mCreateClassDialog->setVisible(true);
@@ -249,13 +260,13 @@ namespace MWGui
                     MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mReviewDialog));
                     mReviewDialog = std::make_unique<ReviewDialog>();
 
-                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWBase::World* world = MWBase::Environment::get().getWorld();
 
-                    const ESM::NPC *playerNpc = world->getPlayerPtr().get<ESM::NPC>()->mBase;
+                    const ESM::NPC* playerNpc = world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
                     const MWWorld::Player player = world->getPlayer();
 
-                    const ESM::Class *playerClass = world->getStore().get<ESM::Class>().find(playerNpc->mClass);
+                    const ESM::Class* playerClass = world->getStore().get<ESM::Class>().find(playerNpc->mClass);
 
                     mReviewDialog->setPlayerName(playerNpc->mName);
                     mReviewDialog->setRace(playerNpc->mRace);
@@ -270,17 +281,20 @@ namespace MWGui
                     mReviewDialog->setFatigue(stats.getFatigue());
                     for (auto& attributePair : mPlayerAttributes)
                     {
-                        mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID> (attributePair.first), attributePair.second);
+                        mReviewDialog->setAttribute(
+                            static_cast<ESM::Attribute::AttributeID>(attributePair.first), attributePair.second);
                     }
                     for (auto& skillPair : mPlayerSkillValues)
                     {
-                        mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (skillPair.first), skillPair.second);
+                        mReviewDialog->setSkillValue(
+                            static_cast<ESM::Skill::SkillEnum>(skillPair.first), skillPair.second);
                     }
                     mReviewDialog->configureSkills(mPlayerMajorSkills, mPlayerMinorSkills);
 
                     mReviewDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogDone);
                     mReviewDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogBack);
-                    mReviewDialog->eventActivateDialog += MyGUI::newDelegate(this, &CharacterCreation::onReviewActivateDialog);
+                    mReviewDialog->eventActivateDialog
+                        += MyGUI::newDelegate(this, &CharacterCreation::onReviewActivateDialog);
                     mReviewDialog->setVisible(true);
                     if (mCreationStage < CSE_BirthSignChosen)
                         mCreationStage = CSE_BirthSignChosen;
@@ -315,7 +329,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
 
-        switch(parDialog)
+        switch (parDialog)
         {
             case ReviewDialog::NAME_DIALOG:
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Name);
@@ -335,12 +349,11 @@ namespace MWGui
     {
         if (mPickClassDialog)
         {
-            const std::string &classId = mPickClassDialog->getClassId();
+            const std::string& classId = mPickClassDialog->getClassId();
             if (!classId.empty())
                 MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
 
-            const ESM::Class *klass =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(classId);
+            const ESM::Class* klass = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(classId);
             if (klass)
             {
                 mPlayerClass = *klass;
@@ -370,7 +383,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
 
-        switch(_index)
+        switch (_index)
         {
             case ClassChoiceDialog::Class_Generate:
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_ClassGenerate);
@@ -384,7 +397,6 @@ namespace MWGui
             case ClassChoiceDialog::Class_Back:
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Race);
                 break;
-
         };
     }
 
@@ -404,15 +416,12 @@ namespace MWGui
     {
         if (mRaceDialog)
         {
-            const ESM::NPC &data = mRaceDialog->getResult();
+            const ESM::NPC& data = mRaceDialog->getResult();
             mPlayerRaceId = data.mRace;
-            if (!mPlayerRaceId.empty()) {
+            if (!mPlayerRaceId.empty())
+            {
                 MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
-                    data.mRace,
-                    data.isMale(),
-                    data.mHead,
-                    data.mHair
-                );
+                    data.mRace, data.isMale(), data.mHead, data.mHair);
             }
             MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
 
@@ -479,9 +488,9 @@ namespace MWGui
 
             std::vector<ESM::Skill::SkillEnum> majorSkills = mCreateClassDialog->getMajorSkills();
             std::vector<ESM::Skill::SkillEnum> minorSkills = mCreateClassDialog->getMinorSkills();
-            assert(majorSkills.size() >= sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]));
-            assert(minorSkills.size() >= sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]));
-            for (size_t i = 0; i < sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]); ++i)
+            assert(majorSkills.size() >= sizeof(klass.mData.mSkills) / sizeof(klass.mData.mSkills[0]));
+            assert(minorSkills.size() >= sizeof(klass.mData.mSkills) / sizeof(klass.mData.mSkills[0]));
+            for (size_t i = 0; i < sizeof(klass.mData.mSkills) / sizeof(klass.mData.mSkills[0]); ++i)
             {
                 klass.mData.mSkills[i][1] = majorSkills[i];
                 klass.mData.mSkills[i][0] = minorSkills[i];
@@ -664,7 +673,8 @@ namespace MWGui
         buttons.push_back(step.mResponses[1].mText);
         buttons.push_back(step.mResponses[2].mText);
         mGenerateClassQuestionDialog->setButtons(buttons);
-        mGenerateClassQuestionDialog->eventButtonSelected += MyGUI::newDelegate(this, &CharacterCreation::onClassQuestionChosen);
+        mGenerateClassQuestionDialog->eventButtonSelected
+            += MyGUI::newDelegate(this, &CharacterCreation::onClassQuestionChosen);
         mGenerateClassQuestionDialog->setVisible(true);
 
         MWBase::Environment::get().getSoundManager()->say(step.mSound);
@@ -676,8 +686,8 @@ namespace MWGui
 
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
 
-        const ESM::Class *klass =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mGenerateClass);
+        const ESM::Class* klass
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mGenerateClass);
 
         mPlayerClass = *klass;
     }

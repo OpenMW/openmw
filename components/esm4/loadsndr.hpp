@@ -49,8 +49,8 @@ namespace ESM4
     struct SoundInfo
     {
         std::int8_t frequencyAdjustment; // %, signed
-        std::uint8_t frequencyVariance;  // %
-        std::uint8_t priority;           // default 128
+        std::uint8_t frequencyVariance; // %
+        std::uint8_t priority; // default 128
         std::uint8_t dBVriance;
         std::uint16_t staticAttenuation; // divide by 100 to get value in dB
     };
@@ -58,7 +58,7 @@ namespace ESM4
 
     struct SoundReference
     {
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -74,9 +74,9 @@ namespace ESM4
         TargetCondition mTargetCondition;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

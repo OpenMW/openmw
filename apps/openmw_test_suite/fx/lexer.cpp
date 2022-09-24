@@ -7,8 +7,10 @@ namespace
     using namespace testing;
     using namespace fx::Lexer;
 
-    struct LexerTest : Test {};
-    
+    struct LexerTest : Test
+    {
+    };
+
     struct LexerSingleTokenTest : Test
     {
         template <class Token>
@@ -21,20 +23,62 @@ namespace
         }
     };
 
-    TEST_F(LexerSingleTokenTest, single_token_shared) { test<Shared>(); }
-    TEST_F(LexerSingleTokenTest, single_token_technique) { test<Technique>(); }
-    TEST_F(LexerSingleTokenTest, single_token_render_target) { test<Render_Target>(); }
-    TEST_F(LexerSingleTokenTest, single_token_vertex) { test<Vertex>(); }
-    TEST_F(LexerSingleTokenTest, single_token_fragment) { test<Fragment>(); }
-    TEST_F(LexerSingleTokenTest, single_token_compute) { test<Compute>(); }
-    TEST_F(LexerSingleTokenTest, single_token_sampler_1d) { test<Sampler_1D>(); }
-    TEST_F(LexerSingleTokenTest, single_token_sampler_2d) { test<Sampler_2D>(); }
-    TEST_F(LexerSingleTokenTest, single_token_sampler_3d) { test<Sampler_3D>(); }
-    TEST_F(LexerSingleTokenTest, single_token_true) { test<True>(); }
-    TEST_F(LexerSingleTokenTest, single_token_false) { test<False>(); }
-    TEST_F(LexerSingleTokenTest, single_token_vec2) { test<Vec2>(); }
-    TEST_F(LexerSingleTokenTest, single_token_vec3) { test<Vec3>(); }
-    TEST_F(LexerSingleTokenTest, single_token_vec4) { test<Vec4>(); }
+    TEST_F(LexerSingleTokenTest, single_token_shared)
+    {
+        test<Shared>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_technique)
+    {
+        test<Technique>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_render_target)
+    {
+        test<Render_Target>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_vertex)
+    {
+        test<Vertex>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_fragment)
+    {
+        test<Fragment>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_compute)
+    {
+        test<Compute>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_sampler_1d)
+    {
+        test<Sampler_1D>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_sampler_2d)
+    {
+        test<Sampler_2D>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_sampler_3d)
+    {
+        test<Sampler_3D>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_true)
+    {
+        test<True>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_false)
+    {
+        test<False>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_vec2)
+    {
+        test<Vec2>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_vec3)
+    {
+        test<Vec3>();
+    }
+    TEST_F(LexerSingleTokenTest, single_token_vec4)
+    {
+        test<Vec4>();
+    }
 
     TEST(LexerTest, peek_whitespace_only_content_should_be_eof)
     {
@@ -151,7 +195,7 @@ namespace
         Lexer lexer(content);
 
         auto block = lexer.jump();
-    
+
         EXPECT_NE(block, std::nullopt);
         EXPECT_EQ(expected, std::string(block.value()));
     }
@@ -172,7 +216,7 @@ namespace
         Lexer lexer(content);
 
         auto block = lexer.jump();
-    
+
         EXPECT_NE(block, std::nullopt);
         EXPECT_EQ(expected, std::string(block.value()));
     }
@@ -195,7 +239,7 @@ namespace
         Lexer lexer(content);
 
         auto block = lexer.jump();
-    
+
         EXPECT_NE(block, std::nullopt);
         EXPECT_EQ(expected, std::string(block.value()));
     }

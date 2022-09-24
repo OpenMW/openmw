@@ -1,14 +1,14 @@
 #ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_LOGLISTENER_H
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_LOGLISTENER_H
 
-#include <string>
 #include <filesystem>
 #include <fstream>
+#include <string>
 
-#include <MyGUI_ILogListener.h>
-#include <MyGUI_LogSource.h>
 #include <MyGUI_ConsoleLogListener.h>
+#include <MyGUI_ILogListener.h>
 #include <MyGUI_LevelLogFilter.h>
+#include <MyGUI_LogSource.h>
 
 namespace osgMyGUI
 {
@@ -19,9 +19,10 @@ namespace osgMyGUI
     class CustomLogListener : public MyGUI::ILogListener
     {
     public:
-        CustomLogListener(const std::filesystem::path &name)
+        CustomLogListener(const std::filesystem::path& name)
             : mFileName(name)
-        {}
+        {
+        }
 
         ~CustomLogListener() {}
 
@@ -29,7 +30,8 @@ namespace osgMyGUI
         void close() override;
         void flush() override;
 
-        void log(const std::string& _section, MyGUI::LogLevel _level, const struct tm* _time, const std::string& _message, const char* _file, int _line) override;
+        void log(const std::string& _section, MyGUI::LogLevel _level, const struct tm* _time,
+            const std::string& _message, const char* _file, int _line) override;
 
     private:
         std::ofstream mStream;
@@ -40,15 +42,14 @@ namespace osgMyGUI
     /// MyGUI log creation
     class LogFacility
     {
-        MyGUI::ConsoleLogListener  mConsole;
-        CustomLogListener   mFile;
-        MyGUI::LevelLogFilter      mFilter;
-        MyGUI::LogSource           mSource;
+        MyGUI::ConsoleLogListener mConsole;
+        CustomLogListener mFile;
+        MyGUI::LevelLogFilter mFilter;
+        MyGUI::LogSource mSource;
 
     public:
-
-        LogFacility(const std::filesystem::path &output, bool console)
-          : mFile(output)
+        LogFacility(const std::filesystem::path& output, bool console)
+            : mFile(output)
         {
             mConsole.setEnabled(console);
             mFilter.setLoggingLevel(MyGUI::LogLevel::Info);
@@ -60,7 +61,7 @@ namespace osgMyGUI
             mSource.open();
         }
 
-        MyGUI::LogSource *getSource() { return &mSource; }
+        MyGUI::LogSource* getSource() { return &mSource; }
     };
 
 }

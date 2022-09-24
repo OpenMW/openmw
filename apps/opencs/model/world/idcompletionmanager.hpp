@@ -1,9 +1,9 @@
 #ifndef CSM_WORLD_IDCOMPLETIONMANAGER_HPP
 #define CSM_WORLD_IDCOMPLETIONMANAGER_HPP
 
-#include <vector>
 #include <map>
 #include <memory>
+#include <vector>
 
 #include "columnbase.hpp"
 #include "universalid.hpp"
@@ -17,23 +17,23 @@ namespace CSMWorld
     /// \brief Creates and stores all ID completers
     class IdCompletionManager
     {
-            static const std::map<ColumnBase::Display, UniversalId::Type> sCompleterModelTypes;
+        static const std::map<ColumnBase::Display, UniversalId::Type> sCompleterModelTypes;
 
-            std::map<ColumnBase::Display, std::shared_ptr<QCompleter> > mCompleters;
+        std::map<ColumnBase::Display, std::shared_ptr<QCompleter>> mCompleters;
 
-            // Don't allow copying
-            IdCompletionManager(const IdCompletionManager &);
-            IdCompletionManager &operator = (const IdCompletionManager &);
+        // Don't allow copying
+        IdCompletionManager(const IdCompletionManager&);
+        IdCompletionManager& operator=(const IdCompletionManager&);
 
-            void generateCompleters(Data &data);
+        void generateCompleters(Data& data);
 
-        public:
-            static std::vector<ColumnBase::Display> getDisplayTypes();
+    public:
+        static std::vector<ColumnBase::Display> getDisplayTypes();
 
-            IdCompletionManager(Data &data);
+        IdCompletionManager(Data& data);
 
-            bool hasCompleterFor(ColumnBase::Display display) const;
-            std::shared_ptr<QCompleter> getCompleter(ColumnBase::Display display);
+        bool hasCompleterFor(ColumnBase::Display display) const;
+        std::shared_ptr<QCompleter> getCompleter(ColumnBase::Display display);
     };
 }
 

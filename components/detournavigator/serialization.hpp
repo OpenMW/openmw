@@ -13,10 +13,10 @@ namespace DetourNavigator
     struct RecastSettings;
     struct AgentBounds;
 
-    constexpr char recastMeshMagic[] = {'r', 'c', 's', 't'};
+    constexpr char recastMeshMagic[] = { 'r', 'c', 's', 't' };
     constexpr std::uint32_t recastMeshVersion = 2;
 
-    constexpr char preparedNavMeshDataMagic[] = {'p', 'n', 'a', 'v'};
+    constexpr char preparedNavMeshDataMagic[] = { 'p', 'n', 'a', 'v' };
     constexpr std::uint32_t preparedNavMeshDataVersion = 1;
 
     std::vector<std::byte> serialize(const RecastSettings& settings, const AgentBounds& agentBounds,

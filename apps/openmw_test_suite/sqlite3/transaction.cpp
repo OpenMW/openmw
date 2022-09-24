@@ -3,8 +3,8 @@
 #include <components/sqlite3/statement.hpp>
 #include <components/sqlite3/transaction.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <limits>
 #include <tuple>
@@ -33,13 +33,13 @@ namespace
 
         void insertId() const
         {
-            Statement insertId(*mDb, InsertId {});
+            Statement insertId(*mDb, InsertId{});
             EXPECT_EQ(execute(*mDb, insertId), 1);
         }
 
         std::vector<std::tuple<int>> getIds() const
         {
-            Statement getIds(*mDb, GetIds {});
+            Statement getIds(*mDb, GetIds{});
             std::vector<std::tuple<int>> result;
             request(*mDb, getIds, std::back_inserter(result), std::numeric_limits<std::size_t>::max());
             return result;

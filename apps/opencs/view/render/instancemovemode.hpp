@@ -7,11 +7,10 @@ namespace CSVRender
 {
     class InstanceMoveMode : public CSVWidget::ModeButton
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
-
-            InstanceMoveMode (QWidget *parent = nullptr);
+    public:
+        InstanceMoveMode(QWidget* parent = nullptr);
     };
 }
 

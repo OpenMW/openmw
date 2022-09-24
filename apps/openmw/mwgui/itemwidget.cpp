@@ -7,9 +7,9 @@
 
 #include <components/debug/debuglog.hpp>
 // correctIconPath
+#include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/vfs/manager.hpp>
-#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -29,25 +29,25 @@ namespace
         if (fontHeight > 16)
         {
             if (count > 999999999)
-                return MyGUI::utility::toString(count/1000000000) + "b";
+                return MyGUI::utility::toString(count / 1000000000) + "b";
             else if (count > 9999999)
                 return ">9m";
             else if (count > 999999)
-                return MyGUI::utility::toString(count/1000000) + "m";
+                return MyGUI::utility::toString(count / 1000000) + "m";
             else if (count > 9999)
                 return ">9k";
             else if (count > 999)
-                return MyGUI::utility::toString(count/1000) + "k";
+                return MyGUI::utility::toString(count / 1000) + "k";
             else
                 return MyGUI::utility::toString(count);
         }
 
         if (count > 999999999)
-            return MyGUI::utility::toString(count/1000000000) + "b";
+            return MyGUI::utility::toString(count / 1000000000) + "b";
         else if (count > 999999)
-            return MyGUI::utility::toString(count/1000000) + "m";
+            return MyGUI::utility::toString(count / 1000000) + "m";
         else if (count > 9999)
-            return MyGUI::utility::toString(count/1000) + "k";
+            return MyGUI::utility::toString(count / 1000) + "k";
         else
             return MyGUI::utility::toString(count);
     }
@@ -63,7 +63,6 @@ namespace MWGui
         , mFrame(nullptr)
         , mText(nullptr)
     {
-
     }
 
     void ItemWidget::registerComponents()
@@ -97,7 +96,7 @@ namespace MWGui
         mText->setCaption(getCountString(count));
     }
 
-    void ItemWidget::setIcon(const std::string &icon)
+    void ItemWidget::setIcon(const std::string& icon)
     {
         if (mCurrentIcon != icon)
         {
@@ -110,7 +109,7 @@ namespace MWGui
         }
     }
 
-    void ItemWidget::setFrame(const std::string &frame, const MyGUI::IntCoord &coord)
+    void ItemWidget::setFrame(const std::string& frame, const MyGUI::IntCoord& coord)
     {
         if (mFrame)
         {
@@ -125,7 +124,7 @@ namespace MWGui
         }
     }
 
-    void ItemWidget::setIcon(const MWWorld::Ptr &ptr)
+    void ItemWidget::setIcon(const MWWorld::Ptr& ptr)
     {
         std::string_view icon = ptr.getClass().getInventoryIcon(ptr);
         if (icon.empty())
@@ -134,14 +133,14 @@ namespace MWGui
         std::string invIcon = Misc::ResourceHelpers::correctIconPath(icon, vfs);
         if (!vfs->exists(invIcon))
         {
-            Log(Debug::Error) << "Failed to open image: '" << invIcon << "' not found, falling back to 'default-icon.tga'";
+            Log(Debug::Error) << "Failed to open image: '" << invIcon
+                              << "' not found, falling back to 'default-icon.tga'";
             invIcon = Misc::ResourceHelpers::correctIconPath("default icon.tga", vfs);
         }
         setIcon(invIcon);
     }
 
-
-    void ItemWidget::setItem(const MWWorld::Ptr &ptr, ItemState state)
+    void ItemWidget::setItem(const MWWorld::Ptr& ptr, ItemState state)
     {
         if (!mItem)
             return;
@@ -199,9 +198,9 @@ namespace MWGui
         }
 
         if (state == Barter && !isMagic)
-            setFrame(backgroundTex, MyGUI::IntCoord(2*scale,2*scale,44*scale,44*scale));
+            setFrame(backgroundTex, MyGUI::IntCoord(2 * scale, 2 * scale, 44 * scale, 44 * scale));
         else
-            setFrame(backgroundTex, MyGUI::IntCoord(0,0,44*scale,44*scale));
+            setFrame(backgroundTex, MyGUI::IntCoord(0, 0, 44 * scale, 44 * scale));
 
         setIcon(ptr);
     }

@@ -29,7 +29,7 @@ namespace Terrain
             StopTraversal,
             StopTraversalAndUse
         };
-        virtual ReturnValue isSufficientDetail(QuadTreeNode *node, float dist) = 0;
+        virtual ReturnValue isSufficientDetail(QuadTreeNode* node, float dist) = 0;
     };
 
     class ViewData;
@@ -62,7 +62,7 @@ namespace Terrain
         ChildDirection getDirection() { return mDirection; }
 
         /// Get neighbour node in this direction
-        QuadTreeNode* getNeighbour (Direction dir);
+        QuadTreeNode* getNeighbour(Direction dir);
 
         /// Initialize neighbours - do this after the quadtree is built
         void initNeighbours();

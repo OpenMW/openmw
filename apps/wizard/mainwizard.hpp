@@ -19,7 +19,8 @@ namespace Wizard
         Q_OBJECT
 
     public:
-        struct Installation {
+        struct Installation
+        {
             bool hasMorrowind;
             bool hasTribunal;
             bool hasBloodmoon;
@@ -27,7 +28,8 @@ namespace Wizard
             QString iniPath;
         };
 
-        enum {
+        enum
+        {
             Page_Intro,
             Page_MethodSelection,
             Page_LanguageSelection,
@@ -39,23 +41,23 @@ namespace Wizard
             Page_Conclusion
         };
 
-        MainWizard(QWidget *parent = nullptr);
+        MainWizard(QWidget* parent = nullptr);
         ~MainWizard() override;
 
-        bool findFiles(const QString &name, const QString &path);
-        void addInstallation(const QString &path);
+        bool findFiles(const QString& name, const QString& path);
+        void addInstallation(const QString& path);
         void runSettingsImporter();
 
         QMap<QString, Installation> mInstallations;
 
         Files::ConfigurationManager mCfgMgr;
 
-        Process::ProcessInvoker *mImporterInvoker;
+        Process::ProcessInvoker* mImporterInvoker;
 
         bool mError;
 
     public slots:
-        void addLogText(const QString &text);
+        void addLogText(const QString& text);
 
     private:
         void setupLog();
@@ -78,7 +80,6 @@ namespace Wizard
 
         void accept() override;
         void reject() override;
-
     };
 
 }

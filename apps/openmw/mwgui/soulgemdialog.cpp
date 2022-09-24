@@ -8,7 +8,7 @@
 namespace MWGui
 {
 
-    void SoulgemDialog::show(const MWWorld::Ptr &soulgem)
+    void SoulgemDialog::show(const MWWorld::Ptr& soulgem)
     {
         mSoulgem = soulgem;
         std::vector<std::string> buttons;

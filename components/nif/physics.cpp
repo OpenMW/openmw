@@ -8,14 +8,14 @@ namespace Nif
 
     /// Non-record data types
 
-    void bhkWorldObjCInfoProperty::read(NIFStream *nif)
+    void bhkWorldObjCInfoProperty::read(NIFStream* nif)
     {
         mData = nif->getUInt();
         mSize = nif->getUInt();
         mCapacityAndFlags = nif->getUInt();
     }
 
-    void bhkWorldObjectCInfo::read(NIFStream *nif)
+    void bhkWorldObjectCInfo::read(NIFStream* nif)
     {
         nif->skip(4); // Unused
         mPhaseType = static_cast<BroadPhaseType>(nif->getChar());
@@ -23,31 +23,31 @@ namespace Nif
         mProperty.read(nif);
     }
 
-    void HavokMaterial::read(NIFStream *nif)
+    void HavokMaterial::read(NIFStream* nif)
     {
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
             nif->skip(4); // Unknown
         mMaterial = nif->getUInt();
     }
 
-    void HavokFilter::read(NIFStream *nif)
+    void HavokFilter::read(NIFStream* nif)
     {
         mLayer = nif->getChar();
         mFlags = nif->getChar();
         mGroup = nif->getUShort();
     }
 
-    void hkSubPartData::read(NIFStream *nif)
+    void hkSubPartData::read(NIFStream* nif)
     {
         mHavokFilter.read(nif);
         mNumVertices = nif->getUInt();
         mHavokMaterial.read(nif);
     }
 
-    void hkpMoppCode::read(NIFStream *nif)
+    void hkpMoppCode::read(NIFStream* nif)
     {
         unsigned int size = nif->getUInt();
-        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             mOffset = nif->getVector4();
         if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
             nif->getChar(); // MOPP data build type
@@ -55,14 +55,14 @@ namespace Nif
             nif->getChars(mData, size);
     }
 
-    void bhkEntityCInfo::read(NIFStream *nif)
+    void bhkEntityCInfo::read(NIFStream* nif)
     {
         mResponseType = static_cast<hkResponseType>(nif->getChar());
         nif->skip(1); // Unused
         mProcessContactDelay = nif->getUShort();
     }
 
-    void TriangleData::read(NIFStream *nif)
+    void TriangleData::read(NIFStream* nif)
     {
         for (int i = 0; i < 3; i++)
             mTriangle[i] = nif->getUShort();
@@ -71,9 +71,9 @@ namespace Nif
             mNormal = nif->getVector3();
     }
 
-    void bhkRigidBodyCInfo::read(NIFStream *nif)
+    void bhkRigidBodyCInfo::read(NIFStream* nif)
     {
-        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
         {
             nif->skip(4); // Unused
             mHavokFilter.read(nif);
@@ -110,7 +110,7 @@ namespace Nif
         if (nif->getBethVersion() >= 83)
             mRollingFrictionMult = nif->getFloat();
         mRestitution = nif->getFloat();
-        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
         {
             mMaxLinearVelocity = nif->getFloat();
             mMaxAngularVelocity = nif->getFloat();
@@ -149,14 +149,14 @@ namespace Nif
 
     /// Record types
 
-    void bhkCollisionObject::read(NIFStream *nif)
+    void bhkCollisionObject::read(NIFStream* nif)
     {
         NiCollisionObject::read(nif);
         mFlags = nif->getUShort();
         mBody.read(nif);
     }
 
-    void bhkWorldObject::read(NIFStream *nif)
+    void bhkWorldObject::read(NIFStream* nif)
     {
         mShape.read(nif);
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
@@ -165,28 +165,28 @@ namespace Nif
         mWorldObjectInfo.read(nif);
     }
 
-    void bhkWorldObject::post(NIFFile *nif)
+    void bhkWorldObject::post(NIFFile* nif)
     {
         mShape.post(nif);
     }
 
-    void bhkEntity::read(NIFStream *nif)
+    void bhkEntity::read(NIFStream* nif)
     {
         bhkWorldObject::read(nif);
         mInfo.read(nif);
     }
 
-    void bhkBvTreeShape::read(NIFStream *nif)
+    void bhkBvTreeShape::read(NIFStream* nif)
     {
         mShape.read(nif);
     }
 
-    void bhkBvTreeShape::post(NIFFile *nif)
+    void bhkBvTreeShape::post(NIFFile* nif)
     {
         mShape.post(nif);
     }
 
-    void bhkMoppBvTreeShape::read(NIFStream *nif)
+    void bhkMoppBvTreeShape::read(NIFStream* nif)
     {
         bhkBvTreeShape::read(nif);
         nif->skip(12); // Unused
@@ -194,25 +194,25 @@ namespace Nif
         mMopp.read(nif);
     }
 
-    void bhkNiTriStripsShape::read(NIFStream *nif)
+    void bhkNiTriStripsShape::read(NIFStream* nif)
     {
         mHavokMaterial.read(nif);
         mRadius = nif->getFloat();
         nif->skip(20); // Unused
         mGrowBy = nif->getUInt();
-        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             mScale = nif->getVector4();
         mData.read(nif);
         unsigned int numFilters = nif->getUInt();
         nif->getUInts(mFilters, numFilters);
     }
 
-    void bhkNiTriStripsShape::post(NIFFile *nif)
+    void bhkNiTriStripsShape::post(NIFFile* nif)
     {
         mData.post(nif);
     }
 
-    void bhkPackedNiTriStripsShape::read(NIFStream *nif)
+    void bhkPackedNiTriStripsShape::read(NIFStream* nif)
     {
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
         {
@@ -229,12 +229,12 @@ namespace Nif
         mData.read(nif);
     }
 
-    void bhkPackedNiTriStripsShape::post(NIFFile *nif)
+    void bhkPackedNiTriStripsShape::post(NIFFile* nif)
     {
         mData.post(nif);
     }
 
-    void hkPackedNiTriStripsData::read(NIFStream *nif)
+    void hkPackedNiTriStripsData::read(NIFStream* nif)
     {
         unsigned int numTriangles = nif->getUInt();
         mTriangles.resize(numTriangles);
@@ -257,18 +257,18 @@ namespace Nif
         }
     }
 
-    void bhkSphereRepShape::read(NIFStream *nif)
+    void bhkSphereRepShape::read(NIFStream* nif)
     {
         mHavokMaterial.read(nif);
     }
 
-    void bhkConvexShape::read(NIFStream *nif)
+    void bhkConvexShape::read(NIFStream* nif)
     {
         bhkSphereRepShape::read(nif);
         mRadius = nif->getFloat();
     }
 
-    void bhkConvexVerticesShape::read(NIFStream *nif)
+    void bhkConvexVerticesShape::read(NIFStream* nif)
     {
         bhkConvexShape::read(nif);
         mVerticesProperty.read(nif);
@@ -281,7 +281,7 @@ namespace Nif
             nif->getVector4s(mNormals, numNormals);
     }
 
-    void bhkBoxShape::read(NIFStream *nif)
+    void bhkBoxShape::read(NIFStream* nif)
     {
         bhkConvexShape::read(nif);
         nif->skip(8); // Unused
@@ -289,7 +289,7 @@ namespace Nif
         nif->skip(4); // Unused
     }
 
-    void bhkCapsuleShape::read(NIFStream *nif)
+    void bhkCapsuleShape::read(NIFStream* nif)
     {
         bhkConvexShape::read(nif);
         nif->skip(8); // Unused
@@ -299,7 +299,7 @@ namespace Nif
         mRadius2 = nif->getFloat();
     }
 
-    void bhkListShape::read(NIFStream *nif)
+    void bhkListShape::read(NIFStream* nif)
     {
         mSubshapes.read(nif);
         mHavokMaterial.read(nif);
@@ -311,7 +311,7 @@ namespace Nif
             filter.read(nif);
     }
 
-    void bhkRigidBody::read(NIFStream *nif)
+    void bhkRigidBody::read(NIFStream* nif)
     {
         bhkEntity::read(nif);
         mInfo.read(nif);

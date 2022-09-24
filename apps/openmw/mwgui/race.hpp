@@ -5,7 +5,6 @@
 
 #include "windowbase.hpp"
 
-
 namespace MWRender
 {
     class RaceSelectionPreview;
@@ -39,11 +38,11 @@ namespace MWGui
             GM_Female
         };
 
-        const ESM::NPC &getResult() const;
-        const std::string &getRaceId() const { return mCurrentRaceId; }
+        const ESM::NPC& getResult() const;
+        const std::string& getRaceId() const { return mCurrentRaceId; }
         Gender getGender() const { return mGenderIndex == 0 ? GM_Male : GM_Female; }
 
-        void setRaceId(const std::string &raceId);
+        void setRaceId(const std::string& raceId);
         void setGender(Gender gender) { mGenderIndex = gender == GM_Male ? 0 : 1; }
 
         void setNextButtonShow(bool shown);
@@ -91,7 +90,7 @@ namespace MWGui
         void updatePreview();
         void recountParts();
 
-        void getBodyParts (int part, std::vector<std::string>& out);
+        void getBodyParts(int part, std::vector<std::string>& out);
 
         osg::Group* mParent;
         Resource::ResourceSystem* mResourceSystem;
@@ -99,8 +98,8 @@ namespace MWGui
         std::vector<std::string> mAvailableHeads;
         std::vector<std::string> mAvailableHairs;
 
-        MyGUI::ImageBox*  mPreviewImage;
-        MyGUI::ListBox*   mRaceList;
+        MyGUI::ImageBox* mPreviewImage;
+        MyGUI::ListBox* mRaceList;
         MyGUI::ScrollBar* mHeadRotate;
 
         MyGUI::Widget* mSkillList;

@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void NPC::load(ESMReader &esm, bool &isDeleted)
+    void NPC::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -63,14 +63,14 @@ namespace ESM
                     }
                     else if (esm.getSubSize() == 12)
                     {
-                        //Reading into temporary NPDTstruct12 object
+                        // Reading into temporary NPDTstruct12 object
                         NPDTstruct12 npdt12;
                         mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
                         esm.getExact(&npdt12, 12);
 
-                        //Clearing the mNdpt struct to initialize all values
+                        // Clearing the mNdpt struct to initialize all values
                         blankNpdt();
-                        //Swiching to an internal representation
+                        // Swiching to an internal representation
                         mNpdt.mLevel = npdt12.mLevel;
                         mNpdt.mDisposition = npdt12.mDisposition;
                         mNpdt.mReputation = npdt12.mReputation;
@@ -125,7 +125,7 @@ namespace ESM
         if (!hasFlags && !isDeleted)
             esm.fail("Missing FLAG subrecord");
     }
-    void NPC::save(ESMWriter &esm, bool isDeleted) const
+    void NPC::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -173,13 +173,16 @@ namespace ESM
         mAiPackage.save(esm);
     }
 
-    bool NPC::isMale() const {
+    bool NPC::isMale() const
+    {
         return (mFlags & Female) == 0;
     }
 
-    void NPC::setIsMale(bool value) {
+    void NPC::setIsMale(bool value)
+    {
         mFlags |= Female;
-        if (value) {
+        if (value)
+        {
             mFlags ^= Female;
         }
     }
@@ -210,9 +213,10 @@ namespace ESM
     void NPC::blankNpdt()
     {
         mNpdt.mLevel = 0;
-        mNpdt.mStrength = mNpdt.mIntelligence = mNpdt.mWillpower = mNpdt.mAgility =
-            mNpdt.mSpeed = mNpdt.mEndurance = mNpdt.mPersonality = mNpdt.mLuck = 0;
-        for (int i=0; i< Skill::Length; ++i) mNpdt.mSkills[i] = 0;
+        mNpdt.mStrength = mNpdt.mIntelligence = mNpdt.mWillpower = mNpdt.mAgility = mNpdt.mSpeed = mNpdt.mEndurance
+            = mNpdt.mPersonality = mNpdt.mLuck = 0;
+        for (int i = 0; i < Skill::Length; ++i)
+            mNpdt.mSkills[i] = 0;
         mNpdt.mReputation = 0;
         mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;
         mNpdt.mDisposition = 0;

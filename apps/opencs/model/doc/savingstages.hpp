@@ -3,8 +3,8 @@
 
 #include "stage.hpp"
 
-#include "../world/record.hpp"
 #include "../world/idcollection.hpp"
+#include "../world/record.hpp"
 #include "../world/scope.hpp"
 
 #include <components/esm/defs.hpp>
@@ -28,242 +28,225 @@ namespace CSMDoc
 
     class OpenSaveStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
-            bool mProjectFile;
+        Document& mDocument;
+        SavingState& mState;
+        bool mProjectFile;
 
-        public:
+    public:
+        OpenSaveStage(Document& document, SavingState& state, bool projectFile);
+        ///< \param projectFile Saving the project file instead of the content file.
 
-            OpenSaveStage (Document& document, SavingState& state, bool projectFile);
-            ///< \param projectFile Saving the project file instead of the content file.
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
 
     class WriteHeaderStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
-            bool mSimple;
+        Document& mDocument;
+        SavingState& mState;
+        bool mSimple;
 
-        public:
+    public:
+        WriteHeaderStage(Document& document, SavingState& state, bool simple);
+        ///< \param simple Simplified header (used for project files).
 
-            WriteHeaderStage (Document& document, SavingState& state, bool simple);
-            ///< \param simple Simplified header (used for project files).
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
 
-
-    template<class CollectionT>
+    template <class CollectionT>
     class WriteCollectionStage : public Stage
     {
-            const CollectionT& mCollection;
-            SavingState& mState;
-            CSMWorld::Scope mScope;
+        const CollectionT& mCollection;
+        SavingState& mState;
+        CSMWorld::Scope mScope;
 
-        public:
+    public:
+        WriteCollectionStage(
+            const CollectionT& collection, SavingState& state, CSMWorld::Scope scope = CSMWorld::Scope_Content);
 
-            WriteCollectionStage (const CollectionT& collection, SavingState& state,
-                CSMWorld::Scope scope = CSMWorld::Scope_Content);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
 
-    template<class CollectionT>
-    WriteCollectionStage<CollectionT>::WriteCollectionStage (const CollectionT& collection,
-        SavingState& state, CSMWorld::Scope scope)
-    : mCollection (collection), mState (state), mScope (scope)
-    {}
+    template <class CollectionT>
+    WriteCollectionStage<CollectionT>::WriteCollectionStage(
+        const CollectionT& collection, SavingState& state, CSMWorld::Scope scope)
+        : mCollection(collection)
+        , mState(state)
+        , mScope(scope)
+    {
+    }
 
-    template<class CollectionT>
+    template <class CollectionT>
     int WriteCollectionStage<CollectionT>::setup()
     {
         return mCollection.getSize();
     }
 
-    template<class CollectionT>
-    void WriteCollectionStage<CollectionT>::perform (int stage, Messages& messages)
+    template <class CollectionT>
+    void WriteCollectionStage<CollectionT>::perform(int stage, Messages& messages)
     {
-        if (CSMWorld::getScopeFromId (mCollection.getRecord (stage).get().mId)!=mScope)
+        if (CSMWorld::getScopeFromId(mCollection.getRecord(stage).get().mId) != mScope)
             return;
 
         ESM::ESMWriter& writer = mState.getWriter();
-        CSMWorld::RecordBase::State state = mCollection.getRecord (stage).mState;
-        typename CollectionT::ESXRecord record = mCollection.getRecord (stage).get();
+        CSMWorld::RecordBase::State state = mCollection.getRecord(stage).mState;
+        typename CollectionT::ESXRecord record = mCollection.getRecord(stage).get();
 
-        if (state == CSMWorld::RecordBase::State_Modified ||
-            state == CSMWorld::RecordBase::State_ModifiedOnly ||
-            state == CSMWorld::RecordBase::State_Deleted)
+        if (state == CSMWorld::RecordBase::State_Modified || state == CSMWorld::RecordBase::State_ModifiedOnly
+            || state == CSMWorld::RecordBase::State_Deleted)
         {
-            writer.startRecord (record.sRecordId, record.mRecordFlags);
-            record.save (writer, state == CSMWorld::RecordBase::State_Deleted);
-            writer.endRecord (record.sRecordId);
+            writer.startRecord(record.sRecordId, record.mRecordFlags);
+            record.save(writer, state == CSMWorld::RecordBase::State_Deleted);
+            writer.endRecord(record.sRecordId);
         }
     }
 
-
     class WriteDialogueCollectionStage : public Stage
     {
-            SavingState& mState;
-            const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
-            CSMWorld::InfoCollection& mInfos;
+        SavingState& mState;
+        const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
+        CSMWorld::InfoCollection& mInfos;
 
-        public:
+    public:
+        WriteDialogueCollectionStage(Document& document, SavingState& state, bool journal);
 
-            WriteDialogueCollectionStage (Document& document, SavingState& state, bool journal);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
-
 
     class WriteRefIdCollectionStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
+        Document& mDocument;
+        SavingState& mState;
 
-        public:
+    public:
+        WriteRefIdCollectionStage(Document& document, SavingState& state);
 
-            WriteRefIdCollectionStage (Document& document, SavingState& state);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
-
 
     class CollectionReferencesStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
+        Document& mDocument;
+        SavingState& mState;
 
-        public:
+    public:
+        CollectionReferencesStage(Document& document, SavingState& state);
 
-            CollectionReferencesStage (Document& document, SavingState& state);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
 
     class WriteCellCollectionStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
+        Document& mDocument;
+        SavingState& mState;
 
-            void writeReferences (const std::deque<int>& references, bool interior, unsigned int& newRefNum);
+        void writeReferences(const std::deque<int>& references, bool interior, unsigned int& newRefNum);
 
-        public:
+    public:
+        WriteCellCollectionStage(Document& document, SavingState& state);
 
-            WriteCellCollectionStage (Document& document, SavingState& state);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
-
 
     class WritePathgridCollectionStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
+        Document& mDocument;
+        SavingState& mState;
 
-        public:
+    public:
+        WritePathgridCollectionStage(Document& document, SavingState& state);
 
-            WritePathgridCollectionStage (Document& document, SavingState& state);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
-
 
     class WriteLandCollectionStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
+        Document& mDocument;
+        SavingState& mState;
 
-        public:
+    public:
+        WriteLandCollectionStage(Document& document, SavingState& state);
 
-            WriteLandCollectionStage (Document& document, SavingState& state);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
-
 
     class WriteLandTextureCollectionStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
+        Document& mDocument;
+        SavingState& mState;
 
-        public:
+    public:
+        WriteLandTextureCollectionStage(Document& document, SavingState& state);
 
-            WriteLandTextureCollectionStage (Document& document, SavingState& state);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
 
     class CloseSaveStage : public Stage
     {
-            SavingState& mState;
+        SavingState& mState;
 
-        public:
+    public:
+        CloseSaveStage(SavingState& state);
 
-            CloseSaveStage (SavingState& state);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
 
     class FinalSavingStage : public Stage
     {
-            Document& mDocument;
-            SavingState& mState;
+        Document& mDocument;
+        SavingState& mState;
 
-        public:
+    public:
+        FinalSavingStage(Document& document, SavingState& state);
 
-            FinalSavingStage (Document& document, SavingState& state);
+        int setup() override;
+        ///< \return number of steps
 
-            int setup() override;
-            ///< \return number of steps
-
-            void perform (int stage, Messages& messages) override;
-            ///< Messages resulting from this stage will be appended to \a messages.
+        void perform(int stage, Messages& messages) override;
+        ///< Messages resulting from this stage will be appended to \a messages.
     };
 }
 

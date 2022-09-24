@@ -16,19 +16,18 @@ namespace CSVWorld
 
     class RegionMapSubView : public CSVDoc::SubView
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            RegionMap *mRegionMap;
+        RegionMap* mRegionMap;
 
-        public:
+    public:
+        RegionMapSubView(CSMWorld::UniversalId universalId, CSMDoc::Document& document);
 
-            RegionMapSubView (CSMWorld::UniversalId universalId, CSMDoc::Document& document);
+        void setEditLock(bool locked) override;
 
-            void setEditLock (bool locked) override;
+    private slots:
 
-        private slots:
-
-            void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
+        void editRequest(const CSMWorld::UniversalId& id, const std::string& hint);
     };
 }
 

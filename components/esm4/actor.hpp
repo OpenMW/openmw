@@ -34,28 +34,28 @@
 namespace ESM4
 {
 #pragma pack(push, 1)
-    struct AIData        // NPC_, CREA
+    struct AIData // NPC_, CREA
     {
-        std::uint8_t  aggression;
-        std::uint8_t  confidence;
-        std::uint8_t  energyLevel;
-        std::uint8_t  responsibility;
+        std::uint8_t aggression;
+        std::uint8_t confidence;
+        std::uint8_t energyLevel;
+        std::uint8_t responsibility;
         std::uint32_t aiFlags;
-        std::uint8_t  trainSkill;
-        std::uint8_t  trainLevel;
+        std::uint8_t trainSkill;
+        std::uint8_t trainLevel;
         std::uint16_t unknown;
     };
 
     struct AttributeValues
     {
-        std::uint8_t  strength;
-        std::uint8_t  intelligence;
-        std::uint8_t  willpower;
-        std::uint8_t  agility;
-        std::uint8_t  speed;
-        std::uint8_t  endurance;
-        std::uint8_t  personality;
-        std::uint8_t  luck;
+        std::uint8_t strength;
+        std::uint8_t intelligence;
+        std::uint8_t willpower;
+        std::uint8_t agility;
+        std::uint8_t speed;
+        std::uint8_t endurance;
+        std::uint8_t personality;
+        std::uint8_t luck;
     };
 
     struct ACBS_TES4
@@ -64,7 +64,7 @@ namespace ESM4
         std::uint16_t baseSpell;
         std::uint16_t fatigue;
         std::uint16_t barterGold;
-        std::int16_t  levelOrOffset;
+        std::int16_t levelOrOffset;
         std::uint16_t calcMin;
         std::uint16_t calcMax;
         std::uint32_t padding1;
@@ -76,12 +76,12 @@ namespace ESM4
         std::uint32_t flags;
         std::uint16_t fatigue;
         std::uint16_t barterGold;
-        std::int16_t  levelOrMult;
+        std::int16_t levelOrMult;
         std::uint16_t calcMinlevel;
         std::uint16_t calcMaxlevel;
         std::uint16_t speedMultiplier;
-        float         karma;
-        std::int16_t  dispositionBase;
+        float karma;
+        std::int16_t dispositionBase;
         std::uint16_t templateFlags;
     };
 
@@ -90,7 +90,7 @@ namespace ESM4
         std::uint32_t flags;
         std::uint16_t magickaOffset;
         std::uint16_t staminaOffset;
-        std::uint16_t levelOrMult;     // TODO: check if int16_t
+        std::uint16_t levelOrMult; // TODO: check if int16_t
         std::uint16_t calcMinlevel;
         std::uint16_t calcMaxlevel;
         std::uint16_t speedMultiplier;
@@ -103,14 +103,14 @@ namespace ESM4
     union ActorBaseConfig
     {
         ACBS_TES4 tes4;
-        ACBS_FO3  fo3;
+        ACBS_FO3 fo3;
         ACBS_TES5 tes5;
     };
 
     struct ActorFaction
     {
-        FormId       faction;
-        std::int8_t  rank;
+        FormId faction;
+        std::int8_t rank;
         std::uint8_t unknown1;
         std::uint8_t unknown2;
         std::uint8_t unknown3;

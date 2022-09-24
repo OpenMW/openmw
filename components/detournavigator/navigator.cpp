@@ -17,7 +17,8 @@ namespace DetourNavigator
         {
             try
             {
-                db = std::make_unique<NavMeshDb>(Files::pathToUnicodeString(userDataPath / "navmesh.db"), settings.mMaxDbFileSize);
+                db = std::make_unique<NavMeshDb>(
+                    Files::pathToUnicodeString(userDataPath / "navmesh.db"), settings.mMaxDbFileSize);
             }
             catch (const std::exception& e)
             {

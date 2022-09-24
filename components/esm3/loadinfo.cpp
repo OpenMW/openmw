@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void DialInfo::load(ESMReader &esm, bool &isDeleted)
+    void DialInfo::load(ESMReader& esm, bool& isDeleted)
     {
         mId = esm.getHNString("INAM");
 
@@ -89,7 +89,7 @@ namespace ESM
         }
     }
 
-    void DialInfo::save(ESMWriter &esm, bool isDeleted) const
+    void DialInfo::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("INAM", mId);
         esm.writeHNCString("PNAM", mPrev);
@@ -114,17 +114,24 @@ namespace ESM
         for (std::vector<SelectStruct>::const_iterator it = mSelects.begin(); it != mSelects.end(); ++it)
         {
             esm.writeHNString("SCVR", it->mSelectRule);
-            it->mValue.write (esm, Variant::Format_Info);
+            it->mValue.write(esm, Variant::Format_Info);
         }
 
         esm.writeHNOString("BNAM", mResultScript);
 
-        switch(mQuestStatus)
+        switch (mQuestStatus)
         {
-        case QS_Name: esm.writeHNT("QSTN",'\1'); break;
-        case QS_Finished: esm.writeHNT("QSTF", '\1'); break;
-        case QS_Restart: esm.writeHNT("QSTR", '\1'); break;
-        default: break;
+            case QS_Name:
+                esm.writeHNT("QSTN", '\1');
+                break;
+            case QS_Finished:
+                esm.writeHNT("QSTF", '\1');
+                break;
+            case QS_Restart:
+                esm.writeHNT("QSTR", '\1');
+                break;
+            default:
+                break;
         }
     }
 

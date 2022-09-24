@@ -36,17 +36,25 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel);    break;
-            case ESM4::SUB_DATA: reader.get(mData);            break;
-            case ESM4::SUB_SNAM: reader.get(mLoopingSound);    break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_DATA:
+                reader.get(mData);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.get(mLoopingSound);
+                break;
             case ESM4::SUB_DEST: // destruction data
             case ESM4::SUB_OBND: // object bounds
             case ESM4::SUB_MODT: // model texture data
@@ -58,7 +66,7 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
             case ESM4::SUB_FULL:
             case ESM4::SUB_MODB:
             {
-                //std::cout << "MSTT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "MSTT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -68,10 +76,10 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::MovableStatic::save(ESM4::Writer& writer) const
+// void ESM4::MovableStatic::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::MovableStatic::blank()
+// void ESM4::MovableStatic::blank()
 //{
-//}
+// }

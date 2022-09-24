@@ -6,8 +6,8 @@
 #include <SDL.h>
 
 #include <components/debug/debuglog.hpp>
-#include <components/sdlutil/sdlmappings.hpp>
 #include <components/files/conversion.hpp>
+#include <components/sdlutil/sdlmappings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -18,22 +18,20 @@
 
 #include "../mwworld/player.hpp"
 
-#include "actions.hpp"
 #include "actionmanager.hpp"
+#include "actions.hpp"
 #include "bindingsmanager.hpp"
 #include "mousemanager.hpp"
 
 namespace MWInput
 {
-    ControllerManager::ControllerManager(BindingsManager* bindingsManager,
-            ActionManager* actionManager,
-            MouseManager* mouseManager,
-            const std::filesystem::path &userControllerBindingsFile,
-            const std::filesystem::path &controllerBindingsFile)
+    ControllerManager::ControllerManager(BindingsManager* bindingsManager, ActionManager* actionManager,
+        MouseManager* mouseManager, const std::filesystem::path& userControllerBindingsFile,
+        const std::filesystem::path& controllerBindingsFile)
         : mBindingsManager(bindingsManager)
         , mActionManager(actionManager)
         , mMouseManager(mouseManager)
-        , mJoystickEnabled (Settings::Manager::getBool("enable controller", "Input"))
+        , mJoystickEnabled(Settings::Manager::getBool("enable controller", "Input"))
         , mGyroAvailable(false)
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
         , mSneakToggleShortcutTimer(0.f)
@@ -135,7 +133,7 @@ namespace MWInput
             if (yAxis != 0.5)
             {
                 triedToMove = true;
-                player.setAutoMove (false);
+                player.setAutoMove(false);
                 player.setForwardBackward((0.5f - yAxis) * 2);
             }
 
@@ -183,13 +181,13 @@ namespace MWInput
         return triedToMove;
     }
 
-    void ControllerManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg)
+    void ControllerManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent& arg)
     {
         if (!mJoystickEnabled || mBindingsManager->isDetectingBindingState())
             return;
 
         MWBase::Environment::get().getLuaManager()->inputEvent(
-            {MWBase::LuaManager::InputEvent::ControllerPressed, arg.button});
+            { MWBase::LuaManager::InputEvent::ControllerPressed, arg.button });
 
         mJoystickLastUsed = true;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
@@ -205,7 +203,8 @@ namespace MWInput
                     bool mousePressSuccess = mMouseManager->injectMouseButtonPress(SDL_BUTTON_LEFT);
                     if (MyGUI::InputManager::getInstance().getMouseFocusWidget())
                     {
-                        MyGUI::Button* b = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
+                        MyGUI::Button* b
+                            = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
                         if (b && b->getEnabled())
                             MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
                     }
@@ -217,7 +216,7 @@ namespace MWInput
         else
             mBindingsManager->setPlayerControlsEnabled(true);
 
-        //esc, to leave initial movie screen
+        // esc, to leave initial movie screen
         auto kc = SDLUtil::sdlKeyToMyGUI(SDLK_ESCAPE);
         mBindingsManager->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyPress(kc, 0));
 
@@ -225,7 +224,7 @@ namespace MWInput
             mBindingsManager->controllerButtonPressed(deviceID, arg);
     }
 
-    void ControllerManager::buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg)
+    void ControllerManager::buttonReleased(int deviceID, const SDL_ControllerButtonEvent& arg)
     {
         if (mBindingsManager->isDetectingBindingState())
         {
@@ -236,7 +235,7 @@ namespace MWInput
         if (mJoystickEnabled)
         {
             MWBase::Environment::get().getLuaManager()->inputEvent(
-                {MWBase::LuaManager::InputEvent::ControllerReleased, arg.button});
+                { MWBase::LuaManager::InputEvent::ControllerReleased, arg.button });
         }
 
         if (!mJoystickEnabled || MWBase::Environment::get().getInputManager()->controlsDisabled())
@@ -251,7 +250,8 @@ namespace MWInput
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
                     bool mousePressSuccess = mMouseManager->injectMouseButtonRelease(SDL_BUTTON_LEFT);
-                    if (mBindingsManager->isDetectingBindingState()) // If the player just triggered binding, don't let button release bind.
+                    if (mBindingsManager->isDetectingBindingState()) // If the player just triggered binding, don't let
+                                                                     // button release bind.
                         return;
 
                     mBindingsManager->setPlayerControlsEnabled(!mousePressSuccess);
@@ -261,14 +261,14 @@ namespace MWInput
         else
             mBindingsManager->setPlayerControlsEnabled(true);
 
-        //esc, to leave initial movie screen
+        // esc, to leave initial movie screen
         auto kc = SDLUtil::sdlKeyToMyGUI(SDLK_ESCAPE);
         mBindingsManager->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(kc));
 
         mBindingsManager->controllerButtonReleased(deviceID, arg);
     }
 
-    void ControllerManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg)
+    void ControllerManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent& arg)
     {
         if (!mJoystickEnabled || MWBase::Environment::get().getInputManager()->controlsDisabled())
             return;
@@ -278,8 +278,8 @@ namespace MWInput
         {
             gamepadToGuiControl(arg);
         }
-        else if (mBindingsManager->actionIsActive(A_TogglePOV) &&
-                (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT || arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT))
+        else if (mBindingsManager->actionIsActive(A_TogglePOV)
+            && (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT || arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT))
         {
             // Preview Mode Gamepad Zooming; do not propagate to mBindingsManager
             return;
@@ -287,18 +287,18 @@ namespace MWInput
         mBindingsManager->controllerAxisMoved(deviceID, arg);
     }
 
-    void ControllerManager::controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg)
+    void ControllerManager::controllerAdded(int deviceID, const SDL_ControllerDeviceEvent& arg)
     {
         mBindingsManager->controllerAdded(deviceID, arg);
         enableGyroSensor();
     }
 
-    void ControllerManager::controllerRemoved(const SDL_ControllerDeviceEvent &arg)
+    void ControllerManager::controllerRemoved(const SDL_ControllerDeviceEvent& arg)
     {
         mBindingsManager->controllerRemoved(arg);
     }
 
-    bool ControllerManager::gamepadToGuiControl(const SDL_ControllerButtonEvent &arg)
+    bool ControllerManager::gamepadToGuiControl(const SDL_ControllerButtonEvent& arg)
     {
         // Presumption of GUI mode will be removed in the future.
         // MyGUI KeyCodes *may* change.
@@ -357,7 +357,7 @@ namespace MWInput
         return true;
     }
 
-    bool ControllerManager::gamepadToGuiControl(const SDL_ControllerAxisEvent &arg)
+    bool ControllerManager::gamepadToGuiControl(const SDL_ControllerAxisEvent& arg)
     {
         switch (arg.axis)
         {
@@ -406,16 +406,16 @@ namespace MWInput
     void ControllerManager::enableGyroSensor()
     {
         mGyroAvailable = false;
-        #if SDL_VERSION_ATLEAST(2, 0, 14)
-            SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
-            if (!cntrl)
-                return;
-            if (!SDL_GameControllerHasSensor(cntrl, SDL_SENSOR_GYRO))
-                return;
-            if (SDL_GameControllerSetSensorEnabled(cntrl, SDL_SENSOR_GYRO, SDL_TRUE) < 0)
-                return;
-            mGyroAvailable = true;
-        #endif
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+        SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+        if (!cntrl)
+            return;
+        if (!SDL_GameControllerHasSensor(cntrl, SDL_SENSOR_GYRO))
+            return;
+        if (SDL_GameControllerSetSensorEnabled(cntrl, SDL_SENSOR_GYRO, SDL_TRUE) < 0)
+            return;
+        mGyroAvailable = true;
+#endif
     }
 
     bool ControllerManager::isGyroAvailable() const
@@ -426,29 +426,26 @@ namespace MWInput
     std::array<float, 3> ControllerManager::getGyroValues() const
     {
         float gyro[3] = { 0.f };
-        #if SDL_VERSION_ATLEAST(2, 0, 14)
-            SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
-            if (cntrl && mGyroAvailable)
-                SDL_GameControllerGetSensorData(cntrl, SDL_SENSOR_GYRO, gyro, 3);
-        #endif
-        return std::array<float, 3>({gyro[0], gyro[1], gyro[2]});
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+        SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+        if (cntrl && mGyroAvailable)
+            SDL_GameControllerGetSensorData(cntrl, SDL_SENSOR_GYRO, gyro, 3);
+#endif
+        return std::array<float, 3>({ gyro[0], gyro[1], gyro[2] });
     }
 
     void ControllerManager::touchpadMoved(int deviceId, const SDLUtil::TouchEvent& arg)
     {
-        MWBase::Environment::get().getLuaManager()->inputEvent(
-            { MWBase::LuaManager::InputEvent::TouchMoved, arg });
+        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchMoved, arg });
     }
 
     void ControllerManager::touchpadPressed(int deviceId, const SDLUtil::TouchEvent& arg)
     {
-        MWBase::Environment::get().getLuaManager()->inputEvent(
-            { MWBase::LuaManager::InputEvent::TouchPressed, arg });
+        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchPressed, arg });
     }
 
     void ControllerManager::touchpadReleased(int deviceId, const SDLUtil::TouchEvent& arg)
     {
-        MWBase::Environment::get().getLuaManager()->inputEvent(
-            { MWBase::LuaManager::InputEvent::TouchReleased, arg });
+        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchReleased, arg });
     }
 }

@@ -1,17 +1,17 @@
 #include "material.hpp"
 
-#include <osg/Fog>
-#include <osg/Depth>
-#include <osg/TexEnvCombine>
-#include <osg/Texture2D>
-#include <osg/TexMat>
 #include <osg/BlendFunc>
 #include <osg/Capability>
+#include <osg/Depth>
+#include <osg/Fog>
+#include <osg/TexEnvCombine>
+#include <osg/TexMat>
+#include <osg/Texture2D>
 
-#include <components/stereo/stereomanager.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/shader/shadermanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/shader/shadermanager.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include <mutex>
 
@@ -33,13 +33,14 @@ namespace
             if (texMat == mTexMatMap.end())
             {
                 osg::Matrixf matrix;
-                float scale = (blendmapScale/(static_cast<float>(blendmapScale)+1.f));
+                float scale = (blendmapScale / (static_cast<float>(blendmapScale) + 1.f));
                 matrix.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
                 matrix.preMultScale(osg::Vec3f(scale, scale, 1.f));
                 matrix.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
                 // We need to nudge the blendmap to look like vanilla.
-                // This causes visible seams unless the blendmap's resolution is doubled, but Vanilla also doubles the blendmap, apparently.
-                matrix.preMultTranslate(osg::Vec3f(1.0f/blendmapScale/4.0f, 1.0f/blendmapScale/4.0f, 0.f));
+                // This causes visible seams unless the blendmap's resolution is doubled, but Vanilla also doubles the
+                // blendmap, apparently.
+                matrix.preMultTranslate(osg::Vec3f(1.0f / blendmapScale / 4.0f, 1.0f / blendmapScale / 4.0f, 0.f));
 
                 texMat = mTexMatMap.insert(std::make_pair(blendmapScale, new osg::TexMat(matrix))).first;
             }
@@ -66,8 +67,10 @@ namespace
             auto texMat = mTexMatMap.find(layerTileSize);
             if (texMat == mTexMatMap.end())
             {
-                texMat = mTexMatMap.insert(std::make_pair(layerTileSize,
-                    new osg::TexMat(osg::Matrix::scale(osg::Vec3f(layerTileSize, layerTileSize, 1.f))))).first;
+                texMat = mTexMatMap
+                             .insert(std::make_pair(layerTileSize,
+                                 new osg::TexMat(osg::Matrix::scale(osg::Vec3f(layerTileSize, layerTileSize, 1.f)))))
+                             .first;
             }
             return texMat->second;
         }
@@ -196,18 +199,19 @@ namespace
 
 namespace Terrain
 {
-    std::vector<osg::ref_ptr<osg::StateSet> > createPasses(bool useShaders, Resource::SceneManager* sceneManager, const std::vector<TextureLayer> &layers,
-                                                           const std::vector<osg::ref_ptr<osg::Texture2D> > &blendmaps, int blendmapScale, float layerTileSize)
+    std::vector<osg::ref_ptr<osg::StateSet>> createPasses(bool useShaders, Resource::SceneManager* sceneManager,
+        const std::vector<TextureLayer>& layers, const std::vector<osg::ref_ptr<osg::Texture2D>>& blendmaps,
+        int blendmapScale, float layerTileSize)
     {
         auto& shaderManager = sceneManager->getShaderManager();
-        std::vector<osg::ref_ptr<osg::StateSet> > passes;
+        std::vector<osg::ref_ptr<osg::StateSet>> passes;
 
         unsigned int blendmapIndex = 0;
         for (std::vector<TextureLayer>::const_iterator it = layers.begin(); it != layers.end(); ++it)
         {
             bool firstLayer = (it == layers.begin());
 
-            osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
+            osg::ref_ptr<osg::StateSet> stateset(new osg::StateSet);
 
             if (!blendmaps.empty())
             {
@@ -232,7 +236,8 @@ namespace Terrain
                 stateset->setTextureAttributeAndModes(0, it->mDiffuseMap);
 
                 if (layerTileSize != 1.f)
-                    stateset->setTextureAttributeAndModes(0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
+                    stateset->setTextureAttributeAndModes(
+                        0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
 
                 stateset->addUniform(UniformCollection::value().mDiffuseMap);
 
@@ -259,8 +264,10 @@ namespace Terrain
                 defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
                 Stereo::Manager::instance().shaderStereoDefines(defineMap);
 
-                osg::ref_ptr<osg::Shader> vertexShader = shaderManager.getShader("terrain_vertex.glsl", defineMap, osg::Shader::VERTEX);
-                osg::ref_ptr<osg::Shader> fragmentShader = shaderManager.getShader("terrain_fragment.glsl", defineMap, osg::Shader::FRAGMENT);
+                osg::ref_ptr<osg::Shader> vertexShader
+                    = shaderManager.getShader("terrain_vertex.glsl", defineMap, osg::Shader::VERTEX);
+                osg::ref_ptr<osg::Shader> fragmentShader
+                    = shaderManager.getShader("terrain_fragment.glsl", defineMap, osg::Shader::FRAGMENT);
                 if (!vertexShader || !fragmentShader)
                 {
                     // Try again without shader. Error already logged by above
@@ -277,7 +284,8 @@ namespace Terrain
                 stateset->setTextureAttributeAndModes(0, tex.get());
 
                 if (layerTileSize != 1.f)
-                    stateset->setTextureAttributeAndModes(0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
+                    stateset->setTextureAttributeAndModes(
+                        0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
 
                 // Multiply by the alpha map
                 if (!blendmaps.empty())
@@ -290,7 +298,6 @@ namespace Terrain
                     stateset->setTextureAttributeAndModes(1, BlendmapTexMat::value(blendmapScale));
                     stateset->setTextureAttributeAndModes(1, TexEnvCombine::value(), osg::StateAttribute::ON);
                 }
-
             }
 
             passes.push_back(stateset);

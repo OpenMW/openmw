@@ -11,16 +11,15 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        MethodSelectionPage(QWidget *parent);
+        MethodSelectionPage(QWidget* parent);
 
         int nextId() const override;
 
     private slots:
         void handleBuyButton();
-        
-    private:
-        MainWizard *mWizard;
 
+    private:
+        MainWizard* mWizard;
     };
 
 }

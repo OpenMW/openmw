@@ -13,7 +13,7 @@ namespace Interpreter
 
 namespace MWScript
 {
-    void installOpcodes (Interpreter::Interpreter& interpreter, bool consoleOnly = false);
+    void installOpcodes(Interpreter::Interpreter& interpreter, bool consoleOnly = false);
     ///< \param consoleOnly include console only opcodes
 }
 

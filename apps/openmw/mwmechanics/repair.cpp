@@ -3,107 +3,113 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/format.hpp>
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "creaturestats.hpp"
 #include "actorutil.hpp"
+#include "creaturestats.hpp"
 
 namespace MWMechanics
 {
 
-void Repair::repair(const MWWorld::Ptr &itemToRepair)
-{
-    MWWorld::Ptr player = getPlayer();
-    MWWorld::LiveCellRef<ESM::Repair> *ref =
-        mTool.get<ESM::Repair>();
-
-    // unstack tool if required
-    player.getClass().getContainerStore(player).unstack(mTool, player);
-
-    // reduce number of uses left
-    int uses = mTool.getClass().getItemHealth(mTool);
-    uses -= std::min(uses, 1);
-    mTool.getCellRef().setCharge(uses);
-
-    MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-
-    float fatigueTerm = stats.getFatigueTerm();
-    float pcStrength = stats.getAttribute(ESM::Attribute::Strength).getModified();
-    float pcLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
-    float armorerSkill = player.getClass().getSkill(player, ESM::Skill::Armorer);
-
-    float fRepairAmountMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-            .find("fRepairAmountMult")->mValue.getFloat();
-
-    float toolQuality = ref->mBase->mData.mQuality;
-
-    float x = (0.1f * pcStrength + 0.1f * pcLuck + armorerSkill) * fatigueTerm;
-
-    auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-    int roll = Misc::Rng::roll0to99(prng);
-    if (roll <= x)
+    void Repair::repair(const MWWorld::Ptr& itemToRepair)
     {
-        int y = static_cast<int>(fRepairAmountMult * toolQuality * roll);
-        y = std::max(1, y);
+        MWWorld::Ptr player = getPlayer();
+        MWWorld::LiveCellRef<ESM::Repair>* ref = mTool.get<ESM::Repair>();
 
-        // repair by 'y' points
-        int charge = itemToRepair.getClass().getItemHealth(itemToRepair);
-        charge = std::min(charge + y, itemToRepair.getClass().getItemMaxHealth(itemToRepair));
-        itemToRepair.getCellRef().setCharge(charge);
+        // unstack tool if required
+        player.getClass().getContainerStore(player).unstack(mTool, player);
 
-        // attempt to re-stack item, in case it was fully repaired
-        MWWorld::ContainerStoreIterator stacked = player.getClass().getContainerStore(player).restack(itemToRepair);
+        // reduce number of uses left
+        int uses = mTool.getClass().getItemHealth(mTool);
+        uses -= std::min(uses, 1);
+        mTool.getCellRef().setCharge(uses);
 
-        // set the OnPCRepair variable on the item's script
-        std::string_view script = stacked->getClass().getScript(itemToRepair);
-        if(!script.empty())
-            stacked->getRefData().getLocals().setVarByInt(script, "onpcrepair", 1);
+        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
-        // increase skill
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Armorer, 0);
+        float fatigueTerm = stats.getFatigueTerm();
+        float pcStrength = stats.getAttribute(ESM::Attribute::Strength).getModified();
+        float pcLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
+        float armorerSkill = player.getClass().getSkill(player, ESM::Skill::Armorer);
 
-        MWBase::Environment::get().getWindowManager()->playSound("Repair");
-        MWBase::Environment::get().getWindowManager()->messageBox("#{sRepairSuccess}");
-    }
-    else
-    {
-        MWBase::Environment::get().getWindowManager()->playSound("Repair Fail");
-        MWBase::Environment::get().getWindowManager()->messageBox("#{sRepairFailed}");
-    }
+        float fRepairAmountMult = MWBase::Environment::get()
+                                      .getWorld()
+                                      ->getStore()
+                                      .get<ESM::GameSetting>()
+                                      .find("fRepairAmountMult")
+                                      ->mValue.getFloat();
 
-    // tool used up?
-    if (mTool.getCellRef().getCharge() == 0)
-    {
-        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+        float toolQuality = ref->mBase->mData.mQuality;
 
-        store.remove(mTool, 1, player);
+        float x = (0.1f * pcStrength + 0.1f * pcLuck + armorerSkill) * fatigueTerm;
 
-        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("sNotifyMessage51")->mValue.getString();
-        message = Misc::StringUtils::format(message, mTool.getClass().getName(mTool));
-
-        MWBase::Environment::get().getWindowManager()->messageBox(message);
-
-        // try to find a new tool of the same ID
-        for (MWWorld::ContainerStoreIterator iter (store.begin());
-             iter!=store.end(); ++iter)
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        int roll = Misc::Rng::roll0to99(prng);
+        if (roll <= x)
         {
-            if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), mTool.getCellRef().getRefId()))
+            int y = static_cast<int>(fRepairAmountMult * toolQuality * roll);
+            y = std::max(1, y);
+
+            // repair by 'y' points
+            int charge = itemToRepair.getClass().getItemHealth(itemToRepair);
+            charge = std::min(charge + y, itemToRepair.getClass().getItemMaxHealth(itemToRepair));
+            itemToRepair.getCellRef().setCharge(charge);
+
+            // attempt to re-stack item, in case it was fully repaired
+            MWWorld::ContainerStoreIterator stacked = player.getClass().getContainerStore(player).restack(itemToRepair);
+
+            // set the OnPCRepair variable on the item's script
+            std::string_view script = stacked->getClass().getScript(itemToRepair);
+            if (!script.empty())
+                stacked->getRefData().getLocals().setVarByInt(script, "onpcrepair", 1);
+
+            // increase skill
+            player.getClass().skillUsageSucceeded(player, ESM::Skill::Armorer, 0);
+
+            MWBase::Environment::get().getWindowManager()->playSound("Repair");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sRepairSuccess}");
+        }
+        else
+        {
+            MWBase::Environment::get().getWindowManager()->playSound("Repair Fail");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sRepairFailed}");
+        }
+
+        // tool used up?
+        if (mTool.getCellRef().getCharge() == 0)
+        {
+            MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+
+            store.remove(mTool, 1, player);
+
+            std::string message = MWBase::Environment::get()
+                                      .getWorld()
+                                      ->getStore()
+                                      .get<ESM::GameSetting>()
+                                      .find("sNotifyMessage51")
+                                      ->mValue.getString();
+            message = Misc::StringUtils::format(message, mTool.getClass().getName(mTool));
+
+            MWBase::Environment::get().getWindowManager()->messageBox(message);
+
+            // try to find a new tool of the same ID
+            for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
             {
-                mTool = *iter;
+                if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), mTool.getCellRef().getRefId()))
+                {
+                    mTool = *iter;
 
-                MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
+                    MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
 
-                break;
+                    break;
+                }
             }
         }
     }
-}
 
 }

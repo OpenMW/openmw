@@ -26,7 +26,7 @@ namespace MWGui
         SpellView();
 
         /// Register needed components with MyGUI's factory manager
-        static void registerComponents ();
+        static void registerComponents();
 
         /// Should the cost/chance column be shown?
         void setShowCostColumn(bool show);
@@ -34,7 +34,7 @@ namespace MWGui
         void setHighlightSelected(bool highlight);
 
         /// Takes ownership of \a model
-        void setModel (SpellModel* model);
+        void setModel(SpellModel* model);
 
         SpellModel* getModel();
 
@@ -75,9 +75,12 @@ namespace MWGui
         };
 
         /// magic number indicating LineInfo does not correspond to an item in mModel
-        enum { NoSpellIndex = -1 };
+        enum
+        {
+            NoSpellIndex = -1
+        };
 
-        std::vector< LineInfo > mLines;
+        std::vector<LineInfo> mLines;
 
         bool mShowCostColumn;
         bool mHighlightSelected;

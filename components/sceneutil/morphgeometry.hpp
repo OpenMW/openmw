@@ -7,8 +7,9 @@ namespace SceneUtil
 {
 
     /// @brief Vertex morphing implementation.
-    /// @note The internal Geometry used for rendering is double buffered, this allows updates to be done in a thread safe way while
-    /// not compromising rendering performance. This is crucial when using osg's default threading model of DrawThreadPerContext.
+    /// @note The internal Geometry used for rendering is double buffered, this allows updates to be done in a thread
+    /// safe way while not compromising rendering performance. This is crucial when using osg's default threading model
+    /// of DrawThreadPerContext.
     class MorphGeometry : public osg::Drawable
     {
     public:
@@ -21,7 +22,9 @@ namespace SceneUtil
         /// @note The source geometry will not be modified.
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
 
-        // Currently empty as this is difficult to implement. Technically we would need to compile both internal geometries in separate frames but this method is only called once. Alternatively we could compile just the static parts of the model.
+        // Currently empty as this is difficult to implement. Technically we would need to compile both internal
+        // geometries in separate frames but this method is only called once. Alternatively we could compile just the
+        // static parts of the model.
         void compileGLObjects(osg::RenderInfo& renderInfo) const override {}
 
         class MorphTarget
@@ -29,8 +32,13 @@ namespace SceneUtil
         protected:
             osg::ref_ptr<osg::Vec3Array> mOffsets;
             float mWeight;
+
         public:
-            MorphTarget(osg::Vec3Array* offsets, float w = 1.0) : mOffsets(offsets), mWeight(w) {}
+            MorphTarget(osg::Vec3Array* offsets, float w = 1.0)
+                : mOffsets(offsets)
+                , mWeight(w)
+            {
+            }
             void setWeight(float weight) { mWeight = weight; }
             float getWeight() const { return mWeight; }
             osg::Vec3Array* getOffsets() { return mOffsets.get(); }
@@ -40,7 +48,7 @@ namespace SceneUtil
 
         typedef std::vector<MorphTarget> MorphTargetList;
 
-        virtual void addMorphTarget( osg::Vec3Array* offsets, float weight = 1.0 );
+        virtual void addMorphTarget(osg::Vec3Array* offsets, float weight = 1.0);
 
         /** Set the MorphGeometry dirty.*/
         void dirty();
@@ -52,14 +60,14 @@ namespace SceneUtil
         MorphTargetList& getMorphTargetList() { return mMorphTargets; }
 
         /** Return the \c MorphTarget at position \c i.*/
-        inline const MorphTarget& getMorphTarget( unsigned int i ) const { return mMorphTargets[i]; }
+        inline const MorphTarget& getMorphTarget(unsigned int i) const { return mMorphTargets[i]; }
 
         /** Return the \c MorphTarget at position \c i.*/
-        inline MorphTarget& getMorphTarget( unsigned int i ) { return mMorphTargets[i]; }
+        inline MorphTarget& getMorphTarget(unsigned int i) { return mMorphTargets[i]; }
 
         osg::ref_ptr<osg::Geometry> getSourceGeometry() const;
 
-        void accept(osg::NodeVisitor &nv) override;
+        void accept(osg::NodeVisitor& nv) override;
         bool supports(const osg::PrimitiveFunctor&) const override { return true; }
         void accept(osg::PrimitiveFunctor&) const override;
 

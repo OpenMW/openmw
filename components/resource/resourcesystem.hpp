@@ -38,7 +38,8 @@ namespace Resource
         NifFileManager* getNifFileManager();
         KeyframeManager* getKeyframeManager();
 
-        /// Indicates to each resource manager to clear the cache, i.e. to drop cached objects that are no longer referenced.
+        /// Indicates to each resource manager to clear the cache, i.e. to drop cached objects that are no longer
+        /// referenced.
         /// @note May be called from any thread if you do not add or remove resource managers at that point.
         void updateCache(double referenceTime);
 
@@ -77,7 +78,7 @@ namespace Resource
         const VFS::Manager* mVFS;
 
         ResourceSystem(const ResourceSystem&);
-        void operator = (const ResourceSystem&);
+        void operator=(const ResourceSystem&);
     };
 
 }

@@ -61,7 +61,7 @@ namespace LuaUi
         mEditBox->detachFromWidget();
         mEditBox->attachToWidget(this);
     }
-    
+
     MyGUI::IntSize LuaTextEdit::calculateSize()
     {
         MyGUI::IntSize normalSize = WidgetExtension::calculateSize();

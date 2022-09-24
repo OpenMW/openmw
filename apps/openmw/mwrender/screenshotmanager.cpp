@@ -11,21 +11,21 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/shader/shadermanager.hpp>
 #include <components/sceneutil/depth.hpp>
-#include <components/stereo/stereomanager.hpp>
+#include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include <components/settings/settings.hpp>
 
-#include "../mwgui/loadingscreen.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwgui/loadingscreen.hpp"
 
+#include "postprocessor.hpp"
 #include "util.hpp"
 #include "vismask.hpp"
 #include "water.hpp"
-#include "postprocessor.hpp"
 
 namespace MWRender
 {
@@ -41,11 +41,12 @@ namespace MWRender
     {
     public:
         NotifyDrawCompletedCallback()
-            : mDone(false), mFrame(0)
+            : mDone(false)
+            , mFrame(0)
         {
         }
 
-        void operator () (osg::RenderInfo& renderInfo) const override
+        void operator()(osg::RenderInfo& renderInfo) const override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             if (renderInfo.getState()->getFrameStamp()->getFrameNumber() >= mFrame && !mDone)
@@ -80,10 +81,12 @@ namespace MWRender
     {
     public:
         ReadImageFromFramebufferCallback(osg::Image* image, int width, int height)
-            : mWidth(width), mHeight(height), mImage(image)
+            : mWidth(width)
+            , mHeight(height)
+            , mImage(image)
         {
         }
-        void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* /*drawable*/) const override
+        void drawImplementation(osg::RenderInfo& renderInfo, const osg::Drawable* /*drawable*/) const override
         {
             int screenW = renderInfo.getCurrentCamera()->getViewport()->width();
             int screenH = renderInfo.getCurrentCamera()->getViewport()->height();
@@ -93,14 +96,15 @@ namespace MWRender
                 screenW = eyeRes.x();
                 screenH = eyeRes.y();
             }
-            double imageaspect = (double)mWidth/(double)mHeight;
+            double imageaspect = (double)mWidth / (double)mHeight;
             int leftPadding = std::max(0, static_cast<int>(screenW - screenH * imageaspect) / 2);
             int topPadding = std::max(0, static_cast<int>(screenH - screenW / imageaspect) / 2);
-            int width = screenW - leftPadding*2;
-            int height = screenH - topPadding*2;
+            int width = screenW - leftPadding * 2;
+            int height = screenH - topPadding * 2;
 
-            // Ensure we are reading from the resolved framebuffer and not the multisampled render buffer. Also ensure that the readbuffer is set correctly with rendeirng to FBO.
-            // glReadPixel() cannot read from multisampled targets
+            // Ensure we are reading from the resolved framebuffer and not the multisampled render buffer. Also ensure
+            // that the readbuffer is set correctly with rendeirng to FBO. glReadPixel() cannot read from multisampled
+            // targets
             PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
             osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getContextID(), false);
 
@@ -119,13 +123,15 @@ namespace MWRender
             mImage->readPixels(leftPadding, topPadding, width, height, GL_RGB, GL_UNSIGNED_BYTE);
             mImage->scaleImage(mWidth, mHeight, 1);
         }
+
     private:
         int mWidth;
         int mHeight;
         osg::ref_ptr<osg::Image> mImage;
     };
 
-    ScreenshotManager::ScreenshotManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, osg::ref_ptr<osg::Group> sceneRoot, Resource::ResourceSystem* resourceSystem, Water* water)
+    ScreenshotManager::ScreenshotManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
+        osg::ref_ptr<osg::Group> sceneRoot, Resource::ResourceSystem* resourceSystem, Water* water)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mSceneRoot(sceneRoot)
@@ -135,9 +141,7 @@ namespace MWRender
     {
     }
 
-    ScreenshotManager::~ScreenshotManager()
-    {
-    }
+    ScreenshotManager::~ScreenshotManager() {}
 
     void ScreenshotManager::screenshot(osg::Image* image, int w, int h)
     {
@@ -145,10 +149,12 @@ namespace MWRender
         osg::ref_ptr<osg::Drawable> tempDrw = new osg::Drawable;
         tempDrw->setDrawCallback(new ReadImageFromFramebufferCallback(image, w, h));
         tempDrw->setCullingActive(false);
-        tempDrw->getOrCreateStateSet()->setRenderBinDetails(100, "RenderBin", osg::StateSet::USE_RENDERBIN_DETAILS); // so its after all scene bins but before POST_RENDER gui camera
+        tempDrw->getOrCreateStateSet()->setRenderBinDetails(100, "RenderBin",
+            osg::StateSet::USE_RENDERBIN_DETAILS); // so its after all scene bins but before POST_RENDER gui camera
         camera->addChild(tempDrw);
         traversalsAndWait(mViewer->getFrameStamp()->getFrameNumber());
-        // now that we've "used up" the current frame, get a fresh frame number for the next frame() following after the screenshot is completed
+        // now that we've "used up" the current frame, get a fresh frame number for the next frame() following after the
+        // screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
         camera->removeChild(tempDrw);
     }
@@ -165,7 +171,7 @@ namespace MWRender
 
         if (settingArgs.size() > 0)
         {
-            std::string typeStrings[4] = {"spherical", "cylindrical", "planet", "cubemap"};
+            std::string typeStrings[4] = { "spherical", "cylindrical", "planet", "cubemap" };
             bool found = false;
 
             for (int i = 0; i < 4; ++i)
@@ -200,9 +206,9 @@ namespace MWRender
         bool rawCubemap = screenshotMapping == RawCubemap;
 
         if (rawCubemap)
-            screenshotW = cubeSize * 6;  // the image will consist of 6 cube sides in a row
+            screenshotW = cubeSize * 6; // the image will consist of 6 cube sides in a row
         else if (screenshotMapping == Planet)
-            screenshotH = screenshotW;   // use square resolution for planet mapping
+            screenshotH = screenshotW; // use square resolution for planet mapping
 
         std::vector<osg::ref_ptr<osg::Image>> images;
         images.reserve(6);
@@ -210,30 +216,20 @@ namespace MWRender
         for (int i = 0; i < 6; ++i)
             images.push_back(new osg::Image);
 
-        osg::Vec3 directions[6] = {
-            rawCubemap ? osg::Vec3(1,0,0) : osg::Vec3(0,0,1),
-            osg::Vec3(0,0,-1),
-            osg::Vec3(-1,0,0),
-            rawCubemap ? osg::Vec3(0,0,1) : osg::Vec3(1,0,0),
-            osg::Vec3(0,1,0),
-            osg::Vec3(0,-1,0)};
+        osg::Vec3 directions[6]
+            = { rawCubemap ? osg::Vec3(1, 0, 0) : osg::Vec3(0, 0, 1), osg::Vec3(0, 0, -1), osg::Vec3(-1, 0, 0),
+                  rawCubemap ? osg::Vec3(0, 0, 1) : osg::Vec3(1, 0, 0), osg::Vec3(0, 1, 0), osg::Vec3(0, -1, 0) };
 
-        double rotations[] = {
-            -osg::PI / 2.0,
-            osg::PI / 2.0,
-            osg::PI,
-            0,
-            osg::PI / 2.0,
-            osg::PI / 2.0 };
+        double rotations[] = { -osg::PI / 2.0, osg::PI / 2.0, osg::PI, 0, osg::PI / 2.0, osg::PI / 2.0 };
 
         for (int i = 0; i < 6; ++i) // for each cubemap side
         {
-            osg::Matrixd transform = osg::Matrixd::rotate(osg::Vec3(0,0,-1), directions[i]);
+            osg::Matrixd transform = osg::Matrixd::rotate(osg::Vec3(0, 0, -1), directions[i]);
 
             if (!rawCubemap)
-                transform *= osg::Matrixd::rotate(rotations[i],osg::Vec3(0,0,-1));
+                transform *= osg::Matrixd::rotate(rotations[i], osg::Vec3(0, 0, -1));
 
-            osg::Image *sideImage = images[i].get();
+            osg::Image* sideImage = images[i].get();
             makeCubemapScreenshot(sideImage, cubeSize, cubeSize, transform);
 
             if (!rawCubemap)
@@ -242,20 +238,22 @@ namespace MWRender
 
         if (rawCubemap) // for raw cubemap don't run on GPU, just merge the images
         {
-            image->allocateImage(cubeSize * 6,cubeSize,images[0]->r(),images[0]->getPixelFormat(),images[0]->getDataType());
+            image->allocateImage(
+                cubeSize * 6, cubeSize, images[0]->r(), images[0]->getPixelFormat(), images[0]->getDataType());
 
             for (int i = 0; i < 6; ++i)
-                osg::copyImage(images[i].get(),0,0,0,images[i]->s(),images[i]->t(),images[i]->r(),image,i * cubeSize,0,0);
+                osg::copyImage(images[i].get(), 0, 0, 0, images[i]->s(), images[i]->t(), images[i]->r(), image,
+                    i * cubeSize, 0, 0);
 
             return true;
         }
 
         // run on GPU now:
-        osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
+        osg::ref_ptr<osg::TextureCubeMap> cubeTexture(new osg::TextureCubeMap);
         cubeTexture->setResizeNonPowerOfTwoHint(false);
 
-        cubeTexture->setFilter(osg::Texture::MIN_FILTER,osg::Texture::NEAREST);
-        cubeTexture->setFilter(osg::Texture::MAG_FILTER,osg::Texture::NEAREST);
+        cubeTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::NEAREST);
+        cubeTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
 
         cubeTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         cubeTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
@@ -264,12 +262,13 @@ namespace MWRender
             cubeTexture->setImage(i, images[i].get());
 
         osg::ref_ptr<osg::Camera> screenshotCamera(new osg::Camera);
-        osg::ref_ptr<osg::ShapeDrawable> quad(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0), 2.0)));
+        osg::ref_ptr<osg::ShapeDrawable> quad(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0, 0, 0), 2.0)));
 
         std::map<std::string, std::string> defineMap;
 
         Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
-        osg::ref_ptr<osg::Shader> fragmentShader(shaderMgr.getShader("s360_fragment.glsl", defineMap,osg::Shader::FRAGMENT));
+        osg::ref_ptr<osg::Shader> fragmentShader(
+            shaderMgr.getShader("s360_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
         osg::ref_ptr<osg::Shader> vertexShader(shaderMgr.getShader("s360_vertex.glsl", defineMap, osg::Shader::VERTEX));
         osg::ref_ptr<osg::StateSet> stateset = quad->getOrCreateStateSet();
 
@@ -301,24 +300,24 @@ namespace MWRender
         mDrawCompleteCallback->waitTillDone();
     }
 
-    void ScreenshotManager::renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h)
+    void ScreenshotManager::renderCameraToImage(osg::Camera* camera, osg::Image* image, int w, int h)
     {
         camera->setNodeMask(Mask_RenderToTexture);
         camera->attach(osg::Camera::COLOR_BUFFER, image);
         camera->setRenderOrder(osg::Camera::PRE_RENDER);
         camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-        camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT,osg::Camera::PIXEL_BUFFER_RTT);
+        camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         camera->setViewport(0, 0, w, h);
 
         SceneUtil::setCameraClearDepth(camera);
 
-        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
+        osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D);
         texture->setInternalFormat(GL_RGB);
-        texture->setTextureSize(w,h);
+        texture->setTextureSize(w, h);
         texture->setResizeNonPowerOfTwoHint(false);
         texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        camera->attach(osg::Camera::COLOR_BUFFER,texture);
+        camera->attach(osg::Camera::COLOR_BUFFER, texture);
 
         image->setDataType(GL_UNSIGNED_BYTE);
         image->setPixelFormat(texture->getInternalFormat());
@@ -332,23 +331,25 @@ namespace MWRender
 
         MWBase::Environment::get().getWindowManager()->getLoadingScreen()->loadingOff();
 
-        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
+        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the
+        // screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
         camera->removeChildren(0, camera->getNumChildren());
         mRootNode->removeChild(camera);
     }
 
-    void ScreenshotManager::makeCubemapScreenshot(osg::Image *image, int w, int h, const osg::Matrixd& cameraTransform)
+    void ScreenshotManager::makeCubemapScreenshot(osg::Image* image, int w, int h, const osg::Matrixd& cameraTransform)
     {
-        osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
+        osg::ref_ptr<osg::Camera> rttCamera(new osg::Camera);
         float nearClip = Settings::Manager::getFloat("near clip", "Camera");
         float viewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         // each cubemap side sees 90 degrees
         if (SceneUtil::AutoDepth::isReversed())
-            rttCamera->setProjectionMatrix(SceneUtil::getReversedZProjectionMatrixAsPerspectiveInf(90.0, w/float(h), nearClip));
+            rttCamera->setProjectionMatrix(
+                SceneUtil::getReversedZProjectionMatrixAsPerspectiveInf(90.0, w / float(h), nearClip));
         else
-            rttCamera->setProjectionMatrixAsPerspective(90.0, w/float(h), nearClip, viewDistance);
+            rttCamera->setProjectionMatrixAsPerspective(90.0, w / float(h), nearClip, viewDistance);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);
@@ -357,10 +358,11 @@ namespace MWRender
         rttCamera->addChild(mWater->getReflectionNode());
         rttCamera->addChild(mWater->getRefractionNode());
 
-        rttCamera->setCullMask(MWBase::Environment::get().getWindowManager()->getCullMask() & ~(Mask_GUI|Mask_FirstPerson));
+        rttCamera->setCullMask(
+            MWBase::Environment::get().getWindowManager()->getCullMask() & ~(Mask_GUI | Mask_FirstPerson));
 
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        renderCameraToImage(rttCamera.get(),image,w,h);
+        renderCameraToImage(rttCamera.get(), image, w, h);
     }
 }

@@ -2,8 +2,8 @@
 
 #include <components/esm3/aisequence.hpp>
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -14,13 +14,16 @@
 namespace MWMechanics
 {
     AiActivate::AiActivate(std::string_view objectId, bool repeat)
-        : TypedAiPackage<AiActivate>(repeat), mObjectId(objectId)
+        : TypedAiPackage<AiActivate>(repeat)
+        , mObjectId(objectId)
     {
     }
 
-    bool AiActivate::execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
+    bool AiActivate::execute(
+        const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
-        const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mObjectId, false); //The target to follow
+        const MWWorld::Ptr target
+            = MWBase::Environment::get().getWorld()->searchPtr(mObjectId, false); // The target to follow
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
 
@@ -30,7 +33,8 @@ namespace MWMechanics
             return true;
 
         // Turn to target and move to it directly, without pathfinding.
-        const osg::Vec3f targetDir = target.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3();
+        const osg::Vec3f targetDir
+            = target.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3();
 
         zTurn(actor, std::atan2(targetDir.x(), targetDir.y()), 0.f);
         actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
@@ -38,13 +42,14 @@ namespace MWMechanics
 
         if (MWBase::Environment::get().getWorld()->getMaxActivationDistance() >= targetDir.length())
         {
-            // Note: we intentionally do not cancel package after activation here for backward compatibility with original engine.
+            // Note: we intentionally do not cancel package after activation here for backward compatibility with
+            // original engine.
             MWBase::Environment::get().getWorld()->activate(target, actor);
         }
         return false;
     }
 
-    void AiActivate::writeState(ESM::AiSequence::AiSequence &sequence) const
+    void AiActivate::writeState(ESM::AiSequence::AiSequence& sequence) const
     {
         auto activate = std::make_unique<ESM::AiSequence::AiActivate>();
         activate->mTargetId = mObjectId;
@@ -56,7 +61,7 @@ namespace MWMechanics
         sequence.mPackages.push_back(std::move(package));
     }
 
-    AiActivate::AiActivate(const ESM::AiSequence::AiActivate *activate)
+    AiActivate::AiActivate(const ESM::AiSequence::AiActivate* activate)
         : AiActivate(activate->mTargetId, activate->mRepeat)
     {
     }

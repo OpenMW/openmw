@@ -8,9 +8,9 @@ namespace Fallback
 {
     std::map<std::string, std::string, std::less<>> Map::mFallbackMap;
 
-    void Map::init(const std::map<std::string,std::string>& fallback)
+    void Map::init(const std::map<std::string, std::string>& fallback)
     {
-        for(const auto& entry : fallback)
+        for (const auto& entry : fallback)
             mFallbackMap.insert(entry);
     }
 
@@ -71,18 +71,21 @@ namespace Fallback
                 unsigned int j = 0;
                 for (unsigned int i = 0; i < sum.length(); ++i)
                 {
-                    if(sum[i]==',') j++;
-                    else if (sum[i] != ' ') ret[j]+=sum[i];
+                    if (sum[i] == ',')
+                        j++;
+                    else if (sum[i] != ' ')
+                        ret[j] += sum[i];
                 }
-                return osg::Vec4f(std::stoi(ret[0])/255.f,std::stoi(ret[1])/255.f,std::stoi(ret[2])/255.f, 1.f);    
+                return osg::Vec4f(std::stoi(ret[0]) / 255.f, std::stoi(ret[1]) / 255.f, std::stoi(ret[2]) / 255.f, 1.f);
             }
             catch (const std::invalid_argument&)
             {
-                Log(Debug::Error) << "Error: '" << fall << "' setting value (" << sum << ") is not a valid color, using middle gray as a fallback";
+                Log(Debug::Error) << "Error: '" << fall << "' setting value (" << sum
+                                  << ") is not a valid color, using middle gray as a fallback";
             }
         }
 
-        return osg::Vec4f(0.5f,0.5f,0.5f,1.f);
+        return osg::Vec4f(0.5f, 0.5f, 0.5f, 1.f);
     }
 
 }

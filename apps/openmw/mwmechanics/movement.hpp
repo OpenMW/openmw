@@ -27,10 +27,7 @@ namespace MWMechanics
             mIsStrafing = false;
         }
 
-        osg::Vec3f asVec3()
-        {
-            return osg::Vec3f(mPosition[0], mPosition[1], mPosition[2]);
-        }
+        osg::Vec3f asVec3() { return osg::Vec3f(mPosition[0], mPosition[1], mPosition[2]); }
     };
 }
 

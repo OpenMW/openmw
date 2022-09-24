@@ -9,66 +9,63 @@
 
 #include "../../model/doc/document.hpp"
 
-CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mTitle (id.toString().c_str())
+CSVWorld::PreviewSubView::PreviewSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document)
+    : SubView(id)
+    , mTitle(id.toString().c_str())
 {
-    QHBoxLayout *layout = new QHBoxLayout;
+    QHBoxLayout* layout = new QHBoxLayout;
 
-    if (document.getData().getReferenceables().searchId (id.getId())==-1)
+    if (document.getData().getReferenceables().searchId(id.getId()) == -1)
     {
-        std::string referenceableId =
-            document.getData().getReferences().getRecord (id.getId()).get().mRefID;
+        std::string referenceableId = document.getData().getReferences().getRecord(id.getId()).get().mRefID;
 
-        referenceableIdChanged (referenceableId);
+        referenceableIdChanged(referenceableId);
 
-        mScene =
-            new CSVRender::PreviewWidget (document.getData(), id.getId(), false, this);
+        mScene = new CSVRender::PreviewWidget(document.getData(), id.getId(), false, this);
     }
     else
-        mScene = new CSVRender::PreviewWidget (document.getData(), id.getId(), true, this);
+        mScene = new CSVRender::PreviewWidget(document.getData(), id.getId(), true, this);
 
     mScene->setExterior(true);
 
-    CSVWidget::SceneToolbar *toolbar = new CSVWidget::SceneToolbar (48+6, this);
+    CSVWidget::SceneToolbar* toolbar = new CSVWidget::SceneToolbar(48 + 6, this);
 
-    CSVWidget::SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
-    toolbar->addTool (lightingTool);
+    CSVWidget::SceneToolMode* lightingTool = mScene->makeLightingSelector(toolbar);
+    toolbar->addTool(lightingTool);
 
-    layout->addWidget (toolbar, 0);
+    layout->addWidget(toolbar, 0);
 
-    layout->addWidget (mScene, 1);
+    layout->addWidget(mScene, 1);
 
-    QWidget *widget = new QWidget;
+    QWidget* widget = new QWidget;
 
-    widget->setLayout (layout);
+    widget->setLayout(layout);
 
-    setWidget (widget);
+    setWidget(widget);
 
-    connect (mScene, &CSVRender::PreviewWidget::closeRequest, 
-        this, qOverload<>(&PreviewSubView::closeRequest));
-    connect (mScene, &CSVRender::PreviewWidget::referenceableIdChanged,
-        this, &PreviewSubView::referenceableIdChanged);
-    connect (mScene, &CSVRender::PreviewWidget::focusToolbarRequest, 
-        toolbar, qOverload<>(&CSVWidget::SceneToolbar::setFocus));
-    connect (toolbar, &CSVWidget::SceneToolbar::focusSceneRequest, 
-        mScene, qOverload<>(&CSVRender::PreviewWidget::setFocus));
+    connect(mScene, &CSVRender::PreviewWidget::closeRequest, this, qOverload<>(&PreviewSubView::closeRequest));
+    connect(mScene, &CSVRender::PreviewWidget::referenceableIdChanged, this, &PreviewSubView::referenceableIdChanged);
+    connect(mScene, &CSVRender::PreviewWidget::focusToolbarRequest, toolbar,
+        qOverload<>(&CSVWidget::SceneToolbar::setFocus));
+    connect(
+        toolbar, &CSVWidget::SceneToolbar::focusSceneRequest, mScene, qOverload<>(&CSVRender::PreviewWidget::setFocus));
 }
 
-void CSVWorld::PreviewSubView::setEditLock (bool locked) {}
+void CSVWorld::PreviewSubView::setEditLock(bool locked) {}
 
 std::string CSVWorld::PreviewSubView::getTitle() const
 {
     return mTitle;
 }
 
-void CSVWorld::PreviewSubView::referenceableIdChanged (const std::string& id)
+void CSVWorld::PreviewSubView::referenceableIdChanged(const std::string& id)
 {
     if (id.empty())
         mTitle = "Preview: Reference to <nothing>";
     else
         mTitle = "Preview: Reference to " + id;
 
-    setWindowTitle (QString::fromUtf8 (mTitle.c_str()));
+    setWindowTitle(QString::fromUtf8(mTitle.c_str()));
 
     emit updateTitle();
 }

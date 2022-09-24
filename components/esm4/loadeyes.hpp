@@ -46,19 +46,19 @@ namespace ESM4
         };
 #pragma pack(pop)
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::string mFullName;
-        std::string mIcon;    // texture
+        std::string mIcon; // texture
 
         Data mData;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

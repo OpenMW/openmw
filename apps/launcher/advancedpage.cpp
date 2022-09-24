@@ -1,32 +1,32 @@
 #include "advancedpage.hpp"
 
 #include <array>
-#include <string>
 #include <cmath>
+#include <string>
 
-#include <QFileDialog>
 #include <QCompleter>
+#include <QFileDialog>
 #include <QString>
 
 #include <components/config/gamesettings.hpp>
-#include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>
+#include <components/contentselector/view/contentselector.hpp>
 #include <components/detournavigator/collisionshapetype.hpp>
 
 #include "utils/openalutil.hpp"
 
-Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings, QWidget *parent)
-        : QWidget(parent)
-        , mGameSettings(gameSettings)
+Launcher::AdvancedPage::AdvancedPage(Config::GameSettings& gameSettings, QWidget* parent)
+    : QWidget(parent)
+    , mGameSettings(gameSettings)
 {
-    setObjectName ("AdvancedPage");
+    setObjectName("AdvancedPage");
     setupUi(this);
 
-    for(const std::string& name : Launcher::enumerateOpenALDevices())
+    for (const std::string& name : Launcher::enumerateOpenALDevices())
     {
         audioDeviceSelectorComboBox->addItem(QString::fromStdString(name), QString::fromStdString(name));
     }
-    for(const std::string& name : Launcher::enumerateOpenALDevicesHrtf())
+    for (const std::string& name : Launcher::enumerateOpenALDevicesHrtf())
     {
         hrtfProfileSelectorComboBox->addItem(QString::fromStdString(name), QString::fromStdString(name));
     }
@@ -37,14 +37,16 @@ Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings, QWidget
     startDefaultCharacterAtField->setCompleter(&mCellNameCompleter);
 }
 
-void Launcher::AdvancedPage::loadCellsForAutocomplete(QStringList cellNames) {
+void Launcher::AdvancedPage::loadCellsForAutocomplete(QStringList cellNames)
+{
     // Update the list of suggestions for the "Start default character at" field
     mCellNameCompleterModel.setStringList(cellNames);
     mCellNameCompleter.setCompletionMode(QCompleter::PopupCompletion);
     mCellNameCompleter.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
 }
 
-void Launcher::AdvancedPage::on_skipMenuCheckBox_stateChanged(int state) {
+void Launcher::AdvancedPage::on_skipMenuCheckBox_stateChanged(int state)
+{
     startDefaultCharacterAtLabel->setEnabled(state == Qt::Checked);
     startDefaultCharacterAtField->setEnabled(state == Qt::Checked);
 }
@@ -52,10 +54,7 @@ void Launcher::AdvancedPage::on_skipMenuCheckBox_stateChanged(int state) {
 void Launcher::AdvancedPage::on_runScriptAfterStartupBrowseButton_clicked()
 {
     QString scriptFile = QFileDialog::getOpenFileName(
-            this,
-            QObject::tr("Select script file"),
-            QDir::currentPath(),
-            QString(tr("Text file (*.txt)")));
+        this, QObject::tr("Select script file"), QDir::currentPath(), QString(tr("Text file (*.txt)")));
 
     if (scriptFile.isEmpty())
         return;
@@ -95,7 +94,8 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
         loadSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
         loadSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
-        loadSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
+        loadSettingBool(
+            requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
         loadSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
         loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
         loadSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
@@ -124,7 +124,8 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
         loadSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
         loadSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
-        if (Settings::Manager::getInt("antialiasing", "Video") == 0) {
+        if (Settings::Manager::getInt("antialiasing", "Video") == 0)
+        {
             antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
         }
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
@@ -140,7 +141,8 @@ bool Launcher::AdvancedPage::loadSettings()
 
         const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
         const bool objectPaging = Settings::Manager::getBool("object paging", "Terrain");
-        if (distantTerrain && objectPaging) {
+        if (distantTerrain && objectPaging)
+        {
             distantLandCheckBox->setCheckState(Qt::Checked);
         }
 
@@ -210,17 +212,19 @@ bool Launcher::AdvancedPage::loadSettings()
     // Bug fixes
     {
         loadSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
-        loadSettingBool(trainersTrainingSkillsBasedOnBaseSkillCheckBox, "trainers training skills based on base skill", "Game");
+        loadSettingBool(
+            trainersTrainingSkillsBasedOnBaseSkillCheckBox, "trainers training skills based on base skill", "Game");
     }
 
     // Miscellaneous
     {
         // Saves
         loadSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        loadSettingInt(maximumQuicksavesComboBox,"max quicksaves", "Saves");
+        loadSettingInt(maximumQuicksavesComboBox, "max quicksaves", "Saves");
 
         // Other Settings
-        QString screenshotFormatString = QString::fromStdString(Settings::Manager::getString("screenshot format", "General")).toUpper();
+        QString screenshotFormatString
+            = QString::fromStdString(Settings::Manager::getString("screenshot format", "General")).toUpper();
         if (screenshotFormatComboBox->findText(screenshotFormatString) == -1)
             screenshotFormatComboBox->addItem(screenshotFormatString);
         screenshotFormatComboBox->setCurrentIndex(screenshotFormatComboBox->findText(screenshotFormatString));
@@ -257,7 +261,8 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
         saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
         saveSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
-        saveSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
+        saveSettingBool(
+            requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
         saveSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
         saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
         saveSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
@@ -291,7 +296,8 @@ void Launcher::AdvancedPage::saveSettings()
         const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
         const bool objectPaging = Settings::Manager::getBool("object paging", "Terrain");
         const bool wantDistantLand = distantLandCheckBox->checkState();
-        if (wantDistantLand != (distantTerrain && objectPaging)) {
+        if (wantDistantLand != (distantTerrain && objectPaging))
+        {
             Settings::Manager::setBool("distant terrain", "Terrain", wantDistantLand);
             Settings::Manager::setBool("object paging", "Terrain", wantDistantLand);
         }
@@ -343,7 +349,7 @@ void Launcher::AdvancedPage::saveSettings()
         const std::string& prevHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
         if (selectedHRTFProfileIndex != 0)
         {
-            const std::string& newHRTFProfile  = hrtfProfileSelectorComboBox->currentText().toUtf8().constData();
+            const std::string& newHRTFProfile = hrtfProfileSelectorComboBox->currentText().toUtf8().constData();
             if (newHRTFProfile != prevHRTFProfile)
                 Settings::Manager::setString("hrtf", "Sound", newHRTFProfile);
         }
@@ -360,7 +366,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
         saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
         saveSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
-        saveSettingInt(showOwnedComboBox,"show owned", "Game");
+        saveSettingInt(showOwnedComboBox, "show owned", "Game");
         saveSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
         saveSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
         saveSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
@@ -377,7 +383,8 @@ void Launcher::AdvancedPage::saveSettings()
     // Bug fixes
     {
         saveSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
-        saveSettingBool(trainersTrainingSkillsBasedOnBaseSkillCheckBox, "trainers training skills based on base skill", "Game");
+        saveSettingBool(
+            trainersTrainingSkillsBasedOnBaseSkillCheckBox, "trainers training skills based on base skill", "Game");
     }
 
     // Miscellaneous
@@ -413,39 +420,39 @@ void Launcher::AdvancedPage::saveSettings()
     }
 }
 
-void Launcher::AdvancedPage::loadSettingBool(QCheckBox *checkbox, const std::string &setting, const std::string &group)
+void Launcher::AdvancedPage::loadSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group)
 {
     if (Settings::Manager::getBool(setting, group))
         checkbox->setCheckState(Qt::Checked);
 }
 
-void Launcher::AdvancedPage::saveSettingBool(QCheckBox *checkbox, const std::string &setting, const std::string &group)
+void Launcher::AdvancedPage::saveSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group)
 {
     bool cValue = checkbox->checkState();
     if (cValue != Settings::Manager::getBool(setting, group))
         Settings::Manager::setBool(setting, group, cValue);
 }
 
-void Launcher::AdvancedPage::loadSettingInt(QComboBox *comboBox, const std::string &setting, const std::string &group)
+void Launcher::AdvancedPage::loadSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group)
 {
     int currentIndex = Settings::Manager::getInt(setting, group);
     comboBox->setCurrentIndex(currentIndex);
 }
 
-void Launcher::AdvancedPage::saveSettingInt(QComboBox *comboBox, const std::string &setting, const std::string &group)
+void Launcher::AdvancedPage::saveSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group)
 {
     int currentIndex = comboBox->currentIndex();
     if (currentIndex != Settings::Manager::getInt(setting, group))
         Settings::Manager::setInt(setting, group, currentIndex);
 }
 
-void Launcher::AdvancedPage::loadSettingInt(QSpinBox *spinBox, const std::string &setting, const std::string &group)
+void Launcher::AdvancedPage::loadSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group)
 {
     int value = Settings::Manager::getInt(setting, group);
     spinBox->setValue(value);
 }
 
-void Launcher::AdvancedPage::saveSettingInt(QSpinBox *spinBox, const std::string &setting, const std::string &group)
+void Launcher::AdvancedPage::saveSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group)
 {
     int value = spinBox->value();
     if (value != Settings::Manager::getInt(setting, group))

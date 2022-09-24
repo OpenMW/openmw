@@ -1,8 +1,8 @@
 #include "loadlevlist.hpp"
 
+#include "components/esm/defs.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
@@ -42,7 +42,7 @@ namespace ESM
                     // that does something with that list.
                     for (size_t i = 0; i < mList.size(); i++)
                     {
-                        LevelItem &li = mList[i];
+                        LevelItem& li = mList[i];
                         li.mId = esm.getHNString(recName);
                         esm.getHNT(li.mLevel, "INTV");
                     }

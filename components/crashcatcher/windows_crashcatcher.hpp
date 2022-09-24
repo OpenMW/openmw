@@ -3,8 +3,8 @@
 
 #include <filesystem>
 
-#include <components/windows.hpp>
 #include <components/crashcatcher/crashcatcher.hpp>
+#include <components/windows.hpp>
 
 namespace Crash
 {
@@ -27,12 +27,10 @@ namespace Crash
     class CrashCatcher final
     {
     public:
-
-        CrashCatcher(int argc, char **argv, const std::filesystem::path& crashLogPath);
+        CrashCatcher(int argc, char** argv, const std::filesystem::path& crashLogPath);
         ~CrashCatcher();
 
     private:
-
         static CrashCatcher* sInstance;
 
         //  mapped SHM area
@@ -67,7 +65,6 @@ namespace Crash
         void handleVectoredException(PEXCEPTION_POINTERS info);
 
     public:
-
         static LONG WINAPI vectoredExceptionHandler(PEXCEPTION_POINTERS info);
     };
 

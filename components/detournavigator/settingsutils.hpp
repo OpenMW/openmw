@@ -31,10 +31,7 @@ namespace DetourNavigator
 
     inline TileBounds toNavMeshCoordinates(const RecastSettings& settings, const TileBounds& value)
     {
-        return TileBounds {
-            toNavMeshCoordinates(settings, value.mMin),
-            toNavMeshCoordinates(settings, value.mMax)
-        };
+        return TileBounds{ toNavMeshCoordinates(settings, value.mMin), toNavMeshCoordinates(settings, value.mMax) };
     }
 
     inline float fromNavMeshCoordinates(const RecastSettings& settings, float value)
@@ -77,7 +74,7 @@ namespace DetourNavigator
 
     inline TileBounds makeTileBounds(const RecastSettings& settings, const TilePosition& tilePosition)
     {
-        return TileBounds {
+        return TileBounds{
             osg::Vec2f(tilePosition.x(), tilePosition.y()) * getTileSize(settings),
             osg::Vec2f(tilePosition.x() + 1, tilePosition.y() + 1) * getTileSize(settings),
         };

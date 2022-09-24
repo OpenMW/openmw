@@ -1,8 +1,8 @@
 #ifndef CSV_WORLD_DIALOGUESPINBOX_H
 #define CSV_WORLD_DIALOGUESPINBOX_H
 
-#include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QSpinBox>
 
 namespace CSVWorld
 {
@@ -10,30 +10,26 @@ namespace CSVWorld
     {
         Q_OBJECT
 
-        public:
+    public:
+        DialogueSpinBox(QWidget* parent = nullptr);
 
-            DialogueSpinBox (QWidget *parent = nullptr);
-
-        protected:
-
-            void focusInEvent(QFocusEvent *event) override;
-            void focusOutEvent(QFocusEvent *event) override;
-            void wheelEvent(QWheelEvent *event) override;
+    protected:
+        void focusInEvent(QFocusEvent* event) override;
+        void focusOutEvent(QFocusEvent* event) override;
+        void wheelEvent(QWheelEvent* event) override;
     };
 
     class DialogueDoubleSpinBox : public QDoubleSpinBox
     {
         Q_OBJECT
 
-        public:
+    public:
+        DialogueDoubleSpinBox(QWidget* parent = nullptr);
 
-            DialogueDoubleSpinBox (QWidget *parent = nullptr);
-
-        protected:
-
-            void focusInEvent(QFocusEvent *event) override;
-            void focusOutEvent(QFocusEvent *event) override;
-            void wheelEvent(QWheelEvent *event) override;
+    protected:
+        void focusInEvent(QFocusEvent* event) override;
+        void focusOutEvent(QFocusEvent* event) override;
+        void wheelEvent(QWheelEvent* event) override;
     };
 }
 

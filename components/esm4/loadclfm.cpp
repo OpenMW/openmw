@@ -26,8 +26,8 @@
 */
 #include "loadclfm.hpp"
 
-#include <stdexcept>
 #include <iostream> // FIXME: for debugging only
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -36,15 +36,19 @@ void ESM4::Colour::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId);  break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_CNAM:
             {
                 reader.get(mColour.red);
@@ -61,18 +65,18 @@ void ESM4::Colour::load(ESM4::Reader& reader)
                 break;
             }
             default:
-                //std::cout << "CLFM " << ESM::printName(subHdr.typeId) << " skipping..."
-                          //<< subHdr.dataSize << std::endl;
-                //reader.skipSubRecordData();
+                // std::cout << "CLFM " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
+                // reader.skipSubRecordData();
                 throw std::runtime_error("ESM4::CLFM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }
 
-//void ESM4::Colour::save(ESM4::Writer& writer) const
+// void ESM4::Colour::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Colour::blank()
+// void ESM4::Colour::blank()
 //{
-//}
+// }

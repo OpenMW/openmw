@@ -9,11 +9,14 @@
 
 namespace NavMeshTool
 {
-    inline constexpr char messageMagic[] = {'n', 'v', 't', 'm'};
+    inline constexpr char messageMagic[] = { 'n', 'v', 't', 'm' };
 
     struct BadMessageMagic : std::runtime_error
     {
-        BadMessageMagic() : std::runtime_error("Bad Message magic") {}
+        BadMessageMagic()
+            : std::runtime_error("Bad Message magic")
+        {
+        }
     };
 
     enum class MessageType : std::uint64_t
@@ -55,12 +58,7 @@ namespace NavMeshTool
         std::uint64_t mCount = 0;
     };
 
-    using TypedMessage = std::variant<
-        ExpectedCells,
-        ProcessedCells,
-        ExpectedTiles,
-        GeneratedTiles
-    >;
+    using TypedMessage = std::variant<ExpectedCells, ProcessedCells, ExpectedTiles, GeneratedTiles>;
 
     std::vector<std::byte> serialize(const ExpectedCells& value);
 

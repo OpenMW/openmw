@@ -1,15 +1,15 @@
 #include "actorspaths.hpp"
 #include "vismask.hpp"
 
-#include <components/sceneutil/agentpath.hpp>
+#include <components/detournavigator/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/detournavigator/settings.hpp>
+#include <components/sceneutil/agentpath.hpp>
 
 #include <osg/PositionAttitudeTransform>
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include <algorithm>
 
@@ -38,8 +38,8 @@ namespace MWRender
     }
 
     void ActorsPaths::update(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
-            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
-            const DetourNavigator::Settings& settings)
+        const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
+        const DetourNavigator::Settings& settings)
     {
         if (!mEnabled)
             return;
@@ -54,7 +54,7 @@ namespace MWRender
             MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(newGroup, "debug");
             newGroup->setNodeMask(Mask_Debug);
             mRootNode->addChild(newGroup);
-            mGroups[actor.mRef] = Group {actor.mCell, std::move(newGroup)};
+            mGroups[actor.mRef] = Group{ actor.mCell, std::move(newGroup) };
         }
     }
 
@@ -70,7 +70,7 @@ namespace MWRender
 
     void ActorsPaths::removeCell(const MWWorld::CellStore* const store)
     {
-        for (auto it = mGroups.begin(); it != mGroups.end(); )
+        for (auto it = mGroups.begin(); it != mGroups.end();)
         {
             if (it->second.mCell == store)
             {
@@ -92,15 +92,15 @@ namespace MWRender
 
     void ActorsPaths::enable()
     {
-        std::for_each(mGroups.begin(), mGroups.end(),
-            [&] (const Groups::value_type& v) { mRootNode->addChild(v.second.mNode); });
+        std::for_each(
+            mGroups.begin(), mGroups.end(), [&](const Groups::value_type& v) { mRootNode->addChild(v.second.mNode); });
         mEnabled = true;
     }
 
     void ActorsPaths::disable()
     {
         std::for_each(mGroups.begin(), mGroups.end(),
-            [&] (const Groups::value_type& v) { mRootNode->removeChild(v.second.mNode); });
+            [&](const Groups::value_type& v) { mRootNode->removeChild(v.second.mNode); });
         mEnabled = false;
     }
 }

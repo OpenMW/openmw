@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Potion::load(ESMReader &esm, bool &isDeleted)
+    void Potion::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -57,7 +57,7 @@ namespace ESM
         if (!hasData && !isDeleted)
             esm.fail("Missing ALDT subrecord");
     }
-    void Potion::save(ESMWriter &esm, bool isDeleted) const
+    void Potion::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

@@ -1,9 +1,9 @@
 #ifndef GAME_MWBASE_LUAMANAGER_H
 #define GAME_MWBASE_LUAMANAGER_H
 
-#include <variant>
-#include <string>
 #include <map>
+#include <string>
+#include <variant>
 
 #include <SDL_events.h>
 
@@ -49,7 +49,8 @@ namespace MWBase
 
         struct InputEvent
         {
-            enum {
+            enum
+            {
                 KeyPressed,
                 KeyReleased,
                 ControllerPressed,
@@ -97,9 +98,11 @@ namespace MWBase
         // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
         virtual void reloadAllScripts() = 0;
 
-        virtual void handleConsoleCommand(const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) = 0;
+        virtual void handleConsoleCommand(
+            const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr)
+            = 0;
     };
 
 }
 
-#endif  // GAME_MWBASE_LUAMANAGER_H
+#endif // GAME_MWBASE_LUAMANAGER_H

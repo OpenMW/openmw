@@ -1,19 +1,19 @@
 #ifndef OPENMW_ESM_CREATURESTATS_H
 #define OPENMW_ESM_CREATURESTATS_H
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 #include "statstate.hpp"
 
 #include "components/esm/defs.hpp"
 
-#include "components/esm/attr.hpp"
-#include "spellstate.hpp"
 #include "activespells.hpp"
-#include "magiceffects.hpp"
 #include "aisequence.hpp"
+#include "components/esm/attr.hpp"
+#include "magiceffects.hpp"
+#include "spellstate.hpp"
 
 namespace ESM
 {
@@ -46,23 +46,23 @@ namespace ESM
         TimeStamp mTradeTime;
         int mGoldPool;
         int mActorId;
-        //int mHitAttemptActorId;
+        // int mHitAttemptActorId;
 
         enum Flags
         {
-            Dead                   = 0x0001,
+            Dead = 0x0001,
             DeathAnimationFinished = 0x0002,
-            Died                   = 0x0004,
-            Murdered               = 0x0008,
-            TalkedTo               = 0x0010,
-            Alarmed                = 0x0020,
-            Attacked               = 0x0040,
-            Knockdown              = 0x0080,
-            KnockdownOneFrame      = 0x0100,
-            KnockdownOverOneFrame  = 0x0200,
-            HitRecovery            = 0x0400,
-            Block                  = 0x0800,
-            RecalcDynamicStats     = 0x1000
+            Died = 0x0004,
+            Murdered = 0x0008,
+            TalkedTo = 0x0010,
+            Alarmed = 0x0020,
+            Attacked = 0x0040,
+            Knockdown = 0x0080,
+            KnockdownOneFrame = 0x0100,
+            KnockdownOverOneFrame = 0x0200,
+            HitRecovery = 0x0400,
+            Block = 0x0800,
+            RecalcDynamicStats = 0x1000
         };
         bool mDead;
         bool mDeathAnimationFinished;
@@ -94,8 +94,8 @@ namespace ESM
         /// Initialize to default state
         void blank();
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 }
 

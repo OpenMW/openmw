@@ -4,9 +4,9 @@
 #include <array>
 #include <optional>
 
+#include <osg/FrameBufferObject>
 #include <osg/Geometry>
 #include <osg/Texture2D>
-#include <osg/FrameBufferObject>
 
 #include <components/fx/technique.hpp>
 
@@ -37,17 +37,29 @@ namespace MWRender
 
         void setSceneTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].sceneTex = tex; }
 
-        void setLDRSceneTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].sceneTexLDR = tex; }
+        void setLDRSceneTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex)
+        {
+            mBufferData[frameId].sceneTexLDR = tex;
+        }
 
         void setDepthTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].depthTex = tex; }
 
-        void setNormalsTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].normalsTex = tex; }
+        void setNormalsTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex)
+        {
+            mBufferData[frameId].normalsTex = tex;
+        }
 
         void setHDR(size_t frameId, bool hdr) { mBufferData[frameId].hdr = hdr; }
 
-        void setPostProcessing(size_t frameId, bool postprocessing) { mBufferData[frameId].postprocessing = postprocessing; }
+        void setPostProcessing(size_t frameId, bool postprocessing)
+        {
+            mBufferData[frameId].postprocessing = postprocessing;
+        }
 
-        const osg::ref_ptr<osg::Texture>& getSceneTexture(size_t frameId) const { return mBufferData[frameId].sceneTex; }
+        const osg::ref_ptr<osg::Texture>& getSceneTexture(size_t frameId) const
+        {
+            return mBufferData[frameId].sceneTex;
+        }
 
         void drawGeometry(osg::RenderInfo& renderInfo) const;
 

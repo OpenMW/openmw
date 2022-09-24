@@ -8,39 +8,39 @@
 namespace ESM
 {
 
-class ESMReader;
-class ESMWriter;
+    class ESMReader;
+    class ESMWriter;
 
-/*
- * Misc inventory items, basically things that have no use but can be
- * carried, bought and sold. It also includes keys.
- */
+    /*
+     * Misc inventory items, basically things that have no use but can be
+     * carried, bought and sold. It also includes keys.
+     */
 
-struct Miscellaneous
-{
-    constexpr static RecNameInts sRecordId = REC_MISC;
-
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string_view getRecordType() { return "Miscellaneous"; }
-
-    struct MCDTstruct
+    struct Miscellaneous
     {
-        float mWeight;
-        int mValue;
-        int mIsKey; // There are many keys in Morrowind.esm that has this
-                   // set to 0. TODO: Check what this field corresponds to
-                   // in the editor.
+        constexpr static RecNameInts sRecordId = REC_MISC;
+
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string_view getRecordType() { return "Miscellaneous"; }
+
+        struct MCDTstruct
+        {
+            float mWeight;
+            int mValue;
+            int mIsKey; // There are many keys in Morrowind.esm that has this
+                        // set to 0. TODO: Check what this field corresponds to
+                        // in the editor.
+        };
+        MCDTstruct mData;
+
+        unsigned int mRecordFlags;
+        std::string mId, mName, mModel, mIcon, mScript;
+
+        void load(ESMReader& esm, bool& isDeleted);
+        void save(ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+        ///< Set record to default state (does not touch the ID).
     };
-    MCDTstruct mData;
-
-    unsigned int mRecordFlags;
-    std::string mId, mName, mModel, mIcon, mScript;
-
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
-
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
 }
 #endif

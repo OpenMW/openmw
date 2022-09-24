@@ -4,28 +4,25 @@
 
 #include "../prefs/state.hpp"
 
-std::string CSMTools::MagicEffectCheckStage::checkObject(const std::string &id, 
-                                                                const CSMWorld::UniversalId &type, 
-                                                                const std::string &column) const
+std::string CSMTools::MagicEffectCheckStage::checkObject(
+    const std::string& id, const CSMWorld::UniversalId& type, const std::string& column) const
 {
     CSMWorld::RefIdData::LocalIndex index = mObjects.getDataSet().searchId(id);
-    if (index.first == -1) 
+    if (index.first == -1)
         return (column + " '" + id + "' does not exist");
-    else if (index.second != type.getType()) 
+    else if (index.second != type.getType())
         return (column + " '" + id + "' does not have " + type.getTypeName() + " type");
     return std::string();
 }
 
-CSMTools::MagicEffectCheckStage::MagicEffectCheckStage(const CSMWorld::IdCollection<ESM::MagicEffect> &effects,
-                                                       const CSMWorld::IdCollection<ESM::Sound> &sounds,
-                                                       const CSMWorld::RefIdCollection &objects,
-                                                       const CSMWorld::Resources &icons,
-                                                       const CSMWorld::Resources &textures)
-    : mMagicEffects(effects),
-      mSounds(sounds),
-      mObjects(objects),
-      mIcons(icons),
-      mTextures(textures)
+CSMTools::MagicEffectCheckStage::MagicEffectCheckStage(const CSMWorld::IdCollection<ESM::MagicEffect>& effects,
+    const CSMWorld::IdCollection<ESM::Sound>& sounds, const CSMWorld::RefIdCollection& objects,
+    const CSMWorld::Resources& icons, const CSMWorld::Resources& textures)
+    : mMagicEffects(effects)
+    , mSounds(sounds)
+    , mObjects(objects)
+    , mIcons(icons)
+    , mTextures(textures)
 {
     mIgnoreBaseRecords = false;
 }
@@ -37,9 +34,9 @@ int CSMTools::MagicEffectCheckStage::setup()
     return mMagicEffects.getSize();
 }
 
-void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messages)
+void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::MagicEffect> &record = mMagicEffects.getRecord(stage);
+    const CSMWorld::Record<ESM::MagicEffect>& record = mMagicEffects.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
@@ -78,7 +75,8 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
         {
             std::string ddsParticle = effect.mParticle;
             if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsParticle) && mTextures.searchId(ddsParticle) != -1))
-                messages.add(id, "Particle texture '" + effect.mParticle + "' does not exist", "", CSMDoc::Message::Severity_Error);
+                messages.add(id, "Particle texture '" + effect.mParticle + "' does not exist", "",
+                    CSMDoc::Message::Severity_Error);
         }
     }
 
@@ -111,7 +109,8 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
     }
 
     if (!effect.mCastSound.empty() && mSounds.searchId(effect.mCastSound) == -1)
-        messages.add(id, "Casting sound '" + effect.mCastSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(
+            id, "Casting sound '" + effect.mCastSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
     if (!effect.mHitSound.empty() && mSounds.searchId(effect.mHitSound) == -1)
         messages.add(id, "Hit sound '" + effect.mHitSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
     if (!effect.mAreaSound.empty() && mSounds.searchId(effect.mAreaSound) == -1)

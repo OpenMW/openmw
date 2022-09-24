@@ -1,7 +1,7 @@
 #include "pickpocketitemmodel.hpp"
 
-#include <components/misc/rng.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -17,8 +17,10 @@
 namespace MWGui
 {
 
-    PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& actor, std::unique_ptr<ItemModel> sourceModel, bool hideItems)
-        : mActor(actor), mPickpocketDetected(false)
+    PickpocketItemModel::PickpocketItemModel(
+        const MWWorld::Ptr& actor, std::unique_ptr<ItemModel> sourceModel, bool hideItems)
+        : mActor(actor)
+        , mPickpocketDetected(false)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         mSourceModel = std::move(sourceModel);
@@ -29,7 +31,7 @@ namespace MWGui
         if (hideItems)
         {
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
+            for (size_t i = 0; i < mSourceModel->getItemCount(); ++i)
             {
                 if (Misc::Rng::roll0to99(prng) > chance)
                     mHiddenItems.push_back(mSourceModel->getItem(i));
@@ -42,7 +44,7 @@ namespace MWGui
         return false;
     }
 
-    ItemStack PickpocketItemModel::getItem (ModelIndex index)
+    ItemStack PickpocketItemModel::getItem(ModelIndex index)
     {
         if (index < 0)
             throw std::runtime_error("Invalid index supplied");
@@ -60,7 +62,7 @@ namespace MWGui
     {
         mSourceModel->update();
         mItems.clear();
-        for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
+        for (size_t i = 0; i < mSourceModel->getItemCount(); ++i)
         {
             const ItemStack& item = mSourceModel->getItem(i);
 
@@ -69,17 +71,17 @@ namespace MWGui
                 continue;
 
             if (std::find(mHiddenItems.begin(), mHiddenItems.end(), item) == mHiddenItems.end()
-                    && item.mType != ItemStack::Type_Equipped)
+                && item.mType != ItemStack::Type_Equipped)
                 mItems.push_back(item);
         }
     }
 
-    void PickpocketItemModel::removeItem (const ItemStack &item, size_t count)
+    void PickpocketItemModel::removeItem(const ItemStack& item, size_t count)
     {
         ProxyItemModel::removeItem(item, count);
     }
 
-    bool PickpocketItemModel::onDropItem(const MWWorld::Ptr &item, int count)
+    bool PickpocketItemModel::onDropItem(const MWWorld::Ptr& item, int count)
     {
         // don't allow "reverse pickpocket" (it will be handled by scripts after 1.0)
         return false;
@@ -89,8 +91,8 @@ namespace MWGui
     {
         // Make sure we were actually closed, rather than just temporarily hidden (e.g. console or main menu opened)
         if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Container)
-        // If it was already detected while taking an item, no need to check now
-                || mPickpocketDetected)
+            // If it was already detected while taking an item, no need to check now
+            || mPickpocketDetected)
             return;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -98,13 +100,13 @@ namespace MWGui
         if (pickpocket.finish())
         {
             MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, std::string(), 0, true);
+                player, mActor, MWBase::MechanicsManager::OT_Pickpocket, std::string(), 0, true);
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
             mPickpocketDetected = true;
         }
     }
 
-    bool PickpocketItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    bool PickpocketItemModel::onTakeItem(const MWWorld::Ptr& item, int count)
     {
         if (mActor.getClass().getCreatureStats(mActor).getKnockedDown())
             return mSourceModel->onTakeItem(item, count);
@@ -119,14 +121,14 @@ namespace MWGui
         return success;
     }
 
-    bool PickpocketItemModel::stealItem(const MWWorld::Ptr &item, int count)
+    bool PickpocketItemModel::stealItem(const MWWorld::Ptr& item, int count)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::Pickpocket pickpocket(player, mActor);
         if (pickpocket.pick(item, count))
         {
             MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, std::string(), 0, true);
+                player, mActor, MWBase::MechanicsManager::OT_Pickpocket, std::string(), 0, true);
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
             mPickpocketDetected = true;
             return false;

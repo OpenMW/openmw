@@ -24,45 +24,45 @@ namespace MWMechanics
     /** \return Pointer to the door, or empty pointer if none exists **/
     const MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist);
 
-    bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& destination, bool ignorePlayer = false,
-        std::vector<MWWorld::Ptr>* occupyingActors = nullptr);
+    bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& destination,
+        bool ignorePlayer = false, std::vector<MWWorld::Ptr>* occupyingActors = nullptr);
 
     class ObstacleCheck
     {
-        public:
-            ObstacleCheck();
+    public:
+        ObstacleCheck();
 
-            // Clear the timers and set the state machine to default
-            void clear();
+        // Clear the timers and set the state machine to default
+        void clear();
 
-            bool isEvading() const;
+        bool isEvading() const;
 
-            // Updates internal state, call each frame for moving actor
-            void update(const MWWorld::Ptr& actor, const osg::Vec3f& destination, float duration);
+        // Updates internal state, call each frame for moving actor
+        void update(const MWWorld::Ptr& actor, const osg::Vec3f& destination, float duration);
 
-            // change direction to try to fix "stuck" actor
-            void takeEvasiveAction(MWMechanics::Movement& actorMovement) const;
+        // change direction to try to fix "stuck" actor
+        void takeEvasiveAction(MWMechanics::Movement& actorMovement) const;
 
-        private:
-            osg::Vec3f mPrev;
+    private:
+        osg::Vec3f mPrev;
 
-            // directions to try moving in when get stuck
-            static const float evadeDirections[NUM_EVADE_DIRECTIONS][2];
+        // directions to try moving in when get stuck
+        static const float evadeDirections[NUM_EVADE_DIRECTIONS][2];
 
-            enum class WalkState
-            {
-                Initial,
-                Norm,
-                CheckStuck,
-                Evade
-            };
-            WalkState mWalkState;
+        enum class WalkState
+        {
+            Initial,
+            Norm,
+            CheckStuck,
+            Evade
+        };
+        WalkState mWalkState;
 
-            float mStateDuration;
-            int mEvadeDirectionIndex;
-            float mInitialDistance = 0;
+        float mStateDuration;
+        int mEvadeDirectionIndex;
+        float mInitialDistance = 0;
 
-            void chooseEvasionDirection();
+        void chooseEvasionDirection();
     };
 }
 

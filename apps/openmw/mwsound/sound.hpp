@@ -19,8 +19,14 @@ namespace MWSound
     };
 
     // For testing individual PlayMode flags
-    inline int operator&(int a, PlayMode b) { return a & static_cast<int>(b); }
-    inline int operator&(PlayMode a, PlayMode b) { return static_cast<int>(a) & static_cast<int>(b); }
+    inline int operator&(int a, PlayMode b)
+    {
+        return a & static_cast<int>(b);
+    }
+    inline int operator&(PlayMode a, PlayMode b)
+    {
+        return static_cast<int>(a) & static_cast<int>(b);
+    }
 
     struct SoundParams
     {
@@ -36,7 +42,8 @@ namespace MWSound
         float mFadeStep = 0.0f;
     };
 
-    class SoundBase {
+    class SoundBase
+    {
         SoundBase& operator=(const SoundBase&) = delete;
         SoundBase(const SoundBase&) = delete;
         SoundBase(SoundBase&&) = delete;
@@ -49,7 +56,7 @@ namespace MWSound
         friend class OpenAL_Output;
 
     public:
-        void setPosition(const osg::Vec3f &pos) { mParams.mPos = pos; }
+        void setPosition(const osg::Vec3f& pos) { mParams.mPos = pos; }
         void setVolume(float volume) { mParams.mVolume = volume; }
         void setBaseVolume(float volume) { mParams.mBaseVolume = volume; }
         void setFadeout(float duration) { setFade(duration, 0.0, Play_StopAtFadeEnd); }
@@ -85,7 +92,8 @@ namespace MWSound
         /// once the fade duration has passed or the target volume has been
         /// reached. If Play_FadeExponential is set, enables the exponential
         /// fade mode (see above).
-        void setFade(float duration, float targetVolume, int flags = 0) {
+        void setFade(float duration, float targetVolume, int flags = 0)
+        {
             // Approximation of log(1%) (i.e., -40 dB).
             constexpr float minus40Decibel = -4.6f;
 
@@ -141,14 +149,13 @@ namespace MWSound
             return getInFade() || !(mParams.mFlags & Play_StopAtFadeEnd);
         }
 
-        const osg::Vec3f &getPosition() const { return mParams.mPos; }
+        const osg::Vec3f& getPosition() const { return mParams.mPos; }
         float getRealVolume() const { return mParams.mVolume * mParams.mBaseVolume * mParams.mFadeVolume; }
         float getPitch() const { return mParams.mPitch; }
         float getMinDistance() const { return mParams.mMinDistance; }
         float getMaxDistance() const { return mParams.mMaxDistance; }
 
-        MWSound::Type getPlayType() const
-        { return static_cast<MWSound::Type>(mParams.mFlags & MWSound::Type::Mask); }
+        MWSound::Type getPlayType() const { return static_cast<MWSound::Type>(mParams.mFlags & MWSound::Type::Mask); }
         bool getUseEnv() const { return !(mParams.mFlags & MWSound::PlayMode::NoEnv); }
         bool getIsLooping() const { return mParams.mFlags & MWSound::PlayMode::Loop; }
         bool getDistanceCull() const { return mParams.mFlags & MWSound::PlayMode::RemoveAtDistance; }
@@ -164,7 +171,8 @@ namespace MWSound
         SoundBase() = default;
     };
 
-    class Sound : public SoundBase {
+    class Sound : public SoundBase
+    {
         Sound& operator=(const Sound&) = delete;
         Sound(const Sound&) = delete;
         Sound(Sound&&) = delete;
@@ -173,7 +181,8 @@ namespace MWSound
         Sound() = default;
     };
 
-    class Stream : public SoundBase {
+    class Stream : public SoundBase
+    {
         Stream& operator=(const Stream&) = delete;
         Stream(const Stream&) = delete;
         Stream(Stream&&) = delete;

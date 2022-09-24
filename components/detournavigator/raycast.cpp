@@ -1,6 +1,6 @@
 #include "raycast.hpp"
-#include "settings.hpp"
 #include "findsmoothpath.hpp"
+#include "settings.hpp"
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
@@ -9,8 +9,8 @@
 
 namespace DetourNavigator
 {
-    std::optional<osg::Vec3f> raycast(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents,
-        const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags, const DetourSettings& settings)
+    std::optional<osg::Vec3f> raycast(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents, const osg::Vec3f& start,
+        const osg::Vec3f& end, const Flags includeFlags, const DetourSettings& settings)
     {
         dtNavMeshQuery navMeshQuery;
         if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes))
@@ -34,7 +34,8 @@ namespace DetourNavigator
             return {};
 
         osg::Vec3f hitPosition;
-        if (dtStatus status = navMeshQuery.closestPointOnPoly(path[hit.pathCount - 1], end.ptr(), hitPosition.ptr(), nullptr);
+        if (dtStatus status
+            = navMeshQuery.closestPointOnPoly(path[hit.pathCount - 1], end.ptr(), hitPosition.ptr(), nullptr);
             dtStatusFailed(status))
             return {};
 

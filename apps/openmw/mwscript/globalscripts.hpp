@@ -1,14 +1,14 @@
 #ifndef GAME_SCRIPT_GLOBALSCRIPTS_H
 #define GAME_SCRIPT_GLOBALSCRIPTS_H
 
-#include <string>
-#include <string_view>
+#include <cstdint>
 #include <map>
 #include <memory>
+#include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <variant>
-#include <cstdint>
 
 #include <components/misc/algorithm.hpp>
 
@@ -52,44 +52,45 @@ namespace MWScript
 
     class GlobalScripts
     {
-            const MWWorld::ESMStore& mStore;
-            std::unordered_map<std::string, std::shared_ptr<GlobalScriptDesc>, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual> mScripts;
+        const MWWorld::ESMStore& mStore;
+        std::unordered_map<std::string, std::shared_ptr<GlobalScriptDesc>, ::Misc::StringUtils::CiHash,
+            ::Misc::StringUtils::CiEqual>
+            mScripts;
 
-        public:
+    public:
+        GlobalScripts(const MWWorld::ESMStore& store);
 
-            GlobalScripts (const MWWorld::ESMStore& store);
+        void addScript(std::string_view name, const MWWorld::Ptr& target = MWWorld::Ptr());
 
-            void addScript(std::string_view name, const MWWorld::Ptr& target = MWWorld::Ptr());
+        void removeScript(std::string_view name);
 
-            void removeScript (std::string_view name);
+        bool isRunning(std::string_view name) const;
 
-            bool isRunning (std::string_view name) const;
+        void run();
+        ///< run all active global scripts
 
-            void run();
-            ///< run all active global scripts
+        void clear();
 
-            void clear();
+        void addStartup();
+        ///< Add startup script
 
-            void addStartup();
-            ///< Add startup script
+        int countSavedGameRecords() const;
 
-            int countSavedGameRecords() const;
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
+        bool readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
+        ///< Records for variables that do not exist are dropped silently.
+        ///
+        /// \return Known type?
 
-            bool readRecord (ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
-            ///< Records for variables that do not exist are dropped silently.
-            ///
-            /// \return Known type?
+        Locals& getLocals(std::string_view name);
+        ///< If the script \a name has not been added as a global script yet, it is added
+        /// automatically, but is not set to running state.
 
-            Locals& getLocals(std::string_view name);
-            ///< If the script \a name has not been added as a global script yet, it is added
-            /// automatically, but is not set to running state.
+        const Locals* getLocalsIfPresent(std::string_view name) const;
 
-            const Locals* getLocalsIfPresent(std::string_view name) const;
-
-            void updatePtrs(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
-            ///< Update the Ptrs stored in mTarget. Should be called after the reference has been moved to a new cell.
+        void updatePtrs(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
+        ///< Update the Ptrs stored in mTarget. Should be called after the reference has been moved to a new cell.
     };
 }
 

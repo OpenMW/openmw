@@ -6,9 +6,9 @@
 namespace MWMechanics
 {
 
-    bool rechargeItem(const MWWorld::Ptr &item, const float maxCharge, const float duration);
+    bool rechargeItem(const MWWorld::Ptr& item, const float maxCharge, const float duration);
 
-    bool rechargeItem(const MWWorld::Ptr &item, const MWWorld::Ptr &gem);
+    bool rechargeItem(const MWWorld::Ptr& item, const MWWorld::Ptr& gem);
 
 }
 

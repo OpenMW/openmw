@@ -40,10 +40,10 @@ namespace ESM4
 #pragma pack(push, 1)
     struct QuestData
     {
-        std::uint8_t flags;    // Quest_Flags
+        std::uint8_t flags; // Quest_Flags
         std::uint8_t priority;
         std::uint16_t padding; // FO3
-        float questDelay;      // FO3
+        float questDelay; // FO3
     };
 #pragma pack(pop)
 
@@ -52,12 +52,12 @@ namespace ESM4
         // NOTE: these values are for TES4
         enum Quest_Flags
         {
-            Flag_StartGameEnabled     = 0x01,
+            Flag_StartGameEnabled = 0x01,
             Flag_AllowRepeatConvTopic = 0x04,
-            Flag_AllowRepeatStages    = 0x08
+            Flag_AllowRepeatStages = 0x08
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -72,9 +72,9 @@ namespace ESM4
         ScriptDefinition mScript;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

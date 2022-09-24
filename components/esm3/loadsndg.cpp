@@ -1,12 +1,12 @@
 #include "loadsndg.hpp"
 
+#include "components/esm/defs.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    void SoundGenerator::load(ESMReader &esm, bool &isDeleted)
+    void SoundGenerator::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -47,7 +47,7 @@ namespace ESM
         if (!hasData && !isDeleted)
             esm.fail("Missing DATA subrecord");
     }
-    void SoundGenerator::save(ESMWriter &esm, bool isDeleted) const
+    void SoundGenerator::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -60,7 +60,6 @@ namespace ESM
         esm.writeHNT("DATA", mType, 4);
         esm.writeHNOCString("CNAM", mCreature);
         esm.writeHNOCString("SNAM", mSound);
-        
     }
 
     void SoundGenerator::blank()

@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Sound::load(ESMReader &esm, bool &isDeleted)
+    void Sound::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -44,7 +44,7 @@ namespace ESM
             esm.fail("Missing DATA subrecord");
     }
 
-    void Sound::save(ESMWriter &esm, bool isDeleted) const
+    void Sound::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

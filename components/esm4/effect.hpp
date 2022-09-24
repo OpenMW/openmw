@@ -42,10 +42,10 @@ namespace ESM4
 
     struct ScriptEffect
     {
-        FormId       formId;       // Script effect (Magic effect must be SEFF)
-        std::int32_t school;       // Magic school. See Magic schools for more information.
-        EFI_Label    visualEffect; // Visual effect name or 0x00000000 if None
-        std::uint8_t flags;        // 0x01 = Hostile
+        FormId formId; // Script effect (Magic effect must be SEFF)
+        std::int32_t school; // Magic school. See Magic schools for more information.
+        EFI_Label visualEffect; // Visual effect name or 0x00000000 if None
+        std::uint8_t flags; // 0x01 = Hostile
         std::uint8_t unknown1;
         std::uint8_t unknown2;
         std::uint8_t unknown3;

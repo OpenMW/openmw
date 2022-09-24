@@ -30,8 +30,8 @@ namespace ESM
 
         std::vector<FogTexture> mFogTextures;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm, bool interiorCell) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm, bool interiorCell) const;
     };
 }
 

@@ -24,7 +24,7 @@ namespace MWWorld
     /// Used to create pointers to hold any type of LiveCellRef<> object.
     struct LiveCellRefBase
     {
-        const Class *mClass;
+        const Class* mClass;
 
         /** Information about this instance, such as 3D location and rotation
          * and individual type-dependent data.
@@ -34,16 +34,16 @@ namespace MWWorld
         /** runtime-data */
         RefData mData;
 
-        LiveCellRefBase(unsigned int type, const ESM::CellRef &cref=ESM::CellRef());
+        LiveCellRefBase(unsigned int type, const ESM::CellRef& cref = ESM::CellRef());
         /* Need this for the class to be recognized as polymorphic */
-        virtual ~LiveCellRefBase() { }
+        virtual ~LiveCellRefBase() {}
 
-        virtual void load (const ESM::ObjectState& state) = 0;
+        virtual void load(const ESM::ObjectState& state) = 0;
         ///< Load state into a LiveCellRef, that has already been initialised with base and class.
         ///
         /// \attention Must not be called with an invalid \a state.
 
-        virtual void save (ESM::ObjectState& state) const = 0;
+        virtual void save(ESM::ObjectState& state) const = 0;
         ///< Save LiveCellRef state into \a state.
 
         virtual std::string_view getTypeDescription() const = 0;
@@ -57,28 +57,27 @@ namespace MWWorld
         template <class T>
         static LiveCellRef<T>* dynamicCast(LiveCellRefBase* value);
 
-        protected:
+    protected:
+        void loadImp(const ESM::ObjectState& state);
+        ///< Load state into a LiveCellRef, that has already been initialised with base and
+        /// class.
+        ///
+        /// \attention Must not be called with an invalid \a state.
 
-            void loadImp (const ESM::ObjectState& state);
-            ///< Load state into a LiveCellRef, that has already been initialised with base and
-            /// class.
-            ///
-            /// \attention Must not be called with an invalid \a state.
+        void saveImp(ESM::ObjectState& state) const;
+        ///< Save LiveCellRef state into \a state.
 
-            void saveImp (ESM::ObjectState& state) const;
-            ///< Save LiveCellRef state into \a state.
-
-            static bool checkStateImp (const ESM::ObjectState& state);
-            ///< Check if state is valid and report errors.
-            ///
-            /// \return Valid?
-            ///
-            /// \note Does not check if the RefId exists.
+        static bool checkStateImp(const ESM::ObjectState& state);
+        ///< Check if state is valid and report errors.
+        ///
+        /// \return Valid?
+        ///
+        /// \note Does not check if the RefId exists.
     };
 
-    inline bool operator== (const LiveCellRefBase& cellRef, const ESM::RefNum refNum)
+    inline bool operator==(const LiveCellRefBase& cellRef, const ESM::RefNum refNum)
     {
-        return cellRef.mRef.getRefNum()==refNum;
+        return cellRef.mRef.getRefNum() == refNum;
     }
 
     std::string makeDynamicCastErrorMessage(const LiveCellRefBase* value, std::string_view recordType);
@@ -109,27 +108,31 @@ namespace MWWorld
     struct LiveCellRef : public LiveCellRefBase
     {
         LiveCellRef(const ESM::CellRef& cref, const X* b = nullptr)
-            : LiveCellRefBase(X::sRecordId, cref), mBase(b)
-        {}
+            : LiveCellRefBase(X::sRecordId, cref)
+            , mBase(b)
+        {
+        }
 
         LiveCellRef(const X* b = nullptr)
-            : LiveCellRefBase(X::sRecordId), mBase(b)
-        {}
+            : LiveCellRefBase(X::sRecordId)
+            , mBase(b)
+        {
+        }
 
         // The object that this instance is based on.
         const X* mBase;
 
-        void load (const ESM::ObjectState& state) override;
+        void load(const ESM::ObjectState& state) override;
         ///< Load state into a LiveCellRef, that has already been initialised with base and class.
         ///
         /// \attention Must not be called with an invalid \a state.
 
-        void save (ESM::ObjectState& state) const override;
+        void save(ESM::ObjectState& state) const override;
         ///< Save LiveCellRef state into \a state.
 
         std::string_view getTypeDescription() const override { return X::getRecordType(); }
 
-        static bool checkState (const ESM::ObjectState& state);
+        static bool checkState(const ESM::ObjectState& state);
         ///< Check if state is valid and report errors.
         ///
         /// \return Valid?
@@ -138,21 +141,21 @@ namespace MWWorld
     };
 
     template <typename X>
-    void LiveCellRef<X>::load (const ESM::ObjectState& state)
+    void LiveCellRef<X>::load(const ESM::ObjectState& state)
     {
-        loadImp (state);
+        loadImp(state);
     }
 
     template <typename X>
-    void LiveCellRef<X>::save (ESM::ObjectState& state) const
+    void LiveCellRef<X>::save(ESM::ObjectState& state) const
     {
-        saveImp (state);
+        saveImp(state);
     }
 
     template <typename X>
-    bool LiveCellRef<X>::checkState (const ESM::ObjectState& state)
+    bool LiveCellRef<X>::checkState(const ESM::ObjectState& state)
     {
-        return checkStateImp (state);
+        return checkStateImp(state);
     }
 }
 

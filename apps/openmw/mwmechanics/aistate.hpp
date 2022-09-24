@@ -14,7 +14,7 @@ namespace MWMechanics
      * the stored object if it has the correct type or otherwise replaces
      * it with an object of the requested type.
      */
-    template< class Base >
+    template <class Base>
     class DerivedClassStorage
     {
     private:
@@ -22,7 +22,7 @@ namespace MWMechanics
 
     public:
         /// \brief returns reference to stored object or deletes it and creates a fitting
-        template< class Derived >
+        template <class Derived>
         Derived& get()
         {
             Derived* result = dynamic_cast<Derived*>(mStorage.get());
@@ -34,11 +34,11 @@ namespace MWMechanics
                 mStorage = std::move(storage);
             }
 
-            //return a reference to the (new allocated) object 
+            // return a reference to the (new allocated) object
             return *result;
         }
 
-        template< class Derived >
+        template <class Derived>
         void copy(DerivedClassStorage& destination) const
         {
             Derived* result = dynamic_cast<Derived*>(mStorage.get());
@@ -46,8 +46,8 @@ namespace MWMechanics
                 destination.store<Derived>(*result);
         }
 
-        template< class Derived >
-        void store( const Derived& payload )
+        template <class Derived>
+        void store(const Derived& payload)
         {
             mStorage = std::make_unique<Derived>(payload);
         }

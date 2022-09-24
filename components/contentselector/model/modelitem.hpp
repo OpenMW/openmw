@@ -1,8 +1,8 @@
 #ifndef MODELITEM_HPP
 #define MODELITEM_HPP
 
-#include <QMimeData>
 #include <QList>
+#include <QMimeData>
 
 namespace ContentSelectorModel
 {
@@ -11,27 +11,27 @@ namespace ContentSelectorModel
         Q_OBJECT
 
     public:
-        ModelItem(ModelItem *parent = nullptr);
-        //ModelItem(const ModelItem *parent = 0);
+        ModelItem(ModelItem* parent = nullptr);
+        // ModelItem(const ModelItem *parent = 0);
 
         ~ModelItem();
 
-        ModelItem *parent() const;
+        ModelItem* parent() const;
         int row() const;
 
         int childCount() const;
-        int childRow(ModelItem *child) const;
-        ModelItem *child(int row);
+        int childRow(ModelItem* child) const;
+        ModelItem* child(int row);
 
-        void appendChild(ModelItem *child);
+        void appendChild(ModelItem* child);
         void removeChild(int row);
 
-        bool hasFormat(const QString &mimetype) const override;
+        bool hasFormat(const QString& mimetype) const override;
 
-        //virtual bool acceptChild(ModelItem *child);
+        // virtual bool acceptChild(ModelItem *child);
 
     protected:
-        ModelItem *mParentItem;
+        ModelItem* mParentItem;
         QList<ModelItem*> mChildItems;
     };
 }

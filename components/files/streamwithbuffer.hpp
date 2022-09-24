@@ -9,14 +9,15 @@ namespace Files
     template <class Buffer>
     class StreamWithBuffer final : public std::istream
     {
-        public:
-            explicit StreamWithBuffer(std::unique_ptr<Buffer>&& buffer)
-                : std::istream(buffer.get())
-                , mBuffer(std::move(buffer))
-            {}
+    public:
+        explicit StreamWithBuffer(std::unique_ptr<Buffer>&& buffer)
+            : std::istream(buffer.get())
+            , mBuffer(std::move(buffer))
+        {
+        }
 
-        private:
-            std::unique_ptr<Buffer> mBuffer;
+    private:
+        std::unique_ptr<Buffer> mBuffer;
     };
 }
 

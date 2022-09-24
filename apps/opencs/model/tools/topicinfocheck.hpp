@@ -25,19 +25,12 @@ namespace CSMTools
     class TopicInfoCheckStage : public CSMDoc::Stage
     {
     public:
-
-        TopicInfoCheckStage(
-            const CSMWorld::InfoCollection& topicInfos,
-            const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
-            const CSMWorld::IdCollection<ESM::Class>& classes,
-            const CSMWorld::IdCollection<ESM::Faction>& factions,
-            const CSMWorld::IdCollection<ESM::GameSetting>& gmsts,
-            const CSMWorld::IdCollection<ESM::Global>& globals,
-            const CSMWorld::IdCollection<ESM::Dialogue>& journals,
-            const CSMWorld::IdCollection<ESM::Race>& races,
-            const CSMWorld::IdCollection<ESM::Region>& regions,
-            const CSMWorld::IdCollection<ESM::Dialogue>& topics,
-            const CSMWorld::RefIdData& referencables,
+        TopicInfoCheckStage(const CSMWorld::InfoCollection& topicInfos,
+            const CSMWorld::IdCollection<CSMWorld::Cell>& cells, const CSMWorld::IdCollection<ESM::Class>& classes,
+            const CSMWorld::IdCollection<ESM::Faction>& factions, const CSMWorld::IdCollection<ESM::GameSetting>& gmsts,
+            const CSMWorld::IdCollection<ESM::Global>& globals, const CSMWorld::IdCollection<ESM::Dialogue>& journals,
+            const CSMWorld::IdCollection<ESM::Race>& races, const CSMWorld::IdCollection<ESM::Region>& regions,
+            const CSMWorld::IdCollection<ESM::Dialogue>& topics, const CSMWorld::RefIdData& referencables,
             const CSMWorld::Resources& soundFiles);
 
         int setup() override;
@@ -47,7 +40,6 @@ namespace CSMTools
         ///< Messages resulting from this stage will be appended to \a messages
 
     private:
-
         const CSMWorld::InfoCollection& mTopicInfos;
 
         const CSMWorld::IdCollection<CSMWorld::Cell>& mCells;
@@ -70,11 +62,11 @@ namespace CSMTools
         // These return false when not successful and write an error
         bool verifyActor(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifyCell(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-        bool verifyFactionRank(const std::string& name, int rank, const CSMWorld::UniversalId& id,
-            CSMDoc::Messages& messages);
+        bool verifyFactionRank(
+            const std::string& name, int rank, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifyItem(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-        bool verifySelectStruct(const ESM::DialInfo::SelectStruct& select, const CSMWorld::UniversalId& id,
-            CSMDoc::Messages& messages);
+        bool verifySelectStruct(
+            const ESM::DialInfo::SelectStruct& select, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifySound(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
 
         template <typename T>

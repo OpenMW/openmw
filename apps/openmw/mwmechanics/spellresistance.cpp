@@ -17,7 +17,7 @@ namespace MWMechanics
 {
 
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                              const ESM::Spell* spell, const MagicEffects* effects)
+        const ESM::Spell* spell, const MagicEffects* effects)
     {
         if (!actor.getClass().isActor())
             return 1;
@@ -26,14 +26,15 @@ namespace MWMechanics
         return 1 - resistance / 100.f;
     }
 
-    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                               const ESM::Spell* spell, const MagicEffects* effects)
+    float getEffectResistance(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+        const ESM::Spell* spell, const MagicEffects* effects)
     {
         // Effects with no resistance attribute belonging to them can not be resisted
         if (ESM::MagicEffect::getResistanceEffect(effectId) == -1)
             return 0.f;
 
-        const auto magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
+        const auto magicEffect
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
 
         const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
         const MWMechanics::MagicEffects* magicEffects = &stats.getMagicEffects();
@@ -72,7 +73,7 @@ namespace MWMechanics
         return x;
     }
 
-    float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects)
+    float getEffectResistanceAttribute(short effectId, const MagicEffects* actorEffects)
     {
         short resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
         short weaknessEffect = ESM::MagicEffect::getWeaknessEffect(effectId);

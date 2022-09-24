@@ -2,9 +2,9 @@
 #define OPENMW_ESM_SPELLSTATE_H
 
 #include <map>
-#include <vector>
-#include <string>
 #include <set>
+#include <string>
+#include <vector>
 
 #include "components/esm/defs.hpp"
 
@@ -38,15 +38,15 @@ namespace ESM
 
         // FIXME: obsolete, used only for old saves
         std::map<std::string, SpellParams> mSpellParams;
-        std::map<std::string, std::vector<PermanentSpellEffectInfo> > mPermanentSpellEffects;
+        std::map<std::string, std::vector<PermanentSpellEffectInfo>> mPermanentSpellEffects;
         std::map<std::string, CorprusStats> mCorprusSpells;
 
         std::map<std::string, TimeStamp> mUsedPowers;
 
         std::string mSelectedSpell;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 
 }

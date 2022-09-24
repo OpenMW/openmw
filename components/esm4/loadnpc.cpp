@@ -26,12 +26,12 @@
 */
 #include "loadnpc.hpp"
 
-#include <stdexcept>
 #include <cstring>
-#include <string> // getline
+#include <iomanip> // NOTE: for testing only
 #include <iostream> // NOTE: for testing only
 #include <sstream> // NOTE: for testing only
-#include <iomanip>  // NOTE: for testing only
+#include <stdexcept>
+#include <string> // getline
 
 //#include <boost/iostreams/filtering_streambuf.hpp>
 //#include <boost/iostreams/copy.hpp>
@@ -45,21 +45,27 @@ void ESM4::Npc::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
     mIsTES4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
     mIsFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-    //mIsTES5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_170; // WARN: FO3 is also VER_094
+    // mIsTES5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_170; // WARN: FO3 is also VER_094
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel);    break; // not for TES5, see Race
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break; // not for TES5, see Race
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_CNTO:
             {
                 static InventoryItem inv; // FIXME: use unique_ptr here?
@@ -88,13 +94,25 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 reader.adjustFormId(mFaction.faction);
                 break;
             }
-            case ESM4::SUB_RNAM: reader.getFormId(mRace);      break;
-            case ESM4::SUB_CNAM: reader.getFormId(mClass);     break;
-            case ESM4::SUB_HNAM: reader.getFormId(mHair);      break; // not for TES5
-            case ESM4::SUB_ENAM: reader.getFormId(mEyes);      break;
+            case ESM4::SUB_RNAM:
+                reader.getFormId(mRace);
+                break;
+            case ESM4::SUB_CNAM:
+                reader.getFormId(mClass);
+                break;
+            case ESM4::SUB_HNAM:
+                reader.getFormId(mHair);
+                break; // not for TES5
+            case ESM4::SUB_ENAM:
+                reader.getFormId(mEyes);
+                break;
             //
-            case ESM4::SUB_INAM: reader.getFormId(mDeathItem); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId);    break;
+            case ESM4::SUB_INAM:
+                reader.getFormId(mDeathItem);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
             //
             case ESM4::SUB_AIDT:
             {
@@ -109,7 +127,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_ACBS:
             {
-                //if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || mIsFONV)
+                // if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || mIsFONV)
                 if (subHdr.dataSize == 24)
                     reader.get(mBaseConfig);
                 else
@@ -129,10 +147,18 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 reader.get(&mData, 33); // FIXME: check packing
                 break;
             }
-            case ESM4::SUB_ZNAM: reader.getFormId(mCombatStyle); break;
-            case ESM4::SUB_CSCR: reader.getFormId(mSoundBase);   break;
-            case ESM4::SUB_CSDI: reader.getFormId(mSound);       break;
-            case ESM4::SUB_CSDC: reader.get(mSoundChance); break;
+            case ESM4::SUB_ZNAM:
+                reader.getFormId(mCombatStyle);
+                break;
+            case ESM4::SUB_CSCR:
+                reader.getFormId(mSoundBase);
+                break;
+            case ESM4::SUB_CSDI:
+                reader.getFormId(mSound);
+                break;
+            case ESM4::SUB_CSDC:
+                reader.get(mSoundChance);
+                break;
             case ESM4::SUB_WNAM:
             {
                 if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
@@ -141,7 +167,9 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                     reader.get(mFootWeight);
                 break;
             }
-            case ESM4::SUB_MODB: reader.get(mBoundRadius); break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
             case ESM4::SUB_KFFZ:
             {
                 // Seems to be only below 3, and only happens 3 times while loading TES4:
@@ -149,10 +177,12 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 //   TurnLeft_SheogorathWithCane.kf
                 //   TurnRight_SheogorathWithCane.kf
                 if (!reader.getZeroTerminatedStringArray(mKf))
-                    throw std::runtime_error ("NPC_ KFFZ data read error");
+                    throw std::runtime_error("NPC_ KFFZ data read error");
                 break;
             }
-            case ESM4::SUB_LNAM: reader.get(mHairLength); break;
+            case ESM4::SUB_LNAM:
+                reader.get(mHairLength);
+                break;
             case ESM4::SUB_HCLR:
             {
                 reader.get(mHairColour.red);
@@ -162,7 +192,9 @@ void ESM4::Npc::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_TPLT: reader.get(mBaseTemplate); break;
+            case ESM4::SUB_TPLT:
+                reader.get(mBaseTemplate);
+                break;
             case ESM4::SUB_FGGS:
             {
                 mSymShapeModeCoefficients.resize(50);
@@ -190,8 +222,8 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_FNAM:
             {
                 reader.get(mFgRace);
-                //std::cout << "race " << mEditorId << " " << mRace << std::endl; // FIXME
-                //std::cout << "fg race " << mEditorId << " " << mFgRace << std::endl; // FIXME
+                // std::cout << "race " << mEditorId << " " << mRace << std::endl; // FIXME
+                // std::cout << "fg race " << mEditorId << " " << mFgRace << std::endl; // FIXME
                 break;
             }
             case ESM4::SUB_PNAM: // FO3/FONV/TES5
@@ -215,9 +247,15 @@ void ESM4::Npc::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_DOFT: reader.getFormId(mDefaultOutfit); break;
-            case ESM4::SUB_SOFT: reader.getFormId(mSleepOutfit); break;
-            case ESM4::SUB_DPLT: reader.getFormId(mDefaultPkg); break; // AI package list
+            case ESM4::SUB_DOFT:
+                reader.getFormId(mDefaultOutfit);
+                break;
+            case ESM4::SUB_SOFT:
+                reader.getFormId(mSleepOutfit);
+                break;
+            case ESM4::SUB_DPLT:
+                reader.getFormId(mDefaultPkg);
+                break; // AI package list
             case ESM4::SUB_DEST:
             case ESM4::SUB_DSTD:
             case ESM4::SUB_DSTF:
@@ -236,13 +274,13 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                         ss << std::setfill('0') << std::setw(2) << std::hex << (int)(dataBuf[i]);
                     if ((i & 0x000f) == 0xf) // wrap around
                         ss << "\n";
-                    else if (i < (size_t)(subHdr.dataSize-1)) // quiesce gcc
+                    else if (i < (size_t)(subHdr.dataSize - 1)) // quiesce gcc
                         ss << " ";
                 }
                 std::cout << ss.str() << std::endl;
 #else
-                //std::cout << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping..."
-                          //<< subHdr.dataSize << std::endl;
+                // std::cout << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
 #endif
                 break;
@@ -282,7 +320,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_NAM4: // FO3
             case ESM4::SUB_COED: // FO3
             {
-                //std::cout << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -292,10 +330,10 @@ void ESM4::Npc::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Npc::save(ESM4::Writer& writer) const
+// void ESM4::Npc::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Npc::blank()
+// void ESM4::Npc::blank()
 //{
-//}
+// }

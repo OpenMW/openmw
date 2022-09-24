@@ -34,13 +34,13 @@ namespace CSVWidget
     {
         Q_OBJECT
 
-        public:
-            BrushSizeControls(const QString &title, QWidget *parent);
+    public:
+        BrushSizeControls(const QString& title, QWidget* parent);
 
-        private:
-            QHBoxLayout *mLayoutSliderSize;
-            QSlider *mBrushSizeSlider;
-            QSpinBox *mBrushSizeSpinBox;
+    private:
+        QHBoxLayout* mLayoutSliderSize;
+        QSlider* mBrushSizeSlider;
+        QSpinBox* mBrushSizeSpinBox;
 
         friend class SceneToolTextureBrush;
         friend class CSVRender::TerrainTextureMode;
@@ -53,80 +53,78 @@ namespace CSVWidget
     {
         Q_OBJECT
 
-        public:
-            TextureBrushWindow(CSMDoc::Document& document, QWidget *parent = nullptr);
-            void configureButtonInitialSettings(QPushButton *button);
+    public:
+        TextureBrushWindow(CSMDoc::Document& document, QWidget* parent = nullptr);
+        void configureButtonInitialSettings(QPushButton* button);
 
-            const QString toolTipPoint = "Paint single point";
-            const QString toolTipSquare = "Paint with square brush";
-            const QString toolTipCircle = "Paint with circle brush";
-            const QString toolTipCustom = "Paint custom selection (not implemented yet)";
+        const QString toolTipPoint = "Paint single point";
+        const QString toolTipSquare = "Paint with square brush";
+        const QString toolTipCircle = "Paint with circle brush";
+        const QString toolTipCustom = "Paint custom selection (not implemented yet)";
 
-        private:
-            CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
-            int mBrushSize = 1;
-            std::string mBrushTexture = "L0#0";
-            CSMDoc::Document& mDocument;
-            QLabel *mSelectedBrush;
-            QGroupBox *mHorizontalGroupBox;
-            std::string mBrushTextureLabel;
-            QPushButton *mButtonPoint;
-            QPushButton *mButtonSquare;
-            QPushButton *mButtonCircle;
-            QPushButton *mButtonCustom;
-            BrushSizeControls* mSizeSliders;
+    private:
+        CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
+        int mBrushSize = 1;
+        std::string mBrushTexture = "L0#0";
+        CSMDoc::Document& mDocument;
+        QLabel* mSelectedBrush;
+        QGroupBox* mHorizontalGroupBox;
+        std::string mBrushTextureLabel;
+        QPushButton* mButtonPoint;
+        QPushButton* mButtonSquare;
+        QPushButton* mButtonCircle;
+        QPushButton* mButtonCustom;
+        BrushSizeControls* mSizeSliders;
 
         friend class SceneToolTextureBrush;
         friend class CSVRender::TerrainTextureMode;
 
-        public slots:
-            void setBrushTexture(std::string brushTexture);
-            void setBrushShape();
-            void setBrushSize(int brushSize);
+    public slots:
+        void setBrushTexture(std::string brushTexture);
+        void setBrushShape();
+        void setBrushSize(int brushSize);
 
-        signals:
-            void passBrushSize (int brushSize);
-            void passBrushShape(CSVWidget::BrushShape brushShape);
-            void passTextureId(std::string brushTexture);
+    signals:
+        void passBrushSize(int brushSize);
+        void passBrushShape(CSVWidget::BrushShape brushShape);
+        void passTextureId(std::string brushTexture);
     };
 
     class SceneToolTextureBrush : public SceneTool
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QString mToolTip;
-            CSMDoc::Document& mDocument;
-            QFrame *mPanel;
-            QTableWidget *mTable;
-            std::vector<std::string> mBrushHistory;
-            TextureBrushWindow *mTextureBrushWindow;
+        QString mToolTip;
+        CSMDoc::Document& mDocument;
+        QFrame* mPanel;
+        QTableWidget* mTable;
+        std::vector<std::string> mBrushHistory;
+        TextureBrushWindow* mTextureBrushWindow;
 
-        private:
+    private:
+        void adjustToolTips();
 
-            void adjustToolTips();
+    public:
+        SceneToolTextureBrush(SceneToolbar* parent, const QString& toolTip, CSMDoc::Document& document);
 
-        public:
+        void showPanel(const QPoint& position) override;
+        void updatePanel();
 
-            SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip, CSMDoc::Document& document);
-
-            void showPanel (const QPoint& position) override;
-            void updatePanel ();
-
-            void dropEvent (QDropEvent *event) override;
-            void dragEnterEvent (QDragEnterEvent *event) override;
+        void dropEvent(QDropEvent* event) override;
+        void dragEnterEvent(QDragEnterEvent* event) override;
 
         friend class CSVRender::TerrainTextureMode;
 
-        public slots:
-            void setButtonIcon(CSVWidget::BrushShape brushShape);
-            void updateBrushHistory (const std::string& mBrushTexture);
-            void clicked (const QModelIndex& index);
-            void activate() override;
+    public slots:
+        void setButtonIcon(CSVWidget::BrushShape brushShape);
+        void updateBrushHistory(const std::string& mBrushTexture);
+        void clicked(const QModelIndex& index);
+        void activate() override;
 
-        signals:
-            void passEvent(QDropEvent *event);
-            void passEvent(QDragEnterEvent *event);
-            void passTextureId(std::string brushTexture);
+    signals:
+        void passEvent(QDropEvent* event);
+        void passEvent(QDragEnterEvent* event);
+        void passTextureId(std::string brushTexture);
     };
 }
 

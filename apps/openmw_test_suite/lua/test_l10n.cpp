@@ -3,8 +3,8 @@
 
 #include <components/files/fixedpath.hpp>
 
-#include <components/lua/luastate.hpp>
 #include <components/lua/l10n.hpp>
+#include <components/lua/luastate.hpp>
 
 #include "../testing_util.hpp"
 
@@ -20,9 +20,10 @@ namespace
     }
 
     VFSTestFile invalidScript("not a script");
-    VFSTestFile incorrectScript("return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
+    VFSTestFile incorrectScript(
+        "return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
     VFSTestFile emptyScript("");
-    
+
     VFSTestFile test1En(R"X(
 good_morning: "Good morning."
 you_have_arrows: |-
@@ -55,11 +56,11 @@ you_have_arrows: |-
 "Hello {name}!": "Hallo {name}!"
 )X");
 
-     VFSTestFile test1EnUS(R"X(
+    VFSTestFile test1EnUS(R"X(
 currency: "You have {money, number, currency}"
 )X");
 
-VFSTestFile test2En(R"X(
+    VFSTestFile test2En(R"X(
 good_morning: "Morning!"
 you_have_arrows: "Arrows count: {count}"
 )X");
@@ -67,12 +68,12 @@ you_have_arrows: "Arrows count: {count}"
     struct LuaL10nTest : Test
     {
         std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
-            {"l10n/Test1/en.yaml", &test1En},
-            {"l10n/Test1/en_US.yaml", &test1EnUS},
-            {"l10n/Test1/de.yaml", &test1De},
-            {"l10n/Test2/en.yaml", &test2En},
-            {"l10n/Test3/en.yaml", &test1En},
-            {"l10n/Test3/de.yaml", &test1De},
+            { "l10n/Test1/en.yaml", &test1En },
+            { "l10n/Test1/en_US.yaml", &test1EnUS },
+            { "l10n/Test1/de.yaml", &test1De },
+            { "l10n/Test2/en.yaml", &test2En },
+            { "l10n/Test3/en.yaml", &test1En },
+            { "l10n/Test3/de.yaml", &test1De },
         });
 
         LuaUtil::ScriptsConfiguration mCfg;
@@ -81,11 +82,11 @@ you_have_arrows: "Arrows count: {count}"
     TEST_F(LuaL10nTest, L10n)
     {
         internal::CaptureStdout();
-        LuaUtil::LuaState lua{mVFS.get(), &mCfg};
+        LuaUtil::LuaState lua{ mVFS.get(), &mCfg };
         sol::state& l = lua.sol();
         LuaUtil::L10nManager l10n(mVFS.get(), &lua);
         l10n.init();
-        l10n.setPreferredLocales({"de", "en"});
+        l10n.setPreferredLocales({ "de", "en" });
         EXPECT_THAT(internal::GetCapturedStdout(), "Preferred locales: de en\n");
 
         internal::CaptureStdout();
@@ -110,7 +111,7 @@ you_have_arrows: "Arrows count: {count}"
         EXPECT_EQ(get<std::string>(l, "t2('you_have_arrows', {count=3})"), "Arrows count: 3");
 
         internal::CaptureStdout();
-        l10n.setPreferredLocales({"en", "de"});
+        l10n.setPreferredLocales({ "en", "de" });
         EXPECT_THAT(internal::GetCapturedStdout(),
             "Preferred locales: en de\n"
             "Language file \"l10n/Test1/en.yaml\" is enabled\n"
@@ -131,14 +132,15 @@ you_have_arrows: "Arrows count: {count}"
         EXPECT_EQ(get<std::string>(l, "t1('spellout', {num=1})"), "There is one thing.");
         EXPECT_EQ(get<std::string>(l, "t1('spellout', {num=100})"), "There are one hundred things.");
         EXPECT_EQ(get<std::string>(l, "t1('duration', {num=100})"), "It took 1:40");
-        EXPECT_EQ(get<std::string>(l, "t1('numbers', {int=123, double=123.456})"), "123 and 123 are integers, but 123.456 is a double");
+        EXPECT_EQ(get<std::string>(l, "t1('numbers', {int=123, double=123.456})"),
+            "123 and 123 are integers, but 123.456 is a double");
         EXPECT_EQ(get<std::string>(l, "t1('rounding', {value=123.456789})"), "123.46");
         // Check that failed messages display the key instead of an empty string
         EXPECT_EQ(get<std::string>(l, "t1('{mismatched_braces')"), "{mismatched_braces");
         EXPECT_EQ(get<std::string>(l, "t1('{unknown_arg}')"), "{unknown_arg}");
         EXPECT_EQ(get<std::string>(l, "t1('{num, integer}', {num=1})"), "{num, integer}");
         // Doesn't give a valid currency symbol with `en`. Not that openmw is designed for real world currency.
-        l10n.setPreferredLocales({"en-US", "de"});
+        l10n.setPreferredLocales({ "en-US", "de" });
         EXPECT_EQ(get<std::string>(l, "t1('currency', {money=10000.10})"), "You have $10,000.10");
         // Note: Not defined in English localisation file, so we fall back to the German before falling back to the key
         EXPECT_EQ(get<std::string>(l, "t1('Hello {name}!', {name='World'})"), "Hallo World!");
@@ -147,7 +149,7 @@ you_have_arrows: "Arrows count: {count}"
 
         // Test that locales with variants and country codes fall back to more generic locales
         internal::CaptureStdout();
-        l10n.setPreferredLocales({"en-GB-oed", "de"});
+        l10n.setPreferredLocales({ "en-GB-oed", "de" });
         EXPECT_THAT(internal::GetCapturedStdout(),
             "Preferred locales: en_GB_OED de\n"
             "Language file \"l10n/Test1/en.yaml\" is enabled\n"
@@ -157,7 +159,7 @@ you_have_arrows: "Arrows count: {count}"
 
         // Test setting fallback language
         l["t3"] = l10n.getContext("Test3", "de");
-        l10n.setPreferredLocales({"en"});
+        l10n.setPreferredLocales({ "en" });
         EXPECT_EQ(get<std::string>(l, "t3('Hello {name}!', {name='World'})"), "Hallo World!");
     }
 

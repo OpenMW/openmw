@@ -24,8 +24,8 @@ namespace ESM
 
         int mActorId;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 
     struct MagicBoltState : public BaseProjectileState
@@ -34,8 +34,8 @@ namespace ESM
         float mSpeed;
         int mSlot;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 
     struct ProjectileState : public BaseProjectileState
@@ -44,8 +44,8 @@ namespace ESM
         Vector3 mVelocity;
         float mAttackStrength;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 
 }

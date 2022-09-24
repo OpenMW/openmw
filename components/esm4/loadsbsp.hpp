@@ -45,16 +45,16 @@ namespace ESM4
             float z;
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         Dimension mDimension;
 
         virtual void load(Reader& reader);
-        //virtual void save(Writer& writer) const;
+        // virtual void save(Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

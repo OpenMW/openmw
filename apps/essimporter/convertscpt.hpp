@@ -8,7 +8,7 @@
 namespace ESSImport
 {
 
-void convertSCPT(const SCPT& scpt, ESM::GlobalScript& out);
+    void convertSCPT(const SCPT& scpt, ESM::GlobalScript& out);
 
 }
 

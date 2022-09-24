@@ -51,14 +51,20 @@ void ESM4::Header::load(ESM4::Reader& reader)
         {
             case ESM4::SUB_HEDR:
             {
-                if (!reader.getExact(mData.version) || !reader.getExact(mData.records) || !reader.getExact(mData.nextObjectId))
+                if (!reader.getExact(mData.version) || !reader.getExact(mData.records)
+                    || !reader.getExact(mData.nextObjectId))
                     throw std::runtime_error("TES4 HEDR data read error");
-                if ((size_t)subHdr.dataSize != sizeof(mData.version)+sizeof(mData.records)+sizeof(mData.nextObjectId))
+                if ((size_t)subHdr.dataSize
+                    != sizeof(mData.version) + sizeof(mData.records) + sizeof(mData.nextObjectId))
                     throw std::runtime_error("TES4 HEDR data size mismatch");
                 break;
             }
-            case ESM4::SUB_CNAM: reader.getZString(mAuthor); break;
-            case ESM4::SUB_SNAM: reader.getZString(mDesc); break;
+            case ESM4::SUB_CNAM:
+                reader.getZString(mAuthor);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.getZString(mDesc);
+                break;
             case ESM4::SUB_MAST: // multiple
             {
                 ESM::MasterData m;
@@ -67,7 +73,7 @@ void ESM4::Header::load(ESM4::Reader& reader)
 
                 // NOTE: some mods do not have DATA following MAST so can't read DATA here
                 m.size = 0;
-                mMaster.push_back (m);
+                mMaster.push_back(m);
                 break;
             }
             case ESM4::SUB_DATA:
@@ -79,8 +85,8 @@ void ESM4::Header::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_ONAM:
             {
-                mOverrides.resize(subHdr.dataSize/sizeof(FormId));
-                for (unsigned int & mOverride : mOverrides)
+                mOverrides.resize(subHdr.dataSize / sizeof(FormId));
+                for (unsigned int& mOverride : mOverrides)
                 {
                     if (!reader.getExact(mOverride))
                         throw std::runtime_error("TES4 ONAM data read error");
@@ -97,7 +103,7 @@ void ESM4::Header::load(ESM4::Reader& reader)
             case ESM4::SUB_OFST: // Oblivion only?
             case ESM4::SUB_DELE: // Oblivion only?
             {
-                //std::cout << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -107,6 +113,6 @@ void ESM4::Header::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Header::save(ESM4::Writer& writer)
+// void ESM4::Header::save(ESM4::Writer& writer)
 //{
-//}
+// }

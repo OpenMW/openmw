@@ -19,7 +19,7 @@ std::string_view bodyPartLabel(int idx)
 {
     if (idx >= 0 && idx <= 26)
     {
-        static constexpr std::string_view bodyPartLabels[] =  {
+        static constexpr std::string_view bodyPartLabels[] = {
             "Head",
             "Hair",
             "Neck",
@@ -58,7 +58,7 @@ std::string_view meshPartLabel(int idx)
 {
     if (idx >= 0 && idx <= ESM::BodyPart::MP_Tail)
     {
-        static constexpr std::string_view meshPartLabels[] =  {
+        static constexpr std::string_view meshPartLabels[] = {
             "Head",
             "Hair",
             "Neck",
@@ -85,7 +85,7 @@ std::string_view meshTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= ESM::BodyPart::MT_Armor)
     {
-        static constexpr std::string_view meshTypeLabels[] =  {
+        static constexpr std::string_view meshTypeLabels[] = {
             "Skin",
             "Clothing",
             "Armor",
@@ -122,7 +122,7 @@ std::string_view armorTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 10)
     {
-         static constexpr std::string_view armorTypeLabels[] = {
+        static constexpr std::string_view armorTypeLabels[] = {
             "Helmet",
             "Cuirass",
             "Left Pauldron",
@@ -243,11 +243,16 @@ std::string_view aiTypeLabel(ESM::AiPackageType type)
 {
     switch (type)
     {
-        case ESM::AI_Wander: return "Wander";
-        case ESM::AI_Travel: return "Travel";
-        case ESM::AI_Follow: return "Follow";
-        case ESM::AI_Escort: return "Escort";
-        case ESM::AI_Activate: return "Activate";
+        case ESM::AI_Wander:
+            return "Wander";
+        case ESM::AI_Travel:
+            return "Travel";
+        case ESM::AI_Follow:
+            return "Follow";
+        case ESM::AI_Escort:
+            return "Escort";
+        case ESM::AI_Activate:
+            return "Activate";
     }
     return "Invalid";
 }
@@ -256,7 +261,7 @@ std::string_view magicEffectLabel(int idx)
 {
     if (idx >= 0 && idx <= 142)
     {
-        static constexpr std::string_view magicEffectLabels [] = {
+        static constexpr std::string_view magicEffectLabels[] = {
             "Water Breathing",
             "Swift Swim",
             "Water Walking",
@@ -411,7 +416,7 @@ std::string_view attributeLabel(int idx)
 {
     if (idx >= 0 && idx <= 7)
     {
-        static constexpr std::string_view attributeLabels [] = {
+        static constexpr std::string_view attributeLabels[] = {
             "Strength",
             "Intelligence",
             "Willpower",
@@ -431,7 +436,7 @@ std::string_view spellTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 5)
     {
-        static constexpr std::string_view spellTypeLabels [] = {
+        static constexpr std::string_view spellTypeLabels[] = {
             "Spells",
             "Abilities",
             "Blight Disease",
@@ -449,7 +454,7 @@ std::string_view specializationLabel(int idx)
 {
     if (idx >= 0 && idx <= 2)
     {
-        static constexpr std::string_view specializationLabels [] = {
+        static constexpr std::string_view specializationLabels[] = {
             "Combat",
             "Magic",
             "Stealth",
@@ -464,7 +469,7 @@ std::string_view skillLabel(int idx)
 {
     if (idx >= 0 && idx <= 26)
     {
-        static constexpr std::string_view skillLabels [] = {
+        static constexpr std::string_view skillLabels[] = {
             "Block",
             "Armorer",
             "Medium Armor",
@@ -503,7 +508,7 @@ std::string_view apparatusTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 3)
     {
-        static constexpr std::string_view apparatusTypeLabels [] = {
+        static constexpr std::string_view apparatusTypeLabels[] = {
             "Mortar",
             "Alembic",
             "Calcinator",
@@ -519,7 +524,7 @@ std::string_view rangeTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 2)
     {
-        static constexpr std::string_view rangeTypeLabels [] = {
+        static constexpr std::string_view rangeTypeLabels[] = {
             "Self",
             "Touch",
             "Target",
@@ -534,7 +539,7 @@ std::string_view schoolLabel(int idx)
 {
     if (idx >= 0 && idx <= 5)
     {
-        static constexpr std::string_view schoolLabels [] = {
+        static constexpr std::string_view schoolLabels[] = {
             "Alteration",
             "Conjuration",
             "Destruction",
@@ -552,7 +557,7 @@ std::string_view enchantTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 3)
     {
-        static constexpr std::string_view enchantTypeLabels [] = {
+        static constexpr std::string_view enchantTypeLabels[] = {
             "Cast Once",
             "Cast When Strikes",
             "Cast When Used",
@@ -656,13 +661,15 @@ std::string_view ruleFunction(int idx)
 std::string bodyPartFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::BodyPart::BPF_Female) properties += "Female ";
-    if (flags & ESM::BodyPart::BPF_NotPlayable) properties += "NotPlayable ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::BodyPart::BPF_Female|
-                   ESM::BodyPart::BPF_NotPlayable));
-    if (flags & unused) properties += "Invalid ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::BodyPart::BPF_Female)
+        properties += "Female ";
+    if (flags & ESM::BodyPart::BPF_NotPlayable)
+        properties += "NotPlayable ";
+    int unused = (0xFFFFFFFF ^ (ESM::BodyPart::BPF_Female | ESM::BodyPart::BPF_NotPlayable));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -670,20 +677,23 @@ std::string bodyPartFlags(int flags)
 std::string cellFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::Cell::HasWater) properties += "HasWater ";
-    if (flags & ESM::Cell::Interior) properties += "Interior ";
-    if (flags & ESM::Cell::NoSleep) properties += "NoSleep ";
-    if (flags & ESM::Cell::QuasiEx) properties += "QuasiEx ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::Cell::HasWater)
+        properties += "HasWater ";
+    if (flags & ESM::Cell::Interior)
+        properties += "Interior ";
+    if (flags & ESM::Cell::NoSleep)
+        properties += "NoSleep ";
+    if (flags & ESM::Cell::QuasiEx)
+        properties += "QuasiEx ";
     // This used value is not in the ESM component.
-    if (flags & 0x00000040) properties += "Unknown ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::Cell::HasWater|
-                   ESM::Cell::Interior|
-                   ESM::Cell::NoSleep|
-                   ESM::Cell::QuasiEx|
-                   0x00000040));
-    if (flags & unused) properties += "Invalid ";
+    if (flags & 0x00000040)
+        properties += "Unknown ";
+    int unused = (0xFFFFFFFF
+        ^ (ESM::Cell::HasWater | ESM::Cell::Interior | ESM::Cell::NoSleep | ESM::Cell::QuasiEx | 0x00000040));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -691,15 +701,17 @@ std::string cellFlags(int flags)
 std::string containerFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::Container::Unknown) properties += "Unknown ";
-    if (flags & ESM::Container::Organic) properties += "Organic ";
-    if (flags & ESM::Container::Respawn) properties += "Respawn ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::Container::Unknown|
-                   ESM::Container::Organic|
-                   ESM::Container::Respawn));
-    if (flags & unused) properties += "Invalid ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::Container::Unknown)
+        properties += "Unknown ";
+    if (flags & ESM::Container::Organic)
+        properties += "Organic ";
+    if (flags & ESM::Container::Respawn)
+        properties += "Respawn ";
+    int unused = (0xFFFFFFFF ^ (ESM::Container::Unknown | ESM::Container::Organic | ESM::Container::Respawn));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -707,25 +719,29 @@ std::string containerFlags(int flags)
 std::string creatureFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::Creature::Base) properties += "Base ";
-    if (flags & ESM::Creature::Walks) properties += "Walks ";
-    if (flags & ESM::Creature::Swims) properties += "Swims ";
-    if (flags & ESM::Creature::Flies) properties += "Flies ";
-    if (flags & ESM::Creature::Bipedal) properties += "Bipedal ";
-    if (flags & ESM::Creature::Respawn) properties += "Respawn ";
-    if (flags & ESM::Creature::Weapon) properties += "Weapon ";
-    if (flags & ESM::Creature::Essential) properties += "Essential ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::Creature::Base|
-                   ESM::Creature::Walks|
-                   ESM::Creature::Swims|
-                   ESM::Creature::Flies|
-                   ESM::Creature::Bipedal|
-                   ESM::Creature::Respawn|
-                   ESM::Creature::Weapon|
-                   ESM::Creature::Essential));
-    if (flags & unused) properties += "Invalid ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::Creature::Base)
+        properties += "Base ";
+    if (flags & ESM::Creature::Walks)
+        properties += "Walks ";
+    if (flags & ESM::Creature::Swims)
+        properties += "Swims ";
+    if (flags & ESM::Creature::Flies)
+        properties += "Flies ";
+    if (flags & ESM::Creature::Bipedal)
+        properties += "Bipedal ";
+    if (flags & ESM::Creature::Respawn)
+        properties += "Respawn ";
+    if (flags & ESM::Creature::Weapon)
+        properties += "Weapon ";
+    if (flags & ESM::Creature::Essential)
+        properties += "Essential ";
+    int unused = (0xFFFFFFFF
+        ^ (ESM::Creature::Base | ESM::Creature::Walks | ESM::Creature::Swims | ESM::Creature::Flies
+            | ESM::Creature::Bipedal | ESM::Creature::Respawn | ESM::Creature::Weapon | ESM::Creature::Essential));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%02X)", flags);
     return properties;
 }
@@ -733,9 +749,12 @@ std::string creatureFlags(int flags)
 std::string enchantmentFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::Enchantment::Autocalc) properties += "Autocalc ";
-    if (flags & (0xFFFFFFFF ^ ESM::Enchantment::Autocalc)) properties += "Invalid ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::Enchantment::Autocalc)
+        properties += "Autocalc ";
+    if (flags & (0xFFFFFFFF ^ ESM::Enchantment::Autocalc))
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -746,11 +765,16 @@ std::string landFlags(int flags)
     // The ESM component says that this first four bits are used, but
     // only the first three bits are used as far as I can tell.
     // There's also no enumeration of the bit in the ESM component.
-    if (flags == 0) properties += "[None] ";
-    if (flags & 0x00000001) properties += "Unknown1 ";
-    if (flags & 0x00000004) properties += "Unknown3 ";
-    if (flags & 0x00000002) properties += "Unknown2 ";
-    if (flags & 0xFFFFFFF8) properties += "Invalid ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & 0x00000001)
+        properties += "Unknown1 ";
+    if (flags & 0x00000004)
+        properties += "Unknown3 ";
+    if (flags & 0x00000002)
+        properties += "Unknown2 ";
+    if (flags & 0xFFFFFFF8)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -758,13 +782,15 @@ std::string landFlags(int flags)
 std::string itemListFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::ItemLevList::AllLevels) properties += "AllLevels ";
-    if (flags & ESM::ItemLevList::Each) properties += "Each ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::ItemLevList::AllLevels|
-                   ESM::ItemLevList::Each));
-    if (flags & unused) properties += "Invalid ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::ItemLevList::AllLevels)
+        properties += "AllLevels ";
+    if (flags & ESM::ItemLevList::Each)
+        properties += "Each ";
+    int unused = (0xFFFFFFFF ^ (ESM::ItemLevList::AllLevels | ESM::ItemLevList::Each));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -772,10 +798,13 @@ std::string itemListFlags(int flags)
 std::string creatureListFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::CreatureLevList::AllLevels) properties += "AllLevels ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::CreatureLevList::AllLevels)
+        properties += "AllLevels ";
     int unused = (0xFFFFFFFF ^ ESM::CreatureLevList::AllLevels);
-    if (flags & unused) properties += "Invalid ";
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -783,27 +812,31 @@ std::string creatureListFlags(int flags)
 std::string lightFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::Light::Dynamic) properties += "Dynamic ";
-    if (flags & ESM::Light::Fire) properties += "Fire ";
-    if (flags & ESM::Light::Carry) properties += "Carry ";
-    if (flags & ESM::Light::Flicker) properties += "Flicker ";
-    if (flags & ESM::Light::FlickerSlow) properties += "FlickerSlow ";
-    if (flags & ESM::Light::Pulse) properties += "Pulse ";
-    if (flags & ESM::Light::PulseSlow) properties += "PulseSlow ";
-    if (flags & ESM::Light::Negative) properties += "Negative ";
-    if (flags & ESM::Light::OffDefault) properties += "OffDefault ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::Light::Dynamic|
-                   ESM::Light::Fire|
-                   ESM::Light::Carry|
-                   ESM::Light::Flicker|
-                   ESM::Light::FlickerSlow|
-                   ESM::Light::Pulse|
-                   ESM::Light::PulseSlow|
-                   ESM::Light::Negative|
-                   ESM::Light::OffDefault));
-    if (flags & unused) properties += "Invalid ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::Light::Dynamic)
+        properties += "Dynamic ";
+    if (flags & ESM::Light::Fire)
+        properties += "Fire ";
+    if (flags & ESM::Light::Carry)
+        properties += "Carry ";
+    if (flags & ESM::Light::Flicker)
+        properties += "Flicker ";
+    if (flags & ESM::Light::FlickerSlow)
+        properties += "FlickerSlow ";
+    if (flags & ESM::Light::Pulse)
+        properties += "Pulse ";
+    if (flags & ESM::Light::PulseSlow)
+        properties += "PulseSlow ";
+    if (flags & ESM::Light::Negative)
+        properties += "Negative ";
+    if (flags & ESM::Light::OffDefault)
+        properties += "OffDefault ";
+    int unused = (0xFFFFFFFF
+        ^ (ESM::Light::Dynamic | ESM::Light::Fire | ESM::Light::Carry | ESM::Light::Flicker | ESM::Light::FlickerSlow
+            | ESM::Light::Pulse | ESM::Light::PulseSlow | ESM::Light::Negative | ESM::Light::OffDefault));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -811,27 +844,47 @@ std::string lightFlags(int flags)
 std::string magicEffectFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::MagicEffect::TargetAttribute) properties += "TargetAttribute ";
-    if (flags & ESM::MagicEffect::TargetSkill) properties += "TargetSkill ";
-    if (flags & ESM::MagicEffect::NoDuration) properties += "NoDuration ";
-    if (flags & ESM::MagicEffect::NoMagnitude) properties += "NoMagnitude ";
-    if (flags & ESM::MagicEffect::Harmful) properties += "Harmful ";
-    if (flags & ESM::MagicEffect::ContinuousVfx) properties += "ContinuousVFX ";
-    if (flags & ESM::MagicEffect::CastSelf) properties += "CastSelf ";
-    if (flags & ESM::MagicEffect::CastTouch) properties += "CastTouch ";
-    if (flags & ESM::MagicEffect::CastTarget) properties += "CastTarget ";
-    if (flags & ESM::MagicEffect::AppliedOnce) properties += "AppliedOnce ";
-    if (flags & ESM::MagicEffect::Stealth) properties += "Stealth ";
-    if (flags & ESM::MagicEffect::NonRecastable) properties += "NonRecastable ";
-    if (flags & ESM::MagicEffect::IllegalDaedra) properties += "IllegalDaedra ";
-    if (flags & ESM::MagicEffect::Unreflectable) properties += "Unreflectable ";
-    if (flags & ESM::MagicEffect::CasterLinked) properties += "CasterLinked ";
-    if (flags & ESM::MagicEffect::AllowSpellmaking) properties += "AllowSpellmaking ";
-    if (flags & ESM::MagicEffect::AllowEnchanting) properties += "AllowEnchanting ";
-    if (flags & ESM::MagicEffect::NegativeLight) properties += "NegativeLight ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::MagicEffect::TargetAttribute)
+        properties += "TargetAttribute ";
+    if (flags & ESM::MagicEffect::TargetSkill)
+        properties += "TargetSkill ";
+    if (flags & ESM::MagicEffect::NoDuration)
+        properties += "NoDuration ";
+    if (flags & ESM::MagicEffect::NoMagnitude)
+        properties += "NoMagnitude ";
+    if (flags & ESM::MagicEffect::Harmful)
+        properties += "Harmful ";
+    if (flags & ESM::MagicEffect::ContinuousVfx)
+        properties += "ContinuousVFX ";
+    if (flags & ESM::MagicEffect::CastSelf)
+        properties += "CastSelf ";
+    if (flags & ESM::MagicEffect::CastTouch)
+        properties += "CastTouch ";
+    if (flags & ESM::MagicEffect::CastTarget)
+        properties += "CastTarget ";
+    if (flags & ESM::MagicEffect::AppliedOnce)
+        properties += "AppliedOnce ";
+    if (flags & ESM::MagicEffect::Stealth)
+        properties += "Stealth ";
+    if (flags & ESM::MagicEffect::NonRecastable)
+        properties += "NonRecastable ";
+    if (flags & ESM::MagicEffect::IllegalDaedra)
+        properties += "IllegalDaedra ";
+    if (flags & ESM::MagicEffect::Unreflectable)
+        properties += "Unreflectable ";
+    if (flags & ESM::MagicEffect::CasterLinked)
+        properties += "CasterLinked ";
+    if (flags & ESM::MagicEffect::AllowSpellmaking)
+        properties += "AllowSpellmaking ";
+    if (flags & ESM::MagicEffect::AllowEnchanting)
+        properties += "AllowEnchanting ";
+    if (flags & ESM::MagicEffect::NegativeLight)
+        properties += "NegativeLight ";
 
-    if (flags & 0xFFFC0000) properties += "Invalid ";
+    if (flags & 0xFFFC0000)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -839,21 +892,24 @@ std::string magicEffectFlags(int flags)
 std::string npcFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::NPC::Base) properties += "Base ";
-    if (flags & ESM::NPC::Autocalc) properties += "Autocalc ";
-    if (flags & ESM::NPC::Female) properties += "Female ";
-    if (flags & ESM::NPC::Respawn) properties += "Respawn ";
-    if (flags & ESM::NPC::Essential) properties += "Essential ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::NPC::Base)
+        properties += "Base ";
+    if (flags & ESM::NPC::Autocalc)
+        properties += "Autocalc ";
+    if (flags & ESM::NPC::Female)
+        properties += "Female ";
+    if (flags & ESM::NPC::Respawn)
+        properties += "Respawn ";
+    if (flags & ESM::NPC::Essential)
+        properties += "Essential ";
     // Whether corpses persist is a bit that is unaccounted for,
     // however relatively few NPCs have this bit set.
-    int unused = (0xFF ^
-                  (ESM::NPC::Base|
-                   ESM::NPC::Autocalc|
-                   ESM::NPC::Female|
-                   ESM::NPC::Respawn|
-                   ESM::NPC::Essential));
-    if (flags & unused) properties += "Invalid ";
+    int unused
+        = (0xFF ^ (ESM::NPC::Base | ESM::NPC::Autocalc | ESM::NPC::Female | ESM::NPC::Respawn | ESM::NPC::Essential));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%02X)", flags);
     return properties;
 }
@@ -861,14 +917,16 @@ std::string npcFlags(int flags)
 std::string raceFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
+    if (flags == 0)
+        properties += "[None] ";
     // All races have the playable flag set in Bethesda files.
-    if (flags & ESM::Race::Playable) properties += "Playable ";
-    if (flags & ESM::Race::Beast) properties += "Beast ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::Race::Playable|
-                   ESM::Race::Beast));
-    if (flags & unused) properties += "Invalid ";
+    if (flags & ESM::Race::Playable)
+        properties += "Playable ";
+    if (flags & ESM::Race::Beast)
+        properties += "Beast ";
+    int unused = (0xFFFFFFFF ^ (ESM::Race::Playable | ESM::Race::Beast));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -876,15 +934,17 @@ std::string raceFlags(int flags)
 std::string spellFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::Spell::F_Autocalc) properties += "Autocalc ";
-    if (flags & ESM::Spell::F_PCStart) properties += "PCStart ";
-    if (flags & ESM::Spell::F_Always) properties += "Always ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::Spell::F_Autocalc|
-                   ESM::Spell::F_PCStart|
-                   ESM::Spell::F_Always));
-    if (flags & unused) properties += "Invalid ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::Spell::F_Autocalc)
+        properties += "Autocalc ";
+    if (flags & ESM::Spell::F_PCStart)
+        properties += "PCStart ";
+    if (flags & ESM::Spell::F_Always)
+        properties += "Always ";
+    int unused = (0xFFFFFFFF ^ (ESM::Spell::F_Autocalc | ESM::Spell::F_PCStart | ESM::Spell::F_Always));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -892,16 +952,18 @@ std::string spellFlags(int flags)
 std::string weaponFlags(int flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
+    if (flags == 0)
+        properties += "[None] ";
     // The interpretation of the flags are still unclear to me.
     // Apparently you can't be Silver without being Magical?  Many of
     // the "Magical" weapons don't have enchantments of any sort.
-    if (flags & ESM::Weapon::Magical) properties += "Magical ";
-    if (flags & ESM::Weapon::Silver) properties += "Silver ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::Weapon::Magical|
-                   ESM::Weapon::Silver));
-    if (flags & unused) properties += "Invalid ";
+    if (flags & ESM::Weapon::Magical)
+        properties += "Magical ";
+    if (flags & ESM::Weapon::Silver)
+        properties += "Silver ";
+    int unused = (0xFFFFFFFF ^ (ESM::Weapon::Magical | ESM::Weapon::Silver));
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
@@ -909,13 +971,19 @@ std::string weaponFlags(int flags)
 std::string recordFlags(uint32_t flags)
 {
     std::string properties;
-    if (flags == 0) properties += "[None] ";
-    if (flags & ESM::FLAG_Deleted) properties += "Deleted ";
-    if (flags & ESM::FLAG_Persistent) properties += "Persistent ";
-    if (flags & ESM::FLAG_Ignored) properties += "Ignored ";
-    if (flags & ESM::FLAG_Blocked) properties += "Blocked ";
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::FLAG_Deleted)
+        properties += "Deleted ";
+    if (flags & ESM::FLAG_Persistent)
+        properties += "Persistent ";
+    if (flags & ESM::FLAG_Ignored)
+        properties += "Ignored ";
+    if (flags & ESM::FLAG_Blocked)
+        properties += "Blocked ";
     int unused = ~(ESM::FLAG_Deleted | ESM::FLAG_Persistent | ESM::FLAG_Ignored | ESM::FLAG_Blocked);
-    if (flags & unused) properties += "Invalid ";
+    if (flags & unused)
+        properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }

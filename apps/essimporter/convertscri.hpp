@@ -9,7 +9,7 @@ namespace ESSImport
 {
 
     /// Convert script variable assignments
-    void convertSCRI (const SCRI& scri, ESM::Locals& locals);
+    void convertSCRI(const SCRI& scri, ESM::Locals& locals);
 
 }
 

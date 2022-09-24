@@ -16,11 +16,12 @@ namespace MWRender
     class TerrainStorage : public ESMTerrain::Storage
     {
     public:
-
-        TerrainStorage(Resource::ResourceSystem* resourceSystem, const std::string& normalMapPattern = "", const std::string& normalHeightMapPattern = "", bool autoUseNormalMaps = false, const std::string& specularMapPattern = "", bool autoUseSpecularMaps = false);
+        TerrainStorage(Resource::ResourceSystem* resourceSystem, const std::string& normalMapPattern = "",
+            const std::string& normalHeightMapPattern = "", bool autoUseNormalMaps = false,
+            const std::string& specularMapPattern = "", bool autoUseSpecularMaps = false);
         ~TerrainStorage();
 
-        osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY) override;
+        osg::ref_ptr<const ESMTerrain::LandObject> getLand(int cellX, int cellY) override;
         const ESM::LandTexture* getLandTexture(int index, short plugin) override;
 
         bool hasData(int cellX, int cellY) override;
@@ -31,12 +32,11 @@ namespace MWRender
         LandManager* getLandManager() const;
 
     private:
-       std::unique_ptr<LandManager> mLandManager;
+        std::unique_ptr<LandManager> mLandManager;
 
-       Resource::ResourceSystem* mResourceSystem;
+        Resource::ResourceSystem* mResourceSystem;
     };
 
 }
-
 
 #endif

@@ -6,9 +6,9 @@
 namespace ESM
 {
 
-    void SpellState::load(ESMReader &esm)
+    void SpellState::load(ESMReader& esm)
     {
-        if(esm.getFormat() < 17)
+        if (esm.getFormat() < 17)
         {
             while (esm.isNextSub("SPEL"))
             {
@@ -26,7 +26,8 @@ namespace ESM
                     state.mEffectRands[index] = magnitude;
                 }
 
-                while (esm.isNextSub("PURG")) {
+                while (esm.isNextSub("PURG"))
+                {
                     int index;
                     esm.getHT(index);
                     state.mPurgedEffects.insert(index);
@@ -95,7 +96,7 @@ namespace ESM
         mSelectedSpell = esm.getHNOString("SLCT");
     }
 
-    void SpellState::save(ESMWriter &esm) const
+    void SpellState::save(ESMWriter& esm) const
     {
         for (const std::string& spell : mSpells)
             esm.writeHNString("SPEL", spell);

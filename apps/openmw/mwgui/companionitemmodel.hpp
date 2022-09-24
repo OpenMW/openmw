@@ -11,10 +11,10 @@ namespace MWGui
     class CompanionItemModel : public InventoryItemModel
     {
     public:
-        CompanionItemModel (const MWWorld::Ptr& actor);
+        CompanionItemModel(const MWWorld::Ptr& actor);
 
-        MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
-        void removeItem (const ItemStack& item, size_t count) override;
+        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
+        void removeItem(const ItemStack& item, size_t count) override;
 
         bool hasProfit(const MWWorld::Ptr& actor);
     };

@@ -1,18 +1,18 @@
 #include "unshieldworker.hpp"
 
 #include <QDebug>
-#include <QReadLocker>
-#include <QFileInfo>
-#include <QStringList>
-#include <QTextStream>
-#include <QTextCodec>
-#include <QFile>
 #include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QReadLocker>
+#include <QStringList>
+#include <QTextCodec>
+#include <QTextStream>
 
-Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject *parent) :
-    QObject(parent),
-    mExpectedMorrowindBsaSize(expectedMorrowindBsaSize),
-    mIniSettings()
+Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject* parent)
+    : QObject(parent)
+    , mExpectedMorrowindBsaSize(expectedMorrowindBsaSize)
+    , mIniSettings()
 {
     unshield_set_log_level(0);
 
@@ -36,9 +36,7 @@ Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject 
     qRegisterMetaType<Wizard::Component>("Wizard::Component");
 }
 
-Wizard::UnshieldWorker::~UnshieldWorker()
-{
-}
+Wizard::UnshieldWorker::~UnshieldWorker() {}
 
 void Wizard::UnshieldWorker::stopWorker()
 {
@@ -49,31 +47,33 @@ void Wizard::UnshieldWorker::stopWorker()
 void Wizard::UnshieldWorker::setInstallComponent(Wizard::Component component, bool install)
 {
     QWriteLocker writeLock(&mLock);
-    switch (component) {
+    switch (component)
+    {
 
-    case Wizard::Component_Morrowind:
-        mInstallMorrowind = install;
-        break;
-    case Wizard::Component_Tribunal:
-        mInstallTribunal = install;
-        break;
-    case Wizard::Component_Bloodmoon:
-        mInstallBloodmoon = install;
-        break;
+        case Wizard::Component_Morrowind:
+            mInstallMorrowind = install;
+            break;
+        case Wizard::Component_Tribunal:
+            mInstallTribunal = install;
+            break;
+        case Wizard::Component_Bloodmoon:
+            mInstallBloodmoon = install;
+            break;
     }
 }
 
 bool Wizard::UnshieldWorker::getInstallComponent(Component component)
 {
     QReadLocker readLock(&mLock);
-    switch (component) {
+    switch (component)
+    {
 
-    case Wizard::Component_Morrowind:
-        return mInstallMorrowind;
-    case Wizard::Component_Tribunal:
-        return mInstallTribunal;
-    case Wizard::Component_Bloodmoon:
-        return mInstallBloodmoon;
+        case Wizard::Component_Morrowind:
+            return mInstallMorrowind;
+        case Wizard::Component_Tribunal:
+            return mInstallTribunal;
+        case Wizard::Component_Bloodmoon:
+            return mInstallBloodmoon;
     }
 
     return false;
@@ -82,17 +82,18 @@ bool Wizard::UnshieldWorker::getInstallComponent(Component component)
 void Wizard::UnshieldWorker::setComponentDone(Component component, bool done)
 {
     QWriteLocker writeLock(&mLock);
-    switch (component) {
+    switch (component)
+    {
 
-    case Wizard::Component_Morrowind:
-        mMorrowindDone = done;
-        break;
-    case Wizard::Component_Tribunal:
-        mTribunalDone = done;
-        break;
-    case Wizard::Component_Bloodmoon:
-        mBloodmoonDone = done;
-        break;
+        case Wizard::Component_Morrowind:
+            mMorrowindDone = done;
+            break;
+        case Wizard::Component_Tribunal:
+            mTribunalDone = done;
+            break;
+        case Wizard::Component_Bloodmoon:
+            mBloodmoonDone = done;
+            break;
     }
 }
 
@@ -102,30 +103,30 @@ bool Wizard::UnshieldWorker::getComponentDone(Component component)
     switch (component)
     {
 
-    case Wizard::Component_Morrowind:
-        return mMorrowindDone;
-    case Wizard::Component_Tribunal:
-        return mTribunalDone;
-    case Wizard::Component_Bloodmoon:
-        return mBloodmoonDone;
+        case Wizard::Component_Morrowind:
+            return mMorrowindDone;
+        case Wizard::Component_Tribunal:
+            return mTribunalDone;
+        case Wizard::Component_Bloodmoon:
+            return mBloodmoonDone;
     }
 
     return false;
 }
 
-void Wizard::UnshieldWorker::setPath(const QString &path)
+void Wizard::UnshieldWorker::setPath(const QString& path)
 {
     QWriteLocker writeLock(&mLock);
     mPath = path;
 }
 
-void Wizard::UnshieldWorker::setIniPath(const QString &path)
+void Wizard::UnshieldWorker::setIniPath(const QString& path)
 {
     QWriteLocker writeLock(&mLock);
     mIniPath = path;
 }
 
-void Wizard::UnshieldWorker::setDiskPath(const QString &path)
+void Wizard::UnshieldWorker::setDiskPath(const QString& path)
 {
     QWriteLocker writeLock(&mLock);
     mDiskPath = path;
@@ -150,8 +151,7 @@ QString Wizard::UnshieldWorker::getDiskPath()
     return mDiskPath;
 }
 
-
-void Wizard::UnshieldWorker::setIniCodec(QTextCodec *codec)
+void Wizard::UnshieldWorker::setIniCodec(QTextCodec* codec)
 {
     QWriteLocker writeLock(&mLock);
     mIniCodec = codec;
@@ -170,9 +170,10 @@ bool Wizard::UnshieldWorker::setupSettings()
 
     QFile file(getIniPath());
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
         emit error(tr("Failed to open Morrowind configuration file!"),
-                   tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
+            tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
         return false;
     }
 
@@ -191,39 +192,43 @@ bool Wizard::UnshieldWorker::writeSettings()
 
     QFile file(getIniPath());
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
         emit error(tr("Failed to open Morrowind configuration file!"),
-                   tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
+            tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
         return false;
     }
 
     QTextStream stream(&file);
     stream.setCodec(mIniCodec);
 
-    if (!mIniSettings.writeFile(getIniPath(), stream)) {
-         emit error(tr("Failed to write Morrowind configuration file!"),
-                    tr("Writing to %1 failed: %2.").arg(getIniPath(), file.errorString()));
-         return false;
+    if (!mIniSettings.writeFile(getIniPath(), stream))
+    {
+        emit error(tr("Failed to write Morrowind configuration file!"),
+            tr("Writing to %1 failed: %2.").arg(getIniPath(), file.errorString()));
+        return false;
     }
 
     return true;
 }
 
-bool Wizard::UnshieldWorker::removeDirectory(const QString &dirName)
+bool Wizard::UnshieldWorker::removeDirectory(const QString& dirName)
 {
     bool result = false;
     QDir dir(dirName);
 
     if (dir.exists(dirName))
     {
-        QFileInfoList list(dir.entryInfoList(QDir::NoDotAndDotDot |
-                                               QDir::System | QDir::Hidden |
-                                               QDir::AllDirs | QDir::Files, QDir::DirsFirst));
+        QFileInfoList list(dir.entryInfoList(
+            QDir::NoDotAndDotDot | QDir::System | QDir::Hidden | QDir::AllDirs | QDir::Files, QDir::DirsFirst));
         for (const QFileInfo& info : list)
         {
-            if (info.isDir()) {
+            if (info.isDir())
+            {
                 result = removeDirectory(info.absoluteFilePath());
-            } else {
+            }
+            else
+            {
                 result = QFile::remove(info.absoluteFilePath());
             }
 
@@ -236,39 +241,47 @@ bool Wizard::UnshieldWorker::removeDirectory(const QString &dirName)
     return result;
 }
 
-bool Wizard::UnshieldWorker::copyFile(const QString &source, const QString &destination, bool keepSource)
+bool Wizard::UnshieldWorker::copyFile(const QString& source, const QString& destination, bool keepSource)
 {
     QDir dir;
     QFile file;
 
     QFileInfo info(destination);
 
-    if (info.exists()) {
+    if (info.exists())
+    {
         if (!dir.remove(info.absoluteFilePath()))
             return false;
     }
 
-    if (file.copy(source, destination)) {
-        if (!keepSource) {
+    if (file.copy(source, destination))
+    {
+        if (!keepSource)
+        {
             if (!file.remove(source))
                 return false;
-        } else {
+        }
+        else
+        {
             return true;
         }
-    } else {
+    }
+    else
+    {
         return false;
     }
 
     return true;
 }
 
-bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString &destination, bool keepSource)
+bool Wizard::UnshieldWorker::copyDirectory(const QString& source, const QString& destination, bool keepSource)
 {
     QDir sourceDir(source);
     QDir destDir(destination);
     bool result = true;
 
-    if (!destDir.exists()) {
+    if (!destDir.exists())
+    {
         if (!sourceDir.mkpath(destination))
             return false;
     }
@@ -278,11 +291,10 @@ bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString 
     if (!destDir.exists())
         return false;
 
-    QFileInfoList list(sourceDir.entryInfoList(QDir::NoDotAndDotDot |
-                                                 QDir::System | QDir::Hidden |
-                                                 QDir::AllDirs | QDir::Files, QDir::DirsFirst));
+    QFileInfoList list(sourceDir.entryInfoList(
+        QDir::NoDotAndDotDot | QDir::System | QDir::Hidden | QDir::AllDirs | QDir::Files, QDir::DirsFirst));
 
-    for (const QFileInfo &info : list)
+    for (const QFileInfo& info : list)
     {
         QString relativePath(info.absoluteFilePath());
         relativePath.remove(source);
@@ -292,9 +304,12 @@ bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString 
         if (info.isSymLink())
             continue;
 
-        if (info.isDir()) {
+        if (info.isDir())
+        {
             result = copyDirectory(info.absoluteFilePath(), destinationPath);
-        } else {
+        }
+        else
+        {
             result = copyFile(info.absoluteFilePath(), destinationPath);
         }
     }
@@ -305,12 +320,14 @@ bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString 
     return result;
 }
 
-bool Wizard::UnshieldWorker::installFile(const QString &fileName, const QString &path, Qt::MatchFlags flags, bool keepSource)
+bool Wizard::UnshieldWorker::installFile(
+    const QString& fileName, const QString& path, Qt::MatchFlags flags, bool keepSource)
 {
     return installFiles(fileName, path, flags, keepSource, true);
 }
 
-bool Wizard::UnshieldWorker::installFiles(const QString &fileName, const QString &path, Qt::MatchFlags flags, bool keepSource, bool single)
+bool Wizard::UnshieldWorker::installFiles(
+    const QString& fileName, const QString& path, Qt::MatchFlags flags, bool keepSource, bool single)
 {
     QDir dir(path);
 
@@ -319,14 +336,17 @@ bool Wizard::UnshieldWorker::installFiles(const QString &fileName, const QString
 
     QStringList files(findFiles(fileName, path, flags));
 
-    for (const QString &file : files)
+    for (const QString& file : files)
     {
         QFileInfo info(file);
         emit textChanged(tr("Installing: %1").arg(info.fileName()));
 
-        if (single) {
+        if (single)
+        {
             return copyFile(info.absoluteFilePath(), getPath() + QDir::separator() + info.fileName(), keepSource);
-        } else {
+        }
+        else
+        {
             if (!copyFile(info.absoluteFilePath(), getPath() + QDir::separator() + info.fileName(), keepSource))
                 return false;
         }
@@ -335,7 +355,8 @@ bool Wizard::UnshieldWorker::installFiles(const QString &fileName, const QString
     return true;
 }
 
-bool Wizard::UnshieldWorker::installDirectories(const QString &dirName, const QString &path, bool recursive, bool keepSource)
+bool Wizard::UnshieldWorker::installDirectories(
+    const QString& dirName, const QString& path, bool recursive, bool keepSource)
 {
     QDir dir(path);
 
@@ -344,7 +365,7 @@ bool Wizard::UnshieldWorker::installDirectories(const QString &dirName, const QS
 
     QStringList directories(findDirectories(dirName, path, recursive));
 
-    for (const QString &dir : directories)
+    for (const QString& dir : directories)
     {
         QFileInfo info(dir);
         emit textChanged(tr("Installing: %1 directory").arg(info.fileName()));
@@ -391,8 +412,7 @@ void Wizard::UnshieldWorker::extract()
         mIniSettings.setValue(QLatin1String("Game Files/GameFile1"), QVariant(QString("Bloodmoon.esm")));
     }
 
-    if (getInstallComponent(Wizard::Component_Tribunal) &&
-            getInstallComponent(Wizard::Component_Bloodmoon))
+    if (getInstallComponent(Wizard::Component_Tribunal) && getInstallComponent(Wizard::Component_Bloodmoon))
     {
         mIniSettings.setValue(QLatin1String("Archives/Archive 0"), QVariant(QString("Tribunal.bsa")));
         mIniSettings.setValue(QLatin1String("Archives/Archive 1"), QVariant(QString("Bloodmoon.bsa")));
@@ -427,20 +447,22 @@ void Wizard::UnshieldWorker::extract()
 bool Wizard::UnshieldWorker::setupComponent(Component component)
 {
     QString name;
-    switch (component) {
+    switch (component)
+    {
 
-    case Wizard::Component_Morrowind:
-        name = QLatin1String("Morrowind");
-        break;
-    case Wizard::Component_Tribunal:
-        name = QLatin1String("Tribunal");
-        break;
-    case Wizard::Component_Bloodmoon:
-        name = QLatin1String("Bloodmoon");
-        break;
+        case Wizard::Component_Morrowind:
+            name = QLatin1String("Morrowind");
+            break;
+        case Wizard::Component_Tribunal:
+            name = QLatin1String("Tribunal");
+            break;
+        case Wizard::Component_Bloodmoon:
+            name = QLatin1String("Bloodmoon");
+            break;
     }
 
-    if (name.isEmpty()) {
+    if (name.isEmpty())
+    {
         emit error(tr("Component parameter is invalid!"), tr("An invalid component parameter was supplied."));
         return false;
     }
@@ -450,23 +472,28 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
     QDir disk;
 
     // Keep showing the file dialog until we find the necessary install files
-    while (!found) {
-        if (getDiskPath().isEmpty()) {
+    while (!found)
+    {
+        if (getDiskPath().isEmpty())
+        {
             QReadLocker readLock(&mLock);
             emit requestFileDialog(component);
             mWait.wait(&mLock);
-            if(mStopped) {
+            if (mStopped)
+            {
                 qDebug() << "We are asked to stop !!";
                 break;
             }
             disk.setPath(getDiskPath());
-        } else {
+        }
+        else
+        {
             disk.setPath(getDiskPath());
         }
 
         QStringList list(findFiles(QLatin1String("data1.hdr"), disk.absolutePath()));
 
-        for (const QString &file : list)
+        for (const QString& file : list)
         {
 
             qDebug() << "current archive: " << file;
@@ -477,7 +504,8 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
                 bool tribunalFound = findInCab(QLatin1String("Tribunal.bsa"), file);
                 bool bloodmoonFound = findInCab(QLatin1String("Bloodmoon.bsa"), file);
 
-                if (morrowindFound) {
+                if (morrowindFound)
+                {
                     // Check if we have correct archive, other archives have Morrowind.bsa too
                     if (tribunalFound == bloodmoonFound)
                     {
@@ -497,14 +525,16 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
                         found = true; // We have a GoTY disk or a Morrowind-only disk
                     }
                 }
-            } else {
+            }
+            else
+            {
 
-                if (findInCab(name + QLatin1String(".bsa"), file)) {
+                if (findInCab(name + QLatin1String(".bsa"), file))
+                {
                     cabFile = file;
                     found = true;
                 }
             }
-
         }
 
         if (cabFile.isEmpty())
@@ -521,33 +551,38 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
         }
     }
 
-    if (installComponent(component, cabFile)) {
+    if (installComponent(component, cabFile))
+    {
         setComponentDone(component, true);
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 
     return true;
 }
 
-bool Wizard::UnshieldWorker::installComponent(Component component, const QString &path)
+bool Wizard::UnshieldWorker::installComponent(Component component, const QString& path)
 {
     QString name;
-    switch (component) {
+    switch (component)
+    {
 
-    case Wizard::Component_Morrowind:
-        name = QLatin1String("Morrowind");
-        break;
-    case Wizard::Component_Tribunal:
-        name = QLatin1String("Tribunal");
-        break;
-    case Wizard::Component_Bloodmoon:
-        name = QLatin1String("Bloodmoon");
-        break;
+        case Wizard::Component_Morrowind:
+            name = QLatin1String("Morrowind");
+            break;
+        case Wizard::Component_Tribunal:
+            name = QLatin1String("Tribunal");
+            break;
+        case Wizard::Component_Bloodmoon:
+            name = QLatin1String("Bloodmoon");
+            break;
     }
 
-    if (name.isEmpty()) {
+    if (name.isEmpty())
+    {
         emit error(tr("Component parameter is invalid!"), tr("An invalid component parameter was supplied."));
         return false;
     }
@@ -556,7 +591,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
 
     QFileInfo info(path);
 
-    if (!info.exists()) {
+    if (!info.exists())
+    {
         emit error(tr("Installation media path not set!"), tr("The source path for %1 was not set.").arg(name));
         return false;
     }
@@ -569,20 +605,25 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
     // Make sure the temporary folder is empty
     removeDirectory(tempPath);
 
-    if (!temp.mkpath(tempPath)) {
+    if (!temp.mkpath(tempPath))
+    {
         emit error(tr("Cannot create temporary directory!"), tr("Failed to create %1.").arg(tempPath));
         return false;
     }
 
     temp.setPath(tempPath);
 
-    if (!temp.mkdir(name)) {
-        emit error(tr("Cannot create temporary directory!"), tr("Failed to create %1.").arg(temp.absoluteFilePath(name)));
+    if (!temp.mkdir(name))
+    {
+        emit error(
+            tr("Cannot create temporary directory!"), tr("Failed to create %1.").arg(temp.absoluteFilePath(name)));
         return false;
     }
 
-    if (!temp.cd(name)) {
-        emit error(tr("Cannot move into temporary directory!"), tr("Failed to move into %1.").arg(temp.absoluteFilePath(name)));
+    if (!temp.cd(name))
+    {
+        emit error(tr("Cannot move into temporary directory!"),
+            tr("Failed to move into %1.").arg(temp.absoluteFilePath(name)));
         return false;
     }
 
@@ -595,47 +636,40 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
 
     // Install extracted directories
     QStringList directories;
-    directories << QLatin1String("BookArt")
-                << QLatin1String("Fonts")
-                << QLatin1String("Icons")
-                << QLatin1String("Meshes")
-                << QLatin1String("Music")
-                << QLatin1String("Sound")
-                << QLatin1String("Splash")
-                << QLatin1String("Textures")
-                << QLatin1String("Video");
+    directories << QLatin1String("BookArt") << QLatin1String("Fonts") << QLatin1String("Icons")
+                << QLatin1String("Meshes") << QLatin1String("Music") << QLatin1String("Sound")
+                << QLatin1String("Splash") << QLatin1String("Textures") << QLatin1String("Video");
 
-    for (const QString &dir : directories)
+    for (const QString& dir : directories)
     {
-        if (!installDirectories(dir, temp.absolutePath())) {
-            emit error(tr("Could not install directory!"),
-                       tr("Installing %1 to %2 failed.").arg(dir, temp.absolutePath()));
+        if (!installDirectories(dir, temp.absolutePath()))
+        {
+            emit error(
+                tr("Could not install directory!"), tr("Installing %1 to %2 failed.").arg(dir, temp.absolutePath()));
             return false;
         }
     }
 
     // Install directories from disk
-    for (const QString &dir : directories)
+    for (const QString& dir : directories)
     {
-        if (!installDirectories(dir, info.absolutePath(), false, true)) {
-            emit error(tr("Could not install directory!"),
-                       tr("Installing %1 to %2 failed.").arg(dir, info.absolutePath()));
+        if (!installDirectories(dir, info.absolutePath(), false, true))
+        {
+            emit error(
+                tr("Could not install directory!"), tr("Installing %1 to %2 failed.").arg(dir, info.absolutePath()));
             return false;
         }
-
     }
 
     // Install translation files
     QStringList extensions;
-    extensions << QLatin1String(".cel")
-               << QLatin1String(".top")
-               << QLatin1String(".mrk");
+    extensions << QLatin1String(".cel") << QLatin1String(".top") << QLatin1String(".mrk");
 
-    for (const QString &extension : extensions)
+    for (const QString& extension : extensions)
     {
-        if (!installFiles(extension, info.absolutePath(), Qt::MatchEndsWith)) {
-            emit error(tr("Could not install translation file!"),
-                       tr("Failed to install *%1 files.").arg(extension));
+        if (!installFiles(extension, info.absolutePath(), Qt::MatchEndsWith))
+        {
+            emit error(tr("Could not install translation file!"), tr("Failed to install *%1 files.").arg(extension));
             return false;
         }
     }
@@ -643,22 +677,22 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
     if (component == Wizard::Component_Morrowind)
     {
         QStringList files;
-        files << QLatin1String("Morrowind.esm")
-              << QLatin1String("Morrowind.bsa");
+        files << QLatin1String("Morrowind.esm") << QLatin1String("Morrowind.bsa");
 
-        for (const QString &file : files)
+        for (const QString& file : files)
         {
-            if (!installFile(file, temp.absolutePath())) {
-                emit error(tr("Could not install Morrowind data file!"),
-                           tr("Failed to install %1.").arg(file));
+            if (!installFile(file, temp.absolutePath()))
+            {
+                emit error(tr("Could not install Morrowind data file!"), tr("Failed to install %1.").arg(file));
                 return false;
             }
         }
 
         // Copy Morrowind configuration file
-        if (!installFile(QLatin1String("Morrowind.ini"), temp.absolutePath())) {
+        if (!installFile(QLatin1String("Morrowind.ini"), temp.absolutePath()))
+        {
             emit error(tr("Could not install Morrowind configuration file!"),
-                       tr("Failed to install %1.").arg(QLatin1String("Morrowind.ini")));
+                tr("Failed to install %1.").arg(QLatin1String("Morrowind.ini")));
             return false;
         }
 
@@ -674,25 +708,25 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
         QFileInfo sounds(temp.absoluteFilePath(QLatin1String("Sounds")));
         QString dest(getPath() + QDir::separator() + QLatin1String("Sound"));
 
-        if (sounds.exists()) {
+        if (sounds.exists())
+        {
             emit textChanged(tr("Installing: Sound directory"));
-            if (!copyDirectory(sounds.absoluteFilePath(), dest)) {
+            if (!copyDirectory(sounds.absoluteFilePath(), dest))
+            {
                 emit error(tr("Could not install directory!"),
-                           tr("Installing %1 to %2 failed.").arg(sounds.absoluteFilePath(), dest));
+                    tr("Installing %1 to %2 failed.").arg(sounds.absoluteFilePath(), dest));
                 return false;
             }
-
         }
 
         QStringList files;
-        files << QLatin1String("Tribunal.esm")
-              << QLatin1String("Tribunal.bsa");
+        files << QLatin1String("Tribunal.esm") << QLatin1String("Tribunal.bsa");
 
-        for (const QString &file : files)
+        for (const QString& file : files)
         {
-            if (!installFile(file, temp.absolutePath())) {
-                emit error(tr("Could not find Tribunal data file!"),
-                           tr("Failed to find %1.").arg(file));
+            if (!installFile(file, temp.absolutePath()))
+            {
+                emit error(tr("Could not find Tribunal data file!"), tr("Failed to find %1.").arg(file));
                 return false;
             }
         }
@@ -702,23 +736,24 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
     {
         QFileInfo original(getPath() + QDir::separator() + QLatin1String("Tribunal.esm"));
 
-        if (original.exists()) {
-            if (!installFile(QLatin1String("Tribunal.esm"), temp.absolutePath())) {
+        if (original.exists())
+        {
+            if (!installFile(QLatin1String("Tribunal.esm"), temp.absolutePath()))
+            {
                 emit error(tr("Could not find Tribunal patch file!"),
-                           tr("Failed to find %1.").arg(QLatin1String("Tribunal.esm")));
+                    tr("Failed to find %1.").arg(QLatin1String("Tribunal.esm")));
                 return false;
             }
         }
 
         QStringList files;
-        files << QLatin1String("Bloodmoon.esm")
-              << QLatin1String("Bloodmoon.bsa");
+        files << QLatin1String("Bloodmoon.esm") << QLatin1String("Bloodmoon.bsa");
 
-        for (const QString &file : files)
+        for (const QString& file : files)
         {
-            if (!installFile(file, temp.absolutePath())) {
-                emit error(tr("Could not find Bloodmoon data file!"),
-                           tr("Failed to find %1.").arg(file));
+            if (!installFile(file, temp.absolutePath()))
+            {
+                emit error(tr("Could not find Bloodmoon data file!"), tr("Failed to find %1.").arg(file));
                 return false;
             }
         }
@@ -728,9 +763,9 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
 
         emit textChanged(tr("Updating Morrowind configuration file"));
 
-        for (const QString &inx : list)
+        for (const QString& inx : list)
         {
-             mIniSettings.parseInx(inx);
+            mIniSettings.parseInx(inx);
         }
     }
 
@@ -738,24 +773,25 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
     QStringList datafiles(findDirectories(QLatin1String("Data Files"), temp.absolutePath()));
     datafiles.append(findDirectories(QLatin1String("Data Files"), info.absolutePath()));
 
-    for (const QString &dir : datafiles)
+    for (const QString& dir : datafiles)
     {
         QFileInfo info(dir);
         emit textChanged(tr("Installing: %1 directory").arg(info.fileName()));
 
-        if (!copyDirectory(info.absoluteFilePath(), getPath())) {
+        if (!copyDirectory(info.absoluteFilePath(), getPath()))
+        {
             emit error(tr("Could not install directory!"),
-                       tr("Installing %1 to %2 failed.").arg(info.absoluteFilePath(), getPath()));
+                tr("Installing %1 to %2 failed.").arg(info.absoluteFilePath(), getPath()));
             return false;
         }
     }
 
     emit textChanged(tr("%1 installation finished!").arg(name));
     return true;
-
 }
 
-bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &destination, const QString &prefix, int index, int counter)
+bool Wizard::UnshieldWorker::extractFile(
+    Unshield* unshield, const QString& destination, const QString& prefix, int index, int counter)
 {
     bool success = false;
     QString path(destination);
@@ -782,7 +818,7 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &dest
     fileName.append(QString::fromUtf8(unshield_file_name(unshield, index)));
 
     // Calculate the percentage done
-    int progress = (((float) counter / (float) unshield_file_count(unshield)) * 100);
+    int progress = (((float)counter / (float)unshield_file_count(unshield)) * 100);
 
     if (getComponentDone(Wizard::Component_Morrowind))
         progress = progress + 100;
@@ -796,7 +832,8 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &dest
     QByteArray array(fileName.toUtf8());
     success = unshield_file_save(unshield, index, array.constData());
 
-    if (!success) {
+    if (!success)
+    {
         qDebug() << "error";
         dir.remove(fileName);
     }
@@ -804,16 +841,17 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &dest
     return success;
 }
 
-bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &destination)
+bool Wizard::UnshieldWorker::extractCab(const QString& cabFile, const QString& destination)
 {
     bool success = false;
 
     QByteArray array(cabFile.toUtf8());
 
-    Unshield *unshield;
+    Unshield* unshield;
     unshield = unshield_open(array.constData());
 
-    if (!unshield) {
+    if (!unshield)
+    {
         emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
         unshield_close(unshield);
         return false;
@@ -821,27 +859,30 @@ bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &d
 
     int counter = 0;
 
-    for (int i=0; i<unshield_file_group_count(unshield); ++i)
+    for (int i = 0; i < unshield_file_group_count(unshield); ++i)
     {
-        UnshieldFileGroup *group = unshield_file_group_get(unshield, i);
+        UnshieldFileGroup* group = unshield_file_group_get(unshield, i);
 
-        for (size_t j=group->first_file; j<=group->last_file; ++j)
+        for (size_t j = group->first_file; j <= group->last_file; ++j)
         {
-            if (mStopped) {
+            if (mStopped)
+            {
                 qDebug() << "We're asked to stop!";
 
                 unshield_close(unshield);
                 return true;
             }
 
-            if (unshield_file_is_valid(unshield, j)) {
+            if (unshield_file_is_valid(unshield, j))
+            {
                 success = extractFile(unshield, destination, group->name, j, counter);
 
-                if (!success) {
+                if (!success)
+                {
                     QString name(QString::fromUtf8(unshield_file_name(unshield, j)));
 
                     emit error(tr("Failed to extract %1.").arg(name),
-                               tr("Complete path: %1").arg(destination + QDir::separator() + name));
+                        tr("Complete path: %1").arg(destination + QDir::separator() + name));
 
                     unshield_close(unshield);
                     return false;
@@ -856,17 +897,18 @@ bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &d
     return success;
 }
 
-QString Wizard::UnshieldWorker::findFile(const QString &fileName, const QString &path)
+QString Wizard::UnshieldWorker::findFile(const QString& fileName, const QString& path)
 {
     return findFiles(fileName, path).first();
 }
 
-QStringList Wizard::UnshieldWorker::findFiles(const QString &fileName, const QString &path, int depth, bool recursive,
-                                              bool directories, Qt::MatchFlags flags)
+QStringList Wizard::UnshieldWorker::findFiles(
+    const QString& fileName, const QString& path, int depth, bool recursive, bool directories, Qt::MatchFlags flags)
 {
     static const int MAXIMUM_DEPTH = 10;
 
-    if (depth >= MAXIMUM_DEPTH) {
+    if (depth >= MAXIMUM_DEPTH)
+    {
         qWarning("Maximum directory depth limit reached.");
         return QStringList();
     }
@@ -881,39 +923,47 @@ QStringList Wizard::UnshieldWorker::findFiles(const QString &fileName, const QSt
     if (!dir.exists())
         return QStringList();
 
-    QFileInfoList list(dir.entryInfoList(QDir::NoDotAndDotDot |
-                                         QDir::AllDirs | QDir::Files, QDir::DirsFirst));
+    QFileInfoList list(dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files, QDir::DirsFirst));
     for (const QFileInfo& info : list)
     {
         if (info.isSymLink())
             continue;
 
-        if (info.isDir()) {
+        if (info.isDir())
+        {
             if (directories)
             {
-                if (!info.fileName().compare(fileName, Qt::CaseInsensitive)) {
+                if (!info.fileName().compare(fileName, Qt::CaseInsensitive))
+                {
                     result.append(info.absoluteFilePath());
-                } else {
+                }
+                else
+                {
                     if (recursive)
                         result.append(findFiles(fileName, info.absoluteFilePath(), depth + 1, recursive, true));
                 }
-            } else {
+            }
+            else
+            {
                 if (recursive)
                     result.append(findFiles(fileName, info.absoluteFilePath(), depth + 1));
             }
-        } else {
+        }
+        else
+        {
             if (directories)
                 break;
 
-            switch (flags) {
-            case Qt::MatchExactly:
-                if (!info.fileName().compare(fileName, Qt::CaseInsensitive))
-                    result.append(info.absoluteFilePath());
-                break;
-            case Qt::MatchEndsWith:
-                if (info.fileName().endsWith(fileName, Qt::CaseInsensitive))
-                    result.append(info.absoluteFilePath());
-                break;
+            switch (flags)
+            {
+                case Qt::MatchExactly:
+                    if (!info.fileName().compare(fileName, Qt::CaseInsensitive))
+                        result.append(info.absoluteFilePath());
+                    break;
+                case Qt::MatchEndsWith:
+                    if (info.fileName().endsWith(fileName, Qt::CaseInsensitive))
+                        result.append(info.absoluteFilePath());
+                    break;
             }
         }
     }
@@ -921,51 +971,16 @@ QStringList Wizard::UnshieldWorker::findFiles(const QString &fileName, const QSt
     return result;
 }
 
-QStringList Wizard::UnshieldWorker::findDirectories(const QString &dirName, const QString &path, bool recursive)
+QStringList Wizard::UnshieldWorker::findDirectories(const QString& dirName, const QString& path, bool recursive)
 {
     return findFiles(dirName, path, 0, true, true);
 }
 
-bool Wizard::UnshieldWorker::findInCab(const QString &fileName, const QString &cabFile)
+bool Wizard::UnshieldWorker::findInCab(const QString& fileName, const QString& cabFile)
 {
     QByteArray array(cabFile.toUtf8());
 
-    Unshield *unshield;
-    unshield = unshield_open(array.constData());
-
-    if (!unshield) {
-        emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
-        unshield_close(unshield);
-        return false;
-    }
-
-    for (int i=0; i<unshield_file_group_count(unshield); ++i)
-    {
-        UnshieldFileGroup *group = unshield_file_group_get(unshield, i);
-
-        for (size_t j=group->first_file; j<=group->last_file; ++j)
-        {
-
-            if (unshield_file_is_valid(unshield, j)) {
-                QString current(QString::fromUtf8(unshield_file_name(unshield, j)));
-                if (current.toLower() == fileName.toLower()) {
-                    unshield_close(unshield);
-                    return true; // File is found!
-                }
-            }
-        }
-    }
-
-    unshield_close(unshield);
-    return false;
-}
-
-size_t Wizard::UnshieldWorker::getMorrowindBsaFileSize(const QString &cabFile)
-{
-    QString fileName = QString("Morrowind.bsa");
-    QByteArray array(cabFile.toUtf8());
-
-    Unshield *unshield;
+    Unshield* unshield;
     unshield = unshield_open(array.constData());
 
     if (!unshield)
@@ -977,7 +992,45 @@ size_t Wizard::UnshieldWorker::getMorrowindBsaFileSize(const QString &cabFile)
 
     for (int i = 0; i < unshield_file_group_count(unshield); ++i)
     {
-        UnshieldFileGroup *group = unshield_file_group_get(unshield, i);
+        UnshieldFileGroup* group = unshield_file_group_get(unshield, i);
+
+        for (size_t j = group->first_file; j <= group->last_file; ++j)
+        {
+
+            if (unshield_file_is_valid(unshield, j))
+            {
+                QString current(QString::fromUtf8(unshield_file_name(unshield, j)));
+                if (current.toLower() == fileName.toLower())
+                {
+                    unshield_close(unshield);
+                    return true; // File is found!
+                }
+            }
+        }
+    }
+
+    unshield_close(unshield);
+    return false;
+}
+
+size_t Wizard::UnshieldWorker::getMorrowindBsaFileSize(const QString& cabFile)
+{
+    QString fileName = QString("Morrowind.bsa");
+    QByteArray array(cabFile.toUtf8());
+
+    Unshield* unshield;
+    unshield = unshield_open(array.constData());
+
+    if (!unshield)
+    {
+        emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
+        unshield_close(unshield);
+        return false;
+    }
+
+    for (int i = 0; i < unshield_file_group_count(unshield); ++i)
+    {
+        UnshieldFileGroup* group = unshield_file_group_get(unshield, i);
 
         for (size_t j = group->first_file; j <= group->last_file; ++j)
         {

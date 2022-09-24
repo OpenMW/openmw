@@ -14,7 +14,8 @@ namespace BulletHelpers
     public:
         explicit ProcessTriangleCallback(Impl impl)
             : mImpl(std::move(impl))
-        {}
+        {
+        }
 
         void processTriangle(btVector3* triangle, int partId, int triangleIndex) override
         {

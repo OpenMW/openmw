@@ -1,30 +1,30 @@
 #include "dialogue.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_LanguageManager.h>
-#include <MyGUI_Window.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollBar.h>
-#include <MyGUI_Button.h>
+#include <MyGUI_Window.h>
 
 #include <components/debug/debuglog.hpp>
-#include <components/widgets/box.hpp>
-#include <components/widgets/list.hpp>
-#include <components/translation/translation.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadfact.hpp>
+#include <components/translation/translation.hpp>
+#include <components/widgets/box.hpp>
+#include <components/widgets/list.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "bookpage.hpp"
 #include "textcolours.hpp"
@@ -96,17 +96,20 @@ namespace MWGui
         totalHeight += lineHeight;
     }
 
-    void PersuasionDialog::onCancel(MyGUI::Widget *sender)
+    void PersuasionDialog::onCancel(MyGUI::Widget* sender)
     {
         setVisible(false);
     }
 
-    void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
+    void PersuasionDialog::onPersuade(MyGUI::Widget* sender)
     {
         MWBase::MechanicsManager::PersuasionType type;
-        if (sender == mAdmireButton) type = MWBase::MechanicsManager::PT_Admire;
-        else if (sender == mIntimidateButton) type = MWBase::MechanicsManager::PT_Intimidate;
-        else if (sender == mTauntButton) type = MWBase::MechanicsManager::PT_Taunt;
+        if (sender == mAdmireButton)
+            type = MWBase::MechanicsManager::PT_Admire;
+        else if (sender == mIntimidateButton)
+            type = MWBase::MechanicsManager::PT_Intimidate;
+        else if (sender == mTauntButton)
+            type = MWBase::MechanicsManager::PT_Taunt;
         else if (sender == mBribe10Button)
             type = MWBase::MechanicsManager::PT_Bribe10;
         else if (sender == mBribe100Button)
@@ -127,9 +130,9 @@ namespace MWGui
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        mBribe10Button->setEnabled (playerGold >= 10);
-        mBribe100Button->setEnabled (playerGold >= 100);
-        mBribe1000Button->setEnabled (playerGold >= 1000);
+        mBribe10Button->setEnabled(playerGold >= 10);
+        mBribe100Button->setEnabled(playerGold >= 100);
+        mBribe1000Button->setEnabled(playerGold >= 1000);
 
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
 
@@ -149,13 +152,15 @@ namespace MWGui
 
     // --------------------------------------------------------------------------------------------------
 
-    Response::Response(const std::string &text, const std::string &title, bool needMargin)
-        : mTitle(title), mNeedMargin(needMargin)
+    Response::Response(const std::string& text, const std::string& title, bool needMargin)
+        : mTitle(title)
+        , mNeedMargin(needMargin)
     {
         mText = text;
     }
 
-    void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
+    void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
+        std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
     {
         typesetter->sectionBreak(mNeedMargin ? 9 : 0);
         auto windowManager = MWBase::Environment::get().getWindowManager();
@@ -175,7 +180,7 @@ namespace MWGui
         std::string text = mText;
 
         size_t pos_end = std::string::npos;
-        for(;;)
+        for (;;)
         {
             size_t pos_begin = text.find('@');
             if (pos_begin != std::string::npos)
@@ -186,16 +191,18 @@ namespace MWGui
                 std::string link = text.substr(pos_begin + 1, pos_end - pos_begin - 1);
                 const char specialPseudoAsteriskCharacter = 127;
                 std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
-                std::string topicName = Misc::StringUtils::lowerCase(windowManager->getTranslationDataStorage().topicStandardForm(link));
+                std::string topicName
+                    = Misc::StringUtils::lowerCase(windowManager->getTranslationDataStorage().topicStandardForm(link));
 
                 std::string displayName = link;
-                while (displayName[displayName.size()-1] == '*')
-                    displayName.erase(displayName.size()-1, 1);
+                while (displayName[displayName.size() - 1] == '*')
+                    displayName.erase(displayName.size() - 1, 1);
 
-                text.replace(pos_begin, pos_end+1-pos_begin, displayName);
+                text.replace(pos_begin, pos_end + 1 - pos_begin, displayName);
 
                 if (topicLinks.find(topicName) != topicLinks.end())
-                    hyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = intptr_t(topicLinks[topicName].get());
+                    hyperLinks[std::make_pair(pos_begin, pos_begin + displayName.size())]
+                        = intptr_t(topicLinks[topicName].get());
             }
             else
                 break;
@@ -203,7 +210,8 @@ namespace MWGui
 
         typesetter->addContent(to_utf8_span(text.c_str()));
 
-        if (hyperLinks.size() && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
+        if (hyperLinks.size()
+            && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
         {
             const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
 
@@ -212,9 +220,8 @@ namespace MWGui
             for (auto& hyperLink : hyperLinks)
             {
                 intptr_t topicId = hyperLink.second;
-                BookTypesetter::Style* hotStyle = typesetter->createHotStyle (style, textColours.link,
-                                                                              textColours.linkOver, textColours.linkPressed,
-                                                                              topicId);
+                BookTypesetter::Style* hotStyle = typesetter->createHotStyle(
+                    style, textColours.link, textColours.linkOver, textColours.linkPressed, topicId);
                 if (formatted < hyperLink.first.first)
                     typesetter->write(style, formatted, hyperLink.first.first);
                 typesetter->write(hotStyle, hyperLink.first.first, hyperLink.first.second);
@@ -228,18 +235,18 @@ namespace MWGui
             std::vector<KeywordSearchT::Match> matches;
             keywordSearch->highlightKeywords(text.begin(), text.end(), matches);
 
-            std::string::const_iterator i = text.begin ();
+            std::string::const_iterator i = text.begin();
             for (KeywordSearchT::Match& match : matches)
             {
                 if (i != match.mBeg)
-                    addTopicLink (typesetter, 0, i - text.begin (), match.mBeg - text.begin ());
+                    addTopicLink(typesetter, 0, i - text.begin(), match.mBeg - text.begin());
 
-                addTopicLink (typesetter, match.mValue, match.mBeg - text.begin (), match.mEnd - text.begin ());
+                addTopicLink(typesetter, match.mValue, match.mBeg - text.begin(), match.mEnd - text.begin());
 
                 i = match.mEnd;
             }
-            if (i != text.end ())
-                addTopicLink (typesetter, 0, i - text.begin (), text.size ());
+            if (i != text.end())
+                addTopicLink(typesetter, 0, i - text.begin(), text.size());
         }
     }
 
@@ -249,10 +256,10 @@ namespace MWGui
 
         BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal, false);
 
-
         if (topicId)
-            style = typesetter->createHotStyle (style, textColours.link, textColours.linkOver, textColours.linkPressed, topicId);
-        typesetter->write (style, begin, end);
+            style = typesetter->createHotStyle(
+                style, textColours.link, textColours.linkOver, textColours.linkPressed, topicId);
+        typesetter->write(style, begin, end);
     }
 
     Message::Message(const std::string& text)
@@ -260,7 +267,8 @@ namespace MWGui
         mText = text;
     }
 
-    void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
+    void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
+        std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
     {
         const MyGUI::Colour& textColour = MWBase::Environment::get().getWindowManager()->getTextColours().notify;
         BookTypesetter::Style* title = typesetter->createStyle("", textColour, false);
@@ -303,10 +311,10 @@ namespace MWGui
 
         mPersuasionDialog.setVisible(false);
 
-        //History view
+        // History view
         getWidget(mHistory, "History");
 
-        //Topics list
+        // Topics list
         getWidget(mTopicsList, "TopicsList");
         mTopicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectListItem);
 
@@ -314,16 +322,17 @@ namespace MWGui
         mGoodbyeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
 
         getWidget(mDispositionBar, "Disposition");
-        getWidget(mDispositionText,"DispositionText");
+        getWidget(mDispositionText, "DispositionText");
         getWidget(mScrollBar, "VScroll");
 
         mScrollBar->eventScrollChangePosition += MyGUI::newDelegate(this, &DialogueWindow::onScrollbarMoved);
         mHistory->eventMouseWheel += MyGUI::newDelegate(this, &DialogueWindow::onMouseWheel);
 
-        BookPage::ClickCallback callback = std::bind (&DialogueWindow::notifyLinkClicked, this, std::placeholders::_1);
+        BookPage::ClickCallback callback = std::bind(&DialogueWindow::notifyLinkClicked, this, std::placeholders::_1);
         mHistory->adviseLinkClicked(callback);
 
-        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
+        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
+            += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
     }
 
     void DialogueWindow::onTradeComplete()
@@ -349,7 +358,8 @@ namespace MWGui
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
     {
         // if the window has only been moved, not resized, we don't need to update
-        if (mCurrentWindowSize == _sender->getSize()) return;
+        if (mCurrentWindowSize == _sender->getSize())
+            return;
 
         mTopicsList->adjustSize();
         updateHistory();
@@ -361,7 +371,8 @@ namespace MWGui
     {
         if (!mScrollBar->getVisible())
             return;
-        mScrollBar->setScrollPosition(std::clamp<int>(mScrollBar->getScrollPosition() - _rel*0.3, 0, mScrollBar->getScrollRange() - 1));
+        mScrollBar->setScrollPosition(
+            std::clamp<int>(mScrollBar->getScrollPosition() - _rel * 0.3, 0, mScrollBar->getScrollRange() - 1));
         onScrollbarMoved(mScrollBar, mScrollBar->getScrollPosition());
     }
 
@@ -380,7 +391,8 @@ namespace MWGui
         if (mGoodbye || dialogueManager->isInChoice())
             return;
 
-        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM::GameSetting>& gmst
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         const std::string& sPersuasion = gmst.find("sPersuasion")->mValue.getString();
         const std::string& sCompanionShare = gmst.find("sCompanionShare")->mValue.getString();
@@ -392,9 +404,9 @@ namespace MWGui
         const std::string& sServiceTrainingTitle = gmst.find("sServiceTrainingTitle")->mValue.getString();
         const std::string& sRepair = gmst.find("sRepair")->mValue.getString();
 
-        if (topic != sPersuasion && topic != sCompanionShare && topic != sBarter 
-         && topic != sSpells && topic != sTravel && topic != sSpellMakingMenuTitle 
-         && topic != sEnchanting && topic != sServiceTrainingTitle && topic != sRepair)
+        if (topic != sPersuasion && topic != sCompanionShare && topic != sBarter && topic != sSpells && topic != sTravel
+            && topic != sSpellMakingMenuTitle && topic != sEnchanting && topic != sServiceTrainingTitle
+            && topic != sRepair)
         {
             onTopicActivated(topic);
             if (mGoodbyeButton->getEnabled())
@@ -406,19 +418,26 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion, mPtr);
         else if (!dialogueManager->checkServiceRefused(mCallback.get()))
         {
-            if (topic == sBarter && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Barter))
+            if (topic == sBarter
+                && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Barter))
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter, mPtr);
-            else if (topic == sSpells && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Spells))
+            else if (topic == sSpells
+                && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Spells))
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellBuying, mPtr);
-            else if (topic == sTravel && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Travel))
+            else if (topic == sTravel
+                && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Travel))
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Travel, mPtr);
-            else if (topic == sSpellMakingMenuTitle && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Spellmaking))
+            else if (topic == sSpellMakingMenuTitle
+                && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Spellmaking))
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellCreation, mPtr);
-            else if (topic == sEnchanting && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Enchanting))
+            else if (topic == sEnchanting
+                && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Enchanting))
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting, mPtr);
-            else if (topic == sServiceTrainingTitle && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Training))
+            else if (topic == sServiceTrainingTitle
+                && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Training))
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Training, mPtr);
-            else if (topic == sRepair && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Repair))
+            else if (topic == sRepair
+                && !dialogueManager->checkServiceRefused(mCallback.get(), MWBase::DialogueManager::Repair))
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair, mPtr);
         }
         else
@@ -440,7 +459,8 @@ namespace MWGui
             mKeywords.clear();
             mTopicsList->clear();
             for (auto& link : mLinks)
-                mDeleteLater.push_back(std::move(link)); // Links are not deleted right away to prevent issues with event handlers
+                mDeleteLater.push_back(
+                    std::move(link)); // Links are not deleted right away to prevent issues with event handlers
             mLinks.clear();
         }
 
@@ -472,8 +492,13 @@ namespace MWGui
 
     void DialogueWindow::restock()
     {
-        MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
-        float delay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->mValue.getFloat();
+        MWMechanics::CreatureStats& sellerStats = mPtr.getClass().getCreatureStats(mPtr);
+        float delay = MWBase::Environment::get()
+                          .getWorld()
+                          ->getStore()
+                          .get<ESM::GameSetting>()
+                          .find("fBarterGoldResetDelay")
+                          ->mValue.getFloat();
 
         // Gold is restocked every 24h
         if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getLastRestockTime() + delay)
@@ -518,10 +543,11 @@ namespace MWGui
         int services = mPtr.getClass().getServices(mPtr);
 
         bool travel = (mPtr.getType() == ESM::NPC::sRecordId && !mPtr.get<ESM::NPC>()->mBase->getTransport().empty())
-                || (mPtr.getType() == ESM::Creature::sRecordId && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
+            || (mPtr.getType() == ESM::Creature::sRecordId
+                && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM::GameSetting>& gmst
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         if (mPtr.getType() == ESM::NPC::sRecordId)
             mTopicsList->addItem(gmst.find("sPersuasion")->mValue.getString());
@@ -553,8 +579,7 @@ namespace MWGui
         if (mTopicsList->getItemCount() > 0)
             mTopicsList->addSeparator();
 
-
-        for(const auto& keyword : mKeywords)
+        for (const auto& keyword : mKeywords)
         {
             std::string topicId = Misc::StringUtils::lowerCase(keyword);
             mTopicsList->addItem(keyword);
@@ -575,16 +600,16 @@ namespace MWGui
     {
         if (!scrollbar && mScrollBar->getVisible())
         {
-            mHistory->setSize(mHistory->getSize()+MyGUI::IntSize(mScrollBar->getWidth(),0));
+            mHistory->setSize(mHistory->getSize() + MyGUI::IntSize(mScrollBar->getWidth(), 0));
             mScrollBar->setVisible(false);
         }
         if (scrollbar && !mScrollBar->getVisible())
         {
-            mHistory->setSize(mHistory->getSize()-MyGUI::IntSize(mScrollBar->getWidth(),0));
+            mHistory->setSize(mHistory->getSize() - MyGUI::IntSize(mScrollBar->getWidth(), 0));
             mScrollBar->setVisible(true);
         }
 
-        BookTypesetter::Ptr typesetter = BookTypesetter::create (mHistory->getWidth(), std::numeric_limits<int>::max());
+        BookTypesetter::Ptr typesetter = BookTypesetter::create(mHistory->getWidth(), std::numeric_limits<int>::max());
 
         for (const auto& text : mHistoryContents)
             text->write(typesetter, &mKeywordSearch, mTopicLinks);
@@ -603,8 +628,8 @@ namespace MWGui
             mLinks.push_back(std::move(link));
 
             typesetter->lineBreak();
-            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
-                                                                              textColours.answerPressed, interactiveId);
+            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(
+                body, textColours.answer, textColours.answerOver, textColours.answerPressed, interactiveId);
             typesetter->write(questionStyle, to_utf8_span(choice.first.c_str()));
         }
 
@@ -615,9 +640,14 @@ namespace MWGui
             link->eventActivated += MyGUI::newDelegate(this, &DialogueWindow::onGoodbyeActivated);
             auto interactiveId = TypesetBook::InteractiveId(link.get());
             mLinks.push_back(std::move(link));
-            const std::string& goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->mValue.getString();
-            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
-                textColours.answerPressed, interactiveId);
+            const std::string& goodbye = MWBase::Environment::get()
+                                             .getWorld()
+                                             ->getStore()
+                                             .get<ESM::GameSetting>()
+                                             .find("sGoodbye")
+                                             ->mValue.getString();
+            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(
+                body, textColours.answer, textColours.answerOver, textColours.answerPressed, interactiveId);
             typesetter->lineBreak();
             typesetter->write(questionStyle, to_utf8_span(goodbye.c_str()));
         }
@@ -632,9 +662,10 @@ namespace MWGui
             mHistory->setSize(MyGUI::IntSize(mHistory->getWidth(), book->getSize().second));
             size_t range = book->getSize().second - viewHeight;
             mScrollBar->setScrollRange(range);
-            mScrollBar->setScrollPosition(range-1);
-            mScrollBar->setTrackSize(static_cast<int>(viewHeight / static_cast<float>(book->getSize().second) * mScrollBar->getLineSize()));
-            onScrollbarMoved(mScrollBar, range-1);
+            mScrollBar->setScrollPosition(range - 1);
+            mScrollBar->setTrackSize(
+                static_cast<int>(viewHeight / static_cast<float>(book->getSize().second) * mScrollBar->getLineSize()));
+            onScrollbarMoved(mScrollBar, range - 1);
         }
         else
         {
@@ -652,12 +683,12 @@ namespace MWGui
         mTopicsList->setEnabled(topicsEnabled);
     }
 
-    void DialogueWindow::notifyLinkClicked (TypesetBook::InteractiveId link)
+    void DialogueWindow::notifyLinkClicked(TypesetBook::InteractiveId link)
     {
         reinterpret_cast<Link*>(link)->activated();
     }
 
-    void DialogueWindow::onTopicActivated(const std::string &topicId)
+    void DialogueWindow::onTopicActivated(const std::string& topicId)
     {
         if (mGoodbye)
             return;
@@ -684,12 +715,12 @@ namespace MWGui
         resetReference();
     }
 
-    void DialogueWindow::onScrollbarMoved(MyGUI::ScrollBar *sender, size_t pos)
+    void DialogueWindow::onScrollbarMoved(MyGUI::ScrollBar* sender, size_t pos)
     {
         mHistory->setPosition(0, static_cast<int>(pos) * -1);
     }
 
-    void DialogueWindow::addResponse(const std::string &title, const std::string &text, bool needMargin)
+    void DialogueWindow::addResponse(const std::string& title, const std::string& text, bool needMargin)
     {
         mHistoryContents.push_back(std::make_unique<Response>(text, title, needMargin));
         updateHistory();
@@ -708,8 +739,11 @@ namespace MWGui
         {
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
-            mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
-            mDispositionText->setCaption(MyGUI::utility::toString(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100"));
+            mDispositionBar->setProgressPosition(
+                MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
+            mDispositionText->setCaption(
+                MyGUI::utility::toString(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))
+                + std::string("/100"));
         }
 
         bool dispositionWasVisible = mDispositionBar->getVisible();
@@ -717,15 +751,15 @@ namespace MWGui
         if (dispositionVisible && !dispositionWasVisible)
         {
             mDispositionBar->setVisible(true);
-            int offset = mDispositionBar->getHeight()+5;
-            mTopicsList->setCoord(mTopicsList->getCoord() + MyGUI::IntCoord(0,offset,0,-offset));
+            int offset = mDispositionBar->getHeight() + 5;
+            mTopicsList->setCoord(mTopicsList->getCoord() + MyGUI::IntCoord(0, offset, 0, -offset));
             mTopicsList->adjustSize();
         }
         else if (!dispositionVisible && dispositionWasVisible)
         {
             mDispositionBar->setVisible(false);
-            int offset = mDispositionBar->getHeight()+5;
-            mTopicsList->setCoord(mTopicsList->getCoord() - MyGUI::IntCoord(0,offset,0,-offset));
+            int offset = mDispositionBar->getHeight() + 5;
+            mTopicsList->setCoord(mTopicsList->getCoord() - MyGUI::IntCoord(0, offset, 0, -offset));
             mTopicsList->adjustSize();
         }
     }
@@ -745,7 +779,7 @@ namespace MWGui
         deleteLater();
 
         if (mChoices != MWBase::Environment::get().getDialogueManager()->getChoices()
-                || mGoodbye != MWBase::Environment::get().getDialogueManager()->isGoodbye())
+            || mGoodbye != MWBase::Environment::get().getDialogueManager()->isGoodbye())
             updateHistory();
     }
 
@@ -787,7 +821,7 @@ namespace MWGui
             return false;
 
         return !actor.getClass().getScript(actor).empty()
-                && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
+            && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
     }
 
 }

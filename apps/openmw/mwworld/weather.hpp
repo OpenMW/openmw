@@ -2,8 +2,8 @@
 #define GAME_MWWORLD_WEATHER_H
 
 #include <cstdint>
-#include <string>
 #include <map>
+#include <string>
 
 #include <osg/Vec4f>
 
@@ -83,12 +83,10 @@ namespace MWWorld
 
         void addSetting(const std::string& type)
         {
-            WeatherSetting setting = {
-                Fallback::Map::getFloat("Weather_" + type + "_Pre-Sunrise_Time"),
+            WeatherSetting setting = { Fallback::Map::getFloat("Weather_" + type + "_Pre-Sunrise_Time"),
                 Fallback::Map::getFloat("Weather_" + type + "_Post-Sunrise_Time"),
                 Fallback::Map::getFloat("Weather_" + type + "_Pre-Sunset_Time"),
-                Fallback::Map::getFloat("Weather_" + type + "_Post-Sunset_Time")
-            };
+                Fallback::Map::getFloat("Weather_" + type + "_Post-Sunset_Time") };
 
             mSunriseTransitions[type] = setting;
         }
@@ -101,11 +99,14 @@ namespace MWWorld
     {
     public:
         TimeOfDayInterpolator(const T& sunrise, const T& day, const T& sunset, const T& night)
-            : mSunriseValue(sunrise), mDayValue(day), mSunsetValue(sunset), mNightValue(night)
+            : mSunriseValue(sunrise)
+            , mDayValue(day)
+            , mSunsetValue(sunset)
+            , mNightValue(night)
         {
         }
 
-        T getValue (const float gameHour, const TimeOfDaySettings& timeSettings, const std::string& prefix) const;
+        T getValue(const float gameHour, const TimeOfDaySettings& timeSettings, const std::string& prefix) const;
 
     private:
         T mSunriseValue, mDayValue, mSunsetValue, mNightValue;
@@ -117,12 +118,8 @@ namespace MWWorld
     public:
         static osg::Vec3f defaultDirection();
 
-        Weather(const std::string& name,
-                float stormWindSpeed,
-                float rainSpeed,
-                float dlFactor,
-                float dlOffset,
-                const std::string& particleEffect);
+        Weather(const std::string& name, float stormWindSpeed, float rainSpeed, float dlFactor, float dlOffset,
+            const std::string& particleEffect);
 
         std::string mCloudTexture;
 
@@ -152,7 +149,8 @@ namespace MWWorld
         float mGlareView;
 
         // Fog factor and offset used with distant land rendering.
-        struct {
+        struct
+        {
             float FogFactor;
             float FogOffset;
         } mDL;
@@ -163,7 +161,8 @@ namespace MWWorld
 
         // Is this an ash storm / blight storm? If so, the following will happen:
         // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
-        // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm animation)
+        // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm
+        // animation)
         // - Slower movement when walking against the storm (fStromWalkMult)
         bool mIsStorm;
 
@@ -369,12 +368,11 @@ namespace MWWorld
         std::map<std::string, RegionWeather> mRegions;
         MWRender::WeatherResult mResult;
 
-        MWBase::Sound *mAmbientSound;
+        MWBase::Sound* mAmbientSound;
         std::string mPlayingSoundID;
 
-        void addWeather(const std::string& name,
-                        float dlFactor, float dlOffset,
-                        const std::string& particleEffect = "");
+        void addWeather(
+            const std::string& name, float dlFactor, float dlOffset, const std::string& particleEffect = "");
 
         void importRegions();
 

@@ -8,7 +8,7 @@
 namespace ESSImport
 {
 
-    void convertInventory (const Inventory& inventory, ESM::InventoryState& state);
+    void convertInventory(const Inventory& inventory, ESM::InventoryState& state);
 
 }
 

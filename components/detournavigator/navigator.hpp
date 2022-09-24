@@ -3,15 +3,14 @@
 
 #include <filesystem>
 
-#include "objectid.hpp"
-#include "sharednavmeshcacheitem.hpp"
-#include "recastmeshtiles.hpp"
-#include "waitconditiontype.hpp"
 #include "heightfieldshape.hpp"
+#include "objectid.hpp"
 #include "objecttransform.hpp"
+#include "recastmeshtiles.hpp"
+#include "sharednavmeshcacheitem.hpp"
+#include "waitconditiontype.hpp"
 
 #include <components/resource/bulletshape.hpp>
-
 
 namespace ESM
 {
@@ -35,7 +34,8 @@ namespace DetourNavigator
         osg::ref_ptr<const Resource::BulletShapeInstance> mShapeInstance;
         ObjectTransform mTransform;
 
-        ObjectShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance, const ObjectTransform& transform)
+        ObjectShapes(
+            const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance, const ObjectTransform& transform)
             : mShapeInstance(shapeInstance)
             , mTransform(transform)
         {
@@ -49,11 +49,12 @@ namespace DetourNavigator
         osg::Vec3f mConnectionEnd;
 
         DoorShapes(const osg::ref_ptr<const Resource::BulletShapeInstance>& shapeInstance,
-                   const ObjectTransform& transform, const osg::Vec3f& connectionStart, const osg::Vec3f& connectionEnd)
+            const ObjectTransform& transform, const osg::Vec3f& connectionStart, const osg::Vec3f& connectionEnd)
             : ObjectShapes(shapeInstance, transform)
             , mConnectionStart(connectionStart)
             , mConnectionEnd(connectionEnd)
-        {}
+        {
+        }
     };
 
     class UpdateGuard;
@@ -102,8 +103,9 @@ namespace DetourNavigator
          * @param shape members must live until object is updated by another shape removed from Navigator
          * @param transform allows to setup objects geometry according to its world state
          */
-        virtual void addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
-            const UpdateGuard* guard) = 0;
+        virtual void addObject(
+            const ObjectId id, const ObjectShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
+            = 0;
 
         /**
          * @brief addObject is used to add doors.
@@ -111,8 +113,9 @@ namespace DetourNavigator
          * @param shape members must live until object is updated by another shape or removed from Navigator.
          * @param transform allows to setup objects geometry according to its world state.
          */
-        virtual void addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform,
-            const UpdateGuard* guard) = 0;
+        virtual void addObject(
+            const ObjectId id, const DoorShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
+            = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -120,8 +123,9 @@ namespace DetourNavigator
          * @param shape members must live until object is updated by another shape removed from Navigator.
          * @param transform allows to setup objects geometry according to its world state.
          */
-        virtual void updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
-            const UpdateGuard* guard) = 0;
+        virtual void updateObject(
+            const ObjectId id, const ObjectShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
+            = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -129,8 +133,9 @@ namespace DetourNavigator
          * @param shape members must live until object is updated by another shape removed from Navigator.
          * @param transform allows to setup objects geometry according to its world state.
          */
-        virtual void updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform,
-            const UpdateGuard* guard) = 0;
+        virtual void updateObject(
+            const ObjectId id, const DoorShapes& shapes, const btTransform& transform, const UpdateGuard* guard)
+            = 0;
 
         /**
          * @brief removeObject to make it no more available at the scene.
@@ -144,8 +149,7 @@ namespace DetourNavigator
          * @param cellSize set cell borders. std::numeric_limits<int>::max() disables cell borders.
          * @param shift set global shift of cell center.
          */
-        virtual void addWater(const osg::Vec2i& cellPosition, int cellSize, float level,
-            const UpdateGuard* guard) = 0;
+        virtual void addWater(const osg::Vec2i& cellPosition, int cellSize, float level, const UpdateGuard* guard) = 0;
 
         /**
          * @brief removeWater to make it no more available at the scene.
@@ -153,8 +157,9 @@ namespace DetourNavigator
          */
         virtual void removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard) = 0;
 
-        virtual void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape,
-            const UpdateGuard* guard) = 0;
+        virtual void addHeightfield(
+            const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape, const UpdateGuard* guard)
+            = 0;
 
         virtual void removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard) = 0;
 

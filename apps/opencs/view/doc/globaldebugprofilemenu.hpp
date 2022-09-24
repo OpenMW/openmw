@@ -15,34 +15,32 @@ namespace CSVDoc
 {
     class GlobalDebugProfileMenu : public QMenu
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMWorld::IdTable *mDebugProfiles;
-            QActionGroup *mActions;
+        CSMWorld::IdTable* mDebugProfiles;
+        QActionGroup* mActions;
 
-        private:
+    private:
+        void rebuild();
 
-            void rebuild();
+    public:
+        GlobalDebugProfileMenu(CSMWorld::IdTable* debugProfiles, QWidget* parent = nullptr);
 
-        public:
+        void updateActions(bool running);
 
-            GlobalDebugProfileMenu (CSMWorld::IdTable *debugProfiles, QWidget *parent = nullptr);
+    private slots:
 
-            void updateActions (bool running);
+        void profileAboutToBeRemoved(const QModelIndex& parent, int start, int end);
 
-        private slots:
+        void profileInserted(const QModelIndex& parent, int start, int end);
 
-            void profileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+        void profileChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void profileInserted (const QModelIndex& parent, int start, int end);
+        void actionTriggered(QAction* action);
 
-            void profileChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+    signals:
 
-            void actionTriggered (QAction *action);
-
-        signals:
-
-            void triggered (const std::string& profile);
+        void triggered(const std::string& profile);
     };
 }
 

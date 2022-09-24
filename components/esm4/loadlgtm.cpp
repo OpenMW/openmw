@@ -28,8 +28,8 @@
 */
 #include "loadlgtm.hpp"
 
-#include <stdexcept>
 #include <cfloat> // FLT_MAX for gcc
+#include <stdexcept>
 //#include <iostream> // FIXME: for debugging only
 
 #include "reader.hpp"
@@ -39,14 +39,16 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId);  break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
             case ESM4::SUB_DATA:
             {
                 if (subHdr.dataSize == 36) // TES4
@@ -65,8 +67,8 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_DALC: // TES5
             {
-                //std::cout << "LGTM " << ESM::printName(subHdr.typeId) << " skipping..."
-                          //<< subHdr.dataSize << std::endl;
+                // std::cout << "LGTM " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -76,10 +78,10 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::LightingTemplate::save(ESM4::Writer& writer) const
+// void ESM4::LightingTemplate::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::LightingTemplate::blank()
+// void ESM4::LightingTemplate::blank()
 //{
-//}
+// }

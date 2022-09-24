@@ -17,7 +17,7 @@ namespace
     TEST(Sqlite3StatementTest, makeStatementShouldCreateStatementWithPreparedQuery)
     {
         const auto db = makeDb(":memory:", "CREATE TABLE test ( id INTEGER )");
-        const Statement statement(*db, Query {});
+        const Statement statement(*db, Query{});
         EXPECT_FALSE(statement.mNeedReset);
         EXPECT_NE(statement.mHandle, nullptr);
         EXPECT_EQ(statement.mQuery.text(), "SELECT 1");

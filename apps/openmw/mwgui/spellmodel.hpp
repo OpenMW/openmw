@@ -45,7 +45,7 @@ namespace MWGui
 
         void update();
 
-        Spell getItem (ModelIndex index) const;
+        Spell getItem(ModelIndex index) const;
         ///< throws for invalid index
 
         size_t getItemCount() const;
@@ -59,7 +59,7 @@ namespace MWGui
 
         std::string mFilter;
 
-        bool matchingEffectExists(std::string filter, const ESM::EffectList &effects);
+        bool matchingEffectExists(std::string filter, const ESM::EffectList& effects);
     };
 
 }

@@ -41,13 +41,13 @@ namespace ESM4
     {
         enum Flags
         {
-            Flag_OblivionGate  = 0x01,
+            Flag_OblivionGate = 0x01,
             Flag_AutomaticDoor = 0x02,
-            Flag_Hidden        = 0x04,
-            Flag_MinimalUse    = 0x08
+            Flag_Hidden = 0x04,
+            Flag_MinimalUse = 0x08
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -58,15 +58,15 @@ namespace ESM4
 
         std::uint8_t mDoorFlags;
         FormId mScriptId;
-        FormId mOpenSound;  // SNDR for TES5, SOUN for others
+        FormId mOpenSound; // SNDR for TES5, SOUN for others
         FormId mCloseSound; // SNDR for TES5, SOUN for others
         FormId mLoopSound;
         FormId mRandomTeleport;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

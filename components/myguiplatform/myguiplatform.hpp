@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIPLATFORM_H
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIPLATFORM_H
 
-#include <string>
-#include <memory>
 #include <filesystem>
+#include <memory>
+#include <string>
 
 namespace osgViewer
 {

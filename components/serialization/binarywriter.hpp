@@ -14,14 +14,18 @@ namespace Serialization
 {
     struct NotEnoughSpace : std::runtime_error
     {
-        NotEnoughSpace() : std::runtime_error("Not enough space") {}
+        NotEnoughSpace()
+            : std::runtime_error("Not enough space")
+        {
+        }
     };
 
     struct BinaryWriter
     {
     public:
         explicit BinaryWriter(std::byte* dest, const std::byte* end)
-            : mDest(dest), mEnd(end)
+            : mDest(dest)
+            , mEnd(end)
         {
             assert(mDest <= mEnd);
         }
@@ -61,7 +65,7 @@ namespace Serialization
                     mDest += size;
                 }
                 else
-                    std::for_each(data, data + count, [&] (const T& v) { writeValue(v); });
+                    std::for_each(data, data + count, [&](const T& v) { writeValue(v); });
             }
             else
             {

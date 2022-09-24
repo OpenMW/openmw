@@ -2,8 +2,8 @@
 #define MWLUA_LUABINDINGS_H
 
 #include <components/lua/luastate.hpp>
-#include <components/lua/serialization.hpp>
 #include <components/lua/scriptscontainer.hpp>
+#include <components/lua/serialization.hpp>
 #include <components/lua/storage.hpp>
 
 #include "context.hpp"
@@ -22,7 +22,8 @@ namespace MWLua
 
     sol::table initGlobalStoragePackage(const Context&, LuaUtil::LuaStorage* globalStorage);
     sol::table initLocalStoragePackage(const Context&, LuaUtil::LuaStorage* globalStorage);
-    sol::table initPlayerStoragePackage(const Context&, LuaUtil::LuaStorage* globalStorage, LuaUtil::LuaStorage* playerStorage);
+    sol::table initPlayerStoragePackage(
+        const Context&, LuaUtil::LuaStorage* globalStorage, LuaUtil::LuaStorage* playerStorage);
 
     // Implemented in nearbybindings.cpp
     sol::table initNearbyPackage(const Context&);

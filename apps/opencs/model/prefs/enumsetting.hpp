@@ -14,53 +14,51 @@ namespace CSMPrefs
         std::string mValue;
         std::string mTooltip;
 
-        EnumValue (const std::string& value, const std::string& tooltip = "");
+        EnumValue(const std::string& value, const std::string& tooltip = "");
 
-        EnumValue (const char *value);
+        EnumValue(const char* value);
     };
 
     struct EnumValues
     {
         std::vector<EnumValue> mValues;
 
-        EnumValues& add (const EnumValues& values);
+        EnumValues& add(const EnumValues& values);
 
-        EnumValues& add (const EnumValue& value);
+        EnumValues& add(const EnumValue& value);
 
-        EnumValues& add (const std::string& value, const std::string& tooltip);
+        EnumValues& add(const std::string& value, const std::string& tooltip);
     };
 
     class EnumSetting : public Setting
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            std::string mTooltip;
-            EnumValue mDefault;
-            EnumValues mValues;
-            QComboBox* mWidget;
+        std::string mTooltip;
+        EnumValue mDefault;
+        EnumValues mValues;
+        QComboBox* mWidget;
 
-        public:
+    public:
+        EnumSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label,
+            const EnumValue& default_);
 
-            EnumSetting (Category *parent,
-                QMutex *mutex, const std::string& key, const std::string& label,
-                const EnumValue& default_);
+        EnumSetting& setTooltip(const std::string& tooltip);
 
-            EnumSetting& setTooltip (const std::string& tooltip);
+        EnumSetting& addValues(const EnumValues& values);
 
-            EnumSetting& addValues (const EnumValues& values);
+        EnumSetting& addValue(const EnumValue& value);
 
-            EnumSetting& addValue (const EnumValue& value);
+        EnumSetting& addValue(const std::string& value, const std::string& tooltip);
 
-            EnumSetting& addValue (const std::string& value, const std::string& tooltip);
+        /// Return label, input widget.
+        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
 
-            /// Return label, input widget.
-            std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent) override;
+        void updateWidget() override;
 
-            void updateWidget() override;
+    private slots:
 
-        private slots:
-
-            void valueChanged (int value);
+        void valueChanged(int value);
     };
 }
 

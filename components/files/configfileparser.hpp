@@ -6,11 +6,11 @@
 namespace Files
 {
 
-namespace bpo = boost::program_options;
+    namespace bpo = boost::program_options;
 
-template<class charT>
-bpo::basic_parsed_options<charT> parse_config_file(std::basic_istream<charT>&, const bpo::options_description&,
-                                                   bool allow_unregistered = false);
+    template <class charT>
+    bpo::basic_parsed_options<charT> parse_config_file(
+        std::basic_istream<charT>&, const bpo::options_description&, bool allow_unregistered = false);
 
 }
 

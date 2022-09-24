@@ -2,9 +2,9 @@
 
 #include <sstream>
 
+#include "components/esm/defs.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
@@ -95,37 +95,12 @@ namespace ESM
         "stealth_speechcraft.dds",
         "stealth_handtohand.dds",
     };
-    const std::array<Skill::SkillEnum, Skill::Length> Skill::sSkillIds = {{
-        Block,
-        Armorer,
-        MediumArmor,
-        HeavyArmor,
-        BluntWeapon,
-        LongBlade,
-        Axe,
-        Spear,
-        Athletics,
-        Enchant,
-        Destruction,
-        Alteration,
-        Illusion,
-        Conjuration,
-        Mysticism,
-        Restoration,
-        Alchemy,
-        Unarmored,
-        Security,
-        Sneak,
-        Acrobatics,
-        LightArmor,
-        ShortBlade,
-        Marksman,
-        Mercantile,
-        Speechcraft,
-        HandToHand
-    }};
+    const std::array<Skill::SkillEnum, Skill::Length> Skill::sSkillIds
+        = { { Block, Armorer, MediumArmor, HeavyArmor, BluntWeapon, LongBlade, Axe, Spear, Athletics, Enchant,
+            Destruction, Alteration, Illusion, Conjuration, Mysticism, Restoration, Alchemy, Unarmored, Security, Sneak,
+            Acrobatics, LightArmor, ShortBlade, Marksman, Mercantile, Speechcraft, HandToHand } };
 
-    void Skill::load(ESMReader &esm, bool &isDeleted)
+    void Skill::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false; // Skill record can't be deleted now (may be changed in the future)
         mRecordFlags = esm.getRecordFlags();
@@ -159,10 +134,10 @@ namespace ESM
 
         // create an ID from the index and the name (only used in the editor and likely to change in the
         // future)
-        mId = indexToId (mIndex);
+        mId = indexToId(mIndex);
     }
 
-    void Skill::save(ESMWriter &esm, bool /*isDeleted*/) const
+    void Skill::save(ESMWriter& esm, bool /*isDeleted*/) const
     {
         esm.writeHNT("INDX", mIndex);
         esm.writeHNT("SKDT", mData, 24);
@@ -178,21 +153,21 @@ namespace ESM
         mDescription.clear();
     }
 
-    std::string Skill::indexToId (int index)
+    std::string Skill::indexToId(int index)
     {
         std::ostringstream stream;
 
-        if (index!=-1)
+        if (index != -1)
         {
             stream << "#";
 
-            if (index<10)
+            if (index < 10)
                 stream << "0";
 
             stream << index;
 
-            if (index>=0 && index<Length)
-                stream << sSkillNameIds[index].substr (6);
+            if (index >= 0 && index < Length)
+                stream << sSkillNameIds[index].substr(6);
         }
 
         return stream.str();

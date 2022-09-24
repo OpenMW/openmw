@@ -1,16 +1,16 @@
 #ifndef OPENMW_MWRENDER_RENDERINGMANAGER_H
 #define OPENMW_MWRENDER_RENDERINGMANAGER_H
 
-#include <osg/ref_ptr>
-#include <osg/Light>
 #include <osg/Camera>
+#include <osg/Light>
+#include <osg/ref_ptr>
 
 #include <components/settings/settings.hpp>
 
 #include <osgUtil/IncrementalCompileOperation>
 
-#include "objects.hpp"
 #include "navmeshmode.hpp"
+#include "objects.hpp"
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
 
@@ -107,9 +107,9 @@ namespace MWRender
     {
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::filesystem::path& resourcePath,
-            DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
-            SceneUtil::UnrefQueue& unrefQueue);
+            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+            const std::filesystem::path& resourcePath, DetourNavigator::Navigator& navigator,
+            const MWWorld::GroundcoverStore& groundcoverStore, SceneUtil::UnrefQueue& unrefQueue);
         ~RenderingManager();
 
         osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();
@@ -142,7 +142,8 @@ namespace MWRender
 
         void configureAmbient(const ESM::Cell* cell);
         void configureFog(const ESM::Cell* cell);
-        void configureFog(float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f& colour);
+        void configureFog(
+            float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f& colour);
 
         void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
@@ -174,14 +175,17 @@ namespace MWRender
             float mRatio;
         };
 
-        RayResult castRay(const osg::Vec3f& origin, const osg::Vec3f& dest, bool ignorePlayer, bool ignoreActors=false);
+        RayResult castRay(
+            const osg::Vec3f& origin, const osg::Vec3f& dest, bool ignorePlayer, bool ignoreActors = false);
 
-        /// Return the object under the mouse cursor / crosshair position, given by nX and nY normalized screen coordinates,
-        /// where (0,0) is the top left corner.
-        RayResult castCameraToViewportRay(const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors=false);
+        /// Return the object under the mouse cursor / crosshair position, given by nX and nY normalized screen
+        /// coordinates, where (0,0) is the top left corner.
+        RayResult castCameraToViewportRay(
+            const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors = false);
 
-        /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being the top left corner.
-        osg::Vec4f getScreenBounds(const osg::BoundingBox &worldbb);
+        /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being
+        /// the top left corner.
+        osg::Vec4f getScreenBounds(const osg::BoundingBox& worldbb);
 
         void setSkyEnabled(bool enabled);
 
@@ -189,7 +193,8 @@ namespace MWRender
 
         SkyManager* getSkyManager();
 
-        void spawnEffect(const std::string& model, std::string_view texture, const osg::Vec3f& worldPosition, float scale = 1.f, bool isMagicVFX = true);
+        void spawnEffect(const std::string& model, std::string_view texture, const osg::Vec3f& worldPosition,
+            float scale = 1.f, bool isMagicVFX = true);
 
         /// Clear all savegame-specific data
         void clear();
@@ -208,7 +213,7 @@ namespace MWRender
         void removeWaterRippleEmitter(const MWWorld::Ptr& ptr);
         void emitWaterRipple(const osg::Vec3f& pos);
 
-        void updatePlayerPtr(const MWWorld::Ptr &ptr);
+        void updatePlayerPtr(const MWWorld::Ptr& ptr);
 
         void removePlayer(const MWWorld::Ptr& player);
         void setupPlayer(const MWWorld::Ptr& player);
@@ -237,7 +242,8 @@ namespace MWRender
 
         osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& object) const;
 
-        void exportSceneGraph(const MWWorld::Ptr& ptr, const std::filesystem::path& filename, const std::string& format);
+        void exportSceneGraph(
+            const MWWorld::Ptr& ptr, const std::filesystem::path& filename, const std::string& format);
 
         Debug::DebugDrawer& getDebugDrawer() const { return *mDebugDraw; }
 
@@ -252,12 +258,12 @@ namespace MWRender
 
         void setNavMeshNumber(const std::size_t value);
 
-        void setActiveGrid(const osg::Vec4i &grid);
+        void setActiveGrid(const osg::Vec4i& grid);
 
         bool pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled);
-        void pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr);
+        void pagingBlacklistObject(int type, const MWWorld::ConstPtr& ptr);
         bool pagingUnlockCache();
-        void getPagedRefnums(const osg::Vec4i &activeGrid, std::vector<ESM::RefNum>& out);
+        void getPagedRefnums(const osg::Vec4i& activeGrid, std::vector<ESM::RefNum>& out);
 
         void updateProjectionMatrix();
 
@@ -279,7 +285,8 @@ namespace MWRender
 
         const bool mSkyBlending;
 
-        osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
+        osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(
+            osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;
 
@@ -332,7 +339,7 @@ namespace MWRender
         bool mUpdateProjectionMatrix = false;
         bool mNight = false;
 
-        void operator = (const RenderingManager&);
+        void operator=(const RenderingManager&);
         RenderingManager(const RenderingManager&);
     };
 

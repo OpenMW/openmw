@@ -5,6 +5,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/readerscache.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/lessbyid.hpp>
 #include <components/esmloader/record.hpp>
@@ -13,7 +14,6 @@
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
-#include <components/esm3/readerscache.hpp>
 
 #include <osg/ref_ptr>
 
@@ -37,27 +37,35 @@ namespace Resource
             float mScale;
             ESM::Position mPos;
 
-            CellRef(ESM::RecNameInts type, ESM::RefNum refNum, std::string&& refId, float scale, const ESM::Position& pos)
-                : mType(type), mRefNum(refNum), mRefId(std::move(refId)), mScale(scale), mPos(pos) {}
+            CellRef(
+                ESM::RecNameInts type, ESM::RefNum refNum, std::string&& refId, float scale, const ESM::Position& pos)
+                : mType(type)
+                , mRefNum(refNum)
+                , mRefId(std::move(refId))
+                , mScale(scale)
+                , mPos(pos)
+            {
+            }
         };
 
         ESM::RecNameInts getType(const EsmLoader::EsmData& esmData, std::string_view refId)
         {
-            const auto it = std::lower_bound(esmData.mRefIdTypes.begin(), esmData.mRefIdTypes.end(),
-                                             refId, EsmLoader::LessById {});
+            const auto it = std::lower_bound(
+                esmData.mRefIdTypes.begin(), esmData.mRefIdTypes.end(), refId, EsmLoader::LessById{});
             if (it == esmData.mRefIdTypes.end() || it->mId != refId)
                 return {};
             return it->mType;
         }
 
-        std::vector<CellRef> loadCellRefs(const ESM::Cell& cell, const EsmLoader::EsmData& esmData,
-            ESM::ReadersCache& readers)
+        std::vector<CellRef> loadCellRefs(
+            const ESM::Cell& cell, const EsmLoader::EsmData& esmData, ESM::ReadersCache& readers)
         {
             std::vector<EsmLoader::Record<CellRef>> cellRefs;
 
             for (std::size_t i = 0; i < cell.mContextList.size(); i++)
             {
-                const ESM::ReadersCache::BusyItem reader = readers.get(static_cast<std::size_t>(cell.mContextList[i].index));
+                const ESM::ReadersCache::BusyItem reader
+                    = readers.get(static_cast<std::size_t>(cell.mContextList[i].index));
                 cell.restore(*reader, static_cast<int>(i));
                 ESM::CellRef cellRef;
                 bool deleted = false;
@@ -65,16 +73,17 @@ namespace Resource
                 {
                     Misc::StringUtils::lowerCaseInPlace(cellRef.mRefID);
                     const ESM::RecNameInts type = getType(esmData, cellRef.mRefID);
-                    if (type == ESM::RecNameInts {})
+                    if (type == ESM::RecNameInts{})
                         continue;
-                    cellRefs.emplace_back(deleted, type, cellRef.mRefNum, std::move(cellRef.mRefID),
-                                        cellRef.mScale, cellRef.mPos);
+                    cellRefs.emplace_back(
+                        deleted, type, cellRef.mRefNum, std::move(cellRef.mRefID), cellRef.mScale, cellRef.mPos);
                 }
             }
 
             Log(Debug::Debug) << "Loaded " << cellRefs.size() << " cell refs";
 
-            const auto getKey = [] (const EsmLoader::Record<CellRef>& v) -> const ESM::RefNum& { return v.mValue.mRefNum; };
+            const auto getKey
+                = [](const EsmLoader::Record<CellRef>& v) -> const ESM::RefNum& { return v.mValue.mRefNum; };
             std::vector<CellRef> result = prepareRecords(cellRefs, getKey);
 
             Log(Debug::Debug) << "Prepared " << result.size() << " unique cell refs";
@@ -84,8 +93,7 @@ namespace Resource
 
         template <class F>
         void forEachObject(const ESM::Cell& cell, const EsmLoader::EsmData& esmData, const VFS::Manager& vfs,
-            Resource::BulletShapeManager& bulletShapeManager, ESM::ReadersCache& readers,
-            F&& f)
+            Resource::BulletShapeManager& bulletShapeManager, ESM::ReadersCache& readers, F&& f)
         {
             std::vector<CellRef> cellRefs = loadCellRefs(cell, esmData, readers);
 
@@ -100,18 +108,18 @@ namespace Resource
                 if (cellRef.mType != ESM::REC_STAT)
                     model = Misc::ResourceHelpers::correctActorModelPath(model, &vfs);
 
-                osg::ref_ptr<const Resource::BulletShape> shape = [&]
-                {
+                osg::ref_ptr<const Resource::BulletShape> shape = [&] {
                     try
                     {
                         return bulletShapeManager.getShape("meshes/" + model);
                     }
                     catch (const std::exception& e)
                     {
-                        Log(Debug::Warning) << "Failed to load cell ref \"" << cellRef.mRefId << "\" model \"" << model << "\": " << e.what();
+                        Log(Debug::Warning) << "Failed to load cell ref \"" << cellRef.mRefId << "\" model \"" << model
+                                            << "\": " << e.what();
                         return osg::ref_ptr<const Resource::BulletShape>();
                     }
-                } ();
+                }();
 
                 if (shape == nullptr)
                     continue;
@@ -122,7 +130,7 @@ namespace Resource
                     case ESM::REC_CONT:
                     case ESM::REC_DOOR:
                     case ESM::REC_STAT:
-                        f(BulletObject {std::move(shape), cellRef.mPos, cellRef.mScale});
+                        f(BulletObject{ std::move(shape), cellRef.mPos, cellRef.mScale });
                         break;
                     default:
                         break;
@@ -133,7 +141,7 @@ namespace Resource
 
     void forEachBulletObject(ESM::ReadersCache& readers, const VFS::Manager& vfs,
         Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
-        std::function<void (const ESM::Cell& cell, const BulletObject& object)> callback)
+        std::function<void(const ESM::Cell& cell, const BulletObject& object)> callback)
     {
         Log(Debug::Info) << "Processing " << esmData.mCells.size() << " cells...";
 
@@ -142,21 +150,19 @@ namespace Resource
             const ESM::Cell& cell = esmData.mCells[i];
             const bool exterior = cell.isExterior();
 
-            Log(Debug::Debug) << "Processing " << (exterior ? "exterior" : "interior")
-                << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") \"" << cell.getDescription() << "\"";
+            Log(Debug::Debug) << "Processing " << (exterior ? "exterior" : "interior") << " cell (" << (i + 1) << "/"
+                              << esmData.mCells.size() << ") \"" << cell.getDescription() << "\"";
 
             std::size_t objects = 0;
 
-            forEachObject(cell, esmData, vfs, bulletShapeManager, readers,
-                [&] (const BulletObject& object)
-                {
-                    callback(cell, object);
-                    ++objects;
-                });
+            forEachObject(cell, esmData, vfs, bulletShapeManager, readers, [&](const BulletObject& object) {
+                callback(cell, object);
+                ++objects;
+            });
 
-            Log(Debug::Info) << "Processed " << (exterior ? "exterior" : "interior")
-                << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") " << cell.getDescription()
-                << " with " << objects << " objects";
+            Log(Debug::Info) << "Processed " << (exterior ? "exterior" : "interior") << " cell (" << (i + 1) << "/"
+                             << esmData.mCells.size() << ") " << cell.getDescription() << " with " << objects
+                             << " objects";
         }
     }
 }

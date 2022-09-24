@@ -6,8 +6,8 @@
 #include <osg/ref_ptr>
 #include <osgAnimation/UpdateMatrixTransform>
 
-#include "nodecallback.hpp"
 #include "keyframe.hpp"
+#include "nodecallback.hpp"
 
 #include <components/resource/animation.hpp>
 
@@ -22,32 +22,33 @@ namespace SceneUtil
 
     class LinkVisitor : public osg::NodeVisitor
     {
-        public:
-            LinkVisitor();
+    public:
+        LinkVisitor();
 
-            virtual void link(osgAnimation::UpdateMatrixTransform* umt);
+        virtual void link(osgAnimation::UpdateMatrixTransform* umt);
 
-            virtual void setAnimation(Resource::Animation* animation);
+        virtual void setAnimation(Resource::Animation* animation);
 
-            virtual void apply(osg::Node& node) override;
+        virtual void apply(osg::Node& node) override;
 
-        protected:
-            Resource::Animation* mAnimation;
+    protected:
+        Resource::Animation* mAnimation;
     };
 
 #ifdef _MSC_VER
-#pragma warning( push )
+#pragma warning(push)
 /*
- * Warning C4250: 'SceneUtil::OsgAnimationController': inherits 'osg::Callback::osg::Callback::asCallback' via dominance,
- * there is no way to solved this if an object must inherit from both osg::Object and osg::Callback
+ * Warning C4250: 'SceneUtil::OsgAnimationController': inherits 'osg::Callback::osg::Callback::asCallback' via
+ * dominance, there is no way to solved this if an object must inherit from both osg::Object and osg::Callback
  */
-#pragma warning( disable : 4250 )
+#pragma warning(disable : 4250)
 #endif
-    class OsgAnimationController : public SceneUtil::KeyframeController, public SceneUtil::NodeCallback<OsgAnimationController>
+    class OsgAnimationController : public SceneUtil::KeyframeController,
+                                   public SceneUtil::NodeCallback<OsgAnimationController>
     {
     public:
         /// @brief Handles the animation for osgAnimation formats
-        OsgAnimationController() {};
+        OsgAnimationController(){};
 
         OsgAnimationController(const OsgAnimationController& copy, const osg::CopyOp& copyop);
 
@@ -62,7 +63,7 @@ namespace SceneUtil
         void update(float time, const std::string& animationName);
 
         /// @brief Called every frame for osgAnimation
-        void operator() (osg::Node*, osg::NodeVisitor*);
+        void operator()(osg::Node*, osg::NodeVisitor*);
 
         /// @brief Sets details of the animations
         void setEmulatedAnimations(const std::vector<EmulatedAnimation>& emulatedAnimations);
@@ -73,11 +74,12 @@ namespace SceneUtil
     private:
         bool mNeedToLink = true;
         osg::ref_ptr<LinkVisitor> mLinker;
-        std::vector<osg::ref_ptr<Resource::Animation>> mMergedAnimationTracks; // Used only by osgAnimation-based formats (e.g. dae)
+        std::vector<osg::ref_ptr<Resource::Animation>>
+            mMergedAnimationTracks; // Used only by osgAnimation-based formats (e.g. dae)
         std::vector<EmulatedAnimation> mEmulatedAnimations;
     };
 #ifdef _MSC_VER
-#pragma warning( pop )
+#pragma warning(pop)
 #endif
 }
 

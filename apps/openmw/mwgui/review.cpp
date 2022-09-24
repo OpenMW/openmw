@@ -3,26 +3,26 @@
 #include <cmath>
 
 #include <MyGUI_Button.h>
-#include <MyGUI_ScrollView.h>
-#include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ScrollView.h>
 
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadspel.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwworld/esmstore.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwmechanics/autocalcspell.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "tooltips.hpp"
 #include "ustring.hpp"
 
 namespace
 {
-    void adjustButtonSize(MyGUI::Button *button)
+    void adjustButtonSize(MyGUI::Button* button)
     {
         // adjust size of button to fit its text
         MyGUI::IntSize size = button->getTextSize();
@@ -33,8 +33,8 @@ namespace
 namespace MWGui
 {
     ReviewDialog::ReviewDialog()
-        : WindowModal("openmw_chargen_review.layout"),
-          mUpdateSkillArea(false)
+        : WindowModal("openmw_chargen_review.layout")
+        , mUpdateSkillArea(false)
     {
         // Centre dialog
         center();
@@ -92,7 +92,7 @@ namespace MWGui
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
-            mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (nullptr)));
+            mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*>(nullptr)));
         }
 
         MyGUI::Button* backButton;
@@ -119,17 +119,16 @@ namespace MWGui
         }
     }
 
-    void ReviewDialog::setPlayerName(const std::string &name)
+    void ReviewDialog::setPlayerName(const std::string& name)
     {
         mNameWidget->setCaption(name);
     }
 
-    void ReviewDialog::setRace(const std::string &raceId)
+    void ReviewDialog::setRace(const std::string& raceId)
     {
         mRaceId = raceId;
 
-        const ESM::Race *race =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().search(mRaceId);
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().search(mRaceId);
         if (race)
         {
             ToolTips::createRaceToolTip(mRaceWidget, race);
@@ -150,8 +149,8 @@ namespace MWGui
     {
         mBirthSignId = signId;
 
-        const ESM::BirthSign *sign =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().search(mBirthSignId);
+        const ESM::BirthSign* sign
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().search(mBirthSignId);
         if (sign)
         {
             mBirthSignWidget->setCaption(sign->mName);
@@ -167,7 +166,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         mHealth->setValue(current, modified);
-        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
+        std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mHealth->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
     }
 
@@ -177,7 +176,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         mMagicka->setValue(current, modified);
-        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
+        std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mMagicka->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
     }
 
@@ -187,7 +186,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         mFatigue->setValue(current, modified);
-        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
+        std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mFatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
     }
 
@@ -244,9 +243,10 @@ namespace MWGui
         mUpdateSkillArea = true;
     }
 
-    void ReviewDialog::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+    void ReviewDialog::addSeparator(MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
-        MyGUI::ImageBox* separator = mSkillView->createWidget<MyGUI::ImageBox>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
+        MyGUI::ImageBox* separator = mSkillView->createWidget<MyGUI::ImageBox>(
+            "MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
         separator->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
         mSkillWidgets.push_back(separator);
@@ -257,7 +257,8 @@ namespace MWGui
 
     void ReviewDialog::addGroup(std::string_view label, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
-        MyGUI::TextBox* groupWidget = mSkillView->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
+        MyGUI::TextBox* groupWidget = mSkillView->createWidget<MyGUI::TextBox>("SandBrightText",
+            MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
         groupWidget->setCaption(toUString(label));
         mSkillWidgets.push_back(groupWidget);
@@ -267,7 +268,8 @@ namespace MWGui
         coord2.top += lineHeight;
     }
 
-    MyGUI::TextBox* ReviewDialog::addValueItem(std::string_view text, const std::string& value, const std::string& state, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
+    MyGUI::TextBox* ReviewDialog::addValueItem(std::string_view text, const std::string& value,
+        const std::string& state, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         MyGUI::TextBox* skillNameWidget;
         MyGUI::TextBox* skillValueWidget;
@@ -291,11 +293,12 @@ namespace MWGui
         return skillValueWidget;
     }
 
-    void ReviewDialog::addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+    void ReviewDialog::addItem(const std::string& text, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         MyGUI::TextBox* skillNameWidget;
 
-        skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+        skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>(
+            "SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
         skillNameWidget->setCaption(text);
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
@@ -308,7 +311,8 @@ namespace MWGui
 
     void ReviewDialog::addItem(const ESM::Spell* spell, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
-        Widgets::MWSpellPtr widget = mSkillView->createWidget<Widgets::MWSpell>("MW_StatName", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+        Widgets::MWSpellPtr widget = mSkillView->createWidget<Widgets::MWSpell>(
+            "MW_StatName", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
         widget->setSpellId(spell->mId);
         widget->setUserString("ToolTipType", "Spell");
         widget->setUserString("Spell", spell->mId);
@@ -321,7 +325,8 @@ namespace MWGui
         coord2.top += lineHeight;
     }
 
-    void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+    void ReviewDialog::addSkills(const SkillList& skills, const std::string& titleId, const std::string& titleDefault,
+        MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         // Add a line separator if there are items above
         if (!mSkillWidgets.empty())
@@ -329,15 +334,16 @@ namespace MWGui
             addSeparator(coord1, coord2);
         }
 
-        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
+        addGroup(
+            MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
         for (const int& skillId : skills)
         {
             if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
                 continue;
             assert(skillId >= 0 && skillId < ESM::Skill::Length);
-            const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
-            const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
+            const std::string& skillNameId = ESM::Skill::sSkillNameIds[skillId];
+            const MWMechanics::SkillValue& stat = mSkillValues.find(skillId)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
 
@@ -346,11 +352,13 @@ namespace MWGui
                 state = "increased";
             else if (modified < base)
                 state = "decreased";
-            MyGUI::TextBox* widget = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId), MyGUI::utility::toString(static_cast<int>(modified)), state, coord1, coord2);
+            MyGUI::TextBox* widget = addValueItem(
+                MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
+                MyGUI::utility::toString(static_cast<int>(modified)), state, coord1, coord2);
 
-            for (int i=0; i<2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
-                ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size()-1-i], skillId);
+                ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size() - 1 - i], skillId);
             }
 
             mSkillWidgetMap[skillId] = widget;
@@ -386,11 +394,11 @@ namespace MWGui
             race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(mRaceId);
 
         int skills[ESM::Skill::Length];
-        for (int i=0; i<ESM::Skill::Length; ++i)
+        for (int i = 0; i < ESM::Skill::Length; ++i)
             skills[i] = mSkillValues.find(i)->second.getBase();
 
         int attributes[ESM::Attribute::Length];
-        for (int i=0; i<ESM::Attribute::Length; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
             attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
 
         std::vector<std::string> selectedSpells = MWMechanics::autoCalcPlayerSpells(skills, attributes, race);
@@ -413,7 +421,8 @@ namespace MWGui
 
         if (!mBirthSignId.empty())
         {
-            const ESM::BirthSign* sign = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find(mBirthSignId);
+            const ESM::BirthSign* sign
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find(mBirthSignId);
             for (const std::string& spellId : sign->mPowers.mList)
             {
                 std::string lower = Misc::StringUtils::lowerCase(spellId);
@@ -424,7 +433,8 @@ namespace MWGui
 
         if (!mSkillWidgets.empty())
             addSeparator(coord1, coord2);
-        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeAbility", "Abilities"), coord1, coord2);
+        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeAbility", "Abilities"),
+            coord1, coord2);
         for (std::string& spellId : spells)
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
@@ -433,7 +443,8 @@ namespace MWGui
         }
 
         addSeparator(coord1, coord2);
-        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypePower", "Powers"), coord1, coord2);
+        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypePower", "Powers"), coord1,
+            coord2);
         for (std::string& spellId : spells)
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
@@ -442,7 +453,8 @@ namespace MWGui
         }
 
         addSeparator(coord1, coord2);
-        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeSpell", "Spells"), coord1, coord2);
+        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeSpell", "Spells"), coord1,
+            coord2);
         for (std::string& spellId : spells)
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
@@ -450,9 +462,10 @@ namespace MWGui
                 addItem(spell, coord1, coord2);
         }
 
-        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
+        // scrollbar is hidden
         mSkillView->setVisibleVScroll(false);
-        mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), coord1.top));
+        mSkillView->setCanvasSize(mSkillView->getWidth(), std::max(mSkillView->getHeight(), coord1.top));
         mSkillView->setVisibleVScroll(true);
     }
 
@@ -490,10 +503,11 @@ namespace MWGui
 
     void ReviewDialog::onMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
-        if (mSkillView->getViewOffset().top + _rel*0.3 > 0)
+        if (mSkillView->getViewOffset().top + _rel * 0.3 > 0)
             mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSkillView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel*0.3)));
+            mSkillView->setViewOffset(
+                MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel * 0.3)));
     }
 
 }

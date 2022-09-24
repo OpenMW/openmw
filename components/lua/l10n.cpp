@@ -8,7 +8,9 @@
 namespace sol
 {
     template <>
-    struct is_automagical<LuaUtil::L10nManager::Context> : std::false_type {};
+    struct is_automagical<LuaUtil::L10nManager::Context> : std::false_type
+    {
+    };
 }
 
 namespace LuaUtil
@@ -28,7 +30,7 @@ namespace LuaUtil
     void L10nManager::setPreferredLocales(const std::vector<std::string>& langs)
     {
         mPreferredLocales.clear();
-        for (const auto &lang : langs)
+        for (const auto& lang : langs)
             mPreferredLocales.push_back(icu::Locale(lang.c_str()));
         {
             Log msg(Debug::Info);
@@ -53,7 +55,8 @@ namespace LuaUtil
         mMessageBundles->load(*manager->mVFS->get(path), lang, path);
     }
 
-    std::pair<std::vector<icu::Formattable>, std::vector<icu::UnicodeString>> getICUArgs(std::string_view messageId, const sol::table &table)
+    std::pair<std::vector<icu::Formattable>, std::vector<icu::UnicodeString>> getICUArgs(
+        std::string_view messageId, const sol::table& table)
     {
         std::vector<icu::Formattable> args;
         std::vector<icu::UnicodeString> argNames;
@@ -70,7 +73,7 @@ namespace LuaUtil
             else
             {
                 Log(Debug::Error) << "Unrecognized argument type for key \"" << key.as<std::string>()
-                    << "\" when formatting message \"" << messageId << "\"";
+                                  << "\" when formatting message \"" << messageId << "\"";
             }
 
             // Argument names
@@ -85,7 +88,8 @@ namespace LuaUtil
         std::vector<icu::Formattable> args;
         std::vector<icu::UnicodeString> argNames;
 
-        if (data.is<sol::table>()) {
+        if (data.is<sol::table>())
+        {
             sol::table dataTable = data.as<sol::table>();
             auto argData = getICUArgs(key, dataTable);
             args = argData.first;
@@ -101,7 +105,7 @@ namespace LuaUtil
         mMessageBundles->setPreferredLocales(manager->mPreferredLocales);
         int localeCount = 0;
         bool fallbackLocaleInPreferred = false;
-        for (const icu::Locale& loc: mMessageBundles->getPreferredLocales())
+        for (const icu::Locale& loc : mMessageBundles->getPreferredLocales())
         {
             if (!mMessageBundles->isLoaded(loc))
                 readLangData(manager, loc);
@@ -116,7 +120,8 @@ namespace LuaUtil
         if (!mMessageBundles->isLoaded(fallbackLocale))
             readLangData(manager, fallbackLocale);
         if (mMessageBundles->isLoaded(fallbackLocale) && !fallbackLocaleInPreferred)
-            Log(Debug::Verbose) << "Fallback language file \"l10n/" << mName << "/" << fallbackLocale.getName() << ".yaml\" is enabled";
+            Log(Debug::Verbose) << "Fallback language file \"l10n/" << mName << "/" << fallbackLocale.getName()
+                                << ".yaml\" is enabled";
 
         if (localeCount == 0)
         {
@@ -129,10 +134,8 @@ namespace LuaUtil
         auto it = mContexts.find(contextName);
         if (it != mContexts.end())
             return sol::make_object(mLua->sol(), it->second);
-        auto allowedChar = [](char c)
-        {
-            return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
-                   (c >= '0' && c <= '9') || c == '_';
+        auto allowedChar = [](char c) {
+            return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_';
         };
         bool valid = !contextName.empty();
         for (char c : contextName)
@@ -140,7 +143,7 @@ namespace LuaUtil
         if (!valid)
             throw std::runtime_error(std::string("Invalid l10n context name: ") + contextName);
         icu::Locale fallbackLocale(fallbackLocaleName.c_str());
-        Context ctx{contextName, std::make_shared<l10n::MessageBundles>(mPreferredLocales, fallbackLocale)};
+        Context ctx{ contextName, std::make_shared<l10n::MessageBundles>(mPreferredLocales, fallbackLocale) };
         {
             Log msg(Debug::Verbose);
             msg << "Fallback locale: " << fallbackLocale.getName();

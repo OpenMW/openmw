@@ -9,11 +9,10 @@ namespace CSMFilter
 {
     class LeafNode : public Node
     {
-        public:
-
-            std::vector<int> getReferencedColumns() const override;
-            ///< Return a list of the IDs of the columns referenced by this node. The column mapping
-            /// passed into test as columns must contain all columns listed here.
+    public:
+        std::vector<int> getReferencedColumns() const override;
+        ///< Return a list of the IDs of the columns referenced by this node. The column mapping
+        /// passed into test as columns must contain all columns listed here.
     };
 }
 

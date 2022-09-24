@@ -53,14 +53,11 @@ return {
 
     struct LuaStateTest : Test
     {
-        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({
-            {"aaa/counter.lua", &counterFile},
-            {"bbb/tests.lua", &testsFile},
-            {"invalid.lua", &invalidScriptFile}
-        });
+        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { "aaa/counter.lua", &counterFile },
+            { "bbb/tests.lua", &testsFile }, { "invalid.lua", &invalidScriptFile } });
 
         LuaUtil::ScriptsConfiguration mCfg;
-        LuaUtil::LuaState mLua{mVFS.get(), &mCfg};
+        LuaUtil::LuaState mLua{ mVFS.get(), &mCfg };
     };
 
     TEST_F(LuaStateTest, Sandbox)
@@ -96,8 +93,8 @@ return {
     {
         sol::table script = mLua.runInNewSandbox("bbb/tests.lua");
 
-        EXPECT_FLOAT_EQ(LuaUtil::call(script["sin"], 1).get<float>(),
-                        -LuaUtil::call(script["requireMathSin"], -1).get<float>());
+        EXPECT_FLOAT_EQ(
+            LuaUtil::call(script["sin"], 1).get<float>(), -LuaUtil::call(script["requireMathSin"], -1).get<float>());
 
         EXPECT_EQ(LuaUtil::call(script["useCounter"]).get<int>(), 43);
         EXPECT_EQ(LuaUtil::call(script["useCounter"]).get<int>(), 44);
@@ -118,7 +115,8 @@ return {
         EXPECT_EQ(LuaUtil::call(script["callRawset"]).get<int>(), 3);
 
         // but read-only object can not be modified even with rawset
-        EXPECT_ERROR(LuaUtil::call(script["rawsetSystemLib"]), "bad argument #1 to 'rawset' (table expected, got userdata)");
+        EXPECT_ERROR(
+            LuaUtil::call(script["rawsetSystemLib"]), "bad argument #1 to 'rawset' (table expected, got userdata)");
         EXPECT_ERROR(LuaUtil::call(script["modifySystemLib"]), "a userdata value");
         EXPECT_ERROR(LuaUtil::call(script["modifySystemLib2"]), "a nil value");
 
@@ -137,7 +135,7 @@ return {
         {
             sol::table script = mLua.runInNewSandbox("bbb/tests.lua", "prefix");
             testing::internal::CaptureStdout();
-            LuaUtil::call(script["print"]);  // print with no arguments
+            LuaUtil::call(script["print"]); // print with no arguments
             std::string output = testing::internal::GetCapturedStdout();
             EXPECT_EQ(output, "prefix[bbb/tests.lua]:\n");
         }
@@ -156,12 +154,11 @@ return {
         sol::table api1 = LuaUtil::makeReadOnly(lua.sol().create_table_with("name", "api1"));
         sol::table api2 = LuaUtil::makeReadOnly(lua.sol().create_table_with("name", "api2"));
 
-        sol::table script1 = lua.runInNewSandbox("bbb/tests.lua", "", {{"test.api", api1}});
+        sol::table script1 = lua.runInNewSandbox("bbb/tests.lua", "", { { "test.api", api1 } });
 
-        lua.addCommonPackage(
-            "sqrlib", lua.sol().create_table_with("sqr", [](int x) { return x * x; }));
+        lua.addCommonPackage("sqrlib", lua.sol().create_table_with("sqr", [](int x) { return x * x; }));
 
-        sol::table script2 = lua.runInNewSandbox("bbb/tests.lua", "", {{"test.api", api2}});
+        sol::table script2 = lua.runInNewSandbox("bbb/tests.lua", "", { { "test.api", api2 } });
 
         EXPECT_ERROR(LuaUtil::call(script1["sqr"], 3), "module not found: sqrlib");
         EXPECT_EQ(LuaUtil::call(script2["sqr"], 3).get<int>(), 9);

@@ -13,37 +13,36 @@ namespace
     {
         std::map<CSMWorld::ColumnBase::Display, CSMWorld::UniversalId::Type> types;
 
-        types[CSMWorld::ColumnBase::Display_BodyPart            ] = CSMWorld::UniversalId::Type_BodyPart;
-        types[CSMWorld::ColumnBase::Display_Cell                ] = CSMWorld::UniversalId::Type_Cell;
-        types[CSMWorld::ColumnBase::Display_Class               ] = CSMWorld::UniversalId::Type_Class;
+        types[CSMWorld::ColumnBase::Display_BodyPart] = CSMWorld::UniversalId::Type_BodyPart;
+        types[CSMWorld::ColumnBase::Display_Cell] = CSMWorld::UniversalId::Type_Cell;
+        types[CSMWorld::ColumnBase::Display_Class] = CSMWorld::UniversalId::Type_Class;
         types[CSMWorld::ColumnBase::Display_CreatureLevelledList] = CSMWorld::UniversalId::Type_Referenceable;
-        types[CSMWorld::ColumnBase::Display_Creature            ] = CSMWorld::UniversalId::Type_Referenceable;
-        types[CSMWorld::ColumnBase::Display_Enchantment         ] = CSMWorld::UniversalId::Type_Enchantment;
-        types[CSMWorld::ColumnBase::Display_Faction             ] = CSMWorld::UniversalId::Type_Faction;
-        types[CSMWorld::ColumnBase::Display_GlobalVariable      ] = CSMWorld::UniversalId::Type_Global;
-        types[CSMWorld::ColumnBase::Display_Icon                ] = CSMWorld::UniversalId::Type_Icon;
-        types[CSMWorld::ColumnBase::Display_Journal             ] = CSMWorld::UniversalId::Type_Journal;
-        types[CSMWorld::ColumnBase::Display_Mesh                ] = CSMWorld::UniversalId::Type_Mesh;
-        types[CSMWorld::ColumnBase::Display_Miscellaneous       ] = CSMWorld::UniversalId::Type_Referenceable;
-        types[CSMWorld::ColumnBase::Display_Npc                 ] = CSMWorld::UniversalId::Type_Referenceable;
-        types[CSMWorld::ColumnBase::Display_Race                ] = CSMWorld::UniversalId::Type_Race;
-        types[CSMWorld::ColumnBase::Display_Region              ] = CSMWorld::UniversalId::Type_Region;
-        types[CSMWorld::ColumnBase::Display_Referenceable       ] = CSMWorld::UniversalId::Type_Referenceable;
-        types[CSMWorld::ColumnBase::Display_Script              ] = CSMWorld::UniversalId::Type_Script;
-        types[CSMWorld::ColumnBase::Display_Skill               ] = CSMWorld::UniversalId::Type_Skill;
-        types[CSMWorld::ColumnBase::Display_Sound               ] = CSMWorld::UniversalId::Type_Sound;
-        types[CSMWorld::ColumnBase::Display_SoundRes            ] = CSMWorld::UniversalId::Type_SoundRes;
-        types[CSMWorld::ColumnBase::Display_Spell               ] = CSMWorld::UniversalId::Type_Spell;
-        types[CSMWorld::ColumnBase::Display_Static              ] = CSMWorld::UniversalId::Type_Referenceable;
-        types[CSMWorld::ColumnBase::Display_Texture             ] = CSMWorld::UniversalId::Type_Texture;
-        types[CSMWorld::ColumnBase::Display_Topic               ] = CSMWorld::UniversalId::Type_Topic;
-        types[CSMWorld::ColumnBase::Display_Weapon              ] = CSMWorld::UniversalId::Type_Referenceable;
+        types[CSMWorld::ColumnBase::Display_Creature] = CSMWorld::UniversalId::Type_Referenceable;
+        types[CSMWorld::ColumnBase::Display_Enchantment] = CSMWorld::UniversalId::Type_Enchantment;
+        types[CSMWorld::ColumnBase::Display_Faction] = CSMWorld::UniversalId::Type_Faction;
+        types[CSMWorld::ColumnBase::Display_GlobalVariable] = CSMWorld::UniversalId::Type_Global;
+        types[CSMWorld::ColumnBase::Display_Icon] = CSMWorld::UniversalId::Type_Icon;
+        types[CSMWorld::ColumnBase::Display_Journal] = CSMWorld::UniversalId::Type_Journal;
+        types[CSMWorld::ColumnBase::Display_Mesh] = CSMWorld::UniversalId::Type_Mesh;
+        types[CSMWorld::ColumnBase::Display_Miscellaneous] = CSMWorld::UniversalId::Type_Referenceable;
+        types[CSMWorld::ColumnBase::Display_Npc] = CSMWorld::UniversalId::Type_Referenceable;
+        types[CSMWorld::ColumnBase::Display_Race] = CSMWorld::UniversalId::Type_Race;
+        types[CSMWorld::ColumnBase::Display_Region] = CSMWorld::UniversalId::Type_Region;
+        types[CSMWorld::ColumnBase::Display_Referenceable] = CSMWorld::UniversalId::Type_Referenceable;
+        types[CSMWorld::ColumnBase::Display_Script] = CSMWorld::UniversalId::Type_Script;
+        types[CSMWorld::ColumnBase::Display_Skill] = CSMWorld::UniversalId::Type_Skill;
+        types[CSMWorld::ColumnBase::Display_Sound] = CSMWorld::UniversalId::Type_Sound;
+        types[CSMWorld::ColumnBase::Display_SoundRes] = CSMWorld::UniversalId::Type_SoundRes;
+        types[CSMWorld::ColumnBase::Display_Spell] = CSMWorld::UniversalId::Type_Spell;
+        types[CSMWorld::ColumnBase::Display_Static] = CSMWorld::UniversalId::Type_Referenceable;
+        types[CSMWorld::ColumnBase::Display_Texture] = CSMWorld::UniversalId::Type_Texture;
+        types[CSMWorld::ColumnBase::Display_Topic] = CSMWorld::UniversalId::Type_Topic;
+        types[CSMWorld::ColumnBase::Display_Weapon] = CSMWorld::UniversalId::Type_Referenceable;
 
         return types;
     }
 
-    typedef std::map<CSMWorld::ColumnBase::Display, 
-                     CSMWorld::UniversalId::Type>::const_iterator ModelTypeConstIterator;
+    typedef std::map<CSMWorld::ColumnBase::Display, CSMWorld::UniversalId::Type>::const_iterator ModelTypeConstIterator;
 }
 
 const std::map<CSMWorld::ColumnBase::Display, CSMWorld::UniversalId::Type>
@@ -65,7 +64,7 @@ std::vector<CSMWorld::ColumnBase::Display> CSMWorld::IdCompletionManager::getDis
     return types;
 }
 
-CSMWorld::IdCompletionManager::IdCompletionManager(CSMWorld::Data &data)
+CSMWorld::IdCompletionManager::IdCompletionManager(CSMWorld::Data& data)
 {
     generateCompleters(data);
 }
@@ -84,14 +83,14 @@ std::shared_ptr<QCompleter> CSMWorld::IdCompletionManager::getCompleter(CSMWorld
     return mCompleters[display];
 }
 
-void CSMWorld::IdCompletionManager::generateCompleters(CSMWorld::Data &data)
+void CSMWorld::IdCompletionManager::generateCompleters(CSMWorld::Data& data)
 {
     ModelTypeConstIterator current = sCompleterModelTypes.begin();
     ModelTypeConstIterator end = sCompleterModelTypes.end();
     for (; current != end; ++current)
     {
-        QAbstractItemModel *model = data.getTableModel(current->second);
-        CSMWorld::IdTableBase *table = dynamic_cast<CSMWorld::IdTableBase *>(model);
+        QAbstractItemModel* model = data.getTableModel(current->second);
+        CSMWorld::IdTableBase* table = dynamic_cast<CSMWorld::IdTableBase*>(model);
         if (table != nullptr)
         {
             int idColumn = table->searchColumnIndex(CSMWorld::Columns::ColumnId_Id);
@@ -103,7 +102,7 @@ void CSMWorld::IdCompletionManager::generateCompleters(CSMWorld::Data &data)
                 completer->setCompletionRole(Qt::DisplayRole);
                 completer->setCaseSensitivity(Qt::CaseInsensitive);
 
-                QAbstractItemView *popup = new CSVWidget::CompleterPopup();
+                QAbstractItemView* popup = new CSVWidget::CompleterPopup();
                 completer->setPopup(popup); // The completer takes ownership of the popup
                 completer->setMaxVisibleItems(10);
 

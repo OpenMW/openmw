@@ -35,21 +35,37 @@ void ESM4::Flora::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId);     break;
-            case ESM4::SUB_PFIG: reader.getFormId(mIngredient); break;
-            case ESM4::SUB_PFPC: reader.get(mPercentHarvest);   break;
-            case ESM4::SUB_SNAM: reader.getFormId(mSound);      break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_PFIG:
+                reader.getFormId(mIngredient);
+                break;
+            case ESM4::SUB_PFPC:
+                reader.get(mPercentHarvest);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.getFormId(mSound);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
             case ESM4::SUB_MODT:
             case ESM4::SUB_MODS:
             case ESM4::SUB_FNAM:
@@ -58,7 +74,7 @@ void ESM4::Flora::load(ESM4::Reader& reader)
             case ESM4::SUB_RNAM:
             case ESM4::SUB_VMAD:
             {
-                //std::cout << "FLOR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "FLOR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -68,10 +84,10 @@ void ESM4::Flora::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Flora::save(ESM4::Writer& writer) const
+// void ESM4::Flora::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Flora::blank()
+// void ESM4::Flora::blank()
 //{
-//}
+// }

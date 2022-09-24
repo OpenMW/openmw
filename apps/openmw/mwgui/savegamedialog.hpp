@@ -28,27 +28,27 @@ namespace MWGui
         void confirmDeleteSave();
 
         void onKeyButtonPressed(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character);
-        void onCancelButtonClicked (MyGUI::Widget* sender);
-        void onOkButtonClicked (MyGUI::Widget* sender);
-        void onDeleteButtonClicked (MyGUI::Widget* sender);
-        void onCharacterSelected (MyGUI::ComboBox* sender, size_t pos);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onOkButtonClicked(MyGUI::Widget* sender);
+        void onDeleteButtonClicked(MyGUI::Widget* sender);
+        void onCharacterSelected(MyGUI::ComboBox* sender, size_t pos);
         void onCharacterAccept(MyGUI::ComboBox* sender, size_t pos);
         // Slot selected (mouse click or arrow keys)
-        void onSlotSelected (MyGUI::ListBox* sender, size_t pos);
+        void onSlotSelected(MyGUI::ListBox* sender, size_t pos);
         // Slot activated (double click or enter key)
-        void onSlotActivated (MyGUI::ListBox* sender, size_t pos);
+        void onSlotActivated(MyGUI::ListBox* sender, size_t pos);
         // Slot clicked with mouse
         void onSlotMouseClick(MyGUI::ListBox* sender, size_t pos);
 
         void onDeleteSlotConfirmed();
         void onDeleteSlotCancel();
 
-        void onEditSelectAccept (MyGUI::EditBox* sender);
-        void onSaveNameChanged (MyGUI::EditBox* sender);
+        void onEditSelectAccept(MyGUI::EditBox* sender);
+        void onSaveNameChanged(MyGUI::EditBox* sender);
         void onConfirmationGiven();
         void onConfirmationCancel();
 
-        void accept(bool reallySure=false);
+        void accept(bool reallySure = false);
 
         void fillSaveList();
 
@@ -66,7 +66,6 @@ namespace MWGui
 
         const MWState::Character* mCurrentCharacter;
         const MWState::Slot* mCurrentSlot;
-
     };
 
 }

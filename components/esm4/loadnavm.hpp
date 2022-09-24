@@ -39,7 +39,7 @@ namespace ESM4
 
     struct NavMesh
     {
-#pragma pack(push,1)
+#pragma pack(push, 1)
         struct Triangle
         {
             std::uint16_t vertexIndex0;
@@ -55,7 +55,7 @@ namespace ESM4
         struct ExtConnection
         {
             std::uint32_t unknown;
-            FormId        navMesh;
+            FormId navMesh;
             std::uint16_t triangleIndex;
         };
 
@@ -63,7 +63,7 @@ namespace ESM4
         {
             std::uint16_t triangleIndex;
             std::uint32_t unknown;
-            FormId        doorRef;
+            FormId doorRef;
         };
 #pragma pack(pop)
 
@@ -71,12 +71,12 @@ namespace ESM4
         {
             std::uint32_t unknownNVER;
             std::uint32_t unknownLCTN;
-            FormId        worldSpaceId;
+            FormId worldSpaceId;
             CellGrid cellGrid;
-            std::vector<Vertex>        verticies;
-            std::vector<Triangle>      triangles;
+            std::vector<Vertex> verticies;
+            std::vector<Triangle> triangles;
             std::vector<ExtConnection> extConns;
-            std::vector<DoorTriangle>  doorTriangles;
+            std::vector<DoorTriangle> doorTriangles;
             std::vector<std::uint16_t> coverTriangles;
             std::uint32_t divisor;
             float maxXDist;
@@ -88,18 +88,18 @@ namespace ESM4
             float maxY;
             float maxZ;
             // there are divisor^2 segments, each segment is a vector of triangle indices
-            std::vector<std::vector<std::uint16_t> >  triSegments;
+            std::vector<std::vector<std::uint16_t>> triSegments;
 
             void load(ESM4::Reader& esm);
         };
 
         std::vector<NVNMstruct> mData; // Up to 4 skywind cells in one Morrowind cell
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
         void blank();
     };

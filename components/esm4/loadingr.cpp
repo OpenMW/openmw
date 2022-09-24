@@ -26,8 +26,8 @@
 */
 #include "loadingr.hpp"
 
-#include <stdexcept>
 #include <cstring>
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -36,26 +36,29 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
             case ESM4::SUB_FULL:
             {
                 if (mFullName.empty())
                 {
-                    reader.getLocalizedString(mFullName); break;
+                    reader.getLocalizedString(mFullName);
+                    break;
                 }
                 else // in TES4 subsequent FULL records are script effect names
                 {
                     // FIXME: should be part of a struct?
                     std::string scriptEffectName;
                     if (!reader.getZString(scriptEffectName))
-                        throw std::runtime_error ("INGR FULL data read error");
+                        throw std::runtime_error("INGR FULL data read error");
 
                     mScriptEffect.push_back(scriptEffectName);
 
@@ -64,7 +67,7 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_DATA:
             {
-                //if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 if (subHdr.dataSize == 8) // FO3 is size 4 even though VER_094
                     reader.get(mData);
                 else
@@ -72,11 +75,21 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_ICON: reader.getZString(mIcon);  break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId); break;
-            case ESM4::SUB_ENIT: reader.get(mEnchantment);  break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mIcon);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_ENIT:
+                reader.get(mEnchantment);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
             case ESM4::SUB_SCIT:
             {
                 reader.get(mEffect);
@@ -95,7 +108,7 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
             case ESM4::SUB_ETYP: // FO3
             {
-                //std::cout << "INGR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "INGR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -105,10 +118,10 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Ingredient::save(ESM4::Writer& writer) const
+// void ESM4::Ingredient::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Ingredient::blank()
+// void ESM4::Ingredient::blank()
 //{
-//}
+// }

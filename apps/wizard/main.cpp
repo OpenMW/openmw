@@ -9,7 +9,7 @@
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 
     QApplication app(argc, argv);
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     // Now we make sure the current dir is set to application path
     QDir dir(QCoreApplication::applicationDirPath());
 
-    #ifdef Q_OS_MAC
+#ifdef Q_OS_MAC
     // force Qt to load only LOCAL plugins, don't touch system Qt installation
     QDir pluginsPath(QCoreApplication::applicationDirPath());
     pluginsPath.cdUp();
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     QStringList libraryPaths;
     libraryPaths << pluginsPath.path() << QCoreApplication::applicationDirPath();
     app.setLibraryPaths(libraryPaths);
-    #endif
+#endif
 
     QDir::setCurrent(dir.absolutePath());
 

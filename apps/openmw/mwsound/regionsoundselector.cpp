@@ -1,8 +1,8 @@
 #include "regionsoundselector.hpp"
 
+#include <components/esm3/loadregn.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/misc/rng.hpp>
-#include <components/esm3/loadregn.hpp>
 
 #include <algorithm>
 #include <numeric>
@@ -14,19 +14,20 @@ namespace MWSound
 {
     namespace
     {
-        int addChance(int result, const ESM::Region::SoundRef &v)
+        int addChance(int result, const ESM::Region::SoundRef& v)
         {
             return result + v.mChance;
         }
     }
 
     RegionSoundSelector::RegionSoundSelector()
-    : mMinTimeBetweenSounds(Fallback::Map::getFloat("Weather_Minimum_Time_Between_Environmental_Sounds"))
-    , mMaxTimeBetweenSounds(Fallback::Map::getFloat("Weather_Maximum_Time_Between_Environmental_Sounds"))
-    {}
+        : mMinTimeBetweenSounds(Fallback::Map::getFloat("Weather_Minimum_Time_Between_Environmental_Sounds"))
+        , mMaxTimeBetweenSounds(Fallback::Map::getFloat("Weather_Maximum_Time_Between_Environmental_Sounds"))
+    {
+    }
 
-    std::optional<std::string> RegionSoundSelector::getNextRandom(float duration, const std::string& regionName,
-                                                                    const MWBase::World& world)
+    std::optional<std::string> RegionSoundSelector::getNextRandom(
+        float duration, const std::string& regionName, const MWBase::World& world)
     {
         mTimePassed += duration;
 
@@ -58,8 +59,7 @@ namespace MWSound
         const int r = Misc::Rng::rollDice(std::max(mSumChance, 100));
         int pos = 0;
 
-        const auto isSelected = [&] (const ESM::Region::SoundRef& sound)
-        {
+        const auto isSelected = [&](const ESM::Region::SoundRef& sound) {
             if (r - pos < sound.mChance)
                 return true;
             pos += sound.mChance;

@@ -26,8 +26,8 @@
 */
 #include "loadpack.hpp"
 
-#include <stdexcept>
 #include <cstring>
+#include <stdexcept>
 //#include <iostream> // FIXME: for debugging only
 
 #include "reader.hpp"
@@ -37,19 +37,21 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
             case ESM4::SUB_PKDT:
             {
                 if (subHdr.dataSize != sizeof(PKDT) && subHdr.dataSize == 4)
                 {
-                    //std::cout << "skip fallout" << mEditorId << std::endl; // FIXME
+                    // std::cout << "skip fallout" << mEditorId << std::endl; // FIXME
                     reader.get(mData.flags);
                     mData.type = 0; // FIXME
                 }
@@ -60,7 +62,7 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PSDT: //reader.get(mSchedule); break;
+            case ESM4::SUB_PSDT: // reader.get(mSchedule); break;
             {
                 if (subHdr.dataSize != sizeof(mSchedule))
                     reader.skipSubRecordData(); // FIXME:
@@ -106,8 +108,8 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
                 static CTDA condition;
                 reader.get(condition);
                 // FIXME: how to "unadjust" if not FormId?
-                //adjustFormId(condition.param1);
-                //adjustFormId(condition.param2);
+                // adjustFormId(condition.param1);
+                // adjustFormId(condition.param2);
                 mConditions.push_back(condition);
 
                 break;
@@ -162,8 +164,8 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
             case ESM4::SUB_VMAD: // TES5
             case ESM4::SUB_TPIC: // TES5
             {
-                //std::cout << "PACK " << ESM::printName(subHdr.typeId) << " skipping..."
-                        //<< subHdr.dataSize << std::endl;
+                // std::cout << "PACK " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -173,10 +175,10 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::AIPackage::save(ESM4::Writer& writer) const
+// void ESM4::AIPackage::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::AIPackage::blank()
+// void ESM4::AIPackage::blank()
 //{
-//}
+// }

@@ -36,21 +36,37 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_DESC: reader.getLocalizedString(mText); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId); break;
-            case ESM4::SUB_PNAM: reader.getFormId(mPasswordNote); break;
-            case ESM4::SUB_SNAM: reader.getFormId(mSound); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_RNAM: reader.getZString(mResultText); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_DESC:
+                reader.getLocalizedString(mText);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_PNAM:
+                reader.getFormId(mPasswordNote);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.getFormId(mSound);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_RNAM:
+                reader.getZString(mResultText);
+                break;
             case ESM4::SUB_DNAM: // difficulty
             case ESM4::SUB_ANAM: // flags
             case ESM4::SUB_CTDA:
@@ -68,7 +84,7 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND:
             case ESM4::SUB_MODS: // FONV
             {
-                //std::cout << "TERM " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "TERM " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -78,10 +94,10 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Terminal::save(ESM4::Writer& writer) const
+// void ESM4::Terminal::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Terminal::blank()
+// void ESM4::Terminal::blank()
 //{
-//}
+// }

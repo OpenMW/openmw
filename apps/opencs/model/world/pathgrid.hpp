@@ -1,18 +1,18 @@
 #ifndef CSM_WOLRD_PATHGRID_H
 #define CSM_WOLRD_PATHGRID_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <components/esm3/loadpgrd.hpp>
 
 namespace CSMWorld
 {
     struct Cell;
-    template<typename T, typename AT>
+    template <typename T, typename AT>
     class IdCollection;
 
-    template<typename ESXRecordT>
+    template <typename ESXRecordT>
     struct IdAccessor;
 
     /// \brief Wrapper for Pathgrid record
@@ -23,8 +23,8 @@ namespace CSMWorld
     {
         std::string mId;
 
-        void load (ESM::ESMReader &esm, bool &isDeleted, const IdCollection<Cell, IdAccessor<Cell> >& cells);
-        void load (ESM::ESMReader &esm, bool &isDeleted);
+        void load(ESM::ESMReader& esm, bool& isDeleted, const IdCollection<Cell, IdAccessor<Cell>>& cells);
+        void load(ESM::ESMReader& esm, bool& isDeleted);
     };
 }
 

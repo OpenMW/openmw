@@ -7,8 +7,8 @@
 #include <filesystem>
 
 #include <components/debug/debuglog.hpp>
-#include <components/vfs/manager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/vfs/manager.hpp>
 
 namespace LuaUtil
 {
@@ -27,7 +27,8 @@ namespace LuaUtil
             throw std::runtime_error("module not found: " + std::string(packageName));
     }
 
-    static std::filesystem::path packageNameToPath(std::string_view packageName, const std::vector<std::filesystem::path> &searchDirs)
+    static std::filesystem::path packageNameToPath(
+        std::string_view packageName, const std::vector<std::filesystem::path>& searchDirs)
     {
         std::string path(packageName);
         std::replace(path.begin(), path.end(), '.', '/');
@@ -45,18 +46,19 @@ namespace LuaUtil
         throw std::runtime_error("module not found: " + std::string(packageName));
     }
 
-    static const std::string safeFunctions[] = {
-        "assert", "error", "ipairs", "next", "pairs", "pcall", "select", "tonumber", "tostring",
-        "type", "unpack", "xpcall", "rawequal", "rawget", "rawset", "setmetatable"};
-    static const std::string safePackages[] = {"coroutine", "math", "string", "table"};
+    static const std::string safeFunctions[] = { "assert", "error", "ipairs", "next", "pairs", "pcall", "select",
+        "tonumber", "tostring", "type", "unpack", "xpcall", "rawequal", "rawget", "rawset", "setmetatable" };
+    static const std::string safePackages[] = { "coroutine", "math", "string", "table" };
 
-    LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf) : mConf(conf), mVFS(vfs)
+    LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf)
+        : mConf(conf)
+        , mVFS(vfs)
     {
-        mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32,
-                            sol::lib::string, sol::lib::table, sol::lib::os, sol::lib::debug);
+        mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32, sol::lib::string,
+            sol::lib::table, sol::lib::os, sol::lib::debug);
 
         mLua["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
-        mLua["math"]["randomseed"] = []{};
+        mLua["math"]["randomseed"] = [] {};
 
         mLua["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
 
@@ -124,20 +126,20 @@ namespace LuaUtil
         mSandboxEnv["_VERSION"] = mLua["_VERSION"];
         for (const std::string& s : safeFunctions)
         {
-            if (mLua[s] == sol::nil) throw std::logic_error("Lua function not found: " + s);
+            if (mLua[s] == sol::nil)
+                throw std::logic_error("Lua function not found: " + s);
             mSandboxEnv[s] = mLua[s];
         }
         for (const std::string& s : safePackages)
         {
-            if (mLua[s] == sol::nil) throw std::logic_error("Lua package not found: " + s);
+            if (mLua[s] == sol::nil)
+                throw std::logic_error("Lua package not found: " + s);
             mCommonPackages[s] = mSandboxEnv[s] = makeReadOnly(mLua[s]);
         }
         mSandboxEnv["getmetatable"] = mLua["getSafeMetatable"];
-        mCommonPackages["os"] = mSandboxEnv["os"] = makeReadOnly(tableFromPairs<std::string_view, sol::function>({
-            {"date", mLua["os"]["date"]},
-            {"difftime", mLua["os"]["difftime"]},
-            {"time", mLua["os"]["time"]}
-        }));
+        mCommonPackages["os"] = mSandboxEnv["os"]
+            = makeReadOnly(tableFromPairs<std::string_view, sol::function>({ { "date", mLua["os"]["date"] },
+                { "difftime", mLua["os"]["difftime"] }, { "time", mLua["os"]["time"] } }));
     }
 
     LuaState::~LuaState()
@@ -152,7 +154,7 @@ namespace LuaUtil
         if (table == sol::nil)
             return table;
         if (table.is<sol::userdata>())
-            return table;  // it is already userdata, no sense to wrap it again
+            return table; // it is already userdata, no sense to wrap it again
 
         lua_State* luaState = table.lua_state();
         sol::state_view lua(luaState);
@@ -183,8 +185,7 @@ namespace LuaUtil
         mCommonPackages.emplace(std::move(packageName), std::move(package));
     }
 
-    sol::protected_function_result LuaState::runInNewSandbox(
-        const std::string& path, const std::string& namePrefix,
+    sol::protected_function_result LuaState::runInNewSandbox(const std::string& path, const std::string& namePrefix,
         const std::map<std::string, sol::object>& packages, const sol::object& hiddenData)
     {
         sol::protected_function script = loadScriptAndCache(path);
@@ -195,8 +196,7 @@ namespace LuaUtil
         env["_G"] = env;
         env[sol::metatable_key]["__metatable"] = false;
 
-        auto maybeRunLoader = [&hiddenData](const sol::object& package) -> sol::object
-        {
+        auto maybeRunLoader = [&hiddenData](const sol::object& package) -> sol::object {
             if (package.is<sol::function>())
                 return call(package.as<sol::function>(), hiddenData);
             else
@@ -207,8 +207,7 @@ namespace LuaUtil
             loaded[key] = maybeRunLoader(value);
         for (const auto& [key, value] : packages)
             loaded[key] = maybeRunLoader(value);
-        env["require"] = [this, env, loaded, hiddenData](std::string_view packageName) mutable
-        {
+        env["require"] = [this, env, loaded, hiddenData](std::string_view packageName) mutable {
             sol::object package = loaded[packageName];
             if (package != sol::nil)
                 return package;
@@ -229,8 +228,7 @@ namespace LuaUtil
         sol::table loaded(mLua, sol::create);
         for (const std::string& s : safePackages)
             loaded[s] = static_cast<sol::object>(mSandboxEnv[s]);
-        env["require"] = [this, loaded, env](const std::string& module) mutable
-        {
+        env["require"] = [this, loaded, env](const std::string& module) mutable {
             if (loaded[module] != sol::nil)
                 return loaded[module];
             sol::protected_function initializer = loadInternalLib(module);
@@ -279,11 +277,11 @@ namespace LuaUtil
 
     std::string getLuaVersion()
     {
-        #ifdef NO_LUAJIT
+#ifdef NO_LUAJIT
         return LUA_RELEASE;
-        #else
+#else
         return LUA_RELEASE " (" LUAJIT_VERSION ")";
-        #endif
+#endif
     }
 
     std::string toString(const sol::object& obj)

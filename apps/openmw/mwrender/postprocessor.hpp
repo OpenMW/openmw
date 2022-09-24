@@ -2,22 +2,22 @@
 #define OPENMW_MWRENDER_POSTPROCESSOR_H
 
 #include <array>
-#include <vector>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <filesystem>
 
-#include <osg/Texture2D>
-#include <osg/Group>
-#include <osg/FrameBufferObject>
 #include <osg/Camera>
+#include <osg/FrameBufferObject>
+#include <osg/Group>
+#include <osg/Texture2D>
 
 #include <osgViewer/Viewer>
 
+#include <components/debug/debuglog.hpp>
 #include <components/fx/stateupdater.hpp>
 #include <components/fx/technique.hpp>
-#include <components/debug/debuglog.hpp>
 
 #include "pingpongcanvas.hpp"
 #include "transparentpass.hpp"
@@ -93,17 +93,27 @@ namespace MWRender
             Status_Unchanged
         };
 
-        PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode, const VFS::Manager* vfs);
+        PostProcessor(
+            RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode, const VFS::Manager* vfs);
 
         ~PostProcessor();
 
         void traverse(osg::NodeVisitor& nv) override;
 
-        osg::ref_ptr<osg::FrameBufferObject> getFbo(FBOIndex index, unsigned int frameId) { return mFbos[frameId][index]; }
+        osg::ref_ptr<osg::FrameBufferObject> getFbo(FBOIndex index, unsigned int frameId)
+        {
+            return mFbos[frameId][index];
+        }
 
-        osg::ref_ptr<osg::Texture> getTexture(TextureIndex index, unsigned int frameId) { return mTextures[frameId][index]; }
+        osg::ref_ptr<osg::Texture> getTexture(TextureIndex index, unsigned int frameId)
+        {
+            return mTextures[frameId][index];
+        }
 
-        osg::ref_ptr<osg::FrameBufferObject> getPrimaryFbo(unsigned int frameId) { return mFbos[frameId][FBO_Multisample] ? mFbos[frameId][FBO_Multisample] : mFbos[frameId][FBO_Primary]; }
+        osg::ref_ptr<osg::FrameBufferObject> getPrimaryFbo(unsigned int frameId)
+        {
+            return mFbos[frameId][FBO_Multisample] ? mFbos[frameId][FBO_Multisample] : mFbos[frameId][FBO_Primary];
+        }
 
         osg::ref_ptr<fx::StateUpdater> getStateUpdater() { return mStateUpdater; }
 
@@ -161,11 +171,11 @@ namespace MWRender
 
         void toggleMode();
 
-        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame=false);
+        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame = false);
 
         bool isEnabled() const { return mUsePostProcessing && mEnabled; }
 
-        bool softParticlesEnabled() const {return mSoftParticles; }
+        bool softParticlesEnabled() const { return mSoftParticles; }
 
         bool getHDR() const { return mHDR; }
 
@@ -173,7 +183,11 @@ namespace MWRender
 
         void enable(bool usePostProcessing = true);
 
-        void setRenderTargetSize(int width, int height) { mWidth = width; mHeight = height; }
+        void setRenderTargetSize(int width, int height)
+        {
+            mWidth = width;
+            mHeight = height;
+        }
 
         void disableDynamicShaders();
 
@@ -187,9 +201,7 @@ namespace MWRender
         void loadChain();
         void saveChain();
 
-
     private:
-
         void populateTechniqueFiles();
 
         size_t frame() const { return mViewer->getFrameStamp()->getFrameNumber(); }
@@ -256,7 +268,7 @@ namespace MWRender
         osg::ref_ptr<PingPongCull> mPingPongCull;
         osg::ref_ptr<PingPongCanvas> mPingPongCanvas;
         osg::ref_ptr<TransparentDepthBinCallback> mTransparentDepthPostPass;
-    
+
         int mWidth;
         int mHeight;
 

@@ -4,10 +4,10 @@
 
 #include <components/resource/resourcesystem.hpp>
 
-#include "world.hpp"
 #include "mechanicsmanager.hpp"
+#include "world.hpp"
 
-MWBase::Environment *MWBase::Environment::sThis = nullptr;
+MWBase::Environment* MWBase::Environment::sThis = nullptr;
 
 MWBase::Environment::Environment()
 {

@@ -1,12 +1,12 @@
 #include "manager.hpp"
 
-#include <stdexcept>
-#include <istream>
 #include <algorithm>
+#include <istream>
+#include <stdexcept>
 
-#include <components/misc/strings/lower.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "archive.hpp"
 
@@ -37,7 +37,6 @@ namespace VFS
     Manager::Manager(bool strict)
         : mStrict(strict)
     {
-
     }
 
     Manager::~Manager() {}
@@ -69,7 +68,7 @@ namespace VFS
         return getNormalized(normalized);
     }
 
-    Files::IStreamPtr Manager::getNormalized(const std::string &normalizedName) const
+    Files::IStreamPtr Manager::getNormalized(const std::string& normalizedName) const
     {
         std::map<std::string, File*>::const_iterator found = mIndex.find(normalizedName);
         if (found == mIndex.end())
@@ -96,15 +95,15 @@ namespace VFS
     {
         std::string normalized(name);
         normalize_path(normalized, mStrict);
-        for(auto it = mArchives.rbegin(); it != mArchives.rend(); ++it)
+        for (auto it = mArchives.rbegin(); it != mArchives.rend(); ++it)
         {
-            if((*it)->contains(normalized, mStrict ? &strict_normalize_char : &nonstrict_normalize_char))
+            if ((*it)->contains(normalized, mStrict ? &strict_normalize_char : &nonstrict_normalize_char))
                 return (*it)->getDescription();
         }
         return {};
     }
 
-    std::filesystem::path Manager::getAbsoluteFileName(const std::filesystem::path &name) const
+    std::filesystem::path Manager::getAbsoluteFileName(const std::filesystem::path& name) const
     {
         std::string normalized = Files::pathToUnicodeString(name);
         normalize_path(normalized, mStrict);

@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "npcstate.hpp"
 #include "cellid.hpp"
 #include "components/esm/defs.hpp"
+#include "npcstate.hpp"
 
-#include "loadskil.hpp"
 #include "components/esm/attr.hpp"
+#include "loadskil.hpp"
 
 namespace ESM
 {
@@ -37,8 +37,8 @@ namespace ESM
         typedef std::map<std::string, std::string> PreviousItems; // previous equipped items, needed for bound spells
         PreviousItems mPreviousItems;
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 }
 

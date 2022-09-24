@@ -43,7 +43,7 @@ namespace SDLUtil
         bool mHasSetGammaContrast;
 
         // Store system gamma ramp on window creation. Restore system gamma ramp on exit
-        Uint16 mOldSystemGammaRamp[256*3];
+        Uint16 mOldSystemGammaRamp[256 * 3];
     };
 
 }

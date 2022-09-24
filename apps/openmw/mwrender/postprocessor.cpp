@@ -1,41 +1,41 @@
 #include "postprocessor.hpp"
 
+#include <SDL_opengl_glext.h>
 #include <algorithm>
 #include <chrono>
 #include <thread>
-#include <SDL_opengl_glext.h>
 
 #include <osg/Texture1D>
 #include <osg/Texture2D>
+#include <osg/Texture2DArray>
 #include <osg/Texture2DMultisample>
 #include <osg/Texture3D>
-#include <osg/Texture2DArray>
 
-#include <components/settings/settings.hpp>
-#include <components/sceneutil/depth.hpp>
+#include <components/files/conversion.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/color.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/util.hpp>
-#include <components/resource/scenemanager.hpp>
+#include <components/settings/settings.hpp>
 #include <components/shader/shadermanager.hpp>
-#include <components/misc/strings/lower.hpp>
-#include <components/misc/strings/algorithm.hpp>
-#include <components/vfs/manager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
-#include <components/files/conversion.hpp>
+#include <components/vfs/manager.hpp>
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwgui/postprocessorhud.hpp"
 
-#include "transparentpass.hpp"
 #include "pingpongcull.hpp"
 #include "renderingmanager.hpp"
-#include "vismask.hpp"
 #include "sky.hpp"
+#include "transparentpass.hpp"
+#include "vismask.hpp"
 
 namespace
 {
@@ -43,7 +43,8 @@ namespace
     {
         ResizedCallback(MWRender::PostProcessor* postProcessor)
             : mPostProcessor(postProcessor)
-        { }
+        {
+        }
 
         void resizedImplementation(osg::GraphicsContext* gc, int x, int y, int width, int height) override
         {
@@ -65,9 +66,11 @@ namespace
             auto& sm = Stereo::Manager::instance();
             auto* fullViewport = camera->getViewport();
             if (sm.getEye(cv) == Stereo::Eye::Left)
-                stateset->setAttributeAndModes(new osg::Viewport(0, 0, fullViewport->width() / 2, fullViewport->height()));
+                stateset->setAttributeAndModes(
+                    new osg::Viewport(0, 0, fullViewport->width() / 2, fullViewport->height()));
             if (sm.getEye(cv) == Stereo::Eye::Right)
-                stateset->setAttributeAndModes(new osg::Viewport(fullViewport->width() / 2, 0, fullViewport->width() / 2, fullViewport->height()));
+                stateset->setAttributeAndModes(
+                    new osg::Viewport(fullViewport->width() / 2, 0, fullViewport->width() / 2, fullViewport->height()));
 
             cv->pushStateSet(stateset);
             traverse(camera, cv);
@@ -81,11 +84,13 @@ namespace
         TEXTURE,
     };
 
-    static osg::FrameBufferAttachment createFrameBufferAttachmentFromTemplate(Usage usage, int width, int height, osg::Texture* template_, int samples)
+    static osg::FrameBufferAttachment createFrameBufferAttachmentFromTemplate(
+        Usage usage, int width, int height, osg::Texture* template_, int samples)
     {
         if (usage == Usage::RENDER_BUFFER && !Stereo::getMultiview())
         {
-            osg::ref_ptr<osg::RenderBuffer> attachment = new osg::RenderBuffer(width, height, template_->getInternalFormat(), samples);
+            osg::ref_ptr<osg::RenderBuffer> attachment
+                = new osg::RenderBuffer(width, height, template_->getInternalFormat(), samples);
             return osg::FrameBufferAttachment(attachment);
         }
 
@@ -104,7 +109,8 @@ namespace
 
 namespace MWRender
 {
-    PostProcessor::PostProcessor(RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode, const VFS::Manager* vfs)
+    PostProcessor::PostProcessor(
+        RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode, const VFS::Manager* vfs)
         : osg::Group()
         , mEnableLiveReload(false)
         , mRootNode(rootNode)
@@ -211,7 +217,6 @@ namespace MWRender
 
         mDirty = true;
         mDirtyFrameId = !frameId;
-
     }
 
     void PostProcessor::populateTechniqueFiles()
@@ -243,7 +248,8 @@ namespace MWRender
 
         if (!mDisableDepthPasses)
         {
-            mTransparentDepthPostPass = new TransparentDepthBinCallback(mRendering.getResourceSystem()->getSceneManager()->getShaderManager(), postPass);
+            mTransparentDepthPostPass = new TransparentDepthBinCallback(
+                mRendering.getResourceSystem()->getSceneManager()->getShaderManager(), postPass);
             osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
         }
 
@@ -324,12 +330,12 @@ namespace MWRender
         mPingPongCanvas->setHDR(frameId, getHDR());
 
         mPingPongCanvas->setSceneTexture(frameId, getTexture(Tex_Scene, frameId));
-            if (mDisableDepthPasses)
-                mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_Depth, frameId));
-            else
-                mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_OpaqueDepth, frameId));
+        if (mDisableDepthPasses)
+            mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_Depth, frameId));
+        else
+            mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_OpaqueDepth, frameId));
 
-            mPingPongCanvas->setLDRSceneTexture(frameId, getTexture(Tex_Scene_LDR, frameId));
+        mPingPongCanvas->setLDRSceneTexture(frameId, getTexture(Tex_Scene_LDR, frameId));
 
         if (mTransparentDepthPostPass)
         {
@@ -370,7 +376,7 @@ namespace MWRender
         if (!mEnableLiveReload && !mTriggerShaderReload)
             return;
 
-        mTriggerShaderReload = false;//Done only once
+        mTriggerShaderReload = false; // Done only once
 
         for (auto& technique : mTechniques)
         {
@@ -383,7 +389,8 @@ namespace MWRender
             if (!isDirty)
                 continue;
 
-            // TODO: Temporary workaround to avoid conflicts with external programs saving the file, especially problematic on Windows.
+            // TODO: Temporary workaround to avoid conflicts with external programs saving the file, especially
+            // problematic on Windows.
             //       If we move to a file watcher using native APIs this should be removed.
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
@@ -470,50 +477,66 @@ namespace MWRender
         }
 
         fbos[FBO_Primary] = new osg::FrameBufferObject;
-        fbos[FBO_Primary]->setAttachment(osg::Camera::COLOR_BUFFER0, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
+        fbos[FBO_Primary]->setAttachment(
+            osg::Camera::COLOR_BUFFER0, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
         if (mNormals && mNormalsSupported)
-            fbos[FBO_Primary]->setAttachment(osg::Camera::COLOR_BUFFER1, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
-        fbos[FBO_Primary]->setAttachment(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Depth]));
+            fbos[FBO_Primary]->setAttachment(
+                osg::Camera::COLOR_BUFFER1, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
+        fbos[FBO_Primary]->setAttachment(
+            osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Depth]));
 
         fbos[FBO_FirstPerson] = new osg::FrameBufferObject;
 
-        auto fpDepthRb = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
-        fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, osg::FrameBufferAttachment(fpDepthRb));
+        auto fpDepthRb = createFrameBufferAttachmentFromTemplate(
+            Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
+        fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER,
+            osg::FrameBufferAttachment(fpDepthRb));
 
         if (mSamples > 1)
         {
             fbos[FBO_Multisample] = new osg::FrameBufferObject;
-            auto colorRB = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Scene], mSamples);
+            auto colorRB = createFrameBufferAttachmentFromTemplate(
+                Usage::RENDER_BUFFER, width, height, textures[Tex_Scene], mSamples);
             if (mNormals && mNormalsSupported)
             {
-                auto normalRB = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Normal], mSamples);
+                auto normalRB = createFrameBufferAttachmentFromTemplate(
+                    Usage::RENDER_BUFFER, width, height, textures[Tex_Normal], mSamples);
                 fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
             }
-            auto depthRB = createFrameBufferAttachmentFromTemplate(Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
+            auto depthRB = createFrameBufferAttachmentFromTemplate(
+                Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
             fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, colorRB);
-            fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, depthRB);
+            fbos[FBO_Multisample]->setAttachment(
+                osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, depthRB);
             fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, colorRB);
 
             fbos[FBO_Intercept] = new osg::FrameBufferObject;
-            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
-            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
+            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
+                Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
+            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1,
+                Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
         }
         else
         {
-            fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
+            fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
+                Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
             if (mNormals && mNormalsSupported)
-                fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
+                fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1,
+                    Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
         }
 
         if (textures[Tex_OpaqueDepth])
         {
             fbos[FBO_OpaqueDepth] = new osg::FrameBufferObject;
-            fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, Stereo::createMultiviewCompatibleAttachment(textures[Tex_OpaqueDepth]));
+            fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER,
+                Stereo::createMultiviewCompatibleAttachment(textures[Tex_OpaqueDepth]));
         }
 
 #ifdef __APPLE__
         if (textures[Tex_OpaqueDepth])
-            fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER, osg::FrameBufferAttachment(new osg::RenderBuffer(textures[Tex_OpaqueDepth]->getTextureWidth(), textures[Tex_OpaqueDepth]->getTextureHeight(), textures[Tex_Scene]->getInternalFormat())));
+            fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER,
+                osg::FrameBufferAttachment(new osg::RenderBuffer(textures[Tex_OpaqueDepth]->getTextureWidth(),
+                    textures[Tex_OpaqueDepth]->getTextureHeight(), textures[Tex_Scene]->getInternalFormat())));
 #endif
     }
 
@@ -541,7 +564,8 @@ namespace MWRender
 
             if (technique->getGLSLVersion() > mGLSLVersion)
             {
-                Log(Debug::Warning) << "Technique " << technique->getName() << " requires GLSL version " << technique->getGLSLVersion() << " which is unsupported by your hardware.";
+                Log(Debug::Warning) << "Technique " << technique->getName() << " requires GLSL version "
+                                    << technique->getGLSLVersion() << " which is unsupported by your hardware.";
                 continue;
             }
 
@@ -590,10 +614,12 @@ namespace MWRender
             // user-defined uniforms
             for (auto& uniform : technique->getUniformMap())
             {
-                if (uniform->mSamplerType) continue;
+                if (uniform->mSamplerType)
+                    continue;
 
                 if (auto type = uniform->getType())
-                    uniform->setUniform(node.mRootStateSet->getOrCreateUniform(uniform->mName.c_str(), *type, uniform->getNumElements()));
+                    uniform->setUniform(node.mRootStateSet->getOrCreateUniform(
+                        uniform->mName.c_str(), *type, uniform->getNumElements()));
             }
 
             std::unordered_map<osg::Texture2D*, osg::Texture2D*> renderTargetCache;
@@ -622,7 +648,8 @@ namespace MWRender
                         subPass.mRenderTexture->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
 
                     subPass.mRenderTarget = new osg::FrameBufferObject;
-                    subPass.mRenderTarget->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(subPass.mRenderTexture));
+                    subPass.mRenderTarget->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
+                        osg::FrameBufferAttachment(subPass.mRenderTexture));
                     subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
                 }
 
@@ -652,7 +679,8 @@ namespace MWRender
         mRendering.getSkyManager()->setSunglare(sunglare);
     }
 
-    PostProcessor::Status PostProcessor::enableTechnique(std::shared_ptr<fx::Technique> technique, std::optional<int> location)
+    PostProcessor::Status PostProcessor::enableTechnique(
+        std::shared_ptr<fx::Technique> technique, std::optional<int> location)
     {
         if (!isEnabled())
         {
@@ -727,7 +755,7 @@ namespace MWRender
         textures[Tex_Normal]->setSourceFormat(GL_RGB);
         textures[Tex_Normal]->setInternalFormat(GL_RGB);
 
-        auto setupDepth = [] (osg::Texture* tex) {
+        auto setupDepth = [](osg::Texture* tex) {
             tex->setSourceFormat(GL_DEPTH_STENCIL_EXT);
             tex->setSourceType(SceneUtil::AutoDepth::depthSourceType());
             tex->setInternalFormat(SceneUtil::AutoDepth::depthInternalFormat());
@@ -785,12 +813,14 @@ namespace MWRender
             if (Misc::StringUtils::ciEqual(technique->getName(), name))
                 return technique;
 
-        auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(), name, renderWidth(), renderHeight(), mUBO, mNormalsSupported);
+        auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(),
+            name, renderWidth(), renderHeight(), mUBO, mNormalsSupported);
 
         technique->compile();
 
         if (technique->getStatus() != fx::Technique::Status::File_Not_exists)
-            technique->setLastModificationTime(std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
+            technique->setLastModificationTime(
+                std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
 
         if (loadNextFrame)
         {
@@ -827,7 +857,8 @@ namespace MWRender
     {
         std::vector<std::string> chain;
 
-        for (const auto& technique : mTechniques) {
+        for (const auto& technique : mTechniques)
+        {
             if (!technique || technique->getDynamic())
                 continue;
             chain.push_back(technique->getName());
@@ -870,4 +901,3 @@ namespace MWRender
         mTriggerShaderReload = true;
     }
 }
-

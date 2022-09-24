@@ -1,9 +1,9 @@
 #ifndef OPENMW_ESM_CREATURESTATE_H
 #define OPENMW_ESM_CREATURESTATE_H
 
-#include "objectstate.hpp"
-#include "inventorystate.hpp"
 #include "creaturestats.hpp"
+#include "inventorystate.hpp"
+#include "objectstate.hpp"
 
 namespace ESM
 {
@@ -17,17 +17,11 @@ namespace ESM
         /// Initialize to default state
         void blank() override;
 
-        void load (ESMReader &esm) override;
-        void save (ESMWriter &esm, bool inInventory = false) const override;
+        void load(ESMReader& esm) override;
+        void save(ESMWriter& esm, bool inInventory = false) const override;
 
-        CreatureState& asCreatureState() override
-        {
-            return *this;
-        }
-        const CreatureState& asCreatureState() const override
-        {
-            return *this;
-        }
+        CreatureState& asCreatureState() override { return *this; }
+        const CreatureState& asCreatureState() const override { return *this; }
     };
 }
 

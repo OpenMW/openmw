@@ -1,10 +1,10 @@
 #ifndef CSM_DOC_SAVINGSTATE_H
 #define CSM_DOC_SAVINGSTATE_H
 
-#include <fstream>
-#include <map>
 #include <deque>
 #include <filesystem>
+#include <fstream>
+#include <map>
 
 #include <components/esm3/esmwriter.hpp>
 
@@ -17,40 +17,37 @@ namespace CSMDoc
 
     class SavingState
     {
-            Operation& mOperation;
-            std::filesystem::path mPath;
-            std::filesystem::path mTmpPath;
-            ToUTF8::Utf8Encoder mEncoder;
-            std::ofstream mStream;
-            ESM::ESMWriter mWriter;
-            std::filesystem::path mProjectPath;
-            bool mProjectFile;
-            std::map<std::string, std::deque<int> > mSubRecords; // record ID, list of subrecords
+        Operation& mOperation;
+        std::filesystem::path mPath;
+        std::filesystem::path mTmpPath;
+        ToUTF8::Utf8Encoder mEncoder;
+        std::ofstream mStream;
+        ESM::ESMWriter mWriter;
+        std::filesystem::path mProjectPath;
+        bool mProjectFile;
+        std::map<std::string, std::deque<int>> mSubRecords; // record ID, list of subrecords
 
-        public:
+    public:
+        SavingState(Operation& operation, std::filesystem::path projectPath, ToUTF8::FromType encoding);
 
-            SavingState (Operation& operation, std::filesystem::path  projectPath,
-                ToUTF8::FromType encoding);
+        bool hasError() const;
 
-            bool hasError() const;
+        void start(Document& document, bool project);
+        ///< \param project Save project file instead of content file.
 
-            void start (Document& document, bool project);
-            ///< \param project Save project file instead of content file.
+        const std::filesystem::path& getPath() const;
 
-            const std::filesystem::path& getPath() const;
+        const std::filesystem::path& getTmpPath() const;
 
-            const std::filesystem::path& getTmpPath() const;
+        std::ofstream& getStream();
 
-            std::ofstream& getStream();
+        ESM::ESMWriter& getWriter();
 
-            ESM::ESMWriter& getWriter();
+        bool isProjectFile() const;
+        ///< Currently saving project file? (instead of content file)
 
-            bool isProjectFile() const;
-            ///< Currently saving project file? (instead of content file)
-
-            std::map<std::string, std::deque<int> >& getSubRecords();
+        std::map<std::string, std::deque<int>>& getSubRecords();
     };
-
 
 }
 

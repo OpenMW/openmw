@@ -31,12 +31,12 @@ namespace DetourNavigator
         return tie(lhs) < tie(rhs);
     }
 
-    inline bool operator ==(const TileBounds& lhs, const TileBounds& rhs) noexcept
+    inline bool operator==(const TileBounds& lhs, const TileBounds& rhs) noexcept
     {
         return tie(lhs) == tie(rhs);
     }
 
-    inline bool operator !=(const TileBounds& lhs, const TileBounds& rhs) noexcept
+    inline bool operator!=(const TileBounds& lhs, const TileBounds& rhs) noexcept
     {
         return !(lhs == rhs);
     }
@@ -51,15 +51,13 @@ namespace DetourNavigator
         const float maxY = std::min(a.mMax.y(), b.mMax.y());
         if (minY > maxY)
             return std::nullopt;
-        return TileBounds {osg::Vec2f(minX, minY), osg::Vec2f(maxX, maxY)};
+        return TileBounds{ osg::Vec2f(minX, minY), osg::Vec2f(maxX, maxY) };
     }
 
     inline TileBounds maxCellTileBounds(const osg::Vec2i& position, int size)
     {
-        return TileBounds {
-            osg::Vec2f(position.x(), position.y()) * size,
-            osg::Vec2f(position.x() + 1, position.y() + 1) * size
-        };
+        return TileBounds{ osg::Vec2f(position.x(), position.y()) * size,
+            osg::Vec2f(position.x() + 1, position.y() + 1) * size };
     }
 
     inline TileBounds makeObjectTileBounds(const btCollisionShape& shape, const btTransform& transform)
@@ -67,7 +65,7 @@ namespace DetourNavigator
         btVector3 aabbMin;
         btVector3 aabbMax;
         shape.getAabb(transform, aabbMin, aabbMax);
-        return TileBounds {Misc::Convert::toOsgXY(aabbMin), Misc::Convert::toOsgXY(aabbMax)};
+        return TileBounds{ Misc::Convert::toOsgXY(aabbMin), Misc::Convert::toOsgXY(aabbMax) };
     }
 }
 

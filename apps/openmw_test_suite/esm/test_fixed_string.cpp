@@ -1,13 +1,13 @@
-#include <gtest/gtest.h>
-#include "components/esm/esmcommon.hpp"
 #include "components/esm/defs.hpp"
+#include "components/esm/esmcommon.hpp"
+#include <gtest/gtest.h>
 
 TEST(EsmFixedString, operator__eq_ne)
 {
     {
         SCOPED_TRACE("asdc == asdc");
         constexpr ESM::NAME name("asdc");
-        char s[4] = {'a', 's', 'd', 'c'};
+        char s[4] = { 'a', 's', 'd', 'c' };
         std::string ss(s, 4);
 
         EXPECT_TRUE(name == s);
@@ -17,7 +17,7 @@ TEST(EsmFixedString, operator__eq_ne)
     {
         SCOPED_TRACE("asdc == asdcx");
         constexpr ESM::NAME name("asdc");
-        char s[5] = {'a', 's', 'd', 'c', 'x'};
+        char s[5] = { 'a', 's', 'd', 'c', 'x' };
         std::string ss(s, 5);
 
         EXPECT_TRUE(name != s);
@@ -27,7 +27,7 @@ TEST(EsmFixedString, operator__eq_ne)
     {
         SCOPED_TRACE("asdc == asdc[NULL]");
         const ESM::NAME name("asdc");
-        char s[5] = {'a', 's', 'd', 'c', '\0'};
+        char s[5] = { 'a', 's', 'd', 'c', '\0' };
         std::string ss(s, 5);
 
         EXPECT_TRUE(name == s);

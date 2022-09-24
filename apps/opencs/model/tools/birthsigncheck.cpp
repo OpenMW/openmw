@@ -6,10 +6,10 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns,
-                                                    const CSMWorld::Resources &textures)
-: mBirthsigns(birthsigns),
-  mTextures(textures)
+CSMTools::BirthsignCheckStage::BirthsignCheckStage(
+    const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns, const CSMWorld::Resources& textures)
+    : mBirthsigns(birthsigns)
+    , mTextures(textures)
 {
     mIgnoreBaseRecords = false;
 }
@@ -21,9 +21,9 @@ int CSMTools::BirthsignCheckStage::setup()
     return mBirthsigns.getSize();
 }
 
-void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messages)
+void CSMTools::BirthsignCheckStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::BirthSign>& record = mBirthsigns.getRecord (stage);
+    const CSMWorld::Record<ESM::BirthSign>& record = mBirthsigns.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
@@ -31,7 +31,7 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
 
     const ESM::BirthSign& birthsign = record.get();
 
-    CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Birthsign, birthsign.mId);
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Birthsign, birthsign.mId);
 
     if (birthsign.mName.empty())
         messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
@@ -45,7 +45,7 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
     {
         std::string ddsTexture = birthsign.mTexture;
         if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && mTextures.searchId(ddsTexture) != -1))
-            messages.add(id,  "Image '" + birthsign.mTexture + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Image '" + birthsign.mTexture + "' does not exist", "", CSMDoc::Message::Severity_Error);
     }
 
     /// \todo check data members that can't be edited in the table view

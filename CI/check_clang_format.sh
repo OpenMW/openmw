@@ -1,23 +1,25 @@
 #!/bin/bash
 
-CLANG_FORMAT="clang-format-14"
+CLANG_FORMAT="${CLANG_FORMAT:-clang-format}"
 HAS_DIFFS=0
+
+check_format_file() {
+    local item=$1
+    "$CLANG_FORMAT" --dry-run -Werror "$item" &>/dev/null 
+    if [[ $? = 1 ]]; then
+        "${CLANG_FORMAT}" "${item}" | git diff --color=always --no-index "${item}" -
+        HAS_DIFFS=1
+    fi
+}
 
 check_format() {
     local path=$1
-    local tempfile=$(mktemp)
-    for item in $(find $path -type f -name "*");
+    find "$path" -type f -name "*" | while read item;
     do
         if [[ "$item" =~ .*\.(cpp|hpp|h) ]]; then
-            echo "Checking code formatting on $item"
-            $CLANG_FORMAT $item > $tempfile
-            git diff --color=always --no-index $item $tempfile
-            if [[ $? = 1 ]]; then
-                HAS_DIFFS=1
-            fi
+            check_format_file "$item"
         fi;
     done;
-    rm -f $tempfile
 }
 
 check_format "./apps"

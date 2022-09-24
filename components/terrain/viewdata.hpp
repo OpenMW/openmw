@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_TERRAIN_VIEWDATA_H
 #define OPENMW_COMPONENTS_TERRAIN_VIEWDATA_H
 
-#include <vector>
 #include <deque>
+#include <vector>
 
 #include <osg/Node>
 
@@ -60,8 +60,16 @@ namespace Terrain
         void setViewPoint(const osg::Vec3f& viewPoint);
         const osg::Vec3f& getViewPoint() const { return mViewPoint; }
 
-        void setActiveGrid(const osg::Vec4i &grid) { if (grid != mActiveGrid) {mActiveGrid = grid;mEntries.clear();mNumEntries=0;} }
-        const osg::Vec4i &getActiveGrid() const { return mActiveGrid;}
+        void setActiveGrid(const osg::Vec4i& grid)
+        {
+            if (grid != mActiveGrid)
+            {
+                mActiveGrid = grid;
+                mEntries.clear();
+                mNumEntries = 0;
+            }
+        }
+        const osg::Vec4i& getActiveGrid() const { return mActiveGrid; }
 
         unsigned int getWorldUpdateRevision() const { return mWorldUpdateRevision; }
         void setWorldUpdateRevision(int updateRevision) { mWorldUpdateRevision = updateRevision; }
@@ -81,13 +89,18 @@ namespace Terrain
     {
     public:
         ViewDataMap()
-            : mReuseDistance(150) // large value should be safe because the visibility of each node is still updated individually for each camera even if the base view was reused.
-                                  // this value also serves as a threshold for when a newly loaded LOD gets unloaded again so that if you hover around an LOD transition point the LODs won't keep loading and unloading all the time.
+            : mReuseDistance(
+                150) // large value should be safe because the visibility of each node is still updated individually for
+                     // each camera even if the base view was reused. this value also serves as a threshold for when a
+                     // newly loaded LOD gets unloaded again so that if you hover around an LOD transition point the
+                     // LODs won't keep loading and unloading all the time.
             , mExpiryDelay(1.f)
             , mWorldUpdateRevision(0)
-        {}
+        {
+        }
 
-        ViewData* getViewData(osg::Object* viewer, const osg::Vec3f& viewPoint, const osg::Vec4i &activeGrid, bool& needsUpdate);
+        ViewData* getViewData(
+            osg::Object* viewer, const osg::Vec3f& viewPoint, const osg::Vec4i& activeGrid, bool& needsUpdate);
 
         ViewData* createOrReuseView();
         ViewData* createIndependentView() const;

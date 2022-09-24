@@ -17,7 +17,7 @@ namespace CSMWorld
         Scope_Session = 4
     };
 
-    Scope getScopeFromId (const std::string& id);
+    Scope getScopeFromId(const std::string& id);
 }
 
 #endif

@@ -3,34 +3,34 @@
 namespace ESM
 {
 
-void CreatureState::load (ESMReader &esm)
-{
-    ObjectState::load (esm);
-
-    if (mHasCustomState)
+    void CreatureState::load(ESMReader& esm)
     {
-        mInventory.load (esm);
+        ObjectState::load(esm);
 
-        mCreatureStats.load (esm);
+        if (mHasCustomState)
+        {
+            mInventory.load(esm);
+
+            mCreatureStats.load(esm);
+        }
     }
-}
 
-void CreatureState::save (ESMWriter &esm, bool inInventory) const
-{
-    ObjectState::save (esm, inInventory);
-
-    if (mHasCustomState)
+    void CreatureState::save(ESMWriter& esm, bool inInventory) const
     {
-        mInventory.save (esm);
+        ObjectState::save(esm, inInventory);
 
-        mCreatureStats.save (esm);
+        if (mHasCustomState)
+        {
+            mInventory.save(esm);
+
+            mCreatureStats.save(esm);
+        }
     }
-}
 
-void CreatureState::blank()
-{
-    ObjectState::blank();
-    mCreatureStats.blank();
-}
+    void CreatureState::blank()
+    {
+        ObjectState::blank();
+        mCreatureStats.blank();
+    }
 
 }

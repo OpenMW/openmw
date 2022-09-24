@@ -52,8 +52,8 @@ namespace ESM4
     // REFR, ACHR, ACRE
     struct EnableParent
     {
-        FormId        parent;
-        std::uint32_t flags; //0x0001 = Set Enable State Opposite Parent, 0x0002 = Pop In
+        FormId parent;
+        std::uint32_t flags; // 0x0001 = Set Enable State Opposite Parent, 0x0002 = Pop In
     };
 #pragma pack(pop)
 

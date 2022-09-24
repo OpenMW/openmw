@@ -14,9 +14,10 @@ namespace
     using namespace TestingOpenMW;
 
     VFSTestFile invalidScript("not a script");
-    VFSTestFile incorrectScript("return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
+    VFSTestFile incorrectScript(
+        "return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
     VFSTestFile emptyScript("");
-    
+
     VFSTestFile testScript(R"X(
 return {
     engineHandlers = {
@@ -116,21 +117,21 @@ return {
     struct LuaScriptsContainerTest : Test
     {
         std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
-            {"invalid.lua", &invalidScript},
-            {"incorrect.lua", &incorrectScript},
-            {"empty.lua", &emptyScript},
-            {"test1.lua", &testScript},
-            {"test2.lua", &testScript},
-            {"stopEvent.lua", &stopEventScript},
-            {"loadSave1.lua", &loadSaveScript},
-            {"loadSave2.lua", &loadSaveScript},
-            {"testInterface.lua", &interfaceScript},
-            {"overrideInterface.lua", &overrideInterfaceScript},
-            {"useInterface.lua", &useInterfaceScript},
+            { "invalid.lua", &invalidScript },
+            { "incorrect.lua", &incorrectScript },
+            { "empty.lua", &emptyScript },
+            { "test1.lua", &testScript },
+            { "test2.lua", &testScript },
+            { "stopEvent.lua", &stopEventScript },
+            { "loadSave1.lua", &loadSaveScript },
+            { "loadSave2.lua", &loadSaveScript },
+            { "testInterface.lua", &interfaceScript },
+            { "overrideInterface.lua", &overrideInterfaceScript },
+            { "useInterface.lua", &useInterfaceScript },
         });
 
         LuaUtil::ScriptsConfiguration mCfg;
-        LuaUtil::LuaState mLua{mVFS.get(), &mCfg};
+        LuaUtil::LuaState mLua{ mVFS.get(), &mCfg };
 
         LuaScriptsContainerTest()
         {
@@ -171,7 +172,7 @@ CUSTOM, PLAYER: useInterface.lua
         {
             testing::internal::CaptureStdout();
             EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("empty.lua")));
-            EXPECT_FALSE(scripts.addCustomScript(*mCfg.findId("empty.lua")));  // already present
+            EXPECT_FALSE(scripts.addCustomScript(*mCfg.findId("empty.lua"))); // already present
             EXPECT_EQ(internal::GetCapturedStdout(), "");
         }
     }
@@ -184,8 +185,9 @@ CUSTOM, PLAYER: useInterface.lua
         EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("stopEvent.lua")));
         EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test2.lua")));
         scripts.update(1.5f);
-        EXPECT_EQ(internal::GetCapturedStdout(), "Test[test1.lua]:\t update 1.5\n"
-                                                 "Test[test2.lua]:\t update 1.5\n");
+        EXPECT_EQ(internal::GetCapturedStdout(),
+            "Test[test1.lua]:\t update 1.5\n"
+            "Test[test2.lua]:\t update 1.5\n");
     }
 
     TEST_F(LuaScriptsContainerTest, CallEvent)
@@ -202,36 +204,36 @@ CUSTOM, PLAYER: useInterface.lua
             testing::internal::CaptureStdout();
             scripts.receiveEvent("SomeEvent", X1);
             EXPECT_EQ(internal::GetCapturedStdout(),
-                      "Test has received event 'SomeEvent', but there are no handlers for this event\n");
+                "Test has received event 'SomeEvent', but there are no handlers for this event\n");
         }
         {
             testing::internal::CaptureStdout();
             scripts.receiveEvent("Event1", X1);
             EXPECT_EQ(internal::GetCapturedStdout(),
-                      "Test[test2.lua]:\t event1 1.5\n"
-                      "Test[stopEvent.lua]:\t event1 1.5\n"
-                      "Test[test1.lua]:\t event1 1.5\n");
+                "Test[test2.lua]:\t event1 1.5\n"
+                "Test[stopEvent.lua]:\t event1 1.5\n"
+                "Test[test1.lua]:\t event1 1.5\n");
         }
         {
             testing::internal::CaptureStdout();
             scripts.receiveEvent("Event2", X1);
             EXPECT_EQ(internal::GetCapturedStdout(),
-                      "Test[test2.lua]:\t event2 1.5\n"
-                      "Test[test1.lua]:\t event2 1.5\n");
+                "Test[test2.lua]:\t event2 1.5\n"
+                "Test[test1.lua]:\t event2 1.5\n");
         }
         {
             testing::internal::CaptureStdout();
             scripts.receiveEvent("Event1", X0);
             EXPECT_EQ(internal::GetCapturedStdout(),
-                      "Test[test2.lua]:\t event1 0.5\n"
-                      "Test[stopEvent.lua]:\t event1 0.5\n");
+                "Test[test2.lua]:\t event1 0.5\n"
+                "Test[stopEvent.lua]:\t event1 0.5\n");
         }
         {
             testing::internal::CaptureStdout();
             scripts.receiveEvent("Event2", X0);
             EXPECT_EQ(internal::GetCapturedStdout(),
-                      "Test[test2.lua]:\t event2 0.5\n"
-                      "Test[test1.lua]:\t event2 0.5\n");
+                "Test[test2.lua]:\t event2 0.5\n"
+                "Test[test1.lua]:\t event2 0.5\n");
         }
     }
 
@@ -248,10 +250,10 @@ CUSTOM, PLAYER: useInterface.lua
             scripts.update(1.5f);
             scripts.receiveEvent("Event1", X);
             EXPECT_EQ(internal::GetCapturedStdout(),
-                      "Test[test1.lua]:\t update 1.5\n"
-                      "Test[test2.lua]:\t update 1.5\n"
-                      "Test[test2.lua]:\t event1 0.5\n"
-                      "Test[stopEvent.lua]:\t event1 0.5\n");
+                "Test[test1.lua]:\t update 1.5\n"
+                "Test[test2.lua]:\t update 1.5\n"
+                "Test[test2.lua]:\t event1 0.5\n"
+                "Test[stopEvent.lua]:\t event1 0.5\n");
         }
         {
             testing::internal::CaptureStdout();
@@ -262,10 +264,10 @@ CUSTOM, PLAYER: useInterface.lua
             scripts.update(1.5f);
             scripts.receiveEvent("Event1", X);
             EXPECT_EQ(internal::GetCapturedStdout(),
-                      "Test[test1.lua]:\t update 1.5\n"
-                      "Test[test2.lua]:\t update 1.5\n"
-                      "Test[test2.lua]:\t event1 0.5\n"
-                      "Test[test1.lua]:\t event1 0.5\n");
+                "Test[test1.lua]:\t update 1.5\n"
+                "Test[test2.lua]:\t update 1.5\n"
+                "Test[test2.lua]:\t event1 0.5\n"
+                "Test[test1.lua]:\t event1 0.5\n");
         }
         {
             testing::internal::CaptureStdout();
@@ -273,8 +275,8 @@ CUSTOM, PLAYER: useInterface.lua
             scripts.update(1.5f);
             scripts.receiveEvent("Event1", X);
             EXPECT_EQ(internal::GetCapturedStdout(),
-                      "Test[test2.lua]:\t update 1.5\n"
-                      "Test[test2.lua]:\t event1 0.5\n");
+                "Test[test2.lua]:\t update 1.5\n"
+                "Test[test2.lua]:\t event1 0.5\n");
         }
     }
 
@@ -332,14 +334,8 @@ CUSTOM, PLAYER: useInterface.lua
         scripts1.addAutoStartedScripts();
         EXPECT_TRUE(scripts1.addCustomScript(*mCfg.findId("test1.lua")));
 
-        scripts1.receiveEvent("Set", LuaUtil::serialize(mLua.sol().create_table_with(
-            "n", 1,
-            "x", 0.5,
-            "y", 3.5)));
-        scripts1.receiveEvent("Set", LuaUtil::serialize(mLua.sol().create_table_with(
-            "n", 2,
-            "x", 2.5,
-            "y", 1.5)));
+        scripts1.receiveEvent("Set", LuaUtil::serialize(mLua.sol().create_table_with("n", 1, "x", 0.5, "y", 3.5)));
+        scripts1.receiveEvent("Set", LuaUtil::serialize(mLua.sol().create_table_with("n", 2, "x", 2.5, "y", 1.5)));
 
         ESM::LuaScripts data;
         scripts1.save(data);
@@ -450,9 +446,10 @@ CUSTOM, PLAYER: useInterface.lua
 
     TEST_F(LuaScriptsContainerTest, CallbackWrapper)
     {
-        LuaUtil::Callback callback{mLua.sol()["print"], mLua.newTable()};
+        LuaUtil::Callback callback{ mLua.sol()["print"], mLua.newTable() };
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptDebugNameKey] = "some_script.lua";
-        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptsContainer::ScriptId{nullptr, 0};
+        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey]
+            = LuaUtil::ScriptsContainer::ScriptId{ nullptr, 0 };
 
         testing::internal::CaptureStdout();
         callback.call(1.5);

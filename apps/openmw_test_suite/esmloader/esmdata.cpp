@@ -25,10 +25,12 @@ namespace
         std::string mRefId;
         ESM::RecNameInts mType;
         std::string mResult;
-        std::function<void (EsmData&)> mPushBack;
+        std::function<void(EsmData&)> mPushBack;
     };
 
-    struct EsmLoaderGetModelTest : TestWithParam<Params> {};
+    struct EsmLoaderGetModelTest : TestWithParam<Params>
+    {
+    };
 
     TEST_P(EsmLoaderGetModelTest, shouldReturnFoundModelName)
     {
@@ -73,20 +75,21 @@ namespace
     };
 
     const std::array params = {
-        Params {"acti_ref_id", ESM::REC_ACTI, "acti_model", PushBack<ESM::Activator> {"acti_ref_id", "acti_model"}},
-        Params {"cont_ref_id", ESM::REC_CONT, "cont_model", PushBack<ESM::Container> {"cont_ref_id", "cont_model"}},
-        Params {"door_ref_id", ESM::REC_DOOR, "door_model", PushBack<ESM::Door> {"door_ref_id", "door_model"}},
-        Params {"static_ref_id", ESM::REC_STAT, "static_model", PushBack<ESM::Static> {"static_ref_id", "static_model"}},
-        Params {"acti_ref_id_a", ESM::REC_ACTI, "", PushBack<ESM::Activator> {"acti_ref_id_z", "acti_model"}},
-        Params {"cont_ref_id_a", ESM::REC_CONT, "", PushBack<ESM::Container> {"cont_ref_id_z", "cont_model"}},
-        Params {"door_ref_id_a", ESM::REC_DOOR, "", PushBack<ESM::Door> {"door_ref_id_z", "door_model"}},
-        Params {"static_ref_id_a", ESM::REC_STAT, "", PushBack<ESM::Static> {"static_ref_id_z", "static_model"}},
-        Params {"acti_ref_id_z", ESM::REC_ACTI, "", PushBack<ESM::Activator> {"acti_ref_id_a", "acti_model"}},
-        Params {"cont_ref_id_z", ESM::REC_CONT, "", PushBack<ESM::Container> {"cont_ref_id_a", "cont_model"}},
-        Params {"door_ref_id_z", ESM::REC_DOOR, "", PushBack<ESM::Door> {"door_ref_id_a", "door_model"}},
-        Params {"static_ref_id_z", ESM::REC_STAT, "", PushBack<ESM::Static> {"static_ref_id_a", "static_model"}},
-        Params {"ref_id", ESM::REC_STAT, "", [] (EsmData&) {}},
-        Params {"ref_id", ESM::REC_BOOK, "", [] (EsmData&) {}},
+        Params{ "acti_ref_id", ESM::REC_ACTI, "acti_model", PushBack<ESM::Activator>{ "acti_ref_id", "acti_model" } },
+        Params{ "cont_ref_id", ESM::REC_CONT, "cont_model", PushBack<ESM::Container>{ "cont_ref_id", "cont_model" } },
+        Params{ "door_ref_id", ESM::REC_DOOR, "door_model", PushBack<ESM::Door>{ "door_ref_id", "door_model" } },
+        Params{
+            "static_ref_id", ESM::REC_STAT, "static_model", PushBack<ESM::Static>{ "static_ref_id", "static_model" } },
+        Params{ "acti_ref_id_a", ESM::REC_ACTI, "", PushBack<ESM::Activator>{ "acti_ref_id_z", "acti_model" } },
+        Params{ "cont_ref_id_a", ESM::REC_CONT, "", PushBack<ESM::Container>{ "cont_ref_id_z", "cont_model" } },
+        Params{ "door_ref_id_a", ESM::REC_DOOR, "", PushBack<ESM::Door>{ "door_ref_id_z", "door_model" } },
+        Params{ "static_ref_id_a", ESM::REC_STAT, "", PushBack<ESM::Static>{ "static_ref_id_z", "static_model" } },
+        Params{ "acti_ref_id_z", ESM::REC_ACTI, "", PushBack<ESM::Activator>{ "acti_ref_id_a", "acti_model" } },
+        Params{ "cont_ref_id_z", ESM::REC_CONT, "", PushBack<ESM::Container>{ "cont_ref_id_a", "cont_model" } },
+        Params{ "door_ref_id_z", ESM::REC_DOOR, "", PushBack<ESM::Door>{ "door_ref_id_a", "door_model" } },
+        Params{ "static_ref_id_z", ESM::REC_STAT, "", PushBack<ESM::Static>{ "static_ref_id_a", "static_model" } },
+        Params{ "ref_id", ESM::REC_STAT, "", [](EsmData&) {} },
+        Params{ "ref_id", ESM::REC_BOOK, "", [](EsmData&) {} },
     };
 
     INSTANTIATE_TEST_SUITE_P(Params, EsmLoaderGetModelTest, ValuesIn(params));

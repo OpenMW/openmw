@@ -10,3 +10,8 @@
 # Date:   Fri Sep 16 00:53:24 2022 +0100
 # Renormalise line endings
 84f8a6848a8b05502d7618ca7af8cca74f2c3bae
+
+# Author: clang-format-bot <bot@clang-format>
+# Date:   9/22/2022 9:26:05 PM
+# Apply clang-format to code base
+ddb0522bbf2aa8aa7c9e139ff7395fb8ed6a841f

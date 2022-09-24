@@ -43,8 +43,8 @@ namespace DetourNavigator
 
 namespace NavMeshTool
 {
-    using DetourNavigator::TileCachedRecastMeshManager;
     using DetourNavigator::ObjectTransform;
+    using DetourNavigator::TileCachedRecastMeshManager;
 
     struct WorldspaceNavMeshInput
     {
@@ -62,12 +62,10 @@ namespace NavMeshTool
         BulletObject(osg::ref_ptr<Resource::BulletShapeInstance>&& shapeInstance, const ESM::Position& position,
             float localScaling)
             : mShapeInstance(std::move(shapeInstance))
-            , mObjectTransform {position, localScaling}
-            , mCollisionObject(BulletHelpers::makeCollisionObject(
-                mShapeInstance->mCollisionShape.get(),
-                Misc::Convert::toBullet(position.asVec3()),
-                Misc::Convert::toBullet(Misc::Convert::makeOsgQuat(position))
-            ))
+            , mObjectTransform{ position, localScaling }
+            , mCollisionObject(BulletHelpers::makeCollisionObject(mShapeInstance->mCollisionShape.get(),
+                  Misc::Convert::toBullet(position.asVec3()),
+                  Misc::Convert::toBullet(Misc::Convert::makeOsgQuat(position))))
         {
             mShapeInstance->setLocalScaling(btVector3(localScaling, localScaling, localScaling));
         }

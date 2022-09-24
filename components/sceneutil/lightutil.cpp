@@ -1,15 +1,15 @@
 #include "lightutil.hpp"
 
-#include <osg/Light>
 #include <osg/Group>
+#include <osg/Light>
 
 #include <osgParticle/ParticleSystem>
 
 #include <components/esm3/loadligh.hpp>
 #include <components/fallback/fallback.hpp>
 
-#include "lightmanager.hpp"
 #include "lightcontroller.hpp"
+#include "lightmanager.hpp"
 #include "util.hpp"
 #include "visitor.hpp"
 
@@ -18,7 +18,10 @@ namespace
     class CheckEmptyLightVisitor : public osg::NodeVisitor
     {
     public:
-        CheckEmptyLightVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN) {}
+        CheckEmptyLightVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
 
         void apply(osg::Drawable& drawable) override
         {
@@ -31,10 +34,7 @@ namespace
                 traverse(drawable);
         }
 
-        void apply(osg::Geometry& geometry) override
-        {
-            mEmpty = false;
-        }
+        void apply(osg::Geometry& geometry) override { mEmpty = false; }
 
         bool mEmpty = true;
     };
@@ -43,7 +43,7 @@ namespace
 namespace SceneUtil
 {
 
-    void configureLight(osg::Light *light, float radius, bool isExterior)
+    void configureLight(osg::Light* light, float radius, bool isExterior)
     {
         float quadraticAttenuation = 0.f;
         float linearAttenuation = 0.f;
@@ -85,13 +85,15 @@ namespace SceneUtil
         light->setQuadraticAttenuation(quadraticAttenuation);
     }
 
-    osg::ref_ptr<LightSource> addLight(osg::Group* node, const ESM::Light* esmLight, unsigned int lightMask, bool isExterior)
+    osg::ref_ptr<LightSource> addLight(
+        osg::Group* node, const ESM::Light* esmLight, unsigned int lightMask, bool isExterior)
     {
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
 
         osg::Group* attachTo = visitor.mFoundNode ? visitor.mFoundNode : node;
-        osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, lightMask, isExterior, osg::Vec4f(0,0,0,1));
+        osg::ref_ptr<LightSource> lightSource
+            = createLightSource(esmLight, lightMask, isExterior, osg::Vec4f(0, 0, 0, 1));
         attachTo->addChild(lightSource);
 
         CheckEmptyLightVisitor emptyVisitor;
@@ -102,10 +104,11 @@ namespace SceneUtil
         return lightSource;
     }
 
-    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
+    osg::ref_ptr<LightSource> createLightSource(
+        const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
     {
-        osg::ref_ptr<SceneUtil::LightSource> lightSource (new SceneUtil::LightSource);
-        osg::ref_ptr<osg::Light> light (new osg::Light);
+        osg::ref_ptr<SceneUtil::LightSource> lightSource(new SceneUtil::LightSource);
+        osg::ref_ptr<osg::Light> light(new osg::Light);
         lightSource->setNodeMask(lightMask);
 
         float radius = esmLight->mData.mRadius;
@@ -121,11 +124,11 @@ namespace SceneUtil
         }
         light->setDiffuse(diffuse);
         light->setAmbient(ambient);
-        light->setSpecular(osg::Vec4f(0,0,0,0));
+        light->setSpecular(osg::Vec4f(0, 0, 0, 0));
 
         lightSource->setLight(light);
 
-        osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController);
+        osg::ref_ptr<SceneUtil::LightController> ctrl(new SceneUtil::LightController);
         ctrl->setDiffuse(light->getDiffuse());
         if (esmLight->mData.mFlags & ESM::Light::Flicker)
             ctrl->setType(SceneUtil::LightController::LT_Flicker);

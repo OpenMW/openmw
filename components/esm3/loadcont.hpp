@@ -9,56 +9,56 @@
 namespace ESM
 {
 
-class ESMReader;
-class ESMWriter;
+    class ESMReader;
+    class ESMWriter;
 
-/*
- * Container definition
- */
+    /*
+     * Container definition
+     */
 
-struct ContItem
-{
-    int mCount{0};
-    std::string mItem;
-};
-
-/// InventoryList, NPCO subrecord
-struct InventoryList
-{
-    std::vector<ContItem> mList;
-
-    /// Load one item, assumes subrecord name is already read
-    void add(ESMReader &esm);
-
-    void save(ESMWriter &esm) const;
-};
-
-struct Container
-{
-    constexpr static RecNameInts sRecordId = REC_CONT;
-
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string_view getRecordType() { return "Container"; }
-
-    enum Flags
+    struct ContItem
     {
-        Organic = 1, // Objects cannot be placed in this container
-        Respawn = 2, // Respawns after 4 months
-        Unknown = 8
+        int mCount{ 0 };
+        std::string mItem;
     };
 
-    unsigned int mRecordFlags;
-    std::string mId, mName, mModel, mScript;
+    /// InventoryList, NPCO subrecord
+    struct InventoryList
+    {
+        std::vector<ContItem> mList;
 
-    float mWeight; // Not sure, might be max total weight allowed?
-    int mFlags;
-    InventoryList mInventory;
+        /// Load one item, assumes subrecord name is already read
+        void add(ESMReader& esm);
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        void save(ESMWriter& esm) const;
+    };
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
+    struct Container
+    {
+        constexpr static RecNameInts sRecordId = REC_CONT;
+
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string_view getRecordType() { return "Container"; }
+
+        enum Flags
+        {
+            Organic = 1, // Objects cannot be placed in this container
+            Respawn = 2, // Respawns after 4 months
+            Unknown = 8
+        };
+
+        unsigned int mRecordFlags;
+        std::string mId, mName, mModel, mScript;
+
+        float mWeight; // Not sure, might be max total weight allowed?
+        int mFlags;
+        InventoryList mInventory;
+
+        void load(ESMReader& esm, bool& isDeleted);
+        void save(ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+        ///< Set record to default state (does not touch the ID).
+    };
 }
 #endif

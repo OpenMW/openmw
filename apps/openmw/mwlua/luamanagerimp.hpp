@@ -15,11 +15,11 @@
 
 #include "../mwbase/luamanager.hpp"
 
-#include "object.hpp"
 #include "eventqueue.hpp"
 #include "globalscripts.hpp"
-#include "worldview.hpp"
 #include "localscripts.hpp"
+#include "object.hpp"
+#include "worldview.hpp"
 
 namespace MWLua
 {
@@ -27,7 +27,7 @@ namespace MWLua
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs, const std::filesystem::path &libsDir);
+        LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir);
 
         // Called by engine.cpp before UI setup.
         void initL10n();
@@ -35,8 +35,8 @@ namespace MWLua
         // Called by engine.cpp when the environment is fully initialized.
         void init();
 
-        void loadPermanentStorage(const std::filesystem::path &userConfigPath);
-        void savePermanentStorage(const std::filesystem::path &userConfigPath);
+        void loadPermanentStorage(const std::filesystem::path& userConfigPath);
+        void savePermanentStorage(const std::filesystem::path& userConfigPath);
 
         // Called by engine.cpp every frame. For performance reasons it works in a separate
         // thread (in parallel with osg Cull). Can not use scene graph.
@@ -61,20 +61,20 @@ namespace MWLua
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 
-        void clear() override;  // should be called before loading game or starting a new game to reset internal state.
-        void setupPlayer(const MWWorld::Ptr& ptr) override;  // Should be called once after each "clear".
+        void clear() override; // should be called before loading game or starting a new game to reset internal state.
+        void setupPlayer(const MWWorld::Ptr& ptr) override; // Should be called once after each "clear".
 
         // Used only in Lua bindings
         void addCustomLocalScript(const MWWorld::Ptr&, int scriptId);
         void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
         void addInGameConsoleMessage(const std::string& msg, const Misc::Color& color)
         {
-            mInGameConsoleMessages.push_back({msg, color});
+            mInGameConsoleMessages.push_back({ msg, color });
         }
-        
-        // Some changes to the game world can not be done from the scripting thread (because it runs in parallel with OSG Cull),
-        // so we need to queue it and apply from the main thread. All such changes should be implemented as classes inherited
-        // from MWLua::Action.
+
+        // Some changes to the game world can not be done from the scripting thread (because it runs in parallel with
+        // OSG Cull), so we need to queue it and apply from the main thread. All such changes should be implemented as
+        // classes inherited from MWLua::Action.
         class Action
         {
         public:
@@ -105,12 +105,13 @@ namespace MWLua
         // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
         void reloadAllScripts() override;
 
-        void handleConsoleCommand(const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) override;
+        void handleConsoleCommand(
+            const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) override;
 
         // Used to call Lua callbacks from C++
         void queueCallback(LuaUtil::Callback callback, sol::object arg)
         {
-            mQueuedCallbacks.push_back({std::move(callback), std::move(arg)});
+            mQueuedCallbacks.push_back({ std::move(callback), std::move(arg) });
         }
 
         // Wraps Lua callback into an std::function.
@@ -129,7 +130,7 @@ namespace MWLua
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
-                                         std::optional<LuaUtil::ScriptIdsWithInitializationData> autoStartConf = std::nullopt);
+            std::optional<LuaUtil::ScriptIdsWithInitializationData> autoStartConf = std::nullopt);
 
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
@@ -147,7 +148,7 @@ namespace MWLua
         sol::table mPostprocessingPackage;
         sol::table mDebugPackage;
 
-        GlobalScripts mGlobalScripts{&mLua};
+        GlobalScripts mGlobalScripts{ &mLua };
         std::set<LocalScripts*> mActiveLocalScripts;
         WorldView mWorldView;
 
@@ -188,10 +189,10 @@ namespace MWLua
         std::vector<std::string> mUIMessages;
         std::vector<std::pair<std::string, Misc::Color>> mInGameConsoleMessages;
 
-        LuaUtil::LuaStorage mGlobalStorage{mLua.sol()};
-        LuaUtil::LuaStorage mPlayerStorage{mLua.sol()};
+        LuaUtil::LuaStorage mGlobalStorage{ mLua.sol() };
+        LuaUtil::LuaStorage mPlayerStorage{ mLua.sol() };
     };
 
 }
 
-#endif  // MWLUA_LUAMANAGERIMP_H
+#endif // MWLUA_LUAMANAGERIMP_H

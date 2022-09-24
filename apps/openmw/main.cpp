@@ -1,10 +1,10 @@
-#include <components/version/version.hpp>
-#include <components/files/configurationmanager.hpp>
+#include <components/debug/debugging.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
-#include <components/debug/debugging.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/misc/rng.hpp>
 #include <components/platform/platform.hpp>
+#include <components/version/version.hpp>
 
 #include "mwgui/debugwindow.hpp"
 
@@ -27,7 +27,6 @@ extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x
 #include <unistd.h>
 #endif
 
-
 using namespace Fallback;
 
 /**
@@ -39,7 +38,7 @@ using namespace Fallback;
  * \retval true - Everything goes OK
  * \retval false - Error
  */
-bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::ConfigurationManager& cfgMgr)
+bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::ConfigurationManager& cfgMgr)
 {
     // Create a local alias for brevity
     namespace bpo = boost::program_options;
@@ -51,17 +50,21 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     Files::parseArgs(argc, argv, variables, desc);
     bpo::notify(variables);
 
-    if (variables.count ("help"))
+    if (variables.count("help"))
     {
         getRawStdout() << desc << std::endl;
         return false;
     }
 
-    if (variables.count ("version"))
+    if (variables.count("version"))
     {
         cfgMgr.readConfiguration(variables, desc, true);
 
-        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+        Version::Version v
+            = Version::getOpenmwVersion(variables["resources"]
+                                            .as<Files::MaybeQuotedPath>()
+                                            .u8string()); // This call to u8string is redundant, but required to build
+                                                          // on MSVC 14.26 due to implementation bugs.
         getRawStdout() << v.describe() << std::endl;
         return false;
     }
@@ -72,7 +75,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     setupLogging(cfgMgr.getLogPath(), "OpenMW");
     MWGui::DebugWindow::startLogRecording();
 
-    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+    Version::Version v
+        = Version::getOpenmwVersion(variables["resources"]
+                                        .as<Files::MaybeQuotedPath>()
+                                        .u8string()); // This call to u8string is redundant, but required to build on
+                                                      // MSVC 14.26 due to implementation bugs.
     Log(Debug::Info) << v.describe();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
@@ -87,13 +94,19 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     Files::PathContainer dataDirs(asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>()));
 
-    Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+    Files::PathContainer::value_type local(variables["data-local"]
+                                               .as<Files::MaybeQuotedPathContainer::value_type>()
+                                               .u8string()); // This call to u8string is redundant, but required to
+                                                             // build on MSVC 14.26 due to implementation bugs.
     if (!local.empty())
         dataDirs.push_back(local);
 
     cfgMgr.filterOutNonExistingPaths(dataDirs);
 
-    engine.setResourceDir(variables["resources"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26 due to implementation bugs.
+    engine.setResourceDir(variables["resources"]
+                              .as<Files::MaybeQuotedPath>()
+                              .u8string()); // This call to u8string is redundant, but required to build on MSVC 14.26
+                                            // due to implementation bugs.
     engine.setDataDirs(dataDirs);
 
     // fallback archives
@@ -138,24 +151,24 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());
-    engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
+    engine.setSkipMenu(variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
         Log(Debug::Warning) << "Warning: new-game used without skip-menu -> ignoring it";
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setCompileAllDialogue(variables["script-all-dialogue"].as<bool>());
-    engine.setScriptConsoleMode (variables["script-console"].as<bool>());
-    engine.setStartupScript (variables["script-run"].as<std::string>());
-    engine.setWarningsMode (variables["script-warn"].as<int>());
-    engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
-    engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
-    engine.setSaveGameFile (variables["load-savegame"].as<Files::MaybeQuotedPath>().u8string());
+    engine.setScriptConsoleMode(variables["script-console"].as<bool>());
+    engine.setStartupScript(variables["script-run"].as<std::string>());
+    engine.setWarningsMode(variables["script-warn"].as<int>());
+    engine.setScriptBlacklist(variables["script-blacklist"].as<StringsVector>());
+    engine.setScriptBlacklistUse(variables["script-blacklist-use"].as<bool>());
+    engine.setSaveGameFile(variables["load-savegame"].as<Files::MaybeQuotedPath>().u8string());
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
-    engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
+    engine.setActivationDistanceOverride(variables["activate-dist"].as<int>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());
 
     return true;
@@ -175,21 +188,21 @@ namespace
             Debug::Level level;
             switch (severity)
             {
-            case osg::ALWAYS:
-            case osg::FATAL:
-                level = Debug::Error;
-                break;
-            case osg::WARN:
-            case osg::NOTICE:
-                level = Debug::Warning;
-                break;
-            case osg::INFO:
-                level = Debug::Info;
-                break;
-            case osg::DEBUG_INFO:
-            case osg::DEBUG_FP:
-            default:
-                level = Debug::Debug;
+                case osg::ALWAYS:
+                case osg::FATAL:
+                    level = Debug::Error;
+                    break;
+                case osg::WARN:
+                case osg::NOTICE:
+                    level = Debug::Warning;
+                    break;
+                case osg::INFO:
+                    level = Debug::Info;
+                    break;
+                case osg::DEBUG_INFO:
+                case osg::DEBUG_FP:
+                default:
+                    level = Debug::Debug;
             }
             std::string_view s(msgCopy);
             if (s.size() < 1024)
@@ -209,7 +222,7 @@ namespace
     };
 }
 
-int runApplication(int argc, char *argv[])
+int runApplication(int argc, char* argv[])
 {
     Platform::init();
 
@@ -232,9 +245,9 @@ int runApplication(int argc, char *argv[])
 }
 
 #ifdef ANDROID
-extern "C" int SDL_main(int argc, char**argv)
+extern "C" int SDL_main(int argc, char** argv)
 #else
-int main(int argc, char**argv)
+int main(int argc, char** argv)
 #endif
 {
     return wrapApplication(&runApplication, argc, argv, "OpenMW", false);

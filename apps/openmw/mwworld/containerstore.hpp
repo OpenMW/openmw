@@ -12,8 +12,8 @@
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadclot.hpp>
 #include <components/esm3/loadingr.hpp>
-#include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadprob.hpp>
 #include <components/esm3/loadrepa.hpp>
@@ -21,8 +21,8 @@
 
 #include <components/misc/rng.hpp>
 
-#include "ptr.hpp"
 #include "cellreflist.hpp"
+#include "ptr.hpp"
 
 namespace ESM
 {
@@ -39,7 +39,7 @@ namespace MWWorld
 {
     class ContainerStore;
 
-    template<class PtrType>
+    template <class PtrType>
     class ContainerStoreIteratorBase;
 
     typedef ContainerStoreIteratorBase<Ptr> ContainerStoreIterator;
@@ -47,256 +47,269 @@ namespace MWWorld
 
     class ResolutionListener
     {
-            ContainerStore& mStore;
-        public:
-            ResolutionListener(ContainerStore& store) : mStore(store) {}
-            ~ResolutionListener();
+        ContainerStore& mStore;
+
+    public:
+        ResolutionListener(ContainerStore& store)
+            : mStore(store)
+        {
+        }
+        ~ResolutionListener();
     };
 
     class ResolutionHandle
     {
-            std::shared_ptr<ResolutionListener> mListener;
-        public:
-            ResolutionHandle(std::shared_ptr<ResolutionListener> listener) : mListener(listener) {}
-            ResolutionHandle() = default;
+        std::shared_ptr<ResolutionListener> mListener;
+
+    public:
+        ResolutionHandle(std::shared_ptr<ResolutionListener> listener)
+            : mListener(listener)
+        {
+        }
+        ResolutionHandle() = default;
     };
-    
+
     class ContainerStoreListener
     {
-        public:
-            virtual void itemAdded(const ConstPtr& item, int count) {}
-            virtual void itemRemoved(const ConstPtr& item, int count) {}
-            virtual ~ContainerStoreListener() = default;
+    public:
+        virtual void itemAdded(const ConstPtr& item, int count) {}
+        virtual void itemRemoved(const ConstPtr& item, int count) {}
+        virtual ~ContainerStoreListener() = default;
     };
 
     class ContainerStore
     {
-        public:
+    public:
+        static constexpr int Type_Potion = 0x0001;
+        static constexpr int Type_Apparatus = 0x0002;
+        static constexpr int Type_Armor = 0x0004;
+        static constexpr int Type_Book = 0x0008;
+        static constexpr int Type_Clothing = 0x0010;
+        static constexpr int Type_Ingredient = 0x0020;
+        static constexpr int Type_Light = 0x0040;
+        static constexpr int Type_Lockpick = 0x0080;
+        static constexpr int Type_Miscellaneous = 0x0100;
+        static constexpr int Type_Probe = 0x0200;
+        static constexpr int Type_Repair = 0x0400;
+        static constexpr int Type_Weapon = 0x0800;
 
-            static constexpr int Type_Potion = 0x0001;
-            static constexpr int Type_Apparatus = 0x0002;
-            static constexpr int Type_Armor = 0x0004;
-            static constexpr int Type_Book = 0x0008;
-            static constexpr int Type_Clothing = 0x0010;
-            static constexpr int Type_Ingredient = 0x0020;
-            static constexpr int Type_Light = 0x0040;
-            static constexpr int Type_Lockpick = 0x0080;
-            static constexpr int Type_Miscellaneous = 0x0100;
-            static constexpr int Type_Probe = 0x0200;
-            static constexpr int Type_Repair = 0x0400;
-            static constexpr int Type_Weapon = 0x0800;
+        static constexpr int Type_Last = Type_Weapon;
 
-            static constexpr int Type_Last = Type_Weapon;
+        static constexpr int Type_All = 0xffff;
 
-            static constexpr int Type_All = 0xffff;
+        static const std::string_view sGoldId;
 
-            static const std::string_view sGoldId;
+    protected:
+        ContainerStoreListener* mListener;
 
-        protected:
-            ContainerStoreListener* mListener;
+        // (item, max charge)
+        typedef std::vector<std::pair<ContainerStoreIterator, float>> TRechargingItems;
+        TRechargingItems mRechargingItems;
 
-            // (item, max charge)
-            typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
-            TRechargingItems mRechargingItems;
+        bool mRechargingItemsUpToDate;
 
-            bool mRechargingItemsUpToDate;
+    private:
+        MWWorld::CellRefList<ESM::Potion> potions;
+        MWWorld::CellRefList<ESM::Apparatus> appas;
+        MWWorld::CellRefList<ESM::Armor> armors;
+        MWWorld::CellRefList<ESM::Book> books;
+        MWWorld::CellRefList<ESM::Clothing> clothes;
+        MWWorld::CellRefList<ESM::Ingredient> ingreds;
+        MWWorld::CellRefList<ESM::Light> lights;
+        MWWorld::CellRefList<ESM::Lockpick> lockpicks;
+        MWWorld::CellRefList<ESM::Miscellaneous> miscItems;
+        MWWorld::CellRefList<ESM::Probe> probes;
+        MWWorld::CellRefList<ESM::Repair> repairs;
+        MWWorld::CellRefList<ESM::Weapon> weapons;
 
-        private:
+        mutable float mCachedWeight;
+        mutable bool mWeightUpToDate;
 
-            MWWorld::CellRefList<ESM::Potion>            potions;
-            MWWorld::CellRefList<ESM::Apparatus>         appas;
-            MWWorld::CellRefList<ESM::Armor>             armors;
-            MWWorld::CellRefList<ESM::Book>              books;
-            MWWorld::CellRefList<ESM::Clothing>          clothes;
-            MWWorld::CellRefList<ESM::Ingredient>        ingreds;
-            MWWorld::CellRefList<ESM::Light>             lights;
-            MWWorld::CellRefList<ESM::Lockpick>          lockpicks;
-            MWWorld::CellRefList<ESM::Miscellaneous>     miscItems;
-            MWWorld::CellRefList<ESM::Probe>             probes;
-            MWWorld::CellRefList<ESM::Repair>            repairs;
-            MWWorld::CellRefList<ESM::Weapon>            weapons;
+        bool mModified;
+        bool mResolved;
+        unsigned int mSeed;
+        MWWorld::Ptr mPtr;
+        std::weak_ptr<ResolutionListener> mResolutionListener;
 
-            mutable float mCachedWeight;
-            mutable bool mWeightUpToDate;
+        ContainerStoreIterator addImp(const Ptr& ptr, int count, bool markModified = true);
+        void addInitialItem(
+            std::string_view id, const std::string& owner, int count, Misc::Rng::Generator* prng, bool topLevel = true);
+        void addInitialItemImp(const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Generator* prng,
+            bool topLevel = true);
 
-            bool mModified;
-            bool mResolved;
-            unsigned int mSeed;
-            MWWorld::Ptr mPtr;
-            std::weak_ptr<ResolutionListener> mResolutionListener;
+        template <typename T>
+        ContainerStoreIterator getState(CellRefList<T>& collection, const ESM::ObjectState& state);
 
-            ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
-            void addInitialItem(std::string_view id, const std::string& owner, int count, Misc::Rng::Generator* prng, bool topLevel=true);
-            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Generator* prng, bool topLevel=true);
+        template <typename T>
+        void storeState(const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
-            template<typename T>
-            ContainerStoreIterator getState (CellRefList<T>& collection,
-                const ESM::ObjectState& state);
+        template <typename T>
+        void storeStates(
+            const CellRefList<T>& collection, ESM::InventoryState& inventory, int& index, bool equipable = false) const;
 
-            template<typename T>
-            void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
+        void updateRechargingItems();
 
-            template<typename T>
-            void storeStates (const CellRefList<T>& collection,
-                ESM::InventoryState& inventory, int& index,
-                bool equipable = false) const;
+        virtual void storeEquipmentState(
+            const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
 
-            void updateRechargingItems();
+        virtual void readEquipmentState(
+            const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
-            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
+    public:
+        ContainerStore();
 
-            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
+        virtual ~ContainerStore();
 
-        public:
+        virtual std::unique_ptr<ContainerStore> clone() { return std::make_unique<ContainerStore>(*this); }
 
-            ContainerStore();
+        ConstContainerStoreIterator cbegin(int mask = Type_All) const;
+        ConstContainerStoreIterator cend() const;
+        ConstContainerStoreIterator begin(int mask = Type_All) const;
+        ConstContainerStoreIterator end() const;
 
-            virtual ~ContainerStore();
+        ContainerStoreIterator begin(int mask = Type_All);
+        ContainerStoreIterator end();
 
-            virtual std::unique_ptr<ContainerStore> clone() { return std::make_unique<ContainerStore>(*this); }
+        bool hasVisibleItems() const;
 
-            ConstContainerStoreIterator cbegin (int mask = Type_All) const;
-            ConstContainerStoreIterator cend() const;
-            ConstContainerStoreIterator begin (int mask = Type_All) const;
-            ConstContainerStoreIterator end() const;
-            
-            ContainerStoreIterator begin (int mask = Type_All);
-            ContainerStoreIterator end();
+        virtual ContainerStoreIterator add(
+            const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true, bool resolve = true);
+        ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
+        ///
+        /// \note The item pointed to is not required to exist beyond this function call.
+        ///
+        /// \attention Do not add items to an existing stack by increasing the count instead of
+        /// calling this function!
+        ///
+        /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to
+        /// the newly inserted item.
 
-            bool hasVisibleItems() const;
+        ContainerStoreIterator add(std::string_view id, int count, const Ptr& actorPtr);
+        ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true, bool resolve = true);
-            ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
-            ///
-            /// \note The item pointed to is not required to exist beyond this function call.
-            ///
-            /// \attention Do not add items to an existing stack by increasing the count instead of
-            /// calling this function!
-            ///
-            /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
+        int remove(
+            std::string_view itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
+        ///< Remove \a count item(s) designated by \a itemId from this container.
+        ///
+        /// @return the number of items actually removed
 
-            ContainerStoreIterator add(std::string_view id, int count, const Ptr& actorPtr);
-            ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
+        virtual int remove(
+            const Ptr& item, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
+        ///< Remove \a count item(s) designated by \a item from this inventory.
+        ///
+        /// @return the number of items actually removed
 
-            int remove(std::string_view itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
-            ///< Remove \a count item(s) designated by \a itemId from this container.
-            ///
-            /// @return the number of items actually removed
+        void rechargeItems(float duration);
+        ///< Restore charge on enchanted items. Note this should only be done for the player.
 
-            virtual int remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
-            ///< Remove \a count item(s) designated by \a item from this inventory.
-            ///
-            /// @return the number of items actually removed
+        ContainerStoreIterator unstack(const Ptr& ptr, const Ptr& container, int count = 1);
+        ///< Unstack an item in this container. The item's count will be set to count, then a new stack will be added
+        ///< with (origCount-count).
+        ///
+        /// @return an iterator to the new stack, or end() if no new stack was created.
 
-            void rechargeItems (float duration);
-            ///< Restore charge on enchanted items. Note this should only be done for the player.
+        MWWorld::ContainerStoreIterator restack(const MWWorld::Ptr& item);
+        ///< Attempt to re-stack an item in this container.
+        /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
+        /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-            ContainerStoreIterator unstack (const Ptr& ptr, const Ptr& container, int count = 1);
-            ///< Unstack an item in this container. The item's count will be set to count, then a new stack will be added with (origCount-count).
-            ///
-            /// @return an iterator to the new stack, or end() if no new stack was created.
+        int count(std::string_view id) const;
+        ///< @return How many items with refID \a id are in this container?
 
-            MWWorld::ContainerStoreIterator restack (const MWWorld::Ptr& item);
-            ///< Attempt to re-stack an item in this container.
-            /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
-            /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
+        ContainerStoreListener* getContListener() const;
+        void setContListener(ContainerStoreListener* listener);
 
-            int count(std::string_view id) const;
-            ///< @return How many items with refID \a id are in this container?
+    protected:
+        ContainerStoreIterator addNewStack(const ConstPtr& ptr, int count);
+        ///< Add the item to this container (do not try to stack it onto existing items)
 
-            ContainerStoreListener* getContListener() const;
-            void setContListener(ContainerStoreListener* listener);
-        protected:
-            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count);
-            ///< Add the item to this container (do not try to stack it onto existing items)
+        virtual void flagAsModified();
 
-            virtual void flagAsModified();
+        /// + and - operations that can deal with negative stacks
+        /// Note that negativity is infectious
+        static int addItems(int count1, int count2);
+        static int subtractItems(int count1, int count2);
 
-            /// + and - operations that can deal with negative stacks
-            /// Note that negativity is infectious
-            static int addItems(int count1, int count2);
-            static int subtractItems(int count1, int count2);
-        public:
+    public:
+        virtual bool stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const;
+        ///< @return true if the two specified objects can stack with each other
 
-            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
-            ///< @return true if the two specified objects can stack with each other
+        void fill(const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Generator& seed);
+        ///< Insert items into *this.
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Generator& seed);
-            ///< Insert items into *this.
+        void fillNonRandom(const ESM::InventoryList& items, const std::string& owner, unsigned int seed);
+        ///< Insert items into *this, excluding leveled items
 
-            void fillNonRandom (const ESM::InventoryList& items, const std::string& owner, unsigned int seed);
-            ///< Insert items into *this, excluding leveled items
+        virtual void clear();
+        ///< Empty container.
 
-            virtual void clear();
-            ///< Empty container.
+        float getWeight() const;
+        ///< Return total weight of the items contained in *this.
 
-            float getWeight() const;
-            ///< Return total weight of the items contained in *this.
+        static int getType(const ConstPtr& ptr);
+        ///< This function throws an exception, if ptr does not point to an object, that can be
+        /// put into a container.
 
-            static int getType (const ConstPtr& ptr);
-            ///< This function throws an exception, if ptr does not point to an object, that can be
-            /// put into a container.
+        Ptr findReplacement(const std::string& id);
+        ///< Returns replacement for object with given id. Prefer used items (with low durability left).
 
-            Ptr findReplacement(const std::string& id);
-            ///< Returns replacement for object with given id. Prefer used items (with low durability left).
+        Ptr search(std::string_view id);
 
-            Ptr search(std::string_view id);
+        virtual void writeState(ESM::InventoryState& state) const;
 
-            virtual void writeState (ESM::InventoryState& state) const;
+        virtual void readState(const ESM::InventoryState& state);
 
-            virtual void readState (const ESM::InventoryState& state);
+        bool isResolved() const;
 
-            bool isResolved() const;
+        void resolve();
+        ResolutionHandle resolveTemporarily();
+        void unresolve();
 
-            void resolve();
-            ResolutionHandle resolveTemporarily();
-            void unresolve();
-
-            friend class ContainerStoreIteratorBase<Ptr>;
-            friend class ContainerStoreIteratorBase<ConstPtr>;
-            friend class ResolutionListener;
-            friend class MWClass::Container;
+        friend class ContainerStoreIteratorBase<Ptr>;
+        friend class ContainerStoreIteratorBase<ConstPtr>;
+        friend class ResolutionListener;
+        friend class MWClass::Container;
     };
 
-    template<class PtrType>
+    template <class PtrType>
     class ContainerStoreIteratorBase
     {
-        template<class From, class To, class Dummy>
+        template <class From, class To, class Dummy>
         struct IsConvertible
         {
             static constexpr bool value = true;
         };
 
-        template<class Dummy>
+        template <class Dummy>
         struct IsConvertible<ConstPtr, Ptr, Dummy>
         {
             static constexpr bool value = false;
         };
 
-        template<class T, class U>
+        template <class T, class U>
         struct IteratorTrait
         {
             typedef typename MWWorld::CellRefList<T>::List::iterator type;
         };
 
-        template<class T>
+        template <class T>
         struct IteratorTrait<T, ConstPtr>
         {
             typedef typename MWWorld::CellRefList<T>::List::const_iterator type;
         };
 
-        template<class T>
+        template <class T>
         struct Iterator : IteratorTrait<T, PtrType>
         {
         };
 
-        template<class T, class Dummy>
+        template <class T, class Dummy>
         struct ContainerStoreTrait
         {
             typedef ContainerStore* type;
         };
-        
-        template<class Dummy>
+
+        template <class Dummy>
         struct ContainerStoreTrait<ConstPtr, Dummy>
         {
             typedef const ContainerStore* type;
@@ -322,80 +335,80 @@ namespace MWWorld
         typename Iterator<ESM::Repair>::type mRepair;
         typename Iterator<ESM::Weapon>::type mWeapon;
 
-        ContainerStoreIteratorBase (ContainerStoreType container);
+        ContainerStoreIteratorBase(ContainerStoreType container);
         ///< End-iterator
 
-        ContainerStoreIteratorBase (int mask, ContainerStoreType container);
+        ContainerStoreIteratorBase(int mask, ContainerStoreType container);
         ///< Begin-iterator
 
         // construct iterator using a CellRefList iterator
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Potion>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Apparatus>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Armor>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Book>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Clothing>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Ingredient>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Light>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Lockpick>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Miscellaneous>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Probe>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Repair>::type);
-        ContainerStoreIteratorBase (ContainerStoreType container, typename Iterator<ESM::Weapon>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Potion>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Apparatus>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Armor>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Book>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Clothing>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Ingredient>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Light>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Lockpick>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Miscellaneous>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Probe>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Repair>::type);
+        ContainerStoreIteratorBase(ContainerStoreType container, typename Iterator<ESM::Weapon>::type);
 
-        template<class T>
-        void copy (const ContainerStoreIteratorBase<T>& src);
-        
-        void incType ();
-        
-        void nextType ();
+        template <class T>
+        void copy(const ContainerStoreIteratorBase<T>& src);
 
-        bool resetIterator ();
+        void incType();
+
+        void nextType();
+
+        bool resetIterator();
         ///< Reset iterator for selected type.
         ///
         /// \return Type not empty?
 
-        bool incIterator ();
+        bool incIterator();
         ///< Increment iterator for selected type.
         ///
         /// \return reached the end?
 
-        public:
-            using iterator_category = std::forward_iterator_tag;
-            using value_type = PtrType;
-            using difference_type = std::ptrdiff_t;
-            using pointer = PtrType*;
-            using reference = PtrType&;
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = PtrType;
+        using difference_type = std::ptrdiff_t;
+        using pointer = PtrType*;
+        using reference = PtrType&;
 
-            template<class T>
-            ContainerStoreIteratorBase (const ContainerStoreIteratorBase<T>& other)
-            {
-                char CANNOT_CONVERT_CONST_ITERATOR_TO_ITERATOR[IsConvertible<T, PtrType, void>::value ? 1 : -1];
-                ((void)CANNOT_CONVERT_CONST_ITERATOR_TO_ITERATOR);
-                copy (other);
-            }
+        template <class T>
+        ContainerStoreIteratorBase(const ContainerStoreIteratorBase<T>& other)
+        {
+            char CANNOT_CONVERT_CONST_ITERATOR_TO_ITERATOR[IsConvertible<T, PtrType, void>::value ? 1 : -1];
+            ((void)CANNOT_CONVERT_CONST_ITERATOR_TO_ITERATOR);
+            copy(other);
+        }
 
-            template<class T>
-            bool isEqual(const ContainerStoreIteratorBase<T>& other) const;
+        template <class T>
+        bool isEqual(const ContainerStoreIteratorBase<T>& other) const;
 
-            PtrType *operator->() const;
-            PtrType operator*() const;
+        PtrType* operator->() const;
+        PtrType operator*() const;
 
-            ContainerStoreIteratorBase& operator++ ();
-            ContainerStoreIteratorBase operator++ (int);
-            ContainerStoreIteratorBase& operator= (const ContainerStoreIteratorBase& rhs);
-            ContainerStoreIteratorBase (const ContainerStoreIteratorBase& rhs) = default;
+        ContainerStoreIteratorBase& operator++();
+        ContainerStoreIteratorBase operator++(int);
+        ContainerStoreIteratorBase& operator=(const ContainerStoreIteratorBase& rhs);
+        ContainerStoreIteratorBase(const ContainerStoreIteratorBase& rhs) = default;
 
-            int getType() const;
-            const ContainerStore *getContainerStore() const;
+        int getType() const;
+        const ContainerStore* getContainerStore() const;
 
-            friend class ContainerStore;
-            friend class ContainerStoreIteratorBase<Ptr>;
-            friend class ContainerStoreIteratorBase<ConstPtr>;
+        friend class ContainerStore;
+        friend class ContainerStoreIteratorBase<Ptr>;
+        friend class ContainerStoreIteratorBase<ConstPtr>;
     };
 
-    template<class T, class U>
-    bool operator== (const ContainerStoreIteratorBase<T>& left, const ContainerStoreIteratorBase<U>& right);
-    template<class T, class U>
-    bool operator!= (const ContainerStoreIteratorBase<T>& left, const ContainerStoreIteratorBase<U>& right);
+    template <class T, class U>
+    bool operator==(const ContainerStoreIteratorBase<T>& left, const ContainerStoreIteratorBase<U>& right);
+    template <class T, class U>
+    bool operator!=(const ContainerStoreIteratorBase<T>& left, const ContainerStoreIteratorBase<U>& right);
 }
 #endif

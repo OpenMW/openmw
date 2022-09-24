@@ -2,13 +2,13 @@
 #include "maindialog.hpp"
 
 #include <QDebug>
-#include <QPushButton>
-#include <QMessageBox>
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QPushButton>
 
-#include <thread>
-#include <mutex>
 #include <algorithm>
+#include <mutex>
+#include <thread>
 
 #include <apps/launcher/utils/cellnameloader.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -31,18 +31,18 @@
 
 #include "ui_directorypicker.h"
 
-const char *Launcher::DataFilesPage::mDefaultContentListName = "Default";
+const char* Launcher::DataFilesPage::mDefaultContentListName = "Default";
 
 namespace
 {
     void contentSubdirs(const QString& path, QStringList& dirs)
     {
-        QStringList fileFilter {"*.esm", "*.esp", "*.omwaddon", "*.bsa"};
-        QStringList dirFilter {"bookart", "icons", "meshes", "music", "sound", "textures"};
+        QStringList fileFilter{ "*.esm", "*.esp", "*.omwaddon", "*.bsa" };
+        QStringList dirFilter{ "bookart", "icons", "meshes", "music", "sound", "textures" };
 
         QDir currentDir(path);
         if (!currentDir.entryInfoList(fileFilter, QDir::Files).empty()
-                || !currentDir.entryInfoList(dirFilter, QDir::Dirs | QDir::NoDotAndDotDot).empty())
+            || !currentDir.entryInfoList(dirFilter, QDir::Dirs | QDir::NoDotAndDotDot).empty())
             dirs.push_back(currentDir.canonicalPath());
 
         for (const auto& subdir : currentDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
@@ -63,61 +63,44 @@ namespace Launcher
 
             HandleNavMeshToolMessage operator()(NavMeshTool::ExpectedCells&& message) const
             {
-                return HandleNavMeshToolMessage {
-                    static_cast<int>(message.mCount),
-                    mExpectedMaxProgress,
-                    static_cast<int>(message.mCount) * 100,
-                    mProgress
-                };
+                return HandleNavMeshToolMessage{ static_cast<int>(message.mCount), mExpectedMaxProgress,
+                    static_cast<int>(message.mCount) * 100, mProgress };
             }
 
             HandleNavMeshToolMessage operator()(NavMeshTool::ProcessedCells&& message) const
             {
-                return HandleNavMeshToolMessage {
-                    mCellsCount,
-                    mExpectedMaxProgress,
-                    mMaxProgress,
-                    std::max(mProgress, static_cast<int>(message.mCount))
-                };
+                return HandleNavMeshToolMessage{ mCellsCount, mExpectedMaxProgress, mMaxProgress,
+                    std::max(mProgress, static_cast<int>(message.mCount)) };
             }
 
             HandleNavMeshToolMessage operator()(NavMeshTool::ExpectedTiles&& message) const
             {
                 const int expectedMaxProgress = mCellsCount + static_cast<int>(message.mCount);
-                return HandleNavMeshToolMessage {
-                    mCellsCount,
-                    expectedMaxProgress,
-                    std::max(mMaxProgress, expectedMaxProgress),
-                    mProgress
-                };
+                return HandleNavMeshToolMessage{ mCellsCount, expectedMaxProgress,
+                    std::max(mMaxProgress, expectedMaxProgress), mProgress };
             }
 
             HandleNavMeshToolMessage operator()(NavMeshTool::GeneratedTiles&& message) const
             {
                 int progress = mCellsCount + static_cast<int>(message.mCount);
                 if (mExpectedMaxProgress < mMaxProgress)
-                    progress += static_cast<int>(std::round(
-                        (mMaxProgress - mExpectedMaxProgress)
-                        * (static_cast<float>(progress) / static_cast<float>(mExpectedMaxProgress))
-                    ));
-                return HandleNavMeshToolMessage {
-                    mCellsCount,
-                    mExpectedMaxProgress,
-                    mMaxProgress,
-                    std::max(mProgress, progress)
-                };
+                    progress += static_cast<int>(std::round((mMaxProgress - mExpectedMaxProgress)
+                        * (static_cast<float>(progress) / static_cast<float>(mExpectedMaxProgress))));
+                return HandleNavMeshToolMessage{ mCellsCount, mExpectedMaxProgress, mMaxProgress,
+                    std::max(mProgress, progress) };
             }
         };
 
         int getMaxNavMeshDbFileSizeMiB()
         {
-            return static_cast<int>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator") / (1024 * 1024));
+            return static_cast<int>(
+                Settings::Manager::getInt64("max navmeshdb file size", "Navigator") / (1024 * 1024));
         }
     }
 }
 
-Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
-                                       Config::LauncherSettings &launcherSettings, MainDialog *parent)
+Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+    Config::LauncherSettings& launcherSettings, MainDialog* parent)
     : QWidget(parent)
     , mMainDialog(parent)
     , mCfgMgr(cfg)
@@ -125,78 +108,78 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
     , mLauncherSettings(launcherSettings)
     , mNavMeshToolInvoker(new Process::ProcessInvoker(this))
 {
-    ui.setupUi (this);
-    setObjectName ("DataFilesPage");
-    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget, /*showOMWScripts=*/true);
+    ui.setupUi(this);
+    setObjectName("DataFilesPage");
+    mSelector = new ContentSelectorView::ContentSelector(ui.contentSelectorWidget, /*showOMWScripts=*/true);
     const QString encoding = mGameSettings.value("encoding", "win1252");
     mSelector->setEncoding(encoding);
 
     mNewProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
     mCloneProfileDialog = new TextInputDialog(tr("Clone Content List"), tr("Content List name:"), this);
 
-    connect(mNewProfileDialog->lineEdit(), &LineEdit::textChanged,
-            this, &DataFilesPage::updateNewProfileOkButton);
-    connect(mCloneProfileDialog->lineEdit(), &LineEdit::textChanged,
-            this, &DataFilesPage::updateCloneProfileOkButton);
+    connect(mNewProfileDialog->lineEdit(), &LineEdit::textChanged, this, &DataFilesPage::updateNewProfileOkButton);
+    connect(mCloneProfileDialog->lineEdit(), &LineEdit::textChanged, this, &DataFilesPage::updateCloneProfileOkButton);
     connect(ui.directoryAddSubdirsButton, &QPushButton::released, this, [this]() { this->addSubdirectories(true); });
-    connect(ui.directoryInsertButton,     &QPushButton::released, this, [this]() { this->addSubdirectories(false); });
-    connect(ui.directoryUpButton,         &QPushButton::released, this, [this]() { this->moveDirectory(-1); });
-    connect(ui.directoryDownButton,       &QPushButton::released, this, [this]() { this->moveDirectory(1); });
-    connect(ui.directoryRemoveButton,     &QPushButton::released, this, [this]() { this->removeDirectory(); });
-    connect(ui.archiveUpButton,           &QPushButton::released, this, [this]() { this->moveArchive(-1); });
-    connect(ui.archiveDownButton,         &QPushButton::released, this, [this]() { this->moveArchive(1); });
-    connect(ui.directoryListWidget->model(), &QAbstractItemModel::rowsMoved, this, [this]() { this->sortDirectories(); });
+    connect(ui.directoryInsertButton, &QPushButton::released, this, [this]() { this->addSubdirectories(false); });
+    connect(ui.directoryUpButton, &QPushButton::released, this, [this]() { this->moveDirectory(-1); });
+    connect(ui.directoryDownButton, &QPushButton::released, this, [this]() { this->moveDirectory(1); });
+    connect(ui.directoryRemoveButton, &QPushButton::released, this, [this]() { this->removeDirectory(); });
+    connect(ui.archiveUpButton, &QPushButton::released, this, [this]() { this->moveArchive(-1); });
+    connect(ui.archiveDownButton, &QPushButton::released, this, [this]() { this->moveArchive(1); });
+    connect(
+        ui.directoryListWidget->model(), &QAbstractItemModel::rowsMoved, this, [this]() { this->sortDirectories(); });
 
     buildView();
     loadSettings();
 
     // Connect signal and slot after the settings have been loaded. We only care about the user changing
     // the addons and don't want to get signals of the system doing it during startup.
-    connect(mSelector, &ContentSelectorView::ContentSelector::signalAddonDataChanged,
-            this, &DataFilesPage::slotAddonDataChanged);
+    connect(mSelector, &ContentSelectorView::ContentSelector::signalAddonDataChanged, this,
+        &DataFilesPage::slotAddonDataChanged);
     // Call manually to indicate all changes to addon data during startup.
     slotAddonDataChanged();
 }
 
 void Launcher::DataFilesPage::buildView()
 {
-    QToolButton * refreshButton = mSelector->refreshButton();
+    QToolButton* refreshButton = mSelector->refreshButton();
 
-    //tool buttons
-    ui.newProfileButton->setToolTip ("Create a new Content List");
-    ui.cloneProfileButton->setToolTip ("Clone the current Content List");
-    ui.deleteProfileButton->setToolTip ("Delete an existing Content List");
+    // tool buttons
+    ui.newProfileButton->setToolTip("Create a new Content List");
+    ui.cloneProfileButton->setToolTip("Clone the current Content List");
+    ui.deleteProfileButton->setToolTip("Delete an existing Content List");
 
-    //combo box
+    // combo box
     ui.profilesComboBox->addItem(mDefaultContentListName);
-    ui.profilesComboBox->setPlaceholderText (QString("Select a Content List..."));
+    ui.profilesComboBox->setPlaceholderText(QString("Select a Content List..."));
     ui.profilesComboBox->setCurrentIndex(ui.profilesComboBox->findText(QLatin1String(mDefaultContentListName)));
 
     // Add the actions to the toolbuttons
-    ui.newProfileButton->setDefaultAction (ui.newProfileAction);
-    ui.cloneProfileButton->setDefaultAction (ui.cloneProfileAction);
-    ui.deleteProfileButton->setDefaultAction (ui.deleteProfileAction);
+    ui.newProfileButton->setDefaultAction(ui.newProfileAction);
+    ui.cloneProfileButton->setDefaultAction(ui.cloneProfileAction);
+    ui.deleteProfileButton->setDefaultAction(ui.deleteProfileAction);
     refreshButton->setDefaultAction(ui.refreshDataFilesAction);
 
-    //establish connections
-    connect (ui.profilesComboBox, qOverload<int>(&::ProfilesComboBox::currentIndexChanged),
-             this, &DataFilesPage::slotProfileChanged);
+    // establish connections
+    connect(ui.profilesComboBox, qOverload<int>(&::ProfilesComboBox::currentIndexChanged), this,
+        &DataFilesPage::slotProfileChanged);
 
-    connect (ui.profilesComboBox, &::ProfilesComboBox::profileRenamed,
-             this, &DataFilesPage::slotProfileRenamed);
+    connect(ui.profilesComboBox, &::ProfilesComboBox::profileRenamed, this, &DataFilesPage::slotProfileRenamed);
 
-    connect (ui.profilesComboBox, qOverload<const QString&,const QString&>(&::ProfilesComboBox::signalProfileChanged),
-             this, &DataFilesPage::slotProfileChangedByUser);
+    connect(ui.profilesComboBox, qOverload<const QString&, const QString&>(&::ProfilesComboBox::signalProfileChanged),
+        this, &DataFilesPage::slotProfileChangedByUser);
 
-    connect(ui.refreshDataFilesAction, &QAction::triggered,
-            this, &DataFilesPage::slotRefreshButtonClicked);
+    connect(ui.refreshDataFilesAction, &QAction::triggered, this, &DataFilesPage::slotRefreshButtonClicked);
 
     connect(ui.updateNavMeshButton, &QPushButton::clicked, this, &DataFilesPage::startNavMeshTool);
     connect(ui.cancelNavMeshButton, &QPushButton::clicked, this, &DataFilesPage::killNavMeshTool);
 
-    connect(mNavMeshToolInvoker->getProcess(), &QProcess::readyReadStandardOutput, this, &DataFilesPage::readNavMeshToolStdout);
-    connect(mNavMeshToolInvoker->getProcess(), &QProcess::readyReadStandardError, this, &DataFilesPage::readNavMeshToolStderr);
-    connect(mNavMeshToolInvoker->getProcess(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished), this, &DataFilesPage::navMeshToolFinished);
+    connect(mNavMeshToolInvoker->getProcess(), &QProcess::readyReadStandardOutput, this,
+        &DataFilesPage::readNavMeshToolStdout);
+    connect(mNavMeshToolInvoker->getProcess(), &QProcess::readyReadStandardError, this,
+        &DataFilesPage::readNavMeshToolStderr);
+    connect(mNavMeshToolInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
+        &DataFilesPage::navMeshToolFinished);
 }
 
 bool Launcher::DataFilesPage::loadSettings()
@@ -208,8 +191,8 @@ bool Launcher::DataFilesPage::loadSettings()
 
     qDebug() << "The current profile is: " << currentProfile;
 
-    for (const QString &item : profiles)
-        addProfile (item, false);
+    for (const QString& item : profiles)
+        addProfile(item, false);
 
     // Hack: also add the current profile
     if (!currentProfile.isEmpty())
@@ -267,10 +250,11 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
         // deactivate data-local and global data directory: they are always included
         const auto tmp = currentDir.toUtf8();
-        if (currentDir == mDataLocal || std::filesystem::path(Misc::StringUtils::stringToU8String(tmp)) == globalDataDir)
+        if (currentDir == mDataLocal
+            || std::filesystem::path(Misc::StringUtils::stringToU8String(tmp)) == globalDataDir)
         {
             auto flags = item->flags();
-            item->setFlags(flags & ~(Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled|Qt::ItemIsEnabled));
+            item->setFlags(flags & ~(Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled));
         }
 
         // Add a "data file" icon if the directory contains a content file
@@ -293,7 +277,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     QStringList selectedArchives = mLauncherSettings.getArchiveList(contentModelName);
     if (selectedArchives.isEmpty())
-         selectedArchives = mGameSettings.getArchiveList();
+        selectedArchives = mGameSettings.getArchiveList();
 
     // sort and tick BSA according to profile
     int row = 0;
@@ -331,27 +315,28 @@ QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, 
     return filepaths;
 }
 
-void Launcher::DataFilesPage::saveSettings(const QString &profile)
+void Launcher::DataFilesPage::saveSettings(const QString& profile)
 {
     if (const int value = ui.navMeshMaxSizeSpinBox->value(); value != getMaxNavMeshDbFileSizeMiB())
-        Settings::Manager::setInt64("max navmeshdb file size", "Navigator", static_cast<std::int64_t>(value) * 1024 * 1024);
+        Settings::Manager::setInt64(
+            "max navmeshdb file size", "Navigator", static_cast<std::int64_t>(value) * 1024 * 1024);
 
     QString profileName = profile;
 
     if (profileName.isEmpty())
         profileName = ui.profilesComboBox->currentText();
 
-    //retrieve the data paths
+    // retrieve the data paths
     auto dirList = selectedDirectoriesPaths();
 
-    //retrieve the files selected for the profile
+    // retrieve the files selected for the profile
     ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
 
-    //set the value of the current profile (not necessarily the profile being saved!)
+    // set the value of the current profile (not necessarily the profile being saved!)
     mLauncherSettings.setCurrentContentListName(ui.profilesComboBox->currentText());
 
     QStringList fileNames;
-    for (const ContentSelectorModel::EsmFile *item : items)
+    for (const ContentSelectorModel::EsmFile* item : items)
     {
         fileNames.append(item->fileName());
     }
@@ -361,49 +346,49 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
 
 QStringList Launcher::DataFilesPage::selectedDirectoriesPaths() const
 {
-   QStringList dirList;
-   for (int i = 0; i < ui.directoryListWidget->count(); ++i)
-   {
-       if (ui.directoryListWidget->item(i)->flags() & Qt::ItemIsEnabled)
-           dirList.append(ui.directoryListWidget->item(i)->text());
-   }
-   return dirList;
+    QStringList dirList;
+    for (int i = 0; i < ui.directoryListWidget->count(); ++i)
+    {
+        if (ui.directoryListWidget->item(i)->flags() & Qt::ItemIsEnabled)
+            dirList.append(ui.directoryListWidget->item(i)->text());
+    }
+    return dirList;
 }
 
 QStringList Launcher::DataFilesPage::selectedArchivePaths(bool all) const
 {
-   QStringList archiveList;
-   for (int i = 0; i < ui.archiveListWidget->count(); ++i)
-   {
-       const auto* item = ui.archiveListWidget->item(i);
-       const auto archive = ui.archiveListWidget->item(i)->text();
+    QStringList archiveList;
+    for (int i = 0; i < ui.archiveListWidget->count(); ++i)
+    {
+        const auto* item = ui.archiveListWidget->item(i);
+        const auto archive = ui.archiveListWidget->item(i)->text();
 
-       if (all ||item->checkState() == Qt::Checked)
-           archiveList.append(item->text());
-   }
-   return archiveList;
+        if (all || item->checkState() == Qt::Checked)
+            archiveList.append(item->text());
+    }
+    return archiveList;
 }
 
 QStringList Launcher::DataFilesPage::selectedFilePaths() const
 {
-    //retrieve the files selected for the profile
+    // retrieve the files selected for the profile
     ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
     QStringList filePaths;
-    for (const ContentSelectorModel::EsmFile *item : items)
+    for (const ContentSelectorModel::EsmFile* item : items)
     {
         QFile file(item->filePath());
-        if(file.exists())
+        if (file.exists())
             filePaths.append(item->filePath());
     }
     return filePaths;
 }
 
-void Launcher::DataFilesPage::removeProfile(const QString &profile)
+void Launcher::DataFilesPage::removeProfile(const QString& profile)
 {
     mLauncherSettings.removeContentList(profile);
 }
 
-QAbstractItemModel *Launcher::DataFilesPage::profilesModel() const
+QAbstractItemModel* Launcher::DataFilesPage::profilesModel() const
 {
     return ui.profilesComboBox->model();
 }
@@ -422,20 +407,20 @@ void Launcher::DataFilesPage::setProfile(int index, bool savePrevious)
 
         mPreviousProfile = current;
 
-        setProfile (previous, current, savePrevious);
+        setProfile(previous, current, savePrevious);
     }
 }
 
-void Launcher::DataFilesPage::setProfile (const QString &previous, const QString &current, bool savePrevious)
+void Launcher::DataFilesPage::setProfile(const QString& previous, const QString& current, bool savePrevious)
 {
-    //abort if no change (poss. duplicate signal)
+    // abort if no change (poss. duplicate signal)
     if (previous == current)
-            return;
+        return;
 
     if (!previous.isEmpty() && savePrevious)
-        saveSettings (previous);
+        saveSettings(previous);
 
-    ui.profilesComboBox->setCurrentProfile (ui.profilesComboBox->findText (current));
+    ui.profilesComboBox->setCurrentProfile(ui.profilesComboBox->findText(current));
 
     mNewDataDirs.clear();
     mKnownArchives.clear();
@@ -451,30 +436,30 @@ void Launcher::DataFilesPage::setProfile (const QString &previous, const QString
     checkForDefaultProfile();
 }
 
-void Launcher::DataFilesPage::slotProfileDeleted (const QString &item)
+void Launcher::DataFilesPage::slotProfileDeleted(const QString& item)
 {
-    removeProfile (item);
+    removeProfile(item);
 }
 
-void Launcher::DataFilesPage:: refreshDataFilesView ()
+void Launcher::DataFilesPage::refreshDataFilesView()
 {
     QString currentProfile = ui.profilesComboBox->currentText();
     saveSettings(currentProfile);
     populateFileViews(currentProfile);
 }
 
-void Launcher::DataFilesPage::slotRefreshButtonClicked ()
+void Launcher::DataFilesPage::slotRefreshButtonClicked()
 {
     refreshDataFilesView();
 }
 
-void Launcher::DataFilesPage::slotProfileChangedByUser(const QString &previous, const QString &current)
+void Launcher::DataFilesPage::slotProfileChangedByUser(const QString& previous, const QString& current)
 {
     setProfile(previous, current, true);
-    emit signalProfileChanged (ui.profilesComboBox->findText(current));
+    emit signalProfileChanged(ui.profilesComboBox->findText(current));
 }
 
-void Launcher::DataFilesPage::slotProfileRenamed(const QString &previous, const QString &current)
+void Launcher::DataFilesPage::slotProfileRenamed(const QString& previous, const QString& current)
 {
     if (previous.isEmpty())
         return;
@@ -483,7 +468,7 @@ void Launcher::DataFilesPage::slotProfileRenamed(const QString &previous, const 
     saveSettings();
 
     // Remove the old one
-    removeProfile (previous);
+    removeProfile(previous);
 
     loadSettings();
 }
@@ -494,7 +479,7 @@ void Launcher::DataFilesPage::slotProfileChanged(int index)
     if (ui.profilesComboBox->currentIndex() != index)
         ui.profilesComboBox->setCurrentIndex(index);
 
-    setProfile (index, true);
+    setProfile(index, true);
 }
 
 void Launcher::DataFilesPage::on_newProfileAction_triggered()
@@ -514,16 +499,16 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
     addProfile(profile, true);
 }
 
-void Launcher::DataFilesPage::addProfile (const QString &profile, bool setAsCurrent)
+void Launcher::DataFilesPage::addProfile(const QString& profile, bool setAsCurrent)
 {
     if (profile.isEmpty())
         return;
 
-    if (ui.profilesComboBox->findText (profile) == -1)
-        ui.profilesComboBox->addItem (profile);
+    if (ui.profilesComboBox->findText(profile) == -1)
+        ui.profilesComboBox->addItem(profile);
 
     if (setAsCurrent)
-        setProfile (ui.profilesComboBox->findText (profile), false);
+        setProfile(ui.profilesComboBox->findText(profile), false);
 }
 
 void Launcher::DataFilesPage::on_cloneProfileAction_triggered()
@@ -547,11 +532,11 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
     if (profile.isEmpty())
         return;
 
-    if (!showDeleteMessageBox (profile))
+    if (!showDeleteMessageBox(profile))
         return;
 
     // this should work since the Default profile can't be deleted and is always index 0
-    int next = ui.profilesComboBox->currentIndex()-1;
+    int next = ui.profilesComboBox->currentIndex() - 1;
 
     // changing the profile forces a reload of plugin file views.
     ui.profilesComboBox->setCurrentIndex(next);
@@ -562,13 +547,13 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
     checkForDefaultProfile();
 }
 
-void Launcher::DataFilesPage::updateNewProfileOkButton(const QString &text)
+void Launcher::DataFilesPage::updateNewProfileOkButton(const QString& text)
 {
     // We do this here because we need the profiles combobox text
     mNewProfileDialog->setOkButtonEnabled(!text.isEmpty() && ui.profilesComboBox->findText(text) == -1);
 }
 
-void Launcher::DataFilesPage::updateCloneProfileOkButton(const QString &text)
+void Launcher::DataFilesPage::updateCloneProfileOkButton(const QString& text)
 {
     // We do this here because we need the profiles combobox text
     mCloneProfileDialog->setOkButtonEnabled(!text.isEmpty() && ui.profilesComboBox->findText(text) == -1);
@@ -584,7 +569,6 @@ QString Launcher::DataFilesPage::selectDirectory()
         return {};
 
     return QDir(fileDialog.selectedFiles()[0]).canonicalPath();
-
 }
 
 void Launcher::DataFilesPage::addSubdirectories(bool append)
@@ -634,12 +618,12 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
 
     for (int i = 0; i < select.dirListWidget->count(); ++i)
     {
-       const auto* dir = select.dirListWidget->item(i);
-       if (dir->checkState() == Qt::Checked)
-       {
-           ui.directoryListWidget->insertItem(selectedRow++, dir->text());
-           mNewDataDirs.push_back(dir->text());
-       }
+        const auto* dir = select.dirListWidget->item(i);
+        if (dir->checkState() == Qt::Checked)
+        {
+            ui.directoryListWidget->insertItem(selectedRow++, dir->text());
+            mNewDataDirs.push_back(dir->text());
+        }
     }
 
     refreshDataFilesView();
@@ -650,8 +634,8 @@ void Launcher::DataFilesPage::sortDirectories()
     // Ensure disabled entries (aka default directories) are always at the top.
     for (auto i = 1; i < ui.directoryListWidget->count(); ++i)
     {
-        if (!(ui.directoryListWidget->item(i)->flags() & Qt::ItemIsEnabled) &&
-            (ui.directoryListWidget->item(i - 1)->flags() & Qt::ItemIsEnabled))
+        if (!(ui.directoryListWidget->item(i)->flags() & Qt::ItemIsEnabled)
+            && (ui.directoryListWidget->item(i - 1)->flags() & Qt::ItemIsEnabled))
         {
             const auto item = ui.directoryListWidget->takeItem(i);
             ui.directoryListWidget->insertItem(i - 1, item);
@@ -728,14 +712,14 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
 
 void Launcher::DataFilesPage::checkForDefaultProfile()
 {
-    //don't allow deleting "Default" profile
+    // don't allow deleting "Default" profile
     bool success = (ui.profilesComboBox->currentText() != mDefaultContentListName);
 
-    ui.deleteProfileAction->setEnabled (success);
-    ui.profilesComboBox->setEditEnabled (success);
+    ui.deleteProfileAction->setEnabled(success);
+    ui.profilesComboBox->setEditEnabled(success);
 }
 
-bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
+bool Launcher::DataFilesPage::showDeleteMessageBox(const QString& text)
 {
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Delete Content List"));
@@ -743,8 +727,7 @@ bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
     msgBox.setStandardButtons(QMessageBox::Cancel);
     msgBox.setText(tr("Are you sure you want to delete <b>%1</b>?").arg(text));
 
-    QAbstractButton *deleteButton =
-    msgBox.addButton(tr("Delete"), QMessageBox::ActionRole);
+    QAbstractButton* deleteButton = msgBox.addButton(tr("Delete"), QMessageBox::ActionRole);
 
     msgBox.exec();
 
@@ -754,7 +737,8 @@ bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
 void Launcher::DataFilesPage::slotAddonDataChanged()
 {
     QStringList selectedFiles = selectedFilePaths();
-    if (previousSelectedFiles != selectedFiles) {
+    if (previousSelectedFiles != selectedFiles)
+    {
         previousSelectedFiles = selectedFiles;
         // Loading cells for core Morrowind + Expansions takes about 0.2 seconds, which is enough to cause a
         // barely perceptible UI lag. Splitting into its own thread to alleviate that.
@@ -774,7 +758,7 @@ void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
 
     // The following code will run only if there is not another thread currently running it
     CellNameLoader cellNameLoader;
-#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
     QStringList cellNamesList(set.begin(), set.end());
 #else
@@ -792,9 +776,9 @@ void Launcher::DataFilesPage::startNavMeshTool()
     ui.navMeshProgressBar->setValue(0);
     ui.navMeshProgressBar->setMaximum(1);
 
-    mNavMeshToolProgress = NavMeshToolProgress {};
+    mNavMeshToolProgress = NavMeshToolProgress{};
 
-    QStringList arguments({"--write-binary-log"});
+    QStringList arguments({ "--write-binary-log" });
     if (ui.navMeshRemoveUnusedTilesCheckBox->checkState() == Qt::Checked)
         arguments.append("--remove-unused-tiles");
 
@@ -824,7 +808,7 @@ void Launcher::DataFilesPage::updateNavMeshProgress(int minDataSize)
     const std::byte* const begin = reinterpret_cast<const std::byte*>(mNavMeshToolProgress.mMessagesData.constData());
     const std::byte* const end = begin + mNavMeshToolProgress.mMessagesData.size();
     const std::byte* position = begin;
-    HandleNavMeshToolMessage handle {
+    HandleNavMeshToolMessage handle{
         mNavMeshToolProgress.mCellsCount,
         mNavMeshToolProgress.mExpectedMaxProgress,
         ui.navMeshProgressBar->maximum(),
@@ -863,7 +847,8 @@ void Launcher::DataFilesPage::readNavMeshToolStdout()
 void Launcher::DataFilesPage::navMeshToolFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     updateNavMeshProgress(0);
-    ui.navMeshLogPlainTextEdit->appendPlainText(QString::fromUtf8(mNavMeshToolInvoker->getProcess()->readAllStandardOutput()));
+    ui.navMeshLogPlainTextEdit->appendPlainText(
+        QString::fromUtf8(mNavMeshToolInvoker->getProcess()->readAllStandardOutput()));
     if (exitCode == 0 && exitStatus == QProcess::ExitStatus::NormalExit)
         ui.navMeshProgressBar->setValue(ui.navMeshProgressBar->maximum());
     ui.cancelNavMeshButton->setEnabled(false);

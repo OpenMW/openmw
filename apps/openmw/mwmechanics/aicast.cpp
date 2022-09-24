@@ -26,11 +26,16 @@ namespace MWMechanics
 }
 
 MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)
-    : mTargetId(targetId), mSpellId(spellId), mCasting(false), mManual(manualSpell), mDistance(getInitialDistance(spellId))
+    : mTargetId(targetId)
+    , mSpellId(spellId)
+    , mCasting(false)
+    , mManual(manualSpell)
+    , mDistance(getInitialDistance(spellId))
 {
 }
 
-bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::CharacterController& characterController, MWMechanics::AiState& state, float duration)
+bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::CharacterController& characterController,
+    MWMechanics::AiState& state, float duration)
 {
     MWWorld::Ptr target;
     if (actor.getCellRef().getRefId() == mTargetId)

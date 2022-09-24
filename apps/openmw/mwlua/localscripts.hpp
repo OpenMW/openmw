@@ -29,13 +29,19 @@ namespace MWLua
             class CachedStat
             {
             public:
-                using Setter = void(*)(int, std::string_view, const MWWorld::Ptr&, const sol::object&);
+                using Setter = void (*)(int, std::string_view, const MWWorld::Ptr&, const sol::object&);
+
             private:
                 Setter mSetter; // Function that updates a stat's property
                 int mIndex; // Optional index to disambiguate the stat
                 std::string_view mProp; // Name of the stat's property
             public:
-                CachedStat(Setter setter, int index, std::string_view prop) : mSetter(setter), mIndex(index), mProp(std::move(prop)) {}
+                CachedStat(Setter setter, int index, std::string_view prop)
+                    : mSetter(setter)
+                    , mIndex(index)
+                    , mProp(std::move(prop))
+                {
+                }
 
                 void operator()(const MWWorld::Ptr& ptr, const sol::object& object) const
                 {
@@ -48,17 +54,25 @@ namespace MWLua
                 }
             };
 
-            SelfObject(const LObject& obj) : LObject(obj), mIsActive(false) {}
+            SelfObject(const LObject& obj)
+                : LObject(obj)
+                , mIsActive(false)
+            {
+            }
             MWBase::LuaManager::ActorControls mControls;
             std::map<CachedStat, sol::object> mStatsCache;
             bool mIsActive;
         };
 
-        struct OnActive {};
-        struct OnInactive {};
+        struct OnActive
+        {
+        };
+        struct OnInactive
+        {
+        };
         struct OnActivated
         {
-           LObject mActivatingActor;
+            LObject mActivatingActor;
         };
         struct OnConsume
         {
@@ -69,14 +83,15 @@ namespace MWLua
         void receiveEngineEvent(const EngineEvent&);
 
         void applyStatsCache();
+
     protected:
         SelfObject mData;
 
     private:
-        EngineHandlerList mOnActiveHandlers{"onActive"};
-        EngineHandlerList mOnInactiveHandlers{"onInactive"};
-        EngineHandlerList mOnConsumeHandlers{"onConsume"};
-        EngineHandlerList mOnActivatedHandlers{"onActivated"};
+        EngineHandlerList mOnActiveHandlers{ "onActive" };
+        EngineHandlerList mOnInactiveHandlers{ "onInactive" };
+        EngineHandlerList mOnConsumeHandlers{ "onConsume" };
+        EngineHandlerList mOnActivatedHandlers{ "onActivated" };
     };
 
 }

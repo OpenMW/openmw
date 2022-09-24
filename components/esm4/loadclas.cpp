@@ -38,22 +38,30 @@
 
 void ESM4::Class::load(ESM4::Reader& reader)
 {
-    //mFormId = reader.adjustFormId(reader.hdr().record.id); // FIXME: use master adjusted?
+    // mFormId = reader.adjustFormId(reader.hdr().record.id); // FIXME: use master adjusted?
     mFormId = reader.hdr().record.id;
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_DESC: reader.getLocalizedString(mDesc); break;
-            case ESM4::SUB_ICON: reader.getZString(mIcon);     break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_DESC:
+                reader.getLocalizedString(mDesc);
+                break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mIcon);
+                break;
             case ESM4::SUB_DATA:
             {
-                //std::cout << "CLAS " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "CLAS " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -63,10 +71,10 @@ void ESM4::Class::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Class::save(ESM4::Writer& writer) const
+// void ESM4::Class::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Class::blank()
+// void ESM4::Class::blank()
 //{
-//}
+// }

@@ -2,8 +2,8 @@
 
 #include <components/serialization/binaryreader.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <cstdint>
 #include <cstring>

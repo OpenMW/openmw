@@ -4,15 +4,15 @@
 
 namespace Compiler
 {
-    DiscardParser::DiscardParser (ErrorHandler& errorHandler, const Context& context)
-    : Parser (errorHandler, context), mState (StartState)
+    DiscardParser::DiscardParser(ErrorHandler& errorHandler, const Context& context)
+        : Parser(errorHandler, context)
+        , mState(StartState)
     {
-
     }
 
-    bool DiscardParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
+    bool DiscardParser::parseInt(int value, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==StartState || mState==MinusState)
+        if (mState == StartState || mState == MinusState)
         {
             if (isEmpty())
                 mTokenLoc = loc;
@@ -21,12 +21,12 @@ namespace Compiler
             return false;
         }
 
-        return Parser::parseInt (value, loc, scanner);
+        return Parser::parseInt(value, loc, scanner);
     }
 
-    bool DiscardParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
+    bool DiscardParser::parseFloat(float value, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==StartState || mState==MinusState)
+        if (mState == StartState || mState == MinusState)
         {
             if (isEmpty())
                 mTokenLoc = loc;
@@ -35,13 +35,12 @@ namespace Compiler
             return false;
         }
 
-        return Parser::parseFloat (value, loc, scanner);
+        return Parser::parseFloat(value, loc, scanner);
     }
 
-    bool DiscardParser::parseName (const std::string& name, const TokenLoc& loc,
-        Scanner& scanner)
+    bool DiscardParser::parseName(const std::string& name, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==StartState)
+        if (mState == StartState)
         {
             if (isEmpty())
                 mTokenLoc = loc;
@@ -50,12 +49,12 @@ namespace Compiler
             return false;
         }
 
-        return Parser::parseName (name, loc, scanner);
+        return Parser::parseName(name, loc, scanner);
     }
 
-    bool DiscardParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
+    bool DiscardParser::parseSpecial(int code, const TokenLoc& loc, Scanner& scanner)
     {
-        if (code==Scanner::S_minus && mState==StartState)
+        if (code == Scanner::S_minus && mState == StartState)
         {
             if (isEmpty())
                 mTokenLoc = loc;
@@ -66,7 +65,7 @@ namespace Compiler
             return true;
         }
 
-        return Parser::parseSpecial (code, loc, scanner);
+        return Parser::parseSpecial(code, loc, scanner);
     }
 
     void DiscardParser::reset()

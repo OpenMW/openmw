@@ -5,10 +5,10 @@
 
 namespace ESM
 {
-namespace AiSequence
-{
-    struct AiPursue;
-}
+    namespace AiSequence
+    {
+        struct AiPursue;
+    }
 }
 
 namespace MWMechanics
@@ -19,28 +19,29 @@ namespace MWMechanics
         path is completed). **/
     class AiPursue final : public TypedAiPackage<AiPursue>
     {
-        public:
-            ///Constructor
-            /** \param actor Actor to pursue **/
-            AiPursue(const MWWorld::Ptr& actor);
+    public:
+        /// Constructor
+        /** \param actor Actor to pursue **/
+        AiPursue(const MWWorld::Ptr& actor);
 
-            AiPursue(const ESM::AiSequence::AiPursue* pursue);
+        AiPursue(const ESM::AiSequence::AiPursue* pursue);
 
-            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
+        bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state,
+            float duration) override;
 
-            static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Pursue; }
+        static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Pursue; }
 
-            static constexpr Options makeDefaultOptions()
-            {
-                AiPackage::Options options;
-                options.mCanCancel = false;
-                options.mShouldCancelPreviousAi = false;
-                return options;
-            }
+        static constexpr Options makeDefaultOptions()
+        {
+            AiPackage::Options options;
+            options.mCanCancel = false;
+            options.mShouldCancelPreviousAi = false;
+            return options;
+        }
 
-            MWWorld::Ptr getTarget() const override;
+        MWWorld::Ptr getTarget() const override;
 
-            void writeState (ESM::AiSequence::AiSequence& sequence) const override;
+        void writeState(ESM::AiSequence::AiSequence& sequence) const override;
     };
 }
 #endif

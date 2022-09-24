@@ -27,111 +27,105 @@ namespace CSVWorld
 
     class GenericCreator : public Creator
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMWorld::Data& mData;
-            QUndoStack& mUndoStack;
-            CSMWorld::UniversalId mListId;
-            QPushButton *mCreate;
-            QPushButton *mCancel;
-            QLineEdit *mId;
-            std::string mErrors;
-            QHBoxLayout *mLayout;
-            bool mLocked;
-            std::string mClonedId;
-            CSMWorld::UniversalId::Type mClonedType;
-            unsigned int mScopes;
-            QComboBox *mScope;
-            QLabel *mScopeLabel;
-            IdValidator *mValidator;
+        CSMWorld::Data& mData;
+        QUndoStack& mUndoStack;
+        CSMWorld::UniversalId mListId;
+        QPushButton* mCreate;
+        QPushButton* mCancel;
+        QLineEdit* mId;
+        std::string mErrors;
+        QHBoxLayout* mLayout;
+        bool mLocked;
+        std::string mClonedId;
+        CSMWorld::UniversalId::Type mClonedType;
+        unsigned int mScopes;
+        QComboBox* mScope;
+        QLabel* mScopeLabel;
+        IdValidator* mValidator;
 
-        protected:
-            bool mCloneMode;
+    protected:
+        bool mCloneMode;
 
-        protected:
+    protected:
+        void update();
 
-            void update();
+        virtual void setManualEditing(bool enabled);
+        ///< Enable/disable manual ID editing (enabled by default).
 
-            virtual void setManualEditing (bool enabled);
-            ///< Enable/disable manual ID editing (enabled by default).
+        void insertAtBeginning(QWidget* widget, bool stretched);
 
-            void insertAtBeginning (QWidget *widget, bool stretched);
+        /// \brief Insert given widget before Create and Cancel buttons.
+        /// \param widget Widget to add to layout.
+        /// \param stretched Whether widget should be streched or not.
+        void insertBeforeButtons(QWidget* widget, bool stretched);
 
-            /// \brief Insert given widget before Create and Cancel buttons.
-            /// \param widget Widget to add to layout.
-            /// \param stretched Whether widget should be streched or not.
-            void insertBeforeButtons (QWidget *widget, bool stretched);
+        virtual std::string getId() const;
 
-            virtual std::string getId() const;
+        std::string getClonedId() const;
 
-            std::string getClonedId() const;
+        virtual std::string getIdValidatorResult() const;
 
-            virtual std::string getIdValidatorResult() const;
+        /// Allow subclasses to add additional data to \a command.
+        virtual void configureCreateCommand(CSMWorld::CreateCommand& command) const;
 
-            /// Allow subclasses to add additional data to \a command.
-            virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
+        /// Allow subclasses to wrap the create command together with additional commands
+        /// into a macro.
+        virtual void pushCommand(std::unique_ptr<CSMWorld::CreateCommand> command, const std::string& id);
 
-            /// Allow subclasses to wrap the create command together with additional commands
-            /// into a macro.
-            virtual void pushCommand (std::unique_ptr<CSMWorld::CreateCommand> command,
-                const std::string& id);
+        CSMWorld::Data& getData() const;
 
-            CSMWorld::Data& getData() const;
+        QUndoStack& getUndoStack();
 
-            QUndoStack& getUndoStack();
+        const CSMWorld::UniversalId& getCollectionId() const;
 
-            const CSMWorld::UniversalId& getCollectionId() const;
+        std::string getNamespace() const;
 
-            std::string getNamespace() const;
+        void setEditorMaxLength(int length);
 
-            void setEditorMaxLength(int length);
+    private:
+        void updateNamespace();
 
-        private:
+        void addScope(const QString& name, CSMWorld::Scope scope, const QString& tooltip);
 
-            void updateNamespace();
+    public:
+        GenericCreator(
+            CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id, bool relaxedIdRules = false);
 
-            void addScope (const QString& name, CSMWorld::Scope scope,
-                const QString& tooltip);
+        void setEditLock(bool locked) override;
 
-        public:
+        void reset() override;
 
-            GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id, bool relaxedIdRules = false);
+        void toggleWidgets(bool active = true) override;
 
-            void setEditLock (bool locked) override;
+        void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 
-            void reset() override;
+        void touch(const std::vector<CSMWorld::UniversalId>& ids) override;
 
-            void toggleWidgets (bool active = true) override;
+        virtual std::string getErrors() const;
+        ///< Return formatted error descriptions for the current state of the creator. if an empty
+        /// string is returned, there is no error.
 
-            void cloneMode(const std::string& originId,
-                                   const CSMWorld::UniversalId::Type type) override;
+        void setScope(unsigned int scope) override;
 
-            void touch(const std::vector<CSMWorld::UniversalId>& ids) override;
+        /// Focus main input widget
+        void focus() override;
 
-            virtual std::string getErrors() const;
-            ///< Return formatted error descriptions for the current state of the creator. if an empty
-            /// string is returned, there is no error.
+    protected slots:
 
-            void setScope (unsigned int scope) override;
+        /// \brief Create record if able to after Return key is pressed on input.
+        void inputReturnPressed();
 
-            /// Focus main input widget
-            void focus() override;
+    private slots:
 
-        protected slots:
+        void textChanged(const QString& text);
 
-            /// \brief Create record if able to after Return key is pressed on input.
-            void inputReturnPressed();
+        void create();
 
-        private slots:
+        void scopeChanged(int index);
 
-            void textChanged (const QString& text);
-
-            void create();
-
-            void scopeChanged (int index);
-
-            void dataIdListChanged();
+        void dataIdListChanged();
     };
 }
 

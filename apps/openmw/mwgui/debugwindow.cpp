@@ -1,8 +1,8 @@
 #include "debugwindow.hpp"
 
+#include <MyGUI_EditBox.h>
 #include <MyGUI_TabControl.h>
 #include <MyGUI_TabItem.h>
-#include <MyGUI_EditBox.h>
 
 #include <LinearMath/btQuickprof.h>
 #include <components/debug/debugging.hpp>
@@ -20,47 +20,56 @@ namespace
         if (pit->Is_Done())
             return;
 
-        float accumulated_time=0,parent_time = pit->Is_Root() ? CProfileManager::Get_Time_Since_Reset() : pit->Get_Current_Parent_Total_Time();
-        int i,j;
+        float accumulated_time = 0,
+              parent_time
+            = pit->Is_Root() ? CProfileManager::Get_Time_Since_Reset() : pit->Get_Current_Parent_Total_Time();
+        int i, j;
         int frames_since_reset = CProfileManager::Get_Frame_Count_Since_Reset();
-        for (i=0;i<spacing;i++) os << ".";
+        for (i = 0; i < spacing; i++)
+            os << ".";
         os << "----------------------------------\n";
-        for (i=0;i<spacing;i++) os << ".";
-        std::string s = "Profiling: "+
-                std::string(pit->Get_Current_Parent_Name())+" (total running time: "+MyGUI::utility::toString(parent_time,3)+" ms) ---\n";
+        for (i = 0; i < spacing; i++)
+            os << ".";
+        std::string s = "Profiling: " + std::string(pit->Get_Current_Parent_Name())
+            + " (total running time: " + MyGUI::utility::toString(parent_time, 3) + " ms) ---\n";
         os << s;
-        //float totalTime = 0.f;
+        // float totalTime = 0.f;
 
         int numChildren = 0;
 
-        for (i = 0; !pit->Is_Done(); i++,pit->Next())
+        for (i = 0; !pit->Is_Done(); i++, pit->Next())
         {
             numChildren++;
             float current_total_time = pit->Get_Current_Total_Time();
             accumulated_time += current_total_time;
             float fraction = parent_time > SIMD_EPSILON ? (current_total_time / parent_time) * 100 : 0.f;
 
-            for (j=0;j<spacing;j++) os << ".";
+            for (j = 0; j < spacing; j++)
+                os << ".";
             double ms = (current_total_time / (double)frames_since_reset);
-            s = MyGUI::utility::toString(i)+" -- "+pit->Get_Current_Name()+" ("+MyGUI::utility::toString(fraction,2)+" %) :: "+MyGUI::utility::toString(ms,3)+" ms / frame ("+MyGUI::utility::toString(pit->Get_Current_Total_Calls())+" calls)\n";
+            s = MyGUI::utility::toString(i) + " -- " + pit->Get_Current_Name() + " ("
+                + MyGUI::utility::toString(fraction, 2) + " %) :: " + MyGUI::utility::toString(ms, 3) + " ms / frame ("
+                + MyGUI::utility::toString(pit->Get_Current_Total_Calls()) + " calls)\n";
             os << s;
-            //totalTime += current_total_time;
-            //recurse into children
+            // totalTime += current_total_time;
+            // recurse into children
         }
 
         if (parent_time < accumulated_time)
         {
             os << "what's wrong\n";
         }
-        for (i=0;i<spacing;i++) os << ".";
-        double unaccounted=  parent_time > SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0.f;
-        s = "Unaccounted: ("+MyGUI::utility::toString(unaccounted,3)+" %) :: "+MyGUI::utility::toString(parent_time - accumulated_time,3)+" ms\n";
+        for (i = 0; i < spacing; i++)
+            os << ".";
+        double unaccounted = parent_time > SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0.f;
+        s = "Unaccounted: (" + MyGUI::utility::toString(unaccounted, 3)
+            + " %) :: " + MyGUI::utility::toString(parent_time - accumulated_time, 3) + " ms\n";
         os << s;
 
-        for (i=0;i<numChildren;i++)
+        for (i = 0; i < numChildren; i++)
         {
             pit->Enter_Child(i);
-            bulletDumpRecursive(pit, spacing+3, os);
+            bulletDumpRecursive(pit, spacing + 3, os);
             pit->Enter_Parent();
         }
     }
@@ -93,15 +102,15 @@ namespace MWGui
 
         MyGUI::TabItem* itemLV = mTabControl->addItem("Log Viewer");
         itemLV->setCaptionWithReplacing(" #{DebugMenu:LogViewer} ");
-        mLogView = itemLV->createWidgetReal<MyGUI::EditBox>
-                ("LogEdit", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Stretch);
+        mLogView
+            = itemLV->createWidgetReal<MyGUI::EditBox>("LogEdit", MyGUI::FloatCoord(0, 0, 1, 1), MyGUI::Align::Stretch);
         mLogView->setEditReadOnly(true);
 
 #ifndef BT_NO_PROFILE
         MyGUI::TabItem* item = mTabControl->addItem("Physics Profiler");
         item->setCaptionWithReplacing(" #{DebugMenu:PhysicsProfiler} ");
-        mBulletProfilerEdit = item->createWidgetReal<MyGUI::EditBox>
-                ("LogEdit", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Stretch);
+        mBulletProfilerEdit
+            = item->createWidgetReal<MyGUI::EditBox>("LogEdit", MyGUI::FloatCoord(0, 0, 1, 1), MyGUI::Align::Stretch);
 #else
         mBulletProfilerEdit = nullptr;
 #endif
@@ -115,32 +124,38 @@ namespace MWGui
     void DebugWindow::startLogRecording()
     {
         sLogCircularBuffer.resize(std::max<int64_t>(0, Settings::Manager::getInt64("log buffer size", "General")));
-        Debug::setLogListener([](Debug::Level level, std::string_view prefix, std::string_view msg)
-        {
+        Debug::setLogListener([](Debug::Level level, std::string_view prefix, std::string_view msg) {
             if (sLogCircularBuffer.empty())
-                return;  // Log viewer is disabled.
+                return; // Log viewer is disabled.
             std::string_view color;
             switch (level)
             {
-                case Debug::Error: color = "#FF0000"; break;
-                case Debug::Warning: color = "#FFFF00"; break;
-                case Debug::Info: color = "#FFFFFF"; break;
+                case Debug::Error:
+                    color = "#FF0000";
+                    break;
+                case Debug::Warning:
+                    color = "#FFFF00";
+                    break;
+                case Debug::Info:
+                    color = "#FFFFFF";
+                    break;
                 case Debug::Verbose:
-                case Debug::Debug: color = "#666666"; break;
-                default: color = "#FFFFFF";
+                case Debug::Debug:
+                    color = "#666666";
+                    break;
+                default:
+                    color = "#FFFFFF";
             }
             bool bufferOverflow = false;
             std::lock_guard lock(sBufferMutex);
             const int64_t bufSize = sLogCircularBuffer.size();
-            auto addChar = [&](char c)
-            {
+            auto addChar = [&](char c) {
                 sLogCircularBuffer[sLogEndIndex++] = c;
                 if (sLogEndIndex == bufSize)
                     sLogEndIndex = 0;
                 bufferOverflow = bufferOverflow || sLogEndIndex == sLogStartIndex;
             };
-            auto addShieldedStr = [&](std::string_view s)
-            {
+            auto addShieldedStr = [&](std::string_view s) {
                 for (char c : s)
                 {
                     addChar(c);
@@ -164,7 +179,7 @@ namespace MWGui
         if (!mLogView || sLogCircularBuffer.empty() || sLogStartIndex == sLogEndIndex)
             return;
         if (mLogView->isTextSelection())
-            return;  // Don't change text while player is trying to copy something
+            return; // Don't change text while player is trying to copy something
 
         std::string addition;
         const int64_t bufSize = sLogCircularBuffer.size();
@@ -180,7 +195,7 @@ namespace MWGui
         }
 
         size_t scrollPos = mLogView->getVScrollPosition();
-        bool scrolledToTheEnd = scrollPos+1 >= mLogView->getVScrollRange();
+        bool scrolledToTheEnd = scrollPos + 1 >= mLogView->getVScrollRange();
         int64_t newSizeEstimation = mLogView->getTextLength() + addition.size();
         if (newSizeEstimation > bufSize)
             mLogView->eraseText(0, newSizeEstimation - bufSize);
@@ -202,7 +217,7 @@ namespace MWGui
 
         size_t previousPos = mBulletProfilerEdit->getVScrollPosition();
         mBulletProfilerEdit->setCaption(stream.str());
-        mBulletProfilerEdit->setVScrollPosition(std::min(previousPos, mBulletProfilerEdit->getVScrollRange()-1));
+        mBulletProfilerEdit->setVScrollPosition(std::min(previousPos, mBulletProfilerEdit->getVScrollRange() - 1));
 #endif
     }
 

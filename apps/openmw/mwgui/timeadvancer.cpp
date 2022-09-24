@@ -3,12 +3,12 @@
 namespace MWGui
 {
     TimeAdvancer::TimeAdvancer(float delay)
-        : mRunning(false),
-          mCurHour(0),
-          mHours(1),
-          mInterruptAt(-1),
-          mDelay(delay),
-          mRemainingTime(delay)
+        : mRunning(false)
+        , mCurHour(0)
+        , mHours(1)
+        , mInterruptAt(-1)
+        , mDelay(delay)
+        , mRemainingTime(delay)
     {
     }
 
@@ -54,7 +54,6 @@ namespace MWGui
                 eventFinished();
                 return;
             }
-
         }
     }
 

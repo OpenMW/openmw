@@ -11,7 +11,7 @@ namespace MWGui
         TextInputDialog();
 
         std::string getTextInput() const;
-        void setTextInput(const std::string &text);
+        void setTextInput(const std::string& text);
 
         void setNextButtonShow(bool shown);
         void setTextLabel(std::string_view label);

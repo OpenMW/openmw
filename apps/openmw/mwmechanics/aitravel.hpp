@@ -5,10 +5,10 @@
 
 namespace ESM
 {
-namespace AiSequence
-{
-    struct AiTravel;
-}
+    namespace AiSequence
+    {
+        struct AiTravel;
+    }
 }
 
 namespace MWMechanics
@@ -18,42 +18,43 @@ namespace MWMechanics
     /// \brief Causes the AI to travel to the specified point
     class AiTravel : public TypedAiPackage<AiTravel>
     {
-        public:
-            AiTravel(float x, float y, float z, bool repeat, AiTravel* derived);
+    public:
+        AiTravel(float x, float y, float z, bool repeat, AiTravel* derived);
 
-            AiTravel(float x, float y, float z, AiInternalTravel* derived);
+        AiTravel(float x, float y, float z, AiInternalTravel* derived);
 
-            AiTravel(float x, float y, float z, bool repeat);
+        AiTravel(float x, float y, float z, bool repeat);
 
-            explicit AiTravel(const ESM::AiSequence::AiTravel* travel);
+        explicit AiTravel(const ESM::AiSequence::AiTravel* travel);
 
-            /// Simulates the passing of time
-            void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
+        /// Simulates the passing of time
+        void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
+        void writeState(ESM::AiSequence::AiSequence& sequence) const override;
 
-            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
+        bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state,
+            float duration) override;
 
-            static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Travel; }
+        static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Travel; }
 
-            static constexpr Options makeDefaultOptions()
-            {
-                AiPackage::Options options;
-                options.mUseVariableSpeed = true;
-                options.mAlwaysActive = true;
-                return options;
-            }
+        static constexpr Options makeDefaultOptions()
+        {
+            AiPackage::Options options;
+            options.mUseVariableSpeed = true;
+            options.mAlwaysActive = true;
+            return options;
+        }
 
-            osg::Vec3f getDestination() const override { return osg::Vec3f(mX, mY, mZ); }
+        osg::Vec3f getDestination() const override { return osg::Vec3f(mX, mY, mZ); }
 
-        private:
-            const float mX;
-            const float mY;
-            const float mZ;
+    private:
+        const float mX;
+        const float mY;
+        const float mZ;
 
-            const bool mHidden;
+        const bool mHidden;
 
-            float mDestinationTimer;
+        float mDestinationTimer;
     };
 
     struct AiInternalTravel final : public AiTravel

@@ -1,13 +1,13 @@
 #include "groundcoverstore.hpp"
 
-#include <components/esmloader/load.hpp>
-#include <components/esmloader/esmdata.hpp>
-#include <components/misc/strings/lower.hpp>
-#include <components/esm3/readerscache.hpp>
-#include <components/misc/resourcehelpers.hpp>
-#include <components/resource/resourcesystem.hpp>
-#include <components/esm3/loadstat.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/readerscache.hpp>
+#include <components/esmloader/esmdata.hpp>
+#include <components/esmloader/load.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <apps/openmw/mwbase/environment.hpp>
 
@@ -23,8 +23,8 @@ namespace MWWorld
         query.mLoadCells = true;
 
         ESM::ReadersCache readers;
-        const ::EsmLoader::EsmData content = ::EsmLoader::loadEsmData(query, groundcoverFiles, fileCollections,
-                                                                      readers, encoder, listener);
+        const ::EsmLoader::EsmData content
+            = ::EsmLoader::loadEsmData(query, groundcoverFiles, fileCollections, readers, encoder, listener);
 
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
@@ -51,7 +51,8 @@ namespace MWWorld
 
         for (const ESM::Cell& cell : content.mCells)
         {
-            if (!cell.isExterior()) continue;
+            if (!cell.isExterior())
+                continue;
             auto cellIndex = std::make_pair(cell.getCellId().mIndex.mX, cell.getCellId().mIndex.mY);
             mCellContexts[cellIndex] = std::move(cell.mContextList);
         }
@@ -61,7 +62,8 @@ namespace MWWorld
     {
         std::string idLower = Misc::StringUtils::lowerCase(id);
         auto search = mMeshCache.find(idLower);
-        if (search == mMeshCache.end()) return std::string();
+        if (search == mMeshCache.end())
+            return std::string();
 
         return search->second;
     }

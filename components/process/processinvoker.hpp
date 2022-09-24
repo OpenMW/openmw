@@ -1,9 +1,9 @@
 #ifndef PROCESSINVOKER_HPP
 #define PROCESSINVOKER_HPP
 
-#include <QStringList>
-#include <QString>
 #include <QProcess>
+#include <QString>
+#include <QStringList>
 
 namespace Process
 {
@@ -12,25 +12,27 @@ namespace Process
         Q_OBJECT
 
     public:
-
         ProcessInvoker(QObject* parent = nullptr);
         ~ProcessInvoker();
 
-//        void setProcessName(const QString &name);
-//        void setProcessArguments(const QStringList &arguments);
+        //        void setProcessName(const QString &name);
+        //        void setProcessArguments(const QStringList &arguments);
 
         QProcess* getProcess();
-//        QString getProcessName();
-//        QStringList getProcessArguments();
+        //        QString getProcessName();
+        //        QStringList getProcessArguments();
 
-//        inline bool startProcess(bool detached = false) { return startProcess(mName, mArguments, detached); }
-        inline bool startProcess(const QString &name, bool detached = false) { return startProcess(name, QStringList(), detached); }
-        bool startProcess(const QString &name, const QStringList &arguments, bool detached = false);
+        //        inline bool startProcess(bool detached = false) { return startProcess(mName, mArguments, detached); }
+        inline bool startProcess(const QString& name, bool detached = false)
+        {
+            return startProcess(name, QStringList(), detached);
+        }
+        bool startProcess(const QString& name, const QStringList& arguments, bool detached = false);
 
         void killProcess();
 
     private:
-        QProcess *mProcess;
+        QProcess* mProcess;
 
         QString mName;
         QStringList mArguments;
@@ -40,7 +42,6 @@ namespace Process
     private slots:
         void processError(QProcess::ProcessError error);
         void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
-
     };
 }
 

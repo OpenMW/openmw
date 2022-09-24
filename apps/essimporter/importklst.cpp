@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void KLST::load(ESM::ESMReader &esm)
+    void KLST::load(ESM::ESMReader& esm)
     {
         while (esm.isNextSub("KNAM"))
         {

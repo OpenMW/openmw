@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void BodyPart::load(ESMReader &esm, bool &isDeleted)
+    void BodyPart::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -47,7 +47,7 @@ namespace ESM
             esm.fail("Missing BYDT subrecord");
     }
 
-    void BodyPart::save(ESMWriter &esm, bool isDeleted) const
+    void BodyPart::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

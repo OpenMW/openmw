@@ -16,7 +16,8 @@ namespace ESM
         , mRecordCount(0)
         , mCounting(true)
         , mHeader()
-    {}
+    {
+    }
 
     unsigned int ESMWriter::getVersion() const
     {
@@ -35,20 +36,20 @@ namespace ESM
 
     void ESMWriter::setAuthor(const std::string& auth)
     {
-        mHeader.mData.author.assign (auth);
+        mHeader.mData.author.assign(auth);
     }
 
     void ESMWriter::setDescription(const std::string& desc)
     {
-        mHeader.mData.desc.assign (desc);
+        mHeader.mData.desc.assign(desc);
     }
 
-    void ESMWriter::setRecordCount (int count)
+    void ESMWriter::setRecordCount(int count)
     {
         mHeader.mData.records = count;
     }
 
-    void ESMWriter::setFormat (int format)
+    void ESMWriter::setFormat(int format)
     {
         mHeader.mFormat = format;
     }
@@ -75,7 +76,7 @@ namespace ESM
 
         startRecord("TES3", 0);
 
-        mHeader.save (*this);
+        mHeader.save(*this);
 
         endRecord("TES3");
     }
@@ -83,7 +84,7 @@ namespace ESM
     void ESMWriter::close()
     {
         if (!mRecords.empty())
-            throw std::runtime_error ("Unclosed record remaining");
+            throw std::runtime_error("Unclosed record remaining");
     }
 
     void ESMWriter::startRecord(NAME name, uint32_t flags)
@@ -103,7 +104,7 @@ namespace ESM
         assert(mRecords.back().size == 0);
     }
 
-    void ESMWriter::startRecord (uint32_t name, uint32_t flags)
+    void ESMWriter::startRecord(uint32_t name, uint32_t flags)
     {
         startRecord(NAME(name), flags);
     }
@@ -111,7 +112,7 @@ namespace ESM
     void ESMWriter::startSubRecord(NAME name)
     {
         // Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
-        assert (mRecords.size() <= 1);
+        assert(mRecords.size() <= 1);
 
         writeName(name);
         RecordData rec;
@@ -133,14 +134,13 @@ namespace ESM
         mStream->seekp(rec.position);
 
         mCounting = false;
-        write (reinterpret_cast<const char*> (&rec.size), sizeof(uint32_t));
+        write(reinterpret_cast<const char*>(&rec.size), sizeof(uint32_t));
         mCounting = true;
 
         mStream->seekp(0, std::ios::end);
-
     }
 
-    void ESMWriter::endRecord (uint32_t name)
+    void ESMWriter::endRecord(uint32_t name)
     {
         endRecord(NAME(name));
     }
@@ -161,7 +161,7 @@ namespace ESM
         if (data.size() < size)
         {
             for (size_t i = data.size(); i < size; ++i)
-                write("\0",1);
+                write("\0", 1);
         }
 
         endRecord(name);
@@ -192,7 +192,7 @@ namespace ESM
     void ESMWriter::writeHCString(const std::string& data)
     {
         writeHString(data);
-        if (data.size() > 0 && data[data.size()-1] != '\0')
+        if (data.size() > 0 && data[data.size() - 1] != '\0')
             write("\0", 1);
     }
 

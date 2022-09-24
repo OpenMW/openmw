@@ -14,34 +14,22 @@ namespace SceneUtil
 
     osg::Matrix getReversedZProjectionMatrixAsPerspectiveInf(double fov, double aspect, double near)
     {
-        double A = 1.0/std::tan(osg::DegreesToRadians(fov)/2.0);
-        return osg::Matrix(
-            A/aspect,   0,      0,      0,
-            0,          A,      0,      0,
-            0,          0,      0,      -1,
-            0,          0,      near,   0
-        );
+        double A = 1.0 / std::tan(osg::DegreesToRadians(fov) / 2.0);
+        return osg::Matrix(A / aspect, 0, 0, 0, 0, A, 0, 0, 0, 0, 0, -1, 0, 0, near, 0);
     }
 
     osg::Matrix getReversedZProjectionMatrixAsPerspective(double fov, double aspect, double near, double far)
     {
-        double A = 1.0/std::tan(osg::DegreesToRadians(fov)/2.0);
+        double A = 1.0 / std::tan(osg::DegreesToRadians(fov) / 2.0);
         return osg::Matrix(
-            A/aspect,   0,      0,                          0,
-            0,          A,      0,                          0,
-            0,          0,      near/(far-near),            -1,
-            0,          0,      (far*near)/(far - near),    0
-        );
+            A / aspect, 0, 0, 0, 0, A, 0, 0, 0, 0, near / (far - near), -1, 0, 0, (far * near) / (far - near), 0);
     }
 
-    osg::Matrix getReversedZProjectionMatrixAsOrtho(double left, double right, double bottom, double top, double near, double far)
+    osg::Matrix getReversedZProjectionMatrixAsOrtho(
+        double left, double right, double bottom, double top, double near, double far)
     {
-        return osg::Matrix(
-            2/(right-left),             0,                          0,                  0,
-            0,                          2/(top-bottom),             0,                  0,
-            0,                          0,                          1/(far-near),       0,
-            (right+left)/(left-right),  (top+bottom)/(bottom-top),  far/(far-near),     1
-        );
+        return osg::Matrix(2 / (right - left), 0, 0, 0, 0, 2 / (top - bottom), 0, 0, 0, 0, 1 / (far - near), 0,
+            (right + left) / (left - right), (top + bottom) / (bottom - top), far / (far - near), 1);
     }
 
     bool isDepthFormat(GLenum format)
@@ -75,30 +63,30 @@ namespace SceneUtil
     {
         switch (internalFormat)
         {
-        case GL_DEPTH_COMPONENT16:
-        case GL_DEPTH_COMPONENT24:
-        case GL_DEPTH_COMPONENT32:
-            sourceType = GL_UNSIGNED_INT;
-            sourceFormat = GL_DEPTH_COMPONENT;
-            break;
-        case GL_DEPTH_COMPONENT32F:
-        case GL_DEPTH_COMPONENT32F_NV:
-            sourceType = GL_FLOAT;
-            sourceFormat = GL_DEPTH_COMPONENT;
-            break;
-        case GL_DEPTH24_STENCIL8:
-            sourceType = GL_UNSIGNED_INT_24_8_EXT;
-            sourceFormat = GL_DEPTH_STENCIL_EXT;
-            break;
-        case GL_DEPTH32F_STENCIL8:
-        case GL_DEPTH32F_STENCIL8_NV:
-            sourceType = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
-            sourceFormat = GL_DEPTH_STENCIL_EXT;
-            break;
-        default:
-            sourceType = GL_UNSIGNED_INT;
-            sourceFormat = GL_DEPTH_COMPONENT;
-            break;
+            case GL_DEPTH_COMPONENT16:
+            case GL_DEPTH_COMPONENT24:
+            case GL_DEPTH_COMPONENT32:
+                sourceType = GL_UNSIGNED_INT;
+                sourceFormat = GL_DEPTH_COMPONENT;
+                break;
+            case GL_DEPTH_COMPONENT32F:
+            case GL_DEPTH_COMPONENT32F_NV:
+                sourceType = GL_FLOAT;
+                sourceFormat = GL_DEPTH_COMPONENT;
+                break;
+            case GL_DEPTH24_STENCIL8:
+                sourceType = GL_UNSIGNED_INT_24_8_EXT;
+                sourceFormat = GL_DEPTH_STENCIL_EXT;
+                break;
+            case GL_DEPTH32F_STENCIL8:
+            case GL_DEPTH32F_STENCIL8_NV:
+                sourceType = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+                sourceFormat = GL_DEPTH_STENCIL_EXT;
+                break;
+            default:
+                sourceType = GL_UNSIGNED_INT;
+                sourceFormat = GL_DEPTH_COMPONENT;
+                break;
         }
     }
 
@@ -106,18 +94,18 @@ namespace SceneUtil
     {
         switch (internalFormat)
         {
-        case GL_DEPTH24_STENCIL8:
-            return GL_DEPTH_COMPONENT24;
-            break;
-        case GL_DEPTH32F_STENCIL8:
-            return GL_DEPTH_COMPONENT32F;
-            break;
-        case GL_DEPTH32F_STENCIL8_NV:
-            return GL_DEPTH_COMPONENT32F_NV;
-            break;
-        default:
-            return internalFormat;
-            break;
+            case GL_DEPTH24_STENCIL8:
+                return GL_DEPTH_COMPONENT24;
+                break;
+            case GL_DEPTH32F_STENCIL8:
+                return GL_DEPTH_COMPONENT32F;
+                break;
+            case GL_DEPTH32F_STENCIL8_NV:
+                return GL_DEPTH_COMPONENT32F_NV;
+                break;
+            default:
+                return internalFormat;
+                break;
         }
     }
 
@@ -156,7 +144,8 @@ namespace SceneUtil
             }
             else
             {
-                Log(Debug::Warning) << errPreamble << "'GL_ARB_depth_buffer_float' and 'GL_NV_depth_buffer_float' unsupported.";
+                Log(Debug::Warning) << errPreamble
+                                    << "'GL_ARB_depth_buffer_float' and 'GL_NV_depth_buffer_float' unsupported.";
             }
         }
 
@@ -169,7 +158,8 @@ namespace SceneUtil
         {
             for (auto requestedFormat : requestedFormats)
             {
-                if (std::find(mSupportedFormats.cbegin(), mSupportedFormats.cend(), requestedFormat) != mSupportedFormats.cend())
+                if (std::find(mSupportedFormats.cbegin(), mSupportedFormats.cend(), requestedFormat)
+                    != mSupportedFormats.cend())
                 {
                     SceneUtil::AutoDepth::setDepthFormat(requestedFormat);
                     break;

@@ -7,11 +7,11 @@ namespace MWWorld
 {
     class ActionRead : public Action
     {
-            void executeImp (const MWWorld::Ptr& actor) override;
+        void executeImp(const MWWorld::Ptr& actor) override;
 
-        public:
-            /// @param book or scroll to read
-            ActionRead (const Ptr& object);
+    public:
+        /// @param book or scroll to read
+        ActionRead(const Ptr& object);
     };
 }
 

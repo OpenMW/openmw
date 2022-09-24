@@ -10,23 +10,22 @@ namespace MWMechanics
 
     class AiReactionTimer
     {
-        public:
-            static constexpr float sDeviation = 0.1f;
+    public:
+        static constexpr float sDeviation = 0.1f;
 
-            AiReactionTimer(Misc::Rng::Generator& prng)
-                : mPrng{ prng }
-                , mImpl{ AI_REACTION_TIME, sDeviation, Misc::Rng::deviate(0, sDeviation, prng) }
-            {
-            }
+        AiReactionTimer(Misc::Rng::Generator& prng)
+            : mPrng{ prng }
+            , mImpl{ AI_REACTION_TIME, sDeviation, Misc::Rng::deviate(0, sDeviation, prng) }
+        {
+        }
 
-            Misc::TimerStatus update(float duration) { return mImpl.update(duration, mPrng); }
+        Misc::TimerStatus update(float duration) { return mImpl.update(duration, mPrng); }
 
-            void reset() { mImpl.reset(Misc::Rng::deviate(0, sDeviation, mPrng)); }
+        void reset() { mImpl.reset(Misc::Rng::deviate(0, sDeviation, mPrng)); }
 
-        private:
-            Misc::Rng::Generator& mPrng;
-            Misc::DeviatingPeriodicTimer mImpl;
-
+    private:
+        Misc::Rng::Generator& mPrng;
+        Misc::DeviatingPeriodicTimer mImpl;
     };
 }
 

@@ -4,9 +4,9 @@
 #include <filesystem>
 #include <sstream>
 
+#include <components/misc/strings/conversion.hpp>
 #include <components/vfs/archive.hpp>
 #include <components/vfs/manager.hpp>
-#include <components/misc/strings/conversion.hpp>
 
 namespace TestingOpenMW
 {
@@ -26,17 +26,14 @@ namespace TestingOpenMW
     class VFSTestFile : public VFS::File
     {
     public:
-        explicit VFSTestFile(std::string content) : mContent(std::move(content)) {}
-
-        Files::IStreamPtr open() override
+        explicit VFSTestFile(std::string content)
+            : mContent(std::move(content))
         {
-            return std::make_unique<std::stringstream>(mContent, std::ios_base::in);
         }
 
-        std::filesystem::path getPath() override
-        {
-            return "TestFile";
-        }
+        Files::IStreamPtr open() override { return std::make_unique<std::stringstream>(mContent, std::ios_base::in); }
+
+        std::filesystem::path getPath() override { return "TestFile"; }
 
     private:
         const std::string mContent;
@@ -46,20 +43,22 @@ namespace TestingOpenMW
     {
         std::map<std::string, VFS::File*> mFiles;
 
-        VFSTestData(std::map<std::string, VFS::File*> files) : mFiles(std::move(files)) {}
+        VFSTestData(std::map<std::string, VFS::File*> files)
+            : mFiles(std::move(files))
+        {
+        }
 
-        void listResources(std::map<std::string, VFS::File*>& out, char (*normalize_function) (char)) override
+        void listResources(std::map<std::string, VFS::File*>& out, char (*normalize_function)(char)) override
         {
             out = mFiles;
         }
 
-        bool contains(const std::string& file, char (*normalize_function) (char)) const override
+        bool contains(const std::string& file, char (*normalize_function)(char)) const override
         {
             return mFiles.count(file) != 0;
         }
 
         std::string getDescription() const override { return "TestData"; }
-
     };
 
     inline std::unique_ptr<VFS::Manager> createTestVFS(std::map<std::string, VFS::File*> files)
@@ -70,8 +69,16 @@ namespace TestingOpenMW
         return vfs;
     }
 
-    #define EXPECT_ERROR(X, ERR_SUBSTR) try { X; FAIL() << "Expected error"; } \
-        catch (std::exception& e) { EXPECT_THAT(e.what(), ::testing::HasSubstr(ERR_SUBSTR)); }
+#define EXPECT_ERROR(X, ERR_SUBSTR)                                                                                    \
+    try                                                                                                                \
+    {                                                                                                                  \
+        X;                                                                                                             \
+        FAIL() << "Expected error";                                                                                    \
+    }                                                                                                                  \
+    catch (std::exception & e)                                                                                         \
+    {                                                                                                                  \
+        EXPECT_THAT(e.what(), ::testing::HasSubstr(ERR_SUBSTR));                                                       \
+    }
 
 }
 

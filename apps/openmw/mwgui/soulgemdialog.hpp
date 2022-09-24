@@ -11,10 +11,12 @@ namespace MWGui
     class SoulgemDialog
     {
     public:
-        SoulgemDialog (MessageBoxManager* manager)
-            : mManager(manager) {}
+        SoulgemDialog(MessageBoxManager* manager)
+            : mManager(manager)
+        {
+        }
 
-        void show (const MWWorld::Ptr& soulgem);
+        void show(const MWWorld::Ptr& soulgem);
 
         void onButtonPressed(int button);
 

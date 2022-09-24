@@ -35,27 +35,35 @@ void ESM4::Eyes::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_ICON: reader.getZString(mIcon); break;
-            case ESM4::SUB_DATA: reader.get(mData); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_ICON:
+                reader.getZString(mIcon);
+                break;
+            case ESM4::SUB_DATA:
+                reader.get(mData);
+                break;
             default:
                 throw std::runtime_error("ESM4::EYES::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }
 
-//void ESM4::Eyes::save(ESM4::Writer& writer) const
+// void ESM4::Eyes::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Eyes::blank()
+// void ESM4::Eyes::blank()
 //{
-//}
+// }

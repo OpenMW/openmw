@@ -20,7 +20,7 @@ namespace Interpreter
         throw std::runtime_error(error);
     }
 
-    template<typename T>
+    template <typename T>
     auto& getDispatcher(const T& segment, unsigned int seg, int opcode)
     {
         auto it = segment.find(opcode);
@@ -31,7 +31,7 @@ namespace Interpreter
         return it->second;
     }
 
-    void Interpreter::execute (Type_Code code)
+    void Interpreter::execute(Type_Code code)
     {
         unsigned int segSpec = code >> 30;
 
@@ -74,14 +74,14 @@ namespace Interpreter
             }
         }
 
-        abortUnknownSegment (code);
+        abortUnknownSegment(code);
     }
 
     void Interpreter::begin()
     {
         if (mRunning)
         {
-            mCallstack.push (mRuntime);
+            mCallstack.push(mRuntime);
             mRuntime.clear();
         }
         else
@@ -104,28 +104,30 @@ namespace Interpreter
         }
     }
 
-    Interpreter::Interpreter() : mRunning (false)
-    {}
-
-    void Interpreter::run (const Type_Code *code, int codeSize, Context& context)
+    Interpreter::Interpreter()
+        : mRunning(false)
     {
-        assert (codeSize>=4);
+    }
+
+    void Interpreter::run(const Type_Code* code, int codeSize, Context& context)
+    {
+        assert(codeSize >= 4);
 
         begin();
 
         try
         {
-            mRuntime.configure (code, codeSize, context);
+            mRuntime.configure(code, codeSize, context);
 
-            int opcodes = static_cast<int> (code[0]);
+            int opcodes = static_cast<int>(code[0]);
 
-            const Type_Code *codeBlock = code + 4;
+            const Type_Code* codeBlock = code + 4;
 
-            while (mRuntime.getPC()>=0 && mRuntime.getPC()<opcodes)
+            while (mRuntime.getPC() >= 0 && mRuntime.getPC() < opcodes)
             {
                 Type_Code runCode = codeBlock[mRuntime.getPC()];
-                mRuntime.setPC (mRuntime.getPC()+1);
-                execute (runCode);
+                mRuntime.setPC(mRuntime.getPC() + 1);
+                execute(runCode);
             }
         }
         catch (...)

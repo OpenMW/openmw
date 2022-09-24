@@ -1,15 +1,15 @@
 #ifndef STEREO_FRUSTUM_H
 #define STEREO_FRUSTUM_H
 
-#include <osg/Matrix>
-#include <osg/Vec3>
-#include <osg/Camera>
-#include <osg/StateSet>
 #include <osg/BoundingBox>
+#include <osg/Camera>
+#include <osg/Matrix>
+#include <osg/StateSet>
+#include <osg/Vec3>
 
-#include <memory>
 #include <array>
 #include <map>
+#include <memory>
 
 #include <components/stereo/types.hpp>
 
@@ -41,8 +41,9 @@ namespace Stereo
     struct MultiviewFrustumCallback;
     struct ShadowFrustumCallback;
 
-    void joinBoundingBoxes(const osg::Matrix& masterProjection, const osg::Matrix& slaveProjection, osg::BoundingBoxd& bb);
-    
+    void joinBoundingBoxes(
+        const osg::Matrix& masterProjection, const osg::Matrix& slaveProjection, osg::BoundingBoxd& bb);
+
     class StereoFrustumManager
     {
     public:
@@ -55,13 +56,14 @@ namespace Stereo
 
         void setShadowTechnique(SceneUtil::MWShadowTechnique* shadowTechnique);
 
-        void customFrustumCallback(osgUtil::CullVisitor& cv, osg::BoundingBoxd& customClipSpace, osgUtil::CullVisitor*& sharedFrustumHint);
+        void customFrustumCallback(
+            osgUtil::CullVisitor& cv, osg::BoundingBoxd& customClipSpace, osgUtil::CullVisitor*& sharedFrustumHint);
 
     private:
         osg::ref_ptr<osg::Camera> mCamera;
         osg::ref_ptr<SceneUtil::MWShadowTechnique> mShadowTechnique;
         osg::ref_ptr<ShadowFrustumCallback> mShadowFrustumCallback;
-        std::map< osgUtil::CullVisitor*, osgUtil::CullVisitor*> mSharedFrustums;
+        std::map<osgUtil::CullVisitor*, osgUtil::CullVisitor*> mSharedFrustums;
         osg::BoundingBoxd mBoundingBox;
 
         std::unique_ptr<MultiviewFrustumCallback> mMultiviewFrustumCallback;

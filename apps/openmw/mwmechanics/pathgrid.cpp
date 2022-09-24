@@ -1,7 +1,7 @@
 #include "pathgrid.hpp"
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -42,14 +42,14 @@ namespace
     //   - faster but not the shortest path
     float costAStar(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b)
     {
-        //return distance(a, b);
+        // return distance(a, b);
         return manhattan(a, b);
     }
 }
 
 namespace MWMechanics
 {
-    PathgridGraph::PathgridGraph(const MWWorld::CellStore *cell)
+    PathgridGraph::PathgridGraph(const MWWorld::CellStore* cell)
         : mCell(nullptr)
         , mPathgrid(nullptr)
         , mGraph(0)
@@ -96,40 +96,39 @@ namespace MWMechanics
      *    +---------------->
      *      high cost
      */
-    bool PathgridGraph::load(const MWWorld::CellStore *cell)
+    bool PathgridGraph::load(const MWWorld::CellStore* cell)
     {
-        if(!cell)
+        if (!cell)
             return false;
 
-        if(mIsGraphConstructed)
+        if (mIsGraphConstructed)
             return true;
 
         mCell = cell->getCell();
         mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell->getCell());
-        if(!mPathgrid)
+        if (!mPathgrid)
             return false;
 
-
         mGraph.resize(mPathgrid->mPoints.size());
-        for(int i = 0; i < static_cast<int> (mPathgrid->mEdges.size()); i++)
+        for (int i = 0; i < static_cast<int>(mPathgrid->mEdges.size()); i++)
         {
             ConnectedPoint neighbour;
-            neighbour.cost = costAStar(mPathgrid->mPoints[mPathgrid->mEdges[i].mV0],
-                                       mPathgrid->mPoints[mPathgrid->mEdges[i].mV1]);
+            neighbour.cost
+                = costAStar(mPathgrid->mPoints[mPathgrid->mEdges[i].mV0], mPathgrid->mPoints[mPathgrid->mEdges[i].mV1]);
             // forward path of the edge
             neighbour.index = mPathgrid->mEdges[i].mV1;
             mGraph[mPathgrid->mEdges[i].mV0].edges.push_back(neighbour);
             // reverse path of the edge
             // NOTE: These are redundant, ESM already contains the required reverse paths
-            //neighbour.index = mPathgrid->mEdges[i].mV0;
-            //mGraph[mPathgrid->mEdges[i].mV1].edges.push_back(neighbour);
+            // neighbour.index = mPathgrid->mEdges[i].mV0;
+            // mGraph[mPathgrid->mEdges[i].mV1].edges.push_back(neighbour);
         }
         buildConnectedPoints();
         mIsGraphConstructed = true;
         return true;
     }
 
-    const ESM::Pathgrid *PathgridGraph::getPathgrid() const
+    const ESM::Pathgrid* PathgridGraph::getPathgrid() const
     {
         return mPathgrid;
     }
@@ -137,38 +136,35 @@ namespace MWMechanics
     // v is the pathgrid point index (some call them vertices)
     void PathgridGraph::recursiveStrongConnect(int v)
     {
-        mSCCPoint[v].first = mSCCIndex;  // index
+        mSCCPoint[v].first = mSCCIndex; // index
         mSCCPoint[v].second = mSCCIndex; // lowlink
         mSCCIndex++;
         mSCCStack.push_back(v);
         int w;
 
-        for(int i = 0; i < static_cast<int> (mGraph[v].edges.size()); i++)
+        for (int i = 0; i < static_cast<int>(mGraph[v].edges.size()); i++)
         {
             w = mGraph[v].edges[i].index;
-            if(mSCCPoint[w].first == -1) // not visited
+            if (mSCCPoint[w].first == -1) // not visited
             {
                 recursiveStrongConnect(w); // recurse
-                mSCCPoint[v].second = std::min(mSCCPoint[v].second,
-                                               mSCCPoint[w].second);
+                mSCCPoint[v].second = std::min(mSCCPoint[v].second, mSCCPoint[w].second);
             }
             else
             {
-                if(find(mSCCStack.begin(), mSCCStack.end(), w) != mSCCStack.end())
-                    mSCCPoint[v].second = std::min(mSCCPoint[v].second,
-                                                   mSCCPoint[w].first);
+                if (find(mSCCStack.begin(), mSCCStack.end(), w) != mSCCStack.end())
+                    mSCCPoint[v].second = std::min(mSCCPoint[v].second, mSCCPoint[w].first);
             }
         }
 
-        if(mSCCPoint[v].second == mSCCPoint[v].first)
-        {   // new component
+        if (mSCCPoint[v].second == mSCCPoint[v].first)
+        { // new component
             do
             {
                 w = mSCCStack.back();
                 mSCCStack.pop_back();
                 mGraph[w].componentId = mSCCId;
-            }
-            while(w != v);
+            } while (w != v);
             mSCCId++;
         }
         return;
@@ -200,15 +196,15 @@ namespace MWMechanics
     void PathgridGraph::buildConnectedPoints()
     {
         // both of these are set to zero in the constructor
-        //mSCCId = 0; // how many strongly connected components in this cell
-        //mSCCIndex = 0;
-        int pointsSize = static_cast<int> (mPathgrid->mPoints.size());
-        mSCCPoint.resize(pointsSize, std::pair<int, int> (-1, -1));
+        // mSCCId = 0; // how many strongly connected components in this cell
+        // mSCCIndex = 0;
+        int pointsSize = static_cast<int>(mPathgrid->mPoints.size());
+        mSCCPoint.resize(pointsSize, std::pair<int, int>(-1, -1));
         mSCCStack.reserve(pointsSize);
 
-        for(int v = 0; v < pointsSize; v++)
+        for (int v = 0; v < pointsSize; v++)
         {
-            if(mSCCPoint[v].first == -1) // undefined (haven't visited)
+            if (mSCCPoint[v].first == -1) // undefined (haven't visited)
                 recursiveStrongConnect(v);
         }
     }
@@ -218,9 +214,9 @@ namespace MWMechanics
         return (mGraph[start].componentId == mGraph[end].componentId);
     }
 
-    void PathgridGraph::getNeighbouringPoints(const int index, ESM::Pathgrid::PointList &nodes) const
+    void PathgridGraph::getNeighbouringPoints(const int index, ESM::Pathgrid::PointList& nodes) const
     {
-        for(int i = 0; i < static_cast<int> (mGraph[index].edges.size()); i++)
+        for (int i = 0; i < static_cast<int>(mGraph[index].edges.size()); i++)
         {
             int neighbourIndex = mGraph[index].edges[i].index;
             if (neighbourIndex != index)
@@ -258,15 +254,15 @@ namespace MWMechanics
     std::deque<ESM::Pathgrid::Point> PathgridGraph::aStarSearch(const int start, const int goal) const
     {
         std::deque<ESM::Pathgrid::Point> path;
-        if(!isPointConnected(start, goal))
+        if (!isPointConnected(start, goal))
         {
             return path; // there is no path, return an empty path
         }
 
-        int graphSize = static_cast<int> (mGraph.size());
-        std::vector<float> gScore (graphSize, -1);
-        std::vector<float> fScore (graphSize, -1);
-        std::vector<int> graphParent (graphSize, -1);
+        int graphSize = static_cast<int>(mGraph.size());
+        std::vector<float> gScore(graphSize, -1);
+        std::vector<float> fScore(graphSize, -1);
+        std::vector<int> graphParent(graphSize, -1);
 
         // gScore & fScore keep costs for each pathgrid point in mPoints
         gScore[start] = 0;
@@ -278,41 +274,38 @@ namespace MWMechanics
 
         int current = -1;
 
-        while(!openset.empty())
+        while (!openset.empty())
         {
             current = openset.front(); // front has the lowest cost
             openset.pop_front();
 
-            if(current == goal)
+            if (current == goal)
                 break;
 
             closedset.push_back(current); // remember we've been here
 
             // check all edges for the current point index
-            for(int j = 0; j < static_cast<int> (mGraph[current].edges.size()); j++)
+            for (int j = 0; j < static_cast<int>(mGraph[current].edges.size()); j++)
             {
-                if(std::find(closedset.begin(), closedset.end(), mGraph[current].edges[j].index) ==
-                   closedset.end())
+                if (std::find(closedset.begin(), closedset.end(), mGraph[current].edges[j].index) == closedset.end())
                 {
                     // not in closedset - i.e. have not traversed this edge destination
                     int dest = mGraph[current].edges[j].index;
                     float tentative_g = gScore[current] + mGraph[current].edges[j].cost;
                     bool isInOpenSet = std::find(openset.begin(), openset.end(), dest) != openset.end();
-                    if(!isInOpenSet
-                        || tentative_g < gScore[dest])
+                    if (!isInOpenSet || tentative_g < gScore[dest])
                     {
                         graphParent[dest] = current;
                         gScore[dest] = tentative_g;
-                        fScore[dest] = tentative_g + costAStar(mPathgrid->mPoints[dest],
-                                                               mPathgrid->mPoints[goal]);
-                        if(!isInOpenSet)
+                        fScore[dest] = tentative_g + costAStar(mPathgrid->mPoints[dest], mPathgrid->mPoints[goal]);
+                        if (!isInOpenSet)
                         {
                             // add this edge to openset, lowest cost goes to the front
                             // TODO: if this causes performance problems a hash table may help
                             std::list<int>::iterator it = openset.begin();
-                            for(it = openset.begin(); it!= openset.end(); ++it)
+                            for (it = openset.begin(); it != openset.end(); ++it)
                             {
-                                if(fScore[*it] > fScore[dest])
+                                if (fScore[*it] > fScore[dest])
                                     break;
                             }
                             openset.insert(it, dest);
@@ -322,11 +315,11 @@ namespace MWMechanics
             }
         }
 
-        if(current != goal)
+        if (current != goal)
             return path; // for some reason couldn't build a path
 
         // reconstruct path to return, using local coordinates
-        while(graphParent[current] != -1)
+        while (graphParent[current] != -1)
         {
             path.push_front(mPathgrid->mPoints[current]);
             current = graphParent[current];
@@ -337,4 +330,3 @@ namespace MWMechanics
         return path;
     }
 }
-

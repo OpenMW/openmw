@@ -1,16 +1,16 @@
 #include "itemselection.hpp"
 
-#include <MyGUI_TextBox.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_TextBox.h>
 
-#include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
+#include "itemview.hpp"
 #include "sortfilteritemmodel.hpp"
 
 namespace MWGui
 {
 
-    ItemSelectionDialog::ItemSelectionDialog(const std::string &label)
+    ItemSelectionDialog::ItemSelectionDialog(const std::string& label)
         : WindowModal("openmw_itemselection_dialog.layout")
         , mSortModel(nullptr)
     {
@@ -19,7 +19,7 @@ namespace MWGui
 
         MyGUI::TextBox* l;
         getWidget(l, "Label");
-        l->setCaptionWithReplacing (label);
+        l->setCaptionWithReplacing(label);
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");

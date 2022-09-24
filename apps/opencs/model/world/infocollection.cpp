@@ -1,8 +1,8 @@
 #include "infocollection.hpp"
 
-#include <stdexcept>
-#include <iterator>
 #include <cassert>
+#include <iterator>
+#include <stdexcept>
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loaddial.hpp>
@@ -11,35 +11,34 @@
 
 namespace CSMWorld
 {
-    template<>
-    void Collection<Info, IdAccessor<Info> >::removeRows (int index, int count)
+    template <>
+    void Collection<Info, IdAccessor<Info>>::removeRows(int index, int count)
     {
-        mRecords.erase(mRecords.begin()+index, mRecords.begin()+index+count);
+        mRecords.erase(mRecords.begin() + index, mRecords.begin() + index + count);
 
         // index map is updated in InfoCollection::removeRows()
     }
 
-    template<>
-    void Collection<Info, IdAccessor<Info> >::insertRecord (std::unique_ptr<RecordBase> record,
-        int index, UniversalId::Type type)
+    template <>
+    void Collection<Info, IdAccessor<Info>>::insertRecord(
+        std::unique_ptr<RecordBase> record, int index, UniversalId::Type type)
     {
         int size = static_cast<int>(mRecords.size());
         if (index < 0 || index > size)
             throw std::runtime_error("index out of range");
 
-        std::unique_ptr<Record<Info> > record2(static_cast<Record<Info>*>(record.release()));
+        std::unique_ptr<Record<Info>> record2(static_cast<Record<Info>*>(record.release()));
 
         if (index == size)
             mRecords.push_back(std::move(record2));
         else
-            mRecords.insert(mRecords.begin()+index, std::move(record2));
+            mRecords.insert(mRecords.begin() + index, std::move(record2));
 
         // index map is updated in InfoCollection::insertRecord()
     }
 
-    template<>
-    bool Collection<Info, IdAccessor<Info> >::reorderRowsImp (int baseIndex,
-        const std::vector<int>& newOrder)
+    template <>
+    bool Collection<Info, IdAccessor<Info>>::reorderRowsImp(int baseIndex, const std::vector<int>& newOrder)
     {
         if (!newOrder.empty())
         {
@@ -48,21 +47,21 @@ namespace CSMWorld
             // check that all indices are present
             std::vector<int> test(newOrder);
             std::sort(test.begin(), test.end());
-            if (*test.begin() != 0 || *--test.end() != size-1)
+            if (*test.begin() != 0 || *--test.end() != size - 1)
                 return false;
 
             // reorder records
-            std::vector<std::unique_ptr<Record<Info> > > buffer(size);
+            std::vector<std::unique_ptr<Record<Info>>> buffer(size);
 
             // FIXME: BUG: undo does not remove modified flag
             for (int i = 0; i < size; ++i)
             {
-                buffer[newOrder[i]] = std::move(mRecords[baseIndex+i]);
+                buffer[newOrder[i]] = std::move(mRecords[baseIndex + i]);
                 if (buffer[newOrder[i]])
                     buffer[newOrder[i]]->setModified(buffer[newOrder[i]]->get());
             }
 
-            std::move(buffer.begin(), buffer.end(), mRecords.begin()+baseIndex);
+            std::move(buffer.begin(), buffer.end(), mRecords.begin() + baseIndex);
 
             // index map is updated in InfoCollection::reorderRows()
         }
@@ -71,11 +70,11 @@ namespace CSMWorld
     }
 }
 
-void CSMWorld::InfoCollection::load (const Info& record, bool base)
+void CSMWorld::InfoCollection::load(const Info& record, bool base)
 {
-    int index = searchId (record.mId);
+    int index = searchId(record.mId);
 
-    if (index==-1)
+    if (index == -1)
     {
         // new record
         auto record2 = std::make_unique<Record<Info>>();
@@ -92,24 +91,24 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
         if (base)
             record2->mBase = record;
         else
-            record2->setModified (record);
+            record2->setModified(record);
 
-        setRecord (index, std::move(record2));
+        setRecord(index, std::move(record2));
     }
 }
 
 int CSMWorld::InfoCollection::getInfoIndex(std::string_view id, std::string_view topic) const
 {
     // find the topic first
-    std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::const_iterator iter
+    std::unordered_map<std::string, std::vector<std::pair<std::string, int>>>::const_iterator iter
         = mInfoIndex.find(Misc::StringUtils::lowerCase(topic));
 
     if (iter == mInfoIndex.end())
         return -1;
 
     // brute force loop
-    for (std::vector<std::pair<std::string, int> >::const_iterator it = iter->second.begin();
-            it != iter->second.end(); ++it)
+    for (std::vector<std::pair<std::string, int>>::const_iterator it = iter->second.begin(); it != iter->second.end();
+         ++it)
     {
         if (Misc::StringUtils::ciEqual(it->first, id))
             return it->second;
@@ -120,8 +119,7 @@ int CSMWorld::InfoCollection::getInfoIndex(std::string_view id, std::string_view
 
 // Calling insertRecord() using index from getInsertIndex() needs to take into account of
 // prev/next records; an example is deleting a record then undo
-int CSMWorld::InfoCollection::getInsertIndex (const std::string& id,
-        UniversalId::Type type, RecordBase *record) const
+int CSMWorld::InfoCollection::getInsertIndex(const std::string& id, UniversalId::Type type, RecordBase* record) const
 {
     if (record == nullptr)
     {
@@ -133,7 +131,7 @@ int CSMWorld::InfoCollection::getInsertIndex (const std::string& id,
         std::pair<RecordConstIterator, RecordConstIterator> range = getTopicRange(id.substr(0, separator));
 
         if (range.first == range.second)
-            return Collection<Info, IdAccessor<Info> >::getAppendIndex(id, type);
+            return Collection<Info, IdAccessor<Info>>::getAppendIndex(id, type);
 
         return std::distance(getRecords().begin(), range.second);
     }
@@ -170,21 +168,20 @@ int CSMWorld::InfoCollection::getInsertIndex (const std::string& id,
     return index;
 }
 
-bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+bool CSMWorld::InfoCollection::reorderRows(int baseIndex, const std::vector<int>& newOrder)
 {
     // check if the range is valid
-    int lastIndex = baseIndex + newOrder.size() -1;
+    int lastIndex = baseIndex + newOrder.size() - 1;
 
-    if (lastIndex>=getSize())
+    if (lastIndex >= getSize())
         return false;
 
     // Check that topics match
-    if (!Misc::StringUtils::ciEqual(getRecord(baseIndex).get().mTopicId,
-                                    getRecord(lastIndex).get().mTopicId))
+    if (!Misc::StringUtils::ciEqual(getRecord(baseIndex).get().mTopicId, getRecord(lastIndex).get().mTopicId))
         return false;
 
     // reorder
-    if (!Collection<Info, IdAccessor<Info> >::reorderRowsImp(baseIndex, newOrder))
+    if (!Collection<Info, IdAccessor<Info>>::reorderRowsImp(baseIndex, newOrder))
         return false;
 
     // adjust index
@@ -197,19 +194,19 @@ bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int
     return true;
 }
 
-void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
+void CSMWorld::InfoCollection::load(ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
     Info info;
     bool isDeleted = false;
 
-    info.load (reader, isDeleted);
-    std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" + info.mId;
+    info.load(reader, isDeleted);
+    std::string id = Misc::StringUtils::lowerCase(dialogue.mId) + "#" + info.mId;
 
     if (isDeleted)
     {
-        int index = searchId (id);
+        int index = searchId(id);
 
-        if (index==-1)
+        if (index == -1)
         {
             // deleting a record that does not exist
             // ignore it for now
@@ -217,39 +214,38 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
         }
         else if (base)
         {
-            removeRows (index, 1);
+            removeRows(index, 1);
         }
         else
         {
             auto record = std::make_unique<Record<Info>>(getRecord(index));
             record->mState = RecordBase::State_Deleted;
-            setRecord (index, std::move(record));
+            setRecord(index, std::move(record));
         }
     }
     else
     {
         info.mTopicId = dialogue.mId;
         info.mId = id;
-        load (info, base);
+        load(info, base);
     }
 }
 
-CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const std::string& topic)
-    const
+CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange(const std::string& topic) const
 {
-    std::string lowerTopic = Misc::StringUtils::lowerCase (topic);
+    std::string lowerTopic = Misc::StringUtils::lowerCase(topic);
 
     // find the topic
-    std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::const_iterator iter
+    std::unordered_map<std::string, std::vector<std::pair<std::string, int>>>::const_iterator iter
         = mInfoIndex.find(lowerTopic);
 
     if (iter == mInfoIndex.end())
-        return Range (getRecords().end(), getRecords().end());
+        return Range(getRecords().end(), getRecords().end());
 
     // topic found, find the starting index
     int low = INT_MAX;
-    for (std::vector<std::pair<std::string, int> >::const_iterator it = iter->second.begin();
-            it != iter->second.end(); ++it)
+    for (std::vector<std::pair<std::string, int>>::const_iterator it = iter->second.begin(); it != iter->second.end();
+         ++it)
     {
         low = std::min(low, it->second);
     }
@@ -261,7 +257,7 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
 
     assert(static_cast<size_t>(std::distance(begin, end)) == iter->second.size());
 
-    return Range (begin, end);
+    return Range(begin, end);
 }
 
 void CSMWorld::InfoCollection::removeDialogueInfos(const std::string& dialogueId)
@@ -302,19 +298,18 @@ void CSMWorld::InfoCollection::removeDialogueInfos(const std::string& dialogueId
 
 // FIXME: removing a record should adjust prev/next and mark those records as modified
 // accordingly (also consider undo)
-void CSMWorld::InfoCollection::removeRows (int index, int count)
+void CSMWorld::InfoCollection::removeRows(int index, int count)
 {
-    Collection<Info, IdAccessor<Info> >::removeRows(index, count); // erase records only
+    Collection<Info, IdAccessor<Info>>::removeRows(index, count); // erase records only
 
-    for (std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::iterator iter
-        = mInfoIndex.begin(); iter != mInfoIndex.end();)
+    for (std::unordered_map<std::string, std::vector<std::pair<std::string, int>>>::iterator iter = mInfoIndex.begin();
+         iter != mInfoIndex.end();)
     {
-        for (std::vector<std::pair<std::string, int> >::iterator it = iter->second.begin();
-                it != iter->second.end();)
+        for (std::vector<std::pair<std::string, int>>::iterator it = iter->second.begin(); it != iter->second.end();)
         {
             if (it->second >= index)
             {
-                if (it->second >= index+count)
+                if (it->second >= index + count)
                 {
                     it->second -= count;
                     ++it;
@@ -334,7 +329,7 @@ void CSMWorld::InfoCollection::removeRows (int index, int count)
     }
 }
 
-void  CSMWorld::InfoCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
+void CSMWorld::InfoCollection::appendBlankRecord(const std::string& id, UniversalId::Type type)
 {
     auto record2 = std::make_unique<Record<Info>>();
 
@@ -353,18 +348,17 @@ int CSMWorld::InfoCollection::searchId(std::string_view id) const
     if (separator == std::string::npos)
         throw std::runtime_error("invalid info ID: " + std::string(id));
 
-    return getInfoIndex(id.substr(separator+1), id.substr(0, separator));
+    return getInfoIndex(id.substr(separator + 1), id.substr(0, separator));
 }
 
-void CSMWorld::InfoCollection::appendRecord (std::unique_ptr<RecordBase> record, UniversalId::Type type)
+void CSMWorld::InfoCollection::appendRecord(std::unique_ptr<RecordBase> record, UniversalId::Type type)
 {
     int index = getInsertIndex(static_cast<Record<Info>*>(record.get())->get().mId, type, record.get());
 
     insertRecord(std::move(record), index, type);
 }
 
-void CSMWorld::InfoCollection::insertRecord (std::unique_ptr<RecordBase> record, int index,
-    UniversalId::Type type)
+void CSMWorld::InfoCollection::insertRecord(std::unique_ptr<RecordBase> record, int index, UniversalId::Type type)
 {
     int size = static_cast<int>(getRecords().size());
 
@@ -374,16 +368,17 @@ void CSMWorld::InfoCollection::insertRecord (std::unique_ptr<RecordBase> record,
     if (separator == std::string::npos)
         throw std::runtime_error("invalid info ID: " + id);
 
-    Collection<Info, IdAccessor<Info> >::insertRecord(std::move(record), index, type); // add records only
+    Collection<Info, IdAccessor<Info>>::insertRecord(std::move(record), index, type); // add records only
 
     // adjust index
-    if (index < size-1)
+    if (index < size - 1)
     {
-        for (std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::iterator iter
-            = mInfoIndex.begin(); iter != mInfoIndex.end(); ++iter)
+        for (std::unordered_map<std::string, std::vector<std::pair<std::string, int>>>::iterator iter
+             = mInfoIndex.begin();
+             iter != mInfoIndex.end(); ++iter)
         {
-            for (std::vector<std::pair<std::string, int> >::iterator it = iter->second.begin();
-                    it != iter->second.end(); ++it)
+            for (std::vector<std::pair<std::string, int>>::iterator it = iter->second.begin(); it != iter->second.end();
+                 ++it)
             {
                 if (it->second >= index)
                     ++(it->second);
@@ -393,11 +388,10 @@ void CSMWorld::InfoCollection::insertRecord (std::unique_ptr<RecordBase> record,
 
     // get iterator for existing topic or a new topic
     std::string lowerId = Misc::StringUtils::lowerCase(id);
-    std::pair<std::unordered_map<std::string, std::vector<std::pair<std::string, int> > >::iterator, bool> res
+    std::pair<std::unordered_map<std::string, std::vector<std::pair<std::string, int>>>::iterator, bool> res
         = mInfoIndex.insert(
-                std::make_pair(lowerId.substr(0, separator),
-                               std::vector<std::pair<std::string, int> >())); // empty vector
+            std::make_pair(lowerId.substr(0, separator), std::vector<std::pair<std::string, int>>())); // empty vector
 
     // insert info and index
-    res.first->second.push_back(std::make_pair(lowerId.substr(separator+1), index));
+    res.first->second.push_back(std::make_pair(lowerId.substr(separator + 1), index));
 }

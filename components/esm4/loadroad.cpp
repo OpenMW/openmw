@@ -37,7 +37,7 @@ void ESM4::Road::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
     mParent = reader.currWorld();
 
     mEditorId = formIdToString(mFormId); // FIXME: quick workaround to use existing code
@@ -89,8 +89,8 @@ void ESM4::Road::load(ESM4::Reader& reader)
                         }
 
                         if (!found)
-                            throw std::runtime_error("ESM4::ROAD::PGRR - Unknown link point "
-                                + std::to_string(j) + "at node " + std::to_string(i) + ".");
+                            throw std::runtime_error("ESM4::ROAD::PGRR - Unknown link point " + std::to_string(j)
+                                + "at node " + std::to_string(i) + ".");
                     }
                 }
 
@@ -102,10 +102,10 @@ void ESM4::Road::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Road::save(ESM4::Writer& writer) const
+// void ESM4::Road::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Road::blank()
+// void ESM4::Road::blank()
 //{
-//}
+// }

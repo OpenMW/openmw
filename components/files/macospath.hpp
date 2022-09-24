@@ -11,55 +11,55 @@
 namespace Files
 {
 
-/**
- * \struct MacOsPath
- */
-struct MacOsPath
-{
-    MacOsPath(const std::string& application_name);
-
     /**
-     * \brief Return path to the local directory.
-     *
-     * \return std::filesystem::path
+     * \struct MacOsPath
      */
-    std::filesystem::path getUserConfigPath() const;
+    struct MacOsPath
+    {
+        MacOsPath(const std::string& application_name);
 
-    std::filesystem::path getUserDataPath() const;
+        /**
+         * \brief Return path to the local directory.
+         *
+         * \return std::filesystem::path
+         */
+        std::filesystem::path getUserConfigPath() const;
 
-    /**
-     * \brief Return path to the global (system) directory.
-     *
-     * \return std::filesystem::path
-     */
-    std::filesystem::path getGlobalConfigPath() const;
+        std::filesystem::path getUserDataPath() const;
 
-    /**
-     * \brief Return path to the runtime directory which is the
-     * place where an application was started.
-     *
-     * \return std::filesystem::path
-     */
-    std::filesystem::path getLocalPath() const;
+        /**
+         * \brief Return path to the global (system) directory.
+         *
+         * \return std::filesystem::path
+         */
+        std::filesystem::path getGlobalConfigPath() const;
 
-    /**
-     * \brief
-     *
-     * \return std::filesystem::path
-     */
-    std::filesystem::path getCachePath() const;
+        /**
+         * \brief Return path to the runtime directory which is the
+         * place where an application was started.
+         *
+         * \return std::filesystem::path
+         */
+        std::filesystem::path getLocalPath() const;
 
-    /**
-     * \brief
-     *
-     * \return std::filesystem::path
-     */
-    std::filesystem::path getGlobalDataPath() const;
+        /**
+         * \brief
+         *
+         * \return std::filesystem::path
+         */
+        std::filesystem::path getCachePath() const;
 
-    std::filesystem::path getInstallPath() const;
+        /**
+         * \brief
+         *
+         * \return std::filesystem::path
+         */
+        std::filesystem::path getGlobalDataPath() const;
 
-    std::string mName;
-};
+        std::filesystem::path getInstallPath() const;
+
+        std::string mName;
+    };
 
 } /* namespace Files */
 

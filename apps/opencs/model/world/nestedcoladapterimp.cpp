@@ -1,16 +1,16 @@
 #include "nestedcoladapterimp.hpp"
 
-#include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadregn.hpp>
 
 #include "idcollection.hpp"
-#include "pathgrid.hpp"
 #include "info.hpp"
 #include "infoselectwrapper.hpp"
+#include "pathgrid.hpp"
 
 namespace CSMWorld
 {
-    PathgridPointListAdapter::PathgridPointListAdapter () {}
+    PathgridPointListAdapter::PathgridPointListAdapter() {}
 
     void PathgridPointListAdapter::addRow(Record<Pathgrid>& record, int position) const
     {
@@ -27,10 +27,10 @@ namespace CSMWorld
         point.mConnectionNum = 0;
         point.mUnknown = 0;
 
-        points.insert(points.begin()+position, point);
+        points.insert(points.begin() + position, point);
         pathgrid.mData.mS2 = pathgrid.mPoints.size();
 
-        record.setModified (pathgrid);
+        record.setModified(pathgrid);
     }
 
     void PathgridPointListAdapter::removeRow(Record<Pathgrid>& record, int rowToRemove) const
@@ -39,25 +39,24 @@ namespace CSMWorld
 
         ESM::Pathgrid::PointList& points = pathgrid.mPoints;
 
-        if (rowToRemove < 0 || rowToRemove >= static_cast<int> (points.size()))
-            throw std::runtime_error ("index out of range");
+        if (rowToRemove < 0 || rowToRemove >= static_cast<int>(points.size()))
+            throw std::runtime_error("index out of range");
 
         // Do not remove dangling edges, does not work with current undo mechanism
         // Do not automatically adjust indices, what would be done with dangling edges?
-        points.erase(points.begin()+rowToRemove);
+        points.erase(points.begin() + rowToRemove);
         pathgrid.mData.mS2 = pathgrid.mPoints.size();
 
-        record.setModified (pathgrid);
+        record.setModified(pathgrid);
     }
 
-    void PathgridPointListAdapter::setTable(Record<Pathgrid>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void PathgridPointListAdapter::setTable(Record<Pathgrid>& record, const NestedTableWrapperBase& nestedTable) const
     {
         Pathgrid pathgrid = record.get();
-        pathgrid.mPoints = static_cast<const NestedTableWrapper<ESM::Pathgrid::PointList> &>(nestedTable).mNestedTable;
+        pathgrid.mPoints = static_cast<const NestedTableWrapper<ESM::Pathgrid::PointList>&>(nestedTable).mNestedTable;
         pathgrid.mData.mS2 = pathgrid.mPoints.size();
 
-        record.setModified (pathgrid);
+        record.setModified(pathgrid);
     }
 
     NestedTableWrapperBase* PathgridPointListAdapter::table(const Record<Pathgrid>& record) const
@@ -66,37 +65,49 @@ namespace CSMWorld
         return new NestedTableWrapper<ESM::Pathgrid::PointList>(record.get().mPoints);
     }
 
-    QVariant PathgridPointListAdapter::getData(const Record<Pathgrid>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant PathgridPointListAdapter::getData(const Record<Pathgrid>& record, int subRowIndex, int subColIndex) const
     {
         ESM::Pathgrid::Point point = record.get().mPoints[subRowIndex];
         switch (subColIndex)
         {
-            case 0: return subRowIndex;
-            case 1: return point.mX;
-            case 2: return point.mY;
-            case 3: return point.mZ;
-            default: throw std::runtime_error("Pathgrid point subcolumn index out of range");
+            case 0:
+                return subRowIndex;
+            case 1:
+                return point.mX;
+            case 2:
+                return point.mY;
+            case 3:
+                return point.mZ;
+            default:
+                throw std::runtime_error("Pathgrid point subcolumn index out of range");
         }
     }
 
-    void PathgridPointListAdapter::setData(Record<Pathgrid>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void PathgridPointListAdapter::setData(
+        Record<Pathgrid>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         Pathgrid pathgrid = record.get();
         ESM::Pathgrid::Point point = pathgrid.mPoints[subRowIndex];
         switch (subColIndex)
         {
-            case 0: return; // return without saving
-            case 1: point.mX = value.toInt(); break;
-            case 2: point.mY = value.toInt(); break;
-            case 3: point.mZ = value.toInt(); break;
-            default: throw std::runtime_error("Pathgrid point subcolumn index out of range");
+            case 0:
+                return; // return without saving
+            case 1:
+                point.mX = value.toInt();
+                break;
+            case 2:
+                point.mY = value.toInt();
+                break;
+            case 3:
+                point.mZ = value.toInt();
+                break;
+            default:
+                throw std::runtime_error("Pathgrid point subcolumn index out of range");
         }
 
         pathgrid.mPoints[subRowIndex] = point;
 
-        record.setModified (pathgrid);
+        record.setModified(pathgrid);
     }
 
     int PathgridPointListAdapter::getColumnsCount(const Record<Pathgrid>& record) const
@@ -109,7 +120,7 @@ namespace CSMWorld
         return static_cast<int>(record.get().mPoints.size());
     }
 
-    PathgridEdgeListAdapter::PathgridEdgeListAdapter () {}
+    PathgridEdgeListAdapter::PathgridEdgeListAdapter() {}
 
     void PathgridEdgeListAdapter::addRow(Record<Pathgrid>& record, int position) const
     {
@@ -127,9 +138,9 @@ namespace CSMWorld
         //
         // Currently the code assumes that the end user to know what he/she is doing.
         // e.g. Edges come in pairs, from points a->b and b->a
-        edges.insert(edges.begin()+position, edge);
+        edges.insert(edges.begin() + position, edge);
 
-        record.setModified (pathgrid);
+        record.setModified(pathgrid);
     }
 
     void PathgridEdgeListAdapter::removeRow(Record<Pathgrid>& record, int rowToRemove) const
@@ -138,23 +149,21 @@ namespace CSMWorld
 
         ESM::Pathgrid::EdgeList& edges = pathgrid.mEdges;
 
-        if (rowToRemove < 0 || rowToRemove >= static_cast<int> (edges.size()))
-            throw std::runtime_error ("index out of range");
+        if (rowToRemove < 0 || rowToRemove >= static_cast<int>(edges.size()))
+            throw std::runtime_error("index out of range");
 
-        edges.erase(edges.begin()+rowToRemove);
+        edges.erase(edges.begin() + rowToRemove);
 
-        record.setModified (pathgrid);
+        record.setModified(pathgrid);
     }
 
-    void PathgridEdgeListAdapter::setTable(Record<Pathgrid>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void PathgridEdgeListAdapter::setTable(Record<Pathgrid>& record, const NestedTableWrapperBase& nestedTable) const
     {
         Pathgrid pathgrid = record.get();
 
-        pathgrid.mEdges =
-            static_cast<const NestedTableWrapper<ESM::Pathgrid::EdgeList> &>(nestedTable).mNestedTable;
+        pathgrid.mEdges = static_cast<const NestedTableWrapper<ESM::Pathgrid::EdgeList>&>(nestedTable).mNestedTable;
 
-        record.setModified (pathgrid);
+        record.setModified(pathgrid);
     }
 
     NestedTableWrapperBase* PathgridEdgeListAdapter::table(const Record<Pathgrid>& record) const
@@ -163,44 +172,53 @@ namespace CSMWorld
         return new NestedTableWrapper<ESM::Pathgrid::EdgeList>(record.get().mEdges);
     }
 
-    QVariant PathgridEdgeListAdapter::getData(const Record<Pathgrid>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant PathgridEdgeListAdapter::getData(const Record<Pathgrid>& record, int subRowIndex, int subColIndex) const
     {
         Pathgrid pathgrid = record.get();
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (pathgrid.mEdges.size()))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(pathgrid.mEdges.size()))
+            throw std::runtime_error("index out of range");
 
         ESM::Pathgrid::Edge edge = pathgrid.mEdges[subRowIndex];
         switch (subColIndex)
         {
-            case 0: return subRowIndex;
-            case 1: return edge.mV0;
-            case 2: return edge.mV1;
-            default: throw std::runtime_error("Pathgrid edge subcolumn index out of range");
+            case 0:
+                return subRowIndex;
+            case 1:
+                return edge.mV0;
+            case 2:
+                return edge.mV1;
+            default:
+                throw std::runtime_error("Pathgrid edge subcolumn index out of range");
         }
     }
 
-    void PathgridEdgeListAdapter::setData(Record<Pathgrid>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void PathgridEdgeListAdapter::setData(
+        Record<Pathgrid>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         Pathgrid pathgrid = record.get();
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (pathgrid.mEdges.size()))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(pathgrid.mEdges.size()))
+            throw std::runtime_error("index out of range");
 
         ESM::Pathgrid::Edge edge = pathgrid.mEdges[subRowIndex];
         switch (subColIndex)
         {
-            case 0: return; // return without saving
-            case 1: edge.mV0 = value.toInt(); break;
-            case 2: edge.mV1 = value.toInt(); break;
-            default: throw std::runtime_error("Pathgrid edge subcolumn index out of range");
+            case 0:
+                return; // return without saving
+            case 1:
+                edge.mV0 = value.toInt();
+                break;
+            case 2:
+                edge.mV1 = value.toInt();
+                break;
+            default:
+                throw std::runtime_error("Pathgrid edge subcolumn index out of range");
         }
 
         pathgrid.mEdges[subRowIndex] = edge;
 
-        record.setModified (pathgrid);
+        record.setModified(pathgrid);
     }
 
     int PathgridEdgeListAdapter::getColumnsCount(const Record<Pathgrid>& record) const
@@ -213,7 +231,7 @@ namespace CSMWorld
         return static_cast<int>(record.get().mEdges.size());
     }
 
-    FactionReactionsAdapter::FactionReactionsAdapter () {}
+    FactionReactionsAdapter::FactionReactionsAdapter() {}
 
     void FactionReactionsAdapter::addRow(Record<ESM::Faction>& record, int position) const
     {
@@ -224,7 +242,7 @@ namespace CSMWorld
         // blank row
         reactions.insert(std::make_pair("", 0));
 
-        record.setModified (faction);
+        record.setModified(faction);
     }
 
     void FactionReactionsAdapter::removeRow(Record<ESM::Faction>& record, int rowToRemove) const
@@ -233,73 +251,76 @@ namespace CSMWorld
 
         std::map<std::string, int>& reactions = faction.mReactions;
 
-        if (rowToRemove < 0 || rowToRemove >= static_cast<int> (reactions.size()))
-            throw std::runtime_error ("index out of range");
+        if (rowToRemove < 0 || rowToRemove >= static_cast<int>(reactions.size()))
+            throw std::runtime_error("index out of range");
 
         // FIXME: how to ensure that the map entries correspond to table indicies?
         // WARNING: Assumed that the table view has the same order as std::map
         std::map<std::string, int>::iterator iter = reactions.begin();
-        for(int i = 0; i < rowToRemove; ++i)
+        for (int i = 0; i < rowToRemove; ++i)
             ++iter;
         reactions.erase(iter);
 
-        record.setModified (faction);
+        record.setModified(faction);
     }
 
-    void FactionReactionsAdapter::setTable(Record<ESM::Faction>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void FactionReactionsAdapter::setTable(
+        Record<ESM::Faction>& record, const NestedTableWrapperBase& nestedTable) const
     {
         ESM::Faction faction = record.get();
 
-        faction.mReactions =
-            static_cast<const NestedTableWrapper<std::map<std::string, int> >&>(nestedTable).mNestedTable;
+        faction.mReactions
+            = static_cast<const NestedTableWrapper<std::map<std::string, int>>&>(nestedTable).mNestedTable;
 
-        record.setModified (faction);
+        record.setModified(faction);
     }
 
     NestedTableWrapperBase* FactionReactionsAdapter::table(const Record<ESM::Faction>& record) const
     {
         // deleted by dtor of NestedTableStoring
-        return new NestedTableWrapper<std::map<std::string, int> >(record.get().mReactions);
+        return new NestedTableWrapper<std::map<std::string, int>>(record.get().mReactions);
     }
 
-    QVariant FactionReactionsAdapter::getData(const Record<ESM::Faction>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant FactionReactionsAdapter::getData(
+        const Record<ESM::Faction>& record, int subRowIndex, int subColIndex) const
     {
         ESM::Faction faction = record.get();
 
         std::map<std::string, int>& reactions = faction.mReactions;
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (reactions.size()))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(reactions.size()))
+            throw std::runtime_error("index out of range");
 
         // FIXME: how to ensure that the map entries correspond to table indicies?
         // WARNING: Assumed that the table view has the same order as std::map
         std::map<std::string, int>::const_iterator iter = reactions.begin();
-        for(int i = 0; i < subRowIndex; ++i)
+        for (int i = 0; i < subRowIndex; ++i)
             ++iter;
         switch (subColIndex)
         {
-            case 0: return QString((*iter).first.c_str());
-            case 1: return (*iter).second;
-            default: throw std::runtime_error("Faction reactions subcolumn index out of range");
+            case 0:
+                return QString((*iter).first.c_str());
+            case 1:
+                return (*iter).second;
+            default:
+                throw std::runtime_error("Faction reactions subcolumn index out of range");
         }
     }
 
-    void FactionReactionsAdapter::setData(Record<ESM::Faction>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void FactionReactionsAdapter::setData(
+        Record<ESM::Faction>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Faction faction = record.get();
 
         std::map<std::string, int>& reactions = faction.mReactions;
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (reactions.size()))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(reactions.size()))
+            throw std::runtime_error("index out of range");
 
         // FIXME: how to ensure that the map entries correspond to table indicies?
         // WARNING: Assumed that the table view has the same order as std::map
         std::map<std::string, int>::iterator iter = reactions.begin();
-        for(int i = 0; i < subRowIndex; ++i)
+        for (int i = 0; i < subRowIndex; ++i)
             ++iter;
 
         std::string factionId = (*iter).first;
@@ -318,10 +339,11 @@ namespace CSMWorld
                 reactions[factionId] = value.toInt();
                 break;
             }
-            default: throw std::runtime_error("Faction reactions subcolumn index out of range");
+            default:
+                throw std::runtime_error("Faction reactions subcolumn index out of range");
         }
 
-        record.setModified (faction);
+        record.setModified(faction);
     }
 
     int FactionReactionsAdapter::getColumnsCount(const Record<ESM::Faction>& record) const
@@ -334,7 +356,7 @@ namespace CSMWorld
         return static_cast<int>(record.get().mReactions.size());
     }
 
-    RegionSoundListAdapter::RegionSoundListAdapter () {}
+    RegionSoundListAdapter::RegionSoundListAdapter() {}
 
     void RegionSoundListAdapter::addRow(Record<ESM::Region>& record, int position) const
     {
@@ -347,9 +369,9 @@ namespace CSMWorld
         soundRef.mSound.assign("");
         soundRef.mChance = 0;
 
-        soundList.insert(soundList.begin()+position, soundRef);
+        soundList.insert(soundList.begin() + position, soundRef);
 
-        record.setModified (region);
+        record.setModified(region);
     }
 
     void RegionSoundListAdapter::removeRow(Record<ESM::Region>& record, int rowToRemove) const
@@ -358,71 +380,77 @@ namespace CSMWorld
 
         std::vector<ESM::Region::SoundRef>& soundList = region.mSoundList;
 
-        if (rowToRemove < 0 || rowToRemove >= static_cast<int> (soundList.size()))
-            throw std::runtime_error ("index out of range");
+        if (rowToRemove < 0 || rowToRemove >= static_cast<int>(soundList.size()))
+            throw std::runtime_error("index out of range");
 
-        soundList.erase(soundList.begin()+rowToRemove);
+        soundList.erase(soundList.begin() + rowToRemove);
 
-        record.setModified (region);
+        record.setModified(region);
     }
 
-    void RegionSoundListAdapter::setTable(Record<ESM::Region>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void RegionSoundListAdapter::setTable(Record<ESM::Region>& record, const NestedTableWrapperBase& nestedTable) const
     {
         ESM::Region region = record.get();
 
-        region.mSoundList =
-            static_cast<const NestedTableWrapper<std::vector<ESM::Region::SoundRef> >&>(nestedTable).mNestedTable;
+        region.mSoundList
+            = static_cast<const NestedTableWrapper<std::vector<ESM::Region::SoundRef>>&>(nestedTable).mNestedTable;
 
-        record.setModified (region);
+        record.setModified(region);
     }
 
     NestedTableWrapperBase* RegionSoundListAdapter::table(const Record<ESM::Region>& record) const
     {
         // deleted by dtor of NestedTableStoring
-        return new NestedTableWrapper<std::vector<ESM::Region::SoundRef> >(record.get().mSoundList);
+        return new NestedTableWrapper<std::vector<ESM::Region::SoundRef>>(record.get().mSoundList);
     }
 
-    QVariant RegionSoundListAdapter::getData(const Record<ESM::Region>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant RegionSoundListAdapter::getData(const Record<ESM::Region>& record, int subRowIndex, int subColIndex) const
     {
         ESM::Region region = record.get();
 
         std::vector<ESM::Region::SoundRef>& soundList = region.mSoundList;
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (soundList.size()))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(soundList.size()))
+            throw std::runtime_error("index out of range");
 
         ESM::Region::SoundRef soundRef = soundList[subRowIndex];
         switch (subColIndex)
         {
-            case 0: return QString(soundRef.mSound.c_str());
-            case 1: return soundRef.mChance;
-            default: throw std::runtime_error("Region sounds subcolumn index out of range");
+            case 0:
+                return QString(soundRef.mSound.c_str());
+            case 1:
+                return soundRef.mChance;
+            default:
+                throw std::runtime_error("Region sounds subcolumn index out of range");
         }
     }
 
-    void RegionSoundListAdapter::setData(Record<ESM::Region>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void RegionSoundListAdapter::setData(
+        Record<ESM::Region>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Region region = record.get();
 
         std::vector<ESM::Region::SoundRef>& soundList = region.mSoundList;
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (soundList.size()))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(soundList.size()))
+            throw std::runtime_error("index out of range");
 
         ESM::Region::SoundRef soundRef = soundList[subRowIndex];
         switch (subColIndex)
         {
-            case 0: soundRef.mSound.assign(value.toString().toUtf8().constData()); break;
-            case 1: soundRef.mChance = static_cast<unsigned char>(value.toInt()); break;
-            default: throw std::runtime_error("Region sounds subcolumn index out of range");
+            case 0:
+                soundRef.mSound.assign(value.toString().toUtf8().constData());
+                break;
+            case 1:
+                soundRef.mChance = static_cast<unsigned char>(value.toInt());
+                break;
+            default:
+                throw std::runtime_error("Region sounds subcolumn index out of range");
         }
 
         region.mSoundList[subRowIndex] = soundRef;
 
-        record.setModified (region);
+        record.setModified(region);
     }
 
     int RegionSoundListAdapter::getColumnsCount(const Record<ESM::Region>& record) const
@@ -435,31 +463,29 @@ namespace CSMWorld
         return static_cast<int>(record.get().mSoundList.size());
     }
 
-    InfoListAdapter::InfoListAdapter () {}
+    InfoListAdapter::InfoListAdapter() {}
 
     void InfoListAdapter::addRow(Record<Info>& record, int position) const
     {
-        throw std::logic_error ("cannot add a row to a fixed table");
+        throw std::logic_error("cannot add a row to a fixed table");
     }
 
     void InfoListAdapter::removeRow(Record<Info>& record, int rowToRemove) const
     {
-        throw std::logic_error ("cannot remove a row to a fixed table");
+        throw std::logic_error("cannot remove a row to a fixed table");
     }
 
-    void InfoListAdapter::setTable(Record<Info>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void InfoListAdapter::setTable(Record<Info>& record, const NestedTableWrapperBase& nestedTable) const
     {
-        throw std::logic_error ("table operation not supported");
+        throw std::logic_error("table operation not supported");
     }
 
     NestedTableWrapperBase* InfoListAdapter::table(const Record<Info>& record) const
     {
-        throw std::logic_error ("table operation not supported");
+        throw std::logic_error("table operation not supported");
     }
 
-    QVariant InfoListAdapter::getData(const Record<Info>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant InfoListAdapter::getData(const Record<Info>& record, int subRowIndex, int subColIndex) const
     {
         Info info = record.get();
 
@@ -469,8 +495,7 @@ namespace CSMWorld
             throw std::runtime_error("Trying to access non-existing column in the nested table!");
     }
 
-    void InfoListAdapter::setData(Record<Info>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void InfoListAdapter::setData(Record<Info>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         Info info = record.get();
 
@@ -479,7 +504,7 @@ namespace CSMWorld
         else
             throw std::runtime_error("Trying to access non-existing column in the nested table!");
 
-        record.setModified (info);
+        record.setModified(info);
     }
 
     int InfoListAdapter::getColumnsCount(const Record<Info>& record) const
@@ -492,7 +517,7 @@ namespace CSMWorld
         return 1; // fixed at size 1
     }
 
-    InfoConditionAdapter::InfoConditionAdapter () {}
+    InfoConditionAdapter::InfoConditionAdapter() {}
 
     void InfoConditionAdapter::addRow(Record<Info>& record, int position) const
     {
@@ -506,9 +531,9 @@ namespace CSMWorld
         condStruct.mValue = ESM::Variant();
         condStruct.mValue.setType(ESM::VT_Int);
 
-        conditions.insert(conditions.begin()+position, condStruct);
+        conditions.insert(conditions.begin() + position, condStruct);
 
-        record.setModified (info);
+        record.setModified(info);
     }
 
     void InfoConditionAdapter::removeRow(Record<Info>& record, int rowToRemove) const
@@ -517,40 +542,38 @@ namespace CSMWorld
 
         std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
 
-        if (rowToRemove < 0 || rowToRemove >= static_cast<int> (conditions.size()))
-            throw std::runtime_error ("index out of range");
+        if (rowToRemove < 0 || rowToRemove >= static_cast<int>(conditions.size()))
+            throw std::runtime_error("index out of range");
 
-        conditions.erase(conditions.begin()+rowToRemove);
+        conditions.erase(conditions.begin() + rowToRemove);
 
-        record.setModified (info);
+        record.setModified(info);
     }
 
-    void InfoConditionAdapter::setTable(Record<Info>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void InfoConditionAdapter::setTable(Record<Info>& record, const NestedTableWrapperBase& nestedTable) const
     {
         Info info = record.get();
 
-        info.mSelects =
-            static_cast<const NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct> >&>(nestedTable).mNestedTable;
+        info.mSelects = static_cast<const NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct>>&>(nestedTable)
+                            .mNestedTable;
 
-        record.setModified (info);
+        record.setModified(info);
     }
 
     NestedTableWrapperBase* InfoConditionAdapter::table(const Record<Info>& record) const
     {
         // deleted by dtor of NestedTableStoring
-        return new NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct> >(record.get().mSelects);
+        return new NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct>>(record.get().mSelects);
     }
 
-    QVariant InfoConditionAdapter::getData(const Record<Info>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant InfoConditionAdapter::getData(const Record<Info>& record, int subRowIndex, int subColIndex) const
     {
         Info info = record.get();
 
         std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (conditions.size()))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(conditions.size()))
+            throw std::runtime_error("index out of range");
 
         ConstInfoSelectWrapper infoSelectWrapper(conditions[subRowIndex]);
 
@@ -583,22 +606,24 @@ namespace CSMWorld
                     {
                         return infoSelectWrapper.getVariant().getFloat();
                     }
-                    default: return QVariant();
+                    default:
+                        return QVariant();
                 }
             }
-            default: throw std::runtime_error("Info condition subcolumn index out of range");
+            default:
+                throw std::runtime_error("Info condition subcolumn index out of range");
         }
     }
 
-    void InfoConditionAdapter::setData(Record<Info>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void InfoConditionAdapter::setData(
+        Record<Info>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         Info info = record.get();
 
         std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (conditions.size()))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(conditions.size()))
+            throw std::runtime_error("index out of range");
 
         InfoSelectWrapper infoSelectWrapper(conditions[subRowIndex]);
         bool conversionResult = false;
@@ -609,8 +634,8 @@ namespace CSMWorld
             {
                 infoSelectWrapper.setFunctionName(static_cast<ConstInfoSelectWrapper::FunctionName>(value.toInt()));
 
-                if (infoSelectWrapper.getComparisonType() != ConstInfoSelectWrapper::Comparison_Numeric &&
-                    infoSelectWrapper.getVariant().getType() != ESM::VT_Int)
+                if (infoSelectWrapper.getComparisonType() != ConstInfoSelectWrapper::Comparison_Numeric
+                    && infoSelectWrapper.getVariant().getType() != ESM::VT_Int)
                 {
                     infoSelectWrapper.getVariant().setType(ESM::VT_Int);
                 }
@@ -659,14 +684,16 @@ namespace CSMWorld
                         }
                         break;
                     }
-                    default: break;
+                    default:
+                        break;
                 }
                 break;
             }
-            default: throw std::runtime_error("Info condition subcolumn index out of range");
+            default:
+                throw std::runtime_error("Info condition subcolumn index out of range");
         }
 
-        record.setModified (info);
+        record.setModified(info);
     }
 
     int InfoConditionAdapter::getColumnsCount(const Record<Info>& record) const
@@ -679,7 +706,7 @@ namespace CSMWorld
         return static_cast<int>(record.get().mSelects.size());
     }
 
-    RaceAttributeAdapter::RaceAttributeAdapter () {}
+    RaceAttributeAdapter::RaceAttributeAdapter() {}
 
     void RaceAttributeAdapter::addRow(Record<ESM::Race>& record, int position) const
     {
@@ -691,15 +718,14 @@ namespace CSMWorld
         // Do nothing, this table cannot be changed by the user
     }
 
-    void RaceAttributeAdapter::setTable(Record<ESM::Race>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void RaceAttributeAdapter::setTable(Record<ESM::Race>& record, const NestedTableWrapperBase& nestedTable) const
     {
         ESM::Race race = record.get();
 
-        race.mData =
-            static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >&>(nestedTable).mNestedTable.at(0);
+        race.mData = static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct>>&>(nestedTable)
+                         .mNestedTable.at(0);
 
-        record.setModified (race);
+        record.setModified(race);
     }
 
     NestedTableWrapperBase* RaceAttributeAdapter::table(const Record<ESM::Race>& record) const
@@ -707,43 +733,52 @@ namespace CSMWorld
         std::vector<ESM::Race::RADTstruct> wrap;
         wrap.push_back(record.get().mData);
         // deleted by dtor of NestedTableStoring
-        return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
+        return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct>>(wrap);
     }
 
-    QVariant RaceAttributeAdapter::getData(const Record<ESM::Race>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant RaceAttributeAdapter::getData(const Record<ESM::Race>& record, int subRowIndex, int subColIndex) const
     {
         ESM::Race race = record.get();
 
         if (subRowIndex < 0 || subRowIndex >= ESM::Attribute::Length)
-            throw std::runtime_error ("index out of range");
+            throw std::runtime_error("index out of range");
 
         switch (subColIndex)
         {
-            case 0: return subRowIndex;
-            case 1: return race.mData.mAttributeValues[subRowIndex].mMale;
-            case 2: return race.mData.mAttributeValues[subRowIndex].mFemale;
-            default: throw std::runtime_error("Race Attribute subcolumn index out of range");
+            case 0:
+                return subRowIndex;
+            case 1:
+                return race.mData.mAttributeValues[subRowIndex].mMale;
+            case 2:
+                return race.mData.mAttributeValues[subRowIndex].mFemale;
+            default:
+                throw std::runtime_error("Race Attribute subcolumn index out of range");
         }
     }
 
-    void RaceAttributeAdapter::setData(Record<ESM::Race>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void RaceAttributeAdapter::setData(
+        Record<ESM::Race>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Race race = record.get();
 
         if (subRowIndex < 0 || subRowIndex >= ESM::Attribute::Length)
-            throw std::runtime_error ("index out of range");
+            throw std::runtime_error("index out of range");
 
         switch (subColIndex)
         {
-            case 0: return; // throw an exception here?
-            case 1: race.mData.mAttributeValues[subRowIndex].mMale = value.toInt(); break;
-            case 2: race.mData.mAttributeValues[subRowIndex].mFemale = value.toInt(); break;
-            default: throw std::runtime_error("Race Attribute subcolumn index out of range");
+            case 0:
+                return; // throw an exception here?
+            case 1:
+                race.mData.mAttributeValues[subRowIndex].mMale = value.toInt();
+                break;
+            case 2:
+                race.mData.mAttributeValues[subRowIndex].mFemale = value.toInt();
+                break;
+            default:
+                throw std::runtime_error("Race Attribute subcolumn index out of range");
         }
 
-        record.setModified (race);
+        record.setModified(race);
     }
 
     int RaceAttributeAdapter::getColumnsCount(const Record<ESM::Race>& record) const
@@ -756,7 +791,7 @@ namespace CSMWorld
         return ESM::Attribute::Length; // there are 8 attributes
     }
 
-    RaceSkillsBonusAdapter::RaceSkillsBonusAdapter () {}
+    RaceSkillsBonusAdapter::RaceSkillsBonusAdapter() {}
 
     void RaceSkillsBonusAdapter::addRow(Record<ESM::Race>& record, int position) const
     {
@@ -768,15 +803,14 @@ namespace CSMWorld
         // Do nothing, this table cannot be changed by the user
     }
 
-    void RaceSkillsBonusAdapter::setTable(Record<ESM::Race>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void RaceSkillsBonusAdapter::setTable(Record<ESM::Race>& record, const NestedTableWrapperBase& nestedTable) const
     {
         ESM::Race race = record.get();
 
-        race.mData =
-            static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >&>(nestedTable).mNestedTable.at(0);
+        race.mData = static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct>>&>(nestedTable)
+                         .mNestedTable.at(0);
 
-        record.setModified (race);
+        record.setModified(race);
     }
 
     NestedTableWrapperBase* RaceSkillsBonusAdapter::table(const Record<ESM::Race>& record) const
@@ -784,41 +818,50 @@ namespace CSMWorld
         std::vector<ESM::Race::RADTstruct> wrap;
         wrap.push_back(record.get().mData);
         // deleted by dtor of NestedTableStoring
-        return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
+        return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct>>(wrap);
     }
 
-    QVariant RaceSkillsBonusAdapter::getData(const Record<ESM::Race>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant RaceSkillsBonusAdapter::getData(const Record<ESM::Race>& record, int subRowIndex, int subColIndex) const
     {
         ESM::Race race = record.get();
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus)/sizeof(race.mData.mBonus[0])))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0
+            || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus) / sizeof(race.mData.mBonus[0])))
+            throw std::runtime_error("index out of range");
 
         switch (subColIndex)
         {
-            case 0: return race.mData.mBonus[subRowIndex].mSkill; // can be -1
-            case 1: return race.mData.mBonus[subRowIndex].mBonus;
-            default: throw std::runtime_error("Race skill bonus subcolumn index out of range");
+            case 0:
+                return race.mData.mBonus[subRowIndex].mSkill; // can be -1
+            case 1:
+                return race.mData.mBonus[subRowIndex].mBonus;
+            default:
+                throw std::runtime_error("Race skill bonus subcolumn index out of range");
         }
     }
 
-    void RaceSkillsBonusAdapter::setData(Record<ESM::Race>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void RaceSkillsBonusAdapter::setData(
+        Record<ESM::Race>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Race race = record.get();
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus)/sizeof(race.mData.mBonus[0])))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0
+            || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus) / sizeof(race.mData.mBonus[0])))
+            throw std::runtime_error("index out of range");
 
         switch (subColIndex)
         {
-            case 0: race.mData.mBonus[subRowIndex].mSkill = value.toInt(); break; // can be -1
-            case 1: race.mData.mBonus[subRowIndex].mBonus = value.toInt(); break;
-            default: throw std::runtime_error("Race skill bonus subcolumn index out of range");
+            case 0:
+                race.mData.mBonus[subRowIndex].mSkill = value.toInt();
+                break; // can be -1
+            case 1:
+                race.mData.mBonus[subRowIndex].mBonus = value.toInt();
+                break;
+            default:
+                throw std::runtime_error("Race skill bonus subcolumn index out of range");
         }
 
-        record.setModified (race);
+        record.setModified(race);
     }
 
     int RaceSkillsBonusAdapter::getColumnsCount(const Record<ESM::Race>& record) const
@@ -829,34 +872,32 @@ namespace CSMWorld
     int RaceSkillsBonusAdapter::getRowsCount(const Record<ESM::Race>& record) const
     {
         // there are 7 skill bonuses
-        return static_cast<int>(sizeof(record.get().mData.mBonus)/sizeof(record.get().mData.mBonus[0]));
+        return static_cast<int>(sizeof(record.get().mData.mBonus) / sizeof(record.get().mData.mBonus[0]));
     }
 
-    CellListAdapter::CellListAdapter () {}
+    CellListAdapter::CellListAdapter() {}
 
     void CellListAdapter::addRow(Record<CSMWorld::Cell>& record, int position) const
     {
-        throw std::logic_error ("cannot add a row to a fixed table");
+        throw std::logic_error("cannot add a row to a fixed table");
     }
 
     void CellListAdapter::removeRow(Record<CSMWorld::Cell>& record, int rowToRemove) const
     {
-        throw std::logic_error ("cannot remove a row to a fixed table");
+        throw std::logic_error("cannot remove a row to a fixed table");
     }
 
-    void CellListAdapter::setTable(Record<CSMWorld::Cell>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void CellListAdapter::setTable(Record<CSMWorld::Cell>& record, const NestedTableWrapperBase& nestedTable) const
     {
-        throw std::logic_error ("table operation not supported");
+        throw std::logic_error("table operation not supported");
     }
 
     NestedTableWrapperBase* CellListAdapter::table(const Record<CSMWorld::Cell>& record) const
     {
-        throw std::logic_error ("table operation not supported");
+        throw std::logic_error("table operation not supported");
     }
 
-    QVariant CellListAdapter::getData(const Record<CSMWorld::Cell>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant CellListAdapter::getData(const Record<CSMWorld::Cell>& record, int subRowIndex, int subColIndex) const
     {
         CSMWorld::Cell cell = record.get();
 
@@ -866,17 +907,18 @@ namespace CSMWorld
 
         switch (subColIndex)
         {
-            case 0: return isInterior;
+            case 0:
+                return isInterior;
             // While the ambient information is not necessarily valid if the subrecord wasn't loaded,
             // the user should still be allowed to edit it
-            case 1: return (isInterior && !behaveLikeExterior) ?
-                    cell.mAmbi.mAmbient : QVariant(QVariant::UserType);
-            case 2: return (isInterior && !behaveLikeExterior) ?
-                    cell.mAmbi.mSunlight : QVariant(QVariant::UserType);
-            case 3: return (isInterior && !behaveLikeExterior) ?
-                    cell.mAmbi.mFog : QVariant(QVariant::UserType);
-            case 4: return (isInterior && !behaveLikeExterior) ?
-                    cell.mAmbi.mFogDensity : QVariant(QVariant::UserType);
+            case 1:
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mAmbient : QVariant(QVariant::UserType);
+            case 2:
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mSunlight : QVariant(QVariant::UserType);
+            case 3:
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFog : QVariant(QVariant::UserType);
+            case 4:
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFogDensity : QVariant(QVariant::UserType);
             case 5:
             {
                 if (isInterior && interiorWater)
@@ -884,16 +926,17 @@ namespace CSMWorld
                 else
                     return QVariant(QVariant::UserType);
             }
-            case 6: return isInterior ?
-                    QVariant(QVariant::UserType) : cell.mMapColor; // TODO: how to select?
-            //case 7: return isInterior ?
-                    //behaveLikeExterior : QVariant(QVariant::UserType);
-            default: throw std::runtime_error("Cell subcolumn index out of range");
+            case 6:
+                return isInterior ? QVariant(QVariant::UserType) : cell.mMapColor; // TODO: how to select?
+            // case 7: return isInterior ?
+            // behaveLikeExterior : QVariant(QVariant::UserType);
+            default:
+                throw std::runtime_error("Cell subcolumn index out of range");
         }
     }
 
-    void CellListAdapter::setData(Record<CSMWorld::Cell>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void CellListAdapter::setData(
+        Record<CSMWorld::Cell>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         CSMWorld::Cell cell = record.get();
 
@@ -988,10 +1031,11 @@ namespace CSMWorld
                 break;
             }
 #endif
-            default: throw std::runtime_error("Cell subcolumn index out of range");
+            default:
+                throw std::runtime_error("Cell subcolumn index out of range");
         }
 
-        record.setModified (cell);
+        record.setModified(cell);
     }
 
     int CellListAdapter::getColumnsCount(const Record<CSMWorld::Cell>& record) const
@@ -1004,42 +1048,32 @@ namespace CSMWorld
         return 1; // fixed at size 1
     }
 
-    RegionWeatherAdapter::RegionWeatherAdapter () {}
+    RegionWeatherAdapter::RegionWeatherAdapter() {}
 
     void RegionWeatherAdapter::addRow(Record<ESM::Region>& record, int position) const
     {
-        throw std::logic_error ("cannot add a row to a fixed table");
+        throw std::logic_error("cannot add a row to a fixed table");
     }
 
     void RegionWeatherAdapter::removeRow(Record<ESM::Region>& record, int rowToRemove) const
     {
-        throw std::logic_error ("cannot remove a row from a fixed table");
+        throw std::logic_error("cannot remove a row from a fixed table");
     }
 
     void RegionWeatherAdapter::setTable(Record<ESM::Region>& record, const NestedTableWrapperBase& nestedTable) const
     {
-        throw std::logic_error ("table operation not supported");
+        throw std::logic_error("table operation not supported");
     }
 
     NestedTableWrapperBase* RegionWeatherAdapter::table(const Record<ESM::Region>& record) const
     {
-        throw std::logic_error ("table operation not supported");
+        throw std::logic_error("table operation not supported");
     }
 
     QVariant RegionWeatherAdapter::getData(const Record<ESM::Region>& record, int subRowIndex, int subColIndex) const
     {
-        const char* WeatherNames[] = {
-            "Clear",
-            "Cloudy",
-            "Fog",
-            "Overcast",
-            "Rain",
-            "Thunder",
-            "Ash",
-            "Blight",
-            "Snow",
-            "Blizzard"
-        };
+        const char* WeatherNames[]
+            = { "Clear", "Cloudy", "Fog", "Overcast", "Rain", "Thunder", "Ash", "Blight", "Snow", "Blizzard" };
 
         const ESM::Region& region = record.get();
 
@@ -1051,25 +1085,36 @@ namespace CSMWorld
         {
             switch (subRowIndex)
             {
-                case 0: return region.mData.mClear;
-                case 1: return region.mData.mCloudy;
-                case 2: return region.mData.mFoggy;
-                case 3: return region.mData.mOvercast;
-                case 4: return region.mData.mRain;
-                case 5: return region.mData.mThunder;
-                case 6: return region.mData.mAsh;
-                case 7: return region.mData.mBlight;
-                case 8: return region.mData.mSnow;
-                case 9: return region.mData.mBlizzard;
-                default: break;
+                case 0:
+                    return region.mData.mClear;
+                case 1:
+                    return region.mData.mCloudy;
+                case 2:
+                    return region.mData.mFoggy;
+                case 3:
+                    return region.mData.mOvercast;
+                case 4:
+                    return region.mData.mRain;
+                case 5:
+                    return region.mData.mThunder;
+                case 6:
+                    return region.mData.mAsh;
+                case 7:
+                    return region.mData.mBlight;
+                case 8:
+                    return region.mData.mSnow;
+                case 9:
+                    return region.mData.mBlizzard;
+                default:
+                    break;
             }
         }
 
         throw std::runtime_error("index out of range");
     }
 
-    void RegionWeatherAdapter::setData(Record<ESM::Region>& record, const QVariant& value, int subRowIndex,
-        int subColIndex) const
+    void RegionWeatherAdapter::setData(
+        Record<ESM::Region>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Region region = record.get();
         unsigned char chance = static_cast<unsigned char>(value.toInt());
@@ -1078,20 +1123,41 @@ namespace CSMWorld
         {
             switch (subRowIndex)
             {
-                case 0: region.mData.mClear = chance; break;
-                case 1: region.mData.mCloudy = chance; break;
-                case 2: region.mData.mFoggy = chance; break;
-                case 3: region.mData.mOvercast = chance; break;
-                case 4: region.mData.mRain = chance; break;
-                case 5: region.mData.mThunder = chance; break;
-                case 6: region.mData.mAsh = chance; break;
-                case 7: region.mData.mBlight = chance; break;
-                case 8: region.mData.mSnow = chance; break;
-                case 9: region.mData.mBlizzard = chance; break;
-                default: throw std::runtime_error("index out of range");
+                case 0:
+                    region.mData.mClear = chance;
+                    break;
+                case 1:
+                    region.mData.mCloudy = chance;
+                    break;
+                case 2:
+                    region.mData.mFoggy = chance;
+                    break;
+                case 3:
+                    region.mData.mOvercast = chance;
+                    break;
+                case 4:
+                    region.mData.mRain = chance;
+                    break;
+                case 5:
+                    region.mData.mThunder = chance;
+                    break;
+                case 6:
+                    region.mData.mAsh = chance;
+                    break;
+                case 7:
+                    region.mData.mBlight = chance;
+                    break;
+                case 8:
+                    region.mData.mSnow = chance;
+                    break;
+                case 9:
+                    region.mData.mBlizzard = chance;
+                    break;
+                default:
+                    throw std::runtime_error("index out of range");
             }
 
-            record.setModified (region);
+            record.setModified(region);
         }
     }
 
@@ -1105,73 +1171,93 @@ namespace CSMWorld
         return 10;
     }
 
-    FactionRanksAdapter::FactionRanksAdapter () {}
+    FactionRanksAdapter::FactionRanksAdapter() {}
 
     void FactionRanksAdapter::addRow(Record<ESM::Faction>& record, int position) const
     {
-        throw std::logic_error ("cannot add a row to a fixed table");
+        throw std::logic_error("cannot add a row to a fixed table");
     }
 
     void FactionRanksAdapter::removeRow(Record<ESM::Faction>& record, int rowToRemove) const
     {
-        throw std::logic_error ("cannot remove a row from a fixed table");
+        throw std::logic_error("cannot remove a row from a fixed table");
     }
 
-    void FactionRanksAdapter::setTable(Record<ESM::Faction>& record,
-            const NestedTableWrapperBase& nestedTable) const
+    void FactionRanksAdapter::setTable(Record<ESM::Faction>& record, const NestedTableWrapperBase& nestedTable) const
     {
-        throw std::logic_error ("table operation not supported");
+        throw std::logic_error("table operation not supported");
     }
 
     NestedTableWrapperBase* FactionRanksAdapter::table(const Record<ESM::Faction>& record) const
     {
-        throw std::logic_error ("table operation not supported");
+        throw std::logic_error("table operation not supported");
     }
 
-    QVariant FactionRanksAdapter::getData(const Record<ESM::Faction>& record,
-            int subRowIndex, int subColIndex) const
+    QVariant FactionRanksAdapter::getData(const Record<ESM::Faction>& record, int subRowIndex, int subColIndex) const
     {
         ESM::Faction faction = record.get();
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(sizeof(faction.mData.mRankData)/sizeof(faction.mData.mRankData[0])))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0
+            || subRowIndex >= static_cast<int>(sizeof(faction.mData.mRankData) / sizeof(faction.mData.mRankData[0])))
+            throw std::runtime_error("index out of range");
 
         auto& rankData = faction.mData.mRankData[subRowIndex];
 
         switch (subColIndex)
         {
-            case 0: return QString(faction.mRanks[subRowIndex].c_str());
-            case 1: return rankData.mAttribute1;
-            case 2: return rankData.mAttribute2;
-            case 3: return rankData.mPrimarySkill;
-            case 4: return rankData.mFavouredSkill;
-            case 5: return rankData.mFactReaction;
-            default: throw std::runtime_error("Rank subcolumn index out of range");
+            case 0:
+                return QString(faction.mRanks[subRowIndex].c_str());
+            case 1:
+                return rankData.mAttribute1;
+            case 2:
+                return rankData.mAttribute2;
+            case 3:
+                return rankData.mPrimarySkill;
+            case 4:
+                return rankData.mFavouredSkill;
+            case 5:
+                return rankData.mFactReaction;
+            default:
+                throw std::runtime_error("Rank subcolumn index out of range");
         }
     }
 
-    void FactionRanksAdapter::setData(Record<ESM::Faction>& record,
-            const QVariant& value, int subRowIndex, int subColIndex) const
+    void FactionRanksAdapter::setData(
+        Record<ESM::Faction>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Faction faction = record.get();
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(sizeof(faction.mData.mRankData)/sizeof(faction.mData.mRankData[0])))
-            throw std::runtime_error ("index out of range");
+        if (subRowIndex < 0
+            || subRowIndex >= static_cast<int>(sizeof(faction.mData.mRankData) / sizeof(faction.mData.mRankData[0])))
+            throw std::runtime_error("index out of range");
 
         auto& rankData = faction.mData.mRankData[subRowIndex];
 
         switch (subColIndex)
         {
-            case 0: faction.mRanks[subRowIndex] = value.toString().toUtf8().constData(); break;
-            case 1: rankData.mAttribute1 = value.toInt(); break;
-            case 2: rankData.mAttribute2 = value.toInt(); break;
-            case 3: rankData.mPrimarySkill = value.toInt(); break;
-            case 4: rankData.mFavouredSkill = value.toInt(); break;
-            case 5: rankData.mFactReaction = value.toInt(); break;
-            default: throw std::runtime_error("Rank index out of range");
+            case 0:
+                faction.mRanks[subRowIndex] = value.toString().toUtf8().constData();
+                break;
+            case 1:
+                rankData.mAttribute1 = value.toInt();
+                break;
+            case 2:
+                rankData.mAttribute2 = value.toInt();
+                break;
+            case 3:
+                rankData.mPrimarySkill = value.toInt();
+                break;
+            case 4:
+                rankData.mFavouredSkill = value.toInt();
+                break;
+            case 5:
+                rankData.mFactReaction = value.toInt();
+                break;
+            default:
+                throw std::runtime_error("Rank index out of range");
         }
 
-        record.setModified (faction);
+        record.setModified(faction);
     }
 
     int FactionRanksAdapter::getColumnsCount(const Record<ESM::Faction>& record) const

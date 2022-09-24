@@ -1,13 +1,13 @@
 #include "actorutil.hpp"
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
-#include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 #include <components/esm3/loadmgef.hpp>
 

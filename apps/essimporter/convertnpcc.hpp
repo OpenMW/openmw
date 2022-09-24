@@ -8,7 +8,7 @@
 namespace ESSImport
 {
 
-    void convertNPCC (const NPCC& npcc, ESM::NpcState& npcState);
+    void convertNPCC(const NPCC& npcc, ESM::NpcState& npcState);
 
 }
 

@@ -13,44 +13,43 @@ namespace MWWorld
 namespace MWGui
 {
 
-class ItemSelectionDialog;
-class ItemWidget;
-class ItemChargeView;
+    class ItemSelectionDialog;
+    class ItemWidget;
+    class ItemChargeView;
 
-class Recharge : public WindowBase
-{
-public:
-    Recharge();
+    class Recharge : public WindowBase
+    {
+    public:
+        Recharge();
 
-    void onOpen() override;
+        void onOpen() override;
 
-    void setPtr (const MWWorld::Ptr& gem) override;
+        void setPtr(const MWWorld::Ptr& gem) override;
 
-protected:
-    ItemChargeView* mBox;
+    protected:
+        ItemChargeView* mBox;
 
-    MyGUI::Widget* mGemBox;
+        MyGUI::Widget* mGemBox;
 
-    ItemWidget* mGemIcon;
+        ItemWidget* mGemIcon;
 
-    std::unique_ptr<ItemSelectionDialog> mItemSelectionDialog;
+        std::unique_ptr<ItemSelectionDialog> mItemSelectionDialog;
 
-    MyGUI::TextBox* mChargeLabel;
+        MyGUI::TextBox* mChargeLabel;
 
-    MyGUI::Button* mCancelButton;
+        MyGUI::Button* mCancelButton;
 
-    void updateView();
+        void updateView();
 
-    void onSelectItem(MyGUI::Widget* sender);
+        void onSelectItem(MyGUI::Widget* sender);
 
-    void onItemSelected(MWWorld::Ptr item);
-    void onItemCancel();
+        void onItemSelected(MWWorld::Ptr item);
+        void onItemCancel();
 
-    void onItemClicked (MyGUI::Widget* sender, const MWWorld::Ptr& item);
-    void onCancel (MyGUI::Widget* sender);
-    void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-
-};
+        void onItemClicked(MyGUI::Widget* sender, const MWWorld::Ptr& item);
+        void onCancel(MyGUI::Widget* sender);
+        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+    };
 
 }
 

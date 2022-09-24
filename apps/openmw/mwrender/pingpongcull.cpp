@@ -2,15 +2,15 @@
 
 #include <osg/Camera>
 #include <osg/FrameBufferObject>
-#include <osg/Texture>
 #include <osg/Texture2DArray>
+#include <osg/Texture>
 #include <osgUtil/CullVisitor>
 
-#include <components/stereo/stereomanager.hpp>
 #include <components/stereo/multiview.hpp>
+#include <components/stereo/stereomanager.hpp>
 
-#include "postprocessor.hpp"
 #include "pingpongcanvas.hpp"
+#include "postprocessor.hpp"
 
 namespace MWRender
 {
@@ -38,7 +38,8 @@ namespace MWRender
         size_t frame = cv->getTraversalNumber();
         size_t frameId = frame % 2;
 
-        MWRender::PostProcessor* postProcessor = dynamic_cast<MWRender::PostProcessor*>(cv->getCurrentCamera()->getUserData());
+        MWRender::PostProcessor* postProcessor
+            = dynamic_cast<MWRender::PostProcessor*>(cv->getCurrentCamera()->getUserData());
         if (!postProcessor)
             throw std::runtime_error("PingPongCull: failed to get a PostProcessor!");
 
@@ -69,11 +70,12 @@ namespace MWRender
         }
         else
         {
-            renderStage->setMultisampleResolveFramebufferObject(postProcessor->getFbo(PostProcessor::FBO_Primary, frameId));
+            renderStage->setMultisampleResolveFramebufferObject(
+                postProcessor->getFbo(PostProcessor::FBO_Primary, frameId));
             renderStage->setFrameBufferObject(postProcessor->getFbo(PostProcessor::FBO_Multisample, frameId));
 
-            // The MultiView patch has a bug where it does not update resolve layers if the resolve framebuffer is changed.
-            // So we do blit manually in this case
+            // The MultiView patch has a bug where it does not update resolve layers if the resolve framebuffer is
+            // changed. So we do blit manually in this case
             if (Stereo::getMultiview() && !renderStage->getDrawCallback())
                 Stereo::setMultiviewMSAAResolveCallback(renderStage);
         }

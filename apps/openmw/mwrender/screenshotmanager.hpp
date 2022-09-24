@@ -21,7 +21,8 @@ namespace MWRender
     class ScreenshotManager
     {
     public:
-        ScreenshotManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, osg::ref_ptr<osg::Group> sceneRoot, Resource::ResourceSystem* resourceSystem, Water* water);
+        ScreenshotManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
+            osg::ref_ptr<osg::Group> sceneRoot, Resource::ResourceSystem* resourceSystem, Water* water);
         ~ScreenshotManager();
 
         void screenshot(osg::Image* image, int w, int h);
@@ -36,8 +37,9 @@ namespace MWRender
         Water* mWater;
 
         void traversalsAndWait(unsigned int frame);
-        void renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h);
-        void makeCubemapScreenshot(osg::Image* image, int w, int h, const osg::Matrixd &cameraTransform=osg::Matrixd());
+        void renderCameraToImage(osg::Camera* camera, osg::Image* image, int w, int h);
+        void makeCubemapScreenshot(
+            osg::Image* image, int w, int h, const osg::Matrixd& cameraTransform = osg::Matrixd());
     };
 }
 

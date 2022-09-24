@@ -11,8 +11,8 @@
 
 namespace BulletHelpers
 {
-    inline std::unique_ptr<btCollisionObject> makeCollisionObject(btCollisionShape* shape,
-        const btVector3& position, const btQuaternion& rotation)
+    inline std::unique_ptr<btCollisionObject> makeCollisionObject(
+        btCollisionShape* shape, const btVector3& position, const btQuaternion& rotation)
     {
         std::unique_ptr<btCollisionObject> result = std::make_unique<btCollisionObject>();
         result->setCollisionShape(shape);

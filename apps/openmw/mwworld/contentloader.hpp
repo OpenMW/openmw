@@ -11,12 +11,12 @@ namespace Loading
 namespace MWWorld
 {
 
-struct ContentLoader
-{
-    virtual ~ContentLoader() = default;
+    struct ContentLoader
+    {
+        virtual ~ContentLoader() = default;
 
-    virtual void load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener) = 0;
-};
+        virtual void load(const std::filesystem::path& filepath, int& index, Loading::Listener* listener) = 0;
+    };
 
 } /* namespace MWWorld */
 

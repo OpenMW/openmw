@@ -1,12 +1,12 @@
 #include "loadweap.hpp"
 
+#include "components/esm/defs.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "components/esm/defs.hpp"
 
 namespace ESM
 {
-    void Weapon::load(ESMReader &esm, bool &isDeleted)
+    void Weapon::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -55,7 +55,7 @@ namespace ESM
         if (!hasData && !isDeleted)
             esm.fail("Missing WPDT subrecord");
     }
-    void Weapon::save(ESMWriter &esm, bool isDeleted) const
+    void Weapon::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

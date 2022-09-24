@@ -35,21 +35,27 @@ void ESM4::Book::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
-    //std::uint32_t esmVer = reader.esmVersion(); // currently unused
+    mFlags = reader.hdr().record.flags;
+    // std::uint32_t esmVer = reader.esmVersion(); // currently unused
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_DESC: reader.getLocalizedString(mText); break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_DESC:
+                reader.getLocalizedString(mText);
+                break;
             case ESM4::SUB_DATA:
             {
                 reader.get(mData.flags);
-                //if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 if (subHdr.dataSize == 16) // FO3 has 10 bytes even though VER_094
                 {
                     static std::uint8_t dummy;
@@ -66,14 +72,30 @@ void ESM4::Book::load(ESM4::Reader& reader)
                 reader.get(mData.weight);
                 break;
             }
-            case ESM4::SUB_ICON: reader.getZString(mIcon);  break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId);      break;
-            case ESM4::SUB_ANAM: reader.get(mEnchantmentPoints); break;
-            case ESM4::SUB_ENAM: reader.getFormId(mEnchantment); break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
-            case ESM4::SUB_YNAM: reader.getFormId(mPickUpSound); break;
-            case ESM4::SUB_ZNAM: reader.getFormId(mDropSound); break; // TODO: does this exist?
+            case ESM4::SUB_ICON:
+                reader.getZString(mIcon);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_ANAM:
+                reader.get(mEnchantmentPoints);
+                break;
+            case ESM4::SUB_ENAM:
+                reader.getFormId(mEnchantment);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
+            case ESM4::SUB_YNAM:
+                reader.getFormId(mPickUpSound);
+                break;
+            case ESM4::SUB_ZNAM:
+                reader.getFormId(mDropSound);
+                break; // TODO: does this exist?
             case ESM4::SUB_MODT:
             case ESM4::SUB_OBND:
             case ESM4::SUB_KSIZ:
@@ -82,7 +104,7 @@ void ESM4::Book::load(ESM4::Reader& reader)
             case ESM4::SUB_INAM:
             case ESM4::SUB_VMAD:
             {
-                //std::cout << "BOOK " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "BOOK " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -92,10 +114,10 @@ void ESM4::Book::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Book::save(ESM4::Writer& writer) const
+// void ESM4::Book::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Book::blank()
+// void ESM4::Book::blank()
 //{
-//}
+// }

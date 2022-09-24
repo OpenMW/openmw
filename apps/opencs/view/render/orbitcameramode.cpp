@@ -8,21 +8,18 @@
 
 namespace CSVRender
 {
-    OrbitCameraMode::OrbitCameraMode(WorldspaceWidget* worldspaceWidget, const QIcon& icon, const QString& tooltip,
-        QWidget* parent)
+    OrbitCameraMode::OrbitCameraMode(
+        WorldspaceWidget* worldspaceWidget, const QIcon& icon, const QString& tooltip, QWidget* parent)
         : ModeButton(icon, tooltip, parent)
         , mWorldspaceWidget(worldspaceWidget)
         , mCenterOnSelection(nullptr)
     {
         mCenterShortcut = new CSMPrefs::Shortcut("orbit-center-selection", worldspaceWidget);
         mCenterShortcut->enable(false);
-        connect(mCenterShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), 
-                this, &OrbitCameraMode::centerSelection);
+        connect(mCenterShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &OrbitCameraMode::centerSelection);
     }
 
-    OrbitCameraMode::~OrbitCameraMode()
-    {
-    }
+    OrbitCameraMode::~OrbitCameraMode() {}
 
     void OrbitCameraMode::activate(CSVWidget::SceneToolbar* toolbar)
     {

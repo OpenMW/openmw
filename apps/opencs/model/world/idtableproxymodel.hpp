@@ -15,55 +15,51 @@ namespace CSMWorld
 {
     class IdTableProxyModel : public QSortFilterProxyModel
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            std::shared_ptr<CSMFilter::Node> mFilter;
-            std::map<int, int> mColumnMap; // column ID, column index in this model (or -1)
+        std::shared_ptr<CSMFilter::Node> mFilter;
+        std::map<int, int> mColumnMap; // column ID, column index in this model (or -1)
 
-            // Cache of enum values for enum columns (e.g. Modified, Record Type).
-            // Used to speed up comparisons during the sort by such columns.
-            typedef std::map<Columns::ColumnId, std::vector<std::pair<int,std::string>> > EnumColumnCache;
-            mutable EnumColumnCache mEnumColumnCache;
+        // Cache of enum values for enum columns (e.g. Modified, Record Type).
+        // Used to speed up comparisons during the sort by such columns.
+        typedef std::map<Columns::ColumnId, std::vector<std::pair<int, std::string>>> EnumColumnCache;
+        mutable EnumColumnCache mEnumColumnCache;
 
-        protected:
+    protected:
+        IdTableBase* mSourceModel;
 
-            IdTableBase *mSourceModel;
+    private:
+        void updateColumnMap();
 
-        private:
+    public:
+        IdTableProxyModel(QObject* parent = nullptr);
 
-            void updateColumnMap();
+        virtual QModelIndex getModelIndex(const std::string& id, int column) const;
 
-        public:
+        void setSourceModel(QAbstractItemModel* model) override;
 
-            IdTableProxyModel (QObject *parent = nullptr);
+        void setFilter(const std::shared_ptr<CSMFilter::Node>& filter);
 
-            virtual QModelIndex getModelIndex (const std::string& id, int column) const;
+        void refreshFilter();
 
-            void setSourceModel(QAbstractItemModel *model) override;
+    protected:
+        bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
-            void setFilter (const std::shared_ptr<CSMFilter::Node>& filter);
+        bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
-            void refreshFilter();
+        QString getRecordId(int sourceRow) const;
 
-        protected:
+    protected slots:
 
-            bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+        virtual void sourceRowsInserted(const QModelIndex& parent, int start, int end);
 
-            bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const override;
+        virtual void sourceRowsRemoved(const QModelIndex& parent, int start, int end);
 
-            QString getRecordId(int sourceRow) const;
+        virtual void sourceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-        protected slots:
+    signals:
 
-            virtual void sourceRowsInserted(const QModelIndex &parent, int start, int end);
-
-            virtual void sourceRowsRemoved(const QModelIndex &parent, int start, int end);
-
-            virtual void sourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
-
-        signals:
-
-            void rowAdded(const std::string &id);
+        void rowAdded(const std::string& id);
     };
 }
 

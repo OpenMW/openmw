@@ -16,53 +16,49 @@ namespace CSMPrefs
     /// Users of this class should install it as an event handler
     class ShortcutEventHandler : public QObject
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+    public:
+        ShortcutEventHandler(QObject* parent);
 
-            ShortcutEventHandler(QObject* parent);
+        void addShortcut(Shortcut* shortcut);
+        void removeShortcut(Shortcut* shortcut);
 
-            void addShortcut(Shortcut* shortcut);
-            void removeShortcut(Shortcut* shortcut);
+    protected:
+        bool eventFilter(QObject* watched, QEvent* event) override;
 
-        protected:
+    private:
+        typedef std::vector<Shortcut*> ShortcutList;
+        // Child, Parent
+        typedef std::map<QWidget*, QWidget*> WidgetMap;
+        typedef std::map<QWidget*, ShortcutList> ShortcutMap;
 
-            bool eventFilter(QObject* watched, QEvent* event) override;
+        enum MatchResult
+        {
+            Matches_WithMod,
+            Matches_NoMod,
+            Matches_Not
+        };
 
-        private:
+        void updateParent(QWidget* widget);
 
-            typedef std::vector<Shortcut*> ShortcutList;
-            // Child, Parent
-            typedef std::map<QWidget*, QWidget*> WidgetMap;
-            typedef std::map<QWidget*, ShortcutList> ShortcutMap;
+        bool activate(QWidget* widget, unsigned int mod, unsigned int button);
 
-            enum MatchResult
-            {
-                Matches_WithMod,
-                Matches_NoMod,
-                Matches_Not
-            };
+        bool deactivate(QWidget* widget, unsigned int mod, unsigned int button);
 
-            void updateParent(QWidget* widget);
+        bool checkModifier(unsigned int mod, unsigned int button, Shortcut* shortcut, bool activate);
 
-            bool activate(QWidget* widget, unsigned int mod, unsigned int button);
+        MatchResult match(unsigned int mod, unsigned int button, unsigned int value);
 
-            bool deactivate(QWidget* widget, unsigned int mod, unsigned int button);
+        // Prefers Matches_WithMod and a larger number of buttons
+        static bool sort(const std::pair<MatchResult, Shortcut*>& left, const std::pair<MatchResult, Shortcut*>& right);
 
-            bool checkModifier(unsigned int mod, unsigned int button, Shortcut* shortcut, bool activate);
+        WidgetMap mChildParentRelations;
+        ShortcutMap mWidgetShortcuts;
 
-            MatchResult match(unsigned int mod, unsigned int button, unsigned int value);
+    private slots:
 
-            // Prefers Matches_WithMod and a larger number of buttons
-            static bool sort(const std::pair<MatchResult, Shortcut*>& left,
-                const std::pair<MatchResult, Shortcut*>& right);
-
-            WidgetMap mChildParentRelations;
-            ShortcutMap mWidgetShortcuts;
-
-        private slots:
-
-            void widgetDestroyed();
+        void widgetDestroyed();
     };
 }
 

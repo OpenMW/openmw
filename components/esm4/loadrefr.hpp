@@ -38,24 +38,24 @@ namespace ESM4
 
     enum MapMarkerType
     {
-        Map_None          = 0x00, // ?
-        Map_Camp          = 0x01,
-        Map_Cave          = 0x02,
-        Map_City          = 0x03,
-        Map_ElvenRuin     = 0x04,
-        Map_FortRuin      = 0x05,
-        Map_Mine          = 0x06,
-        Map_Landmark      = 0x07,
-        Map_Tavern        = 0x08,
-        Map_Settlement    = 0x09,
+        Map_None = 0x00, // ?
+        Map_Camp = 0x01,
+        Map_Cave = 0x02,
+        Map_City = 0x03,
+        Map_ElvenRuin = 0x04,
+        Map_FortRuin = 0x05,
+        Map_Mine = 0x06,
+        Map_Landmark = 0x07,
+        Map_Tavern = 0x08,
+        Map_Settlement = 0x09,
         Map_DaedricShrine = 0x0A,
-        Map_OblivionGate  = 0x0B,
-        Map_Unknown       = 0x0C // ? (door icon)
+        Map_OblivionGate = 0x0B,
+        Map_Unknown = 0x0C // ? (door icon)
     };
 
     struct TeleportDest
     {
-        FormId   destDoor;
+        FormId destDoor;
         Placement destPos;
         std::uint32_t flags; // 0x01 no alarm (only in TES5)
     };
@@ -71,20 +71,20 @@ namespace ESM4
 
     struct Reference
     {
-        FormId mParent;       // cell FormId (currently persistent refs only), from the loading sequence
-                              // NOTE: for exterior cells it will be the dummy cell FormId
+        FormId mParent; // cell FormId (currently persistent refs only), from the loading sequence
+                        // NOTE: for exterior cells it will be the dummy cell FormId
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::string mFullName;
-        FormId      mBaseObj;
+        FormId mBaseObj;
 
         Placement mPlacement;
-        float    mScale = 1.0f;
-        FormId   mOwner;
-        FormId   mGlobal;
+        float mScale = 1.0f;
+        FormId mOwner;
+        FormId mGlobal;
         std::int32_t mFactionRank = -1;
 
         bool mInitiallyDisabled; // TODO may need to check mFlags & 0x800 (initially disabled)
@@ -107,7 +107,7 @@ namespace ESM4
         FormId mTargetRef;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
         void blank();
     };

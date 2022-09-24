@@ -14,35 +14,32 @@ namespace CSVPrefs
 
     class Dialogue : public QMainWindow
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QStackedWidget *mContent;
+        QStackedWidget* mContent;
 
-        private:
+    private:
+        void buildCategorySelector(QSplitter* main);
 
-            void buildCategorySelector (QSplitter *main);
+        void buildContentArea(QSplitter* main);
 
-            void buildContentArea (QSplitter *main);
+        PageBase* makePage(const std::string& key);
 
-            PageBase *makePage (const std::string& key);
+    public:
+        Dialogue();
 
-        public:
+        ~Dialogue() override;
 
-            Dialogue();
+    protected:
+        void closeEvent(QCloseEvent* event) override;
 
-            ~Dialogue() override;
+    public slots:
 
-        protected:
+        void show();
 
-            void closeEvent (QCloseEvent *event) override;
+    private slots:
 
-        public slots:
-
-            void show();
-
-        private slots:
-
-            void selectionChanged (QListWidgetItem *current, QListWidgetItem *previous);
+        void selectionChanged(QListWidgetItem* current, QListWidgetItem* previous);
     };
 }
 

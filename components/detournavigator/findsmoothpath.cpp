@@ -16,8 +16,7 @@ namespace DetourNavigator
         const auto end = path.begin() + pathSize;
         const std::reverse_iterator rbegin(end);
         const std::reverse_iterator rend(begin);
-        const auto it = std::find_if(rbegin, rend, [&] (dtPolyRef pathValue)
-        {
+        const auto it = std::find_if(rbegin, rend, [&](dtPolyRef pathValue) {
             const auto it = std::find(visited.rbegin(), visited.rend(), pathValue);
             if (it == visited.rend())
                 return false;
@@ -94,7 +93,7 @@ namespace DetourNavigator
     }
 
     std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& startPos,
-            const osg::Vec3f& endPos, const float minTargetDist, const dtPolyRef* path, const std::size_t pathSize)
+        const osg::Vec3f& endPos, const float minTargetDist, const dtPolyRef* path, const std::size_t pathSize)
     {
         // Find steer target.
         SteerTarget result;
@@ -103,9 +102,9 @@ namespace DetourNavigator
         std::array<unsigned char, maxSteerPoints> steerPathFlags;
         std::array<dtPolyRef, maxSteerPoints> steerPathPolys;
         int nsteerPath = 0;
-        const dtStatus status = navMeshQuery.findStraightPath(startPos.ptr(), endPos.ptr(), path,
-            static_cast<int>(pathSize), steerPath.data(), steerPathFlags.data(), steerPathPolys.data(),
-            &nsteerPath, maxSteerPoints);
+        const dtStatus status
+            = navMeshQuery.findStraightPath(startPos.ptr(), endPos.ptr(), path, static_cast<int>(pathSize),
+                steerPath.data(), steerPathFlags.data(), steerPathPolys.data(), &nsteerPath, maxSteerPoints);
         if (dtStatusFailed(status))
             return std::nullopt;
         assert(nsteerPath >= 0);
@@ -117,8 +116,8 @@ namespace DetourNavigator
         while (ns < static_cast<std::size_t>(nsteerPath))
         {
             // Stop at Off-Mesh link or when point is further than slop away.
-            if ((steerPathFlags[ns] & DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
-                    !inRange(Misc::Convert::makeOsgVec3f(&steerPath[ns * 3]), startPos, minTargetDist))
+            if ((steerPathFlags[ns] & DT_STRAIGHTPATH_OFFMESH_CONNECTION)
+                || !inRange(Misc::Convert::makeOsgVec3f(&steerPath[ns * 3]), startPos, minTargetDist))
                 break;
             ns++;
         }
@@ -134,8 +133,8 @@ namespace DetourNavigator
         return result;
     }
 
-    dtPolyRef findNearestPoly(const dtNavMeshQuery& query, const dtQueryFilter& filter,
-            const osg::Vec3f& center, const osg::Vec3f& halfExtents)
+    dtPolyRef findNearestPoly(const dtNavMeshQuery& query, const dtQueryFilter& filter, const osg::Vec3f& center,
+        const osg::Vec3f& halfExtents)
     {
         dtPolyRef ref = 0;
         const dtStatus status = query.findNearestPoly(center.ptr(), halfExtents.ptr(), &filter, &ref, nullptr);

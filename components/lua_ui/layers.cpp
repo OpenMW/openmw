@@ -20,8 +20,7 @@ namespace LuaUi
             Log(Debug::Error) << "Layer \"" << name << "\" already exists";
         else
         {
-            auto layer = MyGUI::LayerManager::getInstance()
-                .createLayerAt(std::string(name), "OverlappedLayer", index);
+            auto layer = MyGUI::LayerManager::getInstance().createLayerAt(std::string(name), "OverlappedLayer", index);
             auto overlappedLayer = dynamic_cast<MyGUI::OverlappedLayer*>(layer);
             overlappedLayer->setPick(options.mInteractive);
         }

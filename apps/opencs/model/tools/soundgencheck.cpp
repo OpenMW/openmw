@@ -5,15 +5,14 @@
 #include "../world/refiddata.hpp"
 #include "../world/universalid.hpp"
 
-#include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadsndg.hpp>
+#include <components/esm3/loadsoun.hpp>
 
-CSMTools::SoundGenCheckStage::SoundGenCheckStage(const CSMWorld::IdCollection<ESM::SoundGenerator> &soundGens,
-                                                 const CSMWorld::IdCollection<ESM::Sound> &sounds,
-                                                 const CSMWorld::RefIdCollection &objects)
-    : mSoundGens(soundGens),
-      mSounds(sounds),
-      mObjects(objects)
+CSMTools::SoundGenCheckStage::SoundGenCheckStage(const CSMWorld::IdCollection<ESM::SoundGenerator>& soundGens,
+    const CSMWorld::IdCollection<ESM::Sound>& sounds, const CSMWorld::RefIdCollection& objects)
+    : mSoundGens(soundGens)
+    , mSounds(sounds)
+    , mObjects(objects)
 {
     mIgnoreBaseRecords = false;
 }
@@ -25,10 +24,10 @@ int CSMTools::SoundGenCheckStage::setup()
     return mSoundGens.getSize();
 }
 
-void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages)
+void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::SoundGenerator> &record = mSoundGens.getRecord(stage);
-    
+    const CSMWorld::Record<ESM::SoundGenerator>& record = mSoundGens.getRecord(stage);
+
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
@@ -41,7 +40,8 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages
         CSMWorld::RefIdData::LocalIndex creatureIndex = mObjects.getDataSet().searchId(soundGen.mCreature);
         if (creatureIndex.first == -1)
         {
-            messages.add(id, "Creature '" + soundGen.mCreature + "' doesn't exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(
+                id, "Creature '" + soundGen.mCreature + "' doesn't exist", "", CSMDoc::Message::Severity_Error);
         }
         else if (creatureIndex.second != CSMWorld::UniversalId::Type_Creature)
         {

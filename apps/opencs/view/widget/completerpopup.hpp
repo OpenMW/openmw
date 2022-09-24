@@ -7,10 +7,10 @@ namespace CSVWidget
 {
     class CompleterPopup : public QListView
     {
-        public:
-            CompleterPopup(QWidget *parent = nullptr);
+    public:
+        CompleterPopup(QWidget* parent = nullptr);
 
-            int sizeHintForRow(int row) const override;
+        int sizeHintForRow(int row) const override;
     };
 }
 

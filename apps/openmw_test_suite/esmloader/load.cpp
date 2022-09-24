@@ -5,12 +5,12 @@
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadstat.hpp>
+#include <components/esm3/readerscache.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/load.hpp>
 #include <components/files/collections.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>
-#include <components/esm3/readerscache.hpp>
 
 #include <gtest/gtest.h>
 
@@ -25,9 +25,9 @@ namespace
 
     struct EsmLoaderTest : Test
     {
-        const Files::PathContainer mDataDirs {{std::filesystem::path{OPENMW_DATA_DIR}}};
-        const Files::Collections mFileCollections {mDataDirs, true};
-        const std::vector<std::string> mContentFiles {{"template.omwgame"}};
+        const Files::PathContainer mDataDirs{ { std::filesystem::path{ OPENMW_DATA_DIR } } };
+        const Files::Collections mFileCollections{ mDataDirs, true };
+        const std::vector<std::string> mContentFiles{ { "template.omwgame" } };
     };
 
     TEST_F(EsmLoaderTest, loadEsmDataShouldSupportOmwgame)
@@ -121,7 +121,7 @@ namespace
         query.mLoadGameSettings = true;
         query.mLoadLands = true;
         query.mLoadStatics = true;
-        const std::vector<std::string> contentFiles {{"script.omwscripts"}};
+        const std::vector<std::string> contentFiles{ { "script.omwscripts" } };
         ESM::ReadersCache readers;
         ToUTF8::Utf8Encoder* const encoder = nullptr;
         const EsmData esmData = loadEsmData(query, contentFiles, mFileCollections, readers, encoder);

@@ -1,27 +1,28 @@
 #include "postprocessorhud.hpp"
 
-#include <MyGUI_Window.h>
 #include <MyGUI_Button.h>
-#include <MyGUI_TabItem.h>
-#include <MyGUI_ScrollView.h>
 #include <MyGUI_FactoryManager.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_TabItem.h>
+#include <MyGUI_Window.h>
 
-#include <components/fx/widgets.hpp>
 #include <components/fx/technique.hpp>
+#include <components/fx/widgets.hpp>
 
 #include <components/widgets/box.hpp>
 
 #include "../mwrender/postprocessor.hpp"
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWGui
 {
     void PostProcessorHud::ListWrapper::onKeyButtonPressed(MyGUI::KeyCode key, MyGUI::Char ch)
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed() && (key == MyGUI::KeyCode::ArrowUp || key == MyGUI::KeyCode::ArrowDown))
+        if (MyGUI::InputManager::getInstance().isShiftPressed()
+            && (key == MyGUI::KeyCode::ArrowUp || key == MyGUI::KeyCode::ArrowDown))
             return;
 
         MyGUI::ListBox::onKeyButtonPressed(key, ch);
@@ -41,7 +42,8 @@ namespace MWGui
         getWidget(mButtonDown, "ButtonDown");
 
         mButtonActivate->eventMouseButtonClick += MyGUI::newDelegate(this, &PostProcessorHud::notifyActivatePressed);
-        mButtonDeactivate->eventMouseButtonClick += MyGUI::newDelegate(this, &PostProcessorHud::notifyDeactivatePressed);
+        mButtonDeactivate->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &PostProcessorHud::notifyDeactivatePressed);
         mButtonUp->eventMouseButtonClick += MyGUI::newDelegate(this, &PostProcessorHud::notifyShaderUpPressed);
         mButtonDown->eventMouseButtonClick += MyGUI::newDelegate(this, &PostProcessorHud::notifyShaderDownPressed);
 
@@ -53,7 +55,8 @@ namespace MWGui
 
         mFilter->eventEditTextChange += MyGUI::newDelegate(this, &PostProcessorHud::notifyFilterChanged);
 
-        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &PostProcessorHud::notifyWindowResize);
+        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
+            += MyGUI::newDelegate(this, &PostProcessorHud::notifyWindowResize);
 
         mShaderInfo = mConfigLayout->createWidget<Gui::AutoSizedEditBox>("HeaderText", {}, MyGUI::Align::Default);
         mShaderInfo->setUserString("VStretch", "true");
@@ -203,7 +206,8 @@ namespace MWGui
                 select(mActiveList, 0);
             }
         }
-        else if (list == mActiveList && MyGUI::InputManager::getInstance().isShiftPressed() && (key == MyGUI::KeyCode::ArrowUp || key == MyGUI::KeyCode::ArrowDown))
+        else if (list == mActiveList && MyGUI::InputManager::getInstance().isShiftPressed()
+            && (key == MyGUI::KeyCode::ArrowUp || key == MyGUI::KeyCode::ArrowDown))
         {
             moveShader(key == MyGUI::KeyCode::ArrowUp ? Direction::Up : Direction::Down);
         }
@@ -224,19 +228,21 @@ namespace MWGui
     {
         constexpr int padding = 12;
         constexpr int padding2 = padding * 2;
-        mShaderInfo->setCoord(padding, padding, mConfigLayout->getSize().width - padding2 - padding, mShaderInfo->getTextSize().height);
+        mShaderInfo->setCoord(
+            padding, padding, mConfigLayout->getSize().width - padding2 - padding, mShaderInfo->getTextSize().height);
 
         int totalHeight = mShaderInfo->getTop() + mShaderInfo->getTextSize().height + padding;
 
-        mConfigArea->setCoord({padding, totalHeight, mShaderInfo->getSize().width, mConfigLayout->getHeight()});
+        mConfigArea->setCoord({ padding, totalHeight, mShaderInfo->getSize().width, mConfigLayout->getHeight() });
 
         int childHeights = 0;
-		MyGUI::EnumeratorWidgetPtr enumerator = mConfigArea->getEnumerator();
-		while (enumerator.next())
-		{
-			enumerator.current()->setCoord(padding, childHeights + padding, mShaderInfo->getSize().width - padding2, enumerator.current()->getHeight());
+        MyGUI::EnumeratorWidgetPtr enumerator = mConfigArea->getEnumerator();
+        while (enumerator.next())
+        {
+            enumerator.current()->setCoord(padding, childHeights + padding, mShaderInfo->getSize().width - padding2,
+                enumerator.current()->getHeight());
             childHeights += enumerator.current()->getHeight() + padding;
-		}
+        }
         totalHeight += childHeights;
 
         mConfigArea->setSize(mConfigArea->getWidth(), childHeights);
@@ -245,7 +251,7 @@ namespace MWGui
         mConfigLayout->setSize(mConfigLayout->getWidth(), mConfigLayout->getParentSize().height - padding2);
     }
 
-    void PostProcessorHud::notifyMouseWheel(MyGUI::Widget *sender, int rel)
+    void PostProcessorHud::notifyMouseWheel(MyGUI::Widget* sender, int rel)
     {
         int offset = mConfigLayout->getViewOffset().top + rel * 0.3;
         if (offset > 0)
@@ -298,9 +304,7 @@ namespace MWGui
         std::string_view version = technique->getVersion().empty() ? NA : technique->getVersion();
         std::string_view description = technique->getDescription().empty() ? NA : technique->getDescription();
 
-        auto serializeBool = [](bool value) {
-            return value ? "#{sYes}" : "#{sNo}";
-        };
+        auto serializeBool = [](bool value) { return value ? "#{sYes}" : "#{sNo}"; };
 
         const auto flags = technique->getFlags();
 
@@ -315,19 +319,34 @@ namespace MWGui
             case fx::Technique::Status::Uncompiled:
             {
                 if (technique->getDynamic())
-                    ss  << "#{fontcolourhtml=header}#{PostProcessing:ShaderLocked}:      #{fontcolourhtml=normal} #{PostProcessing:ShaderLockedDescription}" << endl << endl;
-                ss  << "#{fontcolourhtml=header}#{PostProcessing:Author}:      #{fontcolourhtml=normal} " << author << endl << endl
-                    << "#{fontcolourhtml=header}#{PostProcessing:Version}:     #{fontcolourhtml=normal} " << version << endl << endl
-                    << "#{fontcolourhtml=header}#{PostProcessing:Description}: #{fontcolourhtml=normal} " << description << endl << endl
-                    << "#{fontcolourhtml=header}#{PostProcessing:InInteriors}: #{fontcolourhtml=normal} " << flag_interior
-                    << "#{fontcolourhtml=header}   #{PostProcessing:InExteriors}: #{fontcolourhtml=normal} " << flag_exterior
-                    << "#{fontcolourhtml=header}   #{PostProcessing:Underwater}: #{fontcolourhtml=normal} " << flag_underwater
-                    << "#{fontcolourhtml=header}   #{PostProcessing:Abovewater}: #{fontcolourhtml=normal} " << flag_abovewater;
+                    ss << "#{fontcolourhtml=header}#{PostProcessing:ShaderLocked}:      #{fontcolourhtml=normal} "
+                          "#{PostProcessing:ShaderLockedDescription}"
+                       << endl
+                       << endl;
+                ss << "#{fontcolourhtml=header}#{PostProcessing:Author}:      #{fontcolourhtml=normal} " << author
+                   << endl
+                   << endl
+                   << "#{fontcolourhtml=header}#{PostProcessing:Version}:     #{fontcolourhtml=normal} " << version
+                   << endl
+                   << endl
+                   << "#{fontcolourhtml=header}#{PostProcessing:Description}: #{fontcolourhtml=normal} " << description
+                   << endl
+                   << endl
+                   << "#{fontcolourhtml=header}#{PostProcessing:InInteriors}: #{fontcolourhtml=normal} "
+                   << flag_interior
+                   << "#{fontcolourhtml=header}   #{PostProcessing:InExteriors}: #{fontcolourhtml=normal} "
+                   << flag_exterior
+                   << "#{fontcolourhtml=header}   #{PostProcessing:Underwater}: #{fontcolourhtml=normal} "
+                   << flag_underwater
+                   << "#{fontcolourhtml=header}   #{PostProcessing:Abovewater}: #{fontcolourhtml=normal} "
+                   << flag_abovewater;
                 break;
             }
             case fx::Technique::Status::Parse_Error:
-                ss  << "#{fontcolourhtml=negative}Shader Compile Error: #{fontcolourhtml=normal} <" << std::string(technique->getName()) << "> failed to compile." << endl << endl
-                    << technique->getLastError();
+                ss << "#{fontcolourhtml=negative}Shader Compile Error: #{fontcolourhtml=normal} <"
+                   << std::string(technique->getName()) << "> failed to compile." << endl
+                   << endl
+                   << technique->getLastError();
                 break;
             case fx::Technique::Status::File_Not_exists:
                 break;
@@ -339,11 +358,13 @@ namespace MWGui
         {
             if (technique->getUniformMap().size() > 0)
             {
-                MyGUI::Button* resetButton = mConfigArea->createWidget<MyGUI::Button>("MW_Button", {0,0,0,24}, MyGUI::Align::Default);
+                MyGUI::Button* resetButton
+                    = mConfigArea->createWidget<MyGUI::Button>("MW_Button", { 0, 0, 0, 24 }, MyGUI::Align::Default);
                 resetButton->setCaptionWithReplacing("#{PostProcessing:ResetShader}");
                 resetButton->setTextAlign(MyGUI::Align::Center);
                 resetButton->eventMouseWheel += MyGUI::newDelegate(this, &PostProcessorHud::notifyMouseWheel);
-                resetButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PostProcessorHud::notifyResetButtonClicked);
+                resetButton->eventMouseButtonClick
+                    += MyGUI::newDelegate(this, &PostProcessorHud::notifyResetButtonClicked);
             }
 
             for (const auto& uniform : technique->getUniformMap())
@@ -353,12 +374,14 @@ namespace MWGui
 
                 if (!uniform->mHeader.empty())
                 {
-                    Gui::AutoSizedTextBox* divider = mConfigArea->createWidget<Gui::AutoSizedTextBox>("MW_UniformGroup", {0,0,0,34}, MyGUI::Align::Default);
+                    Gui::AutoSizedTextBox* divider = mConfigArea->createWidget<Gui::AutoSizedTextBox>(
+                        "MW_UniformGroup", { 0, 0, 0, 34 }, MyGUI::Align::Default);
                     divider->setNeedMouseFocus(false);
                     divider->setCaptionWithReplacing(uniform->mHeader);
                 }
 
-                fx::Widgets::UniformBase* uwidget = mConfigArea->createWidget<fx::Widgets::UniformBase>("MW_UniformEdit", {0,0,0,22}, MyGUI::Align::Default);
+                fx::Widgets::UniformBase* uwidget = mConfigArea->createWidget<fx::Widgets::UniformBase>(
+                    "MW_UniformEdit", { 0, 0, 0, 22 }, MyGUI::Align::Default);
                 uwidget->init(uniform);
                 uwidget->getLabel()->eventMouseWheel += MyGUI::newDelegate(this, &PostProcessorHud::notifyMouseWheel);
             }
@@ -397,7 +420,8 @@ namespace MWGui
             if (!technique)
                 continue;
 
-            if (!technique->getHidden() && !processor->isTechniqueEnabled(technique) && name.find(mFilter->getCaption()) != std::string::npos)
+            if (!technique->getHidden() && !processor->isTechniqueEnabled(technique)
+                && name.find(mFilter->getCaption()) != std::string::npos)
                 mInactiveList->addItem(name, technique);
         }
 
@@ -407,8 +431,7 @@ namespace MWGui
                 mActiveList->addItem(technique->getName(), technique);
         }
 
-        auto tryFocus = [this](ListWrapper* widget, const std::string& hint)
-        {
+        auto tryFocus = [this](ListWrapper* widget, const std::string& hint) {
             size_t index = widget->findItemIndexWith(hint);
 
             if (index != MyGUI::ITEM_NONE)

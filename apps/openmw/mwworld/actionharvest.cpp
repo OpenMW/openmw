@@ -16,19 +16,19 @@
 
 namespace MWWorld
 {
-    ActionHarvest::ActionHarvest (const MWWorld::Ptr& container)
-        : Action (true, container)
+    ActionHarvest::ActionHarvest(const MWWorld::Ptr& container)
+        : Action(true, container)
     {
         setSound("Item Ingredient Up");
     }
 
-    void ActionHarvest::executeImp (const MWWorld::Ptr& actor)
+    void ActionHarvest::executeImp(const MWWorld::Ptr& actor)
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return;
 
         MWWorld::Ptr target = getTarget();
-        MWWorld::ContainerStore& store = target.getClass().getContainerStore (target);
+        MWWorld::ContainerStore& store = target.getClass().getContainerStore(target);
         store.resolve();
         MWWorld::ContainerStore& actorStore = actor.getClass().getContainerStore(actor);
         std::map<std::string, int> takenMap;
@@ -38,13 +38,14 @@ namespace MWWorld
                 continue;
 
             int itemCount = it->getRefData().getCount();
-            // Note: it is important to check for crime before move an item from container. Otherwise owner check will not work
-            // for a last item in the container - empty harvested containers are considered as "allowed to use".
+            // Note: it is important to check for crime before move an item from container. Otherwise owner check will
+            // not work for a last item in the container - empty harvested containers are considered as "allowed to
+            // use".
             MWBase::Environment::get().getMechanicsManager()->itemTaken(actor, *it, target, itemCount);
             actorStore.add(*it, itemCount, actor);
             store.remove(*it, itemCount, getTarget());
-            std::string name{it->getClass().getName(*it)};
-            takenMap[name]+=itemCount;
+            std::string name{ it->getClass().getName(*it) };
+            takenMap[name] += itemCount;
         }
 
         // Spawn a messagebox (only for items added to player's inventory)
@@ -63,7 +64,8 @@ namespace MWWorld
                 else if (lineCount > maxLines)
                     break;
 
-                // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
+                // The two GMST entries below expand to strings informing the player of what, and how many of it has
+                // been added to their inventory
                 std::string msgBox;
                 if (itemCount == 1)
                 {

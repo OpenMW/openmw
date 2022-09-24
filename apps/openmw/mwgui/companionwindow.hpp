@@ -1,8 +1,8 @@
 #ifndef OPENMW_MWGUI_COMPANIONWINDOW_H
 #define OPENMW_MWGUI_COMPANIONWINDOW_H
 
-#include "windowbase.hpp"
 #include "referenceinterface.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
@@ -27,7 +27,7 @@ namespace MWGui
         void resetReference() override;
 
         void setPtr(const MWWorld::Ptr& npc) override;
-        void onFrame (float dt) override;
+        void onFrame(float dt) override;
         void clear() override { resetReference(); }
 
     private:

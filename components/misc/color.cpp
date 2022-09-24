@@ -1,9 +1,9 @@
 #include "color.hpp"
 
-#include <charconv>
-#include <array>
-#include <sstream>
 #include <algorithm>
+#include <array>
+#include <charconv>
+#include <sstream>
 
 namespace Misc
 {
@@ -12,7 +12,8 @@ namespace Misc
         , mG(std::clamp(g, 0.f, 1.f))
         , mB(std::clamp(b, 0.f, 1.f))
         , mA(std::clamp(a, 0.f, 1.f))
-    {}
+    {
+    }
 
     std::string Color::toString() const
     {

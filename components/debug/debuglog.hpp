@@ -1,8 +1,8 @@
 #ifndef DEBUG_LOG_H
 #define DEBUG_LOG_H
 
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 
 namespace Debug
 {
@@ -28,7 +28,7 @@ public:
     ~Log();
 
     // Perfect forwarding wrappers to give the chain of objects to cout
-    template<typename T>
+    template <typename T>
     Log& operator<<(T&& rhs)
     {
         if (mShouldLog)

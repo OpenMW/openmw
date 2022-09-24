@@ -13,7 +13,7 @@ namespace Misc
         double fullTurns = angle / (2 * osg::PI) + 0.5;
         return (fullTurns - floor(fullTurns) - 0.5) * (2 * osg::PI);
     }
-    
+
     /// Rotates given 2d vector counterclockwise. Angle is in radians.
     inline osg::Vec2f rotateVec2f(osg::Vec2f vec, float angle)
     {

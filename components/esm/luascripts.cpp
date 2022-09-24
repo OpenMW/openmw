@@ -94,8 +94,7 @@ void ESM::LuaScriptsCfg::load(ESMReader& esm)
 
 void ESM::LuaScriptsCfg::adjustRefNums(const ESMReader& esm)
 {
-    auto adjustRefNumFn = [&esm](int contentFile) -> int
-    {
+    auto adjustRefNumFn = [&esm](int contentFile) -> int {
         if (contentFile == 0)
             return esm.getIndex();
         else if (contentFile > 0 && contentFile <= static_cast<int>(esm.getParentFileIndices().size()))
@@ -107,8 +106,7 @@ void ESM::LuaScriptsCfg::adjustRefNums(const ESMReader& esm)
     lua_State* L = luaL_newstate();
     LuaUtil::BasicSerializer serializer(adjustRefNumFn);
 
-    auto adjustLuaData = [&](std::string& data)
-    {
+    auto adjustLuaData = [&](std::string& data) {
         if (data.empty())
             return;
         sol::object luaData = LuaUtil::deserialize(L, data, &serializer);
@@ -177,7 +175,7 @@ void ESM::LuaScripts::load(ESMReader& esm)
             timer.mCallbackArgument = loadLuaBinaryData(esm);
             timers.push_back(std::move(timer));
         }
-        mScripts.push_back({std::move(name), std::move(data), std::move(timers)});
+        mScripts.push_back({ std::move(name), std::move(data), std::move(timers) });
     }
 }
 
@@ -196,7 +194,6 @@ void ESM::LuaScripts::save(ESMWriter& esm) const
             esm.writeHNString("LUAC", timer.mCallbackName);
             if (!timer.mCallbackArgument.empty())
                 saveLuaBinaryData(esm, timer.mCallbackArgument);
-            
         }
     }
 }

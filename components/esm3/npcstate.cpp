@@ -3,40 +3,40 @@
 namespace ESM
 {
 
-void NpcState::load (ESMReader &esm)
-{
-    ObjectState::load (esm);
-
-    if (mHasCustomState)
+    void NpcState::load(ESMReader& esm)
     {
-        mInventory.load (esm);
+        ObjectState::load(esm);
 
-        mNpcStats.load (esm);
+        if (mHasCustomState)
+        {
+            mInventory.load(esm);
 
-        mCreatureStats.load (esm);
+            mNpcStats.load(esm);
+
+            mCreatureStats.load(esm);
+        }
     }
-}
 
-void NpcState::save (ESMWriter &esm, bool inInventory) const
-{
-    ObjectState::save (esm, inInventory);
-
-    if (mHasCustomState)
+    void NpcState::save(ESMWriter& esm, bool inInventory) const
     {
-        mInventory.save (esm);
+        ObjectState::save(esm, inInventory);
 
-        mNpcStats.save (esm);
+        if (mHasCustomState)
+        {
+            mInventory.save(esm);
 
-        mCreatureStats.save (esm);
+            mNpcStats.save(esm);
+
+            mCreatureStats.save(esm);
+        }
     }
-}
 
-void NpcState::blank()
-{
-    ObjectState::blank();
-    mNpcStats.blank();
-    mCreatureStats.blank();
-    mHasCustomState = true;
-}
+    void NpcState::blank()
+    {
+        ObjectState::blank();
+        mNpcStats.blank();
+        mCreatureStats.blank();
+        mHasCustomState = true;
+    }
 
 }

@@ -3,17 +3,16 @@
 
 #include <map>
 
-#include <components/esm3/loadnpc.hpp>
-#include <components/esm3/player.hpp>
+#include <components/esm3/controlsstate.hpp>
 #include <components/esm3/dialoguestate.hpp>
 #include <components/esm3/globalmap.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadnpc.hpp>
-#include <components/esm3/controlsstate.hpp>
+#include <components/esm3/player.hpp>
 
-#include "importnpcc.hpp"
-#include "importcrec.hpp"
 #include "importcntc.hpp"
+#include "importcrec.hpp"
+#include "importnpcc.hpp"
 #include "importsplm.h"
 
 namespace ESSImport
@@ -33,7 +32,7 @@ namespace ESSImport
         ESM::ControlsState mControlsState;
 
         // cells which should show an explored overlay on the global map
-        std::set<std::pair<int, int> > mExploredCells;
+        std::set<std::pair<int, int>> mExploredCells;
 
         ESM::GlobalMap mGlobalMapState;
 
@@ -64,10 +63,8 @@ namespace ESSImport
             playerCellId.mPaged = true;
             playerCellId.mIndex.mX = playerCellId.mIndex.mY = 0;
             mPlayer.mCellId = playerCellId;
-            mPlayer.mLastKnownExteriorPosition[0]
-                = mPlayer.mLastKnownExteriorPosition[1]
-                = mPlayer.mLastKnownExteriorPosition[2]
-                = 0.0f;
+            mPlayer.mLastKnownExteriorPosition[0] = mPlayer.mLastKnownExteriorPosition[1]
+                = mPlayer.mLastKnownExteriorPosition[2] = 0.0f;
             mPlayer.mHasMark = 0;
             mPlayer.mCurrentCrimeId = -1; // TODO
             mPlayer.mPaidCrimeId = -1;
@@ -84,10 +81,7 @@ namespace ESSImport
             mPlayerBase.blank();
         }
 
-        int generateActorId()
-        {
-            return mNextActorId++;
-        }
+        int generateActorId() { return mNextActorId++; }
     };
 
 }

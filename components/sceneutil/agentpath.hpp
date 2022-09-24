@@ -20,8 +20,8 @@ namespace DetourNavigator
 namespace SceneUtil
 {
     osg::ref_ptr<osg::Group> createAgentPathGroup(const std::deque<osg::Vec3f>& path,
-            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
-            const DetourNavigator::RecastSettings& settings);
+        const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
+        const DetourNavigator::RecastSettings& settings);
 }
 
 #endif

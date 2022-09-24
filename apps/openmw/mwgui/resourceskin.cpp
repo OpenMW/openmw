@@ -23,7 +23,7 @@ namespace MWGui
 
         MyGUI::IntCoord coord(0, 0, texture->getWidth(), texture->getHeight());
         MyGUI::xml::ElementEnumerator basis = _node->getElementEnumerator();
-        const std::string textureSize = std::to_string(coord.width) + " " +  std::to_string(coord.height);
+        const std::string textureSize = std::to_string(coord.width) + " " + std::to_string(coord.height);
         _node->addAttribute("size", textureSize);
         while (basis.next())
         {

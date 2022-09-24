@@ -1,23 +1,23 @@
-#include <QString>
 #include <QKeyEvent>
+#include <QString>
 
 #include <QStylePainter>
 
 #include "combobox.hpp"
 
-ContentSelectorView::ComboBox::ComboBox(QWidget *parent) :
-    QComboBox(parent)
+ContentSelectorView::ComboBox::ComboBox(QWidget* parent)
+    : QComboBox(parent)
 {
     mValidator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
     setValidator(mValidator);
     setEditable(true);
     setCompleter(nullptr);
-    setEnabled (true);
+    setEnabled(true);
 
     setInsertPolicy(QComboBox::NoInsert);
 }
 
-void ContentSelectorView::ComboBox::paintEvent(QPaintEvent *)
+void ContentSelectorView::ComboBox::paintEvent(QPaintEvent*)
 {
     QStylePainter painter(this);
     painter.setPen(palette().color(QPalette::Text));
@@ -33,7 +33,7 @@ void ContentSelectorView::ComboBox::paintEvent(QPaintEvent *)
     painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
 }
 
-void ContentSelectorView::ComboBox::setPlaceholderText(const QString &text)
+void ContentSelectorView::ComboBox::setPlaceholderText(const QString& text)
 {
     mPlaceholderText = text;
 }

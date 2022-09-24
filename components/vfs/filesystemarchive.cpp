@@ -11,41 +11,42 @@
 namespace VFS
 {
 
-    FileSystemArchive::FileSystemArchive(const std::filesystem::path &path)
+    FileSystemArchive::FileSystemArchive(const std::filesystem::path& path)
         : mBuiltIndex(false)
         , mPath(path)
     {
-
     }
 
-    void FileSystemArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
+    void FileSystemArchive::listResources(std::map<std::string, File*>& out, char (*normalize_function)(char))
     {
         if (!mBuiltIndex)
         {
             const auto str = mPath.u8string();
-            size_t prefix = str.size ();
+            size_t prefix = str.size();
 
-            if (!mPath.empty() && str [prefix - 1] != '\\' && str [prefix - 1] != '/')
+            if (!mPath.empty() && str[prefix - 1] != '\\' && str[prefix - 1] != '/')
                 ++prefix;
 
-            for (const auto& i :
-                    std::filesystem::recursive_directory_iterator(mPath))
+            for (const auto& i : std::filesystem::recursive_directory_iterator(mPath))
             {
-                if(std::filesystem::is_directory (i))
+                if (std::filesystem::is_directory(i))
                     continue;
 
-                const auto& path = i.path ();
+                const auto& path = i.path();
                 const auto& proper = Files::pathToUnicodeString(path);
 
                 FileSystemArchiveFile file(path);
 
                 std::string searchable;
 
-                std::transform(std::next(proper.begin(), static_cast<std::string::difference_type>(prefix)), proper.end(), std::back_inserter(searchable), normalize_function);
+                std::transform(std::next(proper.begin(), static_cast<std::string::difference_type>(prefix)),
+                    proper.end(), std::back_inserter(searchable), normalize_function);
 
                 const auto inserted = mIndex.insert(std::make_pair(searchable, file));
                 if (!inserted.second)
-                    Log(Debug::Warning) << "Warning: found duplicate file for '" << proper << "', please check your file system for two files with the same name in different cases.";
+                    Log(Debug::Warning)
+                        << "Warning: found duplicate file for '" << proper
+                        << "', please check your file system for two files with the same name in different cases.";
                 else
                     out[inserted.first->first] = &inserted.first->second;
             }
@@ -72,7 +73,7 @@ namespace VFS
 
     // ----------------------------------------------------------------------------------
 
-    FileSystemArchiveFile::FileSystemArchiveFile(const std::filesystem::path &path)
+    FileSystemArchiveFile::FileSystemArchiveFile(const std::filesystem::path& path)
         : mPath(path)
     {
     }

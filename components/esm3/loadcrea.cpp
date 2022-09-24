@@ -8,7 +8,7 @@
 namespace ESM
 {
 
-    void Creature::load(ESMReader &esm, bool &isDeleted)
+    void Creature::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -106,7 +106,7 @@ namespace ESM
             esm.fail("Missing FLAG subrecord");
     }
 
-    void Creature::save(ESMWriter &esm, bool isDeleted) const
+    void Creature::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
@@ -122,7 +122,8 @@ namespace ESM
         esm.writeHNOCString("SCRI", mScript);
         esm.writeHNT("NPDT", mData, 96);
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
-        if (mScale != 1.0) {
+        if (mScale != 1.0)
+        {
             esm.writeHNT("XSCL", mScale);
         }
 
@@ -138,12 +139,13 @@ namespace ESM
         mRecordFlags = 0;
         mData.mType = 0;
         mData.mLevel = 0;
-        mData.mStrength = mData.mIntelligence = mData.mWillpower = mData.mAgility =
-            mData.mSpeed = mData.mEndurance = mData.mPersonality = mData.mLuck = 0;
+        mData.mStrength = mData.mIntelligence = mData.mWillpower = mData.mAgility = mData.mSpeed = mData.mEndurance
+            = mData.mPersonality = mData.mLuck = 0;
         mData.mHealth = mData.mMana = mData.mFatigue = 0;
         mData.mSoul = 0;
         mData.mCombat = mData.mMagic = mData.mStealth = 0;
-        for (int i=0; i<6; ++i) mData.mAttack[i] = 0;
+        for (int i = 0; i < 6; ++i)
+            mData.mAttack[i] = 0;
         mData.mGold = 0;
         mBloodType = 0;
         mFlags = 0;

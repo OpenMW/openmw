@@ -3,9 +3,9 @@
 #include <components/esm3/loadstat.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include "../mwworld/ptr.hpp"
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/ptr.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -20,7 +20,8 @@ namespace MWClass
     {
     }
 
-    void Static::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    void Static::insertObjectRendering(
+        const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty())
         {
@@ -29,17 +30,19 @@ namespace MWClass
         }
     }
 
-    void Static::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
+    void Static::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
+        MWPhysics::PhysicsSystem& physics) const
     {
         insertObjectPhysics(ptr, model, rotation, physics);
     }
 
-    void Static::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const
+    void Static::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
+        MWPhysics::PhysicsSystem& physics) const
     {
         physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string Static::getModel(const MWWorld::ConstPtr &ptr) const
+    std::string Static::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Static>(ptr);
     }
@@ -54,9 +57,9 @@ namespace MWClass
         return false;
     }
 
-    MWWorld::Ptr Static::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Static::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const
     {
-        const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
+        const MWWorld::LiveCellRef<ESM::Static>* ref = ptr.get<ESM::Static>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }

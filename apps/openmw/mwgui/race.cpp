@@ -1,8 +1,8 @@
 #include "race.hpp"
 
-#include <MyGUI_ListBox.h>
-#include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollBar.h>
 
 #include <osg/Texture2D>
@@ -13,11 +13,11 @@
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadrace.hpp>
 
-#include "../mwworld/esmstore.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwrender/characterpreview.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "tooltips.hpp"
 #include "ustring.hpp"
@@ -45,19 +45,20 @@ namespace MWGui
 {
 
     RaceDialog::RaceDialog(osg::Group* parent, Resource::ResourceSystem* resourceSystem)
-      : WindowModal("openmw_chargen_race.layout")
-      , mParent(parent)
-      , mResourceSystem(resourceSystem)
-      , mGenderIndex(0)
-      , mFaceIndex(0)
-      , mHairIndex(0)
-      , mCurrentAngle(0)
-      , mPreviewDirty(true)
+        : WindowModal("openmw_chargen_race.layout")
+        , mParent(parent)
+        , mResourceSystem(resourceSystem)
+        , mGenderIndex(0)
+        , mFaceIndex(0)
+        , mHairIndex(0)
+        , mCurrentAngle(0)
+        , mPreviewDirty(true)
     {
         // Centre dialog
         center();
 
-        setText("AppearanceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu1", "Appearance"));
+        setText("AppearanceT",
+            MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu1", "Appearance"));
         getWidget(mPreviewImage, "PreviewImage");
 
         mPreviewImage->eventMouseWheel += MyGUI::newDelegate(this, &RaceDialog::onPreviewScroll);
@@ -74,19 +75,22 @@ namespace MWGui
         // Set up next/previous buttons
         MyGUI::Button *prevButton, *nextButton;
 
-        setText("GenderChoiceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu2", "Change Sex"));
+        setText("GenderChoiceT",
+            MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu2", "Change Sex"));
         getWidget(prevButton, "PrevGenderButton");
         getWidget(nextButton, "NextGenderButton");
         prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousGender);
         nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextGender);
 
-        setText("FaceChoiceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu3", "Change Face"));
+        setText("FaceChoiceT",
+            MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu3", "Change Face"));
         getWidget(prevButton, "PrevFaceButton");
         getWidget(nextButton, "NextFaceButton");
         prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousFace);
         nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextFace);
 
-        setText("HairChoiceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu4", "Change Hair"));
+        setText("HairChoiceT",
+            MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu4", "Change Hair"));
         getWidget(prevButton, "PrevHairButton");
         getWidget(nextButton, "NextHairButton");
         prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
@@ -98,9 +102,11 @@ namespace MWGui
         mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onAccept);
         mRaceList->eventListChangePosition += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
-        setText("SkillsT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
+        setText("SkillsT",
+            MWBase::Environment::get().getWindowManager()->getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
         getWidget(mSkillList, "SkillList");
-        setText("SpellPowerT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu7", "Specials"));
+        setText("SpellPowerT",
+            MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu7", "Specials"));
         getWidget(mSpellPowerList, "SpellPowerList");
 
         MyGUI::Button* backButton;
@@ -123,9 +129,11 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         if (shown)
-            okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+            okButton->setCaption(
+                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
-            okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+            okButton->setCaption(
+                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     void RaceDialog::onOpen()
@@ -143,9 +151,10 @@ namespace MWGui
 
         mPreview = std::make_unique<MWRender::RaceSelectionPreview>(mParent, mResourceSystem);
         mPreview->rebuild();
-        mPreview->setAngle (mCurrentAngle);
+        mPreview->setAngle(mCurrentAngle);
 
-        mPreviewTexture = std::make_unique<osgMyGUI::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
+        mPreviewTexture
+            = std::make_unique<osgMyGUI::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
         mPreviewImage->setRenderItemTexture(mPreviewTexture.get());
         mPreviewImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 
@@ -154,13 +163,13 @@ namespace MWGui
         setGender(proto.isMale() ? GM_Male : GM_Female);
         recountParts();
 
-        for (unsigned int i=0; i<mAvailableHeads.size(); ++i)
+        for (unsigned int i = 0; i < mAvailableHeads.size(); ++i)
         {
             if (Misc::StringUtils::ciEqual(mAvailableHeads[i], proto.mHead))
                 mFaceIndex = i;
         }
 
-        for (unsigned int i=0; i<mAvailableHairs.size(); ++i)
+        for (unsigned int i = 0; i < mAvailableHairs.size(); ++i)
         {
             if (Misc::StringUtils::ciEqual(mAvailableHairs[i], proto.mHair))
                 mHairIndex = i;
@@ -168,14 +177,14 @@ namespace MWGui
 
         mPreviewDirty = true;
 
-        size_t initialPos = mHeadRotate->getScrollRange()/2+mHeadRotate->getScrollRange()/10;
+        size_t initialPos = mHeadRotate->getScrollRange() / 2 + mHeadRotate->getScrollRange() / 10;
         mHeadRotate->setScrollPosition(initialPos);
         onHeadRotate(mHeadRotate, initialPos);
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mRaceList);
     }
 
-    void RaceDialog::setRaceId(const std::string &raceId)
+    void RaceDialog::setRaceId(const std::string& raceId)
     {
         mCurrentRaceId = raceId;
         mRaceList->setIndexSelected(MyGUI::ITEM_NONE);
@@ -207,7 +216,7 @@ namespace MWGui
 
     void RaceDialog::onOkClicked(MyGUI::Widget* _sender)
     {
-        if(mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
+        if (mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
             return;
         eventDone(this);
     }
@@ -232,8 +241,8 @@ namespace MWGui
 
     void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
-        float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5f) * osg::PI * 2;
-        mPreview->setAngle (angle);
+        float angle = (float(_position) / (scroll->getScrollRange() - 1) - 0.5f) * osg::PI * 2;
+        mPreview->setAngle(angle);
 
         mCurrentAngle = angle;
     }
@@ -283,7 +292,7 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
+        const std::string* raceId = mRaceList->getItemDataAt<std::string>(_index);
         if (Misc::StringUtils::ciEqual(mCurrentRaceId, *raceId))
             return;
 
@@ -296,19 +305,19 @@ namespace MWGui
         updateSpellPowers();
     }
 
-    void RaceDialog::onAccept(MyGUI::ListBox *_sender, size_t _index)
+    void RaceDialog::onAccept(MyGUI::ListBox* _sender, size_t _index)
     {
         onSelectRace(_sender, _index);
-        if(mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
+        if (mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
             return;
         eventDone(this);
     }
 
-    void RaceDialog::getBodyParts (int part, std::vector<std::string>& out)
+    void RaceDialog::getBodyParts(int part, std::vector<std::string>& out)
     {
         out.clear();
-        const MWWorld::Store<ESM::BodyPart> &store =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+        const MWWorld::Store<ESM::BodyPart>& store
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
 
         for (const ESM::BodyPart& bodypart : store)
         {
@@ -320,10 +329,8 @@ namespace MWGui
                 continue;
             if (mGenderIndex != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                 continue;
-            bool firstPerson = (bodypart.mId.size() >= 3)
-                    && bodypart.mId[bodypart.mId.size()-3] == '1'
-                    && bodypart.mId[bodypart.mId.size()-2] == 's'
-                    && bodypart.mId[bodypart.mId.size()-1] == 't';
+            bool firstPerson = (bodypart.mId.size() >= 3) && bodypart.mId[bodypart.mId.size() - 3] == '1'
+                && bodypart.mId[bodypart.mId.size() - 2] == 's' && bodypart.mId[bodypart.mId.size() - 1] == 't';
             if (firstPerson)
                 continue;
             if (Misc::StringUtils::ciEqual(bodypart.mRace, mCurrentRaceId))
@@ -368,10 +375,9 @@ namespace MWGui
     {
         mRaceList->removeAllItems();
 
-        const MWWorld::Store<ESM::Race> &races =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
+        const MWWorld::Store<ESM::Race>& races = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
 
-        std::vector<std::pair<std::string, std::string> > items; // ID, name
+        std::vector<std::pair<std::string, std::string>> items; // ID, name
         for (const ESM::Race& race : races)
         {
             bool playable = race.mData.mFlags & ESM::Race::Playable;
@@ -407,21 +413,22 @@ namespace MWGui
         const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
         MyGUI::IntCoord coord1(0, 0, mSkillList->getWidth(), 18);
 
-        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
-        int count = sizeof(race->mData.mBonus)/sizeof(race->mData.mBonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
+        int count = sizeof(race->mData.mBonus)
+            / sizeof(race->mData.mBonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
         for (int i = 0; i < count; ++i)
         {
             int skillId = race->mData.mBonus[i].mSkill;
             if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
                 continue;
 
-            skillWidget = mSkillList->createWidget<Widgets::MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default,
-                                                           std::string("Skill") + MyGUI::utility::toString(i));
+            skillWidget = mSkillList->createWidget<Widgets::MWSkill>(
+                "MW_StatNameValue", coord1, MyGUI::Align::Default, std::string("Skill") + MyGUI::utility::toString(i));
             skillWidget->setSkillNumber(skillId);
-            skillWidget->setSkillValue(Widgets::MWSkill::SkillValue(static_cast<float>(race->mData.mBonus[i].mBonus), 0.f));
+            skillWidget->setSkillValue(
+                Widgets::MWSkill::SkillValue(static_cast<float>(race->mData.mBonus[i].mBonus), 0.f));
             ToolTips::createSkillToolTip(skillWidget, skillId);
-
 
             mSkillItems.push_back(skillWidget);
 
@@ -443,13 +450,14 @@ namespace MWGui
         const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
         MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), lineHeight);
 
-        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
 
         int i = 0;
         for (const std::string& spellpower : race->mPowers.mList)
         {
-            Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + MyGUI::utility::toString(i));
+            Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>(
+                "MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + MyGUI::utility::toString(i));
             spellPowerWidget->setSpellId(spellpower);
             spellPowerWidget->setUserString("ToolTipType", "Spell");
             spellPowerWidget->setUserString("Spell", spellpower);

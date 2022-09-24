@@ -14,12 +14,12 @@ namespace MWGui
     /// @brief A widget that shows an icon for an MWWorld::Ptr
     class ItemWidget : public MyGUI::Widget
     {
-    MYGUI_RTTI_DERIVED(ItemWidget)
+        MYGUI_RTTI_DERIVED(ItemWidget)
     public:
         ItemWidget();
 
         /// Register needed components with MyGUI's factory manager
-        static void registerComponents ();
+        static void registerComponents();
 
         enum ItemState
         {
@@ -33,12 +33,12 @@ namespace MWGui
         void setCount(int count);
 
         /// \a ptr may be empty
-        void setItem (const MWWorld::Ptr& ptr, ItemState state = None);
+        void setItem(const MWWorld::Ptr& ptr, ItemState state = None);
 
         // Set icon and frame manually
-        void setIcon (const std::string& icon);
-        void setIcon (const MWWorld::Ptr& ptr);
-        void setFrame (const std::string& frame, const MyGUI::IntCoord& coord);
+        void setIcon(const std::string& icon);
+        void setIcon(const MWWorld::Ptr& ptr);
+        void setFrame(const std::string& frame, const MyGUI::IntCoord& coord);
 
     protected:
         void initialiseOverride() override;
@@ -56,10 +56,9 @@ namespace MWGui
 
     class SpellWidget : public ItemWidget
     {
-    MYGUI_RTTI_DERIVED(SpellWidget)
+        MYGUI_RTTI_DERIVED(SpellWidget)
     public:
-
-        void setSpellIcon (const std::string& icon);
+        void setSpellIcon(const std::string& icon);
     };
 
 }

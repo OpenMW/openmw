@@ -3,10 +3,10 @@
 #include <components/lua/utilpackage.hpp>
 #include <components/settings/settings.hpp>
 
-#include "../mwrender/camera.hpp"
-#include "../mwrender/renderingmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwrender/camera.hpp"
+#include "../mwrender/renderingmanager.hpp"
 
 namespace MWLua
 {
@@ -19,25 +19,19 @@ namespace MWLua
         MWRender::RenderingManager* renderingManager = MWBase::Environment::get().getWorld()->getRenderingManager();
 
         sol::table api(context.mLua->sol(), sol::create);
-        api["MODE"] = LuaUtil::makeStrictReadOnly(context.mLua->sol().create_table_with(
-            "Static", CameraMode::Static,
-            "FirstPerson", CameraMode::FirstPerson,
-            "ThirdPerson", CameraMode::ThirdPerson,
-            "Vanity", CameraMode::Vanity,
-            "Preview", CameraMode::Preview
-        ));
+        api["MODE"] = LuaUtil::makeStrictReadOnly(
+            context.mLua->sol().create_table_with("Static", CameraMode::Static, "FirstPerson", CameraMode::FirstPerson,
+                "ThirdPerson", CameraMode::ThirdPerson, "Vanity", CameraMode::Vanity, "Preview", CameraMode::Preview));
 
         api["getMode"] = [camera]() -> int { return static_cast<int>(camera->getMode()); };
-        api["getQueuedMode"] = [camera]() -> sol::optional<int>
-        {
+        api["getQueuedMode"] = [camera]() -> sol::optional<int> {
             std::optional<CameraMode> mode = camera->getQueuedMode();
             if (mode)
                 return static_cast<int>(*mode);
             else
                 return sol::nullopt;
         };
-        api["setMode"] = [camera](int mode, sol::optional<bool> force)
-        {
+        api["setMode"] = [camera](int mode, sol::optional<bool> force) {
             camera->setMode(static_cast<CameraMode>(mode), force ? *force : false);
         };
 
@@ -54,14 +48,12 @@ namespace MWLua
         api["getRoll"] = [camera]() { return -camera->getRoll(); };
 
         api["setStaticPosition"] = [camera](const osg::Vec3f& pos) { camera->setStaticPosition(pos); };
-        api["setPitch"] = [camera](float v)
-        {
+        api["setPitch"] = [camera](float v) {
             camera->setPitch(-v, true);
             if (camera->getMode() == CameraMode::ThirdPerson)
                 camera->calculateDeferredRotation();
         };
-        api["setYaw"] = [camera](float v)
-        {
+        api["setYaw"] = [camera](float v) {
             camera->setYaw(-v, true);
             if (camera->getMode() == CameraMode::ThirdPerson)
                 camera->calculateDeferredRotation();
@@ -89,24 +81,23 @@ namespace MWLua
         api["getCollisionType"] = [camera]() { return camera->getCollisionType(); };
         api["setCollisionType"] = [camera](int collisionType) { camera->setCollisionType(collisionType); };
 
-        api["getBaseFieldOfView"] = []()
-        {
-            return osg::DegreesToRadians(std::clamp(Settings::Manager::getFloat("field of view", "Camera"), 1.f, 179.f));
+        api["getBaseFieldOfView"] = []() {
+            return osg::DegreesToRadians(
+                std::clamp(Settings::Manager::getFloat("field of view", "Camera"), 1.f, 179.f));
         };
-        api["getFieldOfView"] = [renderingManager]() { return osg::DegreesToRadians(renderingManager->getFieldOfView()); };
-        api["setFieldOfView"] = [renderingManager](float v) { renderingManager->setFieldOfView(osg::RadiansToDegrees(v)); };
+        api["getFieldOfView"]
+            = [renderingManager]() { return osg::DegreesToRadians(renderingManager->getFieldOfView()); };
+        api["setFieldOfView"]
+            = [renderingManager](float v) { renderingManager->setFieldOfView(osg::RadiansToDegrees(v)); };
 
-        api["getBaseViewDistance"] = []()
-        {
-            return std::max(0.f, Settings::Manager::getFloat("viewing distance", "Camera"));
-        };
+        api["getBaseViewDistance"]
+            = []() { return std::max(0.f, Settings::Manager::getFloat("viewing distance", "Camera")); };
         api["getViewDistance"] = [renderingManager]() { return renderingManager->getViewDistance(); };
         api["setViewDistance"] = [renderingManager](float d) { renderingManager->setViewDistance(d, true); };
 
-        api["getViewTransform"] = [camera]() { return LuaUtil::TransformM{camera->getViewMatrix()}; };
+        api["getViewTransform"] = [camera]() { return LuaUtil::TransformM{ camera->getViewMatrix() }; };
 
-        api["viewportToWorldVector"] = [camera, renderingManager](osg::Vec2f pos) -> osg::Vec3f
-        {
+        api["viewportToWorldVector"] = [camera, renderingManager](osg::Vec2f pos) -> osg::Vec3f {
             double width = Settings::Manager::getInt("resolution x", "Video");
             double height = Settings::Manager::getInt("resolution y", "Video");
             double aspect = (height == 0.0) ? 1.0 : width / height;

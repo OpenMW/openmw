@@ -7,74 +7,76 @@ namespace MWClass
 {
     class Light : public MWWorld::RegisteredClass<Light>
     {
-            friend MWWorld::RegisteredClass<Light>;
+        friend MWWorld::RegisteredClass<Light>;
 
-            Light();
+        Light();
 
-            MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
+        MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const override;
 
-        public:
+    public:
+        void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
+            MWRender::RenderingInterface& renderingInterface) const override;
+        ///< Add reference into a cell for rendering
 
-            void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
-            ///< Add reference into a cell for rendering
+        void insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
+            MWPhysics::PhysicsSystem& physics) const override;
+        void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
+            MWPhysics::PhysicsSystem& physics) const override;
 
-            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
-            void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics) const override;
+        bool useAnim() const override;
 
-            bool useAnim() const override;
+        std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
+        ///< \return name or ID; can return an empty string.
 
-            std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
-            ///< \return name or ID; can return an empty string.
+        bool hasToolTip(const MWWorld::ConstPtr& ptr) const override;
+        ///< @return true if this object has a tooltip when focused (default implementation: true)
 
-            bool hasToolTip (const MWWorld::ConstPtr& ptr) const override;
-            ///< @return true if this object has a tooltip when focused (default implementation: true)
+        MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override;
+        ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const override;
-            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
+        bool showsInInventory(const MWWorld::ConstPtr& ptr) const override;
 
-            bool showsInInventory (const MWWorld::ConstPtr& ptr) const override;
+        std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
+        ///< Generate action for activation
 
-            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
-                const MWWorld::Ptr& actor) const override;
-            ///< Generate action for activation
+        std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return name of the script attached to ptr
 
-            std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return name of the script attached to ptr
+        std::pair<std::vector<int>, bool> getEquipmentSlots(const MWWorld::ConstPtr& ptr) const override;
+        ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
+        /// stay stacked when equipped?
 
-            std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::ConstPtr& ptr) const override;
-            ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
-            /// stay stacked when equipped?
+        int getValue(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            int getValue (const MWWorld::ConstPtr& ptr) const override;
-            ///< Return trade value of the object. Throws an exception, if the object can't be traded.
+        std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return the pick up sound Id
 
-            std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return the pick up sound Id
+        std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return the put down sound Id
 
-            std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return the put down sound Id
+        const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return name of inventory icon.
 
-            const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return name of inventory icon.
+        std::unique_ptr<MWWorld::Action> use(const MWWorld::Ptr& ptr, bool force = false) const override;
+        ///< Generate action for using via inventory menu
 
-            std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
-            ///< Generate action for using via inventory menu
+        void setRemainingUsageTime(const MWWorld::Ptr& ptr, float duration) const override;
+        ///< Sets the remaining duration of the object.
 
-            void setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const override;
-            ///< Sets the remaining duration of the object.
+        float getRemainingUsageTime(const MWWorld::ConstPtr& ptr) const override;
+        ///< Returns the remaining duration of the object.
 
-            float getRemainingUsageTime (const MWWorld::ConstPtr& ptr) const override;
-            ///< Returns the remaining duration of the object.
+        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
 
-            std::string getModel(const MWWorld::ConstPtr &ptr) const override;
+        float getWeight(const MWWorld::ConstPtr& ptr) const override;
 
-            float getWeight (const MWWorld::ConstPtr& ptr) const override;
+        bool canSell(const MWWorld::ConstPtr& item, int npcServices) const override;
 
-            bool canSell (const MWWorld::ConstPtr& item, int npcServices) const override;
+        std::pair<int, std::string_view> canBeEquipped(
+            const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
 
-            std::pair<int, std::string_view> canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
-
-            std::string_view getSound(const MWWorld::ConstPtr& ptr) const override;
+        std::string_view getSound(const MWWorld::ConstPtr& ptr) const override;
     };
 }
 

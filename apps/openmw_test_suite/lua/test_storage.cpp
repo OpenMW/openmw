@@ -22,16 +22,14 @@ namespace
         LuaUtil::LuaStorage storage(mLua);
 
         std::vector<std::string> callbackCalls;
-        LuaUtil::Callback callback{
-            sol::make_object(mLua, [&](const std::string& section, const sol::optional<std::string>& key)
-            {
-                if (key)
-                    callbackCalls.push_back(section + "_" + *key);
-                else
-                    callbackCalls.push_back(section + "_*");
-            }),
-            sol::table(mLua, sol::create)
-        };
+        LuaUtil::Callback callback{ sol::make_object(mLua,
+                                        [&](const std::string& section, const sol::optional<std::string>& key) {
+                                            if (key)
+                                                callbackCalls.push_back(section + "_" + *key);
+                                            else
+                                                callbackCalls.push_back(section + "_*");
+                                        }),
+            sol::table(mLua, sol::create) };
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = "fakeId";
 
         mLua["mutable"] = storage.getMutableSection("test");

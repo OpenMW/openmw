@@ -14,20 +14,17 @@ namespace Launcher
         Q_OBJECT
 
     public:
+        explicit TextInputDialog(const QString& title, const QString& text, QWidget* parent = nullptr);
+        ~TextInputDialog() override;
 
-        explicit TextInputDialog(const QString& title, const QString &text, QWidget *parent = nullptr);
-        ~TextInputDialog () override;
-
-        inline LineEdit *lineEdit() { return mLineEdit; }
+        inline LineEdit* lineEdit() { return mLineEdit; }
         void setOkButtonEnabled(bool enabled);
 
         int exec() override;
 
     private:
-
-        QDialogButtonBox *mButtonBox;
-        LineEdit *mLineEdit;
-
+        QDialogButtonBox* mButtonBox;
+        LineEdit* mLineEdit;
     };
 }
 

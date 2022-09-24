@@ -8,11 +8,11 @@ namespace MWWorld
 {
     class ActionHarvest : public Action
     {
-            void executeImp (const MWWorld::Ptr& actor) override;
+        void executeImp(const MWWorld::Ptr& actor) override;
 
-        public:
-            ActionHarvest (const Ptr& container);
-            ///< \param container The Container the Player has activated.
+    public:
+        ActionHarvest(const Ptr& container);
+        ///< \param container The Container the Player has activated.
     };
 }
 

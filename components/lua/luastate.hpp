@@ -72,17 +72,16 @@ namespace LuaUtil
         //     packages: additional packages that should be available from the sandbox via `require`. Each package
         //         should be either a sol::table or a sol::function. If it is a function, it will be evaluated
         //         (once per sandbox) with the argument 'hiddenData' the first time when requested.
-        sol::protected_function_result runInNewSandbox(const std::string& path,
-                                                       const std::string& namePrefix = "",
-                                                       const std::map<std::string, sol::object>& packages = {},
-                                                       const sol::object& hiddenData = sol::nil);
+        sol::protected_function_result runInNewSandbox(const std::string& path, const std::string& namePrefix = "",
+            const std::map<std::string, sol::object>& packages = {}, const sol::object& hiddenData = sol::nil);
 
         void dropScriptCache() { mCompiledScripts.clear(); }
 
         const ScriptsConfiguration& getConfiguration() const { return *mConf; }
 
-        // Load internal Lua library. All libraries are loaded in one sandbox and shouldn't be exposed to scripts directly.
-        void addInternalLibSearchPath(const std::filesystem::path &path) { mLibSearchPaths.push_back(path); }
+        // Load internal Lua library. All libraries are loaded in one sandbox and shouldn't be exposed to scripts
+        // directly.
+        void addInternalLibSearchPath(const std::filesystem::path& path) { mLibSearchPaths.push_back(path); }
         sol::function loadInternalLib(std::string_view libName);
         sol::function loadFromVFS(const std::string& path);
         sol::environment newInternalLibEnvironment();
@@ -112,8 +111,14 @@ namespace LuaUtil
         {
             return LuaState::throwIfError(fn(std::forward<Args>(args)...));
         }
-        catch (std::exception&) { throw; }
-        catch (...) { throw std::runtime_error("Unknown error"); }
+        catch (std::exception&)
+        {
+            throw;
+        }
+        catch (...)
+        {
+            throw std::runtime_error("Unknown error");
+        }
     }
 
     // getFieldOrNil(table, "a", "b", "c") returns table["a"]["b"]["c"] or nil if some of the fields doesn't exist.
@@ -146,7 +151,10 @@ namespace LuaUtil
     // Needed to forbid any changes in common resources that can be accessed from different sandboxes.
     // `strictIndex = true` replaces default `__index` with a strict version that throws an error if key is not found.
     sol::table makeReadOnly(const sol::table&, bool strictIndex = false);
-    inline sol::table makeStrictReadOnly(const sol::table& tbl) { return makeReadOnly(tbl, true); }
+    inline sol::table makeStrictReadOnly(const sol::table& tbl)
+    {
+        return makeReadOnly(tbl, true);
+    }
     sol::table getMutableFromReadOnly(const sol::userdata&);
 
 }

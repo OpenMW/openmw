@@ -6,8 +6,8 @@
 #include <memory>
 
 #include <osg/Object>
-#include <osg/ref_ptr>
 #include <osg/Vec3f>
+#include <osg/ref_ptr>
 
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 
@@ -45,8 +45,8 @@ namespace Resource
         CollisionShapePtr mCollisionShape;
         CollisionShapePtr mAvoidCollisionShape;
 
-        // Used for actors and projectiles. mCollisionShape is used for actors only when we need to autogenerate collision box for creatures.
-        // For now, use one file <-> one resource for simplicity.
+        // Used for actors and projectiles. mCollisionShape is used for actors only when we need to autogenerate
+        // collision box for creatures. For now, use one file <-> one resource for simplicity.
         CollisionBox mCollisionBox;
 
         // Stores animated collision shapes. If any collision nodes in the NIF are animated, then mCollisionShape
@@ -70,9 +70,9 @@ namespace Resource
         bool isAnimated() const { return !mAnimatedShapes.empty(); }
     };
 
-
     // An instance of a BulletShape that may have its own unique scaling set on the mCollisionShape.
-    // Vertex data is shallow-copied where possible. A ref_ptr to the original shape is held to keep vertex pointers intact.
+    // Vertex data is shallow-copied where possible. A ref_ptr to the original shape is held to keep vertex pointers
+    // intact.
     class BulletShapeInstance : public BulletShape
     {
     public:
@@ -89,7 +89,8 @@ namespace Resource
     // Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
     struct TriangleMeshShape : public btBvhTriangleMeshShape
     {
-        TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression, bool buildBvh = true)
+        TriangleMeshShape(
+            btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression, bool buildBvh = true)
             : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression, buildBvh)
         {
         }
@@ -100,7 +101,6 @@ namespace Resource
             delete m_meshInterface;
         }
     };
-
 
 }
 

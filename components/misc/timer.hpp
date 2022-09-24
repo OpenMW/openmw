@@ -13,29 +13,32 @@ namespace Misc
 
     class DeviatingPeriodicTimer
     {
-        public:
-            explicit DeviatingPeriodicTimer(float period, float deviation, float timeLeft)
-                : mPeriod(period), mDeviation(deviation), mTimeLeft(timeLeft)
-            {}
+    public:
+        explicit DeviatingPeriodicTimer(float period, float deviation, float timeLeft)
+            : mPeriod(period)
+            , mDeviation(deviation)
+            , mTimeLeft(timeLeft)
+        {
+        }
 
-            TimerStatus update(float duration, Rng::Generator& prng)
+        TimerStatus update(float duration, Rng::Generator& prng)
+        {
+            if (mTimeLeft > 0)
             {
-                if (mTimeLeft > 0)
-                {
-                    mTimeLeft -= duration;
-                    return TimerStatus::Waiting;
-                }
-
-                mTimeLeft = Rng::deviate(mPeriod, mDeviation, prng);
-                return TimerStatus::Elapsed;
+                mTimeLeft -= duration;
+                return TimerStatus::Waiting;
             }
 
-            void reset(float timeLeft) { mTimeLeft = timeLeft; }
+            mTimeLeft = Rng::deviate(mPeriod, mDeviation, prng);
+            return TimerStatus::Elapsed;
+        }
 
-        private:
-            const float mPeriod;
-            const float mDeviation;
-            float mTimeLeft;
+        void reset(float timeLeft) { mTimeLeft = timeLeft; }
+
+    private:
+        const float mPeriod;
+        const float mDeviation;
+        float mTimeLeft;
     };
 }
 

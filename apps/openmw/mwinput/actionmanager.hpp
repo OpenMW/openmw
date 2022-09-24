@@ -17,11 +17,9 @@ namespace MWInput
     class ActionManager
     {
     public:
-
         ActionManager(BindingsManager* bindingsManager,
             osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
-            osg::ref_ptr<osgViewer::Viewer> viewer,
-            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler);
+            osg::ref_ptr<osgViewer::Viewer> viewer, osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler);
 
         void update(float dt, bool triedToMove);
 
@@ -44,7 +42,7 @@ namespace MWInput
         void quickLoad();
         void quickSave();
 
-        void quickKey (int index);
+        void quickKey(int index);
         void showQuickKeysMenu();
 
         void resetIdleTime();

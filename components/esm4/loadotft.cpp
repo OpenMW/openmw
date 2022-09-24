@@ -36,14 +36,16 @@ void ESM4::Outfit::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId);  break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
             case ESM4::SUB_INAM:
             {
                 std::size_t numObj = subHdr.dataSize / sizeof(FormId);
@@ -58,18 +60,18 @@ void ESM4::Outfit::load(ESM4::Reader& reader)
                 break;
             }
             default:
-                //std::cout << "OTFT " << ESM::printName(subHdr.typeId) << " skipping..."
-                          //<< subHdr.dataSize << std::endl;
-                //reader.skipSubRecordData();
+                // std::cout << "OTFT " << ESM::printName(subHdr.typeId) << " skipping..."
+                //<< subHdr.dataSize << std::endl;
+                // reader.skipSubRecordData();
                 throw std::runtime_error("ESM4::OTFT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }
 
-//void ESM4::Outfit::save(ESM4::Writer& writer) const
+// void ESM4::Outfit::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Outfit::blank()
+// void ESM4::Outfit::blank()
 //{
-//}
+// }

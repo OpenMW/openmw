@@ -37,7 +37,7 @@ namespace Files
     };
 
     /// @brief A variant of std::istream that reads from a constant in-memory buffer.
-    struct IMemStream: virtual MemBuf, std::istream
+    struct IMemStream : virtual MemBuf, std::istream
     {
         IMemStream(char const* buffer, size_t size)
             : MemBuf(buffer, size)

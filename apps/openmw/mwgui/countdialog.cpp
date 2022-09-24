@@ -1,8 +1,8 @@
 #include "countdialog.hpp"
 
 #include <MyGUI_Button.h>
-#include <MyGUI_ScrollBar.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_ScrollBar.h>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -11,8 +11,8 @@
 
 namespace MWGui
 {
-    CountDialog::CountDialog() :
-        WindowModal("openmw_count_window.layout")
+    CountDialog::CountDialog()
+        : WindowModal("openmw_count_window.layout")
     {
         getWidget(mSlider, "CountSlider");
         getWidget(mItemEdit, "ItemEdit");
@@ -41,15 +41,13 @@ namespace MWGui
         mItemText->setCaption(item);
 
         int width = std::max(mItemText->getTextSize().width + 128, 320);
-        setCoord(viewSize.width/2 - width/2,
-                viewSize.height/2 - mMainWidget->getHeight()/2,
-                width,
-                mMainWidget->getHeight());
+        setCoord(viewSize.width / 2 - width / 2, viewSize.height / 2 - mMainWidget->getHeight() / 2, width,
+            mMainWidget->getHeight());
 
         // by default, the text edit field has the focus of the keyboard
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mItemEdit);
 
-        mSlider->setScrollPosition(maxCount-1);
+        mSlider->setScrollPosition(maxCount - 1);
 
         mItemEdit->setMinValue(1);
         mItemEdit->setMaxValue(maxCount);
@@ -63,7 +61,7 @@ namespace MWGui
 
     void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        eventOkClicked(nullptr, mSlider->getScrollPosition()+1);
+        eventOkClicked(nullptr, mSlider->getScrollPosition() + 1);
 
         setVisible(false);
     }
@@ -72,7 +70,7 @@ namespace MWGui
     // Enter key
     void CountDialog::onEnterKeyPressed(MyGUI::EditBox* _sender)
     {
-        eventOkClicked(nullptr, mSlider->getScrollPosition()+1);
+        eventOkClicked(nullptr, mSlider->getScrollPosition() + 1);
         setVisible(false);
 
         // To do not spam onEnterKeyPressed() again and again
@@ -81,11 +79,11 @@ namespace MWGui
 
     void CountDialog::onEditValueChanged(int value)
     {
-        mSlider->setScrollPosition(value-1);
+        mSlider->setScrollPosition(value - 1);
     }
 
     void CountDialog::onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position)
     {
-        mItemEdit->setValue(_position+1);
+        mItemEdit->setValue(_position + 1);
     }
 }

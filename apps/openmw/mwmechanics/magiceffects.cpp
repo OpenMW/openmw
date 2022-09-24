@@ -17,35 +17,38 @@ namespace
 
 namespace MWMechanics
 {
-    EffectKey::EffectKey() : mId (0), mArg (-1) {}
+    EffectKey::EffectKey()
+        : mId(0)
+        , mArg(-1)
+    {
+    }
 
-    EffectKey::EffectKey (const ESM::ENAMstruct& effect)
+    EffectKey::EffectKey(const ESM::ENAMstruct& effect)
     {
         mId = effect.mEffectID;
         mArg = -1;
 
-        if (effect.mSkill!=-1)
+        if (effect.mSkill != -1)
             mArg = effect.mSkill;
 
-        if (effect.mAttribute!=-1)
+        if (effect.mAttribute != -1)
         {
-            if (mArg!=-1)
-                throw std::runtime_error (
-                    "magic effect can't have both a skill and an attribute argument");
+            if (mArg != -1)
+                throw std::runtime_error("magic effect can't have both a skill and an attribute argument");
 
             mArg = effect.mAttribute;
         }
     }
 
-    bool operator< (const EffectKey& left, const EffectKey& right)
+    bool operator<(const EffectKey& left, const EffectKey& right)
     {
-        if (left.mId<right.mId)
+        if (left.mId < right.mId)
             return true;
 
-        if (left.mId>right.mId)
+        if (left.mId > right.mId)
             return false;
 
-        return left.mArg<right.mArg;
+        return left.mArg < right.mArg;
     }
 
     float EffectParam::getMagnitude() const
@@ -78,9 +81,13 @@ namespace MWMechanics
         return mModifier;
     }
 
-    EffectParam::EffectParam() : mModifier (0), mBase(0) {}
+    EffectParam::EffectParam()
+        : mModifier(0)
+        , mBase(0)
+    {
+    }
 
-    EffectParam& EffectParam::operator+= (const EffectParam& param)
+    EffectParam& EffectParam::operator+=(const EffectParam& param)
     {
         mModifier += param.mModifier;
         mBase += param.mBase;
@@ -88,7 +95,7 @@ namespace MWMechanics
         return *this;
     }
 
-    EffectParam& EffectParam::operator-= (const EffectParam& param)
+    EffectParam& EffectParam::operator-=(const EffectParam& param)
     {
         mModifier -= param.mModifier;
         mBase -= param.mBase;
@@ -96,18 +103,18 @@ namespace MWMechanics
         return *this;
     }
 
-    void MagicEffects::remove(const EffectKey &key)
+    void MagicEffects::remove(const EffectKey& key)
     {
         mCollection.erase(key);
     }
 
-    void MagicEffects::add (const EffectKey& key, const EffectParam& param)
+    void MagicEffects::add(const EffectKey& key, const EffectParam& param)
     {
-        Collection::iterator iter = mCollection.find (key);
+        Collection::iterator iter = mCollection.find(key);
 
-        if (iter==mCollection.end())
+        if (iter == mCollection.end())
         {
-            mCollection.insert (std::make_pair (key, param));
+            mCollection.insert(std::make_pair(key, param));
         }
         else
         {
@@ -115,12 +122,12 @@ namespace MWMechanics
         }
     }
 
-    void MagicEffects::modifyBase(const EffectKey &key, int diff)
+    void MagicEffects::modifyBase(const EffectKey& key, int diff)
     {
         mCollection[key].modifyBase(diff);
     }
 
-    void MagicEffects::setModifiers(const MagicEffects &effects)
+    void MagicEffects::setModifiers(const MagicEffects& effects)
     {
         for (Collection::iterator it = mCollection.begin(); it != mCollection.end(); ++it)
         {
@@ -133,11 +140,11 @@ namespace MWMechanics
         }
     }
 
-    EffectParam MagicEffects::get (const EffectKey& key) const
+    EffectParam MagicEffects::get(const EffectKey& key) const
     {
-        Collection::const_iterator iter = mCollection.find (key);
+        Collection::const_iterator iter = mCollection.find(key);
 
-        if (iter==mCollection.end())
+        if (iter == mCollection.end())
         {
             return EffectParam();
         }
@@ -147,53 +154,53 @@ namespace MWMechanics
         }
     }
 
-    MagicEffects MagicEffects::diff (const MagicEffects& prev, const MagicEffects& now)
+    MagicEffects MagicEffects::diff(const MagicEffects& prev, const MagicEffects& now)
     {
         MagicEffects result;
 
         // adding/changing
-        for (Collection::const_iterator iter (now.begin()); iter!=now.end(); ++iter)
+        for (Collection::const_iterator iter(now.begin()); iter != now.end(); ++iter)
         {
-            Collection::const_iterator other = prev.mCollection.find (iter->first);
+            Collection::const_iterator other = prev.mCollection.find(iter->first);
 
-            if (other==prev.end())
+            if (other == prev.end())
             {
                 // adding
-                result.add (iter->first, iter->second);
+                result.add(iter->first, iter->second);
             }
             else
             {
                 // changing
-                result.add (iter->first, iter->second - other->second);
+                result.add(iter->first, iter->second - other->second);
             }
         }
 
         // removing
-        for (Collection::const_iterator iter (prev.begin()); iter!=prev.end(); ++iter)
+        for (Collection::const_iterator iter(prev.begin()); iter != prev.end(); ++iter)
         {
-            Collection::const_iterator other = now.mCollection.find (iter->first);
-            if (other==now.end())
+            Collection::const_iterator other = now.mCollection.find(iter->first);
+            if (other == now.end())
             {
-                result.add (iter->first, EffectParam() - iter->second);
+                result.add(iter->first, EffectParam() - iter->second);
             }
         }
 
         return result;
     }
 
-    void MagicEffects::writeState(ESM::MagicEffects &state) const
+    void MagicEffects::writeState(ESM::MagicEffects& state) const
     {
         for (const auto& [key, params] : mCollection)
         {
             if (params.getBase() != 0 || params.getModifier() != 0.f)
             {
                 // Don't worry about mArg, never used by magic effect script instructions
-                state.mEffects[key.mId] = {params.getBase(), params.getModifier()};
+                state.mEffects[key.mId] = { params.getBase(), params.getModifier() };
             }
         }
     }
 
-    void MagicEffects::readState(const ESM::MagicEffects &state)
+    void MagicEffects::readState(const ESM::MagicEffects& state)
     {
         for (const auto& [key, params] : state.mEffects)
         {

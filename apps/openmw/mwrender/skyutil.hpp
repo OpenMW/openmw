@@ -1,17 +1,17 @@
 #ifndef OPENMW_MWRENDER_SKYUTIL_H
 #define OPENMW_MWRENDER_SKYUTIL_H
 
-#include <osg/Vec4f>
+#include <osg/Material>
 #include <osg/Matrixf>
 #include <osg/Texture2D>
 #include <osg/Transform>
-#include <osg/Material>
+#include <osg/Vec4f>
 
-#include <osgParticle/Shooter>
 #include <osgParticle/ConstantRateCounter>
+#include <osgParticle/Shooter>
 
-#include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/sceneutil/statesetupdater.hpp>
 
 namespace Resource
 {
@@ -109,10 +109,11 @@ namespace MWRender
     class OcclusionCallback
     {
     public:
-        OcclusionCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal);
+        OcclusionCallback(
+            osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal);
 
     protected:
-        float getVisibleRatio (osg::Camera* camera);
+        float getVisibleRatio(osg::Camera* camera);
 
     private:
         osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
@@ -164,8 +165,8 @@ namespace MWRender
         void setTextureCoord(float timer);
 
     protected:
-        void setDefaults(osg::StateSet *stateset) override;
-        void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
+        void setDefaults(osg::StateSet* stateset) override;
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
 
     private:
         osg::ref_ptr<osg::Texture2D> mTexture;
@@ -186,7 +187,7 @@ namespace MWRender
 
         META_Node(MWRender, CameraRelativeTransform)
 
-        const osg::Vec3f& getLastViewPoint() const;
+            const osg::Vec3f& getLastViewPoint() const;
 
         bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const override;
 
@@ -200,7 +201,8 @@ namespace MWRender
     /// @brief Hides the node subgraph if the eye point is below water.
     /// @note Must be added as cull callback.
     /// @note Meant to be used on a node that is child of a CameraRelativeTransform.
-    /// The current view point must be retrieved by the CameraRelativeTransform since we can't get it anymore once we are in camera-relative space.
+    /// The current view point must be retrieved by the CameraRelativeTransform since we can't get it anymore once we
+    /// are in camera-relative space.
     class UnderwaterSwitchCallback : public SceneUtil::NodeCallback<UnderwaterSwitchCallback>
     {
     public:
@@ -221,7 +223,7 @@ namespace MWRender
     class CelestialBody
     {
     public:
-        CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets, unsigned int visibleMask=~0u);
+        CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets, unsigned int visibleMask = ~0u);
 
         virtual ~CelestialBody() = default;
 
@@ -251,7 +253,8 @@ namespace MWRender
         void setSunglare(bool enabled);
 
     private:
-        /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of pixels.
+        /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of
+        /// pixels.
         osg::ref_ptr<osg::OcclusionQueryNode> createOcclusionQueryNode(osg::Group* parent, bool queryVisible);
 
         void createSunFlash(Resource::ImageManager& imageManager);
@@ -310,7 +313,7 @@ namespace MWRender
 
         osg::Object* cloneType() const override;
 
-        osg::Object* clone(const osg::CopyOp &) const override;
+        osg::Object* clone(const osg::CopyOp&) const override;
 
         void shoot(osgParticle::Particle* particle) const override;
 

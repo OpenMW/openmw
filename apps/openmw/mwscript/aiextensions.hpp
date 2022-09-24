@@ -16,7 +16,7 @@ namespace MWScript
     /// \brief AI-related script functionality
     namespace Ai
     {
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 

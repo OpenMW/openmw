@@ -1,11 +1,11 @@
 #ifndef OPENMW_WIDGETS_BOX_H
 #define OPENMW_WIDGETS_BOX_H
 
-#include <MyGUI_Widget.h>
-#include <MyGUI_TextBox.h>
-#include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ComboBox.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Widget.h>
 
 #include "fontwrapper.hpp"
 
@@ -13,7 +13,7 @@ namespace Gui
 {
     class ComboBox : public FontWrapper<MyGUI::ComboBox>
     {
-        MYGUI_RTTI_DERIVED( ComboBox )
+        MYGUI_RTTI_DERIVED(ComboBox)
 
     protected:
         void setPropertyOverride(const std::string& _key, const std::string& _value) override;
@@ -21,23 +21,26 @@ namespace Gui
 
     class Button : public FontWrapper<MyGUI::Button>
     {
-        MYGUI_RTTI_DERIVED( Button )
+        MYGUI_RTTI_DERIVED(Button)
     };
 
     class TextBox : public FontWrapper<MyGUI::TextBox>
     {
-        MYGUI_RTTI_DERIVED( TextBox )
+        MYGUI_RTTI_DERIVED(TextBox)
     };
 
     class EditBox : public FontWrapper<MyGUI::EditBox>
     {
-        MYGUI_RTTI_DERIVED( EditBox )
+        MYGUI_RTTI_DERIVED(EditBox)
     };
 
     class AutoSizedWidget
     {
     public:
-        AutoSizedWidget() : mExpandDirection(MyGUI::Align::Right) {}
+        AutoSizedWidget()
+            : mExpandDirection(MyGUI::Align::Right)
+        {
+        }
 
         virtual MyGUI::IntSize getRequestedSize() = 0;
 
@@ -51,7 +54,7 @@ namespace Gui
 
     class AutoSizedTextBox : public AutoSizedWidget, public TextBox
     {
-        MYGUI_RTTI_DERIVED( AutoSizedTextBox )
+        MYGUI_RTTI_DERIVED(AutoSizedTextBox)
 
     public:
         MyGUI::IntSize getRequestedSize() override;
@@ -64,10 +67,9 @@ namespace Gui
 
     class AutoSizedEditBox : public AutoSizedWidget, public EditBox
     {
-        MYGUI_RTTI_DERIVED( AutoSizedEditBox )
+        MYGUI_RTTI_DERIVED(AutoSizedEditBox)
 
     public:
-
         MyGUI::IntSize getRequestedSize() override;
         void setCaption(const MyGUI::UString& _value) override;
 
@@ -84,7 +86,7 @@ namespace Gui
 
     class AutoSizedButton : public AutoSizedWidget, public Button
     {
-        MYGUI_RTTI_DERIVED( AutoSizedButton )
+        MYGUI_RTTI_DERIVED(AutoSizedButton)
 
     public:
         MyGUI::IntSize getRequestedSize() override;
@@ -122,20 +124,20 @@ namespace Gui
 
     class Spacer : public AutoSizedWidget, public MyGUI::Widget
     {
-        MYGUI_RTTI_DERIVED( Spacer )
+        MYGUI_RTTI_DERIVED(Spacer)
     public:
         Spacer();
 
-        MyGUI::IntSize getRequestedSize() override { return MyGUI::IntSize(0,0); }
+        MyGUI::IntSize getRequestedSize() override { return MyGUI::IntSize(0, 0); }
     };
 
     class HBox : public Box, public MyGUI::Widget
     {
-        MYGUI_RTTI_DERIVED( HBox )
+        MYGUI_RTTI_DERIVED(HBox)
 
     public:
-        void setSize (const MyGUI::IntSize &_value) override;
-        void setCoord (const MyGUI::IntCoord &_value) override;
+        void setSize(const MyGUI::IntSize& _value) override;
+        void setCoord(const MyGUI::IntCoord& _value) override;
 
     protected:
         void initialiseOverride() override;
@@ -150,11 +152,11 @@ namespace Gui
 
     class VBox : public Box, public MyGUI::Widget
     {
-        MYGUI_RTTI_DERIVED( VBox)
+        MYGUI_RTTI_DERIVED(VBox)
 
     public:
-        void setSize (const MyGUI::IntSize &_value) override;
-        void setCoord (const MyGUI::IntCoord &_value) override;
+        void setSize(const MyGUI::IntSize& _value) override;
+        void setCoord(const MyGUI::IntCoord& _value) override;
 
     protected:
         void initialiseOverride() override;

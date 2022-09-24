@@ -2,11 +2,11 @@
 
 #include <functional>
 
-#include "interpreter.hpp"
+#include "controlopcodes.hpp"
 #include "genericopcodes.hpp"
+#include "interpreter.hpp"
 #include "localopcodes.hpp"
 #include "mathopcodes.hpp"
-#include "controlopcodes.hpp"
 #include "miscopcodes.hpp"
 
 namespace Interpreter
@@ -59,19 +59,19 @@ namespace Interpreter
         interpreter.installSegment5<OpMulInt<Type_Float>>(14);
         interpreter.installSegment5<OpDivInt<Type_Integer>>(15);
         interpreter.installSegment5<OpDivInt<Type_Float>>(16);
-        interpreter.installSegment5<OpCompare<Type_Integer, std::equal_to<Type_Integer> >>(26);
-        interpreter.installSegment5<OpCompare<Type_Integer, std::not_equal_to<Type_Integer> >>(27);
-        interpreter.installSegment5<OpCompare<Type_Integer, std::less<Type_Integer> >>(28);
-        interpreter.installSegment5<OpCompare<Type_Integer, std::less_equal<Type_Integer> >>(29);
-        interpreter.installSegment5<OpCompare<Type_Integer, std::greater<Type_Integer> >>(30);
-        interpreter.installSegment5<OpCompare<Type_Integer, std::greater_equal<Type_Integer> >>(31);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::equal_to<Type_Integer>>>(26);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::not_equal_to<Type_Integer>>>(27);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::less<Type_Integer>>>(28);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::less_equal<Type_Integer>>>(29);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::greater<Type_Integer>>>(30);
+        interpreter.installSegment5<OpCompare<Type_Integer, std::greater_equal<Type_Integer>>>(31);
 
-        interpreter.installSegment5<OpCompare<Type_Float, std::equal_to<Type_Float> >>(32);
-        interpreter.installSegment5<OpCompare<Type_Float, std::not_equal_to<Type_Float> >>(33);
-        interpreter.installSegment5<OpCompare<Type_Float, std::less<Type_Float> >>(34);
-        interpreter.installSegment5<OpCompare<Type_Float, std::less_equal<Type_Float> >>(35);
-        interpreter.installSegment5<OpCompare<Type_Float, std::greater<Type_Float> >>(36);
-        interpreter.installSegment5<OpCompare<Type_Float, std::greater_equal<Type_Float> >>(37);
+        interpreter.installSegment5<OpCompare<Type_Float, std::equal_to<Type_Float>>>(32);
+        interpreter.installSegment5<OpCompare<Type_Float, std::not_equal_to<Type_Float>>>(33);
+        interpreter.installSegment5<OpCompare<Type_Float, std::less<Type_Float>>>(34);
+        interpreter.installSegment5<OpCompare<Type_Float, std::less_equal<Type_Float>>>(35);
+        interpreter.installSegment5<OpCompare<Type_Float, std::greater<Type_Float>>>(36);
+        interpreter.installSegment5<OpCompare<Type_Float, std::greater_equal<Type_Float>>>(37);
 
         // control structures
         interpreter.installSegment5<OpReturn>(20);

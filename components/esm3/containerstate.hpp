@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESM_CONTAINERSTATE_H
 #define OPENMW_ESM_CONTAINERSTATE_H
 
-#include "objectstate.hpp"
 #include "inventorystate.hpp"
+#include "objectstate.hpp"
 
 namespace ESM
 {
@@ -12,17 +12,11 @@ namespace ESM
     {
         InventoryState mInventory;
 
-        void load (ESMReader &esm) override;
-        void save (ESMWriter &esm, bool inInventory = false) const override;
+        void load(ESMReader& esm) override;
+        void save(ESMWriter& esm, bool inInventory = false) const override;
 
-        ContainerState& asContainerState() override
-        {
-            return *this;
-        }
-        const ContainerState& asContainerState() const override
-        {
-            return *this;
-        }
+        ContainerState& asContainerState() override { return *this; }
+        const ContainerState& asContainerState() const override { return *this; }
     };
 }
 

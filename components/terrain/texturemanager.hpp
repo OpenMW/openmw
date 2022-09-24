@@ -31,7 +31,6 @@ namespace Terrain
 
     private:
         Resource::SceneManager* mSceneManager;
-
     };
 
 }

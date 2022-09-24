@@ -123,12 +123,12 @@ Ubuntu_GCC:
 Clang_Format:
   extends: .Ubuntu_Image
   stage: checks
-  # TODO: Remove this once the entire project is formatted.
-  allow_failure: true
   cache:
     key: Ubuntu_Clang_Format.ubuntu_22.04.v1
     paths:
       - apt-cache/
+  variables:
+    CLANG_FORMAT: clang-format-14
   before_script:
     - CI/install_debian_deps.sh openmw-clang-format
   script:

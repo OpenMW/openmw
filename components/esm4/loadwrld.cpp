@@ -36,7 +36,7 @@ void ESM4::World::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     // It should be possible to save the current world formId automatically while reading in
     // the record header rather than doing it manually here but possibly less efficient (may
@@ -50,8 +50,8 @@ void ESM4::World::load(ESM4::Reader& reader)
     std::uint32_t subSize = 0; // for XXXX sub record
 
     std::uint32_t esmVer = reader.esmVersion();
-    //bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100);
-    //bool isFONV = (esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134);
+    // bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100);
+    // bool isFONV = (esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134);
     bool isTES5 = (esmVer == ESM::VER_094 || esmVer == ESM::VER_170); // WARN: FO3 is also VER_094
     bool usingDefaultLevels = true;
 
@@ -60,14 +60,30 @@ void ESM4::World::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_WCTR: reader.get(mCenterCell);   break; // Center cell, TES5 only
-            case ESM4::SUB_WNAM: reader.getFormId(mParent); break;
-            case ESM4::SUB_SNAM: reader.get(mSound);        break; // sound, Oblivion only?
-            case ESM4::SUB_ICON: reader.getZString(mMapFile); break; // map filename, Oblivion only?
-            case ESM4::SUB_CNAM: reader.get(mClimate);      break;
-            case ESM4::SUB_NAM2: reader.getFormId(mWater);  break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_WCTR:
+                reader.get(mCenterCell);
+                break; // Center cell, TES5 only
+            case ESM4::SUB_WNAM:
+                reader.getFormId(mParent);
+                break;
+            case ESM4::SUB_SNAM:
+                reader.get(mSound);
+                break; // sound, Oblivion only?
+            case ESM4::SUB_ICON:
+                reader.getZString(mMapFile);
+                break; // map filename, Oblivion only?
+            case ESM4::SUB_CNAM:
+                reader.get(mClimate);
+                break;
+            case ESM4::SUB_NAM2:
+                reader.getFormId(mWater);
+                break;
             case ESM4::SUB_NAM0:
             {
                 reader.get(mMinX);
@@ -80,7 +96,9 @@ void ESM4::World::load(ESM4::Reader& reader)
                 reader.get(mMaxY);
                 break;
             }
-            case ESM4::SUB_DATA: reader.get(mWorldFlags);   break;
+            case ESM4::SUB_DATA:
+                reader.get(mWorldFlags);
+                break;
             case ESM4::SUB_MNAM:
             {
                 reader.get(mMap.width);
@@ -101,7 +119,7 @@ void ESM4::World::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_DNAM: // defaults
             {
-                reader.get(mLandLevel);  //  -2700.f for TES5
+                reader.get(mLandLevel); //  -2700.f for TES5
                 reader.get(mWaterLevel); // -14000.f for TES5
                 usingDefaultLevels = false;
 
@@ -121,8 +139,12 @@ void ESM4::World::load(ESM4::Reader& reader)
             // 00119D2E freeside\freeside_01.mp3 0012D94D FreesideNorthWorld (Freeside)
             // 00119D2E freeside\freeside_01.mp3 0012D94E FreesideFortWorld (Old Mormon Fort)
             // NOTE: FONV DefaultObjectManager has 00090908 "explore" as the default music
-            case ESM4::SUB_ZNAM: reader.getFormId(mMusic); break;
-            case ESM4::SUB_PNAM: reader.get(mParentUseFlags); break;
+            case ESM4::SUB_ZNAM:
+                reader.getFormId(mMusic);
+                break;
+            case ESM4::SUB_PNAM:
+                reader.get(mParentUseFlags);
+                break;
             case ESM4::SUB_RNAM: // multiple
             case ESM4::SUB_MHDT:
             case ESM4::SUB_LTMP:
@@ -143,7 +165,7 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_IMPS: // FO3 Anchorage
             case ESM4::SUB_IMPF: // FO3 Anchorage
             {
-                //std::cout << "WRLD " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "WRLD " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
                 break;
             }
@@ -177,6 +199,6 @@ void ESM4::World::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::World::save(ESM4::Writer& writer) const
+// void ESM4::World::save(ESM4::Writer& writer) const
 //{
-//}
+// }

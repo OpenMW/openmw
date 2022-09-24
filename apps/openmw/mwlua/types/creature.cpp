@@ -5,14 +5,16 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwworld/esmstore.hpp>
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/world.hpp>
+#include <apps/openmw/mwworld/esmstore.hpp>
 
 namespace sol
 {
     template <>
-    struct is_automagical<ESM::Creature> : std::false_type {};
+    struct is_automagical<ESM::Creature> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
@@ -21,18 +23,21 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Creature>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>();
+        const MWWorld::Store<ESM::Creature>* store
+            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>();
         creature["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Creature* { return obj.ptr().get<ESM::Creature>()->mBase; },
             [store](const std::string& recordId) -> const ESM::Creature* { return store->find(recordId); });
         sol::usertype<ESM::Creature> record = context.mLua->sol().new_usertype<ESM::Creature>("ESM3_Creature");
-        record[sol::meta_function::to_string] = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId + "]"; };
+        record[sol::meta_function::to_string]
+            = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId + "]"; };
         record["name"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Creature& rec) -> std::string
-        {
+        record["model"] = sol::readonly_property([vfs](const ESM::Creature& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
-        record["mwscript"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mScript; });
-        record["baseCreature"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mOriginal; });
+        record["mwscript"]
+            = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mScript; });
+        record["baseCreature"]
+            = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mOriginal; });
     }
 }

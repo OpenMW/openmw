@@ -1,12 +1,12 @@
 #include "quickkeys.hpp"
 
-#include "esmwriter.hpp"
 #include "esmreader.hpp"
+#include "esmwriter.hpp"
 
 namespace ESM
 {
 
-    void QuickKeys::load(ESMReader &esm)
+    void QuickKeys::load(ESMReader& esm)
     {
         if (esm.isNextSub("KEY_"))
             esm.getSubHeader(); // no longer used, because sub-record hierachies do not work properly in esmreader
@@ -25,11 +25,11 @@ namespace ESM
             mKeys.push_back(key);
 
             if (esm.isNextSub("KEY_"))
-                esm.getSubHeader();  // no longer used, because sub-record hierachies do not work properly in esmreader
+                esm.getSubHeader(); // no longer used, because sub-record hierachies do not work properly in esmreader
         }
     }
 
-    void QuickKeys::save(ESMWriter &esm) const
+    void QuickKeys::save(ESMWriter& esm) const
     {
         for (std::vector<QuickKey>::const_iterator it = mKeys.begin(); it != mKeys.end(); ++it)
         {
@@ -37,6 +37,5 @@ namespace ESM
             esm.writeHNString("ID__", it->mId);
         }
     }
-
 
 }

@@ -48,8 +48,8 @@ namespace MWGui
     class CustomMarkerCollection
     {
     public:
-        void addMarker(const ESM::CustomMarker& marker, bool triggerEvent=true);
-        void deleteMarker (const ESM::CustomMarker& marker);
+        void addMarker(const ESM::CustomMarker& marker, bool triggerEvent = true);
+        void deleteMarker(const ESM::CustomMarker& marker);
         void updateMarker(const ESM::CustomMarker& marker, const std::string& newNote);
 
         void clear();
@@ -80,7 +80,7 @@ namespace MWGui
         void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int cellDistance = Constants::CellGridRadius);
 
         void setCellPrefix(const std::string& prefix);
-        void setActiveCell(const int x, const int y, bool interior=false);
+        void setActiveCell(const int x, const int y, bool interior = false);
         void requestMapRender(const MWWorld::CellStore* cell);
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(int cellX, int cellY, const float nx, const float ny);
@@ -117,9 +117,9 @@ namespace MWGui
         float mLocalMapZoom = 1.f;
         MWRender::LocalMap* mLocalMapRender;
 
-        int mCurX, mCurY;   //the position of the active cell on the global map (in cell coords)
+        int mCurX, mCurY; // the position of the active cell on the global map (in cell coords)
         bool mHasALastActiveCell = false;
-        osg::Vec2f mCurPos;   //the position of the player in the world (in cell coords)
+        osg::Vec2f mCurPos; // the position of the player in the world (in cell coords)
 
         bool mInterior;
         MyGUI::ScrollView* mLocalMap;
@@ -140,7 +140,12 @@ namespace MWGui
         struct MapEntry
         {
             MapEntry(MyGUI::ImageBox* mapWidget, MyGUI::ImageBox* fogWidget)
-                : mMapWidget(mapWidget), mFogWidget(fogWidget), mCellX(0), mCellY(0) {}
+                : mMapWidget(mapWidget)
+                , mFogWidget(fogWidget)
+                , mCellX(0)
+                , mCellY(0)
+            {
+            }
 
             MyGUI::ImageBox* mMapWidget;
             MyGUI::ImageBox* mFogWidget;
@@ -166,9 +171,11 @@ namespace MWGui
         void applyFogOfWar();
 
         MyGUI::IntPoint getPosition(int cellX, int cellY, float nx, float ny) const;
-        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerUserData& markerPos) const;
-        MyGUI::IntCoord getMarkerCoordinates(float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const;
-        MyGUI::Widget* createDoorMarker(const std::string& name, const MyGUI::VectorString& notes, float x, float y) const;
+        MyGUI::IntPoint getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const;
+        MyGUI::IntCoord getMarkerCoordinates(
+            float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const;
+        MyGUI::Widget* createDoorMarker(
+            const std::string& name, const MyGUI::VectorString& notes, float x, float y) const;
         MyGUI::IntCoord getMarkerCoordinates(MyGUI::Widget* widget, size_t markerSize) const;
 
         virtual void notifyPlayerUpdate() {}
@@ -228,7 +235,8 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
     public:
-        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue);
+        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender,
+            SceneUtil::WorkQueue* workQueue);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
@@ -245,7 +253,7 @@ namespace MWGui
         // reveals this cell's map on the global map
         void cellExplored(int x, int y);
 
-        void setGlobalMapPlayerPosition (float worldX, float worldY);
+        void setGlobalMapPlayerPosition(float worldX, float worldY);
         void setGlobalMapPlayerDir(const float x, const float y);
 
         void ensureGlobalMapLoaded();
@@ -259,8 +267,8 @@ namespace MWGui
         /// Clear all savegame-specific data
         void clear() override;
 
-        void write (ESM::ESMWriter& writer, Loading::Listener& progress);
-        void readRecord (ESM::ESMReader& reader, uint32_t type);
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress);
+        void readRecord(ESM::ESMReader& reader, uint32_t type);
 
         void asyncPrepareSaveMap();
 
@@ -285,7 +293,6 @@ namespace MWGui
         void worldPosToGlobalMapImageSpace(float x, float z, float& imageX, float& imageY) const;
         MyGUI::IntCoord createMarkerCoords(float x, float y, float agregatedWeight) const;
         MyGUI::Widget* createMarker(const std::string& name, float x, float y, float agregatedWeight);
-
 
         MyGUI::ScrollView* mGlobalMap;
         std::unique_ptr<MyGUI::ITexture> mGlobalMapTexture;
@@ -315,9 +322,7 @@ namespace MWGui
             osg::Vec2f position;
             MyGUI::Widget* widget = nullptr;
 
-            bool operator<(const MapMarkerType& right) const {
-                return widget < right.widget;
-            }
+            bool operator<(const MapMarkerType& right) const { return widget < right.widget; }
         };
 
         std::map<std::string, MapMarkerType> mGlobalMapMarkersByName;
@@ -330,7 +335,7 @@ namespace MWGui
         void onTitleDoubleClicked() override;
 
         void doorMarkerCreated(MyGUI::Widget* marker) override;
-        void customMarkerCreated(MyGUI::Widget *marker) override;
+        void customMarkerCreated(MyGUI::Widget* marker) override;
 
         void notifyPlayerUpdate() override;
 

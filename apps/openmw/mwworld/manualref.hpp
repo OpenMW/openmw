@@ -10,19 +10,16 @@ namespace MWWorld
     /// \brief Manually constructed live cell ref
     class ManualRef
     {
-            std::any mRef;
-            Ptr mPtr;
+        std::any mRef;
+        Ptr mPtr;
 
-            ManualRef (const ManualRef&);
-            ManualRef& operator= (const ManualRef&);
+        ManualRef(const ManualRef&);
+        ManualRef& operator=(const ManualRef&);
 
-        public:
-            ManualRef(const MWWorld::ESMStore& store, std::string_view name, const int count = 1);
+    public:
+        ManualRef(const MWWorld::ESMStore& store, std::string_view name, const int count = 1);
 
-            const Ptr& getPtr() const
-            {
-                return mPtr;
-            }
+        const Ptr& getPtr() const { return mPtr; }
     };
 }
 

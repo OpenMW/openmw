@@ -18,24 +18,24 @@ namespace DetourNavigator
 {
     struct RecastSettings;
 
-    TilesPositionsRange makeTilesPositionsRange(const osg::Vec2f& aabbMin,
-        const osg::Vec2f& aabbMax, const RecastSettings& settings);
+    TilesPositionsRange makeTilesPositionsRange(
+        const osg::Vec2f& aabbMin, const osg::Vec2f& aabbMax, const RecastSettings& settings);
 
-    TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape,
-        const btTransform& transform, const RecastSettings& settings);
+    TilesPositionsRange makeTilesPositionsRange(
+        const btCollisionShape& shape, const btTransform& transform, const RecastSettings& settings);
 
-    TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape,
-        const btTransform& transform, const TileBounds& bounds, const RecastSettings& settings);
+    TilesPositionsRange makeTilesPositionsRange(const btCollisionShape& shape, const btTransform& transform,
+        const TileBounds& bounds, const RecastSettings& settings);
 
-    TilesPositionsRange makeTilesPositionsRange(const int cellSize, const btVector3& shift,
-        const RecastSettings& settings);
+    TilesPositionsRange makeTilesPositionsRange(
+        const int cellSize, const btVector3& shift, const RecastSettings& settings);
 
     template <class Callback>
     inline void getTilesPositions(const TilesPositionsRange& range, Callback&& callback)
     {
         for (int tileX = range.mBegin.x(); tileX < range.mEnd.x(); ++tileX)
             for (int tileY = range.mBegin.y(); tileY < range.mEnd.y(); ++tileY)
-                callback(TilePosition {tileX, tileY});
+                callback(TilePosition{ tileX, tileY });
     }
 
     inline bool isInTilesPositionsRange(int begin, int end, int coordinate)

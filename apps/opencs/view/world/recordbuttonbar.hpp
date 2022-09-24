@@ -35,57 +35,54 @@ namespace CSVWorld
     /// - view (optional)
     class RecordButtonBar : public QWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMWorld::UniversalId mId;
-            CSMWorld::IdTable& mTable;
-            TableBottomBox *mBottom;
-            CSMWorld::CommandDispatcher *mCommandDispatcher;
-            QToolButton *mPrevButton;
-            QToolButton *mNextButton;
-            QToolButton *mCloneButton;
-            QToolButton *mAddButton;
-            QToolButton *mDeleteButton;
-            QToolButton *mRevertButton;
-            bool mLocked;
+        CSMWorld::UniversalId mId;
+        CSMWorld::IdTable& mTable;
+        TableBottomBox* mBottom;
+        CSMWorld::CommandDispatcher* mCommandDispatcher;
+        QToolButton* mPrevButton;
+        QToolButton* mNextButton;
+        QToolButton* mCloneButton;
+        QToolButton* mAddButton;
+        QToolButton* mDeleteButton;
+        QToolButton* mRevertButton;
+        bool mLocked;
 
-        private:
+    private:
+        void updateModificationButtons();
 
-            void updateModificationButtons();
+        void updatePrevNextButtons();
 
-            void updatePrevNextButtons();
+    public:
+        RecordButtonBar(const CSMWorld::UniversalId& id, CSMWorld::IdTable& table, TableBottomBox* bottomBox = nullptr,
+            CSMWorld::CommandDispatcher* commandDispatcher = nullptr, QWidget* parent = nullptr);
 
-        public:
+        void setEditLock(bool locked);
 
-            RecordButtonBar (const CSMWorld::UniversalId& id,
-                CSMWorld::IdTable& table, TableBottomBox *bottomBox = nullptr,
-                CSMWorld::CommandDispatcher *commandDispatcher = nullptr, QWidget *parent = nullptr);
+    public slots:
 
-            void setEditLock (bool locked);
+        void universalIdChanged(const CSMWorld::UniversalId& id);
 
-        public slots:
+    private slots:
 
-            void universalIdChanged (const CSMWorld::UniversalId& id);
+        void settingChanged(const CSMPrefs::Setting* setting);
 
-        private slots:
+        void cloneRequest();
 
-            void settingChanged (const CSMPrefs::Setting *setting);
+        void nextId();
 
-            void cloneRequest();
+        void prevId();
 
-            void nextId();
+        void rowNumberChanged(const QModelIndex& parent, int start, int end);
 
-            void prevId();
+    signals:
 
-            void rowNumberChanged (const QModelIndex& parent, int start, int end);
+        void showPreview();
 
-        signals:
+        void viewRecord();
 
-            void showPreview();
-
-            void viewRecord();
-
-            void switchToRow (int row);
+        void switchToRow(int row);
     };
 }
 

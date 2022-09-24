@@ -12,16 +12,13 @@ namespace CSMDoc
 
     class Saving : public Operation
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            Document& mDocument;
-            SavingState mState;
+        Document& mDocument;
+        SavingState mState;
 
-        public:
-
-            Saving (Document& document, const std::filesystem::path& projectPath,
-                ToUTF8::FromType encoding);
-
+    public:
+        Saving(Document& document, const std::filesystem::path& projectPath, ToUTF8::FromType encoding);
     };
 }
 

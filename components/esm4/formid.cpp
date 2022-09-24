@@ -22,11 +22,11 @@
 */
 #include "formid.hpp"
 
-#include <sstream>
 #include <algorithm>
-#include <stdexcept>
-#include <cstdlib> // strtol
 #include <climits> // LONG_MIN, LONG_MAX for gcc
+#include <cstdlib> // strtol
+#include <sstream>
+#include <stdexcept>
 
 #include <string>
 
@@ -34,9 +34,9 @@ namespace ESM4
 {
     void formIdToString(FormId formId, std::string& str)
     {
-        char buf[8+1];
-        int res = snprintf(buf, 8+1, "%08X", formId);
-        if (res > 0 && res < 8+1)
+        char buf[8 + 1];
+        int res = snprintf(buf, 8 + 1, "%08X", formId);
+        if (res > 0 && res < 8 + 1)
             str.assign(buf);
         else
             throw std::runtime_error("Possible buffer overflow while converting formId");
@@ -49,17 +49,17 @@ namespace ESM4
         return str;
     }
 
-    bool isFormId(const std::string& str, FormId *id)
+    bool isFormId(const std::string& str, FormId* id)
     {
         if (str.size() != 8)
             return false;
 
-        char *tmp;
+        char* tmp;
         errno = 0;
         unsigned long val = strtol(str.c_str(), &tmp, 16);
 
         if (tmp == str.c_str() || *tmp != '\0'
-                || ((val == (unsigned long)LONG_MIN || val == (unsigned long)LONG_MAX) && errno == ERANGE))
+            || ((val == (unsigned long)LONG_MIN || val == (unsigned long)LONG_MAX) && errno == ERANGE))
             return false;
 
         if (id != nullptr)

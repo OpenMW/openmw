@@ -30,9 +30,12 @@ namespace Terrain
     class TerrainDrawable : public osg::Geometry
     {
     public:
-        osg::Object* cloneType() const override { return new TerrainDrawable (); }
-        osg::Object* clone(const osg::CopyOp& copyop) const override { return new TerrainDrawable (*this,copyop); }
-        bool isSameKindAs(const osg::Object* obj) const override { return dynamic_cast<const TerrainDrawable *>(obj)!=nullptr; }
+        osg::Object* cloneType() const override { return new TerrainDrawable(); }
+        osg::Object* clone(const osg::CopyOp& copyop) const override { return new TerrainDrawable(*this, copyop); }
+        bool isSameKindAs(const osg::Object* obj) const override
+        {
+            return dynamic_cast<const TerrainDrawable*>(obj) != nullptr;
+        }
         const char* className() const override { return "TerrainDrawable"; }
         const char* libraryName() const override { return "Terrain"; }
 
@@ -40,12 +43,12 @@ namespace Terrain
         ~TerrainDrawable(); // has to be defined in the cpp file because we only forward declared some members.
         TerrainDrawable(const TerrainDrawable& copy, const osg::CopyOp& copyop);
 
-        void accept(osg::NodeVisitor &nv) override;
+        void accept(osg::NodeVisitor& nv) override;
         void cull(osgUtil::CullVisitor* cv);
 
-        typedef std::vector<osg::ref_ptr<osg::StateSet> > PassVector;
-        void setPasses (const PassVector& passes);
-        const PassVector& getPasses() const {  return mPasses; }
+        typedef std::vector<osg::ref_ptr<osg::StateSet>> PassVector;
+        void setPasses(const PassVector& passes);
+        const PassVector& getPasses() const { return mPasses; }
 
         void setLightListCallback(SceneUtil::LightListCallback* lightListCallback);
 
@@ -72,6 +75,5 @@ namespace Terrain
     };
 
 }
-
 
 #endif

@@ -8,9 +8,9 @@
 
 #include "../mwclass/container.hpp"
 
+#include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
-#include "../mwworld/cellutils.hpp"
 
 namespace MWLua
 {
@@ -122,7 +122,8 @@ namespace MWLua
         group.mChanged = true;
     }
 
-    // TODO: If Lua scripts will use several threads at the same time, then `find*Cell` functions should have critical sections.
+    // TODO: If Lua scripts will use several threads at the same time, then `find*Cell` functions should have critical
+    // sections.
     MWWorld::CellStore* WorldView::findCell(const std::string& name, osg::Vec3f position)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();

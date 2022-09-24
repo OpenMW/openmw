@@ -16,9 +16,10 @@ namespace LuaUtil
     static constexpr std::string_view HANDLER_INTERFACE_OVERRIDE = "onInterfaceOverride";
 
     ScriptsContainer::ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix)
-        : mNamePrefix(namePrefix), mLua(*lua)
+        : mNamePrefix(namePrefix)
+        , mLua(*lua)
     {
-        registerEngineHandlers({&mUpdateHandlers});
+        registerEngineHandlers({ &mUpdateHandlers });
         mPublicInterfaces = sol::table(lua->sol(), sol::create);
         addPackage("openmw.interfaces", mPublicInterfaces);
     }
@@ -55,11 +56,12 @@ namespace LuaUtil
         }
     }
 
-    bool ScriptsContainer::addScript(int scriptId, std::optional<sol::function>& onInit, std::optional<sol::function>& onLoad)
+    bool ScriptsContainer::addScript(
+        int scriptId, std::optional<sol::function>& onInit, std::optional<sol::function>& onLoad)
     {
         assert(scriptId >= 0 && scriptId < static_cast<int>(mLua.getConfiguration().size()));
         if (mScripts.count(scriptId) != 0)
-            return false;  // already present
+            return false; // already present
 
         const std::string& path = scriptPath(scriptId);
         std::string debugName = mNamePrefix;
@@ -69,7 +71,7 @@ namespace LuaUtil
 
         Script& script = mScripts[scriptId];
         script.mHiddenData = mLua.newTable();
-        script.mHiddenData[sScriptIdKey] = ScriptId{this, scriptId};
+        script.mHiddenData[sScriptIdKey] = ScriptId{ this, scriptId };
         script.mHiddenData[sScriptDebugNameKey] = debugName;
         script.mPath = path;
 
@@ -155,7 +157,7 @@ namespace LuaUtil
     {
         auto scriptIter = mScripts.find(scriptId);
         if (scriptIter == mScripts.end())
-            return;  // no such script
+            return; // no such script
         Script& script = scriptIter->second;
         if (script.mInterface)
             removeInterface(scriptId, script);
@@ -188,13 +190,25 @@ namespace LuaUtil
         }
         if (prev && script.mOnOverride)
         {
-            try { LuaUtil::call(*script.mOnOverride, *prev->mInterface); }
-            catch (std::exception& e) { printError(scriptId, "onInterfaceOverride failed", e); }
+            try
+            {
+                LuaUtil::call(*script.mOnOverride, *prev->mInterface);
+            }
+            catch (std::exception& e)
+            {
+                printError(scriptId, "onInterfaceOverride failed", e);
+            }
         }
         if (next && next->mOnOverride)
         {
-            try { LuaUtil::call(*next->mOnOverride, *script.mInterface); }
-            catch (std::exception& e) { printError(nextId, "onInterfaceOverride failed", e); }
+            try
+            {
+                LuaUtil::call(*next->mOnOverride, *script.mInterface);
+            }
+            catch (std::exception& e)
+            {
+                printError(nextId, "onInterfaceOverride failed", e);
+            }
         }
         if (next == nullptr)
             mPublicInterfaces[script.mInterfaceName] = *script.mInterface;
@@ -226,8 +240,14 @@ namespace LuaUtil
                 sol::object prevInterface = sol::nil;
                 if (prev)
                     prevInterface = *prev->mInterface;
-                try { LuaUtil::call(*next->mOnOverride, prevInterface); }
-                catch (std::exception& e) { printError(nextId, "onInterfaceOverride failed", e); }
+                try
+                {
+                    LuaUtil::call(*next->mOnOverride, prevInterface);
+                }
+                catch (std::exception& e)
+                {
+                    printError(nextId, "onInterfaceOverride failed", e);
+                }
             }
         }
         else if (prev)
@@ -251,9 +271,9 @@ namespace LuaUtil
 
     void ScriptsContainer::removeHandler(std::vector<Handler>& list, int scriptId)
     {
-        list.erase(std::remove_if(list.begin(), list.end(),
-                                  [scriptId](const Handler& h){ return h.mScriptId == scriptId; }),
-                   list.end());
+        list.erase(
+            std::remove_if(list.begin(), list.end(), [scriptId](const Handler& h) { return h.mScriptId == scriptId; }),
+            list.end());
     }
 
     void ScriptsContainer::receiveEvent(std::string_view eventName, std::string_view eventData)
@@ -261,7 +281,8 @@ namespace LuaUtil
         auto it = mEventHandlers.find(eventName);
         if (it == mEventHandlers.end())
         {
-            Log(Debug::Warning) << mNamePrefix << " has received event '" << eventName << "', but there are no handlers for this event";
+            Log(Debug::Warning) << mNamePrefix << " has received event '" << eventName
+                                << "', but there are no handlers for this event";
             return;
         }
         sol::object data;
@@ -281,12 +302,12 @@ namespace LuaUtil
             {
                 sol::object res = LuaUtil::call(list[i].mFn, data);
                 if (res != sol::nil && !res.as<bool>())
-                    break;  // Skip other handlers if 'false' was returned.
+                    break; // Skip other handlers if 'false' was returned.
             }
             catch (std::exception& e)
             {
-                Log(Debug::Error) << mNamePrefix << "[" << scriptPath(list[i].mScriptId)
-                                  << "] eventHandler[" << eventName << "] failed. " << e.what();
+                Log(Debug::Error) << mNamePrefix << "[" << scriptPath(list[i].mScriptId) << "] eventHandler["
+                                  << eventName << "] failed. " << e.what();
             }
         }
     }
@@ -303,14 +324,16 @@ namespace LuaUtil
         {
             LuaUtil::call(onInit, deserialize(mLua.sol(), data, mSerializer));
         }
-        catch (std::exception& e) { printError(scriptId, "onInit failed", e); }
+        catch (std::exception& e)
+        {
+            printError(scriptId, "onInit failed", e);
+        }
     }
 
     void ScriptsContainer::save(ESM::LuaScripts& data)
     {
         std::map<int, std::vector<ESM::LuaTimer>> timers;
-        auto saveTimerFn = [&](const Timer& timer, TimerType timerType)
-        {
+        auto saveTimerFn = [&](const Timer& timer, TimerType timerType) {
             if (!timer.mSerializable)
                 return;
             ESM::LuaTimer savedTimer;
@@ -338,7 +361,10 @@ namespace LuaUtil
                     sol::object state = LuaUtil::call(*script.mOnSave);
                     savedScript.mData = serialize(state, mSerializer);
                 }
-                catch (std::exception& e) { printError(scriptId, "onSave failed", e); }
+                catch (std::exception& e)
+                {
+                    printError(scriptId, "onSave failed", e);
+                }
             }
             auto timersIt = timers.find(scriptId);
             if (timersIt != timers.end())
@@ -359,7 +385,7 @@ namespace LuaUtil
         };
         std::map<int, ScriptInfo> scripts;
         for (const auto& [scriptId, initData] : mAutoStartScripts)
-            scripts[scriptId] = {initData, nullptr};
+            scripts[scriptId] = { initData, nullptr };
         for (const ESM::LuaScript& s : data.mScripts)
         {
             std::optional<int> scriptId = cfg.findId(s.mScriptPath);
@@ -372,9 +398,10 @@ namespace LuaUtil
             if (it != scripts.end())
                 it->second.mSavedData = &s;
             else if (cfg.isCustomScript(*scriptId))
-                scripts[*scriptId] = {cfg[*scriptId].mInitializationData, &s};
+                scripts[*scriptId] = { cfg[*scriptId].mInitializationData, &s };
             else
-                Log(Debug::Verbose) << "Ignoring " << mNamePrefix << "[" << s.mScriptPath << "]; this script is not allowed here";
+                Log(Debug::Verbose) << "Ignoring " << mNamePrefix << "[" << s.mScriptPath
+                                    << "]; this script is not allowed here";
         }
 
         for (const auto& [scriptId, scriptInfo] : scripts)
@@ -393,11 +420,13 @@ namespace LuaUtil
                 try
                 {
                     sol::object state = deserialize(mLua.sol(), scriptInfo.mSavedData->mData, mSavedDataDeserializer);
-                    sol::object initializationData =
-                        deserialize(mLua.sol(), scriptInfo.mInitData, mSerializer);
+                    sol::object initializationData = deserialize(mLua.sol(), scriptInfo.mInitData, mSerializer);
                     LuaUtil::call(*onLoad, state, initializationData);
                 }
-                catch (std::exception& e) { printError(scriptId, "onLoad failed", e); }
+                catch (std::exception& e)
+                {
+                    printError(scriptId, "onLoad failed", e);
+                }
             }
             for (const ESM::LuaTimer& savedTimer : scriptInfo.mSavedData->mTimers)
             {
@@ -419,7 +448,10 @@ namespace LuaUtil
                     else
                         mSimulationTimersQueue.push_back(std::move(timer));
                 }
-                catch (std::exception& e) { printError(scriptId, "can not load timer", e); }
+                catch (std::exception& e)
+                {
+                    printError(scriptId, "can not load timer", e);
+                }
             }
         }
 
@@ -467,8 +499,8 @@ namespace LuaUtil
         std::push_heap(timerQueue.begin(), timerQueue.end());
     }
 
-    void ScriptsContainer::setupSerializableTimer(TimerType type, double time, int scriptId,
-                                                  std::string_view callbackName, sol::object callbackArg)
+    void ScriptsContainer::setupSerializableTimer(
+        TimerType type, double time, int scriptId, std::string_view callbackName, sol::object callbackArg)
     {
         Timer t;
         t.mCallback = std::string(callbackName);
@@ -514,7 +546,10 @@ namespace LuaUtil
                 script.mTemporaryCallbacks.erase(id);
             }
         }
-        catch (std::exception& e) { printError(t.mScriptId, "callTimer failed", e); }
+        catch (std::exception& e)
+        {
+            printError(t.mScriptId, "callTimer failed", e);
+        }
     }
 
     void ScriptsContainer::updateTimerQueue(std::vector<Timer>& timerQueue, double time)

@@ -41,17 +41,25 @@ namespace ESM4
     {
         struct Data // FIXME: TES5 projectile, damage (float)
         {
-            float         speed;
+            float speed;
             std::uint32_t flags;
-            std::uint32_t value;   // gold
-            float         weight;
+            std::uint32_t value; // gold
+            float weight;
             std::uint16_t damage;
-            std::uint8_t  clipRounds; // only in FO3/FONV
+            std::uint8_t clipRounds; // only in FO3/FONV
 
-            Data() : speed(0.f), flags(0), value(0), weight(0.f), damage(0), clipRounds(0) {}
+            Data()
+                : speed(0.f)
+                , flags(0)
+                , value(0)
+                , weight(0.f)
+                , damage(0)
+                , clipRounds(0)
+            {
+            }
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -72,9 +80,9 @@ namespace ESM4
         Data mData;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

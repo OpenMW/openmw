@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
-#include <components/sceneutil/recastmesh.hpp>
+#include <components/detournavigator/recastmesh.hpp>
+#include <components/detournavigator/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/detournavigator/settings.hpp>
-#include <components/detournavigator/recastmesh.hpp>
+#include <components/sceneutil/recastmesh.hpp>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -74,26 +74,26 @@ namespace MWRender
             const auto group = SceneUtil::createRecastMeshGroup(*tile.second, settings.mRecast);
             MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
             group->setNodeMask(Mask_Debug);
-            mGroups.emplace(tile.first, Group {tile.second->getVersion(), group});
+            mGroups.emplace(tile.first, Group{ tile.second->getVersion(), group });
             mRootNode->addChild(group);
         }
     }
 
     void RecastMesh::reset()
     {
-        std::for_each(mGroups.begin(), mGroups.end(), [&] (const auto& v) { mRootNode->removeChild(v.second.mValue); });
+        std::for_each(mGroups.begin(), mGroups.end(), [&](const auto& v) { mRootNode->removeChild(v.second.mValue); });
         mGroups.clear();
     }
 
     void RecastMesh::enable()
     {
-        std::for_each(mGroups.begin(), mGroups.end(), [&] (const auto& v) { mRootNode->addChild(v.second.mValue); });
+        std::for_each(mGroups.begin(), mGroups.end(), [&](const auto& v) { mRootNode->addChild(v.second.mValue); });
         mEnabled = true;
     }
 
     void RecastMesh::disable()
     {
-        std::for_each(mGroups.begin(), mGroups.end(), [&] (const auto& v) { mRootNode->removeChild(v.second.mValue); });
+        std::for_each(mGroups.begin(), mGroups.end(), [&](const auto& v) { mRootNode->removeChild(v.second.mValue); });
         mEnabled = false;
     }
 }

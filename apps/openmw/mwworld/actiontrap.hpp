@@ -9,19 +9,21 @@ namespace MWWorld
 {
     class ActionTrap : public Action
     {
-            std::string mSpellId;
-            MWWorld::Ptr mTrapSource;
+        std::string mSpellId;
+        MWWorld::Ptr mTrapSource;
 
-            void executeImp (const Ptr& actor) override;
+        void executeImp(const Ptr& actor) override;
 
-        public:
-
-            /// @param spellId
-            /// @param trapSource
-            ActionTrap (const std::string& spellId, const Ptr& trapSource)
-                : Action(false, trapSource), mSpellId(spellId), mTrapSource(trapSource) {}
+    public:
+        /// @param spellId
+        /// @param trapSource
+        ActionTrap(const std::string& spellId, const Ptr& trapSource)
+            : Action(false, trapSource)
+            , mSpellId(spellId)
+            , mTrapSource(trapSource)
+        {
+        }
     };
 }
-
 
 #endif

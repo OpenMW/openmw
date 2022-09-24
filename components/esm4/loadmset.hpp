@@ -39,7 +39,7 @@ namespace ESM4
 
     struct MediaSet
     {
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -56,12 +56,12 @@ namespace ESM4
         // 0x08 night outer, 0x10 night middle, 0x20 night inner
         std::uint8_t mEnabled; // for location
 
-        float mBoundaryDayOuter;    // %
-        float mBoundaryDayMiddle;   // %
-        float mBoundaryDayInner;    // %
-        float mBoundaryNightOuter;  // %
+        float mBoundaryDayOuter; // %
+        float mBoundaryDayMiddle; // %
+        float mBoundaryDayInner; // %
+        float mBoundaryNightOuter; // %
         float mBoundaryNightMiddle; // %
-        float mBoundaryNightInner;  // %
+        float mBoundaryNightInner; // %
 
         // start at 2 to reduce confusion
         std::string mSet2; // NAM2
@@ -87,9 +87,9 @@ namespace ESM4
         FormId mSoundOutro; // INAM
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

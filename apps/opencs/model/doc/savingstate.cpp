@@ -3,14 +3,16 @@
 #include <filesystem>
 #include <utility>
 
-#include "operation.hpp"
 #include "document.hpp"
+#include "operation.hpp"
 
-CSMDoc::SavingState::SavingState (Operation& operation, std::filesystem::path  projectPath,
-    ToUTF8::FromType encoding)
-: mOperation (operation), mEncoder (encoding),  mProjectPath (std::move(projectPath)), mProjectFile (false)
+CSMDoc::SavingState::SavingState(Operation& operation, std::filesystem::path projectPath, ToUTF8::FromType encoding)
+    : mOperation(operation)
+    , mEncoder(encoding)
+    , mProjectPath(std::move(projectPath))
+    , mProjectFile(false)
 {
-    mWriter.setEncoder (&mEncoder);
+    mWriter.setEncoder(&mEncoder);
 }
 
 bool CSMDoc::SavingState::hasError() const
@@ -18,7 +20,7 @@ bool CSMDoc::SavingState::hasError() const
     return mOperation.hasError();
 }
 
-void CSMDoc::SavingState::start (Document& document, bool project)
+void CSMDoc::SavingState::start(Document& document, bool project)
 {
     mProjectFile = project;
 
@@ -34,7 +36,7 @@ void CSMDoc::SavingState::start (Document& document, bool project)
     else
         mPath = document.getSavePath();
 
-    std::filesystem::path file (mPath.filename().u8string() + u8".tmp");
+    std::filesystem::path file(mPath.filename().u8string() + u8".tmp");
 
     mTmpPath = mPath.parent_path();
 
@@ -66,7 +68,7 @@ bool CSMDoc::SavingState::isProjectFile() const
     return mProjectFile;
 }
 
-std::map<std::string, std::deque<int> >& CSMDoc::SavingState::getSubRecords()
+std::map<std::string, std::deque<int>>& CSMDoc::SavingState::getSubRecords()
 {
     return mSubRecords;
 }

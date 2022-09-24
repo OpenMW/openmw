@@ -7,7 +7,7 @@
 
 namespace CSMWorld
 {
-    void LandTexture::load(ESM::ESMReader &esm, bool &isDeleted)
+    void LandTexture::load(ESM::ESMReader& esm, bool& isDeleted)
     {
         ESM::LandTexture::load(esm, isDeleted);
 
@@ -28,7 +28,7 @@ namespace CSMWorld
         if (middle == std::string::npos || id[0] != 'L')
             throw std::runtime_error("Invalid LandTexture ID");
 
-        plugin = std::stoi(id.substr(1,middle-1));
-        index = std::stoi(id.substr(middle+1));
+        plugin = std::stoi(id.substr(1, middle - 1));
+        index = std::stoi(id.substr(middle + 1));
     }
 }

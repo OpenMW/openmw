@@ -31,7 +31,8 @@ namespace Resource
     };
 
     /// @brief Base class for managers that require a virtual file system and object cache.
-    /// @par This base class implements clearing of the cache, but populating it and what it's used for is up to the individual sub classes.
+    /// @par This base class implements clearing of the cache, but populating it and what it's used for is up to the
+    /// individual sub classes.
     template <class KeyType>
     class GenericResourceManager : public BaseResourceManager
     {
@@ -58,7 +59,7 @@ namespace Resource
         void clearCache() override { mCache->clear(); }
 
         /// How long to keep objects in cache after no longer being referenced.
-        void setExpiryDelay (double expiryDelay) override { mExpiryDelay = expiryDelay; }
+        void setExpiryDelay(double expiryDelay) override { mExpiryDelay = expiryDelay; }
         float getExpiryDelay() const { return mExpiryDelay; }
 
         const VFS::Manager* getVFS() const { return mVFS; }
@@ -73,11 +74,13 @@ namespace Resource
         double mExpiryDelay;
     };
 
-
     class ResourceManager : public GenericResourceManager<std::string>
     {
     public:
-        ResourceManager(const VFS::Manager* vfs) : GenericResourceManager<std::string>(vfs) {}
+        ResourceManager(const VFS::Manager* vfs)
+            : GenericResourceManager<std::string>(vfs)
+        {
+        }
     };
 
 }

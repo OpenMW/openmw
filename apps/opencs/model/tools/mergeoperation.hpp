@@ -18,27 +18,25 @@ namespace CSMTools
 {
     class MergeOperation : public CSMDoc::Operation
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            MergeState mState;
+        MergeState mState;
 
-        public:
+    public:
+        MergeOperation(CSMDoc::Document& document, ToUTF8::FromType encoding);
 
-            MergeOperation (CSMDoc::Document& document, ToUTF8::FromType encoding);
+        /// \attention Do not call this function while a merge is running.
+        void setTarget(std::unique_ptr<CSMDoc::Document> document);
 
-            /// \attention Do not call this function while a merge is running.
-            void setTarget (std::unique_ptr<CSMDoc::Document> document);
+    protected slots:
 
-        protected slots:
+        void operationDone() override;
 
-            void operationDone() override;
+    signals:
 
-        signals:
-
-            /// \attention When this signal is emitted, *this hands over the ownership of the
-            /// document. This signal must be handled to avoid a leak.
-            void mergeDone (CSMDoc::Document *document);
-
+        /// \attention When this signal is emitted, *this hands over the ownership of the
+        /// document. This signal must be handled to avoid a leak.
+        void mergeDone(CSMDoc::Document* document);
     };
 }
 

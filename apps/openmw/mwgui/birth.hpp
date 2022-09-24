@@ -16,8 +16,8 @@ namespace MWGui
             GM_Female
         };
 
-        const std::string &getBirthId() const { return mCurrentBirthId; }
-        void setBirthId(const std::string &raceId);
+        const std::string& getBirthId() const { return mCurrentBirthId; }
+        void setBirthId(const std::string& raceId);
 
         void setNextButtonShow(bool shown);
         void onOpen() override;

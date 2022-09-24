@@ -10,34 +10,34 @@
 namespace ESM
 {
 
-class ESMReader;
-class ESMWriter;
+    class ESMReader;
+    class ESMWriter;
 
-/*
- *  Game setting
- *
- */
+    /*
+     *  Game setting
+     *
+     */
 
-struct GameSetting
-{
-    constexpr static RecNameInts sRecordId = REC_GMST;
+    struct GameSetting
+    {
+        constexpr static RecNameInts sRecordId = REC_GMST;
 
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string_view getRecordType() { return "GameSetting"; }
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string_view getRecordType() { return "GameSetting"; }
 
-    unsigned int mRecordFlags;
-    std::string mId;
+        unsigned int mRecordFlags;
+        std::string mId;
 
-    Variant mValue;
+        Variant mValue;
 
-    void load(ESMReader &esm, bool &isDeleted);
+        void load(ESMReader& esm, bool& isDeleted);
 
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+        void save(ESMWriter& esm, bool isDeleted = false) const;
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
+        void blank();
+        ///< Set record to default state (does not touch the ID).
+    };
 
-    bool operator== (const GameSetting& left, const GameSetting& right);
+    bool operator==(const GameSetting& left, const GameSetting& right);
 }
 #endif

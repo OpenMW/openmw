@@ -14,13 +14,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
 #include <utility>
 #include <vector>
-#include <memory>
 
 struct sqlite3;
 struct sqlite3_stmt;
@@ -93,8 +93,8 @@ namespace DetourNavigator
         struct DeleteTilesAt
         {
             static std::string_view text() noexcept;
-            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace,
-                const TilePosition& tilePosition);
+            static void bind(
+                sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace, const TilePosition& tilePosition);
         };
 
         struct DeleteTilesAtExcept
@@ -107,8 +107,8 @@ namespace DetourNavigator
         struct DeleteTilesOutsideRange
         {
             static std::string_view text() noexcept;
-            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace,
-                const TilesPositionsRange& range);
+            static void bind(
+                sqlite3& db, sqlite3_stmt& statement, std::string_view worldspace, const TilesPositionsRange& range);
         };
 
         struct GetMaxShapeId
@@ -120,8 +120,8 @@ namespace DetourNavigator
         struct FindShapeId
         {
             static std::string_view text() noexcept;
-            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view name,
-                ShapeType type, const Sqlite3::ConstBlob& hash);
+            static void bind(sqlite3& db, sqlite3_stmt& statement, std::string_view name, ShapeType type,
+                const Sqlite3::ConstBlob& hash);
         };
 
         struct InsertShape
@@ -147,11 +147,11 @@ namespace DetourNavigator
 
         TileId getMaxTileId();
 
-        std::optional<Tile> findTile(std::string_view worldspace,
-            const TilePosition& tilePosition, const std::vector<std::byte>& input);
+        std::optional<Tile> findTile(
+            std::string_view worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
 
-        std::optional<TileData> getTileData(std::string_view worldspace,
-            const TilePosition& tilePosition, const std::vector<std::byte>& input);
+        std::optional<TileData> getTileData(
+            std::string_view worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
 
         int insertTile(TileId tileId, std::string_view worldspace, const TilePosition& tilePosition,
             TileVersion version, const std::vector<std::byte>& input, const std::vector<std::byte>& data);

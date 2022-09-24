@@ -1,10 +1,10 @@
-#include <components/to_utf8/to_utf8.hpp>
 #include <components/misc/strings/conversion.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 #include <gtest/gtest.h>
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 #ifndef OPENMW_TEST_SUITE_SOURCE_DIR
 #define OPENMW_TEST_SUITE_SOURCE_DIR ""
@@ -26,13 +26,16 @@ namespace
     {
         std::ifstream file;
         file.exceptions(std::ios::failbit | std::ios::badbit);
-        file.open(std::filesystem::path{ OPENMW_TEST_SUITE_SOURCE_DIR } / "toutf8" / "data" / Misc::StringUtils::stringToU8String(fileName));
+        file.open(std::filesystem::path{ OPENMW_TEST_SUITE_SOURCE_DIR } / "toutf8" / "data"
+            / Misc::StringUtils::stringToU8String(fileName));
         std::stringstream buffer;
         buffer << file.rdbuf();
         return buffer.str();
     }
 
-    struct Utf8EncoderTest : TestWithParam<Params> {};
+    struct Utf8EncoderTest : TestWithParam<Params>
+    {
+    };
 
     TEST(Utf8EncoderTest, getUtf8ShouldReturnEmptyAsIs)
     {
@@ -69,7 +72,9 @@ namespace
 
     TEST(Utf8EncoderTest, getUtf8ShouldLookUpUntilEndOfInputForNonAscii)
     {
-        const std::string input("a\x92" "b");
+        const std::string input(
+            "a\x92"
+            "b");
         Utf8Encoder encoder(FromType::WINDOWS_1252);
         const std::string_view result = encoder.getUtf8(std::string_view(input.data(), 2));
         EXPECT_EQ(result, "a\xE2\x80\x99");
@@ -134,10 +139,9 @@ namespace
         EXPECT_EQ(result, expected);
     }
 
-    INSTANTIATE_TEST_SUITE_P(Files, Utf8EncoderTest, Values(
-        Params {ToUTF8::WINDOWS_1251, "russian-win1251.txt", "russian-utf8.txt"},
-        Params {ToUTF8::WINDOWS_1252, "french-win1252.txt", "french-utf8.txt"}
-    ));
+    INSTANTIATE_TEST_SUITE_P(Files, Utf8EncoderTest,
+        Values(Params{ ToUTF8::WINDOWS_1251, "russian-win1251.txt", "russian-utf8.txt" },
+            Params{ ToUTF8::WINDOWS_1252, "french-win1252.txt", "french-utf8.txt" }));
 
     TEST(StatelessUtf8EncoderTest, shouldCleanupBuffer)
     {
@@ -155,7 +159,8 @@ namespace
     {
         std::string buffer;
         StatelessUtf8Encoder encoder(FromType::WINDOWS_1252);
-        const std::string_view utf8 = encoder.getUtf8(std::string_view("long string\x92"), BufferAllocationPolicy::FitToRequiredSize, buffer);
+        const std::string_view utf8
+            = encoder.getUtf8(std::string_view("long string\x92"), BufferAllocationPolicy::FitToRequiredSize, buffer);
         EXPECT_EQ(buffer.size(), utf8.size());
     }
 }

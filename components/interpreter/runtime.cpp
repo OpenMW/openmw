@@ -1,45 +1,50 @@
 #include "runtime.hpp"
 
-#include <stdexcept>
 #include <cassert>
 #include <cstring>
+#include <stdexcept>
 
 namespace Interpreter
 {
-    Runtime::Runtime() : mContext (nullptr), mCode (nullptr), mCodeSize(0), mPC (0) {}
+    Runtime::Runtime()
+        : mContext(nullptr)
+        , mCode(nullptr)
+        , mCodeSize(0)
+        , mPC(0)
+    {
+    }
 
     int Runtime::getPC() const
     {
         return mPC;
     }
 
-    int Runtime::getIntegerLiteral (int index) const
+    int Runtime::getIntegerLiteral(int index) const
     {
-        if (index < 0 || index >= static_cast<int> (mCode[1]))
+        if (index < 0 || index >= static_cast<int>(mCode[1]))
             throw std::out_of_range("out of range");
 
-        const Type_Code *literalBlock = mCode + 4 + mCode[0];
+        const Type_Code* literalBlock = mCode + 4 + mCode[0];
 
-        return *reinterpret_cast<const int *> (&literalBlock[index]);
+        return *reinterpret_cast<const int*>(&literalBlock[index]);
     }
 
-    float Runtime::getFloatLiteral (int index) const
+    float Runtime::getFloatLiteral(int index) const
     {
-        if (index < 0 || index >= static_cast<int> (mCode[2]))
+        if (index < 0 || index >= static_cast<int>(mCode[2]))
             throw std::out_of_range("out of range");
 
-        const Type_Code *literalBlock = mCode + 4 + mCode[0] + mCode[1];
+        const Type_Code* literalBlock = mCode + 4 + mCode[0] + mCode[1];
 
-        return *reinterpret_cast<const float *> (&literalBlock[index]);
+        return *reinterpret_cast<const float*>(&literalBlock[index]);
     }
 
     std::string_view Runtime::getStringLiteral(int index) const
     {
-        if (index < 0 || static_cast<int> (mCode[3]) <= 0)
+        if (index < 0 || static_cast<int>(mCode[3]) <= 0)
             throw std::out_of_range("out of range");
 
-        const char *literalBlock =
-            reinterpret_cast<const char *> (mCode + 4 + mCode[0] + mCode[1] + mCode[2]);
+        const char* literalBlock = reinterpret_cast<const char*>(mCode + 4 + mCode[0] + mCode[1] + mCode[2]);
 
         size_t offset = 0;
 
@@ -50,10 +55,10 @@ namespace Interpreter
                 throw std::out_of_range("out of range");
         }
 
-        return literalBlock+offset;
+        return literalBlock + offset;
     }
 
-    void Runtime::configure (const Type_Code *code, int codeSize, Context& context)
+    void Runtime::configure(const Type_Code* code, int codeSize, Context& context)
     {
         clear();
 
@@ -71,49 +76,49 @@ namespace Interpreter
         mStack.clear();
     }
 
-    void Runtime::setPC (int PC)
+    void Runtime::setPC(int PC)
     {
         mPC = PC;
     }
 
-    void Runtime::push (const Data& data)
+    void Runtime::push(const Data& data)
     {
-        mStack.push_back (data);
+        mStack.push_back(data);
     }
 
-    void Runtime::push (Type_Integer value)
+    void Runtime::push(Type_Integer value)
     {
         Data data;
         data.mInteger = value;
-        push (data);
+        push(data);
     }
 
-    void Runtime::push (Type_Float value)
+    void Runtime::push(Type_Float value)
     {
         Data data;
         data.mFloat = value;
-        push (data);
+        push(data);
     }
 
     void Runtime::pop()
     {
         if (mStack.empty())
-            throw std::runtime_error ("stack underflow");
+            throw std::runtime_error("stack underflow");
 
         mStack.pop_back();
     }
 
-    Data& Runtime::operator[] (int Index)
+    Data& Runtime::operator[](int Index)
     {
-        if (Index<0 || Index>=static_cast<int> (mStack.size()))
-            throw std::runtime_error ("stack index out of range");
+        if (Index < 0 || Index >= static_cast<int>(mStack.size()))
+            throw std::runtime_error("stack index out of range");
 
-        return mStack[mStack.size()-Index-1];
+        return mStack[mStack.size() - Index - 1];
     }
 
     Context& Runtime::getContext()
     {
-        assert (mContext);
+        assert(mContext);
         return *mContext;
     }
 }

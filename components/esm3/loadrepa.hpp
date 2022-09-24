@@ -8,35 +8,35 @@
 namespace ESM
 {
 
-class ESMReader;
-class ESMWriter;
+    class ESMReader;
+    class ESMWriter;
 
-struct Repair
-{
-    constexpr static RecNameInts sRecordId = REC_REPA;
-
-    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
-    static std::string_view getRecordType() { return "Repair"; }
-
-    struct Data
+    struct Repair
     {
-        float mWeight;
-        int mValue;
+        constexpr static RecNameInts sRecordId = REC_REPA;
 
-        int mUses;
-        float mQuality;
-    }; // Size = 16
+        /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+        static std::string_view getRecordType() { return "Repair"; }
 
-    Data mData;
-    unsigned int mRecordFlags;
-    std::string mId, mName, mModel, mIcon, mScript;
+        struct Data
+        {
+            float mWeight;
+            int mValue;
 
-    void load(ESMReader &esm, bool &isDeleted);
-    void save(ESMWriter &esm, bool isDeleted = false) const;
+            int mUses;
+            float mQuality;
+        }; // Size = 16
 
-    void blank();
-    ///< Set record to default state (does not touch the ID).
-};
+        Data mData;
+        unsigned int mRecordFlags;
+        std::string mId, mName, mModel, mIcon, mScript;
+
+        void load(ESMReader& esm, bool& isDeleted);
+        void save(ESMWriter& esm, bool isDeleted = false) const;
+
+        void blank();
+        ///< Set record to default state (does not touch the ID).
+    };
 
 }
 #endif

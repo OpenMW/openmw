@@ -7,76 +7,78 @@ namespace MWClass
 {
     class Weapon : public MWWorld::RegisteredClass<Weapon>
     {
-            friend MWWorld::RegisteredClass<Weapon>;
+        friend MWWorld::RegisteredClass<Weapon>;
 
-            MWWorld::Ptr
-            copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
+        MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const override;
 
-        public:
-            Weapon();
+    public:
+        Weapon();
 
-            void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
-            ///< Add reference into a cell for rendering
+        void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
+            MWRender::RenderingInterface& renderingInterface) const override;
+        ///< Add reference into a cell for rendering
 
-            std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
-            ///< \return name or ID; can return an empty string.
+        std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
+        ///< \return name or ID; can return an empty string.
 
-            std::unique_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
-                const MWWorld::Ptr& actor) const override;
-            ///< Generate action for activation
+        std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
+        ///< Generate action for activation
 
-            MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const override;
-            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
+        MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override;
+        ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            bool hasItemHealth (const MWWorld::ConstPtr& ptr) const override;
-            ///< \return Item health data available?
+        bool hasItemHealth(const MWWorld::ConstPtr& ptr) const override;
+        ///< \return Item health data available?
 
-            int getItemMaxHealth (const MWWorld::ConstPtr& ptr) const override;
-            ///< Return item max health or throw an exception, if class does not have item health
+        int getItemMaxHealth(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return item max health or throw an exception, if class does not have item health
 
-            std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return name of the script attached to ptr
+        std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return name of the script attached to ptr
 
-            std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::ConstPtr& ptr) const override;
-            ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
-            /// stay stacked when equipped?
+        std::pair<std::vector<int>, bool> getEquipmentSlots(const MWWorld::ConstPtr& ptr) const override;
+        ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
+        /// stay stacked when equipped?
 
-            int getEquipmentSkill (const MWWorld::ConstPtr& ptr) const override;
-            /// Return the index of the skill this item corresponds to when equipped or -1, if there is
-            /// no such skill.
+        int getEquipmentSkill(const MWWorld::ConstPtr& ptr) const override;
+        /// Return the index of the skill this item corresponds to when equipped or -1, if there is
+        /// no such skill.
 
-            int getValue (const MWWorld::ConstPtr& ptr) const override;
-            ///< Return trade value of the object. Throws an exception, if the object can't be traded.
+        int getValue(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return the pick up sound Id
+        std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return the pick up sound Id
 
-            std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return the put down sound Id
+        std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return the put down sound Id
 
-            const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
-            ///< Return name of inventory icon.
+        const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
+        ///< Return name of inventory icon.
 
-            std::string_view getEnchantment(const MWWorld::ConstPtr& ptr) const override;
-            ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
+        std::string_view getEnchantment(const MWWorld::ConstPtr& ptr) const override;
+        ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
 
-            const std::string& applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const override;
-            ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
+        const std::string& applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge,
+            const std::string& newName) const override;
+        ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
-            std::pair<int, std::string_view> canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
-            ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
-            ///  Second item in the pair specifies the error message
+        std::pair<int, std::string_view> canBeEquipped(
+            const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
+        ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon
+        ///< conflicts with that.
+        ///  Second item in the pair specifies the error message
 
-            std::unique_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const override;
-            ///< Generate action for using via inventory menu
+        std::unique_ptr<MWWorld::Action> use(const MWWorld::Ptr& ptr, bool force = false) const override;
+        ///< Generate action for using via inventory menu
 
-            std::string getModel(const MWWorld::ConstPtr &ptr) const override;
+        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
 
-            bool canSell (const MWWorld::ConstPtr& item, int npcServices) const override;
+        bool canSell(const MWWorld::ConstPtr& item, int npcServices) const override;
 
-            float getWeight (const MWWorld::ConstPtr& ptr) const override;
+        float getWeight(const MWWorld::ConstPtr& ptr) const override;
 
-            int getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const override;
+        int getEnchantmentPoints(const MWWorld::ConstPtr& ptr) const override;
     };
 }
 

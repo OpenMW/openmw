@@ -26,8 +26,8 @@
 */
 #include "loadstat.hpp"
 
-#include <stdexcept>
 #include <iostream> // FIXME: debug only
+#include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -36,24 +36,30 @@ void ESM4::Static::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
             case ESM4::SUB_MODT:
             {
                 // version is only availabe in TES5 (seems to be 27 or 28?)
-                //if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                    //std::cout << "STAT MODT ver: " << std::hex << reader.hdr().record.version << std::endl;
+                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                // std::cout << "STAT MODT ver: " << std::hex << reader.hdr().record.version << std::endl;
 
                 // for TES4 these are just a sequence of bytes
-                mMODT.resize(subHdr.dataSize/sizeof(std::uint8_t));
+                mMODT.resize(subHdr.dataSize / sizeof(std::uint8_t));
                 for (std::vector<std::uint8_t>::iterator it = mMODT.begin(); it != mMODT.end(); ++it)
                 {
                     reader.get(*it);
@@ -72,7 +78,7 @@ void ESM4::Static::load(ESM4::Reader& reader)
             case ESM4::SUB_BRUS: // FONV
             case ESM4::SUB_RNAM: // FONV
             {
-                //std::cout << "STAT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "STAT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -82,10 +88,10 @@ void ESM4::Static::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Static::save(ESM4::Writer& writer) const
+// void ESM4::Static::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Static::blank()
+// void ESM4::Static::blank()
 //{
-//}
+// }

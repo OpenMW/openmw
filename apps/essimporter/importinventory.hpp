@@ -1,11 +1,11 @@
 #ifndef OPENMW_ESSIMPORT_IMPORTINVENTORY_H
 #define OPENMW_ESSIMPORT_IMPORTINVENTORY_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include <components/esm3/cellref.hpp>
 #include <components/esm/esmcommon.hpp>
+#include <components/esm3/cellref.hpp>
 
 #include "importscri.hpp"
 

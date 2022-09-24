@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void StartScript::load(ESMReader &esm, bool &isDeleted)
+    void StartScript::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -40,7 +40,7 @@ namespace ESM
         if (!hasData && !isDeleted)
             esm.fail("Missing DATA");
     }
-    void StartScript::save(ESMWriter &esm, bool isDeleted) const
+    void StartScript::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
         if (isDeleted)

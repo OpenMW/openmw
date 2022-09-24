@@ -6,8 +6,8 @@
 #include <osg/ref_ptr>
 #include <osgViewer/ViewerEventHandlers>
 
-#include <components/settings/settings.hpp>
 #include <components/sdlutil/events.hpp>
+#include <components/settings/settings.hpp>
 #include <filesystem>
 
 #include "../mwbase/inputmanager.hpp"
@@ -43,26 +43,24 @@ namespace MWInput
     class GyroManager;
 
     /**
-    * @brief Class that provides a high-level API for game input
-    */
+     * @brief Class that provides a high-level API for game input
+     */
     class InputManager final : public MWBase::InputManager
     {
     public:
-        InputManager(
-            SDL_Window* window,
-            osg::ref_ptr<osgViewer::Viewer> viewer,
+        InputManager(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
-            osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
-            const std::filesystem::path &userFile, bool userFileExists,
-            const std::filesystem::path &userControllerBindingsFile,
-            const std::filesystem::path &controllerBindingsFile, bool grab);
+            osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
+            const std::filesystem::path& userFile, bool userFileExists,
+            const std::filesystem::path& userControllerBindingsFile,
+            const std::filesystem::path& controllerBindingsFile, bool grab);
 
         ~InputManager() final;
 
         /// Clear all savegame-specific data
         void clear() override;
 
-        void update(float dt, bool disableControls, bool disableEvents=false) override;
+        void update(float dt, bool disableControls, bool disableEvents = false) override;
 
         void changeInputMode(bool guiMode) override;
 
@@ -76,8 +74,8 @@ namespace MWInput
         bool getControlSwitch(std::string_view sw) override;
 
         std::string_view getActionDescription(int action) const override;
-        std::string getActionKeyBindingName (int action) const override;
-        std::string getActionControllerBindingName (int action) const override;
+        std::string getActionKeyBindingName(int action) const override;
+        std::string getActionControllerBindingName(int action) const override;
         bool actionIsActive(int action) const override;
 
         float getActionValue(int action) const override;
@@ -89,7 +87,7 @@ namespace MWInput
         int getNumActions() override { return A_Last; }
         const std::initializer_list<int>& getActionKeySorting() override;
         const std::initializer_list<int>& getActionControllerSorting() override;
-        void enableDetectingBindingMode (int action, bool keyboard) override;
+        void enableDetectingBindingMode(int action, bool keyboard) override;
         void resetToDefaultKeyBindings() override;
         void resetToDefaultControllerBindings() override;
 

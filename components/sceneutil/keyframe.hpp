@@ -5,9 +5,9 @@
 
 #include <osg/Object>
 
+#include <components/resource/animation.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
-#include <components/resource/animation.hpp>
 
 namespace SceneUtil
 {
@@ -18,9 +18,11 @@ namespace SceneUtil
         KeyframeController() {}
 
         KeyframeController(const KeyframeController& copy)
-            : SceneUtil::Controller(copy) {}
+            : SceneUtil::Controller(copy)
+        {
+        }
 
-        virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
+        virtual osg::Vec3f getTranslation(float time) const { return osg::Vec3f(); }
 
         /// @note We could drop this function in favour of osg::Object::asCallback from OSG 3.6 on.
         virtual osg::Callback* getAsCallback() = 0;
@@ -34,12 +36,12 @@ namespace SceneUtil
         TextKeyMapHolder(const TextKeyMapHolder& copy, const osg::CopyOp& copyop)
             : osg::Object(copy, copyop)
             , mTextKeys(copy.mTextKeys)
-        {}
+        {
+        }
 
         TextKeyMap mTextKeys;
 
         META_Object(SceneUtil, TextKeyMapHolder)
-
     };
 
     /// Wrapper object containing the animation track and its KeyframeControllers.
@@ -58,7 +60,7 @@ namespace SceneUtil
         META_Object(SceneUtil, KeyframeHolder)
 
         /// Controllers mapped to node name.
-        typedef std::map<std::string, osg::ref_ptr<const KeyframeController> > KeyframeControllerMap;
+        typedef std::map<std::string, osg::ref_ptr<const KeyframeController>> KeyframeControllerMap;
         KeyframeControllerMap mKeyframeControllers;
     };
 

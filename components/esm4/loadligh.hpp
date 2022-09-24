@@ -41,8 +41,8 @@ namespace ESM4
     {
         struct Data
         {
-            std::uint32_t time;               // FO/FONV only
-            float         duration = -1;
+            std::uint32_t time; // FO/FONV only
+            float duration = -1;
             std::uint32_t radius;
             std::uint32_t colour; // RGBA
             // flags:
@@ -56,18 +56,18 @@ namespace ESM4
             // 0x00000100 = Pulse Slow
             // 0x00000200 = Spot Light
             // 0x00000400 = Spot Shadow
-            std::int32_t  flags;
-            float         falloff = 1.f;
-            float         FOV = 90; // FIXME: FOV in degrees or radians?
-            float         nearClip;           // TES5 only
-            float         frequency;          // TES5 only
-            float         intensityAmplitude; // TES5 only
-            float         movementAmplitude;  // TES5 only
-            std::uint32_t value;   // gold
-            float         weight;
+            std::int32_t flags;
+            float falloff = 1.f;
+            float FOV = 90; // FIXME: FOV in degrees or radians?
+            float nearClip; // TES5 only
+            float frequency; // TES5 only
+            float intensityAmplitude; // TES5 only
+            float movementAmplitude; // TES5 only
+            std::uint32_t value; // gold
+            float weight;
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -85,9 +85,9 @@ namespace ESM4
         Data mData;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

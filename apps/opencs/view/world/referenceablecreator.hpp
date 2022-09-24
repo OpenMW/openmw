@@ -9,29 +9,25 @@ namespace CSVWorld
 {
     class ReferenceableCreator : public GenericCreator
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            QComboBox *mType;
+        QComboBox* mType;
 
-        private:
+    private:
+        void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
 
-            void configureCreateCommand (CSMWorld::CreateCommand& command) const override;
+    public:
+        ReferenceableCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
-        public:
+        void reset() override;
 
-            ReferenceableCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id);
+        void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 
-            void reset() override;
+        void toggleWidgets(bool active = true) override;
 
-            void cloneMode (const std::string& originId,
-                const CSMWorld::UniversalId::Type type) override;
+    private slots:
 
-            void toggleWidgets(bool active = true) override;
-
-        private slots:
-
-            void setType (int index);
+        void setType(int index);
     };
 }
 

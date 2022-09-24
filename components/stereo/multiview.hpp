@@ -1,10 +1,10 @@
 #ifndef STEREO_MULTIVIEW_H
 #define STEREO_MULTIVIEW_H
 
-#include <osg/ref_ptr>
-#include <osg/GL>
 #include <osg/Camera>
 #include <osg/FrameBufferObject>
+#include <osg/GL>
+#include <osg/ref_ptr>
 
 #include <array>
 #include <memory>
@@ -32,16 +32,19 @@ namespace Stereo
     //! Check if Multiview should be used. Results are undefined if called before configureExtensions().
     bool getMultiview();
 
-    //! Use the provided context to check what extensions are supported and configure use of multiview based on extensions and settings.
+    //! Use the provided context to check what extensions are supported and configure use of multiview based on
+    //! extensions and settings.
     void configureExtensions(unsigned int contextID);
 
     //! Sets the appropriate vertex buffer hint on OSG's display settings if needed
     void setVertexBufferHint();
 
     //! Creates a Texture2D as a texture view into a Texture2DArray
-    osg::ref_ptr<osg::Texture2D> createTextureView_Texture2DFromTexture2DArray(osg::Texture2DArray* textureArray, int layer);
+    osg::ref_ptr<osg::Texture2D> createTextureView_Texture2DFromTexture2DArray(
+        osg::Texture2DArray* textureArray, int layer);
 
-    //! Class that manages the specifics of GL_OVR_Multiview aware framebuffers, separating the layers into separate framebuffers, and disabling
+    //! Class that manages the specifics of GL_OVR_Multiview aware framebuffers, separating the layers into separate
+    //! framebuffers, and disabling
     class MultiviewFramebuffer
     {
     public:
@@ -88,25 +91,32 @@ namespace Stereo
     void setMultiviewMSAAResolveCallback(osgUtil::RenderStage* renderStage);
 
     //! Sets up or updates multiview matrices for the given stateset
-    void setMultiviewMatrices(osg::StateSet* stateset, const std::array<osg::Matrix, 2>& projection, bool createInverseMatrices = false);
+    void setMultiviewMatrices(
+        osg::StateSet* stateset, const std::array<osg::Matrix, 2>& projection, bool createInverseMatrices = false);
 
-    //! Sets the width/height of a texture by first down-casting it to the appropriate type. Sets depth to 2 always for Texture2DArray and Texture2DMultisampleArray.
+    //! Sets the width/height of a texture by first down-casting it to the appropriate type. Sets depth to 2 always for
+    //! Texture2DArray and Texture2DMultisampleArray.
     void setMultiviewCompatibleTextureSize(osg::Texture* tex, int w, int h);
 
-    //! Creates a texture (Texture2D, Texture2DMultisample, Texture2DArray, or Texture2DMultisampleArray) based on multiview settings and sample count.
+    //! Creates a texture (Texture2D, Texture2DMultisample, Texture2DArray, or Texture2DMultisampleArray) based on
+    //! multiview settings and sample count.
     osg::ref_ptr<osg::Texture> createMultiviewCompatibleTexture(int width, int height, int samples);
 
-    //! Returns a framebuffer attachment from the texture, returning a multiview attachment if the texture is one of Texture2DArray or Texture2DMultisampleArray
+    //! Returns a framebuffer attachment from the texture, returning a multiview attachment if the texture is one of
+    //! Texture2DArray or Texture2DMultisampleArray
     osg::FrameBufferAttachment createMultiviewCompatibleAttachment(osg::Texture* tex);
 
-    //! If OSG has multiview, returns the magic number used to tell OSG to create a multiview attachment. Otherwise returns 0.
+    //! If OSG has multiview, returns the magic number used to tell OSG to create a multiview attachment. Otherwise
+    //! returns 0.
     unsigned int osgFaceControlledByMultiviewShader();
 
-    //! Implements resolving a multisamples multiview framebuffer. Does not automatically reflect changes to the fbo attachments, must call dirty() when the fbo attachments change.
+    //! Implements resolving a multisamples multiview framebuffer. Does not automatically reflect changes to the fbo
+    //! attachments, must call dirty() when the fbo attachments change.
     class MultiviewFramebufferResolve
     {
     public:
-        MultiviewFramebufferResolve(osg::FrameBufferObject* msaaFbo, osg::FrameBufferObject* resolveFbo, GLbitfield blitMask);
+        MultiviewFramebufferResolve(
+            osg::FrameBufferObject* msaaFbo, osg::FrameBufferObject* resolveFbo, GLbitfield blitMask);
 
         void resolveImplementation(osg::State& state);
 
@@ -129,13 +139,15 @@ namespace Stereo
         int mHeight = -1;
     };
 
-    //! Wrapper for osg::CullSettings::InitialFrustumCallback, to avoid exposing osg multiview interfaces outside of multiview.cpp
+    //! Wrapper for osg::CullSettings::InitialFrustumCallback, to avoid exposing osg multiview interfaces outside of
+    //! multiview.cpp
     struct InitialFrustumCallback
     {
         InitialFrustumCallback(osg::Camera* camera);
         virtual ~InitialFrustumCallback();
 
-        virtual void setInitialFrustum(osg::CullStack& cullStack, osg::BoundingBoxd& bb, bool& nearCulling, bool& farCulling) const = 0;
+        virtual void setInitialFrustum(
+            osg::CullStack& cullStack, osg::BoundingBoxd& bb, bool& nearCulling, bool& farCulling) const = 0;
 
         osg::observer_ptr<osg::Camera> mCamera;
     };

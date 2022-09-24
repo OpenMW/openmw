@@ -9,8 +9,8 @@
 
 #include <osg/ref_ptr>
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace SceneUtil
 {
@@ -36,124 +36,125 @@ namespace MWWorld
 
     class RefData
     {
-            osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mBaseNode;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mBaseNode;
 
-            MWScript::Locals mLocals;
-            std::shared_ptr<MWLua::LocalScripts> mLuaScripts;
+        MWScript::Locals mLocals;
+        std::shared_ptr<MWLua::LocalScripts> mLuaScripts;
 
-            /// separate delete flag used for deletion by a content file
-            /// @note not stored in the save game file.
-            bool mDeletedByContentFile:1;
+        /// separate delete flag used for deletion by a content file
+        /// @note not stored in the save game file.
+        bool mDeletedByContentFile : 1;
 
-            bool mEnabled:1;
-        public:
-            bool mPhysicsPostponed:1;
-        private:
+        bool mEnabled : 1;
 
-            /// 0: deleted
-            int mCount;
+    public:
+        bool mPhysicsPostponed : 1;
 
-            ESM::Position mPosition;
+    private:
+        /// 0: deleted
+        int mCount;
 
-            ESM::AnimationState mAnimationState;
+        ESM::Position mPosition;
 
-            std::unique_ptr<CustomData> mCustomData;
+        ESM::AnimationState mAnimationState;
 
-            void copy (const RefData& refData);
+        std::unique_ptr<CustomData> mCustomData;
 
-            void cleanup();
+        void copy(const RefData& refData);
 
-            bool mChanged;
+        void cleanup();
 
-            unsigned int mFlags;
+        bool mChanged;
 
-        public:
-            RefData();
+        unsigned int mFlags;
 
-            /// @param cellRef Used to copy constant data such as position into this class where it can
-            /// be altered without affecting the original data. This makes it possible
-            /// to reset the position as the original data is still held in the CellRef
-            RefData (const ESM::CellRef& cellRef);
+    public:
+        RefData();
 
-            RefData (const ESM::ObjectState& objectState, bool deletedByContentFile);
-            ///< Ignores local variables and custom data (not enough context available here to
-            /// perform these operations).
+        /// @param cellRef Used to copy constant data such as position into this class where it can
+        /// be altered without affecting the original data. This makes it possible
+        /// to reset the position as the original data is still held in the CellRef
+        RefData(const ESM::CellRef& cellRef);
 
-            RefData (const RefData& refData);
-            RefData (RefData&& other);
+        RefData(const ESM::ObjectState& objectState, bool deletedByContentFile);
+        ///< Ignores local variables and custom data (not enough context available here to
+        /// perform these operations).
 
-            ~RefData();
+        RefData(const RefData& refData);
+        RefData(RefData&& other);
 
-            void write(ESM::ObjectState& objectState, std::string_view scriptId = {}) const;
-            ///< Ignores custom data (not enough context available here to
-            /// perform this operations).
+        ~RefData();
 
-            RefData& operator= (const RefData& refData);
-            RefData& operator= (RefData&& other);
+        void write(ESM::ObjectState& objectState, std::string_view scriptId = {}) const;
+        ///< Ignores custom data (not enough context available here to
+        /// perform this operations).
 
-            /// Return base node (can be a null pointer).
-            SceneUtil::PositionAttitudeTransform* getBaseNode();
+        RefData& operator=(const RefData& refData);
+        RefData& operator=(RefData&& other);
 
-            /// Return base node (can be a null pointer).
-            const SceneUtil::PositionAttitudeTransform* getBaseNode() const;
+        /// Return base node (can be a null pointer).
+        SceneUtil::PositionAttitudeTransform* getBaseNode();
 
-            /// Set base node (can be a null pointer).
-            void setBaseNode(osg::ref_ptr<SceneUtil::PositionAttitudeTransform> base);
+        /// Return base node (can be a null pointer).
+        const SceneUtil::PositionAttitudeTransform* getBaseNode() const;
 
-            int getCount(bool absolute = true) const;
+        /// Set base node (can be a null pointer).
+        void setBaseNode(osg::ref_ptr<SceneUtil::PositionAttitudeTransform> base);
 
-            void setLocals (const ESM::Script& script);
+        int getCount(bool absolute = true) const;
 
-            MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
-            void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
+        void setLocals(const ESM::Script& script);
 
-            void setCount (int count);
-            ///< Set object count (an object pile is a simple object with a count >1).
-            ///
-            /// \warning Do not call setCount() to add or remove objects from a
-            /// container or an actor's inventory. Call ContainerStore::add() or
-            /// ContainerStore::remove() instead.
+        MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
+        void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
 
-            /// This flag is only used for content stack loading and will not be stored in the savegame.
-            /// If the object was deleted by gameplay, then use setCount(0) instead.
-            void setDeletedByContentFile(bool deleted);
+        void setCount(int count);
+        ///< Set object count (an object pile is a simple object with a count >1).
+        ///
+        /// \warning Do not call setCount() to add or remove objects from a
+        /// container or an actor's inventory. Call ContainerStore::add() or
+        /// ContainerStore::remove() instead.
 
-            /// Returns true if the object was either deleted by the content file or by gameplay.
-            bool isDeleted() const;
-            /// Returns true if the object was deleted by a content file.
-            bool isDeletedByContentFile() const;
+        /// This flag is only used for content stack loading and will not be stored in the savegame.
+        /// If the object was deleted by gameplay, then use setCount(0) instead.
+        void setDeletedByContentFile(bool deleted);
 
-            MWScript::Locals& getLocals();
+        /// Returns true if the object was either deleted by the content file or by gameplay.
+        bool isDeleted() const;
+        /// Returns true if the object was deleted by a content file.
+        bool isDeletedByContentFile() const;
 
-            bool isEnabled() const;
+        MWScript::Locals& getLocals();
 
-            void enable();
+        bool isEnabled() const;
 
-            void disable();
+        void enable();
 
-            void setPosition (const ESM::Position& pos);
-            const ESM::Position& getPosition() const;
+        void disable();
 
-            void setCustomData(std::unique_ptr<CustomData>&& value) noexcept;
-            ///< Set custom data (potentially replacing old custom data). The ownership of \a data is
-            /// transferred to this.
+        void setPosition(const ESM::Position& pos);
+        const ESM::Position& getPosition() const;
 
-            CustomData *getCustomData();
-            ///< May return a 0-pointer. The ownership of the return data object is not transferred.
+        void setCustomData(std::unique_ptr<CustomData>&& value) noexcept;
+        ///< Set custom data (potentially replacing old custom data). The ownership of \a data is
+        /// transferred to this.
 
-            const CustomData *getCustomData() const;
+        CustomData* getCustomData();
+        ///< May return a 0-pointer. The ownership of the return data object is not transferred.
 
-            bool activate();
+        const CustomData* getCustomData() const;
 
-            bool onActivate();
+        bool activate();
 
-            bool activateByScript();
+        bool onActivate();
 
-            bool hasChanged() const;
-            ///< Has this RefData changed since it was originally loaded?
+        bool activateByScript();
 
-            const ESM::AnimationState& getAnimationState() const;
-            ESM::AnimationState& getAnimationState();
+        bool hasChanged() const;
+        ///< Has this RefData changed since it was originally loaded?
+
+        const ESM::AnimationState& getAnimationState() const;
+        ESM::AnimationState& getAnimationState();
     };
 }
 

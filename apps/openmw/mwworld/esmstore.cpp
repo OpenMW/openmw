@@ -5,16 +5,16 @@
 #include <tuple>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/readerscache.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/lua/configuration.hpp>
 #include <components/misc/algorithm.hpp>
-#include <components/esm3/readerscache.hpp>
-#include <components/esm/records.hpp>
 
-#include <components/esmloader/load.hpp>
 #include <components/esm4/common.hpp>
+#include <components/esmloader/load.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
 
@@ -25,12 +25,17 @@ namespace
         ESM::RefNum mRefNum;
         std::size_t mRefID;
 
-        Ref(ESM::RefNum refNum, std::size_t refID) : mRefNum(refNum), mRefID(refID) {}
+        Ref(ESM::RefNum refNum, std::size_t refID)
+            : mRefNum(refNum)
+            , mRefID(refID)
+        {
+        }
     };
 
     constexpr std::size_t deletedRefID = std::numeric_limits<std::size_t>::max();
 
-    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, ESM::ReadersCache& readers)
+    void readRefs(
+        const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, ESM::ReadersCache& readers)
     {
         // TODO: we have many similar copies of this code.
         for (size_t i = 0; i < cell.mContextList.size(); i++)
@@ -43,18 +48,19 @@ namespace
             bool deleted = false;
             while (cell.getNextRef(*reader, ref, deleted))
             {
-                if(deleted)
+                if (deleted)
                     refs.emplace_back(ref.mRefNum, deletedRefID);
-                else if (std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), ref.mRefNum) == cell.mMovedRefs.end())
+                else if (std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), ref.mRefNum)
+                    == cell.mMovedRefs.end())
                 {
                     refs.emplace_back(ref.mRefNum, refIDs.size());
                     refIDs.push_back(std::move(ref.mRefID));
                 }
             }
         }
-        for(const auto& [value, deleted] : cell.mLeasedRefs)
+        for (const auto& [value, deleted] : cell.mLeasedRefs)
         {
-            if(deleted)
+            if (deleted)
                 refs.emplace_back(value.mRefNum, deletedRefID);
             else
             {
@@ -72,7 +78,9 @@ namespace
         throw std::runtime_error("List of NPC classes is empty!");
     }
 
-    std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions, const MWWorld::Store<ESM::Class>& classes, const std::unordered_map<std::string, ESM::NPC, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>& npcs)
+    std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions,
+        const MWWorld::Store<ESM::Class>& classes,
+        const std::unordered_map<std::string, ESM::NPC, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
         const std::string& defaultCls = getDefaultClass(classes);
@@ -89,10 +97,11 @@ namespace
             const std::string& npcFaction = npc.mFaction;
             if (!npcFaction.empty())
             {
-                const ESM::Faction *fact = factions.search(npcFaction);
+                const ESM::Faction* fact = factions.search(npcFaction);
                 if (!fact)
                 {
-                    Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '" << npc.mFaction << "', ignoring it.";
+                    Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '"
+                                        << npc.mFaction << "', ignoring it.";
                     npc.mFaction.clear();
                     npc.mNpdt.mRank = 0;
                     changed = true;
@@ -100,10 +109,11 @@ namespace
             }
 
             const std::string& npcClass = npc.mClass;
-            const ESM::Class *cls = classes.search(npcClass);
+            const ESM::Class* cls = classes.search(npcClass);
             if (!cls)
             {
-                Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '" << npc.mClass << "', using '" << defaultCls << "' class as replacement.";
+                Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '"
+                                    << npc.mClass << "', using '" << defaultCls << "' class as replacement.";
                 npc.mClass = defaultCls;
                 changed = true;
             }
@@ -115,17 +125,18 @@ namespace
         return npcsToReplace;
     }
 
-    // Custom enchanted items can reference scripts that no longer exist, this doesn't necessarily mean the base item no longer exists however.
-    // So instead of removing the item altogether, we're only removing the script.
-    template<class MapT>
+    // Custom enchanted items can reference scripts that no longer exist, this doesn't necessarily mean the base item no
+    // longer exists however. So instead of removing the item altogether, we're only removing the script.
+    template <class MapT>
     void removeMissingScripts(const MWWorld::Store<ESM::Script>& scripts, MapT& items)
     {
-        for(auto& [id, item] : items)
+        for (auto& [id, item] : items)
         {
-            if(!item.mScript.empty() && !scripts.search(item.mScript))
+            if (!item.mScript.empty() && !scripts.search(item.mScript))
             {
                 item.mScript.clear();
-                Log(Debug::Verbose) << "Item '" << id << "' (" << item.mName << ") has nonexistent script '" << item.mScript << "', ignoring it.";
+                Log(Debug::Verbose) << "Item '" << id << "' (" << item.mName << ") has nonexistent script '"
+                                    << item.mScript << "', ignoring it.";
             }
         }
     }
@@ -139,14 +150,14 @@ namespace MWWorld
     {
         ESMStore::StoreTuple mStores;
 
-        std::map<ESM::RecNameInts, DynamicStore*>                   mRecNameToStore;
+        std::map<ESM::RecNameInts, DynamicStore*> mRecNameToStore;
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
         IDMap mIds;
         IDMap mStaticIds;
 
-        template<typename T>  
+        template <typename T>
         static void assignStoreToIndex(ESMStore& stores, Store<T>& store)
         {
             const std::size_t storeIndex = ESMStore::getTypeIndex<T>();
@@ -168,11 +179,11 @@ namespace MWWorld
         }
     };
 
-
     int ESMStore::find(const std::string_view id) const
     {
         IDMap::const_iterator it = mStoreImp->mIds.find(id);
-        if (it == mStoreImp->mIds.end()) {
+        if (it == mStoreImp->mIds.end())
+        {
             return 0;
         }
         return it->second;
@@ -180,8 +191,9 @@ namespace MWWorld
 
     int ESMStore::findStatic(const std::string_view id) const
     {
-        IDMap::const_iterator it = mStoreImp-> mStaticIds.find(id);
-        if (it == mStoreImp->mStaticIds.end()) {
+        IDMap::const_iterator it = mStoreImp->mStaticIds.find(id);
+        if (it == mStoreImp->mStaticIds.end())
+        {
             return 0;
         }
         return it->second;
@@ -190,7 +202,7 @@ namespace MWWorld
     ESMStore::ESMStore()
     {
         mStoreImp = std::make_unique<ESMStoreImp>();
-        std::apply([this](auto& ...x) {(ESMStoreImp::assignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
+        std::apply([this](auto&... x) { (ESMStoreImp::assignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
         mDynamicCount = 0;
         getWritable<ESM::Pathgrid>().setCells(getWritable<ESM::Cell>());
     }
@@ -205,355 +217,371 @@ namespace MWWorld
         movePlayerRecord();
     }
 
-static bool isCacheableRecord(int id)
-{
-    switch (id)
+    static bool isCacheableRecord(int id)
     {
-        case ESM::REC_ACTI:
-        case ESM::REC_ALCH:
-        case ESM::REC_APPA:
-        case ESM::REC_ARMO:
-        case ESM::REC_BOOK:
-        case ESM::REC_CLOT:
-        case ESM::REC_CONT:
-        case ESM::REC_CREA:
-        case ESM::REC_DOOR:
-        case ESM::REC_INGR:
-        case ESM::REC_LEVC:
-        case ESM::REC_LEVI:
-        case ESM::REC_LIGH:
-        case ESM::REC_LOCK:
-        case ESM::REC_MISC:
-        case ESM::REC_NPC_:
-        case ESM::REC_PROB:
-        case ESM::REC_REPA:
-        case ESM::REC_STAT:
-        case ESM::REC_WEAP:
-        case ESM::REC_BODY:
-            return true;
-            break;
-    }
-    return false;
-}
-
-void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener, ESM::Dialogue*& dialogue)
-{
-    if (listener != nullptr)
-        listener->setProgressRange(::EsmLoader::fileProgress);
-
-    // Land texture loading needs to use a separate internal store for each plugin.
-    // We set the number of plugins here so we can properly verify if valid plugin
-    // indices are being passed to the LandTexture Store retrieval methods.
-    getWritable<ESM::LandTexture>().resize(esm.getIndex()+1);
-
-    // Loop through all records
-    while(esm.hasMoreRecs())
-    {
-        ESM::NAME n = esm.getRecName();
-        esm.getRecHeader();
-        if (esm.getRecordFlags() & ESM::FLAG_Ignored)
+        switch (id)
         {
-            esm.skipRecord();
-            continue;
+            case ESM::REC_ACTI:
+            case ESM::REC_ALCH:
+            case ESM::REC_APPA:
+            case ESM::REC_ARMO:
+            case ESM::REC_BOOK:
+            case ESM::REC_CLOT:
+            case ESM::REC_CONT:
+            case ESM::REC_CREA:
+            case ESM::REC_DOOR:
+            case ESM::REC_INGR:
+            case ESM::REC_LEVC:
+            case ESM::REC_LEVI:
+            case ESM::REC_LIGH:
+            case ESM::REC_LOCK:
+            case ESM::REC_MISC:
+            case ESM::REC_NPC_:
+            case ESM::REC_PROB:
+            case ESM::REC_REPA:
+            case ESM::REC_STAT:
+            case ESM::REC_WEAP:
+            case ESM::REC_BODY:
+                return true;
+                break;
         }
+        return false;
+    }
 
-        // Look up the record type.
-        ESM::RecNameInts recName = static_cast<ESM::RecNameInts>(n.toInt());
-        const auto& it = mStoreImp->mRecNameToStore.find(recName);
+    void ESMStore::load(ESM::ESMReader& esm, Loading::Listener* listener, ESM::Dialogue*& dialogue)
+    {
+        if (listener != nullptr)
+            listener->setProgressRange(::EsmLoader::fileProgress);
 
-        if (it == mStoreImp->mRecNameToStore.end()) {
-            if (recName == ESM::REC_INFO) {
-                if (dialogue)
+        // Land texture loading needs to use a separate internal store for each plugin.
+        // We set the number of plugins here so we can properly verify if valid plugin
+        // indices are being passed to the LandTexture Store retrieval methods.
+        getWritable<ESM::LandTexture>().resize(esm.getIndex() + 1);
+
+        // Loop through all records
+        while (esm.hasMoreRecs())
+        {
+            ESM::NAME n = esm.getRecName();
+            esm.getRecHeader();
+            if (esm.getRecordFlags() & ESM::FLAG_Ignored)
+            {
+                esm.skipRecord();
+                continue;
+            }
+
+            // Look up the record type.
+            ESM::RecNameInts recName = static_cast<ESM::RecNameInts>(n.toInt());
+            const auto& it = mStoreImp->mRecNameToStore.find(recName);
+
+            if (it == mStoreImp->mRecNameToStore.end())
+            {
+                if (recName == ESM::REC_INFO)
                 {
-                    dialogue->readInfo(esm, esm.getIndex() != 0);
+                    if (dialogue)
+                    {
+                        dialogue->readInfo(esm, esm.getIndex() != 0);
+                    }
+                    else
+                    {
+                        Log(Debug::Error) << "Error: info record without dialog";
+                        esm.skipRecord();
+                    }
+                }
+                else if (n.toInt() == ESM::REC_MGEF)
+                {
+                    getWritable<ESM::MagicEffect>().load(esm);
+                }
+                else if (n.toInt() == ESM::REC_SKIL)
+                {
+                    getWritable<ESM::Skill>().load(esm);
+                }
+                else if (n.toInt() == ESM::REC_FILT || n.toInt() == ESM::REC_DBGP)
+                {
+                    // ignore project file only records
+                    esm.skipRecord();
+                }
+                else if (n.toInt() == ESM::REC_LUAL)
+                {
+                    ESM::LuaScriptsCfg cfg;
+                    cfg.load(esm);
+                    cfg.adjustRefNums(esm);
+                    mLuaContent.push_back(std::move(cfg));
                 }
                 else
                 {
-                    Log(Debug::Error) << "Error: info record without dialog";
-                    esm.skipRecord();
+                    throw std::runtime_error("Unknown record: " + n.toString());
                 }
-            } else if (n.toInt() == ESM::REC_MGEF) {
-                getWritable<ESM::MagicEffect>().load (esm);
-            } else if (n.toInt() == ESM::REC_SKIL) {
-                getWritable<ESM::Skill>().load (esm);
             }
-            else if (n.toInt() == ESM::REC_FILT || n.toInt() == ESM::REC_DBGP)
+            else
             {
-                // ignore project file only records
-                esm.skipRecord();
-            }
-            else if (n.toInt() == ESM::REC_LUAL)
-            {
-                ESM::LuaScriptsCfg cfg;
-                cfg.load(esm);
-                cfg.adjustRefNums(esm);
-                mLuaContent.push_back(std::move(cfg));
-            }
-            else {
-                throw std::runtime_error("Unknown record: " + n.toString());
-            }
-        } else {
-            RecordId id = it->second->load(esm);
-            if (id.mIsDeleted)
-            {
-                it->second->eraseStatic(id.mId);
-                continue;
-            }
-
-            if (n.toInt() == ESM::REC_DIAL) {
-                dialogue = const_cast<ESM::Dialogue*>(getWritable<ESM::Dialogue>().find(id.mId));
-            } else {
-                dialogue = nullptr;
-            }
-        }
-        if (listener != nullptr)
-            listener->setProgress(::EsmLoader::fileProgress * esm.getFileOffset() / esm.getFileSize());
-    }
-}
-
-void ESMStore::setIdType(const std::string& id, ESM::RecNameInts type)
-{
-    mStoreImp->mIds[id] = type;
-}
-
-ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
-{
-    ESM::LuaScriptsCfg cfg;
-    for (const LuaContent& c : mLuaContent)
-    {
-        if (std::holds_alternative<std::filesystem::path>(c))
-        {
-            // *.omwscripts are intentionally reloaded every time when `getLuaScriptsCfg` is called.
-            // It is important for the `reloadlua` console command.
-            try
-            {
-                auto file = std::ifstream(std::get<std::filesystem::path>(c));
-                std::string fileContent(std::istreambuf_iterator<char>(file), {});
-                LuaUtil::parseOMWScripts(cfg, fileContent);
-            }
-            catch (std::exception& e) { Log(Debug::Error) << e.what(); }
-        }
-        else
-        {
-            const ESM::LuaScriptsCfg& addition = std::get<ESM::LuaScriptsCfg>(c);
-            cfg.mScripts.insert(cfg.mScripts.end(), addition.mScripts.begin(), addition.mScripts.end());
-        }
-    }
-    return cfg;
-}
-
-void ESMStore::setUp()
-{
-    mStoreImp->mIds.clear();
-
-    std::map<ESM::RecNameInts, DynamicStore*>::iterator storeIt = mStoreImp->mRecNameToStore.begin();
-    for (; storeIt != mStoreImp->mRecNameToStore.end(); ++storeIt) {
-        storeIt->second->setUp();
-
-        if (isCacheableRecord(storeIt->first))
-        {
-            std::vector<std::string> identifiers;
-            storeIt->second->listIdentifier(identifiers);
-
-            for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end(); ++record)
-                mStoreImp->mIds[*record] = storeIt->first;
-        }
-    }
-
-    if (mStoreImp->mStaticIds.empty())
-        for (const auto& [k, v] : mStoreImp->mIds)
-            mStoreImp->mStaticIds.emplace(Misc::StringUtils::lowerCase(k), v);
-
-    getWritable<ESM::Skill>().setUp();
-    getWritable<ESM::MagicEffect>().setUp();;
-    getWritable<ESM::Attribute>().setUp();
-    getWritable<ESM::Dialogue>().setUp();
-}
-
-void ESMStore::validateRecords(ESM::ReadersCache& readers)
-{
-    validate();
-    countAllCellRefs(readers);
-}
-
-void ESMStore::countAllCellRefs(ESM::ReadersCache& readers)
-{
-    // TODO: We currently need to read entire files here again.
-    // We should consider consolidating or deferring this reading.
-    if(!mRefCount.empty())
-        return;
-    std::vector<Ref> refs;
-    std::vector<std::string> refIDs;
-    Store<ESM::Cell> Cells = getWritable < ESM::Cell>();
-    for(auto it = Cells.intBegin(); it != Cells.intEnd(); ++it)
-        readRefs(*it, refs, refIDs, readers);
-    for(auto it = Cells.extBegin(); it != Cells.extEnd(); ++it)
-        readRefs(*it, refs, refIDs, readers);
-    const auto lessByRefNum = [] (const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
-    std::stable_sort(refs.begin(), refs.end(), lessByRefNum);
-    const auto equalByRefNum = [] (const Ref& l, const Ref& r) { return l.mRefNum == r.mRefNum; };
-    const auto incrementRefCount = [&] (const Ref& value)
-    {
-        if (value.mRefID != deletedRefID)
-        {
-            std::string& refId = refIDs[value.mRefID];
-            // We manually lower case IDs here for the time being to improve performance.
-            Misc::StringUtils::lowerCaseInPlace(refId);
-            ++mRefCount[std::move(refId)];
-        }
-    };
-    Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, incrementRefCount);
-}
-
-int ESMStore::getRefCount(std::string_view id) const
-{
-    const std::string lowerId = Misc::StringUtils::lowerCase(id);
-    auto it = mRefCount.find(lowerId);
-    if(it == mRefCount.end())
-        return 0;
-    return it->second;
-}
-
-void ESMStore::validate()
-{
-    auto& npcs = getWritable<ESM::NPC>();
-    std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(getWritable<ESM::Faction>(),  getWritable<ESM::Class>(),  npcs.mStatic);
-
-    for (const ESM::NPC &npc : npcsToReplace)
-    {
-        npcs.eraseStatic(npc.mId);
-        npcs.insertStatic(npc);
-    }
-
-    // Validate spell effects for invalid arguments
-    std::vector<ESM::Spell> spellsToReplace;
-    auto& spells = getWritable<ESM::Spell>();
-    for (ESM::Spell spell : spells)
-    {
-        if (spell.mEffects.mList.empty())
-            continue;
-
-        bool changed = false;
-        auto iter = spell.mEffects.mList.begin();
-        while (iter != spell.mEffects.mList.end())
-        {
-            const ESM::MagicEffect* mgef = getWritable<ESM::MagicEffect>().search(iter->mEffectID);
-            if (!mgef)
-            {
-                Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an invalid effect (index " << iter->mEffectID << ") present. Dropping the effect.";
-                iter = spell.mEffects.mList.erase(iter);
-                changed = true;
-                continue;
-            }
-
-            if (mgef->mData.mFlags & ESM::MagicEffect::TargetSkill)
-            {
-                if (iter->mAttribute != -1)
+                RecordId id = it->second->load(esm);
+                if (id.mIsDeleted)
                 {
-                    iter->mAttribute = -1;
-                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
-                        " effect of spell '" << spell.mId << "' has an attribute argument present. Dropping the argument.";
-                    changed = true;
+                    it->second->eraseStatic(id.mId);
+                    continue;
+                }
+
+                if (n.toInt() == ESM::REC_DIAL)
+                {
+                    dialogue = const_cast<ESM::Dialogue*>(getWritable<ESM::Dialogue>().find(id.mId));
+                }
+                else
+                {
+                    dialogue = nullptr;
                 }
             }
-            else if (mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+            if (listener != nullptr)
+                listener->setProgress(::EsmLoader::fileProgress * esm.getFileOffset() / esm.getFileSize());
+        }
+    }
+
+    void ESMStore::setIdType(const std::string& id, ESM::RecNameInts type)
+    {
+        mStoreImp->mIds[id] = type;
+    }
+
+    ESM::LuaScriptsCfg ESMStore::getLuaScriptsCfg() const
+    {
+        ESM::LuaScriptsCfg cfg;
+        for (const LuaContent& c : mLuaContent)
+        {
+            if (std::holds_alternative<std::filesystem::path>(c))
             {
-                if (iter->mSkill != -1)
+                // *.omwscripts are intentionally reloaded every time when `getLuaScriptsCfg` is called.
+                // It is important for the `reloadlua` console command.
+                try
+                {
+                    auto file = std::ifstream(std::get<std::filesystem::path>(c));
+                    std::string fileContent(std::istreambuf_iterator<char>(file), {});
+                    LuaUtil::parseOMWScripts(cfg, fileContent);
+                }
+                catch (std::exception& e)
+                {
+                    Log(Debug::Error) << e.what();
+                }
+            }
+            else
+            {
+                const ESM::LuaScriptsCfg& addition = std::get<ESM::LuaScriptsCfg>(c);
+                cfg.mScripts.insert(cfg.mScripts.end(), addition.mScripts.begin(), addition.mScripts.end());
+            }
+        }
+        return cfg;
+    }
+
+    void ESMStore::setUp()
+    {
+        mStoreImp->mIds.clear();
+
+        std::map<ESM::RecNameInts, DynamicStore*>::iterator storeIt = mStoreImp->mRecNameToStore.begin();
+        for (; storeIt != mStoreImp->mRecNameToStore.end(); ++storeIt)
+        {
+            storeIt->second->setUp();
+
+            if (isCacheableRecord(storeIt->first))
+            {
+                std::vector<std::string> identifiers;
+                storeIt->second->listIdentifier(identifiers);
+
+                for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end();
+                     ++record)
+                    mStoreImp->mIds[*record] = storeIt->first;
+            }
+        }
+
+        if (mStoreImp->mStaticIds.empty())
+            for (const auto& [k, v] : mStoreImp->mIds)
+                mStoreImp->mStaticIds.emplace(Misc::StringUtils::lowerCase(k), v);
+
+        getWritable<ESM::Skill>().setUp();
+        getWritable<ESM::MagicEffect>().setUp();
+        ;
+        getWritable<ESM::Attribute>().setUp();
+        getWritable<ESM::Dialogue>().setUp();
+    }
+
+    void ESMStore::validateRecords(ESM::ReadersCache& readers)
+    {
+        validate();
+        countAllCellRefs(readers);
+    }
+
+    void ESMStore::countAllCellRefs(ESM::ReadersCache& readers)
+    {
+        // TODO: We currently need to read entire files here again.
+        // We should consider consolidating or deferring this reading.
+        if (!mRefCount.empty())
+            return;
+        std::vector<Ref> refs;
+        std::vector<std::string> refIDs;
+        Store<ESM::Cell> Cells = getWritable<ESM::Cell>();
+        for (auto it = Cells.intBegin(); it != Cells.intEnd(); ++it)
+            readRefs(*it, refs, refIDs, readers);
+        for (auto it = Cells.extBegin(); it != Cells.extEnd(); ++it)
+            readRefs(*it, refs, refIDs, readers);
+        const auto lessByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
+        std::stable_sort(refs.begin(), refs.end(), lessByRefNum);
+        const auto equalByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum == r.mRefNum; };
+        const auto incrementRefCount = [&](const Ref& value) {
+            if (value.mRefID != deletedRefID)
+            {
+                std::string& refId = refIDs[value.mRefID];
+                // We manually lower case IDs here for the time being to improve performance.
+                Misc::StringUtils::lowerCaseInPlace(refId);
+                ++mRefCount[std::move(refId)];
+            }
+        };
+        Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, incrementRefCount);
+    }
+
+    int ESMStore::getRefCount(std::string_view id) const
+    {
+        const std::string lowerId = Misc::StringUtils::lowerCase(id);
+        auto it = mRefCount.find(lowerId);
+        if (it == mRefCount.end())
+            return 0;
+        return it->second;
+    }
+
+    void ESMStore::validate()
+    {
+        auto& npcs = getWritable<ESM::NPC>();
+        std::vector<ESM::NPC> npcsToReplace
+            = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(), npcs.mStatic);
+
+        for (const ESM::NPC& npc : npcsToReplace)
+        {
+            npcs.eraseStatic(npc.mId);
+            npcs.insertStatic(npc);
+        }
+
+        // Validate spell effects for invalid arguments
+        std::vector<ESM::Spell> spellsToReplace;
+        auto& spells = getWritable<ESM::Spell>();
+        for (ESM::Spell spell : spells)
+        {
+            if (spell.mEffects.mList.empty())
+                continue;
+
+            bool changed = false;
+            auto iter = spell.mEffects.mList.begin();
+            while (iter != spell.mEffects.mList.end())
+            {
+                const ESM::MagicEffect* mgef = getWritable<ESM::MagicEffect>().search(iter->mEffectID);
+                if (!mgef)
+                {
+                    Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an invalid effect (index "
+                                        << iter->mEffectID << ") present. Dropping the effect.";
+                    iter = spell.mEffects.mList.erase(iter);
+                    changed = true;
+                    continue;
+                }
+
+                if (mgef->mData.mFlags & ESM::MagicEffect::TargetSkill)
+                {
+                    if (iter->mAttribute != -1)
+                    {
+                        iter->mAttribute = -1;
+                        Log(Debug::Verbose)
+                            << ESM::MagicEffect::effectIdToString(iter->mEffectID) << " effect of spell '" << spell.mId
+                            << "' has an attribute argument present. Dropping the argument.";
+                        changed = true;
+                    }
+                }
+                else if (mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+                {
+                    if (iter->mSkill != -1)
+                    {
+                        iter->mSkill = -1;
+                        Log(Debug::Verbose)
+                            << ESM::MagicEffect::effectIdToString(iter->mEffectID) << " effect of spell '" << spell.mId
+                            << "' has a skill argument present. Dropping the argument.";
+                        changed = true;
+                    }
+                }
+                else if (iter->mSkill != -1 || iter->mAttribute != -1)
                 {
                     iter->mSkill = -1;
-                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
-                        " effect of spell '" << spell.mId << "' has a skill argument present. Dropping the argument.";
+                    iter->mAttribute = -1;
+                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) << " effect of spell '"
+                                        << spell.mId << "' has argument(s) present. Dropping the argument(s).";
                     changed = true;
                 }
-            }
-            else if (iter->mSkill != -1 || iter->mAttribute != -1)
-            {
-                iter->mSkill = -1;
-                iter->mAttribute = -1;
-                Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
-                    " effect of spell '" << spell.mId << "' has argument(s) present. Dropping the argument(s).";
-                changed = true;
+
+                ++iter;
             }
 
-            ++iter;
+            if (changed)
+                spellsToReplace.emplace_back(spell);
         }
 
-        if (changed)
-            spellsToReplace.emplace_back(spell);
-    }
-
-    for (const ESM::Spell &spell : spellsToReplace)
-    {
-        spells.eraseStatic(spell.mId);
-        spells.insertStatic(spell);
-    }
-}
-
-void ESMStore::movePlayerRecord()
-{
-    auto& npcs = getWritable<ESM::NPC>();
-    auto player = npcs.find("player");
-    npcs.insert(*player);
-}
-
-void ESMStore::validateDynamic()
-{
-    auto& npcs = getWritable<ESM::NPC>();
-    auto& scripts = getWritable<ESM::Script>();
-
-    std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(), npcs.mDynamic);
-
-    for (const ESM::NPC &npc : npcsToReplace)
-        npcs.insert(npc);
-
-    removeMissingScripts(scripts, getWritable<ESM::Armor>().mDynamic);
-    removeMissingScripts(scripts, getWritable<ESM::Book>().mDynamic);
-    removeMissingScripts(scripts, getWritable<ESM::Clothing>().mDynamic);
-    removeMissingScripts(scripts, getWritable<ESM::Weapon>().mDynamic);
-
-    removeMissingObjects(getWritable<ESM::CreatureLevList>());
-    removeMissingObjects(getWritable<ESM::ItemLevList>());
-}
-
-// Leveled lists can be modified by scripts. This removes items that no longer exist (presumably because the plugin was removed) from modified lists
-template<class T>
-void ESMStore::removeMissingObjects(Store<T>& store)
-{
-    for(auto& entry : store.mDynamic)
-    {
-        auto first = std::remove_if(entry.second.mList.begin(), entry.second.mList.end(), [&] (const auto& item)
+        for (const ESM::Spell& spell : spellsToReplace)
         {
-            if(!find(item.mId))
-            {
-                Log(Debug::Verbose) << "Leveled list '" << entry.first << "' has nonexistent object '" << item.mId << "', ignoring it.";
-                return true;
-            }
-            return false;
-        });
-        entry.second.mList.erase(first, entry.second.mList.end());
+            spells.eraseStatic(spell.mId);
+            spells.insertStatic(spell);
+        }
     }
-}
+
+    void ESMStore::movePlayerRecord()
+    {
+        auto& npcs = getWritable<ESM::NPC>();
+        auto player = npcs.find("player");
+        npcs.insert(*player);
+    }
+
+    void ESMStore::validateDynamic()
+    {
+        auto& npcs = getWritable<ESM::NPC>();
+        auto& scripts = getWritable<ESM::Script>();
+
+        std::vector<ESM::NPC> npcsToReplace
+            = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(), npcs.mDynamic);
+
+        for (const ESM::NPC& npc : npcsToReplace)
+            npcs.insert(npc);
+
+        removeMissingScripts(scripts, getWritable<ESM::Armor>().mDynamic);
+        removeMissingScripts(scripts, getWritable<ESM::Book>().mDynamic);
+        removeMissingScripts(scripts, getWritable<ESM::Clothing>().mDynamic);
+        removeMissingScripts(scripts, getWritable<ESM::Weapon>().mDynamic);
+
+        removeMissingObjects(getWritable<ESM::CreatureLevList>());
+        removeMissingObjects(getWritable<ESM::ItemLevList>());
+    }
+
+    // Leveled lists can be modified by scripts. This removes items that no longer exist (presumably because the plugin
+    // was removed) from modified lists
+    template <class T>
+    void ESMStore::removeMissingObjects(Store<T>& store)
+    {
+        for (auto& entry : store.mDynamic)
+        {
+            auto first = std::remove_if(entry.second.mList.begin(), entry.second.mList.end(), [&](const auto& item) {
+                if (!find(item.mId))
+                {
+                    Log(Debug::Verbose) << "Leveled list '" << entry.first << "' has nonexistent object '" << item.mId
+                                        << "', ignoring it.";
+                    return true;
+                }
+                return false;
+            });
+            entry.second.mList.erase(first, entry.second.mList.end());
+        }
+    }
 
     int ESMStore::countSavedGameRecords() const
     {
         return 1 // DYNA (dynamic name counter)
-            + get<ESM::Potion>().getDynamicSize()
-            + get<ESM::Armor>().getDynamicSize()
-            + get<ESM::Book>().getDynamicSize()
-            + get<ESM::Class>().getDynamicSize()
-            + get<ESM::Clothing>().getDynamicSize()
-            + get<ESM::Enchantment>().getDynamicSize()
-            + get<ESM::NPC>().getDynamicSize()
-            + get<ESM::Spell>().getDynamicSize()
-            + get<ESM::Weapon>().getDynamicSize()
-            + get<ESM::CreatureLevList>().getDynamicSize()
-            + get<ESM::ItemLevList>().getDynamicSize()
-            + get<ESM::Creature>().getDynamicSize()
+            + get<ESM::Potion>().getDynamicSize() + get<ESM::Armor>().getDynamicSize()
+            + get<ESM::Book>().getDynamicSize() + get<ESM::Class>().getDynamicSize()
+            + get<ESM::Clothing>().getDynamicSize() + get<ESM::Enchantment>().getDynamicSize()
+            + get<ESM::NPC>().getDynamicSize() + get<ESM::Spell>().getDynamicSize()
+            + get<ESM::Weapon>().getDynamicSize() + get<ESM::CreatureLevList>().getDynamicSize()
+            + get<ESM::ItemLevList>().getDynamicSize() + get<ESM::Creature>().getDynamicSize()
             + get<ESM::Container>().getDynamicSize();
-
     }
 
-    void ESMStore::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
+    void ESMStore::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         writer.startRecord(ESM::REC_DYNA);
         writer.startSubRecord("COUN");
@@ -561,22 +589,22 @@ void ESMStore::removeMissingObjects(Store<T>& store)
         writer.endRecord("COUN");
         writer.endRecord(ESM::REC_DYNA);
 
-        get<ESM::Potion>().write (writer, progress);
-        get<ESM::Armor>().write (writer, progress);
-        get<ESM::Book>().write (writer, progress);
-        get<ESM::Class>().write (writer, progress);
-        get<ESM::Clothing>().write (writer, progress);
-        get<ESM::Enchantment>().write (writer, progress);
-        get<ESM::NPC>().write (writer, progress);
-        get<ESM::Spell>().write (writer, progress);
-        get<ESM::Weapon>().write (writer, progress);
-        get<ESM::CreatureLevList>().write (writer, progress);
-        get<ESM::ItemLevList>().write (writer, progress);
-        get<ESM::Creature>().write (writer, progress);
-        get<ESM::Container>().write (writer, progress);
+        get<ESM::Potion>().write(writer, progress);
+        get<ESM::Armor>().write(writer, progress);
+        get<ESM::Book>().write(writer, progress);
+        get<ESM::Class>().write(writer, progress);
+        get<ESM::Clothing>().write(writer, progress);
+        get<ESM::Enchantment>().write(writer, progress);
+        get<ESM::NPC>().write(writer, progress);
+        get<ESM::Spell>().write(writer, progress);
+        get<ESM::Weapon>().write(writer, progress);
+        get<ESM::CreatureLevList>().write(writer, progress);
+        get<ESM::ItemLevList>().write(writer, progress);
+        get<ESM::Creature>().write(writer, progress);
+        get<ESM::Container>().write(writer, progress);
     }
 
-    bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type_id)
+    bool ESMStore::readRecord(ESM::ESMReader& reader, uint32_t type_id)
     {
         ESM::RecNameInts type = (ESM::RecNameInts)type_id;
         switch (type)
@@ -591,12 +619,12 @@ void ESMStore::removeMissingObjects(Store<T>& store)
             case ESM::REC_WEAP:
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
-                mStoreImp->mRecNameToStore[type]->read (reader);
+                mStoreImp->mRecNameToStore[type]->read(reader);
                 return true;
             case ESM::REC_NPC_:
             case ESM::REC_CREA:
             case ESM::REC_CONT:
-                mStoreImp->mRecNameToStore[type]->read (reader, true);
+                mStoreImp->mRecNameToStore[type]->read(reader, true);
                 return true;
 
             case ESM::REC_DYNA:
@@ -614,11 +642,10 @@ void ESMStore::removeMissingObjects(Store<T>& store)
     {
         setUp();
 
-        const ESM::NPC *player = get<ESM::NPC>().find ("player");
+        const ESM::NPC* player = get<ESM::NPC>().find("player");
 
-        if (!get<ESM::Race>().find (player->mRace) ||
-            !get<ESM::Class>().find (player->mClass))
-            throw std::runtime_error ("Invalid player record (race or class unavailable");
+        if (!get<ESM::Race>().find(player->mRace) || !get<ESM::Class>().find(player->mClass))
+            throw std::runtime_error("Invalid player record (race or class unavailable");
     }
 
     std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(const std::string& id) const
@@ -634,21 +661,22 @@ void ESMStore::removeMissingObjects(Store<T>& store)
             if (result != mSpellListCache.end())
                 result->second = ptr;
             else
-                mSpellListCache.insert({id, ptr});
-            return {ptr, false};
+                mSpellListCache.insert({ id, ptr });
+            return { ptr, false };
         }
-        return {ptr, true};
+        return { ptr, true };
     }
 
     template <>
-    const ESM::Cell *ESMStore::insert<ESM::Cell>(const ESM::Cell &cell) {
+    const ESM::Cell* ESMStore::insert<ESM::Cell>(const ESM::Cell& cell)
+    {
         return getWritable<ESM::Cell>().insert(cell);
     }
 
     template <>
-    const ESM::NPC *ESMStore::insert<ESM::NPC>(const ESM::NPC &npc)
+    const ESM::NPC* ESMStore::insert<ESM::NPC>(const ESM::NPC& npc)
     {
-        
+
         auto& npcs = getWritable<ESM::NPC>();
         if (Misc::StringUtils::ciEqual(npc.mId, "player"))
         {
@@ -664,7 +692,7 @@ void ESMStore::removeMissingObjects(Store<T>& store)
 
         record.mId = id;
 
-        ESM::NPC *ptr = npcs.insert(record);
+        ESM::NPC* ptr = npcs.insert(record);
         mStoreImp->mIds[ptr->mId] = ESM::REC_NPC_;
         return ptr;
     }

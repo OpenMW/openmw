@@ -1,27 +1,27 @@
 ﻿#include "worldspacedata.hpp"
 
 #include <components/bullethelpers/aabb.hpp>
+#include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/objectid.hpp>
 #include <components/detournavigator/recastmesh.hpp>
-#include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
 #include <components/detournavigator/settings.hpp>
+#include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/readerscache.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/lessbyid.hpp>
 #include <components/esmloader/record.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/lower.hpp>
+#include <components/navmeshtool/protocol.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
-#include <components/debug/debugging.hpp>
-#include <components/navmeshtool/protocol.hpp>
-#include <components/esm3/readerscache.hpp>
 
 #include <LinearMath/btVector3.h>
 
@@ -56,21 +56,28 @@ namespace NavMeshTool
             float mScale;
             ESM::Position mPos;
 
-            CellRef(ESM::RecNameInts type, ESM::RefNum refNum, std::string&& refId, float scale, const ESM::Position& pos)
-                : mType(type), mRefNum(refNum), mRefId(std::move(refId)), mScale(scale), mPos(pos) {}
+            CellRef(
+                ESM::RecNameInts type, ESM::RefNum refNum, std::string&& refId, float scale, const ESM::Position& pos)
+                : mType(type)
+                , mRefNum(refNum)
+                , mRefId(std::move(refId))
+                , mScale(scale)
+                , mPos(pos)
+            {
+            }
         };
 
         ESM::RecNameInts getType(const EsmLoader::EsmData& esmData, std::string_view refId)
         {
-            const auto it = std::lower_bound(esmData.mRefIdTypes.begin(), esmData.mRefIdTypes.end(),
-                                             refId, EsmLoader::LessById {});
+            const auto it = std::lower_bound(
+                esmData.mRefIdTypes.begin(), esmData.mRefIdTypes.end(), refId, EsmLoader::LessById{});
             if (it == esmData.mRefIdTypes.end() || it->mId != refId)
                 return {};
             return it->mType;
         }
 
-        std::vector<CellRef> loadCellRefs(const ESM::Cell& cell, const EsmLoader::EsmData& esmData,
-            ESM::ReadersCache& readers)
+        std::vector<CellRef> loadCellRefs(
+            const ESM::Cell& cell, const EsmLoader::EsmData& esmData, ESM::ReadersCache& readers)
         {
             std::vector<EsmLoader::Record<CellRef>> cellRefs;
 
@@ -84,16 +91,17 @@ namespace NavMeshTool
                 {
                     Misc::StringUtils::lowerCaseInPlace(cellRef.mRefID);
                     const ESM::RecNameInts type = getType(esmData, cellRef.mRefID);
-                    if (type == ESM::RecNameInts {})
+                    if (type == ESM::RecNameInts{})
                         continue;
-                    cellRefs.emplace_back(deleted, type, cellRef.mRefNum, std::move(cellRef.mRefID),
-                                        cellRef.mScale, cellRef.mPos);
+                    cellRefs.emplace_back(
+                        deleted, type, cellRef.mRefNum, std::move(cellRef.mRefID), cellRef.mScale, cellRef.mPos);
                 }
             }
 
             Log(Debug::Debug) << "Loaded " << cellRefs.size() << " cell refs";
 
-            const auto getKey = [] (const EsmLoader::Record<CellRef>& v) -> const ESM::RefNum& { return v.mValue.mRefNum; };
+            const auto getKey
+                = [](const EsmLoader::Record<CellRef>& v) -> const ESM::RefNum& { return v.mValue.mRefNum; };
             std::vector<CellRef> result = prepareRecords(cellRefs, getKey);
 
             Log(Debug::Debug) << "Prepared " << result.size() << " unique cell refs";
@@ -103,8 +111,7 @@ namespace NavMeshTool
 
         template <class F>
         void forEachObject(const ESM::Cell& cell, const EsmLoader::EsmData& esmData, const VFS::Manager& vfs,
-            Resource::BulletShapeManager& bulletShapeManager, ESM::ReadersCache& readers,
-            F&& f)
+            Resource::BulletShapeManager& bulletShapeManager, ESM::ReadersCache& readers, F&& f)
         {
             std::vector<CellRef> cellRefs = loadCellRefs(cell, esmData, readers);
 
@@ -119,23 +126,24 @@ namespace NavMeshTool
                 if (cellRef.mType != ESM::REC_STAT)
                     model = Misc::ResourceHelpers::correctActorModelPath(model, &vfs);
 
-                osg::ref_ptr<const Resource::BulletShape> shape = [&]
-                {
+                osg::ref_ptr<const Resource::BulletShape> shape = [&] {
                     try
                     {
                         return bulletShapeManager.getShape(Misc::ResourceHelpers::correctMeshPath(model, &vfs));
                     }
                     catch (const std::exception& e)
                     {
-                        Log(Debug::Warning) << "Failed to load cell ref \"" << cellRef.mRefId << "\" model \"" << model << "\": " << e.what();
+                        Log(Debug::Warning) << "Failed to load cell ref \"" << cellRef.mRefId << "\" model \"" << model
+                                            << "\": " << e.what();
                         return osg::ref_ptr<const Resource::BulletShape>();
                     }
-                } ();
+                }();
 
                 if (shape == nullptr || shape->mCollisionShape == nullptr)
                     continue;
 
-                osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance(new Resource::BulletShapeInstance(std::move(shape)));
+                osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance(
+                    new Resource::BulletShapeInstance(std::move(shape)));
 
                 switch (cellRef.mType)
                 {
@@ -158,35 +166,20 @@ namespace NavMeshTool
 
         struct LessByXY
         {
-            bool operator ()(const ESM::Land& lhs, const ESM::Land& rhs) const
-            {
-                return GetXY {}(lhs) < GetXY {}(rhs);
-            }
+            bool operator()(const ESM::Land& lhs, const ESM::Land& rhs) const { return GetXY{}(lhs) < GetXY{}(rhs); }
 
-            bool operator ()(const ESM::Land& lhs, const osg::Vec2i& rhs) const
-            {
-                return GetXY {}(lhs) < rhs;
-            }
+            bool operator()(const ESM::Land& lhs, const osg::Vec2i& rhs) const { return GetXY{}(lhs) < rhs; }
 
-            bool operator ()(const osg::Vec2i& lhs, const ESM::Land& rhs) const
-            {
-                return lhs < GetXY {}(rhs);
-            }
+            bool operator()(const osg::Vec2i& lhs, const ESM::Land& rhs) const { return lhs < GetXY{}(rhs); }
         };
 
         btAABB getAabb(const osg::Vec2i& cellPosition, btScalar minHeight, btScalar maxHeight)
         {
             btAABB aabb;
-            aabb.m_min = btVector3(
-                static_cast<btScalar>(cellPosition.x() * ESM::Land::REAL_SIZE),
-                static_cast<btScalar>(cellPosition.y() * ESM::Land::REAL_SIZE),
-                minHeight
-            );
-            aabb.m_max = btVector3(
-                static_cast<btScalar>((cellPosition.x() + 1) * ESM::Land::REAL_SIZE),
-                static_cast<btScalar>((cellPosition.y() + 1) * ESM::Land::REAL_SIZE),
-                maxHeight
-            );
+            aabb.m_min = btVector3(static_cast<btScalar>(cellPosition.x() * ESM::Land::REAL_SIZE),
+                static_cast<btScalar>(cellPosition.y() * ESM::Land::REAL_SIZE), minHeight);
+            aabb.m_max = btVector3(static_cast<btScalar>((cellPosition.x() + 1) * ESM::Land::REAL_SIZE),
+                static_cast<btScalar>((cellPosition.y() + 1) * ESM::Land::REAL_SIZE), maxHeight);
             return aabb;
         }
 
@@ -205,8 +198,9 @@ namespace NavMeshTool
             std::vector<std::unique_ptr<ESM::Land::LandData>>& landDatas)
         {
             if (!land.has_value() || osg::Vec2i(land->mX, land->mY) != cellPosition
-                    || (land->mDataTypes & ESM::Land::DATA_VHGT) == 0)
-                return {HeightfieldPlane {ESM::Land::DEFAULT_HEIGHT}, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT};
+                || (land->mDataTypes & ESM::Land::DATA_VHGT) == 0)
+                return { HeightfieldPlane{ ESM::Land::DEFAULT_HEIGHT }, ESM::Land::DEFAULT_HEIGHT,
+                    ESM::Land::DEFAULT_HEIGHT };
 
             ESM::Land::LandData& landData = *landDatas.emplace_back(std::make_unique<ESM::Land::LandData>());
             land->loadData(ESM::Land::DATA_VHGT, &landData);
@@ -216,7 +210,7 @@ namespace NavMeshTool
             surface.mMinHeight = landData.mMinHeight;
             surface.mMaxHeight = landData.mMaxHeight;
             surface.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
-            return {surface, landData.mMinHeight, landData.mMaxHeight};
+            return { surface, landData.mMinHeight, landData.mMaxHeight };
         }
 
         template <class T>
@@ -227,7 +221,8 @@ namespace NavMeshTool
         }
     }
 
-    WorldspaceNavMeshInput::WorldspaceNavMeshInput(std::string worldspace, const DetourNavigator::RecastSettings& settings)
+    WorldspaceNavMeshInput::WorldspaceNavMeshInput(
+        std::string worldspace, const DetourNavigator::RecastSettings& settings)
         : mWorldspace(std::move(worldspace))
         , mTileCachedRecastMeshManager(settings)
     {
@@ -247,7 +242,7 @@ namespace NavMeshTool
         std::size_t objectsCounter = 0;
 
         if (writeBinaryLog)
-            serializeToStderr(ExpectedCells {static_cast<std::uint64_t>(esmData.mCells.size())});
+            serializeToStderr(ExpectedCells{ static_cast<std::uint64_t>(esmData.mCells.size()) });
 
         for (std::size_t i = 0; i < esmData.mCells.size(); ++i)
         {
@@ -257,97 +252,100 @@ namespace NavMeshTool
             if (!exterior && !processInteriorCells)
             {
                 if (writeBinaryLog)
-                    serializeToStderr(ProcessedCells {static_cast<std::uint64_t>(i + 1)});
+                    serializeToStderr(ProcessedCells{ static_cast<std::uint64_t>(i + 1) });
                 Log(Debug::Info) << "Skipped interior"
-                    << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") \"" << cell.getDescription() << "\"";
+                                 << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") \""
+                                 << cell.getDescription() << "\"";
                 continue;
             }
 
-            Log(Debug::Debug) << "Processing " << (exterior ? "exterior" : "interior")
-                << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") \"" << cell.getDescription() << "\"";
+            Log(Debug::Debug) << "Processing " << (exterior ? "exterior" : "interior") << " cell (" << (i + 1) << "/"
+                              << esmData.mCells.size() << ") \"" << cell.getDescription() << "\"";
 
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
             const std::size_t cellObjectsBegin = data.mObjects.size();
 
-            WorldspaceNavMeshInput& navMeshInput = [&] () -> WorldspaceNavMeshInput&
-            {
+            WorldspaceNavMeshInput& navMeshInput = [&]() -> WorldspaceNavMeshInput& {
                 auto it = navMeshInputs.find(cell.mCellId.mWorldspace);
                 if (it == navMeshInputs.end())
                 {
-                    it = navMeshInputs.emplace(cell.mCellId.mWorldspace,
-                        std::make_unique<WorldspaceNavMeshInput>(cell.mCellId.mWorldspace, settings.mRecast)).first;
+                    it = navMeshInputs
+                             .emplace(cell.mCellId.mWorldspace,
+                                 std::make_unique<WorldspaceNavMeshInput>(cell.mCellId.mWorldspace, settings.mRecast))
+                             .first;
                     it->second->mTileCachedRecastMeshManager.setWorldspace(cell.mCellId.mWorldspace, nullptr);
                 }
                 return *it->second;
-            } ();
+            }();
 
             const TileCachedRecastMeshManager::UpdateGuard guard(navMeshInput.mTileCachedRecastMeshManager);
 
             if (exterior)
             {
-                const auto it = std::lower_bound(esmData.mLands.begin(), esmData.mLands.end(), cellPosition, LessByXY {});
-                const auto [heightfieldShape, minHeight, maxHeight] = makeHeightfieldShape(
-                    it == esmData.mLands.end() ? std::optional<ESM::Land>() : *it,
-                    cellPosition, data.mHeightfields, data.mLandData
-                );
+                const auto it
+                    = std::lower_bound(esmData.mLands.begin(), esmData.mLands.end(), cellPosition, LessByXY{});
+                const auto [heightfieldShape, minHeight, maxHeight]
+                    = makeHeightfieldShape(it == esmData.mLands.end() ? std::optional<ESM::Land>() : *it, cellPosition,
+                        data.mHeightfields, data.mLandData);
 
-                mergeOrAssign(getAabb(cellPosition, minHeight, maxHeight),
-                              navMeshInput.mAabb, navMeshInput.mAabbInitialized);
+                mergeOrAssign(
+                    getAabb(cellPosition, minHeight, maxHeight), navMeshInput.mAabb, navMeshInput.mAabbInitialized);
 
-                navMeshInput.mTileCachedRecastMeshManager.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, heightfieldShape, &guard);
+                navMeshInput.mTileCachedRecastMeshManager.addHeightfield(
+                    cellPosition, ESM::Land::REAL_SIZE, heightfieldShape, &guard);
 
                 navMeshInput.mTileCachedRecastMeshManager.addWater(cellPosition, ESM::Land::REAL_SIZE, -1, &guard);
             }
             else
             {
                 if ((cell.mData.mFlags & ESM::Cell::HasWater) != 0)
-                    navMeshInput.mTileCachedRecastMeshManager.addWater(cellPosition, std::numeric_limits<int>::max(), cell.mWater, &guard);
+                    navMeshInput.mTileCachedRecastMeshManager.addWater(
+                        cellPosition, std::numeric_limits<int>::max(), cell.mWater, &guard);
             }
 
-            forEachObject(cell, esmData, vfs, bulletShapeManager, readers,
-                [&] (BulletObject object)
+            forEachObject(cell, esmData, vfs, bulletShapeManager, readers, [&](BulletObject object) {
+                if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
+                    return;
+
+                const btTransform& transform = object.getCollisionObject().getWorldTransform();
+                const btAABB aabb = BulletHelpers::getAabb(*object.getCollisionObject().getCollisionShape(), transform);
+                mergeOrAssign(aabb, navMeshInput.mAabb, navMeshInput.mAabbInitialized);
+                if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
+                    navMeshInput.mAabb.merge(BulletHelpers::getAabb(*avoid, transform));
+
+                const ObjectId objectId(++objectsCounter);
+                const CollisionShape shape(object.getShapeInstance(), *object.getCollisionObject().getCollisionShape(),
+                    object.getObjectTransform());
+
+                navMeshInput.mTileCachedRecastMeshManager.addObject(
+                    objectId, shape, transform, DetourNavigator::AreaType_ground, &guard);
+
+                if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
                 {
-                    if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
-                        return;
+                    const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
+                    navMeshInput.mTileCachedRecastMeshManager.addObject(
+                        objectId, avoidShape, transform, DetourNavigator::AreaType_null, &guard);
+                }
 
-                    const btTransform& transform = object.getCollisionObject().getWorldTransform();
-                    const btAABB aabb = BulletHelpers::getAabb(*object.getCollisionObject().getCollisionShape(), transform);
-                    mergeOrAssign(aabb, navMeshInput.mAabb, navMeshInput.mAabbInitialized);
-                    if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
-                        navMeshInput.mAabb.merge(BulletHelpers::getAabb(*avoid, transform));
-
-                    const ObjectId objectId(++objectsCounter);
-                    const CollisionShape shape(object.getShapeInstance(), *object.getCollisionObject().getCollisionShape(), object.getObjectTransform());
-
-                    navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, shape, transform,
-                        DetourNavigator::AreaType_ground, &guard);
-
-                    if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
-                    {
-                        const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
-                        navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, avoidShape, transform,
-                            DetourNavigator::AreaType_null, &guard);
-                    }
-
-                    data.mObjects.emplace_back(std::move(object));
-                });
+                data.mObjects.emplace_back(std::move(object));
+            });
 
             const auto cellDescription = cell.getDescription();
 
             if (writeBinaryLog)
-                serializeToStderr(ProcessedCells {static_cast<std::uint64_t>(i + 1)});
+                serializeToStderr(ProcessedCells{ static_cast<std::uint64_t>(i + 1) });
 
-            Log(Debug::Info) << "Processed " << (exterior ? "exterior" : "interior")
-                << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") " << cellDescription
-                << " with " << (data.mObjects.size() - cellObjectsBegin) << " objects";
+            Log(Debug::Info) << "Processed " << (exterior ? "exterior" : "interior") << " cell (" << (i + 1) << "/"
+                             << esmData.mCells.size() << ") " << cellDescription << " with "
+                             << (data.mObjects.size() - cellObjectsBegin) << " objects";
         }
 
         data.mNavMeshInputs.reserve(navMeshInputs.size());
         std::transform(navMeshInputs.begin(), navMeshInputs.end(), std::back_inserter(data.mNavMeshInputs),
-                       [] (auto& v) { return std::move(v.second); });
+            [](auto& v) { return std::move(v.second); });
 
-        Log(Debug::Info) << "Processed " << esmData.mCells.size() << " cells, added "
-            << data.mObjects.size() << " objects and " << data.mHeightfields.size() << " height fields";
+        Log(Debug::Info) << "Processed " << esmData.mCells.size() << " cells, added " << data.mObjects.size()
+                         << " objects and " << data.mHeightfields.size() << " height fields";
 
         return data;
     }

@@ -9,10 +9,7 @@ namespace DetourNavigator
 {
     struct NavMeshDataValueDeleter
     {
-        void operator ()(unsigned char* value) const
-        {
-            dtFree(value);
-        }
+        void operator()(unsigned char* value) const { dtFree(value); }
     };
 
     using NavMeshDataValue = std::unique_ptr<unsigned char, NavMeshDataValueDeleter>;
@@ -27,7 +24,8 @@ namespace DetourNavigator
         NavMeshData(unsigned char* value, int size)
             : mValue(value)
             , mSize(size)
-        {}
+        {
+        }
     };
 }
 

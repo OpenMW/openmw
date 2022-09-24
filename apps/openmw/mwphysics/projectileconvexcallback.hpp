@@ -12,7 +12,8 @@ namespace MWPhysics
     class ProjectileConvexCallback : public btCollisionWorld::ClosestConvexResultCallback
     {
     public:
-        ProjectileConvexCallback(const btCollisionObject* caster, const btCollisionObject* me, const btVector3& from, const btVector3& to, Projectile* proj);
+        ProjectileConvexCallback(const btCollisionObject* caster, const btCollisionObject* me, const btVector3& from,
+            const btVector3& to, Projectile* proj);
 
         btScalar addSingleResult(btCollisionWorld::LocalConvexResult& result, bool normalInWorldSpace) override;
 

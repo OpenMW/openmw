@@ -5,46 +5,46 @@
 
 namespace ESM
 {
-    void Global::load (ESMReader &esm, bool &isDeleted)
+    void Global::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
 
-        mId = esm.getHNString ("NAME");
+        mId = esm.getHNString("NAME");
 
-        if (esm.isNextSub ("DELE"))
+        if (esm.isNextSub("DELE"))
         {
             esm.skipHSub();
             isDeleted = true;
         }
         else
         {
-            mValue.read (esm, Variant::Format_Global);
+            mValue.read(esm, Variant::Format_Global);
         }
     }
 
-    void Global::save (ESMWriter &esm, bool isDeleted) const
+    void Global::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString ("NAME", mId);
+        esm.writeHNCString("NAME", mId);
 
         if (isDeleted)
         {
-            esm.writeHNCString ("DELE", "");
+            esm.writeHNCString("DELE", "");
         }
         else
         {
-            mValue.write (esm, Variant::Format_Global);
+            mValue.write(esm, Variant::Format_Global);
         }
     }
 
     void Global::blank()
     {
         mRecordFlags = 0;
-        mValue.setType (VT_None);
+        mValue.setType(VT_None);
     }
 
-    bool operator== (const Global& left, const Global& right)
+    bool operator==(const Global& left, const Global& right)
     {
-        return left.mId==right.mId && left.mValue==right.mValue;
+        return left.mId == right.mId && left.mValue == right.mValue;
     }
 }

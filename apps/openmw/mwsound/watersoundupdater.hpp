@@ -33,21 +33,18 @@ namespace MWSound
 
     class WaterSoundUpdater
     {
-        public:
-            explicit WaterSoundUpdater(const WaterSoundUpdaterSettings& settings);
+    public:
+        explicit WaterSoundUpdater(const WaterSoundUpdaterSettings& settings);
 
-            WaterSoundUpdate update(const MWWorld::ConstPtr& player, const MWBase::World& world) const;
+        WaterSoundUpdate update(const MWWorld::ConstPtr& player, const MWBase::World& world) const;
 
-            void setUnderwater(bool value)
-            {
-                mListenerUnderwater = value;
-            }
+        void setUnderwater(bool value) { mListenerUnderwater = value; }
 
-        private:
-            const WaterSoundUpdaterSettings mSettings;
-            bool mListenerUnderwater = false;
+    private:
+        const WaterSoundUpdaterSettings mSettings;
+        bool mListenerUnderwater = false;
 
-            float getVolume(const MWWorld::ConstPtr& player, const MWBase::World& world) const;
+        float getVolume(const MWWorld::ConstPtr& player, const MWBase::World& world) const;
     };
 }
 

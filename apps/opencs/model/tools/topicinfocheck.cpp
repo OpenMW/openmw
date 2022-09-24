@@ -6,31 +6,25 @@
 
 #include "../world/infoselectwrapper.hpp"
 
-CSMTools::TopicInfoCheckStage::TopicInfoCheckStage(
-    const CSMWorld::InfoCollection& topicInfos,
-    const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
-    const CSMWorld::IdCollection<ESM::Class>& classes,
-    const CSMWorld::IdCollection<ESM::Faction>& factions,
-    const CSMWorld::IdCollection<ESM::GameSetting>& gmsts,
-    const CSMWorld::IdCollection<ESM::Global>& globals,
-    const CSMWorld::IdCollection<ESM::Dialogue>& journals,
-    const CSMWorld::IdCollection<ESM::Race>& races,
-    const CSMWorld::IdCollection<ESM::Region>& regions,
-    const CSMWorld::IdCollection<ESM::Dialogue> &topics,
-    const CSMWorld::RefIdData& referencables,
+CSMTools::TopicInfoCheckStage::TopicInfoCheckStage(const CSMWorld::InfoCollection& topicInfos,
+    const CSMWorld::IdCollection<CSMWorld::Cell>& cells, const CSMWorld::IdCollection<ESM::Class>& classes,
+    const CSMWorld::IdCollection<ESM::Faction>& factions, const CSMWorld::IdCollection<ESM::GameSetting>& gmsts,
+    const CSMWorld::IdCollection<ESM::Global>& globals, const CSMWorld::IdCollection<ESM::Dialogue>& journals,
+    const CSMWorld::IdCollection<ESM::Race>& races, const CSMWorld::IdCollection<ESM::Region>& regions,
+    const CSMWorld::IdCollection<ESM::Dialogue>& topics, const CSMWorld::RefIdData& referencables,
     const CSMWorld::Resources& soundFiles)
-    : mTopicInfos(topicInfos),
-      mCells(cells),
-      mClasses(classes),
-      mFactions(factions),
-      mGameSettings(gmsts),
-      mGlobals(globals),
-      mJournals(journals),
-      mRaces(races),
-      mRegions(regions),
-      mTopics(topics),
-      mReferencables(referencables),
-      mSoundFiles(soundFiles)
+    : mTopicInfos(topicInfos)
+    , mCells(cells)
+    , mClasses(classes)
+    , mFactions(factions)
+    , mGameSettings(gmsts)
+    , mGlobals(globals)
+    , mJournals(journals)
+    , mRaces(races)
+    , mRegions(regions)
+    , mTopics(topics)
+    , mReferencables(referencables)
+    , mSoundFiles(soundFiles)
 {
     mIgnoreBaseRecords = false;
 }
@@ -162,8 +156,8 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
 
 // Verification functions
 
-bool CSMTools::TopicInfoCheckStage::verifyActor(const std::string& actor, const CSMWorld::UniversalId& id,
-    CSMDoc::Messages& messages)
+bool CSMTools::TopicInfoCheckStage::verifyActor(
+    const std::string& actor, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(actor);
 
@@ -181,7 +175,8 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(const std::string& actor, const 
     {
         CSMWorld::UniversalId tempId(index.second, actor);
         std::ostringstream stream;
-        stream << "Object '" << actor << "' has invalid type " << tempId.getTypeName() << " (an actor must be an NPC or a creature)"; 
+        stream << "Object '" << actor << "' has invalid type " << tempId.getTypeName()
+               << " (an actor must be an NPC or a creature)";
         messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
@@ -189,8 +184,8 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(const std::string& actor, const 
     return true;
 }
 
-bool CSMTools::TopicInfoCheckStage::verifyCell(const std::string& cell, const CSMWorld::UniversalId& id,
-    CSMDoc::Messages& messages)
+bool CSMTools::TopicInfoCheckStage::verifyCell(
+    const std::string& cell, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     if (mCellNames.find(cell) == mCellNames.end())
     {
@@ -201,8 +196,8 @@ bool CSMTools::TopicInfoCheckStage::verifyCell(const std::string& cell, const CS
     return true;
 }
 
-bool CSMTools::TopicInfoCheckStage::verifyFactionRank(const std::string& factionName, int rank, const CSMWorld::UniversalId& id,
-    CSMDoc::Messages& messages)
+bool CSMTools::TopicInfoCheckStage::verifyFactionRank(
+    const std::string& factionName, int rank, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     if (rank < -1)
     {
@@ -214,7 +209,7 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(const std::string& faction
 
     int index = mFactions.searchId(factionName);
 
-    const ESM::Faction &faction = mFactions.getRecord(index).get();
+    const ESM::Faction& faction = mFactions.getRecord(index).get();
 
     int limit = 0;
     for (; limit < 10; ++limit)
@@ -236,8 +231,8 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(const std::string& faction
     return true;
 }
 
-bool CSMTools::TopicInfoCheckStage::verifyItem(const std::string& item, const CSMWorld::UniversalId& id,
-    CSMDoc::Messages& messages)
+bool CSMTools::TopicInfoCheckStage::verifyItem(
+    const std::string& item, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(item);
 
@@ -274,7 +269,8 @@ bool CSMTools::TopicInfoCheckStage::verifyItem(const std::string& item, const CS
             {
                 CSMWorld::UniversalId tempId(index.second, item);
                 std::ostringstream stream;
-                stream << "Object '" << item << "' has invalid type " << tempId.getTypeName() << " (an item can be a potion, an armor piece, a book and so on)"; 
+                stream << "Object '" << item << "' has invalid type " << tempId.getTypeName()
+                       << " (an item can be a potion, an armor piece, a book and so on)";
                 messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
                 return false;
             }
@@ -284,8 +280,8 @@ bool CSMTools::TopicInfoCheckStage::verifyItem(const std::string& item, const CS
     return true;
 }
 
-bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::SelectStruct& select,
-    const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
+bool CSMTools::TopicInfoCheckStage::verifySelectStruct(
+    const ESM::DialInfo::SelectStruct& select, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     CSMWorld::ConstInfoSelectWrapper infoCondition(select);
 
@@ -301,13 +297,27 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
 
         switch (select.mValue.getType())
         {
-            case ESM::VT_None:   stream << "None"; break;
-            case ESM::VT_Short:  stream << "Short"; break;
-            case ESM::VT_Int:    stream << "Int"; break;
-            case ESM::VT_Long:   stream << "Long"; break;
-            case ESM::VT_Float:  stream << "Float"; break;
-            case ESM::VT_String: stream << "String"; break;
-            default:             stream << "unknown"; break;
+            case ESM::VT_None:
+                stream << "None";
+                break;
+            case ESM::VT_Short:
+                stream << "Short";
+                break;
+            case ESM::VT_Int:
+                stream << "Int";
+                break;
+            case ESM::VT_Long:
+                stream << "Long";
+                break;
+            case ESM::VT_Float:
+                stream << "Float";
+                break;
+            case ESM::VT_String:
+                stream << "String";
+                break;
+            default:
+                stream << "unknown";
+                break;
         }
         stream << " type";
 
@@ -316,58 +326,60 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
     }
     else if (infoCondition.conditionIsAlwaysTrue())
     {
-        messages.add(id, "Condition '" + infoCondition.toString() + "' is always true", "", CSMDoc::Message::Severity_Warning);
+        messages.add(
+            id, "Condition '" + infoCondition.toString() + "' is always true", "", CSMDoc::Message::Severity_Warning);
         return false;
     }
     else if (infoCondition.conditionIsNeverTrue())
     {
-        messages.add(id, "Condition '" + infoCondition.toString() + "' is never true", "", CSMDoc::Message::Severity_Warning);
+        messages.add(
+            id, "Condition '" + infoCondition.toString() + "' is never true", "", CSMDoc::Message::Severity_Warning);
         return false;
     }
 
     // Id checks
-    if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Global &&
-        !verifyId(infoCondition.getVariableName(), mGlobals, id, messages))
+    if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Global
+        && !verifyId(infoCondition.getVariableName(), mGlobals, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Journal &&
-        !verifyId(infoCondition.getVariableName(), mJournals, id, messages))
+    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Journal
+        && !verifyId(infoCondition.getVariableName(), mJournals, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Item &&
-        !verifyItem(infoCondition.getVariableName(), id, messages))
+    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Item
+        && !verifyItem(infoCondition.getVariableName(), id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Dead &&
-        !verifyActor(infoCondition.getVariableName(), id, messages))
+    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Dead
+        && !verifyActor(infoCondition.getVariableName(), id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotId &&
-        !verifyActor(infoCondition.getVariableName(), id, messages))
+    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotId
+        && !verifyActor(infoCondition.getVariableName(), id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotFaction &&
-        !verifyId(infoCondition.getVariableName(), mFactions, id, messages))
+    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotFaction
+        && !verifyId(infoCondition.getVariableName(), mFactions, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotClass &&
-        !verifyId(infoCondition.getVariableName(), mClasses, id, messages))
+    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotClass
+        && !verifyId(infoCondition.getVariableName(), mClasses, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotRace &&
-        !verifyId(infoCondition.getVariableName(), mRaces, id, messages))
+    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotRace
+        && !verifyId(infoCondition.getVariableName(), mRaces, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotCell &&
-        !verifyCell(infoCondition.getVariableName(), id, messages))
+    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotCell
+        && !verifyCell(infoCondition.getVariableName(), id, messages))
     {
         return false;
     }
@@ -375,8 +387,8 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
     return true;
 }
 
-bool CSMTools::TopicInfoCheckStage::verifySound(const std::string& sound, const CSMWorld::UniversalId& id,
-    CSMDoc::Messages& messages)
+bool CSMTools::TopicInfoCheckStage::verifySound(
+    const std::string& sound, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     if (mSoundFiles.searchId(sound) == -1)
     {
@@ -395,12 +407,14 @@ bool CSMTools::TopicInfoCheckStage::verifyId(const std::string& name, const CSMW
 
     if (index == -1)
     {
-        messages.add(id, std::string(T::getRecordType()) + " '" + name + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, std::string(T::getRecordType()) + " '" + name + "' does not exist", "",
+            CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (collection.getRecord(index).isDeleted())
     {
-        messages.add(id, "Deleted " + std::string(T::getRecordType()) + " record '" + name + "' is being referenced", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Deleted " + std::string(T::getRecordType()) + " record '" + name + "' is being referenced",
+            "", CSMDoc::Message::Severity_Error);
         return false;
     }
 

@@ -6,7 +6,7 @@
 namespace ESM
 {
 
-    void StolenItems::write(ESMWriter &esm) const
+    void StolenItems::write(ESMWriter& esm) const
     {
         for (StolenItemsMap::const_iterator it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
         {
@@ -23,7 +23,7 @@ namespace ESM
         }
     }
 
-    void StolenItems::load(ESMReader &esm)
+    void StolenItems::load(ESMReader& esm)
     {
         while (esm.isNextSub("NAME"))
         {

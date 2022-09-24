@@ -27,7 +27,7 @@ namespace
         {
             if (i++ % newLine == 0)
                 message << "\n";
-            message << Wrapper<typename std::decay<decltype(v)>::type> {v} << ", ";
+            message << Wrapper<typename std::decay<decltype(v)>::type>{ v } << ", ";
         }
         return message << "\n}";
     }
@@ -36,52 +36,51 @@ namespace
 namespace testing
 {
     template <>
-    inline testing::Message& Message::operator <<(const osg::Vec3f& value)
+    inline testing::Message& Message::operator<<(const osg::Vec3f& value)
     {
         return (*this) << "Vec3fEq(" << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.x()
-            << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.y()
-            << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.z()
-            << ')';
+                       << ", " << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.y() << ", "
+                       << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.z() << ')';
     }
 
     template <>
-    inline testing::Message& Message::operator <<(const Wrapper<osg::Vec3f>& value)
+    inline testing::Message& Message::operator<<(const Wrapper<osg::Vec3f>& value)
     {
         return (*this) << value.mValue;
     }
 
     template <>
-    inline testing::Message& Message::operator <<(const Wrapper<float>& value)
+    inline testing::Message& Message::operator<<(const Wrapper<float>& value)
     {
         return (*this) << std::setprecision(std::numeric_limits<float>::max_exponent10) << value.mValue;
     }
 
     template <>
-    inline testing::Message& Message::operator <<(const Wrapper<int>& value)
+    inline testing::Message& Message::operator<<(const Wrapper<int>& value)
     {
         return (*this) << value.mValue;
     }
 
     template <>
-    inline testing::Message& Message::operator <<(const std::deque<osg::Vec3f>& value)
+    inline testing::Message& Message::operator<<(const std::deque<osg::Vec3f>& value)
     {
         return writeRange(*this, value, 1);
     }
 
     template <>
-    inline testing::Message& Message::operator <<(const std::vector<osg::Vec3f>& value)
+    inline testing::Message& Message::operator<<(const std::vector<osg::Vec3f>& value)
     {
         return writeRange(*this, value, 1);
     }
 
     template <>
-    inline testing::Message& Message::operator <<(const std::vector<float>& value)
+    inline testing::Message& Message::operator<<(const std::vector<float>& value)
     {
         return writeRange(*this, value, 3);
     }
 
     template <>
-    inline testing::Message& Message::operator <<(const std::vector<int>& value)
+    inline testing::Message& Message::operator<<(const std::vector<int>& value)
     {
         return writeRange(*this, value, 3);
     }

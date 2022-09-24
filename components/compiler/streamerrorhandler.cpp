@@ -10,8 +10,7 @@ namespace Compiler
 {
     // Report error to the user.
 
-    void StreamErrorHandler::report (const std::string& message, const TokenLoc& loc,
-        Type type)
+    void StreamErrorHandler::report(const std::string& message, const TokenLoc& loc, Type type)
     {
         Debug::Level logLevel = Debug::Info; // Usually script warnings are not too important
         if (type == ErrorMessage)
@@ -19,7 +18,7 @@ namespace Compiler
 
         std::stringstream text;
 
-        if (type==ErrorMessage)
+        if (type == ErrorMessage)
             text << "Error: ";
         else
             text << "Warning: ";
@@ -27,23 +26,22 @@ namespace Compiler
         if (!mContext.empty())
             text << mContext << " ";
 
-        text << "line " << loc.mLine+1 << ", column " << loc.mColumn+1
-             << " (" << loc.mLiteral << "): " << message;
+        text << "line " << loc.mLine + 1 << ", column " << loc.mColumn + 1 << " (" << loc.mLiteral << "): " << message;
 
         Log(logLevel) << text.str();
     }
 
     // Report a file related error
 
-    void StreamErrorHandler::report (const std::string& message, Type type)
+    void StreamErrorHandler::report(const std::string& message, Type type)
     {
         Debug::Level logLevel = Debug::Info;
-        if (type==ErrorMessage)
+        if (type == ErrorMessage)
             logLevel = Debug::Error;
 
         std::stringstream text;
 
-        if (type==ErrorMessage)
+        if (type == ErrorMessage)
             text << "Error: ";
         else
             text << "Warning: ";
@@ -56,14 +54,16 @@ namespace Compiler
         Log(logLevel) << text.str();
     }
 
-    void StreamErrorHandler::setContext(const std::string &context)
+    void StreamErrorHandler::setContext(const std::string& context)
     {
         mContext = context;
     }
 
     StreamErrorHandler::StreamErrorHandler() = default;
 
-    ContextOverride::ContextOverride(StreamErrorHandler& handler, const std::string& context) : mHandler(handler), mContext(handler.mContext)
+    ContextOverride::ContextOverride(StreamErrorHandler& handler, const std::string& context)
+        : mHandler(handler)
+        , mContext(handler.mContext)
     {
         mHandler.setContext(context);
     }

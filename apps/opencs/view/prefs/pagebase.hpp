@@ -14,25 +14,23 @@ namespace CSVPrefs
 {
     class PageBase : public QScrollArea
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMPrefs::Category& mCategory;
+        CSMPrefs::Category& mCategory;
 
-        public:
+    public:
+        PageBase(CSMPrefs::Category& category, QWidget* parent);
 
-            PageBase (CSMPrefs::Category& category, QWidget *parent);
+        CSMPrefs::Category& getCategory();
 
-            CSMPrefs::Category& getCategory();
+    protected:
+        void contextMenuEvent(QContextMenuEvent*) override;
 
-        protected:
+    private slots:
 
-            void contextMenuEvent(QContextMenuEvent*) override;
+        void resetCategory();
 
-        private slots:
-
-            void resetCategory();
-
-            void resetAll();
+        void resetAll();
     };
 }
 

@@ -1,16 +1,16 @@
 #ifndef OPENCS_VIEW_CELL_H
 #define OPENCS_VIEW_CELL_H
 
-#include <string>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <osg/ref_ptr>
 
 #include "../../model/world/cellcoordinates.hpp"
-#include "terrainstorage.hpp"
 #include "instancedragmodes.hpp"
+#include "terrainstorage.hpp"
 
 class QModelIndex;
 
@@ -44,141 +44,136 @@ namespace CSVRender
 
     class Cell
     {
-            CSMWorld::Data& mData;
-            std::string mId;
-            osg::ref_ptr<osg::Group> mCellNode;
-            std::map<std::string, Object *> mObjects;
-            std::unique_ptr<Terrain::TerrainGrid> mTerrain;
-            CSMWorld::CellCoordinates mCoordinates;
-            std::unique_ptr<CellArrow> mCellArrows[4];
-            std::unique_ptr<CellMarker> mCellMarker;
-            std::unique_ptr<CellBorder> mCellBorder;
-            std::unique_ptr<CellWater> mCellWater;
-            std::unique_ptr<Pathgrid> mPathgrid;
-            bool mDeleted;
-            int mSubMode;
-            unsigned int mSubModeElementMask;
-            bool mUpdateLand, mLandDeleted;
-            TerrainStorage *mTerrainStorage;
+        CSMWorld::Data& mData;
+        std::string mId;
+        osg::ref_ptr<osg::Group> mCellNode;
+        std::map<std::string, Object*> mObjects;
+        std::unique_ptr<Terrain::TerrainGrid> mTerrain;
+        CSMWorld::CellCoordinates mCoordinates;
+        std::unique_ptr<CellArrow> mCellArrows[4];
+        std::unique_ptr<CellMarker> mCellMarker;
+        std::unique_ptr<CellBorder> mCellBorder;
+        std::unique_ptr<CellWater> mCellWater;
+        std::unique_ptr<Pathgrid> mPathgrid;
+        bool mDeleted;
+        int mSubMode;
+        unsigned int mSubModeElementMask;
+        bool mUpdateLand, mLandDeleted;
+        TerrainStorage* mTerrainStorage;
 
-            /// Ignored if cell does not have an object with the given ID.
-            ///
-            /// \return Was the object deleted?
-            bool removeObject (const std::string& id);
+        /// Ignored if cell does not have an object with the given ID.
+        ///
+        /// \return Was the object deleted?
+        bool removeObject(const std::string& id);
 
-            // Remove object and return iterator to next object.
-            std::map<std::string, Object *>::iterator removeObject (
-                std::map<std::string, Object *>::iterator iter);
+        // Remove object and return iterator to next object.
+        std::map<std::string, Object*>::iterator removeObject(std::map<std::string, Object*>::iterator iter);
 
-            /// Add objects from reference table that are within this cell.
-            ///
-            /// \return Have any objects been added?
-            bool addObjects (int start, int end);
+        /// Add objects from reference table that are within this cell.
+        ///
+        /// \return Have any objects been added?
+        bool addObjects(int start, int end);
 
-            void updateLand();
-            void unloadLand();
+        void updateLand();
+        void unloadLand();
 
-        public:
+    public:
+        enum Selection
+        {
+            Selection_Clear,
+            Selection_All,
+            Selection_Invert
+        };
 
-            enum Selection
-            {
-                Selection_Clear,
-                Selection_All,
-                Selection_Invert
-            };
+    public:
+        /// \note Deleted covers both cells that are deleted and cells that don't exist in
+        /// the first place.
+        Cell(CSMWorld::Data& data, osg::Group* rootNode, const std::string& id, bool deleted = false);
 
-        public:
+        ~Cell();
 
-            /// \note Deleted covers both cells that are deleted and cells that don't exist in
-            /// the first place.
-            Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
-                bool deleted = false);
+        /// \note Returns the pathgrid representation which will exist as long as the cell exists
+        Pathgrid* getPathgrid() const;
 
-            ~Cell();
+        /// \return Did this call result in a modification of the visual representation of
+        /// this cell?
+        bool referenceableDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            /// \note Returns the pathgrid representation which will exist as long as the cell exists
-            Pathgrid* getPathgrid() const;
+        /// \return Did this call result in a modification of the visual representation of
+        /// this cell?
+        bool referenceableAboutToBeRemoved(const QModelIndex& parent, int start, int end);
 
-            /// \return Did this call result in a modification of the visual representation of
-            /// this cell?
-            bool referenceableDataChanged (const QModelIndex& topLeft,
-                const QModelIndex& bottomRight);
+        /// \return Did this call result in a modification of the visual representation of
+        /// this cell?
+        bool referenceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            /// \return Did this call result in a modification of the visual representation of
-            /// this cell?
-            bool referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+        /// \return Did this call result in a modification of the visual representation of
+        /// this cell?
+        bool referenceAboutToBeRemoved(const QModelIndex& parent, int start, int end);
 
-            /// \return Did this call result in a modification of the visual representation of
-            /// this cell?
-            bool referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+        /// \return Did this call result in a modification of the visual representation of
+        /// this cell?
+        bool referenceAdded(const QModelIndex& parent, int start, int end);
 
-            /// \return Did this call result in a modification of the visual representation of
-            /// this cell?
-            bool referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+        void setAlteredHeight(int inCellX, int inCellY, float height);
 
-            /// \return Did this call result in a modification of the visual representation of
-            /// this cell?
-            bool referenceAdded (const QModelIndex& parent, int start, int end);
+        float getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY);
 
-            void setAlteredHeight(int inCellX, int inCellY, float height);
+        float* getAlteredHeight(int inCellX, int inCellY);
 
-            float getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY);
+        void resetAlteredHeights();
 
-            float* getAlteredHeight(int inCellX, int inCellY);
+        void pathgridModified();
 
-            void resetAlteredHeights();
+        void pathgridRemoved();
 
-            void pathgridModified();
+        void landDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void pathgridRemoved();
+        void landAboutToBeRemoved(const QModelIndex& parent, int start, int end);
 
-            void landDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+        void landAdded(const QModelIndex& parent, int start, int end);
 
-            void landAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+        void landTextureChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void landAdded (const QModelIndex& parent, int start, int end);
+        void landTextureAboutToBeRemoved(const QModelIndex& parent, int start, int end);
 
-            void landTextureChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+        void landTextureAdded(const QModelIndex& parent, int start, int end);
 
-            void landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+        void reloadAssets();
 
-            void landTextureAdded (const QModelIndex& parent, int start, int end);
+        void setSelection(int elementMask, Selection mode);
 
-            void reloadAssets();
+        // Select everything that references the same ID as at least one of the elements
+        // already selected
+        void selectAllWithSameParentId(int elementMask);
 
-            void setSelection (int elementMask, Selection mode);
+        void handleSelectDrag(Object* object, DragMode dragMode);
 
-            // Select everything that references the same ID as at least one of the elements
-            // already selected
-            void selectAllWithSameParentId (int elementMask);
+        void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode);
 
-            void handleSelectDrag(Object* object, DragMode dragMode);
+        void selectWithinDistance(const osg::Vec3d& pointA, float distance, DragMode dragMode);
 
-            void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode);
+        void setCellArrows(int mask);
 
-            void selectWithinDistance(const osg::Vec3d& pointA, float distance, DragMode dragMode);
+        /// \brief Set marker for this cell.
+        void setCellMarker();
 
-            void setCellArrows (int mask);
+        /// Returns 0, 0 in case of an unpaged cell.
+        CSMWorld::CellCoordinates getCoordinates() const;
 
-            /// \brief Set marker for this cell.
-            void setCellMarker();
+        bool isDeleted() const;
 
-            /// Returns 0, 0 in case of an unpaged cell.
-            CSMWorld::CellCoordinates getCoordinates() const;
+        std::vector<osg::ref_ptr<TagBase>> getSelection(unsigned int elementMask) const;
 
-            bool isDeleted() const;
+        std::vector<osg::ref_ptr<TagBase>> getEdited(unsigned int elementMask) const;
 
-            std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask) const;
+        void setSubMode(int subMode, unsigned int elementMask);
 
-            std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask) const;
+        /// Erase all overrides and restore the visual representation of the cell to its
+        /// true state.
+        void reset(unsigned int elementMask);
 
-            void setSubMode (int subMode, unsigned int elementMask);
-
-            /// Erase all overrides and restore the visual representation of the cell to its
-            /// true state.
-            void reset (unsigned int elementMask);
-
-            friend class CellNodeCallback;
+        friend class CellNodeCallback;
     };
 }
 

@@ -11,42 +11,40 @@ namespace CSVDoc
 {
     class Operation : public QObject
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            int mType;
-            bool mStalling;
-            QProgressBar *mProgressBar;
-            QPushButton *mAbortButton;
-            QHBoxLayout *mLayout;
+        int mType;
+        bool mStalling;
+        QProgressBar* mProgressBar;
+        QPushButton* mAbortButton;
+        QHBoxLayout* mLayout;
 
-            // not implemented
-            Operation (const Operation&);
-            Operation& operator= (const Operation&);
+        // not implemented
+        Operation(const Operation&);
+        Operation& operator=(const Operation&);
 
-            void updateLabel (int threads = -1);
+        void updateLabel(int threads = -1);
 
-        public:
+    public:
+        Operation(int type, QWidget* parent);
+        ~Operation() override;
 
-            Operation (int type, QWidget *parent);
-            ~Operation() override;
+        void setProgress(int current, int max, int threads);
 
-            void setProgress (int current, int max, int threads);
+        int getType() const;
+        QHBoxLayout* getLayout() const;
 
-            int getType() const;
-            QHBoxLayout *getLayout() const;
+    private:
+        void setBarColor(int type);
+        void initWidgets();
 
-        private:
+    signals:
 
-            void setBarColor (int type);
-            void initWidgets();
+        void abortOperation(int type);
 
-        signals:
+    private slots:
 
-            void abortOperation (int type);
-
-        private slots:
-
-            void abortOperation();
+        void abortOperation();
     };
 }
 

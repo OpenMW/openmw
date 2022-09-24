@@ -17,36 +17,26 @@ namespace Wizard
         explicit IniSettings();
         ~IniSettings();
 
-        inline QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const
+        inline QVariant value(const QString& key, const QVariant& defaultValue = QVariant()) const
         {
             return mSettings.value(key, defaultValue);
         }
 
-        inline QList<QVariant> values() const
-        {
-            return mSettings.values();
-        }
+        inline QList<QVariant> values() const { return mSettings.values(); }
 
-        inline void setValue(const QString &key, const QVariant &value)
-        {
-            mSettings.insert(key, value);
-        }
+        inline void setValue(const QString& key, const QVariant& value) { mSettings.insert(key, value); }
 
-        inline void remove(const QString &key)
-        {
-            mSettings.remove(key);
-        }
+        inline void remove(const QString& key) { mSettings.remove(key); }
 
-        QStringList findKeys(const QString &text);
+        QStringList findKeys(const QString& text);
 
-        bool readFile(QTextStream &stream);
-        bool writeFile(const QString &path, QTextStream &stream);
+        bool readFile(QTextStream& stream);
+        bool writeFile(const QString& path, QTextStream& stream);
 
-        bool parseInx(const QString &path);
+        bool parseInx(const QString& path);
 
     private:
-
-        int getLastNewline(const QString &buffer, int from);
+        int getLastNewline(const QString& buffer, int from);
 
         SettingsMap mSettings;
     };

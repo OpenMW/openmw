@@ -7,12 +7,11 @@ namespace MWWorld
 {
     class ActionTalk : public Action
     {
-            void executeImp (const Ptr& actor) override;
+        void executeImp(const Ptr& actor) override;
 
-        public:
-
-            ActionTalk (const Ptr& actor);
-            ///< \param actor The actor the player is talking to
+    public:
+        ActionTalk(const Ptr& actor);
+        ///< \param actor The actor the player is talking to
     };
 }
 

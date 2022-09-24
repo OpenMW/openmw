@@ -1,10 +1,10 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_SHADERMANAGER_H
 #define OPENMW_COMPONENTS_SETTINGS_SHADERMANAGER_H
 
-#include <unordered_map>
 #include <filesystem>
-#include <optional>
 #include <fstream>
+#include <optional>
+#include <unordered_map>
 #include <vector>
 
 #include <yaml-cpp/yaml.h>
@@ -13,9 +13,9 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
-#include <components/serialization/osgyaml.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
+#include <components/serialization/osgyaml.hpp>
 
 namespace Settings
 {
@@ -30,11 +30,10 @@ namespace Settings
      *    MY_VEC2: [0.23, 0.34]
      *   TECHNIQUE2:
      *    MY_VEC3: [0.22, 0.33, 0.20]
-    */
+     */
     class ShaderManager
     {
     public:
-
         enum class Mode
         {
             Normal,
@@ -51,27 +50,19 @@ namespace Settings
             return instance;
         }
 
-        Mode getMode()
-        {
-            return mMode;
-        }
+        Mode getMode() { return mMode; }
 
-        void setMode(Mode mode)
-        {
-            mMode = mode;
-        }
+        void setMode(Mode mode) { mMode = mode; }
 
-        const YAML::Node& getRoot()
-        {
-            return mData;
-        }
+        const YAML::Node& getRoot() { return mData; }
 
         template <class T>
         bool setValue(const std::string& tname, const std::string& uname, const T& value)
         {
             if (mData.IsNull())
             {
-                Log(Debug::Warning) << "Failed setting " << tname << ", " << uname << " : shader settings failed to load";
+                Log(Debug::Warning) << "Failed setting " << tname << ", " << uname
+                                    << " : shader settings failed to load";
                 return false;
             }
 
@@ -84,7 +75,8 @@ namespace Settings
         {
             if (mData.IsNull())
             {
-                Log(Debug::Warning) << "Failed getting " << tname << ", " << uname << " : shader settings failed to load";
+                Log(Debug::Warning) << "Failed getting " << tname << ", " << uname
+                                    << " : shader settings failed to load";
                 return std::nullopt;
             }
 
@@ -97,15 +89,16 @@ namespace Settings
 
                 return value.as<T>();
             }
-            catch(const YAML::BadConversion&)
+            catch (const YAML::BadConversion&)
             {
-                Log(Debug::Warning) << "Failed retrieving " << tname << ", " << uname << " : mismatched types in config file.";
+                Log(Debug::Warning) << "Failed retrieving " << tname << ", " << uname
+                                    << " : mismatched types in config file.";
             }
 
             return std::nullopt;
         }
 
-        bool load(const std::filesystem::path &path)
+        bool load(const std::filesystem::path& path)
         {
             mData = YAML::Null;
             mPath = path;
@@ -124,7 +117,7 @@ namespace Settings
 
             try
             {
-                std::ifstream file{mPath};
+                std::ifstream file{ mPath };
                 mData = YAML::Load(file);
                 mData.SetStyle(YAML::EmitterStyle::Block);
 
@@ -133,9 +126,9 @@ namespace Settings
 
                 return true;
             }
-            catch(const YAML::Exception& e)
+            catch (const YAML::Exception& e)
             {
-                Log(Debug::Error) << "Shader settings failed to load, " <<  e.msg;
+                Log(Debug::Error) << "Shader settings failed to load, " << e.msg;
             }
 
             return false;

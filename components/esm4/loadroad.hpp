@@ -47,8 +47,8 @@ namespace ESM4
             float x;
             float y;
             float z;
-            std::uint8_t  numLinks;
-            std::uint8_t  unknown1;
+            std::uint8_t numLinks;
+            std::uint8_t unknown1;
             std::uint16_t unknown2;
         };
 
@@ -66,9 +66,9 @@ namespace ESM4
             float z;
         };
 #pragma pack(pop)
-        FormId mParent;       // world FormId, from the loading sequence
+        FormId mParent; // world FormId, from the loading sequence
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -77,9 +77,9 @@ namespace ESM4
         std::vector<PGRR> mLinks;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

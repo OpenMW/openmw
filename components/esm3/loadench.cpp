@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Enchantment::load(ESMReader &esm, bool &isDeleted)
+    void Enchantment::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -45,7 +45,7 @@ namespace ESM
             esm.fail("Missing ENDT subrecord");
     }
 
-    void Enchantment::save(ESMWriter &esm, bool isDeleted) const
+    void Enchantment::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

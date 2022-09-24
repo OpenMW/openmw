@@ -13,21 +13,33 @@ namespace
     {
         switch (month)
         {
-            case 0: return 31;
-            case 1: return 28;
-            case 2: return 31;
-            case 3: return 30;
-            case 4: return 31;
-            case 5: return 30;
-            case 6: return 31;
-            case 7: return 31;
-            case 8: return 30;
-            case 9: return 31;
-            case 10: return 30;
-            case 11: return 31;
+            case 0:
+                return 31;
+            case 1:
+                return 28;
+            case 2:
+                return 31;
+            case 3:
+                return 30;
+            case 4:
+                return 31;
+            case 5:
+                return 30;
+            case 6:
+                return 31;
+            case 7:
+                return 31;
+            case 8:
+                return 30;
+            case 9:
+                return 31;
+            case 10:
+                return 30;
+            case 11:
+                return 31;
         }
 
-        throw std::runtime_error ("month out of range");
+        throw std::runtime_error("month out of range");
     }
 }
 
@@ -148,43 +160,41 @@ namespace MWWorld
         if (month < 0 || month >= months)
             return {};
 
-        static const std::string_view monthNames[months] =
-        {
-            "sMonthMorningstar", "sMonthSunsdawn", "sMonthFirstseed", "sMonthRainshand",
-            "sMonthSecondseed", "sMonthMidyear", "sMonthSunsheight", "sMonthLastseed",
-            "sMonthHeartfire", "sMonthFrostfall", "sMonthSunsdusk", "sMonthEveningstar"
-        };
+        static const std::string_view monthNames[months] = { "sMonthMorningstar", "sMonthSunsdawn", "sMonthFirstseed",
+            "sMonthRainshand", "sMonthSecondseed", "sMonthMidyear", "sMonthSunsheight", "sMonthLastseed",
+            "sMonthHeartfire", "sMonthFrostfall", "sMonthSunsdusk", "sMonthEveningstar" };
 
-        const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(monthNames[month]);
+        const ESM::GameSetting* setting
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(monthNames[month]);
         return setting->mValue.getString();
     }
 
     bool DateTimeManager::updateGlobalFloat(std::string_view name, float value)
     {
-        if (name=="gamehour")
+        if (name == "gamehour")
         {
             setHour(value);
             return true;
         }
-        else if (name=="day")
+        else if (name == "day")
         {
             setDay(static_cast<int>(value));
             return true;
         }
-        else if (name=="month")
+        else if (name == "month")
         {
             setMonth(static_cast<int>(value));
             return true;
         }
-        else if (name=="year")
+        else if (name == "year")
         {
             mYear = static_cast<int>(value);
         }
-        else if (name=="timescale")
+        else if (name == "timescale")
         {
             mTimeScale = value;
         }
-        else if (name=="dayspassed")
+        else if (name == "dayspassed")
         {
             mDaysPassed = static_cast<int>(value);
         }
@@ -194,30 +204,30 @@ namespace MWWorld
 
     bool DateTimeManager::updateGlobalInt(std::string_view name, int value)
     {
-        if (name=="gamehour")
+        if (name == "gamehour")
         {
             setHour(static_cast<float>(value));
             return true;
         }
-        else if (name=="day")
+        else if (name == "day")
         {
             setDay(value);
             return true;
         }
-        else if (name=="month")
+        else if (name == "month")
         {
             setMonth(value);
             return true;
         }
-        else if (name=="year")
+        else if (name == "year")
         {
             mYear = value;
         }
-        else if (name=="timescale")
+        else if (name == "timescale")
         {
             mTimeScale = static_cast<float>(value);
         }
-        else if (name=="dayspassed")
+        else if (name == "dayspassed")
         {
             mDaysPassed = value;
         }

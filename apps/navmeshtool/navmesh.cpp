@@ -2,6 +2,7 @@
 
 #include "worldspacedata.hpp"
 
+#include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/detournavigator/generatenavmeshtile.hpp>
 #include <components/detournavigator/gettilespositions.hpp>
@@ -14,20 +15,19 @@
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/tileposition.hpp>
 #include <components/misc/progressreporter.hpp>
+#include <components/navmeshtool/protocol.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sqlite3/transaction.hpp>
-#include <components/debug/debugging.hpp>
-#include <components/navmeshtool/protocol.hpp>
 
 #include <osg/Vec3f>
 
 #include <atomic>
 #include <chrono>
 #include <cstddef>
-#include <utility>
-#include <vector>
 #include <random>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 namespace NavMeshTool
 {
@@ -35,50 +35,48 @@ namespace NavMeshTool
     {
         using DetourNavigator::AgentBounds;
         using DetourNavigator::GenerateNavMeshTile;
+        using DetourNavigator::MeshSource;
         using DetourNavigator::NavMeshDb;
         using DetourNavigator::NavMeshTileInfo;
         using DetourNavigator::PreparedNavMeshData;
         using DetourNavigator::RecastMeshProvider;
-        using DetourNavigator::MeshSource;
         using DetourNavigator::Settings;
         using DetourNavigator::ShapeId;
         using DetourNavigator::TileId;
         using DetourNavigator::TilePosition;
-        using DetourNavigator::TileVersion;
         using DetourNavigator::TilesPositionsRange;
+        using DetourNavigator::TileVersion;
         using Sqlite3::Transaction;
 
         void logGeneratedTiles(std::size_t provided, std::size_t expected)
         {
             Log(Debug::Info) << provided << "/" << expected << " ("
-                << (static_cast<double>(provided) / static_cast<double>(expected) * 100)
-                << "%) navmesh tiles are generated";
+                             << (static_cast<double>(provided) / static_cast<double>(expected) * 100)
+                             << "%) navmesh tiles are generated";
         }
 
         template <class T>
         void serializeToStderr(const T& value)
         {
             const std::vector<std::byte> data = serialize(value);
-            getLockedRawStderr()->write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
+            getLockedRawStderr()->write(
+                reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
         }
 
         void logGeneratedTilesMessage(std::size_t number)
         {
-            serializeToStderr(GeneratedTiles {static_cast<std::uint64_t>(number)});
+            serializeToStderr(GeneratedTiles{ static_cast<std::uint64_t>(number) });
         }
 
         struct LogGeneratedTiles
         {
-            void operator()(std::size_t provided, std::size_t expected) const
-            {
-                logGeneratedTiles(provided, expected);
-            }
+            void operator()(std::size_t provided, std::size_t expected) const { logGeneratedTiles(provided, expected); }
         };
 
         class NavMeshTileConsumer final : public DetourNavigator::NavMeshTileConsumer
         {
         public:
-            std::atomic_size_t mExpected {0};
+            std::atomic_size_t mExpected{ 0 };
 
             explicit NavMeshTileConsumer(NavMeshDb&& db, bool removeUnusedTiles, bool writeBinaryLog)
                 : mDb(std::move(db))
@@ -87,7 +85,8 @@ namespace NavMeshTool
                 , mTransaction(mDb.startTransaction(Sqlite3::TransactionMode::Immediate))
                 , mNextTileId(mDb.getMaxTileId() + 1)
                 , mNextShapeId(mDb.getMaxShapeId() + 1)
-            {}
+            {
+            }
 
             std::size_t getProvided() const { return mProvided.load(); }
 
@@ -107,8 +106,8 @@ namespace NavMeshTool
                 return DetourNavigator::resolveMeshSource(mDb, source, mNextShapeId);
             }
 
-            std::optional<NavMeshTileInfo> find(std::string_view worldspace, const TilePosition &tilePosition,
-                const std::vector<std::byte> &input) override
+            std::optional<NavMeshTileInfo> find(std::string_view worldspace, const TilePosition& tilePosition,
+                const std::vector<std::byte>& input) override
             {
                 std::optional<NavMeshTileInfo> result;
                 std::lock_guard lock(mMutex);
@@ -137,35 +136,38 @@ namespace NavMeshTool
                 if (mRemoveUnusedTiles)
                 {
                     std::lock_guard lock(mMutex);
-                    mDeleted += static_cast<std::size_t>(mDb.deleteTilesAtExcept(worldspace, tilePosition, TileId {tileId}));
+                    mDeleted += static_cast<std::size_t>(
+                        mDb.deleteTilesAtExcept(worldspace, tilePosition, TileId{ tileId }));
                 }
                 report();
             }
 
-            void insert(std::string_view worldspace, const TilePosition& tilePosition,
-                std::int64_t version, const std::vector<std::byte>& input, PreparedNavMeshData& data) override
+            void insert(std::string_view worldspace, const TilePosition& tilePosition, std::int64_t version,
+                const std::vector<std::byte>& input, PreparedNavMeshData& data) override
             {
                 {
                     std::lock_guard lock(mMutex);
                     if (mRemoveUnusedTiles)
                         mDeleted += static_cast<std::size_t>(mDb.deleteTilesAt(worldspace, tilePosition));
                     data.mUserId = static_cast<unsigned>(mNextTileId);
-                    mDb.insertTile(mNextTileId, worldspace, tilePosition, TileVersion {version}, input, serialize(data));
+                    mDb.insertTile(
+                        mNextTileId, worldspace, tilePosition, TileVersion{ version }, input, serialize(data));
                     ++mNextTileId;
                 }
                 ++mInserted;
                 report();
             }
 
-            void update(std::string_view worldspace, const TilePosition& tilePosition,
-                std::int64_t tileId, std::int64_t version, PreparedNavMeshData& data) override
+            void update(std::string_view worldspace, const TilePosition& tilePosition, std::int64_t tileId,
+                std::int64_t version, PreparedNavMeshData& data) override
             {
                 data.mUserId = static_cast<unsigned>(tileId);
                 {
                     std::lock_guard lock(mMutex);
                     if (mRemoveUnusedTiles)
-                        mDeleted += static_cast<std::size_t>(mDb.deleteTilesAtExcept(worldspace, tilePosition, TileId {tileId}));
-                    mDb.updateTile(TileId {tileId}, TileVersion {version}, serialize(data));
+                        mDeleted += static_cast<std::size_t>(
+                            mDb.deleteTilesAtExcept(worldspace, tilePosition, TileId{ tileId }));
+                    mDb.updateTile(TileId{ tileId }, TileVersion{ version }, serialize(data));
                 }
                 ++mUpdated;
                 report();
@@ -225,9 +227,9 @@ namespace NavMeshTool
             }
 
         private:
-            std::atomic_size_t mProvided {0};
-            std::atomic_size_t mInserted {0};
-            std::atomic_size_t mUpdated {0};
+            std::atomic_size_t mProvided{ 0 };
+            std::atomic_size_t mInserted{ 0 };
+            std::atomic_size_t mUpdated{ 0 };
             std::size_t mDeleted = 0;
             Status mStatus = Status::Ok;
             mutable std::mutex mMutex;
@@ -252,51 +254,43 @@ namespace NavMeshTool
         };
     }
 
-    Status generateAllNavMeshTiles(const AgentBounds& agentBounds, const Settings& settings,
-        std::size_t threadsNumber, bool removeUnusedTiles, bool writeBinaryLog, WorldspaceData& data,
-        NavMeshDb&& db)
+    Status generateAllNavMeshTiles(const AgentBounds& agentBounds, const Settings& settings, std::size_t threadsNumber,
+        bool removeUnusedTiles, bool writeBinaryLog, WorldspaceData& data, NavMeshDb&& db)
     {
         Log(Debug::Info) << "Generating navmesh tiles by " << threadsNumber << " parallel workers...";
 
         SceneUtil::WorkQueue workQueue(threadsNumber);
-        auto navMeshTileConsumer = std::make_shared<NavMeshTileConsumer>(std::move(db), removeUnusedTiles, writeBinaryLog);
+        auto navMeshTileConsumer
+            = std::make_shared<NavMeshTileConsumer>(std::move(db), removeUnusedTiles, writeBinaryLog);
         std::size_t tiles = 0;
         std::mt19937_64 random;
 
         for (const std::unique_ptr<WorldspaceNavMeshInput>& input : data.mNavMeshInputs)
         {
-            const auto range = DetourNavigator::makeTilesPositionsRange(
-                Misc::Convert::toOsgXY(input->mAabb.m_min),
-                Misc::Convert::toOsgXY(input->mAabb.m_max),
-                settings.mRecast
-            );
+            const auto range = DetourNavigator::makeTilesPositionsRange(Misc::Convert::toOsgXY(input->mAabb.m_min),
+                Misc::Convert::toOsgXY(input->mAabb.m_max), settings.mRecast);
 
             if (removeUnusedTiles)
                 navMeshTileConsumer->removeTilesOutsideRange(input->mWorldspace, range);
 
             std::vector<TilePosition> worldspaceTiles;
 
-            DetourNavigator::getTilesPositions(range,
-                [&] (const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); });
+            DetourNavigator::getTilesPositions(
+                range, [&](const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); });
 
             tiles += worldspaceTiles.size();
 
             if (writeBinaryLog)
-                serializeToStderr(ExpectedTiles {static_cast<std::uint64_t>(tiles)});
+                serializeToStderr(ExpectedTiles{ static_cast<std::uint64_t>(tiles) });
 
             navMeshTileConsumer->mExpected = tiles;
 
             std::shuffle(worldspaceTiles.begin(), worldspaceTiles.end(), random);
 
             for (const TilePosition& tilePosition : worldspaceTiles)
-                workQueue.addWorkItem(new GenerateNavMeshTile(
-                    input->mWorldspace,
-                    tilePosition,
-                    RecastMeshProvider(input->mTileCachedRecastMeshManager),
-                    agentBounds,
-                    settings,
-                    navMeshTileConsumer
-                ));
+                workQueue.addWorkItem(new GenerateNavMeshTile(input->mWorldspace, tilePosition,
+                    RecastMeshProvider(input->mTileCachedRecastMeshManager), agentBounds, settings,
+                    navMeshTileConsumer));
         }
 
         const Status status = navMeshTileConsumer->wait();
@@ -307,10 +301,8 @@ namespace NavMeshTool
         const auto updated = navMeshTileConsumer->getUpdated();
         const auto deleted = navMeshTileConsumer->getDeleted();
 
-        Log(Debug::Info) << "Generated navmesh for " << navMeshTileConsumer->getProvided() << " tiles, "
-            << inserted << " are inserted, "
-            << updated << " updated and "
-            << deleted << " deleted";
+        Log(Debug::Info) << "Generated navmesh for " << navMeshTileConsumer->getProvided() << " tiles, " << inserted
+                         << " are inserted, " << updated << " updated and " << deleted << " deleted";
 
         if (inserted + updated + deleted > 0)
         {

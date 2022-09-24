@@ -1,27 +1,27 @@
 #ifndef OPENMW_COMPONENTS_FX_TECHNIQUE_H
 #define OPENMW_COMPONENTS_FX_TECHNIQUE_H
 
-#include <vector>
-#include <string>
-#include <variant>
-#include <memory>
-#include <unordered_map>
 #include <filesystem>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <variant>
+#include <vector>
 
+#include <osg/BlendEquation>
+#include <osg/BlendFunc>
+#include <osg/FrameBufferObject>
 #include <osg/Node>
 #include <osg/Program>
 #include <osg/Shader>
-#include <osg/Texture2D>
 #include <osg/StateSet>
-#include <osg/FrameBufferObject>
+#include <osg/Texture2D>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
-#include <osg/BlendFunc>
-#include <osg/BlendEquation>
 
-#include "pass.hpp"
 #include "lexer.hpp"
+#include "pass.hpp"
 #include "types.hpp"
 
 namespace Resource
@@ -53,7 +53,8 @@ namespace fx
                 mPasses.emplace_back(subpass, copyOp);
         }
 
-        struct SubPass {
+        struct SubPass
+        {
             SubPass() = default;
 
             osg::ref_ptr<osg::StateSet> mStateSet = new osg::StateSet;
@@ -123,7 +124,8 @@ namespace fx
         static constexpr FlagsType Flag_Disable_SunGlare = (1 << 4);
         static constexpr FlagsType Flag_Hidden = (1 << 5);
 
-        Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string  name, int width, int height, bool ubo, bool supportsNormals);
+        Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string name, int width,
+            int height, bool ubo, bool supportsNormals);
 
         bool compile();
 
@@ -183,11 +185,11 @@ namespace fx
 
         std::string_view asLiteral() const;
 
-        template<class T>
-        void expect(const std::string& err="");
+        template <class T>
+        void expect(const std::string& err = "");
 
-        template<class T, class T2>
-        void expect(const std::string& err="");
+        template <class T, class T2>
+        void expect(const std::string& err = "");
 
         template <class T>
         bool isNext();
@@ -201,10 +203,12 @@ namespace fx
         void parseSampler();
 
         template <class T>
-        void parseBlock(bool named=true);
+        void parseBlock(bool named = true);
 
         template <class T>
-        void parseBlockImp() {}
+        void parseBlockImp()
+        {
+        }
 
         void parseBlockHeader();
 
@@ -296,21 +300,36 @@ namespace fx
         bool mLocked = false;
     };
 
-    template<> void Technique::parseBlockImp<Lexer::Shared>();
-    template<> void Technique::parseBlockImp<Lexer::Technique>();
-    template<> void Technique::parseBlockImp<Lexer::Render_Target>();
-    template<> void Technique::parseBlockImp<Lexer::Vertex>();
-    template<> void Technique::parseBlockImp<Lexer::Fragment>();
-    template<> void Technique::parseBlockImp<Lexer::Compute>();
-    template<> void Technique::parseBlockImp<Lexer::Sampler_1D>();
-    template<> void Technique::parseBlockImp<Lexer::Sampler_2D>();
-    template<> void Technique::parseBlockImp<Lexer::Sampler_3D>();
-    template<> void Technique::parseBlockImp<Lexer::Uniform_Bool>();
-    template<> void Technique::parseBlockImp<Lexer::Uniform_Float>();
-    template<> void Technique::parseBlockImp<Lexer::Uniform_Int>();
-    template<> void Technique::parseBlockImp<Lexer::Uniform_Vec2>();
-    template<> void Technique::parseBlockImp<Lexer::Uniform_Vec3>();
-    template<> void Technique::parseBlockImp<Lexer::Uniform_Vec4>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Shared>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Technique>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Render_Target>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Vertex>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Fragment>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Compute>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Sampler_1D>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Sampler_2D>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Sampler_3D>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Uniform_Bool>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Uniform_Float>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Uniform_Int>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Uniform_Vec2>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Uniform_Vec3>();
+    template <>
+    void Technique::parseBlockImp<Lexer::Uniform_Vec4>();
 }
 
 #endif

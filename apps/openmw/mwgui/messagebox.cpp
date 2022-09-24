@@ -1,29 +1,29 @@
 #include "messagebox.hpp"
 
-#include <MyGUI_LanguageManager.h>
-#include <MyGUI_EditBox.h>
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_RenderManager.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {
 
-    MessageBoxManager::MessageBoxManager (float timePerChar)
+    MessageBoxManager::MessageBoxManager(float timePerChar)
     {
         mStaticMessageBox = nullptr;
         mLastButtonPressed = -1;
         mMessageBoxSpeed = timePerChar;
     }
 
-    MessageBoxManager::~MessageBoxManager ()
+    MessageBoxManager::~MessageBoxManager()
     {
         MessageBoxManager::clear();
     }
@@ -47,12 +47,12 @@ namespace MWGui
         mLastButtonPressed = -1;
     }
 
-    void MessageBoxManager::onFrame (float frameDuration)
+    void MessageBoxManager::onFrame(float frameDuration)
     {
-        for(auto it = mMessageBoxes.begin(); it != mMessageBoxes.end();)
+        for (auto it = mMessageBoxes.begin(); it != mMessageBoxes.end();)
         {
             (*it)->mCurrentTime += frameDuration;
-            if((*it)->mCurrentTime >= (*it)->mMaxTime && it->get() != mStaticMessageBox)
+            if ((*it)->mCurrentTime >= (*it)->mMaxTime && it->get() != mStaticMessageBox)
             {
                 it = mMessageBoxes.erase(it);
             }
@@ -62,19 +62,20 @@ namespace MWGui
 
         float height = 0;
         auto it = mMessageBoxes.begin();
-        while(it != mMessageBoxes.end())
+        while (it != mMessageBoxes.end())
         {
             (*it)->update(static_cast<int>(height));
             height += (*it)->getHeight();
             ++it;
         }
 
-        if(mInterMessageBoxe != nullptr && mInterMessageBoxe->mMarkedToDelete) {
+        if (mInterMessageBoxe != nullptr && mInterMessageBoxe->mMarkedToDelete)
+        {
             mLastButtonPressed = mInterMessageBoxe->readPressedButton();
             mInterMessageBoxe->setVisible(false);
             mInterMessageBoxe.reset();
             MWBase::Environment::get().getInputManager()->changeInputMode(
-                        MWBase::Environment::get().getWindowManager()->isGuiMode());
+                MWBase::Environment::get().getWindowManager()->isGuiMode());
         }
     }
 
@@ -82,17 +83,18 @@ namespace MWGui
     {
         auto box = std::make_unique<MessageBox>(*this, message);
         box->mCurrentTime = 0;
-        auto realMessage = MyGUI::LanguageManager::getInstance().replaceTags({message.data(), message.size()});
-        box->mMaxTime = realMessage.length()*mMessageBoxSpeed;
+        auto realMessage = MyGUI::LanguageManager::getInstance().replaceTags({ message.data(), message.size() });
+        box->mMaxTime = realMessage.length() * mMessageBoxSpeed;
 
-        if(stat)
+        if (stat)
             mStaticMessageBox = box.get();
 
         box->setVisible(mVisible);
 
         mMessageBoxes.push_back(std::move(box));
 
-        if(mMessageBoxes.size() > 3) {
+        if (mMessageBoxes.size() > 3)
+        {
             mMessageBoxes.erase(mMessageBoxes.begin());
         }
 
@@ -104,13 +106,14 @@ namespace MWGui
         }
     }
 
-    void MessageBoxManager::removeStaticMessageBox ()
+    void MessageBoxManager::removeStaticMessageBox()
     {
         removeMessageBox(mStaticMessageBox);
         mStaticMessageBox = nullptr;
     }
 
-    bool MessageBoxManager::createInteractiveMessageBox(std::string_view message, const std::vector<std::string>& buttons)
+    bool MessageBoxManager::createInteractiveMessageBox(
+        std::string_view message, const std::vector<std::string>& buttons)
     {
         if (mInterMessageBoxe != nullptr)
         {
@@ -118,22 +121,22 @@ namespace MWGui
             mInterMessageBoxe->setVisible(false);
         }
 
-        mInterMessageBoxe = std::make_unique<InteractiveMessageBox>(*this, std::string{message}, buttons);
+        mInterMessageBoxe = std::make_unique<InteractiveMessageBox>(*this, std::string{ message }, buttons);
         mLastButtonPressed = -1;
 
         return true;
     }
 
-    bool MessageBoxManager::isInteractiveMessageBox ()
+    bool MessageBoxManager::isInteractiveMessageBox()
     {
         return mInterMessageBoxe != nullptr;
     }
 
-    bool MessageBoxManager::removeMessageBox (MessageBox *msgbox)
+    bool MessageBoxManager::removeMessageBox(MessageBox* msgbox)
     {
-        for(auto it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
+        for (auto it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
         {
-            if(it->get() == msgbox)
+            if (it->get() == msgbox)
             {
                 mMessageBoxes.erase(it);
                 return true;
@@ -147,7 +150,7 @@ namespace MWGui
         return mMessageBoxes;
     }
 
-    int MessageBoxManager::readPressedButton (bool reset)
+    int MessageBoxManager::readPressedButton(bool reset)
     {
         int pressed = mLastButtonPressed;
         if (reset)
@@ -163,11 +166,11 @@ namespace MWGui
     }
 
     MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, std::string_view message)
-      : Layout("openmw_messagebox.layout")
-      , mCurrentTime(0)
-      , mMaxTime(0)
-      , mMessageBoxManager(parMessageBoxManager)
-      , mMessage(message)
+        : Layout("openmw_messagebox.layout")
+        , mCurrentTime(0)
+        , mMaxTime(0)
+        , mMessageBoxManager(parMessageBoxManager)
+        , mMessage(message)
     {
         // defines
         mBottomPadding = 48;
@@ -178,19 +181,19 @@ namespace MWGui
         mMessageWidget->setCaptionWithReplacing(mMessage);
     }
 
-    void MessageBox::update (int height)
+    void MessageBox::update(int height)
     {
         MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
         MyGUI::IntPoint pos;
-        pos.left = (gameWindowSize.width - mMainWidget->getWidth())/2;
+        pos.left = (gameWindowSize.width - mMainWidget->getWidth()) / 2;
         pos.top = (gameWindowSize.height - mMainWidget->getHeight() - height - mBottomPadding);
 
         mMainWidget->setPosition(pos);
     }
 
-    int MessageBox::getHeight ()
+    int MessageBox::getHeight()
     {
-        return mMainWidget->getHeight()+mNextBoxPadding;
+        return mMainWidget->getHeight() + mNextBoxPadding;
     }
 
     void MessageBox::setVisible(bool value)
@@ -198,10 +201,13 @@ namespace MWGui
         mMainWidget->setVisible(value);
     }
 
-    InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
-        : WindowModal(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "openmw_interactive_messagebox_notransp.layout" : "openmw_interactive_messagebox.layout")
-      , mMessageBoxManager(parMessageBoxManager)
-      , mButtonPressed(-1)
+    InteractiveMessageBox::InteractiveMessageBox(
+        MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
+        : WindowModal(MWBase::Environment::get().getWindowManager()->isGuiMode()
+                ? "openmw_interactive_messagebox_notransp.layout"
+                : "openmw_interactive_messagebox.layout")
+        , mMessageBoxManager(parMessageBoxManager)
+        , mButtonPressed(-1)
     {
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 10; // padding between the text-widget und the button-widget
@@ -212,7 +218,6 @@ namespace MWGui
         int buttonMainPadding = 10; // padding between buttons and bottom of the main widget
 
         mMarkedToDelete = false;
-
 
         getWidget(mMessageWidget, "message");
         getWidget(mButtonsWidget, "buttons");
@@ -230,13 +235,10 @@ namespace MWGui
         int buttonHeight = 0;
         MyGUI::IntCoord dummyCoord(0, 0, 0, 0);
 
-        for(const std::string& buttonId : buttons)
+        for (const std::string& buttonId : buttons)
         {
             MyGUI::Button* button = mButtonsWidget->createWidget<MyGUI::Button>(
-                MyGUI::WidgetStyle::Child,
-                std::string("MW_Button"),
-                dummyCoord,
-                MyGUI::Align::Default);
+                MyGUI::WidgetStyle::Child, std::string("MW_Button"), dummyCoord, MyGUI::Align::Default);
             button->setCaptionWithReplacing(buttonId);
 
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed);
@@ -246,41 +248,42 @@ namespace MWGui
             if (buttonsWidth != 0)
                 buttonsWidth += buttonLeftPadding;
 
-            int buttonWidth = button->getTextSize().width + 2*buttonLabelLeftPadding;
+            int buttonWidth = button->getTextSize().width + 2 * buttonLabelLeftPadding;
             buttonsWidth += buttonWidth;
 
-            buttonHeight = button->getTextSize().height + 2*buttonLabelTopPadding;
+            buttonHeight = button->getTextSize().height + 2 * buttonLabelTopPadding;
 
             if (buttonsHeight != 0)
                 buttonsHeight += buttonTopPadding;
             buttonsHeight += buttonHeight;
 
-            if(buttonWidth > biggestButtonWidth)
+            if (buttonWidth > biggestButtonWidth)
             {
                 biggestButtonWidth = buttonWidth;
             }
         }
 
         MyGUI::IntSize mainWidgetSize;
-        if(buttonsWidth < textSize.width)
+        if (buttonsWidth < textSize.width)
         {
             // on one line
-            mainWidgetSize.width = textSize.width + 3*textPadding;
-            mainWidgetSize.height = textPadding + textSize.height + textButtonPadding + buttonHeight + buttonMainPadding;
+            mainWidgetSize.width = textSize.width + 3 * textPadding;
+            mainWidgetSize.height
+                = textPadding + textSize.height + textButtonPadding + buttonHeight + buttonMainPadding;
 
             MyGUI::IntSize realSize = mainWidgetSize +
-                    // To account for borders
-                    (mMainWidget->getSize() - mMainWidget->getClientWidget()->getSize());
+                // To account for borders
+                (mMainWidget->getSize() - mMainWidget->getClientWidget()->getSize());
 
             MyGUI::IntPoint absPos;
-            absPos.left = (gameWindowSize.width - realSize.width)/2;
-            absPos.top = (gameWindowSize.height - realSize.height)/2;
+            absPos.left = (gameWindowSize.width - realSize.width) / 2;
+            absPos.top = (gameWindowSize.height - realSize.height) / 2;
 
             mMainWidget->setPosition(absPos);
             mMainWidget->setSize(realSize);
 
             MyGUI::IntCoord messageWidgetCoord;
-            messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
+            messageWidgetCoord.left = (mainWidgetSize.width - textSize.width) / 2;
             messageWidgetCoord.top = textPadding;
             mMessageWidget->setCoord(messageWidgetCoord);
 
@@ -288,15 +291,15 @@ namespace MWGui
 
             MyGUI::IntCoord buttonCord;
             MyGUI::IntSize buttonSize(0, buttonHeight);
-            int left = (mainWidgetSize.width - buttonsWidth)/2;
+            int left = (mainWidgetSize.width - buttonsWidth) / 2;
 
-            for(MyGUI::Button* button : mButtons)
+            for (MyGUI::Button* button : mButtons)
             {
                 buttonCord.left = left;
                 buttonCord.top = messageWidgetCoord.top + textSize.height + textButtonPadding;
 
-                buttonSize.width = button->getTextSize().width + 2*buttonLabelLeftPadding;
-                buttonSize.height = button->getTextSize().height + 2*buttonLabelTopPadding;
+                buttonSize.width = button->getTextSize().width + 2 * buttonLabelLeftPadding;
+                buttonSize.height = button->getTextSize().height + 2 * buttonLabelTopPadding;
 
                 button->setCoord(buttonCord);
                 button->setSize(buttonSize);
@@ -307,11 +310,13 @@ namespace MWGui
         else
         {
             // among each other
-            if(biggestButtonWidth > textSize.width) {
-                mainWidgetSize.width = biggestButtonWidth + buttonTopPadding*2;
+            if (biggestButtonWidth > textSize.width)
+            {
+                mainWidgetSize.width = biggestButtonWidth + buttonTopPadding * 2;
             }
-            else {
-                mainWidgetSize.width = textSize.width + 3*textPadding;
+            else
+            {
+                mainWidgetSize.width = textSize.width + 3 * textPadding;
             }
 
             MyGUI::IntCoord buttonCord;
@@ -319,13 +324,13 @@ namespace MWGui
 
             int top = textPadding + textSize.height + textButtonPadding;
 
-            for(MyGUI::Button* button : mButtons)
+            for (MyGUI::Button* button : mButtons)
             {
-                buttonSize.width = button->getTextSize().width + buttonLabelLeftPadding*2;
-                buttonSize.height = button->getTextSize().height + buttonLabelTopPadding*2;
+                buttonSize.width = button->getTextSize().width + buttonLabelLeftPadding * 2;
+                buttonSize.height = button->getTextSize().height + buttonLabelTopPadding * 2;
 
                 buttonCord.top = top;
-                buttonCord.left = (mainWidgetSize.width - buttonSize.width)/2;
+                buttonCord.left = (mainWidgetSize.width - buttonSize.width) / 2;
 
                 button->setCoord(buttonCord);
                 button->setSize(buttonSize);
@@ -333,19 +338,20 @@ namespace MWGui
                 top += buttonSize.height + buttonTopPadding;
             }
 
-            mainWidgetSize.height = textPadding + textSize.height + textButtonPadding + buttonsHeight + buttonMainPadding;
+            mainWidgetSize.height
+                = textPadding + textSize.height + textButtonPadding + buttonsHeight + buttonMainPadding;
             mMainWidget->setSize(mainWidgetSize +
-                                 // To account for borders
-                                 (mMainWidget->getSize() - mMainWidget->getClientWidget()->getSize()));
+                // To account for borders
+                (mMainWidget->getSize() - mMainWidget->getClientWidget()->getSize()));
 
             MyGUI::IntPoint absPos;
-            absPos.left = (gameWindowSize.width - mainWidgetSize.width)/2;
-            absPos.top = (gameWindowSize.height - mainWidgetSize.height)/2;
+            absPos.left = (gameWindowSize.width - mainWidgetSize.width) / 2;
+            absPos.top = (gameWindowSize.height - mainWidgetSize.height) / 2;
 
             mMainWidget->setPosition(absPos);
 
             MyGUI::IntCoord messageWidgetCoord;
-            messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
+            messageWidgetCoord.left = (mainWidgetSize.width - textSize.width) / 2;
             messageWidgetCoord.top = textPadding;
             messageWidgetCoord.width = textSize.width;
             messageWidgetCoord.height = textSize.height;
@@ -357,8 +363,8 @@ namespace MWGui
 
     MyGUI::Widget* InteractiveMessageBox::getDefaultKeyFocus()
     {
-        std::vector<std::string> keywords { "sOk", "sYes" };
-        for(MyGUI::Button* button : mButtons)
+        std::vector<std::string> keywords{ "sOk", "sYes" };
+        for (MyGUI::Button* button : mButtons)
         {
             for (const std::string& keyword : keywords)
             {
@@ -373,18 +379,18 @@ namespace MWGui
         return nullptr;
     }
 
-    void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)
+    void InteractiveMessageBox::mousePressed(MyGUI::Widget* pressed)
     {
-        buttonActivated (pressed);
+        buttonActivated(pressed);
     }
 
-    void InteractiveMessageBox::buttonActivated (MyGUI::Widget* pressed)
+    void InteractiveMessageBox::buttonActivated(MyGUI::Widget* pressed)
     {
         mMarkedToDelete = true;
         int index = 0;
-        for(const MyGUI::Button* button : mButtons)
+        for (const MyGUI::Button* button : mButtons)
         {
-            if(button == pressed)
+            if (button == pressed)
             {
                 mButtonPressed = index;
                 mMessageBoxManager.onButtonPressed(mButtonPressed);
@@ -394,7 +400,7 @@ namespace MWGui
         }
     }
 
-    int InteractiveMessageBox::readPressedButton ()
+    int InteractiveMessageBox::readPressedButton()
     {
         return mButtonPressed;
     }

@@ -4,66 +4,74 @@
 
 #include <components/misc/strings/lower.hpp>
 
-#include "scanner.hpp"
 #include "context.hpp"
-#include "errorhandler.hpp"
-#include "skipparser.hpp"
-#include "locals.hpp"
-#include "generator.hpp"
-#include "extensions.hpp"
 #include "declarationparser.hpp"
+#include "errorhandler.hpp"
+#include "extensions.hpp"
+#include "generator.hpp"
+#include "locals.hpp"
+#include "scanner.hpp"
+#include "skipparser.hpp"
 
 namespace Compiler
 {
-    void LineParser::parseExpression (Scanner& scanner, const TokenLoc& loc)
+    void LineParser::parseExpression(Scanner& scanner, const TokenLoc& loc)
     {
         mExprParser.reset();
 
         if (!mExplicit.empty())
         {
-            mExprParser.parseName (mExplicit, loc, scanner);
-            if (mState==MemberState)
-                mExprParser.parseSpecial (Scanner::S_member, loc, scanner);
+            mExprParser.parseName(mExplicit, loc, scanner);
+            if (mState == MemberState)
+                mExprParser.parseSpecial(Scanner::S_member, loc, scanner);
             else
-                mExprParser.parseSpecial (Scanner::S_ref, loc, scanner);
+                mExprParser.parseSpecial(Scanner::S_ref, loc, scanner);
         }
 
-        scanner.scan (mExprParser);
+        scanner.scan(mExprParser);
 
-        char type = mExprParser.append (mCode);
+        char type = mExprParser.append(mCode);
         mState = EndState;
 
         switch (type)
         {
             case 'l':
 
-                Generator::report (mCode, mLiterals, "%d");
+                Generator::report(mCode, mLiterals, "%d");
                 break;
 
             case 'f':
 
-                Generator::report (mCode, mLiterals, "%f");
+                Generator::report(mCode, mLiterals, "%f");
                 break;
 
             default:
 
-                throw std::runtime_error ("Unknown expression result type");
+                throw std::runtime_error("Unknown expression result type");
         }
     }
 
-    LineParser::LineParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
-        Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
-    : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
-       mState (BeginState), mReferenceMember(false), mButtons(0), mType(0),
-       mExprParser (errorHandler, context, locals, literals), mAllowExpression (allowExpression)
-    {}
-
-    bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
+    LineParser::LineParser(ErrorHandler& errorHandler, const Context& context, Locals& locals, Literals& literals,
+        std::vector<Interpreter::Type_Code>& code, bool allowExpression)
+        : Parser(errorHandler, context)
+        , mLocals(locals)
+        , mLiterals(literals)
+        , mCode(code)
+        , mState(BeginState)
+        , mReferenceMember(false)
+        , mButtons(0)
+        , mType(0)
+        , mExprParser(errorHandler, context, locals, literals)
+        , mAllowExpression(allowExpression)
     {
-        if (mAllowExpression && mState==BeginState)
+    }
+
+    bool LineParser::parseInt(int value, const TokenLoc& loc, Scanner& scanner)
+    {
+        if (mAllowExpression && mState == BeginState)
         {
-            scanner.putbackInt (value, loc);
-            parseExpression (scanner, loc);
+            scanner.putbackInt(value, loc);
+            parseExpression(scanner, loc);
             return true;
         }
         else if (mState == SetState)
@@ -72,40 +80,39 @@ namespace Compiler
             return parseName(loc.mLiteral, loc, scanner);
         }
 
-        return Parser::parseInt (value, loc, scanner);
+        return Parser::parseInt(value, loc, scanner);
     }
 
-    bool LineParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
+    bool LineParser::parseFloat(float value, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mAllowExpression && mState==BeginState)
+        if (mAllowExpression && mState == BeginState)
         {
-            scanner.putbackFloat (value, loc);
-            parseExpression (scanner, loc);
+            scanner.putbackFloat(value, loc);
+            parseExpression(scanner, loc);
             return true;
         }
 
-        return Parser::parseFloat (value, loc, scanner);
+        return Parser::parseFloat(value, loc, scanner);
     }
 
-    bool LineParser::parseName (const std::string& name, const TokenLoc& loc,
-        Scanner& scanner)
+    bool LineParser::parseName(const std::string& name, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==SetState)
+        if (mState == SetState)
         {
-            std::string name2 = Misc::StringUtils::lowerCase (name);
+            std::string name2 = Misc::StringUtils::lowerCase(name);
             mName = name2;
 
             // local variable?
-            char type = mLocals.getType (name2);
-            if (type!=' ')
+            char type = mLocals.getType(name2);
+            if (type != ' ')
             {
                 mType = type;
                 mState = SetLocalVarState;
                 return true;
             }
 
-            type = getContext().getGlobalType (name2);
-            if (type!=' ')
+            type = getContext().getGlobalType(name2);
+            if (type != ' ')
             {
                 mType = type;
                 mState = SetGlobalVarState;
@@ -116,12 +123,12 @@ namespace Compiler
             return true;
         }
 
-        if (mState==SetMemberVarState)
+        if (mState == SetMemberVarState)
         {
-            mMemberName = Misc::StringUtils::lowerCase (name);
-            std::pair<char, bool> type = getContext().getMemberType (mMemberName, mName);
+            mMemberName = Misc::StringUtils::lowerCase(name);
+            std::pair<char, bool> type = getContext().getMemberType(mMemberName, mName);
 
-            if (type.first!=' ')
+            if (type.first != ' ')
             {
                 mState = SetMemberVarState2;
                 mType = type.first;
@@ -129,13 +136,13 @@ namespace Compiler
                 return true;
             }
 
-            getErrorHandler().error ("Unknown variable", loc);
-            SkipParser skip (getErrorHandler(), getContext());
-            scanner.scan (skip);
+            getErrorHandler().error("Unknown variable", loc);
+            SkipParser skip(getErrorHandler(), getContext());
+            scanner.scan(skip);
             return false;
         }
 
-        if (mState==MessageState)
+        if (mState == MessageState)
         {
             GetArgumentsFromMessageFormat processor;
             processor.process(name);
@@ -144,7 +151,7 @@ namespace Compiler
             if (!arguments.empty())
             {
                 mExprParser.reset();
-                mExprParser.parseArguments (arguments, scanner, mCode, -1, true);
+                mExprParser.parseArguments(arguments, scanner, mCode, -1, true);
             }
 
             mName = name;
@@ -154,72 +161,72 @@ namespace Compiler
             return true;
         }
 
-        if (mState==MessageButtonState)
+        if (mState == MessageButtonState)
         {
-            Generator::pushString (mCode, mLiterals, name);
+            Generator::pushString(mCode, mLiterals, name);
             mState = MessageButtonState;
             ++mButtons;
             return true;
         }
 
-        if (mState==BeginState && getContext().isId (name))
+        if (mState == BeginState && getContext().isId(name))
         {
             mState = PotentialExplicitState;
-            mExplicit = Misc::StringUtils::lowerCase (name);
+            mExplicit = Misc::StringUtils::lowerCase(name);
             return true;
         }
 
-        if (mState==BeginState && mAllowExpression)
+        if (mState == BeginState && mAllowExpression)
         {
-            std::string name2 = Misc::StringUtils::lowerCase (name);
+            std::string name2 = Misc::StringUtils::lowerCase(name);
 
-            char type = mLocals.getType (name2);
+            char type = mLocals.getType(name2);
 
-            if (type!=' ')
+            if (type != ' ')
             {
-                scanner.putbackName (name, loc);
-                parseExpression (scanner, loc);
+                scanner.putbackName(name, loc);
+                parseExpression(scanner, loc);
                 return true;
             }
 
-            type = getContext().getGlobalType (name2);
+            type = getContext().getGlobalType(name2);
 
-            if (type!=' ')
+            if (type != ' ')
             {
-                scanner.putbackName (name, loc);
-                parseExpression (scanner, loc);
+                scanner.putbackName(name, loc);
+                parseExpression(scanner, loc);
                 return true;
             }
         }
 
-        return Parser::parseName (name, loc, scanner);
+        return Parser::parseName(name, loc, scanner);
     }
 
-    bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
+    bool LineParser::parseKeyword(int keyword, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==MessageState)
+        if (mState == MessageState)
         {
-            if (const Extensions *extensions = getContext().getExtensions())
+            if (const Extensions* extensions = getContext().getExtensions())
             {
                 std::string argumentType; // ignored
                 bool hasExplicit = false; // ignored
-                if (extensions->isInstruction (keyword, argumentType, hasExplicit))
+                if (extensions->isInstruction(keyword, argumentType, hasExplicit))
                 {
                     // pretend this is not a keyword
                     std::string name = loc.mLiteral;
-                    if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
-                        name = name.substr (1, name.size()-2);
-                    return parseName (name, loc, scanner);
+                    if (name.size() >= 2 && name[0] == '"' && name[name.size() - 1] == '"')
+                        name = name.substr(1, name.size() - 2);
+                    return parseName(name, loc, scanner);
                 }
             }
         }
 
-        if (mState==SetMemberVarState)
+        if (mState == SetMemberVarState)
         {
             mMemberName = loc.mLiteral;
-            std::pair<char, bool> type = getContext().getMemberType (mMemberName, mName);
+            std::pair<char, bool> type = getContext().getMemberType(mMemberName, mName);
 
-            if (type.first!=' ')
+            if (type.first != ' ')
             {
                 mState = SetMemberVarState2;
                 mType = type.first;
@@ -228,73 +235,72 @@ namespace Compiler
             }
         }
 
-        if (mState==SetPotentialMemberVarState && keyword==Scanner::K_to)
+        if (mState == SetPotentialMemberVarState && keyword == Scanner::K_to)
         {
-            getErrorHandler().warning ("Unknown variable", loc);
-            SkipParser skip (getErrorHandler(), getContext());
-            scanner.scan (skip);
+            getErrorHandler().warning("Unknown variable", loc);
+            SkipParser skip(getErrorHandler(), getContext());
+            scanner.scan(skip);
             return false;
         }
 
-        if (mState==SetState)
+        if (mState == SetState)
         {
             // allow keywords to be used as variable names when assigning a value to a variable.
-            return parseName (loc.mLiteral, loc, scanner);
+            return parseName(loc.mLiteral, loc, scanner);
         }
 
-        if (mState==BeginState || mState==ExplicitState)
+        if (mState == BeginState || mState == ExplicitState)
         {
             // check for custom extensions
-            if (const Extensions *extensions = getContext().getExtensions())
+            if (const Extensions* extensions = getContext().getExtensions())
             {
                 std::string argumentType;
 
-                bool hasExplicit = mState==ExplicitState;
-                if (extensions->isInstruction (keyword, argumentType, hasExplicit))
+                bool hasExplicit = mState == ExplicitState;
+                if (extensions->isInstruction(keyword, argumentType, hasExplicit))
                 {
-                    if (!hasExplicit && mState==ExplicitState)
+                    if (!hasExplicit && mState == ExplicitState)
                     {
-                        getErrorHandler().warning ("Stray explicit reference", loc);
+                        getErrorHandler().warning("Stray explicit reference", loc);
                         mExplicit.clear();
                     }
 
                     std::vector<Interpreter::Type_Code> code;
-                    int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
-                    mCode.insert (mCode.end(), code.begin(), code.end());
-                    extensions->generateInstructionCode (keyword, mCode, mLiterals,
-                        mExplicit, optionals);
+                    int optionals = mExprParser.parseArguments(argumentType, scanner, code, keyword);
+                    mCode.insert(mCode.end(), code.begin(), code.end());
+                    extensions->generateInstructionCode(keyword, mCode, mLiterals, mExplicit, optionals);
 
                     mState = EndState;
                     return true;
                 }
             }
 
-            if (const Extensions *extensions = getContext().getExtensions())
+            if (const Extensions* extensions = getContext().getExtensions())
             {
                 char returnType;
                 std::string argumentType;
 
-                bool hasExplicit = mState==ExplicitState;
+                bool hasExplicit = mState == ExplicitState;
 
-                if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
+                if (extensions->isFunction(keyword, returnType, argumentType, hasExplicit))
                 {
-                    if (!hasExplicit && mState==ExplicitState)
+                    if (!hasExplicit && mState == ExplicitState)
                     {
-                        getErrorHandler().warning ("Stray explicit reference", loc);
+                        getErrorHandler().warning("Stray explicit reference", loc);
                         mExplicit.clear();
                     }
 
                     if (mAllowExpression)
                     {
-                        scanner.putbackKeyword (keyword, loc);
-                        parseExpression (scanner, loc);
+                        scanner.putbackKeyword(keyword, loc);
+                        parseExpression(scanner, loc);
                     }
                     else
                     {
                         std::vector<Interpreter::Type_Code> code;
-                        int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
+                        int optionals = mExprParser.parseArguments(argumentType, scanner, code, keyword);
                         mCode.insert(mCode.end(), code.begin(), code.end());
-                        extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit, optionals);
+                        extensions->generateFunctionCode(keyword, mCode, mLiterals, mExplicit, optionals);
                     }
                     mState = EndState;
                     return true;
@@ -302,15 +308,15 @@ namespace Compiler
             }
         }
 
-        if (mState==ExplicitState)
+        if (mState == ExplicitState)
         {
             // drop stray explicit reference
-            getErrorHandler().warning ("Stray explicit reference", loc);
+            getErrorHandler().warning("Stray explicit reference", loc);
             mState = BeginState;
             mExplicit.clear();
         }
 
-        if (mState==BeginState)
+        if (mState == BeginState)
         {
             switch (keyword)
             {
@@ -321,19 +327,21 @@ namespace Compiler
                     if (!getContext().canDeclareLocals())
                     {
                         getErrorHandler().error("Local variables cannot be declared in this context", loc);
-                        SkipParser skip (getErrorHandler(), getContext());
-                        scanner.scan (skip);
+                        SkipParser skip(getErrorHandler(), getContext());
+                        scanner.scan(skip);
                         return true;
                     }
 
-                    DeclarationParser declaration (getErrorHandler(), getContext(), mLocals);
-                    if (declaration.parseKeyword (keyword, loc, scanner))
-                        scanner.scan (declaration);
+                    DeclarationParser declaration(getErrorHandler(), getContext(), mLocals);
+                    if (declaration.parseKeyword(keyword, loc, scanner))
+                        scanner.scan(declaration);
 
                     return false;
                 }
 
-                case Scanner::K_set: mState = SetState; return true;
+                case Scanner::K_set:
+                    mState = SetState;
+                    return true;
 
                 case Scanner::K_messagebox:
 
@@ -343,129 +351,126 @@ namespace Compiler
 
                 case Scanner::K_return:
 
-                    Generator::exit (mCode);
+                    Generator::exit(mCode);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_else:
 
-                    getErrorHandler().warning ("Stray else", loc);
+                    getErrorHandler().warning("Stray else", loc);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_endif:
 
-                    getErrorHandler().warning ("Stray endif", loc);
+                    getErrorHandler().warning("Stray endif", loc);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_begin:
 
-                    getErrorHandler().warning ("Stray begin", loc);
+                    getErrorHandler().warning("Stray begin", loc);
                     mState = EndState;
                     return true;
             }
         }
-        else if (mState==SetLocalVarState && keyword==Scanner::K_to)
+        else if (mState == SetLocalVarState && keyword == Scanner::K_to)
         {
             mExprParser.reset();
-            scanner.scan (mExprParser);
+            scanner.scan(mExprParser);
 
             std::vector<Interpreter::Type_Code> code;
-            char type = mExprParser.append (code);
+            char type = mExprParser.append(code);
 
-            Generator::assignToLocal (mCode, mLocals.getType (mName),
-                mLocals.getIndex (mName), code, type);
+            Generator::assignToLocal(mCode, mLocals.getType(mName), mLocals.getIndex(mName), code, type);
 
             mState = EndState;
             return true;
         }
-        else if (mState==SetGlobalVarState && keyword==Scanner::K_to)
+        else if (mState == SetGlobalVarState && keyword == Scanner::K_to)
         {
             mExprParser.reset();
-            scanner.scan (mExprParser);
+            scanner.scan(mExprParser);
 
             std::vector<Interpreter::Type_Code> code;
-            char type = mExprParser.append (code);
+            char type = mExprParser.append(code);
 
-            Generator::assignToGlobal (mCode, mLiterals, mType, mName, code, type);
+            Generator::assignToGlobal(mCode, mLiterals, mType, mName, code, type);
 
             mState = EndState;
             return true;
         }
-        else if (mState==SetMemberVarState2 && keyword==Scanner::K_to)
+        else if (mState == SetMemberVarState2 && keyword == Scanner::K_to)
         {
             mExprParser.reset();
-            scanner.scan (mExprParser);
+            scanner.scan(mExprParser);
 
             std::vector<Interpreter::Type_Code> code;
-            char type = mExprParser.append (code);
+            char type = mExprParser.append(code);
 
-            Generator::assignToMember (mCode, mLiterals, mType, mMemberName, mName, code, type,
-                !mReferenceMember);
+            Generator::assignToMember(mCode, mLiterals, mType, mMemberName, mName, code, type, !mReferenceMember);
 
             mState = EndState;
             return true;
         }
 
-        return Parser::parseKeyword (keyword, loc, scanner);
+        return Parser::parseKeyword(keyword, loc, scanner);
     }
 
-    bool LineParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
+    bool LineParser::parseSpecial(int code, const TokenLoc& loc, Scanner& scanner)
     {
-        if (mState==EndState && code==Scanner::S_open)
+        if (mState == EndState && code == Scanner::S_open)
         {
-            getErrorHandler().warning ("Stray '[' or '(' at the end of the line",
-                loc);
+            getErrorHandler().warning("Stray '[' or '(' at the end of the line", loc);
             return true;
         }
 
-        if (code==Scanner::S_newline && (mState==EndState || mState==BeginState))
+        if (code == Scanner::S_newline && (mState == EndState || mState == BeginState))
             return false;
 
-        if (code==Scanner::S_ref && mState==SetPotentialMemberVarState)
+        if (code == Scanner::S_ref && mState == SetPotentialMemberVarState)
         {
-            getErrorHandler().warning ("Stray explicit reference", loc);
+            getErrorHandler().warning("Stray explicit reference", loc);
             mState = SetState;
             return true;
         }
 
-        if (code==Scanner::S_ref && mState==PotentialExplicitState)
+        if (code == Scanner::S_ref && mState == PotentialExplicitState)
         {
             mState = ExplicitState;
             return true;
         }
 
-        if (code==Scanner::S_member && mState==PotentialExplicitState && mAllowExpression)
+        if (code == Scanner::S_member && mState == PotentialExplicitState && mAllowExpression)
         {
             mState = MemberState;
-            parseExpression (scanner, loc);
+            parseExpression(scanner, loc);
             mState = EndState;
             return true;
         }
 
-        if (code==Scanner::S_newline && mState==MessageButtonState)
+        if (code == Scanner::S_newline && mState == MessageButtonState)
         {
-            Generator::message (mCode, mLiterals, mName, mButtons);
+            Generator::message(mCode, mLiterals, mName, mButtons);
             return false;
         }
 
-        if (code==Scanner::S_member && mState==SetPotentialMemberVarState)
+        if (code == Scanner::S_member && mState == SetPotentialMemberVarState)
         {
             mState = SetMemberVarState;
             return true;
         }
 
-        if (mAllowExpression && mState==BeginState &&
-            (code==Scanner::S_open || code==Scanner::S_minus || code==Scanner::S_plus))
+        if (mAllowExpression && mState == BeginState
+            && (code == Scanner::S_open || code == Scanner::S_minus || code == Scanner::S_plus))
         {
-            scanner.putbackSpecial (code, loc);
-            parseExpression (scanner, loc);
+            scanner.putbackSpecial(code, loc);
+            parseExpression(scanner, loc);
             mState = EndState;
             return true;
         }
 
-        return Parser::parseSpecial (code, loc, scanner);
+        return Parser::parseSpecial(code, loc, scanner);
     }
 
     void LineParser::reset()
@@ -475,7 +480,8 @@ namespace Compiler
         mExplicit.clear();
     }
 
-    void GetArgumentsFromMessageFormat::visitedPlaceholder(Placeholder placeholder, char /*padding*/, int /*width*/, int /*precision*/, Notation /*notation*/)
+    void GetArgumentsFromMessageFormat::visitedPlaceholder(
+        Placeholder placeholder, char /*padding*/, int /*width*/, int /*precision*/, Notation /*notation*/)
     {
         switch (placeholder)
         {

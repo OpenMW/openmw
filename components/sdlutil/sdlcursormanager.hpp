@@ -27,13 +27,15 @@ namespace SDLUtil
 
         /// \brief Tell the manager that the cursor has changed, giving the
         ///        name of the cursor we changed to ("arrow", "ibeam", etc)
-        virtual void cursorChanged(const std::string &name);
+        virtual void cursorChanged(const std::string& name);
 
-        virtual void createCursor(const std::string &name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y, int cursorWidth, int cursorHeight);
+        virtual void createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x,
+            Uint8 hotspot_y, int cursorWidth, int cursorHeight);
 
     private:
-        void _createCursorFromResource(const std::string &name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y, int cursorWidth, int cursorHeight);
-        void _putPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
+        void _createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x,
+            Uint8 hotspot_y, int cursorWidth, int cursorHeight);
+        void _putPixel(SDL_Surface* surface, int x, int y, Uint32 pixel);
 
         void _setGUICursor(const std::string& name);
 

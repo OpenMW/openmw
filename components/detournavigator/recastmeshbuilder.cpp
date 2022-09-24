@@ -1,25 +1,25 @@
 #include "recastmeshbuilder.hpp"
 #include "exceptions.hpp"
 
-#include <components/bullethelpers/transformboundingbox.hpp>
-#include <components/bullethelpers/processtrianglecallback.hpp>
-#include <components/misc/convert.hpp>
-#include <components/debug/debuglog.hpp>
 #include <components/bullethelpers/heightfield.hpp>
+#include <components/bullethelpers/processtrianglecallback.hpp>
+#include <components/bullethelpers/transformboundingbox.hpp>
+#include <components/debug/debuglog.hpp>
+#include <components/misc/convert.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btConcaveShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <LinearMath/btTransform.h>
 #include <LinearMath/btAabbUtil2.h>
+#include <LinearMath/btTransform.h>
 
 #include <algorithm>
-#include <cassert>
 #include <array>
-#include <vector>
-#include <sstream>
+#include <cassert>
 #include <cmath>
+#include <sstream>
+#include <vector>
 
 namespace DetourNavigator
 {
@@ -44,8 +44,7 @@ namespace DetourNavigator
         bool isNan(const RecastMeshTriangle& triangle)
         {
             for (std::size_t i = 0; i < 3; ++i)
-                if (std::isnan(triangle.mVertices[i].x())
-                    || std::isnan(triangle.mVertices[i].y())
+                if (std::isnan(triangle.mVertices[i].x()) || std::isnan(triangle.mVertices[i].y())
                     || std::isnan(triangle.mVertices[i].z()))
                     return true;
             return false;
@@ -107,13 +106,12 @@ namespace DetourNavigator
 #if BT_BULLET_VERSION < 310
         std::vector<btScalar> heights(heightfield.mHeights.begin(), heightfield.mHeights.end());
         btHeightfieldTerrainShape shape(static_cast<int>(heightfield.mHeights.size() / heightfield.mLength),
-            static_cast<int>(heightfield.mLength), heights.data(), 1,
-            heightfield.mMinHeight, heightfield.mMaxHeight, upAxis, PHY_FLOAT, flipQuadEdges
-        );
+            static_cast<int>(heightfield.mLength), heights.data(), 1, heightfield.mMinHeight, heightfield.mMaxHeight,
+            upAxis, PHY_FLOAT, flipQuadEdges);
 #else
         btHeightfieldTerrainShape shape(static_cast<int>(heightfield.mHeights.size() / heightfield.mLength),
-            static_cast<int>(heightfield.mLength), heightfield.mHeights.data(),
-            heightfield.mMinHeight, heightfield.mMaxHeight, upAxis, flipQuadEdges);
+            static_cast<int>(heightfield.mLength), heightfield.mHeights.data(), heightfield.mMinHeight,
+            heightfield.mMaxHeight, upAxis, flipQuadEdges);
 #endif
         const float scale = getHeightfieldScale(heightfield.mCellSize, heightfield.mOriginalSize);
         shape.setLocalScaling(btVector3(scale, scale, 1));
@@ -121,20 +119,17 @@ namespace DetourNavigator
         btVector3 aabbMax;
         shape.getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
         std::vector<RecastMeshTriangle> triangles;
-        auto callback = makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
-        {
+        auto callback = makeProcessTriangleCallback([&](btVector3* vertices, int, int) {
             triangles.emplace_back(makeRecastMeshTriangle(vertices, AreaType_ground));
         });
         shape.processAllTriangles(&callback, aabbMin, aabbMax);
-        const osg::Vec2f aabbShift = (osg::Vec2f(aabbMax.x(), aabbMax.y()) - osg::Vec2f(aabbMin.x(), aabbMin.y())) * 0.5;
+        const osg::Vec2f aabbShift
+            = (osg::Vec2f(aabbMax.x(), aabbMax.y()) - osg::Vec2f(aabbMin.x(), aabbMin.y())) * 0.5;
         const osg::Vec2f tileShift = osg::Vec2f(heightfield.mMinX, heightfield.mMinY) * scale;
         const osg::Vec2f localShift = aabbShift + tileShift;
         const float cellSize = static_cast<float>(heightfield.mCellSize);
-        const osg::Vec3f cellShift(
-            heightfield.mCellPosition.x() * cellSize,
-            heightfield.mCellPosition.y() * cellSize,
-            (heightfield.mMinHeight + heightfield.mMaxHeight) * 0.5f
-        );
+        const osg::Vec3f cellShift(heightfield.mCellPosition.x() * cellSize, heightfield.mCellPosition.y() * cellSize,
+            (heightfield.mMinHeight + heightfield.mMaxHeight) * 0.5f);
         return makeMesh(std::move(triangles), cellShift + osg::Vec3f(localShift.x(), localShift.y(), 0));
     }
 
@@ -144,14 +139,15 @@ namespace DetourNavigator
     }
 
     void RecastMeshBuilder::addObject(const btCollisionShape& shape, const btTransform& transform,
-        const AreaType areaType, osg::ref_ptr<const Resource::BulletShape> source, const ObjectTransform& objectTransform)
+        const AreaType areaType, osg::ref_ptr<const Resource::BulletShape> source,
+        const ObjectTransform& objectTransform)
     {
         addObject(shape, transform, areaType);
-        mSources.push_back(MeshSource {std::move(source), objectTransform, areaType});
+        mSources.push_back(MeshSource{ std::move(source), objectTransform, areaType });
     }
 
-    void RecastMeshBuilder::addObject(const btCollisionShape& shape, const btTransform& transform,
-                                      const AreaType areaType)
+    void RecastMeshBuilder::addObject(
+        const btCollisionShape& shape, const btTransform& transform, const AreaType areaType)
     {
         if (shape.isCompound())
             return addObject(static_cast<const btCompoundShape&>(shape), transform, areaType);
@@ -166,49 +162,71 @@ namespace DetourNavigator
         throw InvalidArgument(message.str());
     }
 
-    void RecastMeshBuilder::addObject(const btCompoundShape& shape, const btTransform& transform,
-                                      const AreaType areaType)
+    void RecastMeshBuilder::addObject(
+        const btCompoundShape& shape, const btTransform& transform, const AreaType areaType)
     {
         for (int i = 0, num = shape.getNumChildShapes(); i < num; ++i)
             addObject(*shape.getChildShape(i), transform * shape.getChildTransform(i), areaType);
     }
 
-    void RecastMeshBuilder::addObject(const btConcaveShape& shape, const btTransform& transform,
-                                      const AreaType areaType)
+    void RecastMeshBuilder::addObject(
+        const btConcaveShape& shape, const btTransform& transform, const AreaType areaType)
     {
-        return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
-        {
+        return addObject(shape, transform, makeProcessTriangleCallback([&](btVector3* vertices, int, int) {
             RecastMeshTriangle triangle = makeRecastMeshTriangle(vertices, areaType);
             std::reverse(triangle.mVertices.begin(), triangle.mVertices.end());
             mTriangles.emplace_back(triangle);
         }));
     }
 
-    void RecastMeshBuilder::addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform,
-                                      const AreaType areaType)
+    void RecastMeshBuilder::addObject(
+        const btHeightfieldTerrainShape& shape, const btTransform& transform, const AreaType areaType)
     {
-        addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* vertices, int, int)
-        {
+        addObject(shape, transform, makeProcessTriangleCallback([&](btVector3* vertices, int, int) {
             mTriangles.emplace_back(makeRecastMeshTriangle(vertices, areaType));
         }));
     }
 
     void RecastMeshBuilder::addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType)
     {
-        constexpr std::array<int, 36> indices {{
-            0, 2, 3,
-            3, 1, 0,
-            0, 4, 6,
-            6, 2, 0,
-            0, 1, 5,
-            5, 4, 0,
-            7, 5, 1,
-            1, 3, 7,
-            7, 3, 2,
-            2, 6, 7,
-            7, 6, 4,
-            4, 5, 7,
-        }};
+        constexpr std::array<int, 36> indices{ {
+            0,
+            2,
+            3,
+            3,
+            1,
+            0,
+            0,
+            4,
+            6,
+            6,
+            2,
+            0,
+            0,
+            1,
+            5,
+            5,
+            4,
+            0,
+            7,
+            5,
+            1,
+            1,
+            3,
+            7,
+            7,
+            3,
+            2,
+            2,
+            6,
+            7,
+            7,
+            6,
+            4,
+            4,
+            5,
+            7,
+        } };
 
         for (std::size_t i = 0; i < indices.size(); i += 3)
         {
@@ -225,13 +243,13 @@ namespace DetourNavigator
 
     void RecastMeshBuilder::addWater(const osg::Vec2i& cellPosition, const Water& water)
     {
-        mWater.push_back(CellWater {cellPosition, water});
+        mWater.push_back(CellWater{ cellPosition, water });
     }
 
     void RecastMeshBuilder::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, float height)
     {
         if (const auto intersection = getIntersection(mBounds, maxCellTileBounds(cellPosition, cellSize)))
-            mFlatHeightfields.emplace_back(FlatHeightfield {cellPosition, cellSize, height});
+            mFlatHeightfields.emplace_back(FlatHeightfield{ cellPosition, cellSize, height });
     }
 
     void RecastMeshBuilder::addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const float* heights,
@@ -240,11 +258,12 @@ namespace DetourNavigator
         const auto intersection = getIntersection(mBounds, maxCellTileBounds(cellPosition, cellSize));
         if (!intersection.has_value())
             return;
-        const osg::Vec3f shift = Misc::Convert::toOsg(BulletHelpers::getHeightfieldShift(cellPosition.x(), cellPosition.y(), cellSize, minHeight, maxHeight));
+        const osg::Vec3f shift = Misc::Convert::toOsg(
+            BulletHelpers::getHeightfieldShift(cellPosition.x(), cellPosition.y(), cellSize, minHeight, maxHeight));
         const float stepSize = getHeightfieldScale(cellSize, size);
         const int halfCellSize = cellSize / 2;
-        const auto local = [&] (float v, float shift) { return (v - shift + halfCellSize) / stepSize; };
-        const auto index = [&] (float v, int add) { return std::clamp<int>(static_cast<int>(v) + add, 0, size); };
+        const auto local = [&](float v, float shift) { return (v - shift + halfCellSize) / stepSize; };
+        const auto index = [&](float v, int add) { return std::clamp<int>(static_cast<int>(v) + add, 0, size); };
         const std::size_t minX = index(std::round(local(intersection->mMin.x(), shift.x())), -1);
         const std::size_t minY = index(std::round(local(intersection->mMin.y(), shift.y())), -1);
         const std::size_t maxX = index(std::round(local(intersection->mMax.x(), shift.x())), 1);
@@ -280,13 +299,12 @@ namespace DetourNavigator
         std::sort(mHeightfields.begin(), mHeightfields.end());
         std::sort(mFlatHeightfields.begin(), mFlatHeightfields.end());
         Mesh mesh = makeMesh(std::move(mTriangles));
-        return std::make_shared<RecastMesh>(version, std::move(mesh), std::move(mWater),
-                                            std::move(mHeightfields), std::move(mFlatHeightfields),
-                                            std::move(mSources));
+        return std::make_shared<RecastMesh>(version, std::move(mesh), std::move(mWater), std::move(mHeightfields),
+            std::move(mFlatHeightfields), std::move(mSources));
     }
 
-    void RecastMeshBuilder::addObject(const btConcaveShape& shape, const btTransform& transform,
-                                      btTriangleCallback&& callback)
+    void RecastMeshBuilder::addObject(
+        const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback)
     {
         btVector3 aabbMin;
         btVector3 aabbMax;
@@ -298,8 +316,7 @@ namespace DetourNavigator
         const btVector3 boundsMax(mBounds.mMax.x(), mBounds.mMax.y(),
             std::numeric_limits<btScalar>::max() * std::numeric_limits<btScalar>::epsilon());
 
-        auto wrapper = makeProcessTriangleCallback([&] (btVector3* triangle, int partId, int triangleIndex)
-        {
+        auto wrapper = makeProcessTriangleCallback([&](btVector3* triangle, int partId, int triangleIndex) {
             std::array<btVector3, 3> transformed;
             for (std::size_t i = 0; i < 3; ++i)
                 transformed[i] = transform(triangle[i]);
@@ -310,8 +327,8 @@ namespace DetourNavigator
         shape.processAllTriangles(&wrapper, aabbMin, aabbMax);
     }
 
-    void RecastMeshBuilder::addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform,
-                                      btTriangleCallback&& callback)
+    void RecastMeshBuilder::addObject(
+        const btHeightfieldTerrainShape& shape, const btTransform& transform, btTriangleCallback&& callback)
     {
         using BulletHelpers::transformBoundingBox;
 
@@ -334,8 +351,7 @@ namespace DetourNavigator
 
         transformBoundingBox(transform.inverse(), aabbMin, aabbMax);
 
-        auto wrapper = makeProcessTriangleCallback([&] (btVector3* triangle, int partId, int triangleIndex)
-        {
+        auto wrapper = makeProcessTriangleCallback([&](btVector3* triangle, int partId, int triangleIndex) {
             std::array<btVector3, 3> transformed;
             for (std::size_t i = 0; i < 3; ++i)
                 transformed[i] = transform(triangle[i]);

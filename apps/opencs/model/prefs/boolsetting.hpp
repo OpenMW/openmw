@@ -9,27 +9,25 @@ namespace CSMPrefs
 {
     class BoolSetting : public Setting
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            std::string mTooltip;
-            bool mDefault;
-            QCheckBox* mWidget;
+        std::string mTooltip;
+        bool mDefault;
+        QCheckBox* mWidget;
 
-        public:
+    public:
+        BoolSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label, bool default_);
 
-            BoolSetting (Category *parent,
-                QMutex *mutex, const std::string& key, const std::string& label, bool default_);
+        BoolSetting& setTooltip(const std::string& tooltip);
 
-            BoolSetting& setTooltip (const std::string& tooltip);
+        /// Return label, input widget.
+        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
 
-            /// Return label, input widget.
-            std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent) override;
+        void updateWidget() override;
 
-            void updateWidget() override;
+    private slots:
 
-        private slots:
-
-            void valueChanged (int value);
+        void valueChanged(int value);
     };
 }
 

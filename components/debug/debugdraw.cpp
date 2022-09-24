@@ -82,7 +82,9 @@ static void generateCube(osg::Geometry& geom, float dim)
 
         for (int i_point = 0; i_point < 4; i_point++)
         {
-            float iu = i_point % 2 == 1 ? float_dir : -float_dir; //This is to get the right triangle orientation when the normal changes*
+            float iu = i_point % 2 == 1
+                ? float_dir
+                : -float_dir; // This is to get the right triangle orientation when the normal changes*
             float iv = i_point / 2 == 1 ? 1.0 : -1.0;
             osg::Vec3f point = (u * iu) + (v * iv);
             point = (point + normale);
@@ -112,13 +114,13 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
     osg::ref_ptr<osg::DrawElementsUShort> indices = new osg::DrawElementsUShort(osg::DrawElementsUShort::TRIANGLES, 0);
-    int vertexCount = subdiv * 4 + 2; //2 discs + top and bottom + 2 center
+    int vertexCount = subdiv * 4 + 2; // 2 discs + top and bottom + 2 center
     indices->reserve(vertexCount);
     int iVertex = 0;
 
     int beginTop = iVertex;
     auto topNormal = osg::Vec3(0., 0., 1.);
-    //top disk
+    // top disk
     for (int i = 0; i < subdiv; i++)
     {
         float theta = (float(i) / float(subdiv)) * osg::PI * 2.;
@@ -130,20 +132,20 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
         iVertex += 1;
     }
     auto centerTop = iVertex;
-    //centerTop
+    // centerTop
     {
         vertices->push_back(osg::Vec3(0., 0., height / 2.));
         normals->push_back(topNormal);
         iVertex += 1;
     }
     auto centerBot = iVertex;
-    //centerBot
+    // centerBot
     {
         vertices->push_back(osg::Vec3(0., 0., -height / 2));
         normals->push_back(-topNormal);
         iVertex += 1;
     }
-    //bottom disk
+    // bottom disk
     auto begin_bot = iVertex;
     for (int i = 0; i < subdiv; i++)
     {
@@ -155,7 +157,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
         normals->push_back(-topNormal);
         iVertex += 1;
     }
-    //sides
+    // sides
     int beginSide = iVertex;
     for (int i = 0; i < subdiv; i++)
     {
@@ -174,7 +176,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
         iVertex += 1;
     }
 
-    //create triangles sides
+    // create triangles sides
     for (int i = 0; i < subdiv; i++)
     {
         auto next_vert = (i + 1) % subdiv;
@@ -239,7 +241,6 @@ namespace Debug
 
         lines.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
     }
-
 
     DebugCustomDraw::DebugCustomDraw()
     {
@@ -311,7 +312,10 @@ namespace Debug
     class DebugDrawCallback : public SceneUtil::NodeCallback<DebugDrawCallback>
     {
     public:
-        DebugDrawCallback(Debug::DebugDrawer& debugDrawer) : mDebugDrawer(debugDrawer) {}
+        DebugDrawCallback(Debug::DebugDrawer& debugDrawer)
+            : mDebugDrawer(debugDrawer)
+        {
+        }
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
@@ -319,7 +323,8 @@ namespace Debug
             int indexRead = getIdexBufferReadFromFrame(mDebugDrawer.mCurrentFrame);
             auto& lines = mDebugDrawer.mCustomDebugDrawer[indexRead]->mLinesToDraw;
             lines->removePrimitiveSet(0, 1);
-            lines->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->getVertexArray())->size()));
+            lines->addPrimitiveSet(new osg::DrawArrays(
+                osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->getVertexArray())->size()));
 
             nv->pushOntoNodePath(mDebugDrawer.mCustomDebugDrawer[indexRead]);
             nv->apply(*mDebugDrawer.mCustomDebugDrawer[indexRead]);
@@ -330,11 +335,14 @@ namespace Debug
     };
 }
 
-Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode) : mParentNode(parentNode)
+Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
+    : mParentNode(parentNode)
 {
     mCurrentFrame = 0;
-    auto vertexShader = shaderManager.getShader("debug_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::VERTEX);
-    auto fragmentShader = shaderManager.getShader("debug_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
+    auto vertexShader
+        = shaderManager.getShader("debug_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::VERTEX);
+    auto fragmentShader = shaderManager.getShader(
+        "debug_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
 
     auto program = shaderManager.getProgram(vertexShader, fragmentShader);
 
@@ -382,11 +390,12 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
 Debug::DebugDrawer::~DebugDrawer()
 {
     mParentNode->removeChild(mDebugDrawSceneObjects);
-} 
+}
 
 void Debug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
 {
-    mCustomDebugDrawer[getIdexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back({ mPosition, mDims, mColor, DrawShape::Cube });
+    mCustomDebugDrawer[getIdexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(
+        { mPosition, mDims, mColor, DrawShape::Cube });
 }
 
 void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f color)

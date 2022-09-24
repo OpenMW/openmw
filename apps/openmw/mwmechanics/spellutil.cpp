@@ -17,15 +17,19 @@ namespace MWMechanics
 {
     ESM::Skill::SkillEnum spellSchoolToSkill(int school)
     {
-        static const std::array<ESM::Skill::SkillEnum, 6> schoolSkillArray
-        {
-            ESM::Skill::Alteration, ESM::Skill::Conjuration, ESM::Skill::Destruction,
-            ESM::Skill::Illusion, ESM::Skill::Mysticism, ESM::Skill::Restoration,
+        static const std::array<ESM::Skill::SkillEnum, 6> schoolSkillArray{
+            ESM::Skill::Alteration,
+            ESM::Skill::Conjuration,
+            ESM::Skill::Destruction,
+            ESM::Skill::Illusion,
+            ESM::Skill::Mysticism,
+            ESM::Skill::Restoration,
         };
         return schoolSkillArray.at(school);
     }
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const EffectCostMethod method)
+    float calcEffectCost(
+        const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const EffectCostMethod method)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (!magicEffect)
@@ -42,7 +46,8 @@ namespace MWMechanics
 
         int durationOffset = 0;
         int minArea = 0;
-        if (method == EffectCostMethod::PlayerSpell) {
+        if (method == EffectCostMethod::PlayerSpell)
+        {
             durationOffset = 1;
             minArea = 1;
         }
@@ -55,7 +60,7 @@ namespace MWMechanics
         return x * fEffectCostMult;
     }
 
-    int calcSpellCost (const ESM::Spell& spell)
+    int calcSpellCost(const ESM::Spell& spell)
     {
         if (!(spell.mData.mFlags & ESM::Spell::F_Autocalc))
             return spell.mData.mCost;
@@ -77,7 +82,7 @@ namespace MWMechanics
         return std::round(cost);
     }
 
-    int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)
+    int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr& actor)
     {
         /*
          * Each point of enchant skill above/under 10 subtracts/adds
@@ -89,7 +94,7 @@ namespace MWMechanics
         return static_cast<int>((result < 1) ? 1 : result);
     }
 
-    float calcSpellBaseSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool)
+    float calcSpellBaseSuccessChance(const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool)
     {
         // Morrowind for some reason uses a formula slightly different from magicka cost calculation
         float y = std::numeric_limits<float>::max();
@@ -98,7 +103,8 @@ namespace MWMechanics
         for (const ESM::ENAMstruct& effect : spell->mEffects.mList)
         {
             float x = static_cast<float>(effect.mDuration);
-            const auto magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+            const auto magicEffect
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
                 x = std::max(1.f, x);
@@ -108,8 +114,12 @@ namespace MWMechanics
             x += effect.mArea * 0.05f * magicEffect->mData.mBaseCost;
             if (effect.mRange == ESM::RT_Target)
                 x *= 1.5f;
-            static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                        "fEffectCostMult")->mValue.getFloat();
+            static const float fEffectCostMult = MWBase::Environment::get()
+                                                     .getWorld()
+                                                     ->getStore()
+                                                     .get<ESM::GameSetting>()
+                                                     .find("fEffectCostMult")
+                                                     ->mValue.getFloat();
             x *= fEffectCostMult;
 
             float s = 2.0f * actor.getClass().getSkill(actor, spellSchoolToSkill(magicEffect->mData.mSchool));
@@ -132,7 +142,8 @@ namespace MWMechanics
         return castChance;
     }
 
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
+    float getSpellSuccessChance(
+        const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
         // NB: Base chance is calculated here because the effective school pointer must be filled
         float baseChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool);
@@ -169,7 +180,8 @@ namespace MWMechanics
         return std::max(castChance, 0.f);
     }
 
-    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
+    float getSpellSuccessChance(
+        const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
         if (const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId))
             return getSpellSuccessChance(spell, actor, effectiveSchool, cap, checkMagicka);
@@ -190,12 +202,12 @@ namespace MWMechanics
         return school;
     }
 
-    bool spellIncreasesSkill(const ESM::Spell *spell)
+    bool spellIncreasesSkill(const ESM::Spell* spell)
     {
         return spell->mData.mType == ESM::Spell::ST_Spell && !(spell->mData.mFlags & ESM::Spell::F_Always);
     }
 
-    bool spellIncreasesSkill(const std::string &spellId)
+    bool spellIncreasesSkill(const std::string& spellId)
     {
         const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
         return spell && spellIncreasesSkill(spell);

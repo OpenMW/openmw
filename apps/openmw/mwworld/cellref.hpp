@@ -17,8 +17,7 @@ namespace MWWorld
     class CellRef
     {
     public:
-
-        CellRef (const ESM::CellRef& ref)
+        CellRef(const ESM::CellRef& ref)
             : mCellRef(ref)
         {
             mChanged = false;
@@ -57,7 +56,7 @@ namespace MWWorld
         // The *original* position and rotation as it was given in the Construction Set.
         // Current position and rotation of the object is stored in RefData.
         const ESM::Position& getPosition() const { return mCellRef.mPos; }
-        void setPosition (const ESM::Position& position);
+        void setPosition(const ESM::Position& position);
 
         // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
         float getEnchantmentCharge() const { return mCellRef.mEnchantmentCharge; }
@@ -94,7 +93,7 @@ namespace MWWorld
         // The faction that owns this object (and will get angry if
         // you take it and are not a faction member)
         const std::string& getFaction() const { return mCellRef.mFaction; }
-        void setFaction (const std::string& faction);
+        void setFaction(const std::string& faction);
 
         // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
         void setFactionRank(int factionRank);
@@ -107,7 +106,7 @@ namespace MWWorld
         void setLockLevel(int lockLevel);
         void lock(int lockLevel);
         void unlock();
-         // Key and trap ID names, if any
+        // Key and trap ID names, if any
         const std::string& getKey() const { return mCellRef.mKey; }
         const std::string& getTrap() const { return mCellRef.mTrap; }
         void setTrap(const std::string& trap);
@@ -117,7 +116,7 @@ namespace MWWorld
         void setGoldValue(int value);
 
         // Write the content of this CellRef into the given ObjectState
-        void writeState (ESM::ObjectState& state) const;
+        void writeState(ESM::ObjectState& state) const;
 
         // Has this CellRef changed since it was originally loaded?
         bool hasChanged() const { return mChanged; }

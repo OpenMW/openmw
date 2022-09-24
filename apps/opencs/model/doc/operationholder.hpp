@@ -17,40 +17,39 @@ namespace CSMDoc
 
     class OperationHolder : public QObject
     {
-            Q_OBJECT
-            
-            QThread mThread;
-            Operation *mOperation;
-            bool mRunning;
+        Q_OBJECT
 
-        public:
+        QThread mThread;
+        Operation* mOperation;
+        bool mRunning;
 
-            OperationHolder (Operation *operation = nullptr);
+    public:
+        OperationHolder(Operation* operation = nullptr);
 
-            void setOperation (Operation *operation);
+        void setOperation(Operation* operation);
 
-            bool isRunning() const;
+        bool isRunning() const;
 
-            void start();
+        void start();
 
-            void abort();
+        void abort();
 
-            // Abort and wait until thread has finished.
-            void abortAndWait();
+        // Abort and wait until thread has finished.
+        void abortAndWait();
 
-        private slots:
+    private slots:
 
-            void doneSlot (int type, bool failed);
-            
-        signals:
+        void doneSlot(int type, bool failed);
 
-            void progress (int current, int max, int type);
+    signals:
 
-            void reportMessage (const CSMDoc::Message& message, int type);
+        void progress(int current, int max, int type);
 
-            void done (int type, bool failed);
+        void reportMessage(const CSMDoc::Message& message, int type);
 
-            void abortSignal();
+        void done(int type, bool failed);
+
+        void abortSignal();
     };
 }
 

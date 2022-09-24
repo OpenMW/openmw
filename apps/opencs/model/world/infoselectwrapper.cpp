@@ -11,8 +11,7 @@ const size_t CSMWorld::ConstInfoSelectWrapper::FunctionIndexOffset = 2;
 const size_t CSMWorld::ConstInfoSelectWrapper::RelationIndexOffset = 4;
 const size_t CSMWorld::ConstInfoSelectWrapper::VarNameOffset = 5;
 
-const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] =
-{
+const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] = {
     "Rank Low",
     "Rank High",
     "Rank Requirement",
@@ -101,8 +100,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] =
     nullptr,
 };
 
-const char* CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[] =
-{
+const char* CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[] = {
     "=",
     "!=",
     ">",
@@ -112,8 +110,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[] =
     nullptr,
 };
 
-const char* CSMWorld::ConstInfoSelectWrapper::ComparisonEnumStrings[] =
-{
+const char* CSMWorld::ConstInfoSelectWrapper::ComparisonEnumStrings[] = {
     "Boolean",
     "Integer",
     "Numeric",
@@ -298,18 +295,42 @@ void CSMWorld::ConstInfoSelectWrapper::readFunctionName()
                 mFunctionName = Function_None;
             break;
 
-        case '2': mFunctionName = Function_Global; break;
-        case '3': mFunctionName = Function_Local; break;
-        case '4': mFunctionName = Function_Journal; break;
-        case '5': mFunctionName = Function_Item; break;
-        case '6': mFunctionName = Function_Dead; break;
-        case '7': mFunctionName = Function_NotId; break;
-        case '8': mFunctionName = Function_NotFaction; break;
-        case '9': mFunctionName = Function_NotClass; break;
-        case 'A': mFunctionName = Function_NotRace; break;
-        case 'B': mFunctionName = Function_NotCell; break;
-        case 'C': mFunctionName = Function_NotLocal; break;
-        default:  mFunctionName = Function_None; break;
+        case '2':
+            mFunctionName = Function_Global;
+            break;
+        case '3':
+            mFunctionName = Function_Local;
+            break;
+        case '4':
+            mFunctionName = Function_Journal;
+            break;
+        case '5':
+            mFunctionName = Function_Item;
+            break;
+        case '6':
+            mFunctionName = Function_Dead;
+            break;
+        case '7':
+            mFunctionName = Function_NotId;
+            break;
+        case '8':
+            mFunctionName = Function_NotFaction;
+            break;
+        case '9':
+            mFunctionName = Function_NotClass;
+            break;
+        case 'A':
+            mFunctionName = Function_NotRace;
+            break;
+        case 'B':
+            mFunctionName = Function_NotCell;
+            break;
+        case 'C':
+            mFunctionName = Function_NotLocal;
+            break;
+        default:
+            mFunctionName = Function_None;
+            break;
     }
 }
 
@@ -319,13 +340,26 @@ void CSMWorld::ConstInfoSelectWrapper::readRelationType()
 
     switch (relationIndex)
     {
-        case '0': mRelationType = Relation_Equal; break;
-        case '1': mRelationType = Relation_NotEqual; break;
-        case '2': mRelationType = Relation_Greater; break;
-        case '3': mRelationType = Relation_GreaterOrEqual; break;
-        case '4': mRelationType = Relation_Less; break;
-        case '5': mRelationType = Relation_LessOrEqual; break;
-        default:  mRelationType = Relation_None;
+        case '0':
+            mRelationType = Relation_Equal;
+            break;
+        case '1':
+            mRelationType = Relation_NotEqual;
+            break;
+        case '2':
+            mRelationType = Relation_Greater;
+            break;
+        case '3':
+            mRelationType = Relation_GreaterOrEqual;
+            break;
+        case '4':
+            mRelationType = Relation_Less;
+            break;
+        case '5':
+            mRelationType = Relation_LessOrEqual;
+            break;
+        default:
+            mRelationType = Relation_None;
     }
 }
 
@@ -700,38 +734,37 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getValidFloatRange() c
 }
 
 template <typename T1, typename T2>
-bool CSMWorld::ConstInfoSelectWrapper::rangeContains(T1 value, std::pair<T2,T2> range) const
+bool CSMWorld::ConstInfoSelectWrapper::rangeContains(T1 value, std::pair<T2, T2> range) const
 {
     return (value >= range.first && value <= range.second);
 }
 
 template <typename T1, typename T2>
-bool CSMWorld::ConstInfoSelectWrapper::rangeFullyContains(std::pair<T1,T1> containingRange,
-    std::pair<T2,T2> testRange) const
+bool CSMWorld::ConstInfoSelectWrapper::rangeFullyContains(
+    std::pair<T1, T1> containingRange, std::pair<T2, T2> testRange) const
 {
     return (containingRange.first <= testRange.first) && (testRange.second <= containingRange.second);
 }
 
 template <typename T1, typename T2>
-bool CSMWorld::ConstInfoSelectWrapper::rangesOverlap(std::pair<T1,T1> range1, std::pair<T2,T2> range2) const
+bool CSMWorld::ConstInfoSelectWrapper::rangesOverlap(std::pair<T1, T1> range1, std::pair<T2, T2> range2) const
 {
     // One of the bounds of either range should fall within the other range
-    return
-        (range1.first <= range2.first  && range2.first  <= range1.second) ||
-        (range1.first <= range2.second && range2.second <= range1.second) ||
-        (range2.first <= range1.first  && range1.first  <= range2.second) ||
-        (range2.first <= range1.second && range1.second <= range2.second);
+    return (range1.first <= range2.first && range2.first <= range1.second)
+        || (range1.first <= range2.second && range2.second <= range1.second)
+        || (range2.first <= range1.first && range1.first <= range2.second)
+        || (range2.first <= range1.second && range1.second <= range2.second);
 }
 
 template <typename T1, typename T2>
-bool CSMWorld::ConstInfoSelectWrapper::rangesMatch(std::pair<T1,T1> range1, std::pair<T2,T2> range2) const
+bool CSMWorld::ConstInfoSelectWrapper::rangesMatch(std::pair<T1, T1> range1, std::pair<T2, T2> range2) const
 {
-    return (range1.first == range2.first  && range1.second == range2.second);
+    return (range1.first == range2.first && range1.second == range2.second);
 }
 
 template <typename T1, typename T2>
-bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue(std::pair<T1,T1> conditionRange,
-    std::pair<T2,T2> validRange) const
+bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue(
+    std::pair<T1, T1> conditionRange, std::pair<T2, T2> validRange) const
 {
     switch (mRelationType)
     {
@@ -757,8 +790,8 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue(std::pair<T1,T1> co
 }
 
 template <typename T1, typename T2>
-bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(std::pair<T1,T1> conditionRange,
-    std::pair<T2,T2> validRange) const
+bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(
+    std::pair<T1, T1> conditionRange, std::pair<T2, T2> validRange) const
 {
     switch (mRelationType)
     {
@@ -785,7 +818,8 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(std::pair<T1,T1> con
 // InfoSelectWrapper
 
 CSMWorld::InfoSelectWrapper::InfoSelectWrapper(ESM::DialInfo::SelectStruct& select)
-    : CSMWorld::ConstInfoSelectWrapper(select), mSelect(select)
+    : CSMWorld::ConstInfoSelectWrapper(select)
+    , mSelect(select)
 {
 }
 
@@ -846,19 +880,46 @@ void CSMWorld::InfoSelectWrapper::update()
 
     switch (mFunctionName)
     {
-        case Function_None:         stream << '0'; break;
-        case Function_Global:       stream << '2'; break;
-        case Function_Local:        stream << '3'; break;
-        case Function_Journal:      stream << '4'; break;
-        case Function_Item:         stream << '5'; break;
-        case Function_Dead:         stream << '6'; break;
-        case Function_NotId:        stream << '7'; break;
-        case Function_NotFaction:   stream << '8'; break;
-        case Function_NotClass:     stream << '9'; break;
-        case Function_NotRace:      stream << 'A'; break;
-        case Function_NotCell:      stream << 'B'; break;
-        case Function_NotLocal:     stream << 'C'; break;
-        default:                    stream << '1'; writeIndex = true; break;
+        case Function_None:
+            stream << '0';
+            break;
+        case Function_Global:
+            stream << '2';
+            break;
+        case Function_Local:
+            stream << '3';
+            break;
+        case Function_Journal:
+            stream << '4';
+            break;
+        case Function_Item:
+            stream << '5';
+            break;
+        case Function_Dead:
+            stream << '6';
+            break;
+        case Function_NotId:
+            stream << '7';
+            break;
+        case Function_NotFaction:
+            stream << '8';
+            break;
+        case Function_NotClass:
+            stream << '9';
+            break;
+        case Function_NotRace:
+            stream << 'A';
+            break;
+        case Function_NotCell:
+            stream << 'B';
+            break;
+        case Function_NotLocal:
+            stream << 'C';
+            break;
+        default:
+            stream << '1';
+            writeIndex = true;
+            break;
     }
 
     if (writeIndex && functionIndex < 10) // leading 0
@@ -871,13 +932,27 @@ void CSMWorld::InfoSelectWrapper::update()
     // Write Relation
     switch (mRelationType)
     {
-        case Relation_Equal:            stream << '0'; break;
-        case Relation_NotEqual:         stream << '1'; break;
-        case Relation_Greater:          stream << '2'; break;
-        case Relation_GreaterOrEqual:   stream << '3'; break;
-        case Relation_Less:             stream << '4'; break;
-        case Relation_LessOrEqual:      stream << '5'; break;
-        default:                        stream << '0'; break;
+        case Relation_Equal:
+            stream << '0';
+            break;
+        case Relation_NotEqual:
+            stream << '1';
+            break;
+        case Relation_Greater:
+            stream << '2';
+            break;
+        case Relation_GreaterOrEqual:
+            stream << '3';
+            break;
+        case Relation_Less:
+            stream << '4';
+            break;
+        case Relation_LessOrEqual:
+            stream << '5';
+            break;
+        default:
+            stream << '0';
+            break;
     }
 
     if (mHasVariable)

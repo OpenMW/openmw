@@ -4,9 +4,10 @@
 
 #include "../prefs/state.hpp"
 
-CSMTools::JournalCheckStage::JournalCheckStage(const CSMWorld::IdCollection<ESM::Dialogue> &journals,
-    const CSMWorld::InfoCollection& journalInfos)
-    : mJournals(journals), mJournalInfos(journalInfos)
+CSMTools::JournalCheckStage::JournalCheckStage(
+    const CSMWorld::IdCollection<ESM::Dialogue>& journals, const CSMWorld::InfoCollection& journalInfos)
+    : mJournals(journals)
+    , mJournalInfos(journalInfos)
 {
     mIgnoreBaseRecords = false;
 }
@@ -20,13 +21,14 @@ int CSMTools::JournalCheckStage::setup()
 
 void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<ESM::Dialogue> &journalRecord = mJournals.getRecord(stage);
+    const CSMWorld::Record<ESM::Dialogue>& journalRecord = mJournals.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && journalRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || journalRecord.isDeleted())
+    if ((mIgnoreBaseRecords && journalRecord.mState == CSMWorld::RecordBase::State_BaseOnly)
+        || journalRecord.isDeleted())
         return;
 
-    const ESM::Dialogue &journal = journalRecord.get();
+    const ESM::Dialogue& journal = journalRecord.get();
     int statusNamedCount = 0;
     int totalInfoCount = 0;
     std::set<int> questIndices;
@@ -65,7 +67,8 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
         if (!result.second)
         {
             CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
-            messages.add(id, "Duplicated quest index " + std::to_string(journalInfo.mData.mJournalIndex), "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Duplicated quest index " + std::to_string(journalInfo.mData.mJournalIndex), "",
+                CSMDoc::Message::Severity_Error);
         }
     }
 

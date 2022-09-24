@@ -28,7 +28,7 @@ namespace MWGui
         EventHandle_Item eventItemSelected;
         EventHandle_Void eventDialogCanceled;
 
-        void openContainer (const MWWorld::Ptr& container);
+        void openContainer(const MWWorld::Ptr& container);
         void setCategory(int category);
         void setFilter(int filter);
 

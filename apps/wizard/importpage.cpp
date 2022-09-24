@@ -2,8 +2,8 @@
 
 #include "mainwizard.hpp"
 
-Wizard::ImportPage::ImportPage(QWidget *parent) :
-    QWizardPage(parent)
+Wizard::ImportPage::ImportPage(QWidget* parent)
+    : QWizardPage(parent)
 {
     mWizard = qobject_cast<MainWizard*>(parent);
 

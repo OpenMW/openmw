@@ -1,17 +1,16 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_TILECACHEDRECASTMESHMANAGER_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_TILECACHEDRECASTMESHMANAGER_H
 
-#include "tileposition.hpp"
-#include "gettilespositions.hpp"
-#include "version.hpp"
-#include "heightfieldshape.hpp"
-#include "changetype.hpp"
-#include "objectid.hpp"
 #include "areatype.hpp"
-#include "recastmeshobject.hpp"
+#include "changetype.hpp"
 #include "commulativeaabb.hpp"
-#include "version.hpp"
+#include "gettilespositions.hpp"
+#include "heightfieldshape.hpp"
+#include "objectid.hpp"
 #include "recastmesh.hpp"
+#include "recastmeshobject.hpp"
+#include "tileposition.hpp"
+#include "version.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -21,8 +20,8 @@
 
 #include <map>
 #include <mutex>
-#include <vector>
 #include <optional>
+#include <vector>
 
 namespace DetourNavigator
 {
@@ -34,7 +33,10 @@ namespace DetourNavigator
         class UpdateGuard
         {
         public:
-            explicit UpdateGuard(TileCachedRecastMeshManager& manager) : mImpl(manager.mMutex) {}
+            explicit UpdateGuard(TileCachedRecastMeshManager& manager)
+                : mImpl(manager.mMutex)
+            {
+            }
 
         private:
             const std::lock_guard<std::mutex> mImpl;
@@ -59,8 +61,8 @@ namespace DetourNavigator
 
         void removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
-        void addHeightfield(const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape,
-            const UpdateGuard* guard);
+        void addHeightfield(
+            const osg::Vec2i& cellPosition, int cellSize, const HeightfieldShape& shape, const UpdateGuard* guard);
 
         void removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
@@ -147,11 +149,11 @@ namespace DetourNavigator
 
         inline static ObjectIndexValue makeObjectIndexValue(const TilesPositionsRange& range, ObjectData* data);
 
-        inline static WaterIndexValue makeWaterIndexValue(const TilesPositionsRange& range,
-            std::map<osg::Vec2i, WaterData>::const_iterator it);
+        inline static WaterIndexValue makeWaterIndexValue(
+            const TilesPositionsRange& range, std::map<osg::Vec2i, WaterData>::const_iterator it);
 
-        inline static HeightfieldIndexValue makeHeightfieldIndexValue(const TilesPositionsRange& range,
-            std::map<osg::Vec2i, HeightfieldData>::const_iterator it);
+        inline static HeightfieldIndexValue makeHeightfieldIndexValue(
+            const TilesPositionsRange& range, std::map<osg::Vec2i, HeightfieldData>::const_iterator it);
 
         inline static auto makeIndexQuery(const TilePosition& tilePosition)
             -> decltype(boost::geometry::index::intersects(IndexBox()));

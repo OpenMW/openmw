@@ -2,15 +2,15 @@
 
 #include <array>
 
-#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loaddoor.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
-#include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "movement.hpp"
 
@@ -21,17 +21,16 @@ namespace MWMechanics
     static const float DURATION_SAME_SPOT = 1.5f;
     static const float DURATION_TO_EVADE = 0.4f;
 
-    const float ObstacleCheck::evadeDirections[NUM_EVADE_DIRECTIONS][2] =
-    {
-        { 1.0f, 0.0f },     // move to side
-        { 1.0f, -1.0f },    // move to side and backwards
-        { -1.0f, 0.0f },    // move to other side
-        { -1.0f, -1.0f }    // move to side and backwards
+    const float ObstacleCheck::evadeDirections[NUM_EVADE_DIRECTIONS][2] = {
+        { 1.0f, 0.0f }, // move to side
+        { 1.0f, -1.0f }, // move to side and backwards
+        { -1.0f, 0.0f }, // move to other side
+        { -1.0f, -1.0f } // move to side and backwards
     };
 
     bool proximityToDoor(const MWWorld::Ptr& actor, float minDist)
     {
-        if(getNearbyDoor(actor, minDist).isEmpty())
+        if (getNearbyDoor(actor, minDist).isEmpty())
             return false;
         else
             return true;
@@ -39,21 +38,22 @@ namespace MWMechanics
 
     const MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist)
     {
-        MWWorld::CellStore *cell = actor.getCell();
+        MWWorld::CellStore* cell = actor.getCell();
 
         // Check all the doors in this cell
         const MWWorld::CellRefList<ESM::Door>& doors = cell->getReadOnlyDoors();
         osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
         pos.z() = 0;
 
-        osg::Vec3f actorDir = (actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0));
+        osg::Vec3f actorDir = (actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0, 1, 0));
 
         for (const auto& ref : doors.mList)
         {
             osg::Vec3f doorPos(ref.mData.getPosition().asVec3());
 
             // FIXME: cast
-            const MWWorld::Ptr doorPtr = MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell());
+            const MWWorld::Ptr doorPtr
+                = MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door>&>(ref), actor.getCell());
 
             const auto doorState = doorPtr.getClass().getDoorState(doorPtr);
             float doorRot = ref.mData.getPosition().rot[2] - doorPtr.getCellRef().getPosition().rot[2];
@@ -70,7 +70,7 @@ namespace MWMechanics
                 continue;
 
             // Door is not close enough
-            if ((pos - doorPos).length2() > minDist*minDist)
+            if ((pos - doorPos).length2() > minDist * minDist)
                 continue;
 
             return doorPtr; // found, stop searching
@@ -87,17 +87,17 @@ namespace MWMechanics
         const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
         if (ignorePlayer)
         {
-            const std::array ignore {actor, world->getPlayerConstPtr()};
+            const std::array ignore{ actor, world->getPlayerConstPtr() };
             return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, ignore, occupyingActors);
         }
-        const std::array ignore {actor};
+        const std::array ignore{ actor };
         return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, ignore, occupyingActors);
     }
 
     ObstacleCheck::ObstacleCheck()
-      : mWalkState(WalkState::Initial)
-      , mStateDuration(0)
-      , mEvadeDirectionIndex(0)
+        : mWalkState(WalkState::Initial)
+        , mStateDuration(0)
+        , mEvadeDirectionIndex(0)
     {
     }
 
@@ -180,7 +180,7 @@ namespace MWMechanics
         }
 
         mStateDuration += duration;
-        if(mStateDuration >= DURATION_TO_EVADE)
+        if (mStateDuration >= DURATION_TO_EVADE)
         {
             // tried to evade, assume all is ok and start again
             mWalkState = WalkState::Norm;

@@ -9,8 +9,8 @@ namespace MWLua
     {
         // Names of object types in Lua.
         // These names are part of OpenMW Lua API.
-        constexpr std::string_view Actor = "Actor";  // base type for NPC, Creature, Player
-        constexpr std::string_view Item = "Item";  // base type for all items
+        constexpr std::string_view Actor = "Actor"; // base type for NPC, Creature, Player
+        constexpr std::string_view Item = "Item"; // base type for all items
 
         constexpr std::string_view Activator = "Activator";
         constexpr std::string_view Armor = "Armor";
@@ -37,26 +37,26 @@ namespace MWLua
     namespace
     {
         const static std::unordered_map<ESM::RecNameInts, std::string_view> luaObjectTypeInfo = {
-            {ESM::REC_INTERNAL_PLAYER, ObjectTypeName::Player},
-            {ESM::REC_INTERNAL_MARKER, ObjectTypeName::Marker},
-            {ESM::REC_ACTI, ObjectTypeName::Activator},
-            {ESM::REC_ARMO, ObjectTypeName::Armor},
-            {ESM::REC_BOOK, ObjectTypeName::Book},
-            {ESM::REC_CLOT, ObjectTypeName::Clothing},
-            {ESM::REC_CONT, ObjectTypeName::Container},
-            {ESM::REC_CREA, ObjectTypeName::Creature},
-            {ESM::REC_DOOR, ObjectTypeName::Door},
-            {ESM::REC_INGR, ObjectTypeName::Ingredient},
-            {ESM::REC_LIGH, ObjectTypeName::Light},
-            {ESM::REC_MISC, ObjectTypeName::MiscItem},
-            {ESM::REC_NPC_, ObjectTypeName::NPC},
-            {ESM::REC_ALCH, ObjectTypeName::Potion},
-            {ESM::REC_STAT, ObjectTypeName::Static},
-            {ESM::REC_WEAP, ObjectTypeName::Weapon},
-            {ESM::REC_APPA, ObjectTypeName::Apparatus},
-            {ESM::REC_LOCK, ObjectTypeName::Lockpick},
-            {ESM::REC_PROB, ObjectTypeName::Probe},
-            {ESM::REC_REPA, ObjectTypeName::Repair},
+            { ESM::REC_INTERNAL_PLAYER, ObjectTypeName::Player },
+            { ESM::REC_INTERNAL_MARKER, ObjectTypeName::Marker },
+            { ESM::REC_ACTI, ObjectTypeName::Activator },
+            { ESM::REC_ARMO, ObjectTypeName::Armor },
+            { ESM::REC_BOOK, ObjectTypeName::Book },
+            { ESM::REC_CLOT, ObjectTypeName::Clothing },
+            { ESM::REC_CONT, ObjectTypeName::Container },
+            { ESM::REC_CREA, ObjectTypeName::Creature },
+            { ESM::REC_DOOR, ObjectTypeName::Door },
+            { ESM::REC_INGR, ObjectTypeName::Ingredient },
+            { ESM::REC_LIGH, ObjectTypeName::Light },
+            { ESM::REC_MISC, ObjectTypeName::MiscItem },
+            { ESM::REC_NPC_, ObjectTypeName::NPC },
+            { ESM::REC_ALCH, ObjectTypeName::Potion },
+            { ESM::REC_STAT, ObjectTypeName::Static },
+            { ESM::REC_WEAP, ObjectTypeName::Weapon },
+            { ESM::REC_APPA, ObjectTypeName::Apparatus },
+            { ESM::REC_LOCK, ObjectTypeName::Lockpick },
+            { ESM::REC_PROB, ObjectTypeName::Probe },
+            { ESM::REC_REPA, ObjectTypeName::Repair },
         };
 
     }
@@ -84,7 +84,8 @@ namespace MWLua
 
     std::string_view getLuaObjectTypeName(const MWWorld::Ptr& ptr)
     {
-        return getLuaObjectTypeName(static_cast<ESM::RecNameInts>(getLiveCellRefType(ptr.mRef)), /*fallback=*/ptr.getTypeDescription());
+        return getLuaObjectTypeName(
+            static_cast<ESM::RecNameInts>(getLiveCellRefType(ptr.mRef)), /*fallback=*/ptr.getTypeDescription());
     }
 
     const MWWorld::Ptr& verifyType(ESM::RecNameInts recordType, const MWWorld::Ptr& ptr)
@@ -123,8 +124,7 @@ namespace MWLua
         auto* lua = context.mLua;
         sol::table types(lua->sol(), sol::create);
         auto addType = [&](std::string_view name, std::vector<ESM::RecNameInts> recTypes,
-                           std::optional<std::string_view> base = std::nullopt) -> sol::table
-        {
+                           std::optional<std::string_view> base = std::nullopt) -> sol::table {
             sol::table t(lua->sol(), sol::create);
             sol::table ro = LuaUtil::makeReadOnly(t);
             sol::table meta = ro[sol::metatable_key];
@@ -136,8 +136,7 @@ namespace MWLua
                 baseMeta[sol::meta_function::index] = LuaUtil::getMutableFromReadOnly(types[*base]);
                 t[sol::metatable_key] = baseMeta;
             }
-            t["objectIsInstance"] = [types=recTypes](const Object& o)
-            {
+            t["objectIsInstance"] = [types = recTypes](const Object& o) {
                 unsigned int type = getLiveCellRefType(o.ptr().mRef);
                 for (ESM::RecNameInts t : types)
                     if (t == type)
@@ -148,32 +147,34 @@ namespace MWLua
             return t;
         };
 
-        addActorBindings(addType(ObjectTypeName::Actor, {ESM::REC_INTERNAL_PLAYER, ESM::REC_CREA, ESM::REC_NPC_}), context);
-        addType(ObjectTypeName::Item, {ESM::REC_ARMO, ESM::REC_BOOK, ESM::REC_CLOT, ESM::REC_INGR,
-                                       ESM::REC_LIGH, ESM::REC_MISC, ESM::REC_ALCH, ESM::REC_WEAP,
-                                       ESM::REC_APPA, ESM::REC_LOCK, ESM::REC_PROB, ESM::REC_REPA});
+        addActorBindings(
+            addType(ObjectTypeName::Actor, { ESM::REC_INTERNAL_PLAYER, ESM::REC_CREA, ESM::REC_NPC_ }), context);
+        addType(ObjectTypeName::Item,
+            { ESM::REC_ARMO, ESM::REC_BOOK, ESM::REC_CLOT, ESM::REC_INGR, ESM::REC_LIGH, ESM::REC_MISC, ESM::REC_ALCH,
+                ESM::REC_WEAP, ESM::REC_APPA, ESM::REC_LOCK, ESM::REC_PROB, ESM::REC_REPA });
 
-        addCreatureBindings(addType(ObjectTypeName::Creature, {ESM::REC_CREA}, ObjectTypeName::Actor), context);
-        addNpcBindings(addType(ObjectTypeName::NPC, {ESM::REC_INTERNAL_PLAYER, ESM::REC_NPC_}, ObjectTypeName::Actor), context);
-        addType(ObjectTypeName::Player, {ESM::REC_INTERNAL_PLAYER}, ObjectTypeName::NPC);
+        addCreatureBindings(addType(ObjectTypeName::Creature, { ESM::REC_CREA }, ObjectTypeName::Actor), context);
+        addNpcBindings(
+            addType(ObjectTypeName::NPC, { ESM::REC_INTERNAL_PLAYER, ESM::REC_NPC_ }, ObjectTypeName::Actor), context);
+        addType(ObjectTypeName::Player, { ESM::REC_INTERNAL_PLAYER }, ObjectTypeName::NPC);
 
-        addType(ObjectTypeName::Armor, {ESM::REC_ARMO}, ObjectTypeName::Item);
-        addType(ObjectTypeName::Clothing, {ESM::REC_CLOT}, ObjectTypeName::Item);
+        addType(ObjectTypeName::Armor, { ESM::REC_ARMO }, ObjectTypeName::Item);
+        addType(ObjectTypeName::Clothing, { ESM::REC_CLOT }, ObjectTypeName::Item);
         addIngredientBindings(addType(ObjectTypeName::Ingredient, { ESM::REC_INGR }, ObjectTypeName::Item), context);
-        addType(ObjectTypeName::Light, {ESM::REC_LIGH}, ObjectTypeName::Item);
-        addMiscellaneousBindings(addType(ObjectTypeName::MiscItem, {ESM::REC_MISC}, ObjectTypeName::Item), context);
-        addPotionBindings(addType(ObjectTypeName::Potion, {ESM::REC_ALCH}, ObjectTypeName::Item), context);
-        addWeaponBindings(addType(ObjectTypeName::Weapon, {ESM::REC_WEAP}, ObjectTypeName::Item), context);
-        addBookBindings(addType(ObjectTypeName::Book, {ESM::REC_BOOK}, ObjectTypeName::Item), context);
-        addLockpickBindings(addType(ObjectTypeName::Lockpick, {ESM::REC_LOCK}, ObjectTypeName::Item), context);
-        addProbeBindings(addType(ObjectTypeName::Probe, {ESM::REC_PROB}, ObjectTypeName::Item), context);
-        addApparatusBindings(addType(ObjectTypeName::Apparatus, {ESM::REC_APPA}, ObjectTypeName::Item), context);
-        addRepairBindings(addType(ObjectTypeName::Repair, {ESM::REC_REPA}, ObjectTypeName::Item), context);
+        addType(ObjectTypeName::Light, { ESM::REC_LIGH }, ObjectTypeName::Item);
+        addMiscellaneousBindings(addType(ObjectTypeName::MiscItem, { ESM::REC_MISC }, ObjectTypeName::Item), context);
+        addPotionBindings(addType(ObjectTypeName::Potion, { ESM::REC_ALCH }, ObjectTypeName::Item), context);
+        addWeaponBindings(addType(ObjectTypeName::Weapon, { ESM::REC_WEAP }, ObjectTypeName::Item), context);
+        addBookBindings(addType(ObjectTypeName::Book, { ESM::REC_BOOK }, ObjectTypeName::Item), context);
+        addLockpickBindings(addType(ObjectTypeName::Lockpick, { ESM::REC_LOCK }, ObjectTypeName::Item), context);
+        addProbeBindings(addType(ObjectTypeName::Probe, { ESM::REC_PROB }, ObjectTypeName::Item), context);
+        addApparatusBindings(addType(ObjectTypeName::Apparatus, { ESM::REC_APPA }, ObjectTypeName::Item), context);
+        addRepairBindings(addType(ObjectTypeName::Repair, { ESM::REC_REPA }, ObjectTypeName::Item), context);
 
-        addActivatorBindings(addType(ObjectTypeName::Activator, {ESM::REC_ACTI}), context);
-        addContainerBindings(addType(ObjectTypeName::Container, {ESM::REC_CONT}), context);
-        addDoorBindings(addType(ObjectTypeName::Door, {ESM::REC_DOOR}), context);
-        addType(ObjectTypeName::Static, {ESM::REC_STAT});
+        addActivatorBindings(addType(ObjectTypeName::Activator, { ESM::REC_ACTI }), context);
+        addContainerBindings(addType(ObjectTypeName::Container, { ESM::REC_CONT }), context);
+        addDoorBindings(addType(ObjectTypeName::Door, { ESM::REC_DOOR }), context);
+        addType(ObjectTypeName::Static, { ESM::REC_STAT });
 
         sol::table typeToPackage = getTypeToPackageTable(context.mLua->sol());
         sol::table packageToType = getPackageToTypeTable(context.mLua->sol());

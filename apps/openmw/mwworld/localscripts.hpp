@@ -15,37 +15,36 @@ namespace MWWorld
     /// \brief List of active local scripts
     class LocalScripts
     {
-            std::list<std::pair<std::string, Ptr> > mScripts;
-            std::list<std::pair<std::string, Ptr> >::iterator mIter;
-            const MWWorld::ESMStore& mStore;
+        std::list<std::pair<std::string, Ptr>> mScripts;
+        std::list<std::pair<std::string, Ptr>>::iterator mIter;
+        const MWWorld::ESMStore& mStore;
 
-        public:
+    public:
+        LocalScripts(const MWWorld::ESMStore& store);
 
-            LocalScripts (const MWWorld::ESMStore& store);
+        void startIteration();
+        ///< Set the iterator to the begin of the script list.
 
-            void startIteration();
-            ///< Set the iterator to the begin of the script list.
+        bool getNext(std::pair<std::string, Ptr>& script);
+        ///< Get next local script
+        /// @return Did we get a script?
 
-            bool getNext(std::pair<std::string, Ptr>& script);
-            ///< Get next local script
-            /// @return Did we get a script?
+        void add(std::string_view scriptName, const Ptr& ptr);
+        ///< Add script to collection of active local scripts.
 
-            void add(std::string_view scriptName, const Ptr& ptr);
-            ///< Add script to collection of active local scripts.
+        void addCell(CellStore* cell);
+        ///< Add all local scripts in a cell.
 
-            void addCell (CellStore *cell);
-            ///< Add all local scripts in a cell.
+        void clear();
+        ///< Clear active local scripts collection.
 
-            void clear();
-            ///< Clear active local scripts collection.
+        void clearCell(CellStore* cell);
+        ///< Remove all scripts belonging to \a cell.
 
-            void clearCell (CellStore *cell);
-            ///< Remove all scripts belonging to \a cell.
-            
-            void remove (RefData *ref);
+        void remove(RefData* ref);
 
-            void remove (const Ptr& ptr);
-            ///< Remove script for given reference (ignored if reference does not have a script listed).
+        void remove(const Ptr& ptr);
+        ///< Remove script for given reference (ignored if reference does not have a script listed).
     };
 }
 

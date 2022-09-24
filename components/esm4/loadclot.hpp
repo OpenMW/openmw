@@ -42,12 +42,12 @@ namespace ESM4
 #pragma pack(push, 1)
         struct Data
         {
-            std::uint32_t value;   // gold
-            float         weight;
+            std::uint32_t value; // gold
+            float weight;
         };
 #pragma pack(pop)
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -56,7 +56,7 @@ namespace ESM4
         std::string mModelMaleWorld;
         std::string mModelFemale;
         std::string mModelFemaleWorld;
-        std::string mIconMale;   // texture
+        std::string mIconMale; // texture
         std::string mIconFemale; // texture
 
         std::string mModel; // FIXME: for OpenCS
@@ -64,16 +64,16 @@ namespace ESM4
         float mBoundRadius;
 
         std::uint32_t mClothingFlags; // see Armor::ArmorFlags for the values
-        FormId        mScriptId;
+        FormId mScriptId;
         std::uint16_t mEnchantmentPoints;
-        FormId        mEnchantment;
+        FormId mEnchantment;
 
         Data mData;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

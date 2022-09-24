@@ -1,14 +1,14 @@
 #ifndef STEREO_MANAGER_H
 #define STEREO_MANAGER_H
 
-#include <osg/Matrix>
-#include <osg/Vec3>
 #include <osg/Camera>
+#include <osg/Matrix>
 #include <osg/StateSet>
+#include <osg/Vec3>
 #include <osgUtil/CullVisitor>
 
-#include <memory>
 #include <array>
+#include <memory>
 
 #include <components/shader/shadermanager.hpp>
 
@@ -76,7 +76,7 @@ namespace Stereo
 
         const std::shared_ptr<MultiviewFramebuffer>& multiviewFramebuffer() { return mMultiviewFramebuffer; };
 
-        //! Sets rendering resolution of each eye to eyeResolution. 
+        //! Sets rendering resolution of each eye to eyeResolution.
         //! Once set, there will no longer be any connection between rendering resolution and screen/window resolution.
         void overrideEyeResolution(const osg::Vec2i& eyeResolution);
 
@@ -86,9 +86,12 @@ namespace Stereo
         //! Get current eye resolution
         osg::Vec2i eyeResolution();
 
-        //! The projection intended for rendering. When reverse Z is enabled, this is not the same as the camera's projection matrix, 
-        //! and therefore must be provided to the manager explicitly.
-        void setMasterProjectionMatrix(const osg::Matrixd& projectionMatrix) { mMasterProjectionMatrix = projectionMatrix; }
+        //! The projection intended for rendering. When reverse Z is enabled, this is not the same as the camera's
+        //! projection matrix, and therefore must be provided to the manager explicitly.
+        void setMasterProjectionMatrix(const osg::Matrixd& projectionMatrix)
+        {
+            mMasterProjectionMatrix = projectionMatrix;
+        }
 
         //! Causes the subgraph represented by the node to draw to the full viewport.
         //! This has no effect if stereo is not enabled
@@ -107,18 +110,18 @@ namespace Stereo
         void setupOVRMultiView2Technique();
 
         osg::ref_ptr<osgViewer::Viewer> mViewer;
-        osg::ref_ptr<osg::Camera>       mMainCamera;
-        osg::ref_ptr<osg::Callback>     mUpdateCallback;
-        std::string                     mError;
-        osg::Matrixd                     mMasterProjectionMatrix;
+        osg::ref_ptr<osg::Camera> mMainCamera;
+        osg::ref_ptr<osg::Callback> mUpdateCallback;
+        std::string mError;
+        osg::Matrixd mMasterProjectionMatrix;
         std::shared_ptr<MultiviewFramebuffer> mMultiviewFramebuffer;
-        bool                            mEyeResolutionOverriden;
-        osg::Vec2i                      mEyeResolutionOverride;
+        bool mEyeResolutionOverriden;
+        osg::Vec2i mEyeResolutionOverride;
 
-        std::array<View, 2>         mView;
-        std::array<osg::Matrixd, 2>  mViewOffsetMatrix;
-        std::array<osg::Matrixd, 2>  mProjectionMatrix;
-        std::array<osg::Matrixd, 2>  mProjectionMatrixReverseZ;
+        std::array<View, 2> mView;
+        std::array<osg::Matrixd, 2> mViewOffsetMatrix;
+        std::array<osg::Matrixd, 2> mProjectionMatrix;
+        std::array<osg::Matrixd, 2> mProjectionMatrixReverseZ;
 
         std::unique_ptr<StereoFrustumManager> mFrustumManager;
         std::shared_ptr<UpdateViewCallback> mUpdateViewCallback;

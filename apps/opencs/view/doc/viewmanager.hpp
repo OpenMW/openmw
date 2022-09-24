@@ -29,67 +29,66 @@ namespace CSVDoc
 
     class ViewManager : public QObject
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMDoc::DocumentManager& mDocumentManager;
-            std::vector<View *> mViews;
-            CSVWorld::CommandDelegateFactoryCollection *mDelegateFactories;
-            bool mExitOnSaveStateChange;
-            bool mUserWarned;
-            Loader mLoader;
+        CSMDoc::DocumentManager& mDocumentManager;
+        std::vector<View*> mViews;
+        CSVWorld::CommandDelegateFactoryCollection* mDelegateFactories;
+        bool mExitOnSaveStateChange;
+        bool mUserWarned;
+        Loader mLoader;
 
-            // not implemented
-            ViewManager (const ViewManager&);
-            ViewManager& operator= (const ViewManager&);
+        // not implemented
+        ViewManager(const ViewManager&);
+        ViewManager& operator=(const ViewManager&);
 
-            void updateIndices();
-            bool notifySaveOnClose (View *view = nullptr);
-            bool showModifiedDocumentMessageBox (View *view);
-            bool showSaveInProgressMessageBox (View *view);
-            bool removeDocument(View *view);
+        void updateIndices();
+        bool notifySaveOnClose(View* view = nullptr);
+        bool showModifiedDocumentMessageBox(View* view);
+        bool showSaveInProgressMessageBox(View* view);
+        bool removeDocument(View* view);
 
-        public:
+    public:
+        ViewManager(CSMDoc::DocumentManager& documentManager);
 
-            ViewManager (CSMDoc::DocumentManager& documentManager);
+        ~ViewManager() override;
 
-            ~ViewManager() override;
+        View* addView(CSMDoc::Document* document);
+        ///< The ownership of the returned view is not transferred.
 
-            View *addView (CSMDoc::Document *document);
-            ///< The ownership of the returned view is not transferred.
+        View* addView(CSMDoc::Document* document, const CSMWorld::UniversalId& id, const std::string& hint);
 
-            View *addView (CSMDoc::Document *document, const CSMWorld::UniversalId& id, const std::string& hint);
+        int countViews(const CSMDoc::Document* document) const;
+        ///< Return number of views for \a document.
 
-            int countViews (const CSMDoc::Document *document) const;
-            ///< Return number of views for \a document.
+        bool closeRequest(View* view);
+        void removeDocAndView(CSMDoc::Document* document);
 
-            bool closeRequest (View *view);
-            void removeDocAndView (CSMDoc::Document *document);
+    signals:
 
-        signals:
+        void newGameRequest();
 
-            void newGameRequest();
+        void newAddonRequest();
 
-            void newAddonRequest();
+        void loadDocumentRequest();
 
-            void loadDocumentRequest();
+        void closeMessageBox();
 
-            void closeMessageBox();
+        void editSettingsRequest();
 
-            void editSettingsRequest();
+        void mergeDocument(CSMDoc::Document* document);
 
-            void mergeDocument (CSMDoc::Document *document);
+    public slots:
 
-        public slots:
+        void exitApplication(CSVDoc::View* view);
 
-            void exitApplication (CSVDoc::View *view);
+    private slots:
 
-        private slots:
+        void documentStateChanged(int state, CSMDoc::Document* document);
 
-            void documentStateChanged (int state, CSMDoc::Document *document);
+        void progress(int current, int max, int type, int threads, CSMDoc::Document* document);
 
-            void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
-
-            void onExitWarningHandler(int state, CSMDoc::Document* document);
+        void onExitWarningHandler(int state, CSMDoc::Document* document);
     };
 
 }

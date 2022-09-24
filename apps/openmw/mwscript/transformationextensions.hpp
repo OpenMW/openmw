@@ -15,8 +15,8 @@ namespace MWScript
 {
     /// \brief stats-related script functionality (creatures and NPCs)
     namespace Transformation
-    {        
-        void installOpcodes (Interpreter::Interpreter& interpreter);
+    {
+        void installOpcodes(Interpreter::Interpreter& interpreter);
     }
 }
 

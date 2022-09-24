@@ -2,8 +2,8 @@
 
 #include "mainwizard.hpp"
 
-Wizard::IntroPage::IntroPage(QWidget *parent) :
-    QWizardPage(parent)
+Wizard::IntroPage::IntroPage(QWidget* parent)
+    : QWizardPage(parent)
 {
     mWizard = qobject_cast<MainWizard*>(parent);
 

@@ -7,37 +7,38 @@ namespace MWClass
 {
     class CreatureLevList : public MWWorld::RegisteredClass<CreatureLevList>
     {
-            friend MWWorld::RegisteredClass<CreatureLevList>;
+        friend MWWorld::RegisteredClass<CreatureLevList>;
 
-            CreatureLevList();
+        CreatureLevList();
 
-            void ensureCustomData (const MWWorld::Ptr& ptr) const;
+        void ensureCustomData(const MWWorld::Ptr& ptr) const;
 
-        public:
+    public:
+        std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
+        ///< \return name or ID; can return an empty string.
 
-            std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
-            ///< \return name or ID; can return an empty string.
+        bool hasToolTip(const MWWorld::ConstPtr& ptr) const override;
+        ///< @return true if this object has a tooltip when focused (default implementation: true)
 
-            bool hasToolTip (const MWWorld::ConstPtr& ptr) const override;
-            ///< @return true if this object has a tooltip when focused (default implementation: true)
+        void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
+        ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
+        ///< list getModel().
 
-            void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
-            ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
+        void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
+            MWRender::RenderingInterface& renderingInterface) const override;
+        ///< Add reference into a cell for rendering
 
-            void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
-            ///< Add reference into a cell for rendering
+        void readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
+        ///< Read additional state from \a state into \a ptr.
 
-            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
-            ///< Read additional state from \a state into \a ptr.
+        void writeAdditionalState(const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
+        ///< Write additional state from \a ptr into \a state.
 
-            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
-            ///< Write additional state from \a ptr into \a state.
+        void respawn(const MWWorld::Ptr& ptr) const override;
 
-            void respawn (const MWWorld::Ptr& ptr) const override;
+        MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const override;
 
-            MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
-
-            void adjustPosition(const MWWorld::Ptr& ptr, bool force) const override;
+        void adjustPosition(const MWWorld::Ptr& ptr, bool force) const override;
     };
 }
 

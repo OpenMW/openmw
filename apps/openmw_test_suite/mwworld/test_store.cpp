@@ -5,22 +5,26 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-#include <components/files/configurationmanager.hpp>
+#include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/esm/records.hpp>
+#include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/strings/algorithm.hpp>
-#include <components/files/conversion.hpp>
 
-#include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwmechanics/spelllist.hpp"
+#include "apps/openmw/mwworld/esmstore.hpp"
 
 #include "../testing_util.hpp"
 
 namespace MWMechanics
 {
-    SpellList::SpellList(const std::string& id, int type) : mId(id), mType(type) {}
+    SpellList::SpellList(const std::string& id, int type)
+        : mId(id)
+        , mType(type)
+    {
+    }
 }
 
 static Loading::Listener dummyListener;
@@ -28,16 +32,15 @@ static Loading::Listener dummyListener;
 /// Base class for tests of ESMStore that rely on external content files to produce the test results
 struct ContentFileTest : public ::testing::Test
 {
-  protected:
-
+protected:
     void SetUp() override
     {
         readContentFiles();
 
         // load the content files
-        int index=0;
+        int index = 0;
         ESM::Dialogue* dialogue = nullptr;
-        for (const auto & mContentFile : mContentFiles)
+        for (const auto& mContentFile : mContentFiles)
         {
             ESM::ESMReader lEsm;
             lEsm.setEncoder(nullptr);
@@ -51,9 +54,7 @@ struct ContentFileTest : public ::testing::Test
         mEsmStore.setUp();
     }
 
-    void TearDown() override
-    {
-    }
+    void TearDown() override {}
 
     // read absolute path to content files from openmw.cfg
     void readContentFiles()
@@ -62,20 +63,32 @@ struct ContentFileTest : public ::testing::Test
 
         boost::program_options::options_description desc("Allowed options");
         auto addOption = desc.add_options();
-        addOption("data", boost::program_options::value<Files::MaybeQuotedPathContainer>()->default_value(Files::MaybeQuotedPathContainer(), "data")->multitoken()->composing());
-        addOption("content", boost::program_options::value<std::vector<std::string>>()->default_value(std::vector<std::string>(), "")
-            ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon");
-        addOption("data-local", boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(Files::MaybeQuotedPathContainer::value_type(), ""));
+        addOption("data",
+            boost::program_options::value<Files::MaybeQuotedPathContainer>()
+                ->default_value(Files::MaybeQuotedPathContainer(), "data")
+                ->multitoken()
+                ->composing());
+        addOption("content",
+            boost::program_options::value<std::vector<std::string>>()
+                ->default_value(std::vector<std::string>(), "")
+                ->multitoken()
+                ->composing(),
+            "content file(s): esm/esp, or omwgame/omwaddon");
+        addOption("data-local",
+            boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(
+                Files::MaybeQuotedPathContainer::value_type(), ""));
         Files::ConfigurationManager::addCommonOptions(desc);
 
         mConfigurationManager.readConfiguration(variables, desc, true);
 
         Files::PathContainer dataDirs, dataLocal;
-        if (!variables["data"].empty()) {
+        if (!variables["data"].empty())
+        {
             dataDirs = asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>());
         }
 
-        Files::PathContainer::value_type local(variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>().u8string());
+        Files::PathContainer::value_type local(
+            variables["data-local"].as<Files::MaybeQuotedPathContainer::value_type>().u8string());
         if (!local.empty())
             dataLocal.push_back(local);
 
@@ -83,12 +96,12 @@ struct ContentFileTest : public ::testing::Test
         mConfigurationManager.filterOutNonExistingPaths(dataLocal);
 
         if (!dataLocal.empty())
-            dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
+            dataDirs.insert(dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
-        Files::Collections collections (dataDirs, true);
+        Files::Collections collections(dataDirs, true);
 
         std::vector<std::string> contentFiles = variables["content"].as<std::vector<std::string>>();
-        for (auto & contentFile : contentFiles)
+        for (auto& contentFile : contentFiles)
         {
             if (!Misc::StringUtils::ciEndsWith(contentFile, ".omwscripts"))
                 mContentFiles.push_back(collections.getPath(contentFile));
@@ -114,55 +127,56 @@ TEST_F(ContentFileTest, dialogue_merging_test)
     std::ofstream stream(file);
 
     const MWWorld::Store<ESM::Dialogue>& dialStore = mEsmStore.get<ESM::Dialogue>();
-    for (const auto & dial : dialStore)
+    for (const auto& dial : dialStore)
     {
         stream << "Dialogue: " << dial.mId << std::endl;
 
-        for (const auto & info : dial.mInfo)
+        for (const auto& info : dial.mInfo)
         {
             stream << info.mId << std::endl;
         }
         stream << std::endl;
     }
 
-    std::cout << "dialogue_merging_test successful, results printed to " << Files::pathToUnicodeString(file) << std::endl;
+    std::cout << "dialogue_merging_test successful, results printed to " << Files::pathToUnicodeString(file)
+              << std::endl;
 }
 
 // Note: here we don't test records that don't use string names (e.g. Land, Pathgrid, Cell)
-#define RUN_TEST_FOR_TYPES(func, arg1, arg2) \
-    func<ESM::Activator>(arg1, arg2); \
-    func<ESM::Apparatus>(arg1, arg2); \
-    func<ESM::Armor>(arg1, arg2); \
-    func<ESM::BirthSign>(arg1, arg2); \
-    func<ESM::BodyPart>(arg1, arg2); \
-    func<ESM::Book>(arg1, arg2); \
-    func<ESM::Class>(arg1, arg2); \
-    func<ESM::Clothing>(arg1, arg2); \
-    func<ESM::Container>(arg1, arg2); \
-    func<ESM::Creature>(arg1, arg2); \
-    func<ESM::CreatureLevList>(arg1, arg2); \
-    func<ESM::Dialogue>(arg1, arg2); \
-    func<ESM::Door>(arg1, arg2); \
-    func<ESM::Enchantment>(arg1, arg2); \
-    func<ESM::Faction>(arg1, arg2); \
-    func<ESM::GameSetting>(arg1, arg2); \
-    func<ESM::Global>(arg1, arg2); \
-    func<ESM::Ingredient>(arg1, arg2); \
-    func<ESM::ItemLevList>(arg1, arg2); \
-    func<ESM::Light>(arg1, arg2); \
-    func<ESM::Lockpick>(arg1, arg2); \
-    func<ESM::Miscellaneous>(arg1, arg2); \
-    func<ESM::NPC>(arg1, arg2); \
-    func<ESM::Potion>(arg1, arg2); \
-    func<ESM::Probe>(arg1, arg2); \
-    func<ESM::Race>(arg1, arg2); \
-    func<ESM::Region>(arg1, arg2); \
-    func<ESM::Repair>(arg1, arg2); \
-    func<ESM::Script>(arg1, arg2); \
-    func<ESM::Sound>(arg1, arg2); \
-    func<ESM::SoundGenerator>(arg1, arg2); \
-    func<ESM::Spell>(arg1, arg2); \
-    func<ESM::StartScript>(arg1, arg2); \
+#define RUN_TEST_FOR_TYPES(func, arg1, arg2)                                                                           \
+    func<ESM::Activator>(arg1, arg2);                                                                                  \
+    func<ESM::Apparatus>(arg1, arg2);                                                                                  \
+    func<ESM::Armor>(arg1, arg2);                                                                                      \
+    func<ESM::BirthSign>(arg1, arg2);                                                                                  \
+    func<ESM::BodyPart>(arg1, arg2);                                                                                   \
+    func<ESM::Book>(arg1, arg2);                                                                                       \
+    func<ESM::Class>(arg1, arg2);                                                                                      \
+    func<ESM::Clothing>(arg1, arg2);                                                                                   \
+    func<ESM::Container>(arg1, arg2);                                                                                  \
+    func<ESM::Creature>(arg1, arg2);                                                                                   \
+    func<ESM::CreatureLevList>(arg1, arg2);                                                                            \
+    func<ESM::Dialogue>(arg1, arg2);                                                                                   \
+    func<ESM::Door>(arg1, arg2);                                                                                       \
+    func<ESM::Enchantment>(arg1, arg2);                                                                                \
+    func<ESM::Faction>(arg1, arg2);                                                                                    \
+    func<ESM::GameSetting>(arg1, arg2);                                                                                \
+    func<ESM::Global>(arg1, arg2);                                                                                     \
+    func<ESM::Ingredient>(arg1, arg2);                                                                                 \
+    func<ESM::ItemLevList>(arg1, arg2);                                                                                \
+    func<ESM::Light>(arg1, arg2);                                                                                      \
+    func<ESM::Lockpick>(arg1, arg2);                                                                                   \
+    func<ESM::Miscellaneous>(arg1, arg2);                                                                              \
+    func<ESM::NPC>(arg1, arg2);                                                                                        \
+    func<ESM::Potion>(arg1, arg2);                                                                                     \
+    func<ESM::Probe>(arg1, arg2);                                                                                      \
+    func<ESM::Race>(arg1, arg2);                                                                                       \
+    func<ESM::Region>(arg1, arg2);                                                                                     \
+    func<ESM::Repair>(arg1, arg2);                                                                                     \
+    func<ESM::Script>(arg1, arg2);                                                                                     \
+    func<ESM::Sound>(arg1, arg2);                                                                                      \
+    func<ESM::SoundGenerator>(arg1, arg2);                                                                             \
+    func<ESM::Spell>(arg1, arg2);                                                                                      \
+    func<ESM::StartScript>(arg1, arg2);                                                                                \
     func<ESM::Weapon>(arg1, arg2);
 
 template <typename T>
@@ -199,7 +213,8 @@ TEST_F(ContentFileTest, content_diagnostics_test)
 }
 
 // TODO:
-/// Print results of autocalculated NPC spell lists. Also serves as test for attribute/skill autocalculation which the spell autocalculation heavily relies on
+/// Print results of autocalculated NPC spell lists. Also serves as test for attribute/skill autocalculation which the
+/// spell autocalculation heavily relies on
 /// - even incorrect rounding modes can completely change the resulting spell lists.
 /*
 TEST_F(ContentFileTest, autocalc_test)
@@ -220,7 +235,6 @@ struct StoreTest : public ::testing::Test
 protected:
     MWWorld::ESMStore mEsmStore;
 };
-
 
 /// Create an ESM file in-memory containing the specified record.
 /// @param deleted Write record with deleted flag?
@@ -257,14 +271,14 @@ TEST_F(StoreTest, delete_test)
     mEsmStore.load(reader, &dummyListener, dialogue);
     mEsmStore.setUp();
 
-    ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 1);
+    ASSERT_TRUE(mEsmStore.get<RecordType>().getSize() == 1);
 
     // now a plugin deletes it
     reader.open(getEsmFile(record, true), "filename");
     mEsmStore.load(reader, &dummyListener, dialogue);
     mEsmStore.setUp();
 
-    ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 0);
+    ASSERT_TRUE(mEsmStore.get<RecordType>().getSize() == 0);
 
     // now another plugin inserts it again
     // expected behaviour is the record to reappear rather than staying deleted
@@ -272,7 +286,7 @@ TEST_F(StoreTest, delete_test)
     mEsmStore.load(reader, &dummyListener, dialogue);
     mEsmStore.setUp();
 
-    ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 1);
+    ASSERT_TRUE(mEsmStore.get<RecordType>().getSize() == 1);
 }
 
 /// Tests overwriting of records.
@@ -305,7 +319,7 @@ TEST_F(StoreTest, overwrite_test)
     // verify that changes were actually applied
     const RecordType* overwrittenRec = mEsmStore.get<RecordType>().search(recordId);
 
-    ASSERT_TRUE (overwrittenRec != nullptr);
+    ASSERT_TRUE(overwrittenRec != nullptr);
 
-    ASSERT_TRUE (overwrittenRec && overwrittenRec->mModel == "the_new_model");
+    ASSERT_TRUE(overwrittenRec && overwrittenRec->mModel == "the_new_model");
 }

@@ -6,11 +6,16 @@
 namespace DetourNavigator
 {
     NavMeshTilesCache::NavMeshTilesCache(const std::size_t maxNavMeshDataSize)
-        : mMaxNavMeshDataSize(maxNavMeshDataSize), mUsedNavMeshDataSize(0), mFreeNavMeshDataSize(0),
-          mHitCount(0), mGetCount(0) {}
+        : mMaxNavMeshDataSize(maxNavMeshDataSize)
+        , mUsedNavMeshDataSize(0)
+        , mFreeNavMeshDataSize(0)
+        , mHitCount(0)
+        , mGetCount(0)
+    {
+    }
 
-    NavMeshTilesCache::Value NavMeshTilesCache::get(const AgentBounds& agentBounds, const TilePosition& changedTile,
-        const RecastMesh& recastMesh)
+    NavMeshTilesCache::Value NavMeshTilesCache::get(
+        const AgentBounds& agentBounds, const TilePosition& changedTile, const RecastMesh& recastMesh)
     {
         const std::lock_guard<std::mutex> lock(mMutex);
 
@@ -41,11 +46,12 @@ namespace DetourNavigator
         while (!mFreeItems.empty() && mUsedNavMeshDataSize + itemSize > mMaxNavMeshDataSize)
             removeLeastRecentlyUsed();
 
-        RecastMeshData key {recastMesh.getMesh(), recastMesh.getWater(),
-                    recastMesh.getHeightfields(), recastMesh.getFlatHeightfields()};
+        RecastMeshData key{ recastMesh.getMesh(), recastMesh.getWater(), recastMesh.getHeightfields(),
+            recastMesh.getFlatHeightfields() };
 
         const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentBounds, changedTile, std::move(key), itemSize);
-        const auto emplaced = mValues.emplace(std::make_tuple(agentBounds, changedTile, std::cref(iterator->mRecastMeshData)), iterator);
+        const auto emplaced = mValues.emplace(
+            std::make_tuple(agentBounds, changedTile, std::cref(iterator->mRecastMeshData)), iterator);
 
         if (!emplaced.second)
         {

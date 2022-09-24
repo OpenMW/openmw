@@ -13,22 +13,19 @@ namespace CSMTools
     class GmstCheckStage : public CSMDoc::Stage
     {
     public:
-        
         GmstCheckStage(const CSMWorld::IdCollection<ESM::GameSetting>& gameSettings);
-        
+
         int setup() override;
         ///< \return number of steps
 
         void perform(int stage, CSMDoc::Messages& messages) override;
         ///< Messages resulting from this stage will be appended to \a messages
-        
+
     private:
-        
         const CSMWorld::IdCollection<ESM::GameSetting>& mGameSettings;
         bool mIgnoreBaseRecords;
-        
+
         std::string varTypeToString(ESM::VarType);
-        
     };
 }
 

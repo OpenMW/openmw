@@ -18,45 +18,41 @@ namespace CSVWorld
 
     class ReferenceCreator : public GenericCreator
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSVWidget::DropLineEdit *mCell;
-            std::string mId;
+        CSVWidget::DropLineEdit* mCell;
+        std::string mId;
 
-        private:
+    private:
+        std::string getId() const override;
 
-            std::string getId() const override;
+        void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
 
-            void configureCreateCommand (CSMWorld::CreateCommand& command) const override;
+    public:
+        ReferenceCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
+            CSMWorld::IdCompletionManager& completionManager);
 
-        public:
+        void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 
-            ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager &completionManager);
+        void reset() override;
 
-            void cloneMode(const std::string& originId,
-                                   const CSMWorld::UniversalId::Type type) override;
+        std::string getErrors() const override;
+        ///< Return formatted error descriptions for the current state of the creator. if an empty
+        /// string is returned, there is no error.
 
-            void reset() override;
+        /// Focus main input widget
+        void focus() override;
 
-            std::string getErrors() const override;
-            ///< Return formatted error descriptions for the current state of the creator. if an empty
-            /// string is returned, there is no error.
+    private slots:
 
-            /// Focus main input widget
-            void focus() override;
-
-        private slots:
-
-            void cellChanged();
+        void cellChanged();
     };
 
     class ReferenceCreatorFactory : public CreatorFactoryBase
     {
-        public:
-
-            Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
-            ///< The ownership of the returned Creator is transferred to the caller.
+    public:
+        Creator* makeCreator(CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
+        ///< The ownership of the returned Creator is transferred to the caller.
     };
 }
 

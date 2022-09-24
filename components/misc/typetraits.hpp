@@ -7,10 +7,14 @@
 namespace Misc
 {
     template <class T>
-    struct IsOptional : std::false_type {};
+    struct IsOptional : std::false_type
+    {
+    };
 
     template <class T>
-    struct IsOptional<std::optional<T>> : std::true_type {};
+    struct IsOptional<std::optional<T>> : std::true_type
+    {
+    };
 
     template <class T>
     inline constexpr bool isOptional = IsOptional<T>::value;

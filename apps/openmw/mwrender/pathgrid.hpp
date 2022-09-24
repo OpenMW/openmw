@@ -3,8 +3,8 @@
 
 #include <utility>
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include <osg/ref_ptr>
 
@@ -33,29 +33,28 @@ namespace MWRender
 
         void togglePathgrid();
 
-        typedef std::vector<const MWWorld::CellStore *> CellList;
+        typedef std::vector<const MWWorld::CellStore*> CellList;
         CellList mActiveCells;
 
         osg::ref_ptr<osg::Group> mRootNode;
 
         osg::ref_ptr<osg::Group> mPathGridRoot;
 
-        typedef std::map<std::pair<int,int>, osg::ref_ptr<osg::Group> > ExteriorPathgridNodes;
+        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Group>> ExteriorPathgridNodes;
         ExteriorPathgridNodes mExteriorPathgridNodes;
         osg::ref_ptr<osg::Group> mInteriorPathgridNode;
 
-        void enableCellPathgrid(const MWWorld::CellStore *store);
-        void disableCellPathgrid(const MWWorld::CellStore *store);
+        void enableCellPathgrid(const MWWorld::CellStore* store);
+        void disableCellPathgrid(const MWWorld::CellStore* store);
 
     public:
         Pathgrid(osg::ref_ptr<osg::Group> root);
         ~Pathgrid();
-        bool toggleRenderMode (int mode);
+        bool toggleRenderMode(int mode);
 
         void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
     };
-
 
 }
 

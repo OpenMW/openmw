@@ -10,8 +10,8 @@
 #include <components/lua/serialization.hpp>
 #include <components/lua/utilpackage.hpp>
 
-#include <components/misc/endianness.hpp>
 #include <components/misc/color.hpp>
+#include <components/misc/endianness.hpp>
 
 #include "../testing_util.hpp"
 
@@ -30,7 +30,7 @@ namespace
     {
         sol::state lua;
         std::string serialized = LuaUtil::serialize(sol::make_object<double>(lua, 3.14));
-        EXPECT_EQ(serialized.size(), 10);  // version, type, 8 bytes value
+        EXPECT_EQ(serialized.size(), 10); // version, type, 8 bytes value
         sol::object value = LuaUtil::deserialize(lua, serialized);
         ASSERT_TRUE(value.is<double>());
         EXPECT_DOUBLE_EQ(value.as<double>(), 3.14);
@@ -41,7 +41,7 @@ namespace
         sol::state lua;
         {
             std::string serialized = LuaUtil::serialize(sol::make_object<bool>(lua, true));
-            EXPECT_EQ(serialized.size(), 3);  // version, type, 1 byte value
+            EXPECT_EQ(serialized.size(), 3); // version, type, 1 byte value
             sol::object value = LuaUtil::deserialize(lua, serialized);
             EXPECT_FALSE(value.is<double>());
             ASSERT_TRUE(value.is<bool>());
@@ -49,7 +49,7 @@ namespace
         }
         {
             std::string serialized = LuaUtil::serialize(sol::make_object<bool>(lua, false));
-            EXPECT_EQ(serialized.size(), 3);  // version, type, 1 byte value
+            EXPECT_EQ(serialized.size(), 3); // version, type, 1 byte value
             sol::object value = LuaUtil::deserialize(lua, serialized);
             EXPECT_FALSE(value.is<double>());
             ASSERT_TRUE(value.is<bool>());
@@ -63,24 +63,24 @@ namespace
         std::string_view emptyString = "";
         std::string_view shortString = "abc";
         std::string_view longString = "It is a string with more than 32 characters...........................";
-        
+
         {
             std::string serialized = LuaUtil::serialize(sol::make_object<std::string_view>(lua, emptyString));
-            EXPECT_EQ(serialized.size(), 2);  // version, type
+            EXPECT_EQ(serialized.size(), 2); // version, type
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<std::string>());
             EXPECT_EQ(value.as<std::string>(), emptyString);
         }
         {
             std::string serialized = LuaUtil::serialize(sol::make_object<std::string_view>(lua, shortString));
-            EXPECT_EQ(serialized.size(), 2 + shortString.size());  // version, type, str data
+            EXPECT_EQ(serialized.size(), 2 + shortString.size()); // version, type, str data
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<std::string>());
             EXPECT_EQ(value.as<std::string>(), shortString);
         }
         {
             std::string serialized = LuaUtil::serialize(sol::make_object<std::string_view>(lua, longString));
-            EXPECT_EQ(serialized.size(), 6 + longString.size());  // version, type, size, str data
+            EXPECT_EQ(serialized.size(), 6 + longString.size()); // version, type, size, str data
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<std::string>());
             EXPECT_EQ(value.as<std::string>(), longString);
@@ -96,14 +96,14 @@ namespace
 
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec2));
-            EXPECT_EQ(serialized.size(), 18);  // version, type, 2x double
+            EXPECT_EQ(serialized.size(), 18); // version, type, 2x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<osg::Vec2f>());
             EXPECT_EQ(value.as<osg::Vec2f>(), vec2);
         }
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec3));
-            EXPECT_EQ(serialized.size(), 26);  // version, type, 3x double
+            EXPECT_EQ(serialized.size(), 26); // version, type, 3x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<osg::Vec3f>());
             EXPECT_EQ(value.as<osg::Vec3f>(), vec3);
@@ -131,12 +131,10 @@ namespace
         }
     }
 
-    TEST(LuaSerializationTest, Transform) {
+    TEST(LuaSerializationTest, Transform)
+    {
         sol::state lua;
-        osg::Matrixf matrix(1, 2, 3, 4,
-                            5, 6, 7, 8,
-                            9, 10, 11, 12,
-                            13, 14, 15, 16);
+        osg::Matrixf matrix(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
         LuaUtil::TransformM transM = LuaUtil::asTransform(matrix);
         osg::Quat quat(1, 2, 3, 4);
         LuaUtil::TransformQ transQ = LuaUtil::asTransform(quat);
@@ -155,7 +153,6 @@ namespace
             ASSERT_TRUE(value.is<LuaUtil::TransformQ>());
             EXPECT_EQ(value.as<LuaUtil::TransformQ>().mQ, transQ.mQ);
         }
-
     }
 
     TEST(LuaSerializationTest, Table)
@@ -177,7 +174,7 @@ namespace
         sol::table res_table = LuaUtil::deserialize(lua, serialized);
         sol::table res_readonly_table = LuaUtil::deserialize(lua, serialized, nullptr, true);
 
-        for (auto t : {res_table, res_readonly_table})
+        for (auto t : { res_table, res_readonly_table })
         {
             EXPECT_EQ(t.get<int>("aa"), 1);
             EXPECT_EQ(t.get<bool>("ab"), true);
@@ -196,8 +193,14 @@ namespace
         EXPECT_ERROR(lua.safe_script("ro_t.nested.x = 5"), "userdata value");
     }
 
-    struct TestStruct1 { double a, b; };
-    struct TestStruct2 { int a, b; };
+    struct TestStruct1
+    {
+        double a, b;
+    };
+    struct TestStruct2
+    {
+        int a, b;
+    };
 
     class TestSerializer final : public LuaUtil::UserdataSerializer
     {
@@ -227,7 +230,8 @@ namespace
             if (typeName == "ts1")
             {
                 if (sizeof(TestStruct1) != binaryData.size())
-                    throw std::runtime_error("Incorrect binaryData.size() for TestStruct1: " + std::to_string(binaryData.size()));
+                    throw std::runtime_error(
+                        "Incorrect binaryData.size() for TestStruct1: " + std::to_string(binaryData.size()));
                 TestStruct1 t;
                 std::memcpy(&t, binaryData.data(), sizeof(t));
                 t.a = Misc::fromLittleEndian(t.a);
@@ -238,7 +242,8 @@ namespace
             if (typeName == "test_struct2")
             {
                 if (sizeof(TestStruct2) != binaryData.size())
-                    throw std::runtime_error("Incorrect binaryData.size() for TestStruct2: " + std::to_string(binaryData.size()));
+                    throw std::runtime_error(
+                        "Incorrect binaryData.size() for TestStruct2: " + std::to_string(binaryData.size()));
                 TestStruct2 t;
                 std::memcpy(&t, binaryData.data(), sizeof(t));
                 t.a = Misc::fromLittleEndian(t.a);
@@ -254,8 +259,8 @@ namespace
     {
         sol::state lua;
         sol::table table(lua, sol::create);
-        table["x"] = TestStruct1{1.5, 2.5};
-        table["y"] = TestStruct2{4, 3};
+        table["x"] = TestStruct1{ 1.5, 2.5 };
+        table["y"] = TestStruct2{ 4, 3 };
         TestSerializer serializer;
 
         EXPECT_ERROR(LuaUtil::serialize(table), "Value is not serializable.");

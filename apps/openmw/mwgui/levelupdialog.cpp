@@ -1,21 +1,21 @@
 #include "levelupdialog.hpp"
 
 #include <MyGUI_Button.h>
-#include <MyGUI_ImageBox.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_ImageBox.h>
 
 #include <components/fallback/fallback.hpp>
 
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/actorutil.hpp"
 
 #include "class.hpp"
 #include "ustring.hpp"
@@ -24,8 +24,8 @@ namespace MWGui
 {
     const unsigned int LevelupDialog::sMaxCoins = 3;
     LevelupDialog::LevelupDialog()
-        : WindowBase("openmw_levelup_dialog.layout"),
-          mCoinCount(sMaxCoins)
+        : WindowBase("openmw_levelup_dialog.layout")
+        , mCoinCount(sMaxCoins)
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mClassImage, "ClassImage");
@@ -36,7 +36,7 @@ namespace MWGui
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onOkButtonClicked);
 
-        for (int i=1; i<9; ++i)
+        for (int i = 1; i < 9; ++i)
         {
             MyGUI::TextBox* t;
             getWidget(t, "AttribVal" + MyGUI::utility::toString(i));
@@ -44,7 +44,7 @@ namespace MWGui
 
             MyGUI::Button* b;
             getWidget(b, "Attrib" + MyGUI::utility::toString(i));
-            b->setUserData (i-1);
+            b->setUserData(i - 1);
             b->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onAttributeClicked);
             mAttributes.push_back(b);
 
@@ -54,8 +54,9 @@ namespace MWGui
 
         for (unsigned int i = 0; i < mCoinCount; ++i)
         {
-            MyGUI::ImageBox* image = mCoinBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0,0,16,16), MyGUI::Align::Default);
-            image->setImageTexture ("icons\\tx_goldicon.dds");
+            MyGUI::ImageBox* image = mCoinBox->createWidget<MyGUI::ImageBox>(
+                "ImageBox", MyGUI::IntCoord(0, 0, 16, 16), MyGUI::Align::Default);
+            image->setImageTexture("icons\\tx_goldicon.dds");
             mCoins.push_back(image);
         }
 
@@ -64,9 +65,9 @@ namespace MWGui
 
     void LevelupDialog::setAttributeValues()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
-        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
+        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         for (int i = 0; i < 8; ++i)
         {
@@ -83,12 +84,11 @@ namespace MWGui
         }
     }
 
-
     void LevelupDialog::resetCoins()
     {
         const int coinSpacing = 33;
-        int curX = mCoinBox->getWidth()/2 - (coinSpacing*(mCoinCount - 1) + 16*mCoinCount)/2;
-        for (unsigned int i=0; i<sMaxCoins; ++i)
+        int curX = mCoinBox->getWidth() / 2 - (coinSpacing * (mCoinCount - 1) + 16 * mCoinCount) / 2;
+        for (unsigned int i = 0; i < sMaxCoins; ++i)
         {
             MyGUI::ImageBox* image = mCoins[i];
             image->detachFromWidget();
@@ -96,8 +96,8 @@ namespace MWGui
             if (i < mCoinCount)
             {
                 mCoins[i]->setVisible(true);
-                image->setCoord(MyGUI::IntCoord(curX,0,16,16));
-                curX += 16+coinSpacing;
+                image->setCoord(MyGUI::IntCoord(curX, 0, 16, 16));
+                curX += 16 + coinSpacing;
             }
             else
                 mCoins[i]->setVisible(false);
@@ -107,7 +107,7 @@ namespace MWGui
     void LevelupDialog::assignCoins()
     {
         resetCoins();
-        for (unsigned int i=0; i<mSpentAttributes.size(); ++i)
+        for (unsigned int i = 0; i < mSpentAttributes.size(); ++i)
         {
             MyGUI::ImageBox* image = mCoins[i];
             image->detachFromWidget();
@@ -117,8 +117,9 @@ namespace MWGui
 
             int xdiff = mAttributeMultipliers[attribute]->getCaption() == "" ? 0 : 20;
 
-            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mAssignWidget->getAbsolutePosition() - MyGUI::IntPoint(22+xdiff,0);
-            pos.top += (mAttributes[attribute]->getHeight() - image->getHeight())/2;
+            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mAssignWidget->getAbsolutePosition()
+                - MyGUI::IntPoint(22 + xdiff, 0);
+            pos.top += (mAttributes[attribute]->getHeight() - image->getHeight()) / 2;
             image->setPosition(pos);
         }
 
@@ -127,20 +128,20 @@ namespace MWGui
 
     void LevelupDialog::onOpen()
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
         MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
-        setClassImage(mClassImage, getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
-                                                        pcStats.getSkillIncreasesForSpecialization(1),
-                                                        pcStats.getSkillIncreasesForSpecialization(2)));
+        setClassImage(mClassImage,
+            getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
+                pcStats.getSkillIncreasesForSpecialization(1), pcStats.getSkillIncreasesForSpecialization(2)));
 
-        int level = creatureStats.getLevel ()+1;
+        int level = creatureStats.getLevel() + 1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
 
         std::string_view levelupdescription;
-        levelupdescription = Fallback::Map::getString("Level_Up_Level"+MyGUI::utility::toString(level));
+        levelupdescription = Fallback::Map::getString("Level_Up_Level" + MyGUI::utility::toString(level));
 
         if (levelupdescription.empty())
             levelupdescription = Fallback::Map::getString("Level_Up_Default");
@@ -157,8 +158,8 @@ namespace MWGui
                 mAttributeValues[i]->setEnabled(true);
                 availableAttributes++;
 
-                float mult = pcStats.getLevelupAttributeMultiplier (i);
-                mult = std::min(mult, 100-pcStats.getAttribute(i).getBase());
+                float mult = pcStats.getLevelupAttributeMultiplier(i);
+                mult = std::min(mult, 100 - pcStats.getAttribute(i).getBase());
                 text->setCaption(mult <= 1 ? "" : "x" + MyGUI::utility::toString(mult));
             }
             else
@@ -186,7 +187,7 @@ namespace MWGui
     void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
+        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         if (mSpentAttributes.size() < mCoinCount)
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage36}");
@@ -207,10 +208,9 @@ namespace MWGui
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Levelup);
         }
-
     }
 
-    void LevelupDialog::onAttributeClicked(MyGUI::Widget *sender)
+    void LevelupDialog::onAttributeClicked(MyGUI::Widget* sender)
     {
         int attribute = *sender->getUserData<int>();
 
@@ -227,7 +227,8 @@ namespace MWGui
         assignCoins();
     }
 
-    std::string LevelupDialog::getLevelupClassImage(const int combatIncreases, const int magicIncreases, const int stealthIncreases)
+    std::string LevelupDialog::getLevelupClassImage(
+        const int combatIncreases, const int magicIncreases, const int stealthIncreases)
     {
         std::string ret = "acrobat";
 

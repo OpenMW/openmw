@@ -38,14 +38,14 @@ namespace MWRender
         DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
     }
 
-    void FogManager::configure(float viewDistance, const ESM::Cell *cell)
+    void FogManager::configure(float viewDistance, const ESM::Cell* cell)
     {
         osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
 
         if (mDistantFog)
         {
             float density = std::max(0.2f, cell->mAmbi.mFogDensity);
-            mLandFogStart = DLInteriorFogEnd * (1.0f - density) + DLInteriorFogStart*density;
+            mLandFogStart = DLInteriorFogEnd * (1.0f - density) + DLInteriorFogStart * density;
             mLandFogEnd = DLInteriorFogEnd;
             mUnderwaterFogStart = DLUnderwaterFogStart;
             mUnderwaterFogEnd = DLUnderwaterFogEnd;
@@ -55,7 +55,8 @@ namespace MWRender
             configure(viewDistance, cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, 1.0f, 0.0f, color);
     }
 
-    void FogManager::configure(float viewDistance, float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f &color)
+    void FogManager::configure(float viewDistance, float fogDepth, float underwaterFog, float dlFactor, float dlOffset,
+        const osg::Vec4f& color)
     {
         if (mDistantFog)
         {
@@ -96,7 +97,7 @@ namespace MWRender
     {
         if (isUnderwater)
         {
-            return mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight);
+            return mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f - mUnderwaterWeight);
         }
 
         return mFogColor;

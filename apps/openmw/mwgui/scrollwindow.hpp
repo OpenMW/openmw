@@ -14,30 +14,29 @@ namespace MWGui
 {
     class ScrollWindow : public BookWindowBase
     {
-        public:
-            ScrollWindow ();
+    public:
+        ScrollWindow();
 
-            void setPtr (const MWWorld::Ptr& scroll) override;
-            void setInventoryAllowed(bool allowed);
+        void setPtr(const MWWorld::Ptr& scroll) override;
+        void setInventoryAllowed(bool allowed);
 
-            void onResChange(int, int) override { center(); }
+        void onResChange(int, int) override { center(); }
 
-        protected:
-            void onCloseButtonClicked (MyGUI::Widget* _sender);
-            void onTakeButtonClicked (MyGUI::Widget* _sender);
-            void setTakeButtonShow(bool show);
-            void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
+    protected:
+        void onCloseButtonClicked(MyGUI::Widget* _sender);
+        void onTakeButtonClicked(MyGUI::Widget* _sender);
+        void setTakeButtonShow(bool show);
+        void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
 
-        private:
-            Gui::ImageButton* mCloseButton;
-            Gui::ImageButton* mTakeButton;
-            MyGUI::ScrollView* mTextView;
+    private:
+        Gui::ImageButton* mCloseButton;
+        Gui::ImageButton* mTakeButton;
+        MyGUI::ScrollView* mTextView;
 
-            MWWorld::Ptr mScroll;
+        MWWorld::Ptr mScroll;
 
-            bool mTakeButtonShow;
-            bool mTakeButtonAllowed;
-
+        bool mTakeButtonShow;
+        bool mTakeButtonAllowed;
     };
 
 }

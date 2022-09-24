@@ -27,8 +27,8 @@
 #ifndef ESM4_HDPT_H
 #define ESM4_HDPT_H
 
-#include <cstdint>
 #include <array>
+#include <cstdint>
 
 #include "formid.hpp"
 
@@ -39,7 +39,7 @@ namespace ESM4
 
     struct HeadPart
     {
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -54,9 +54,9 @@ namespace ESM4
         FormId mBaseTexture;
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

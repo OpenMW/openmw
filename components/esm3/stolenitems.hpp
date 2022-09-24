@@ -12,7 +12,7 @@ namespace ESM
     // format 0, saved games only
     struct StolenItems
     {
-        typedef std::map<std::string, std::map<std::pair<std::string, bool>, int> > StolenItemsMap;
+        typedef std::map<std::string, std::map<std::pair<std::string, bool>, int>> StolenItemsMap;
         StolenItemsMap mStolenItems;
 
         void load(ESMReader& esm);

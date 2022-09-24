@@ -3,8 +3,8 @@
 #include "recastmesh.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
-#include "version.hpp"
 #include "tilespositionsrange.hpp"
+#include "version.hpp"
 
 #include <components/bullethelpers/operators.hpp>
 
@@ -13,10 +13,10 @@
 
 #include <osg/io_utils>
 
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <ostream>
-#include <array>
 #include <string_view>
 
 namespace DetourNavigator
@@ -28,8 +28,9 @@ namespace DetourNavigator
 
     std::ostream& operator<<(std::ostream& stream, Status value)
     {
-#define OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(name) \
-    case Status::name: return stream << "DetourNavigator::Status::"#name;
+#define OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(name)                                                   \
+    case Status::name:                                                                                                 \
+        return stream << "DetourNavigator::Status::" #name;
         switch (value)
         {
             OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(Success)
@@ -62,12 +63,9 @@ namespace DetourNavigator
 
     std::ostream& operator<<(std::ostream& s, const Heightfield& v)
     {
-        s << "Heightfield {.mCellPosition=" << v.mCellPosition
-          << ", .mCellSize=" << v.mCellSize
-          << ", .mLength=" << static_cast<int>(v.mLength)
-          << ", .mMinHeight=" << v.mMinHeight
-          << ", .mMaxHeight=" << v.mMaxHeight
-          << ", .mHeights={";
+        s << "Heightfield {.mCellPosition=" << v.mCellPosition << ", .mCellSize=" << v.mCellSize
+          << ", .mLength=" << static_cast<int>(v.mLength) << ", .mMinHeight=" << v.mMinHeight
+          << ", .mMaxHeight=" << v.mMaxHeight << ", .mHeights={";
         for (float h : v.mHeights)
             s << h << ", ";
         s << "}";
@@ -78,9 +76,12 @@ namespace DetourNavigator
     {
         switch (v)
         {
-            case CollisionShapeType::Aabb: return s << "AgentShapeType::Aabb";
-            case CollisionShapeType::RotatingBox: return s << "AgentShapeType::RotatingBox";
-            case CollisionShapeType::Cylinder: return s << "AgentShapeType::Cylinder";
+            case CollisionShapeType::Aabb:
+                return s << "AgentShapeType::Aabb";
+            case CollisionShapeType::RotatingBox:
+                return s << "AgentShapeType::RotatingBox";
+            case CollisionShapeType::Cylinder:
+                return s << "AgentShapeType::Cylinder";
         }
         return s << "AgentShapeType::" << static_cast<std::underlying_type_t<CollisionShapeType>>(v);
     }
@@ -99,17 +100,17 @@ namespace DetourNavigator
         };
     }
 
-    static constexpr std::array dtStatuses {
-        StatusString {DT_FAILURE, "DT_FAILURE"},
-        StatusString {DT_SUCCESS, "DT_SUCCESS"},
-        StatusString {DT_IN_PROGRESS, "DT_IN_PROGRESS"},
-        StatusString {DT_WRONG_MAGIC, "DT_WRONG_MAGIC"},
-        StatusString {DT_WRONG_VERSION, "DT_WRONG_VERSION"},
-        StatusString {DT_OUT_OF_MEMORY, "DT_OUT_OF_MEMORY"},
-        StatusString {DT_INVALID_PARAM, "DT_INVALID_PARAM"},
-        StatusString {DT_BUFFER_TOO_SMALL, "DT_BUFFER_TOO_SMALL"},
-        StatusString {DT_OUT_OF_NODES, "DT_OUT_OF_NODES"},
-        StatusString {DT_PARTIAL_RESULT, "DT_PARTIAL_RESULT"},
+    static constexpr std::array dtStatuses{
+        StatusString{ DT_FAILURE, "DT_FAILURE" },
+        StatusString{ DT_SUCCESS, "DT_SUCCESS" },
+        StatusString{ DT_IN_PROGRESS, "DT_IN_PROGRESS" },
+        StatusString{ DT_WRONG_MAGIC, "DT_WRONG_MAGIC" },
+        StatusString{ DT_WRONG_VERSION, "DT_WRONG_VERSION" },
+        StatusString{ DT_OUT_OF_MEMORY, "DT_OUT_OF_MEMORY" },
+        StatusString{ DT_INVALID_PARAM, "DT_INVALID_PARAM" },
+        StatusString{ DT_BUFFER_TOO_SMALL, "DT_BUFFER_TOO_SMALL" },
+        StatusString{ DT_OUT_OF_NODES, "DT_OUT_OF_NODES" },
+        StatusString{ DT_PARTIAL_RESULT, "DT_PARTIAL_RESULT" },
     };
 
     std::ostream& operator<<(std::ostream& stream, const WriteDtStatus& value)
@@ -148,7 +149,7 @@ namespace DetourNavigator
         else
         {
             bool first = true;
-            for (const auto flag : {Flag_walk, Flag_swim, Flag_openDoor, Flag_usePathgrid})
+            for (const auto flag : { Flag_walk, Flag_swim, Flag_openDoor, Flag_usePathgrid })
             {
                 if (value.mValue & flag)
                 {
@@ -167,11 +168,16 @@ namespace DetourNavigator
     {
         switch (value)
         {
-            case AreaType_null: return stream << "null";
-            case AreaType_water: return stream << "water";
-            case AreaType_door: return stream << "door";
-            case AreaType_pathgrid: return stream << "pathgrid";
-            case AreaType_ground: return stream << "ground";
+            case AreaType_null:
+                return stream << "null";
+            case AreaType_water:
+                return stream << "water";
+            case AreaType_door:
+                return stream << "door";
+            case AreaType_pathgrid:
+                return stream << "pathgrid";
+            case AreaType_ground:
+                return stream << "ground";
         }
         return stream << "unknown area type (" << static_cast<std::underlying_type_t<AreaType>>(value) << ")";
     }
@@ -202,8 +208,8 @@ namespace DetourNavigator
         return stream << "TilesPositionsRange {" << value.mBegin << ", " << value.mEnd << "}";
     }
 
-    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix,
-        const std::string& revision, const RecastSettings& settings)
+    void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision,
+        const RecastSettings& settings)
     {
         const auto path = pathPrefix + "recastmesh" + revision + ".obj";
         std::ofstream file(std::filesystem::path(path), std::ios::out);

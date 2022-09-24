@@ -1,8 +1,8 @@
 #ifndef MWGUI_TOOLTIPS_H
 #define MWGUI_TOOLTIPS_H
 
-#include "layout.hpp"
 #include "../mwworld/ptr.hpp"
+#include "layout.hpp"
 
 #include "widgets.hpp"
 
@@ -24,7 +24,8 @@ namespace MWGui
             , isPotion(false)
             , isIngredient(false)
             , wordWrap(true)
-        {}
+        {
+        }
 
         std::string caption;
         std::string text;
@@ -87,7 +88,7 @@ namespace MWGui
         static std::string getCellRefString(const MWWorld::CellRef& cellref);
         ///< Returns a string containing debug tooltip information about the given cellref.
 
-        static std::string getDurationString (float duration, const std::string& prefix);
+        static std::string getDurationString(float duration, const std::string& prefix);
         ///< Returns duration as two largest time units, rounded down. Note: not localized; no line break.
 
         // these do not create an actual tooltip, but they fill in the data that is required so the tooltip
@@ -99,16 +100,16 @@ namespace MWGui
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
         static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
-        
+
         bool checkOwned();
         /// Returns True if taking mFocusObject would be crime
- 
+
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
         MWWorld::Ptr mFocusObject;
 
-        MyGUI::IntSize getToolTipViaPtr (int count, bool image = true, bool isOwned = false);
+        MyGUI::IntSize getToolTipViaPtr(int count, bool image = true, bool isOwned = false);
         ///< @return requested tooltip size
 
         MyGUI::IntSize createToolTip(const ToolTipInfo& info, bool isOwned = false);
@@ -125,7 +126,6 @@ namespace MWGui
 
         int mHorizontalScrollIndex;
 
-
         float mDelay;
         float mRemainingDelay; // remaining time until tooltip will show
 
@@ -135,7 +135,7 @@ namespace MWGui
         bool mEnabled;
 
         bool mFullHelp;
-        
+
         int mShowOwned;
 
         float mFrameDuration;

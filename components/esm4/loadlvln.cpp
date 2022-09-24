@@ -36,19 +36,29 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
-    //std::uint32_t esmVer = reader.esmVersion(); // currently unused
+    mFlags = reader.hdr().record.flags;
+    // std::uint32_t esmVer = reader.esmVersion(); // currently unused
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel);    break;
-            case ESM4::SUB_LLCT: reader.get(mListCount);       break;
-            case ESM4::SUB_LVLD: reader.get(mChanceNone);      break;
-            case ESM4::SUB_LVLF: reader.get(mLvlActorFlags);   break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_LLCT:
+                reader.get(mListCount);
+                break;
+            case ESM4::SUB_LVLD:
+                reader.get(mChanceNone);
+                break;
+            case ESM4::SUB_LVLF:
+                reader.get(mLvlActorFlags);
+                break;
             case ESM4::SUB_LVLO:
             {
                 static LVLO lvlo;
@@ -64,16 +74,16 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
                     else
                         throw std::runtime_error("ESM4::LVLN::load - " + mEditorId + " LVLO size error");
                 }
-//              else if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
-//              {
-//                  std::uint32_t level;
-//                  reader.get(level);
-//                  lvlo.level = static_cast<std::uint16_t>(level);
-//                  reader.get(lvlo.item);
-//                  std::uint32_t count;
-//                  reader.get(count);
-//                  lvlo.count = static_cast<std::uint16_t>(count);
-//              }
+                //              else if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
+                //              {
+                //                  std::uint32_t level;
+                //                  reader.get(level);
+                //                  lvlo.level = static_cast<std::uint16_t>(level);
+                //                  reader.get(lvlo.item);
+                //                  std::uint32_t count;
+                //                  reader.get(count);
+                //                  lvlo.count = static_cast<std::uint16_t>(count);
+                //              }
                 else
                     reader.get(lvlo);
 
@@ -85,7 +95,7 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND: // object bounds
             case ESM4::SUB_MODT: // model texture data
             {
-                //std::cout << "LVLN " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "LVLN " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -95,10 +105,10 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::LevelledNpc::save(ESM4::Writer& writer) const
+// void ESM4::LevelledNpc::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::LevelledNpc::blank()
+// void ESM4::LevelledNpc::blank()
 //{
-//}
+// }

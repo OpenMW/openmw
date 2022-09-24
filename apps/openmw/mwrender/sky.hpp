@@ -1,12 +1,12 @@
 #ifndef OPENMW_MWRENDER_SKY_H
 #define OPENMW_MWRENDER_SKY_H
 
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
 
-#include <osg/ref_ptr>
 #include <osg/Vec4f>
+#include <osg/ref_ptr>
 
 #include "skyutil.hpp"
 
@@ -37,7 +37,8 @@ namespace SceneUtil
 
 namespace MWRender
 {
-    ///@brief The SkyManager handles rendering of the sky domes, celestial bodies as well as other objects that need to be rendered
+    ///@brief The SkyManager handles rendering of the sky domes, celestial bodies as well as other objects that need to
+    /// be rendered
     /// relative to the camera (e.g. weather particle effects)
     class SkyManager
     {
@@ -49,10 +50,10 @@ namespace MWRender
 
         void setEnabled(bool enabled);
 
-        void setHour (double hour);
+        void setHour(double hour);
         ///< will be called even when sky is disabled.
 
-        void setDate (int day, int month);
+        void setDate(int day, int month);
         ///< will be called even when sky is disabled.
 
         int getMasserPhase() const;
@@ -63,7 +64,7 @@ namespace MWRender
         ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
         /// 3 waxing or waning gibbous, 4 full moon
 
-        void setMoonColour (bool red);
+        void setMoonColour(bool red);
         ///< change Secunda colour to red
 
         void setWeather(const WeatherResult& weather);
@@ -97,7 +98,7 @@ namespace MWRender
 
         void listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures);
 
-        void setCamera(osg::Camera *camera);
+        void setCamera(osg::Camera* camera);
 
         float getBaseWindSpeed() const;
 
@@ -116,7 +117,7 @@ namespace MWRender
 
         Resource::SceneManager* mSceneManager;
 
-        osg::Camera *mCamera;
+        osg::Camera* mCamera;
 
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;

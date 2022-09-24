@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    void Repair::load(ESMReader &esm, bool &isDeleted)
+    void Repair::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
@@ -53,7 +53,7 @@ namespace ESM
             esm.fail("Missing RIDT subrecord");
     }
 
-    void Repair::save(ESMWriter &esm, bool isDeleted) const
+    void Repair::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 

@@ -1,33 +1,33 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_ASYNCNAVMESHUPDATER_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_ASYNCNAVMESHUPDATER_H
 
-#include "navmeshcacheitem.hpp"
-#include "offmeshconnectionsmanager.hpp"
-#include "tilecachedrecastmeshmanager.hpp"
-#include "tileposition.hpp"
-#include "navmeshtilescache.hpp"
-#include "waitconditiontype.hpp"
-#include "navmeshdb.hpp"
-#include "changetype.hpp"
 #include "agentbounds.hpp"
+#include "changetype.hpp"
 #include "guardednavmeshcacheitem.hpp"
+#include "navmeshcacheitem.hpp"
+#include "navmeshdb.hpp"
+#include "navmeshtilescache.hpp"
+#include "offmeshconnectionsmanager.hpp"
 #include "sharednavmeshcacheitem.hpp"
 #include "stats.hpp"
+#include "tilecachedrecastmeshmanager.hpp"
+#include "tileposition.hpp"
+#include "waitconditiontype.hpp"
 
 #include <osg/Vec3f>
 
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <deque>
+#include <iosfwd>
+#include <list>
 #include <memory>
 #include <mutex>
-#include <deque>
+#include <optional>
 #include <set>
 #include <thread>
 #include <tuple>
-#include <list>
-#include <optional>
-#include <iosfwd>
 
 class dtNavMesh;
 
@@ -105,8 +105,8 @@ namespace DetourNavigator
     class DbWorker
     {
     public:
-        DbWorker(AsyncNavMeshUpdater& updater, std::unique_ptr<NavMeshDb>&& db,
-            TileVersion version, const RecastSettings& recastSettings, bool writeToDb);
+        DbWorker(AsyncNavMeshUpdater& updater, std::unique_ptr<NavMeshDb>&& db, TileVersion version,
+            const RecastSettings& recastSettings, bool writeToDb);
 
         ~DbWorker();
 
@@ -127,8 +127,8 @@ namespace DetourNavigator
         TileId mNextTileId;
         ShapeId mNextShapeId;
         DbJobQueue mQueue;
-        std::atomic_bool mShouldStop {false};
-        std::atomic_size_t mGetTileCount {0};
+        std::atomic_bool mShouldStop{ false };
+        std::atomic_size_t mGetTileCount{ 0 };
         std::thread mThread;
 
         inline void run() noexcept;
@@ -180,7 +180,7 @@ namespace DetourNavigator
         std::set<std::tuple<AgentBounds, TilePosition>> mPresentTiles;
         std::vector<std::thread> mThreads;
         std::unique_ptr<DbWorker> mDbWorker;
-        std::atomic_size_t mDbGetTileHits {0};
+        std::atomic_size_t mDbGetTileHits{ 0 };
 
         void process() noexcept;
 

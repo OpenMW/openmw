@@ -37,8 +37,8 @@ namespace CSVWorld
         insertBeforeButtons(mYLabel, false);
         insertBeforeButtons(mY, true);
 
-        connect (mX, qOverload<int>(&QSpinBox::valueChanged), this, &LandCreator::coordChanged);
-        connect (mY, qOverload<int>(&QSpinBox::valueChanged), this, &LandCreator::coordChanged);
+        connect(mX, qOverload<int>(&QSpinBox::valueChanged), this, &LandCreator::coordChanged);
+        connect(mY, qOverload<int>(&QSpinBox::valueChanged), this, &LandCreator::coordChanged);
     }
 
     void LandCreator::cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type)
@@ -57,8 +57,10 @@ namespace CSVWorld
         // Combine multiple touch commands into one "macro" command
         getUndoStack().beginMacro("Touch records");
 
-        CSMWorld::IdTable& lands = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_Lands));
-        CSMWorld::IdTable& ltexs = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
+        CSMWorld::IdTable& lands
+            = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_Lands));
+        CSMWorld::IdTable& ltexs
+            = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
         for (const CSMWorld::UniversalId& uid : ids)
         {
             CSMWorld::TouchLandCommand* touchCmd = new CSMWorld::TouchLandCommand(lands, ltexs, uid.getId());
@@ -98,19 +100,22 @@ namespace CSVWorld
     {
         if (mCloneMode)
         {
-            CSMWorld::IdTable& lands = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_Lands));
-            CSMWorld::IdTable& ltexs = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
+            CSMWorld::IdTable& lands
+                = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_Lands));
+            CSMWorld::IdTable& ltexs
+                = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
 
             getUndoStack().beginMacro(("Clone " + id).c_str());
             getUndoStack().push(command.release());
 
-            CSMWorld::CopyLandTexturesCommand* ltexCopy = new CSMWorld::CopyLandTexturesCommand(lands, ltexs, getClonedId(), getId());
+            CSMWorld::CopyLandTexturesCommand* ltexCopy
+                = new CSMWorld::CopyLandTexturesCommand(lands, ltexs, getClonedId(), getId());
             getUndoStack().push(ltexCopy);
 
             getUndoStack().endMacro();
         }
         else
-            getUndoStack().push (command.release());
+            getUndoStack().push(command.release());
     }
 
     void LandCreator::coordChanged(int value)

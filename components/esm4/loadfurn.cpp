@@ -35,19 +35,31 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
-    mFlags  = reader.hdr().record.flags;
+    mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
-            case ESM4::SUB_FULL: reader.getLocalizedString(mFullName); break;
-            case ESM4::SUB_MODL: reader.getZString(mModel); break;
-            case ESM4::SUB_SCRI: reader.getFormId(mScriptId); break;
-            case ESM4::SUB_MNAM: reader.get(mActiveMarkerFlags); break;
-            case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
+            case ESM4::SUB_EDID:
+                reader.getZString(mEditorId);
+                break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
+            case ESM4::SUB_SCRI:
+                reader.getFormId(mScriptId);
+                break;
+            case ESM4::SUB_MNAM:
+                reader.get(mActiveMarkerFlags);
+                break;
+            case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
             case ESM4::SUB_MODT:
             case ESM4::SUB_DEST:
             case ESM4::SUB_DSTD:
@@ -67,7 +79,7 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_WBDT:
             case ESM4::SUB_XMRK:
             {
-                //std::cout << "FURN " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                // std::cout << "FURN " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -77,10 +89,10 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Furniture::save(ESM4::Writer& writer) const
+// void ESM4::Furniture::save(ESM4::Writer& writer) const
 //{
-//}
+// }
 
-//void ESM4::Furniture::blank()
+// void ESM4::Furniture::blank()
 //{
-//}
+// }

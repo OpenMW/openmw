@@ -27,13 +27,13 @@
 #ifndef ESM4_RACE
 #define ESM4_RACE
 
-#include <cstdint>
-#include <vector>
-#include <map>
 #include <array>
+#include <cstdint>
+#include <map>
+#include <vector>
 
-#include "formid.hpp"
 #include "actor.hpp" // AttributeValues, BodyTemplate
+#include "formid.hpp"
 
 namespace ESM4
 {
@@ -52,62 +52,62 @@ namespace ESM4
 
         enum SkillIndex
         {
-            Skill_Armorer     = 0x0C,
-            Skill_Athletics   = 0x0D,
-            Skill_Blade       = 0x0E,
-            Skill_Block       = 0x0F,
-            Skill_Blunt       = 0x10,
-            Skill_HandToHand  = 0x11,
-            Skill_HeavyArmor  = 0x12,
-            Skill_Alchemy     = 0x13,
-            Skill_Alteration  = 0x14,
+            Skill_Armorer = 0x0C,
+            Skill_Athletics = 0x0D,
+            Skill_Blade = 0x0E,
+            Skill_Block = 0x0F,
+            Skill_Blunt = 0x10,
+            Skill_HandToHand = 0x11,
+            Skill_HeavyArmor = 0x12,
+            Skill_Alchemy = 0x13,
+            Skill_Alteration = 0x14,
             Skill_Conjuration = 0x15,
             Skill_Destruction = 0x16,
-            Skill_Illusion    = 0x17,
-            Skill_Mysticism   = 0x18,
+            Skill_Illusion = 0x17,
+            Skill_Mysticism = 0x18,
             Skill_Restoration = 0x19,
-            Skill_Acrobatics  = 0x1A,
-            Skill_LightArmor  = 0x1B,
-            Skill_Marksman    = 0x1C,
-            Skill_Mercantile  = 0x1D,
-            Skill_Security    = 0x1E,
-            Skill_Sneak       = 0x1F,
+            Skill_Acrobatics = 0x1A,
+            Skill_LightArmor = 0x1B,
+            Skill_Marksman = 0x1C,
+            Skill_Mercantile = 0x1D,
+            Skill_Security = 0x1E,
+            Skill_Sneak = 0x1F,
             Skill_Speechcraft = 0x20,
-            Skill_None        = 0xFF,
-            Skill_Unknown     = 0x00
+            Skill_None = 0xFF,
+            Skill_Unknown = 0x00
         };
 
         enum HeadPartIndex // TES4
         {
-            Head              = 0,
-            EarMale           = 1,
-            EarFemale         = 2,
-            Mouth             = 3,
-            TeethLower        = 4,
-            TeethUpper        = 5,
-            Tongue            = 6,
-            EyeLeft           = 7, // no texture
-            EyeRight          = 8, // no texture
-            NumHeadParts      = 9
+            Head = 0,
+            EarMale = 1,
+            EarFemale = 2,
+            Mouth = 3,
+            TeethLower = 4,
+            TeethUpper = 5,
+            Tongue = 6,
+            EyeLeft = 7, // no texture
+            EyeRight = 8, // no texture
+            NumHeadParts = 9
         };
 
         enum BodyPartIndex // TES4
         {
-            UpperBody         = 0,
-            LowerBody         = 1,
-            Hands             = 2,
-            Feet              = 3,
-            Tail              = 4,
-            NumBodyParts      = 5
+            UpperBody = 0,
+            LowerBody = 1,
+            Hands = 2,
+            Feet = 3,
+            Tail = 4,
+            NumBodyParts = 5
         };
 
         struct BodyPart
         {
-            std::string mesh;    // can be empty for arms, hands, etc
+            std::string mesh; // can be empty for arms, hands, etc
             std::string texture; // can be empty e.g. eye left, eye right
         };
 
-        FormId mFormId;       // from the header
+        FormId mFormId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         bool mIsTES5;
@@ -115,7 +115,7 @@ namespace ESM4
         std::string mEditorId;
         std::string mFullName;
         std::string mDesc;
-        std::string mModelMale;   // TES5 skeleton (in TES4 skeleton is found in npc_)
+        std::string mModelMale; // TES5 skeleton (in TES4 skeleton is found in npc_)
         std::string mModelFemale; // TES5 skeleton (in TES4 skeleton is found in npc_)
 
         AttributeValues mAttribMale;
@@ -129,26 +129,26 @@ namespace ESM4
         float mWeightFemale = 1.0f;
         std::uint32_t mRaceFlags; // 0x0001 = playable?
 
-        std::vector<BodyPart> mHeadParts;       // see HeadPartIndex
+        std::vector<BodyPart> mHeadParts; // see HeadPartIndex
         std::vector<BodyPart> mHeadPartsFemale; // see HeadPartIndex
 
-        std::vector<BodyPart> mBodyPartsMale;   // see BodyPartIndex
+        std::vector<BodyPart> mBodyPartsMale; // see BodyPartIndex
         std::vector<BodyPart> mBodyPartsFemale; // see BodyPartIndex
 
-        std::vector<FormId> mEyeChoices;        // texture only
+        std::vector<FormId> mEyeChoices; // texture only
         std::vector<FormId> mHairChoices; // not for TES5
 
         float mFaceGenMainClamp;
         float mFaceGenFaceClamp;
-        std::vector<float> mSymShapeModeCoefficients;   // should be 50
-        std::vector<float> mSymShapeModeCoeffFemale;    // should be 50
-        std::vector<float> mAsymShapeModeCoefficients;  // should be 30
-        std::vector<float> mAsymShapeModeCoeffFemale;   // should be 30
+        std::vector<float> mSymShapeModeCoefficients; // should be 50
+        std::vector<float> mSymShapeModeCoeffFemale; // should be 50
+        std::vector<float> mAsymShapeModeCoefficients; // should be 30
+        std::vector<float> mAsymShapeModeCoeffFemale; // should be 30
         std::vector<float> mSymTextureModeCoefficients; // should be 50
-        std::vector<float> mSymTextureModeCoeffFemale;  // should be 50
+        std::vector<float> mSymTextureModeCoeffFemale; // should be 50
 
         std::map<FormId, std::int32_t> mDisposition; // race adjustments
-        std::vector<FormId> mBonusSpells;            // race ability/power
+        std::vector<FormId> mBonusSpells; // race ability/power
         std::array<FormId, 2> mVNAM; // don't know what these are; 1 or 2 RACE FormIds
         std::array<FormId, 2> mDefaultHair; // male/female (HAIR FormId for TES4)
 
@@ -159,13 +159,13 @@ namespace ESM4
 
         // FIXME: there's no fixed order?
         // head, mouth, eyes, brow, hair
-        std::vector<FormId> mHeadPartIdsMale;   // TES5
+        std::vector<FormId> mHeadPartIdsMale; // TES5
         std::vector<FormId> mHeadPartIdsFemale; // TES5
 
         void load(ESM4::Reader& reader);
-        //void save(ESM4::Writer& writer) const;
+        // void save(ESM4::Writer& writer) const;
 
-        //void blank();
+        // void blank();
     };
 }
 

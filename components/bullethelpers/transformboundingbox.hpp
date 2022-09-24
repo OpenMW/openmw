@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_BULLETHELPERS_TRANSFORMBOUNDINGBOX_H
 #define OPENMW_COMPONENTS_BULLETHELPERS_TRANSFORMBOUNDINGBOX_H
 
-#include <LinearMath/btVector3.h>
 #include <LinearMath/btTransform.h>
+#include <LinearMath/btVector3.h>
 
 #include <algorithm>
 

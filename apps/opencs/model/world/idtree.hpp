@@ -1,8 +1,8 @@
 #ifndef CSM_WOLRD_IDTREE_H
 #define CSM_WOLRD_IDTREE_H
 
-#include "idtable.hpp"
 #include "columns.hpp"
+#include "idtable.hpp"
 
 /*! \brief
  * Class for holding the model. Uses typical qt table abstraction/interface for granting access
@@ -23,59 +23,58 @@ namespace CSMWorld
 
     class IdTree : public IdTable
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        private:
+    private:
+        NestedCollection* mNestedCollection;
 
-            NestedCollection *mNestedCollection;
+        // not implemented
+        IdTree(const IdTree&);
+        IdTree& operator=(const IdTree&);
 
-            // not implemented
-            IdTree (const IdTree&);
-            IdTree& operator= (const IdTree&);
+        unsigned int foldIndexAddress(const QModelIndex& index) const;
+        std::pair<int, int> unfoldIndexAddress(unsigned int id) const;
 
-            unsigned int foldIndexAddress(const QModelIndex& index) const;
-            std::pair<int, int> unfoldIndexAddress(unsigned int id) const;
+    public:
+        IdTree(NestedCollection* nestedCollection, CollectionBase* idCollection, unsigned int features = 0);
+        ///< The ownerships of \a nestedCollecton and \a idCollection are not transferred.
 
-        public:
+        ~IdTree() override;
 
-            IdTree (NestedCollection *nestedCollection, CollectionBase *idCollection, unsigned int features = 0);
-            ///< The ownerships of \a nestedCollecton and \a idCollection are not transferred.
+        int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-            ~IdTree() override;
+        int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-            int rowCount (const QModelIndex & parent = QModelIndex()) const override;
+        QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-            int columnCount (const QModelIndex & parent = QModelIndex()) const override;
+        bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
-            QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const override;
+        Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-            bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+        bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
-            Qt::ItemFlags flags (const QModelIndex & index) const override;
+        QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 
-            bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex()) override;
+        QModelIndex parent(const QModelIndex& index) const override;
 
-            QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+        QModelIndex getNestedModelIndex(const std::string& id, int column) const;
 
-            QModelIndex parent (const QModelIndex& index) const override;
+        QVariant nestedHeaderData(
+            int section, int subSection, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-            QModelIndex getNestedModelIndex (const std::string& id, int column) const;
+        NestedTableWrapperBase* nestedTable(const QModelIndex& index) const;
 
-            QVariant nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+        void setNestedTable(const QModelIndex& index, const NestedTableWrapperBase& nestedTable);
 
-            NestedTableWrapperBase* nestedTable(const QModelIndex &index) const;
+        void addNestedRow(const QModelIndex& parent, int position);
 
-            void setNestedTable(const QModelIndex &index, const NestedTableWrapperBase& nestedTable);
+        bool hasChildren(const QModelIndex& index) const override;
 
-            void addNestedRow (const QModelIndex& parent, int position);
+        virtual int searchNestedColumnIndex(int parentColumn, Columns::ColumnId id);
+        ///< \return the column index or -1 if the requested column wasn't found.
 
-            bool hasChildren (const QModelIndex& index) const override;
-
-            virtual int searchNestedColumnIndex(int parentColumn, Columns::ColumnId id);
-            ///< \return the column index or -1 if the requested column wasn't found.
-
-            virtual int findNestedColumnIndex(int parentColumn, Columns::ColumnId id);
-            ///< \return the column index or throws an exception if the requested column wasn't found.
+        virtual int findNestedColumnIndex(int parentColumn, Columns::ColumnId id);
+        ///< \return the column index or throws an exception if the requested column wasn't found.
 
     signals:
 

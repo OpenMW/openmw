@@ -13,79 +13,76 @@ namespace Compiler
 
     class ErrorHandler
     {
-            int mWarnings;
-            int mErrors;
-            int mWarningsMode;
-            bool mDowngradeErrors;
+        int mWarnings;
+        int mErrors;
+        int mWarningsMode;
+        bool mDowngradeErrors;
 
-        protected:
+    protected:
+        enum Type
+        {
+            WarningMessage,
+            ErrorMessage
+        };
 
-            enum Type
-            {
-                WarningMessage, ErrorMessage
-            };
-
-        private:
-
+    private:
         // mutators
 
-            virtual void report (const std::string& message, const TokenLoc& loc, Type type) = 0;
-            ///< Report error to the user.
+        virtual void report(const std::string& message, const TokenLoc& loc, Type type) = 0;
+        ///< Report error to the user.
 
-            virtual void report (const std::string& message, Type type) = 0;
-            ///< Report a file related error
+        virtual void report(const std::string& message, Type type) = 0;
+        ///< Report a file related error
 
-        public:
+    public:
+        ErrorHandler();
+        ///< constructor
 
-            ErrorHandler();
-            ///< constructor
+        virtual ~ErrorHandler();
+        ///< destructor
 
-            virtual ~ErrorHandler();
-            ///< destructor
+        bool isGood() const;
+        ///< Was compiling successful?
 
-            bool isGood() const;
-            ///< Was compiling successful?
+        int countErrors() const;
+        ///< Return number of errors
 
-            int countErrors() const;
-            ///< Return number of errors
+        int countWarnings() const;
+        ///< Return number of warnings
 
-            int countWarnings() const;
-            ///< Return number of warnings
+        void warning(const std::string& message, const TokenLoc& loc);
+        ///< Generate a warning message.
 
-            void warning (const std::string& message, const TokenLoc& loc);
-            ///< Generate a warning message.
+        void error(const std::string& message, const TokenLoc& loc);
+        ///< Generate an error message.
 
-            void error (const std::string& message, const TokenLoc& loc);
-            ///< Generate an error message.
+        void endOfFile();
+        ///< Generate an error message for an unexpected EOF.
 
-            void endOfFile();
-            ///< Generate an error message for an unexpected EOF.
+        virtual void reset();
+        ///< Remove all previous error/warning events
 
-            virtual void reset();
-            ///< Remove all previous error/warning events
+        void setWarningsMode(int mode);
+        ///< // 0 ignore, 1 rate as warning, 2 rate as error
 
-            void setWarningsMode (int mode);
-            ///< // 0 ignore, 1 rate as warning, 2 rate as error
-
-            /// Treat errors as warnings.
-            void downgradeErrors (bool downgrade);
+        /// Treat errors as warnings.
+        void downgradeErrors(bool downgrade);
     };
 
     class ErrorDowngrade
     {
-            ErrorHandler& mHandler;
+        ErrorHandler& mHandler;
 
-            /// not implemented
-            ErrorDowngrade (const ErrorDowngrade&);
+        /// not implemented
+        ErrorDowngrade(const ErrorDowngrade&);
 
-            /// not implemented
-            ErrorDowngrade& operator= (const ErrorDowngrade&);
+        /// not implemented
+        ErrorDowngrade& operator=(const ErrorDowngrade&);
 
-        public:
+    public:
+        explicit ErrorDowngrade(ErrorHandler& handler);
 
-            explicit ErrorDowngrade (ErrorHandler& handler);
-
-            ~ErrorDowngrade();
+        ~ErrorDowngrade();
     };
 }
 
