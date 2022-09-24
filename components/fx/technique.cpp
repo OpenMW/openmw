@@ -44,7 +44,7 @@ namespace fx
         : mName(std::move(name))
         , mFileName(Files::pathToUnicodeString(
               (Files::pathFromUnicodeString(Technique::sSubdir) / (mName + Technique::sExt))))
-        , mLastModificationTime(std::filesystem::file_time_type())
+        , mLastModificationTime(std::filesystem::file_time_type::clock::now())
         , mWidth(width)
         , mHeight(height)
         , mVFS(vfs)

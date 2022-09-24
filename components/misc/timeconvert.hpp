@@ -5,12 +5,16 @@
 
 namespace Misc
 {
-    template <typename TP>
-    inline std::time_t toTimeT(TP tp)
+    inline std::time_t toTimeT(std::filesystem::file_time_type tp)
     {
         using namespace std::chrono;
-        auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now() + system_clock::now());
-        return system_clock::to_time_t(sctp);
+#if __cpp_lib_chrono >= 201907
+        const auto systemTime = clock_cast<system_clock>(tp);
+#else
+        auto systemTime = time_point_cast<system_clock::duration>(
+            tp - std::filesystem::file_time_type::clock::now() + system_clock::now());
+#endif
+        return system_clock::to_time_t(systemTime);
     }
 
     inline std::string timeTToString(const std::time_t tp, const char* fmt)
