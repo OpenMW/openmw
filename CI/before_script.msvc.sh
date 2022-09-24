@@ -951,9 +951,8 @@ printf "SDL 2.24.0... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf SDL2-2.24.0
-		eval 7z x -y SDL2-2.24.0.zip -oSDL2-2.24.0 $STRIP
+		eval 7z x -y SDL2-2.24.0-win32-x64.zip -oSDL2-2.24.0 $STRIP
 	fi
-	export SDL2DIR="$(real_pwd)/SDL2-2.24.0"
 	for config in ${CONFIGURATIONS[@]}; do
 		add_runtime_dlls $config "$(pwd)/SDL2-2.24.0/SDL2.dll"
 	done
