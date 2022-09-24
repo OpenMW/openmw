@@ -79,7 +79,7 @@ void MWState::Character::addSlot(const ESM::SavedGame& profile)
     }
 
     slot.mProfile = profile;
-    slot.mTimeStamp = std::filesystem::file_time_type();
+    slot.mTimeStamp = std::filesystem::file_time_type::clock::now();
 
     mSlots.push_back(slot);
 }
@@ -157,7 +157,7 @@ const MWState::Slot* MWState::Character::updateSlot(const Slot* slot, const ESM:
 
     Slot newSlot = *slot;
     newSlot.mProfile = profile;
-    newSlot.mTimeStamp = std::filesystem::file_time_type();
+    newSlot.mTimeStamp = std::filesystem::file_time_type::clock::now();
 
     mSlots.erase(mSlots.begin() + index);
 

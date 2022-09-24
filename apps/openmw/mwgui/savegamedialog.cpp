@@ -410,11 +410,8 @@ namespace MWGui
             throw std::runtime_error("Can't find selected slot");
 
         std::stringstream text;
-        time_t time = Misc::to_time_t(mCurrentSlot->mTimeStamp);
-        struct tm* timeinfo;
-        timeinfo = localtime(&time);
 
-        text << std::put_time(timeinfo, "%Y.%m.%d %T") << "\n";
+        text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
 
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";

@@ -223,18 +223,20 @@ bool Config::LauncherSettings::isEqual(const QStringList& list1, const QStringLi
 QString Config::LauncherSettings::makeNewContentListName()
 {
     // basically, use date and time as the name  e.g. YYYY-MM-DDThh:mm:ss
-    time_t rawtime;
-    struct tm* timeinfo;
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
+    auto rawtime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    tm timeinfo{};
+#ifdef _WIN32
+    (void)localtime_s(&timeinfo, &rawtime);
+#else
+    (void)localtime_r(&rawtime, &timeinfo);
+#endif
     int base = 10;
     QChar zeroPad('0');
     return QString("%1-%2-%3T%4:%5:%6")
-        .arg(timeinfo->tm_year + 1900, 4)
-        .arg(timeinfo->tm_mon + 1, 2, base, zeroPad)
-        .arg(timeinfo->tm_mday, 2, base, zeroPad)
-        .arg(timeinfo->tm_hour, 2, base, zeroPad)
-        .arg(timeinfo->tm_min, 2, base, zeroPad)
-        .arg(timeinfo->tm_sec, 2, base, zeroPad);
+        .arg(timeinfo.tm_year + 1900, 4)
+        .arg(timeinfo.tm_mon + 1, 2, base, zeroPad)
+        .arg(timeinfo.tm_mday, 2, base, zeroPad)
+        .arg(timeinfo.tm_hour, 2, base, zeroPad)
+        .arg(timeinfo.tm_min, 2, base, zeroPad)
+        .arg(timeinfo.tm_sec, 2, base, zeroPad);
 }

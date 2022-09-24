@@ -30,6 +30,7 @@
 
 #include <components/files/conversion.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/misc/timeconvert.hpp>
 #include <components/version/version.hpp>
 
 #include "globaldebugprofilemenu.hpp"
@@ -765,11 +766,7 @@ void CSVDoc::View::infoAbout()
 #endif
 
     // Get current year
-    time_t now = time(nullptr);
-    struct tm tstruct;
-    char copyrightInfo[40];
-    tstruct = *localtime(&now);
-    strftime(copyrightInfo, sizeof(copyrightInfo), "Copyright © 2008-%Y OpenMW Team", &tstruct);
+    const auto copyrightInfo = Misc::timeToString(std::chrono::system_clock::now(), "Copyright © 2008-%Y OpenMW Team");
 
     QString aboutText = QString(
         "<p style=\"white-space: pre-wrap;\">"
@@ -788,7 +785,8 @@ void CSVDoc::View::infoAbout()
                             .arg(versionInfo,
                                 tr("OpenMW-CS is a content file editor for OpenMW, a modern, free and open source game "
                                    "engine."),
-                                tr(copyrightInfo), tr("Home Page:"), tr("Forum:"), tr("Bug Tracker:"), tr("IRC:"));
+                                tr(copyrightInfo.c_str()), tr("Home Page:"), tr("Forum:"), tr("Bug Tracker:"),
+                                tr("IRC:"));
 
     QMessageBox::about(this, "About OpenMW-CS", aboutText);
 }
