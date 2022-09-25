@@ -5,10 +5,10 @@
         <Widget type="TextBox" skin="SandText" position="0 4 592 24" align="Left Top HStretch" name="LabelText">
             <Property key="TextAlign" value="Center"/>
         </Widget>
-        <Widget type="TextBox" skin="SandText" position="12 36 521 24" align="Left Top HStretch" name="ItemText">
+        <Widget type="TextBox" skin="SandText" position="12 36 471 24" align="Left Top HStretch" name="ItemText">
             <Property key="TextAlign" value="Left"/>
         </Widget>
-        <Widget type="NumericEditBox" skin="MW_TextEdit" position="535 36 50 24" align="Right Top" name="ItemEdit">
+        <Widget type="NumericEditBox" skin="MW_TextEdit" position="485 36 100 24" align="Right Top" name="ItemEdit">
             <Property key="TextAlign" value="Center"/>
         </Widget>
         <Widget type="ScrollBar" skin="MW_HScroll" position="7 67 578 18" align="Left Top HStretch" name="CountSlider">
