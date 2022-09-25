@@ -148,6 +148,8 @@ namespace MWMechanics
 
     void ActiveSpells::update(const MWWorld::Ptr& ptr, float duration)
     {
+        if (mIterating)
+            return;
         const auto& creatureStats = ptr.getClass().getCreatureStats(ptr);
         assert(&creatureStats.getActiveSpells() == this);
         IterationGuard guard{*this};
