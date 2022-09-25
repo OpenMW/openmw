@@ -74,12 +74,6 @@ namespace Stereo
                 return false;
             }
 
-            if (!Settings::Manager::getBool("multiview", "Stereo"))
-            {
-                Log(Debug::Verbose) << "Disabling Multiview (disabled by config)";
-                return false;
-            }
-
             if (!getMultiviewSupported(contextID))
             {
                 return false;
@@ -94,6 +88,8 @@ namespace Stereo
             Log(Debug::Verbose) << "Enabling Multiview";
             return true;
         }
+
+        static bool sMultiview = false;
 
         bool getMultiview(unsigned int contextID)
         {
@@ -112,16 +108,25 @@ namespace Stereo
         return getMultiview(0);
     }
 
-    void configureExtensions(unsigned int contextID)
+    void configureExtensions(unsigned int contextID, bool enableMultiview)
     {
         getTextureViewSupported(contextID);
         getMultiviewSupported(contextID);
-        getMultiview(contextID);
+
+        if (enableMultiview)
+        {
+            sMultiview = getMultiview(contextID);
+        }
+        else
+        {
+            Log(Debug::Verbose) << "Disabling Multiview (disabled by config)";
+            sMultiview = false;
+        }
     }
 
-    void setVertexBufferHint()
+    void setVertexBufferHint(bool enableMultiview)
     {
-        if (getStereo() && Settings::Manager::getBool("multiview", "Stereo"))
+        if (getStereo() && enableMultiview)
         {
             auto* ds = osg::DisplaySettings::instance().get();
             if (!Settings::Manager::getBool("allow display lists for multiview", "Stereo")

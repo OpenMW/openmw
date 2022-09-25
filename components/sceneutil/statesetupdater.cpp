@@ -42,12 +42,13 @@ namespace SceneUtil
     {
         auto stateset = getCvDependentStateset(cv);
         apply(stateset, cv);
-        auto* sm = &Stereo::Manager::instance();
-        if (sm != nullptr)
+
+        if (Stereo::getStereo())
         {
-            if (sm->getEye(cv) == Stereo::Eye::Left)
+            auto& sm = Stereo::Manager::instance();
+            if (sm.getEye(cv) == Stereo::Eye::Left)
                 applyLeft(stateset, cv);
-            if (sm->getEye(cv) == Stereo::Eye::Right)
+            if (sm.getEye(cv) == Stereo::Eye::Right)
                 applyRight(stateset, cv);
         }
 

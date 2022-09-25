@@ -695,7 +695,7 @@ namespace MWRender
         defineMap["ripple_map_world_scale"] = std::to_string(RipplesSurface::mWorldScaleFactor);
         defineMap["ripple_map_size"] = std::to_string(RipplesSurface::mRTTSize) + ".0";
 
-        Stereo::Manager::instance().shaderStereoDefines(defineMap);
+        Stereo::shaderStereoDefines(defineMap);
 
         Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
         osg::ref_ptr<osg::Program> program = shaderMgr.getProgram("water", defineMap);

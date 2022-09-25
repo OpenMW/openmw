@@ -33,7 +33,7 @@ namespace MWRender
         mStateSet->setTextureAttributeAndModes(0, dummyTexture);
 
         Shader::ShaderManager::DefineMap defines;
-        Stereo::Manager::instance().shaderStereoDefines(defines);
+        Stereo::shaderStereoDefines(defines);
 
         mStateSet->setAttributeAndModes(new osg::BlendFunc, modeOff);
         mStateSet->setAttributeAndModes(shaderManager.getProgram("depthclipped", defines), modeOn);

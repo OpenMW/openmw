@@ -155,7 +155,51 @@ namespace
 
         void operator()(osg::GraphicsContext* graphicsContext) override
         {
-            Stereo::Manager::instance().initializeStereo(graphicsContext);
+            auto& sm = Stereo::Manager::instance();
+
+            if (Settings::Manager::getBool("use custom view", "Stereo"))
+            {
+                Stereo::View left;
+                Stereo::View right;
+
+                left.pose.position.x() = Settings::Manager::getDouble("left eye offset x", "Stereo View");
+                left.pose.position.y() = Settings::Manager::getDouble("left eye offset y", "Stereo View");
+                left.pose.position.z() = Settings::Manager::getDouble("left eye offset z", "Stereo View");
+                left.pose.orientation.x() = Settings::Manager::getDouble("left eye orientation x", "Stereo View");
+                left.pose.orientation.y() = Settings::Manager::getDouble("left eye orientation y", "Stereo View");
+                left.pose.orientation.z() = Settings::Manager::getDouble("left eye orientation z", "Stereo View");
+                left.pose.orientation.w() = Settings::Manager::getDouble("left eye orientation w", "Stereo View");
+                left.fov.angleLeft = Settings::Manager::getDouble("left eye fov left", "Stereo View");
+                left.fov.angleRight = Settings::Manager::getDouble("left eye fov right", "Stereo View");
+                left.fov.angleUp = Settings::Manager::getDouble("left eye fov up", "Stereo View");
+                left.fov.angleDown = Settings::Manager::getDouble("left eye fov down", "Stereo View");
+
+                right.pose.position.x() = Settings::Manager::getDouble("right eye offset x", "Stereo View");
+                right.pose.position.y() = Settings::Manager::getDouble("right eye offset y", "Stereo View");
+                right.pose.position.z() = Settings::Manager::getDouble("right eye offset z", "Stereo View");
+                right.pose.orientation.x() = Settings::Manager::getDouble("right eye orientation x", "Stereo View");
+                right.pose.orientation.y() = Settings::Manager::getDouble("right eye orientation y", "Stereo View");
+                right.pose.orientation.z() = Settings::Manager::getDouble("right eye orientation z", "Stereo View");
+                right.pose.orientation.w() = Settings::Manager::getDouble("right eye orientation w", "Stereo View");
+                right.fov.angleLeft = Settings::Manager::getDouble("right eye fov left", "Stereo View");
+                right.fov.angleRight = Settings::Manager::getDouble("right eye fov right", "Stereo View");
+                right.fov.angleUp = Settings::Manager::getDouble("right eye fov up", "Stereo View");
+                right.fov.angleDown = Settings::Manager::getDouble("right eye fov down", "Stereo View");
+
+                auto customViewCallback = std::make_shared<Stereo::Manager::CustomViewCallback>(left, right);
+                sm.setUpdateViewCallback(customViewCallback);
+            }
+
+            if (Settings::Manager::getBool("use custom eye resolution", "Stereo"))
+            {
+                osg::Vec2i eyeResolution = osg::Vec2i();
+                eyeResolution.x() = Settings::Manager::getInt("eye resolution x", "Stereo View");
+                eyeResolution.y() = Settings::Manager::getInt("eye resolution y", "Stereo View");
+                sm.overrideEyeResolution(eyeResolution);
+            }
+
+            sm.initializeStereo(
+                graphicsContext, Settings::Manager::getBool("multiview", "Stereo"));
         }
     };
 }
@@ -610,7 +654,7 @@ void OMW::Engine::createWindow()
     if (Stereo::getStereo())
     {
         realizeOperations->add(new InitializeStereoOperation());
-        Stereo::setVertexBufferHint();
+        Stereo::setVertexBufferHint(Settings::Manager::getBool("multiview", "Stereo"));
     }
 
     mViewer->realize();
@@ -650,7 +694,9 @@ void OMW::Engine::prepareEngine()
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
 
-    mStereoManager = std::make_unique<Stereo::Manager>(mViewer);
+    bool stereoEnabled
+        = Settings::Manager::getBool("stereo enabled", "Stereo") || osg::DisplaySettings::instance().get()->getStereo();
+    mStereoManager = std::make_unique<Stereo::Manager>(mViewer, stereoEnabled);
 
     osg::ref_ptr<osg::Group> rootNode(new osg::Group);
     mViewer->setSceneData(rootNode);

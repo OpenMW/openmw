@@ -365,7 +365,7 @@ namespace MWRender
         if (mSceneManager->getForceShaders())
         {
             Shader::ShaderManager::DefineMap defines = {};
-            Stereo::Manager::instance().shaderStereoDefines(defines);
+            Stereo::shaderStereoDefines(defines);
             auto program = mSceneManager->getShaderManager().getProgram("sky", defines);
             mEarlyRenderBinRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", -1));
             mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(
