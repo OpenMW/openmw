@@ -8,6 +8,7 @@
 #include <components/resource/bulletshape.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/class.hpp"
 
 #include "collisiontype.hpp"
@@ -30,7 +31,7 @@ namespace MWPhysics
         , mStuckFrames(0)
         , mLastStuckPosition{ 0, 0, 0 }
         , mForce(0.f, 0.f, 0.f)
-        , mOnGround(true)
+        , mOnGround(ptr.getClass().getCreatureStats(ptr).getFallHeight() == 0)
         , mOnSlope(false)
         , mInternalCollisionMode(true)
         , mExternalCollisionMode(true)

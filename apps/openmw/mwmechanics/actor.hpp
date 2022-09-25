@@ -4,10 +4,12 @@
 #include <memory>
 
 #include "character.hpp"
+#include "creaturestats.hpp"
 #include "greetingstate.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/class.hpp"
 
 #include <components/misc/timer.hpp>
 
@@ -28,7 +30,7 @@ namespace MWMechanics
     public:
         Actor(const MWWorld::Ptr& ptr, MWRender::Animation* animation)
             : mCharacterController(ptr, animation)
-            , mPositionAdjusted(false)
+            , mPositionAdjusted(ptr.getClass().getCreatureStats(ptr).getFallHeight() > 0)
         {
         }
 
