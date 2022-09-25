@@ -18,7 +18,7 @@
 
 namespace MWDialogue
 {
-    Quest& Journal::getQuest(const std::string& id)
+    Quest& Journal::getQuest(const ESM::RefId& id)
     {
         TQuestContainer::iterator iter = mQuests.find(id);
 
@@ -32,7 +32,7 @@ namespace MWDialogue
         return iter->second;
     }
 
-    Topic& Journal::getTopic(const std::string& id)
+    Topic& Journal::getTopic(const ESM::RefId& id)
     {
         TTopicContainer::iterator iter = mTopics.find(id);
 
@@ -46,7 +46,7 @@ namespace MWDialogue
         return iter->second;
     }
 
-    bool Journal::isThere(const std::string& topicId, const std::string& infoId) const
+    bool Journal::isThere(const ESM::RefId& topicId, const ESM::RefId& infoId) const
     {
         if (const ESM::Dialogue* dialogue
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().search(topicId))
@@ -72,10 +72,10 @@ namespace MWDialogue
         mTopics.clear();
     }
 
-    void Journal::addEntry(const std::string& id, int index, const MWWorld::Ptr& actor)
+    void Journal::addEntry(const ESM::RefId& id, int index, const MWWorld::Ptr& actor)
     {
         // bail out if we already have heard this...
-        std::string_view infoId = JournalEntry::idFromIndex(id, index);
+        const ESM::RefId& infoId = JournalEntry::idFromIndex(id, index);
         for (TEntryIter i = mJournal.begin(); i != mJournal.end(); ++i)
             if (i->mTopic == id && i->mInfoId == infoId)
             {
@@ -109,14 +109,14 @@ namespace MWDialogue
         }
     }
 
-    void Journal::setJournalIndex(const std::string& id, int index)
+    void Journal::setJournalIndex(const ESM::RefId& id, int index)
     {
         Quest& quest = getQuest(id);
 
         quest.setIndex(index);
     }
 
-    void Journal::addTopic(const std::string& topicId, const std::string& infoId, const MWWorld::Ptr& actor)
+    void Journal::addTopic(const ESM::RefId& topicId, const ESM::RefId& infoId, const MWWorld::Ptr& actor)
     {
         Topic& topic = getTopic(topicId);
 
@@ -125,7 +125,7 @@ namespace MWDialogue
         topic.addEntry(entry);
     }
 
-    void Journal::removeLastAddedTopicResponse(const std::string& topicId, std::string_view actorName)
+    void Journal::removeLastAddedTopicResponse(const ESM::RefId& topicId, std::string_view actorName)
     {
         Topic& topic = getTopic(topicId);
 
@@ -135,7 +135,7 @@ namespace MWDialogue
             mTopics.erase(mTopics.find(topicId)); // All responses removed -> remove topic
     }
 
-    int Journal::getJournalIndex(const std::string& id) const
+    int Journal::getJournalIndex(const ESM::RefId& id) const
     {
         TQuestContainer::const_iterator iter = mQuests.find(id);
 

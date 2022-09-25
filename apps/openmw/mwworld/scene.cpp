@@ -92,7 +92,7 @@ namespace
 
     std::string getModel(const MWWorld::Ptr& ptr, const VFS::Manager* vfs)
     {
-        if (Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId()))
+        if (Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId().getRefIdString()))
             return {};
         bool useAnim = ptr.getClass().useAnim();
         std::string model = ptr.getClass().getModel(ptr);

@@ -27,7 +27,7 @@ namespace MWMechanics
 {
     int AiFollow::mFollowIndexCounter = 0;
 
-    AiFollow::AiFollow(std::string_view actorId, float duration, float x, float y, float z, bool repeat)
+    AiFollow::AiFollow(const ESM::RefId& actorId, float duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiFollow>(repeat)
         , mAlwaysFollow(false)
         , mDuration(duration)
@@ -35,15 +35,15 @@ namespace MWMechanics
         , mX(x)
         , mY(y)
         , mZ(z)
-        , mCellId("")
+        , mCellId(ESM::RefId::sEmpty)
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {
-        mTargetActorRefId = std::string(actorId);
+        mTargetActorRefId = actorId;
     }
 
     AiFollow::AiFollow(
-        std::string_view actorId, std::string_view cellId, float duration, float x, float y, float z, bool repeat)
+        const ESM::RefId& actorId, const ESM::RefId& cellId, float duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiFollow>(repeat)
         , mAlwaysFollow(false)
         , mDuration(duration)
@@ -55,7 +55,7 @@ namespace MWMechanics
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {
-        mTargetActorRefId = std::string(actorId);
+        mTargetActorRefId = actorId;
     }
 
     AiFollow::AiFollow(const MWWorld::Ptr& actor, bool commanded)
@@ -66,7 +66,7 @@ namespace MWMechanics
         , mX(0)
         , mY(0)
         , mZ(0)
-        , mCellId("")
+        , mCellId(ESM::RefId::sEmpty)
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {
@@ -169,13 +169,13 @@ namespace MWMechanics
             {
                 if (actor.getCell()->isExterior()) // Outside?
                 {
-                    if (mCellId == "") // No cell to travel to
+                    if (mCellId == ESM::RefId::sEmpty) // No cell to travel to
                     {
                         mRemainingDuration = mDuration;
                         return true;
                     }
                 }
-                else if (mCellId == actor.getCell()->getCell()->mName) // Cell to travel to
+                else if (mCellId.getRefIdString() == actor.getCell()->getCell()->mName) // Cell to travel to
                 {
                     mRemainingDuration = mDuration;
                     return true;
@@ -221,7 +221,7 @@ namespace MWMechanics
         return false;
     }
 
-    std::string AiFollow::getFollowedActor()
+    ESM::RefId AiFollow::getFollowedActor()
     {
         return mTargetActorRefId;
     }

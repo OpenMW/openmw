@@ -208,7 +208,7 @@ namespace
                 if (caster == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
-                const ESM::Static* const fx = world->getStore().get<ESM::Static>().search("VFX_Soul_Trap");
+                const ESM::Static* const fx = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Soul_Trap"));
                 if (fx != nullptr)
                 {
                     const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -217,7 +217,7 @@ namespace
                 }
 
                 MWBase::Environment::get().getSoundManager()->playSound3D(
-                    creature.getRefData().getPosition().asVec3(), "conjuration hit", 1.f, 1.f);
+                    creature.getRefData().getPosition().asVec3(), ESM::RefId::stringRefId("conjuration hit"), 1.f, 1.f);
                 return; // remove to get vanilla behaviour
             }
         }
@@ -411,7 +411,7 @@ namespace MWMechanics
             = world->getStore().get<ESM::GameSetting>().find("fVoiceIdleOdds")->mValue.getFloat();
         if (Misc::Rng::rollProbability(world->getPrng()) * 10000.f < fVoiceIdleOdds * delta
             && world->getLOS(getPlayer(), actor))
-            MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+            MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("idle"));
     }
 
     void Actors::updateMovementSpeed(const MWWorld::Ptr& actor) const
@@ -505,7 +505,7 @@ namespace MWMechanics
             if (greetingTimer >= GREETING_SHOULD_START)
             {
                 greetingState = Greet_InProgress;
-                MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
+                MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("hello"));
                 greetingTimer = 0;
             }
         }
@@ -973,8 +973,9 @@ namespace MWMechanics
 
                 // Play a drowning sound
                 MWBase::SoundManager* sndmgr = MWBase::Environment::get().getSoundManager();
-                if (!sndmgr->getSoundPlaying(ptr, "drown"))
-                    sndmgr->playSound3D(ptr, "drown", 1.0f, 1.0f);
+                auto soundDrown = ESM::RefId::stringRefId("drown");
+                if (!sndmgr->getSoundPlaying(ptr, soundDrown))
+                    sndmgr->playSound3D(ptr, soundDrown, 1.0f, 1.0f);
 
                 if (isPlayer)
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
@@ -1073,7 +1074,7 @@ namespace MWMechanics
                 // ...But, only the player makes a sound.
                 if (isPlayer)
                     MWBase::Environment::get().getSoundManager()->playSound(
-                        "torch out", 1.0, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
+                        ESM::RefId::stringRefId("torch out"), 1.0, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
             }
         }
     }
@@ -1240,7 +1241,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell) const
+    void Actors::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
@@ -1752,7 +1753,7 @@ namespace MWMechanics
     {
         actor.getClass().getCreatureStats(actor).notifyDied();
 
-        ++mDeathCount[Misc::StringUtils::lowerCase(actor.getCellRef().getRefId())];
+        ++mDeathCount[actor.getCellRef().getRefId()];
     }
 
     void Actors::resurrect(const MWWorld::Ptr& ptr) const
@@ -1786,7 +1787,7 @@ namespace MWMechanics
                 // Play dying words
                 // Note: It's not known whether the soundgen tags scream, roar, and moan are reliable
                 // for NPCs since some of the npc death animation files are missing them.
-                MWBase::Environment::get().getDialogueManager()->say(actor.getPtr(), "hit");
+                MWBase::Environment::get().getDialogueManager()->say(actor.getPtr(), ESM::RefId::stringRefId("hit"));
 
                 // Apply soultrap
                 if (actor.getPtr().getType() == ESM::Creature::sRecordId)
@@ -1833,7 +1834,7 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
 
             const ESM::Static* fx
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().search("VFX_Summon_End");
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_End"));
             if (fx)
             {
                 const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -2002,7 +2003,7 @@ namespace MWMechanics
         return static_cast<int>(std::ceil(std::max(1.f, std::max(healthHours, magickaHours))));
     }
 
-    int Actors::countDeaths(const std::string& id) const
+    int Actors::countDeaths(const ESM::RefId& id) const
     {
         const auto iter = mDeathCount.find(id);
         if (iter != mDeathCount.end())
@@ -2270,7 +2271,7 @@ namespace MWMechanics
         writer.startRecord(ESM::REC_DCOU);
         for (const auto& [id, count] : mDeathCount)
         {
-            writer.writeHNString("ID__", id);
+            writer.writeHNString("ID__", id.getRefIdString());
             writer.writeHNT("COUN", count);
         }
         writer.endRecord(ESM::REC_DCOU);
@@ -2282,7 +2283,7 @@ namespace MWMechanics
         {
             while (reader.isNextSub("ID__"))
             {
-                std::string id = reader.getHString();
+                ESM::RefId id = reader.getRefId();
                 int count;
                 reader.getHNT(count, "COUN");
                 if (MWBase::Environment::get().getWorld()->getStore().find(id))

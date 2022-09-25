@@ -66,7 +66,7 @@ namespace MWGui
         toAdd->setSize(mSpellsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
-        toAdd->setUserString("Spell", spell.mId);
+        toAdd->setUserString("Spell", spell.mId.getRefIdString());
         toAdd->setUserString("SpellCost", std::to_string(spell.mData.mCost));
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onSpellButtonClick);
         mSpellsWidgetMap.insert(std::make_pair(toAdd, spell.mId));
@@ -135,7 +135,7 @@ namespace MWGui
         mSpellsView->setViewOffset(MyGUI::IntPoint(0, startOffset));
     }
 
-    bool SpellBuyingWindow::playerHasSpell(const std::string& id)
+    bool SpellBuyingWindow::playerHasSpell(const ESM::RefId& id)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         return player.getClass().getCreatureStats(player).getSpells().hasSpell(id);
@@ -160,7 +160,7 @@ namespace MWGui
 
         setPtr(mPtr, mSpellsView->getViewOffset().top);
 
-        MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Gold Up"));
     }
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

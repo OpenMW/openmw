@@ -8,6 +8,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm3/loadscpt.hpp>
+#include <components/esm/refid.hpp>
 
 #include <components/misc/strings/lower.hpp>
 
@@ -41,14 +42,14 @@ namespace MWScript
         std::sort(mScriptBlacklist.begin(), mScriptBlacklist.end());
     }
 
-    bool ScriptManager::compile(std::string_view name)
+    bool ScriptManager::compile(const ESM::RefId& name)
     {
         mParser.reset();
         mErrorHandler.reset();
 
         if (const ESM::Script* script = mStore.get<ESM::Script>().find(name))
         {
-            mErrorHandler.setContext(script->mId);
+            mErrorHandler.setContext(script->mId.getRefIdString());
 
             bool Success = true;
             try
@@ -91,7 +92,7 @@ namespace MWScript
         return false;
     }
 
-    bool ScriptManager::run(std::string_view name, Interpreter::Context& interpreterContext)
+    bool ScriptManager::run(const ESM::RefId& name, Interpreter::Context& interpreterContext)
     {
         // compile script
         auto iter = mScripts.find(name);
@@ -111,7 +112,7 @@ namespace MWScript
         }
 
         // execute script
-        std::string target = Misc::StringUtils::lowerCase(interpreterContext.getTarget());
+        auto target = interpreterContext.getTarget();
         if (!iter->second.mByteCode.empty() && iter->second.mInactive.find(target) == iter->second.mInactive.end())
             try
             {
@@ -155,7 +156,7 @@ namespace MWScript
         for (auto& script : mStore.get<ESM::Script>())
         {
             if (!std::binary_search(
-                    mScriptBlacklist.begin(), mScriptBlacklist.end(), Misc::StringUtils::lowerCase(script.mId)))
+                    mScriptBlacklist.begin(), mScriptBlacklist.end(), Misc::StringUtils::lowerCase(script.mId.getRefIdString())))
             {
                 ++count;
 
@@ -167,7 +168,7 @@ namespace MWScript
         return std::make_pair(count, success);
     }
 
-    const Compiler::Locals& ScriptManager::getLocals(std::string_view name)
+    const Compiler::Locals& ScriptManager::getLocals(const ESM::RefId& name)
     {
         {
             auto iter = mScripts.find(name);
@@ -187,7 +188,7 @@ namespace MWScript
         {
             Compiler::Locals locals;
 
-            const Compiler::ContextOverride override(mErrorHandler, std::string{ name } + "[local variables]");
+            const Compiler::ContextOverride override(mErrorHandler, std::string{ name.getRefIdString() } + "[local variables]");
 
             std::istringstream stream(script->mScriptText);
             Compiler::QuickFileParser parser(mErrorHandler, mCompilerContext, locals);
@@ -212,7 +213,7 @@ namespace MWScript
             return iter->second;
         }
 
-        throw std::logic_error("script " + std::string{ name } + " does not exist");
+        throw std::logic_error("script " + std::string{ name.getRefIdString() } + " does not exist");
     }
 
     GlobalScripts& ScriptManager::getGlobalScripts()

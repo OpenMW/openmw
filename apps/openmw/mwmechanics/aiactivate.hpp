@@ -2,7 +2,7 @@
 #define GAME_MWMECHANICS_AIACTIVATE_H
 
 #include "typedaipackage.hpp"
-
+#include <components/esm/refid.hpp>
 #include <string>
 #include <string_view>
 
@@ -23,7 +23,7 @@ namespace MWMechanics
     public:
         /// Constructor
         /** \param objectId Reference to object to activate **/
-        explicit AiActivate(std::string_view objectId, bool repeat);
+        explicit AiActivate(const ESM::RefId& objectId, bool repeat);
 
         explicit AiActivate(const ESM::AiSequence::AiActivate* activate);
 
@@ -35,7 +35,7 @@ namespace MWMechanics
         void writeState(ESM::AiSequence::AiSequence& sequence) const override;
 
     private:
-        const std::string mObjectId;
+        const ESM::RefId mObjectId;
     };
 }
 #endif // GAME_MWMECHANICS_AIACTIVATE_H

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -24,12 +25,12 @@ namespace ESM
         int mPlayerLevel;
 
         // ID of class
-        std::string mPlayerClassId;
+        ESM::RefId mPlayerClassId;
         // Name of the class. When using a custom class, the ID is not really meaningful prior
         // to loading the savegame, so the name is stored separately.
         std::string mPlayerClassName;
 
-        std::string mPlayerCell;
+        ESM::RefId mPlayerCell;
         EpochTimeStamp mInGameTime;
         double mTimePlayed;
         std::string mDescription;

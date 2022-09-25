@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <components/misc/strings/lower.hpp>
+#include <components/esm/refid.hpp>
 
 #include "context.hpp"
 #include "discardparser.hpp"
@@ -204,13 +205,13 @@ namespace Compiler
         mMemberOp = false;
 
         std::string name2 = Misc::StringUtils::lowerCase(name);
-        std::string id = Misc::StringUtils::lowerCase(mExplicit);
+        auto id = ESM::RefId::stringRefId(mExplicit);
 
         std::pair<char, bool> type = getContext().getMemberType(name2, id);
 
         if (type.first != ' ')
         {
-            Generator::fetchMember(mCode, mLiterals, type.first, name2, id, !type.second);
+            Generator::fetchMember(mCode, mLiterals, type.first, name2, id.getRefIdString(), !type.second);
 
             mNextOperand = false;
             mExplicit.clear();
@@ -302,31 +303,30 @@ namespace Compiler
         {
             start();
 
-            std::string name2 = Misc::StringUtils::lowerCase(name);
 
-            char type = mLocals.getType(name2);
+            char type = mLocals.getType(name);
 
             if (type != ' ')
             {
-                Generator::fetchLocal(mCode, type, mLocals.getIndex(name2));
+                Generator::fetchLocal(mCode, type, mLocals.getIndex(name));
                 mNextOperand = false;
                 mOperands.push_back(type == 'f' ? 'f' : 'l');
                 return true;
             }
 
-            type = getContext().getGlobalType(name2);
+            type = getContext().getGlobalType(name);
 
             if (type != ' ')
             {
-                Generator::fetchGlobal(mCode, mLiterals, type, name2);
+                Generator::fetchGlobal(mCode, mLiterals, type, name);
                 mNextOperand = false;
                 mOperands.push_back(type == 'f' ? 'f' : 'l');
                 return true;
             }
 
-            if (mExplicit.empty() && getContext().isId(name2))
+            if (mExplicit.empty() && getContext().isId(ESM::RefId::stringRefId(name)))
             {
-                mExplicit = name2;
+                mExplicit = name;
                 return true;
             }
 
@@ -334,7 +334,7 @@ namespace Compiler
             // Convert the string to a number even if it's impossible and use it as a number literal.
             // Can't use stof/atof or to_string out of locale concerns.
             float number;
-            std::stringstream stream(name2);
+            std::stringstream stream(name);
             stream >> number;
             stream.str(std::string());
             stream.clear();

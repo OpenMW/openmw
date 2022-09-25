@@ -250,7 +250,7 @@ namespace MWGui
         }
 
         const ItemStack& item = mTradeModel->getItem(index);
-        std::string_view sound = item.mBase.getClass().getDownSoundId(item.mBase);
+        const ESM::RefId& sound = item.mBase.getClass().getDownSoundId(item.mBase);
 
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
@@ -360,7 +360,7 @@ namespace MWGui
     {
         ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
-        std::string_view sound = item.mBase.getClass().getUpSoundId(item.mBase);
+        const ESM::RefId& sound = item.mBase.getClass().getUpSoundId(item.mBase);
         MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         if (item.mType == ItemStack::Type_Barter)
@@ -518,7 +518,7 @@ namespace MWGui
 
     void InventoryWindow::useItem(const MWWorld::Ptr& ptr, bool force)
     {
-        std::string_view script = ptr.getClass().getScript(ptr);
+        const ESM::RefId& script = ptr.getClass().getScript(ptr);
         if (!script.empty())
         {
             // Don't try to equip the item if PCSkipEquip is set to 1
@@ -792,7 +792,7 @@ namespace MWGui
 
         int incr = next ? 1 : -1;
         bool found = false;
-        std::string_view lastId;
+        ESM::RefId lastId;
         if (selected != -1)
             lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;
@@ -805,7 +805,7 @@ namespace MWGui
 
             // skip different stacks of the same item, or we will get stuck as stacking/unstacking them may change their
             // relative ordering
-            if (Misc::StringUtils::ciEqual(lastId, item.getCellRef().getRefId()))
+            if (ESM::RefId::ciEqual(lastId, item.getCellRef().getRefId()))
                 continue;
 
             lastId = item.getCellRef().getRefId();

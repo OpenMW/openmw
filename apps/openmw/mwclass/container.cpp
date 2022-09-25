@@ -42,7 +42,7 @@ namespace MWClass
         unsigned int seed = Misc::Rng::rollDice(std::numeric_limits<int>::max(), prng);
         // setting ownership not needed, since taking items from a container inherits the
         // container's owner automatically
-        mStore.fillNonRandom(container.mInventory, "", seed);
+        mStore.fillNonRandom(container.mInventory, ESM::RefId::sEmpty, seed);
     }
 
     ContainerCustomData::ContainerCustomData(const ESM::InventoryState& inventory)
@@ -143,7 +143,7 @@ namespace MWClass
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfContainer", prng);
+            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom(ESM::RefId::stringRefId("WolfContainer"), prng);
 
             std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if (sound)
@@ -152,8 +152,8 @@ namespace MWClass
             return action;
         }
 
-        const std::string_view lockedSound = "LockedChest";
-        const std::string_view trapActivationSound = "Disarm Trap Fail";
+        const ESM::RefId& lockedSound = ESM::RefId::stringRefId("LockedChest");
+        const ESM::RefId& trapActivationSound = ESM::RefId::stringRefId("Disarm Trap Fail");
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
@@ -163,7 +163,7 @@ namespace MWClass
         bool hasKey = false;
         std::string_view keyName;
 
-        const std::string& keyId = ptr.getCellRef().getKey();
+        const ESM::RefId& keyId = ptr.getCellRef().getKey();
         if (!keyId.empty())
         {
             MWWorld::Ptr keyPtr = invStore.search(keyId);
@@ -181,8 +181,8 @@ namespace MWClass
             // using a key disarms the trap
             if (isTrapped)
             {
-                ptr.getCellRef().setTrap("");
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Disarm Trap", 1.0f, 1.0f);
+                ptr.getCellRef().setTrap(ESM::RefId::sEmpty);
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::RefId::stringRefId("Disarm Trap"), 1.0f, 1.0f);
                 isTrapped = false;
             }
         }
@@ -220,7 +220,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     MWWorld::ContainerStore& Container::getContainerStore(const MWWorld::Ptr& ptr) const
@@ -231,7 +231,7 @@ namespace MWClass
         return data.mStore;
     }
 
-    std::string_view Container::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Container::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
 
@@ -259,14 +259,14 @@ namespace MWClass
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(lockLevel);
         else if (lockLevel < 0)
             text += "\n#{sUnlocked}";
-        if (ptr.getCellRef().getTrap() != "")
+        if (ptr.getCellRef().getTrap() != ESM::RefId::sEmpty)
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
-            if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "stolen_goods"))
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            if (ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("stolen_goods")))
                 text += "\nYou can not use evidence chests";
         }
 
@@ -293,7 +293,7 @@ namespace MWClass
         return !(ref->mBase->mFlags & ESM::Container::Organic);
     }
 
-    void Container::modifyBaseInventory(std::string_view containerId, std::string_view itemId, int amount) const
+    void Container::modifyBaseInventory(const ESM::RefId& containerId, const ESM::RefId& itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::Container>(containerId, itemId, amount);
     }

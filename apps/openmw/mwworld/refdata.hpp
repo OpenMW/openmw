@@ -2,6 +2,7 @@
 #define GAME_MWWORLD_REFDATA_H
 
 #include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/animationstate.hpp>
 
 #include "../mwscript/locals.hpp"
@@ -85,7 +86,7 @@ namespace MWWorld
 
         ~RefData();
 
-        void write(ESM::ObjectState& objectState, std::string_view scriptId = {}) const;
+        void write(ESM::ObjectState& objectState,const ESM::RefId& scriptId = ESM::RefId::sEmpty) const;
         ///< Ignores custom data (not enough context available here to
         /// perform this operations).
 

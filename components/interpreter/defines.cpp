@@ -213,7 +213,11 @@ namespace Interpreter
                         /* if list of globals is empty, grab it and sort it by descending string length */
                         if (globals.empty())
                         {
-                            globals = context.getGlobals();
+                            auto globalIds = context.getGlobals();
+                            for (auto id : globalIds)
+                            {
+                                globals.push_back(id);
+                            }
                             sort(globals.begin(), globals.end(), longerStr);
                         }
 

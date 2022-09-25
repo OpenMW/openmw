@@ -25,7 +25,7 @@ namespace
 
     int getProfit(const MWWorld::Ptr& actor)
     {
-        std::string_view script = actor.getClass().getScript(actor);
+        const ESM::RefId& script = actor.getClass().getScript(actor);
         if (!script.empty())
         {
             return actor.getRefData().getLocals().getIntVar(script, "minimumprofit");

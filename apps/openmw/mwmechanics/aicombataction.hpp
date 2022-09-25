@@ -34,11 +34,11 @@ namespace MWMechanics
     class ActionSpell : public Action
     {
     public:
-        ActionSpell(const std::string& spellId)
+        ActionSpell(const ESM::RefId& spellId)
             : mSpellId(spellId)
         {
         }
-        std::string mSpellId;
+        ESM::RefId mSpellId;
         /// Sets the given spell as selected on the actor's spell list.
         void prepare(const MWWorld::Ptr& actor) override;
 

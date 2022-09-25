@@ -26,8 +26,8 @@ namespace MWSound
     {
     }
 
-    std::optional<std::string> RegionSoundSelector::getNextRandom(
-        float duration, const std::string& regionName, const MWBase::World& world)
+    std::optional<ESM::RefId> RegionSoundSelector::getNextRandom(
+        float duration, const ESM::RefId& regionName, const MWBase::World& world)
     {
         mTimePassed += duration;
 

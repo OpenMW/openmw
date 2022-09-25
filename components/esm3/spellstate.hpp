@@ -7,11 +7,13 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
     class ESMReader;
     class ESMWriter;
+    struct RefId;
 
     // NOTE: spell ids must be lower case
     struct SpellState
@@ -34,16 +36,16 @@ namespace ESM
             std::map<int, float> mEffectRands; // <effect index, normalised random magnitude>
             std::set<int> mPurgedEffects; // indices of purged effects
         };
-        std::vector<std::string> mSpells;
+        std::vector<ESM::RefId> mSpells;
 
         // FIXME: obsolete, used only for old saves
-        std::map<std::string, SpellParams> mSpellParams;
-        std::map<std::string, std::vector<PermanentSpellEffectInfo>> mPermanentSpellEffects;
-        std::map<std::string, CorprusStats> mCorprusSpells;
+        std::map<ESM::RefId, SpellParams> mSpellParams;
+        std::map<ESM::RefId, std::vector<PermanentSpellEffectInfo>> mPermanentSpellEffects;
+        std::map<ESM::RefId, CorprusStats> mCorprusSpells;
 
-        std::map<std::string, TimeStamp> mUsedPowers;
+        std::map<ESM::RefId, TimeStamp> mUsedPowers;
 
-        std::string mSelectedSpell;
+        ESM::RefId mSelectedSpell;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;

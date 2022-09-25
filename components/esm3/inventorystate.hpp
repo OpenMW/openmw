@@ -4,6 +4,7 @@
 #include <map>
 
 #include "objectstate.hpp"
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -20,9 +21,9 @@ namespace ESM
         // <Index in mItems, equipment slot>
         std::map<int, int> mEquipmentSlots;
 
-        std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
+        std::map<std::pair<ESM::RefId, std::string>, int> mLevelledItemMap;
 
-        typedef std::map<std::string, std::vector<std::pair<float, float>>> TEffectMagnitudes;
+        typedef std::map<ESM::RefId, std::vector<std::pair<float, float>>> TEffectMagnitudes;
         TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 
         int mSelectedEnchantItem; // For inventories only

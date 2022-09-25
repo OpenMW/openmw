@@ -126,7 +126,7 @@ namespace MWGui
                 winMgr->messageBox("#{sNotifyMessage6a}");
                 break;
             case MWMechanics::Alchemy::Result_Success:
-                winMgr->playSound("potion success");
+                winMgr->playSound(ESM::RefId::stringRefId("potion success"));
                 if (count == 1)
                     winMgr->messageBox("#{sPotionSuccess}");
                 else
@@ -136,7 +136,7 @@ namespace MWGui
             case MWMechanics::Alchemy::Result_NoEffects:
             case MWMechanics::Alchemy::Result_RandomFailure:
                 winMgr->messageBox("#{sNotifyMessage8}");
-                winMgr->playSound("potion fail");
+                winMgr->playSound(ESM::RefId::stringRefId("potion fail"));
                 break;
         }
 
@@ -301,7 +301,7 @@ namespace MWGui
         {
             update();
 
-            std::string_view sound = item.getClass().getUpSoundId(item);
+            const ESM::RefId& sound = item.getClass().getUpSoundId(item);
             MWBase::Environment::get().getWindowManager()->playSound(sound);
         }
     }

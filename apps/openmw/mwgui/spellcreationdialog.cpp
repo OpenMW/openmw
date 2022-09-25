@@ -414,7 +414,7 @@ namespace MWGui
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        MWBase::Environment::get().getWindowManager()->playSound("Mysticism Hit");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Mysticism Hit"));
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 

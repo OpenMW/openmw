@@ -17,7 +17,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("FNAM"):
@@ -44,7 +44,7 @@ namespace ESM
                     break;
                 }
                 case fourCC("BNAM"):
-                    mSleepList = esm.getHString();
+                    mSleepList = esm.getRefId();
                     break;
                 case fourCC("CNAM"):
                     esm.getHT(mMapColor);
@@ -53,7 +53,7 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     SoundRef sr;
-                    sr.mSound.assign(esm.getString(32));
+                    sr.mSound = ESM::RefId::stringRefId(esm.getString(32));
                     esm.getT(sr.mChance);
                     mSoundList.push_back(sr);
                     break;
@@ -74,7 +74,7 @@ namespace ESM
 
     void Region::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -89,13 +89,13 @@ namespace ESM
         else
             esm.writeHNT("WEAT", mData);
 
-        esm.writeHNOCString("BNAM", mSleepList);
+        esm.writeHNOCString("BNAM", mSleepList.getRefIdString());
 
         esm.writeHNT("CNAM", mMapColor);
         for (std::vector<SoundRef>::const_iterator it = mSoundList.begin(); it != mSoundList.end(); ++it)
         {
             esm.startSubRecord("SNAM");
-            esm.writeFixedSizeString(it->mSound, 32);
+            esm.writeFixedSizeString(it->mSound.getRefIdString(), 32);
             esm.writeT(it->mChance);
             esm.endRecord("SNAM");
         }

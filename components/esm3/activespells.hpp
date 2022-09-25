@@ -3,6 +3,7 @@
 
 #include "cellref.hpp"
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 #include <string>
 #include <vector>
@@ -51,7 +52,7 @@ namespace ESM
 
         struct ActiveSpellParams
         {
-            std::string mId;
+            RefId mId;
             std::vector<ActiveEffect> mEffects;
             std::string mDisplayName;
             int mCasterActorId;

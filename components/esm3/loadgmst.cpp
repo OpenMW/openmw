@@ -10,13 +10,13 @@ namespace ESM
         isDeleted = false; // GameSetting record can't be deleted now (may be changed in the future)
         mRecordFlags = esm.getRecordFlags();
 
-        mId = esm.getHNString("NAME");
+        mId = ESM::RefId::stringRefId(esm.getHNString("NAME"));
         mValue.read(esm, Variant::Format_Gmst);
     }
 
     void GameSetting::save(ESMWriter& esm, bool /*isDeleted*/) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
         mValue.write(esm, Variant::Format_Gmst);
     }
 

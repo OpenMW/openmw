@@ -176,7 +176,7 @@ namespace MWRender
         /// @note This is a fixed size list, one list item for each ESM::PartReferenceType, may contain nullptr body
         /// parts.
         static const std::vector<const ESM::BodyPart*>& getBodyParts(
-            const std::string& raceId, bool female, bool firstperson, bool werewolf);
+            const ESM::RefId& raceId, bool female, bool firstperson, bool werewolf);
     };
 
 }

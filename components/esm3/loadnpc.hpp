@@ -6,6 +6,7 @@
 
 #include "aipackage.hpp"
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include "loadcont.hpp"
 #include "loadskil.hpp"
 #include "spelllist.hpp"
@@ -124,10 +125,11 @@ namespace ESM
         AIPackageList mAiPackage;
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mModel, mRace, mClass, mFaction, mScript;
+        RefId mId, mRace, mClass, mFaction, mScript;
+        std::string mModel, mName;
 
         // body parts
-        std::string mHair, mHead;
+        RefId mHair, mHead;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <components/esm/refid.hpp>
 
 namespace Interpreter
 {
@@ -12,7 +13,7 @@ namespace Interpreter
     public:
         virtual ~Context() {}
 
-        virtual std::string_view getTarget() const = 0;
+        virtual const ESM::RefId& getTarget() const = 0;
 
         virtual int getLocalShort(int index) const = 0;
 
@@ -78,17 +79,17 @@ namespace Interpreter
 
         virtual std::string_view getCurrentCellName() const = 0;
 
-        virtual int getMemberShort(std::string_view id, std::string_view name, bool global) const = 0;
+        virtual int getMemberShort(ESM::RefId id, std::string_view name, bool global) const = 0;
 
-        virtual int getMemberLong(std::string_view id, std::string_view name, bool global) const = 0;
+        virtual int getMemberLong(ESM::RefId id, std::string_view name, bool global) const = 0;
 
-        virtual float getMemberFloat(std::string_view id, std::string_view name, bool global) const = 0;
+        virtual float getMemberFloat(ESM::RefId id, std::string_view name, bool global) const = 0;
 
-        virtual void setMemberShort(std::string_view id, std::string_view name, int value, bool global) = 0;
+        virtual void setMemberShort(ESM::RefId id, std::string_view name, int value, bool global) = 0;
 
-        virtual void setMemberLong(std::string_view id, std::string_view name, int value, bool global) = 0;
+        virtual void setMemberLong(ESM::RefId id, std::string_view name, int value, bool global) = 0;
 
-        virtual void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) = 0;
+        virtual void setMemberFloat(ESM::RefId id, std::string_view name, float value, bool global) = 0;
     };
 }
 

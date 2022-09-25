@@ -18,7 +18,7 @@ namespace ESM
         }
         else if (esm.retSubName().toInt() == fourCC("DNAM"))
         {
-            const std::string name = esm.getHString();
+            const ESM::RefId name = esm.getRefId();
             if (mList.empty())
                 Log(Debug::Warning) << "Encountered DNAM record without DODT record, skipped.";
             else
@@ -32,7 +32,7 @@ namespace ESM
         for (DestIter it = mList.begin(); it != mList.end(); ++it)
         {
             esm.writeHNT("DODT", it->mPos, sizeof(it->mPos));
-            esm.writeHNOCString("DNAM", it->mCellName);
+            esm.writeHNOCString("DNAM", it->mCellName.getRefIdString());
         }
     }
 

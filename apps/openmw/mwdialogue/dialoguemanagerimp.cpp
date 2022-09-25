@@ -74,14 +74,14 @@ namespace MWDialogue
         mPermanentDispositionChange = 0;
     }
 
-    void DialogueManager::addTopic(std::string_view topic)
+    void DialogueManager::addTopic(const ESM::RefId& topic)
     {
-        mKnownTopics.insert(Misc::StringUtils::lowerCase(topic));
+        mKnownTopics.insert(topic);
     }
 
-    std::vector<std::string> DialogueManager::parseTopicIdsFromText(const std::string& text)
+    std::vector<ESM::RefId> DialogueManager::parseTopicIdsFromText(const std::string& text)
     {
-        std::vector<std::string> topicIdList;
+        std::vector<ESM::RefId> topicIdList;
 
         std::vector<HyperTextParser::Token> hypertext = HyperTextParser::parseHyperText(text);
 
@@ -99,7 +99,7 @@ namespace MWDialogue
                 topicId = mTranslationDataStorage.topicStandardForm(topicId);
             }
 
-            topicIdList.push_back(topicId);
+            topicIdList.push_back(ESM::RefId::stringRefId(topicId));
         }
 
         return topicIdList;
@@ -204,7 +204,7 @@ namespace MWDialogue
 
             Compiler::Locals locals;
 
-            std::string_view actorScript = actor.getClass().getScript(actor);
+            const ESM::RefId& actorScript = actor.getClass().getScript(actor);
 
             if (!actorScript.empty())
             {
@@ -260,7 +260,7 @@ namespace MWDialogue
         }
     }
 
-    bool DialogueManager::inJournal(const std::string& topicId, const std::string& infoId) const
+    bool DialogueManager::inJournal(const ESM::RefId& topicId, const ESM::RefId& infoId) const
     {
         const MWDialogue::Topic* topicHistory = nullptr;
         MWBase::Journal* journal = MWBase::Environment::get().getJournal();
@@ -284,7 +284,7 @@ namespace MWDialogue
         return false;
     }
 
-    void DialogueManager::executeTopic(const std::string& topic, ResponseCallback* callback)
+    void DialogueManager::executeTopic(const ESM::RefId& topic, ResponseCallback* callback)
     {
         Filter filter(mActor, mChoice, mTalkedTo);
 
@@ -297,26 +297,26 @@ namespace MWDialogue
 
         if (info)
         {
-            std::string title;
+            ESM::RefId title;
             if (dialogue.mType == ESM::Dialogue::Persuasion)
             {
                 // Determine GMST from dialogue topic. GMSTs are:
                 // sAdmireSuccess, sAdmireFail, sIntimidateSuccess, sIntimidateFail,
                 // sTauntSuccess, sTauntFail, sBribeSuccess, sBribeFail
-                std::string modifiedTopic = "s" + topic;
+                std::string modifiedTopic = "s" + topic.getRefIdString();
 
                 modifiedTopic.erase(std::remove(modifiedTopic.begin(), modifiedTopic.end(), ' '), modifiedTopic.end());
 
                 const MWWorld::Store<ESM::GameSetting>& gmsts
                     = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-                title = gmsts.find(modifiedTopic)->mValue.getString();
+                title = ESM::RefId::stringRefId(gmsts.find(modifiedTopic)->mValue.getString());
             }
             else
                 title = topic;
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
-            callback->addResponse(title, Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            callback->addResponse(title.getRefIdString(), Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
 
             if (dialogue.mType == ESM::Dialogue::Topic)
             {
@@ -328,7 +328,7 @@ namespace MWDialogue
                     if (iter->mId == info->mId)
                     {
                         MWBase::Environment::get().getJournal()->addTopic(
-                            Misc::StringUtils::lowerCase(topic), info->mId, mActor);
+                            topic, info->mId, mActor);
                         break;
                     }
                 }
@@ -342,7 +342,7 @@ namespace MWDialogue
         }
     }
 
-    const ESM::Dialogue* DialogueManager::searchDialogue(const std::string& id)
+    const ESM::Dialogue* DialogueManager::searchDialogue(const ESM::RefId& id)
     {
         return MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().search(id);
     }
@@ -367,7 +367,7 @@ namespace MWDialogue
             if (dialog.mType == ESM::Dialogue::Topic)
             {
                 const auto* answer = filter.search(dialog, true);
-                auto topicId = Misc::StringUtils::lowerCase(dialog.mId);
+                auto topicId = dialog.mId;
 
                 if (answer != nullptr)
                 {
@@ -375,7 +375,7 @@ namespace MWDialogue
                     if (!inJournal(topicId, answer->mId))
                     {
                         // Does this dialogue contains some actor-specific answer?
-                        if (Misc::StringUtils::ciEqual(answer->mActor, mActor.getCellRef().getRefId()))
+                        if (ESM::RefId::ciEqual(answer->mActor, mActor.getCellRef().getRefId()))
                             topicFlags |= MWBase::DialogueManager::TopicType::Specific;
                     }
                     else
@@ -416,7 +416,7 @@ namespace MWDialogue
         {
             // does the player know the topic?
             if (mKnownTopics.count(topic))
-                keywordList.push_back(topic);
+                keywordList.push_back(topic.getRefIdString());
         }
 
         // sort again, because the previous sort was case-sensitive
@@ -424,7 +424,7 @@ namespace MWDialogue
         return keywordList;
     }
 
-    int DialogueManager::getTopicFlag(const std::string& topicId) const
+    int DialogueManager::getTopicFlag(const ESM::RefId& topicId) const
     {
         auto known = mActorKnownTopics.find(topicId);
         if (known != mActorKnownTopics.end())
@@ -436,10 +436,10 @@ namespace MWDialogue
     {
         if (!mIsInChoice)
         {
-            const ESM::Dialogue* dialogue = searchDialogue(keyword);
+            const ESM::Dialogue* dialogue = searchDialogue(ESM::RefId::stringRefId(keyword));
             if (dialogue && dialogue->mType == ESM::Dialogue::Topic)
             {
-                executeTopic(keyword, callback);
+                executeTopic(ESM::RefId::stringRefId(keyword), callback);
             }
         }
     }
@@ -502,7 +502,7 @@ namespace MWDialogue
                             if (iter->mId == info->mId)
                             {
                                 MWBase::Environment::get().getJournal()->addTopic(
-                                    Misc::StringUtils::lowerCase(mLastTopic), info->mId, mActor);
+                                    mLastTopic, info->mId, mActor);
                                 break;
                             }
                         }
@@ -590,7 +590,7 @@ namespace MWDialogue
             text = "Bribe";
         }
 
-        executeTopic(text + (success ? " Success" : " Fail"), callback);
+        executeTopic(ESM::RefId::stringRefId(text + (success ? " Success" : " Fail")), callback);
     }
 
     void DialogueManager::applyBarterDispositionChange(int delta)
@@ -612,7 +612,7 @@ namespace MWDialogue
         const MWWorld::Store<ESM::Dialogue>& dialogues
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
-        const ESM::Dialogue& dialogue = *dialogues.find("Service Refusal");
+        const ESM::Dialogue& dialogue = *dialogues.find(ESM::RefId::stringRefId("Service Refusal"));
 
         std::vector<const ESM::DialInfo*> infos = filter.list(dialogue, false, false, true);
         if (!infos.empty())
@@ -635,7 +635,7 @@ namespace MWDialogue
         return false;
     }
 
-    void DialogueManager::say(const MWWorld::Ptr& actor, const std::string& topic)
+    void DialogueManager::say(const MWWorld::Ptr& actor, const ESM::RefId& topic)
     {
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         if (sndMgr->sayActive(actor))
@@ -668,7 +668,7 @@ namespace MWDialogue
             if (winMgr->getSubtitlesEnabled())
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
-                sndMgr->say(actor, info->mSound);
+                sndMgr->say(actor, info->mSound.getRefIdString());
             if (!info->mResultScript.empty())
                 executeScript(info->mResultScript, actor);
         }
@@ -702,7 +702,7 @@ namespace MWDialogue
             ESM::DialogueState state;
             state.load(reader);
 
-            for (std::vector<std::string>::const_iterator iter(state.mKnownTopics.begin());
+            for (std::vector<ESM::RefId>::const_iterator iter(state.mKnownTopics.begin());
                  iter != state.mKnownTopics.end(); ++iter)
                 if (store.get<ESM::Dialogue>().search(*iter))
                     mKnownTopics.insert(*iter);
@@ -711,49 +711,40 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::modFactionReaction(std::string_view faction1, std::string_view faction2, int diff)
+    void DialogueManager::modFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int diff)
     {
-        std::string fact1 = Misc::StringUtils::lowerCase(faction1);
-        std::string fact2 = Misc::StringUtils::lowerCase(faction2);
-
         // Make sure the factions exist
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction1);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction2);
 
         int newValue = getFactionReaction(faction1, faction2) + diff;
 
-        std::map<std::string, int>& map = mChangedFactionReaction[fact1];
-        map[fact2] = newValue;
+        auto& map = mChangedFactionReaction[faction1];
+        map[faction2] = newValue;
     }
 
-    void DialogueManager::setFactionReaction(std::string_view faction1, std::string_view faction2, int absolute)
+    void DialogueManager::setFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int absolute)
     {
-        std::string fact1 = Misc::StringUtils::lowerCase(faction1);
-        std::string fact2 = Misc::StringUtils::lowerCase(faction2);
-
         // Make sure the factions exist
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction1);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction2);
 
-        std::map<std::string, int>& map = mChangedFactionReaction[fact1];
-        map[fact2] = absolute;
+        auto& map = mChangedFactionReaction[faction1];
+        map[faction2] = absolute;
     }
 
-    int DialogueManager::getFactionReaction(std::string_view faction1, std::string_view faction2) const
+    int DialogueManager::getFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2) const
     {
-        std::string fact1 = Misc::StringUtils::lowerCase(faction1);
-        std::string fact2 = Misc::StringUtils::lowerCase(faction2);
+        ModFactionReactionMap::const_iterator map = mChangedFactionReaction.find(faction1);
+        if (map != mChangedFactionReaction.end() && map->second.find(faction2) != map->second.end())
+            return map->second.at(faction2);
 
-        ModFactionReactionMap::const_iterator map = mChangedFactionReaction.find(fact1);
-        if (map != mChangedFactionReaction.end() && map->second.find(fact2) != map->second.end())
-            return map->second.at(fact2);
+        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction1);
 
-        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
-
-        std::map<std::string, int>::const_iterator it = faction->mReactions.begin();
+        auto it = faction->mReactions.begin();
         for (; it != faction->mReactions.end(); ++it)
         {
-            if (Misc::StringUtils::ciEqual(it->first, fact2))
+            if (ESM::RefId::ciEqual(it->first, faction2))
                 return it->second;
         }
         return 0;
@@ -764,7 +755,7 @@ namespace MWDialogue
         if (actor == mActor && !mLastTopic.empty())
         {
             MWBase::Environment::get().getJournal()->removeLastAddedTopicResponse(
-                Misc::StringUtils::lowerCase(mLastTopic), actor.getClass().getName(actor));
+                mLastTopic, actor.getClass().getName(actor));
         }
     }
 }

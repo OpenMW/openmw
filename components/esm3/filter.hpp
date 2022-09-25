@@ -2,6 +2,8 @@
 #define COMPONENTS_ESM_FILTER_H
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
+
 #include <string>
 
 namespace ESM
@@ -14,7 +16,7 @@ namespace ESM
         constexpr static RecNameInts sRecordId = REC_FILT;
 
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
 
         std::string mDescription;
 

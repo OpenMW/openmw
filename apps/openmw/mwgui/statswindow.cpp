@@ -153,7 +153,7 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
     }
 
-    void StatsWindow::setValue(const std::string& id, const MWMechanics::AttributeValue& value)
+    void StatsWindow::setValue(const ESM::RefId& id, const MWMechanics::AttributeValue& value)
     {
         static const char* ids[] = {
             "AttribVal1",
@@ -168,12 +168,12 @@ namespace MWGui
         };
 
         for (int i = 0; ids[i]; ++i)
-            if (ids[i] == id)
+            if (ids[i] == id.getRefIdString())
             {
-                setText(id, std::to_string(static_cast<int>(value.getModified())));
+                setText(id.getRefIdString(), std::to_string(static_cast<int>(value.getModified())));
 
                 MyGUI::TextBox* box;
-                getWidget(box, id);
+                getWidget(box, id.getRefIdString());
 
                 if (value.getModified() > value.getBase())
                     box->_setWidgetState("increased");
@@ -186,50 +186,50 @@ namespace MWGui
             }
     }
 
-    void StatsWindow::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
+    void StatsWindow::setValue(const ESM::RefId& id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified(false));
 
         // Fatigue can be negative
-        if (id != "FBar")
+        if (id.getRefIdString() != "FBar")
             current = std::max(0, current);
 
-        setBar(id, id + "T", current, modified);
+        setBar(id.getRefIdString(), id.getRefIdString() + "T", current, modified);
 
         // health, magicka, fatigue tooltip
         MyGUI::Widget* w;
         std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
-        if (id == "HBar")
+        if (id.getRefIdString() == "HBar")
         {
             getWidget(w, "Health");
             w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
         }
-        else if (id == "MBar")
+        else if (id.getRefIdString() == "MBar")
         {
             getWidget(w, "Magicka");
             w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
-        else if (id == "FBar")
+        else if (id.getRefIdString() == "FBar")
         {
             getWidget(w, "Fatigue");
             w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
         }
     }
 
-    void StatsWindow::setValue(const std::string& id, const std::string& value)
+    void StatsWindow::setValue(const ESM::RefId& id, const std::string& value)
     {
-        if (id == "name")
+        if (id.getRefIdString() == "name")
             setPlayerName(value);
-        else if (id == "race")
+        else if (id.getRefIdString() == "race")
             setText("RaceText", value);
-        else if (id == "class")
+        else if (id.getRefIdString() == "class")
             setText("ClassText", value);
     }
 
-    void StatsWindow::setValue(const std::string& id, int value)
+    void StatsWindow::setValue(const ESM::RefId& id, int value)
     {
-        if (id == "level")
+        if (id.getRefIdString() == "level")
         {
             std::ostringstream text;
             text << value;
@@ -376,7 +376,7 @@ namespace MWGui
         setFactions(PCstats.getFactionRanks());
         setExpelled(PCstats.getExpelled());
 
-        const std::string& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+        auto signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
 
         setBirthSign(signId);
         setReputation(PCstats.getReputation());
@@ -395,7 +395,7 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::setExpelled(const std::set<std::string>& expelled)
+    void StatsWindow::setExpelled(const std::set<ESM::RefId>& expelled)
     {
         if (mExpelled != expelled)
         {
@@ -404,7 +404,7 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::setBirthSign(const std::string& signId)
+    void StatsWindow::setBirthSign(const ESM::RefId& signId)
     {
         if (signId != mBirthSignId)
         {
@@ -591,12 +591,12 @@ namespace MWGui
         {
             MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
             const MWMechanics::NpcStats& PCstats = playerPtr.getClass().getNpcStats(playerPtr);
-            const std::set<std::string>& expelled = PCstats.getExpelled();
+            const std::set<ESM::RefId>& expelled = PCstats.getExpelled();
 
             bool firstFaction = true;
             for (auto& factionPair : mFactions)
             {
-                const std::string& factionId = factionPair.first;
+                const ESM::RefId& factionId = factionPair.first;
                 const ESM::Faction* faction = store.get<ESM::Faction>().find(factionId);
                 if (faction->mData.mIsHidden == 1)
                     continue;

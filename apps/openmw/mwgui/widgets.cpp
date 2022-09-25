@@ -203,7 +203,7 @@ namespace MWGui::Widgets
     {
     }
 
-    void MWSpell::setSpellId(const std::string& spellId)
+    void MWSpell::setSpellId(const ESM::RefId& spellId)
     {
         mId = spellId;
         updateWidgets();

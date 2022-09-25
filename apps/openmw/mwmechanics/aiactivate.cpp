@@ -13,7 +13,7 @@
 
 namespace MWMechanics
 {
-    AiActivate::AiActivate(std::string_view objectId, bool repeat)
+    AiActivate::AiActivate(const ESM::RefId& objectId, bool repeat)
         : TypedAiPackage<AiActivate>(repeat)
         , mObjectId(objectId)
     {

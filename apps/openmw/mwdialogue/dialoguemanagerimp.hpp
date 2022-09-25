@@ -31,13 +31,13 @@ namespace MWDialogue
             const ESM::DialInfo* mInfo;
         };
 
-        std::set<std::string, Misc::StringUtils::CiComp> mKnownTopics; // Those are the topics the player knows.
+        std::set<ESM::RefId> mKnownTopics; // Those are the topics the player knows.
 
         // Modified faction reactions. <Faction1, <Faction2, Difference> >
-        typedef std::map<std::string, std::map<std::string, int>> ModFactionReactionMap;
+        typedef std::map<ESM::RefId, std::map<ESM::RefId, int>> ModFactionReactionMap;
         ModFactionReactionMap mChangedFactionReaction;
 
-        std::map<std::string, ActorKnownTopicInfo, Misc::StringUtils::CiComp> mActorKnownTopics;
+        std::map<ESM::RefId, ActorKnownTopicInfo> mActorKnownTopics;
 
         Translation::Storage& mTranslationDataStorage;
         MWScript::CompilerContext mCompilerContext;
@@ -47,7 +47,7 @@ namespace MWDialogue
         bool mTalkedTo;
 
         int mChoice;
-        std::string mLastTopic; // last topic ID, lowercase
+        ESM::RefId mLastTopic; // last topic ID, lowercase
         bool mIsInChoice;
         bool mGoodbye;
 
@@ -57,7 +57,7 @@ namespace MWDialogue
         int mCurrentDisposition;
         int mPermanentDispositionChange;
 
-        std::vector<std::string> parseTopicIdsFromText(const std::string& text);
+        std::vector<ESM::RefId> parseTopicIdsFromText(const std::string& text);
         void addTopicsFromText(const std::string& text);
 
         void updateActorKnownTopics();
@@ -66,9 +66,9 @@ namespace MWDialogue
         bool compile(const std::string& cmd, std::vector<Interpreter::Type_Code>& code, const MWWorld::Ptr& actor);
         void executeScript(const std::string& script, const MWWorld::Ptr& actor);
 
-        void executeTopic(const std::string& topic, ResponseCallback* callback);
+        void executeTopic(const ESM::RefId& topic, ResponseCallback* callback);
 
-        const ESM::Dialogue* searchDialogue(const std::string& id);
+        const ESM::Dialogue* searchDialogue(const ESM::RefId& id);
 
         void updateOriginalDisposition();
 
@@ -82,11 +82,11 @@ namespace MWDialogue
         bool startDialogue(const MWWorld::Ptr& actor, ResponseCallback* callback) override;
 
         std::list<std::string> getAvailableTopics() override;
-        int getTopicFlag(const std::string& topicId) const override;
+        int getTopicFlag(const ESM::RefId& topicId) const override;
 
-        bool inJournal(const std::string& topicId, const std::string& infoId) const override;
+        bool inJournal(const ESM::RefId& topicId, const ESM::RefId& infoId) const override;
 
-        void addTopic(std::string_view topic) override;
+        void addTopic(const ESM::RefId& topic) override;
 
         void addChoice(std::string_view text, int choice) override;
         const std::vector<std::pair<std::string, int>>& getChoices() const override;
@@ -97,7 +97,7 @@ namespace MWDialogue
 
         bool checkServiceRefused(ResponseCallback* callback, ServiceType service = ServiceType::Any) override;
 
-        void say(const MWWorld::Ptr& actor, const std::string& topic) override;
+        void say(const MWWorld::Ptr& actor, const ESM::RefId& topic) override;
 
         // calbacks for the GUI
         void keywordSelected(const std::string& keyword, ResponseCallback* callback) override;
@@ -116,12 +116,12 @@ namespace MWDialogue
         void readRecord(ESM::ESMReader& reader, uint32_t type) override;
 
         /// Changes faction1's opinion of faction2 by \a diff.
-        void modFactionReaction(std::string_view faction1, std::string_view faction2, int diff) override;
+        void modFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int diff) override;
 
-        void setFactionReaction(std::string_view faction1, std::string_view faction2, int absolute) override;
+        void setFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int absolute) override;
 
         /// @return faction1's opinion of faction2
-        int getFactionReaction(std::string_view faction1, std::string_view faction2) const override;
+        int getFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2) const override;
 
         /// Removes the last added topic response for the given actor from the journal
         void clearInfoActor(const MWWorld::Ptr& actor) const override;

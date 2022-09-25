@@ -20,7 +20,7 @@ namespace MWMechanics
 {
 
     /// @return ID of resulting item, or empty if none
-    inline std::string_view getLevelledItem(
+    inline const ESM::RefId& getLevelledItem(
         const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng)
     {
         const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
@@ -29,9 +29,9 @@ namespace MWMechanics
         int playerLevel = player.getClass().getCreatureStats(player).getLevel();
 
         if (Misc::Rng::roll0to99(prng) < levItem->mChanceNone)
-            return {};
+            return ESM::RefId::sEmpty;
 
-        std::vector<std::string_view> candidates;
+        std::vector<const ESM::RefId*> candidates;
         int highestLevel = 0;
         for (const auto& levelledItem : items)
         {
@@ -44,26 +44,26 @@ namespace MWMechanics
         if (creature)
             allLevels = levItem->mFlags & ESM::CreatureLevList::AllLevels;
 
-        std::pair<int, std::string_view> highest = { -1, {} };
+        std::pair<int, const ESM::RefId*> highest = { -1, {} };
         for (const auto& levelledItem : items)
         {
             if (playerLevel >= levelledItem.mLevel && (allLevels || levelledItem.mLevel == highestLevel))
             {
-                candidates.push_back(levelledItem.mId);
+                candidates.push_back(&levelledItem.mId);
                 if (levelledItem.mLevel >= highest.first)
-                    highest = std::make_pair(levelledItem.mLevel, levelledItem.mId);
+                    highest = std::make_pair(levelledItem.mLevel, &levelledItem.mId);
             }
         }
         if (candidates.empty())
-            return {};
-        std::string_view item = candidates[Misc::Rng::rollDice(candidates.size(), prng)];
+            return ESM::RefId::sEmpty;
+        const ESM::RefId& item = *candidates[Misc::Rng::rollDice(candidates.size(), prng)];
 
         // Vanilla doesn't fail on nonexistent items in levelled lists
         if (!MWBase::Environment::get().getWorld()->getStore().find(item))
         {
             Log(Debug::Warning) << "Warning: ignoring nonexistent item '" << item << "' in levelled list '"
                                 << levItem->mId << "'";
-            return {};
+            return ESM::RefId::sEmpty;
         }
 
         // Is this another levelled item or a real item?

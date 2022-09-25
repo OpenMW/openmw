@@ -10,6 +10,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "components/esm/esmcommon.hpp"
+#include "components/esm/refid.hpp"
 #include "loadtes3.hpp"
 
 namespace ESM
@@ -172,6 +173,7 @@ namespace ESM
 
         // Read a string, including the sub-record header (but not the name)
         std::string getHString();
+        RefId       getRefId();
 
         void skipHString();
 

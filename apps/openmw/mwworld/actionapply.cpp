@@ -6,7 +6,7 @@
 
 namespace MWWorld
 {
-    ActionApply::ActionApply(const Ptr& object, const std::string& id)
+    ActionApply::ActionApply(const Ptr& object, const ESM::RefId& id)
         : Action(false, object)
         , mId(id)
     {
@@ -17,7 +17,7 @@ namespace MWWorld
         actor.getClass().consume(getTarget(), actor);
     }
 
-    ActionApplyWithSkill::ActionApplyWithSkill(const Ptr& object, const std::string& id, int skillIndex, int usageType)
+    ActionApplyWithSkill::ActionApplyWithSkill(const Ptr& object, const ESM::RefId& id, int skillIndex, int usageType)
         : Action(false, object)
         , mId(id)
         , mSkillIndex(skillIndex)

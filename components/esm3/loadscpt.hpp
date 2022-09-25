@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -37,7 +38,7 @@ namespace ESM
         };
 
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
 
         SCHDstruct mData;
 

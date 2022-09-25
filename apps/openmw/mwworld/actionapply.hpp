@@ -2,31 +2,31 @@
 #define GAME_MWWORLD_ACTIONAPPLY_H
 
 #include <string>
-
+#include <components/esm/refid.hpp>
 #include "action.hpp"
 
 namespace MWWorld
 {
     class ActionApply : public Action
     {
-        std::string mId;
+        ESM::RefId mId;
 
         void executeImp(const Ptr& actor) override;
 
     public:
-        ActionApply(const Ptr& object, const std::string& id);
+        ActionApply(const Ptr& object, const ESM::RefId& id);
     };
 
     class ActionApplyWithSkill : public Action
     {
-        std::string mId;
+        ESM::RefId mId;
         int mSkillIndex;
         int mUsageType;
 
         void executeImp(const Ptr& actor) override;
 
     public:
-        ActionApplyWithSkill(const Ptr& object, const std::string& id, int skillIndex, int usageType);
+        ActionApplyWithSkill(const Ptr& object, const ESM::RefId& id, int skillIndex, int usageType);
     };
 }
 

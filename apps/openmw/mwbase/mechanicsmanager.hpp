@@ -21,7 +21,7 @@ namespace osg
 namespace ESM
 {
     struct Class;
-
+    struct RefId;
     class ESMReader;
     class ESMWriter;
 }
@@ -69,14 +69,14 @@ namespace MWBase
         virtual void setPlayerName(const std::string& name) = 0;
         ///< Set player name.
 
-        virtual void setPlayerRace(const std::string& id, bool male, const std::string& head, const std::string& hair)
+        virtual void setPlayerRace(const ESM::RefId& id, bool male, const ESM::RefId& head, const ESM::RefId& hair)
             = 0;
         ///< Set player race.
 
-        virtual void setPlayerBirthsign(const std::string& id) = 0;
+        virtual void setPlayerBirthsign(const ESM::RefId& id) = 0;
         ///< Set player birthsign.
 
-        virtual void setPlayerClass(const std::string& id) = 0;
+        virtual void setPlayerClass(const ESM::RefId& id) = 0;
         ///< Set player class to stock class.
 
         virtual void setPlayerClass(const ESM::Class& class_) = 0;
@@ -98,7 +98,7 @@ namespace MWBase
         virtual int getDerivedDisposition(const MWWorld::Ptr& ptr, bool clamp = true) = 0;
         ///< Calculate the diposition of an NPC toward the player.
 
-        virtual int countDeaths(const std::string& id) const = 0;
+        virtual int countDeaths(const ESM::RefId& id) const = 0;
         ///< Return the number of deaths for actors with the given ID.
 
         /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
@@ -128,7 +128,7 @@ namespace MWBase
          * @return was the crime seen?
          */
         virtual bool commitCrime(const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim, OffenseType type,
-            const std::string& factionId = "", int arg = 0, bool victimAware = false)
+            const ESM::RefId& factionId = ESM::RefId::sEmpty, int arg = 0, bool victimAware = false)
             = 0;
         /// @return false if the attack was considered a "friendly hit" and forgiven
         virtual bool actorAttacked(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
@@ -236,7 +236,7 @@ namespace MWBase
         virtual bool isReadyToBlock(const MWWorld::Ptr& ptr) const = 0;
         virtual bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const = 0;
 
-        virtual void castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell) = 0;
+        virtual void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell) = 0;
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& settings) = 0;
 
@@ -255,10 +255,10 @@ namespace MWBase
 
         /// List the owners that the player has stolen this item from (the owner can be an NPC or a faction).
         /// <Owner, item count>
-        virtual std::vector<std::pair<std::string, int>> getStolenItemOwners(const std::string& itemid) = 0;
+        virtual std::vector<std::pair<ESM::RefId, int>> getStolenItemOwners(const ESM::RefId& itemid) = 0;
 
         /// Has the player stolen this item from the given owner?
-        virtual bool isItemStolenFrom(const std::string& itemid, const MWWorld::Ptr& ptr) = 0;
+        virtual bool isItemStolenFrom(const ESM::RefId& itemid, const MWWorld::Ptr& ptr) = 0;
 
         virtual bool isBoundItem(const MWWorld::Ptr& item) = 0;
         virtual bool isAllowedToUse(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim) = 0;

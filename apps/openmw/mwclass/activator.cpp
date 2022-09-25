@@ -84,7 +84,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    std::string_view Activator::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Activator::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Activator>* ref = ptr.get<ESM::Activator>();
 
@@ -109,7 +109,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
         info.text = text;
 
@@ -122,7 +122,7 @@ namespace MWClass
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfActivator", prng);
+            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom(ESM::RefId::stringRefId("WolfActivator"), prng);
 
             std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if (sound)
@@ -140,12 +140,12 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    std::string_view Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
+    const ESM::RefId& Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         const std::string model
             = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-        std::string_view creatureId;
+        const ESM::RefId* creatureId = nullptr;
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         for (const ESM::Creature& iter : store.get<ESM::Creature>())
@@ -153,7 +153,7 @@ namespace MWClass
             if (!iter.mModel.empty()
                 && Misc::StringUtils::ciEqual(model, Misc::ResourceHelpers::correctMeshPath(iter.mModel, vfs)))
             {
-                creatureId = !iter.mOriginal.empty() ? iter.mOriginal : iter.mId;
+                creatureId = !iter.mOriginal.empty() ? &iter.mOriginal : &iter.mId;
                 break;
             }
         }
@@ -162,14 +162,14 @@ namespace MWClass
 
         std::vector<const ESM::SoundGenerator*> fallbacksounds;
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        if (!creatureId.empty())
+        if (creatureId && !creatureId->empty())
         {
             std::vector<const ESM::SoundGenerator*> sounds;
             for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end();
                  ++sound)
             {
                 if (type == sound->mType && !sound->mCreature.empty()
-                    && (Misc::StringUtils::ciEqual(creatureId, sound->mCreature)))
+                    && (ESM::RefId::ciEqual(*creatureId, sound->mCreature)))
                     sounds.push_back(&*sound);
                 if (type == sound->mType && sound->mCreature.empty())
                     fallbacksounds.push_back(&*sound);
@@ -192,7 +192,7 @@ namespace MWClass
                 return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
         }
 
-        return {};
+        return ESM::RefId::sEmpty;
     }
 
     int Activator::getSndGenTypeFromName(std::string_view name)

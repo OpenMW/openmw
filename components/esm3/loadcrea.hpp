@@ -9,6 +9,7 @@
 #include "transport.hpp"
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -75,8 +76,10 @@ namespace ESM
         float mScale;
 
         unsigned int mRecordFlags;
-        std::string mId, mModel, mName, mScript;
-        std::string mOriginal; // Base creature that this is a modification of
+        RefId mId, mScript;
+        std::string mModel;
+        std::string mName;
+        ESM::RefId mOriginal; // Base creature that this is a modification of
 
         InventoryList mInventory;
         SpellList mSpells;

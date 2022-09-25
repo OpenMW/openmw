@@ -25,7 +25,7 @@ namespace ESM
             {
                 cellRef.blank();
                 cellRef.mRefNum.load(esm, wideRefNum);
-                cellRef.mRefID = esm.getHNOString("NAME");
+                cellRef.mRefID = ESM::RefId::stringRefId(esm.getHNOString("NAME"));
 
                 if (cellRef.mRefID.empty())
                     Log(Debug::Warning) << "Warning: got CellRef with empty RefId in " << esm.getName() << " 0x"
@@ -41,6 +41,14 @@ namespace ESM
         template <bool load>
         void loadDataImpl(ESMReader& esm, bool& isDeleted, CellRef& cellRef)
         {
+            const auto getRefIdOrSkip = [&](ESM::RefId refId)
+            {
+                if constexpr (load)
+                    refId = esm.getRefId();
+                else
+                    esm.skipHString();
+            };
+
             const auto getHStringOrSkip = [&](std::string& value) {
                 if constexpr (load)
                     value = esm.getHString();
@@ -73,16 +81,16 @@ namespace ESM
                             cellRef.mScale = std::clamp(cellRef.mScale, 0.5f, 2.0f);
                         break;
                     case fourCC("ANAM"):
-                        getHStringOrSkip(cellRef.mOwner);
+                        getRefIdOrSkip(cellRef.mOwner);
                         break;
                     case fourCC("BNAM"):
                         getHStringOrSkip(cellRef.mGlobalVariable);
                         break;
                     case fourCC("XSOL"):
-                        getHStringOrSkip(cellRef.mSoul);
+                        getRefIdOrSkip(cellRef.mSoul);
                         break;
                     case fourCC("CNAM"):
-                        getHStringOrSkip(cellRef.mFaction);
+                        getRefIdOrSkip(cellRef.mFaction);
                         break;
                     case fourCC("INDX"):
                         getHTOrSkip(cellRef.mFactionRank);
@@ -108,10 +116,10 @@ namespace ESM
                         getHTOrSkip(cellRef.mLockLevel);
                         break;
                     case fourCC("KNAM"):
-                        getHStringOrSkip(cellRef.mKey);
+                        getRefIdOrSkip(cellRef.mKey);
                         break;
                     case fourCC("TNAM"):
-                        getHStringOrSkip(cellRef.mTrap);
+                        getRefIdOrSkip(cellRef.mTrap);
                         break;
                     case fourCC("DATA"):
                         if constexpr (load)
@@ -188,7 +196,7 @@ namespace ESM
     {
         mRefNum.save(esm, wideRefNum);
 
-        esm.writeHNCString("NAME", mRefID);
+        esm.writeHNCString("NAME", mRefID.getRefIdString());
 
         if (isDeleted)
         {
@@ -202,14 +210,14 @@ namespace ESM
         }
 
         if (!inInventory)
-            esm.writeHNOCString("ANAM", mOwner);
+            esm.writeHNOCString("ANAM", mOwner.getRefIdString());
 
         esm.writeHNOCString("BNAM", mGlobalVariable);
-        esm.writeHNOCString("XSOL", mSoul);
+        esm.writeHNOCString("XSOL", mSoul.getRefIdString());
 
         if (!inInventory)
         {
-            esm.writeHNOCString("CNAM", mFaction);
+            esm.writeHNOCString("CNAM", mFaction.getRefIdString());
             if (mFactionRank != -2)
             {
                 esm.writeHNT("INDX", mFactionRank);
@@ -238,8 +246,8 @@ namespace ESM
 
         if (!inInventory)
         {
-            esm.writeHNOCString("KNAM", mKey);
-            esm.writeHNOCString("TNAM", mTrap);
+            esm.writeHNOCString("KNAM", mKey.getRefIdString());
+            esm.writeHNOCString("TNAM", mTrap.getRefIdString());
         }
 
         if (mReferenceBlocked != -1)

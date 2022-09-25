@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -35,7 +36,7 @@ namespace ESM
         // Reference to a sound that is played randomly in this region
         struct SoundRef
         {
-            std::string mSound;
+            ESM::RefId mSound;
             unsigned char mChance;
         };
 
@@ -45,7 +46,8 @@ namespace ESM
         unsigned int mRecordFlags;
         // sleepList refers to a leveled list of creatures you can meet if
         // you sleep outside in this region.
-        std::string mId, mName, mSleepList;
+        RefId mId, mSleepList;
+        std::string mName;
 
         std::vector<SoundRef> mSoundList;
 

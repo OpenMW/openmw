@@ -28,9 +28,9 @@ namespace MWMechanics
         Objects mObjects;
         Actors mActors;
 
-        typedef std::pair<std::string, bool> Owner; // < Owner id, bool isFaction >
+        typedef std::pair<ESM::RefId, bool> Owner; // < Owner id, bool isFaction >
         typedef std::map<Owner, int> OwnerMap; // < Owner, number of stolen items with this id from this owner >
-        typedef std::map<std::string, OwnerMap> StolenItemsMap;
+        typedef std::map<ESM::RefId, OwnerMap> StolenItemsMap;
         StolenItemsMap mStolenItems;
 
     public:
@@ -61,13 +61,13 @@ namespace MWMechanics
         void setPlayerName(const std::string& name) override;
         ///< Set player name.
 
-        void setPlayerRace(const std::string& id, bool male, const std::string& head, const std::string& hair) override;
+        void setPlayerRace(const ESM::RefId& id, bool male, const ESM::RefId& head, const ESM::RefId& hair) override;
         ///< Set player race.
 
-        void setPlayerBirthsign(const std::string& id) override;
+        void setPlayerBirthsign(const ESM::RefId& id) override;
         ///< Set player birthsign.
 
-        void setPlayerClass(const std::string& id) override;
+        void setPlayerClass(const ESM::RefId& id) override;
         ///< Set player class to stock class.
 
         void setPlayerClass(const ESM::Class& class_) override;
@@ -89,7 +89,7 @@ namespace MWMechanics
         int getDerivedDisposition(const MWWorld::Ptr& ptr, bool clamp = true) override;
         ///< Calculate the diposition of an NPC toward the player.
 
-        int countDeaths(const std::string& id) const override;
+        int countDeaths(const ESM::RefId& id) const override;
         ///< Return the number of deaths for actors with the given ID.
 
         void getPersuasionDispositionChange(
@@ -112,7 +112,7 @@ namespace MWMechanics
          * @return was the crime seen?
          */
         bool commitCrime(const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim, OffenseType type,
-            const std::string& factionId = "", int arg = 0, bool victimAware = false) override;
+            const ESM::RefId& factionId = ESM::RefId::sEmpty, int arg = 0, bool victimAware = false) override;
         /// @return false if the attack was considered a "friendly hit" and forgiven
         bool actorAttacked(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) override;
 
@@ -189,7 +189,7 @@ namespace MWMechanics
         /// Is \a ptr casting spell or using weapon now?
         bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const override;
 
-        void castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell = false) override;
+        void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell = false) override;
 
         void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
@@ -205,10 +205,10 @@ namespace MWMechanics
 
         /// List the owners that the player has stolen this item from (the owner can be an NPC or a faction).
         /// <Owner, item count>
-        std::vector<std::pair<std::string, int>> getStolenItemOwners(const std::string& itemid) override;
+        std::vector<std::pair<ESM::RefId, int>> getStolenItemOwners(const ESM::RefId& itemid) override;
 
         /// Has the player stolen this item from the given owner?
-        bool isItemStolenFrom(const std::string& itemid, const MWWorld::Ptr& ptr) override;
+        bool isItemStolenFrom(const ESM::RefId& itemid, const MWWorld::Ptr& ptr) override;
 
         bool isBoundItem(const MWWorld::Ptr& item) override;
 
@@ -240,7 +240,7 @@ namespace MWMechanics
             const MWWorld::Ptr& actor, const MWWorld::Ptr& victim, std::set<MWWorld::Ptr>& playerFollowers);
 
         bool reportCrime(const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim, OffenseType type,
-            const std::string& factionId, int arg = 0);
+            const ESM::RefId& factionId, int arg = 0);
     };
 }
 

@@ -157,6 +157,8 @@ namespace ESM
         return getString(mCtx.leftSub);
     }
 
+    RefId ESMReader::getRefId() { return ESM::RefId::stringRefId(getHString()); }
+
     void ESMReader::skipHString()
     {
         getSubHeader();

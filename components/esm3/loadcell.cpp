@@ -142,7 +142,7 @@ namespace ESM
                     mHasAmbi = true;
                     break;
                 case fourCC("RGNN"):
-                    mRegion = esm.getHString();
+                    mRegion = esm.getRefId();
                     break;
                 case fourCC("NAM5"):
                     esm.getHT(mMapColor);
@@ -195,7 +195,7 @@ namespace ESM
             }
 
             if (mData.mFlags & QuasiEx)
-                esm.writeHNOCString("RGNN", mRegion);
+                esm.writeHNOCString("RGNN", mRegion.getRefIdString());
             else
             {
                 // Try to avoid saving ambient lighting information when it's unnecessary.
@@ -206,7 +206,7 @@ namespace ESM
         }
         else
         {
-            esm.writeHNOCString("RGNN", mRegion);
+            esm.writeHNOCString("RGNN", mRegion.getRefIdString());
             if (mMapColor != 0)
                 esm.writeHNT("NAM5", mMapColor);
         }
@@ -232,7 +232,7 @@ namespace ESM
         if (!mName.empty())
             return mName + ' ' + cellGrid;
         // FIXME: should use sDefaultCellname GMST instead, but it's not available in this scope
-        std::string region = !mRegion.empty() ? mRegion : "Wilderness";
+        std::string region = !mRegion.empty() ? mRegion.getRefIdString() : "Wilderness";
 
         return region + ' ' + cellGrid;
     }

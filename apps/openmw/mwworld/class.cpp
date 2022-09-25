@@ -167,9 +167,9 @@ namespace MWWorld
         return -1;
     }
 
-    std::string_view Class::getScript(const ConstPtr& ptr) const
+    const ESM::RefId& Class::getScript(const ConstPtr& ptr) const
     {
-        return {};
+        return ESM::RefId::sEmpty;
     }
 
     float Class::getMaxSpeed(const Ptr& ptr) const
@@ -263,17 +263,17 @@ namespace MWWorld
         getClasses().emplace(instance.getType(), &instance);
     }
 
-    std::string_view Class::getUpSoundId(const ConstPtr& ptr) const
+    const ESM::RefId& Class::getUpSoundId(const ConstPtr& ptr) const
     {
         throw std::runtime_error("class does not have an up sound");
     }
 
-    std::string_view Class::getDownSoundId(const ConstPtr& ptr) const
+    const ESM::RefId& Class::getDownSoundId(const ConstPtr& ptr) const
     {
         throw std::runtime_error("class does not have an down sound");
     }
 
-    std::string_view Class::getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const
+    const ESM::RefId& Class::getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const
     {
         throw std::runtime_error("class does not support soundgen look up");
     }
@@ -293,7 +293,7 @@ namespace MWWorld
         // NOTE: Don't show WerewolfRobe objects in the inventory, or allow them to be taken.
         // Vanilla likely uses a hack like this since there's no other way to prevent it from
         // being shown or taken.
-        return (ptr.getCellRef().getRefId() != "werewolfrobe");
+        return (ptr.getCellRef().getRefId() != ESM::RefId::stringRefId("werewolfrobe"));
     }
 
     bool Class::hasToolTip(const ConstPtr& ptr) const
@@ -301,9 +301,9 @@ namespace MWWorld
         return true;
     }
 
-    std::string_view Class::getEnchantment(const ConstPtr& ptr) const
+    const ESM::RefId& Class::getEnchantment(const ConstPtr& ptr) const
     {
-        return {};
+        return ESM::RefId::sEmpty;
     }
 
     void Class::adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const {}
@@ -325,8 +325,8 @@ namespace MWWorld
             models.push_back(model);
     }
 
-    const std::string& Class::applyEnchantment(
-        const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const ESM::RefId& Class::applyEnchantment(
+        const MWWorld::ConstPtr& ptr, const ESM::RefId& enchId, int enchCharge, const std::string& newName) const
     {
         throw std::runtime_error("class can't be enchanted");
     }
@@ -347,7 +347,7 @@ namespace MWWorld
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
+            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom(ESM::RefId::stringRefId("WolfItem"), prng);
 
             std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if (sound)
@@ -471,9 +471,9 @@ namespace MWWorld
         return encumbrance / capacity;
     }
 
-    std::string_view Class::getSound(const MWWorld::ConstPtr&) const
+    const ESM::RefId& Class::getSound(const MWWorld::ConstPtr&) const
     {
-        return {};
+        return ESM::RefId::sEmpty;
     }
 
     int Class::getBaseFightRating(const ConstPtr& ptr) const
@@ -481,9 +481,9 @@ namespace MWWorld
         throw std::runtime_error("class does not support fight rating");
     }
 
-    std::string_view Class::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Class::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
     {
-        return {};
+        return ESM::RefId::sEmpty;
     }
     int Class::getPrimaryFactionRank(const MWWorld::ConstPtr& ptr) const
     {
@@ -498,7 +498,7 @@ namespace MWWorld
     osg::Vec4f Class::getEnchantmentColor(const MWWorld::ConstPtr& item) const
     {
         osg::Vec4f result(1, 1, 1, 1);
-        std::string_view enchantmentName = item.getClass().getEnchantment(item);
+        const ESM::RefId& enchantmentName = item.getClass().getEnchantment(item);
         if (enchantmentName.empty())
             return result;
 
@@ -521,12 +521,12 @@ namespace MWWorld
         return result;
     }
 
-    void Class::setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const
+    void Class::setBaseAISetting(const ESM::RefId&, MWMechanics::AiSetting setting, int value) const
     {
         throw std::runtime_error("class does not have creature stats");
     }
 
-    void Class::modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const
+    void Class::modifyBaseInventory(const ESM::RefId& actorId, const ESM::RefId& itemId, int amount) const
     {
         throw std::runtime_error("class does not have an inventory store");
     }

@@ -51,7 +51,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Book::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -60,7 +60,7 @@ namespace MWClass
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
+            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom(ESM::RefId::stringRefId("WolfItem"), prng);
 
             std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if (sound)
@@ -72,7 +72,7 @@ namespace MWClass
         return std::make_unique<MWWorld::ActionRead>(ptr);
     }
 
-    std::string_view Book::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Book::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 
@@ -86,14 +86,16 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string_view Book::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Book::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Book Up";
+        static auto var = ESM::RefId::stringRefId("Item Book Up");
+        return var;
     }
 
-    std::string_view Book::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Book::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Book Down";
+        static auto var = ESM::RefId::stringRefId("Item Book Down");
+        return var;
     }
 
     const std::string& Book::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -121,7 +123,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.enchant = ref->mBase->mEnchant;
@@ -131,15 +133,15 @@ namespace MWClass
         return info;
     }
 
-    std::string_view Book::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Book::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mEnchant;
     }
 
-    const std::string& Book::applyEnchantment(
-        const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const ESM::RefId& Book::applyEnchantment(
+        const MWWorld::ConstPtr& ptr, const ESM::RefId& enchId, int enchCharge, const std::string& newName) const
     {
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 

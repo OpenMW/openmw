@@ -33,7 +33,7 @@ namespace EsmLoader
         }
 
         template <class T, class F>
-        auto withStatic(std::string_view refId, const std::vector<T>& values, F&& f)
+        auto withStatic(const ESM::RefId& refId, const std::vector<T>& values, F&& f)
         {
             const auto it = std::lower_bound(values.begin(), values.end(), refId, LessById{});
 
@@ -44,7 +44,7 @@ namespace EsmLoader
         }
 
         template <class F>
-        auto withStatic(std::string_view refId, ESM::RecNameInts type, const EsmData& content, F&& f)
+        auto withStatic(const ESM::RefId& refId, ESM::RecNameInts type, const EsmData& content, F&& f)
         {
             switch (type)
             {
@@ -66,17 +66,16 @@ namespace EsmLoader
 
     EsmData::~EsmData() {}
 
-    std::string_view getModel(const EsmData& content, std::string_view refId, ESM::RecNameInts type)
+    std::string_view getModel(const EsmData& content, const ESM::RefId& refId, ESM::RecNameInts type)
     {
         return withStatic(refId, type, content, [](const auto& v) { return std::string_view(v.mModel); });
     }
 
-    ESM::Variant getGameSetting(const std::vector<ESM::GameSetting>& records, std::string_view id)
+    ESM::Variant getGameSetting(const std::vector<ESM::GameSetting>& records, const ESM::RefId& id)
     {
-        const std::string lower = Misc::StringUtils::lowerCase(id);
-        auto it = std::lower_bound(records.begin(), records.end(), lower, LessById{});
-        if (it == records.end() || it->mId != lower)
-            throw std::runtime_error("Game settings \"" + std::string(id) + "\" is not found");
+        auto it = std::lower_bound(records.begin(), records.end(), id, LessById{});
+        if (it == records.end() || it->mId != id)
+            throw std::runtime_error("Game settings \"" + id.getRefIdString() + "\" is not found");
         return it->mValue;
     }
 }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -14,7 +15,7 @@ namespace ESM
         struct QuickKey
         {
             int mType;
-            std::string mId; // Spell or Item ID
+            RefId mId; // Spell or Item ID
         };
 
         std::vector<QuickKey> mKeys;

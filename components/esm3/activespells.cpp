@@ -11,7 +11,7 @@ namespace ESM
         {
             for (const auto& params : spells)
             {
-                esm.writeHNString(tag, params.mId);
+                esm.writeHNString(tag, params.mId.getRefIdString());
 
                 esm.writeHNT("CAST", params.mCasterActorId);
                 esm.writeHNString("DISP", params.mDisplayName);
@@ -47,7 +47,7 @@ namespace ESM
             while (esm.isNextSub(tag))
             {
                 ActiveSpells::ActiveSpellParams params;
-                params.mId = esm.getHString();
+                params.mId = esm.getRefId();
                 esm.getHNT(params.mCasterActorId, "CAST");
                 params.mDisplayName = esm.getHNString("DISP");
                 params.mItem.unset();

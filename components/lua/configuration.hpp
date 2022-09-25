@@ -25,7 +25,7 @@ namespace LuaUtil
         ScriptIdsWithInitializationData getGlobalConf() const { return getConfByFlag(ESM::LuaScriptCfg::sGlobal); }
         ScriptIdsWithInitializationData getPlayerConf() const { return getConfByFlag(ESM::LuaScriptCfg::sPlayer); }
         ScriptIdsWithInitializationData getLocalConf(
-            uint32_t type, std::string_view recordId, ESM::RefNum refnum) const;
+            uint32_t type, const ESM::RefId& recordId, ESM::RefNum refnum) const;
 
     private:
         ScriptIdsWithInitializationData getConfByFlag(ESM::LuaScriptCfg::Flags flag) const;
@@ -40,7 +40,7 @@ namespace LuaUtil
             std::string_view mInitializationData;
         };
         std::map<uint32_t, std::vector<int>> mScriptsPerType;
-        std::map<std::string, std::vector<DetailedConf>, std::less<>> mScriptsPerRecordId;
+        std::map<ESM::RefId, std::vector<DetailedConf>, std::less<>> mScriptsPerRecordId;
         std::map<ESM::RefNum, std::vector<DetailedConf>> mScriptsPerRefNum;
     };
 

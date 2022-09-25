@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "sound_output.hpp"
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -66,11 +67,11 @@ namespace MWSound
 
         /// Lookup a soundId for its sound data (resource name, local volume,
         /// minRange, and maxRange)
-        Sound_Buffer* lookup(const std::string& soundId) const;
+        Sound_Buffer* lookup(const ESM::RefId& soundId) const;
 
         /// Lookup a soundId for its sound data (resource name, local volume,
         /// minRange, and maxRange), and ensure it's ready for use.
-        Sound_Buffer* load(const std::string& soundId);
+        Sound_Buffer* load(const ESM::RefId& soundId);
 
         void use(Sound_Buffer& sfx)
         {
@@ -94,14 +95,14 @@ namespace MWSound
         const VFS::Manager* const mVfs;
         Sound_Output* mOutput;
         std::deque<Sound_Buffer> mSoundBuffers;
-        std::unordered_map<std::string, Sound_Buffer*> mBufferNameMap;
+        std::unordered_map<ESM::RefId, Sound_Buffer*> mBufferNameMap;
         std::size_t mBufferCacheMax;
         std::size_t mBufferCacheMin;
         std::size_t mBufferCacheSize = 0;
         // NOTE: unused buffers are stored in front-newest order.
         std::deque<Sound_Buffer*> mUnusedBuffers;
 
-        inline Sound_Buffer* insertSound(const std::string& soundId, const ESM::Sound& sound);
+        inline Sound_Buffer* insertSound(const ESM::RefId& soundId, const ESM::Sound& sound);
 
         inline void unloadUnused();
     };

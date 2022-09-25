@@ -48,7 +48,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Potion::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -56,7 +56,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string_view Potion::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Potion::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
 
@@ -70,14 +70,16 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string_view Potion::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Potion::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Potion Up";
+        static const auto sound = ESM::RefId::stringRefId("Item Potion Up");
+        return sound;
     }
 
-    std::string_view Potion::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Potion::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Potion Down";
+        static const auto sound = ESM::RefId::stringRefId("Item Potion Down");
+        return sound;
     }
 
     const std::string& Potion::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -114,7 +116,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.text = text;
@@ -128,7 +130,7 @@ namespace MWClass
 
         auto action = std::make_unique<MWWorld::ActionApply>(ptr, ref->mBase->mId);
 
-        action->setSound("Drink");
+        action->setSound(ESM::RefId::stringRefId("Drink"));
 
         return action;
     }

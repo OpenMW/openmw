@@ -50,7 +50,7 @@ namespace MWWorld
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
         void launchMagicBolt(
-            const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot);
+            const ESM::RefId& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot);
 
         void launchProjectile(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& projectile, const osg::Vec3f& pos,
             const osg::Quat& orient, const MWWorld::Ptr& bow, float speed, float attackStrength);
@@ -90,17 +90,17 @@ namespace MWWorld
             MWWorld::Ptr getCaster();
 
             // MW-ids of a magic projectile
-            std::vector<std::string> mIdMagic;
+            std::vector<ESM::RefId> mIdMagic;
 
             // MW-id of an arrow projectile
-            std::string mIdArrow;
+            ESM::RefId mIdArrow;
 
             bool mToDelete;
         };
 
         struct MagicBoltState : public State
         {
-            std::string mSpellId;
+            ESM::RefId mSpellId;
 
             // Name of item to display as effect source in magic menu (in case we casted an enchantment)
             std::string mSourceName;
@@ -111,13 +111,13 @@ namespace MWWorld
             int mSlot;
 
             std::vector<MWBase::Sound*> mSounds;
-            std::set<std::string> mSoundIds;
+            std::set<ESM::RefId> mSoundIds;
         };
 
         struct ProjectileState : public State
         {
             // RefID of the bow or crossbow the actor was using when this projectile was fired (may be empty)
-            std::string mBowId;
+            ESM::RefId mBowId;
 
             osg::Vec3f mVelocity;
             float mAttackStrength;

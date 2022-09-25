@@ -71,7 +71,7 @@ namespace MWMechanics
 
         void resurrect(const MWWorld::Ptr& ptr) const;
 
-        void castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell = false) const;
+        void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell = false) const;
 
         void updateActor(const MWWorld::Ptr& old, const MWWorld::Ptr& ptr) const;
         ///< Updates an actor with a new Ptr
@@ -111,7 +111,7 @@ namespace MWMechanics
         void fastForwardAi() const;
         ///< Simulate the passing of time
 
-        int countDeaths(const std::string& id) const;
+        int countDeaths(const ESM::RefId& id) const;
         ///< Return the number of deaths for actors with the given ID.
 
         bool isAttackPreparing(const MWWorld::Ptr& ptr) const;
@@ -177,7 +177,7 @@ namespace MWMechanics
             Battle
         };
 
-        std::map<std::string, int> mDeathCount;
+        std::map<ESM::RefId, int> mDeathCount;
         std::list<Actor> mActors;
         std::map<const MWWorld::LiveCellRefBase*, std::list<Actor>::iterator> mIndex;
         float mTimerDisposeSummonsCorpses;

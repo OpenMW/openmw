@@ -131,7 +131,7 @@ namespace MWGui
 
     void BookWindow::onTakeButtonClicked(MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getWindowManager()->playSound("Item Book Up");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Book Up"));
 
         MWWorld::ActionTake take(mBook);
         take.execute(MWMechanics::getPlayer());
@@ -191,7 +191,7 @@ namespace MWGui
     {
         if ((mCurrentPage + 1) * 2 < mPages.size())
         {
-            MWBase::Environment::get().getWindowManager()->playSound("book page2");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page2"));
 
             ++mCurrentPage;
 
@@ -202,7 +202,7 @@ namespace MWGui
     {
         if (mCurrentPage > 0)
         {
-            MWBase::Environment::get().getWindowManager()->playSound("book page");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
 
             --mCurrentPage;
 

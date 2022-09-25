@@ -50,11 +50,11 @@ namespace ESM
         void AiEscort::load(ESMReader& esm)
         {
             esm.getHNT(mData, "DATA");
-            mTargetId = esm.getHNString("TARG");
+            mTargetId = ESM::RefId::stringRefId(esm.getHNString("TARG"));
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
             esm.getHNT(mRemainingDuration, "DURA");
-            mCellId = esm.getHNOString("CELL");
+            mCellId = ESM::RefId::stringRefId(esm.getHNOString("CELL"));
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
             if (esm.getFormat() < 18)
@@ -70,11 +70,11 @@ namespace ESM
         void AiEscort::save(ESMWriter& esm) const
         {
             esm.writeHNT("DATA", mData);
-            esm.writeHNString("TARG", mTargetId);
+            esm.writeHNString("TARG", mTargetId.getRefIdString());
             esm.writeHNT("TAID", mTargetActorId);
             esm.writeHNT("DURA", mRemainingDuration);
             if (!mCellId.empty())
-                esm.writeHNString("CELL", mCellId);
+                esm.writeHNString("CELL", mCellId.getRefIdString());
             if (mRepeat)
                 esm.writeHNT("REPT", mRepeat);
         }
@@ -82,11 +82,11 @@ namespace ESM
         void AiFollow::load(ESMReader& esm)
         {
             esm.getHNT(mData, "DATA");
-            mTargetId = esm.getHNString("TARG");
+            mTargetId = ESM::RefId::stringRefId(esm.getHNString("TARG"));
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
             esm.getHNT(mRemainingDuration, "DURA");
-            mCellId = esm.getHNOString("CELL");
+            mCellId = ESM::RefId::stringRefId(esm.getHNOString("CELL"));
             esm.getHNT(mAlwaysFollow, "ALWY");
             mCommanded = false;
             esm.getHNOT(mCommanded, "CMND");
@@ -107,11 +107,11 @@ namespace ESM
         void AiFollow::save(ESMWriter& esm) const
         {
             esm.writeHNT("DATA", mData);
-            esm.writeHNString("TARG", mTargetId);
+            esm.writeHNString("TARG", mTargetId.getRefIdString());
             esm.writeHNT("TAID", mTargetActorId);
             esm.writeHNT("DURA", mRemainingDuration);
             if (!mCellId.empty())
-                esm.writeHNString("CELL", mCellId);
+                esm.writeHNString("CELL", mCellId.getRefIdString());
             esm.writeHNT("ALWY", mAlwaysFollow);
             esm.writeHNT("CMND", mCommanded);
             if (mActive)
@@ -122,14 +122,14 @@ namespace ESM
 
         void AiActivate::load(ESMReader& esm)
         {
-            mTargetId = esm.getHNString("TARG");
+            mTargetId = ESM::RefId::stringRefId(esm.getHNString("TARG"));
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
         }
 
         void AiActivate::save(ESMWriter& esm) const
         {
-            esm.writeHNString("TARG", mTargetId);
+            esm.writeHNString("TARG", mTargetId.getRefIdString());
             if (mRepeat)
                 esm.writeHNT("REPT", mRepeat);
         }

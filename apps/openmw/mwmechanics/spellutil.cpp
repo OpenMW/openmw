@@ -181,14 +181,14 @@ namespace MWMechanics
     }
 
     float getSpellSuccessChance(
-        const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
+        const ESM::RefId& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
         if (const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId))
             return getSpellSuccessChance(spell, actor, effectiveSchool, cap, checkMagicka);
         return 0.f;
     }
 
-    int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor)
+    int getSpellSchool(const ESM::RefId& spellId, const MWWorld::Ptr& actor)
     {
         int school = 0;
         getSpellSuccessChance(spellId, actor, &school);
@@ -207,7 +207,7 @@ namespace MWMechanics
         return spell->mData.mType == ESM::Spell::ST_Spell && !(spell->mData.mFlags & ESM::Spell::F_Always);
     }
 
-    bool spellIncreasesSkill(const std::string& spellId)
+    bool spellIncreasesSkill(const ESM::RefId& spellId)
     {
         const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
         return spell && spellIncreasesSkill(spell);

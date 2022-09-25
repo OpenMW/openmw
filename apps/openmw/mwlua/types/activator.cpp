@@ -27,16 +27,16 @@ namespace MWLua
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Activator>();
         activator["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Activator* { return obj.ptr().get<ESM::Activator>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Activator* { return store->find(recordId); });
+            [store](const std::string& recordId) -> const ESM::Activator* { return store->find(ESM::RefId::stringRefId(recordId)); });
         sol::usertype<ESM::Activator> record = context.mLua->sol().new_usertype<ESM::Activator>("ESM3_Activator");
         record[sol::meta_function::to_string]
-            = [](const ESM::Activator& rec) { return "ESM3_Activator[" + rec.mId + "]"; };
-        record["id"] = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mId; });
+            = [](const ESM::Activator& rec) { return "ESM3_Activator[" + rec.mId.getRefIdString() + "]"; };
+        record["id"] = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Activator& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
         record["mwscript"]
-            = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mScript; });
+            = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mScript.getRefIdString(); });
     }
 }

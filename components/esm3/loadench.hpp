@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include "effectlist.hpp"
 
 namespace ESM
@@ -45,7 +46,7 @@ namespace ESM
         };
 
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
         ENDTstruct mData;
         EffectList mEffects;
 

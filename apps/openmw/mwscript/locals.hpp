@@ -11,6 +11,7 @@ namespace ESM
 {
     class Script;
     struct Locals;
+    struct RefId;
 }
 
 namespace MWScript
@@ -19,7 +20,7 @@ namespace MWScript
     {
         bool mInitialised;
 
-        void ensure(std::string_view scriptName);
+        void ensure(const ESM::RefId& scriptName);
 
     public:
         std::vector<Interpreter::Type_Short> mShorts;
@@ -39,33 +40,33 @@ namespace MWScript
         /// @note var needs to be in lowercase
         ///
         /// \note Locals will be automatically configured first, if necessary
-        bool setVarByInt(std::string_view script, std::string_view var, int val);
+        bool setVarByInt(const ESM::RefId& script, std::string_view var, int val);
 
         /// \note Locals will be automatically configured first, if necessary
         //
         // \note If it can not be determined if the variable exists, the error will be
         // ignored and false will be returned.
-        bool hasVar(std::string_view script, std::string_view var);
+        bool hasVar(const ESM::RefId& script, std::string_view var);
 
         /// if var does not exist, returns 0
         /// @note var needs to be in lowercase
         ///
         /// \note Locals will be automatically configured first, if necessary
-        int getIntVar(std::string_view script, std::string_view var);
+        int getIntVar(const ESM::RefId& script, std::string_view var);
 
         /// if var does not exist, returns 0
         /// @note var needs to be in lowercase
         ///
         /// \note Locals will be automatically configured first, if necessary
-        float getFloatVar(std::string_view script, std::string_view var);
+        float getFloatVar(ESM::RefId& script, std::string_view var);
 
         /// \note If locals have not been configured yet, no data is written.
         ///
         /// \return Locals written?
-        bool write(ESM::Locals& locals, std::string_view script) const;
+        bool write(ESM::Locals& locals, const ESM::RefId& script) const;
 
         /// \note Locals will be automatically configured first, if necessary
-        void read(const ESM::Locals& locals, std::string_view script);
+        void read(const ESM::Locals& locals, const ESM::RefId& script);
     };
 }
 

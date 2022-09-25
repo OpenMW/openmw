@@ -123,7 +123,7 @@ namespace MWGui
                     ToolTipInfo info;
                     info.caption = mFocusObject.getClass().getName(mFocusObject);
                     if (info.caption.empty())
-                        info.caption = mFocusObject.getCellRef().getRefId();
+                        info.caption = mFocusObject.getCellRef().getRefId().getRefIdString();
                     info.icon.clear();
                     tooltipSize = createToolTip(info, checkOwned());
                 }
@@ -226,7 +226,7 @@ namespace MWGui
                     ToolTipInfo info;
 
                     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(
-                        focus->getUserString("Spell"));
+                        ESM::RefId::stringRefId(focus->getUserString("Spell")));
                     info.caption = spell->mName;
                     Widgets::SpellEffectList effects;
                     for (const ESM::ENAMstruct& spellEffect : spell->mEffects.mList)
@@ -677,7 +677,7 @@ namespace MWGui
 
     std::string ToolTips::getSoulString(const MWWorld::CellRef& cellref)
     {
-        const std::string& soul = cellref.getSoul();
+        const ESM::RefId& soul = cellref.getSoul();
         if (soul.empty())
             return {};
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -685,22 +685,22 @@ namespace MWGui
         if (!creature)
             return {};
         if (creature->mName.empty())
-            return " (" + creature->mId + ")";
+            return " (" + creature->mId.getRefIdString() + ")";
         return " (" + creature->mName + ")";
     }
 
     std::string ToolTips::getCellRefString(const MWWorld::CellRef& cellref)
     {
         std::string ret;
-        ret += getMiscString(cellref.getOwner(), "Owner");
-        const std::string& factionId = cellref.getFaction();
+        ret += getMiscString(cellref.getOwner().getRefIdString(), "Owner");
+        const ESM::RefId& factionId = cellref.getFaction();
         if (!factionId.empty())
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Faction* fact = store.get<ESM::Faction>().search(factionId);
             if (fact != nullptr)
             {
-                ret += getMiscString(fact->mName.empty() ? factionId : fact->mName, "Owner Faction");
+                ret += getMiscString(fact->mName.empty() ? factionId.getRefIdString() : fact->mName, "Owner Faction");
                 if (cellref.getFactionRank() >= 0)
                 {
                     int rank = cellref.getFactionRank();
@@ -713,15 +713,15 @@ namespace MWGui
             }
         }
 
-        std::vector<std::pair<std::string, int>> itemOwners
+        std::vector<std::pair<ESM::RefId, int>> itemOwners
             = MWBase::Environment::get().getMechanicsManager()->getStolenItemOwners(cellref.getRefId());
 
-        for (std::pair<std::string, int>& owner : itemOwners)
+        for (std::pair<ESM::RefId, int>& owner : itemOwners)
         {
             if (owner.second == std::numeric_limits<int>::max())
-                ret += std::string("\nStolen from ") + owner.first; // for legacy (ESS) savegames
+                ret += std::string("\nStolen from ") + owner.first.getRefIdString(); // for legacy (ESS) savegames
             else
-                ret += std::string("\nStolen ") + MyGUI::utility::toString(owner.second) + " from " + owner.first;
+                ret += std::string("\nStolen ") + MyGUI::utility::toString(owner.second) + " from " + owner.first.getRefIdString();
         }
 
         ret += getMiscString(cellref.getGlobalVariable(), "Global");
@@ -864,7 +864,7 @@ namespace MWGui
         widget->setUserString("ToolTipType", "Layout");
     }
 
-    void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& birthsignId)
+    void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const ESM::RefId& birthsignId)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
@@ -879,7 +879,7 @@ namespace MWGui
 
         std::vector<const ESM::Spell*> abilities, powers, spells;
 
-        for (const std::string& spellId : sign->mPowers.mList)
+        for (const ESM::RefId& spellId : sign->mPowers.mList)
         {
             const ESM::Spell* spell = store.get<ESM::Spell>().search(spellId);
             if (!spell)

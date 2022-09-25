@@ -3,7 +3,10 @@
 
 #include <string_view>
 #include <utility>
-
+namespace ESM
+{
+    struct RefId;
+}
 namespace MWWorld
 {
     class Ptr;
@@ -13,7 +16,7 @@ namespace MWMechanics
 {
     bool isSummoningEffect(int effectId);
 
-    std::string_view getSummonedCreature(int effectId);
+    const ESM::RefId& getSummonedCreature(int effectId);
 
     void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<int, int>& summon);
 

@@ -118,15 +118,15 @@ namespace MWRender
                 if (part.mPart != ESM::PRT_Shield)
                     continue;
 
-                std::string_view bodypartName;
+                const ESM::RefId* bodypartName = nullptr;
                 if (female && !part.mFemale.empty())
-                    bodypartName = part.mFemale;
+                    bodypartName = &part.mFemale;
                 else if (!part.mMale.empty())
-                    bodypartName = part.mMale;
+                    bodypartName = &part.mMale;
 
-                if (!bodypartName.empty())
+                if (bodypartName && !bodypartName->empty())
                 {
-                    const ESM::BodyPart* bodypart = partStore.search(bodypartName);
+                    const ESM::BodyPart* bodypart = partStore.search(*bodypartName);
                     if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                         return std::string();
                     if (!bodypart->mModel.empty())

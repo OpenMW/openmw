@@ -33,9 +33,9 @@
 
 namespace
 {
-    std::string_view getDialogueActorFaction(const MWWorld::ConstPtr& actor)
+    const ESM::RefId& getDialogueActorFaction(const MWWorld::ConstPtr& actor)
     {
-        std::string_view factionId = actor.getClass().getPrimaryFaction(actor);
+        const ESM::RefId& factionId = actor.getClass().getPrimaryFaction(actor);
         if (factionId.empty())
             throw std::runtime_error("failed to determine dialogue actors faction (because actor is factionless)");
 
@@ -255,7 +255,7 @@ namespace MWScript
                 runtime.pop();
 
                 // workaround broken endgame scripts that kill dagoth ur
-                if (!R::implicit && ::Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "dagoth_ur_1"))
+                if (!R::implicit && ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("dagoth_ur_1")))
                 {
                     runtime.push(peek);
 
@@ -460,7 +460,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(id);
@@ -486,7 +486,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
@@ -509,7 +509,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view spellid = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId spellid = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 ptr.getClass().getCreatureStats(ptr).getActiveSpells().removeEffects(ptr, spellid);
@@ -540,7 +540,7 @@ namespace MWScript
 
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer value = 0;
@@ -560,7 +560,7 @@ namespace MWScript
             {
                 MWWorld::ConstPtr actor = R()(runtime, false);
 
-                std::string_view factionID;
+                ESM::RefId factionID;
 
                 if (arg0 == 0)
                 {
@@ -568,7 +568,7 @@ namespace MWScript
                 }
                 else
                 {
-                    factionID = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 // Make sure this faction exists
@@ -590,7 +590,7 @@ namespace MWScript
             {
                 MWWorld::ConstPtr actor = R()(runtime, false);
 
-                std::string_view factionID;
+                ESM::RefId factionID;
 
                 if (arg0 == 0)
                 {
@@ -598,7 +598,7 @@ namespace MWScript
                 }
                 else
                 {
-                    factionID = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 // Make sure this faction exists
@@ -627,7 +627,7 @@ namespace MWScript
             {
                 MWWorld::ConstPtr actor = R()(runtime, false);
 
-                std::string_view factionID;
+                ESM::RefId factionID;
 
                 if (arg0 == 0)
                 {
@@ -635,7 +635,7 @@ namespace MWScript
                 }
                 else
                 {
-                    factionID = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 // Make sure this faction exists
@@ -657,10 +657,10 @@ namespace MWScript
             {
                 MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                std::string_view factionID;
+                ESM::RefId factionID;
                 if (arg0 > 0)
                 {
-                    factionID = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 else
@@ -737,7 +737,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string id{ runtime.getStringLiteral(runtime[0].mInteger) };
+                ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime[0].mInteger = MWBase::Environment::get().getMechanicsManager()->countDeaths(id);
             }
         };
@@ -750,11 +750,11 @@ namespace MWScript
             {
                 MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                std::string_view factionId;
+                ESM::RefId factionId;
 
                 if (arg0 == 1)
                 {
-                    factionId = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 else
@@ -781,11 +781,11 @@ namespace MWScript
                 Interpreter::Type_Integer value = runtime[0].mInteger;
                 runtime.pop();
 
-                std::string_view factionId;
+                ESM::RefId factionId;
 
                 if (arg0 == 1)
                 {
-                    factionId = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 else
@@ -812,11 +812,11 @@ namespace MWScript
                 Interpreter::Type_Integer value = runtime[0].mInteger;
                 runtime.pop();
 
-                std::string_view factionId;
+                ESM::RefId factionId;
 
                 if (arg0 == 1)
                 {
-                    factionId = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 else
@@ -865,12 +865,12 @@ namespace MWScript
             {
                 MWWorld::ConstPtr ptr = R()(runtime);
 
-                std::string_view race = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId race = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                const std::string& npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
+                const ESM::RefId& npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
 
-                runtime.push(::Misc::StringUtils::ciEqual(race, npcRace));
+                runtime.push(ESM::RefId::ciEqual(race, npcRace));
             }
         };
 
@@ -893,10 +893,10 @@ namespace MWScript
             {
                 MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                std::string_view factionID;
+                ESM::RefId factionID;
                 if (arg0 > 0)
                 {
-                    factionID = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 else
@@ -923,10 +923,10 @@ namespace MWScript
             {
                 MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                std::string_view factionID;
+                ESM::RefId factionID;
                 if (arg0 > 0)
                 {
-                    factionID = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 else
@@ -949,10 +949,10 @@ namespace MWScript
             {
                 MWWorld::ConstPtr ptr = R()(runtime, false);
 
-                std::string_view factionID;
+                ESM::RefId factionID;
                 if (arg0 > 0)
                 {
-                    factionID = runtime.getStringLiteral(runtime[0].mInteger);
+                    factionID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     runtime.pop();
                 }
                 else
@@ -973,7 +973,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view factionID = ptr.getClass().getPrimaryFaction(ptr);
+                ESM::RefId factionID = ptr.getClass().getPrimaryFaction(ptr);
                 if (factionID.empty())
                     return;
 
@@ -1007,7 +1007,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view factionID = ptr.getClass().getPrimaryFaction(ptr);
+                ESM::RefId factionID = ptr.getClass().getPrimaryFaction(ptr);
                 if (factionID.empty())
                     return;
 

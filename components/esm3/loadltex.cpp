@@ -18,7 +18,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("INTV"):
@@ -45,7 +45,7 @@ namespace ESM
     }
     void LandTexture::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
         esm.writeHNT("INTV", mIndex);
         esm.writeHNCString("DATA", mTexture);
 

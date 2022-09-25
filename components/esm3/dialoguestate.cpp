@@ -9,15 +9,15 @@ namespace ESM
     void DialogueState::load(ESMReader& esm)
     {
         while (esm.isNextSub("TOPI"))
-            mKnownTopics.push_back(esm.getHString());
+            mKnownTopics.push_back(esm.getRefId());
 
         while (esm.isNextSub("FACT"))
         {
-            std::string faction = esm.getHString();
+            ESM::RefId faction = esm.getRefId();
 
             while (esm.isNextSub("REA2"))
             {
-                std::string faction2 = esm.getHString();
+                ESM::RefId faction2 = esm.getRefId();
                 int reaction;
                 esm.getHNT(reaction, "INTV");
                 mChangedFactionReaction[faction][faction2] = reaction;
@@ -35,20 +35,20 @@ namespace ESM
 
     void DialogueState::save(ESMWriter& esm) const
     {
-        for (std::vector<std::string>::const_iterator iter(mKnownTopics.begin()); iter != mKnownTopics.end(); ++iter)
+        for (auto iter(mKnownTopics.begin()); iter != mKnownTopics.end(); ++iter)
         {
-            esm.writeHNString("TOPI", *iter);
+            esm.writeHNString("TOPI", iter->getRefIdString());
         }
 
-        for (std::map<std::string, std::map<std::string, int>>::const_iterator iter = mChangedFactionReaction.begin();
+        for (auto iter = mChangedFactionReaction.begin();
              iter != mChangedFactionReaction.end(); ++iter)
         {
-            esm.writeHNString("FACT", iter->first);
+            esm.writeHNString("FACT", iter->first.getRefIdString());
 
-            for (std::map<std::string, int>::const_iterator reactIter = iter->second.begin();
+            for (auto reactIter = iter->second.begin();
                  reactIter != iter->second.end(); ++reactIter)
             {
-                esm.writeHNString("REA2", reactIter->first);
+                esm.writeHNString("REA2", reactIter->first.getRefIdString());
                 esm.writeHNT("INTV", reactIter->second);
             }
         }

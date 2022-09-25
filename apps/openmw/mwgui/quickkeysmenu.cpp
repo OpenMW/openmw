@@ -281,7 +281,7 @@ namespace MWGui
             mMagicSelectionDialog->setVisible(false);
     }
 
-    void QuickKeysMenu::onAssignMagic(const std::string& spellId)
+    void QuickKeysMenu::onAssignMagic(const ESM::RefId& spellId)
     {
         assert(mSelected);
         while (mSelected->button->getChildCount()) // Destroy number label
@@ -296,7 +296,7 @@ namespace MWGui
 
         mSelected->button->setItem(MWWorld::Ptr());
         mSelected->button->setUserString("ToolTipType", "Spell");
-        mSelected->button->setUserString("Spell", spellId);
+        mSelected->button->setUserString("Spell", spellId.getRefIdString());
 
         // use the icon of the first effect
         const ESM::MagicEffect* effect = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
@@ -425,7 +425,7 @@ namespace MWGui
         }
         else if (key->type == Type_Magic)
         {
-            const std::string& spellId = key->id;
+            const ESM::RefId& spellId = key->id;
 
             // Make sure the player still has this spell
             MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
@@ -516,7 +516,7 @@ namespace MWGui
                     break;
                 }
                 case Type_Magic:
-                    key.mId = button->getUserString("Spell");
+                    key.mId = ESM::RefId::stringRefId(button->getUserString("Spell"));
                     break;
             }
 

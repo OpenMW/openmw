@@ -278,19 +278,19 @@ namespace MWGui
 
     void Choice::activated()
     {
-        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         eventChoiceActivated(mChoiceId);
     }
 
     void Topic::activated()
     {
-        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         eventTopicActivated(mTopicId);
     }
 
     void Goodbye::activated()
     {
-        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         eventActivated();
     }
 
@@ -791,7 +791,7 @@ namespace MWGui
 
         for (const std::string& keyword : mKeywords)
         {
-            int flag = MWBase::Environment::get().getDialogueManager()->getTopicFlag(keyword);
+            int flag = MWBase::Environment::get().getDialogueManager()->getTopicFlag(ESM::RefId::stringRefId(keyword));
             MyGUI::Button* button = mTopicsList->getItemWidget(keyword);
 
             if (!specialColour.empty() && flag & MWBase::DialogueManager::TopicType::Specific)

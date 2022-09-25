@@ -48,7 +48,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Lockpick>* ref = ptr.get<ESM::Lockpick>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Lockpick::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -56,7 +56,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string_view Lockpick::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Lockpick::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Lockpick>* ref = ptr.get<ESM::Lockpick>();
 
@@ -79,14 +79,16 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string_view Lockpick::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Lockpick::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Lockpick Up";
+        static ESM::RefId sound = ESM::RefId::stringRefId("Item Lockpick Up");
+        return sound;
     }
 
-    std::string_view Lockpick::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Lockpick::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Lockpick Down";
+        static ESM::RefId sound = ESM::RefId::stringRefId("Item Lockpick Down");
+        return sound;
     }
 
     const std::string& Lockpick::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -118,7 +120,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.text = text;

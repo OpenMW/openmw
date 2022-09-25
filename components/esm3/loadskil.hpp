@@ -5,6 +5,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -25,7 +26,7 @@ namespace ESM
         static std::string_view getRecordType() { return "Skill"; }
 
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
 
         struct SKDTstruct
         {

@@ -2,6 +2,7 @@
 #define OPENMW_ESM_JOURNALENTRY_H
 
 #include <string>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -20,8 +21,8 @@ namespace ESM
         };
 
         int mType;
-        std::string mTopic;
-        std::string mInfo;
+        ESM::RefId mTopic;
+        ESM::RefId mInfo;
         std::string mText;
         std::string mActorName; // Could also be Actor ID to allow switching of localisation, but since mText is
                                 // plaintext anyway...

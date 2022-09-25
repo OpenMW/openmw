@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -50,7 +51,8 @@ namespace ESM
         LHDTstruct mData;
 
         unsigned int mRecordFlags;
-        std::string mSound, mScript, mModel, mIcon, mName, mId;
+        std::string mModel, mIcon, mName;
+        ESM::RefId mId, mSound, mScript;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

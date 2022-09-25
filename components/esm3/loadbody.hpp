@@ -2,6 +2,8 @@
 #define OPENMW_ESM_BODY_H
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
+
 #include <string>
 
 namespace ESM
@@ -61,7 +63,8 @@ namespace ESM
 
         BYDTstruct mData;
         unsigned int mRecordFlags;
-        std::string mId, mModel, mRace;
+        RefId mId, mRace;
+        std::string mModel;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

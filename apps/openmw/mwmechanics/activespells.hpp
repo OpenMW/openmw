@@ -33,7 +33,7 @@ namespace MWMechanics
         using ActiveEffect = ESM::ActiveEffect;
         class ActiveSpellParams
         {
-            std::string mId;
+            ESM::RefId mId;
             std::vector<ActiveEffect> mEffects;
             std::string mDisplayName;
             int mCasterActorId;
@@ -58,7 +58,7 @@ namespace MWMechanics
         public:
             ActiveSpellParams(const CastSpell& cast, const MWWorld::Ptr& caster);
 
-            const std::string& getId() const { return mId; }
+            const ESM::RefId& getId() const { return mId; }
 
             const std::vector<ActiveEffect>& getEffects() const { return mEffects; }
             std::vector<ActiveEffect>& getEffects() { return mEffects; }
@@ -127,7 +127,7 @@ namespace MWMechanics
         void addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor);
 
         /// Removes the active effects from this spell/potion/.. with \a id
-        void removeEffects(const MWWorld::Ptr& ptr, std::string_view id);
+        void removeEffects(const MWWorld::Ptr& ptr, const ESM::RefId& id);
 
         /// Remove all active effects with this effect id
         void purgeEffect(const MWWorld::Ptr& ptr, short effectId);
@@ -141,7 +141,7 @@ namespace MWMechanics
         /// Remove all spells
         void clear(const MWWorld::Ptr& ptr);
 
-        bool isSpellActive(std::string_view id) const;
+        bool isSpellActive(const ESM::RefId& id) const;
         ///< case insensitive
 
         void skipWorsenings(double hours);

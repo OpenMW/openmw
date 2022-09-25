@@ -9,6 +9,7 @@ namespace ESM
 {
     struct DialInfo;
     struct Dialogue;
+    struct RefId;
 }
 
 namespace MWDialogue
@@ -43,12 +44,12 @@ namespace MWDialogue
 
         bool getSelectStructBoolean(const SelectWrapper& select) const;
 
-        int getFactionRank(const MWWorld::Ptr& actor, std::string_view factionId) const;
+        int getFactionRank(const MWWorld::Ptr& actor, const ESM::RefId& factionId) const;
 
-        bool hasFactionRankSkillRequirements(const MWWorld::Ptr& actor, std::string_view factionId, int rank) const;
+        bool hasFactionRankSkillRequirements(const MWWorld::Ptr& actor, const ESM::RefId& factionId, int rank) const;
 
         bool hasFactionRankReputationRequirements(
-            const MWWorld::Ptr& actor, std::string_view factionId, int rank) const;
+            const MWWorld::Ptr& actor,const ESM::RefId& factionId, int rank) const;
 
     public:
         Filter(const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);

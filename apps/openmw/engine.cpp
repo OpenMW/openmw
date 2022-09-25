@@ -163,7 +163,7 @@ void OMW::Engine::executeLocalScripts()
     MWWorld::LocalScripts& localScripts = mWorld->getLocalScripts();
 
     localScripts.startIteration();
-    std::pair<std::string, MWWorld::Ptr> script;
+    std::pair<ESM::RefId, MWWorld::Ptr> script;
     while (localScripts.getNext(script))
     {
         MWScript::InterpreterContext interpreterContext(&script.second.getRefData().getLocals(), script.second);

@@ -66,7 +66,7 @@ namespace MWClass
         MWWorld::ContainerStore& getContainerStore(const MWWorld::Ptr& ptr) const override;
         ///< Return container store
 
-        std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         float getCapacity(const MWWorld::Ptr& ptr) const override;
@@ -91,7 +91,7 @@ namespace MWClass
 
         bool useAnim() const override;
 
-        void modifyBaseInventory(std::string_view containerId, std::string_view itemId, int amount) const override;
+        void modifyBaseInventory(const ESM::RefId& containerId, const ESM::RefId& itemId, int amount) const override;
     };
 }
 

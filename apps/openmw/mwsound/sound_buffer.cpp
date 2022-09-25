@@ -52,7 +52,7 @@ namespace MWSound
         clear();
     }
 
-    Sound_Buffer* SoundBufferPool::lookup(const std::string& soundId) const
+    Sound_Buffer* SoundBufferPool::lookup(const ESM::RefId& soundId) const
     {
         const auto it = mBufferNameMap.find(soundId);
         if (it != mBufferNameMap.end())
@@ -64,12 +64,12 @@ namespace MWSound
         return nullptr;
     }
 
-    Sound_Buffer* SoundBufferPool::load(const std::string& soundId)
+    Sound_Buffer* SoundBufferPool::load(const ESM::RefId& soundId)
     {
         if (mBufferNameMap.empty())
         {
             for (const ESM::Sound& sound : MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>())
-                insertSound(Misc::StringUtils::lowerCase(sound.mId), sound);
+                insertSound(sound.mId, sound);
         }
 
         Sound_Buffer* sfx;
@@ -117,7 +117,7 @@ namespace MWSound
         mUnusedBuffers.clear();
     }
 
-    Sound_Buffer* SoundBufferPool::insertSound(const std::string& soundId, const ESM::Sound& sound)
+    Sound_Buffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM::Sound& sound)
     {
         static const AudioParams audioParams = makeAudioParams(*MWBase::Environment::get().getWorld());
 

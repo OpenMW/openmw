@@ -9,6 +9,7 @@
 #include "cellref.hpp"
 #include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
+#include "components/esm/refid.hpp"
 
 namespace MWWorld
 {
@@ -101,7 +102,7 @@ namespace ESM
 
         Cell()
             : mName("")
-            , mRegion("")
+            , mRegion(ESM::RefId())
             , mHasAmbi(true)
             , mWater(0)
             , mWaterInt(false)
@@ -115,7 +116,7 @@ namespace ESM
         std::string mName;
 
         // Optional region name for exterior and quasi-exterior cells.
-        std::string mRegion;
+        RefId mRegion;
 
         std::vector<ESM_Context> mContextList; // File position; multiple positions for multiple plugin support
         DATAstruct mData;

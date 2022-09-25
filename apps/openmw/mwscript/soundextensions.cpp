@@ -74,7 +74,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId sound = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWBase::Environment::get().getSoundManager()->playSound(
@@ -87,7 +87,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId sound = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Float volume = runtime[0].mFloat;
@@ -109,7 +109,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId sound = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, 1.0, 1.0, MWSound::Type::Sfx,
@@ -125,7 +125,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId sound = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Float volume = runtime[0].mFloat;
@@ -147,7 +147,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view sound = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId sound = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWBase::Environment::get().getSoundManager()->stopSound3D(ptr, sound);
@@ -166,7 +166,7 @@ namespace MWScript
                 runtime.pop();
 
                 bool ret = MWBase::Environment::get().getSoundManager()->getSoundPlaying(
-                    ptr, runtime.getStringLiteral(index));
+                    ptr, ESM::RefId::stringRefId(runtime.getStringLiteral(index)));
 
                 // GetSoundPlaying called on an equipped item should also look for sounds played by the equipping actor.
                 if (!ret && ptr.getContainerStore())
@@ -177,7 +177,7 @@ namespace MWScript
                         && cont.getClass().getInventoryStore(cont).isEquipped(ptr))
                     {
                         ret = MWBase::Environment::get().getSoundManager()->getSoundPlaying(
-                            cont, runtime.getStringLiteral(index));
+                            cont, ESM::RefId::stringRefId(runtime.getStringLiteral(index)));
                     }
                 }
 

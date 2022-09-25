@@ -34,7 +34,7 @@ namespace MWMechanics
         void launchMagicBolt() const;
 
     public:
-        std::string mId; // ID of spell, potion, item etc
+        ESM::RefId mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
         osg::Vec3f mHitPosition{ 0, 0, 0 }; // Used for spawning area orb
         bool mAlwaysSucceed{
@@ -62,7 +62,7 @@ namespace MWMechanics
         bool cast(const ESM::Potion* potion);
 
         /// @note Auto detects if spell, ingredient or potion
-        bool cast(const std::string& id);
+        bool cast(const ESM::RefId& id);
 
         void playSpellCastingEffects(const ESM::Enchantment* enchantment) const;
 

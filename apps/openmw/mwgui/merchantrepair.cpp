@@ -134,7 +134,7 @@ namespace MWGui
 
         player.getClass().getContainerStore(player).restack(item);
 
-        MWBase::Environment::get().getWindowManager()->playSound("Repair");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Repair"));
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -15,10 +16,10 @@ namespace ESM
      */
     struct SpellList
     {
-        std::vector<std::string> mList;
+        std::vector<ESM::RefId> mList;
 
         /// Is this spell ID in mList?
-        bool exists(const std::string& spell) const;
+        bool exists(const ESM::RefId& spell) const;
 
         /// Load one spell, assumes the subrecord name was already read
         void add(ESMReader& esm);

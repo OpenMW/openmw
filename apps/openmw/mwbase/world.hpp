@@ -56,6 +56,7 @@ namespace ESM
     struct CreatureLevList;
     struct ItemLevList;
     struct TimeStamp;
+    struct RefId;
 }
 
 namespace MWPhysics
@@ -176,28 +177,28 @@ namespace MWBase
         virtual char getGlobalVariableType(std::string_view name) const = 0;
         ///< Return ' ', if there is no global variable with this name.
 
-        virtual std::string_view getCellName(const MWWorld::CellStore* cell = nullptr) const = 0;
+        virtual const std::string& getCellName(const MWWorld::CellStore* cell = nullptr) const = 0;
         ///< Return name of the cell.
         ///
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
-        virtual std::string_view getCellName(const ESM::Cell* cell) const = 0;
+        virtual const std::string& getCellName(const ESM::Cell* cell) const = 0;
 
         virtual void removeRefScript(MWWorld::RefData* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts
 
-        virtual MWWorld::Ptr getPtr(std::string_view name, bool activeOnly) = 0;
+        virtual MWWorld::Ptr getPtr(const ESM::RefId& name, bool activeOnly) = 0;
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do non search inactive cells.
 
-        virtual MWWorld::Ptr searchPtr(std::string_view name, bool activeOnly, bool searchInContainers = true) = 0;
+        virtual MWWorld::Ptr searchPtr(const ESM::RefId& name, bool activeOnly, bool searchInContainers = true) = 0;
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do non search inactive cells.
 
         virtual MWWorld::Ptr searchPtrViaActorId(int actorId) = 0;
         ///< Search is limited to the active cells.
 
-        virtual MWWorld::Ptr searchPtrViaRefNum(const std::string& id, const ESM::RefNum& refNum) = 0;
+        virtual MWWorld::Ptr searchPtrViaRefNum(const ESM::RefId& id, const ESM::RefNum& refNum) = 0;
 
         virtual MWWorld::Ptr findContainer(const MWWorld::ConstPtr& ptr) = 0;
         ///< Return a pointer to a liveCellRef which contains \a ptr.
@@ -222,7 +223,7 @@ namespace MWBase
         virtual bool toggleSky() = 0;
         ///< \return Resulting mode
 
-        virtual void changeWeather(std::string_view region, const unsigned int id) = 0;
+        virtual void changeWeather(const ESM::RefId& region, const unsigned int id) = 0;
 
         virtual int getCurrentWeather() const = 0;
 
@@ -238,7 +239,7 @@ namespace MWBase
 
         virtual void setMoonColour(bool red) = 0;
 
-        virtual void modRegion(std::string_view regionid, const std::vector<char>& chances) = 0;
+        virtual void modRegion(const ESM::RefId& regionid, const std::vector<char>& chances) = 0;
 
         virtual float getTimeScaleFactor() const = 0;
 
@@ -553,7 +554,7 @@ namespace MWBase
         virtual void castSpell(const MWWorld::Ptr& actor, bool manualSpell = false) = 0;
 
         virtual void launchMagicBolt(
-            const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
+            const ESM::RefId& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
             = 0;
         virtual void launchProjectile(MWWorld::Ptr& actor, MWWorld::Ptr& projectile, const osg::Vec3f& worldPos,
             const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength)
@@ -576,7 +577,7 @@ namespace MWBase
 
         /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
         /// @note id must be lower case
-        virtual void teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id) = 0;
+        virtual void teleportToClosestMarker(const MWWorld::Ptr& ptr, const ESM::RefId& id) = 0;
 
         enum DetectionType
         {
@@ -600,7 +601,7 @@ namespace MWBase
         virtual void goToJail() = 0;
 
         /// Spawn a random creature from a levelled list next to the player
-        virtual void spawnRandomCreature(std::string_view creatureList) = 0;
+        virtual void spawnRandomCreature(const ESM::RefId& creatureList) = 0;
 
         /// Spawn a blood effect for \a ptr at \a worldPosition
         virtual void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
@@ -675,7 +676,7 @@ namespace MWBase
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 
-        virtual std::vector<MWWorld::Ptr> getAll(const std::string& id) = 0;
+        virtual std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id) = 0;
 
         virtual Misc::Rng::Generator& getPrng() = 0;
 

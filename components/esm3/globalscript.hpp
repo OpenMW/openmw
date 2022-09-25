@@ -3,6 +3,7 @@
 
 #include "cellref.hpp"
 #include "locals.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -13,10 +14,10 @@ namespace ESM
 
     struct GlobalScript
     {
-        std::string mId; /// \note must be lowercase
+        RefId mId; /// \note must be lowercase
         Locals mLocals;
         int mRunning;
-        std::string mTargetId; // for targeted scripts
+        RefId mTargetId; // for targeted scripts
         RefNum mTargetRef;
 
         void load(ESMReader& esm);

@@ -15,31 +15,31 @@ namespace MWDialogue
         TTopicContainer mTopics;
 
     private:
-        Quest& getQuest(const std::string& id);
+        Quest& getQuest(const ESM::RefId& id);
 
-        Topic& getTopic(const std::string& id);
+        Topic& getTopic(const ESM::RefId& id);
 
-        bool isThere(const std::string& topicId, const std::string& infoId = "") const;
+        bool isThere(const ESM::RefId& topicId, const ESM::RefId& infoId = ESM::RefId::sEmpty) const;
 
     public:
         Journal();
 
         void clear() override;
 
-        void addEntry(const std::string& id, int index, const MWWorld::Ptr& actor) override;
+        void addEntry(const ESM::RefId& id, int index, const MWWorld::Ptr& actor) override;
         ///< Add a journal entry.
         /// @param actor Used as context for replacing of escape sequences (%name, etc).
 
-        void setJournalIndex(const std::string& id, int index) override;
+        void setJournalIndex(const ESM::RefId& id, int index) override;
         ///< Set the journal index without adding an entry.
 
-        int getJournalIndex(const std::string& id) const override;
+        int getJournalIndex(const ESM::RefId& id) const override;
         ///< Get the journal index.
 
-        void addTopic(const std::string& topicId, const std::string& infoId, const MWWorld::Ptr& actor) override;
+        void addTopic(const ESM::RefId& topicId, const ESM::RefId& infoId, const MWWorld::Ptr& actor) override;
         /// \note topicId must be lowercase
 
-        void removeLastAddedTopicResponse(const std::string& topicId, std::string_view actorName) override;
+        void removeLastAddedTopicResponse(const ESM::RefId& topicId, std::string_view actorName) override;
         ///< Removes the last topic response added for the given topicId and actor name.
         /// \note topicId must be lowercase
 

@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -18,7 +19,7 @@ namespace ESM
 
     struct WeatherState
     {
-        std::string mCurrentRegion;
+        ESM::RefId mCurrentRegion;
         float mTimePassed;
         bool mFastForward;
         float mWeatherUpdateTime;
@@ -26,7 +27,7 @@ namespace ESM
         int mCurrentWeather;
         int mNextWeather;
         int mQueuedWeather;
-        std::map<std::string, RegionWeatherState> mRegions;
+        std::map<ESM::RefId, RegionWeatherState> mRegions;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;

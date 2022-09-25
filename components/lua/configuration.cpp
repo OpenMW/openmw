@@ -134,7 +134,7 @@ namespace LuaUtil
     }
 
     ScriptIdsWithInitializationData ScriptsConfiguration::getLocalConf(
-        uint32_t type, std::string_view recordId, ESM::RefNum refnum) const
+        uint32_t type, const ESM::RefId& recordId, ESM::RefNum refnum) const
     {
         ScriptIdsWithInitializationData res;
         auto typeIt = mScriptsPerType.find(type);

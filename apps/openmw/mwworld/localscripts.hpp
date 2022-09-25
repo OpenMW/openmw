@@ -15,8 +15,8 @@ namespace MWWorld
     /// \brief List of active local scripts
     class LocalScripts
     {
-        std::list<std::pair<std::string, Ptr>> mScripts;
-        std::list<std::pair<std::string, Ptr>>::iterator mIter;
+        std::list<std::pair<ESM::RefId, Ptr>> mScripts;
+        std::list<std::pair<ESM::RefId, Ptr>>::iterator mIter;
         const MWWorld::ESMStore& mStore;
 
     public:
@@ -25,11 +25,11 @@ namespace MWWorld
         void startIteration();
         ///< Set the iterator to the begin of the script list.
 
-        bool getNext(std::pair<std::string, Ptr>& script);
+        bool getNext(std::pair<ESM::RefId, Ptr>& script);
         ///< Get next local script
         /// @return Did we get a script?
 
-        void add(std::string_view scriptName, const Ptr& ptr);
+        void add(const ESM::RefId& scriptName, const Ptr& ptr);
         ///< Add script to collection of active local scripts.
 
         void addCell(CellStore* cell);

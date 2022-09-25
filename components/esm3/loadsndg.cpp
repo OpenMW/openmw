@@ -19,7 +19,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("DATA"):
@@ -27,10 +27,10 @@ namespace ESM
                     hasData = true;
                     break;
                 case fourCC("CNAM"):
-                    mCreature = esm.getHString();
+                    mCreature = esm.getRefId();
                     break;
                 case fourCC("SNAM"):
-                    mSound = esm.getHString();
+                    mSound = esm.getRefId();
                     break;
                 case SREC_DELE:
                     esm.skipHSub();
@@ -49,7 +49,7 @@ namespace ESM
     }
     void SoundGenerator::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -58,8 +58,8 @@ namespace ESM
         }
 
         esm.writeHNT("DATA", mType, 4);
-        esm.writeHNOCString("CNAM", mCreature);
-        esm.writeHNOCString("SNAM", mSound);
+        esm.writeHNOCString("CNAM", mCreature.getRefIdString());
+        esm.writeHNOCString("SNAM", mSound.getRefIdString());
     }
 
     void SoundGenerator::blank()

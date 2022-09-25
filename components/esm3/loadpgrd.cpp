@@ -51,7 +51,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mCell = esm.getHString();
+                    mCell = esm.getRefId();
                     break;
                 case fourCC("DATA"):
                     esm.getHTSized<12>(mData);
@@ -154,7 +154,7 @@ namespace ESM
         }
 
         // Save
-        esm.writeHNCString("NAME", mCell);
+        esm.writeHNCString("NAME", mCell.getRefIdString());
         esm.writeHNT("DATA", mData, 12);
 
         if (isDeleted)

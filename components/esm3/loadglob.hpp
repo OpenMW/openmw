@@ -6,6 +6,7 @@
 #include "variant.hpp"
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -25,7 +26,7 @@ namespace ESM
         static std::string_view getRecordType() { return "Global"; }
 
         unsigned int mRecordFlags;
-        std::string mId;
+        ESM::RefId mId;
         Variant mValue;
 
         void load(ESMReader& esm, bool& isDeleted);

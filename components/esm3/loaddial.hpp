@@ -6,6 +6,8 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
+
 #include "loadinfo.hpp"
 
 namespace ESM
@@ -35,13 +37,13 @@ namespace ESM
             Unknown = -1 // Used for deleted dialogues
         };
 
-        std::string mId;
+        RefId mId;
         signed char mType;
 
         typedef std::list<DialInfo> InfoContainer;
 
         // Parameters: Info ID, (Info iterator, Deleted flag)
-        typedef std::map<std::string, std::pair<InfoContainer::iterator, bool>> LookupMap;
+        typedef std::map<ESM::RefId, std::pair<InfoContainer::iterator, bool>> LookupMap;
 
         InfoContainer mInfo;
 

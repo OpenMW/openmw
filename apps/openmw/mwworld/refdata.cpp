@@ -120,7 +120,7 @@ namespace MWWorld
         }
     }
 
-    void RefData::write(ESM::ObjectState& objectState, std::string_view scriptId) const
+    void RefData::write(ESM::ObjectState& objectState, const ESM::RefId& scriptId) const
     {
         objectState.mHasLocals = mLocals.write(objectState.mLocals, scriptId);
 

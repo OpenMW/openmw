@@ -101,7 +101,7 @@ namespace MWGui
             mPlayerSkillValues.emplace(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue());
     }
 
-    void CharacterCreation::setValue(const std::string& id, const MWMechanics::AttributeValue& value)
+    void CharacterCreation::setValue(const ESM::RefId& id, const MWMechanics::AttributeValue& value)
     {
         static const char* ids[] = {
             "AttribVal1",
@@ -117,7 +117,7 @@ namespace MWGui
 
         for (int i = 0; ids[i]; ++i)
         {
-            if (ids[i] == id)
+            if (ids[i] == id.getRefIdString())
             {
                 mPlayerAttributes[static_cast<ESM::Attribute::AttributeID>(i)] = value;
                 if (mReviewDialog)
@@ -128,19 +128,19 @@ namespace MWGui
         }
     }
 
-    void CharacterCreation::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
+    void CharacterCreation::setValue(const ESM::RefId& id, const MWMechanics::DynamicStat<float>& value)
     {
         if (mReviewDialog)
         {
-            if (id == "HBar")
+            if (id.getRefIdString() == "HBar")
             {
                 mReviewDialog->setHealth(value);
             }
-            else if (id == "MBar")
+            else if (id.getRefIdString() == "MBar")
             {
                 mReviewDialog->setMagicka(value);
             }
-            else if (id == "FBar")
+            else if (id.getRefIdString() == "FBar")
             {
                 mReviewDialog->setFatigue(value);
             }
@@ -349,7 +349,7 @@ namespace MWGui
     {
         if (mPickClassDialog)
         {
-            const std::string& classId = mPickClassDialog->getClassId();
+            const ESM::RefId& classId = mPickClassDialog->getClassId();
             if (!classId.empty())
                 MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
 
@@ -551,96 +551,96 @@ namespace MWGui
             unsigned combat = mGenerateClassSpecializations[0];
             unsigned magic = mGenerateClassSpecializations[1];
             unsigned stealth = mGenerateClassSpecializations[2];
-
+            std::string className;
             if (combat > 7)
             {
-                mGenerateClass = "Warrior";
+                className = "Warrior";
             }
             else if (magic > 7)
             {
-                mGenerateClass = "Mage";
+                className = "Mage";
             }
             else if (stealth > 7)
             {
-                mGenerateClass = "Thief";
+                className = "Thief";
             }
             else
             {
                 switch (combat)
                 {
                     case 4:
-                        mGenerateClass = "Rogue";
+                        className = "Rogue";
                         break;
                     case 5:
                         if (stealth == 3)
-                            mGenerateClass = "Scout";
+                            className = "Scout";
                         else
-                            mGenerateClass = "Archer";
+                            className = "Archer";
                         break;
                     case 6:
                         if (stealth == 1)
-                            mGenerateClass = "Barbarian";
+                            className = "Barbarian";
                         else if (stealth == 3)
-                            mGenerateClass = "Crusader";
+                            className = "Crusader";
                         else
-                            mGenerateClass = "Knight";
+                            className = "Knight";
                         break;
                     case 7:
-                        mGenerateClass = "Warrior";
+                        className = "Warrior";
                         break;
                     default:
                         switch (magic)
                         {
                             case 4:
-                                mGenerateClass = "Spellsword";
+                                className = "Spellsword";
                                 break;
                             case 5:
-                                mGenerateClass = "Witchhunter";
+                                className = "Witchhunter";
                                 break;
                             case 6:
                                 if (combat == 2)
-                                    mGenerateClass = "Sorcerer";
+                                    className = "Sorcerer";
                                 else if (combat == 3)
-                                    mGenerateClass = "Healer";
+                                    className = "Healer";
                                 else
-                                    mGenerateClass = "Battlemage";
+                                    className = "Battlemage";
                                 break;
                             case 7:
-                                mGenerateClass = "Mage";
+                                className = "Mage";
                                 break;
                             default:
                                 switch (stealth)
                                 {
                                     case 3:
                                         if (magic == 3)
-                                            mGenerateClass = "Bard"; // unreachable
+                                            className = "Bard"; // unreachable
                                         else
-                                            mGenerateClass = "Warrior";
+                                            className = "Warrior";
                                         break;
                                     case 5:
                                         if (magic == 3)
-                                            mGenerateClass = "Monk";
+                                            className = "Monk";
                                         else
-                                            mGenerateClass = "Pilgrim";
+                                            className = "Pilgrim";
                                         break;
                                     case 6:
                                         if (magic == 1)
-                                            mGenerateClass = "Agent";
+                                            className = "Agent";
                                         else if (magic == 3)
-                                            mGenerateClass = "Assassin";
+                                            className = "Assassin";
                                         else
-                                            mGenerateClass = "Acrobat";
+                                            className = "Acrobat";
                                         break;
                                     case 7:
-                                        mGenerateClass = "Thief";
+                                        className = "Thief";
                                         break;
                                     default:
-                                        mGenerateClass = "Warrior";
+                                        className = "Warrior";
                                 }
                         }
                 }
             }
-
+            mGenerateClass = ESM::RefId::stringRefId(className);
             MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mGenerateClassResultDialog));
 
             mGenerateClassResultDialog = std::make_unique<GenerateClassResultDialog>();

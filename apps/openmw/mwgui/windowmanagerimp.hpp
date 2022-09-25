@@ -232,8 +232,8 @@ namespace MWGui
         /// update activated quick key state (if action executing was delayed for some reason)
         void updateActivatedQuickKey() override;
 
-        const std::string& getSelectedSpell() override { return mSelectedSpell; }
-        void setSelectedSpell(const std::string& spellId, int successChancePercent) override;
+        const ESM::RefId& getSelectedSpell() override { return mSelectedSpell; }
+        void setSelectedSpell(const ESM::RefId& spellId, int successChancePercent) override;
         void setSelectedEnchantItem(const MWWorld::Ptr& item) override;
         const MWWorld::Ptr& getSelectedEnchantItem() const override;
         void setSelectedWeapon(const MWWorld::Ptr& item) override;
@@ -283,7 +283,7 @@ namespace MWGui
          * @param id Identifier for the GMST setting, e.g. "aName"
          * @param default Default value if the GMST setting cannot be used.
          */
-        std::string_view getGameSettingString(std::string_view id, std::string_view default_) override;
+        std::string_view getGameSettingString(const std::string_view& id, std::string_view default_) override;
 
         void processChangedSettings(const Settings::CategorySettingVector& changed) override;
 
@@ -370,7 +370,7 @@ namespace MWGui
         /// Cycle to next or previous weapon
         void cycleWeapon(bool next) override;
 
-        void playSound(std::string_view soundId, float volume = 1.f, float pitch = 1.f) override;
+        void playSound(const ESM::RefId& soundId, float volume = 1.f, float pitch = 1.f) override;
 
         void addCell(MWWorld::CellStore* cell) override;
         void removeCell(MWWorld::CellStore* cell) override;
@@ -408,7 +408,7 @@ namespace MWGui
         void trackWindow(Layout* layout, const std::string& name);
         void onWindowChangeCoord(MyGUI::Window* _sender);
 
-        std::string mSelectedSpell;
+        ESM::RefId mSelectedSpell;
         MWWorld::Ptr mSelectedEnchantItem;
         MWWorld::Ptr mSelectedWeapon;
 
@@ -485,8 +485,8 @@ namespace MWGui
 
             std::vector<WindowBase*> mWindows;
 
-            std::string mCloseSound;
-            std::string mOpenSound;
+            ESM::RefId mCloseSound;
+            ESM::RefId mOpenSound;
         };
         // Defines the windows that should be shown in a particular GUI mode.
         std::map<GuiMode, GuiModeState> mGuiModeStates;

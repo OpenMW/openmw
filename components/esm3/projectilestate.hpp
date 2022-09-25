@@ -9,6 +9,7 @@
 #include "effectlist.hpp"
 
 #include "components/esm/util.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -17,7 +18,7 @@ namespace ESM
 
     struct BaseProjectileState
     {
-        std::string mId;
+        RefId mId;
 
         Vector3 mPosition;
         Quaternion mOrientation;
@@ -30,7 +31,7 @@ namespace ESM
 
     struct MagicBoltState : public BaseProjectileState
     {
-        std::string mSpellId;
+        RefId mSpellId;
         float mSpeed;
         int mSlot;
 
@@ -40,7 +41,7 @@ namespace ESM
 
     struct ProjectileState : public BaseProjectileState
     {
-        std::string mBowId;
+        RefId mBowId;
         Vector3 mVelocity;
         float mAttackStrength;
 

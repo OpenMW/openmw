@@ -206,7 +206,7 @@ namespace MWInput
                         MyGUI::Button* b
                             = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
                         if (b && b->getEnabled())
-                            MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
+                            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
                     }
 
                     mBindingsManager->setPlayerControlsEnabled(!mousePressSuccess);

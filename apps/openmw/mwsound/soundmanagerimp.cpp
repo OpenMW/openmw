@@ -46,9 +46,9 @@ namespace MWSound
             settings.mNearWaterIndoorTolerance = Fallback::Map::getFloat("Water_NearWaterIndoorTolerance");
             settings.mNearWaterOutdoorTolerance = Fallback::Map::getFloat("Water_NearWaterOutdoorTolerance");
             settings.mNearWaterIndoorID
-                = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterIndoorID"));
+                = ESM::RefId::stringRefId(Fallback::Map::getString("Water_NearWaterIndoorID"));
             settings.mNearWaterOutdoorID
-                = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterOutdoorID"));
+                = ESM::RefId::stringRefId(Fallback::Map::getString("Water_NearWaterOutdoorID"));
 
             return settings;
         }
@@ -496,12 +496,12 @@ namespace MWSound
     }
 
     Sound* SoundManager::playSound(
-        std::string_view soundId, float volume, float pitch, Type type, PlayMode mode, float offset)
+        const ESM::RefId& soundId, float volume, float pitch, Type type, PlayMode mode, float offset)
     {
         if (!mOutput->isInitialized())
             return nullptr;
 
-        Sound_Buffer* sfx = mSoundBuffers.load(Misc::StringUtils::lowerCase(soundId));
+        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
         if (!sfx)
             return nullptr;
 
@@ -526,7 +526,7 @@ namespace MWSound
         return result;
     }
 
-    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, std::string_view soundId, float volume, float pitch,
+    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, const ESM::RefId& soundId, float volume, float pitch,
         Type type, PlayMode mode, float offset)
     {
         if (!mOutput->isInitialized())
@@ -538,7 +538,7 @@ namespace MWSound
             return nullptr;
 
         // Look up the sound in the ESM data
-        Sound_Buffer* sfx = mSoundBuffers.load(Misc::StringUtils::lowerCase(soundId));
+        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
         if (!sfx)
             return nullptr;
 
@@ -587,14 +587,14 @@ namespace MWSound
         return result;
     }
 
-    Sound* SoundManager::playSound3D(const osg::Vec3f& initialPos, std::string_view soundId, float volume, float pitch,
+    Sound* SoundManager::playSound3D(const osg::Vec3f& initialPos, const ESM::RefId& soundId, float volume, float pitch,
         Type type, PlayMode mode, float offset)
     {
         if (!mOutput->isInitialized())
             return nullptr;
 
         // Look up the sound in the ESM data
-        Sound_Buffer* sfx = mSoundBuffers.load(Misc::StringUtils::lowerCase(soundId));
+        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
         if (!sfx)
             return nullptr;
 
@@ -641,12 +641,12 @@ namespace MWSound
         }
     }
 
-    void SoundManager::stopSound3D(const MWWorld::ConstPtr& ptr, std::string_view soundId)
+    void SoundManager::stopSound3D(const MWWorld::ConstPtr& ptr, const ESM::RefId& soundId)
     {
         if (!mOutput->isInitialized())
             return;
 
-        Sound_Buffer* sfx = mSoundBuffers.lookup(Misc::StringUtils::lowerCase(soundId));
+        Sound_Buffer* sfx = mSoundBuffers.lookup(soundId);
         if (!sfx)
             return;
 
@@ -693,12 +693,12 @@ namespace MWSound
         }
     }
 
-    void SoundManager::fadeOutSound3D(const MWWorld::ConstPtr& ptr, std::string_view soundId, float duration)
+    void SoundManager::fadeOutSound3D(const MWWorld::ConstPtr& ptr, const ESM::RefId& soundId, float duration)
     {
         SoundMap::iterator snditer = mActiveSounds.find(ptr.mRef);
         if (snditer != mActiveSounds.end())
         {
-            Sound_Buffer* sfx = mSoundBuffers.lookup(Misc::StringUtils::lowerCase(soundId));
+            Sound_Buffer* sfx = mSoundBuffers.lookup(soundId);
             if (sfx == nullptr)
                 return;
             for (SoundBufferRefPair& sndbuf : snditer->second.mList)
@@ -709,12 +709,12 @@ namespace MWSound
         }
     }
 
-    bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr& ptr, std::string_view soundId) const
+    bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr& ptr, const ESM::RefId& soundId) const
     {
         SoundMap::const_iterator snditer = mActiveSounds.find(ptr.mRef);
         if (snditer != mActiveSounds.end())
         {
-            Sound_Buffer* sfx = mSoundBuffers.lookup(Misc::StringUtils::lowerCase(soundId));
+            Sound_Buffer* sfx = mSoundBuffers.lookup(soundId);
             return std::find_if(snditer->second.mList.cbegin(), snditer->second.mList.cend(),
                        [this, sfx](const SoundBufferRefPair& snd) -> bool {
                            return snd.second == sfx && mOutput->isSoundPlaying(snd.first.get());
@@ -1006,7 +1006,7 @@ namespace MWSound
         {
             // Play underwater sound (after updating sounds)
             if (!mUnderwaterSound)
-                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Type::Sfx, PlayMode::LoopNoEnv);
+                mUnderwaterSound = playSound(ESM::RefId::stringRefId("Underwater"), 1.0f, 1.0f, Type::Sfx, PlayMode::LoopNoEnv);
         }
         mOutput->finishUpdate();
     }

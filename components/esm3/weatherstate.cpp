@@ -25,7 +25,7 @@ namespace ESM
 {
     void WeatherState::load(ESMReader& esm)
     {
-        mCurrentRegion = esm.getHNString(currentRegionRecord);
+        mCurrentRegion = ESM::RefId::stringRefId(esm.getHNString(currentRegionRecord));
         esm.getHNT(mTimePassed, timePassedRecord);
         esm.getHNT(mFastForward, fastForwardRecord);
         esm.getHNT(mWeatherUpdateTime, weatherUpdateTimeRecord);
@@ -36,7 +36,7 @@ namespace ESM
 
         while (esm.isNextSub(regionNameRecord))
         {
-            std::string regionID = esm.getHString();
+            ESM::RefId regionID = esm.getRefId();
             RegionWeatherState region;
             esm.getHNT(region.mWeather, regionWeatherRecord);
             while (esm.isNextSub(regionChanceRecord))
@@ -52,7 +52,7 @@ namespace ESM
 
     void WeatherState::save(ESMWriter& esm) const
     {
-        esm.writeHNCString(currentRegionRecord, mCurrentRegion);
+        esm.writeHNCString(currentRegionRecord, mCurrentRegion.getRefIdString());
         esm.writeHNT(timePassedRecord, mTimePassed);
         esm.writeHNT(fastForwardRecord, mFastForward);
         esm.writeHNT(weatherUpdateTimeRecord, mWeatherUpdateTime);
@@ -61,10 +61,10 @@ namespace ESM
         esm.writeHNT(nextWeatherRecord, mNextWeather);
         esm.writeHNT(queuedWeatherRecord, mQueuedWeather);
 
-        std::map<std::string, RegionWeatherState>::const_iterator it = mRegions.begin();
+        auto it = mRegions.begin();
         for (; it != mRegions.end(); ++it)
         {
-            esm.writeHNCString(regionNameRecord, it->first.c_str());
+            esm.writeHNCString(regionNameRecord, it->first.getRefIdString().c_str());
             esm.writeHNT(regionWeatherRecord, it->second.mWeather);
             for (size_t i = 0; i < it->second.mChances.size(); ++i)
             {

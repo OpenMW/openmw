@@ -43,15 +43,15 @@ namespace MWMechanics
     float calcSpellBaseSuccessChance(const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool);
     float getSpellSuccessChance(const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr,
         bool cap = true, bool checkMagicka = true);
-    float getSpellSuccessChance(const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr,
+    float getSpellSuccessChance(const ESM::RefId& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr,
         bool cap = true, bool checkMagicka = true);
 
-    int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor);
+    int getSpellSchool(const ESM::RefId& spellId, const MWWorld::Ptr& actor);
     int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
 
     /// Get whether or not the given spell contributes to skill progress.
     bool spellIncreasesSkill(const ESM::Spell* spell);
-    bool spellIncreasesSkill(const std::string& spellId);
+    bool spellIncreasesSkill(const ESM::RefId& spellId);
 }
 
 #endif

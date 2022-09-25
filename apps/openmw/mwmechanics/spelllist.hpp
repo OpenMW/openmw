@@ -30,24 +30,24 @@ namespace MWMechanics
     ///       saving and loading the game might reapply the cured disease depending on which instance was cured.
     class SpellList
     {
-        const std::string mId;
+        ESM::RefId mId;
         const int mType;
         std::vector<Spells*> mListeners;
 
-        bool withBaseRecord(const std::function<bool(std::vector<std::string>&)>& function);
+        bool withBaseRecord(const std::function<bool(std::vector<ESM::RefId>&)>& function);
 
     public:
-        SpellList(const std::string& id, int type);
+        SpellList(const ESM::RefId& id, int type);
 
         /// Get spell from ID, throws exception if not found
-        static const ESM::Spell* getSpell(std::string_view id);
+        static const ESM::Spell* getSpell(const ESM::RefId& id);
 
         void add(const ESM::Spell* spell);
         ///< Adding a spell that is already listed in *this is a no-op.
 
         void remove(const ESM::Spell* spell);
 
-        void removeAll(const std::vector<std::string>& spells);
+        void removeAll(const std::vector<ESM::RefId>& spells);
 
         void clear();
         ///< Remove all spells of all types.
@@ -58,7 +58,7 @@ namespace MWMechanics
 
         void updateListener(Spells* before, Spells* after);
 
-        const std::vector<std::string> getSpells() const;
+        const std::vector<ESM::RefId> getSpells() const;
     };
 }
 

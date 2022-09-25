@@ -543,7 +543,7 @@ namespace MWRender
     void RaceSelectionPreview::setPrototype(const ESM::NPC& proto)
     {
         mBase = proto;
-        mBase.mId = "player";
+        mBase.mId = ESM::RefId::stringRefId("player");
         rebuild();
     }
 

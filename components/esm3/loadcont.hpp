@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -19,7 +20,7 @@ namespace ESM
     struct ContItem
     {
         int mCount{ 0 };
-        std::string mItem;
+        ESM::RefId mItem;
     };
 
     /// InventoryList, NPCO subrecord
@@ -48,7 +49,8 @@ namespace ESM
         };
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mModel, mScript;
+        RefId mId, mScript;
+        std::string mName, mModel;
 
         float mWeight; // Not sure, might be max total weight allowed?
         int mFlags;

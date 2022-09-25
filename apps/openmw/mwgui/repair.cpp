@@ -57,7 +57,7 @@ namespace MWGui
 
     void Repair::setPtr(const MWWorld::Ptr& item)
     {
-        MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Repair Up"));
 
         mRepair.setTool(item);
 

@@ -46,13 +46,13 @@ namespace MWClass
         switch (shield->getClass().getEquipmentSkill(*shield))
         {
             case ESM::Skill::LightArmor:
-                sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
+                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
                 break;
             case ESM::Skill::MediumArmor:
-                sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
+                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
                 break;
             case ESM::Skill::HeavyArmor:
-                sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
+                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
                 break;
             default:
                 return;

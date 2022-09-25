@@ -17,6 +17,7 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
+    struct RefId;
 }
 
 namespace MWWorld
@@ -53,9 +54,9 @@ namespace MWBase
 
         virtual bool startDialogue(const MWWorld::Ptr& actor, ResponseCallback* callback) = 0;
 
-        virtual bool inJournal(const std::string& topicId, const std::string& infoId) const = 0;
+        virtual bool inJournal(const ESM::RefId& topicId, const ESM::RefId& infoId) const = 0;
 
-        virtual void addTopic(std::string_view topic) = 0;
+        virtual void addTopic(const ESM::RefId& topic) = 0;
 
         virtual void addChoice(std::string_view text, int choice) = 0;
         virtual const std::vector<std::pair<std::string, int>>& getChoices() const = 0;
@@ -64,7 +65,7 @@ namespace MWBase
 
         virtual void goodbye() = 0;
 
-        virtual void say(const MWWorld::Ptr& actor, const std::string& topic) = 0;
+        virtual void say(const MWWorld::Ptr& actor, const ESM::RefId& topic) = 0;
 
         virtual void keywordSelected(const std::string& keyword, ResponseCallback* callback) = 0;
         virtual void goodbyeSelected() = 0;
@@ -89,7 +90,7 @@ namespace MWBase
         };
 
         virtual std::list<std::string> getAvailableTopics() = 0;
-        virtual int getTopicFlag(const std::string&) const = 0;
+        virtual int getTopicFlag(const ESM::RefId&) const = 0;
 
         virtual bool checkServiceRefused(ResponseCallback* callback, ServiceType service = ServiceType::Any) = 0;
 
@@ -105,12 +106,12 @@ namespace MWBase
         virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
 
         /// Changes faction1's opinion of faction2 by \a diff.
-        virtual void modFactionReaction(std::string_view faction1, std::string_view faction2, int diff) = 0;
+        virtual void modFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int diff) = 0;
 
-        virtual void setFactionReaction(std::string_view faction1, std::string_view faction2, int absolute) = 0;
+        virtual void setFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int absolute) = 0;
 
         /// @return faction1's opinion of faction2
-        virtual int getFactionReaction(std::string_view faction1, std::string_view faction2) const = 0;
+        virtual int getFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2) const = 0;
 
         /// Removes the last added topic response for the given actor from the journal
         virtual void clearInfoActor(const MWWorld::Ptr& actor) const = 0;

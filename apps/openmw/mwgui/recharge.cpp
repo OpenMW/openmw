@@ -68,7 +68,7 @@ namespace MWGui
     {
         MWWorld::Ptr gem = *mGemIcon->getUserData<MWWorld::Ptr>();
 
-        const std::string& soul = gem.getCellRef().getSoul();
+        const ESM::RefId& soul = gem.getCellRef().getSoul();
         const ESM::Creature* creature
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 

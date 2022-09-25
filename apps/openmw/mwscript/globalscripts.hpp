@@ -11,6 +11,7 @@
 #include <variant>
 
 #include <components/misc/algorithm.hpp>
+#include <components/esm/refid.hpp>
 
 #include "locals.hpp"
 
@@ -39,7 +40,7 @@ namespace MWScript
     {
         bool mRunning;
         Locals mLocals;
-        std::variant<MWWorld::Ptr, std::pair<ESM::RefNum, std::string>> mTarget; // Used to start targeted script
+        std::variant<MWWorld::Ptr, std::pair<ESM::RefNum, ESM::RefId>> mTarget; // Used to start targeted script
 
         GlobalScriptDesc();
 
@@ -47,24 +48,23 @@ namespace MWScript
 
         MWWorld::Ptr getPtr(); // Resolves mTarget to a Ptr and caches the (potentially empty) result
 
-        std::string_view getId() const; // Returns the target's ID -- if any
+        const ESM::RefId& getId() const; // Returns the target's ID -- if any
     };
 
     class GlobalScripts
     {
         const MWWorld::ESMStore& mStore;
-        std::unordered_map<std::string, std::shared_ptr<GlobalScriptDesc>, ::Misc::StringUtils::CiHash,
-            ::Misc::StringUtils::CiEqual>
+        std::unordered_map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>>
             mScripts;
 
     public:
         GlobalScripts(const MWWorld::ESMStore& store);
 
-        void addScript(std::string_view name, const MWWorld::Ptr& target = MWWorld::Ptr());
+        void addScript(const ESM::RefId& name, const MWWorld::Ptr& target = MWWorld::Ptr());
 
-        void removeScript(std::string_view name);
+        void removeScript(const ESM::RefId& name);
 
-        bool isRunning(std::string_view name) const;
+        bool isRunning(const ESM::RefId& name) const;
 
         void run();
         ///< run all active global scripts
@@ -83,11 +83,11 @@ namespace MWScript
         ///
         /// \return Known type?
 
-        Locals& getLocals(std::string_view name);
+        Locals& getLocals(const ESM::RefId& name);
         ///< If the script \a name has not been added as a global script yet, it is added
         /// automatically, but is not set to running state.
 
-        const Locals* getLocalsIfPresent(std::string_view name) const;
+        const Locals* getLocalsIfPresent(const ESM::RefId& name) const;
 
         void updatePtrs(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
         ///< Update the Ptrs stored in mTarget. Should be called after the reference has been moved to a new cell.

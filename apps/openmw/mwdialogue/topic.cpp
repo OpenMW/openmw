@@ -9,9 +9,9 @@ namespace MWDialogue
 {
     Topic::Topic() {}
 
-    Topic::Topic(const std::string& topic)
+    Topic::Topic(const ESM::RefId& topic)
         : mTopic(topic)
-        , mName(MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic)->mId)
+        , mName(MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic)->mId.getRefIdString())
     {
     }
 
@@ -20,7 +20,7 @@ namespace MWDialogue
     bool Topic::addEntry(const JournalEntry& entry)
     {
         if (entry.mTopic != mTopic)
-            throw std::runtime_error("topic does not match: " + mTopic);
+            throw std::runtime_error("topic does not match: " + mTopic.getRefIdString());
 
         // bail out if we already have heard this
         for (Topic::TEntryIter it = mEntries.begin(); it != mEntries.end(); ++it)
@@ -38,7 +38,7 @@ namespace MWDialogue
         mEntries.push_back(entry);
     }
 
-    std::string Topic::getTopic() const
+    ESM::RefId Topic::getTopic() const
     {
         return mTopic;
     }

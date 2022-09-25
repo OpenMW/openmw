@@ -24,7 +24,7 @@
 namespace
 {
 
-    bool sortClasses(const std::pair<std::string, std::string>& left, const std::pair<std::string, std::string>& right)
+    bool sortClasses(const std::pair<ESM::RefId, std::string>& left, const std::pair<ESM::RefId, std::string>& right)
     {
         return left.second.compare(right.second) < 0;
     }
@@ -58,7 +58,7 @@ namespace MWGui
         center();
     }
 
-    void GenerateClassResultDialog::setClassId(const std::string& classId)
+    void GenerateClassResultDialog::setClassId(const ESM::RefId& classId)
     {
         mCurrentClassId = classId;
 
@@ -144,20 +144,20 @@ namespace MWGui
         // Show the current class by default
         MWWorld::Ptr player = MWMechanics::getPlayer();
 
-        const std::string& classId = player.get<ESM::NPC>()->mBase->mClass;
+        const ESM::RefId& classId = player.get<ESM::NPC>()->mBase->mClass;
 
         if (!classId.empty())
             setClassId(classId);
     }
 
-    void PickClassDialog::setClassId(const std::string& classId)
+    void PickClassDialog::setClassId(const ESM::RefId& classId)
     {
         mCurrentClassId = classId;
         mClassList->setIndexSelected(MyGUI::ITEM_NONE);
         size_t count = mClassList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (Misc::StringUtils::ciEqual(*mClassList->getItemDataAt<std::string>(i), classId))
+            if (ESM::RefId::ciEqual(*mClassList->getItemDataAt<ESM::RefId>(i), classId))
             {
                 mClassList->setIndexSelected(i);
                 break;
@@ -194,8 +194,8 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        const std::string* classId = mClassList->getItemDataAt<std::string>(_index);
-        if (Misc::StringUtils::ciEqual(mCurrentClassId, *classId))
+        const ESM::RefId* classId = mClassList->getItemDataAt<ESM::RefId>(_index);
+        if (ESM::RefId::ciEqual(mCurrentClassId, *classId))
             return;
 
         mCurrentClassId = *classId;
@@ -210,7 +210,7 @@ namespace MWGui
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
-        std::vector<std::pair<std::string, std::string>> items; // class id, class name
+        std::vector<std::pair<ESM::RefId, std::string>> items; // class id, class name
         for (const ESM::Class& classInfo : store.get<ESM::Class>())
         {
             bool playable = (classInfo.mData.mIsPlayable != 0);
@@ -227,14 +227,14 @@ namespace MWGui
         int index = 0;
         for (auto& itemPair : items)
         {
-            const std::string& id = itemPair.first;
+            const ESM::RefId& id = itemPair.first;
             mClassList->addItem(itemPair.second, id);
             if (mCurrentClassId.empty())
             {
                 mCurrentClassId = id;
                 mClassList->setIndexSelected(index);
             }
-            else if (Misc::StringUtils::ciEqual(id, mCurrentClassId))
+            else if (ESM::RefId::ciEqual(id, mCurrentClassId))
             {
                 mClassList->setIndexSelected(index);
             }
@@ -889,14 +889,14 @@ namespace MWGui
         eventDone(this);
     }
 
-    void setClassImage(MyGUI::ImageBox* imageBox, const std::string& classId)
+    void setClassImage(MyGUI::ImageBox* imageBox, const ESM::RefId& classId)
     {
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         std::string classImage
-            = Misc::ResourceHelpers::correctTexturePath("textures\\levelup\\" + classId + ".dds", vfs);
+            = Misc::ResourceHelpers::correctTexturePath("textures\\levelup\\" + classId.getRefIdString() + ".dds", vfs);
         if (!vfs->exists(classImage))
         {
-            Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
+            Log(Debug::Warning) << "No class image for " << classId.getRefIdString() << ", falling back to default";
             classImage = "textures\\levelup\\warrior.dds";
         }
         imageBox->setImageTexture(classImage);

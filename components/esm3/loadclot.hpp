@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include "loadarmo.hpp"
 
 namespace ESM
@@ -49,7 +50,8 @@ namespace ESM
         PartReferenceList mParts;
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mModel, mIcon, mEnchant, mScript;
+        RefId mId, mEnchant, mScript;
+        std::string mModel, mIcon, mName;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

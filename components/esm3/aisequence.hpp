@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
-
+#include "components/esm/refid.hpp"
 #include "components/esm/util.hpp"
 
 namespace ESM
@@ -91,8 +91,8 @@ namespace ESM
             AiEscortData mData;
 
             int mTargetActorId;
-            std::string mTargetId;
-            std::string mCellId;
+            ESM::RefId mTargetId;
+            ESM::RefId mCellId;
             float mRemainingDuration;
             bool mRepeat;
 
@@ -105,8 +105,8 @@ namespace ESM
             AiEscortData mData;
 
             int mTargetActorId;
-            std::string mTargetId;
-            std::string mCellId;
+            ESM::RefId mTargetId;
+            ESM::RefId mCellId;
             float mRemainingDuration;
 
             bool mAlwaysFollow;
@@ -121,7 +121,7 @@ namespace ESM
 
         struct AiActivate : AiPackage
         {
-            std::string mTargetId;
+            ESM::RefId mTargetId;
             bool mRepeat;
 
             void load(ESMReader& esm);

@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
-
+#include <components/esm/refid.hpp>
 #include "statstate.hpp"
 
 namespace ESM
@@ -29,7 +29,7 @@ namespace ESM
 
         bool mWerewolfDeprecatedData;
 
-        std::map<std::string, Faction> mFactions; // lower case IDs
+        std::map<ESM::RefId, Faction> mFactions; // lower case IDs
         int mDisposition;
         StatState<float> mSkills[27];
         int mBounty;
@@ -38,7 +38,7 @@ namespace ESM
         int mLevelProgress;
         int mSkillIncrease[8];
         int mSpecIncreases[3];
-        std::vector<std::string> mUsedIds; // lower case IDs
+        std::vector<ESM::RefId> mUsedIds; // lower case IDs
         float mTimeToStartDrowning;
         int mCrimeId;
 

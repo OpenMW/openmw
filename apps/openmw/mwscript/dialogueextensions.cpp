@@ -33,7 +33,7 @@ namespace MWScript
                 if (ptr.isEmpty())
                     ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-                std::string quest{ runtime.getStringLiteral(runtime[0].mInteger) };
+                ESM::RefId quest = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer index = runtime[0].mInteger;
@@ -57,7 +57,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string quest{ runtime.getStringLiteral(runtime[0].mInteger) };
+                ESM::RefId quest = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer index = runtime[0].mInteger;
@@ -72,7 +72,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string quest{ runtime.getStringLiteral(runtime[0].mInteger) };
+                ESM::RefId quest = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 int index = MWBase::Environment::get().getJournal()->getJournalIndex(quest);
@@ -86,7 +86,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view topic = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId topic = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWBase::Environment::get().getDialogueManager()->addTopic(topic);
@@ -207,10 +207,10 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view faction1 = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId faction1 = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                std::string_view faction2 = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId faction2 = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 int modReaction = runtime[0].mInteger;
@@ -225,10 +225,10 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view faction1 = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId faction1 = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                std::string_view faction2 = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId faction2 = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 runtime.push(MWBase::Environment::get().getDialogueManager()->getFactionReaction(faction1, faction2));
@@ -240,10 +240,10 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view faction1 = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId faction1 = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                std::string_view faction2 = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId faction2 = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 int newValue = runtime[0].mInteger;

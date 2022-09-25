@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 #include <vector>
-
+#include <components/esm/refid.hpp>
 #include "creaturestats.hpp"
 
 namespace ESM
@@ -31,14 +31,14 @@ namespace MWMechanics
         int mWerewolfKills;
         /// Used only for the player and for NPC's with ranks, modified by scripts; other NPCs have maximum one faction
         /// defined in their NPC record
-        std::map<std::string, int> mFactionRank;
-        std::set<std::string> mExpelled;
-        std::map<std::string, int> mFactionReputation;
+        std::map<ESM::RefId, int> mFactionRank;
+        std::set<ESM::RefId> mExpelled;
+        std::map<ESM::RefId, int> mFactionReputation;
         int mLevelProgress; // 0-10
         std::vector<int> mSkillIncreases; // number of skill increases for each attribute (resets after leveling up)
         std::vector<int> mSpecIncreases; // number of skill increases for each specialization (accumulates throughout
                                          // the entire game)
-        std::set<std::string> mUsedIds;
+        std::set<ESM::RefId> mUsedIds;
         // ---------------------------------------------------------------------------
 
         /// Countdown to getting damage while underwater
@@ -62,22 +62,22 @@ namespace MWMechanics
         SkillValue& getSkill(int index);
         void setSkill(int index, const SkillValue& value);
 
-        int getFactionRank(std::string_view faction) const;
-        const std::map<std::string, int>& getFactionRanks() const;
+        int getFactionRank(const ESM::RefId& faction) const;
+        const std::map<ESM::RefId, int>& getFactionRanks() const;
 
         /// Increase the rank in this faction by 1, if such a rank exists.
-        void raiseRank(std::string_view faction);
+        void raiseRank(const ESM::RefId& faction);
         /// Lower the rank in this faction by 1, if such a rank exists.
-        void lowerRank(std::string_view faction);
+        void lowerRank(const ESM::RefId& faction);
         /// Join this faction, setting the initial rank to 0.
-        void joinFaction(std::string_view faction);
+        void joinFaction(const ESM::RefId& faction);
 
-        const std::set<std::string>& getExpelled() const { return mExpelled; }
-        bool getExpelled(std::string_view factionID) const;
-        void expell(std::string_view factionID);
-        void clearExpelled(std::string_view factionID);
+        const std::set<ESM::RefId>& getExpelled() const { return mExpelled; }
+        bool getExpelled(const ESM::RefId& factionID) const;
+        void expell(const ESM::RefId& factionID);
+        void clearExpelled(const ESM::RefId& factionID);
 
-        bool isInFaction(std::string_view faction) const;
+        bool isInFaction(const ESM::RefId& faction) const;
 
         float getSkillProgressRequirement(int skillIndex, const ESM::Class& class_) const;
 
@@ -98,21 +98,21 @@ namespace MWMechanics
         ///< Calculate health based on endurance and strength.
         ///  Called at character creation.
 
-        void flagAsUsed(const std::string& id);
+        void flagAsUsed(const ESM::RefId& id);
         ///< @note Id must be lower-case
 
-        bool hasBeenUsed(const std::string& id) const;
+        bool hasBeenUsed(const ESM::RefId& id) const;
         ///< @note Id must be lower-case
 
         int getBounty() const;
 
         void setBounty(int bounty);
 
-        int getFactionReputation(std::string_view faction) const;
+        int getFactionReputation(const ESM::RefId& faction) const;
 
-        void setFactionReputation(std::string_view faction, int value);
+        void setFactionReputation(const ESM::RefId& faction, int value);
 
-        bool hasSkillsForRank(std::string_view factionId, int rank) const;
+        bool hasSkillsForRank(const ESM::RefId& factionId, int rank) const;
 
         bool isWerewolf() const;
 

@@ -9,7 +9,7 @@ namespace MWWorld
 {
     class ActionTrap : public Action
     {
-        std::string mSpellId;
+        ESM::RefId mSpellId;
         MWWorld::Ptr mTrapSource;
 
         void executeImp(const Ptr& actor) override;
@@ -17,7 +17,7 @@ namespace MWWorld
     public:
         /// @param spellId
         /// @param trapSource
-        ActionTrap(const std::string& spellId, const Ptr& trapSource)
+        ActionTrap(const ESM::RefId& spellId, const Ptr& trapSource)
             : Action(false, trapSource)
             , mSpellId(spellId)
             , mTrapSource(trapSource)

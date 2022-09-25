@@ -50,7 +50,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Clothing::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -58,7 +58,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string_view Clothing::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Clothing::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
@@ -118,26 +118,28 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string_view Clothing::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Clothing::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
-
+        static ESM::RefId sound;
         if (ref->mBase->mData.mType == 8)
         {
-            return "Item Ring Up";
+            sound = ESM::RefId::stringRefId("Item Ring Up");
         }
-        return "Item Clothes Up";
+        sound = ESM::RefId::stringRefId("Item Clothes Up");
+        return sound;
     }
 
-    std::string_view Clothing::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Clothing::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
-
+        static ESM::RefId sound;
         if (ref->mBase->mData.mType == 8)
         {
-            return "Item Ring Down";
+            sound = ESM::RefId::stringRefId("Item Ring Down");
         }
-        return "Item Clothes Down";
+        sound = ESM::RefId::stringRefId("Item Clothes Down");
+        return sound;
     }
 
     const std::string& Clothing::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -165,7 +167,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.enchant = ref->mBase->mEnchant;
@@ -177,15 +179,15 @@ namespace MWClass
         return info;
     }
 
-    std::string_view Clothing::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Clothing::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
         return ref->mBase->mEnchant;
     }
 
-    const std::string& Clothing::applyEnchantment(
-        const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const ESM::RefId& Clothing::applyEnchantment(
+        const MWWorld::ConstPtr& ptr, const ESM::RefId& enchId, int enchCharge, const std::string& newName) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
@@ -209,7 +211,7 @@ namespace MWClass
 
         if (npc.getClass().isNpc())
         {
-            const std::string& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+            const ESM::RefId& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);

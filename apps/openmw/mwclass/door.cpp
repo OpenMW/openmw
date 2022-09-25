@@ -104,17 +104,17 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Door>* ref = ptr.get<ESM::Door>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Door::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
     {
         MWWorld::LiveCellRef<ESM::Door>* ref = ptr.get<ESM::Door>();
 
-        const std::string& openSound = ref->mBase->mOpenSound;
-        const std::string& closeSound = ref->mBase->mCloseSound;
-        const std::string_view lockedSound = "LockedDoor";
-        const std::string_view trapActivationSound = "Disarm Trap Fail";
+        const ESM::RefId& openSound = ref->mBase->mOpenSound;
+        const ESM::RefId& closeSound = ref->mBase->mCloseSound;
+        const ESM::RefId lockedSound = ESM::RefId::stringRefId("LockedDoor");
+        const ESM::RefId trapActivationSound = ESM::RefId::stringRefId("Disarm Trap Fail");
 
         // FIXME: If NPC activate teleporting door, it can lead to crash due to iterator invalidation in the Actors
         // update. Make such activation a no-op for now, like how it is in the vanilla game.
@@ -148,7 +148,7 @@ namespace MWClass
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
         bool hasKey = false;
         std::string_view keyName;
-        const std::string& keyId = ptr.getCellRef().getKey();
+        const ESM::RefId& keyId = ptr.getCellRef().getKey();
         if (!keyId.empty())
         {
             MWWorld::Ptr keyPtr = invStore.search(keyId);
@@ -167,8 +167,8 @@ namespace MWClass
             // using a key disarms the trap
             if (isTrapped)
             {
-                ptr.getCellRef().setTrap("");
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Disarm Trap", 1.0f, 1.0f);
+                ptr.getCellRef().setTrap(ESM::RefId::sEmpty);
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::RefId::stringRefId("Disarm Trap"), 1.0f, 1.0f);
                 isTrapped = false;
             }
         }
@@ -256,7 +256,7 @@ namespace MWClass
             return true;
     }
 
-    std::string_view Door::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Door::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door>* ref = ptr.get<ESM::Door>();
 
@@ -290,7 +290,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
         info.text = text;
 

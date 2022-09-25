@@ -341,8 +341,8 @@ namespace MWGui
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
         auto journal = JournalWindow::create(JournalViewModel::create(), questList, mEncoding);
         mGuiModeStates[GM_Journal] = GuiModeState(journal.get());
-        mGuiModeStates[GM_Journal].mCloseSound = "book close";
-        mGuiModeStates[GM_Journal].mOpenSound = "book open";
+        mGuiModeStates[GM_Journal].mCloseSound = ESM::RefId::stringRefId("book close");
+        mGuiModeStates[GM_Journal].mOpenSound = ESM::RefId::stringRefId("book open");
         mWindows.push_back(std::move(journal));
 
         mMessageBoxManager = std::make_unique<MessageBoxManager>(
@@ -379,15 +379,15 @@ namespace MWGui
         mScrollWindow = scrollWindow.get();
         mWindows.push_back(std::move(scrollWindow));
         mGuiModeStates[GM_Scroll] = GuiModeState(mScrollWindow);
-        mGuiModeStates[GM_Scroll].mOpenSound = "scroll";
-        mGuiModeStates[GM_Scroll].mCloseSound = "scroll";
+        mGuiModeStates[GM_Scroll].mOpenSound = ESM::RefId::stringRefId("scroll");
+        mGuiModeStates[GM_Scroll].mCloseSound = ESM::RefId::stringRefId("scroll");
 
         auto bookWindow = std::make_unique<BookWindow>();
         mBookWindow = bookWindow.get();
         mWindows.push_back(std::move(bookWindow));
         mGuiModeStates[GM_Book] = GuiModeState(mBookWindow);
-        mGuiModeStates[GM_Book].mOpenSound = "book open";
-        mGuiModeStates[GM_Book].mCloseSound = "book close";
+        mGuiModeStates[GM_Book].mOpenSound = ESM::RefId::stringRefId("book open");
+        mGuiModeStates[GM_Book].mCloseSound = ESM::RefId::stringRefId("book close");
 
         auto countDialog = std::make_unique<CountDialog>();
         mCountDialog = countDialog.get();
@@ -804,7 +804,7 @@ namespace MWGui
         return mMessageBoxManager->readPressedButton();
     }
 
-    std::string_view WindowManager::getGameSettingString(std::string_view id, std::string_view default_)
+    std::string_view WindowManager::getGameSettingString(const std::string_view& id, std::string_view default_)
     {
         const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(id);
 
@@ -933,7 +933,7 @@ namespace MWGui
     {
         mMap->requestMapRender(cell);
 
-        std::string name{ MWBase::Environment::get().getWorld()->getCellName(cell) };
+        std::string name = MWBase::Environment::get().getWorld()->getCellName(cell) ;
 
         mMap->setCellName(name);
         mHud->setCellName(name);
@@ -1330,7 +1330,7 @@ namespace MWGui
         mJailScreen->goToJail(days);
     }
 
-    void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
+    void WindowManager::setSelectedSpell(const ESM::RefId& spellId, int successChancePercent)
     {
         mSelectedSpell = spellId;
         mSelectedEnchantItem = MWWorld::Ptr();
@@ -1791,7 +1791,7 @@ namespace MWGui
         if (!mSelectedSpell.empty())
         {
             writer.startRecord(ESM::REC_ASPL);
-            writer.writeHNString("ID__", mSelectedSpell);
+            writer.writeHNString("ID__", mSelectedSpell.getRefIdString());
             writer.endRecord(ESM::REC_ASPL);
         }
 
@@ -1813,7 +1813,7 @@ namespace MWGui
         else if (type == ESM::REC_ASPL)
         {
             reader.getSubNameIs("ID__");
-            std::string spell = reader.getHString();
+            ESM::RefId spell = reader.getRefId();
             if (mStore->get<ESM::Spell>().search(spell))
                 mSelectedSpell = spell;
         }
@@ -2139,7 +2139,7 @@ namespace MWGui
             mInventoryWindow->cycle(next);
     }
 
-    void WindowManager::playSound(std::string_view soundId, float volume, float pitch)
+    void WindowManager::playSound(const ESM::RefId& soundId, float volume, float pitch)
     {
         if (soundId.empty())
             return;

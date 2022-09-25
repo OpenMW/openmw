@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <components/misc/strings/lower.hpp>
+#include <components/esm/refid.hpp>
 
 #include "context.hpp"
 #include "declarationparser.hpp"
@@ -126,7 +127,7 @@ namespace Compiler
         if (mState == SetMemberVarState)
         {
             mMemberName = Misc::StringUtils::lowerCase(name);
-            std::pair<char, bool> type = getContext().getMemberType(mMemberName, mName);
+            std::pair<char, bool> type = getContext().getMemberType(mMemberName, ESM::RefId::stringRefId(mName));
 
             if (type.first != ' ')
             {
@@ -169,7 +170,7 @@ namespace Compiler
             return true;
         }
 
-        if (mState == BeginState && getContext().isId(name))
+        if (mState == BeginState && getContext().isId(ESM::RefId::stringRefId(name)))
         {
             mState = PotentialExplicitState;
             mExplicit = Misc::StringUtils::lowerCase(name);
@@ -224,7 +225,7 @@ namespace Compiler
         if (mState == SetMemberVarState)
         {
             mMemberName = loc.mLiteral;
-            std::pair<char, bool> type = getContext().getMemberType(mMemberName, mName);
+            std::pair<char, bool> type = getContext().getMemberType(mMemberName, ESM::RefId::stringRefId(mName));
 
             if (type.first != ' ')
             {

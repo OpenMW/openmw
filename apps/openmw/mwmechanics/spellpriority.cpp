@@ -59,7 +59,7 @@ namespace
         return toCure;
     }
 
-    float getSpellDuration(const MWWorld::Ptr& actor, const std::string& spellId)
+    float getSpellDuration(const MWWorld::Ptr& actor, const ESM::RefId& spellId)
     {
         float duration = 0;
         const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
@@ -78,12 +78,12 @@ namespace
         return duration;
     }
 
-    bool isSpellActive(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const std::string& id)
+    bool isSpellActive(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const ESM::RefId& id)
     {
         int actorId = caster.getClass().getCreatureStats(caster).getActorId();
         const auto& active = target.getClass().getCreatureStats(target).getActiveSpells();
         return std::find_if(active.begin(), active.end(), [&](const auto& spell) {
-            return spell.getCasterActorId() == actorId && Misc::StringUtils::ciEqual(spell.getId(), id);
+            return spell.getCasterActorId() == actorId && ESM::RefId::ciEqual(spell.getId(), id);
         }) != active.end();
     }
 }
@@ -126,7 +126,7 @@ namespace MWMechanics
         // Don't make use of racial bonus spells, like MW. Can be made optional later
         if (actor.getClass().isNpc())
         {
-            const std::string& raceid = actor.get<ESM::NPC>()->mBase->mRace;
+            const ESM::RefId& raceid = actor.get<ESM::NPC>()->mBase->mRace;
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
             if (race->mPowers.exists(spell->mId))
                 return 0.f;
@@ -371,7 +371,7 @@ namespace MWMechanics
                 if (actor.getClass().isNpc())
                 {
                     // Beast races can't wear helmets or boots
-                    const std::string& raceid = actor.get<ESM::NPC>()->mBase->mRace;
+                    const ESM::RefId& raceid = actor.get<ESM::NPC>()->mBase->mRace;
                     const ESM::Race* race
                         = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
                     if (race->mData.mFlags & ESM::Race::Beast)

@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 #include <components/esm/luascripts.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/misc/tuplemeta.hpp>
 
@@ -105,15 +106,14 @@ namespace MWWorld
 
         std::unique_ptr<ESMStoreImp> mStoreImp;
 
-        std::unordered_map<std::string, int> mRefCount;
+        std::unordered_map<ESM::RefId, int> mRefCount;
 
         std::vector<StoreBase*> mStores;
         std::vector<DynamicStore*> mDynamicStores;
 
         unsigned int mDynamicCount;
 
-        mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash,
-            Misc::StringUtils::CiEqual>
+        mutable std::unordered_map<ESM::RefId, std::weak_ptr<MWMechanics::SpellList>>
             mSpellListCache;
 
         template <class T>
@@ -130,7 +130,7 @@ namespace MWWorld
         template <class T>
         void removeMissingObjects(Store<T>& store);
 
-        void setIdType(const std::string& id, ESM::RecNameInts type);
+        void setIdType(const ESM::RefId& id, ESM::RecNameInts type);
 
         using LuaContent = std::variant<ESM::LuaScriptsCfg, // data from an omwaddon
             std::filesystem::path>; // path to an omwscripts file
@@ -148,9 +148,9 @@ namespace MWWorld
         iterator end() const { return mDynamicStores.end(); }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
-        int find(const std::string_view id) const;
+        int find(const ESM::RefId& id) const;
 
-        int findStatic(const std::string_view id) const;
+        int findStatic(const ESM::RefId& id) const;
 
         ESMStore();
         ~ESMStore();
@@ -174,12 +174,12 @@ namespace MWWorld
         template <class T>
         const T* insert(const T& x)
         {
-            const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
+            const ESM::RefId id = ESM::RefId::stringRefId("$dynamic" + std::to_string(mDynamicCount++));
 
             Store<T>& store = getWritable<T>();
             if (store.search(id) != nullptr)
             {
-                const std::string msg = "Try to override existing record '" + id + "'";
+                const std::string msg = "Try to override existing record '" + id.getRefIdString() + "'";
                 throw std::runtime_error(msg);
             }
             T record = x;
@@ -214,7 +214,7 @@ namespace MWWorld
             Store<T>& store = getWritable<T>();
             if (store.search(x.mId) != nullptr)
             {
-                const std::string msg = "Try to override existing record '" + x.mId + "'";
+                const std::string msg = "Try to override existing record '" + x.mId.getRefIdString() + "'";
                 throw std::runtime_error(msg);
             }
 
@@ -242,11 +242,11 @@ namespace MWWorld
         void checkPlayer();
 
         /// @return The number of instances defined in the base files. Excludes changes from the save file.
-        int getRefCount(std::string_view id) const;
+        int getRefCount(const ESM::RefId& id) const;
 
         /// Actors with the same ID share spells, abilities, etc.
         /// @return The shared spell list to use for this actor and whether or not it has already been initialized.
-        std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
+        std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const ESM::RefId& id) const;
     };
     template <>
     const ESM::Cell* ESMStore::insert<ESM::Cell>(const ESM::Cell& cell);

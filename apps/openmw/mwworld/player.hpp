@@ -8,6 +8,7 @@
 #include "../mwmechanics/drawstate.hpp"
 
 #include <components/esm/attr.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadskil.hpp>
 
@@ -32,7 +33,7 @@ namespace MWWorld
     {
         LiveCellRef<ESM::NPC> mPlayer;
         MWWorld::CellStore* mCellStore;
-        std::string mSign;
+        ESM::RefId mSign;
 
         osg::Vec3f mLastKnownExteriorPosition;
 
@@ -47,7 +48,7 @@ namespace MWWorld
         int mCurrentCrimeId; // the id assigned witnesses
         int mPaidCrimeId; // the last id paid off (0 bounty)
 
-        typedef std::map<std::string, std::string> PreviousItems; // previous equipped items, needed for bound spells
+        typedef std::map<ESM::RefId, ESM::RefId> PreviousItems; // previous equipped items, needed for bound spells
         PreviousItems mPreviousItems;
 
         // Saved stats prior to becoming a werewolf
@@ -80,8 +81,8 @@ namespace MWWorld
         MWWorld::Ptr getPlayer();
         MWWorld::ConstPtr getConstPlayer() const;
 
-        void setBirthSign(const std::string& sign);
-        const std::string& getBirthSign() const;
+        void setBirthSign(const ESM::RefId& sign);
+        const ESM::RefId& getBirthSign() const;
 
         void setDrawState(MWMechanics::DrawState state);
         MWMechanics::DrawState getDrawState(); /// \todo constness
@@ -127,11 +128,11 @@ namespace MWWorld
         void recordCrimeId(); // record the paid crime id when bounty is 0
         int getCrimeId() const; // get the last paid crime id
 
-        void setPreviousItem(const std::string& boundItemId, const std::string& previousItemId);
-        std::string getPreviousItem(const std::string& boundItemId);
-        void erasePreviousItem(const std::string& boundItemId);
+        void setPreviousItem(const ESM::RefId& boundItemId, const ESM::RefId& previousItemId);
+        ESM::RefId getPreviousItem(const ESM::RefId& boundItemId);
+        void erasePreviousItem(const ESM::RefId& boundItemId);
 
-        void setSelectedSpell(const std::string& spellId);
+        void setSelectedSpell(const ESM::RefId& spellId);
 
         void update();
     };

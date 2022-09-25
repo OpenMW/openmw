@@ -19,7 +19,7 @@ namespace ESM
     {
         while (esm.isNextSub("FACT"))
         {
-            std::string id = esm.getHString();
+            ESM::RefId id = esm.getRefId();
 
             Faction faction;
 
@@ -113,7 +113,7 @@ namespace ESM
         esm.getHNOT(mSpecIncreases, "SPEC");
 
         while (esm.isNextSub("USED"))
-            mUsedIds.push_back(esm.getHString());
+            mUsedIds.push_back(esm.getRefId());
 
         mTimeToStartDrowning = 0;
         esm.getHNOT(mTimeToStartDrowning, "DRTI");
@@ -132,9 +132,9 @@ namespace ESM
 
     void NpcStats::save(ESMWriter& esm) const
     {
-        for (std::map<std::string, Faction>::const_iterator iter(mFactions.begin()); iter != mFactions.end(); ++iter)
+        for (auto iter(mFactions.begin()); iter != mFactions.end(); ++iter)
         {
-            esm.writeHNString("FACT", iter->first);
+            esm.writeHNString("FACT", iter->first.getRefIdString());
 
             if (iter->second.mExpelled)
             {
@@ -185,8 +185,8 @@ namespace ESM
         if (mSpecIncreases[0] != 0 || mSpecIncreases[1] != 0 || mSpecIncreases[2] != 0)
             esm.writeHNT("SPEC", mSpecIncreases);
 
-        for (std::vector<std::string>::const_iterator iter(mUsedIds.begin()); iter != mUsedIds.end(); ++iter)
-            esm.writeHNString("USED", *iter);
+        for (auto iter(mUsedIds.begin()); iter != mUsedIds.end(); ++iter)
+            esm.writeHNString("USED", iter->getRefIdString());
 
         if (mTimeToStartDrowning)
             esm.writeHNT("DRTI", mTimeToStartDrowning);

@@ -42,7 +42,7 @@ namespace
 
             Compiler::Locals locals;
 
-            std::string_view actorScript = actor.getClass().getScript(actor);
+            const ESM::RefId& actorScript = actor.getClass().getScript(actor);
             if (!actorScript.empty())
             {
                 // grab local variables from actor's script, if available.

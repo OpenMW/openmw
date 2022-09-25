@@ -19,7 +19,7 @@ namespace MWDialogue
     public:
         Quest();
 
-        Quest(const std::string& topic);
+        Quest(const ESM::RefId& topic);
 
         Quest(const ESM::QuestState& state);
 

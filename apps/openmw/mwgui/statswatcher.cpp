@@ -42,25 +42,25 @@ namespace MWGui
             if (stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
             {
                 mWatchedAttributes[i] = stats.getAttribute(i);
-                setValue("AttribVal" + std::to_string(i + 1), stats.getAttribute(i));
+                setValue(ESM::RefId::stringRefId("AttribVal" + std::to_string(i + 1)), stats.getAttribute(i));
             }
         }
 
         if (stats.getHealth() != mWatchedHealth || mWatchedStatsEmpty)
         {
-            static const std::string hbar("HBar");
+            static const ESM::RefId hbar(ESM::RefId::stringRefId("HBar"));
             mWatchedHealth = stats.getHealth();
             setValue(hbar, stats.getHealth());
         }
         if (stats.getMagicka() != mWatchedMagicka || mWatchedStatsEmpty)
         {
-            static const std::string mbar("MBar");
+            static const ESM::RefId mbar(ESM::RefId::stringRefId("MBar"));
             mWatchedMagicka = stats.getMagicka();
             setValue(mbar, stats.getMagicka());
         }
         if (stats.getFatigue() != mWatchedFatigue || mWatchedStatsEmpty)
         {
-            static const std::string fbar("FBar");
+            static const ESM::RefId fbar(ESM::RefId::stringRefId("FBar"));
             mWatchedFatigue = stats.getFatigue();
             setValue(fbar, stats.getFatigue());
         }
@@ -100,7 +100,7 @@ namespace MWGui
         if (stats.getLevel() != mWatchedLevel || mWatchedStatsEmpty)
         {
             mWatchedLevel = stats.getLevel();
-            setValue("level", mWatchedLevel);
+            setValue(ESM::RefId::stringRefId("level"), mWatchedLevel);
         }
 
         if (mWatched.getClass().isNpc())
@@ -110,7 +110,7 @@ namespace MWGui
             if (watchedRecord->mName != mWatchedName || mWatchedStatsEmpty)
             {
                 mWatchedName = watchedRecord->mName;
-                setValue("name", watchedRecord->mName);
+                setValue(ESM::RefId::stringRefId("name"), watchedRecord->mName);
             }
 
             if (watchedRecord->mRace != mWatchedRace || mWatchedStatsEmpty)
@@ -118,7 +118,7 @@ namespace MWGui
                 mWatchedRace = watchedRecord->mRace;
                 const ESM::Race* race
                     = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(watchedRecord->mRace);
-                setValue("race", race->mName);
+                setValue(ESM::RefId::stringRefId("race"), race->mName);
             }
 
             if (watchedRecord->mClass != mWatchedClass || mWatchedStatsEmpty)
@@ -126,7 +126,7 @@ namespace MWGui
                 mWatchedClass = watchedRecord->mClass;
                 const ESM::Class* cls
                     = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(watchedRecord->mClass);
-                setValue("class", cls->mName);
+                setValue(ESM::RefId::stringRefId("class"), cls->mName);
 
                 MWBase::WindowManager::SkillList majorSkills(5);
                 MWBase::WindowManager::SkillList minorSkills(5);
@@ -154,7 +154,7 @@ namespace MWGui
         mListeners.erase(listener);
     }
 
-    void StatsWatcher::setValue(const std::string& id, const MWMechanics::AttributeValue& value)
+    void StatsWatcher::setValue(const ESM::RefId& id, const MWMechanics::AttributeValue& value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);
@@ -168,19 +168,19 @@ namespace MWGui
             listener->setValue(parSkill, value);
     }
 
-    void StatsWatcher::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
+    void StatsWatcher::setValue(const ESM::RefId& id, const MWMechanics::DynamicStat<float>& value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::setValue(const std::string& id, const std::string& value)
+    void StatsWatcher::setValue(const ESM::RefId& id, const std::string& value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::setValue(const std::string& id, int value)
+    void StatsWatcher::setValue(const ESM::RefId& id, int value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);

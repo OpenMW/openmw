@@ -35,11 +35,11 @@ namespace MWClass
 
     bool Miscellaneous::isGold(const MWWorld::ConstPtr& ptr) const
     {
-        return Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
-            || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
-            || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
-            || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
-            || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100");
+        return ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_001"))
+            || ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_005"))
+            || ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_010"))
+            || ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_025"))
+            || ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_100"));
     }
 
     void Miscellaneous::insertObjectRendering(
@@ -61,7 +61,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Miscellaneous::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -69,7 +69,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string_view Miscellaneous::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Miscellaneous::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
@@ -97,7 +97,7 @@ namespace MWClass
                     float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
 
                     // for Azura's star add the unfilled value
-                    if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "Misc_SoulGem_Azura"))
+                    if (ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("Misc_SoulGem_Azura")))
                         value += soulValue;
                     else
                         value = soulValue;
@@ -110,18 +110,22 @@ namespace MWClass
         return value;
     }
 
-    std::string_view Miscellaneous::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Miscellaneous::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
+        static ESM::RefId sound;
         if (isGold(ptr))
-            return "Item Gold Up";
-        return "Item Misc Up";
+            sound = ESM::RefId::stringRefId("Item Gold Up");
+        sound = ESM::RefId::stringRefId("Item Misc Up");
+        return sound;
     }
 
-    std::string_view Miscellaneous::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Miscellaneous::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
+        static ESM::RefId sound;
         if (isGold(ptr))
-            return "Item Gold Down";
-        return "Item Misc Down";
+            sound = ESM::RefId::stringRefId("Item Gold Down");
+        sound = ESM::RefId::stringRefId("Item Misc Down");
+        return sound;
     }
 
     const std::string& Miscellaneous::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -161,7 +165,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.text = text;
@@ -191,7 +195,7 @@ namespace MWClass
 
             // Really, I have no idea why moving ref out of conditional
             // scope causes list::push_back throwing std::bad_alloc
-            MWWorld::ManualRef newRef(store, base);
+            MWWorld::ManualRef newRef(store,  ESM::RefId::stringRefId(base));
             const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
 
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
@@ -238,7 +242,7 @@ namespace MWClass
 
     bool Miscellaneous::isSoulGem(const MWWorld::ConstPtr& ptr) const
     {
-        return Misc::StringUtils::ciStartsWith(ptr.getCellRef().getRefId(), "misc_soulgem");
+        return Misc::StringUtils::ciStartsWith(ptr.getCellRef().getRefId().getRefIdString(), "misc_soulgem");
     }
 
 }

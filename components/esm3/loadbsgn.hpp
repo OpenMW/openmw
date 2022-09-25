@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include "spelllist.hpp"
 
 namespace ESM
@@ -20,7 +21,8 @@ namespace ESM
         static std::string_view getRecordType() { return "BirthSign"; }
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mDescription, mTexture;
+        RefId mId;
+        std::string mName, mDescription, mTexture;
 
         // List of powers and abilities that come with this birth sign.
         SpellList mPowers;

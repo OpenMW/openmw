@@ -23,6 +23,7 @@
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/loadweap.hpp>
+#include <components/esm/refid.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
@@ -49,34 +50,34 @@ namespace MWScript
         return MWBase::Environment::get().getWorld()->getGlobalVariableType(name);
     }
 
-    std::pair<char, bool> CompilerContext::getMemberType(const std::string& name, const std::string& id) const
+    std::pair<char, bool> CompilerContext::getMemberType(const std::string& name, const ESM::RefId& id) const
     {
-        std::string_view script;
+        const ESM::RefId* script = nullptr;
         bool reference = false;
 
         if (const ESM::Script* scriptRecord
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search(id))
         {
-            script = scriptRecord->mId;
+            script = &scriptRecord->mId;
         }
         else
         {
             MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id);
 
-            script = ref.getPtr().getClass().getScript(ref.getPtr());
+            script = &ref.getPtr().getClass().getScript(ref.getPtr());
             reference = true;
         }
 
         char type = ' ';
 
-        if (!script.empty())
-            type = MWBase::Environment::get().getScriptManager()->getLocals(script).getType(
+        if (script && !script->empty())
+            type = MWBase::Environment::get().getScriptManager()->getLocals(*script).getType(
                 Misc::StringUtils::lowerCase(name));
 
         return std::make_pair(type, reference);
     }
 
-    bool CompilerContext::isId(const std::string& name) const
+    bool CompilerContext::isId(const ESM::RefId& name) const
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 

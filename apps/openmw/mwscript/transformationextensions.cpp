@@ -45,7 +45,7 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr from = R()(runtime, !R::implicit);
-                std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 if (from.isEmpty())
@@ -66,7 +66,7 @@ namespace MWScript
                     else
                     {
                         std::string error
-                            = "Failed to find the container of object '" + from.getCellRef().getRefId() + "'";
+                            = "Failed to find the container of object '" + from.getCellRef().getRefId().getRefIdString() + "'";
                         runtime.getContext().report(error);
                         Log(Debug::Error) << error;
                         runtime.push(0.f);
@@ -77,7 +77,7 @@ namespace MWScript
                 const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->searchPtr(name, false);
                 if (to.isEmpty())
                 {
-                    std::string error = "Failed to find an instance of object '" + std::string(name) + "'";
+                    std::string error = "Failed to find an instance of object '" + name.getRefIdString() + "'";
                     runtime.getContext().report(error);
                     Log(Debug::Error) << error;
                     runtime.push(0.f);
@@ -502,7 +502,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId itemID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
                 std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
@@ -554,7 +554,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId itemID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Float x = runtime[0].mFloat;
@@ -602,7 +602,7 @@ namespace MWScript
             {
                 MWWorld::Ptr actor = pc ? MWMechanics::getPlayer() : R()(runtime);
 
-                std::string_view itemID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId itemID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer count = runtime[0].mInteger;

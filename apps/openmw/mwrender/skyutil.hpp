@@ -12,6 +12,7 @@
 
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
+#include <components/esm/refid.hpp>
 
 namespace Resource
 {
@@ -63,7 +64,7 @@ namespace MWRender
 
         bool mIsStorm;
 
-        std::string mAmbientLoopSoundID;
+        ESM::RefId mAmbientLoopSoundID;
         float mAmbientSoundVolume;
 
         std::string mParticleEffect;

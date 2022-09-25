@@ -9,8 +9,8 @@ namespace ESM
     void JournalEntry::load(ESMReader& esm)
     {
         esm.getHNOT(mType, "JETY");
-        mTopic = esm.getHNString("YETO");
-        mInfo = esm.getHNString("YEIN");
+        mTopic = ESM::RefId::stringRefId(esm.getHNString("YETO"));
+        mInfo = ESM::RefId::stringRefId(esm.getHNString("YEIN"));
         mText = esm.getHNString("TEXT");
 
         if (mType == Type_Journal)
@@ -26,8 +26,8 @@ namespace ESM
     void JournalEntry::save(ESMWriter& esm) const
     {
         esm.writeHNT("JETY", mType);
-        esm.writeHNString("YETO", mTopic);
-        esm.writeHNString("YEIN", mInfo);
+        esm.writeHNString("YETO", mTopic.getRefIdString());
+        esm.writeHNString("YEIN", mInfo.getRefIdString());
         esm.writeHNString("TEXT", mText);
 
         if (mType == Type_Journal)

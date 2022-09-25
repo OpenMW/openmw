@@ -27,7 +27,7 @@ namespace
             if (ptr.getRefData().isDeleted())
                 return true;
 
-            std::string_view script = ptr.getClass().getScript(ptr);
+            const ESM::RefId& script = ptr.getClass().getScript(ptr);
 
             if (!script.empty())
                 mScripts.add(script, ptr);
@@ -54,7 +54,7 @@ namespace
             MWWorld::ContainerStore& container = containerPtr.getClass().getContainerStore(containerPtr);
             for (const auto& ptr : container)
             {
-                std::string_view script = ptr.getClass().getScript(ptr);
+                const ESM::RefId& script = ptr.getClass().getScript(ptr);
                 if (!script.empty())
                 {
                     MWWorld::Ptr item = ptr;
@@ -79,18 +79,18 @@ void MWWorld::LocalScripts::startIteration()
     mIter = mScripts.begin();
 }
 
-bool MWWorld::LocalScripts::getNext(std::pair<std::string, Ptr>& script)
+bool MWWorld::LocalScripts::getNext(std::pair<ESM::RefId, Ptr>& script)
 {
     if (mIter != mScripts.end())
     {
-        std::list<std::pair<std::string, Ptr>>::iterator iter = mIter++;
+        auto iter = mIter++;
         script = *iter;
         return true;
     }
     return false;
 }
 
-void MWWorld::LocalScripts::add(std::string_view scriptName, const Ptr& ptr)
+void MWWorld::LocalScripts::add(const ESM::RefId& scriptName, const Ptr& ptr)
 {
     if (const ESM::Script* script = mStore.get<ESM::Script>().search(scriptName))
     {
@@ -98,7 +98,7 @@ void MWWorld::LocalScripts::add(std::string_view scriptName, const Ptr& ptr)
         {
             ptr.getRefData().setLocals(*script);
 
-            for (std::list<std::pair<std::string, Ptr>>::iterator iter = mScripts.begin(); iter != mScripts.end();
+            for (auto iter = mScripts.begin(); iter != mScripts.end();
                  ++iter)
                 if (iter->second == ptr)
                 {
@@ -137,7 +137,7 @@ void MWWorld::LocalScripts::clear()
 
 void MWWorld::LocalScripts::clearCell(CellStore* cell)
 {
-    std::list<std::pair<std::string, Ptr>>::iterator iter = mScripts.begin();
+    auto iter = mScripts.begin();
 
     while (iter != mScripts.end())
     {
@@ -155,7 +155,7 @@ void MWWorld::LocalScripts::clearCell(CellStore* cell)
 
 void MWWorld::LocalScripts::remove(RefData* ref)
 {
-    for (std::list<std::pair<std::string, Ptr>>::iterator iter = mScripts.begin(); iter != mScripts.end(); ++iter)
+    for (auto iter = mScripts.begin(); iter != mScripts.end(); ++iter)
         if (&(iter->second.getRefData()) == ref)
         {
             if (iter == mIter)
@@ -168,7 +168,7 @@ void MWWorld::LocalScripts::remove(RefData* ref)
 
 void MWWorld::LocalScripts::remove(const Ptr& ptr)
 {
-    for (std::list<std::pair<std::string, Ptr>>::iterator iter = mScripts.begin(); iter != mScripts.end(); ++iter)
+    for (auto iter = mScripts.begin(); iter != mScripts.end(); ++iter)
         if (iter->second == ptr)
         {
             if (iter == mIter)

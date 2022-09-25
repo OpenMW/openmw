@@ -34,7 +34,7 @@ namespace
             return index;
     }
 
-    bool sortRaces(const std::pair<std::string, std::string>& left, const std::pair<std::string, std::string>& right)
+    bool sortRaces(const std::pair<ESM::RefId, std::string>& left, const std::pair<ESM::RefId, std::string>& right)
     {
         return left.second.compare(right.second) < 0;
     }
@@ -165,13 +165,13 @@ namespace MWGui
 
         for (unsigned int i = 0; i < mAvailableHeads.size(); ++i)
         {
-            if (Misc::StringUtils::ciEqual(mAvailableHeads[i], proto.mHead))
+            if (ESM::RefId::ciEqual(mAvailableHeads[i], proto.mHead))
                 mFaceIndex = i;
         }
 
         for (unsigned int i = 0; i < mAvailableHairs.size(); ++i)
         {
-            if (Misc::StringUtils::ciEqual(mAvailableHairs[i], proto.mHair))
+            if (ESM::RefId::ciEqual(mAvailableHairs[i], proto.mHair))
                 mHairIndex = i;
         }
 
@@ -184,14 +184,14 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mRaceList);
     }
 
-    void RaceDialog::setRaceId(const std::string& raceId)
+    void RaceDialog::setRaceId(const ESM::RefId& raceId)
     {
         mCurrentRaceId = raceId;
         mRaceList->setIndexSelected(MyGUI::ITEM_NONE);
         size_t count = mRaceList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (Misc::StringUtils::ciEqual(*mRaceList->getItemDataAt<std::string>(i), raceId))
+            if (ESM::RefId::ciEqual(ESM::RefId::stringRefId(*mRaceList->getItemDataAt<std::string>(i)), raceId))
             {
                 mRaceList->setIndexSelected(i);
                 break;
@@ -292,11 +292,11 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        const std::string* raceId = mRaceList->getItemDataAt<std::string>(_index);
-        if (Misc::StringUtils::ciEqual(mCurrentRaceId, *raceId))
+        ESM::RefId raceId = ESM::RefId::stringRefId(*mRaceList->getItemDataAt<std::string>(_index));
+        if (ESM::RefId::ciEqual(mCurrentRaceId, raceId))
             return;
 
-        mCurrentRaceId = *raceId;
+        mCurrentRaceId = raceId;
 
         recountParts();
 
@@ -313,7 +313,7 @@ namespace MWGui
         eventDone(this);
     }
 
-    void RaceDialog::getBodyParts(int part, std::vector<std::string>& out)
+    void RaceDialog::getBodyParts(int part, std::vector<ESM::RefId>& out)
     {
         out.clear();
         const MWWorld::Store<ESM::BodyPart>& store
@@ -321,6 +321,7 @@ namespace MWGui
 
         for (const ESM::BodyPart& bodypart : store)
         {
+            const std::string& idString = bodypart.mId.getRefIdString();
             if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
                 continue;
             if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
@@ -329,11 +330,11 @@ namespace MWGui
                 continue;
             if (mGenderIndex != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                 continue;
-            bool firstPerson = (bodypart.mId.size() >= 3) && bodypart.mId[bodypart.mId.size() - 3] == '1'
-                && bodypart.mId[bodypart.mId.size() - 2] == 's' && bodypart.mId[bodypart.mId.size() - 1] == 't';
+            bool firstPerson = (idString.size() >= 3) && idString[idString.size() - 3] == '1'
+                && idString[idString.size() - 2] == 's' && idString[idString.size() - 1] == 't';
             if (firstPerson)
                 continue;
-            if (Misc::StringUtils::ciEqual(bodypart.mRace, mCurrentRaceId))
+            if (ESM::RefId::ciEqual(bodypart.mRace, mCurrentRaceId))
                 out.push_back(bodypart.mId);
         }
     }
@@ -377,7 +378,7 @@ namespace MWGui
 
         const MWWorld::Store<ESM::Race>& races = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
 
-        std::vector<std::pair<std::string, std::string>> items; // ID, name
+        std::vector<std::pair<ESM::RefId, std::string>> items; // ID, name
         for (const ESM::Race& race : races)
         {
             bool playable = race.mData.mFlags & ESM::Race::Playable;
@@ -392,7 +393,7 @@ namespace MWGui
         for (auto& item : items)
         {
             mRaceList->addItem(item.second, item.first);
-            if (Misc::StringUtils::ciEqual(item.first, mCurrentRaceId))
+            if (ESM::RefId::ciEqual(item.first, mCurrentRaceId))
                 mRaceList->setIndexSelected(index);
             ++index;
         }
@@ -454,13 +455,13 @@ namespace MWGui
         const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
 
         int i = 0;
-        for (const std::string& spellpower : race->mPowers.mList)
+        for (const auto& spellpower : race->mPowers.mList)
         {
             Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>(
                 "MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + MyGUI::utility::toString(i));
             spellPowerWidget->setSpellId(spellpower);
             spellPowerWidget->setUserString("ToolTipType", "Spell");
-            spellPowerWidget->setUserString("Spell", spellpower);
+            spellPowerWidget->setUserString("Spell", spellpower.getRefIdString());
 
             mSpellPowerItems.push_back(spellPowerWidget);
 

@@ -31,7 +31,7 @@ namespace MWMechanics
         std::vector<const ESM::Spell*> mSpells;
 
         // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
-        std::string mSelectedSpell;
+        ESM::RefId mSelectedSpell;
 
         std::vector<std::pair<const ESM::Spell*, MWWorld::TimeStamp>> mUsedPowers;
 
@@ -69,26 +69,26 @@ namespace MWMechanics
 
         std::vector<const ESM::Spell*>::const_iterator end() const;
 
-        bool hasSpell(std::string_view spell) const;
+        bool hasSpell(const ESM::RefId& spell) const;
         bool hasSpell(const ESM::Spell* spell) const;
 
-        void add(std::string_view spell);
+        void add(const ESM::RefId& spell);
         ///< Adding a spell that is already listed in *this is a no-op.
 
         void add(const ESM::Spell* spell);
         ///< Adding a spell that is already listed in *this is a no-op.
 
-        void remove(std::string_view spell);
+        void remove(const ESM::RefId& spell);
         ///< If the spell to be removed is the selected spell, the selected spell will be changed to
         /// no spell (empty string).
 
         void clear(bool modifyBase = false);
         ///< Remove all spells of al types.
 
-        void setSelectedSpell(const std::string& spellId);
+        void setSelectedSpell(const ESM::RefId& spellId);
         ///< This function does not verify, if the spell is available.
 
-        const std::string& getSelectedSpell() const;
+        const ESM::RefId& getSelectedSpell() const;
         ///< May return an empty string.
 
         bool hasCommonDisease() const;
@@ -98,9 +98,9 @@ namespace MWMechanics
         void readState(const ESM::SpellState& state, CreatureStats* creatureStats);
         void writeState(ESM::SpellState& state) const;
 
-        bool setSpells(const std::string& id);
+        bool setSpells(const ESM::RefId& id);
 
-        void addAllToInstance(const std::vector<std::string>& spells);
+        void addAllToInstance(const std::vector<ESM::RefId>& spells);
     };
 }
 

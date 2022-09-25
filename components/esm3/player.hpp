@@ -26,7 +26,7 @@ namespace ESM
         bool mSetWerewolfAcrobatics;
         Position mMarkedPosition;
         CellId mMarkedCell;
-        std::string mBirthsign;
+        ESM::RefId mBirthsign;
 
         int mCurrentCrimeId;
         int mPaidCrimeId;
@@ -34,7 +34,7 @@ namespace ESM
         float mSaveAttributes[Attribute::Length];
         float mSaveSkills[Skill::Length];
 
-        typedef std::map<std::string, std::string> PreviousItems; // previous equipped items, needed for bound spells
+        typedef std::map<ESM::RefId, ESM::RefId> PreviousItems; // previous equipped items, needed for bound spells
         PreviousItems mPreviousItems;
 
         void load(ESMReader& esm);

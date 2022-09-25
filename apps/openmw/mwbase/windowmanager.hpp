@@ -14,6 +14,11 @@
 
 #include <components/sdlutil/events.hpp>
 
+namespace ESM
+{
+    struct RefId;
+}
+
 namespace Loading
 {
     class Listener;
@@ -215,8 +220,8 @@ namespace MWBase
         /// update activated quick key state (if action executing was delayed for some reason)
         virtual void updateActivatedQuickKey() = 0;
 
-        virtual const std::string& getSelectedSpell() = 0;
-        virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
+        virtual const ESM::RefId& getSelectedSpell() = 0;
+        virtual void setSelectedSpell(const ESM::RefId& spellId, int successChancePercent) = 0;
         virtual void setSelectedEnchantItem(const MWWorld::Ptr& item) = 0;
         virtual const MWWorld::Ptr& getSelectedEnchantItem() const = 0;
         virtual void setSelectedWeapon(const MWWorld::Ptr& item) = 0;
@@ -268,7 +273,7 @@ namespace MWBase
          * @param id Identifier for the GMST setting, e.g. "aName"
          * @param default Default value if the GMST setting cannot be used.
          */
-        virtual std::string_view getGameSettingString(std::string_view id, std::string_view default_) = 0;
+        virtual std::string_view getGameSettingString(const std::string_view& id, std::string_view default_) = 0;
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& changed) = 0;
 
@@ -345,7 +350,7 @@ namespace MWBase
         /// Cycle to next or previous weapon
         virtual void cycleWeapon(bool next) = 0;
 
-        virtual void playSound(std::string_view soundId, float volume = 1.f, float pitch = 1.f) = 0;
+        virtual void playSound(const ESM::RefId& soundId, float volume = 1.f, float pitch = 1.f) = 0;
 
         virtual void addCell(MWWorld::CellStore* cell) = 0;
         virtual void removeCell(MWWorld::CellStore* cell) = 0;

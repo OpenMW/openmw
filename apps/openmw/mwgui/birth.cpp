@@ -23,8 +23,8 @@
 namespace
 {
 
-    bool sortBirthSigns(const std::pair<std::string, const ESM::BirthSign*>& left,
-        const std::pair<std::string, const ESM::BirthSign*>& right)
+    bool sortBirthSigns(const std::pair<ESM::RefId, const ESM::BirthSign*>& left,
+        const std::pair<ESM::RefId, const ESM::BirthSign*>& right)
     {
         return left.second->mName.compare(right.second->mName) < 0;
     }
@@ -83,20 +83,20 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mBirthList);
 
         // Show the current birthsign by default
-        const std::string& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+        const auto& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
 
         if (!signId.empty())
             setBirthId(signId);
     }
 
-    void BirthDialog::setBirthId(const std::string& birthId)
+    void BirthDialog::setBirthId(const ESM::RefId& birthId)
     {
         mCurrentBirthId = birthId;
         mBirthList->setIndexSelected(MyGUI::ITEM_NONE);
         size_t count = mBirthList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (Misc::StringUtils::ciEqual(*mBirthList->getItemDataAt<std::string>(i), birthId))
+            if (ESM::RefId::ciEqual(ESM::RefId::stringRefId(*mBirthList->getItemDataAt<std::string>(i)), birthId))
             {
                 mBirthList->setIndexSelected(i);
                 break;
@@ -133,11 +133,11 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        const std::string* birthId = mBirthList->getItemDataAt<std::string>(_index);
-        if (Misc::StringUtils::ciEqual(mCurrentBirthId, *birthId))
+        const ESM::RefId birthId = ESM::RefId::stringRefId(*mBirthList->getItemDataAt<std::string>(_index));
+        if (ESM::RefId::ciEqual(mCurrentBirthId, birthId))
             return;
 
-        mCurrentBirthId = *birthId;
+        mCurrentBirthId = birthId;
         updateSpells();
     }
 
@@ -151,7 +151,7 @@ namespace MWGui
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>();
 
         // sort by name
-        std::vector<std::pair<std::string, const ESM::BirthSign*>> birthSigns;
+        std::vector<std::pair<ESM::RefId, const ESM::BirthSign*>> birthSigns;
 
         for (const ESM::BirthSign& sign : signs)
         {
@@ -168,7 +168,7 @@ namespace MWGui
                 mBirthList->setIndexSelected(index);
                 mCurrentBirthId = birthsignPair.first;
             }
-            else if (Misc::StringUtils::ciEqual(birthsignPair.first, mCurrentBirthId))
+            else if (ESM::RefId::ciEqual(birthsignPair.first, mCurrentBirthId))
             {
                 mBirthList->setIndexSelected(index);
             }
@@ -199,13 +199,13 @@ namespace MWGui
         mBirthImage->setImageTexture(Misc::ResourceHelpers::correctTexturePath(
             birth->mTexture, MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-        std::vector<std::string> abilities, powers, spells;
+        std::vector<ESM::RefId> abilities, powers, spells;
 
-        std::vector<std::string>::const_iterator it = birth->mPowers.mList.begin();
-        std::vector<std::string>::const_iterator end = birth->mPowers.mList.end();
+        std::vector<ESM::RefId>::const_iterator it = birth->mPowers.mList.begin();
+        std::vector<ESM::RefId>::const_iterator end = birth->mPowers.mList.end();
         for (; it != end; ++it)
         {
-            const std::string& spellId = *it;
+            const ESM::RefId& spellId = *it;
             const ESM::Spell* spell = store.get<ESM::Spell>().search(spellId);
             if (!spell)
                 continue; // Skip spells which cannot be found
@@ -225,7 +225,7 @@ namespace MWGui
 
         struct
         {
-            const std::vector<std::string>& spells;
+            const std::vector<ESM::RefId>& spells;
             const char* label;
         } categories[3] = { { abilities, "sBirthsignmenu1" }, { powers, "sPowers" }, { spells, "sBirthsignmenu2" } };
 
@@ -243,7 +243,7 @@ namespace MWGui
                 end = categories[category].spells.end();
                 for (it = categories[category].spells.begin(); it != end; ++it)
                 {
-                    const std::string& spellId = *it;
+                    const ESM::RefId& spellId = *it;
                     spellWidget = mSpellArea->createWidget<Widgets::MWSpell>("MW_StatName", coord,
                         MyGUI::Align::Default, std::string("Spell") + MyGUI::utility::toString(i));
                     spellWidget->setSpellId(spellId);

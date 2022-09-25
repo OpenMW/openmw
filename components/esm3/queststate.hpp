@@ -2,6 +2,7 @@
 #define OPENMW_ESM_QUESTSTATE_H
 
 #include <string>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -12,7 +13,7 @@ namespace ESM
 
     struct QuestState
     {
-        std::string mTopic; // lower case id
+        ESM::RefId mTopic; // lower case id
         int mState;
         unsigned char mFinished;
 

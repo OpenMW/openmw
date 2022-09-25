@@ -14,7 +14,7 @@ namespace MWLua
 
     bool isMarker(const MWWorld::Ptr& ptr)
     {
-        return Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId());
+        return Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId().getRefIdString());
     }
 
     std::string ptrToString(const MWWorld::Ptr& ptr)
@@ -24,7 +24,7 @@ namespace MWLua
         res.append(" (");
         res.append(getLuaObjectTypeName(ptr));
         res.append(", ");
-        res.append(ptr.getCellRef().getRefId());
+        res.append(ptr.getCellRef().getRefId().getRefIdString());
         res.append(")");
         return res;
     }

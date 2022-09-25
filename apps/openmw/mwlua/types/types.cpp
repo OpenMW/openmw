@@ -65,10 +65,10 @@ namespace MWLua
     {
         if (ref == nullptr)
             throw std::runtime_error("Can't get type name from an empty object.");
-        const std::string_view id = ref->mRef.getRefId();
-        if (id == "player")
+        const ESM::RefId& id = ref->mRef.getRefId();
+        if (id == ESM::RefId::stringRefId("player"))
             return ESM::REC_INTERNAL_PLAYER;
-        if (Misc::ResourceHelpers::isHiddenMarker(id))
+        if (Misc::ResourceHelpers::isHiddenMarker(id.getRefIdString()))
             return ESM::REC_INTERNAL_MARKER;
         return ref->getType();
     }

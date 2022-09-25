@@ -11,6 +11,8 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/types.hpp>
 
+#include <components/esm/refid.hpp>
+
 #include "../mwbase/scriptmanager.hpp"
 
 #include "globalscripts.hpp"
@@ -46,7 +48,7 @@ namespace MWScript
         {
             std::vector<Interpreter::Type_Code> mByteCode;
             Compiler::Locals mLocals;
-            std::set<std::string> mInactive;
+            std::set<ESM::RefId> mInactive;
 
             CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
                 : mByteCode(code)
@@ -55,10 +57,10 @@ namespace MWScript
             }
         };
 
-        std::unordered_map<std::string, CompiledScript, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual>
+        std::unordered_map<ESM::RefId, CompiledScript>
             mScripts;
         GlobalScripts mGlobalScripts;
-        std::unordered_map<std::string, Compiler::Locals, ::Misc::StringUtils::CiHash, ::Misc::StringUtils::CiEqual>
+        std::unordered_map<ESM::RefId, Compiler::Locals>
             mOtherLocals;
         std::vector<std::string> mScriptBlacklist;
 
@@ -68,10 +70,10 @@ namespace MWScript
 
         void clear() override;
 
-        bool run(std::string_view name, Interpreter::Context& interpreterContext) override;
+        bool run(const ESM::RefId& name, Interpreter::Context& interpreterContext) override;
         ///< Run the script with the given name (compile first, if not compiled yet)
 
-        bool compile(std::string_view name) override;
+        bool compile(const ESM::RefId& name) override;
         ///< Compile script with the given namen
         /// \return Success?
 
@@ -79,7 +81,7 @@ namespace MWScript
         ///< Compile all scripts
         /// \return count, success
 
-        const Compiler::Locals& getLocals(std::string_view name) override;
+        const Compiler::Locals& getLocals(const ESM::RefId& name) override;
         ///< Return locals for script \a name.
 
         GlobalScripts& getGlobalScripts() override;

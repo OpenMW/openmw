@@ -61,7 +61,7 @@ namespace MWMechanics
         int roll = Misc::Rng::roll0to99(prng);
         if (roll < x)
         {
-            const std::string& soul = gem.getCellRef().getSoul();
+            const ESM::RefId& soul = gem.getCellRef().getSoul();
             const ESM::Creature* creature
                 = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
@@ -73,13 +73,13 @@ namespace MWMechanics
             item.getCellRef().setEnchantmentCharge(std::min(
                 item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
 
-            MWBase::Environment::get().getWindowManager()->playSound("Enchant Success");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Enchant Success"));
 
             player.getClass().getContainerStore(player).restack(item);
         }
         else
         {
-            MWBase::Environment::get().getWindowManager()->playSound("Enchant Fail");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Enchant Fail"));
         }
 
         player.getClass().skillUsageSucceeded(player, ESM::Skill::Enchant, 0);
@@ -97,9 +97,10 @@ namespace MWMechanics
 
             MWBase::Environment::get().getWindowManager()->messageBox(message);
 
+            ESM::RefId soulGemAzura = ESM::RefId::stringRefId("Misc_SoulGem_Azura");
             // special case: readd Azura's Star
-            if (Misc::StringUtils::ciEqual(gem.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
-                player.getClass().getContainerStore(player).add("Misc_SoulGem_Azura", 1, player);
+            if (ESM::RefId::ciEqual(gem.get<ESM::Miscellaneous>()->mBase->mId, soulGemAzura))
+                player.getClass().getContainerStore(player).add(soulGemAzura, 1, player);
         }
 
         return true;

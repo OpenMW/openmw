@@ -90,9 +90,9 @@ namespace
     };
 
     template <typename T>
-    MWWorld::Ptr searchInContainerList(MWWorld::CellRefList<T>& containerList, std::string_view id)
+    MWWorld::Ptr searchInContainerList(MWWorld::CellRefList<T>& containerList, const ESM::RefId& id)
     {
-        for (typename MWWorld::CellRefList<T>::List::iterator iter(containerList.mList.begin());
+        for (auto iter(containerList.mList.begin());
              iter != containerList.mList.end(); ++iter)
         {
             MWWorld::Ptr container(&*iter, nullptr);
@@ -169,7 +169,7 @@ namespace
             {
                 for (auto& item : state.mInventory.mItems)
                 {
-                    if (item.mCount > 0 && Misc::StringUtils::ciEqual(baseItem.mItem, item.mRef.mRefID))
+                    if (item.mCount > 0 && ESM::RefId::ciEqual(baseItem.mItem, item.mRef.mRefID))
                         item.mCount = -item.mCount;
                 }
             }
@@ -526,7 +526,7 @@ namespace MWWorld
         return mState;
     }
 
-    const std::vector<std::string>& CellStore::getPreloadedIds() const
+    const std::vector<ESM::RefId>& CellStore::getPreloadedIds() const
     {
         return mIds;
     }
@@ -536,7 +536,7 @@ namespace MWWorld
         return mHasState;
     }
 
-    bool CellStore::hasId(std::string_view id) const
+    bool CellStore::hasId(const ESM::RefId& id) const
     {
         if (mState == State_Unloaded)
             return false;
@@ -551,7 +551,8 @@ namespace MWWorld
     struct SearchVisitor
     {
         PtrType mFound;
-        std::string_view mIdToFind;
+        const ESM::RefId& mIdToFind;
+        SearchVisitor(const ESM::RefId& id) : mIdToFind(id) {}
         bool operator()(const PtrType& ptr)
         {
             if (ptr.getCellRef().getRefId() == mIdToFind)
@@ -563,18 +564,16 @@ namespace MWWorld
         }
     };
 
-    Ptr CellStore::search(std::string_view id)
+    Ptr CellStore::search(const ESM::RefId& id)
     {
-        SearchVisitor<MWWorld::Ptr> searchVisitor;
-        searchVisitor.mIdToFind = id;
+        SearchVisitor<MWWorld::Ptr> searchVisitor(id);
         forEach(searchVisitor);
         return searchVisitor.mFound;
     }
 
-    ConstPtr CellStore::searchConst(std::string_view id) const
+    ConstPtr CellStore::searchConst(const ESM::RefId& id) const
     {
-        SearchVisitor<MWWorld::ConstPtr> searchVisitor;
-        searchVisitor.mIdToFind = id;
+        SearchVisitor<MWWorld::ConstPtr> searchVisitor(id);
         forEachConst(searchVisitor);
         return searchVisitor.mFound;
     }
@@ -708,7 +707,6 @@ namespace MWWorld
                         continue;
                     }
 
-                    Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                     mIds.push_back(std::move(ref.mRefID));
                 }
             }
@@ -723,7 +721,7 @@ namespace MWWorld
         for (const auto& [ref, deleted] : mCell->mLeasedRefs)
         {
             if (!deleted)
-                mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
+                mIds.push_back(ref.mRefID);
         }
 
         std::sort(mIds.begin(), mIds.end());
@@ -736,7 +734,7 @@ namespace MWWorld
         if (mCell->mContextList.empty())
             return; // this is a dynamically generated cell -> skipping.
 
-        std::map<ESM::RefNum, std::string> refNumToID; // used to detect refID modifications
+        std::map<ESM::RefNum, ESM::RefId> refNumToID; // used to detect refID modifications
 
         // Load references from all plugins that do something with this cell.
         for (size_t i = 0; i < mCell->mContextList.size(); i++)
@@ -802,7 +800,7 @@ namespace MWWorld
         return (mCell->mData.mFlags & ESM::Cell::QuasiEx) != 0;
     }
 
-    Ptr CellStore::searchInContainer(std::string_view id)
+    Ptr CellStore::searchInContainer(const ESM::RefId& id)
     {
         bool oldState = mHasState;
 
@@ -822,13 +820,11 @@ namespace MWWorld
         return Ptr();
     }
 
-    void CellStore::loadRef(ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, std::string>& refNumToID)
+    void CellStore::loadRef(ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
     {
-        Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-
         const MWWorld::ESMStore& store = mStore;
 
-        std::map<ESM::RefNum, std::string>::iterator it = refNumToID.find(ref.mRefNum);
+        auto it = refNumToID.find(ref.mRefNum);
         if (it != refNumToID.end())
         {
             if (it->second != ref.mRefID)
@@ -858,13 +854,13 @@ namespace MWWorld
         }
         else
         {
-            Log(Debug::Error) << "Cell reference '" + ref.mRefID + "' not found!";
+            Log(Debug::Error) << "Cell reference '" + ref.mRefID.getRefIdString() + "' not found!";
             return;
         }
 
         if (!handledType)
         {
-            Log(Debug::Error) << "Error: Ignoring reference '" << ref.mRefID << "' of unhandled type";
+            Log(Debug::Error) << "Error: Ignoring reference '" << ref.mRefID.getRefIdString() << "' of unhandled type";
             return;
         }
 
@@ -1200,7 +1196,7 @@ namespace MWWorld
 
     void MWWorld::CellStore::checkItem(const Ptr& ptr)
     {
-        std::string_view enchantmentId = ptr.getClass().getEnchantment(ptr);
+        const ESM::RefId& enchantmentId = ptr.getClass().getEnchantment(ptr);
         if (enchantmentId.empty())
             return;
 

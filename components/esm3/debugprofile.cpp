@@ -17,7 +17,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     break;
                 case fourCC("DESC"):
                     mDescription = esm.getHString();
@@ -41,7 +41,7 @@ namespace ESM
 
     void DebugProfile::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {

@@ -214,7 +214,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     MWMechanics::CreatureStats& Creature::getCreatureStats(const MWWorld::Ptr& ptr) const
@@ -401,7 +401,7 @@ namespace MWClass
 
         if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
-            const std::string& script = ptr.get<ESM::Creature>()->mBase->mScript;
+            const ESM::RefId& script = ptr.get<ESM::Creature>()->mBase->mScript;
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
             if (!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
@@ -411,7 +411,7 @@ namespace MWClass
         {
             // Missed
             if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer())
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::RefId::stringRefId("miss"), 1.0f, 1.0f);
             return;
         }
 
@@ -448,7 +448,7 @@ namespace MWClass
                     MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
                 }
 
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
 
                 MWMechanics::DynamicStat<float> health(stats.getHealth());
                 health.setCurrent(health.getCurrent() - damage);
@@ -469,7 +469,7 @@ namespace MWClass
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfCreature", prng);
+            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom(ESM::RefId::stringRefId("WolfCreature"), prng);
 
             std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if (sound)
@@ -522,7 +522,7 @@ namespace MWClass
         return isFlagBitSet(ptr, ESM::Creature::Weapon);
     }
 
-    std::string_view Creature::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Creature::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
@@ -601,7 +601,7 @@ namespace MWClass
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         info.text = text;
 
         return info;
@@ -630,18 +630,18 @@ namespace MWClass
         return (ref->mBase->mRecordFlags & ESM::FLAG_Persistent) != 0;
     }
 
-    std::string_view Creature::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
+    const ESM::RefId& Creature::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         int type = getSndGenTypeFromName(ptr, name);
         if (type < 0)
-            return {};
+            return ESM::RefId::sEmpty;
 
         std::vector<const ESM::SoundGenerator*> sounds;
         std::vector<const ESM::SoundGenerator*> fallbacksounds;
 
         MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
-        const std::string& ourId
+        const ESM::RefId& ourId
             = (ref->mBase->mOriginal.empty()) ? ptr.getCellRef().getRefId() : ref->mBase->mOriginal;
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -649,7 +649,7 @@ namespace MWClass
         while (sound != store.get<ESM::SoundGenerator>().end())
         {
             if (type == sound->mType && !sound->mCreature.empty()
-                && Misc::StringUtils::ciEqual(ourId, sound->mCreature))
+                && ESM::RefId::ciEqual(ourId, sound->mCreature))
                 sounds.push_back(&*sound);
             if (type == sound->mType && sound->mCreature.empty())
                 fallbacksounds.push_back(&*sound);
@@ -668,12 +668,12 @@ namespace MWClass
                         && Misc::StringUtils::ciEqual(
                             model, Misc::ResourceHelpers::correctMeshPath(creature.mModel, vfs)))
                     {
-                        const std::string& fallbackId = !creature.mOriginal.empty() ? creature.mOriginal : creature.mId;
+                        const ESM::RefId& fallbackId = !creature.mOriginal.empty() ? creature.mOriginal : creature.mId;
                         sound = store.get<ESM::SoundGenerator>().begin();
                         while (sound != store.get<ESM::SoundGenerator>().end())
                         {
                             if (type == sound->mType && !sound->mCreature.empty()
-                                && Misc::StringUtils::ciEqual(fallbackId, sound->mCreature))
+                                && ESM::RefId::ciEqual(fallbackId, sound->mCreature))
                                 sounds.push_back(&*sound);
                             ++sound;
                         }
@@ -689,7 +689,7 @@ namespace MWClass
         if (!fallbacksounds.empty())
             return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
 
-        return {};
+        return ESM::RefId::sEmpty;
     }
 
     MWWorld::Ptr Creature::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const
@@ -876,7 +876,7 @@ namespace MWClass
                 if (ptr.getRefData().getCount() == 0)
                 {
                     ptr.getRefData().setCount(1);
-                    std::string_view script = getScript(ptr);
+                    const ESM::RefId& script = getScript(ptr);
                     if (!script.empty())
                         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);
                 }
@@ -905,12 +905,12 @@ namespace MWClass
         scale *= ref->mBase->mScale;
     }
 
-    void Creature::setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const
+    void Creature::setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, int value) const
     {
         MWMechanics::setBaseAISetting<ESM::Creature>(id, setting, value);
     }
 
-    void Creature::modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const
+    void Creature::modifyBaseInventory(const ESM::RefId& actorId, const ESM::RefId& itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::Creature>(actorId, itemId, amount);
     }

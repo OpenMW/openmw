@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -21,7 +22,7 @@ namespace ESM
         static std::string_view getRecordType() { return "MagicEffect"; }
 
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
 
         enum Flags
         {
@@ -93,9 +94,9 @@ namespace ESM
         MEDTstruct mData;
 
         std::string mIcon, mParticle; // Textures
-        std::string mCasting, mHit, mArea; // Static
-        std::string mBolt; // Weapon
-        std::string mCastSound, mBoltSound, mHitSound, mAreaSound; // Sounds
+        ESM::RefId mCasting, mHit, mArea; // Static
+        ESM::RefId mBolt; // Weapon
+        ESM::RefId mCastSound, mBoltSound, mHitSound, mAreaSound; // Sounds
         std::string mDescription;
 
         // Index of this magical effect. Corresponds to one of the

@@ -31,12 +31,12 @@ namespace Resource
         {
             ESM::RecNameInts mType;
             ESM::RefNum mRefNum;
-            std::string mRefId;
+            ESM::RefId mRefId;
             float mScale;
             ESM::Position mPos;
 
             CellRef(
-                ESM::RecNameInts type, ESM::RefNum refNum, std::string&& refId, float scale, const ESM::Position& pos)
+                ESM::RecNameInts type, ESM::RefNum refNum, ESM::RefId&& refId, float scale, const ESM::Position& pos)
                 : mType(type)
                 , mRefNum(refNum)
                 , mRefId(std::move(refId))
@@ -46,7 +46,7 @@ namespace Resource
             }
         };
 
-        ESM::RecNameInts getType(const EsmLoader::EsmData& esmData, std::string_view refId)
+        ESM::RecNameInts getType(const EsmLoader::EsmData& esmData, const ESM::RefId& refId)
         {
             const auto it = std::lower_bound(
                 esmData.mRefIdTypes.begin(), esmData.mRefIdTypes.end(), refId, EsmLoader::LessById{});
@@ -69,7 +69,6 @@ namespace Resource
                 bool deleted = false;
                 while (ESM::Cell::getNextRef(*reader, cellRef, deleted))
                 {
-                    Misc::StringUtils::lowerCaseInPlace(cellRef.mRefID);
                     const ESM::RecNameInts type = getType(esmData, cellRef.mRefID);
                     if (type == ESM::RecNameInts{})
                         continue;

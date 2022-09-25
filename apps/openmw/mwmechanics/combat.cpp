@@ -44,7 +44,7 @@ namespace MWMechanics
     bool applyOnStrikeEnchantment(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object,
         const osg::Vec3f& hitPosition, const bool fromProjectile)
     {
-        std::string_view enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : "";
+        const ESM::RefId& enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : ESM::RefId::sEmpty;
         if (!enchantmentName.empty())
         {
             const ESM::Enchantment* enchantment
@@ -268,7 +268,7 @@ namespace MWMechanics
                 static const float fCombatKODamageMult = gmst.find("fCombatKODamageMult")->mValue.getFloat();
                 damage *= fCombatKODamageMult;
                 if (!knockedDown)
-                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, ESM::RefId::stringRefId("critical damage"), 1.0f, 1.0f);
             }
         }
 
@@ -382,7 +382,7 @@ namespace MWMechanics
             health.setCurrent(health.getCurrent() - x);
             attackerStats.setHealth(health);
 
-            MWBase::Environment::get().getSoundManager()->playSound3D(attacker, "Health Damage", 1.0f, 1.0f);
+            MWBase::Environment::get().getSoundManager()->playSound3D(attacker, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
         }
     }
 
@@ -493,12 +493,12 @@ namespace MWMechanics
         if (isWerewolf)
         {
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfHit", prng);
+            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom(ESM::RefId::stringRefId("WolfHit"), prng);
             if (sound)
                 sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
         }
         else if (!healthdmg)
-            sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
+            sndMgr->playSound3D(victim, ESM::RefId::stringRefId("Hand To Hand Hit"), 1.0f, 1.0f);
     }
 
     void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float attackStrength)

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-
+#include <components/esm/refid.hpp>
 namespace ESM
 {
     struct Spell;
@@ -16,10 +16,10 @@ namespace MWMechanics
     /// Contains algorithm for calculating an NPC's spells based on stats
     /// @note We might want to move this code to a component later, so the editor can use it for preview purposes
 
-    std::vector<std::string> autoCalcNpcSpells(
+    std::vector<ESM::RefId> autoCalcNpcSpells(
         const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
 
-    std::vector<std::string> autoCalcPlayerSpells(
+    std::vector<ESM::RefId> autoCalcPlayerSpells(
         const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
 
     // Helpers

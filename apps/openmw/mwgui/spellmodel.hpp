@@ -19,7 +19,7 @@ namespace MWGui
         Type mType;
         std::string mName;
         std::string mCostColumn; // Cost/chance or Cost/charge
-        std::string mId; // Item ID or spell ID
+        ESM::RefId mId; // Item ID or spell ID
         MWWorld::Ptr mItem; // Only for Type_EnchantedItem
         int mCount; // Only for Type_EnchantedItem
         bool mSelected; // Is this the currently selected spell/item (only one can be selected at a time)

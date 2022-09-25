@@ -64,19 +64,19 @@ namespace MWMechanics
             MWWorld::ContainerStoreIterator stacked = player.getClass().getContainerStore(player).restack(itemToRepair);
 
             // set the OnPCRepair variable on the item's script
-            std::string_view script = stacked->getClass().getScript(itemToRepair);
+            const ESM::RefId& script = stacked->getClass().getScript(itemToRepair);
             if (!script.empty())
                 stacked->getRefData().getLocals().setVarByInt(script, "onpcrepair", 1);
 
             // increase skill
             player.getClass().skillUsageSucceeded(player, ESM::Skill::Armorer, 0);
 
-            MWBase::Environment::get().getWindowManager()->playSound("Repair");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Repair"));
             MWBase::Environment::get().getWindowManager()->messageBox("#{sRepairSuccess}");
         }
         else
         {
-            MWBase::Environment::get().getWindowManager()->playSound("Repair Fail");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Repair Fail"));
             MWBase::Environment::get().getWindowManager()->messageBox("#{sRepairFailed}");
         }
 
@@ -100,11 +100,11 @@ namespace MWMechanics
             // try to find a new tool of the same ID
             for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
             {
-                if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), mTool.getCellRef().getRefId()))
+                if (ESM::RefId::ciEqual(iter->getCellRef().getRefId(), mTool.getCellRef().getRefId()))
                 {
                     mTool = *iter;
 
-                    MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
+                    MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Repair Up"));
 
                     break;
                 }

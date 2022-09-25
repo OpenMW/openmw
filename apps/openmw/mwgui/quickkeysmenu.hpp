@@ -30,7 +30,7 @@ namespace MWGui
         void onAssignItem(MWWorld::Ptr item);
         void onAssignItemCancel();
         void onAssignMagicItem(MWWorld::Ptr item);
-        void onAssignMagic(const std::string& spellId);
+        void onAssignMagic(const ESM::RefId& spellId);
         void onAssignMagicCancel();
         void onOpen() override;
         void onClose() override;
@@ -58,13 +58,13 @@ namespace MWGui
             int index;
             ItemWidget* button;
             QuickKeysMenu::QuickKeyType type;
-            std::string id;
+            ESM::RefId id;
             std::string name;
             keyData()
                 : index(-1)
                 , button(nullptr)
                 , type(Type_Unassigned)
-                , id("")
+                , id(ESM::RefId::sEmpty)
                 , name("")
             {
             }

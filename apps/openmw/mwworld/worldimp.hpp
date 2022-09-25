@@ -45,6 +45,7 @@ namespace SceneUtil
 namespace ESM
 {
     struct Position;
+    struct RefId;
 }
 
 namespace Files
@@ -184,8 +185,8 @@ namespace MWWorld
         float feetToGameUnits(float feet);
         float getActivationDistancePlusTelekinesis();
 
-        MWWorld::ConstPtr getClosestMarker(const MWWorld::ConstPtr& ptr, std::string_view id);
-        MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id);
+        MWWorld::ConstPtr getClosestMarker(const MWWorld::ConstPtr& ptr, const ESM::RefId& id);
+        MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, const ESM::RefId& id);
 
     public:
         WorldModel& getWorldModel() { return mWorldModel; }
@@ -266,28 +267,28 @@ namespace MWWorld
         char getGlobalVariableType(std::string_view name) const override;
         ///< Return ' ', if there is no global variable with this name.
 
-        std::string_view getCellName(const MWWorld::CellStore* cell = nullptr) const override;
+        const std::string& getCellName(const MWWorld::CellStore* cell = nullptr) const override;
         ///< Return name of the cell.
         ///
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
-        std::string_view getCellName(const ESM::Cell* cell) const override;
+        const std::string& getCellName(const ESM::Cell* cell) const override;
 
         void removeRefScript(MWWorld::RefData* ref) override;
         //< Remove the script attached to ref from mLocalScripts
 
-        Ptr getPtr(std::string_view name, bool activeOnly) override;
+        Ptr getPtr(const ESM::RefId& name, bool activeOnly) override;
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do non search inactive cells.
 
-        Ptr searchPtr(std::string_view name, bool activeOnly, bool searchInContainers = false) override;
+        Ptr searchPtr(const ESM::RefId& name, bool activeOnly, bool searchInContainers = false) override;
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do not search inactive cells.
 
         Ptr searchPtrViaActorId(int actorId) override;
         ///< Search is limited to the active cells.
 
-        Ptr searchPtrViaRefNum(const std::string& id, const ESM::RefNum& refNum) override;
+        Ptr searchPtrViaRefNum(const ESM::RefId& id, const ESM::RefNum& refNum) override;
 
         MWWorld::Ptr findContainer(const MWWorld::ConstPtr& ptr) override;
         ///< Return a pointer to a liveCellRef which contains \a ptr.
@@ -319,7 +320,7 @@ namespace MWWorld
         bool toggleSky() override;
         ///< \return Resulting mode
 
-        void changeWeather(std::string_view region, const unsigned int id) override;
+        void changeWeather(const ESM::RefId& region, const unsigned int id) override;
 
         int getCurrentWeather() const override;
 
@@ -335,7 +336,7 @@ namespace MWWorld
 
         void setMoonColour(bool red) override;
 
-        void modRegion(std::string_view regionid, const std::vector<char>& chances) override;
+        void modRegion(const ESM::RefId& regionid, const std::vector<char>& chances) override;
 
         float getTimeScaleFactor() const override;
 
@@ -646,7 +647,7 @@ namespace MWWorld
          */
         void castSpell(const MWWorld::Ptr& actor, bool manualSpell = false) override;
 
-        void launchMagicBolt(const std::string& spellId, const MWWorld::Ptr& caster,
+        void launchMagicBolt(const ESM::RefId& spellId, const MWWorld::Ptr& caster,
             const osg::Vec3f& fallbackDirection, int slot) override;
         void launchProjectile(MWWorld::Ptr& actor, MWWorld::Ptr& projectile, const osg::Vec3f& worldPos,
             const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) override;
@@ -667,7 +668,7 @@ namespace MWWorld
 
         /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
         /// @note id must be lower case
-        void teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id) override;
+        void teleportToClosestMarker(const MWWorld::Ptr& ptr, const ESM::RefId& id) override;
 
         /// List all references (filtered by \a type) detected by \a ptr. The range
         /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.
@@ -685,7 +686,7 @@ namespace MWWorld
         void goToJail() override;
 
         /// Spawn a random creature from a levelled list next to the player
-        void spawnRandomCreature(std::string_view creatureList) override;
+        void spawnRandomCreature(const ESM::RefId& creatureList) override;
 
         /// Spawn a blood effect for \a ptr at \a worldPosition
         void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
@@ -752,7 +753,7 @@ namespace MWWorld
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 
-        std::vector<MWWorld::Ptr> getAll(const std::string& id) override;
+        std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id) override;
 
         Misc::Rng::Generator& getPrng() override;
 

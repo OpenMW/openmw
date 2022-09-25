@@ -54,7 +54,7 @@ namespace MWGui
                 dropped = world->placeObject(item.mBase, mLeft, mTop, count);
             else
                 dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
-            dropped.getCellRef().setOwner("");
+            dropped.getCellRef().setOwner(ESM::RefId::sEmpty);
 
             return dropped;
         }
@@ -181,32 +181,32 @@ namespace MWGui
         mMainWidget->eventMouseButtonClick.clear();
     }
 
-    void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
+    void HUD::setValue(const ESM::RefId& id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified());
-
+        const std::string idString = id.getRefIdString();
         // Fatigue can be negative
-        if (id != "FBar")
+        if (idString != "FBar")
             current = std::max(0, current);
 
         MyGUI::Widget* w;
         std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
-        if (id == "HBar")
+        if (idString == "HBar")
         {
             mHealth->setProgressRange(std::max(0, modified));
             mHealth->setProgressPosition(std::max(0, current));
             getWidget(w, "HealthFrame");
             w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
         }
-        else if (id == "MBar")
+        else if (idString == "MBar")
         {
             mMagicka->setProgressRange(std::max(0, modified));
             mMagicka->setProgressPosition(std::max(0, current));
             getWidget(w, "MagickaFrame");
             w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
-        else if (id == "FBar")
+        else if (idString == "FBar")
         {
             mStamina->setProgressRange(std::max(0, modified));
             mStamina->setProgressPosition(std::max(0, current));
@@ -393,7 +393,7 @@ namespace MWGui
         }
     }
 
-    void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
+    void HUD::setSelectedSpell(const ESM::RefId& spellId, int successChancePercent)
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
 
@@ -410,7 +410,7 @@ namespace MWGui
         mSpellStatus->setProgressPosition(successChancePercent);
 
         mSpellBox->setUserString("ToolTipType", "Spell");
-        mSpellBox->setUserString("Spell", spellId);
+        mSpellBox->setUserString("Spell",  spellId.getRefIdString());
 
         // use the icon of the first effect
         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(

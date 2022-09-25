@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -21,7 +22,7 @@ namespace ESM
 
     struct SummonKey
     {
-        SummonKey(int effectId, const std::string& sourceId, int index)
+        SummonKey(int effectId, const ESM::RefId& sourceId, int index)
             : mEffectId(effectId)
             , mSourceId(sourceId)
             , mEffectIndex(index)
@@ -49,7 +50,7 @@ namespace ESM
         }
 
         int mEffectId;
-        std::string mSourceId;
+        ESM::RefId mSourceId;
         int mEffectIndex;
     };
 }

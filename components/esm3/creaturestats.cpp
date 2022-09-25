@@ -87,9 +87,9 @@ namespace ESM
         mFallHeight = 0;
         esm.getHNOT(mFallHeight, "FALL");
 
-        mLastHitObject = esm.getHNOString("LHIT");
+        mLastHitObject = ESM::RefId::stringRefId(esm.getHNOString("LHIT"));
 
-        mLastHitAttemptObject = esm.getHNOString("LHAT");
+        mLastHitAttemptObject = ESM::RefId::stringRefId(esm.getHNOString("LHAT"));
 
         if (esm.getFormat() < 8)
             esm.getHNOT(mRecalcDynamicStats, "CALC");
@@ -121,7 +121,7 @@ namespace ESM
             {
                 int magicEffect;
                 esm.getHT(magicEffect);
-                std::string source = esm.getHNOString("SOUR");
+                ESM::RefId source = ESM::RefId::stringRefId(esm.getHNOString("SOUR"));
                 int effectIndex = -1;
                 esm.getHNOT(effectIndex, "EIND");
                 int actorId;
@@ -160,7 +160,7 @@ namespace ESM
 
         while (esm.isNextSub("CORP"))
         {
-            std::string id = esm.getHString();
+            ESM::RefId id = esm.getRefId();
 
             CorprusStats stats;
             esm.getHNT(stats.mWorsenings, "WORS");
@@ -229,10 +229,10 @@ namespace ESM
             esm.writeHNT("FALL", mFallHeight);
 
         if (!mLastHitObject.empty())
-            esm.writeHNString("LHIT", mLastHitObject);
+            esm.writeHNString("LHIT", mLastHitObject.getRefIdString());
 
         if (!mLastHitAttemptObject.empty())
-            esm.writeHNString("LHAT", mLastHitAttemptObject);
+            esm.writeHNString("LHAT", mLastHitAttemptObject.getRefIdString());
 
         if (mDrawState)
             esm.writeHNT("DRAW", mDrawState);
