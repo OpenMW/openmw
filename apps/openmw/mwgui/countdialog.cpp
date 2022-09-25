@@ -40,7 +40,7 @@ namespace MWGui
         mSlider->setScrollRange(maxCount);
         mItemText->setCaption(item);
 
-        int width = std::max(mItemText->getTextSize().width + 128, 320);
+        int width = std::max(mItemText->getTextSize().width + 160, 320);
         setCoord(viewSize.width/2 - width/2,
                 viewSize.height/2 - mMainWidget->getHeight()/2,
                 width,

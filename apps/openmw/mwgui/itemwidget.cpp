@@ -30,11 +30,11 @@ namespace
         {
             if (count > 999999999)
                 return MyGUI::utility::toString(count/1000000000) + "b";
-            else if (count > 9999999)
+            else if (count > 99999999)
                 return ">9m";
             else if (count > 999999)
                 return MyGUI::utility::toString(count/1000000) + "m";
-            else if (count > 9999)
+            else if (count > 99999)
                 return ">9k";
             else if (count > 999)
                 return MyGUI::utility::toString(count/1000) + "k";
