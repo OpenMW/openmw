@@ -165,7 +165,7 @@ namespace Nif
         mWorldObjectInfo.read(nif);
     }
 
-    void bhkWorldObject::post(NIFFile* nif)
+    void bhkWorldObject::post(Reader& nif)
     {
         mShape.post(nif);
     }
@@ -181,7 +181,7 @@ namespace Nif
         mShape.read(nif);
     }
 
-    void bhkBvTreeShape::post(NIFFile* nif)
+    void bhkBvTreeShape::post(Reader& nif)
     {
         mShape.post(nif);
     }
@@ -202,14 +202,14 @@ namespace Nif
         mGrowBy = nif->getUInt();
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             mScale = nif->getVector4();
-        mData.read(nif);
+        readRecordList(nif, mData);
         unsigned int numFilters = nif->getUInt();
         nif->getUInts(mFilters, numFilters);
     }
 
-    void bhkNiTriStripsShape::post(NIFFile* nif)
+    void bhkNiTriStripsShape::post(Reader& nif)
     {
-        mData.post(nif);
+        postRecordList(nif, mData);
     }
 
     void bhkPackedNiTriStripsShape::read(NIFStream* nif)
@@ -229,7 +229,7 @@ namespace Nif
         mData.read(nif);
     }
 
-    void bhkPackedNiTriStripsShape::post(NIFFile* nif)
+    void bhkPackedNiTriStripsShape::post(Reader& nif)
     {
         mData.post(nif);
     }
@@ -301,7 +301,7 @@ namespace Nif
 
     void bhkListShape::read(NIFStream* nif)
     {
-        mSubshapes.read(nif);
+        readRecordList(nif, mSubshapes);
         mHavokMaterial.read(nif);
         mChildShapeProperty.read(nif);
         mChildFilterProperty.read(nif);
@@ -315,7 +315,7 @@ namespace Nif
     {
         bhkEntity::read(nif);
         mInfo.read(nif);
-        mConstraints.read(nif);
+        readRecordList(nif, mConstraints);
         if (nif->getBethVersion() < 76)
             mBodyFlags = nif->getUInt();
         else

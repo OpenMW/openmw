@@ -44,13 +44,13 @@ namespace Nif
         }
 
         /// Resolve index to pointer
-        void post(NIFFile* nif)
+        void post(Reader& nif)
         {
             if (index < 0)
                 ptr = nullptr;
             else
             {
-                Record* r = nif->getRecord(index);
+                Record* r = nif.getRecord(index);
                 // And cast it
                 ptr = dynamic_cast<X*>(r);
                 assert(ptr != nullptr);
@@ -85,39 +85,28 @@ namespace Nif
         implementation.
      */
     template <class X>
-    class RecordListT
+    using RecordListT = std::vector<RecordPtrT<X>>;
+
+    template <class T>
+    void readRecordList(NIFStream* nif, RecordListT<T>& list)
     {
-        typedef RecordPtrT<X> Ptr;
-        std::vector<Ptr> list;
+        const int length = nif->getInt();
 
-    public:
-        RecordListT() = default;
+        if (length < 0)
+            throw std::runtime_error("Negative NIF record list length: " + std::to_string(length));
 
-        RecordListT(std::vector<Ptr> list)
-            : list(std::move(list))
-        {
-        }
+        list.resize(static_cast<std::size_t>(length));
 
-        void read(NIFStream* nif)
-        {
-            int len = nif->getInt();
-            list.resize(len);
+        for (auto& value : list)
+            value.read(nif);
+    }
 
-            for (size_t i = 0; i < list.size(); i++)
-                list[i].read(nif);
-        }
-
-        void post(NIFFile* nif)
-        {
-            for (size_t i = 0; i < list.size(); i++)
-                list[i].post(nif);
-        }
-
-        const Ptr& operator[](size_t index) const { return list.at(index); }
-        Ptr& operator[](size_t index) { return list.at(index); }
-
-        size_t length() const { return list.size(); }
-    };
+    template <class T>
+    void postRecordList(Reader& nif, RecordListT<T>& list)
+    {
+        for (auto& value : list)
+            value.post(nif);
+    }
 
     struct Node;
     struct Extra;

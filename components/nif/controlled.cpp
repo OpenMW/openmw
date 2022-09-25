@@ -42,7 +42,7 @@ namespace Nif
             /* bool mPersistRenderData = */ nif->getBoolean();
     }
 
-    void NiSourceTexture::post(NIFFile* nif)
+    void NiSourceTexture::post(Reader& nif)
     {
         Named::post(nif);
         data.post(nif);
@@ -59,7 +59,7 @@ namespace Nif
         controller.read(nif);
     }
 
-    void NiParticleModifier::post(NIFFile* nif)
+    void NiParticleModifier::post(Reader& nif)
     {
         next.post(nif);
         controller.post(nif);
@@ -78,7 +78,7 @@ namespace Nif
         data.read(nif);
     }
 
-    void NiParticleColorModifier::post(NIFFile* nif)
+    void NiParticleColorModifier::post(Reader& nif)
     {
         NiParticleModifier::post(nif);
         data.post(nif);

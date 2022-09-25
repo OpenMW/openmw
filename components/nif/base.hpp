@@ -18,7 +18,7 @@ namespace Nif
         unsigned int recordSize{ 0u };
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override { next.post(nif); }
+        void post(Reader& nif) override { next.post(nif); }
     };
 
     struct Controller : public Record
@@ -43,7 +43,7 @@ namespace Nif
         NamedPtr target;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
 
         bool isActive() const { return flags & Flag_Active; }
         ExtrapolationMode extrapolationMode() const { return static_cast<ExtrapolationMode>(flags & Mask); }
@@ -58,7 +58,7 @@ namespace Nif
         ControllerPtr controller;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
     using NiSequenceStreamHelper = Named;
 

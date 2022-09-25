@@ -3,6 +3,7 @@
 #include <components/misc/algorithm.hpp>
 
 #include "data.hpp"
+#include "exception.hpp"
 #include "physics.hpp"
 #include "property.hpp"
 
@@ -68,7 +69,8 @@ namespace Nif
             }
             default:
             {
-                nif->file->fail("Unhandled NiBoundingVolume type: " + std::to_string(type));
+                throw Nif::Exception(
+                    "Unhandled NiBoundingVolume type: " + std::to_string(type), nif->getFile().getFilename());
             }
         }
     }
@@ -82,7 +84,7 @@ namespace Nif
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
             velocity = nif->getVector3();
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
-            props.read(nif);
+            readRecordList(nif, props);
 
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
             hasBounds = nif->getBoolean();
@@ -97,10 +99,10 @@ namespace Nif
         isBone = false;
     }
 
-    void Node::post(NIFFile* nif)
+    void Node::post(Reader& nif)
     {
         Named::post(nif);
-        props.post(nif);
+        postRecordList(nif, props);
         collision.post(nif);
     }
 
@@ -112,9 +114,9 @@ namespace Nif
     void NiNode::read(NIFStream* nif)
     {
         Node::read(nif);
-        children.read(nif);
+        readRecordList(nif, children);
         if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
-            effects.read(nif);
+            readRecordList(nif, effects);
 
         // Discard transformations for the root node, otherwise some meshes
         // occasionally get wrong orientation. Only for NiNode-s for now, but
@@ -126,17 +128,17 @@ namespace Nif
         }
     }
 
-    void NiNode::post(NIFFile* nif)
+    void NiNode::post(Reader& nif)
     {
         Node::post(nif);
-        children.post(nif);
-        effects.post(nif);
+        postRecordList(nif, children);
+        postRecordList(nif, effects);
 
-        for (size_t i = 0; i < children.length(); i++)
+        for (auto& child : children)
         {
             // Why would a unique list of children contain empty refs?
-            if (!children[i].empty())
-                children[i]->parents.push_back(this);
+            if (!child.empty())
+                child->parents.push_back(this);
         }
     }
 
@@ -174,7 +176,7 @@ namespace Nif
         }
     }
 
-    void NiGeometry::post(NIFFile* nif)
+    void NiGeometry::post(Reader& nif)
     {
         Node::post(nif);
         data.post(nif);
@@ -182,7 +184,7 @@ namespace Nif
         shaderprop.post(nif);
         alphaprop.post(nif);
         if (recType != RC_NiParticles && !skin.empty())
-            nif->setUseSkinning(true);
+            nif.setUseSkinning(true);
     }
 
     void BSLODTriShape::read(NIFStream* nif)
@@ -269,7 +271,7 @@ namespace Nif
             mSubSorter.read(nif);
     }
 
-    void NiSortAdjustNode::post(NIFFile* nif)
+    void NiSortAdjustNode::post(Reader& nif)
     {
         NiNode::post(nif);
         mSubSorter.post(nif);

@@ -17,7 +17,7 @@ namespace Nif
 {
 
     class NIFStream;
-    class NIFFile;
+    struct NIFFile;
 
     /// Non-record data types
 
@@ -204,7 +204,7 @@ namespace Nif
         NodePtr mTarget;
 
         void read(NIFStream* nif) override { mTarget.read(nif); }
-        void post(NIFFile* nif) override { mTarget.post(nif); }
+        void post(Reader& nif) override { mTarget.post(nif); }
     };
 
     // Bethesda Havok-specific collision object
@@ -214,7 +214,7 @@ namespace Nif
         bhkWorldObjectPtr mBody;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override
+        void post(Reader& nif) override
         {
             NiCollisionObject::post(nif);
             mBody.post(nif);
@@ -228,7 +228,7 @@ namespace Nif
         HavokFilter mHavokFilter;
         bhkWorldObjectCInfo mWorldObjectInfo;
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     // Abstract
@@ -244,7 +244,7 @@ namespace Nif
     {
         bhkShapePtr mShape;
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     // bhkBvTreeShape with Havok MOPP code
@@ -265,7 +265,7 @@ namespace Nif
         NiTriStripsDataList mData;
         std::vector<unsigned int> mFilters;
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     // Bethesda packed triangle strip-based Havok shape collection
@@ -278,7 +278,7 @@ namespace Nif
         hkPackedNiTriStripsDataPtr mData;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     // bhkPackedNiTriStripsShape data block

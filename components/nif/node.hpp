@@ -94,7 +94,7 @@ namespace Nif
         NiCollisionObjectPtr collision;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
 
         // Parent node, or nullptr for the root node. As far as I'm aware, only
         // NiNodes (or types derived from NiNodes) can be parents.
@@ -126,7 +126,7 @@ namespace Nif
         };
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiGeometry : Node
@@ -154,7 +154,7 @@ namespace Nif
         NiAlphaPropertyPtr alphaprop;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiTriShape : NiGeometry
@@ -263,7 +263,7 @@ namespace Nif
         NiAccumulatorPtr mSubSorter;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiBillboardNode : NiNode

@@ -60,7 +60,7 @@ namespace Nif
             nif->skip(2); // Unknown short
     }
 
-    void NiTextureEffect::post(NIFFile* nif)
+    void NiTextureEffect::post(Reader& nif)
     {
         NiDynamicEffect::post(nif);
         texture.post(nif);

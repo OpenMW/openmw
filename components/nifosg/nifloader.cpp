@@ -42,6 +42,7 @@
 
 #include <components/nif/controlled.hpp>
 #include <components/nif/effect.hpp>
+#include <components/nif/exception.hpp>
 #include <components/nif/extra.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/property.hpp>
@@ -75,9 +76,9 @@ namespace
         if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node))
         {
             outIndices.push_back(ninode->recIndex);
-            for (unsigned int i = 0; i < ninode->children.length(); ++i)
-                if (!ninode->children[i].empty())
-                    getAllNiNodes(ninode->children[i].getPtr(), outIndices);
+            for (const auto& child : ninode->children)
+                if (!child.empty())
+                    getAllNiNodes(child.getPtr(), outIndices);
         }
     }
 
@@ -101,18 +102,17 @@ namespace
     {
         if (parent != nullptr)
             collectDrawableProperties(&parent->mNiNode, parent->mParent, out);
-        const Nif::PropertyList& props = nifNode->props;
-        for (size_t i = 0; i < props.length(); ++i)
+        for (const auto& property : nifNode->props)
         {
-            if (!props[i].empty())
+            if (!property.empty())
             {
-                switch (props[i]->recType)
+                switch (property->recType)
                 {
                     case Nif::RC_NiMaterialProperty:
                     case Nif::RC_NiVertexColorProperty:
                     case Nif::RC_NiSpecularProperty:
                     case Nif::RC_NiAlphaProperty:
-                        out.push_back(props[i].getPtr());
+                        out.push_back(property.getPtr());
                         break;
                     default:
                         break;
@@ -249,13 +249,13 @@ namespace NifOsg
         // This is used to queue emitters that weren't attached to their node yet.
         std::vector<std::pair<size_t, osg::ref_ptr<Emitter>>> mEmitterQueue;
 
-        void loadKf(Nif::NIFFilePtr nif, SceneUtil::KeyframeHolder& target) const
+        void loadKf(Nif::FileView nif, SceneUtil::KeyframeHolder& target) const
         {
             const Nif::NiSequenceStreamHelper* seq = nullptr;
-            const size_t numRoots = nif->numRoots();
+            const size_t numRoots = nif.numRoots();
             for (size_t i = 0; i < numRoots; ++i)
             {
-                const Nif::Record* r = nif->getRoot(i);
+                const Nif::Record* r = nif.getRoot(i);
                 if (r && r->recType == Nif::RC_NiSequenceStreamHelper)
                 {
                     seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
@@ -265,15 +265,17 @@ namespace NifOsg
 
             if (!seq)
             {
-                nif->warn("Found no NiSequenceStreamHelper root record");
+                Log(Debug::Warning) << "NIFFile Warning: Found no NiSequenceStreamHelper root record. File: "
+                                    << nif.getFilename();
                 return;
             }
 
             Nif::ExtraPtr extra = seq->extra;
             if (extra.empty() || extra->recType != Nif::RC_NiTextKeyExtraData)
             {
-                nif->warn("First extra data was not a NiTextKeyExtraData, but a "
-                    + (extra.empty() ? std::string("nil") : extra->recName) + ".");
+                Log(Debug::Warning) << "NIFFile Warning: First extra data was not a NiTextKeyExtraData, but a "
+                                    << (extra.empty() ? std::string_view("nil") : std::string_view(extra->recName))
+                                    << ". File: " << nif.getFilename();
                 return;
             }
 
@@ -285,7 +287,8 @@ namespace NifOsg
             {
                 if (extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
                 {
-                    nif->warn("Unexpected extra data " + extra->recName + " with controller " + ctrl->recName);
+                    Log(Debug::Warning) << "NIFFile Warning: Unexpected extra data " << extra->recName
+                                        << " with controller " << ctrl->recName << ". File: " << nif.getFilename();
                     continue;
                 }
 
@@ -310,17 +313,17 @@ namespace NifOsg
 
                 if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
                     Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in "
-                                        << nif->getFilename() << ", ignoring later version";
+                                        << nif.getFilename() << ", ignoring later version";
             }
         }
 
-        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
+        osg::ref_ptr<osg::Node> load(Nif::FileView nif, Resource::ImageManager* imageManager)
         {
-            const size_t numRoots = nif->numRoots();
+            const size_t numRoots = nif.numRoots();
             std::vector<const Nif::Node*> roots;
             for (size_t i = 0; i < numRoots; ++i)
             {
-                const Nif::Record* r = nif->getRoot(i);
+                const Nif::Record* r = nif.getRoot(i);
                 if (!r)
                     continue;
                 const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
@@ -328,7 +331,7 @@ namespace NifOsg
                     roots.emplace_back(nifNode);
             }
             if (roots.empty())
-                nif->fail("Found no root nodes");
+                throw Nif::Exception("Found no root nodes", nif.getFilename());
 
             osg::ref_ptr<SceneUtil::TextKeyMapHolder> textkeys(new SceneUtil::TextKeyMapHolder);
 
@@ -348,7 +351,7 @@ namespace NifOsg
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
 
-            if (nif->getUseSkinning())
+            if (nif.getUseSkinning())
             {
                 osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
                 skel->setStateSet(created->getStateSet());
@@ -362,7 +365,7 @@ namespace NifOsg
             if (!textkeys->mTextKeys.empty())
                 created->getOrCreateUserDataContainer()->addUserObject(textkeys);
 
-            created->setUserValue(Misc::OsgUserValues::sFileHash, nif->getHash());
+            created->setUserValue(Misc::OsgUserValues::sFileHash, nif.getHash());
 
             return created;
         }
@@ -371,19 +374,17 @@ namespace NifOsg
             SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
             std::vector<unsigned int>& boundTextures, int animflags)
         {
-            const Nif::PropertyList& props = nifNode->props;
-
             bool hasStencilProperty = false;
 
-            for (size_t i = 0; i < props.length(); ++i)
+            for (const auto& property : nifNode->props)
             {
-                if (props[i].empty())
+                if (property.empty())
                     continue;
 
-                if (props[i].getPtr()->recType == Nif::RC_NiStencilProperty)
+                if (property.getPtr()->recType == Nif::RC_NiStencilProperty)
                 {
                     const Nif::NiStencilProperty* stencilprop
-                        = static_cast<const Nif::NiStencilProperty*>(props[i].getPtr());
+                        = static_cast<const Nif::NiStencilProperty*>(property.getPtr());
                     if (stencilprop->data.enabled != 0)
                     {
                         hasStencilProperty = true;
@@ -392,24 +393,24 @@ namespace NifOsg
                 }
             }
 
-            for (size_t i = 0; i < props.length(); ++i)
+            for (const auto& property : nifNode->props)
             {
-                if (!props[i].empty())
+                if (!property.empty())
                 {
                     // Get the lowest numbered recIndex of the NiTexturingProperty root node.
                     // This is what is overridden when a spell effect "particle texture" is used.
                     if (nifNode->parents.empty() && !mFoundFirstRootTexturingProperty
-                        && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                        && property.getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
-                        mFirstRootTextureIndex = props[i].getPtr()->recIndex;
+                        mFirstRootTextureIndex = property.getPtr()->recIndex;
                         mFoundFirstRootTexturingProperty = true;
                     }
-                    else if (props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    else if (property.getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
-                        if (props[i].getPtr()->recIndex == mFirstRootTextureIndex)
+                        if (property.getPtr()->recIndex == mFirstRootTextureIndex)
                             applyTo->setUserValue("overrideFx", 1);
                     }
-                    handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags,
+                    handleProperty(property.getPtr(), applyTo, composite, imageManager, boundTextures, animflags,
                         hasStencilProperty);
                 }
             }
@@ -459,13 +460,13 @@ namespace NifOsg
             const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
             osg::ref_ptr<osg::Sequence> sequenceNode(new osg::Sequence);
             sequenceNode->setName(niFltAnimationNode->name);
-            if (niFltAnimationNode->children.length() != 0)
+            if (!niFltAnimationNode->children.empty())
             {
                 if (niFltAnimationNode->swing())
                     sequenceNode->setDefaultTime(
-                        niFltAnimationNode->mDuration / (niFltAnimationNode->children.length() * 2));
+                        niFltAnimationNode->mDuration / (niFltAnimationNode->children.size() * 2));
                 else
-                    sequenceNode->setDefaultTime(niFltAnimationNode->mDuration / niFltAnimationNode->children.length());
+                    sequenceNode->setDefaultTime(niFltAnimationNode->mDuration / niFltAnimationNode->children.size());
             }
             return sequenceNode;
         }
@@ -626,12 +627,9 @@ namespace NifOsg
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
                 extraCollection.emplace_back(e);
 
-            for (size_t i = 0; i < nifNode->extralist.length(); ++i)
-            {
-                Nif::ExtraPtr e = nifNode->extralist[i];
-                if (!e.empty())
-                    extraCollection.emplace_back(e);
-            }
+            for (const auto& extraNode : nifNode->extralist)
+                if (!extraNode.empty())
+                    extraCollection.emplace_back(extraNode);
 
             for (const auto& e : extraCollection)
             {
@@ -801,20 +799,16 @@ namespace NifOsg
             if (ninode)
             {
                 const Nif::NodeList& effects = ninode->effects;
-                for (size_t i = 0; i < effects.length(); ++i)
-                {
-                    if (!effects[i].empty())
-                        handleEffect(effects[i].getPtr(), currentNode, imageManager);
-                }
+                for (const auto& effect : effects)
+                    if (!effect.empty())
+                        handleEffect(effect.getPtr(), currentNode, imageManager);
 
                 const Nif::NodeList& children = ninode->children;
                 const Nif::Parent currentParent{ *ninode, parent };
-                for (size_t i = 0; i < children.length(); ++i)
-                {
-                    if (!children[i].empty())
-                        handleNode(children[i].getPtr(), &currentParent, currentNode, imageManager, boundTextures,
-                            animflags, skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
-                }
+                for (const auto& child : children)
+                    if (!child.empty())
+                        handleNode(child.getPtr(), &currentParent, currentNode, imageManager, boundTextures, animflags,
+                            skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
             }
 
             if (nifNode->recType == Nif::RC_NiFltAnimationNode)
@@ -959,7 +953,7 @@ namespace NifOsg
                     if (matctrl->mData.empty() && matctrl->mInterpolator.empty())
                         continue;
                     auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->mTargetColor);
-                    if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW
+                    if (mVersion <= Nif::NIFFile::VER_MW
                         && targetColor == MaterialColorController::TargetColor::Specular)
                         continue;
                     if (!matctrl->mInterpolator.empty()
@@ -1008,13 +1002,12 @@ namespace NifOsg
                         wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
                     }
 
-                    for (unsigned int i = 0; i < flipctrl->mSources.length(); ++i)
+                    for (const auto& source : flipctrl->mSources)
                     {
-                        Nif::NiSourceTexturePtr st = flipctrl->mSources[i];
-                        if (st.empty())
+                        if (source.empty())
                             continue;
 
-                        osg::ref_ptr<osg::Image> image(handleSourceTexture(st.getPtr(), imageManager));
+                        osg::ref_ptr<osg::Image> image(handleSourceTexture(source.getPtr(), imageManager));
                         osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D(image));
                         if (image)
                             texture->setTextureSize(image->s(), image->t());
@@ -1188,7 +1181,7 @@ namespace NifOsg
             return emitter;
         }
 
-        void handleQueuedParticleEmitters(osg::Group* rootNode, Nif::NIFFilePtr nif)
+        void handleQueuedParticleEmitters(osg::Group* rootNode, Nif::FileView nif)
         {
             for (const auto& emitterPair : mEmitterQueue)
             {
@@ -1198,8 +1191,9 @@ namespace NifOsg
                 osg::Group* emitterNode = findEmitterNode.mFound;
                 if (!emitterNode)
                 {
-                    nif->warn("Failed to find particle emitter emitter node (node record index "
-                        + std::to_string(recIndex) + ")");
+                    Log(Debug::Warning)
+                        << "NIFFile Warning: Failed to find particle emitter emitter node (node record index "
+                        << recIndex << "). File: " << nif.getFilename();
                     continue;
                 }
 
@@ -1475,7 +1469,7 @@ namespace NifOsg
             const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
             const Nif::NiSkinData* data = skin->data.getPtr();
             const Nif::NodeList& bones = skin->bones;
-            for (size_t i = 0; i < bones.length(); i++)
+            for (std::size_t i = 0, n = bones.size(); i < n; ++i)
             {
                 std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
 
@@ -2393,7 +2387,7 @@ namespace NifOsg
             }
 
             // While NetImmerse and Gamebryo support specular lighting, Morrowind has its support disabled.
-            if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW || !specEnabled)
+            if (mVersion <= Nif::NIFFile::VER_MW || !specEnabled)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
 
             if (lightmode == 0)
@@ -2495,15 +2489,15 @@ namespace NifOsg
         }
     };
 
-    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::ImageManager* imageManager)
+    osg::ref_ptr<osg::Node> Loader::load(Nif::FileView file, Resource::ImageManager* imageManager)
     {
-        LoaderImpl impl(file->getFilename(), file->getVersion(), file->getUserVersion(), file->getBethVersion());
+        LoaderImpl impl(file.getFilename(), file.getVersion(), file.getUserVersion(), file.getBethVersion());
         return impl.load(file, imageManager);
     }
 
-    void Loader::loadKf(Nif::NIFFilePtr kf, SceneUtil::KeyframeHolder& target)
+    void Loader::loadKf(Nif::FileView kf, SceneUtil::KeyframeHolder& target)
     {
-        LoaderImpl impl(kf->getFilename(), kf->getVersion(), kf->getUserVersion(), kf->getBethVersion());
+        LoaderImpl impl(kf.getFilename(), kf.getVersion(), kf.getUserVersion(), kf.getBethVersion());
         impl.loadKf(kf, target);
     }
 

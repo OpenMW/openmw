@@ -19,14 +19,14 @@ namespace Nif
         if (nif->getVersion() < NIFStream::generateVersion(10, 0, 1, 0))
             extra.read(nif);
         else
-            extralist.read(nif);
+            readRecordList(nif, extralist);
         controller.read(nif);
     }
 
-    void Named::post(NIFFile* nif)
+    void Named::post(Reader& nif)
     {
         extra.post(nif);
-        extralist.post(nif);
+        postRecordList(nif, extralist);
         controller.post(nif);
     }
 }

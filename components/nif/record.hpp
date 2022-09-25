@@ -29,7 +29,7 @@
 namespace Nif
 {
 
-    class NIFFile;
+    class Reader;
     class NIFStream;
 
     enum RecordType
@@ -164,7 +164,7 @@ namespace Nif
         virtual void read(NIFStream* nif) = 0;
 
         /// Does post-processing, after the entire tree is loaded
-        virtual void post(NIFFile* nif) {}
+        virtual void post(Reader& nif) {}
 
         virtual ~Record() {}
     };

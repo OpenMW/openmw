@@ -53,7 +53,7 @@ namespace Nif
             unsigned int clamp, uvSet;
 
             void read(NIFStream* nif);
-            void post(NIFFile* nif);
+            void post(Reader& nif);
 
             bool wrapT() const { return clamp & 1; }
             bool wrapS() const { return (clamp >> 1) & 1; }
@@ -97,7 +97,7 @@ namespace Nif
         osg::Vec4f bumpMapMatrix;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiFogProperty : public Property
@@ -166,7 +166,7 @@ namespace Nif
         ParallaxSettings parallax;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct BSShaderNoLightingProperty : public BSShaderLightingProperty
@@ -212,7 +212,7 @@ namespace Nif
         float mEmissiveMult, mSpecStrength;
 
         void read(NIFStream* nif) override;
-        void post(NIFFile* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiDitherProperty : public Property

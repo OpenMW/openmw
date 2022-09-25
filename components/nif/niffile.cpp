@@ -15,6 +15,7 @@
 #include "controller.hpp"
 #include "data.hpp"
 #include "effect.hpp"
+#include "exception.hpp"
 #include "extra.hpp"
 #include "physics.hpp"
 #include "property.hpp"
@@ -22,11 +23,16 @@
 namespace Nif
 {
 
-    /// Open a NIF stream. The name is used for error messages.
-    NIFFile::NIFFile(Files::IStreamPtr&& stream, const std::filesystem::path& name)
-        : filename(name)
+    Reader::Reader(NIFFile& file)
+        : ver(file.mVersion)
+        , userVer(file.mUserVersion)
+        , bethVer(file.mBethVersion)
+        , filename(file.mPath)
+        , hash(file.mHash)
+        , records(file.mRecords)
+        , roots(file.mRoots)
+        , mUseSkinning(file.mUseSkinning)
     {
-        parse(std::move(stream));
     }
 
     template <typename NodeType, RecordType recordType>
@@ -172,7 +178,7 @@ namespace Nif
     /// Make the factory map used for parsing the file
     static const std::map<std::string, CreateRecord> factories = makeFactory();
 
-    std::string NIFFile::printVersion(unsigned int version)
+    std::string Reader::printVersion(unsigned int version)
     {
         int major = (version >> 24) & 0xFF;
         int minor = (version >> 16) & 0xFF;
@@ -184,12 +190,12 @@ namespace Nif
         return stream.str();
     }
 
-    void NIFFile::parse(Files::IStreamPtr&& stream)
+    void Reader::parse(Files::IStreamPtr&& stream)
     {
         const std::array<std::uint64_t, 2> fileHash = Files::getHash(filename, *stream);
         hash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
 
-        NIFStream nif(this, std::move(stream));
+        NIFStream nif(*this, std::move(stream));
 
         // Check the header string
         std::string head = nif.getVersionString();
@@ -200,7 +206,7 @@ namespace Nif
         const bool supportedHeader = std::any_of(verStrings.begin(), verStrings.end(),
             [&](const std::string& verString) { return head.compare(0, verString.size(), verString) == 0; });
         if (!supportedHeader)
-            fail("Invalid NIF header: " + head);
+            throw Nif::Exception("Invalid NIF header: " + head, filename);
 
         // Get BCD version
         ver = nif.getUInt();
@@ -208,15 +214,16 @@ namespace Nif
         // It's not used by Morrowind assets but Morrowind supports it.
         static const std::array<uint32_t, 2> supportedVers = {
             NIFStream::generateVersion(4, 0, 0, 0),
-            VER_MW,
+            NIFFile::VER_MW,
         };
         const bool supportedVersion = std::find(supportedVers.begin(), supportedVers.end(), ver) != supportedVers.end();
         if (!supportedVersion)
         {
             if (sLoadUnsupportedFiles)
-                warn("Unsupported NIF version: " + printVersion(ver) + ". Proceed with caution!");
+                Log(Debug::Warning) << " NIFFile Warning: Unsupported NIF version: " << printVersion(ver)
+                                    << ". Proceed with caution! File: " << filename;
             else
-                fail("Unsupported NIF version: " + printVersion(ver));
+                throw Nif::Exception("Unsupported NIF version: " + printVersion(ver), filename);
         }
 
         // NIF data endianness
@@ -224,7 +231,7 @@ namespace Nif
         {
             unsigned char endianness = nif.getChar();
             if (endianness == 0)
-                fail("Big endian NIF files are unsupported");
+                throw Nif::Exception("Big endian NIF files are unsupported", filename);
         }
 
         // User version
@@ -237,19 +244,19 @@ namespace Nif
 
         // Bethesda stream header
         // It contains Bethesda format version and (useless) export information
-        if (ver == VER_OB_OLD
+        if (ver == NIFFile::VER_OB_OLD
             || (userVer >= 3
-                && ((ver == VER_OB || ver == VER_BGS)
+                && ((ver == NIFFile::VER_OB || ver == NIFFile::VER_BGS)
                     || (ver >= NIFStream::generateVersion(10, 1, 0, 0) && ver <= NIFStream::generateVersion(20, 0, 0, 4)
                         && userVer <= 11))))
         {
             bethVer = nif.getUInt();
             nif.getExportString(); // Author
-            if (bethVer > BETHVER_FO4)
+            if (bethVer > NIFFile::BETHVER_FO4)
                 nif.getUInt(); // Unknown
             nif.getExportString(); // Process script
             nif.getExportString(); // Export script
-            if (bethVer == BETHVER_FO4)
+            if (bethVer == NIFFile::BETHVER_FO4)
                 nif.getExportString(); // Max file path
         }
 
@@ -296,24 +303,19 @@ namespace Nif
             {
                 std::stringstream error;
                 error << "Record number " << i << " out of " << recNum << " is blank.";
-                fail(error.str());
+                throw Nif::Exception(error.str(), filename);
             }
 
             // Record separator. Some Havok records in Oblivion do not have it.
             if (hasRecordSeparators && rec.compare(0, 3, "bhk"))
-            {
                 if (nif.getInt())
-                {
-                    std::stringstream warning;
-                    warning << "Record number " << i << " out of " << recNum << " is preceded by a non-zero separator.";
-                    warn(warning.str());
-                }
-            }
+                    Log(Debug::Warning) << "NIFFile Warning: Record number " << i << " out of " << recNum
+                                        << " is preceded by a non-zero separator. File: " << filename;
 
             const auto entry = factories.find(rec);
 
             if (entry == factories.end())
-                fail("Unknown record type " + rec);
+                throw Nif::Exception("Unknown record type " + rec, filename);
 
             r = entry->second();
 
@@ -343,45 +345,31 @@ namespace Nif
             else
             {
                 roots[i] = nullptr;
-                warn("Root " + std::to_string(i + 1) + " does not point to a record: index " + std::to_string(idx));
+                Log(Debug::Warning) << "NIFFile Warning: Root " << i + 1 << " does not point to a record: index " << idx
+                                    << ". File: " << filename;
             }
         }
 
         // Once parsing is done, do post-processing.
         for (const auto& record : records)
-            record->post(this);
+            record->post(*this);
     }
 
-    void NIFFile::setUseSkinning(bool skinning)
+    void Reader::setUseSkinning(bool skinning)
     {
         mUseSkinning = skinning;
     }
 
-    bool NIFFile::getUseSkinning() const
-    {
-        return mUseSkinning;
-    }
+    std::atomic_bool Reader::sLoadUnsupportedFiles = false;
 
-    std::atomic_bool NIFFile::sLoadUnsupportedFiles = false;
-
-    void NIFFile::setLoadUnsupportedFiles(bool load)
+    void Reader::setLoadUnsupportedFiles(bool load)
     {
         sLoadUnsupportedFiles = load;
     }
 
-    void NIFFile::warn(const std::string& msg) const
+    std::string Reader::getString(std::uint32_t index) const
     {
-        Log(Debug::Warning) << " NIFFile Warning: " << msg << "\nFile: " << filename;
-    }
-
-    [[noreturn]] void NIFFile::fail(const std::string& msg) const
-    {
-        throw std::runtime_error(" NIFFile Error: " + msg + "\nFile: " + Files::pathToUnicodeString(filename));
-    }
-
-    std::string NIFFile::getString(uint32_t index) const
-    {
-        if (index == std::numeric_limits<uint32_t>::max())
+        if (index == std::numeric_limits<std::uint32_t>::max())
             return std::string();
         return strings.at(index);
     }

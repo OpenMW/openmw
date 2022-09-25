@@ -14,72 +14,8 @@
 namespace Nif
 {
 
-    struct File
+    struct NIFFile
     {
-        virtual ~File() = default;
-
-        virtual Record* getRecord(size_t index) const = 0;
-
-        virtual size_t numRecords() const = 0;
-
-        virtual Record* getRoot(size_t index = 0) const = 0;
-
-        virtual size_t numRoots() const = 0;
-
-        virtual std::string getString(uint32_t index) const = 0;
-
-        virtual void setUseSkinning(bool skinning) = 0;
-
-        virtual bool getUseSkinning() const = 0;
-
-        virtual std::filesystem::path getFilename() const = 0;
-
-        virtual std::string getHash() const = 0;
-
-        virtual unsigned int getVersion() const = 0;
-
-        virtual unsigned int getUserVersion() const = 0;
-
-        virtual unsigned int getBethVersion() const = 0;
-    };
-
-    class NIFFile final : public File
-    {
-        /// File version, user version, Bethesda version
-        unsigned int ver = 0;
-        unsigned int userVer = 0;
-        unsigned int bethVer = 0;
-
-        /// File name, used for error messages and opening the file
-        std::filesystem::path filename;
-        std::string hash;
-
-        /// Record list
-        std::vector<std::unique_ptr<Record>> records;
-
-        /// Root list.  This is a select portion of the pointers from records
-        std::vector<Record*> roots;
-
-        /// String table
-        std::vector<std::string> strings;
-
-        bool mUseSkinning = false;
-
-        static std::atomic_bool sLoadUnsupportedFiles;
-
-        /// Parse the file
-        void parse(Files::IStreamPtr&& stream);
-
-        /// Get the file's version in a human readable form
-        ///\returns A string containing a human readable NIF version number
-        std::string printVersion(unsigned int version);
-
-        /// Private Copy Constructor
-        NIFFile(NIFFile const&);
-        ///\overload
-        void operator=(NIFFile const&);
-
-    public:
         // For generic versions NIFStream::generateVersion() is used instead
         enum NIFVersion
         {
@@ -94,51 +30,119 @@ namespace Nif
             BETHVER_FO4 = 130 // Fallout 4
         };
 
-        /// Used if file parsing fails
-        [[noreturn]] void fail(const std::string& msg) const;
+        /// File version, user version, Bethesda version
+        unsigned int mVersion = 0;
+        unsigned int mUserVersion = 0;
+        unsigned int mBethVersion = 0;
 
-        /// Used when something goes wrong, but not catastrophically so
-        void warn(const std::string& msg) const;
+        /// File name, used for error messages and opening the file
+        std::filesystem::path mPath;
+        std::string mHash;
 
-        /// Open a NIF stream. The name is used for error messages.
-        NIFFile(Files::IStreamPtr&& stream, const std::filesystem::path& name);
+        /// Record list
+        std::vector<std::unique_ptr<Record>> mRecords;
 
-        /// Get a given record
-        Record* getRecord(size_t index) const override { return records.at(index).get(); }
-        /// Number of records
-        size_t numRecords() const override { return records.size(); }
+        /// Root list.  This is a select portion of the pointers from records
+        std::vector<Record*> mRoots;
+
+        bool mUseSkinning = false;
+
+        explicit NIFFile(const std::filesystem::path& path)
+            : mPath(path)
+        {
+        }
+    };
+
+    class FileView
+    {
+    public:
+        FileView(const NIFFile& file)
+            : mFile(&file)
+        {
+        }
 
         /// Get a given root
-        Record* getRoot(size_t index = 0) const override
-        {
-            Record* res = roots.at(index);
-            return res;
-        }
+        const Record* getRoot(std::size_t index) const { return mFile->mRoots.at(index); }
+
         /// Number of roots
-        size_t numRoots() const override { return roots.size(); }
+        std::size_t numRoots() const { return mFile->mRoots.size(); }
+
+        /// Get the name of the file
+        const std::filesystem::path& getFilename() const { return mFile->mPath; }
+
+        const std::string& getHash() const { return mFile->mHash; }
+
+        /// Get the version of the NIF format used
+        unsigned int getVersion() const { return mFile->mVersion; }
+
+        /// Get the user version of the NIF format used
+        unsigned int getUserVersion() const { return mFile->mUserVersion; }
+
+        /// Get the Bethesda version of the NIF format used
+        unsigned int getBethVersion() const { return mFile->mBethVersion; }
+
+        bool getUseSkinning() const { return mFile->mUseSkinning; }
+
+    private:
+        const NIFFile* mFile;
+    };
+
+    class Reader
+    {
+        /// File version, user version, Bethesda version
+        unsigned int& ver;
+        unsigned int& userVer;
+        unsigned int& bethVer;
+
+        /// File name, used for error messages and opening the file
+        std::filesystem::path& filename;
+        std::string& hash;
+
+        /// Record list
+        std::vector<std::unique_ptr<Record>>& records;
+
+        /// Root list.  This is a select portion of the pointers from records
+        std::vector<Record*>& roots;
+
+        /// String table
+        std::vector<std::string> strings;
+
+        bool& mUseSkinning;
+
+        static std::atomic_bool sLoadUnsupportedFiles;
+
+        /// Get the file's version in a human readable form
+        ///\returns A string containing a human readable NIF version number
+        std::string printVersion(unsigned int version);
+
+    public:
+        /// Open a NIF stream. The name is used for error messages.
+        explicit Reader(NIFFile& file);
+
+        /// Parse the file
+        void parse(Files::IStreamPtr&& stream);
+
+        /// Get a given record
+        Record* getRecord(size_t index) const { return records.at(index).get(); }
 
         /// Get a given string from the file's string table
-        std::string getString(uint32_t index) const override;
+        std::string getString(uint32_t index) const;
 
         /// Set whether there is skinning contained in this NIF file.
         /// @note This is just a hint for users of the NIF file and has no effect on the loading procedure.
-        void setUseSkinning(bool skinning) override;
-
-        bool getUseSkinning() const override;
+        void setUseSkinning(bool skinning);
 
         /// Get the name of the file
-        std::filesystem::path getFilename() const override { return filename; }
-
-        std::string getHash() const override { return hash; }
+        std::filesystem::path getFilename() const { return filename; }
 
         /// Get the version of the NIF format used
-        unsigned int getVersion() const override { return ver; }
+        unsigned int getVersion() const { return ver; }
 
         /// Get the user version of the NIF format used
-        unsigned int getUserVersion() const override { return userVer; }
+        unsigned int getUserVersion() const { return userVer; }
 
         /// Get the Bethesda version of the NIF format used
-        unsigned int getBethVersion() const override { return bethVer; }
+        unsigned int getBethVersion() const { return bethVer; }
 
         static void setLoadUnsupportedFiles(bool load);
     };

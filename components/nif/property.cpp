@@ -47,7 +47,7 @@ namespace Nif
         }
     }
 
-    void NiTexturingProperty::Texture::post(NIFFile* nif)
+    void NiTexturingProperty::Texture::post(Reader& nif)
     {
         texture.post(nif);
     }
@@ -92,7 +92,7 @@ namespace Nif
         }
     }
 
-    void NiTexturingProperty::post(NIFFile* nif)
+    void NiTexturingProperty::post(Reader& nif)
     {
         Property::post(nif);
         for (size_t i = 0; i < textures.size(); i++)
@@ -134,7 +134,7 @@ namespace Nif
         parallax.scale = nif->getFloat();
     }
 
-    void BSShaderPPLightingProperty::post(NIFFile* nif)
+    void BSShaderPPLightingProperty::post(Reader& nif)
     {
         BSShaderLightingProperty::post(nif);
         textureSet.post(nif);
@@ -198,7 +198,7 @@ namespace Nif
         }
     }
 
-    void BSLightingShaderProperty::post(NIFFile* nif)
+    void BSLightingShaderProperty::post(Reader& nif)
     {
         BSShaderProperty::post(nif);
         mTextureSet.post(nif);

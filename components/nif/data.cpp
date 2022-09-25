@@ -1,6 +1,9 @@
 #include "data.hpp"
+#include "exception.hpp"
 #include "nifkey.hpp"
 #include "node.hpp"
+
+#include <components/debug/debuglog.hpp>
 
 namespace Nif
 {
@@ -10,28 +13,27 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 101))
             partitions.read(nif);
         root.read(nif);
-        bones.read(nif);
+        readRecordList(nif, bones);
     }
 
-    void NiSkinInstance::post(NIFFile* nif)
+    void NiSkinInstance::post(Reader& nif)
     {
         data.post(nif);
         partitions.post(nif);
         root.post(nif);
-        bones.post(nif);
+        postRecordList(nif, bones);
 
         if (data.empty() || root.empty())
-            nif->fail("NiSkinInstance missing root or data");
+            throw Nif::Exception("NiSkinInstance missing root or data", nif.getFilename());
 
-        size_t bnum = bones.length();
-        if (bnum != data->bones.size())
-            nif->fail("Mismatch in NiSkinData bone count");
+        if (bones.size() != data->bones.size())
+            throw Nif::Exception("Mismatch in NiSkinData bone count", nif.getFilename());
 
-        for (size_t i = 0; i < bnum; i++)
+        for (auto& bone : bones)
         {
-            if (bones[i].empty())
-                nif->fail("Oops: Missing bone! Don't know how to handle this.");
-            bones[i]->setBone();
+            if (bone.empty())
+                throw Nif::Exception("Oops: Missing bone! Don't know how to handle this.", nif.getFilename());
+            bone->setBone();
         }
     }
 
@@ -301,7 +303,7 @@ namespace Nif
             nif->getUChars(data, numPixels * numFaces);
     }
 
-    void NiPixelData::post(NIFFile* nif)
+    void NiPixelData::post(Reader& nif)
     {
         palette.post(nif);
     }
@@ -357,7 +359,7 @@ namespace Nif
         }
     }
 
-    void NiSkinData::post(NIFFile* nif)
+    void NiSkinData::post(Reader& nif)
     {
         partitions.post(nif);
     }
@@ -470,7 +472,8 @@ namespace Nif
     {
         palette = nif->getString();
         if (nif->getUInt() != palette.size())
-            nif->file->warn("Failed size check in NiStringPalette");
+            Log(Debug::Warning) << "NIFFile Warning: Failed size check in NiStringPalette. File: "
+                                << nif->getFile().getFilename();
     }
 
     void NiBoolData::read(NIFStream* nif)
