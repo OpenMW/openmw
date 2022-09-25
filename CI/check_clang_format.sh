@@ -1,33 +1,10 @@
-#!/bin/bash
+#!/bin/bash -ex
+
+set -o pipefail
 
 CLANG_FORMAT="${CLANG_FORMAT:-clang-format}"
-HAS_DIFFS=0
-
-check_format_file() {
-    local item=$1
-    "$CLANG_FORMAT" --dry-run -Werror "$item" &>/dev/null 
-    if [[ $? = 1 ]]; then
-        "${CLANG_FORMAT}" "${item}" | git diff --color=always --no-index "${item}" -
-        HAS_DIFFS=1
-    fi
-}
-
-check_format() {
-    local path=$1
-    find "$path" -type f -name "*" | while read item;
-    do
-        if [[ "$item" =~ .*\.(cpp|hpp|h) ]]; then
-            check_format_file "$item"
-        fi;
-    done;
-}
-
-check_format "./apps"
-check_format "./components"
-
-if [[ $HAS_DIFFS -eq 1 ]]; then
-    echo "clang-format differences detected" 
-    exit 1
-fi;
-
-exit 0
+git ls-files |
+    grep -v '^extern/' |
+    grep -P '\.(cpp|hpp|h)$' |
+    xargs -I '{}' -P $(nproc) bash -ec "\"${CLANG_FORMAT:?}\" --dry-run -Werror \"\${0:?}\" &> /dev/null || \"${CLANG_FORMAT:?}\" \"\${0:?}\" | git diff --color=always --no-index \"\${0:?}\" -" '{}' ||
+    ( echo "clang-format differences detected"; exit -1 )
