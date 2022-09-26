@@ -45,6 +45,7 @@ namespace MWMechanics
 
         private:
             osg::Vec3f mPrev;
+            osg::Vec3f mDestination;
 
             // directions to try moving in when get stuck
             static const float evadeDirections[NUM_EVADE_DIRECTIONS][2];

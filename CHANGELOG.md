@@ -143,6 +143,7 @@
     Bug #6794: Light sources are attached to mesh bounds centers instead of mesh origins when AttachLight NiNode is missing
     Bug #6799: Game crashes if an NPC has no Class attached
     Bug #6849: ImageButton texture is not scaled properly
+    Bug #6860: Sinnammu randomly strafes while running on water
     Bug #6869: Hits queue stagger during swing animation
     Bug #6890: SDL_PeepEvents errors are not handled
     Bug #6895: Removing a negative number of items from a script, makes the script terminate with an error
