@@ -40,15 +40,13 @@ finally
     Pop-Location
 }
 
-$windowsSDKFolder = Get-ItemPropertyValue "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0" InstallationFolder
-
-try
+if (-not (Test-Path symstore-venv))
 {
-    $responseFile = New-TemporaryFile
-    $artifacts | Set-Content $responseFile
-    & "$windowsSDKFolder\debuggers\x64\symstore.exe" add /f @$responseFile /s .\SymStore /compress /t "I don't know why /t is needed"
+    python -m venv symstore-venv
 }
-finally
+if (-not (Test-Path symstore-venv\Scripts\symstore.exe))
 {
-    Remove-Item $responseFile
+    symstore-venv\Scripts\pip install symstore==0.3.3
 }
+$artifacts = $artifacts | Where-Object { Test-Path $_ }
+symstore-venv\Scripts\symstore --compress .\SymStore @artifacts
