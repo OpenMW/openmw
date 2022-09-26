@@ -188,27 +188,15 @@ namespace DetourNavigator
             const RecastParams& params, rcHeightfield& solid)
         {
             const std::array vertices{
-                rectangle.mBounds.mMin.x(),
-                rectangle.mHeight,
-                rectangle.mBounds.mMin.y(),
-                rectangle.mBounds.mMin.x(),
-                rectangle.mHeight,
-                rectangle.mBounds.mMax.y(),
-                rectangle.mBounds.mMax.x(),
-                rectangle.mHeight,
-                rectangle.mBounds.mMax.y(),
-                rectangle.mBounds.mMax.x(),
-                rectangle.mHeight,
-                rectangle.mBounds.mMin.y(),
+                rectangle.mBounds.mMin.x(), rectangle.mHeight, rectangle.mBounds.mMin.y(), // vertex 0
+                rectangle.mBounds.mMin.x(), rectangle.mHeight, rectangle.mBounds.mMax.y(), // vertex 1
+                rectangle.mBounds.mMax.x(), rectangle.mHeight, rectangle.mBounds.mMax.y(), // vertex 2
+                rectangle.mBounds.mMax.x(), rectangle.mHeight, rectangle.mBounds.mMin.y(), // vertex 3
             };
 
             const std::array indices{
-                0,
-                1,
-                2,
-                0,
-                2,
-                3,
+                0, 1, 2, // triangle 0
+                0, 2, 3, // triangle 1
             };
 
             const std::array<unsigned char, 2> areas{ areaType, areaType };
