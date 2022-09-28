@@ -72,7 +72,7 @@ namespace Stereo
         static Manager& instance();
 
         //! Constructor
-        //! 
+        //!
         //! @Param viewer the osg viewer whose stereo should be managed.
         //! @Param enableStereo whether or not stereo should be enabled.
         //! @Param enableMultiview whether or not to make use of the GL_OVR_Multiview extension, if supported.
@@ -82,7 +82,7 @@ namespace Stereo
         //! Called during update traversal
         void update();
 
-        //! Initializes all details of stereo if applicable. If the constructor was called with enableMultiview=true, 
+        //! Initializes all details of stereo if applicable. If the constructor was called with enableMultiview=true,
         //! and the GL_OVR_Multiview extension is supported, Stereo::getMultiview() will return true after this call.
         void initializeStereo(osg::GraphicsContext* gc, bool enableMultiview);
 
@@ -151,6 +151,15 @@ namespace Stereo
         osg::ref_ptr<Identifier> mIdentifierMain = new Identifier();
         osg::ref_ptr<Identifier> mIdentifierLeft = new Identifier();
         osg::ref_ptr<Identifier> mIdentifierRight = new Identifier();
+    };
+
+    //! Performs stereo-specific initialization operations.
+    class InitializeStereoOperation final : public osg::GraphicsOperation
+    {
+    public:
+        InitializeStereoOperation();
+
+        void operator()(osg::GraphicsContext* graphicsContext) override;
     };
 }
 

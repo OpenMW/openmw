@@ -396,4 +396,61 @@ namespace Stereo
         left = mLeft;
         right = mRight;
     }
+
+    InitializeStereoOperation::InitializeStereoOperation()
+        : GraphicsOperation("InitializeStereoOperation", false)
+    {
+        // Ideally, this would have belonged to the operator(). But the vertex buffer
+        // hint has to be set before realize is called on the osg viewer, and so has to
+        // be done here instead.
+        Stereo::setVertexBufferHint(Settings::Manager::getBool("multiview", "Stereo"));
+    }
+
+    void InitializeStereoOperation::operator()(osg::GraphicsContext* graphicsContext)
+    {
+        auto& sm = Stereo::Manager::instance();
+
+        if (Settings::Manager::getBool("use custom view", "Stereo"))
+        {
+            Stereo::View left;
+            Stereo::View right;
+
+            left.pose.position.x() = Settings::Manager::getDouble("left eye offset x", "Stereo View");
+            left.pose.position.y() = Settings::Manager::getDouble("left eye offset y", "Stereo View");
+            left.pose.position.z() = Settings::Manager::getDouble("left eye offset z", "Stereo View");
+            left.pose.orientation.x() = Settings::Manager::getDouble("left eye orientation x", "Stereo View");
+            left.pose.orientation.y() = Settings::Manager::getDouble("left eye orientation y", "Stereo View");
+            left.pose.orientation.z() = Settings::Manager::getDouble("left eye orientation z", "Stereo View");
+            left.pose.orientation.w() = Settings::Manager::getDouble("left eye orientation w", "Stereo View");
+            left.fov.angleLeft = Settings::Manager::getDouble("left eye fov left", "Stereo View");
+            left.fov.angleRight = Settings::Manager::getDouble("left eye fov right", "Stereo View");
+            left.fov.angleUp = Settings::Manager::getDouble("left eye fov up", "Stereo View");
+            left.fov.angleDown = Settings::Manager::getDouble("left eye fov down", "Stereo View");
+
+            right.pose.position.x() = Settings::Manager::getDouble("right eye offset x", "Stereo View");
+            right.pose.position.y() = Settings::Manager::getDouble("right eye offset y", "Stereo View");
+            right.pose.position.z() = Settings::Manager::getDouble("right eye offset z", "Stereo View");
+            right.pose.orientation.x() = Settings::Manager::getDouble("right eye orientation x", "Stereo View");
+            right.pose.orientation.y() = Settings::Manager::getDouble("right eye orientation y", "Stereo View");
+            right.pose.orientation.z() = Settings::Manager::getDouble("right eye orientation z", "Stereo View");
+            right.pose.orientation.w() = Settings::Manager::getDouble("right eye orientation w", "Stereo View");
+            right.fov.angleLeft = Settings::Manager::getDouble("right eye fov left", "Stereo View");
+            right.fov.angleRight = Settings::Manager::getDouble("right eye fov right", "Stereo View");
+            right.fov.angleUp = Settings::Manager::getDouble("right eye fov up", "Stereo View");
+            right.fov.angleDown = Settings::Manager::getDouble("right eye fov down", "Stereo View");
+
+            auto customViewCallback = std::make_shared<Stereo::Manager::CustomViewCallback>(left, right);
+            sm.setUpdateViewCallback(customViewCallback);
+        }
+
+        if (Settings::Manager::getBool("use custom eye resolution", "Stereo"))
+        {
+            osg::Vec2i eyeResolution = osg::Vec2i();
+            eyeResolution.x() = Settings::Manager::getInt("eye resolution x", "Stereo View");
+            eyeResolution.y() = Settings::Manager::getInt("eye resolution y", "Stereo View");
+            sm.overrideEyeResolution(eyeResolution);
+        }
+
+        sm.initializeStereo(graphicsContext, Settings::Manager::getBool("multiview", "Stereo"));
+    }
 }
