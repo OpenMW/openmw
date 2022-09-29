@@ -1,5 +1,9 @@
 #include "luamanagerimp.hpp"
 
+#include <osg/Stats>
+
+#include "sol/state_view.hpp"
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm3/esmreader.hpp>
@@ -598,4 +602,9 @@ namespace MWLua
         mActionQueue.push_back(std::make_unique<FunctionAction>(&mLua, std::move(action), name));
     }
 
+    void LuaManager::reportStats(unsigned int frameNumber, osg::Stats& stats)
+    {
+        const sol::state_view state(mLua.sol());
+        stats.setAttribute(frameNumber, "Lua UsedMemory", state.memory_used());
+    }
 }

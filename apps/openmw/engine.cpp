@@ -440,7 +440,9 @@ bool OMW::Engine::frame(float frametime)
             stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
             stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
 
-            mEnvironment.reportStats(frameNumber, *stats);
+            mMechanicsManager->reportStats(frameNumber, *stats);
+            mWorld->reportStats(frameNumber, *stats);
+            mLuaManager->reportStats(frameNumber, *stats);
         }
     }
     catch (const std::exception& e)
