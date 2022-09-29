@@ -69,8 +69,8 @@ Coverity:
     - linux
   image: ubuntu:22.04
   stage: build
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+  #rules:  # TODO: remove comment before merging
+  #  - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
     key: Coverity.ubuntu_22.04.v1
     paths:
@@ -78,12 +78,13 @@ Coverity:
     - ccache/
   variables:
     CCACHE_SIZE: 2G
-    CC: clang
-    CXX: clang++
+    CC: clang-12
+    CXX: clang++-12
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:
     - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
+    - apt-get install clang-12
     - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64
       --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - tar xfz /tmp/cov-analysis-linux64.tgz
