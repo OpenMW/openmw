@@ -127,6 +127,8 @@ namespace MWLua
 
         bool isProcessingInputEvents() const { return mProcessingInputEvents; }
 
+        void reportStats(unsigned int frameNumber, osg::Stats& stats);
+
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,

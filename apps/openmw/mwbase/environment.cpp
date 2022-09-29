@@ -4,9 +4,6 @@
 
 #include <components/resource/resourcesystem.hpp>
 
-#include "mechanicsmanager.hpp"
-#include "world.hpp"
-
 MWBase::Environment* MWBase::Environment::sThis = nullptr;
 
 MWBase::Environment::Environment()
@@ -18,10 +15,4 @@ MWBase::Environment::Environment()
 MWBase::Environment::~Environment()
 {
     sThis = nullptr;
-}
-
-void MWBase::Environment::reportStats(unsigned int frameNumber, osg::Stats& stats) const
-{
-    mMechanicsManager->reportStats(frameNumber, stats);
-    mWorld->reportStats(frameNumber, stats);
 }
