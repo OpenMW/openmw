@@ -67,12 +67,12 @@ Coverity:
   tags:
     - docker
     - linux
-  image: ubuntu:22.04
+  image: ubuntu:20.04
   stage: build
   #rules:  # TODO: remove comment before merging
   #  - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
-    key: Coverity.ubuntu_22.04.v1
+    key: Coverity.ubuntu_20.04.v1
     paths:
     - apt-cache/
     - ccache/
