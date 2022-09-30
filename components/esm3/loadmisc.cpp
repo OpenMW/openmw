@@ -75,7 +75,7 @@ namespace ESM
         mRecordFlags = 0;
         mData.mWeight = 0;
         mData.mValue = 0;
-        mData.mIsKey = 0;
+        mData.mFlags = 0;
         mName.clear();
         mModel.clear();
         mIcon.clear();

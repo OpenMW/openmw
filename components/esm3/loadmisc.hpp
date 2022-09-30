@@ -27,10 +27,14 @@ namespace ESM
         {
             float mWeight;
             int mValue;
-            int mIsKey; // There are many keys in Morrowind.esm that has this
-                        // set to 0. TODO: Check what this field corresponds to
-                        // in the editor.
+            int mFlags;
         };
+
+        enum Flags
+        {
+            Key = 0x1 // Assigned as a key in the content file that defined the record
+        };
+
         MCDTstruct mData;
 
         unsigned int mRecordFlags;
