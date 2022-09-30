@@ -453,6 +453,8 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "Physics Objects",
             "Physics Projectiles",
             "Physics HeightFields",
+            "",
+            "Lua UsedMemory",
         });
 
         static const auto longest = std::max_element(statNames.begin(), statNames.end(),

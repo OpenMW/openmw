@@ -5,11 +5,6 @@
 
 #include <memory>
 
-namespace osg
-{
-    class Stats;
-}
-
 namespace Resource
 {
     class ResourceSystem;
@@ -118,8 +113,6 @@ namespace MWBase
                 assert(sThis != nullptr);
                 return *sThis;
             }
-
-            void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
     };
 }
 
