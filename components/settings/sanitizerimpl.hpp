@@ -26,6 +26,8 @@ namespace Settings
 
     std::unique_ptr<Sanitizer<float>> makeClampSanitizerFloat(float min, float max);
 
+    std::unique_ptr<Sanitizer<double>> makeClampSanitizerDouble(double min, double max);
+
     std::unique_ptr<Sanitizer<int>> makeClampSanitizerInt(int min, int max);
 
     std::unique_ptr<Sanitizer<float>> makeClampStrictMaxSanitizerFloat(float min, float max);

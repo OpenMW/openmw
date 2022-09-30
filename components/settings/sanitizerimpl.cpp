@@ -178,6 +178,11 @@ namespace Settings
         return std::make_unique<Clamp<float>>(min, max);
     }
 
+    std::unique_ptr<Sanitizer<double>> makeClampSanitizerDouble(double min, double max)
+    {
+        return std::make_unique<Clamp<double>>(min, max);
+    }
+
     std::unique_ptr<Sanitizer<int>> makeClampSanitizerInt(int min, int max)
     {
         return std::make_unique<Clamp<int>>(min, max);
