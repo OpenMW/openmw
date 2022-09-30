@@ -72,14 +72,14 @@ Coverity:
 #  rules:
 #    - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
-    key: Coverity.ubuntu_20.04.v2
+    key: Coverity.ubuntu_20.04.v3
     paths:
     - apt-cache/
     - ccache/
   variables:
     CCACHE_SIZE: 2G
-    CC: clang-12
-    CXX: clang++-12
+    CC: gcc-10
+    CXX: g++-10
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:

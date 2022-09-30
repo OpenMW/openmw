@@ -11,7 +11,7 @@ print_help() {
 declare -rA GROUPED_DEPS=(
   [gcc]="binutils gcc build-essential cmake ccache curl unzip git pkg-config mold"
   [clang]="binutils clang make cmake ccache curl unzip git pkg-config mold"
-  [coverity]="binutils clang-12 make cmake ccache curl unzip git pkg-config"
+  [coverity]="binutils gcc-10 g++-10 make cmake ccache curl unzip git pkg-config"
 
   # Common dependencies for building OpenMW.
   [openmw-deps]="
