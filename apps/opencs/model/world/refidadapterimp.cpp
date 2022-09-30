@@ -726,7 +726,7 @@ QVariant CSMWorld::MiscRefIdAdapter::getData(const RefIdColumn* column, const Re
         data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Miscellaneous)));
 
     if (column == mKey)
-        return record.get().mData.mIsKey != 0;
+        return bool(record.get().mData.mFlags & ESM::Miscellaneous::Key);
 
     return InventoryRefIdAdapter<ESM::Miscellaneous>::getData(column, data, index);
 }
@@ -740,7 +740,7 @@ void CSMWorld::MiscRefIdAdapter::setData(
     ESM::Miscellaneous misc = record.get();
 
     if (column == mKey)
-        misc.mData.mIsKey = value.toInt();
+        misc.mData.mFlags = value.toInt();
     else
     {
         InventoryRefIdAdapter<ESM::Miscellaneous>::setData(column, data, index, value);

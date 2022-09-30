@@ -1042,7 +1042,7 @@ namespace EsmTool
             std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
         std::cout << "  Value: " << mData.mData.mValue << std::endl;
-        std::cout << "  Is Key: " << mData.mData.mIsKey << std::endl;
+        std::cout << "  Is Key: " << (mData.mData.mFlags & ESM::Miscellaneous::Key) << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 

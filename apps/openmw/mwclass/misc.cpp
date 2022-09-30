@@ -155,7 +155,7 @@ namespace MWClass
         std::string text;
 
         text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
-        if (!gold && !ref->mBase->mData.mIsKey)
+        if (!gold && !(ref->mBase->mData.mFlags & ESM::Miscellaneous::Key))
             text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
@@ -221,7 +221,7 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = item.get<ESM::Miscellaneous>();
 
-        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc) && !isGold(item);
+        return !(ref->mBase->mData.mFlags & ESM::Miscellaneous::Key) && (npcServices & ESM::NPC::Misc) && !isGold(item);
     }
 
     float Miscellaneous::getWeight(const MWWorld::ConstPtr& ptr) const
@@ -233,7 +233,7 @@ namespace MWClass
     bool Miscellaneous::isKey(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
-        return ref->mBase->mData.mIsKey != 0;
+        return ref->mBase->mData.mFlags & ESM::Miscellaneous::Key;
     }
 
     bool Miscellaneous::isSoulGem(const MWWorld::ConstPtr& ptr) const

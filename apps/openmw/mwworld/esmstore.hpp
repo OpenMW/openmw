@@ -125,7 +125,7 @@ namespace MWWorld
         /// Validate entries in store after setup
         void validate();
 
-        void countAllCellRefs(ESM::ReadersCache& readers);
+        void countAllCellRefsAndMarkKeys(ESM::ReadersCache& readers);
 
         template <class T>
         void removeMissingObjects(Store<T>& store);

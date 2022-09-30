@@ -34,8 +34,8 @@ namespace
 
     constexpr std::size_t deletedRefID = std::numeric_limits<std::size_t>::max();
 
-    void readRefs(
-        const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs, ESM::ReadersCache& readers)
+    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs,
+        std::set<std::string, Misc::StringUtils::CiComp>& keyIDs, ESM::ReadersCache& readers)
     {
         // TODO: we have many similar copies of this code.
         for (size_t i = 0; i < cell.mContextList.size(); i++)
@@ -53,6 +53,8 @@ namespace
                 else if (std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), ref.mRefNum)
                     == cell.mMovedRefs.end())
                 {
+                    if (!ref.mKey.empty())
+                        keyIDs.insert(std::move(ref.mKey));
                     refs.emplace_back(ref.mRefNum, refIDs.size());
                     refIDs.push_back(std::move(ref.mRefID));
                 }
@@ -64,6 +66,8 @@ namespace
                 refs.emplace_back(value.mRefNum, deletedRefID);
             else
             {
+                if (!value.mKey.empty())
+                    keyIDs.insert(std::move(value.mKey));
                 refs.emplace_back(value.mRefNum, refIDs.size());
                 refIDs.push_back(value.mRefID);
             }
@@ -403,10 +407,10 @@ namespace MWWorld
     void ESMStore::validateRecords(ESM::ReadersCache& readers)
     {
         validate();
-        countAllCellRefs(readers);
+        countAllCellRefsAndMarkKeys(readers);
     }
 
-    void ESMStore::countAllCellRefs(ESM::ReadersCache& readers)
+    void ESMStore::countAllCellRefsAndMarkKeys(ESM::ReadersCache& readers)
     {
         // TODO: We currently need to read entire files here again.
         // We should consider consolidating or deferring this reading.
@@ -414,11 +418,12 @@ namespace MWWorld
             return;
         std::vector<Ref> refs;
         std::vector<std::string> refIDs;
-        Store<ESM::Cell> Cells = getWritable<ESM::Cell>();
+        std::set<std::string, Misc::StringUtils::CiComp> keyIDs;
+        Store<ESM::Cell> Cells = get<ESM::Cell>();
         for (auto it = Cells.intBegin(); it != Cells.intEnd(); ++it)
-            readRefs(*it, refs, refIDs, readers);
+            readRefs(*it, refs, refIDs, keyIDs, readers);
         for (auto it = Cells.extBegin(); it != Cells.extEnd(); ++it)
-            readRefs(*it, refs, refIDs, readers);
+            readRefs(*it, refs, refIDs, keyIDs, readers);
         const auto lessByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
         std::stable_sort(refs.begin(), refs.end(), lessByRefNum);
         const auto equalByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum == r.mRefNum; };
@@ -432,6 +437,13 @@ namespace MWWorld
             }
         };
         Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, incrementRefCount);
+        auto& store = getWritable<ESM::Miscellaneous>().mStatic;
+        for (const std::string& id : keyIDs)
+        {
+            auto it = store.find(id);
+            if (it != store.end())
+                it->second.mData.mFlags |= ESM::Miscellaneous::Key;
+        }
     }
 
     int ESMStore::getRefCount(std::string_view id) const
