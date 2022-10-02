@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_ESM_REFID_HPP
 #define OPENMW_COMPONENTS_ESM_REFID_HPP
-#include <string>
-#include <iosfwd>
 #include <functional>
+#include <iosfwd>
+#include <string>
 
 namespace ESM
 {
@@ -14,44 +14,33 @@ namespace ESM
         void swap(RefId& rhs) { mId.swap(rhs.mId); }
         bool operator==(const RefId& rhs) const { return mId == rhs.mId; }
         void operator=(const RefId& rhs) { mId = rhs.mId; }
-        bool operator <(const RefId& rhs) const
-        {
-            return mId < rhs.mId;
-        }
-        bool operator >(const RefId& rhs) const
-        {
-            return mId > rhs.mId;
-        }
+        bool operator<(const RefId& rhs) const { return mId < rhs.mId; }
+        bool operator>(const RefId& rhs) const { return mId > rhs.mId; }
+        static bool ciEqual(const RefId& left, const RefId& right);
 
         friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
 
-        static RefId stringRefId(
-            const std::string_view& id); // This makes it very visible the places where I had to convert from string to Refid
+        static RefId stringRefId(const std::string_view& id); //The 
+        std::string& getRefIdString() { return mId; } 
+        const std::string& getRefIdString() const { return mId; } 
 
-        std::string& getRefIdString() { return mId; } // Same thing
-        const std::string& getRefIdString() const { return mId; } // Same thing
-
-        static bool ciEqual(const RefId& left, const RefId& right);
 
     private:
         std::string mId;
     };
 }
 
-namespace std {
+namespace std
+{
 
     template <>
     struct hash<ESM::RefId>
     {
         std::size_t operator()(const ESM::RefId& k) const
         {
-            using std::size_t;
             using std::hash;
+            using std::size_t;
             using std::string;
-
-            // Compute individual hash values for first,
-            // second and third and combine them using XOR
-            // and bit shifting:
 
             return hash<string>()(k.getRefIdString());
         }

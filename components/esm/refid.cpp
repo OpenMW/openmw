@@ -27,16 +27,3 @@ ESM::RefId ESM::RefId::stringRefId(const std::string_view & id)
 
 const ESM::RefId ESM::RefId::sEmpty = ESM::RefId::stringRefId("");
 
-//template<>
-//std::size_t std::hash<ESM::RefId>::operator()(const ESM::RefId& k) const
-//{
-//    using std::size_t;
-//    using std::hash;
-//    using std::string;
-//
-//    // Compute individual hash values for first,
-//    // second and third and combine them using XOR
-//    // and bit shifting:
-//
-//    return hash<string>()(k.getRefIdString());
-//}
