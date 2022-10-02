@@ -60,7 +60,10 @@ namespace MWRender
         removeEffects();
     }
 
-    ActorAnimation::~ActorAnimation() = default;
+    ActorAnimation::~ActorAnimation()
+    {
+        removeFromSceneImpl();
+    }
 
     PartHolderPtr ActorAnimation::attachMesh(
         const std::string& model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor)
@@ -584,9 +587,13 @@ namespace MWRender
 
     void ActorAnimation::removeFromScene()
     {
-        for (const auto& [k, v] : mItemLights)
-            mInsert->removeChild(v);
+        removeFromSceneImpl();
         Animation::removeFromScene();
     }
 
+    void ActorAnimation::removeFromSceneImpl()
+    {
+        for (const auto& [k, v] : mItemLights)
+            mInsert->removeChild(v);
+    }
 }
