@@ -344,6 +344,8 @@ protected:
      */
     virtual void addControllers();
 
+    void removeFromSceneImpl();
+
 public:
 
     Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
