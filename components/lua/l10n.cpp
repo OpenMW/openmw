@@ -1,65 +1,18 @@
 #include "l10n.hpp"
 
-#include <unicode/errorcode.h>
-
 #include <components/debug/debuglog.hpp>
-#include <components/vfs/manager.hpp>
+#include <components/l10n/manager.hpp>
 
-namespace sol
+namespace
 {
-    template <>
-    struct is_automagical<LuaUtil::L10nManager::Context> : std::false_type
+    struct L10nContext
     {
+        std::shared_ptr<const l10n::MessageBundles> mData;
     };
-}
 
-namespace LuaUtil
-{
-    void L10nManager::init()
+    void getICUArgs(std::string_view messageId, const sol::table& table, std::vector<icu::UnicodeString>& argNames,
+        std::vector<icu::Formattable>& args)
     {
-        sol::usertype<Context> ctx = mLua->sol().new_usertype<Context>("L10nContext");
-        ctx[sol::meta_function::call] = &Context::translate;
-    }
-
-    std::string L10nManager::translate(const std::string& contextName, const std::string& key)
-    {
-        Context& ctx = getContext(contextName).as<Context>();
-        return ctx.translate(key, sol::nil);
-    }
-
-    void L10nManager::setPreferredLocales(const std::vector<std::string>& langs)
-    {
-        mPreferredLocales.clear();
-        for (const auto& lang : langs)
-            mPreferredLocales.push_back(icu::Locale(lang.c_str()));
-        {
-            Log msg(Debug::Info);
-            msg << "Preferred locales:";
-            for (const icu::Locale& l : mPreferredLocales)
-                msg << " " << l.getName();
-        }
-        for (auto& [_, context] : mContexts)
-            context.updateLang(this);
-    }
-
-    void L10nManager::Context::readLangData(L10nManager* manager, const icu::Locale& lang)
-    {
-        std::string path = "l10n/";
-        path.append(mName);
-        path.append("/");
-        path.append(lang.getName());
-        path.append(".yaml");
-        if (!manager->mVFS->exists(path))
-            return;
-
-        mMessageBundles->load(*manager->mVFS->get(path), lang, path);
-    }
-
-    std::pair<std::vector<icu::Formattable>, std::vector<icu::UnicodeString>> getICUArgs(
-        std::string_view messageId, const sol::table& table)
-    {
-        std::vector<icu::Formattable> args;
-        std::vector<icu::UnicodeString> argNames;
         for (auto& [key, value] : table)
         {
             // Argument values
@@ -80,77 +33,37 @@ namespace LuaUtil
             const auto str = key.as<std::string>();
             argNames.push_back(icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.size())));
         }
-        return std::make_pair(args, argNames);
     }
+}
 
-    std::string L10nManager::Context::translate(std::string_view key, const sol::object& data)
+namespace sol
+{
+    template <>
+    struct is_automagical<L10nContext> : std::false_type
     {
-        std::vector<icu::Formattable> args;
-        std::vector<icu::UnicodeString> argNames;
+    };
+}
 
-        if (data.is<sol::table>())
-        {
-            sol::table dataTable = data.as<sol::table>();
-            auto argData = getICUArgs(key, dataTable);
-            args = argData.first;
-            argNames = argData.second;
-        }
-
-        return mMessageBundles->formatMessage(key, argNames, args);
-    }
-
-    void L10nManager::Context::updateLang(L10nManager* manager)
+namespace LuaUtil
+{
+    sol::function initL10nLoader(sol::state& lua, l10n::Manager* manager)
     {
-        icu::Locale fallbackLocale = mMessageBundles->getFallbackLocale();
-        mMessageBundles->setPreferredLocales(manager->mPreferredLocales);
-        int localeCount = 0;
-        bool fallbackLocaleInPreferred = false;
-        for (const icu::Locale& loc : mMessageBundles->getPreferredLocales())
-        {
-            if (!mMessageBundles->isLoaded(loc))
-                readLangData(manager, loc);
-            if (mMessageBundles->isLoaded(loc))
-            {
-                localeCount++;
-                Log(Debug::Verbose) << "Language file \"l10n/" << mName << "/" << loc.getName() << ".yaml\" is enabled";
-                if (loc == fallbackLocale)
-                    fallbackLocaleInPreferred = true;
-            }
-        }
-        if (!mMessageBundles->isLoaded(fallbackLocale))
-            readLangData(manager, fallbackLocale);
-        if (mMessageBundles->isLoaded(fallbackLocale) && !fallbackLocaleInPreferred)
-            Log(Debug::Verbose) << "Fallback language file \"l10n/" << mName << "/" << fallbackLocale.getName()
-                                << ".yaml\" is enabled";
+        sol::usertype<L10nContext> ctxDef = lua.new_usertype<L10nContext>("L10nContext");
+        ctxDef[sol::meta_function::call]
+            = [](const L10nContext& ctx, std::string_view key, sol::optional<sol::table> args) {
+                  std::vector<icu::Formattable> argValues;
+                  std::vector<icu::UnicodeString> argNames;
+                  if (args)
+                      getICUArgs(key, *args, argNames, argValues);
+                  return ctx.mData->formatMessage(key, argNames, argValues);
+              };
 
-        if (localeCount == 0)
-        {
-            Log(Debug::Warning) << "No language files for the preferred languages found in \"l10n/" << mName << "\"";
-        }
+        return sol::make_object(
+            lua, [manager](const std::string& contextName, sol::optional<std::string> fallbackLocale) {
+                if (fallbackLocale)
+                    return L10nContext{ manager->getContext(contextName, *fallbackLocale) };
+                else
+                    return L10nContext{ manager->getContext(contextName) };
+            });
     }
-
-    sol::object L10nManager::getContext(const std::string& contextName, const std::string& fallbackLocaleName)
-    {
-        auto it = mContexts.find(contextName);
-        if (it != mContexts.end())
-            return sol::make_object(mLua->sol(), it->second);
-        auto allowedChar = [](char c) {
-            return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_';
-        };
-        bool valid = !contextName.empty();
-        for (char c : contextName)
-            valid = valid && allowedChar(c);
-        if (!valid)
-            throw std::runtime_error(std::string("Invalid l10n context name: ") + contextName);
-        icu::Locale fallbackLocale(fallbackLocaleName.c_str());
-        Context ctx{ contextName, std::make_shared<l10n::MessageBundles>(mPreferredLocales, fallbackLocale) };
-        {
-            Log msg(Debug::Verbose);
-            msg << "Fallback locale: " << fallbackLocale.getName();
-        }
-        ctx.updateLang(this);
-        mContexts.emplace(contextName, ctx);
-        return sol::make_object(mLua->sol(), ctx);
-    }
-
 }
