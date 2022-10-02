@@ -153,7 +153,7 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
     }
 
-    void StatsWindow::setValue(const ESM::RefId& id, const MWMechanics::AttributeValue& value)
+    void StatsWindow::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
     {
         static const char* ids[] = {
             "AttribVal1",
@@ -168,12 +168,12 @@ namespace MWGui
         };
 
         for (int i = 0; ids[i]; ++i)
-            if (ids[i] == id.getRefIdString())
+            if (ids[i] == id)
             {
-                setText(id.getRefIdString(), std::to_string(static_cast<int>(value.getModified())));
+                setText(id, std::to_string(static_cast<int>(value.getModified())));
 
                 MyGUI::TextBox* box;
-                getWidget(box, id.getRefIdString());
+                getWidget(box, id);
 
                 if (value.getModified() > value.getBase())
                     box->_setWidgetState("increased");
@@ -186,50 +186,50 @@ namespace MWGui
             }
     }
 
-    void StatsWindow::setValue(const ESM::RefId& id, const MWMechanics::DynamicStat<float>& value)
+    void StatsWindow::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified(false));
 
         // Fatigue can be negative
-        if (id.getRefIdString() != "FBar")
+        if (id != "FBar")
             current = std::max(0, current);
 
-        setBar(id.getRefIdString(), id.getRefIdString() + "T", current, modified);
+        setBar(std::string(id), std::string(id) + "T", current, modified);
 
         // health, magicka, fatigue tooltip
         MyGUI::Widget* w;
         std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
-        if (id.getRefIdString() == "HBar")
+        if (id == "HBar")
         {
             getWidget(w, "Health");
             w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
         }
-        else if (id.getRefIdString() == "MBar")
+        else if (id == "MBar")
         {
             getWidget(w, "Magicka");
             w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
-        else if (id.getRefIdString() == "FBar")
+        else if (id == "FBar")
         {
             getWidget(w, "Fatigue");
             w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
         }
     }
 
-    void StatsWindow::setValue(const ESM::RefId& id, const std::string& value)
+    void StatsWindow::setValue(std::string_view id, const std::string& value)
     {
-        if (id.getRefIdString() == "name")
+        if (id == "name")
             setPlayerName(value);
-        else if (id.getRefIdString() == "race")
+        else if (id == "race")
             setText("RaceText", value);
-        else if (id.getRefIdString() == "class")
+        else if (id == "class")
             setText("ClassText", value);
     }
 
-    void StatsWindow::setValue(const ESM::RefId& id, int value)
+    void StatsWindow::setValue(std::string_view id, int value)
     {
-        if (id.getRefIdString() == "level")
+        if (id == "level")
         {
             std::ostringstream text;
             text << value;

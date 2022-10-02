@@ -101,7 +101,7 @@ namespace MWGui
             mPlayerSkillValues.emplace(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue());
     }
 
-    void CharacterCreation::setValue(const ESM::RefId& id, const MWMechanics::AttributeValue& value)
+    void CharacterCreation::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
     {
         static const char* ids[] = {
             "AttribVal1",
@@ -117,7 +117,7 @@ namespace MWGui
 
         for (int i = 0; ids[i]; ++i)
         {
-            if (ids[i] == id.getRefIdString())
+            if (ids[i] == id)
             {
                 mPlayerAttributes[static_cast<ESM::Attribute::AttributeID>(i)] = value;
                 if (mReviewDialog)
@@ -128,19 +128,19 @@ namespace MWGui
         }
     }
 
-    void CharacterCreation::setValue(const ESM::RefId& id, const MWMechanics::DynamicStat<float>& value)
+    void CharacterCreation::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)
     {
         if (mReviewDialog)
         {
-            if (id.getRefIdString() == "HBar")
+            if (id == "HBar")
             {
                 mReviewDialog->setHealth(value);
             }
-            else if (id.getRefIdString() == "MBar")
+            else if (id == "MBar")
             {
                 mReviewDialog->setMagicka(value);
             }
-            else if (id.getRefIdString() == "FBar")
+            else if (id == "FBar")
             {
                 mReviewDialog->setFatigue(value);
             }

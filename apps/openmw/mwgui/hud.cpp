@@ -181,32 +181,31 @@ namespace MWGui
         mMainWidget->eventMouseButtonClick.clear();
     }
 
-    void HUD::setValue(const ESM::RefId& id, const MWMechanics::DynamicStat<float>& value)
+    void HUD::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified());
-        const std::string idString = id.getRefIdString();
         // Fatigue can be negative
-        if (idString != "FBar")
+        if (id != "FBar")
             current = std::max(0, current);
 
         MyGUI::Widget* w;
         std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
-        if (idString == "HBar")
+        if (id == "HBar")
         {
             mHealth->setProgressRange(std::max(0, modified));
             mHealth->setProgressPosition(std::max(0, current));
             getWidget(w, "HealthFrame");
             w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
         }
-        else if (idString == "MBar")
+        else if (id == "MBar")
         {
             mMagicka->setProgressRange(std::max(0, modified));
             mMagicka->setProgressPosition(std::max(0, current));
             getWidget(w, "MagickaFrame");
             w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
-        else if (idString == "FBar")
+        else if (id == "FBar")
         {
             mStamina->setProgressRange(std::max(0, modified));
             mStamina->setProgressPosition(std::max(0, current));

@@ -23,7 +23,7 @@ namespace MWGui
     public:
         HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
         virtual ~HUD();
-        void setValue(const ESM::RefId& id, const MWMechanics::DynamicStat<float>& value) override;
+        void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
 
         /// Set time left for the player to start drowning
         /// @param time time left to start drowning
