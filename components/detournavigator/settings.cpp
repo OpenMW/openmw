@@ -1,36 +1,29 @@
 #include "settings.hpp"
 
 #include <components/misc/constants.hpp>
-#include <components/settings/settings.hpp>
-
-#include <algorithm>
+#include <components/settings/values.hpp>
 
 namespace DetourNavigator
 {
     RecastSettings makeRecastSettingsFromSettingsManager()
     {
-        constexpr float epsilon = std::numeric_limits<float>::epsilon();
-
         RecastSettings result;
 
-        result.mBorderSize = std::max(0, ::Settings::Manager::getInt("border size", "Navigator"));
-        result.mCellHeight = std::max(epsilon, ::Settings::Manager::getFloat("cell height", "Navigator"));
-        result.mCellSize = std::max(epsilon, ::Settings::Manager::getFloat("cell size", "Navigator"));
-        result.mDetailSampleDist = std::max(0.0f, ::Settings::Manager::getFloat("detail sample dist", "Navigator"));
-        result.mDetailSampleMaxError
-            = std::max(0.0f, ::Settings::Manager::getFloat("detail sample max error", "Navigator"));
+        result.mBorderSize = ::Settings::navigator().mBorderSize;
+        result.mCellHeight = ::Settings::navigator().mCellHeight;
+        result.mCellSize = ::Settings::navigator().mCellSize;
+        result.mDetailSampleDist = ::Settings::navigator().mDetailSampleDist;
+        result.mDetailSampleMaxError = ::Settings::navigator().mDetailSampleMaxError;
         result.mMaxClimb = Constants::sStepSizeUp;
-        result.mMaxSimplificationError
-            = std::max(0.0f, ::Settings::Manager::getFloat("max simplification error", "Navigator"));
+        result.mMaxSimplificationError = ::Settings::navigator().mMaxSimplificationError;
         result.mMaxSlope = Constants::sMaxSlope;
-        result.mRecastScaleFactor
-            = std::max(epsilon, ::Settings::Manager::getFloat("recast scale factor", "Navigator"));
+        result.mRecastScaleFactor = ::Settings::navigator().mRecastScaleFactor;
         result.mSwimHeightScale = 0;
-        result.mMaxEdgeLen = std::max(0, ::Settings::Manager::getInt("max edge len", "Navigator"));
-        result.mMaxVertsPerPoly = std::max(3, ::Settings::Manager::getInt("max verts per poly", "Navigator"));
-        result.mRegionMergeArea = std::max(0, ::Settings::Manager::getInt("region merge area", "Navigator"));
-        result.mRegionMinArea = std::max(0, ::Settings::Manager::getInt("region min area", "Navigator"));
-        result.mTileSize = std::max(1, ::Settings::Manager::getInt("tile size", "Navigator"));
+        result.mMaxEdgeLen = ::Settings::navigator().mMaxEdgeLen;
+        result.mMaxVertsPerPoly = ::Settings::navigator().mMaxVertsPerPoly;
+        result.mRegionMergeArea = ::Settings::navigator().mRegionMergeArea;
+        result.mRegionMinArea = ::Settings::navigator().mRegionMinArea;
+        result.mTileSize = ::Settings::navigator().mTileSize;
 
         return result;
     }
@@ -39,12 +32,10 @@ namespace DetourNavigator
     {
         DetourSettings result;
 
-        result.mMaxNavMeshQueryNodes
-            = std::clamp(::Settings::Manager::getInt("max nav mesh query nodes", "Navigator"), 1, 65535);
-        result.mMaxPolys
-            = std::clamp(::Settings::Manager::getInt("max polygons per tile", "Navigator"), 1, (1 << 22) - 1);
-        result.mMaxPolygonPathSize = ::Settings::Manager::getSize("max polygon path size", "Navigator");
-        result.mMaxSmoothPathSize = ::Settings::Manager::getSize("max smooth path size", "Navigator");
+        result.mMaxNavMeshQueryNodes = ::Settings::navigator().mMaxNavMeshQueryNodes;
+        result.mMaxPolys = ::Settings::navigator().mMaxPolygonsPerTile;
+        result.mMaxPolygonPathSize = ::Settings::navigator().mMaxPolygonPathSize;
+        result.mMaxSmoothPathSize = ::Settings::navigator().mMaxSmoothPathSize;
 
         return result;
     }
@@ -55,26 +46,20 @@ namespace DetourNavigator
 
         result.mRecast = makeRecastSettingsFromSettingsManager();
         result.mDetour = makeDetourSettingsFromSettingsManager();
-        result.mMaxTilesNumber = std::max(0, ::Settings::Manager::getInt("max tiles number", "Navigator"));
-        result.mWaitUntilMinDistanceToPlayer
-            = ::Settings::Manager::getInt("wait until min distance to player", "Navigator");
-        result.mAsyncNavMeshUpdaterThreads
-            = ::Settings::Manager::getSize("async nav mesh updater threads", "Navigator");
-        result.mMaxNavMeshTilesCacheSize = ::Settings::Manager::getSize("max nav mesh tiles cache size", "Navigator");
-        result.mEnableWriteRecastMeshToFile
-            = ::Settings::Manager::getBool("enable write recast mesh to file", "Navigator");
-        result.mEnableWriteNavMeshToFile = ::Settings::Manager::getBool("enable write nav mesh to file", "Navigator");
-        result.mRecastMeshPathPrefix = ::Settings::Manager::getString("recast mesh path prefix", "Navigator");
-        result.mNavMeshPathPrefix = ::Settings::Manager::getString("nav mesh path prefix", "Navigator");
-        result.mEnableRecastMeshFileNameRevision
-            = ::Settings::Manager::getBool("enable recast mesh file name revision", "Navigator");
-        result.mEnableNavMeshFileNameRevision
-            = ::Settings::Manager::getBool("enable nav mesh file name revision", "Navigator");
-        result.mMinUpdateInterval
-            = std::chrono::milliseconds(::Settings::Manager::getInt("min update interval ms", "Navigator"));
-        result.mEnableNavMeshDiskCache = ::Settings::Manager::getBool("enable nav mesh disk cache", "Navigator");
-        result.mWriteToNavMeshDb = ::Settings::Manager::getBool("write to navmeshdb", "Navigator");
-        result.mMaxDbFileSize = ::Settings::Manager::getUInt64("max navmeshdb file size", "Navigator");
+        result.mMaxTilesNumber = ::Settings::navigator().mMaxTilesNumber;
+        result.mWaitUntilMinDistanceToPlayer = ::Settings::navigator().mWaitUntilMinDistanceToPlayer;
+        result.mAsyncNavMeshUpdaterThreads = ::Settings::navigator().mAsyncNavMeshUpdaterThreads;
+        result.mMaxNavMeshTilesCacheSize = ::Settings::navigator().mMaxNavMeshTilesCacheSize;
+        result.mEnableWriteRecastMeshToFile = ::Settings::navigator().mEnableWriteRecastMeshToFile;
+        result.mEnableWriteNavMeshToFile = ::Settings::navigator().mEnableWriteNavMeshToFile;
+        result.mRecastMeshPathPrefix = ::Settings::navigator().mRecastMeshPathPrefix;
+        result.mNavMeshPathPrefix = ::Settings::navigator().mNavMeshPathPrefix;
+        result.mEnableRecastMeshFileNameRevision = ::Settings::navigator().mEnableRecastMeshFileNameRevision;
+        result.mEnableNavMeshFileNameRevision = ::Settings::navigator().mEnableNavMeshFileNameRevision;
+        result.mMinUpdateInterval = std::chrono::milliseconds(::Settings::navigator().mMinUpdateIntervalMs);
+        result.mEnableNavMeshDiskCache = ::Settings::navigator().mEnableNavMeshDiskCache;
+        result.mWriteToNavMeshDb = ::Settings::navigator().mWriteToNavmeshdb;
+        result.mMaxDbFileSize = ::Settings::navigator().mMaxNavmeshdbFileSize;
 
         return result;
     }
