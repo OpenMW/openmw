@@ -649,7 +649,7 @@ namespace MWClass
         while (sound != store.get<ESM::SoundGenerator>().end())
         {
             if (type == sound->mType && !sound->mCreature.empty()
-                && ESM::RefId::ciEqual(ourId, sound->mCreature))
+                && ourId ==  sound->mCreature)
                 sounds.push_back(&*sound);
             if (type == sound->mType && sound->mCreature.empty())
                 fallbacksounds.push_back(&*sound);
@@ -673,7 +673,7 @@ namespace MWClass
                         while (sound != store.get<ESM::SoundGenerator>().end())
                         {
                             if (type == sound->mType && !sound->mCreature.empty()
-                                && ESM::RefId::ciEqual(fallbackId, sound->mCreature))
+                                && fallbackId ==  sound->mCreature)
                                 sounds.push_back(&*sound);
                             ++sound;
                         }

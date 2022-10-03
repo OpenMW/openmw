@@ -9,13 +9,11 @@ namespace ESM
     struct RefId
     {
         const static RefId sEmpty;
-        void clear() { mId.clear(); }
         bool empty() const { return mId.empty(); }
         void swap(RefId& rhs) { mId.swap(rhs.mId); }
-        bool operator==(const RefId& rhs) const { return ciEqual(*this, rhs); }
+        bool operator==(const RefId& rhs) const;
         bool operator<(const RefId& rhs) const { return mId < rhs.mId; }
         bool operator>(const RefId& rhs) const { return mId > rhs.mId; }
-        static bool ciEqual(const RefId& left, const RefId& right);
 
         friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
 
@@ -38,11 +36,7 @@ namespace std
     {
         std::size_t operator()(const ESM::RefId& k) const
         {
-            using std::hash;
-            using std::size_t;
-            using std::string;
-
-            return hash<string>()(k.getRefIdString());
+            return std::hash<std::string>()(k.getRefIdString());
         }
     };
 }

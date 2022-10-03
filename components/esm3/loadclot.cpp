@@ -94,7 +94,7 @@ namespace ESM
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mEnchant.clear();
-        mScript.clear();
+        mEnchant = ESM::RefId::sEmpty;
+        mScript = ESM::RefId::sEmpty;
     }
 }

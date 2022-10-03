@@ -84,7 +84,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
     // actor id
     if (!info.mActor.empty())
     {
-        if (!ESM::RefId::ciEqual(info.mActor, mActor.getCellRef().getRefId()))
+        if (!(info.mActor ==  mActor.getCellRef().getRefId()))
             return false;
     }
     else if (isCreature)
@@ -101,7 +101,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC>* cellRef = mActor.get<ESM::NPC>();
 
-        if (!ESM::RefId::ciEqual(info.mRace, cellRef->mBase->mRace))
+        if (!(info.mRace ==  cellRef->mBase->mRace))
             return false;
     }
 
@@ -113,7 +113,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC>* cellRef = mActor.get<ESM::NPC>();
 
-        if (!ESM::RefId::ciEqual(info.mClass, cellRef->mBase->mClass))
+        if (!(info.mClass ==  cellRef->mBase->mClass))
             return false;
     }
 
@@ -131,7 +131,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
         if (isCreature)
             return true;
 
-        if (!ESM::RefId::ciEqual(mActor.getClass().getPrimaryFaction(mActor), info.mFaction))
+        if (!(mActor.getClass().getPrimaryFaction(mActor) ==  info.mFaction))
             return false;
 
         // check rank
@@ -536,19 +536,19 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
         case SelectWrapper::Function_NotId:
 
-            return !ESM::RefId::ciEqual(mActor.getCellRef().getRefId(), ESM::RefId::stringRefId(select.getName()));
+            return !(mActor.getCellRef().getRefId() ==  ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_NotFaction:
 
-            return !ESM::RefId::ciEqual(mActor.getClass().getPrimaryFaction(mActor), ESM::RefId::stringRefId(select.getName()));
+            return !(mActor.getClass().getPrimaryFaction(mActor) ==  ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_NotClass:
 
-            return !ESM::RefId::ciEqual(mActor.get<ESM::NPC>()->mBase->mClass, ESM::RefId::stringRefId(select.getName()));
+            return !(mActor.get<ESM::NPC>()->mBase->mClass ==  ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_NotRace:
 
-            return !ESM::RefId::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, ESM::RefId::stringRefId(select.getName()));
+            return !(mActor.get<ESM::NPC>()->mBase->mRace ==  ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_NotCell:
         {
@@ -562,8 +562,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
         case SelectWrapper::Function_SameRace:
 
-            return ESM::RefId::ciEqual(
-                mActor.get<ESM::NPC>()->mBase->mRace, player.get<ESM::NPC>()->mBase->mRace);
+            return mActor.get<ESM::NPC>()->mBase->mRace == player.get<ESM::NPC>()->mBase->mRace;
 
         case SelectWrapper::Function_SameFaction:
 

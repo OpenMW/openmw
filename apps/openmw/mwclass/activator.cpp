@@ -169,7 +169,7 @@ namespace MWClass
                  ++sound)
             {
                 if (type == sound->mType && !sound->mCreature.empty()
-                    && (ESM::RefId::ciEqual(*creatureId, sound->mCreature)))
+                    && (*creatureId ==  sound->mCreature))
                     sounds.push_back(&*sound);
                 if (type == sound->mType && sound->mCreature.empty())
                     fallbacksounds.push_back(&*sound);

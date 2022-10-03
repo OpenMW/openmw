@@ -166,7 +166,7 @@ namespace MWGui
             if (!mMerchant.isEmpty())
             {
                 MWWorld::Ptr base = item.mBase;
-                if (ESM::RefId::ciEqual(base.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
+                if (base.getCellRef().getRefId() ==  MWWorld::ContainerStore::sGoldId)
                     continue;
 
                 if (!base.getClass().showsInInventory(base))

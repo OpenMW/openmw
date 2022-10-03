@@ -110,7 +110,7 @@ namespace ESM
         mMapColor = 0;
 
         mName.clear();
-        mSleepList.clear();
+        mSleepList = ESM::RefId::sEmpty;
         mSoundList.clear();
     }
 }

@@ -82,8 +82,8 @@ namespace MWMechanics
         removeSpell(spell);
         mSpellList->remove(spell);
 
-        if (ESM::RefId::ciEqual(spellId, mSelectedSpell))
-            mSelectedSpell.clear();
+        if (spellId ==  mSelectedSpell)
+            mSelectedSpell = ESM::RefId::sEmpty;
     }
 
     void Spells::removeSpell(const ESM::Spell* spell)

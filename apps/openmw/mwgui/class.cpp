@@ -157,7 +157,7 @@ namespace MWGui
         size_t count = mClassList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (ESM::RefId::ciEqual(*mClassList->getItemDataAt<ESM::RefId>(i), classId))
+            if (*mClassList->getItemDataAt<ESM::RefId>(i) ==  classId)
             {
                 mClassList->setIndexSelected(i);
                 break;
@@ -195,7 +195,7 @@ namespace MWGui
             return;
 
         const ESM::RefId* classId = mClassList->getItemDataAt<ESM::RefId>(_index);
-        if (ESM::RefId::ciEqual(mCurrentClassId, *classId))
+        if (mCurrentClassId ==  *classId)
             return;
 
         mCurrentClassId = *classId;
@@ -234,7 +234,7 @@ namespace MWGui
                 mCurrentClassId = id;
                 mClassList->setIndexSelected(index);
             }
-            else if (ESM::RefId::ciEqual(id, mCurrentClassId))
+            else if (id ==  mCurrentClassId)
             {
                 mClassList->setIndexSelected(index);
             }

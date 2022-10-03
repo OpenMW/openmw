@@ -266,7 +266,7 @@ namespace MWClass
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
-            if (ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("stolen_goods")))
+            if (ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("stolen_goods"))
                 text += "\nYou can not use evidence chests";
         }
 

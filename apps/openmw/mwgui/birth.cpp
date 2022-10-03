@@ -96,7 +96,7 @@ namespace MWGui
         size_t count = mBirthList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (ESM::RefId::ciEqual(ESM::RefId::stringRefId(*mBirthList->getItemDataAt<std::string>(i)), birthId))
+            if (ESM::RefId::stringRefId(*mBirthList->getItemDataAt<std::string>(i)) ==  birthId)
             {
                 mBirthList->setIndexSelected(i);
                 break;
@@ -134,7 +134,7 @@ namespace MWGui
             return;
 
         const ESM::RefId birthId = ESM::RefId::stringRefId(*mBirthList->getItemDataAt<std::string>(_index));
-        if (ESM::RefId::ciEqual(mCurrentBirthId, birthId))
+        if (mCurrentBirthId ==  birthId)
             return;
 
         mCurrentBirthId = birthId;
@@ -168,7 +168,7 @@ namespace MWGui
                 mBirthList->setIndexSelected(index);
                 mCurrentBirthId = birthsignPair.first;
             }
-            else if (ESM::RefId::ciEqual(birthsignPair.first, mCurrentBirthId))
+            else if (birthsignPair.first ==  mCurrentBirthId)
             {
                 mBirthList->setIndexSelected(index);
             }

@@ -152,8 +152,8 @@ namespace ESM
         mScale = 1.f;
         mModel.clear();
         mName.clear();
-        mScript.clear();
-        mOriginal.clear();
+        mScript = ESM::RefId::sEmpty;
+        mOriginal = ESM::RefId::sEmpty;
         mInventory.mList.clear();
         mSpells.mList.clear();
         mAiData.blank();

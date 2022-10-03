@@ -315,7 +315,7 @@ namespace ESM
     void Cell::blank()
     {
         mName.clear();
-        mRegion.clear();
+        mRegion = ESM::RefId::sEmpty;
         mWater = 0;
         mWaterInt = false;
         mMapColor = 0;

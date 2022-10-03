@@ -71,6 +71,6 @@ namespace ESM
         mData.mType = 0;
 
         mModel.clear();
-        mRace.clear();
+        mRace = ESM::RefId::sEmpty;
     }
 }

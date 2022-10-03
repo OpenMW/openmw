@@ -146,7 +146,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 
         ESM::Book newItem = *ref->mBase;
-        newItem.mId.clear();
+        newItem.mId = ESM::RefId::sEmpty;
         newItem.mName = newName;
         newItem.mData.mIsScroll = 1;
         newItem.mData.mEnchant = enchCharge;

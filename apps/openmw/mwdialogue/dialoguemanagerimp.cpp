@@ -138,7 +138,7 @@ namespace MWDialogue
         if (actor.getClass().getCreatureStats(actor).isDead())
             return false;
 
-        mLastTopic.clear();
+        mLastTopic = ESM::RefId::sEmpty;
         // Note that we intentionally don't reset mPermanentDispositionChange
 
         mChoice = -1;
@@ -375,7 +375,7 @@ namespace MWDialogue
                     if (!inJournal(topicId, answer->mId))
                     {
                         // Does this dialogue contains some actor-specific answer?
-                        if (ESM::RefId::ciEqual(answer->mActor, mActor.getCellRef().getRefId()))
+                        if (answer->mActor ==  mActor.getCellRef().getRefId())
                             topicFlags |= MWBase::DialogueManager::TopicType::Specific;
                     }
                     else
@@ -744,7 +744,7 @@ namespace MWDialogue
         auto it = faction->mReactions.begin();
         for (; it != faction->mReactions.end(); ++it)
         {
-            if (ESM::RefId::ciEqual(it->first, faction2))
+            if (it->first ==  faction2)
                 return it->second;
         }
         return 0;

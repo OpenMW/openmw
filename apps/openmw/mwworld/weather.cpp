@@ -203,8 +203,8 @@ namespace MWWorld
         else
             mAmbientLoopSoundID = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
 
-        if (ESM::RefId::ciEqual(mAmbientLoopSoundID, ESM::RefId::stringRefId("None")))
-            mAmbientLoopSoundID.clear();
+        if (mAmbientLoopSoundID ==  ESM::RefId::stringRefId("None"))
+            mAmbientLoopSoundID = ESM::RefId::sEmpty;
     }
 
     float Weather::transitionDelta() const
@@ -827,7 +827,7 @@ namespace MWWorld
         if (mAmbientSound)
             MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
         mAmbientSound = nullptr;
-        mPlayingSoundID.clear();
+        mPlayingSoundID = ESM::RefId::sEmpty;
     }
 
     float WeatherManager::getWindSpeed() const
@@ -959,7 +959,7 @@ namespace MWWorld
     {
         stopSounds();
 
-        mCurrentRegion.clear();
+        mCurrentRegion = ESM::RefId::sEmpty;
         mTimePassed = 0.0f;
         mWeatherUpdateTime = 0.0f;
         forceWeather(0);
@@ -991,7 +991,7 @@ namespace MWWorld
         MWWorld::ConstPtr player = MWMechanics::getPlayer();
         if (player.isInCell())
         {
-            if (ESM::RefId::ciEqual(regionID, mCurrentRegion))
+            if (regionID ==  mCurrentRegion)
             {
                 addWeatherTransition(region.getWeather());
             }

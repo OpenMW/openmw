@@ -544,7 +544,7 @@ namespace MWWorld
                 MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
                 MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 if (invIt != inv.end()
-                    && ESM::RefId::ciEqual(invIt->getCellRef().getRefId(), projectileState.mBowId))
+                    && invIt->getCellRef().getRefId() ==  projectileState.mBowId)
                     bow = *invIt;
             }
             if (projectile->getHitWater())

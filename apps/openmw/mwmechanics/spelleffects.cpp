@@ -207,7 +207,7 @@ namespace
     {
         MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
         auto item = std::find_if(store.begin(), store.end(),
-            [&](const auto& it) { return ESM::RefId::ciEqual(it.getCellRef().getRefId(), itemId); });
+            [&](const auto& it) { return it.getCellRef().getRefId() == itemId; });
         if (item == store.end())
             return;
         int slot = getBoundItemSlot(*item);
@@ -215,7 +215,7 @@ namespace
         auto currentItem = store.getSlot(slot);
 
         bool wasEquipped
-            = currentItem != store.end() && ESM::RefId::ciEqual(currentItem->getCellRef().getRefId(), itemId);
+            = currentItem != store.end() && currentItem->getCellRef().getRefId() ==  itemId;
 
         if (wasEquipped)
             store.remove(*currentItem, 1, actor);

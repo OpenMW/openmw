@@ -419,7 +419,7 @@ namespace MWMechanics
     bool ActiveSpells::isSpellActive(const ESM::RefId& id) const
     {
         return std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& spell) {
-            return ESM::RefId::ciEqual(spell.mId, id);
+            return spell.mId ==  id;
         }) != mSpells.end();
     }
 

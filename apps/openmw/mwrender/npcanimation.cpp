@@ -66,7 +66,7 @@ namespace
                     continue;
                 if (female != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                     continue;
-                if (!ESM::RefId::ciEqual(bodypart.mRace, race))
+                if (!(bodypart.mRace == race))
                     continue;
                 sVampireMapping[thisCombination] = &bodypart;
             }
@@ -1209,7 +1209,7 @@ namespace MWRender
                 if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
                     continue;
 
-                if (!ESM::RefId::ciEqual(bodypart.mRace, race))
+                if (!(bodypart.mRace == race))
                     continue;
 
                 bool partFirstPerson = isFirstPersonPart(&bodypart);

@@ -83,7 +83,7 @@ namespace
         int actorId = caster.getClass().getCreatureStats(caster).getActorId();
         const auto& active = target.getClass().getCreatureStats(target).getActiveSpells();
         return std::find_if(active.begin(), active.end(), [&](const auto& spell) {
-            return spell.getCasterActorId() == actorId && ESM::RefId::ciEqual(spell.getId(), id);
+            return spell.getCasterActorId() == actorId && spell.getId() ==  id;
         }) != active.end();
     }
 }

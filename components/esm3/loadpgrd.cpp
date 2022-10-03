@@ -186,7 +186,7 @@ namespace ESM
 
     void Pathgrid::blank()
     {
-        mCell.clear();
+        mCell = ESM::RefId::sEmpty;
         mData.mX = 0;
         mData.mY = 0;
         mData.mS1 = 0;

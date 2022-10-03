@@ -106,7 +106,7 @@ namespace
                 {
                     Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '"
                                         << npc.mFaction << "', ignoring it.";
-                    npc.mFaction.clear();
+                    npc.mFaction = ESM::RefId::sEmpty;
                     npc.mNpdt.mRank = 0;
                     changed = true;
                 }
@@ -138,7 +138,7 @@ namespace
         {
             if (!item.mScript.empty() && !scripts.search(item.mScript))
             {
-                item.mScript.clear();
+                item.mScript = ESM::RefId::sEmpty;
                 Log(Debug::Verbose) << "Item '" << id << "' (" << item.mName << ") has nonexistent script '"
                                     << item.mScript << "', ignoring it.";
             }
@@ -687,7 +687,7 @@ namespace MWWorld
     {
 
         auto& npcs = getWritable<ESM::NPC>();
-        if (ESM::RefId::ciEqual(npc.mId, ESM::RefId::stringRefId("player")))
+        if (npc.mId ==  ESM::RefId::stringRefId("player"))
         {
             return npcs.insert(npc);
         }

@@ -99,7 +99,7 @@ namespace
                 ++it;
                 continue;
             }
-            if (ESM::RefId::ciEqual(itemId, it->mId))
+            if (itemId ==  it->mId)
                 it = list->mList.erase(it);
             else
                 ++it;
@@ -612,7 +612,7 @@ namespace MWScript
                 MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
-                    if (ESM::RefId::ciEqual(it->getCellRef().getSoul(), soul))
+                    if (it->getCellRef().getSoul() ==  soul)
                     {
                         store.remove(*it, 1, ptr);
                         return;
@@ -655,7 +655,7 @@ namespace MWScript
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
                         MWWorld::ConstContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && ESM::RefId::ciEqual(it->getCellRef().getRefId(), item))
+                        if (it != store.end() && it->getCellRef().getRefId() ==  item)
                         {
                             numNotEquipped -= it->getRefData().getCount();
                         }
@@ -664,7 +664,7 @@ namespace MWScript
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots && amount > numNotEquipped; ++slot)
                     {
                         MWWorld::ContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && ESM::RefId::ciEqual(it->getCellRef().getRefId(), item))
+                        if (it != store.end() && it->getCellRef().getRefId() ==  item)
                         {
                             int numToRemove = std::min(amount - numNotEquipped, it->getRefData().getCount());
                             store.unequipItemQuantity(*it, ptr, numToRemove);
@@ -674,7 +674,7 @@ namespace MWScript
 
                     for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
                     {
-                        if (ESM::RefId::ciEqual(iter->getCellRef().getRefId(), item)
+                        if (iter->getCellRef().getRefId() ==  item
                             && !store.isEquipped(*iter))
                         {
                             int removed = store.remove(*iter, amount, ptr);
@@ -730,7 +730,7 @@ namespace MWScript
 
                 for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
                 {
-                    if (ESM::RefId::ciEqual(iter->getCellRef().getSoul(), soul))
+                    if (iter->getCellRef().getSoul() ==  soul)
                     {
                         MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, 1);
                         store.remove(*iter, 1, ptr);
@@ -953,7 +953,7 @@ namespace MWScript
                 runtime.pop();
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                bool hit = ESM::RefId::ciEqual(objectID, stats.getLastHitObject());
+                bool hit = objectID ==  stats.getLastHitObject();
                 runtime.push(hit);
                 if (hit)
                     stats.clearLastHitObject();
@@ -972,7 +972,7 @@ namespace MWScript
                 runtime.pop();
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                bool hit = ESM::RefId::ciEqual(objectID, stats.getLastHitAttemptObject());
+                bool hit = objectID ==  stats.getLastHitAttemptObject();
                 runtime.push(hit);
                 if (hit)
                     stats.clearLastHitAttemptObject();

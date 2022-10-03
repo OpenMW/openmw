@@ -581,14 +581,14 @@ namespace ESM
 
         mIcon.clear();
         mParticle.clear();
-        mCasting.clear();
-        mHit.clear();
-        mArea.clear();
-        mBolt.clear();
-        mCastSound.clear();
-        mBoltSound.clear();
-        mHitSound.clear();
-        mAreaSound.clear();
+        mCasting = ESM::RefId::sEmpty;
+        mHit = ESM::RefId::sEmpty;
+        mArea = ESM::RefId::sEmpty;
+        mBolt = ESM::RefId::sEmpty;
+        mCastSound = ESM::RefId::sEmpty;
+        mBoltSound = ESM::RefId::sEmpty;
+        mHitSound = ESM::RefId::sEmpty;
+        mAreaSound = ESM::RefId::sEmpty;
         mDescription.clear();
     }
 

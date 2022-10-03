@@ -20,7 +20,7 @@ namespace MWMechanics
         T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(actorId);
         for (auto& it : copy.mInventory.mList)
         {
-            if (ESM::RefId::ciEqual(it.mItem, itemId))
+            if (it.mItem == itemId)
             {
                 const int sign = it.mCount < 1 ? -1 : 1;
                 it.mCount = sign * std::max(it.mCount * sign + amount, 0);

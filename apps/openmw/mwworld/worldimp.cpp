@@ -1759,13 +1759,13 @@ namespace MWWorld
     {
         bool update = false;
 
-        if (ESM::RefId::ciEqual(record.mId, ESM::RefId::stringRefId("player")))
+        if (record.mId ==  ESM::RefId::stringRefId("player"))
         {
             const ESM::NPC* player = mPlayer->getPlayer().get<ESM::NPC>()->mBase;
 
-            update = record.isMale() != player->isMale() || !ESM::RefId::ciEqual(record.mRace, player->mRace)
-                || !ESM::RefId::ciEqual(record.mHead, player->mHead)
-                || !ESM::RefId::ciEqual(record.mHair, player->mHair);
+            update = record.isMale() != player->isMale() || !(record.mRace ==  player->mRace)
+                || !(record.mHead ==  player->mHead)
+                || !(record.mHair ==  player->mHair);
         }
         const ESM::NPC* ret = mStore.insert(record);
         if (update)
@@ -2719,7 +2719,7 @@ namespace MWWorld
             if (ptr.getClass().getCapacity(ptr) <= 0.f)
                 return true;
 
-            if (ESM::RefId::ciEqual(ptr.getCellRef().getOwner(), mOwner.getCellRef().getRefId()))
+            if (ptr.getCellRef().getOwner() ==  mOwner.getCellRef().getRefId())
                 mOut.push_back(ptr);
 
             return true;
@@ -2741,7 +2741,7 @@ namespace MWWorld
         {
             cellstore->forEach([&](const auto& ptr) {
                 if (ptr.getRefData().getBaseNode()
-                    && ESM::RefId::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
+                    && ptr.getCellRef().getOwner() ==  npc.getCellRef().getRefId())
                     out.push_back(ptr);
                 return true;
             });

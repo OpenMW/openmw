@@ -422,7 +422,7 @@ namespace
             intptr_t topicId = 0; /// \todo get rid of intptr ids
             for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
             {
-                if (ESM::RefId::ciEqual(i->first, topic))
+                if (i->first ==  topic)
                     topicId = intptr_t(&i->second);
             }
 

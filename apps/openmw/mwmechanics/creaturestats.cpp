@@ -371,7 +371,7 @@ namespace MWMechanics
 
     void CreatureStats::clearLastHitObject()
     {
-        mLastHitObject.clear();
+        mLastHitObject = ESM::RefId::sEmpty;
     }
 
     const ESM::RefId& CreatureStats::getLastHitObject() const
@@ -386,7 +386,7 @@ namespace MWMechanics
 
     void CreatureStats::clearLastHitAttemptObject()
     {
-        mLastHitAttemptObject.clear();
+        mLastHitAttemptObject = ESM::RefId::sEmpty;
     }
 
     const ESM::RefId& CreatureStats::getLastHitAttemptObject() const

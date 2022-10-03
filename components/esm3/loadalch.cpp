@@ -84,7 +84,7 @@ namespace ESM
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mScript.clear();
+        mScript = ESM::RefId::sEmpty;
         mEffects.mList.clear();
     }
 }

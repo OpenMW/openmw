@@ -313,7 +313,7 @@ namespace MWWorld
     void Player::clear()
     {
         mCellStore = nullptr;
-        mSign.clear();
+        mSign = ESM::RefId::sEmpty;
         mMarkedCell = nullptr;
         mAutoMove = false;
         mForwardBackward = 0;

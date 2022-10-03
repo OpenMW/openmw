@@ -56,7 +56,7 @@ namespace MWMechanics
             caps.mLimit = iAutoSpellSchoolMax[i];
             caps.mReachedLimit = iAutoSpellSchoolMax[i] <= 0;
             caps.mMinCost = std::numeric_limits<int>::max();
-            caps.mWeakestSpell.clear();
+            caps.mWeakestSpell = ESM::RefId::sEmpty;
             schoolCaps[i] = caps;
         }
 

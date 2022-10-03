@@ -35,11 +35,11 @@ namespace MWClass
 
     bool Miscellaneous::isGold(const MWWorld::ConstPtr& ptr) const
     {
-        return ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_001"))
-            || ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_005"))
-            || ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_010"))
-            || ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_025"))
-            || ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("gold_100"));
+        return ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_001")
+            || ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_005")
+            || ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_010")
+            || ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_025")
+            || ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_100");
     }
 
     void Miscellaneous::insertObjectRendering(
@@ -97,7 +97,7 @@ namespace MWClass
                     float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
 
                     // for Azura's star add the unfilled value
-                    if (ESM::RefId::ciEqual(ptr.getCellRef().getRefId(), ESM::RefId::stringRefId("Misc_SoulGem_Azura")))
+                    if (ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("Misc_SoulGem_Azura"))
                         value += soulValue;
                     else
                         value = soulValue;

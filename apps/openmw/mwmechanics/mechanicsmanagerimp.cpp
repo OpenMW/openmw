@@ -513,7 +513,7 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         static const float fDispRaceMod = gmst.find("fDispRaceMod")->mValue.getFloat();
-        if (ESM::RefId::ciEqual(npc->mBase->mRace, player->mBase->mRace))
+        if (npc->mBase->mRace ==  player->mBase->mRace)
             x += fDispRaceMod;
 
         static const float fDispPersonalityMult = gmst.find("fDispPersonalityMult")->mValue.getFloat();
@@ -913,7 +913,7 @@ namespace MWMechanics
             return false;
 
         // A special case for evidence chest - we should not allow to take items even if it is technically permitted
-        return !ESM::RefId::ciEqual(cellref.getRefId(), ESM::RefId::stringRefId("stolen_goods"));
+        return !(cellref.getRefId() ==  ESM::RefId::stringRefId("stolen_goods"));
     }
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed)
@@ -1013,7 +1013,7 @@ namespace MWMechanics
 
         const ESM::RefId& victimFaction = victim.getClass().getPrimaryFaction(victim);
         if (!victimFaction.empty()
-            && ESM::RefId::ciEqual(item.getCellRef().getFaction(), victimFaction)) // Is the item faction-owned?
+            && item.getCellRef().getFaction() ==  victimFaction) // Is the item faction-owned?
         {
             owner.first = victimFaction;
             owner.second = true;
@@ -1118,7 +1118,7 @@ namespace MWMechanics
             }
         }
 
-        if (!ESM::RefId::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
+        if (!(item.getCellRef().getRefId() ==  MWWorld::ContainerStore::sGoldId))
         {
             if (victim.isEmpty()
                 || (victim.getClass().isActor() && victim.getRefData().getCount() > 0

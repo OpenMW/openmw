@@ -120,7 +120,7 @@ namespace ESM
             const int count = entry.second;
             for (auto& item : mItems)
             {
-                if (item.mCount == count && ESM::RefId::ciEqual(id, item.mRef.mRefID))
+                if (item.mCount == count && id ==  item.mRef.mRefID)
                     item.mCount = -count;
             }
         }

@@ -77,7 +77,7 @@ namespace MWMechanics
         bool changed = withBaseRecord([&](auto& spells) {
             for (const auto& it : spells)
             {
-                if (ESM::RefId::ciEqual(id, it))
+                if (id ==  it)
                     return false;
             }
             spells.push_back(id);
@@ -96,7 +96,7 @@ namespace MWMechanics
         bool changed = withBaseRecord([&](auto& spells) {
             for (auto it = spells.begin(); it != spells.end(); it++)
             {
-                if (ESM::RefId::ciEqual(id, *it))
+                if (id ==  *it)
                 {
                     spells.erase(it);
                     return true;
@@ -115,7 +115,7 @@ namespace MWMechanics
     {
         bool changed = withBaseRecord([&](auto& spells) {
             const auto it = std::remove_if(spells.begin(), spells.end(), [&](const auto& spell) {
-                const auto isSpell = [&](const auto& id) { return ESM::RefId::ciEqual(spell, id); };
+                const auto isSpell = [&](const auto& id) { return spell ==  id; };
                 return ids.end() != std::find_if(ids.begin(), ids.end(), isSpell);
             });
             if (it == spells.end())

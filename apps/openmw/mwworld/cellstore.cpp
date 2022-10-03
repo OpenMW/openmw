@@ -169,7 +169,7 @@ namespace
             {
                 for (auto& item : state.mInventory.mItems)
                 {
-                    if (item.mCount > 0 && ESM::RefId::ciEqual(baseItem.mItem, item.mRef.mRefID))
+                    if (item.mCount > 0 && baseItem.mItem ==  item.mRef.mRefID)
                         item.mCount = -item.mCount;
                 }
             }

@@ -4,9 +4,9 @@
 
 #include "components/misc/strings/algorithm.hpp"
 
-bool ESM::RefId::ciEqual(const RefId & left, const RefId & right)
+bool ESM::RefId::operator==(const RefId& rhs) const
 {
-    return Misc::StringUtils::ciEqual(left.mId, right.mId);
+    return Misc::StringUtils::ciEqual(this->mId, rhs.mId);
 }
 
 namespace ESM
