@@ -93,8 +93,7 @@ namespace Launcher
 
         int getMaxNavMeshDbFileSizeMiB()
         {
-            return static_cast<int>(
-                Settings::Manager::getInt64("max navmeshdb file size", "Navigator") / (1024 * 1024));
+            return Settings::Manager::getUInt64("max navmeshdb file size", "Navigator") / (1024 * 1024);
         }
     }
 }
@@ -318,8 +317,8 @@ QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, 
 void Launcher::DataFilesPage::saveSettings(const QString& profile)
 {
     if (const int value = ui.navMeshMaxSizeSpinBox->value(); value != getMaxNavMeshDbFileSizeMiB())
-        Settings::Manager::setInt64(
-            "max navmeshdb file size", "Navigator", static_cast<std::int64_t>(value) * 1024 * 1024);
+        Settings::Manager::setUInt64(
+            "max navmeshdb file size", "Navigator", static_cast<std::uint64_t>(std::max(0, value)) * 1024 * 1024);
 
     QString profileName = profile;
 

@@ -77,7 +77,7 @@ If true generated navmesh tiles will be stored into disk cache while game is run
 max navmeshdb file size
 -----------------------
 
-:Type:		integer
+:Type:		unsigned 64-bit integer
 :Range:		> 0
 :Default:	2147483648
 
@@ -91,7 +91,7 @@ This section is for advanced PC uses who understands concepts of OS thread and m
 async nav mesh updater threads
 ------------------------------
 
-:Type:		integer
+:Type:		platform dependant unsigned integer
 :Range:		>= 1
 :Default:	1
 
@@ -103,7 +103,7 @@ Don't expect twice better latency by doubling this value.
 max nav mesh tiles cache size
 -----------------------------
 
-:Type:		integer
+:Type:		platform dependant unsigned integer
 :Range:		>= 0
 :Default:	268435456
 
@@ -279,7 +279,7 @@ Pay attention to slopes and roofs when change it. Increasing this value will red
 max polygon path size
 ---------------------
 
-:Type:		integer
+:Type:		platform dependant unsigned integer
 :Range:		> 0
 :Default:	1024
 
@@ -288,7 +288,7 @@ Maximum size of path over polygons.
 max smooth path size
 --------------------
 
-:Type:		integer
+:Type:		platform dependant unsigned integer
 :Range:		> 0
 :Default:	1024
 

@@ -152,9 +152,14 @@ namespace Settings
         return parseIntegralNumber<int>(getString(setting, category), setting, category);
     }
 
-    std::int64_t Manager::getInt64(std::string_view setting, std::string_view category)
+    std::uint64_t Manager::getUInt64(std::string_view setting, std::string_view category)
     {
-        return parseIntegralNumber<std::int64_t>(getString(setting, category), setting, category);
+        return parseIntegralNumber<std::uint64_t>(getString(setting, category), setting, category);
+    }
+
+    std::size_t Manager::getSize(std::string_view setting, std::string_view category)
+    {
+        return parseIntegralNumber<std::size_t>(getString(setting, category), setting, category);
     }
 
     bool Manager::getBool(std::string_view setting, std::string_view category)
@@ -227,7 +232,7 @@ namespace Settings
         setString(setting, category, stream.str());
     }
 
-    void Manager::setInt64(std::string_view setting, std::string_view category, const std::int64_t value)
+    void Manager::setUInt64(std::string_view setting, std::string_view category, const std::uint64_t value)
     {
         std::ostringstream stream;
         stream << value;

@@ -61,7 +61,8 @@ namespace Settings
         ///< returns the list of changed settings intersecting with the filter
 
         static int getInt(std::string_view setting, std::string_view category);
-        static std::int64_t getInt64(std::string_view setting, std::string_view category);
+        static std::uint64_t getUInt64(std::string_view setting, std::string_view category);
+        static std::size_t getSize(std::string_view setting, std::string_view category);
         static float getFloat(std::string_view setting, std::string_view category);
         static double getDouble(std::string_view setting, std::string_view category);
         static const std::string& getString(std::string_view setting, std::string_view category);
@@ -71,7 +72,7 @@ namespace Settings
         static osg::Vec3f getVector3(std::string_view setting, std::string_view category);
 
         static void setInt(std::string_view setting, std::string_view category, int value);
-        static void setInt64(std::string_view setting, std::string_view category, std::int64_t value);
+        static void setUInt64(std::string_view setting, std::string_view category, std::uint64_t value);
         static void setFloat(std::string_view setting, std::string_view category, float value);
         static void setDouble(std::string_view setting, std::string_view category, double value);
         static void setString(std::string_view setting, std::string_view category, const std::string& value);
