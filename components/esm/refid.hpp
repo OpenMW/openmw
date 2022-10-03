@@ -12,16 +12,16 @@ namespace ESM
         void clear() { mId.clear(); }
         bool empty() const { return mId.empty(); }
         void swap(RefId& rhs) { mId.swap(rhs.mId); }
-        bool operator==(const RefId& rhs) const { return mId == rhs.mId; }
-        void operator=(const RefId& rhs) { mId = rhs.mId; }
+        bool operator==(const RefId& rhs) const { return ciEqual(*this, rhs); }
         bool operator<(const RefId& rhs) const { return mId < rhs.mId; }
         bool operator>(const RefId& rhs) const { return mId > rhs.mId; }
         static bool ciEqual(const RefId& left, const RefId& right);
 
         friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
 
-        static RefId stringRefId(const std::string_view& id); //The 
-        std::string& getRefIdString() { return mId; } 
+        //The 2 following functions are used to move back and forth between string and RefID. Used for hard coded RefIds that are as string in the code.
+        //For serialization, and display. Using explicit conversions make it very clear where in the code we need to convert from string to RefId and Vice versa.
+        static RefId stringRefId(const std::string_view& id); 
         const std::string& getRefIdString() const { return mId; } 
 
 

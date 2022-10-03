@@ -431,7 +431,6 @@ namespace MWWorld
             {
                 ESM::RefId& refId = refIDs[value.mRefID];
                 // We manually lower case IDs here for the time being to improve performance.
-                Misc::StringUtils::lowerCaseInPlace(refId.getRefIdString());
                 ++mRefCount[std::move(refId)];
             }
         };

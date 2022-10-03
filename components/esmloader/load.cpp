@@ -82,7 +82,6 @@ namespace EsmLoader
             T record;
             bool deleted = false;
             record.load(reader, deleted);
-            Misc::StringUtils::lowerCaseInPlace(record.mId.getRefIdString());
             if (Misc::ResourceHelpers::isHiddenMarker(record.mId.getRefIdString()))
                 return;
             records.emplace_back(deleted, std::move(record));
