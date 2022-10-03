@@ -4,26 +4,31 @@
 
 #include "components/misc/strings/algorithm.hpp"
 
-bool ESM::RefId::operator==(const RefId& rhs) const
-{
-    return Misc::StringUtils::ciEqual(this->mId, rhs.mId);
-}
+
 
 namespace ESM
 {
-    std::ostream& operator<<(std::ostream& os, const ESM::RefId& refId)
+    bool RefId::operator==(const RefId& rhs) const
+    {
+        return this->mId == rhs.mId;
+    }
+
+    std::ostream& operator<<(std::ostream& os, const RefId& refId)
     {
         os << refId.getRefIdString();
         return os;
     }
+
+    RefId RefId::stringRefId(const std::string_view & id)
+    {
+        RefId newRefId;
+        newRefId.mId = Misc::StringUtils::lowerCase(id);
+        return newRefId;
+    }
+
+    const RefId RefId::sEmpty = RefId::stringRefId("");
 }
 
-ESM::RefId ESM::RefId::stringRefId(const std::string_view & id)
-{
-    RefId newRefId;
-    newRefId.mId = Misc::StringUtils::lowerCase(id);
-    return newRefId;
-}
 
-const ESM::RefId ESM::RefId::sEmpty = ESM::RefId::stringRefId("");
+
 
