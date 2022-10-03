@@ -599,7 +599,7 @@ namespace MWRender
                     continue;
             }
 
-            if (Misc::ResourceHelpers::isHiddenMarker(ref.mRefID.getRefIdString()))
+            if (Misc::ResourceHelpers::isHiddenMarker(ref.mRefID))
                 continue;
 
             int type = store.findStatic(ref.mRefID);

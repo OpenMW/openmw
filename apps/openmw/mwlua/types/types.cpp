@@ -68,7 +68,7 @@ namespace MWLua
         const ESM::RefId& id = ref->mRef.getRefId();
         if (id == ESM::RefId::stringRefId("player"))
             return ESM::REC_INTERNAL_PLAYER;
-        if (Misc::ResourceHelpers::isHiddenMarker(id.getRefIdString()))
+        if (Misc::ResourceHelpers::isHiddenMarker(id))
             return ESM::REC_INTERNAL_MARKER;
         return ref->getType();
     }
