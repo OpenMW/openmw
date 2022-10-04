@@ -378,6 +378,8 @@ namespace Terrain
 
         if (vd->hasChanged())
         {
+            vd->buildNodeIndex();
+
             unsigned int ourVertexLod = getVertexLod(entry.mNode, mVertexLodMod);
             // have to recompute the lodFlags in case a neighbour has changed LOD.
             unsigned int lodFlags = getLodFlags(entry.mNode, ourVertexLod, mVertexLodMod, vd);
@@ -499,7 +501,7 @@ namespace Terrain
             updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv),
                 mStorage->getCellWorldSize(), !isGridEmpty());
 
-        vd->setChanged(false);
+        vd->resetChanged();
 
         double referenceTime = nv.getFrameStamp() ? nv.getFrameStamp()->getReferenceTime() : 0.0;
         if (referenceTime != 0.0)
@@ -579,6 +581,7 @@ namespace Terrain
                 loadRenderingNode(entry, vd, cellWorldSize, grid, true);
                 if (pass == 0)
                     reporter.addProgress(entry.mNode->getSize());
+                vd->removeNodeFromIndex(entry.mNode);
                 entry.mNode = nullptr; // Clear node lest we break the neighbours search for the next pass
             }
         }

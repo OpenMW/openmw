@@ -2,6 +2,8 @@
 
 #include "quadtreenode.hpp"
 
+#include <algorithm>
+
 namespace Terrain
 {
 
@@ -25,6 +27,7 @@ namespace Terrain
         mViewPoint = other.mViewPoint;
         mActiveGrid = other.mActiveGrid;
         mWorldUpdateRevision = other.mWorldUpdateRevision;
+        mNodes = other.mNodes;
     }
 
     void ViewData::add(QuadTreeNode* node)
@@ -36,7 +39,10 @@ namespace Terrain
 
         ViewDataEntry& entry = mEntries[index];
         if (entry.set(node))
+        {
             mChanged = true;
+            mNodes.clear();
+        }
     }
 
     void ViewData::setViewPoint(const osg::Vec3f& viewPoint)
@@ -56,6 +62,7 @@ namespace Terrain
         // reset index for next frame
         mNumEntries = 0;
         mChanged = false;
+        mNodes.clear();
     }
 
     void ViewData::clear()
@@ -66,6 +73,7 @@ namespace Terrain
         mLastUsageTimeStamp = 0;
         mChanged = false;
         mHasViewPoint = false;
+        mNodes.clear();
     }
 
     bool ViewData::suitableToUse(const osg::Vec4i& activeGrid) const
@@ -73,12 +81,30 @@ namespace Terrain
         return hasViewPoint() && activeGrid == mActiveGrid && getNumEntries();
     }
 
-    bool ViewData::contains(QuadTreeNode* node) const
+    bool ViewData::contains(const QuadTreeNode* node) const
     {
-        for (unsigned int i = 0; i < mNumEntries; ++i)
-            if (mEntries[i].mNode == node)
-                return true;
-        return false;
+        return std::binary_search(mNodes.begin(), mNodes.end(), node);
+    }
+
+    void ViewData::buildNodeIndex()
+    {
+        if (!mNodes.empty())
+            return;
+
+        mNodes.reserve(mNumEntries);
+        for (std::size_t i = 0; i < mNumEntries; ++i)
+            if (const QuadTreeNode* node = mEntries[i].mNode)
+                mNodes.push_back(node);
+
+        std::sort(mNodes.begin(), mNodes.end());
+    }
+
+    void ViewData::removeNodeFromIndex(const QuadTreeNode* node)
+    {
+        const auto it = std::lower_bound(mNodes.begin(), mNodes.end(), node);
+        if (it == mNodes.end() || *it != node)
+            return;
+        mNodes.erase(it);
     }
 
     ViewDataEntry::ViewDataEntry()
