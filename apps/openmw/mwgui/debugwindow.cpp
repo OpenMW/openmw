@@ -123,7 +123,7 @@ namespace MWGui
 
     void DebugWindow::startLogRecording()
     {
-        sLogCircularBuffer.resize(std::max<int64_t>(0, Settings::Manager::getInt64("log buffer size", "General")));
+        sLogCircularBuffer.resize(Settings::Manager::getSize("log buffer size", "General"));
         Debug::setLogListener([](Debug::Level level, std::string_view prefix, std::string_view msg) {
             if (sLogCircularBuffer.empty())
                 return; // Log viewer is disabled.

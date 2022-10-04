@@ -43,10 +43,8 @@ namespace DetourNavigator
             = std::clamp(::Settings::Manager::getInt("max nav mesh query nodes", "Navigator"), 1, 65535);
         result.mMaxPolys
             = std::clamp(::Settings::Manager::getInt("max polygons per tile", "Navigator"), 1, (1 << 22) - 1);
-        result.mMaxPolygonPathSize
-            = static_cast<std::size_t>(std::max(0, ::Settings::Manager::getInt("max polygon path size", "Navigator")));
-        result.mMaxSmoothPathSize
-            = static_cast<std::size_t>(std::max(0, ::Settings::Manager::getInt("max smooth path size", "Navigator")));
+        result.mMaxPolygonPathSize = ::Settings::Manager::getSize("max polygon path size", "Navigator");
+        result.mMaxSmoothPathSize = ::Settings::Manager::getSize("max smooth path size", "Navigator");
 
         return result;
     }
@@ -60,10 +58,9 @@ namespace DetourNavigator
         result.mMaxTilesNumber = std::max(0, ::Settings::Manager::getInt("max tiles number", "Navigator"));
         result.mWaitUntilMinDistanceToPlayer
             = ::Settings::Manager::getInt("wait until min distance to player", "Navigator");
-        result.mAsyncNavMeshUpdaterThreads = static_cast<std::size_t>(
-            std::max(0, ::Settings::Manager::getInt("async nav mesh updater threads", "Navigator")));
-        result.mMaxNavMeshTilesCacheSize = static_cast<std::size_t>(
-            std::max(std::int64_t{ 0 }, ::Settings::Manager::getInt64("max nav mesh tiles cache size", "Navigator")));
+        result.mAsyncNavMeshUpdaterThreads
+            = ::Settings::Manager::getSize("async nav mesh updater threads", "Navigator");
+        result.mMaxNavMeshTilesCacheSize = ::Settings::Manager::getSize("max nav mesh tiles cache size", "Navigator");
         result.mEnableWriteRecastMeshToFile
             = ::Settings::Manager::getBool("enable write recast mesh to file", "Navigator");
         result.mEnableWriteNavMeshToFile = ::Settings::Manager::getBool("enable write nav mesh to file", "Navigator");
@@ -77,8 +74,7 @@ namespace DetourNavigator
             = std::chrono::milliseconds(::Settings::Manager::getInt("min update interval ms", "Navigator"));
         result.mEnableNavMeshDiskCache = ::Settings::Manager::getBool("enable nav mesh disk cache", "Navigator");
         result.mWriteToNavMeshDb = ::Settings::Manager::getBool("write to navmeshdb", "Navigator");
-        result.mMaxDbFileSize
-            = static_cast<std::uint64_t>(::Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
+        result.mMaxDbFileSize = ::Settings::Manager::getUInt64("max navmeshdb file size", "Navigator");
 
         return result;
     }

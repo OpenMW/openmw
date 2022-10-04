@@ -1,14 +1,44 @@
 #include "settings.hpp"
 #include "parser.hpp"
 
+#include <cerrno>
+#include <charconv>
 #include <filesystem>
 #include <sstream>
+#include <system_error>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 namespace Settings
 {
+    namespace
+    {
+        template <class T>
+        auto parseIntegralNumber(const std::string& value, std::string_view setting, std::string_view category)
+        {
+            T number{};
+            const auto result = std::from_chars(value.data(), value.data() + value.size(), number);
+            if (result.ec != std::errc())
+                throw std::system_error(std::make_error_code(result.ec),
+                    "Failed to parse number from setting [" + std::string(category) + "] " + std::string(setting)
+                        + " value \"" + value + "\"");
+            return number;
+        }
+
+        template <class T>
+        auto parseFloatingPointNumber(const std::string& value, std::string_view setting, std::string_view category)
+        {
+            std::stringstream stream(value);
+            T number{};
+            stream >> number;
+            if (stream.bad())
+                throw std::system_error(errno, std::generic_category(),
+                    "Failed to parse number from setting [" + std::string(category) + "] " + std::string(setting)
+                        + " value \"" + value + "\"");
+            return number;
+        }
+    }
 
     CategorySettingValueMap Manager::mDefaultSettings = CategorySettingValueMap();
     CategorySettingValueMap Manager::mUserSettings = CategorySettingValueMap();
@@ -109,38 +139,27 @@ namespace Settings
 
     float Manager::getFloat(std::string_view setting, std::string_view category)
     {
-        const std::string& value = getString(setting, category);
-        std::stringstream stream(value);
-        float number = 0.f;
-        stream >> number;
-        return number;
+        return parseFloatingPointNumber<float>(getString(setting, category), setting, category);
     }
 
     double Manager::getDouble(std::string_view setting, std::string_view category)
     {
-        const std::string& value = getString(setting, category);
-        std::stringstream stream(value);
-        double number = 0.0;
-        stream >> number;
-        return number;
+        return parseFloatingPointNumber<double>(getString(setting, category), setting, category);
     }
 
     int Manager::getInt(std::string_view setting, std::string_view category)
     {
-        const std::string& value = getString(setting, category);
-        std::stringstream stream(value);
-        int number = 0;
-        stream >> number;
-        return number;
+        return parseIntegralNumber<int>(getString(setting, category), setting, category);
     }
 
-    std::int64_t Manager::getInt64(std::string_view setting, std::string_view category)
+    std::uint64_t Manager::getUInt64(std::string_view setting, std::string_view category)
     {
-        const std::string& value = getString(setting, category);
-        std::stringstream stream(value);
-        std::int64_t number = 0;
-        stream >> number;
-        return number;
+        return parseIntegralNumber<std::uint64_t>(getString(setting, category), setting, category);
+    }
+
+    std::size_t Manager::getSize(std::string_view setting, std::string_view category)
+    {
+        return parseIntegralNumber<std::size_t>(getString(setting, category), setting, category);
     }
 
     bool Manager::getBool(std::string_view setting, std::string_view category)
@@ -213,7 +232,7 @@ namespace Settings
         setString(setting, category, stream.str());
     }
 
-    void Manager::setInt64(std::string_view setting, std::string_view category, const std::int64_t value)
+    void Manager::setUInt64(std::string_view setting, std::string_view category, const std::uint64_t value)
     {
         std::ostringstream stream;
         stream << value;

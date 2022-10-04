@@ -90,7 +90,7 @@ Two highest priority locales may be assigned via the Localization tab of the in-
 log buffer size
 ---------------
 
-:Type:		integer
+:Type:		platform dependant unsigned integer
 :Range:		>= 0
 :Default:	65536
 

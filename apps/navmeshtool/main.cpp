@@ -196,8 +196,7 @@ namespace NavMeshTool
             const osg::Vec3f agentHalfExtents
                 = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
             const DetourNavigator::AgentBounds agentBounds{ agentCollisionShape, agentHalfExtents };
-            const std::uint64_t maxDbFileSize
-                = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
+            const std::uint64_t maxDbFileSize = Settings::Manager::getUInt64("max navmeshdb file size", "Navigator");
             const auto dbPath = Files::pathToUnicodeString(config.getUserDataPath() / "navmesh.db");
 
             DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
