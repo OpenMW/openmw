@@ -413,12 +413,12 @@ macOS12_Xcode13_Coverity:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:
+    - rm -fr build  # remove the build directory
+    - CI/before_install.osx.sh    
     - curl -o /tmp/cov-analysis-macos.dmg https://scan.coverity.com/download/cxx/macOSX
       --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - 7z x /tmp/cov-analysis-macos.tgz
   script:
-    - rm -fr build  # remove the build directory
-    - CI/before_install.osx.sh
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
