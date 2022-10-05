@@ -63,23 +63,23 @@ variables:
     paths:
       - build/install/
 
-Coverity:
+.Coverity:
   tags:
     - docker
     - linux
   image: ubuntu:20.04
   stage: build
-#  rules:
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
-    key: Coverity.ubuntu_20.04.v3
+    key: Coverity.ubuntu_20.04.v1
     paths:
     - apt-cache/
     - ccache/
   variables:
     CCACHE_SIZE: 2G
-    CC: gcc-10
-    CXX: g++-10
+    CC: clang-11
+    CXX: clang++-11
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:
@@ -366,7 +366,7 @@ Ubuntu_Clang_integration_tests:
     - CI/run_integration_tests.sh
 
 .MacOS:
-  image: macos-11-xcode-12
+  image: macos-12-xcode-13
   tags:
     - shared-macos-amd64
   stage: build
@@ -394,11 +394,47 @@ Ubuntu_Clang_integration_tests:
 
 macOS12_Xcode13:
   extends: .MacOS
-  image: macos-12-xcode-13
   cache:
     key: macOS12_Xcode13.v1
   variables:
     CCACHE_SIZE: 3G
+
+macOS12_Xcode13_Coverity:
+  extends: .MacOS  
+  stage: build
+  #rules:
+  #  - if: $CI_PIPELINE_SOURCE == "schedule"
+  cache:
+    key: Coverity.macos.12.v1
+    paths:
+    - ccache/    
+  variables:
+    CCACHE_SIZE: 2G
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -O0
+  before_script:
+    - curl -o /tmp/cov-analysis-macos.dmg https://scan.coverity.com/download/cxx/macOSX
+      --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
+    - 7z x /tmp/cov-analysis-linux64.tgz
+  script:
+    - rm -fr build  # remove the build directory
+    - CI/before_install.osx.sh
+    - export CCACHE_BASEDIR="$(pwd)"
+    - export CCACHE_DIR="$(pwd)/ccache"
+    - mkdir -pv "${CCACHE_DIR}"
+    - ccache -z -M "${CCACHE_SIZE}"
+    - CI/before_script.osx.sh
+    - bin/cov-configure --template --comptype prefix --compiler ccache
+    - bin/cov-build --dir cov-int cmake --build build -- -j $(sysctl -n hw.logicalcpu)
+  after_script:
+    - tar cfz cov-int.tar.gz cov-int
+    - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
+      --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
+      --form file=@cov-int.tar.gz --form version="$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA"
+      --form description="CI_COMMIT_SHORT_SHA / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
+  artifacts:
+    paths:
+      - /builds/OpenMW/openmw/cov-int/build-log.txt
 
 .Windows_Ninja_Base:
   tags:
