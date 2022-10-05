@@ -70,6 +70,8 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#include "profile.hpp"
+
 namespace
 {
     void checkSDLError(int ret)
@@ -77,140 +79,6 @@ namespace
         if (ret != 0)
             Log(Debug::Error) << "SDL error: " << SDL_GetError();
     }
-
-    struct UserStats
-    {
-        const std::string mLabel;
-        const std::string mBegin;
-        const std::string mEnd;
-        const std::string mTaken;
-
-        UserStats(const std::string& label, const std::string& prefix)
-            : mLabel(label)
-            , mBegin(prefix + "_time_begin")
-            , mEnd(prefix + "_time_end")
-            , mTaken(prefix + "_time_taken")
-        {
-        }
-    };
-
-    enum class UserStatsType : std::size_t
-    {
-        Input,
-        Sound,
-        State,
-        Script,
-        Mechanics,
-        Physics,
-        PhysicsWorker,
-        World,
-        Gui,
-        Lua,
-        LuaSyncUpdate,
-        Number,
-    };
-
-    template <UserStatsType type>
-    struct UserStatsValue
-    {
-        static const UserStats sValue;
-    };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Input>::sValue{ "Input", "input" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Sound>::sValue{ "Sound", "sound" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::State>::sValue{ "State", "state" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Script>::sValue{ "Script", "script" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Mechanics>::sValue{ "Mech", "mechanics" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Physics>::sValue{ "Phys", "physics" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::PhysicsWorker>::sValue{ " -Async", "physicsworker" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::World>::sValue{ "World", "world" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Gui>::sValue{ "Gui", "gui" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Lua>::sValue{ "Lua", "lua" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::LuaSyncUpdate>::sValue{ " -Sync", "luasyncupdate" };
-
-    template <UserStatsType type>
-    struct ForEachUserStatsValue
-    {
-        template <class F>
-        static void apply(F&& f)
-        {
-            f(UserStatsValue<type>::sValue);
-            using Next = ForEachUserStatsValue<static_cast<UserStatsType>(static_cast<std::size_t>(type) + 1)>;
-            Next::apply(std::forward<F>(f));
-        }
-    };
-
-    template <>
-    struct ForEachUserStatsValue<UserStatsType::Number>
-    {
-        template <class F>
-        static void apply(F&&)
-        {
-        }
-    };
-
-    template <class F>
-    void forEachUserStatsValue(F&& f)
-    {
-        ForEachUserStatsValue<static_cast<UserStatsType>(0)>::apply(std::forward<F>(f));
-    }
-
-    template <UserStatsType sType>
-    class ScopedProfile
-    {
-    public:
-        ScopedProfile(osg::Timer_t frameStart, unsigned int frameNumber, const osg::Timer& timer, osg::Stats& stats)
-            : mScopeStart(timer.tick())
-            , mFrameStart(frameStart)
-            , mFrameNumber(frameNumber)
-            , mTimer(timer)
-            , mStats(stats)
-        {
-        }
-
-        ScopedProfile(const ScopedProfile&) = delete;
-        ScopedProfile& operator=(const ScopedProfile&) = delete;
-
-        ~ScopedProfile()
-        {
-            if (!mStats.collectStats("engine"))
-                return;
-            const osg::Timer_t end = mTimer.tick();
-            const UserStats& stats = UserStatsValue<sType>::sValue;
-
-            mStats.setAttribute(mFrameNumber, stats.mBegin, mTimer.delta_s(mFrameStart, mScopeStart));
-            mStats.setAttribute(mFrameNumber, stats.mTaken, mTimer.delta_s(mScopeStart, end));
-            mStats.setAttribute(mFrameNumber, stats.mEnd, mTimer.delta_s(mFrameStart, end));
-        }
-
-    private:
-        const osg::Timer_t mScopeStart;
-        const osg::Timer_t mFrameStart;
-        const unsigned int mFrameNumber;
-        const osg::Timer& mTimer;
-        osg::Stats& mStats;
-    };
 
     void initStatsHandler(Resource::Profiler& profiler)
     {
@@ -221,7 +89,7 @@ namespace
         const bool averageInInverseSpace = false;
         const float maxValue = 10000;
 
-        forEachUserStatsValue([&](const UserStats& v) {
+        OMW::forEachUserStatsValue([&](const OMW::UserStats& v) {
             profiler.addUserStatsLine(v.mLabel, textColor, barColor, v.mTaken, multiplier, average,
                 averageInInverseSpace, v.mBegin, v.mEnd, maxValue);
         });
