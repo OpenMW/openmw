@@ -418,6 +418,8 @@ macOS12_Xcode13_Coverity:
     - curl -o /tmp/cov-analysis-macos.dmg https://scan.coverity.com/download/cxx/macOSX
       --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - 7zz x /tmp/cov-analysis-macos.dmg
+    - mv cov-analysis-macosx-*/*.sh .
+    - ./cov-analysis-macosx-*.sh
   script:
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
