@@ -38,6 +38,7 @@ namespace Compiler
 namespace MWLua
 {
     class LuaManager;
+    class Worker;
 }
 
 namespace Stereo
@@ -132,6 +133,7 @@ namespace OMW
         std::unique_ptr<MWInput::InputManager> mInputManager;
         std::unique_ptr<MWState::StateManager> mStateManager;
         std::unique_ptr<MWLua::LuaManager> mLuaManager;
+        std::unique_ptr<MWLua::Worker> mLuaWorker;
         MWBase::Environment mEnvironment;
         ToUTF8::FromType mEncoding;
         std::unique_ptr<ToUTF8::Utf8Encoder> mEncoder;

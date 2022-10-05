@@ -38,6 +38,7 @@ namespace OMW
         Gui,
         Lua,
         LuaSyncUpdate,
+        WindowManager,
         Number,
     };
 
@@ -79,6 +80,9 @@ namespace OMW
 
     template <>
     inline const UserStats UserStatsValue<UserStatsType::LuaSyncUpdate>::sValue{ " -Sync", "luasyncupdate" };
+
+    template <>
+    inline const UserStats UserStatsValue<UserStatsType::WindowManager>::sValue{ "WindowManager", "windowmanager" };
 
     template <UserStatsType type>
     struct ForEachUserStatsValue

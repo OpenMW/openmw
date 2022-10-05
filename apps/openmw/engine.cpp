@@ -171,15 +171,15 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frame(float frametime)
 {
+    const osg::Timer_t frameStart = mViewer->getStartTick();
+    const unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+    const osg::Timer* const timer = osg::Timer::instance();
+    osg::Stats* const stats = mViewer->getViewerStats();
+
+    mEnvironment.setFrameDuration(frametime);
+
     try
     {
-        const osg::Timer_t frameStart = mViewer->getStartTick();
-        const unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
-        const osg::Timer* const timer = osg::Timer::instance();
-        osg::Stats* const stats = mViewer->getViewerStats();
-
-        mEnvironment.setFrameDuration(frametime);
-
         // update input
         {
             ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
@@ -294,32 +294,47 @@ bool OMW::Engine::frame(float frametime)
             ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
             mWindowManager->update(frametime);
         }
-
-        const bool reportResource = stats->collectStats("resource");
-
-        if (reportResource)
-            stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getSize());
-
-        mUnrefQueue->flush(*mWorkQueue);
-
-        if (reportResource)
-        {
-            stats->setAttribute(frameNumber, "FrameNumber", frameNumber);
-
-            mResourceSystem->reportStats(frameNumber, stats);
-
-            stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
-            stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
-
-            mMechanicsManager->reportStats(frameNumber, *stats);
-            mWorld->reportStats(frameNumber, *stats);
-            mLuaManager->reportStats(frameNumber, *stats);
-        }
     }
     catch (const std::exception& e)
     {
         Log(Debug::Error) << "Error in frame: " << e.what();
     }
+
+    const bool reportResource = stats->collectStats("resource");
+
+    if (reportResource)
+        stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getSize());
+
+    mUnrefQueue->flush(*mWorkQueue);
+
+    if (reportResource)
+    {
+        stats->setAttribute(frameNumber, "FrameNumber", frameNumber);
+
+        mResourceSystem->reportStats(frameNumber, stats);
+
+        stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
+        stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
+
+        mMechanicsManager->reportStats(frameNumber, *stats);
+        mWorld->reportStats(frameNumber, *stats);
+        mLuaManager->reportStats(frameNumber, *stats);
+    }
+
+    mViewer->eventTraversal();
+    mViewer->updateTraversal();
+
+    {
+        ScopedProfile<UserStatsType::WindowManager> profile(frameStart, frameNumber, *timer, *stats);
+        mWorld->updateWindowManager();
+    }
+
+    mLuaWorker->allowUpdate(); // if there is a separate Lua thread, it starts the update now
+
+    mViewer->renderingTraversals();
+
+    mLuaWorker->finishUpdate();
+
     return true;
 }
 
@@ -374,6 +389,7 @@ OMW::Engine::~Engine()
     mSoundManager = nullptr;
     mInputManager = nullptr;
     mStateManager = nullptr;
+    mLuaWorker = nullptr;
     mLuaManager = nullptr;
 
     mScriptContext = nullptr;
@@ -669,6 +685,9 @@ void OMW::Engine::prepareEngine()
     mLuaManager = std::make_unique<MWLua::LuaManager>(mVFS.get(), mResDir / "lua_libs");
     mEnvironment.setLuaManager(*mLuaManager);
 
+    // starts a separate lua thread if "lua num threads" > 0
+    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager, *mViewer);
+
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
@@ -886,8 +905,6 @@ void OMW::Engine::go()
         mWindowManager->executeInConsole(mStartupScript);
     }
 
-    MWLua::Worker luaWorker(*mLuaManager, *mViewer); // starts a separate lua thread if "lua num threads" > 0
-
     // Start the main rendering loop
     double simulationTime = 0.0;
     Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(mEnvironment.getFrameRateLimit());
@@ -908,17 +925,6 @@ void OMW::Engine::go()
         }
         else
         {
-            mViewer->eventTraversal();
-            mViewer->updateTraversal();
-
-            mWorld->updateWindowManager();
-
-            luaWorker.allowUpdate(); // if there is a separate Lua thread, it starts the update now
-
-            mViewer->renderingTraversals();
-
-            luaWorker.finishUpdate();
-
             bool guiActive = mWindowManager->isGuiMode();
             if (!guiActive)
                 simulationTime += dt;
@@ -940,7 +946,7 @@ void OMW::Engine::go()
         frameRateLimiter.limit();
     }
 
-    luaWorker.join();
+    mLuaWorker->join();
 
     // Save user settings
     Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
