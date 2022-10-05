@@ -415,7 +415,7 @@ macOS12_Xcode13_Coverity:
   before_script:
     - rm -fr build  # remove the build directory
     - CI/before_install.osx.sh    
-    - curl -o /tmp/cov-analysis-macos.dmg https://scan.coverity.com/download/cxx/Darkwin
+    - curl -o /tmp/cov-analysis-macos.dmg https://scan.coverity.com/download/cxx/Darwin
       --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - 7zz x /tmp/cov-analysis-macos.dmg
     - mv cov-analysis-macosx-*/*.sh .
