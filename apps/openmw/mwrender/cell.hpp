@@ -8,7 +8,7 @@ namespace MWRender
     class CellRender
     {
     public:
-        virtual ~CellRender(){};
+        virtual ~CellRender() = default;
 
         /// Make the cell visible. Load the cell if necessary.
         virtual void show() = 0;

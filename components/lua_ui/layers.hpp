@@ -21,7 +21,7 @@ namespace LuaUi
         {
         }
 
-        const std::string& name() const noexcept { return mName; };
+        const std::string& name() const noexcept { return mName; }
         const osg::Vec2f size()
         {
             MyGUI::ILayer* p = refresh();

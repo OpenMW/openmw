@@ -62,12 +62,12 @@ namespace SceneUtil
         osg::Camera* getCamera(osgUtil::CullVisitor* cv);
 
         /// Set default settings - optionally override in derived classes
-        virtual void setDefaults(osg::Camera* camera){};
+        virtual void setDefaults(osg::Camera* camera) {}
 
         /// Apply state - to override in derived classes
         /// @note Due to the view mapping approach you *have* to apply all camera settings, even if they have not
         /// changed since the last frame.
-        virtual void apply(osg::Camera* camera){};
+        virtual void apply(osg::Camera* camera) {}
 
         /// Apply any state specific to the Left view. Default implementation does nothing. Called after apply()
         virtual void applyLeft(osg::Camera* camera) {}

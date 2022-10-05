@@ -24,14 +24,14 @@ namespace MWMechanics
         Stat();
         Stat(T base, T modified);
 
-        const T& getBase() const { return mBase; };
+        const T& getBase() const { return mBase; }
 
         T getModified(bool capped = true) const;
-        T getModifier() const { return mModifier; };
+        T getModifier() const { return mModifier; }
 
-        void setBase(const T& value) { mBase = value; };
+        void setBase(const T& value) { mBase = value; }
 
-        void setModifier(const T& modifier) { mModifier = modifier; };
+        void setModifier(const T& modifier) { mModifier = modifier; }
 
         void writeState(ESM::StatState<T>& state) const;
         void readState(const ESM::StatState<T>& state);
@@ -63,13 +63,13 @@ namespace MWMechanics
         DynamicStat(T base, T modified, T current);
         DynamicStat(const Stat<T>& stat, T current);
 
-        const T& getBase() const { return mStatic.getBase(); };
-        T getModified(bool capped = true) const { return mStatic.getModified(capped); };
-        const T& getCurrent() const { return mCurrent; };
+        const T& getBase() const { return mStatic.getBase(); }
+        T getModified(bool capped = true) const { return mStatic.getModified(capped); }
+        const T& getCurrent() const { return mCurrent; }
         T getRatio(bool nanIsZero = true) const;
 
         /// Set base and adjust current accordingly.
-        void setBase(const T& value) { mStatic.setBase(value); };
+        void setBase(const T& value) { mStatic.setBase(value); }
 
         void setCurrent(const T& value, bool allowDecreaseBelowZero = false, bool allowIncreaseAboveModified = false);
 

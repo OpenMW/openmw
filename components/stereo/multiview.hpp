@@ -67,7 +67,7 @@ namespace Stereo
 
         int width() const { return mWidth; }
         int height() const { return mHeight; }
-        int samples() const { return mSamples; };
+        int samples() const { return mSamples; }
 
     private:
         osg::Texture2D* createTexture(GLint sourceFormat, GLint sourceType, GLint internalFormat);
@@ -122,8 +122,8 @@ namespace Stereo
 
         void dirty() { mDirtyLayers = true; }
 
-        const osg::FrameBufferObject* resolveFbo() const { return mResolveFbo; };
-        const osg::FrameBufferObject* msaaFbo() const { return mMsaaFbo; };
+        const osg::FrameBufferObject* resolveFbo() const { return mResolveFbo; }
+        const osg::FrameBufferObject* msaaFbo() const { return mMsaaFbo; }
 
     private:
         void setupLayers();

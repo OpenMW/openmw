@@ -318,10 +318,7 @@ namespace SceneUtil
 
         META_StateAttribute(SceneUtil, DisableLight, osg::StateAttribute::LIGHT)
 
-            unsigned int getMember() const override
-        {
-            return mIndex;
-        }
+        unsigned int getMember() const override { return mIndex; }
 
         bool getModeUsage(ModeUsage& usage) const override
         {
@@ -387,7 +384,7 @@ namespace SceneUtil
 
         META_StateAttribute(SceneUtil, FFPLightStateAttribute, osg::StateAttribute::LIGHT)
 
-            void apply(osg::State& state) const override
+        void apply(osg::State& state) const override
         {
             if (mLights.empty())
                 return;

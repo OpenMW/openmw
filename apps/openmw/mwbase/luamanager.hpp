@@ -84,7 +84,7 @@ namespace MWBase
         virtual void setupPlayer(const MWWorld::Ptr&) = 0;
 
         // Saving
-        int countSavedGameRecords() const { return 1; };
+        int countSavedGameRecords() const { return 1; }
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
         virtual void saveLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScripts& data) = 0;
 

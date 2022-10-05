@@ -48,7 +48,7 @@ namespace SceneUtil
     {
     public:
         /// @brief Handles the animation for osgAnimation formats
-        OsgAnimationController(){};
+        OsgAnimationController() = default;
 
         OsgAnimationController(const OsgAnimationController& copy, const osg::CopyOp& copyop);
 

@@ -101,3 +101,4 @@ TabWidth:        4
 UseTab:          Never
 StatementMacros:
   - META_Object
+  - META_StateAttribute

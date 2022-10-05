@@ -48,8 +48,8 @@ namespace MWInput
         void resetIdleTime();
         float getIdleTime() const { return mTimeIdle; }
 
-        bool isAlwaysRunActive() const { return mAlwaysRunActive; };
-        bool isSneaking() const { return mSneaking; };
+        bool isAlwaysRunActive() const { return mAlwaysRunActive; }
+        bool isSneaking() const { return mSneaking; }
 
         void setAttemptJump(bool enabled) { mAttemptJump = enabled; }
 

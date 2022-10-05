@@ -53,7 +53,7 @@ namespace Debug
 
         DebugGroup(const DebugGroup& debugGroup, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_StateAttribute(Debug, DebugGroup, osg::StateAttribute::Type(101));
+        META_StateAttribute(Debug, DebugGroup, osg::StateAttribute::Type(101))
 
         void apply(osg::State& state) const override;
 

@@ -96,7 +96,7 @@ namespace LuaUi
 
         virtual void updateTemplate();
         virtual void updateProperties();
-        virtual void updateChildren(){};
+        virtual void updateChildren() {}
 
         lua_State* lua() const { return mLua; }
 

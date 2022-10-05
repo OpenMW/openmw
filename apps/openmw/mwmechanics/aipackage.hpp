@@ -89,7 +89,7 @@ namespace MWMechanics
         virtual MWWorld::Ptr getTarget() const;
 
         /// Get the destination point of the AI package (not applicable to all AI packages, default return (0, 0, 0))
-        virtual osg::Vec3f getDestination(const MWWorld::Ptr& actor) const { return osg::Vec3f(0, 0, 0); };
+        virtual osg::Vec3f getDestination(const MWWorld::Ptr& actor) const { return osg::Vec3f(0, 0, 0); }
 
         /// Return true if having this AiPackage makes the actor side with the target in fights (default false)
         bool sideWithTarget() const { return mOptions.mSideWithTarget; }
