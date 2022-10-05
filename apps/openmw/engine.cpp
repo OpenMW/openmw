@@ -49,6 +49,7 @@
 #include "mwgui/windowmanagerimp.hpp"
 
 #include "mwlua/luamanagerimp.hpp"
+#include "mwlua/worker.hpp"
 
 #include "mwscript/interpretercontext.hpp"
 #include "mwscript/scriptmanagerimp.hpp"
@@ -797,98 +798,6 @@ void OMW::Engine::prepareEngine()
     mLuaManager->loadPermanentStorage(mCfgMgr.getUserConfigPath());
 }
 
-class OMW::Engine::LuaWorker
-{
-public:
-    explicit LuaWorker(Engine* engine)
-        : mEngine(engine)
-    {
-        if (Settings::Manager::getInt("lua num threads", "Lua") > 0)
-            mThread = std::thread([this] { threadBody(); });
-    }
-
-    ~LuaWorker()
-    {
-        if (mThread && mThread->joinable())
-        {
-            Log(Debug::Error)
-                << "Unexpected destruction of LuaWorker; likely there is an unhandled exception in the main thread.";
-            join();
-        }
-    }
-
-    void allowUpdate()
-    {
-        if (!mThread)
-            return;
-        {
-            std::lock_guard<std::mutex> lk(mMutex);
-            mUpdateRequest = true;
-        }
-        mCV.notify_one();
-    }
-
-    void finishUpdate()
-    {
-        if (mThread)
-        {
-            std::unique_lock<std::mutex> lk(mMutex);
-            mCV.wait(lk, [&] { return !mUpdateRequest; });
-        }
-        else
-            update();
-    }
-
-    void join()
-    {
-        if (mThread)
-        {
-            {
-                std::lock_guard<std::mutex> lk(mMutex);
-                mJoinRequest = true;
-            }
-            mCV.notify_one();
-            mThread->join();
-        }
-    }
-
-private:
-    void update()
-    {
-        const auto& viewer = mEngine->mViewer;
-        const osg::Timer_t frameStart = viewer->getStartTick();
-        const unsigned int frameNumber = viewer->getFrameStamp()->getFrameNumber();
-        ScopedProfile<UserStatsType::Lua> profile(
-            frameStart, frameNumber, *osg::Timer::instance(), *viewer->getViewerStats());
-
-        mEngine->mLuaManager->update();
-    }
-
-    void threadBody()
-    {
-        while (true)
-        {
-            std::unique_lock<std::mutex> lk(mMutex);
-            mCV.wait(lk, [&] { return mUpdateRequest || mJoinRequest; });
-            if (mJoinRequest)
-                break;
-
-            update();
-
-            mUpdateRequest = false;
-            lk.unlock();
-            mCV.notify_one();
-        }
-    }
-
-    Engine* mEngine;
-    std::mutex mMutex;
-    std::condition_variable mCV;
-    bool mUpdateRequest = false;
-    bool mJoinRequest = false;
-    std::optional<std::thread> mThread;
-};
-
 // Initialise and enter main loop.
 void OMW::Engine::go()
 {
@@ -977,7 +886,7 @@ void OMW::Engine::go()
         mWindowManager->executeInConsole(mStartupScript);
     }
 
-    LuaWorker luaWorker(this); // starts a separate lua thread if "lua num threads" > 0
+    MWLua::Worker luaWorker(*mLuaManager, *mViewer); // starts a separate lua thread if "lua num threads" > 0
 
     // Start the main rendering loop
     double simulationTime = 0.0;
