@@ -39,7 +39,7 @@ namespace Terrain
 
         void clear();
 
-        bool contains(QuadTreeNode* node) const;
+        bool contains(const QuadTreeNode* node) const;
 
         void copyFrom(const ViewData& other);
 
@@ -53,7 +53,7 @@ namespace Terrain
         /// @note Such changes may necessitate a revalidation of cached mRenderingNodes elsewhere depending
         /// on the parameters that affect the creation of mRenderingNode.
         bool hasChanged() const { return mChanged; }
-        void setChanged(bool changed) { mChanged = changed; }
+        void resetChanged() { mChanged = false; }
 
         bool hasViewPoint() const { return mHasViewPoint; }
 
@@ -67,6 +67,7 @@ namespace Terrain
                 mActiveGrid = grid;
                 mEntries.clear();
                 mNumEntries = 0;
+                mNodes.clear();
             }
         }
         const osg::Vec4i& getActiveGrid() const { return mActiveGrid; }
@@ -74,8 +75,13 @@ namespace Terrain
         unsigned int getWorldUpdateRevision() const { return mWorldUpdateRevision; }
         void setWorldUpdateRevision(int updateRevision) { mWorldUpdateRevision = updateRevision; }
 
+        void buildNodeIndex();
+
+        void removeNodeFromIndex(const QuadTreeNode* node);
+
     private:
         std::vector<ViewDataEntry> mEntries;
+        std::vector<const QuadTreeNode*> mNodes;
         unsigned int mNumEntries;
         double mLastUsageTimeStamp;
         bool mChanged;
