@@ -37,8 +37,8 @@ namespace SceneUtil
 
         META_Node(SceneUtil, Skeleton)
 
-            /// Retrieve a bone by name.
-            Bone* getBone(const std::string& name);
+        /// Retrieve a bone by name.
+        Bone* getBone(const std::string& name);
 
         /// Request an update of bone matrices. May be a no-op if already updated in this frame.
         void updateBoneMatrices(unsigned int traversalNumber);

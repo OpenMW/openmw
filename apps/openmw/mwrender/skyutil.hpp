@@ -187,7 +187,7 @@ namespace MWRender
 
         META_Node(MWRender, CameraRelativeTransform)
 
-            const osg::Vec3f& getLastViewPoint() const;
+        const osg::Vec3f& getLastViewPoint() const;
 
         bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const override;
 

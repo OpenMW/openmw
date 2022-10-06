@@ -24,7 +24,7 @@ namespace SceneUtil
 
         META_Node(SceneUtil, PositionAttitudeTransform)
 
-            inline void setPosition(const osg::Vec3f& pos)
+        inline void setPosition(const osg::Vec3f& pos)
         {
             _position = pos;
             dirtyBound();

@@ -126,7 +126,7 @@ namespace SceneUtil
     public:
         META_Node(SceneUtil, LightSource)
 
-            LightSource();
+        LightSource();
 
         LightSource(const LightSource& copy, const osg::CopyOp& copyop);
 
@@ -219,7 +219,7 @@ namespace SceneUtil
 
         META_Node(SceneUtil, LightManager)
 
-            LightManager(bool ffp = true);
+        LightManager(bool ffp = true);
 
         LightManager(const LightManager& copy, const osg::CopyOp& copyop);
 
