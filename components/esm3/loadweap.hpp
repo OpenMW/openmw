@@ -123,7 +123,9 @@ namespace ESM
             , mSkill(skill)
             , mWeaponClass(weaponClass)
             , mAmmoType(ammoType)
-            , mFlags(flags){};
+            , mFlags(flags)
+        {
+        }
     };
 
 }

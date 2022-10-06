@@ -74,7 +74,7 @@ namespace Stereo
         //! Sets up any definitions necessary for stereo rendering
         void shaderStereoDefines(Shader::ShaderManager::DefineMap& defines) const;
 
-        const std::shared_ptr<MultiviewFramebuffer>& multiviewFramebuffer() { return mMultiviewFramebuffer; };
+        const std::shared_ptr<MultiviewFramebuffer>& multiviewFramebuffer() { return mMultiviewFramebuffer; }
 
         //! Sets rendering resolution of each eye to eyeResolution.
         //! Once set, there will no longer be any connection between rendering resolution and screen/window resolution.

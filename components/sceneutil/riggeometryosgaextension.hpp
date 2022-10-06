@@ -20,7 +20,7 @@ namespace SceneUtil
 
         OsgaRigGeometry(const OsgaRigGeometry& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_Object(SceneUtil, OsgaRigGeometry);
+        META_Object(SceneUtil, OsgaRigGeometry)
 
         void computeMatrixFromRootSkeleton(osg::MatrixList mtxList);
     };
@@ -36,7 +36,7 @@ namespace SceneUtil
 
         RigGeometryHolder(const osgAnimation::RigGeometry& copy, const osg::CopyOp& copyop);
 
-        META_Object(SceneUtil, RigGeometryHolder);
+        META_Object(SceneUtil, RigGeometryHolder)
 
         void setSourceRigGeometry(osg::ref_ptr<OsgaRigGeometry> sourceRigGeometry);
         osg::ref_ptr<OsgaRigGeometry> getSourceRigGeometry() const;

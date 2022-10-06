@@ -32,7 +32,9 @@ namespace MWRender
             CollisionView(btVector3 orig, btVector3 normal)
                 : mOrig(orig)
                 , mEnd(orig + normal * 20)
-                , mCreated(std::chrono::steady_clock::now()){};
+                , mCreated(std::chrono::steady_clock::now())
+            {
+            }
         };
         std::vector<CollisionView> mCollisionViews;
         osg::ref_ptr<osg::Group> mShapesRoot;
@@ -69,7 +71,9 @@ namespace MWRender
         void showCollisions();
 
         void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime,
-            const btVector3& color) override{};
+            const btVector3& color) override
+        {
+        }
         void drawSphere(btScalar radius, const btTransform& transform, const btVector3& color) override;
 
         void reportErrorWarning(const char* warningString) override;

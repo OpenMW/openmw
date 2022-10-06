@@ -937,7 +937,7 @@ public:
     {
         if (Settings::Manager::getInt("lua num threads", "Lua") > 0)
             mThread = std::thread([this] { threadBody(); });
-    };
+    }
 
     ~LuaWorker()
     {
@@ -969,7 +969,7 @@ public:
         }
         else
             update();
-    };
+    }
 
     void join()
     {

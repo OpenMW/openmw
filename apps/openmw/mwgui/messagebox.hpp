@@ -68,7 +68,7 @@ namespace MWGui
     {
     public:
         MessageBox(MessageBoxManager& parMessageBoxManager, std::string_view message);
-        const std::string& getMessage() { return mMessage; };
+        const std::string& getMessage() { return mMessage; }
         int getHeight();
         void update(int height);
         void setVisible(bool value);

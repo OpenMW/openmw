@@ -178,7 +178,7 @@ namespace SceneUtil
 
         META_StateAttribute(SceneUtil, UBOManager, osg::StateAttribute::LIGHT)
 
-            void apply(osg::State& state) const override;
+        void apply(osg::State& state) const override;
 
         auto& getLightBuffer(size_t frameNum) { return mLightBuffers[frameNum % 2]; }
 

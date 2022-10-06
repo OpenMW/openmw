@@ -35,10 +35,10 @@ namespace ESM
         const std::string& getDesc() const { return mHeader.mData.desc; }
         const std::vector<Header::MasterData>& getGameFiles() const { return mHeader.mMaster; }
         const Header& getHeader() const { return mHeader; }
-        int getFormat() const { return mHeader.mFormat; };
+        int getFormat() const { return mHeader.mFormat; }
         const NAME& retSubName() const { return mCtx.subName; }
         uint32_t getSubSize() const { return mCtx.leftSub; }
-        const std::filesystem::path& getName() const { return mCtx.filename; };
+        const std::filesystem::path& getName() const { return mCtx.filename; }
         bool isOpen() const { return mEsm != nullptr; }
 
         /*************************************************************************
@@ -73,7 +73,7 @@ namespace ESM
         void openRaw(const std::filesystem::path& filename);
 
         /// Get the current position in the file. Make sure that the file has been opened!
-        size_t getFileOffset() const { return mEsm->tellg(); };
+        size_t getFileOffset() const { return mEsm->tellg(); }
 
         // This is a quick hack for multiple esm/esp files. Each plugin introduces its own
         //  terrain palette, but ESMReader does not pass a reference to the correct plugin
@@ -200,7 +200,7 @@ namespace ESM
         bool peekNextSub(NAME name);
 
         // Store the current subrecord name for the next call of getSubName()
-        void cacheSubName() { mCtx.subCached = true; };
+        void cacheSubName() { mCtx.subCached = true; }
 
         // Read subrecord name. This gets called a LOT, so I've optimized it
         // slightly.
@@ -283,7 +283,7 @@ namespace ESM
         [[noreturn]] void fail(const std::string& msg);
 
         /// Sets font encoder for ESM strings
-        void setEncoder(ToUTF8::Utf8Encoder* encoder) { mEncoder = encoder; };
+        void setEncoder(ToUTF8::Utf8Encoder* encoder) { mEncoder = encoder; }
 
         /// Get record flags of last record
         unsigned int getRecordFlags() { return mRecordFlags; }

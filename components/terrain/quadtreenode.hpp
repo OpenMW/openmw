@@ -54,7 +54,7 @@ namespace Terrain
             _children.reserve(4);
             _children.push_back(child);
             child->addParent(this);
-        };
+        }
 
         float distance(const osg::Vec3f& v) const;
 

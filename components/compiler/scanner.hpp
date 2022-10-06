@@ -149,7 +149,7 @@ namespace Compiler
 
             in.seekg(p_orig);
             return true;
-        };
+        }
 
         void blank()
         {

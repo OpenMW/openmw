@@ -30,7 +30,7 @@ namespace Shader
         {
         }
 
-        META_StateAttribute(Shader, RemovedAlphaFunc, ALPHAFUNC);
+        META_StateAttribute(Shader, RemovedAlphaFunc, ALPHAFUNC)
 
         void apply(osg::State& state) const override {}
 

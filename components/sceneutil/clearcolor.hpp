@@ -28,7 +28,7 @@ namespace SceneUtil
 
         META_StateAttribute(fx, ClearColor, static_cast<osg::StateAttribute::Type>(100))
 
-            int compare(const StateAttribute& sa) const override
+        int compare(const StateAttribute& sa) const override
         {
             COMPARE_StateAttribute_Types(ClearColor, sa);
 

@@ -185,7 +185,7 @@ namespace MWRender
 
             camera->setNodeMask(Mask_RenderToTexture);
             camera->addChild(mGroup);
-        };
+        }
 
         void apply(osg::Camera* camera) override
         {
@@ -195,7 +195,7 @@ namespace MWRender
 
             if (shouldDoTextureArray())
                 Stereo::setMultiviewMatrices(mGroup->getOrCreateStateSet(), { mPerspectiveMatrix, mPerspectiveMatrix });
-        };
+        }
 
         void addChild(osg::Node* node) { mGroup->addChild(node); }
 

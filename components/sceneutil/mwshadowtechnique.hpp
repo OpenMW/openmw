@@ -44,7 +44,7 @@ namespace SceneUtil {
 
         MWShadowTechnique(const MWShadowTechnique& vdsm, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_Object(SceneUtil, MWShadowTechnique);
+        META_Object(SceneUtil, MWShadowTechnique)
 
         /** initialize the ShadowedScene and local cached data structures.*/
         void init() override;

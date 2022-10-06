@@ -92,17 +92,17 @@ namespace
             mFloats.clear();
         }
 
-        int getShort(std::size_t index) const { return getLocal(index, mShorts); };
+        int getShort(std::size_t index) const { return getLocal(index, mShorts); }
 
-        int getLong(std::size_t index) const { return getLocal(index, mLongs); };
+        int getLong(std::size_t index) const { return getLocal(index, mLongs); }
 
-        float getFloat(std::size_t index) const { return getLocal(index, mFloats); };
+        float getFloat(std::size_t index) const { return getLocal(index, mFloats); }
 
-        void setShort(std::size_t index, int value) { setLocal(value, index, mShorts); };
+        void setShort(std::size_t index, int value) { setLocal(value, index, mShorts); }
 
-        void setLong(std::size_t index, int value) { setLocal(value, index, mLongs); };
+        void setLong(std::size_t index, int value) { setLocal(value, index, mLongs); }
 
-        void setFloat(std::size_t index, float value) { setLocal(value, index, mFloats); };
+        void setFloat(std::size_t index, float value) { setLocal(value, index, mFloats); }
     };
 
     class GlobalVariables
@@ -128,17 +128,17 @@ namespace
             mFloats.clear();
         }
 
-        int getShort(std::string_view name) const { return getGlobal(name, mShorts); };
+        int getShort(std::string_view name) const { return getGlobal(name, mShorts); }
 
-        int getLong(std::string_view name) const { return getGlobal(name, mLongs); };
+        int getLong(std::string_view name) const { return getGlobal(name, mLongs); }
 
-        float getFloat(std::string_view name) const { return getGlobal(name, mFloats); };
+        float getFloat(std::string_view name) const { return getGlobal(name, mFloats); }
 
-        void setShort(std::string_view name, int value) { mShorts[std::string(name)] = value; };
+        void setShort(std::string_view name, int value) { mShorts[std::string(name)] = value; }
 
-        void setLong(std::string_view name, int value) { mLongs[std::string(name)] = value; };
+        void setLong(std::string_view name, int value) { mLongs[std::string(name)] = value; }
 
-        void setFloat(std::string_view name, float value) { mFloats[std::string(name)] = value; };
+        void setFloat(std::string_view name, float value) { mFloats[std::string(name)] = value; }
     };
 
     class TestInterpreterContext : public Interpreter::Context
@@ -147,65 +147,65 @@ namespace
         std::map<std::string, GlobalVariables, std::less<>> mMembers;
 
     public:
-        std::string_view getTarget() const override { return {}; };
+        std::string_view getTarget() const override { return {}; }
 
-        int getLocalShort(int index) const override { return mLocals.getShort(index); };
+        int getLocalShort(int index) const override { return mLocals.getShort(index); }
 
-        int getLocalLong(int index) const override { return mLocals.getLong(index); };
+        int getLocalLong(int index) const override { return mLocals.getLong(index); }
 
-        float getLocalFloat(int index) const override { return mLocals.getFloat(index); };
+        float getLocalFloat(int index) const override { return mLocals.getFloat(index); }
 
-        void setLocalShort(int index, int value) override { mLocals.setShort(index, value); };
+        void setLocalShort(int index, int value) override { mLocals.setShort(index, value); }
 
-        void setLocalLong(int index, int value) override { mLocals.setLong(index, value); };
+        void setLocalLong(int index, int value) override { mLocals.setLong(index, value); }
 
-        void setLocalFloat(int index, float value) override { mLocals.setFloat(index, value); };
+        void setLocalFloat(int index, float value) override { mLocals.setFloat(index, value); }
 
-        void messageBox(std::string_view message, const std::vector<std::string>& buttons) override{};
+        void messageBox(std::string_view message, const std::vector<std::string>& buttons) override {}
 
-        void report(const std::string& message) override{};
+        void report(const std::string& message) override {}
 
-        int getGlobalShort(std::string_view name) const override { return {}; };
+        int getGlobalShort(std::string_view name) const override { return {}; }
 
-        int getGlobalLong(std::string_view name) const override { return {}; };
+        int getGlobalLong(std::string_view name) const override { return {}; }
 
-        float getGlobalFloat(std::string_view name) const override { return {}; };
+        float getGlobalFloat(std::string_view name) const override { return {}; }
 
-        void setGlobalShort(std::string_view name, int value) override{};
+        void setGlobalShort(std::string_view name, int value) override {}
 
-        void setGlobalLong(std::string_view name, int value) override{};
+        void setGlobalLong(std::string_view name, int value) override {}
 
-        void setGlobalFloat(std::string_view name, float value) override{};
+        void setGlobalFloat(std::string_view name, float value) override {}
 
-        std::vector<std::string> getGlobals() const override { return {}; };
+        std::vector<std::string> getGlobals() const override { return {}; }
 
-        char getGlobalType(std::string_view name) const override { return ' '; };
+        char getGlobalType(std::string_view name) const override { return ' '; }
 
-        std::string getActionBinding(std::string_view action) const override { return {}; };
+        std::string getActionBinding(std::string_view action) const override { return {}; }
 
-        std::string_view getActorName() const override { return {}; };
+        std::string_view getActorName() const override { return {}; }
 
-        std::string_view getNPCRace() const override { return {}; };
+        std::string_view getNPCRace() const override { return {}; }
 
-        std::string_view getNPCClass() const override { return {}; };
+        std::string_view getNPCClass() const override { return {}; }
 
-        std::string_view getNPCFaction() const override { return {}; };
+        std::string_view getNPCFaction() const override { return {}; }
 
-        std::string_view getNPCRank() const override { return {}; };
+        std::string_view getNPCRank() const override { return {}; }
 
-        std::string_view getPCName() const override { return {}; };
+        std::string_view getPCName() const override { return {}; }
 
-        std::string_view getPCRace() const override { return {}; };
+        std::string_view getPCRace() const override { return {}; }
 
-        std::string_view getPCClass() const override { return {}; };
+        std::string_view getPCClass() const override { return {}; }
 
-        std::string_view getPCRank() const override { return {}; };
+        std::string_view getPCRank() const override { return {}; }
 
-        std::string_view getPCNextRank() const override { return {}; };
+        std::string_view getPCNextRank() const override { return {}; }
 
-        int getPCBounty() const override { return {}; };
+        int getPCBounty() const override { return {}; }
 
-        std::string_view getCurrentCellName() const override { return {}; };
+        std::string_view getCurrentCellName() const override { return {}; }
 
         int getMemberShort(std::string_view id, std::string_view name, bool global) const override
         {
@@ -213,7 +213,7 @@ namespace
             if (it != mMembers.end())
                 return it->second.getShort(name);
             return {};
-        };
+        }
 
         int getMemberLong(std::string_view id, std::string_view name, bool global) const override
         {
@@ -221,7 +221,7 @@ namespace
             if (it != mMembers.end())
                 return it->second.getLong(name);
             return {};
-        };
+        }
 
         float getMemberFloat(std::string_view id, std::string_view name, bool global) const override
         {
@@ -229,22 +229,22 @@ namespace
             if (it != mMembers.end())
                 return it->second.getFloat(name);
             return {};
-        };
+        }
 
         void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override
         {
             mMembers[std::string(id)].setShort(name, value);
-        };
+        }
 
         void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override
         {
             mMembers[std::string(id)].setLong(name, value);
-        };
+        }
 
         void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override
         {
             mMembers[std::string(id)].setFloat(name, value);
-        };
+        }
     };
 
     struct CompiledScript

@@ -65,7 +65,7 @@ namespace Bsa
             Hash hash;
 
             // Zero-terminated file name
-            const char* name() const { return &(*namesBuffer)[namesOffset]; };
+            const char* name() const { return &(*namesBuffer)[namesOffset]; }
 
             uint32_t namesOffset = 0;
             std::vector<char>* namesBuffer = nullptr;
