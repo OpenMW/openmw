@@ -145,7 +145,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
 
     // Test, if we need to save anything associated info records.
     bool infoModified = false;
-    CSMWorld::InfoCollection::Range range = mInfos.getTopicRange(topic.get().mId);
+    CSMWorld::InfoCollection::Range range = mInfos.getTopicRange(topic.get().mId.getRefIdString());
 
     for (CSMWorld::InfoCollection::RecordConstIterator iter(range.first); iter != range.second; ++iter)
     {
@@ -178,24 +178,26 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
             if ((*iter)->isModified() || (*iter)->mState == CSMWorld::RecordBase::State_Deleted)
             {
                 ESM::DialInfo info = (*iter)->get();
-                info.mId = info.mId.substr(info.mId.find_last_of('#') + 1);
+                std::string infoIdString = info.mId.getRefIdString();
+                info.mId = ESM::RefId::stringRefId(infoIdString.substr(infoIdString.find_last_of('#') + 1));
 
-                info.mPrev.clear();
+                info.mPrev = ESM::RefId::sEmpty;
                 if (iter != range.first)
                 {
                     CSMWorld::InfoCollection::RecordConstIterator prev = iter;
                     --prev;
-
-                    info.mPrev = (*prev)->get().mId.substr((*prev)->get().mId.find_last_of('#') + 1);
+                    std::string prevIdString = (*prev)->get().mId.getRefIdString();
+                    info.mPrev = ESM::RefId::stringRefId(prevIdString.substr(prevIdString.find_last_of('#') + 1));
                 }
 
                 CSMWorld::InfoCollection::RecordConstIterator next = iter;
                 ++next;
 
-                info.mNext.clear();
+                info.mNext = ESM::RefId::sEmpty;
                 if (next != range.second)
                 {
-                    info.mNext = (*next)->get().mId.substr((*next)->get().mId.find_last_of('#') + 1);
+                    std::string nextIdString = (*next)->get().mId.getRefIdString();
+                    info.mNext = ESM::RefId::stringRefId(nextIdString.substr(nextIdString.find_last_of('#') + 1));
                 }
 
                 writer.startRecord(info.sRecordId);
@@ -251,12 +253,12 @@ void CSMDoc::CollectionReferencesStage::perform(int stage, Messages& messages)
 
         if (record.isModified() || record.mState == CSMWorld::RecordBase::State_Deleted)
         {
-            std::string cellId = record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell;
+            ESM::RefId cellId = record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell;
 
-            std::deque<int>& indices = mState.getSubRecords()[Misc::StringUtils::lowerCase(cellId)];
+            std::deque<int>& indices = mState.getSubRecords()[cellId.getRefIdString()];
 
             // collect moved references at the end of the container
-            bool interior = cellId.substr(0, 1) != "#";
+            bool interior = cellId.getRefIdString().substr(0, 1) != "#";
             std::ostringstream stream;
             if (!interior)
             {
@@ -267,7 +269,7 @@ void CSMDoc::CollectionReferencesStage::perform(int stage, Messages& messages)
 
             // An empty mOriginalCell is meant to indicate that it is the same as
             // the current cell.  It is possible that a moved ref is moved again.
-            if ((record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell) != stream.str()
+            if ((record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell) != ESM::RefId::stringRefId(stream.str())
                 && !interior && record.mState != CSMWorld::RecordBase::State_ModifiedOnly && !record.get().mNew)
                 indices.push_back(i);
             else
@@ -312,13 +314,14 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
                 stream << "#" << index.first << " " << index.second;
             }
 
+            ESM::RefId streamId = ESM::RefId::stringRefId(stream.str());
             if (refRecord.mNew || refRecord.mRefNum.mIndex == 0
                 || (!interior && ref.mState == CSMWorld::RecordBase::State_ModifiedOnly
-                    && refRecord.mCell != stream.str()))
+                    && refRecord.mCell != streamId))
             {
                 refRecord.mRefNum.mIndex = newRefNum++;
             }
-            else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell) != stream.str()
+            else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell) != streamId
                 && !interior)
             {
                 // An empty mOriginalCell is meant to indicate that it is the same as
@@ -353,13 +356,13 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
     std::deque<int> persistentRefs;
 
     std::map<std::string, std::deque<int>>::const_iterator references
-        = mState.getSubRecords().find(Misc::StringUtils::lowerCase(cell.get().mId));
+        = mState.getSubRecords().find(cell.get().mId.getRefIdString());
 
     if (cell.isModified() || cell.mState == CSMWorld::RecordBase::State_Deleted
         || references != mState.getSubRecords().end())
     {
         CSMWorld::Cell cellRecord = cell.get();
-        bool interior = cellRecord.mId.substr(0, 1) != "#";
+        bool interior = cellRecord.mId.getRefIdString().substr(0, 1) != "#";
 
         // count new references and adjust RefNumCount accordingsly
         unsigned int newRefNum = cellRecord.mRefNumCounter;
@@ -387,7 +390,7 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
                 if (refRecord.mNew
                     || (!interior && ref.mState == CSMWorld::RecordBase::State_ModifiedOnly &&
                         /// \todo consider worldspace
-                        CSMWorld::CellCoordinates(refRecord.getCellIndex()).getId("") != refRecord.mCell))
+                        ESM::RefId::stringRefId(CSMWorld::CellCoordinates( refRecord.getCellIndex()).getId("")) != refRecord.mCell))
                     ++cellRecord.mRefNumCounter;
 
                 if (refRecord.mRefNum.mIndex >= newRefNum)
@@ -404,7 +407,7 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         {
             cellRecord.mData.mFlags &= ~ESM::Cell::Interior;
 
-            std::istringstream stream(cellRecord.mId.c_str());
+            std::istringstream stream(cellRecord.mId.getRefIdString().c_str());
             char ignore;
             stream >> ignore >> cellRecord.mData.mX >> cellRecord.mData.mY;
         }
@@ -442,10 +445,10 @@ void CSMDoc::WritePathgridCollectionStage::perform(int stage, Messages& messages
     if (pathgrid.isModified() || pathgrid.mState == CSMWorld::RecordBase::State_Deleted)
     {
         CSMWorld::Pathgrid record = pathgrid.get();
-
-        if (record.mId.substr(0, 1) == "#")
+        std::string recordIdString = record.mId.getRefIdString();
+        if (recordIdString.substr(0, 1) == "#")
         {
-            std::istringstream stream(record.mId.c_str());
+            std::istringstream stream(recordIdString.c_str());
             char ignore;
             stream >> ignore >> record.mData.mX >> record.mData.mY;
         }

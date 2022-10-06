@@ -74,7 +74,7 @@ namespace CSMWorld
 
         loadRecord(record, reader, isDeleted);
 
-        std::string id = IdAccessorT().getId(record);
+        ESM::RefId id = IdAccessorT().getId(record);
         int index = this->searchId(id);
 
         if (isDeleted)

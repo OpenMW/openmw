@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "../world/universalid.hpp"
-
+#include <components/esm/refid.hpp>
 #include "../doc/stage.hpp"
 
 namespace CSMDoc
@@ -25,11 +25,11 @@ namespace CSMTools
     {
         const CSMWorld::CollectionBase& mIdCollection;
         CSMWorld::UniversalId mCollectionId;
-        std::vector<std::string> mIds;
+        std::vector<ESM::RefId> mIds;
 
     public:
         MandatoryIdStage(const CSMWorld::CollectionBase& idCollection, const CSMWorld::UniversalId& collectionId,
-            const std::vector<std::string>& ids);
+            const std::vector<ESM::RefId>& ids);
 
         int setup() override;
         ///< \return number of steps

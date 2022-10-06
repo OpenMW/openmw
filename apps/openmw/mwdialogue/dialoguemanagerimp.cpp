@@ -668,7 +668,7 @@ namespace MWDialogue
             if (winMgr->getSubtitlesEnabled())
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
-                sndMgr->say(actor, info->mSound.getRefIdString());
+                sndMgr->say(actor, info->mSound);
             if (!info->mResultScript.empty())
                 executeScript(info->mResultScript, actor);
         }

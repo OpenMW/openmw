@@ -2,6 +2,7 @@
 #define CSM_WOLRD_REFIDADAPTER_H
 
 #include <string>
+#include <components/esm/refid.hpp>
 
 /*! \brief
  * Adapters acts as indirection layer, abstracting details of the record types (in the wrappers) from the higher levels
@@ -38,7 +39,7 @@ namespace CSMWorld
         virtual void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const = 0;
         ///< If the data type does not match an exception is thrown.
 
-        virtual std::string getId(const RecordBase& record) const = 0;
+        virtual ESM::RefId getId(const RecordBase& record) const = 0;
 
         virtual void setId(RecordBase& record, const std::string& id) = 0; // used by RefIdCollection::cloneRecord()
     };

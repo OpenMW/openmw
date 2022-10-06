@@ -24,7 +24,7 @@ CSVWorld::PreviewSubView::PreviewSubView(const CSMWorld::UniversalId& id, CSMDoc
 
     if (document.getData().getReferenceables().searchId(id.getId()) == -1)
     {
-        std::string referenceableId = document.getData().getReferences().getRecord(id.getId()).get().mRefID;
+        std::string referenceableId = document.getData().getReferences().getRecord(ESM::RefId::stringRefId(id.getId())).get().mRefID.getRefIdString();
 
         referenceableIdChanged(referenceableId);
 

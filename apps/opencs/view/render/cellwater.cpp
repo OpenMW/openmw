@@ -131,7 +131,7 @@ namespace CSVRender
         {
             const CSMWorld::Record<CSMWorld::Cell>& cellRecord = cells.getRecord(row);
 
-            if (Misc::StringUtils::lowerCase(cellRecord.get().mId) == mId)
+            if (cellRecord.get().mId == ESM::RefId::stringRefId(mId))
                 updateCellData(cellRecord);
         }
     }

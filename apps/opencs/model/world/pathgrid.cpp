@@ -9,11 +9,11 @@ void CSMWorld::Pathgrid::load(ESM::ESMReader& esm, bool& isDeleted, const IdColl
     load(esm, isDeleted);
 
     // correct ID
-    if (!mId.empty() && mId[0] != '#' && cells.searchId(mId) == -1)
+    if (!mId.empty() && mId.getRefIdString()[0] != '#' && cells.searchId(mId) == -1)
     {
         std::ostringstream stream;
         stream << "#" << mData.mX << " " << mData.mY;
-        mId = stream.str();
+        mId = ESM::RefId::stringRefId(stream.str());
     }
 }
 
@@ -26,6 +26,6 @@ void CSMWorld::Pathgrid::load(ESM::ESMReader& esm, bool& isDeleted)
     {
         std::ostringstream stream;
         stream << "#" << mData.mX << " " << mData.mY;
-        mId = stream.str();
+        mId = ESM::RefId::stringRefId(stream.str());
     }
 }

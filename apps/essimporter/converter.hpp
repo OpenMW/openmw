@@ -45,6 +45,7 @@
 #include "convertnpcc.hpp"
 #include "convertplayer.hpp"
 #include "convertscpt.hpp"
+#include <components/esm/refid.hpp>
 
 namespace ESSImport
 {
@@ -89,7 +90,7 @@ namespace ESSImport
 
         void write(ESM::ESMWriter& esm) override
         {
-            for (typename std::map<std::string, T>::const_iterator it = mRecords.begin(); it != mRecords.end(); ++it)
+            for (auto it = mRecords.begin(); it != mRecords.end(); ++it)
             {
                 esm.startRecord(T::sRecordId);
                 it->second.save(esm);
@@ -98,7 +99,7 @@ namespace ESSImport
         }
 
     protected:
-        std::map<std::string, T> mRecords;
+        std::map<ESM::RefId, T> mRecords;
     };
 
     class ConvertNPC : public Converter
@@ -110,12 +111,12 @@ namespace ESSImport
             bool isDeleted = false;
 
             npc.load(esm, isDeleted);
-            if (npc.mId != "player")
+            if (npc.mId != ESM::RefId::stringRefId("player"))
             {
                 // Handles changes to the NPC struct, but since there is no index here
                 // it will apply to ALL instances of the class. seems to be the reason for the
                 // "feature" in MW where changing AI settings of one guard will change it for all guards of that refID.
-                mContext->mNpcs[Misc::StringUtils::lowerCase(npc.mId)] = npc;
+                mContext->mNpcs[npc.mId] = npc;
             }
             else
             {
@@ -146,7 +147,7 @@ namespace ESSImport
             bool isDeleted = false;
 
             creature.load(esm, isDeleted);
-            mContext->mCreatures[Misc::StringUtils::lowerCase(creature.mId)] = creature;
+            mContext->mCreatures[creature.mId] = creature;
         }
     };
 
@@ -163,13 +164,13 @@ namespace ESSImport
             bool isDeleted = false;
 
             global.load(esm, isDeleted);
-            if (Misc::StringUtils::ciEqual(global.mId, "gamehour"))
+            if (global.mId == ESM::RefId::stringRefId("gamehour"))
                 mContext->mHour = global.mValue.getFloat();
-            if (Misc::StringUtils::ciEqual(global.mId, "day"))
+            if (global.mId == ESM::RefId::stringRefId("day"))
                 mContext->mDay = global.mValue.getInteger();
-            if (Misc::StringUtils::ciEqual(global.mId, "month"))
+            if (global.mId == ESM::RefId::stringRefId("month"))
                 mContext->mMonth = global.mValue.getInteger();
-            if (Misc::StringUtils::ciEqual(global.mId, "year"))
+            if (global.mId == ESM::RefId::stringRefId("year"))
                 mContext->mYear = global.mValue.getInteger();
             mRecords[global.mId] = global;
         }
@@ -184,7 +185,7 @@ namespace ESSImport
             bool isDeleted = false;
 
             class_.load(esm, isDeleted);
-            if (class_.mId == "NEWCLASSID_CHARGEN")
+            if (class_.mId == ESM::RefId::stringRefId("NEWCLASSID_CHARGEN"))
                 mContext->mCustomPlayerClassName = class_.mName;
 
             mRecords[class_.mId] = class_;
@@ -201,7 +202,7 @@ namespace ESSImport
 
             book.load(esm, isDeleted);
             if (book.mData.mSkillId == -1)
-                mContext->mPlayer.mObject.mNpcStats.mUsedIds.push_back(Misc::StringUtils::lowerCase(book.mId));
+                mContext->mPlayer.mObject.mNpcStats.mUsedIds.push_back(book.mId);
 
             mRecords[book.mId] = book;
         }
@@ -212,10 +213,10 @@ namespace ESSImport
     public:
         void read(ESM::ESMReader& esm) override
         {
-            std::string id = esm.getHNString("NAME");
+            auto id = ESM::RefId::stringRefId(esm.getHNString("NAME"));
             NPCC npcc;
             npcc.load(esm);
-            if (id == "PlayerSaveGame")
+            if (id == ESM::RefId::stringRefId("PlayerSaveGame"))
             {
                 convertNPCC(npcc, mContext->mPlayer.mObject);
             }
@@ -251,8 +252,7 @@ namespace ESSImport
                 for (unsigned int i = 0; i < invState.mItems.size(); ++i)
                 {
                     // FIXME: in case of conflict (multiple items with this refID) use the already equipped one?
-                    if (Misc::StringUtils::ciEqual(
-                            invState.mItems[i].mRef.mRefID, refr.mActorData.mSelectedEnchantItem))
+                    if (invState.mItems[i].mRef.mRefID == ESM::RefId::stringRefId(refr.mActorData.mSelectedEnchantItem))
                         invState.mSelectedEnchantItem = i;
                 }
             }
@@ -308,7 +308,7 @@ namespace ESSImport
     {
         void read(ESM::ESMReader& esm) override
         {
-            std::string id = esm.getHNString("NAME");
+            auto id = ESM::RefId::stringRefId(esm.getHNString("NAME"));
             CNTC cntc;
             cntc.load(esm);
             mContext->mContainerChanges.insert(std::make_pair(std::make_pair(cntc.mIndex, id), cntc));
@@ -320,7 +320,7 @@ namespace ESSImport
     public:
         void read(ESM::ESMReader& esm) override
         {
-            std::string id = esm.getHNString("NAME");
+            auto id = ESM::RefId::stringRefId(esm.getHNString("NAME"));
             CREC crec;
             crec.load(esm);
             mContext->mCreatureChanges.insert(std::make_pair(std::make_pair(crec.mIndex, id), crec));
@@ -395,11 +395,11 @@ namespace ESSImport
             bool isDeleted = false;
 
             faction.load(esm, isDeleted);
-            std::string id = Misc::StringUtils::lowerCase(faction.mId);
+            const auto& id = faction.mId;
 
             for (auto it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
             {
-                std::string faction2 = Misc::StringUtils::lowerCase(it->first);
+                const auto& faction2 = it->first;
                 mContext->mDialogueState.mChangedFactionReaction[id].insert(std::make_pair(faction2, it->second));
             }
         }
@@ -433,10 +433,10 @@ namespace ESSImport
             ESM::StolenItems items;
             for (auto it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
             {
-                std::map<std::pair<std::string, bool>, int> owners;
+                std::map<std::pair<ESM::RefId, bool>, int> owners;
                 for (const auto& ownerIt : it->second)
                 {
-                    owners.insert(std::make_pair(std::make_pair(ownerIt.first, ownerIt.second)
+                    owners.insert(std::make_pair(std::make_pair(ESM::RefId::stringRefId(ownerIt.first), ownerIt.second)
                         // Since OpenMW doesn't suffer from the owner contamination bug,
                         // it needs a count argument. But for legacy savegames, we don't know
                         // this count, so must assume all items of that ID are stolen,
@@ -445,7 +445,7 @@ namespace ESSImport
                         std::numeric_limits<int>::max()));
                 }
 
-                items.mStolenItems.insert(std::make_pair(it->first, owners));
+                items.mStolenItems.insert(std::make_pair(ESM::RefId::stringRefId(it->first), owners));
             }
 
             esm.startRecord(ESM::REC_STLN);
@@ -494,7 +494,7 @@ namespace ESSImport
                 ESM::QuestState state;
                 state.mFinished = 0;
                 state.mState = it->second.mIndex;
-                state.mTopic = Misc::StringUtils::lowerCase(it->first);
+                state.mTopic = ESM::RefId::stringRefId(it->first);
                 state.save(esm);
                 esm.endRecord(ESM::REC_QUES);
             }

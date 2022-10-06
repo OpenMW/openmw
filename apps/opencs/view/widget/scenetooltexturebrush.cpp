@@ -182,9 +182,9 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
             {
                 newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
                 if (landtexturesCollection.searchId(brushTexture) != -1
-                    && landtexturesCollection.getRecord(brushTexture).isDeleted() == 0
+                    && landtexturesCollection.getRecord(ESM::RefId::stringRefId(brushTexture)).isDeleted() == 0
                     && landtexturesCollection.searchId(newBrushTextureId) != -1
-                    && landtexturesCollection.getRecord(newBrushTextureId).isDeleted() == 0)
+                    && landtexturesCollection.getRecord(ESM::RefId::stringRefId(newBrushTextureId)).isDeleted() == 0)
                     counter = (counter + 1) % maxCounter;
                 else
                     freeIndexFound = true;

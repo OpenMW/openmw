@@ -85,7 +85,7 @@ namespace CSVRender
         const CSMWorld::CellCoordinates& coordinates)
         : mData(data)
         , mPathgridCollection(mData.getPathgrids())
-        , mId(pathgridId)
+        , mId(ESM::RefId::stringRefId(pathgridId))
         , mCoords(coordinates)
         , mInterior(false)
         , mDragOrigin(0)
@@ -131,7 +131,7 @@ namespace CSVRender
 
     const std::string& Pathgrid::getId() const
     {
-        return mId;
+        return mId.getRefIdString();
     }
 
     bool Pathgrid::isSelected() const
@@ -259,7 +259,7 @@ namespace CSVRender
     {
         CSMWorld::IdTree* model
             = &dynamic_cast<CSMWorld::IdTree&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids));
-
+        std::string idString = mId.getRefIdString();
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
@@ -285,7 +285,7 @@ namespace CSVRender
             int row = static_cast<int>(source->mPoints.size());
 
             // Add node to end of list
-            commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push(new CSMWorld::AddNestedCommand(*model, idString, row, parentColumn));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent), posX));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent), posY));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posZColumn, parent), posZ));
@@ -296,25 +296,25 @@ namespace CSVRender
             if (index == -1)
             {
                 // Does not exist
-                commands.push(new CSMWorld::CreatePathgridCommand(*model, mId));
+                commands.push(new CSMWorld::CreatePathgridCommand(*model, idString));
             }
             else
             {
                 source = &mPathgridCollection.getRecord(index).get();
 
                 // Deleted, so revert and remove all data
-                commands.push(new CSMWorld::RevertCommand(*model, mId));
+                commands.push(new CSMWorld::RevertCommand(*model, idString));
 
                 int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
                 for (int row = source->mPoints.size() - 1; row >= 0; --row)
                 {
-                    commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, row, parentColumn));
+                    commands.push(new CSMWorld::DeleteNestedCommand(*model, idString, row, parentColumn));
                 }
 
                 parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
                 for (int row = source->mEdges.size() - 1; row >= 0; --row)
                 {
-                    commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, row, parentColumn));
+                    commands.push(new CSMWorld::DeleteNestedCommand(*model, idString, row, parentColumn));
                 }
             }
         }
@@ -401,7 +401,7 @@ namespace CSVRender
 
             for (std::vector<unsigned short>::iterator row = mSelected.begin(); row != mSelected.end(); ++row)
             {
-                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, static_cast<int>(*row), parentColumn));
+                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId.getRefIdString(), static_cast<int>(*row), parentColumn));
             }
 
             // Fix/remove edges
@@ -459,7 +459,7 @@ namespace CSVRender
             std::set<int, std::greater<int>>::iterator row;
             for (row = edgeRowsToRemove.begin(); row != edgeRowsToRemove.end(); ++row)
             {
-                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, *row, parentColumn));
+                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId.getRefIdString(), *row, parentColumn));
             }
         }
 
@@ -498,7 +498,7 @@ namespace CSVRender
             std::set<int, std::greater<int>>::iterator row;
             for (row = rowsToRemove.begin(); row != rowsToRemove.end(); ++row)
             {
-                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, *row, parentColumn));
+                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId.getRefIdString(), *row, parentColumn));
             }
         }
     }
@@ -682,7 +682,7 @@ namespace CSVRender
 
         if (edgeExists(source, node1, node2) == -1)
         {
-            commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push(new CSMWorld::AddNestedCommand(*model, mId.getRefIdString(), row, parentColumn));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge0Column, parent), node1));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge1Column, parent), node2));
             ++row;
@@ -690,7 +690,7 @@ namespace CSVRender
 
         if (edgeExists(source, node2, node1) == -1)
         {
-            commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push(new CSMWorld::AddNestedCommand(*model, mId.getRefIdString(), row, parentColumn));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge0Column, parent), node2));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge1Column, parent), node1));
         }

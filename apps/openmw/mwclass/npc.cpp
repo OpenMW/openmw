@@ -1319,11 +1319,11 @@ namespace MWClass
                 switch (boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
-                        sound = (name == "left") ? "FootLightLeft" : "FootLightRight";
+                        sound = (name == "left") ? "FootLightLeft" : "FootLightRight"; break;
                     case ESM::Skill::MediumArmor:
-                        sound = (name == "left") ? "FootMedLeft" : "FootMedRight";
+                        sound = (name == "left") ? "FootMedLeft" : "FootMedRight"; break;
                     case ESM::Skill::HeavyArmor:
-                        sound = (name == "left") ? "FootHeavyLeft" : "FootHeavyRight";
+                        sound = (name == "left") ? "FootHeavyLeft" : "FootHeavyRight"; break;
                 }
             }
             return ESM::RefId::sEmpty;

@@ -15,7 +15,7 @@ namespace ESSImport
             ESM::ObjectState objstate;
             objstate.blank();
             objstate.mRef = item;
-            objstate.mRef.mRefID = Misc::StringUtils::lowerCase(item.mId);
+            objstate.mRef.mRefID = ESM::RefId::stringRefId(item.mId);
             objstate.mCount = std::abs(item.mCount); // restocking items have negative count in the savefile
                                                      // openmw handles them differently, so no need to set any flags
             state.mItems.push_back(objstate);

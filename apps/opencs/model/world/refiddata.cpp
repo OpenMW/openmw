@@ -16,7 +16,7 @@ namespace ESM
 
 CSMWorld::RefIdDataContainerBase::~RefIdDataContainerBase() {}
 
-std::string CSMWorld::RefIdData::getRecordId(const CSMWorld::RefIdData::LocalIndex& index) const
+ESM::RefId CSMWorld::RefIdData::getRecordId(const CSMWorld::RefIdData::LocalIndex& index) const
 {
     std::map<UniversalId::Type, RefIdDataContainerBase*>::const_iterator found = mRecordContainers.find(index.second);
 
@@ -80,11 +80,9 @@ int CSMWorld::RefIdData::localToGlobalIndex(const LocalIndex& index) const
     return globalIndex;
 }
 
-CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId(std::string_view id) const
+CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId(const ESM::RefId& id) const
 {
-    std::string id2 = Misc::StringUtils::lowerCase(id);
-
-    std::map<std::string, std::pair<int, UniversalId::Type>>::const_iterator iter = mIndex.find(id2);
+    auto iter = mIndex.find(id);
 
     if (iter == mIndex.end())
         return std::make_pair(-1, CSMWorld::UniversalId::Type_None);
@@ -92,7 +90,7 @@ CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId(std::string_view i
     return iter->second;
 }
 
-unsigned int CSMWorld::RefIdData::getRecordFlags(const std::string& id) const
+unsigned int CSMWorld::RefIdData::getRecordFlags(const ESM::RefId& id) const
 {
     LocalIndex localIndex = searchId(id);
 
@@ -197,7 +195,7 @@ CSMWorld::RecordBase& CSMWorld::RefIdData::getRecord(const LocalIndex& index)
     return iter->second->getRecord(index.first);
 }
 
-void CSMWorld::RefIdData::appendRecord(UniversalId::Type type, const std::string& id, bool base)
+void CSMWorld::RefIdData::appendRecord(UniversalId::Type type, const ESM::RefId& id, bool base)
 {
     std::map<UniversalId::Type, RefIdDataContainerBase*>::iterator iter = mRecordContainers.find(type);
 
@@ -206,7 +204,7 @@ void CSMWorld::RefIdData::appendRecord(UniversalId::Type type, const std::string
 
     iter->second->appendRecord(id, base);
 
-    mIndex.insert(std::make_pair(Misc::StringUtils::lowerCase(id), LocalIndex(iter->second->getSize() - 1, type)));
+    mIndex.insert(std::make_pair(id, LocalIndex(iter->second->getSize() - 1, type)));
 }
 
 int CSMWorld::RefIdData::getAppendIndex(UniversalId::Type type) const
@@ -242,7 +240,7 @@ void CSMWorld::RefIdData::load(ESM::ESMReader& reader, bool base, CSMWorld::Univ
         }
         else
         {
-            mIndex[Misc::StringUtils::lowerCase(getRecordId(localIndex))] = localIndex;
+            mIndex[getRecordId(localIndex)] = localIndex;
         }
     }
 }
@@ -255,8 +253,8 @@ void CSMWorld::RefIdData::erase(const LocalIndex& index, int count)
 
     for (int i = index.first; i < index.first + count; ++i)
     {
-        std::map<std::string, LocalIndex>::iterator result
-            = mIndex.find(Misc::StringUtils::lowerCase(iter->second->getId(i)));
+        auto result
+            = mIndex.find(iter->second->getId(i));
 
         if (result != mIndex.end())
             mIndex.erase(result);
@@ -267,8 +265,8 @@ void CSMWorld::RefIdData::erase(const LocalIndex& index, int count)
     int recordCount = iter->second->getSize();
     while (recordIndex < recordCount)
     {
-        std::map<std::string, LocalIndex>::iterator recordIndexFound
-            = mIndex.find(Misc::StringUtils::lowerCase(iter->second->getId(recordIndex)));
+        auto recordIndexFound
+            = mIndex.find(iter->second->getId(recordIndex));
         if (recordIndexFound != mIndex.end())
         {
             recordIndexFound->second.first -= count;
@@ -284,11 +282,11 @@ int CSMWorld::RefIdData::getSize() const
     return mIndex.size();
 }
 
-std::vector<std::string> CSMWorld::RefIdData::getIds(bool listDeleted) const
+std::vector<ESM::RefId> CSMWorld::RefIdData::getIds(bool listDeleted) const
 {
-    std::vector<std::string> ids;
+    std::vector<ESM::RefId> ids;
 
-    for (std::map<std::string, LocalIndex>::const_iterator iter(mIndex.begin()); iter != mIndex.end(); ++iter)
+    for (auto iter(mIndex.begin()); iter != mIndex.end(); ++iter)
     {
         if (listDeleted || !getRecord(iter->second).isDeleted())
         {
@@ -419,7 +417,7 @@ const CSMWorld::RefIdDataContainer<ESM::Static>& CSMWorld::RefIdData::getStatics
 }
 
 void CSMWorld::RefIdData::insertRecord(
-    std::unique_ptr<CSMWorld::RecordBase> record, CSMWorld::UniversalId::Type type, const std::string& id)
+    std::unique_ptr<CSMWorld::RecordBase> record, CSMWorld::UniversalId::Type type, const ESM::RefId& id)
 {
     std::map<UniversalId::Type, RefIdDataContainerBase*>::iterator iter = mRecordContainers.find(type);
 
@@ -428,7 +426,7 @@ void CSMWorld::RefIdData::insertRecord(
 
     iter->second->insertRecord(std::move(record));
 
-    mIndex.insert(std::make_pair(Misc::StringUtils::lowerCase(id), LocalIndex(iter->second->getSize() - 1, type)));
+    mIndex.insert(std::make_pair(id, LocalIndex(iter->second->getSize() - 1, type)));
 }
 
 void CSMWorld::RefIdData::copyTo(int index, RefIdData& target) const

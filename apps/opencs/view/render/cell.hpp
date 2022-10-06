@@ -44,7 +44,7 @@ namespace CSVRender
     class Cell
     {
         CSMWorld::Data& mData;
-        std::string mId;
+        ESM::RefId mId;
         osg::ref_ptr<osg::Group> mCellNode;
         std::map<std::string, Object*> mObjects;
         std::unique_ptr<Terrain::TerrainGrid> mTerrain;

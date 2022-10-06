@@ -37,9 +37,9 @@ namespace CSMWorld
         /// A list indexed by ESM::PartReferenceType
         using ActorPartList = std::map<ESM::PartReferenceType, std::pair<std::string, int>>;
         /// A list indexed by ESM::BodyPart::MeshPart
-        using RacePartList = std::array<std::string, ESM::BodyPart::MP_Count>;
+        using RacePartList = std::array<ESM::RefId, ESM::BodyPart::MP_Count>;
         /// Tracks unique strings
-        using StringSet = std::unordered_set<std::string>;
+        using RefIdSet = std::unordered_set<ESM::RefId>;
 
         /// Contains base race data shared between actors
         class RaceData
@@ -48,34 +48,34 @@ namespace CSMWorld
             RaceData();
 
             /// Retrieves the id of the race represented
-            const std::string& getId() const;
+            const ESM::RefId& getId() const;
             /// Checks if it's a beast race
             bool isBeast() const;
             /// Checks if a part could exist for the given type
             bool handlesPart(ESM::PartReferenceType type) const;
             /// Retrieves the associated body part
-            const std::string& getFemalePart(ESM::PartReferenceType index) const;
+            const ESM::RefId& getFemalePart(ESM::PartReferenceType index) const;
             /// Retrieves the associated body part
-            const std::string& getMalePart(ESM::PartReferenceType index) const;
+            const ESM::RefId& getMalePart(ESM::PartReferenceType index) const;
             /// Checks if the race has a data dependency
-            bool hasDependency(const std::string& id) const;
+            bool hasDependency(const ESM::RefId& id) const;
 
             /// Sets the associated part if it's empty and marks a dependency
-            void setFemalePart(ESM::BodyPart::MeshPart partIndex, const std::string& partId);
+            void setFemalePart(ESM::BodyPart::MeshPart partIndex, const ESM::RefId& partId);
             /// Sets the associated part if it's empty and marks a dependency
-            void setMalePart(ESM::BodyPart::MeshPart partIndex, const std::string& partId);
+            void setMalePart(ESM::BodyPart::MeshPart partIndex, const ESM::RefId& partId);
             /// Marks an additional dependency
-            void addOtherDependency(const std::string& id);
+            void addOtherDependency(const ESM::RefId& id);
             /// Clears parts and dependencies
-            void reset_data(const std::string& raceId, bool isBeast = false);
+            void reset_data(const ESM::RefId& raceId, bool isBeast = false);
 
         private:
             bool handles(ESM::PartReferenceType type) const;
-            std::string mId;
+            ESM::RefId mId;
             bool mIsBeast;
             RacePartList mFemaleParts;
             RacePartList mMaleParts;
-            StringSet mDependencies;
+            RefIdSet mDependencies;
         };
         using RaceDataPtr = std::shared_ptr<RaceData>;
 
@@ -87,7 +87,7 @@ namespace CSMWorld
             ActorData();
 
             /// Retrieves the id of the actor represented
-            const std::string& getId() const;
+            const ESM::RefId& getId() const;
             /// Checks if the actor is a creature
             bool isCreature() const;
             /// Checks if the actor is female
@@ -97,35 +97,35 @@ namespace CSMWorld
             /// Retrieves the associated actor part
             std::string_view getPart(ESM::PartReferenceType index) const;
             /// Checks if the actor has a data dependency
-            bool hasDependency(const std::string& id) const;
+            bool hasDependency(const ESM::RefId& id) const;
 
             /// Sets the actor part used and marks a dependency
-            void setPart(ESM::PartReferenceType partIndex, const std::string& partId, int priority);
+            void setPart(ESM::PartReferenceType partIndex, const ESM::RefId& partId, int priority);
             /// Marks an additional dependency for the actor
-            void addOtherDependency(const std::string& id);
+            void addOtherDependency(const ESM::RefId& id);
             /// Clears race, parts, and dependencies
-            void reset_data(const std::string& actorId, const std::string& skeleton = "", bool isCreature = false,
+            void reset_data(const ESM::RefId& actorId, const std::string& skeleton = "", bool isCreature = false,
                 bool female = true, RaceDataPtr raceData = nullptr);
 
         private:
-            std::string mId;
+            ESM::RefId mId;
             bool mCreature;
             bool mFemale;
             std::string mSkeletonOverride;
             RaceDataPtr mRaceData;
             ActorPartList mParts;
-            StringSet mDependencies;
+            RefIdSet mDependencies;
         };
         using ActorDataPtr = std::shared_ptr<ActorData>;
 
         ActorAdapter(Data& data);
 
         /// Obtains the shared data for a given actor
-        ActorDataPtr getActorData(const std::string& refId);
+        ActorDataPtr getActorData(const ESM::RefId& refId);
 
     signals:
 
-        void actorChanged(const std::string& refId);
+        void actorChanged(const ESM::RefId& refId);
 
     public slots:
 
@@ -151,28 +151,28 @@ namespace CSMWorld
         QModelIndex getHighestIndex(QModelIndex) const;
         bool is1stPersonPart(const std::string& id) const;
 
-        RaceDataPtr getRaceData(const std::string& raceId);
+        RaceDataPtr getRaceData(const ESM::RefId& raceId);
 
-        void setupActor(const std::string& id, ActorDataPtr data);
-        void setupRace(const std::string& id, RaceDataPtr data);
+        void setupActor(const ESM::RefId& id, ActorDataPtr data);
+        void setupRace(const ESM::RefId& id, RaceDataPtr data);
 
-        void setupNpc(const std::string& id, ActorDataPtr data);
-        void addNpcItem(const std::string& itemId, ActorDataPtr data);
+        void setupNpc(const ESM::RefId& id, ActorDataPtr data);
+        void addNpcItem(const ESM::RefId& itemId, ActorDataPtr data);
 
-        void setupCreature(const std::string& id, ActorDataPtr data);
+        void setupCreature(const ESM::RefId& id, ActorDataPtr data);
 
-        void markDirtyDependency(const std::string& dependency);
+        void markDirtyDependency(const ESM::RefId& dependency);
         void updateDirty();
 
         RefIdCollection& mReferenceables;
         IdCollection<ESM::Race>& mRaces;
         IdCollection<ESM::BodyPart>& mBodyParts;
 
-        Misc::WeakCache<std::string, ActorData> mCachedActors; // Key: referenceable id
-        Misc::WeakCache<std::string, RaceData> mCachedRaces; // Key: race id
+        Misc::WeakCache<ESM::RefId, ActorData> mCachedActors; // Key: referenceable id
+        Misc::WeakCache<ESM::RefId, RaceData> mCachedRaces; // Key: race id
 
-        StringSet mDirtyActors; // Actors that need updating
-        StringSet mDirtyRaces; // Races that need updating
+        RefIdSet mDirtyActors; // Actors that need updating
+        RefIdSet mDirtyRaces; // Races that need updating
     };
 }
 

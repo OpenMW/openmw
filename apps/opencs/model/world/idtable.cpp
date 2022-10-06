@@ -181,11 +181,12 @@ QModelIndex CSMWorld::IdTable::parent(const QModelIndex& index) const
 
 void CSMWorld::IdTable::addRecord(const std::string& id, UniversalId::Type type)
 {
-    int index = mIdCollection->getAppendIndex(id, type);
+    ESM::RefId refId = ESM::RefId::stringRefId(id);
+    int index = mIdCollection->getAppendIndex(refId, type);
 
     beginInsertRows(QModelIndex(), index, index);
 
-    mIdCollection->appendBlankRecord(id, type);
+    mIdCollection->appendBlankRecord(refId, type);
 
     endInsertRows();
 }
@@ -193,11 +194,12 @@ void CSMWorld::IdTable::addRecord(const std::string& id, UniversalId::Type type)
 void CSMWorld::IdTable::addRecordWithData(
     const std::string& id, const std::map<int, QVariant>& data, UniversalId::Type type)
 {
-    int index = mIdCollection->getAppendIndex(id, type);
+    ESM::RefId refId = ESM::RefId::stringRefId(id);
+    int index = mIdCollection->getAppendIndex(refId, type);
 
     beginInsertRows(QModelIndex(), index, index);
 
-    mIdCollection->appendBlankRecord(id, type);
+    mIdCollection->appendBlankRecord(refId, type);
 
     for (std::map<int, QVariant>::const_iterator iter(data.begin()); iter != data.end(); ++iter)
     {
@@ -208,7 +210,7 @@ void CSMWorld::IdTable::addRecordWithData(
 }
 
 void CSMWorld::IdTable::cloneRecord(
-    const std::string& origin, const std::string& destination, CSMWorld::UniversalId::Type type)
+    const ESM::RefId& origin, const ESM::RefId& destination, CSMWorld::UniversalId::Type type)
 {
     int index = mIdCollection->getAppendIndex(destination, type);
 
@@ -219,9 +221,10 @@ void CSMWorld::IdTable::cloneRecord(
 
 bool CSMWorld::IdTable::touchRecord(const std::string& id)
 {
-    bool changed = mIdCollection->touchRecord(id);
+    ESM::RefId refId = ESM::RefId::stringRefId(id);
+    bool changed = mIdCollection->touchRecord(refId);
 
-    int row = mIdCollection->getIndex(id);
+    int row = mIdCollection->getIndex(refId);
     int column = mIdCollection->searchColumnIndex(Columns::ColumnId_RecordType);
     if (changed && column != -1)
     {
@@ -234,7 +237,7 @@ bool CSMWorld::IdTable::touchRecord(const std::string& id)
 
 std::string CSMWorld::IdTable::getId(int row) const
 {
-    return mIdCollection->getId(row);
+    return mIdCollection->getId(row).getRefIdString();
 }
 
 /// This method can return only indexes to the top level table cells
@@ -278,7 +281,7 @@ void CSMWorld::IdTable::setRecord(
 
 const CSMWorld::RecordBase& CSMWorld::IdTable::getRecord(const std::string& id) const
 {
-    return mIdCollection->getRecord(id);
+    return mIdCollection->getRecord(ESM::RefId::stringRefId(id));
 }
 
 int CSMWorld::IdTable::searchColumnIndex(Columns::ColumnId id) const
@@ -367,7 +370,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
     {
         auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(i));
         if (record.isModified())
-            reverseLookupMap.emplace(Misc::StringUtils::lowerCase(record.get().mTexture), idCollection()->getId(i));
+            reverseLookupMap.emplace(Misc::StringUtils::lowerCase(record.get().mTexture), idCollection()->getId(i).getRefIdString());
     }
 
     for (const std::string& id : ids)
@@ -404,7 +407,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
             if (newRow < 0)
             {
                 // Id not taken, clone it
-                cloneRecord(id, newId, UniversalId::Type_LandTexture);
+                cloneRecord(ESM::RefId::stringRefId(id), ESM::RefId::stringRefId(newId), UniversalId::Type_LandTexture);
                 results.createdRecords.push_back(newId);
                 results.recordMapping.emplace_back(id, newId);
                 reverseLookupMap.emplace(texture, newId);

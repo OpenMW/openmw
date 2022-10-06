@@ -154,10 +154,10 @@ namespace CSMWorld
         {
             ESXRecordT raceOrBthSgn = record.get();
 
-            std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
+            std::vector<ESM::RefId>& spells = raceOrBthSgn.mPowers.mList;
 
             // blank row
-            std::string spell;
+            ESM::RefId spell;
 
             spells.insert(spells.begin() + position, spell);
 
@@ -168,7 +168,7 @@ namespace CSMWorld
         {
             ESXRecordT raceOrBthSgn = record.get();
 
-            std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
+            std::vector<ESM::RefId>& spells = raceOrBthSgn.mPowers.mList;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int>(spells.size()))
                 throw std::runtime_error("index out of range");
@@ -183,7 +183,7 @@ namespace CSMWorld
             ESXRecordT raceOrBthSgn = record.get();
 
             raceOrBthSgn.mPowers.mList
-                = static_cast<const NestedTableWrapper<std::vector<std::string>>&>(nestedTable).mNestedTable;
+                = static_cast<const NestedTableWrapper<std::vector<ESM::RefId>>&>(nestedTable).mNestedTable;
 
             record.setModified(raceOrBthSgn);
         }
@@ -191,23 +191,23 @@ namespace CSMWorld
         NestedTableWrapperBase* table(const Record<ESXRecordT>& record) const override
         {
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<std::string>>(record.get().mPowers.mList);
+            return new NestedTableWrapper<std::vector<ESM::RefId>>(record.get().mPowers.mList);
         }
 
         QVariant getData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const override
         {
             ESXRecordT raceOrBthSgn = record.get();
 
-            std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
+            std::vector<ESM::RefId>& spells = raceOrBthSgn.mPowers.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int>(spells.size()))
                 throw std::runtime_error("index out of range");
 
-            std::string spell = spells[subRowIndex];
+            ESM::RefId spell = spells[subRowIndex];
             switch (subColIndex)
             {
                 case 0:
-                    return QString(spell.c_str());
+                    return QString(spell.getRefIdString().c_str());
                 default:
                     throw std::runtime_error("Spells subcolumn index out of range");
             }
@@ -217,16 +217,16 @@ namespace CSMWorld
         {
             ESXRecordT raceOrBthSgn = record.get();
 
-            std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
+            std::vector<ESM::RefId>& spells = raceOrBthSgn.mPowers.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int>(spells.size()))
                 throw std::runtime_error("index out of range");
 
-            std::string spell = spells[subRowIndex];
+            ESM::RefId spell = spells[subRowIndex];
             switch (subColIndex)
             {
                 case 0:
-                    spell = value.toString().toUtf8().constData();
+                    spell = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
                     break;
                 default:
                     throw std::runtime_error("Spells subcolumn index out of range");

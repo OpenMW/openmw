@@ -64,7 +64,7 @@ namespace CSMWorld
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
         void cloneRecord(
-            const std::string& origin, const std::string& destination, UniversalId::Type type = UniversalId::Type_None);
+            const ESM::RefId& origin, const ESM::RefId& destination, UniversalId::Type type = UniversalId::Type_None);
 
         bool touchRecord(const std::string& id);
         ///< Will change the record state to modified, if it is not already.

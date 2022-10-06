@@ -373,8 +373,8 @@ namespace ESSImport
         profile.mInGameTime.mMonth = context.mMonth;
         profile.mInGameTime.mYear = context.mYear;
         profile.mTimePlayed = 0;
-        profile.mPlayerCell = header.mGameData.mCurrentCell.toString();
-        if (context.mPlayerBase.mClass == "NEWCLASSID_CHARGEN")
+        profile.mPlayerCell = ESM::RefId::stringRefId(header.mGameData.mCurrentCell.toString());
+        if (context.mPlayerBase.mClass == ESM::RefId::stringRefId("NEWCLASSID_CHARGEN"))
             profile.mPlayerClassName = context.mCustomPlayerClassName;
         else
             profile.mPlayerClassId = context.mPlayerBase.mClass;
@@ -397,7 +397,7 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_NPC_);
-        context.mPlayerBase.mId = "player";
+        context.mPlayerBase.mId = ESM::RefId::stringRefId("player");
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 

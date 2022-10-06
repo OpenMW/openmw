@@ -35,7 +35,7 @@ namespace CSVRender
         /// \param id       The referenceable id
         /// \param type     The record type
         /// \param data     The data store
-        Actor(const std::string& id, CSMWorld::Data& data);
+        Actor(const ESM::RefId& id, CSMWorld::Data& data);
 
         /// Retrieves the base node that meshes are attached to
         osg::Group* getBaseNode();
@@ -44,7 +44,7 @@ namespace CSVRender
         void update();
 
     private slots:
-        void handleActorChanged(const std::string& refId);
+        void handleActorChanged(const ESM::RefId& refId);
 
     private:
         void loadSkeleton(const std::string& model);
@@ -55,7 +55,7 @@ namespace CSVRender
 
         static const std::string MeshPrefix;
 
-        std::string mId;
+        ESM::RefId mId;
         CSMWorld::Data& mData;
         CSMWorld::ActorAdapter::ActorDataPtr mActorData;
 

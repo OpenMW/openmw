@@ -310,7 +310,7 @@ bool CSVRender::TerrainSelection::noLandLoaded(const std::string& cellId)
 {
     CSMDoc::Document& document = mWorldspaceWidget->getDocument();
     const CSMWorld::IdCollection<CSMWorld::Land>& landCollection = document.getData().getLand();
-    return !landCollection.getRecord(cellId).get().isDataLoaded(ESM::Land::DATA_VNML);
+    return !landCollection.getRecord(ESM::RefId::stringRefId(cellId)).get().isDataLoaded(ESM::Land::DATA_VNML);
 }
 
 bool CSVRender::TerrainSelection::isLandLoaded(const std::string& cellId)
@@ -339,7 +339,7 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
         CSMDoc::Document& document = mWorldspaceWidget->getDocument();
         std::string cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
         const ESM::Land::LandData* landData
-            = document.getData().getLand().getRecord(cellId).get().getLandData(ESM::Land::DATA_VHGT);
+            = document.getData().getLand().getRecord(ESM::RefId::stringRefId(cellId)).get().getLandData(ESM::Land::DATA_VHGT);
         return landData->mHeights[localY * ESM::Land::LAND_SIZE + localX];
     }
 

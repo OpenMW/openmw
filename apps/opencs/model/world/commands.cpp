@@ -411,7 +411,7 @@ CSMWorld::CloneCommand::CloneCommand(CSMWorld::IdTable& model, const std::string
 
 void CSMWorld::CloneCommand::redo()
 {
-    mModel.cloneRecord(mIdOrigin, mId, mType);
+    mModel.cloneRecord(ESM::RefId::stringRefId(mIdOrigin), ESM::RefId::stringRefId(mId), mType);
     applyModifications();
     for (auto& value : mOverrideValues)
     {
@@ -442,7 +442,7 @@ void CSMWorld::CreatePathgridCommand::redo()
     std::unique_ptr<Record<Pathgrid>> record
         = std::make_unique<Record<Pathgrid>>(static_cast<const Record<Pathgrid>&>(mModel.getRecord(mId)));
     record->get().blank();
-    record->get().mCell = mId;
+    record->get().mCell = ESM::RefId::stringRefId(mId);
 
     std::pair<CellCoordinates, bool> coords = CellCoordinates::fromId(mId);
     if (coords.second)

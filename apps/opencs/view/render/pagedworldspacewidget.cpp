@@ -23,6 +23,7 @@
 
 #include <components/esm3/loadpgrd.hpp>
 #include <components/misc/constants.hpp>
+#include <components/esm/refid.hpp>
 
 #include <osg/Camera>
 #include <osg/Vec3f>
@@ -380,9 +381,9 @@ void CSVRender::PagedWorldspaceWidget::landDataChanged(const QModelIndex& topLef
 {
     for (int r = topLeft.row(); r <= bottomRight.row(); ++r)
     {
-        std::string id = mDocument.getData().getLand().getId(r);
+        auto id = mDocument.getData().getLand().getId(r);
 
-        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id).first);
+        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id.getRefIdString()).first);
         if (cellIt != mCells.end())
         {
             cellIt->second->landDataChanged(topLeft, bottomRight);
@@ -395,9 +396,9 @@ void CSVRender::PagedWorldspaceWidget::landAboutToBeRemoved(const QModelIndex& p
 {
     for (int r = start; r <= end; ++r)
     {
-        std::string id = mDocument.getData().getLand().getId(r);
+        auto id = mDocument.getData().getLand().getId(r);
 
-        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id).first);
+        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id.getRefIdString()).first);
         if (cellIt != mCells.end())
         {
             cellIt->second->landAboutToBeRemoved(parent, start, end);
@@ -410,9 +411,9 @@ void CSVRender::PagedWorldspaceWidget::landAdded(const QModelIndex& parent, int 
 {
     for (int r = start; r <= end; ++r)
     {
-        std::string id = mDocument.getData().getLand().getId(r);
+        auto id = mDocument.getData().getLand().getId(r);
 
-        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id).first);
+        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id.getRefIdString()).first);
         if (cellIt != mCells.end())
         {
             cellIt->second->landAdded(parent, start, end);

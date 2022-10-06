@@ -29,11 +29,11 @@ namespace
     public:
         bool canDeclareLocals() const override { return true; }
         char getGlobalType(const std::string& name) const override { return ' '; }
-        std::pair<char, bool> getMemberType(const std::string& name, const std::string& id) const override
+        std::pair<char, bool> getMemberType(const std::string& name, const ESM::RefId& id) const override
         {
             return { ' ', false };
         }
-        bool isId(const std::string& name) const override { return Misc::StringUtils::ciEqual(name, "player"); }
+        bool isId(const ESM::RefId& name) const override { return name == ESM::RefId::stringRefId("player"); }
     };
 
     class TestErrorHandler : public Compiler::ErrorHandler
@@ -147,7 +147,7 @@ namespace
         std::map<std::string, GlobalVariables, std::less<>> mMembers;
 
     public:
-        std::string_view getTarget() const override { return {}; }
+        const ESM::RefId& getTarget() const override { return ESM::RefId::sEmpty; };
 
         int getLocalShort(int index) const override { return mLocals.getShort(index); }
 
@@ -207,44 +207,44 @@ namespace
 
         std::string_view getCurrentCellName() const override { return {}; }
 
-        int getMemberShort(std::string_view id, std::string_view name, bool global) const override
+        int getMemberShort(const ESM::RefId id, std::string_view name, bool global) const override
         {
-            auto it = mMembers.find(id);
+            auto it = mMembers.find(id.getRefIdString());
             if (it != mMembers.end())
                 return it->second.getShort(name);
             return {};
         }
 
-        int getMemberLong(std::string_view id, std::string_view name, bool global) const override
+        int getMemberLong(const ESM::RefId id, std::string_view name, bool global) const override
         {
-            auto it = mMembers.find(id);
+            auto it = mMembers.find(id.getRefIdString());
             if (it != mMembers.end())
                 return it->second.getLong(name);
             return {};
         }
 
-        float getMemberFloat(std::string_view id, std::string_view name, bool global) const override
+        float getMemberFloat(const ESM::RefId id, std::string_view name, bool global) const override
         {
-            auto it = mMembers.find(id);
+            auto it = mMembers.find(id.getRefIdString());
             if (it != mMembers.end())
                 return it->second.getFloat(name);
             return {};
         }
 
-        void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override
+        void setMemberShort(const ESM::RefId id, std::string_view name, int value, bool global) override
         {
-            mMembers[std::string(id)].setShort(name, value);
-        }
+            mMembers[id.getRefIdString()].setShort(name, value);
+        };
 
-        void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override
+        void setMemberLong(const ESM::RefId id, std::string_view name, int value, bool global) override
         {
-            mMembers[std::string(id)].setLong(name, value);
-        }
+            mMembers[id.getRefIdString()].setLong(name, value);
+        };
 
-        void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override
+        void setMemberFloat(const ESM::RefId id, std::string_view name, float value, bool global) override
         {
-            mMembers[std::string(id)].setFloat(name, value);
-        }
+            mMembers[id.getRefIdString()].setFloat(name, value);
+        };
     };
 
     struct CompiledScript

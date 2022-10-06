@@ -648,17 +648,17 @@ int CSMWorld::RefIdCollection::getSize() const
     return mData.getSize();
 }
 
-std::string CSMWorld::RefIdCollection::getId(int index) const
+ESM::RefId CSMWorld::RefIdCollection::getId(int index) const
 {
-    return getData(index, 0).toString().toUtf8().constData();
+    return ESM::RefId::stringRefId(getData(index, 0).toString().toUtf8().constData());
 }
 
-int CSMWorld::RefIdCollection::getIndex(const std::string& id) const
+int CSMWorld::RefIdCollection::getIndex(const ESM::RefId& id) const
 {
     int index = searchId(id);
 
     if (index == -1)
-        throw std::runtime_error("invalid ID: " + id);
+        throw std::runtime_error("invalid ID: " + id.getRefIdString());
 
     return index;
 }
@@ -720,19 +720,24 @@ void CSMWorld::RefIdCollection::removeNestedRows(int row, int column, int subRow
     nestedAdapter.removeNestedRow(&mColumns.at(column), mData, localIndex.first, subRow);
 }
 
-void CSMWorld::RefIdCollection::appendBlankRecord(const std::string& id, UniversalId::Type type)
+void CSMWorld::RefIdCollection::appendBlankRecord(const ESM::RefId& id, UniversalId::Type type)
 {
     mData.appendRecord(type, id, false);
 }
 
 int CSMWorld::RefIdCollection::searchId(std::string_view id) const
 {
-    RefIdData::LocalIndex localIndex = mData.searchId(id);
+    RefIdData::LocalIndex localIndex = mData.searchId(ESM::RefId::stringRefId(id));
 
     if (localIndex.first == -1)
         return -1;
 
     return mData.localToGlobalIndex(localIndex);
+}
+
+int CSMWorld::RefIdCollection::searchId(const ESM::RefId& id) const
+{
+    return searchId(id.getRefIdString());
 }
 
 void CSMWorld::RefIdCollection::replace(int index, std::unique_ptr<RecordBase> record)
@@ -741,14 +746,14 @@ void CSMWorld::RefIdCollection::replace(int index, std::unique_ptr<RecordBase> r
 }
 
 void CSMWorld::RefIdCollection::cloneRecord(
-    const std::string& origin, const std::string& destination, const CSMWorld::UniversalId::Type type)
+    const ESM::RefId& origin, const ESM::RefId& destination, const CSMWorld::UniversalId::Type type)
 {
     std::unique_ptr<RecordBase> newRecord = mData.getRecord(mData.searchId(origin)).modifiedCopy();
-    mAdapters.find(type)->second->setId(*newRecord, destination);
+    mAdapters.find(type)->second->setId(*newRecord, destination.getRefIdString());
     mData.insertRecord(std::move(newRecord), type, destination);
 }
 
-bool CSMWorld::RefIdCollection::touchRecord(const std::string& id)
+bool CSMWorld::RefIdCollection::touchRecord(const ESM::RefId& id)
 {
     throw std::runtime_error("RefIdCollection::touchRecord is unimplemented");
     return false;
@@ -756,7 +761,7 @@ bool CSMWorld::RefIdCollection::touchRecord(const std::string& id)
 
 void CSMWorld::RefIdCollection::appendRecord(std::unique_ptr<RecordBase> record, UniversalId::Type type)
 {
-    std::string id = findAdapter(type).getId(*record.get());
+    auto id = findAdapter(type).getId(*record.get());
 
     int index = mData.getAppendIndex(type);
 
@@ -765,7 +770,7 @@ void CSMWorld::RefIdCollection::appendRecord(std::unique_ptr<RecordBase> record,
     mData.getRecord(mData.globalToLocalIndex(index)).assign(*record.release());
 }
 
-const CSMWorld::RecordBase& CSMWorld::RefIdCollection::getRecord(const std::string& id) const
+const CSMWorld::RecordBase& CSMWorld::RefIdCollection::getRecord(const ESM::RefId& id) const
 {
     return mData.getRecord(mData.searchId(id));
 }
@@ -780,12 +785,12 @@ void CSMWorld::RefIdCollection::load(ESM::ESMReader& reader, bool base, Universa
     mData.load(reader, base, type);
 }
 
-int CSMWorld::RefIdCollection::getAppendIndex(const std::string& id, UniversalId::Type type) const
+int CSMWorld::RefIdCollection::getAppendIndex(const ESM::RefId& id, UniversalId::Type type) const
 {
     return mData.getAppendIndex(type);
 }
 
-std::vector<std::string> CSMWorld::RefIdCollection::getIds(bool listDeleted) const
+std::vector<ESM::RefId> CSMWorld::RefIdCollection::getIds(bool listDeleted) const
 {
     return mData.getIds(listDeleted);
 }

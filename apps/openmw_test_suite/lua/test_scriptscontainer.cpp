@@ -297,7 +297,7 @@ CUSTOM, PLAYER: useInterface.lua
     TEST_F(LuaScriptsContainerTest, Interface)
     {
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
-        scripts.setAutoStartConf(mCfg.getLocalConf(ESM::REC_CREA, "", ESM::RefNum()));
+        scripts.setAutoStartConf(mCfg.getLocalConf(ESM::REC_CREA, ESM::RefId::sEmpty, ESM::RefNum()));
         int addIfaceId = *mCfg.findId("testInterface.lua");
         int overrideIfaceId = *mCfg.findId("overrideInterface.lua");
         int useIfaceId = *mCfg.findId("useInterface.lua");
@@ -327,8 +327,8 @@ CUSTOM, PLAYER: useInterface.lua
         LuaUtil::ScriptsContainer scripts1(&mLua, "Test");
         LuaUtil::ScriptsContainer scripts2(&mLua, "Test");
         LuaUtil::ScriptsContainer scripts3(&mLua, "Test");
-        scripts1.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, "", ESM::RefNum()));
-        scripts2.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, "", ESM::RefNum()));
+        scripts1.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, ESM::RefId::sEmpty, ESM::RefNum()));
+        scripts2.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, ESM::RefId::sEmpty, ESM::RefNum()));
         scripts3.setAutoStartConf(mCfg.getPlayerConf());
 
         scripts1.addAutoStartedScripts();

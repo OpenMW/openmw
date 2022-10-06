@@ -140,7 +140,7 @@ namespace CSMWorld
 
         void addModel(QAbstractItemModel* model, UniversalId::Type type, bool update = true);
 
-        static void appendIds(std::vector<std::string>& ids, const CollectionBase& collection, bool listDeleted);
+        static void appendIds(std::vector<ESM::RefId>& ids, const CollectionBase& collection, bool listDeleted);
         ///< Append all IDs from collection to \a ids.
 
         static int count(RecordBase::State state, const CollectionBase& collection);
@@ -305,7 +305,7 @@ namespace CSMWorld
 
         bool hasId(const std::string& id) const;
 
-        std::vector<std::string> getIds(bool listDeleted = true) const;
+        std::vector<ESM::RefId> getIds(bool listDeleted = true) const;
         ///< Return a sorted collection of all IDs that are not internal to the editor.
         ///
         /// \param listDeleted include deleted record in the list

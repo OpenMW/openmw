@@ -40,18 +40,18 @@ void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
     const ESM::GameSetting& gmst = record.get();
 
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Gmst, gmst.mId);
-
+    std::string gmstIdString = gmst.mId.getRefIdString();
     // Test for empty string
     if (gmst.mValue.getType() == ESM::VT_String && gmst.mValue.getString().empty())
-        messages.add(id, gmst.mId + " is an empty string", "", CSMDoc::Message::Severity_Warning);
+        messages.add(id, gmstIdString + " is an empty string", "", CSMDoc::Message::Severity_Warning);
 
     // Checking type and limits
     // optimization - compare it to lists based on naming convention (f-float,i-int,s-string)
-    if (gmst.mId[0] == 'f')
+    if (gmstIdString[0] == 'f')
     {
         for (size_t i = 0; i < CSMWorld::DefaultGmsts::FloatCount; ++i)
         {
-            if (gmst.mId == CSMWorld::DefaultGmsts::Floats[i])
+            if (gmst.mId == ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::Floats[i]))
             {
                 if (gmst.mValue.getType() != ESM::VT_Float)
                 {
@@ -64,21 +64,21 @@ void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
                 if (gmst.mValue.getFloat() < CSMWorld::DefaultGmsts::FloatLimits[i * 2])
                     messages.add(
-                        id, gmst.mId + " is less than the suggested range", "", CSMDoc::Message::Severity_Warning);
+                        id, gmstIdString + " is less than the suggested range", "", CSMDoc::Message::Severity_Warning);
 
                 if (gmst.mValue.getFloat() > CSMWorld::DefaultGmsts::FloatLimits[i * 2 + 1])
                     messages.add(
-                        id, gmst.mId + " is more than the suggested range", "", CSMDoc::Message::Severity_Warning);
+                        id, gmstIdString + " is more than the suggested range", "", CSMDoc::Message::Severity_Warning);
 
                 break; // for loop
             }
         }
     }
-    else if (gmst.mId[0] == 'i')
+    else if (gmstIdString[0] == 'i')
     {
         for (size_t i = 0; i < CSMWorld::DefaultGmsts::IntCount; ++i)
         {
-            if (gmst.mId == CSMWorld::DefaultGmsts::Ints[i])
+            if (gmst.mId == ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::Ints[i]))
             {
                 if (gmst.mValue.getType() != ESM::VT_Int)
                 {
@@ -91,28 +91,28 @@ void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
                 if (gmst.mValue.getInteger() < CSMWorld::DefaultGmsts::IntLimits[i * 2])
                     messages.add(
-                        id, gmst.mId + " is less than the suggested range", "", CSMDoc::Message::Severity_Warning);
+                        id, gmstIdString + " is less than the suggested range", "", CSMDoc::Message::Severity_Warning);
 
                 if (gmst.mValue.getInteger() > CSMWorld::DefaultGmsts::IntLimits[i * 2 + 1])
                     messages.add(
-                        id, gmst.mId + " is more than the suggested range", "", CSMDoc::Message::Severity_Warning);
+                        id, gmstIdString + " is more than the suggested range", "", CSMDoc::Message::Severity_Warning);
 
                 break; // for loop
             }
         }
     }
-    else if (gmst.mId[0] == 's')
+    else if (gmstIdString[0] == 's')
     {
         for (size_t i = 0; i < CSMWorld::DefaultGmsts::StringCount; ++i)
         {
-            if (gmst.mId == CSMWorld::DefaultGmsts::Strings[i])
+            if (gmst.mId == ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::Strings[i]))
             {
                 ESM::VarType type = gmst.mValue.getType();
 
                 if (type != ESM::VT_String && type != ESM::VT_None)
                 {
                     std::ostringstream stream;
-                    stream << "Expected string or none type for " << gmst.mId << " but found "
+                    stream << "Expected string or none type for " << gmstIdString << " but found "
                            << varTypeToString(gmst.mValue.getType()) << " type";
 
                     messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);

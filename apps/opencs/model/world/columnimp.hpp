@@ -61,7 +61,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mId.c_str());
+            return QString::fromUtf8(record.get().mId.getRefIdString().c_str());
         }
 
         bool isEditable() const override { return false; }
@@ -690,14 +690,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mSleepList.c_str());
+            return QString::fromUtf8(record.get().mSleepList.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mSleepList = data.toString().toUtf8().constData();
+            record2.mSleepList = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -816,14 +816,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mRegion.c_str());
+            return QString::fromUtf8(record.get().mRegion.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mRegion = data.toString().toUtf8().constData();
+            record2.mRegion = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -845,14 +845,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mCell.c_str());
+            return QString::fromUtf8(record.get().mCell.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mCell = data.toString().toUtf8().constData();
+            record2.mCell = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -872,14 +872,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mOriginalCell.c_str());
+            return QString::fromUtf8(record.get().mOriginalCell.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mOriginalCell = data.toString().toUtf8().constData();
+            record2.mOriginalCell = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -899,14 +899,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mRefID.c_str());
+            return QString::fromUtf8(record.get().mRefID.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mRefID = data.toString().toUtf8().constData();
+            record2.mRefID = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -944,14 +944,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mOwner.c_str());
+            return QString::fromUtf8(record.get().mOwner.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mOwner = data.toString().toUtf8().constData();
+            record2.mOwner = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -969,14 +969,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mSoul.c_str());
+            return QString::fromUtf8(record.get().mSoul.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mSoul = data.toString().toUtf8().constData();
+            record2.mSoul = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -994,14 +994,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mFaction.c_str());
+            return QString::fromUtf8(record.get().mFaction.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mFaction = data.toString().toUtf8().constData();
+            record2.mFaction = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1168,14 +1168,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mKey.c_str());
+            return QString::fromUtf8(record.get().mKey.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mKey = data.toString().toUtf8().constData();
+            record2.mKey = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1193,14 +1193,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mTrap.c_str());
+            return QString::fromUtf8(record.get().mTrap.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mTrap = data.toString().toUtf8().constData();
+            record2.mTrap = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1407,14 +1407,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mTopicId.c_str());
+            return QString::fromUtf8(record.get().mTopicId.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mTopicId = data.toString().toUtf8().constData();
+            record2.mTopicId = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1434,14 +1434,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mActor.c_str());
+            return QString::fromUtf8(record.get().mActor.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mActor = data.toString().toUtf8().constData();
+            record2.mActor = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1459,14 +1459,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mRace.c_str());
+            return QString::fromUtf8(record.get().mRace.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mRace = data.toString().toUtf8().constData();
+            record2.mRace = ESM::RefId::stringRefId( data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1484,14 +1484,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mClass.c_str());
+            return QString::fromUtf8(record.get().mClass.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mClass = data.toString().toUtf8().constData();
+            record2.mClass = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1509,14 +1509,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mPcFaction.c_str());
+            return QString::fromUtf8(record.get().mPcFaction.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mPcFaction = data.toString().toUtf8().constData();
+            record2.mPcFaction = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1926,14 +1926,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mSound.c_str());
+            return QString::fromUtf8(record.get().mSound.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mSound = data.toString().toUtf8().constData();
+            record2.mSound = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1951,14 +1951,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mCreature.c_str());
+            return QString::fromUtf8(record.get().mCreature.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mCreature = data.toString().toUtf8().constData();
+            record2.mCreature = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -2072,7 +2072,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            const std::string* string = nullptr;
+            const ESM::RefId* string = nullptr;
 
             switch (this->mColumnId)
             {
@@ -2093,12 +2093,12 @@ namespace CSMWorld
             if (!string)
                 throw std::logic_error("Unsupported column ID");
 
-            return QString::fromUtf8(string->c_str());
+            return QString::fromUtf8(string->getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
-            std::string* string = nullptr;
+            ESM::RefId* string = nullptr;
 
             ESXRecordT record2 = record.get();
 
@@ -2121,7 +2121,7 @@ namespace CSMWorld
             if (!string)
                 throw std::logic_error("Unsupported column ID");
 
-            *string = data.toString().toUtf8().constData();
+            *string = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -2141,7 +2141,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            const std::string* string = nullptr;
+            const ESM::RefId* string = nullptr;
 
             switch (this->mColumnId)
             {
@@ -2162,12 +2162,12 @@ namespace CSMWorld
             if (!string)
                 throw std::logic_error("Unsupported column ID");
 
-            return QString::fromUtf8(string->c_str());
+            return QString::fromUtf8(string->getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
-            std::string* string = nullptr;
+            ESM::RefId* string = nullptr;
 
             ESXRecordT record2 = record.get();
 
@@ -2190,7 +2190,7 @@ namespace CSMWorld
             if (!string)
                 throw std::logic_error("Unsupported column ID");
 
-            *string = data.toString().toUtf8().constData();
+            *string = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }

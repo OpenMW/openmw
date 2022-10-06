@@ -11,7 +11,7 @@
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/subcellcollection.hpp"
-
+#include <components/esm/refid.hpp>
 #include "tagbase.hpp"
 
 namespace osg
@@ -92,7 +92,7 @@ namespace CSVRender
     private:
         CSMWorld::Data& mData;
         CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& mPathgridCollection;
-        std::string mId;
+        ESM::RefId mId;
         CSMWorld::CellCoordinates mCoords;
         bool mInterior;
 

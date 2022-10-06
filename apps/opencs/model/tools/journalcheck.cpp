@@ -50,7 +50,7 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
     int totalInfoCount = 0;
     std::set<int> questIndices;
 
-    CSMWorld::InfoCollection::Range range = mJournalInfos.getTopicRange(journal.mId);
+    CSMWorld::InfoCollection::Range range = mJournalInfos.getTopicRange(journal.mId.getRefIdString());
 
     for (CSMWorld::InfoCollection::RecordConstIterator it = range.first; it != range.second; ++it)
     {

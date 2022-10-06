@@ -53,7 +53,7 @@ QModelIndex CSMWorld::RegionMap::getIndex(const CellCoordinates& index) const
 
 CSMWorld::CellCoordinates CSMWorld::RegionMap::getIndex(const Cell& cell) const
 {
-    std::istringstream stream(cell.mId);
+    std::istringstream stream(cell.mId.getRefIdString());
 
     char ignore;
     int x = 0;
@@ -74,7 +74,7 @@ void CSMWorld::RegionMap::buildRegions()
         const Record<ESM::Region>& region = regions.getRecord(i);
 
         if (!region.isDeleted())
-            mColours.insert(std::make_pair(Misc::StringUtils::lowerCase(region.get().mId), region.get().mMapColor));
+            mColours.insert(std::make_pair(region.get().mId, region.get().mMapColor));
     }
 }
 
@@ -163,33 +163,29 @@ void CSMWorld::RegionMap::removeCell(const CellCoordinates& index)
     }
 }
 
-void CSMWorld::RegionMap::addRegion(const std::string& region, unsigned int colour)
+void CSMWorld::RegionMap::addRegion(const ESM::RefId& region, unsigned int colour)
 {
-    mColours[Misc::StringUtils::lowerCase(region)] = colour;
+    mColours[region] = colour;
 }
 
-void CSMWorld::RegionMap::removeRegion(const std::string& region)
+void CSMWorld::RegionMap::removeRegion(const ESM::RefId& region)
 {
-    std::map<std::string, unsigned int>::iterator iter(mColours.find(Misc::StringUtils::lowerCase(region)));
+    auto iter(mColours.find(region));
 
     if (iter != mColours.end())
         mColours.erase(iter);
 }
 
-void CSMWorld::RegionMap::updateRegions(const std::vector<std::string>& regions)
+void CSMWorld::RegionMap::updateRegions(const std::vector<ESM::RefId>& regions)
 {
-    std::vector<std::string> regions2(regions);
+    std::vector<ESM::RefId> regions2(regions);
 
-    for (auto& region2 : regions2)
-    {
-        Misc::StringUtils::lowerCaseInPlace(region2);
-    }
     std::sort(regions2.begin(), regions2.end());
 
     for (std::map<CellCoordinates, CellDescription>::const_iterator iter(mMap.begin()); iter != mMap.end(); ++iter)
     {
         if (!iter->second.mRegion.empty()
-            && std::find(regions2.begin(), regions2.end(), Misc::StringUtils::lowerCase(iter->second.mRegion))
+            && std::find(regions2.begin(), regions2.end(),iter->second.mRegion)
                 != regions2.end())
         {
             QModelIndex index = getIndex(iter->first);
@@ -337,8 +333,8 @@ QVariant CSMWorld::RegionMap::data(const QModelIndex& index, int role) const
             if (cell->second.mDeleted)
                 return QBrush(Qt::red, Qt::DiagCrossPattern);
 
-            std::map<std::string, unsigned int>::const_iterator iter
-                = mColours.find(Misc::StringUtils::lowerCase(cell->second.mRegion));
+            auto iter
+                = mColours.find(cell->second.mRegion);
 
             if (iter != mColours.end())
                 return QBrush(QColor(iter->second & 0xff, (iter->second >> 8) & 0xff, (iter->second >> 16) & 0xff));
@@ -374,8 +370,8 @@ QVariant CSMWorld::RegionMap::data(const QModelIndex& index, int role) const
             {
                 stream << "<br>";
 
-                std::map<std::string, unsigned int>::const_iterator iter
-                    = mColours.find(Misc::StringUtils::lowerCase(cell->second.mRegion));
+                auto iter
+                    = mColours.find(cell->second.mRegion);
 
                 if (iter != mColours.end())
                     stream << cell->second.mRegion;
@@ -396,7 +392,7 @@ QVariant CSMWorld::RegionMap::data(const QModelIndex& index, int role) const
         std::map<CellCoordinates, CellDescription>::const_iterator cell = mMap.find(cellIndex);
 
         if (cell != mMap.end() && !cell->second.mRegion.empty())
-            return QString::fromUtf8(Misc::StringUtils::lowerCase(cell->second.mRegion).c_str());
+            return QString::fromUtf8(cell->second.mRegion.getRefIdString().c_str());
     }
 
     if (role == Role_CellId)
@@ -419,7 +415,7 @@ Qt::ItemFlags CSMWorld::RegionMap::flags(const QModelIndex& index) const
 
 void CSMWorld::RegionMap::regionsAboutToBeRemoved(const QModelIndex& parent, int start, int end)
 {
-    std::vector<std::string> update;
+    std::vector<ESM::RefId> update;
 
     const IdCollection<ESM::Region>& regions = mData.getRegions();
 
@@ -437,7 +433,7 @@ void CSMWorld::RegionMap::regionsAboutToBeRemoved(const QModelIndex& parent, int
 
 void CSMWorld::RegionMap::regionsInserted(const QModelIndex& parent, int start, int end)
 {
-    std::vector<std::string> update;
+    std::vector<ESM::RefId> update;
 
     const IdCollection<ESM::Region>& regions = mData.getRegions();
 
@@ -461,7 +457,7 @@ void CSMWorld::RegionMap::regionsChanged(const QModelIndex& topLeft, const QMode
     // Note: At this point an additional check could be inserted to see if there is any change to the
     // columns we are interested in. If not we can exit the function here and avoid all updating.
 
-    std::vector<std::string> update;
+    std::vector<ESM::RefId> update;
 
     const IdCollection<ESM::Region>& regions = mData.getRegions();
 

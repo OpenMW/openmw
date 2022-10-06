@@ -53,9 +53,9 @@ char CSMWorld::ScriptContext::getGlobalType(const std::string& name) const
     return ' ';
 }
 
-std::pair<char, bool> CSMWorld::ScriptContext::getMemberType(const std::string& name, const std::string& id) const
+std::pair<char, bool> CSMWorld::ScriptContext::getMemberType(const std::string& name, const ESM::RefId& id) const
 {
-    std::string id2 = Misc::StringUtils::lowerCase(id);
+    ESM::RefId id2 = id;
 
     int index = mData.getScripts().searchId(id2);
     bool reference = false;
@@ -70,7 +70,7 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType(const std::string& 
             // Referenceable found.
             int columnIndex = mData.getReferenceables().findColumnIndex(Columns::ColumnId_Script);
 
-            id2 = Misc::StringUtils::lowerCase(
+            id2 = ESM::RefId::stringRefId(
                 mData.getReferenceables().getData(index, columnIndex).toString().toUtf8().constData());
 
             if (!id2.empty())
@@ -85,7 +85,7 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType(const std::string& 
     if (index == -1)
         return std::make_pair(' ', false);
 
-    std::map<std::string, Compiler::Locals>::iterator iter = mLocals.find(id2);
+    std::map<std::string, Compiler::Locals>::iterator iter = mLocals.find(id2.getRefIdString());
 
     if (iter == mLocals.end())
     {
@@ -97,28 +97,24 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType(const std::string& 
         Compiler::Scanner scanner(errorHandler, stream, getExtensions());
         scanner.scan(parser);
 
-        iter = mLocals.insert(std::make_pair(id2, locals)).first;
+        iter = mLocals.insert(std::make_pair(id2.getRefIdString(), locals)).first;
     }
 
     return std::make_pair(iter->second.getType(Misc::StringUtils::lowerCase(name)), reference);
 }
 
-bool CSMWorld::ScriptContext::isId(const std::string& name) const
+bool CSMWorld::ScriptContext::isId(const ESM::RefId& name) const
 {
     if (!mIdsUpdated)
     {
         mIds = mData.getIds();
-
-        for (auto& id : mIds)
-        {
-            Misc::StringUtils::lowerCaseInPlace(id);
-        }
+        
         std::sort(mIds.begin(), mIds.end());
 
         mIdsUpdated = true;
     }
 
-    return std::binary_search(mIds.begin(), mIds.end(), Misc::StringUtils::lowerCase(name));
+    return std::binary_search(mIds.begin(), mIds.end(), name);
 }
 
 void CSMWorld::ScriptContext::invalidateIds()

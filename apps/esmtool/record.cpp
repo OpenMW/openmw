@@ -560,7 +560,7 @@ namespace EsmTool
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Texture: " << mData.mTexture << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
-        for (const std::string& power : mData.mPowers.mList)
+        for (const auto& power : mData.mPowers.mList)
             std::cout << "  Power: " << power << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -704,7 +704,7 @@ namespace EsmTool
             std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
                       << " Item: " << item.mItem << std::endl;
 
-        for (const std::string& spell : mData.mSpells.mList)
+        for (const auto& spell : mData.mSpells.mList)
             std::cout << "  Spell: " << spell << std::endl;
 
         printTransport(mData.getTransport());
@@ -1102,7 +1102,7 @@ namespace EsmTool
             std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
                       << " Item: " << item.mItem << std::endl;
 
-        for (const std::string& spell : mData.mSpells.mList)
+        for (const auto& spell : mData.mSpells.mList)
             std::cout << "  Spell: " << spell << std::endl;
 
         printTransport(mData.getTransport());
@@ -1187,7 +1187,7 @@ namespace EsmTool
                 std::cout << "  Skill: " << skillLabel(mData.mData.mBonus[i].mSkill) << " ("
                           << mData.mData.mBonus[i].mSkill << ") = " << mData.mData.mBonus[i].mBonus << std::endl;
 
-        for (const std::string& power : mData.mPowers.mList)
+        for (const auto& power : mData.mPowers.mList)
             std::cout << "  Power: " << power << std::endl;
 
         std::cout << "  Deleted: " << mIsDeleted << std::endl;

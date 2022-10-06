@@ -86,7 +86,7 @@ namespace CSMWorld
 
         void removeRows(int index, int count) override;
 
-        void appendBlankRecord(const std::string& id, UniversalId::Type type = UniversalId::Type_None) override;
+        void appendBlankRecord(const ESM::RefId& id, UniversalId::Type type = UniversalId::Type_None) override;
 
         int searchId(std::string_view id) const override;
 

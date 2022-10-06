@@ -75,7 +75,7 @@ namespace ESM
         RefId mActor, mRace, mClass, mFaction, mPcFaction, mCell;
 
         // Sound and text associated with this item
-        RefId mSound;
+        std::string mSound;
         std::string mResponse;
         // Result script (uncompiled) to run whenever this dialog item is
         // selected

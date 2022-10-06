@@ -68,7 +68,7 @@ void CSMTools::FinishMergedDocumentStage::perform(int stage, CSMDoc::Messages& m
     reader.open(path);
 
     CSMWorld::MetaData source;
-    source.mId = "sys::meta";
+    source.mId = ESM::RefId::stringRefId("sys::meta");
     source.load(reader);
 
     CSMWorld::MetaData target = mState.mTarget->getData().getMetaData();
@@ -117,7 +117,7 @@ void CSMTools::MergeReferencesStage::perform(int stage, CSMDoc::Messages& messag
 
         ref.mOriginalCell = ref.mCell;
 
-        ref.mRefNum.mIndex = mIndex[Misc::StringUtils::lowerCase(ref.mCell)]++;
+        ref.mRefNum.mIndex = mIndex[ref.mCell.getRefIdString()]++;
         ref.mRefNum.mContentFile = 0;
         ref.mNew = false;
 
@@ -190,7 +190,7 @@ void CSMTools::FixLandsAndLandTexturesMergeStage::perform(int stage, CSMDoc::Mes
         CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&>(
             *mState.mTarget->getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
 
-        std::string id = mState.mTarget->getData().getLand().getId(stage);
+        std::string id = mState.mTarget->getData().getLand().getId(stage).getRefIdString();
 
         CSMWorld::TouchLandCommand cmd(landTable, ltexTable, id);
         cmd.redo();

@@ -2,6 +2,7 @@
 #define CSM_WOLRD_METADATA_H
 
 #include <string>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -13,7 +14,7 @@ namespace CSMWorld
 {
     struct MetaData
     {
-        std::string mId;
+        ESM::RefId mId;
 
         int mFormat;
         std::string mAuthor;

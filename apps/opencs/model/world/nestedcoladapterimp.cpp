@@ -252,10 +252,10 @@ namespace CSMWorld
     {
         ESM::Faction faction = record.get();
 
-        std::map<std::string, int>& reactions = faction.mReactions;
+        std::map<ESM::RefId, int>& reactions = faction.mReactions;
 
         // blank row
-        reactions.insert(std::make_pair("", 0));
+        reactions.insert(std::make_pair(ESM::RefId::sEmpty, 0));
 
         record.setModified(faction);
     }
@@ -264,14 +264,14 @@ namespace CSMWorld
     {
         ESM::Faction faction = record.get();
 
-        std::map<std::string, int>& reactions = faction.mReactions;
+        std::map<ESM::RefId, int>& reactions = faction.mReactions;
 
         if (rowToRemove < 0 || rowToRemove >= static_cast<int>(reactions.size()))
             throw std::runtime_error("index out of range");
 
         // FIXME: how to ensure that the map entries correspond to table indicies?
         // WARNING: Assumed that the table view has the same order as std::map
-        std::map<std::string, int>::iterator iter = reactions.begin();
+        auto iter = reactions.begin();
         for (int i = 0; i < rowToRemove; ++i)
             ++iter;
         reactions.erase(iter);
@@ -285,7 +285,7 @@ namespace CSMWorld
         ESM::Faction faction = record.get();
 
         faction.mReactions
-            = static_cast<const NestedTableWrapper<std::map<std::string, int>>&>(nestedTable).mNestedTable;
+            = static_cast<const NestedTableWrapper<std::map<ESM::RefId, int>>&>(nestedTable).mNestedTable;
 
         record.setModified(faction);
     }
@@ -293,7 +293,7 @@ namespace CSMWorld
     NestedTableWrapperBase* FactionReactionsAdapter::table(const Record<ESM::Faction>& record) const
     {
         // deleted by dtor of NestedTableStoring
-        return new NestedTableWrapper<std::map<std::string, int>>(record.get().mReactions);
+        return new NestedTableWrapper<std::map<ESM::RefId, int>>(record.get().mReactions);
     }
 
     QVariant FactionReactionsAdapter::getData(
@@ -301,20 +301,20 @@ namespace CSMWorld
     {
         ESM::Faction faction = record.get();
 
-        std::map<std::string, int>& reactions = faction.mReactions;
+        std::map<ESM::RefId, int>& reactions = faction.mReactions;
 
         if (subRowIndex < 0 || subRowIndex >= static_cast<int>(reactions.size()))
             throw std::runtime_error("index out of range");
 
         // FIXME: how to ensure that the map entries correspond to table indicies?
         // WARNING: Assumed that the table view has the same order as std::map
-        std::map<std::string, int>::const_iterator iter = reactions.begin();
+        auto iter = reactions.begin();
         for (int i = 0; i < subRowIndex; ++i)
             ++iter;
         switch (subColIndex)
         {
             case 0:
-                return QString((*iter).first.c_str());
+                return QString((*iter).first.getRefIdString().c_str());
             case 1:
                 return (*iter).second;
             default:
@@ -327,18 +327,18 @@ namespace CSMWorld
     {
         ESM::Faction faction = record.get();
 
-        std::map<std::string, int>& reactions = faction.mReactions;
+        std::map<ESM::RefId, int>& reactions = faction.mReactions;
 
         if (subRowIndex < 0 || subRowIndex >= static_cast<int>(reactions.size()))
             throw std::runtime_error("index out of range");
 
         // FIXME: how to ensure that the map entries correspond to table indicies?
         // WARNING: Assumed that the table view has the same order as std::map
-        std::map<std::string, int>::iterator iter = reactions.begin();
+        auto iter = reactions.begin();
         for (int i = 0; i < subRowIndex; ++i)
             ++iter;
 
-        std::string factionId = (*iter).first;
+        ESM::RefId factionId = (*iter).first;
         int reaction = (*iter).second;
 
         switch (subColIndex)
@@ -346,7 +346,7 @@ namespace CSMWorld
             case 0:
             {
                 reactions.erase(iter);
-                reactions.insert(std::make_pair(value.toString().toUtf8().constData(), reaction));
+                reactions.insert(std::make_pair(ESM::RefId::stringRefId(value.toString().toUtf8().constData()), reaction));
                 break;
             }
             case 1:
@@ -381,7 +381,7 @@ namespace CSMWorld
 
         // blank row
         ESM::Region::SoundRef soundRef;
-        soundRef.mSound.assign("");
+        soundRef.mSound = ESM::RefId::sEmpty;
         soundRef.mChance = 0;
 
         soundList.insert(soundList.begin() + position, soundRef);
@@ -432,7 +432,7 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0:
-                return QString(soundRef.mSound.c_str());
+                return QString(soundRef.mSound.getRefIdString().c_str());
             case 1:
                 return soundRef.mChance;
             default:
@@ -454,7 +454,7 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0:
-                soundRef.mSound.assign(value.toString().toUtf8().constData());
+                soundRef.mSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
                 break;
             case 1:
                 soundRef.mChance = static_cast<unsigned char>(value.toInt());

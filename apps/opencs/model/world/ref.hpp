@@ -11,9 +11,9 @@ namespace CSMWorld
     /// \brief Wrapper for CellRef sub record
     struct CellRef : public ESM::CellRef
     {
-        std::string mId;
-        std::string mCell;
-        std::string mOriginalCell;
+        ESM::RefId mId;
+        ESM::RefId mCell;
+        ESM::RefId mOriginalCell;
         bool mNew; // new reference, not counted yet, ref num not assigned yet
         unsigned int mIdNum;
 

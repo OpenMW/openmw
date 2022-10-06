@@ -73,9 +73,9 @@ void CSMWorld::Data::addModel(QAbstractItemModel* model, UniversalId::Type type,
     }
 }
 
-void CSMWorld::Data::appendIds(std::vector<std::string>& ids, const CollectionBase& collection, bool listDeleted)
+void CSMWorld::Data::appendIds(std::vector<ESM::RefId>& ids, const CollectionBase& collection, bool listDeleted)
 {
-    std::vector<std::string> ids2 = collection.getIds(listDeleted);
+    std::vector<ESM::RefId> ids2 = collection.getIds(listDeleted);
 
     ids.insert(ids.end(), ids2.begin(), ids2.end());
 }
@@ -578,7 +578,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, bool fsStrict, const Files::Path
     mDebugProfiles.addColumn(new DescriptionColumn<ESM::DebugProfile>);
     mDebugProfiles.addColumn(new ScriptColumn<ESM::DebugProfile>(ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
-    mMetaData.appendBlankRecord("sys::meta");
+    mMetaData.appendBlankRecord(ESM::RefId::stringRefId("sys::meta"));
 
     mMetaData.addColumn(new StringIdColumn<MetaData>(true));
     mMetaData.addColumn(new RecordStateColumn<MetaData>);
@@ -1018,7 +1018,7 @@ int CSMWorld::Data::startLoading(const std::filesystem::path& path, bool base, b
     if (!mProject && !mBase)
     {
         MetaData metaData;
-        metaData.mId = "sys::meta";
+        metaData.mId = ESM::RefId::stringRefId("sys::meta");
         metaData.load(*mReader);
 
         mMetaData.setRecord(0,
@@ -1042,7 +1042,7 @@ void CSMWorld::Data::loadFallbackEntries()
         if (mReferenceables.searchId(marker.first) == -1)
         {
             ESM::Static newMarker;
-            newMarker.mId = marker.first;
+            newMarker.mId = ESM::RefId::stringRefId(marker.first);
             newMarker.mModel = marker.second;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Static>>();
@@ -1057,7 +1057,7 @@ void CSMWorld::Data::loadFallbackEntries()
         if (mReferenceables.searchId(marker.first) == -1)
         {
             ESM::Door newMarker;
-            newMarker.mId = marker.first;
+            newMarker.mId = ESM::RefId::stringRefId(marker.first);
             newMarker.mModel = marker.second;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Door>>();
@@ -1172,7 +1172,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 messages.add(id, "Logic error: cell index out of bounds", "", CSMDoc::Message::Severity_Error);
                 index = mCells.getSize() - 1;
             }
-            std::string cellId = Misc::StringUtils::lowerCase(mCells.getId(index));
+            std::string cellId = mCells.getId(index).getRefIdString();;
             mRefs.load(*mReader, index, mBase, mRefLoadCache[cellId], messages);
             break;
         }
@@ -1241,6 +1241,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
         case ESM::REC_DIAL:
         {
             ESM::Dialogue record;
+            std::string recordIdString = record.mId.getRefIdString();
             bool isDeleted = false;
 
             record.load(*mReader, isDeleted);
@@ -1250,18 +1251,18 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 // record vector can be shuffled around which would make pointer to record invalid
                 mDialogue = nullptr;
 
-                if (mJournals.tryDelete(record.mId))
+                if (mJournals.tryDelete(recordIdString))
                 {
-                    mJournalInfos.removeDialogueInfos(record.mId);
+                    mJournalInfos.removeDialogueInfos(recordIdString);
                 }
-                else if (mTopics.tryDelete(record.mId))
+                else if (mTopics.tryDelete(recordIdString))
                 {
-                    mTopicInfos.removeDialogueInfos(record.mId);
+                    mTopicInfos.removeDialogueInfos(recordIdString);
                 }
                 else
                 {
                     messages.add(UniversalId::Type_None,
-                        "Trying to delete dialogue record " + record.mId + " which does not exist", "",
+                        "Trying to delete dialogue record " + recordIdString + " which does not exist", "",
                         CSMDoc::Message::Severity_Warning);
                 }
             }
@@ -1360,9 +1361,9 @@ int CSMWorld::Data::count(RecordBase::State state) const
         + count(state, mPathgrids);
 }
 
-std::vector<std::string> CSMWorld::Data::getIds(bool listDeleted) const
+std::vector<ESM::RefId> CSMWorld::Data::getIds(bool listDeleted) const
 {
-    std::vector<std::string> ids;
+    std::vector<ESM::RefId> ids;
 
     appendIds(ids, mGlobals, listDeleted);
     appendIds(ids, mGmsts, listDeleted);

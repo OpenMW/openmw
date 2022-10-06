@@ -50,7 +50,7 @@ namespace ESM
                     mPcFaction = esm.getRefId();
                     break;
                 case fourCC("SNAM"):
-                    mSound = esm.getRefId();
+                    mSound = esm.getHString();
                     break;
                 case SREC_NAME:
                     mResponse = esm.getHString();
@@ -108,7 +108,7 @@ namespace ESM
         esm.writeHNOCString("FNAM", mFaction.getRefIdString());
         esm.writeHNOCString("ANAM", mCell.getRefIdString());
         esm.writeHNOCString("DNAM", mPcFaction.getRefIdString());
-        esm.writeHNOCString("SNAM", mSound.getRefIdString());
+        esm.writeHNOCString("SNAM", mSound);
         esm.writeHNOString("NAME", mResponse);
 
         for (std::vector<SelectStruct>::const_iterator it = mSelects.begin(); it != mSelects.end(); ++it)
@@ -148,7 +148,7 @@ namespace ESM
         mFaction = ESM::RefId::sEmpty;
         mPcFaction = ESM::RefId::sEmpty;
         mCell = ESM::RefId::sEmpty;
-        mSound = ESM::RefId::sEmpty;
+        mSound.clear();
         mResponse.clear();
         mResultScript.clear();
         mFactionLess = false;

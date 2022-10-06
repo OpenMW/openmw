@@ -79,8 +79,12 @@ CSMDoc::OperationHolder* CSMTools::Tools::getVerifier()
 
         std::vector<std::string> mandatoryIds{ "Day", "DaysPassed", "GameHour", "Month", "PCRace" };
 
+        std::vector<ESM::RefId> mandatoryRefIds;
+        for (auto& id : mandatoryIds)
+            mandatoryRefIds.push_back(ESM::RefId::stringRefId(id));
+
         mVerifierOperation->appendStage(new MandatoryIdStage(
-            mData.getGlobals(), CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Globals), mandatoryIds));
+            mData.getGlobals(), CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Globals), mandatoryRefIds));
 
         mVerifierOperation->appendStage(new SkillCheckStage(mData.getSkills()));
 

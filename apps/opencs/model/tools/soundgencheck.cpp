@@ -50,11 +50,11 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages& messages
         if (creatureIndex.first == -1)
         {
             messages.add(
-                id, "Creature '" + soundGen.mCreature + "' doesn't exist", "", CSMDoc::Message::Severity_Error);
+                id, "Creature '" + soundGen.mCreature.getRefIdString() + "' doesn't exist", "", CSMDoc::Message::Severity_Error);
         }
         else if (creatureIndex.second != CSMWorld::UniversalId::Type_Creature)
         {
-            messages.add(id, "'" + soundGen.mCreature + "' is not a creature", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "'" + soundGen.mCreature.getRefIdString() + "' is not a creature", "", CSMDoc::Message::Severity_Error);
         }
     }
 
@@ -64,6 +64,6 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages& messages
     }
     else if (mSounds.searchId(soundGen.mSound) == -1)
     {
-        messages.add(id, "Sound '" + soundGen.mSound + "' doesn't exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Sound '" + soundGen.mSound.getRefIdString() + "' doesn't exist", "", CSMDoc::Message::Severity_Error);
     }
 }

@@ -70,7 +70,7 @@ namespace EsmTool
         {
         }
 
-        std::string getId() const override { return mData.mId; }
+        std::string getId() const override { return mData.mId.getRefIdString(); }
 
         T& get() { return mData; }
 
