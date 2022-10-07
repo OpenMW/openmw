@@ -49,6 +49,7 @@
 #include "mwgui/windowmanagerimp.hpp"
 
 #include "mwlua/luamanagerimp.hpp"
+#include "mwlua/worker.hpp"
 
 #include "mwscript/interpretercontext.hpp"
 #include "mwscript/scriptmanagerimp.hpp"
@@ -70,6 +71,8 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#include "profile.hpp"
+
 namespace
 {
     void checkSDLError(int ret)
@@ -77,140 +80,6 @@ namespace
         if (ret != 0)
             Log(Debug::Error) << "SDL error: " << SDL_GetError();
     }
-
-    struct UserStats
-    {
-        const std::string mLabel;
-        const std::string mBegin;
-        const std::string mEnd;
-        const std::string mTaken;
-
-        UserStats(const std::string& label, const std::string& prefix)
-            : mLabel(label)
-            , mBegin(prefix + "_time_begin")
-            , mEnd(prefix + "_time_end")
-            , mTaken(prefix + "_time_taken")
-        {
-        }
-    };
-
-    enum class UserStatsType : std::size_t
-    {
-        Input,
-        Sound,
-        State,
-        Script,
-        Mechanics,
-        Physics,
-        PhysicsWorker,
-        World,
-        Gui,
-        Lua,
-        LuaSyncUpdate,
-        Number,
-    };
-
-    template <UserStatsType type>
-    struct UserStatsValue
-    {
-        static const UserStats sValue;
-    };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Input>::sValue{ "Input", "input" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Sound>::sValue{ "Sound", "sound" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::State>::sValue{ "State", "state" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Script>::sValue{ "Script", "script" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Mechanics>::sValue{ "Mech", "mechanics" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Physics>::sValue{ "Phys", "physics" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::PhysicsWorker>::sValue{ " -Async", "physicsworker" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::World>::sValue{ "World", "world" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Gui>::sValue{ "Gui", "gui" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::Lua>::sValue{ "Lua", "lua" };
-
-    template <>
-    const UserStats UserStatsValue<UserStatsType::LuaSyncUpdate>::sValue{ " -Sync", "luasyncupdate" };
-
-    template <UserStatsType type>
-    struct ForEachUserStatsValue
-    {
-        template <class F>
-        static void apply(F&& f)
-        {
-            f(UserStatsValue<type>::sValue);
-            using Next = ForEachUserStatsValue<static_cast<UserStatsType>(static_cast<std::size_t>(type) + 1)>;
-            Next::apply(std::forward<F>(f));
-        }
-    };
-
-    template <>
-    struct ForEachUserStatsValue<UserStatsType::Number>
-    {
-        template <class F>
-        static void apply(F&&)
-        {
-        }
-    };
-
-    template <class F>
-    void forEachUserStatsValue(F&& f)
-    {
-        ForEachUserStatsValue<static_cast<UserStatsType>(0)>::apply(std::forward<F>(f));
-    }
-
-    template <UserStatsType sType>
-    class ScopedProfile
-    {
-    public:
-        ScopedProfile(osg::Timer_t frameStart, unsigned int frameNumber, const osg::Timer& timer, osg::Stats& stats)
-            : mScopeStart(timer.tick())
-            , mFrameStart(frameStart)
-            , mFrameNumber(frameNumber)
-            , mTimer(timer)
-            , mStats(stats)
-        {
-        }
-
-        ScopedProfile(const ScopedProfile&) = delete;
-        ScopedProfile& operator=(const ScopedProfile&) = delete;
-
-        ~ScopedProfile()
-        {
-            if (!mStats.collectStats("engine"))
-                return;
-            const osg::Timer_t end = mTimer.tick();
-            const UserStats& stats = UserStatsValue<sType>::sValue;
-
-            mStats.setAttribute(mFrameNumber, stats.mBegin, mTimer.delta_s(mFrameStart, mScopeStart));
-            mStats.setAttribute(mFrameNumber, stats.mTaken, mTimer.delta_s(mScopeStart, end));
-            mStats.setAttribute(mFrameNumber, stats.mEnd, mTimer.delta_s(mFrameStart, end));
-        }
-
-    private:
-        const osg::Timer_t mScopeStart;
-        const osg::Timer_t mFrameStart;
-        const unsigned int mFrameNumber;
-        const osg::Timer& mTimer;
-        osg::Stats& mStats;
-    };
 
     void initStatsHandler(Resource::Profiler& profiler)
     {
@@ -221,7 +90,7 @@ namespace
         const bool averageInInverseSpace = false;
         const float maxValue = 10000;
 
-        forEachUserStatsValue([&](const UserStats& v) {
+        OMW::forEachUserStatsValue([&](const OMW::UserStats& v) {
             profiler.addUserStatsLine(v.mLabel, textColor, barColor, v.mTaken, multiplier, average,
                 averageInInverseSpace, v.mBegin, v.mEnd, maxValue);
         });
@@ -302,15 +171,15 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frame(float frametime)
 {
+    const osg::Timer_t frameStart = mViewer->getStartTick();
+    const unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+    const osg::Timer* const timer = osg::Timer::instance();
+    osg::Stats* const stats = mViewer->getViewerStats();
+
+    mEnvironment.setFrameDuration(frametime);
+
     try
     {
-        const osg::Timer_t frameStart = mViewer->getStartTick();
-        const unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
-        const osg::Timer* const timer = osg::Timer::instance();
-        osg::Stats* const stats = mViewer->getViewerStats();
-
-        mEnvironment.setFrameDuration(frametime);
-
         // update input
         {
             ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
@@ -425,32 +294,47 @@ bool OMW::Engine::frame(float frametime)
             ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
             mWindowManager->update(frametime);
         }
-
-        const bool reportResource = stats->collectStats("resource");
-
-        if (reportResource)
-            stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getSize());
-
-        mUnrefQueue->flush(*mWorkQueue);
-
-        if (reportResource)
-        {
-            stats->setAttribute(frameNumber, "FrameNumber", frameNumber);
-
-            mResourceSystem->reportStats(frameNumber, stats);
-
-            stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
-            stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
-
-            mMechanicsManager->reportStats(frameNumber, *stats);
-            mWorld->reportStats(frameNumber, *stats);
-            mLuaManager->reportStats(frameNumber, *stats);
-        }
     }
     catch (const std::exception& e)
     {
         Log(Debug::Error) << "Error in frame: " << e.what();
     }
+
+    const bool reportResource = stats->collectStats("resource");
+
+    if (reportResource)
+        stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getSize());
+
+    mUnrefQueue->flush(*mWorkQueue);
+
+    if (reportResource)
+    {
+        stats->setAttribute(frameNumber, "FrameNumber", frameNumber);
+
+        mResourceSystem->reportStats(frameNumber, stats);
+
+        stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
+        stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
+
+        mMechanicsManager->reportStats(frameNumber, *stats);
+        mWorld->reportStats(frameNumber, *stats);
+        mLuaManager->reportStats(frameNumber, *stats);
+    }
+
+    mViewer->eventTraversal();
+    mViewer->updateTraversal();
+
+    {
+        ScopedProfile<UserStatsType::WindowManager> profile(frameStart, frameNumber, *timer, *stats);
+        mWorld->updateWindowManager();
+    }
+
+    mLuaWorker->allowUpdate(); // if there is a separate Lua thread, it starts the update now
+
+    mViewer->renderingTraversals();
+
+    mLuaWorker->finishUpdate();
+
     return true;
 }
 
@@ -505,6 +389,7 @@ OMW::Engine::~Engine()
     mSoundManager = nullptr;
     mInputManager = nullptr;
     mStateManager = nullptr;
+    mLuaWorker = nullptr;
     mLuaManager = nullptr;
 
     mScriptContext = nullptr;
@@ -800,6 +685,9 @@ void OMW::Engine::prepareEngine()
     mLuaManager = std::make_unique<MWLua::LuaManager>(mVFS.get(), mResDir / "lua_libs");
     mEnvironment.setLuaManager(*mLuaManager);
 
+    // starts a separate lua thread if "lua num threads" > 0
+    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager, *mViewer);
+
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
@@ -929,98 +817,6 @@ void OMW::Engine::prepareEngine()
     mLuaManager->loadPermanentStorage(mCfgMgr.getUserConfigPath());
 }
 
-class OMW::Engine::LuaWorker
-{
-public:
-    explicit LuaWorker(Engine* engine)
-        : mEngine(engine)
-    {
-        if (Settings::Manager::getInt("lua num threads", "Lua") > 0)
-            mThread = std::thread([this] { threadBody(); });
-    }
-
-    ~LuaWorker()
-    {
-        if (mThread && mThread->joinable())
-        {
-            Log(Debug::Error)
-                << "Unexpected destruction of LuaWorker; likely there is an unhandled exception in the main thread.";
-            join();
-        }
-    }
-
-    void allowUpdate()
-    {
-        if (!mThread)
-            return;
-        {
-            std::lock_guard<std::mutex> lk(mMutex);
-            mUpdateRequest = true;
-        }
-        mCV.notify_one();
-    }
-
-    void finishUpdate()
-    {
-        if (mThread)
-        {
-            std::unique_lock<std::mutex> lk(mMutex);
-            mCV.wait(lk, [&] { return !mUpdateRequest; });
-        }
-        else
-            update();
-    }
-
-    void join()
-    {
-        if (mThread)
-        {
-            {
-                std::lock_guard<std::mutex> lk(mMutex);
-                mJoinRequest = true;
-            }
-            mCV.notify_one();
-            mThread->join();
-        }
-    }
-
-private:
-    void update()
-    {
-        const auto& viewer = mEngine->mViewer;
-        const osg::Timer_t frameStart = viewer->getStartTick();
-        const unsigned int frameNumber = viewer->getFrameStamp()->getFrameNumber();
-        ScopedProfile<UserStatsType::Lua> profile(
-            frameStart, frameNumber, *osg::Timer::instance(), *viewer->getViewerStats());
-
-        mEngine->mLuaManager->update();
-    }
-
-    void threadBody()
-    {
-        while (true)
-        {
-            std::unique_lock<std::mutex> lk(mMutex);
-            mCV.wait(lk, [&] { return mUpdateRequest || mJoinRequest; });
-            if (mJoinRequest)
-                break;
-
-            update();
-
-            mUpdateRequest = false;
-            lk.unlock();
-            mCV.notify_one();
-        }
-    }
-
-    Engine* mEngine;
-    std::mutex mMutex;
-    std::condition_variable mCV;
-    bool mUpdateRequest = false;
-    bool mJoinRequest = false;
-    std::optional<std::thread> mThread;
-};
-
 // Initialise and enter main loop.
 void OMW::Engine::go()
 {
@@ -1109,8 +905,6 @@ void OMW::Engine::go()
         mWindowManager->executeInConsole(mStartupScript);
     }
 
-    LuaWorker luaWorker(this); // starts a separate lua thread if "lua num threads" > 0
-
     // Start the main rendering loop
     double simulationTime = 0.0;
     Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(mEnvironment.getFrameRateLimit());
@@ -1131,17 +925,6 @@ void OMW::Engine::go()
         }
         else
         {
-            mViewer->eventTraversal();
-            mViewer->updateTraversal();
-
-            mWorld->updateWindowManager();
-
-            luaWorker.allowUpdate(); // if there is a separate Lua thread, it starts the update now
-
-            mViewer->renderingTraversals();
-
-            luaWorker.finishUpdate();
-
             bool guiActive = mWindowManager->isGuiMode();
             if (!guiActive)
                 simulationTime += dt;
@@ -1163,7 +946,7 @@ void OMW::Engine::go()
         frameRateLimiter.limit();
     }
 
-    luaWorker.join();
+    mLuaWorker->join();
 
     // Save user settings
     Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
