@@ -9,9 +9,6 @@
 #include <QString>
 
 #include <components/config/gamesettings.hpp>
-#include <components/contentselector/model/esmfile.hpp>
-#include <components/contentselector/view/contentselector.hpp>
-#include <components/detournavigator/collisionshapetype.hpp>
 
 #include "utils/openalutil.hpp"
 

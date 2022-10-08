@@ -58,7 +58,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/groundcoverstore.hpp"
 
-#include "../mwgui/loadingscreen.hpp"
 #include "../mwgui/postprocessorhud.hpp"
 
 #include "../mwmechanics/actorutil.hpp"

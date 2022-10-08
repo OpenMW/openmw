@@ -33,9 +33,6 @@
 #include <components/sceneutil/statesetupdater.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
-#include "../mwworld/weather.hpp"
 
 #include "renderbin.hpp"
 #include "vismask.hpp"

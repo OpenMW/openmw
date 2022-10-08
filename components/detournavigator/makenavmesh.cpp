@@ -14,16 +14,10 @@
 #include "settingsutils.hpp"
 #include "sharednavmesh.hpp"
 
-#include <components/bullethelpers/processtrianglecallback.hpp>
-#include <components/misc/convert.hpp>
-#include <components/misc/guarded.hpp>
-
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
 #include <Recast.h>
 #include <RecastAlloc.h>
-
-#include <components/debug/debuglog.hpp>
 
 #include <algorithm>
 #include <array>

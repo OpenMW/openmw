@@ -5,7 +5,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
-#include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadcell.hpp>

@@ -4,7 +4,6 @@
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
-#include <components/esm3/loadland.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/lessbyid.hpp>
@@ -12,7 +11,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/bulletshapemanager.hpp>
-#include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
 
 #include <osg/ref_ptr>

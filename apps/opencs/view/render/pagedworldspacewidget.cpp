@@ -13,7 +13,6 @@
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
-#include "cameracontroller.hpp"
 #include "cellarrow.hpp"
 #include "editmode.hpp"
 #include "mask.hpp"

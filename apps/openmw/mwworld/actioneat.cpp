@@ -2,8 +2,6 @@
 
 #include <components/esm3/loadskil.hpp>
 
-#include "../mwworld/containerstore.hpp"
-
 #include "../mwmechanics/actorutil.hpp"
 
 #include "class.hpp"

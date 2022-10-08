@@ -1,7 +1,5 @@
 #include "subview.hpp"
 
-#include "view.hpp"
-
 #include <QEvent>
 #include <QKeyEvent>
 

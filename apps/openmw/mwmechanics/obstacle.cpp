@@ -3,7 +3,6 @@
 #include <array>
 
 #include <components/detournavigator/agentbounds.hpp>
-#include <components/esm3/loadbody.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 

@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_RESOURCE_FOREACHBULLETOBJECT_H
 
 #include <components/esm/defs.hpp>
-#include <components/misc/convert.hpp>
 #include <components/resource/bulletshape.hpp>
 
 #include <osg/ref_ptr>

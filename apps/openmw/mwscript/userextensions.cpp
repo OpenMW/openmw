@@ -1,6 +1,5 @@
 #include "userextensions.hpp"
 
-#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/context.hpp>

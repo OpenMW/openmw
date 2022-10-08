@@ -20,7 +20,6 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/columns.hpp"
-#include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/nestedtableproxymodel.hpp"
@@ -34,7 +33,6 @@
 
 #include "nestedtable.hpp"
 #include "recordbuttonbar.hpp"
-#include "recordstatusdelegate.hpp"
 #include "tablebottombox.hpp"
 #include "util.hpp"
 /*

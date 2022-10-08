@@ -1,4 +1,3 @@
-#include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/settings.hpp>
 

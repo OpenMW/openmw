@@ -5,7 +5,6 @@
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/columns.hpp"
-#include "../../model/world/commandmacro.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/idcompletionmanager.hpp"

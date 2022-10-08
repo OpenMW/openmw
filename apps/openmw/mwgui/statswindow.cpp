@@ -14,7 +14,6 @@
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadrace.hpp>
-#include <components/esm3/loadspel.hpp>
 
 #include <components/settings/settings.hpp>
 

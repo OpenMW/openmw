@@ -27,7 +27,6 @@
 #include <components/settings/settings.hpp>
 #include <components/stereo/multiview.hpp>
 
-#include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 

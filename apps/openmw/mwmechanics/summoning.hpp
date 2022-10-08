@@ -4,8 +4,6 @@
 #include <string_view>
 #include <utility>
 
-#include <components/esm3/magiceffects.hpp>
-
 namespace MWWorld
 {
     class Ptr;

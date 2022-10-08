@@ -6,7 +6,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "sound.hpp"
 #include "sound_decoder.hpp"
 
 namespace MWSound

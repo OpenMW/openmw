@@ -14,7 +14,6 @@
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/nodecallback.hpp>
 
 namespace SceneUtil
 {

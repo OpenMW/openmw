@@ -21,10 +21,8 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
-#include <components/myguiplatform/myguitexture.hpp>
 #include <components/myguiplatform/scalinglayer.hpp>
 
 #include <components/settings/settings.hpp>

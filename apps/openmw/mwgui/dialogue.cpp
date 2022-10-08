@@ -8,7 +8,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
-#include <components/esm3/loadfact.hpp>
 #include <components/translation/translation.hpp>
 #include <components/widgets/box.hpp>
 #include <components/widgets/list.hpp>
@@ -28,7 +27,6 @@
 
 #include "bookpage.hpp"
 #include "textcolours.hpp"
-#include "tooltips.hpp"
 
 #include "journalbooks.hpp" // to_utf8_span
 

@@ -14,7 +14,6 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/clearcolor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
-#include <components/sceneutil/util.hpp>
 #include <components/stereo/multiview.hpp>
 
 #include "stateupdater.hpp"

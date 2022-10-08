@@ -5,7 +5,6 @@
 #include <components/misc/mathutil.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -15,9 +14,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/refdata.hpp"
 
-#include "../mwmechanics/drawstate.hpp"
 #include "../mwmechanics/movement.hpp"
-#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwphysics/raycasting.hpp"
 

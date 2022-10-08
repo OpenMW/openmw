@@ -11,7 +11,6 @@
 #include "../mwworld/class.hpp"
 
 #include "creaturestats.hpp"
-#include "movement.hpp"
 #include "steering.hpp"
 
 namespace

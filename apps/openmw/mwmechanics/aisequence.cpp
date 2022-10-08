@@ -15,7 +15,6 @@
 #include "aifollow.hpp"
 #include "aipackage.hpp"
 #include "aipursue.hpp"
-#include "aistate.hpp"
 #include "aitravel.hpp"
 #include "aiwander.hpp"
 

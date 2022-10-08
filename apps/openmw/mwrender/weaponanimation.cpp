@@ -14,7 +14,6 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/combat.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/weapontype.hpp"
 
 #include "animation.hpp"

@@ -1,9 +1,7 @@
 #ifndef MWLUA_LUABINDINGS_H
 #define MWLUA_LUABINDINGS_H
 
-#include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
-#include <components/lua/serialization.hpp>
 #include <components/lua/storage.hpp>
 
 #include "context.hpp"

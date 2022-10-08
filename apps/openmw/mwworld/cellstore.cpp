@@ -51,7 +51,6 @@
 
 #include "class.hpp"
 #include "containerstore.hpp"
-#include "esmloader.hpp"
 #include "esmstore.hpp"
 #include "ptr.hpp"
 

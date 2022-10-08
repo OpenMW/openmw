@@ -12,7 +12,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "interpretercontext.hpp"
 #include "ref.hpp"
 
 namespace MWScript

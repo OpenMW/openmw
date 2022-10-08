@@ -1,6 +1,5 @@
 #include "pingpongcanvas.hpp"
 
-#include <components/debug/debuglog.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>

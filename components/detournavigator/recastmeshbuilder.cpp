@@ -4,7 +4,6 @@
 #include <components/bullethelpers/heightfield.hpp>
 #include <components/bullethelpers/processtrianglecallback.hpp>
 #include <components/bullethelpers/transformboundingbox.hpp>
-#include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>

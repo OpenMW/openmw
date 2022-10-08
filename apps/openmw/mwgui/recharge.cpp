@@ -4,8 +4,6 @@
 
 #include <components/widgets/box.hpp>
 
-#include <components/misc/rng.hpp>
-
 #include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -13,7 +11,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"

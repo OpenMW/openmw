@@ -3,7 +3,6 @@
 #include <components/esm3/objectstate.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include "cellstore.hpp"
 #include "customdata.hpp"
 
 #include "../mwbase/environment.hpp"

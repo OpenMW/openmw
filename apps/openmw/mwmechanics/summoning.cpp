@@ -2,7 +2,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadmgef.hpp>
-#include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
@@ -12,7 +11,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
 
 #include "../mwrender/animation.hpp"

@@ -5,7 +5,6 @@
 
 #include <osg/Object>
 
-#include <components/resource/animation.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
 

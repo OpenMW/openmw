@@ -24,7 +24,6 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include "util.hpp"
 #include "vismask.hpp"
 
 namespace

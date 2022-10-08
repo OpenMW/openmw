@@ -3,7 +3,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/spellstate.hpp>
-#include <components/misc/rng.hpp>
 
 #include <components/esm3/loadmgef.hpp>
 
@@ -15,7 +14,6 @@
 
 #include "actorutil.hpp"
 #include "creaturestats.hpp"
-#include "magiceffects.hpp"
 #include "stat.hpp"
 
 namespace MWMechanics

@@ -1,3 +1,5 @@
+#include "mtphysics.hpp"
+
 #include <cassert>
 #include <functional>
 #include <mutex>
@@ -28,7 +30,6 @@
 #include "actor.hpp"
 #include "contacttestwrapper.h"
 #include "movementsolver.hpp"
-#include "mtphysics.hpp"
 #include "object.hpp"
 #include "physicssystem.hpp"
 #include "projectile.hpp"

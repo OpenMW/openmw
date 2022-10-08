@@ -13,20 +13,14 @@
 
 #include <components/misc/resourcehelpers.hpp>
 
-#include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadbody.hpp>
-#include <components/esm3/loadcont.hpp>
-#include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadrace.hpp>
-#include <components/esm3/loadstat.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/actorutil.hpp>
-#include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/keyframe.hpp>
-#include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/settings.hpp>
 
@@ -35,7 +29,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -46,11 +39,9 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "camera.hpp"
 #include "postprocessor.hpp"
 #include "renderbin.hpp"
 #include "rotatecontroller.hpp"
-#include "util.hpp"
 #include "vismask.hpp"
 
 namespace

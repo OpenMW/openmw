@@ -3,7 +3,6 @@
 #include <osg/BufferIndexBinding>
 #include <osg/BufferObject>
 
-#include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
 
 namespace fx

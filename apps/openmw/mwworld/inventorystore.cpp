@@ -3,19 +3,13 @@
 #include <algorithm>
 #include <iterator>
 
-#include <components/debug/debuglog.hpp>
 #include <components/esm3/inventorystate.hpp>
-#include <components/esm3/loadench.hpp>
-#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/spellresistance.hpp"
-#include "../mwmechanics/spellutil.hpp"
 #include "../mwmechanics/weapontype.hpp"
 
 #include "class.hpp"

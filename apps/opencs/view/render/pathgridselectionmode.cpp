@@ -4,8 +4,6 @@
 #include <QMenu>
 
 #include "../../model/world/commandmacro.hpp"
-#include "../../model/world/commands.hpp"
-#include "../../model/world/idtable.hpp"
 
 #include "pathgrid.hpp"
 #include "worldspacewidget.hpp"

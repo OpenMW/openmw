@@ -8,7 +8,6 @@
 
 #include "../world/columns.hpp"
 #include "../world/data.hpp"
-#include "../world/idcollection.hpp"
 
 #include "andnode.hpp"
 #include "booleannode.hpp"

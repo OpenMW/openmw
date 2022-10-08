@@ -3,10 +3,6 @@
 #include <SDL_events.h>
 #include <components/sdlutil/sdlmappings.hpp>
 
-#include "text.hpp"
-#include "textedit.hpp"
-#include "window.hpp"
-
 namespace LuaUi
 {
     WidgetExtension::WidgetExtension()

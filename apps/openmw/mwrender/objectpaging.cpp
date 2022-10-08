@@ -19,7 +19,6 @@
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/util.hpp>

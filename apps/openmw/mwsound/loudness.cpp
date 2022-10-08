@@ -1,10 +1,9 @@
 #include "loudness.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <limits>
-
-#include "soundmanagerimp.hpp"
 
 namespace MWSound
 {

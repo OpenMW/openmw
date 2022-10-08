@@ -1,6 +1,5 @@
 #include "editmode.hpp"
 
-#include "tagbase.hpp"
 #include "worldspacewidget.hpp"
 
 CSVRender::WorldspaceWidget& CSVRender::EditMode::getWorldspaceWidget()

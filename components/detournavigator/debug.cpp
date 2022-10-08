@@ -6,8 +6,6 @@
 #include "tilespositionsrange.hpp"
 #include "version.hpp"
 
-#include <components/bullethelpers/operators.hpp>
-
 #include <DetourNavMesh.h>
 #include <DetourStatus.h>
 

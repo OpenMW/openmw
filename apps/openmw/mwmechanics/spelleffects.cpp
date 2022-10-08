@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>

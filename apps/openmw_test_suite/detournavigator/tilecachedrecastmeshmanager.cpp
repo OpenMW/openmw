@@ -1,4 +1,3 @@
-#include "operators.hpp"
 
 #include <components/detournavigator/settingsutils.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>

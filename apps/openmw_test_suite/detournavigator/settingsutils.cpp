@@ -1,4 +1,3 @@
-#include "operators.hpp"
 
 #include <components/detournavigator/settingsutils.hpp>
 

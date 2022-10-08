@@ -12,7 +12,6 @@
 
 #include "class.hpp"
 #include "esmstore.hpp"
-#include "player.hpp"
 
 namespace MWWorld
 {

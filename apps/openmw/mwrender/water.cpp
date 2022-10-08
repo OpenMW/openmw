@@ -26,7 +26,6 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/depth.hpp>
-#include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/waterutil.hpp>
@@ -44,11 +43,8 @@
 
 #include "../mwworld/cellstore.hpp"
 
-#include "../mwbase/environment.hpp"
-
 #include "renderbin.hpp"
 #include "ripplesimulation.hpp"
-#include "util.hpp"
 #include "vismask.hpp"
 
 namespace MWRender

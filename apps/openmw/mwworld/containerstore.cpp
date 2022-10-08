@@ -13,8 +13,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwmechanics/actorutil.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/recharge.hpp"
 

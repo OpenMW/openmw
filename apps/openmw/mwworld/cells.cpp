@@ -13,7 +13,6 @@
 #include "../mwbase/world.hpp"
 
 #include "cellstore.hpp"
-#include "containerstore.hpp"
 #include "esmstore.hpp"
 
 namespace

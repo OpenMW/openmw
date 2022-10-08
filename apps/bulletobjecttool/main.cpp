@@ -1,5 +1,4 @@
 #include <components/debug/debugging.hpp>
-#include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esmloader/esmdata.hpp>

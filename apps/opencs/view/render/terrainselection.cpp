@@ -7,9 +7,6 @@
 
 #include <components/esm3/loadland.hpp>
 
-#include "../../model/world/columnimp.hpp"
-#include "../../model/world/idtable.hpp"
-
 #include "cell.hpp"
 #include "worldspacewidget.hpp"
 

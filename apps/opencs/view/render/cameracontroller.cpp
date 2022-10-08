@@ -16,8 +16,6 @@
 
 #include "../../model/prefs/shortcut.hpp"
 
-#include "scenewidget.hpp"
-
 namespace CSVRender
 {
 

@@ -30,7 +30,6 @@
 #include <cstdint>
 #include <string>
 
-#include "dialogue.hpp" // DialType
 #include "formid.hpp"
 #include "script.hpp" // TargetCondition
 

@@ -7,7 +7,6 @@
 #include <components/esm3/loadsscr.hpp>
 #include <components/misc/strings/lower.hpp>
 
-#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
