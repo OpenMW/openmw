@@ -147,7 +147,6 @@ namespace MWMechanics
         std::string mCurrentMovement;
         float mMovementAnimSpeed{ 0.f };
         bool mAdjustMovementAnimSpeed{ false };
-        bool mHasMovedInXY{ false };
         bool mMovementAnimationControlled{ true };
 
         CharacterState mDeathState{ CharState_None };

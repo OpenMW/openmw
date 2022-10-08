@@ -1424,8 +1424,7 @@ namespace MWMechanics
 
         if (isWerewolf)
         {
-            if (stats.getStance(MWMechanics::CreatureStats::Stance_Run) && mHasMovedInXY && !world->isSwimming(mPtr)
-                && mWeaponType == ESM::Weapon::None)
+            if (isRunning() && !world->isSwimming(mPtr) && mWeaponType == ESM::Weapon::None)
             {
                 if (!sndMgr->getSoundPlaying(mPtr, "WolfRun"))
                     sndMgr->playSound3D(mPtr, "WolfRun", 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
@@ -1856,8 +1855,6 @@ namespace MWMechanics
         else if (!cls.getCreatureStats(mPtr).isDead())
         {
             bool onground = world->isOnGround(mPtr);
-            bool incapacitated = ((!godmode && cls.getCreatureStats(mPtr).isParalyzed())
-                || cls.getCreatureStats(mPtr).getKnockedDown());
             bool inwater = world->isSwimming(mPtr);
             bool flying = world->isFlying(mPtr);
             bool solid = world->isActorCollisionEnabled(mPtr);
@@ -1872,7 +1869,7 @@ namespace MWMechanics
 
             bool isMoving
                 = (std::abs(movementSettings.mPosition[0]) > .5 || std::abs(movementSettings.mPosition[1]) > .5);
-            if (!inwater && !flying && solid)
+            if (!inwater && !flying)
             {
                 // Force Jump
                 if (stats.getMovementFlag(MWMechanics::CreatureStats::Flag_ForceJump))
@@ -1987,115 +1984,116 @@ namespace MWMechanics
             vec.x() *= speed;
             vec.y() *= speed;
 
-            if (mHitState != CharState_None && mHitState != CharState_Block && mJumpState == JumpState_None)
+            if (isKnockedOut() || isKnockedDown() || isRecovery())
                 vec = osg::Vec3f();
 
             CharacterState movestate = CharState_None;
             CharacterState idlestate = CharState_None;
             JumpingState jumpstate = JumpState_None;
 
-            mHasMovedInXY = std::abs(vec.x()) + std::abs(vec.y()) > 0.0f;
-            isrunning = isrunning && mHasMovedInXY;
-
-            // advance athletics
-            if (mHasMovedInXY && isPlayer)
-            {
-                if (inwater)
-                {
-                    mSecondsOfSwimming += duration;
-                    while (mSecondsOfSwimming > 1)
-                    {
-                        cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
-                        mSecondsOfSwimming -= 1;
-                    }
-                }
-                else if (isrunning && !sneak)
-                {
-                    mSecondsOfRunning += duration;
-                    while (mSecondsOfRunning > 1)
-                    {
-                        cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
-                        mSecondsOfRunning -= 1;
-                    }
-                }
-            }
-
-            // reduce fatigue
             const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
-            float fatigueLoss = 0;
-            static const float fFatigueRunBase = gmst.find("fFatigueRunBase")->mValue.getFloat();
-            static const float fFatigueRunMult = gmst.find("fFatigueRunMult")->mValue.getFloat();
-            static const float fFatigueSwimWalkBase = gmst.find("fFatigueSwimWalkBase")->mValue.getFloat();
-            static const float fFatigueSwimRunBase = gmst.find("fFatigueSwimRunBase")->mValue.getFloat();
-            static const float fFatigueSwimWalkMult = gmst.find("fFatigueSwimWalkMult")->mValue.getFloat();
-            static const float fFatigueSwimRunMult = gmst.find("fFatigueSwimRunMult")->mValue.getFloat();
-            static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->mValue.getFloat();
-            static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->mValue.getFloat();
-
-            if (cls.getEncumbrance(mPtr) <= cls.getCapacity(mPtr))
+            if (vec.x() != 0.f || vec.y() != 0.f)
             {
-                const float encumbrance = cls.getNormalizedEncumbrance(mPtr);
-                if (sneak)
-                    fatigueLoss = fFatigueSneakBase + encumbrance * fFatigueSneakMult;
-                else
+                // advance athletics
+                if (isPlayer)
                 {
                     if (inwater)
                     {
-                        if (!isrunning)
-                            fatigueLoss = fFatigueSwimWalkBase + encumbrance * fFatigueSwimWalkMult;
-                        else
-                            fatigueLoss = fFatigueSwimRunBase + encumbrance * fFatigueSwimRunMult;
+                        mSecondsOfSwimming += duration;
+                        while (mSecondsOfSwimming > 1)
+                        {
+                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
+                            mSecondsOfSwimming -= 1;
+                        }
                     }
-                    else if (isrunning)
-                        fatigueLoss = fFatigueRunBase + encumbrance * fFatigueRunMult;
+                    else if (isrunning && !sneak)
+                    {
+                        mSecondsOfRunning += duration;
+                        while (mSecondsOfRunning > 1)
+                        {
+                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
+                            mSecondsOfRunning -= 1;
+                        }
+                    }
+                }
+
+                if (!godmode)
+                {
+                    // reduce fatigue
+                    float fatigueLoss = 0.f;
+                    static const float fFatigueRunBase = gmst.find("fFatigueRunBase")->mValue.getFloat();
+                    static const float fFatigueRunMult = gmst.find("fFatigueRunMult")->mValue.getFloat();
+                    static const float fFatigueSwimWalkBase = gmst.find("fFatigueSwimWalkBase")->mValue.getFloat();
+                    static const float fFatigueSwimRunBase = gmst.find("fFatigueSwimRunBase")->mValue.getFloat();
+                    static const float fFatigueSwimWalkMult = gmst.find("fFatigueSwimWalkMult")->mValue.getFloat();
+                    static const float fFatigueSwimRunMult = gmst.find("fFatigueSwimRunMult")->mValue.getFloat();
+                    static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->mValue.getFloat();
+                    static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->mValue.getFloat();
+
+                    if (cls.getEncumbrance(mPtr) <= cls.getCapacity(mPtr))
+                    {
+                        const float encumbrance = cls.getNormalizedEncumbrance(mPtr);
+                        if (sneak)
+                            fatigueLoss = fFatigueSneakBase + encumbrance * fFatigueSneakMult;
+                        else
+                        {
+                            if (inwater)
+                            {
+                                if (!isrunning)
+                                    fatigueLoss = fFatigueSwimWalkBase + encumbrance * fFatigueSwimWalkMult;
+                                else
+                                    fatigueLoss = fFatigueSwimRunBase + encumbrance * fFatigueSwimRunMult;
+                            }
+                            else if (isrunning)
+                                fatigueLoss = fFatigueRunBase + encumbrance * fFatigueRunMult;
+                        }
+                    }
+                    fatigueLoss *= duration;
+                    fatigueLoss *= movementSettings.mSpeedFactor;
+                    DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
+                    fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
+                    cls.getCreatureStats(mPtr).setFatigue(fatigue);
                 }
             }
-            fatigueLoss *= duration;
-            fatigueLoss *= movementSettings.mSpeedFactor;
-            DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
 
-            if (!godmode)
-            {
-                fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
-                cls.getCreatureStats(mPtr).setFatigue(fatigue);
-            }
-
-            float z = cls.getJump(mPtr);
-            if (sneak || inwater || flying || incapacitated || !solid || z <= 0)
-                vec.z() = 0.0f;
-
-            bool inJump = true;
-            bool playLandingSound = false;
-            if (!onground && !flying && !inwater && solid)
+            bool inJump = false;
+            if (!inwater && !flying && solid)
             {
                 // In the air (either getting up —ascending part of jump— or falling).
-                jumpstate = JumpState_InAir;
-
-                static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->mValue.getFloat();
-                static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->mValue.getFloat();
-                float factor
-                    = fJumpMoveBase + fJumpMoveMult * mPtr.getClass().getSkill(mPtr, ESM::Skill::Acrobatics) / 100.f;
-                factor = std::min(1.f, factor);
-                vec.x() *= factor;
-                vec.y() *= factor;
-                vec.z() = 0.0f;
-            }
-            else if (vec.z() > 0.0f && mJumpState != JumpState_InAir)
-            {
-                // Started a jump.
-                if (z > 0)
+                if (!onground)
                 {
-                    if (vec.x() == 0 && vec.y() == 0)
-                        vec = osg::Vec3f(0.0f, 0.0f, z);
-                    else
+                    inJump = true;
+                    jumpstate = JumpState_InAir;
+
+                    static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->mValue.getFloat();
+                    static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->mValue.getFloat();
+                    float factor = fJumpMoveBase
+                        + fJumpMoveMult * mPtr.getClass().getSkill(mPtr, ESM::Skill::Acrobatics) / 100.f;
+                    factor = std::min(1.f, factor);
+                    vec.x() *= factor;
+                    vec.y() *= factor;
+                    vec.z() = 0.0f;
+                }
+                // Started a jump.
+                else if (mJumpState != JumpState_InAir && vec.z() > 0.f && !sneak)
+                {
+                    float z = cls.getJump(mPtr);
+                    if (z > 0.f)
                     {
-                        osg::Vec3f lat(vec.x(), vec.y(), 0.0f);
-                        lat.normalize();
-                        vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * z * 0.707f;
+                        inJump = true;
+                        if (vec.x() == 0 && vec.y() == 0)
+                            vec.z() = z;
+                        else
+                        {
+                            osg::Vec3f lat(vec.x(), vec.y(), 0.0f);
+                            lat.normalize();
+                            vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * z * 0.707f;
+                        }
                     }
                 }
             }
-            else
+
+            if (!inJump)
             {
                 if (mJumpState == JumpState_InAir && !flying && solid)
                 {
@@ -2135,7 +2133,18 @@ namespace MWMechanics
                     }
 
                     if (mPtr.getClass().isNpc())
-                        playLandingSound = true;
+                    {
+                        std::string_view sound;
+                        osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
+                        if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
+                            sound = "DefaultLandWater";
+                        else if (onground)
+                            sound = "DefaultLand";
+
+                        if (!sound.empty())
+                            sndMgr->playSound3D(
+                                mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
+                    }
                 }
 
                 if (mAnimation->isPlaying(mCurrentJump))
@@ -2144,8 +2153,6 @@ namespace MWMechanics
                 vec.x() *= scale;
                 vec.y() *= scale;
                 vec.z() = 0.0f;
-
-                inJump = false;
 
                 if (movementSettings.mIsStrafing)
                 {
@@ -2185,19 +2192,6 @@ namespace MWMechanics
                             movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
                     }
                 }
-            }
-
-            if (playLandingSound)
-            {
-                std::string_view sound;
-                osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
-                if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
-                    sound = "DefaultLandWater";
-                else if (onground)
-                    sound = "DefaultLand";
-
-                if (!sound.empty())
-                    sndMgr->playSound3D(mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
             }
 
             if (turnToMovementDirection && !isFirstPersonPlayer
