@@ -1,5 +1,7 @@
 #include "color.hpp"
 
+#include "glext.hpp"
+
 #include <algorithm>
 #include <array>
 
