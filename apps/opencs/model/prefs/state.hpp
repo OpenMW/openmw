@@ -13,9 +13,7 @@
 
 #include "category.hpp"
 #include "enumsetting.hpp"
-#include "setting.hpp"
 #include "shortcutmanager.hpp"
-#include "stringsetting.hpp"
 
 class QColor;
 
@@ -27,6 +25,8 @@ namespace CSMPrefs
     class ColourSetting;
     class ShortcutSetting;
     class ModifierSetting;
+    class Setting;
+    class StringSetting;
 
     /// \brief User settings state
     ///

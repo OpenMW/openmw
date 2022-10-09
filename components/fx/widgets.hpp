@@ -2,14 +2,23 @@
 #define OPENMW_COMPONENTS_FX_WIDGETS_H
 
 #include <MyGUI_Button.h>
-#include <MyGUI_Gui.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_MouseButton.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Widget.h>
+
+#include <algorithm>
+#include <components/fx/widgets.hpp>
+#include <components/misc/strings/format.hpp>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
-
-#include <components/misc/strings/format.hpp>
 
 #include "types.hpp"
 

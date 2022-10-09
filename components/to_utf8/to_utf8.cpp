@@ -2,8 +2,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <ios>
+#include <iterator>
 #include <stdexcept>
-#include <vector>
 
 #include <components/debug/debuglog.hpp>
 

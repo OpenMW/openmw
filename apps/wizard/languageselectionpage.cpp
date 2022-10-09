@@ -2,8 +2,6 @@
 
 #include "mainwizard.hpp"
 
-#include <QDebug>
-
 Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
     : QWizardPage(parent)
 {

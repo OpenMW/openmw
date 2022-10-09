@@ -14,6 +14,7 @@
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/shader/shadermanager.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/hash.hpp>

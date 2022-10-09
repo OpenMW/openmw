@@ -1,5 +1,7 @@
 #include "creator.hpp"
 
+#include <MyGUI_TextIterator.h>
+
 #include <stdexcept>
 
 CSVWorld::Creator::~Creator() {}

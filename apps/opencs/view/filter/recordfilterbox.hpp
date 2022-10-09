@@ -3,7 +3,10 @@
 
 #include <QWidget>
 
-#include "../../model/filter/node.hpp"
+namespace CSMFilter
+{
+    class Node;
+}
 
 namespace CSMWorld
 {

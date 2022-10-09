@@ -1,15 +1,17 @@
 #ifndef CSM_PREFS_MODIFIERSETTING_H
 #define CSM_PREFS_MODIFIERSETTING_H
 
-#include <QKeySequence>
-
 #include "setting.hpp"
 
+class QMutex;
+class QObject;
+class QWidget;
 class QEvent;
 class QPushButton;
 
 namespace CSMPrefs
 {
+    class Category;
     class ModifierSetting : public Setting
     {
         Q_OBJECT

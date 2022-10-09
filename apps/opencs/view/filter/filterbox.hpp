@@ -5,12 +5,14 @@
 
 #include <QWidget>
 
-#include "../../model/filter/node.hpp"
-#include "../../model/world/universalid.hpp"
-
+namespace CSMFilter
+{
+    class Node;
+}
 namespace CSMWorld
 {
     class Data;
+    class UniversalId;
 }
 
 namespace CSVFilter

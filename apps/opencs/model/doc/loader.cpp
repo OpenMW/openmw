@@ -2,7 +2,7 @@
 
 #include <components/files/conversion.hpp>
 
-#include <iostream>
+#include <QTimer>
 
 #include "../tools/reportmodel.hpp"
 

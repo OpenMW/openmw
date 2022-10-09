@@ -1,12 +1,8 @@
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-#include "../mwworld/class.hpp"
-
-#include "actor.hpp"
 #include "collisiontype.hpp"
 #include "projectile.hpp"
 #include "projectileconvexcallback.hpp"
-#include "ptrholder.hpp"
 
 namespace MWPhysics
 {

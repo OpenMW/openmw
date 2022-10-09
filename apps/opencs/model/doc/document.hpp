@@ -19,16 +19,12 @@
 #include "runner.hpp"
 #include "saving.hpp"
 
-class QAbstractItemModel;
+class QTextDocument;
 
-namespace Fallback
+namespace CSMTools
 {
-    class Map;
-}
-
-namespace VFS
-{
-    class Manager;
+    class ReportModel;
+    class Search;
 }
 
 namespace ESM
@@ -43,13 +39,9 @@ namespace Files
     struct ConfigurationManager;
 }
 
-namespace CSMWorld
-{
-    class ResourcesManager;
-}
-
 namespace CSMDoc
 {
+    struct Message;
     class Document : public QObject
     {
         Q_OBJECT

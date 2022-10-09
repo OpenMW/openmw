@@ -1,4 +1,5 @@
-#include "sstream"
+#include <cstdint>
+#include <string>
 
 namespace ESM
 {

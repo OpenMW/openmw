@@ -6,8 +6,6 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-#include <QLocalServer>
-#include <QLocalSocket>
 #include <QObject>
 #include <QString>
 
@@ -24,15 +22,22 @@
 #include "view/doc/filedialog.hpp"
 #include "view/doc/newgame.hpp"
 #include "view/doc/startup.hpp"
-#include "view/doc/viewmanager.hpp"
 
 #include "view/prefs/dialogue.hpp"
 
 #include "view/tools/merge.hpp"
 
+class QLocalServer;
+class QLocalSocket;
+
 namespace CSMDoc
 {
     class Document;
+}
+
+namespace CSVDoc
+{
+    class ViewManager;
 }
 
 namespace CS

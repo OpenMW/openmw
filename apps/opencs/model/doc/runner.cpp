@@ -2,8 +2,11 @@
 
 #include <utility>
 
+#if defined(Q_OS_MAC)
 #include <QCoreApplication>
 #include <QDir>
+#endif
+
 #include <QTemporaryFile>
 #include <QTextStream>
 

@@ -1,7 +1,6 @@
 #ifndef OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 #define OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 
-#include <algorithm>
 #include <array>
 #include <functional>
 #include <map>

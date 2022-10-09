@@ -2,18 +2,21 @@
 #define OPENMW_COMPONENTS_FX_PASS_H
 
 #include <array>
-#include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 
 #include <osg/BlendEquation>
 #include <osg/BlendFunc>
-#include <osg/Program>
 #include <osg/Shader>
-#include <osg/State>
-#include <osg/Texture2D>
-#include <osg/Timer>
+#include <osg/Vec4f>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class StateSet;
+}
 
 namespace fx
 {

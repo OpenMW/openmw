@@ -2,6 +2,21 @@
 
 #include <components/esm3terrain/storage.hpp>
 
+#include <algorithm>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/landtexture.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <iterator>
+#include <math.h>
+#include <memory>
+#include <osg/Vec4ub>
+#include <stdexcept>
+#include <stdlib.h>
+#include <string>
+
 namespace CSVRender
 {
     TerrainStorage::TerrainStorage(const CSMWorld::Data& data)

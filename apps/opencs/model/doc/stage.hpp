@@ -1,9 +1,6 @@
 #ifndef CSM_DOC_STAGE_H
 #define CSM_DOC_STAGE_H
 
-#include <string>
-#include <vector>
-
 #include "messages.hpp"
 
 class QString;

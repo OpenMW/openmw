@@ -5,8 +5,6 @@
 
 #include <components/misc/constants.hpp>
 
-#include "../mwworld/ptr.hpp"
-
 class btCollisionWorld;
 
 namespace MWWorld

@@ -1,7 +1,6 @@
 #include "niffile.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/files/conversion.hpp>
 #include <components/files/hash.hpp>
 
 #include <algorithm>

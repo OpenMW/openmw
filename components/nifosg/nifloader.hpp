@@ -2,11 +2,13 @@
 #define OPENMW_COMPONENTS_NIFOSG_LOADER
 
 #include <components/nif/niffile.hpp>
-#include <components/sceneutil/keyframe.hpp>
-#include <components/sceneutil/textkeymap.hpp>
 
-#include <osg/Referenced>
 #include <osg/ref_ptr>
+
+namespace SceneUtil
+{
+    class KeyframeHolder;
+}
 
 namespace osg
 {

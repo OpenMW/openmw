@@ -7,16 +7,10 @@
 #include <QObject>
 #include <QThread>
 
-#include <components/fallback/fallback.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "loader.hpp"
-
-namespace VFS
-{
-    class Manager;
-}
 
 namespace Files
 {

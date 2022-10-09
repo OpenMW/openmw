@@ -18,11 +18,6 @@ namespace osg
     class Vec3f;
 }
 
-namespace Resource
-{
-    struct BulletShape;
-}
-
 namespace MWPhysics
 {
     class PhysicsTaskScheduler;

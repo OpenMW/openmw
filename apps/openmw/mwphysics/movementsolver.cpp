@@ -2,7 +2,6 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
-#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btConvexShape.h>
 
 #include <components/esm3/loadgmst.hpp>
@@ -11,9 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/refdata.hpp"
 
 #include "actor.hpp"
 #include "collisiontype.hpp"

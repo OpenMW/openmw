@@ -7,16 +7,12 @@
 #include <osg/Node>
 
 #include <map>
-#include <memory>
 #include <mutex>
 
 namespace Resource
 {
     class BulletShapeInstance;
 }
-
-class btCollisionObject;
-class btVector3;
 
 namespace MWPhysics
 {

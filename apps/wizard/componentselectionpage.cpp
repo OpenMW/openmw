@@ -1,6 +1,5 @@
 #include "componentselectionpage.hpp"
 
-#include <QDebug>
 #include <QMessageBox>
 #include <QPushButton>
 
@@ -127,8 +126,6 @@ bool Wizard::ComponentSelectionPage::validatePage()
 {
     QStringList components(field(QLatin1String("installation.components")).toStringList());
     QString path(field(QLatin1String("installation.path")).toString());
-
-    //    qDebug() << components << path << mWizard->mInstallations[path];
 
     if (field(QLatin1String("installation.retailDisc")).toBool() == false)
     {

@@ -1,7 +1,6 @@
 
 #include "state.hpp"
 
-#include <algorithm>
 #include <sstream>
 #include <stdexcept>
 
@@ -13,6 +12,7 @@
 #include "intsetting.hpp"
 #include "modifiersetting.hpp"
 #include "shortcutsetting.hpp"
+#include "stringsetting.hpp"
 
 CSMPrefs::State* CSMPrefs::State::sThis = nullptr;
 

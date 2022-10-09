@@ -3,9 +3,19 @@
 
 #include <array>
 
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadltex.hpp>
 #include <components/esm3terrain/storage.hpp>
+#include <osg/ref_ptr>
 
-#include "../../model/world/data.hpp"
+namespace CSMWorld
+{
+    class Data;
+}
+namespace osg
+{
+    class Vec4ub;
+}
 
 namespace CSVRender
 {

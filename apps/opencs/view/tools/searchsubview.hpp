@@ -7,9 +7,6 @@
 
 #include "searchbox.hpp"
 
-class QTableView;
-class QModelIndex;
-
 namespace CSMDoc
 {
     class Document;

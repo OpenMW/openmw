@@ -1,19 +1,13 @@
 #include "lexer.hpp"
 
-#include <array>
-#include <cmath>
-#include <cstdint>
-#include <exception>
+#include <cctype>
+#include <cstdlib>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <variant>
 
+#include <components/fx/lexer_types.hpp>
 #include <components/misc/strings/format.hpp>
-
-#include <components/debug/debuglog.hpp>
-
-#include "types.hpp"
 
 namespace fx
 {

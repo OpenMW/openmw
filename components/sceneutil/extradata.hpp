@@ -1,10 +1,7 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_EXTRADATA_H
 #define OPENMW_COMPONENTS_RESOURCE_EXTRADATA_H
 
-#include <array>
-
 #include <osg/NodeVisitor>
-#include <osg/StateAttribute>
 
 namespace Resource
 {

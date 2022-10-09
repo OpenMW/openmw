@@ -9,7 +9,6 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 
-#include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 
 #include "../../model/doc/document.hpp"

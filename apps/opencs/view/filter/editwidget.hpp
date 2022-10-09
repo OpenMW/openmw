@@ -4,7 +4,6 @@
 #include <QLineEdit>
 #include <QPalette>
 
-#include "../../model/filter/node.hpp"
 #include "../../model/filter/parser.hpp"
 
 class QModelIndex;

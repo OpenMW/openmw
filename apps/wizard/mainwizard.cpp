@@ -6,7 +6,6 @@
 #include <QMessageBox>
 #include <QTextCodec>
 
-#include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 
 #include "componentselectionpage.hpp"
