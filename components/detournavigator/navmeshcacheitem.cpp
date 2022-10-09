@@ -4,8 +4,6 @@
 #include "navmeshtileview.hpp"
 #include "tileposition.hpp"
 
-#include <components/misc/guarded.hpp>
-
 #include <DetourNavMesh.h>
 
 #include <ostream>

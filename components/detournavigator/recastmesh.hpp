@@ -5,7 +5,6 @@
 #include "objecttransform.hpp"
 #include "version.hpp"
 
-#include <components/bullethelpers/operators.hpp>
 #include <components/resource/bulletshape.hpp>
 
 #include <osg/Vec2i>

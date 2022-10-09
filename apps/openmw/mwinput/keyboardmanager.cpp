@@ -11,8 +11,6 @@
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/player.hpp"
-
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
 

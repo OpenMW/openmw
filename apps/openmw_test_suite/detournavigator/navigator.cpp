@@ -2,7 +2,6 @@
 #include "settings.hpp"
 
 #include <components/bullethelpers/heightfield.hpp>
-#include <components/detournavigator/exceptions.hpp>
 #include <components/detournavigator/navigatorimpl.hpp>
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/detournavigator/navmeshdb.hpp>

@@ -7,7 +7,6 @@
 #include "../../model/prefs/state.hpp"
 
 #include "../../model/world/commandmacro.hpp"
-#include "../../model/world/commands.hpp"
 
 #include "../widget/scenetoolbar.hpp"
 

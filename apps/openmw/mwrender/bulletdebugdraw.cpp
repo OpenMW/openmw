@@ -21,7 +21,6 @@
 #include <components/resource/scenemanager.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 namespace MWRender
 {

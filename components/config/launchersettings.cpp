@@ -7,8 +7,6 @@
 
 #include <QDebug>
 
-#include <components/files/configurationmanager.hpp>
-#include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 
 const char Config::LauncherSettings::sCurrentContentListKey[] = "Profiles/currentprofile";

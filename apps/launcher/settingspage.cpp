@@ -5,10 +5,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 
-#include "datafilespage.hpp"
 #include "utils/textinputdialog.hpp"
 
 using namespace Process;

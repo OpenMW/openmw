@@ -2,14 +2,12 @@
 
 #include <algorithm>
 
-#include <components/detournavigator/agentbounds.hpp>
 #include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 
 #include "creaturestats.hpp"

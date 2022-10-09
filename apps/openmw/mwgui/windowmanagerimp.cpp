@@ -47,7 +47,6 @@
 #include <components/widgets/widgets.hpp>
 
 #include <components/misc/frameratelimiter.hpp>
-#include <components/misc/resourcehelpers.hpp>
 
 #include <components/lua_ui/util.hpp>
 

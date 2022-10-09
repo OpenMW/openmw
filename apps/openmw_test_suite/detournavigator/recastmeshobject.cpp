@@ -1,4 +1,3 @@
-#include "operators.hpp"
 
 #include <components/detournavigator/recastmeshobject.hpp>
 #include <components/misc/convert.hpp>

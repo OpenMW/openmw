@@ -6,7 +6,6 @@
 #include <osg/Group>
 
 #include "chunkmanager.hpp"
-#include "compositemaprenderer.hpp"
 #include "heightcull.hpp"
 #include "storage.hpp"
 #include "view.hpp"

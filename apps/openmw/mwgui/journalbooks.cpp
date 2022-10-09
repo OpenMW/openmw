@@ -3,7 +3,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include <components/fontloader/fontloader.hpp>
 #include <components/misc/utf8stream.hpp>
 
 #include "textcolours.hpp"

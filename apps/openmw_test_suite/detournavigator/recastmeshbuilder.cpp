@@ -1,11 +1,7 @@
 #include "operators.hpp"
 
-#include <components/debug/debuglog.hpp>
-#include <components/detournavigator/exceptions.hpp>
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/recastmeshbuilder.hpp>
-#include <components/esm3/loadland.hpp>
-#include <components/misc/convert.hpp>
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>

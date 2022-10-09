@@ -11,8 +11,6 @@
 #include <QUndoStack>
 
 #include "../../model/world/commanddispatcher.hpp"
-#include "../../model/world/commands.hpp"
-#include "../../model/world/tablemimedata.hpp"
 
 #include "../widget/coloreditor.hpp"
 #include "../widget/droplineedit.hpp"

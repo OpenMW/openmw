@@ -8,8 +8,6 @@
 #include <memory>
 #include <set>
 
-#include <components/sceneutil/nodecallback.hpp>
-
 #include "cellborder.hpp"
 
 namespace osg

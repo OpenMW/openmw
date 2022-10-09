@@ -8,11 +8,9 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/spellutil.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/inventorystore.hpp"
 
 #include <string>
 

@@ -23,7 +23,6 @@
 #include <components/vfs/manager.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
-#include <components/misc/rng.hpp>
 #include <components/stereo/stereomanager.hpp>
 
 #include <components/nifosg/particle.hpp>
@@ -35,7 +34,6 @@
 
 #include "renderbin.hpp"
 #include "skyutil.hpp"
-#include "util.hpp"
 #include "vismask.hpp"
 
 namespace

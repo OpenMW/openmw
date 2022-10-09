@@ -1,5 +1,4 @@
 #include "multiview.hpp"
-#include "stereomanager.hpp"
 
 #include <osg/DisplaySettings>
 #include <osg/Texture2D>
@@ -16,14 +15,7 @@
 #include <map>
 #include <string>
 
-#include <components/debug/debuglog.hpp>
-
-#include <components/sceneutil/color.hpp>
-#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/mwshadowtechnique.hpp>
-#include <components/sceneutil/statesetupdater.hpp>
-#include <components/sceneutil/util.hpp>
-#include <components/sceneutil/visitor.hpp>
 
 #include <components/settings/settings.hpp>
 

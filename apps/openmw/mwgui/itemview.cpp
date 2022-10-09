@@ -7,8 +7,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
 
-#include "../mwworld/class.hpp"
-
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
 

@@ -21,7 +21,6 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
-#include "../../model/world/commands.hpp"
 
 CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString& title, QWidget* parent)
     : QGroupBox(title, parent)

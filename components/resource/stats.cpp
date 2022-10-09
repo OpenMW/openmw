@@ -14,8 +14,6 @@
 #include <osgViewer/Renderer>
 #include <osgViewer/Viewer>
 
-#include <components/myguiplatform/myguidatamanager.hpp>
-
 #include <components/vfs/manager.hpp>
 
 namespace Resource

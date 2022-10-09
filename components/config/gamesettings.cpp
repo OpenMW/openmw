@@ -6,9 +6,7 @@
 #include <QTextCodec>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
-#include <components/misc/strings/conversion.hpp>
 
 const char Config::GameSettings::sArchiveKey[] = "fallback-archive";
 const char Config::GameSettings::sContentKey[] = "content";

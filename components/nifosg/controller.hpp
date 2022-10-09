@@ -3,7 +3,6 @@
 
 #include <components/nif/controller.hpp>
 #include <components/nif/data.hpp>
-#include <components/nif/niffile.hpp>
 #include <components/nif/nifkey.hpp>
 
 #include <components/sceneutil/keyframe.hpp>

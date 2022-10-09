@@ -9,9 +9,6 @@
 #include <osg/NodeVisitor>
 #include <osg/PositionAttitudeTransform>
 
-#include <components/debug/debuglog.hpp>
-#include <components/misc/strings/lower.hpp>
-
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/skeleton.hpp>
 

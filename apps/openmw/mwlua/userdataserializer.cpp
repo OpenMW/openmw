@@ -1,7 +1,6 @@
 #include "userdataserializer.hpp"
 
 #include <components/lua/serialization.hpp>
-#include <components/misc/endianness.hpp>
 
 #include "object.hpp"
 

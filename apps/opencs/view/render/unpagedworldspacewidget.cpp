@@ -8,7 +8,6 @@
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
-#include "../../model/world/tablemimedata.hpp"
 
 #include "../widget/scenetooltoggle2.hpp"
 

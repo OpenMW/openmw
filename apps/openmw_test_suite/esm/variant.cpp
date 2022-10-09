@@ -1,6 +1,5 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/esm3/loadglob.hpp>
 #include <components/esm3/variant.hpp>
 
 #include <gmock/gmock.h>

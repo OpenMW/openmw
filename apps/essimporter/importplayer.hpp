@@ -4,9 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <components/esm/defs.hpp>
 #include <components/esm/esmcommon.hpp>
-#include <components/esm3/cellref.hpp>
 
 namespace ESM
 {

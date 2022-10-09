@@ -4,7 +4,6 @@
 #include <sol/sol.hpp>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/luascripts.hpp>
 
 #include "../context.hpp"
 

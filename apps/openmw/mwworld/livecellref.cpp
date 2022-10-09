@@ -3,7 +3,6 @@
 #include <sstream>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/objectstate.hpp>

@@ -10,7 +10,6 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 
-#include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace

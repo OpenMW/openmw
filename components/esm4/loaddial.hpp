@@ -31,7 +31,6 @@
 #include <string>
 #include <vector>
 
-#include "dialogue.hpp" // DialType
 #include "formid.hpp"
 
 namespace ESM4

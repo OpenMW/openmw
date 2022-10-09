@@ -31,7 +31,6 @@
 #include "../mwrender/localmap.hpp"
 
 #include "confirmationdialog.hpp"
-#include "tooltips.hpp"
 
 #include <numeric>
 

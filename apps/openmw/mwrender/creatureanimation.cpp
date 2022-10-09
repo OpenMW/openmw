@@ -5,20 +5,13 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/settings.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/weapontype.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
 
 namespace MWRender
 {

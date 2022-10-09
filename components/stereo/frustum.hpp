@@ -11,8 +11,6 @@
 #include <map>
 #include <memory>
 
-#include <components/stereo/types.hpp>
-
 namespace osg
 {
     class FrameBufferObject;

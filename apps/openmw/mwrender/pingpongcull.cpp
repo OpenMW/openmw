@@ -9,7 +9,6 @@
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
 
-#include "pingpongcanvas.hpp"
 #include "postprocessor.hpp"
 
 namespace MWRender

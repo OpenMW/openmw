@@ -1,13 +1,9 @@
 #include "generate.hpp"
-#include "operators.hpp"
 
-#include <components/detournavigator/exceptions.hpp>
 #include <components/detournavigator/navmeshtilescache.hpp>
 #include <components/detournavigator/preparednavmeshdata.hpp>
-#include <components/detournavigator/preparednavmeshdatatuple.hpp>
 #include <components/detournavigator/recast.hpp>
 #include <components/detournavigator/recastmesh.hpp>
-#include <components/detournavigator/ref.hpp>
 
 #include <osg/Vec3f>
 

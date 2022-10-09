@@ -2,7 +2,6 @@
 #include "settingsutils.hpp"
 #include "stats.hpp"
 
-#include <components/debug/debuglog.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/coordinateconverter.hpp>

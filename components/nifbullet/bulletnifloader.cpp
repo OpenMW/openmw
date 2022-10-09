@@ -21,7 +21,6 @@
 #include <components/nif/parent.hpp>
 
 #include <components/files/conversion.hpp>
-#include <components/settings/settings.hpp>
 
 namespace
 {

@@ -9,7 +9,6 @@
 #include "../mwworld/class.hpp"
 
 #include "aicombataction.hpp"
-#include "creaturestats.hpp"
 #include "steering.hpp"
 
 namespace MWMechanics

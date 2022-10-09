@@ -5,10 +5,7 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-#include "../mwworld/class.hpp"
-
 #include "collisiontype.hpp"
-#include "ptrholder.hpp"
 
 namespace MWPhysics
 {

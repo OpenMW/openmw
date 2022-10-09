@@ -5,11 +5,8 @@
 
 #include "../mwmechanics/actorutil.hpp"
 
-#include <components/compiler/locals.hpp>
-
 #include "class.hpp"
 #include "inventorystore.hpp"
-#include "player.hpp"
 
 namespace MWWorld
 {

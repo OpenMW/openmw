@@ -6,7 +6,6 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadfact.hpp>
@@ -28,7 +27,6 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/spellcasting.hpp"
 
 #include "ref.hpp"
 

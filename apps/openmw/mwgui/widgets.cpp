@@ -19,7 +19,6 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include "controllers.hpp"
 #include "ustring.hpp"
 
 namespace MWGui::Widgets

@@ -9,8 +9,6 @@
 #include <osg/Image>
 #include <osg/Texture>
 
-#include <components/sceneutil/color.hpp>
-
 #include "technique.hpp"
 
 namespace fx

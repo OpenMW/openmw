@@ -1,7 +1,5 @@
 #include "recastmeshobject.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
 #include <cassert>

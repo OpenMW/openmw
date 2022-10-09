@@ -8,7 +8,6 @@
 #include <QAbstractProxyModel>
 
 #include "cellcoordinates.hpp"
-#include "idcollection.hpp"
 #include "idtable.hpp"
 #include "idtree.hpp"
 #include "nestedtablewrapper.hpp"

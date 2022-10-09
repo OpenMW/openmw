@@ -14,22 +14,16 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/actionteleport.hpp"
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/inventorystore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwrender/animation.hpp"
 
 #include "actorutil.hpp"
-#include "aifollow.hpp"
 #include "creaturestats.hpp"
 #include "spelleffects.hpp"
 #include "spellutil.hpp"
-#include "summoning.hpp"
 #include "weapontype.hpp"
 
 namespace MWMechanics

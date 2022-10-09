@@ -11,10 +11,7 @@
 #include <components/misc/osguservalues.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
-#include <components/serialization/osgyaml.hpp>
 #include <components/shader/shadermanager.hpp>
-
-#include <components/debug/debuglog.hpp>
 
 namespace SceneUtil
 {

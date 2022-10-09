@@ -1,5 +1,4 @@
 #include <components/files/constrainedfilestream.hpp>
-#include <components/files/conversion.hpp>
 #include <components/files/hash.hpp>
 
 #include <gmock/gmock.h>

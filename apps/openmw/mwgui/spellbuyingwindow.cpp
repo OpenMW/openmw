@@ -4,8 +4,6 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 
-#include <components/misc/strings/lower.hpp>
-
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadrace.hpp>
 

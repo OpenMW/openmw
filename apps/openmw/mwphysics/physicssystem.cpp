@@ -23,11 +23,8 @@
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/misc/convert.hpp>
-#include <components/nifbullet/bulletnifloader.hpp>
-#include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -57,8 +54,6 @@
 #include "mtphysics.hpp"
 #include "object.hpp"
 #include "projectile.hpp"
-#include "projectileconvexcallback.hpp"
-#include "trace.h"
 
 namespace
 {

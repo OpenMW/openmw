@@ -16,7 +16,6 @@
 #include <components/esm3/projectilestate.hpp>
 
 #include <components/misc/constants.hpp>
-#include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/resource/resourcesystem.hpp>
@@ -40,7 +39,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
-#include "../mwmechanics/aipackage.hpp"
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellcasting.hpp"

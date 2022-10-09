@@ -1,8 +1,6 @@
 #ifndef OPENMW_COMPONENTS_BULLETHELPERS_COLLISIONOBJECT_H
 #define OPENMW_COMPONENTS_BULLETHELPERS_COLLISIONOBJECT_H
 
-#include <components/misc/convert.hpp>
-
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <LinearMath/btQuaternion.h>
 #include <LinearMath/btTransform.h>

@@ -1,6 +1,5 @@
 #include "loadtes3.hpp"
 
-#include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"

@@ -24,7 +24,6 @@
 #include <components/misc/strings/conversion.hpp>
 #include <components/navmeshtool/protocol.hpp>
 #include <components/settings/settings.hpp>
-#include <components/vfs/bsaarchive.hpp>
 
 #include "utils/profilescombobox.hpp"
 #include "utils/textinputdialog.hpp"

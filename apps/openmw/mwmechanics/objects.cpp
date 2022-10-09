@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 
 #include "character.hpp"
-#include "movement.hpp"
 
 namespace MWMechanics
 {

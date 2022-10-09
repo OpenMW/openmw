@@ -19,7 +19,6 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetoolrun.hpp"
-#include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
 #include "creator.hpp"

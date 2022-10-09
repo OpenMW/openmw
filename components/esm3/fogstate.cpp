@@ -8,8 +8,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/files/memorystream.hpp>
 
-#include "savedgame.hpp"
-
 namespace ESM
 {
     namespace
