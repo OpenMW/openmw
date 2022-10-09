@@ -1,5 +1,7 @@
 #include "unrefqueue.hpp"
 
+#include <components/sceneutil/workqueue.hpp>
+
 namespace SceneUtil
 {
     namespace

@@ -1,18 +1,13 @@
 #ifndef CSM_DOC_OPERATION_H
 #define CSM_DOC_OPERATION_H
 
-#include <map>
 #include <vector>
 
 #include <QObject>
-#include <QTimer>
 
 #include "messages.hpp"
 
-namespace CSMWorld
-{
-    class UniversalId;
-}
+class QTimer;
 
 namespace CSMDoc
 {

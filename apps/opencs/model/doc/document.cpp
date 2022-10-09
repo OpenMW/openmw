@@ -2,7 +2,6 @@
 
 #include "state.hpp"
 
-#include <cassert>
 #include <filesystem>
 #include <memory>
 #include <utility>

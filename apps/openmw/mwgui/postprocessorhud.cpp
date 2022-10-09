@@ -1,9 +1,20 @@
 #include "postprocessorhud.hpp"
 
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_FactoryManager.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_Macros.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TabItem.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetDefines.h>
+#include <MyGUI_WidgetInput.h>
 #include <MyGUI_Window.h>
 
 #include <components/fx/technique.hpp>

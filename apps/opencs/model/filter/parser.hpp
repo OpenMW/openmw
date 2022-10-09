@@ -1,7 +1,16 @@
 #ifndef CSM_FILTER_PARSER_H
 #define CSM_FILTER_PARSER_H
 
-#include "node.hpp"
+#include <memory>
+#include <string>
+namespace CSMFilter
+{
+    class Node;
+}
+namespace CSMFilter
+{
+    struct Token;
+}
 
 namespace CSMWorld
 {

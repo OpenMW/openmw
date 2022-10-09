@@ -4,7 +4,6 @@
 #include <string>
 #include <utility>
 
-#include <osg/CullStack>
 #include <osg/Texture1D>
 #include <osg/Texture2D>
 #include <osg/Texture3D>
@@ -15,7 +14,6 @@
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/imagemanager.hpp>
-#include <components/sceneutil/util.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/vfs/manager.hpp>
 

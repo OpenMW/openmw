@@ -1,8 +1,17 @@
 #include "cell.hpp"
 
-#include <osg/Group>
-#include <osg/PositionAttitudeTransform>
+#include <set>
+#include <type_traits>
+#include <utility>
 
+#include <osg/Callback>
+#include <osg/Group>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/PositionAttitudeTransform>
+#include <osg/Referenced>
+
+#include <components/esm/defs.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/misc/strings/lower.hpp>
@@ -19,6 +28,18 @@
 #include "object.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
+
+#include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/ref.hpp>
+#include <apps/opencs/model/world/refcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/render/tagbase.hpp>
 
 namespace CSVRender
 {

@@ -27,7 +27,6 @@
 #include <cassert>
 #include <filesystem>
 #include <fstream>
-#include <stdexcept>
 
 #include <lz4frame.h>
 

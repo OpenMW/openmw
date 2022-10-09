@@ -17,7 +17,6 @@
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/movement.hpp"
 
 #include "../mwrender/bulletdebugdraw.hpp"
 

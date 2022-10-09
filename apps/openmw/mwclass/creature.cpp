@@ -1,6 +1,7 @@
 #include "creature.hpp"
 
-#include <components/debug/debuglog.hpp>
+#include <MyGUI_TextIterator.h>
+
 #include <components/esm3/creaturestate.hpp>
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadcrea.hpp>

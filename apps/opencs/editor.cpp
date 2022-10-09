@@ -9,13 +9,14 @@
 
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
-#include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/misc/rng.hpp>
-#include <components/misc/strings/conversion.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/settings/settings.hpp>
+
+#include "view/doc/viewmanager.hpp"
 
 #include "model/doc/document.hpp"
 

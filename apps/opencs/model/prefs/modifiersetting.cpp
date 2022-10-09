@@ -5,12 +5,14 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QPushButton>
-#include <QWidget>
 
 #include <components/settings/settings.hpp>
 
 #include "shortcutmanager.hpp"
 #include "state.hpp"
+
+class QObject;
+class QWidget;
 
 namespace CSMPrefs
 {

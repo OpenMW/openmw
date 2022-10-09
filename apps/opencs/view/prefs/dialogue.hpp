@@ -4,7 +4,6 @@
 #include <QMainWindow>
 
 class QSplitter;
-class QListWidget;
 class QStackedWidget;
 class QListWidgetItem;
 

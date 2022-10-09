@@ -1,17 +1,13 @@
 #include "rtt.hpp"
 #include "util.hpp"
 
-#include <osg/Node>
-#include <osg/NodeVisitor>
 #include <osg/Texture2D>
 #include <osg/Texture2DArray>
 #include <osgUtil/CullVisitor>
 
-#include <components/debug/debuglog.hpp>
 #include <components/sceneutil/color.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/nodecallback.hpp>
-#include <components/settings/settings.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
 

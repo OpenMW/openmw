@@ -10,8 +10,6 @@
 
 #include "../inisettings.hpp"
 
-#include <components/config/gamesettings.hpp>
-
 namespace Wizard
 {
     enum Component

@@ -1,11 +1,8 @@
 #ifndef OPENMW_COMPONENTS_SHADERVISITOR_H
 #define OPENMW_COMPONENTS_SHADERVISITOR_H
 
-#include <array>
-
 #include <osg/NodeVisitor>
 #include <osg/Program>
-#include <osg/Texture2D>
 
 namespace Resource
 {

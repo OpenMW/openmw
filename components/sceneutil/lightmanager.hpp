@@ -11,15 +11,8 @@
 #include <osg/NodeVisitor>
 #include <osg/observer_ptr>
 
-#include <components/shader/shadermanager.hpp>
-
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/settings/settings.hpp>
-
-namespace osgUtil
-{
-    class CullVisitor;
-}
 
 namespace SceneUtil
 {

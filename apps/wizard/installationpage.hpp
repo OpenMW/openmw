@@ -5,18 +5,21 @@
 
 #include <QWizardPage>
 
-#include "inisettings.hpp"
 #include "ui_installationpage.h"
 #include "unshield/unshieldworker.hpp"
-#include <components/config/gamesettings.hpp>
+
+namespace Config
+{
+    class GameSettings;
+}
 
 class QThread;
+class QObject;
+class QWidget;
 
 namespace Wizard
 {
     class MainWizard;
-    class IniSettings;
-    class UnshieldWorker;
 
     class InstallationPage : public QWizardPage, private Ui::InstallationPage
     {

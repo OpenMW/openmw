@@ -17,7 +17,7 @@ namespace Nif
 {
 
     class NIFStream;
-    struct NIFFile;
+    class Reader;
 
     /// Non-record data types
 

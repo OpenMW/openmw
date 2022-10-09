@@ -5,8 +5,9 @@
 
 #include <QMutex>
 #include <QObject>
-#include <QTimer>
 #include <QWaitCondition>
+
+class QTimer;
 
 namespace CSMDoc
 {

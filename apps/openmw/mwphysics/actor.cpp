@@ -1,6 +1,5 @@
 #include "actor.hpp"
 
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 
 #include <components/debug/debuglog.hpp>

@@ -1,16 +1,11 @@
 #ifndef OPENMW_COMPONENTS_FX_LEXER_H
 #define OPENMW_COMPONENTS_FX_LEXER_H
 
-#include <cstdint>
+#include <cstddef>
 #include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <variant>
-
-#include <osg/Vec2f>
-#include <osg/Vec3f>
-#include <osg/Vec4f>
 
 #include "lexer_types.hpp"
 

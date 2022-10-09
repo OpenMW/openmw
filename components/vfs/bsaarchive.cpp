@@ -1,7 +1,6 @@
 #include "bsaarchive.hpp"
 
 #include <algorithm>
-#include <istream>
 #include <memory>
 
 namespace VFS

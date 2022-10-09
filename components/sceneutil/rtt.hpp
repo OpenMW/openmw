@@ -10,7 +10,6 @@ namespace osg
 {
     class Texture2D;
     class Texture2DArray;
-    class Camera;
 }
 
 namespace osgUtil
@@ -20,8 +19,6 @@ namespace osgUtil
 
 namespace SceneUtil
 {
-    class CreateTextureViewsCallback;
-
     /// @brief Implements per-view RTT operations.
     /// @par With a naive RTT implementation, subsequent views of multiple views will overwrite the results of the
     /// previous views, leading to

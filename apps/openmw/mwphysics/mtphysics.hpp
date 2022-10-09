@@ -7,7 +7,6 @@
 #include <shared_mutex>
 #include <thread>
 #include <unordered_set>
-#include <variant>
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 

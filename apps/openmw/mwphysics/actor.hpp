@@ -8,12 +8,10 @@
 
 #include <components/detournavigator/collisionshapetype.hpp>
 
-#include <LinearMath/btTransform.h>
 #include <osg/Quat>
 #include <osg/Vec3f>
 
 class btCollisionShape;
-class btCollisionObject;
 class btCollisionWorld;
 class btConvexShape;
 

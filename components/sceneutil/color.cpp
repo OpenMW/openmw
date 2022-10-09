@@ -3,11 +3,6 @@
 #include <algorithm>
 #include <array>
 
-#include <SDL_opengl_glext.h>
-
-#include <components/debug/debuglog.hpp>
-#include <components/settings/settings.hpp>
-
 namespace SceneUtil
 {
 

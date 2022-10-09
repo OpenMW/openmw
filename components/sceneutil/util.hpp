@@ -1,9 +1,8 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_UTIL_H
 #define OPENMW_COMPONENTS_SCENEUTIL_UTIL_H
 
-#include <osg/BoundingSphere>
 #include <osg/Camera>
-#include <osg/Matrix>
+#include <osg/Matrixf>
 #include <osg/Texture2D>
 #include <osg/Vec4f>
 

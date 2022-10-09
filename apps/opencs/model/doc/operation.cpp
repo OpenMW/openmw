@@ -1,6 +1,5 @@
 #include "operation.hpp"
 
-#include <string>
 #include <vector>
 
 #include <QTimer>

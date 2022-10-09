@@ -1,13 +1,10 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_SCENEMANAGER_H
 #define OPENMW_COMPONENTS_RESOURCE_SCENEMANAGER_H
 
-#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
 
-#include <osg/Node>
-#include <osg/Texture2D>
 #include <osg/Texture>
 #include <osg/ref_ptr>
 
@@ -15,6 +12,20 @@
 
 #include <components/sceneutil/lightmanager.hpp>
 #include <filesystem>
+
+namespace VFS
+{
+    class Manager;
+}
+
+namespace osg
+{
+    class Group;
+    class Node;
+    class Program;
+    class State;
+    class Stats;
+}
 
 namespace Resource
 {
@@ -26,11 +37,6 @@ namespace Resource
 namespace osgUtil
 {
     class IncrementalCompileOperation;
-}
-
-namespace osgDB
-{
-    class SharedStateManager;
 }
 
 namespace Shader

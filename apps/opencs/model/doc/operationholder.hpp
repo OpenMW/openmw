@@ -6,11 +6,6 @@
 
 #include "messages.hpp"
 
-namespace CSMWorld
-{
-    class UniversalId;
-}
-
 namespace CSMDoc
 {
     class Operation;

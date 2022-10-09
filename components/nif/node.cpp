@@ -1,6 +1,6 @@
 #include "node.hpp"
 
-#include <components/misc/algorithm.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "data.hpp"
 #include "exception.hpp"

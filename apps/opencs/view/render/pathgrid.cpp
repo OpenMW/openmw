@@ -6,7 +6,6 @@
 #include <osg/Geometry>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
-#include <osg/Vec3>
 
 #include <components/sceneutil/pathgridutil.hpp>
 

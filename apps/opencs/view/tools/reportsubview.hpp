@@ -2,9 +2,9 @@
 #define CSV_TOOLS_REPORTSUBVIEW_H
 
 #include "../doc/subview.hpp"
+#include <apps/opencs/model/world/universalid.hpp>
 
-class QTableView;
-class QModelIndex;
+class QObject;
 
 namespace CSMDoc
 {

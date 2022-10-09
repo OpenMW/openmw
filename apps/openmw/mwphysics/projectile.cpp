@@ -4,8 +4,6 @@
 
 #include <components/misc/convert.hpp>
 
-#include "../mwworld/class.hpp"
-
 #include "actor.hpp"
 #include "collisiontype.hpp"
 #include "mtphysics.hpp"

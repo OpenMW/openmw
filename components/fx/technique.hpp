@@ -5,20 +5,13 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 
 #include <osg/BlendEquation>
 #include <osg/BlendFunc>
 #include <osg/FrameBufferObject>
-#include <osg/Node>
-#include <osg/Program>
-#include <osg/Shader>
 #include <osg/StateSet>
 #include <osg/Texture2D>
-#include <osg/Vec2f>
-#include <osg/Vec3f>
-#include <osg/Vec4f>
 
 #include "lexer.hpp"
 #include "pass.hpp"

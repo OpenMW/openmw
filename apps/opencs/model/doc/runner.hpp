@@ -62,8 +62,6 @@ namespace CSMDoc
         void readyReadStandardOutput();
     };
 
-    class Operation;
-
     /// \brief Watch for end of save operation and restart or stop runner
     class SaveWatcher : public QObject
     {

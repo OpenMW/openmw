@@ -1,10 +1,8 @@
 #include "manager.hpp"
 
 #include <algorithm>
-#include <istream>
 #include <stdexcept>
 
-#include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 
