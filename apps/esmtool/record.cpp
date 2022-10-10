@@ -607,7 +607,7 @@ namespace EsmTool
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Playable: " << mData.mData.mIsPlayable << std::endl;
-        std::cout << "  AutoCalc: " << mData.mData.mCalc << std::endl;
+        std::cout << "  AI Services: " << Misc::StringUtils::format("0x%08X", mData.mData.mServices) << std::endl;
         std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttribute[0]) << " (" << mData.mData.mAttribute[0]
                   << ")" << std::endl;
         std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute[1]) << " (" << mData.mData.mAttribute[1]

@@ -1274,7 +1274,14 @@ namespace MWClass
 
     int Npc::getServices(const MWWorld::ConstPtr& actor) const
     {
-        return actor.get<ESM::NPC>()->mBase->mAiData.mServices;
+        const ESM::NPC* npc = actor.get<ESM::NPC>()->mBase;
+        if (npc->mFlags & ESM::NPC::Autocalc)
+        {
+            const ESM::Class* class_
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
+            return class_->mData.mServices;
+        }
+        return npc->mAiData.mServices;
     }
 
     std::string_view Npc::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
