@@ -8,12 +8,11 @@
 #include <osg/Texture2D>
 #include <osg/Texture3D>
 
-#include <SDL_opengl_glext.h>
-
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/sceneutil/glext.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/vfs/manager.hpp>
 
