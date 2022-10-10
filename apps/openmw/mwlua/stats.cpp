@@ -37,6 +37,12 @@ namespace
 
     using SelfObject = MWLua::LocalScripts::SelfObject;
     using StatObject = std::variant<SelfObject*, MWLua::LObject, MWLua::GObject>;
+    SelfObject* asSelfObject(const StatObject& obj)
+    {
+        if (!std::holds_alternative<SelfObject*>(obj))
+            throw std::runtime_error("Changing stats allowed only in local scripts for 'openmw.self'.");
+        return std::get<SelfObject*>(obj);
+    }
 
     const MWLua::Object* getObject(const StatObject& obj)
     {
@@ -123,7 +129,7 @@ namespace MWLua
 
         void setCurrent(const Context& context, const sol::object& value) const
         {
-            SelfObject* obj = std::get<SelfObject*>(mObject);
+            SelfObject* obj = asSelfObject(mObject);
             if (obj->mStatsCache.empty())
                 context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
             obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, 0, "current" }] = value;
@@ -183,7 +189,7 @@ namespace MWLua
 
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
-            SelfObject* obj = std::get<SelfObject*>(mObject);
+            SelfObject* obj = asSelfObject(mObject);
             if (obj->mStatsCache.empty())
                 context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
             obj->mStatsCache[SelfObject::CachedStat{ &DynamicStat::setValue, mIndex, prop }] = value;
@@ -243,7 +249,7 @@ namespace MWLua
 
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
-            SelfObject* obj = std::get<SelfObject*>(mObject);
+            SelfObject* obj = asSelfObject(mObject);
             if (obj->mStatsCache.empty())
                 context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
             obj->mStatsCache[SelfObject::CachedStat{ &AttributeStat::setValue, mIndex, prop }] = value;
@@ -330,7 +336,7 @@ namespace MWLua
 
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
-            SelfObject* obj = std::get<SelfObject*>(mObject);
+            SelfObject* obj = asSelfObject(mObject);
             if (obj->mStatsCache.empty())
                 context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
             obj->mStatsCache[SelfObject::CachedStat{ &SkillStat::setValue, mIndex, prop }] = value;
