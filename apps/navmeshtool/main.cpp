@@ -2,19 +2,22 @@
 #include "worldspacedata.hpp"
 
 #include <components/debug/debugging.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/detournavigator/collisionshapetype.hpp>
 #include <components/detournavigator/navmeshdb.hpp>
 #include <components/detournavigator/recastglobalallocator.hpp>
 #include <components/detournavigator/settings.hpp>
-#include <components/esm3/esmreader.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esm3/variant.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/load.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
+#include <components/files/collections.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/files/multidircollection.hpp>
 #include <components/platform/platform.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -31,8 +34,14 @@
 #include <boost/program_options.hpp>
 
 #include <cstddef>
-#include <stdexcept>
+#include <cstdint>
+#include <filesystem>
+#include <iostream>
+#include <map>
+#include <string>
 #include <thread>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #ifdef WIN32

@@ -1,6 +1,8 @@
 #ifndef INSTALLATIONTARGETPAGE_HPP
 #define INSTALLATIONTARGETPAGE_HPP
 
+#include <QWizard>
+
 #include "ui_installationtargetpage.h"
 
 namespace Files

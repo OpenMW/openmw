@@ -1,14 +1,13 @@
 #include "cell.hpp"
 
+#include <algorithm>
 #include <set>
-#include <type_traits>
 #include <utility>
 
 #include <osg/Callback>
 #include <osg/Group>
 #include <osg/Node>
 #include <osg/NodeVisitor>
-#include <osg/PositionAttitudeTransform>
 #include <osg/Referenced>
 
 #include <components/esm/defs.hpp>

@@ -1,10 +1,23 @@
 #include "cellmarker.hpp"
 
+#include <string>
+
 #include <osg/AutoTransform>
+#include <osg/GL>
+#include <osg/Group>
 #include <osg/Material>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 #include <osgText/Text>
+#include <osgText/TextBase>
 
 #include <components/misc/constants.hpp>
+
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/view/render/mask.hpp>
+#include <apps/opencs/view/render/tagbase.hpp>
 
 CSVRender::CellMarkerTag::CellMarkerTag(CellMarker* marker)
     : TagBase(Mask_CellMarker)

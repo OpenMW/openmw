@@ -1,5 +1,13 @@
 #include "ornode.hpp"
 
+#include <apps/opencs/model/filter/narynode.hpp>
+#include <apps/opencs/model/filter/node.hpp>
+
+namespace CSMWorld
+{
+    class IdTableBase;
+}
+
 CSMFilter::OrNode::OrNode(const std::vector<std::shared_ptr<Node>>& nodes)
     : NAryNode(nodes, "or")
 {

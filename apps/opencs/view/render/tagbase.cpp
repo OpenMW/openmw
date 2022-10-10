@@ -1,5 +1,6 @@
-
 #include "tagbase.hpp"
+
+#include <apps/opencs/view/render/mask.hpp>
 
 CSVRender::TagBase::TagBase(Mask mask)
     : mMask(mask)

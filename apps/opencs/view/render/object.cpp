@@ -1,9 +1,12 @@
 #include "object.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <exception>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
-#include <osg/Depth>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 

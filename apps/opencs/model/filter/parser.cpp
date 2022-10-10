@@ -1,9 +1,15 @@
 #include "parser.hpp"
 
+#include <algorithm>
 #include <cctype>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+
+#include <components/esm3/filter.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "../world/columns.hpp"

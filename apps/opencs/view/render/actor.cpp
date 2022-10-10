@@ -1,11 +1,21 @@
 #include "actor.hpp"
 
+#include <memory>
+#include <unordered_map>
+#include <utility>
+
 #include <osg/Group>
+#include <osg/MatrixTransform>
 #include <osg/Node>
 
+#include <apps/opencs/model/world/actoradapter.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+
+#include <components/esm3/loadbody.hpp>
 #include <components/esm3/mappings.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/resource/resourcemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/skeleton.hpp>

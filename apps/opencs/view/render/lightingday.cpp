@@ -1,6 +1,9 @@
 #include "lightingday.hpp"
 
+#include <osg/Group>
+#include <osg/Light>
 #include <osg/LightSource>
+#include <osg/ref_ptr>
 
 CSVRender::LightingDay::LightingDay() {}
 

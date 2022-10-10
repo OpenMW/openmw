@@ -1,12 +1,23 @@
 #include "brushdraw.hpp"
 
 #include <limits>
+#include <set>
+#include <utility>
 
 #include <osg/Array>
+#include <osg/GL>
 #include <osg/Geometry>
 #include <osg/Group>
+#include <osg/Math>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec4f>
 
+#include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
+
+#include <components/esm3/loadland.hpp>
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "../widget/brushshapes.hpp"

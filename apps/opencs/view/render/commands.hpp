@@ -2,14 +2,11 @@
 #define CSV_RENDER_COMMANDS_HPP
 
 #include <QPointer>
-
 #include <QUndoCommand>
-
-#include "worldspacewidget.hpp"
 
 namespace CSVRender
 {
-    class TerrainSelection;
+    class WorldspaceWidget;
 
     /*
         Current solution to force a redrawing of the terrain-selection grid

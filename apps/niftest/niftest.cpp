@@ -1,13 +1,19 @@
 /// Program to test .nif files both on the FileSystem and in BSA archives.
 
+#include <exception>
 #include <filesystem>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/nif/niffile.hpp>
+#include <components/vfs/archive.hpp>
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
 #include <components/vfs/manager.hpp>

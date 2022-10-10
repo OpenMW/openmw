@@ -1,16 +1,18 @@
 #include "terrainstorage.hpp"
 
+#include <components/esm3/loadltex.hpp>
 #include <components/esm3terrain/storage.hpp>
+#include <components/resource/resourcesystem.hpp>
 
-#include <algorithm>
 #include <apps/opencs/model/world/data.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/land.hpp>
 #include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/record.hpp>
-#include <components/resource/resourcesystem.hpp>
+
+#include <algorithm>
+#include <cmath>
 #include <iterator>
-#include <math.h>
 #include <memory>
 #include <osg/Vec4ub>
 #include <stdexcept>

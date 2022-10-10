@@ -1,6 +1,7 @@
 #ifndef CSM_PREFS_CATEGORY_H
 #define CSM_PREFS_CATEGORY_H
 
+#include <algorithm>
 #include <string>
 #include <vector>
 

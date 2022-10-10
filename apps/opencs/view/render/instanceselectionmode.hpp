@@ -1,16 +1,32 @@
 #ifndef CSV_RENDER_INSTANCE_SELECTION_MODE_H
 #define CSV_RENDER_INSTANCE_SELECTION_MODE_H
 
-#include <QPoint>
-
-#include <osg/PositionAttitudeTransform>
 #include <osg/Vec3d>
+#include <osg/ref_ptr>
+
+class QAction;
+class QMenu;
+class QObject;
+class QPoint;
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
+namespace osg
+{
+    class PositionAttitudeTransform;
+    class Group;
+    class Vec3f;
+}
 
 #include "instancedragmodes.hpp"
 #include "selectionmode.hpp"
 
 namespace CSVRender
 {
+    class WorldspaceWidget;
     class InstanceSelectionMode : public SelectionMode
     {
         Q_OBJECT

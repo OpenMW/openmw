@@ -1,9 +1,13 @@
 #include "droplineedit.hpp"
 
+#include <string>
+
 #include <QDropEvent>
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
+
+#include <apps/opencs/model/world/columnbase.hpp>
 
 #include "../world/dragdroputils.hpp"
 

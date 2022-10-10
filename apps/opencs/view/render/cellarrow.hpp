@@ -3,6 +3,8 @@
 
 #include "tagbase.hpp"
 
+#include <QString>
+
 #include <osg/ref_ptr>
 
 #include "../../model/world/cellcoordinates.hpp"

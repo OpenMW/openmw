@@ -1,12 +1,34 @@
 #include "worldspacewidget.hpp"
 
 #include <algorithm>
+#include <set>
 
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QMouseEvent>
 #include <QToolTip>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/view/render/editmode.hpp>
+#include <apps/opencs/view/render/scenewidget.hpp>
+#include <apps/opencs/view/widget/modebutton.hpp>
+
+#include <components/esm/defs.hpp>
+
+#include <osg/Camera>
+#include <osg/Group>
+#include <osg/Matrixd>
+#include <osg/Node>
+#include <osg/Referenced>
+#include <osg/Viewport>
+#include <osgUtil/IntersectionVisitor>
+#include <osgViewer/View>
 
 #include <osgUtil/LineSegmentIntersector>
 

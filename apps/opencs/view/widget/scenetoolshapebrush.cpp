@@ -19,8 +19,12 @@
 #include "brushshapes.hpp"
 #include "scenetool.hpp"
 
-#include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
+
+namespace CSMDoc
+{
+    class Document;
+}
 
 CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString& title, QWidget* parent)
     : QGroupBox(title, parent)

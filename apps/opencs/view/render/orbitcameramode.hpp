@@ -1,8 +1,6 @@
 #ifndef CSV_RENDER_ORBITCAMERAPICKMODE_H
 #define CSV_RENDER_ORBITCAMERAPICKMODE_H
 
-#include <memory>
-
 #include "../widget/modebutton.hpp"
 
 namespace CSMPrefs

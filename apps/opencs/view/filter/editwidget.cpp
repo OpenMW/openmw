@@ -8,6 +8,9 @@
 #include <QMenu>
 #include <QString>
 
+#include <apps/opencs/model/filter/parser.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include <components/misc/helpviewer.hpp>
 
 #include "../../model/prefs/shortcut.hpp"

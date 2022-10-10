@@ -6,6 +6,8 @@
 
 #include "../../model/doc/document.hpp"
 
+#include <apps/opencs/view/render/tagbase.hpp>
+
 #include "instancedragmodes.hpp"
 #include "scenewidget.hpp"
 
@@ -30,9 +32,7 @@ namespace CSVWidget
 
 namespace CSVRender
 {
-    class TagBase;
     class Cell;
-    class CellArrow;
     class EditMode;
 
     struct WorldspaceHitResult

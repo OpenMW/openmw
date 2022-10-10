@@ -9,7 +9,6 @@
 #include <QIcon>
 #include <QWidget>
 
-#include <osg/Group>
 #include <osg/Vec3f>
 
 #include <components/debug/debuglog.hpp>

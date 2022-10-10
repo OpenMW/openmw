@@ -1,7 +1,6 @@
 #include "scenetooltoggle2.hpp"
 
 #include <sstream>
-#include <stdexcept>
 
 #include <QFrame>
 #include <QHBoxLayout>

@@ -1,17 +1,19 @@
 #include "cameracontroller.hpp"
 
 #include <cmath>
+#include <set>
+#include <string>
 
 #include <QWidget>
 
 #include <osg/BoundingBox>
 #include <osg/Camera>
 #include <osg/ComputeBoundsVisitor>
-#include <osg/Drawable>
 #include <osg/Group>
 #include <osg/Matrixd>
 #include <osg/Quat>
 
+#include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
 
 #include "../../model/prefs/shortcut.hpp"

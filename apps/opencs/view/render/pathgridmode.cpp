@@ -1,6 +1,6 @@
 #include "pathgridmode.hpp"
 
-#include <QPoint>
+#include <QIcon>
 
 #include <components/sceneutil/pathgridutil.hpp>
 
@@ -15,6 +15,23 @@
 #include "pathgrid.hpp"
 #include "pathgridselectionmode.hpp"
 #include "worldspacewidget.hpp"
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/view/render/editmode.hpp>
+#include <apps/opencs/view/render/tagbase.hpp>
+
+#include <osg/Camera>
+#include <osg/Matrixd>
+#include <osg/Vec3d>
+#include <osg/ref_ptr>
+
+#include <vector>
+
+class QPoint;
+class QUndoStack;
+class QWidget;
 
 namespace CSVRender
 {

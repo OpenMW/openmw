@@ -4,9 +4,11 @@
 #include <QDebug>
 #include <QDir>
 #include <QMessageBox>
+#include <QProcess>
 #include <QTextCodec>
 
 #include <components/files/qtconversion.hpp>
+#include <components/process/processinvoker.hpp>
 
 #include "componentselectionpage.hpp"
 #include "conclusionpage.hpp"

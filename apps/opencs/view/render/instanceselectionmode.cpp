@@ -1,13 +1,32 @@
 #include "instanceselectionmode.hpp"
 
+#include <cmath>
+#include <string>
+#include <vector>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/render/mask.hpp>
+#include <apps/opencs/view/render/selectionmode.hpp>
+
+#include <osg/Array>
+#include <osg/GL>
+#include <osg/Geometry>
+#include <osg/Group>
+#include <osg/Math>
+#include <osg/PositionAttitudeTransform>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3d>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+#include <osg/ref_ptr>
+
 #include <QAction>
 #include <QMenu>
 #include <QPoint>
-
-#include <osg/Group>
-#include <osg/PositionAttitudeTransform>
-#include <osg/Vec3d>
-#include <osg/ref_ptr>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
@@ -16,8 +35,15 @@
 #include "object.hpp"
 #include "worldspacewidget.hpp"
 
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
 namespace CSVRender
 {
+    class TagBase;
+
     InstanceSelectionMode::InstanceSelectionMode(
         CSVWidget::SceneToolbar* parent, WorldspaceWidget& worldspaceWidget, osg::Group* cellNode)
         : SelectionMode(parent, worldspaceWidget, Mask_Reference)
