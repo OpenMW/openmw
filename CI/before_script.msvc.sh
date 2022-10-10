@@ -553,7 +553,13 @@ if ! [ -z "$USE_CLANG_TIDY" ]; then
   add_cmake_opts "-DCMAKE_CXX_CLANG_TIDY=\"clang-tidy --warnings-as-errors=*\""
 fi
 
+BULLET_VER="2.89"
+FFMPEG_VER="4.2.2"
 ICU_VER="70_1"
+LUAJIT_VER="2.1.0-beta3"
+LZ4_VER="1.9.2"
+OPENAL_VER="1.20.1"
+QT_VER="5.15.2"
 
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
 OSG_ARCHIVE="OSGoS-3.6.5-dd803bc-msvc${OSG_MSVC_YEAR}-win${BITS}"
@@ -589,16 +595,16 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# Bullet
-	download "Bullet 2.89" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-2.89-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z" \
-		"Bullet-2.89-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z"
+	download "Bullet ${BULLET_VER}" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z" \
+		"Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z"
 
 	# FFmpeg
-	download "FFmpeg 4.2.2" \
-	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-4.2.2-win${BITS}.zip" \
-		"ffmpeg-4.2.2-win${BITS}.zip" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-4.2.2-dev-win${BITS}.zip" \
-		"ffmpeg-4.2.2-dev-win${BITS}.zip"
+	download "FFmpeg ${FFMPEG_VER}" \
+	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-${FFMPEG_VER}-win${BITS}.zip" \
+		"ffmpeg-${FFMPEG_VER}-win${BITS}.zip" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-${FFMPEG_VER}-dev-win${BITS}.zip" \
+		"ffmpeg-${FFMPEG_VER}-dev-win${BITS}.zip"
 
 	# MyGUI
 	download "MyGUI 3.4.1" \
@@ -612,9 +618,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# OpenAL
-	download "OpenAL-Soft 1.20.1" \
-	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-1.20.1.zip" \
-		"OpenAL-Soft-1.20.1.zip"
+	download "OpenAL-Soft ${OPENAL_VER}" \
+	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-${OPENAL_VER}.zip" \
+		"OpenAL-Soft-${OPENAL_VER}.zip"
 
 	# OSGoS
 	download "${OSG_ARCHIVE_NAME}" \
@@ -633,14 +639,14 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"SDL2-devel-2.24.0-VC.zip"
 
 	# LZ4
-	download "LZ4 1.9.2" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v1_9_2.7z" \
-		"lz4_win${BITS}_v1_9_2.7z"
+	download "LZ4 ${LZ4_VER}" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v${LZ4_VER//./_}.7z" \
+		"lz4_win${BITS}_v${LZ4_VER//./_}.7z"
 
 	# LuaJIT
-	download "LuaJIT 2.1.0-beta3" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/LuaJIT-2.1.0-beta3-msvc${LUA_MSVC_YEAR}-win${BITS}.7z" \
-		"LuaJIT-2.1.0-beta3-msvc${LUA_MSVC_YEAR}-win${BITS}.7z"
+	download "LuaJIT ${LUAJIT_VER}" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/LuaJIT-${LUAJIT_VER}-msvc${LUA_MSVC_YEAR}-win${BITS}.7z" \
+		"LuaJIT-${LUAJIT_VER}-msvc${LUA_MSVC_YEAR}-win${BITS}.7z"
 
     # ICU
     download "ICU ${ICU_VER/_/.}"\
@@ -682,7 +688,6 @@ echo "---------------------------------------------------"
 echo
 
 
-# Boost
 if [ -z $APPVEYOR ]; then
 	printf "Boost ${BOOST_VER}... "
 else
@@ -730,35 +735,33 @@ fi
 }
 cd $DEPS
 echo
-# Bullet
-printf "Bullet 2.89... "
+printf "Bullet ${BULLET_VER}... "
 {
 	cd $DEPS_INSTALL
 	if [ -d Bullet ]; then
 		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z" $STRIP
-		mv "Bullet-2.89-msvc${BULLET_MSVC_YEAR}-win${BITS}-double" Bullet
+		eval 7z x -y "${DEPS}/Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z" $STRIP
+		mv "Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double" Bullet
 	fi
 	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
 }
 cd $DEPS
 echo
-# FFmpeg
-printf "FFmpeg 4.2.2... "
+printf "FFmpeg ${FFMPEG_VER}... "
 {
 	cd $DEPS_INSTALL
-	if [ -d FFmpeg ] && grep "4.2.2" FFmpeg/README.txt > /dev/null; then
+	if [ -d FFmpeg ] && grep "${FFMPEG_VER}" FFmpeg/README.txt > /dev/null; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf FFmpeg
-		eval 7z x -y "${DEPS}/ffmpeg-4.2.2-win${BITS}.zip" $STRIP
-		eval 7z x -y "${DEPS}/ffmpeg-4.2.2-dev-win${BITS}.zip" $STRIP
-		mv "ffmpeg-4.2.2-win${BITS}-shared" FFmpeg
-		cp -r "ffmpeg-4.2.2-win${BITS}-dev/"* FFmpeg/
-		rm -rf "ffmpeg-4.2.2-win${BITS}-dev"
+		eval 7z x -y "${DEPS}/ffmpeg-${FFMPEG_VER}-win${BITS}.zip" $STRIP
+		eval 7z x -y "${DEPS}/ffmpeg-${FFMPEG_VER}-dev-win${BITS}.zip" $STRIP
+		mv "ffmpeg-${FFMPEG_VER}-win${BITS}-shared" FFmpeg
+		cp -r "ffmpeg-${FFMPEG_VER}-win${BITS}-dev/"* FFmpeg/
+		rm -rf "ffmpeg-${FFMPEG_VER}-win${BITS}-dev"
 	fi
 	export FFMPEG_HOME="$(real_pwd)/FFmpeg"
 	for config in ${CONFIGURATIONS[@]}; do
@@ -771,7 +774,6 @@ printf "FFmpeg 4.2.2... "
 }
 cd $DEPS
 echo
-# MyGUI
 printf "MyGUI 3.4.1... "
 {
 	cd $DEPS_INSTALL
@@ -802,26 +804,24 @@ printf "MyGUI 3.4.1... "
 }
 cd $DEPS
 echo
-# OpenAL
-printf "OpenAL-Soft 1.20.1... "
+printf "OpenAL-Soft ${OPENAL_VER}... "
 {
-	if [ -d openal-soft-1.20.1-bin ]; then
+	if [ -d openal-soft-${OPENAL_VER}-bin ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf openal-soft-1.20.1-bin
-		eval 7z x -y OpenAL-Soft-1.20.1.zip $STRIP
+		rm -rf openal-soft-${OPENAL_VER}-bin
+		eval 7z x -y OpenAL-Soft-${OPENAL_VER}.zip $STRIP
 	fi
-	OPENAL_SDK="$(real_pwd)/openal-soft-1.20.1-bin"
+	OPENAL_SDK="$(real_pwd)/openal-soft-${OPENAL_VER}-bin"
 	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
 		-DOPENAL_LIBRARY="${OPENAL_SDK}/libs/Win${BITS}/OpenAL32.lib"
 	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/openal-soft-1.20.1-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
+		add_runtime_dlls $config "$(pwd)/openal-soft-${OPENAL_VER}-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
 	done
 	echo Done.
 }
 cd $DEPS
 echo
-# OSGoS
 printf "${OSG_ARCHIVE_NAME}... "
 {
 	cd $DEPS_INSTALL
@@ -869,8 +869,7 @@ printf "${OSG_ARCHIVE_NAME}... "
 }
 cd $DEPS
 echo
-# Qt
-printf "Qt 5.15.2... "
+printf "Qt ${QT_VER}... "
 {
 	if [ $BITS -eq 64 ]; then
 		SUFFIX="_64"
@@ -880,11 +879,10 @@ printf "Qt 5.15.2... "
 
 	cd $DEPS_INSTALL
 
-	qt_version="5.15.2"
 
-	QT_SDK="$(real_pwd)/Qt/${qt_version}/msvc${QT_MSVC_YEAR}${SUFFIX}"
+	QT_SDK="$(real_pwd)/Qt/${QT_VER}/msvc${QT_MSVC_YEAR}${SUFFIX}"
 
-	if [ -d "Qt/${qt_version}" ]; then
+	if [ -d "Qt/${QT_VER}" ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		if [ $MISSINGPYTHON -ne 0 ]; then
@@ -919,7 +917,7 @@ printf "Qt 5.15.2... "
 		mkdir Qt
 		cd Qt
 
-		run_cmd "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install $qt_version windows desktop "win${BITS}_msvc${QT_MSVC_YEAR}${SUFFIX}"
+		run_cmd "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install ${QT_VER} windows desktop "win${BITS}_msvc${QT_MSVC_YEAR}${SUFFIX}"
 
 		printf "  Cleaning up extraneous data... "
 		rm -rf Qt/{aqtinstall.log,Tools}
@@ -944,7 +942,6 @@ printf "Qt 5.15.2... "
 }
 cd $DEPS
 echo
-# SDL2
 printf "SDL 2.24.0... "
 {
 	if [ -d SDL2-2.24.0 ]; then
@@ -961,16 +958,15 @@ printf "SDL 2.24.0... "
 }
 cd $DEPS
 echo
-# LZ4
-printf "LZ4 1.9.2... "
+printf "LZ4 ${LZ4_VER}... "
 {
-	if [ -d LZ4_1.9.2 ]; then
+	if [ -d LZ4_${LZ4_VER} ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf LZ4_1.9.2
-		eval 7z x -y lz4_win${BITS}_v1_9_2.7z -o$(real_pwd)/LZ4_1.9.2 $STRIP
+		rm -rf LZ4_${LZ4_VER}
+		eval 7z x -y lz4_win${BITS}_v${LZ4_VER//./_}.7z -o$(real_pwd)/LZ4_${LZ4_VER} $STRIP
 	fi
-	export LZ4DIR="$(real_pwd)/LZ4_1.9.2"
+	export LZ4DIR="$(real_pwd)/LZ4_${LZ4_VER}"
 	add_cmake_opts -DLZ4_INCLUDE_DIR="${LZ4DIR}/include" \
 		-DLZ4_LIBRARY="${LZ4DIR}/lib/liblz4.lib"
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
@@ -980,20 +976,19 @@ printf "LZ4 1.9.2... "
 			SUFFIX=""
 			LZ4_CONFIGURATION="Release"
 		fi
-		add_runtime_dlls $CONFIGURATION "$(pwd)/LZ4_1.9.2/bin/${LZ4_CONFIGURATION}/liblz4.dll"
+		add_runtime_dlls $CONFIGURATION "$(pwd)/LZ4_${LZ4_VER}/bin/${LZ4_CONFIGURATION}/liblz4.dll"
 	done
 	echo Done.
 }
 cd $DEPS
 echo
-# LuaJIT 2.1.0-beta3
-printf "LuaJIT 2.1.0-beta3... "
+printf "LuaJIT ${LUAJIT_VER}... "
 {
 	if [ -d LuaJIT ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf LuaJIT
-		eval 7z x -y LuaJIT-2.1.0-beta3-msvc${LUA_MSVC_YEAR}-win${BITS}.7z -o$(real_pwd)/LuaJIT $STRIP
+		eval 7z x -y LuaJIT-${LUAJIT_VER}-msvc${LUA_MSVC_YEAR}-win${BITS}.7z -o$(real_pwd)/LuaJIT $STRIP
 	fi
 	export LUAJIT_DIR="$(real_pwd)/LuaJIT"
 	add_cmake_opts -DLuaJit_INCLUDE_DIR="${LUAJIT_DIR}/include" \
@@ -1006,7 +1001,6 @@ printf "LuaJIT 2.1.0-beta3... "
 
 cd $DEPS
 echo
-# ICU
 printf "ICU ${ICU_VER/_/.}... "
 {
 	if [ -d ICU-${ICU_VER} ]; then
