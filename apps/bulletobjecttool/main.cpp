@@ -1,18 +1,24 @@
 #include <components/debug/debugging.hpp>
+#include <components/debug/debuglog.hpp>
+#include <components/esm/defs.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/load.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
+#include <components/files/collections.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/multidircollection.hpp>
 #include <components/platform/platform.hpp>
+#include <components/resource/bulletshape.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/foreachbulletobject.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/niffilemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/settings/settings.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 #include <components/version/version.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
@@ -21,9 +27,19 @@
 
 #include <charconv>
 #include <cstddef>
+#include <cstdint>
+#include <filesystem>
 #include <iomanip>
-#include <stdexcept>
+#include <limits>
+#include <map>
+#include <memory>
+#include <osg/ref_ptr>
+#include <ostream>
 #include <string>
+#include <string_view>
+#include <system_error>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace

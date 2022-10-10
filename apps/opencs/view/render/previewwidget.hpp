@@ -7,11 +7,6 @@
 
 class QModelIndex;
 
-namespace VFS
-{
-    class Manager;
-}
-
 namespace CSMWorld
 {
     class Data;

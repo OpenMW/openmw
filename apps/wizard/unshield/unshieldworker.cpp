@@ -9,6 +9,8 @@
 #include <QTextCodec>
 #include <QTextStream>
 
+#include <apps/wizard/inisettings.hpp>
+
 Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject* parent)
     : QObject(parent)
     , mExpectedMorrowindBsaSize(expectedMorrowindBsaSize)

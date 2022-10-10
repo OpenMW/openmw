@@ -13,11 +13,6 @@
 
 #include "../../model/world/actoradapter.hpp"
 
-namespace osg
-{
-    class Group;
-}
-
 namespace CSMWorld
 {
     class Data;

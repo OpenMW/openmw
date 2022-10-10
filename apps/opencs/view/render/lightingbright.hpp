@@ -3,9 +3,10 @@
 
 #include "lighting.hpp"
 
+#include <osg/Vec4f>
+
 namespace osg
 {
-    class Light;
     class Group;
 }
 

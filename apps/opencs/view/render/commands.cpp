@@ -1,5 +1,10 @@
 #include "commands.hpp"
 
+#include <memory>
+
+#include <apps/opencs/view/render/editmode.hpp>
+#include <apps/opencs/view/render/terrainselection.hpp>
+
 #include <components/debug/debuglog.hpp>
 
 #include "terrainshapemode.hpp"

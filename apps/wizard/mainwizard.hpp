@@ -1,9 +1,8 @@
 #ifndef MAINWIZARD_HPP
 #define MAINWIZARD_HPP
 
+#include <QProcess>
 #include <QWizard>
-
-#include <components/process/processinvoker.hpp>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
@@ -11,6 +10,11 @@
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 #endif
+
+namespace Process
+{
+    class ProcessInvoker;
+}
 
 namespace Wizard
 {

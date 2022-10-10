@@ -3,8 +3,18 @@
 
 #include "narynode.hpp"
 
+#include <map>
+#include <memory>
+#include <vector>
+
+namespace CSMWorld
+{
+    class IdTableBase;
+}
+
 namespace CSMFilter
 {
+    class Node;
     class AndNode : public NAryNode
     {
     public:

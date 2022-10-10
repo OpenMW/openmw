@@ -3,13 +3,10 @@
 
 #include <memory>
 #include <string>
+
 namespace CSMFilter
 {
     class Node;
-}
-namespace CSMFilter
-{
-    struct Token;
 }
 
 namespace CSMWorld

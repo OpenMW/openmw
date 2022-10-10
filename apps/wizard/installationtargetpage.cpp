@@ -1,9 +1,12 @@
 #include "installationtargetpage.hpp"
 
+#include <string>
+
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 
 #include "mainwizard.hpp"

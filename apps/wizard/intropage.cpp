@@ -2,6 +2,10 @@
 
 #include "mainwizard.hpp"
 
+#include <QObject>
+#include <QPixmap>
+#include <QWidget>
+
 Wizard::IntroPage::IntroPage(QWidget* parent)
     : QWizardPage(parent)
 {

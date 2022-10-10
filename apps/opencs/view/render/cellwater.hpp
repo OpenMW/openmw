@@ -5,10 +5,9 @@
 
 #include <osg/ref_ptr>
 
-#include <QModelIndex>
 #include <QObject>
 
-#include "../../model/world/record.hpp"
+class QModelIndex;
 
 namespace osg
 {
@@ -22,6 +21,9 @@ namespace CSMWorld
     struct Cell;
     class CellCoordinates;
     class Data;
+
+    template <typename ESXRecordT>
+    struct Record;
 }
 
 namespace CSVRender

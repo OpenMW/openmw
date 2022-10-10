@@ -1,9 +1,16 @@
 #include "lighting.hpp"
 
+#include <string>
+
+#include <osg/Group>
 #include <osg/LightSource>
 #include <osg/NodeVisitor>
+#include <osg/Object>
 #include <osg/Switch>
 #include <osg/ValueObject>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
 
 #include <components/misc/constants.hpp>
 

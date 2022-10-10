@@ -1,14 +1,18 @@
 #ifndef OPENCS_VIEW_SCENEWIDGET_H
 #define OPENCS_VIEW_SCENEWIDGET_H
 
-#include <map>
 #include <memory>
+#include <string>
 
+#include <QColor>
+#include <QObject>
 #include <QTimer>
 #include <QWidget>
 
+#include <osg/Vec4f>
+#include <osg/ref_ptr>
+
 #include <osgViewer/CompositeViewer>
-#include <osgViewer/View>
 
 #include "lightingbright.hpp"
 #include "lightingday.hpp"

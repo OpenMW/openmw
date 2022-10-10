@@ -6,18 +6,17 @@
 #include <string>
 #include <vector>
 
+#include <osg/Vec3d>
 #include <osg/ref_ptr>
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "instancedragmodes.hpp"
-#include "terrainstorage.hpp"
 
 class QModelIndex;
 
 namespace osg
 {
     class Group;
-    class Geometry;
 }
 
 namespace CSMWorld
@@ -35,12 +34,12 @@ namespace CSVRender
     class CellWater;
     class Pathgrid;
     class TagBase;
+    class TerrainStorage;
     class Object;
 
     class CellArrow;
     class CellBorder;
     class CellMarker;
-    class CellWater;
 
     class Cell
     {

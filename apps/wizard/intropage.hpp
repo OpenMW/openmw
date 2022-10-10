@@ -3,6 +3,8 @@
 
 #include "ui_intropage.h"
 
+#include <QWizard>
+
 namespace Wizard
 {
     class MainWizard;

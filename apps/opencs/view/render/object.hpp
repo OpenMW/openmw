@@ -4,8 +4,7 @@
 #include <memory>
 #include <string>
 
-#include <osg/Geometry>
-#include <osg/Referenced>
+#include <osg/Vec3f>
 #include <osg/ref_ptr>
 
 #include <components/esm/defs.hpp>
@@ -13,11 +12,11 @@
 #include "tagbase.hpp"
 
 class QModelIndex;
-class QUndoStack;
 
 namespace osg
 {
     class PositionAttitudeTransform;
+    class Geometry;
     class Group;
     class Node;
 }

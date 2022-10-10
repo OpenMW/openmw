@@ -1,11 +1,16 @@
 #ifndef CSV_RENDER_BRUSHDRAW_H
 #define CSV_RENDER_BRUSHDRAW_H
 
-#include <osg/Geometry>
-#include <osg/Group>
+#include <osg/Vec3d>
+#include <osg/ref_ptr>
 
 #include "../widget/brushshapes.hpp"
-#include <components/esm3/loadland.hpp>
+
+namespace osg
+{
+    class Geometry;
+    class Group;
+}
 
 namespace CSVRender
 {

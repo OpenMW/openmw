@@ -1,13 +1,11 @@
 #ifndef OPENCS_VIEW_CAMERACONTROLLER_H
 #define OPENCS_VIEW_CAMERACONTROLLER_H
 
-#include <string>
 #include <vector>
 
 #include <QObject>
 
 #include <osg/Vec3d>
-#include <osg/ref_ptr>
 
 namespace osg
 {

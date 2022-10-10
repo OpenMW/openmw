@@ -3,6 +3,8 @@
 
 #include "lighting.hpp"
 
+#include <osg/Vec4f>
+
 namespace CSVRender
 {
     class LightingNight : public Lighting

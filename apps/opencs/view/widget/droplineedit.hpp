@@ -12,7 +12,6 @@ namespace CSMDoc
 
 namespace CSMWorld
 {
-    class TableMimeData;
     class UniversalId;
 }
 
