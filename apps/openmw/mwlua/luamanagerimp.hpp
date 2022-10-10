@@ -4,7 +4,6 @@
 #include <map>
 #include <set>
 
-#include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/storage.hpp>
 
@@ -29,9 +28,6 @@ namespace MWLua
     public:
         LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir);
 
-        // Called by engine.cpp before UI setup.
-        void initL10n();
-
         // Called by engine.cpp when the environment is fully initialized.
         void init();
 
@@ -41,8 +37,6 @@ namespace MWLua
         // Called by engine.cpp every frame. For performance reasons it works in a separate
         // thread (in parallel with osg Cull). Can not use scene graph.
         void update();
-
-        std::string translate(const std::string& contextName, const std::string& key) override;
 
         // Called by engine.cpp from the main thread. Can use scene graph.
         void synchronizedUpdate();
@@ -140,7 +134,6 @@ namespace MWLua
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         LuaUi::ResourceManager mUiResourceManager;
-        LuaUtil::L10nManager mL10n;
         sol::table mNearbyPackage;
         sol::table mUserInterfacePackage;
         sol::table mCameraPackage;

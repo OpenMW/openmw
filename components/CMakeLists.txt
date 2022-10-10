@@ -33,7 +33,7 @@ add_component_dir (lua
     )
 
 add_component_dir (l10n
-    messagebundles
+    messagebundles manager
     )
 
 add_component_dir (settings

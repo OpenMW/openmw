@@ -14,6 +14,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <components/l10n/manager.hpp>
+
 #include <components/lua/utilpackage.hpp>
 
 #include <components/lua_ui/util.hpp>
@@ -38,7 +40,6 @@ namespace MWLua
     LuaManager::LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir)
         : mLua(vfs, &mConfiguration)
         , mUiResourceManager(vfs)
-        , mL10n(vfs, &mLua)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
         mLua.addInternalLibSearchPath(libsDir);
@@ -60,19 +61,12 @@ namespace MWLua
         mGlobalScripts.setAutoStartConf(mConfiguration.getGlobalConf());
     }
 
-    void LuaManager::initL10n()
-    {
-        mL10n.init();
-        mL10n.setPreferredLocales(Settings::Manager::getStringArray("preferred locales", "General"));
-    }
-
     void LuaManager::init()
     {
         Context context;
         context.mIsGlobal = true;
         context.mLuaManager = this;
         context.mLua = &mLua;
-        context.mL10n = &mL10n;
         context.mWorldView = &mWorldView;
         context.mLocalEventQueue = &mLocalEvents;
         context.mGlobalEventQueue = &mGlobalEvents;
@@ -107,11 +101,6 @@ namespace MWLua
 
         initConfiguration();
         mInitialized = true;
-    }
-
-    std::string LuaManager::translate(const std::string& contextName, const std::string& key)
-    {
-        return mL10n.translate(contextName, key);
     }
 
     void LuaManager::loadPermanentStorage(const std::filesystem::path& userConfigPath)
@@ -516,9 +505,9 @@ namespace MWLua
 
         LuaUi::clearUserInterface();
         MWBase::Environment::get().getWindowManager()->setConsoleMode("");
+        MWBase::Environment::get().getL10nManager()->dropCache();
         mUiResourceManager.clear();
         mLua.dropScriptCache();
-        mL10n.clear();
         initConfiguration();
 
         { // Reload global scripts

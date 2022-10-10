@@ -34,6 +34,8 @@
 
 #include <components/version/version.hpp>
 
+#include <components/l10n/manager.hpp>
+
 #include <components/misc/frameratelimiter.hpp>
 
 #include <components/sceneutil/color.hpp>
@@ -391,6 +393,7 @@ OMW::Engine::~Engine()
     mStateManager = nullptr;
     mLuaWorker = nullptr;
     mLuaManager = nullptr;
+    mL10nManager = nullptr;
 
     mScriptContext = nullptr;
 
@@ -682,6 +685,10 @@ void OMW::Engine::prepareEngine()
 
     mViewer->addEventHandler(mScreenCaptureHandler);
 
+    mL10nManager = std::make_unique<l10n::Manager>(mVFS.get());
+    mL10nManager->setPreferredLocales(Settings::Manager::getStringArray("preferred locales", "General"));
+    mEnvironment.setL10nManager(*mL10nManager);
+
     mLuaManager = std::make_unique<MWLua::LuaManager>(mVFS.get(), mResDir / "lua_libs");
     mEnvironment.setLuaManager(*mLuaManager);
 
@@ -767,7 +774,6 @@ void OMW::Engine::prepareEngine()
     mEnvironment.setWorld(*mWorld);
 
     mWindowManager->setStore(mWorld->getStore());
-    mLuaManager->initL10n();
     mWindowManager->initUI();
 
     // Load translation data

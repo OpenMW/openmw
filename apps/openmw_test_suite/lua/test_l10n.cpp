@@ -3,6 +3,7 @@
 
 #include <components/files/fixedpath.hpp>
 
+#include <components/l10n/manager.hpp>
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 
@@ -84,20 +85,21 @@ you_have_arrows: "Arrows count: {count}"
         internal::CaptureStdout();
         LuaUtil::LuaState lua{ mVFS.get(), &mCfg };
         sol::state& l = lua.sol();
-        LuaUtil::L10nManager l10n(mVFS.get(), &lua);
-        l10n.init();
-        l10n.setPreferredLocales({ "de", "en" });
+        l10n::Manager l10nManager(mVFS.get());
+        l10nManager.setPreferredLocales({ "de", "en" });
         EXPECT_THAT(internal::GetCapturedStdout(), "Preferred locales: de en\n");
 
+        l["l10n"] = LuaUtil::initL10nLoader(l, &l10nManager);
+
         internal::CaptureStdout();
-        l["t1"] = l10n.getContext("Test1");
+        l.safe_script("t1 = l10n('Test1')");
         EXPECT_THAT(internal::GetCapturedStdout(),
             "Fallback locale: en\n"
             "Language file \"l10n/Test1/de.yaml\" is enabled\n"
             "Language file \"l10n/Test1/en.yaml\" is enabled\n");
 
         internal::CaptureStdout();
-        l["t2"] = l10n.getContext("Test2");
+        l.safe_script("t2 = l10n('Test2')");
         {
             std::string output = internal::GetCapturedStdout();
             EXPECT_THAT(output, HasSubstr("Language file \"l10n/Test2/en.yaml\" is enabled"));
@@ -111,7 +113,7 @@ you_have_arrows: "Arrows count: {count}"
         EXPECT_EQ(get<std::string>(l, "t2('you_have_arrows', {count=3})"), "Arrows count: 3");
 
         internal::CaptureStdout();
-        l10n.setPreferredLocales({ "en", "de" });
+        l10nManager.setPreferredLocales({ "en", "de" });
         EXPECT_THAT(internal::GetCapturedStdout(),
             "Preferred locales: en de\n"
             "Language file \"l10n/Test1/en.yaml\" is enabled\n"
@@ -140,7 +142,7 @@ you_have_arrows: "Arrows count: {count}"
         EXPECT_EQ(get<std::string>(l, "t1('{unknown_arg}')"), "{unknown_arg}");
         EXPECT_EQ(get<std::string>(l, "t1('{num, integer}', {num=1})"), "{num, integer}");
         // Doesn't give a valid currency symbol with `en`. Not that openmw is designed for real world currency.
-        l10n.setPreferredLocales({ "en-US", "de" });
+        l10nManager.setPreferredLocales({ "en-US", "de" });
         EXPECT_EQ(get<std::string>(l, "t1('currency', {money=10000.10})"), "You have $10,000.10");
         // Note: Not defined in English localisation file, so we fall back to the German before falling back to the key
         EXPECT_EQ(get<std::string>(l, "t1('Hello {name}!', {name='World'})"), "Hallo World!");
@@ -149,7 +151,7 @@ you_have_arrows: "Arrows count: {count}"
 
         // Test that locales with variants and country codes fall back to more generic locales
         internal::CaptureStdout();
-        l10n.setPreferredLocales({ "en-GB-oed", "de" });
+        l10nManager.setPreferredLocales({ "en-GB-oed", "de" });
         EXPECT_THAT(internal::GetCapturedStdout(),
             "Preferred locales: en_GB_OED de\n"
             "Language file \"l10n/Test1/en.yaml\" is enabled\n"
@@ -158,8 +160,8 @@ you_have_arrows: "Arrows count: {count}"
         EXPECT_EQ(get<std::string>(l, "t2('you_have_arrows', {count=3})"), "Arrows count: 3");
 
         // Test setting fallback language
-        l["t3"] = l10n.getContext("Test3", "de");
-        l10n.setPreferredLocales({ "en" });
+        l.safe_script("t3 = l10n('Test3', 'de')");
+        l10nManager.setPreferredLocales({ "en" });
         EXPECT_EQ(get<std::string>(l, "t3('Hello {name}!', {name='World'})"), "Hallo World!");
     }
 

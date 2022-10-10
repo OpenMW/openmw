@@ -58,12 +58,7 @@ namespace MWLua
                 { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
         };
         addTimeBindings(api, context, false);
-        api["l10n"] = [l10n = context.mL10n](const std::string& context, const sol::object& fallbackLocale) {
-            if (fallbackLocale == sol::nil)
-                return l10n->getContext(context);
-            else
-                return l10n->getContext(context, fallbackLocale.as<std::string>());
-        };
+        api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmst
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         api["getGMST"] = [lua = context.mLua, gmst](const std::string& setting) -> sol::object {

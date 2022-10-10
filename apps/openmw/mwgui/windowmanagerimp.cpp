@@ -48,10 +48,11 @@
 
 #include <components/misc/frameratelimiter.hpp>
 
+#include <components/l10n/manager.hpp>
+
 #include <components/lua_ui/util.hpp>
 
 #include "../mwbase/inputmanager.hpp"
-#include "../mwbase/luamanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
@@ -1079,13 +1080,12 @@ namespace MWGui
             std::vector<std::string> split;
             Misc::StringUtils::split(tag, split, ":");
 
-            // TODO: LocalizationManager should not be a part of lua
-            const auto& luaManager = MWBase::Environment::get().getLuaManager();
+            l10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
 
             // If a key has a "Context:KeyName" format, use YAML to translate data
-            if (split.size() == 2 && luaManager != nullptr)
+            if (split.size() == 2)
             {
-                _result = luaManager->translate(split[0], split[1]);
+                _result = l10nManager.getContext(split[0])->formatMessage(split[1], {}, {});
                 return;
             }
 

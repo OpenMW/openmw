@@ -10,6 +10,11 @@ namespace Resource
     class ResourceSystem;
 }
 
+namespace l10n
+{
+    class Manager;
+}
+
 namespace MWBase
 {
     class World;
@@ -42,6 +47,7 @@ namespace MWBase
         StateManager* mStateManager = nullptr;
         LuaManager* mLuaManager = nullptr;
         Resource::ResourceSystem* mResourceSystem = nullptr;
+        l10n::Manager* mL10nManager = nullptr;
         float mFrameRateLimit = 0;
         float mFrameDuration = 0;
 
@@ -76,6 +82,8 @@ namespace MWBase
 
         void setResourceSystem(Resource::ResourceSystem& value) { mResourceSystem = &value; }
 
+        void setL10nManager(l10n::Manager& value) { mL10nManager = &value; }
+
         Misc::NotNullPtr<World> getWorld() const { return mWorld; }
 
         Misc::NotNullPtr<SoundManager> getSoundManager() const { return mSoundManager; }
@@ -97,6 +105,8 @@ namespace MWBase
         Misc::NotNullPtr<LuaManager> getLuaManager() const { return mLuaManager; }
 
         Misc::NotNullPtr<Resource::ResourceSystem> getResourceSystem() const { return mResourceSystem; }
+
+        Misc::NotNullPtr<l10n::Manager> getL10nManager() const { return mL10nManager; }
 
         float getFrameRateLimit() const { return mFrameRateLimit; }
 
