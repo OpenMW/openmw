@@ -1,18 +1,20 @@
 #include "types.hpp"
 
 #include <components/esm3/loadligh.hpp>
+#include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/lua/luastate.hpp>
 
-#include <apps/openmw/mwworld/esmstore.hpp>
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/world.hpp>
+#include <apps/openmw/mwworld/esmstore.hpp>
 
 namespace sol
 {
     template <>
-    struct is_automagical<ESM::Light> : std::false_type {};
+    struct is_automagical<ESM::Light> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
@@ -22,23 +24,21 @@ namespace MWLua
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         const MWWorld::Store<ESM::Light>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Light>();
-        light["record"] = sol::overload(
-            [](const Object& obj) -> const ESM::Light* { return obj.ptr().get<ESM::Light>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Light* { return store->find(recordId); });
+        light["record"]
+            = sol::overload([](const Object& obj) -> const ESM::Light* { return obj.ptr().get<ESM::Light>()->mBase; },
+                [store](const std::string& recordId) -> const ESM::Light* { return store->find(recordId); });
         sol::usertype<ESM::Light> record = context.mLua->sol().new_usertype<ESM::Light>("ESM3_Light");
-        record[sol::meta_function::to_string] = [](const ESM::Light& rec) -> std::string { return "ESM3_Light[" + rec.mId + "]"; };
+        record[sol::meta_function::to_string]
+            = [](const ESM::Light& rec) -> std::string { return "ESM3_Light[" + rec.mId + "]"; };
         record["id"] = sol::readonly_property([](const ESM::Light& rec) -> std::string { return rec.mId; });
         record["name"] = sol::readonly_property([](const ESM::Light& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Light& rec) -> std::string
-        {
+        record["model"] = sol::readonly_property([vfs](const ESM::Light& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
-        record["icon"] = sol::readonly_property([vfs](const ESM::Light& rec) -> std::string
-        {
+        record["icon"] = sol::readonly_property([vfs](const ESM::Light& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
-        record["sound"] = sol::readonly_property([vfs](const ESM::Light& rec) -> std::string
-        {
+        record["sound"] = sol::readonly_property([vfs](const ESM::Light& rec) -> std::string {
             return Misc::ResourceHelpers::correctSoundPath(rec.mSound, vfs);
         });
         record["mwscript"] = sol::readonly_property([](const ESM::Light& rec) -> std::string { return rec.mScript; });
