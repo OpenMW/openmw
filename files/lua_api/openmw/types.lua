@@ -557,7 +557,7 @@
 -- @field #number value
 -- @field #number type See @{#Armor.TYPE}
 -- @field #number health
--- @field #number baseArmor
+-- @field #number baseArmor The base armor rating of this armor
 -- @field #number enchantCapacity
 
 
