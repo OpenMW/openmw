@@ -31,6 +31,7 @@ work_dir.mkdir(parents=True, exist_ok=True)
 config_dir = work_dir / "config"
 userdata_dir = work_dir / "userdata"
 tests_dir = Path(__file__).resolve().parent / "data" / "integration_tests"
+testing_util_dir = tests_dir / "testing_util"
 time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H.%M.%S")
 
 
@@ -44,6 +45,7 @@ def runTest(name):
         omw_cfg.writelines(
             (
                 f'data="{example_suite_dir}{os.sep}game_template{os.sep}data"\n',
+                f'data="{testing_util_dir}"\n',
                 f'data-local="{test_dir}"\n',
                 f'user-data="{userdata_dir}"\n',
                 "content=template.omwgame\n",
