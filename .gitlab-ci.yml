@@ -119,7 +119,23 @@ Ubuntu_GCC:
     CCACHE_SIZE: 4G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
-  
+
+Ubuntu_GCC_Focal:
+  extends: .Ubuntu
+  image: ubuntu:20.04  
+  cache:
+    key: Ubuntu_GCC.ubuntu_20.04.v1
+  before_script:
+    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+    - add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - apt-get -qq -o dir::cache::archives="apt-cache" install -y --no-install-recommends gcc-11 g++-11
+  variables:
+    CC: gcc-11
+    CXX: g++-11
+    CCACHE_SIZE: 4G
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 2h
+
 Clang_Format:
   extends: .Ubuntu_Image
   stage: checks
