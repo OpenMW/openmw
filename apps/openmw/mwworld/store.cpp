@@ -145,11 +145,11 @@ namespace MWWorld
         return (dit != mDynamic.end());
     }
     template <typename T>
-    const T* TypedDynamicStore<T>::searchRandom(const ESM::RefId& id, Misc::Rng::Generator& prng) const
+    const T* TypedDynamicStore<T>::searchRandom(const std::string_view prefix, Misc::Rng::Generator& prng) const
     {
         std::vector<const T*> results;
         std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
-            [&id](const T* item) { return Misc::StringUtils::ciStartsWith(item->mId.getRefIdString(), id.getRefIdString()); });
+            [prefix](const T* item) { return Misc::StringUtils::ciStartsWith(item->mId.getRefIdString(), prefix); });
         if (!results.empty())
             return results[Misc::Rng::rollDice(results.size(), prng)];
         return nullptr;

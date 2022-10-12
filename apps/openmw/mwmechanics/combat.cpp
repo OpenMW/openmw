@@ -493,7 +493,7 @@ namespace MWMechanics
         if (isWerewolf)
         {
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom(ESM::RefId::stringRefId("WolfHit"), prng);
+            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfHit", prng);
             if (sound)
                 sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
         }

@@ -179,29 +179,30 @@ namespace MWClass
     const ESM::RefId& Armor::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
-        std::string soundName;
+        static const ESM::RefId lightUp = ESM::RefId::stringRefId("Item Armor Light Up");
+        static const ESM::RefId mediumUp = ESM::RefId::stringRefId("Item Armor Medium Up");
+        static const ESM::RefId heavyUp = ESM::RefId::stringRefId("Item Armor Heavy Up");
+
         if (es == ESM::Skill::LightArmor)
-            soundName = "Item Armor Light Up";
+            return lightUp;
         else if (es == ESM::Skill::MediumArmor)
-            soundName = "Item Armor Medium Up";
+            return mediumUp;
         else
-            soundName = "Item Armor Heavy Up";
-        static const ESM::RefId id = ESM::RefId::stringRefId(soundName);
-        return id;
+            return heavyUp;
     }
 
     const ESM::RefId& Armor::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
-        std::string soundName;
+        static const ESM::RefId lightDown = ESM::RefId::stringRefId("Item Armor Light Down");
+        static const ESM::RefId mediumDown = ESM::RefId::stringRefId("Item Armor Medium Down");
+        static const ESM::RefId heavyDown = ESM::RefId::stringRefId("Item Armor Heavy Down");
         if (es == ESM::Skill::LightArmor)
-            soundName = "Item Armor Light Down";
+            return lightDown;
         else if (es == ESM::Skill::MediumArmor)
-            soundName = "Item Armor Medium Down";
+            return mediumDown;
         else
-            soundName = "Item Armor Heavy Down";
-        static const ESM::RefId id = ESM::RefId::stringRefId(soundName);
-        return id;
+            return heavyDown;
     }
 
     const std::string& Armor::getInventoryIcon(const MWWorld::ConstPtr& ptr) const

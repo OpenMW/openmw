@@ -122,7 +122,7 @@ namespace MWClass
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom(ESM::RefId::stringRefId("WolfActivator"), prng);
+            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfActivator", prng);
 
             std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
             if (sound)

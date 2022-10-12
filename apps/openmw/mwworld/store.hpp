@@ -200,7 +200,7 @@ namespace MWWorld
         bool isDynamic(const ESM::RefId& id) const;
 
         /** Returns a random record that starts with the named ID, or nullptr if not found. */
-        const T* searchRandom(const ESM::RefId& id, Misc::Rng::Generator& prng) const;
+        const T* searchRandom(const std::string_view prefix, Misc::Rng::Generator& prng) const;
 
         // calls `search` and throws an exception if not found
         const T* find(const ESM::RefId& id) const;
