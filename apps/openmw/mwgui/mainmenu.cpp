@@ -7,6 +7,7 @@
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/widgets/imagebutton.hpp>
+#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -89,7 +90,7 @@ namespace MWGui
         MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
 
         const std::string& name = *sender->getUserData<std::string>();
-        winMgr->playSound(ESM::RefId::stringRefId("Menu Click"));
+        winMgr->playSound(ESM::sMenuClickSoundId);
         if (name == "return")
         {
             winMgr->removeGuiMode(GM_MainMenu);

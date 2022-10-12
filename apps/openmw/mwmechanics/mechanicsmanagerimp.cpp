@@ -6,6 +6,7 @@
 
 #include <components/esm/records.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -84,7 +85,7 @@ namespace
         const MWWorld::CellRef& cellref = target.getCellRef();
 
         const ESM::RefId& owner = cellref.getOwner();
-        bool isOwned = !owner.empty() && owner != ESM::RefId::stringRefId("player");
+        bool isOwned = !owner.empty() && owner != ESM::sPlayerId;
 
         const ESM::RefId& faction = cellref.getFaction();
         bool isFactionOwned = false;

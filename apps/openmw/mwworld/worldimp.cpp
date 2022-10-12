@@ -12,6 +12,7 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -325,7 +326,7 @@ namespace MWWorld
             mPlayer->clear();
             mPlayer->setCell(nullptr);
             mPlayer->getPlayer().getRefData() = RefData();
-            mPlayer->set(mStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("player")));
+            mPlayer->set(mStore.get<ESM::NPC>().find(ESM::sPlayerId));
         }
 
         mWorldModel.clear();
@@ -576,7 +577,7 @@ namespace MWWorld
             = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
         if (Misc::StringUtils::ciEqual(cellName, defaultName))
         {
-            cell = mStore.get<ESM::Cell>().searchExtByName(ESM::RefId::stringRefId(""));
+            cell = mStore.get<ESM::Cell>().searchExtByName(ESM::RefId::sEmpty);
             if (cell)
                 return cell;
         }
@@ -685,7 +686,7 @@ namespace MWWorld
     {
         Ptr ret;
         // the player is always in an active cell.
-        if (name == ESM::RefId::stringRefId("player"))
+        if (name == ESM::sPlayerId)
         {
             return mPlayer->getPlayer();
         }
@@ -1759,7 +1760,7 @@ namespace MWWorld
     {
         bool update = false;
 
-        if (record.mId ==  ESM::RefId::stringRefId("player"))
+        if (record.mId ==  ESM::sPlayerId)
         {
             const ESM::NPC* player = mPlayer->getPlayer().get<ESM::NPC>()->mBase;
 
@@ -2436,7 +2437,7 @@ namespace MWWorld
 
     void World::setupPlayer()
     {
-        const ESM::NPC* player = mStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("player"));
+        const ESM::NPC* player = mStore.get<ESM::NPC>().find(ESM::sPlayerId);
         if (!mPlayer)
             mPlayer = std::make_unique<MWWorld::Player>(player);
         else

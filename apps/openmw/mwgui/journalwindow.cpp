@@ -10,6 +10,7 @@
 #include <MyGUI_TextBox.h>
 
 #include <components/misc/strings/algorithm.hpp>
+#include <components/esm/refidhardcoded.hpp>
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
 
@@ -413,7 +414,7 @@ namespace
             mOptionsMode = false;
             mTopicsMode = false;
 
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
         }
 
         void notifyTopicSelected(const ESM::RefId& topic, int id)
@@ -444,7 +445,7 @@ namespace
 
             mOptionsMode = false;
 
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
@@ -472,7 +473,7 @@ namespace
             assert(mStates.size() > 1);
             popBook();
 
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
         }
 
         void notifyIndexLinkClicked(MWGui::TypesetBook::InteractiveId index)
@@ -493,7 +494,7 @@ namespace
 
             list->adjustSize();
 
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
         }
 
         void notifyTopics(MyGUI::Widget* _sender)
@@ -508,7 +509,7 @@ namespace
             setVisible(ShowAllBTN, false);
             setVisible(ShowActiveBTN, false);
 
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
         }
 
         struct AddNamesToList
@@ -565,7 +566,7 @@ namespace
                 mModel->visitQuestNames(false, setInactive);
             }
 
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)
@@ -589,7 +590,7 @@ namespace
             else
             {
                 setBookMode();
-                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
             }
         }
 
@@ -619,7 +620,7 @@ namespace
 
                 if (page + 2 < book->pageCount())
                 {
-                    MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+                    MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
 
                     page += 2;
                     updateShowingPages();
@@ -637,7 +638,7 @@ namespace
 
                 if (page >= 2)
                 {
-                    MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+                    MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
 
                     page -= 2;
                     updateShowingPages();

@@ -15,7 +15,7 @@
 
 #include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadskil.hpp>
-
+#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -104,9 +104,9 @@ namespace MWScript
                 if (count == 0)
                     return;
 
-                if (item == ESM::RefId::stringRefId("gold_005") ||item == ESM::RefId::stringRefId("gold_010")
-                    || item == ESM::RefId::stringRefId("gold_025") ||item == ESM::RefId::stringRefId("gold_100"))
-                    item = ESM::RefId::stringRefId("gold_001");
+                if (item == ESM::sGoldId005 ||item == ESM::sGoldId010
+                    || item == ESM::sGoldId025||item == ESM::sGoldId100)
+                    item = ESM::sGoldId001;
 
                 // Check if "item" can be placed in a container
                 MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), item, 1);

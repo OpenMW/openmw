@@ -7,6 +7,7 @@
 #include <osg/ImageUtils>
 #include <osgDB/ReadFile>
 
+#include <components/esm/refidhardcoded.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -397,7 +398,7 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_NPC_);
-        context.mPlayerBase.mId = ESM::RefId::stringRefId("player");
+        context.mPlayerBase.mId = ESM::sPlayerId;
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 

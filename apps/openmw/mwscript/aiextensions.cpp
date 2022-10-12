@@ -10,6 +10,7 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/opcodes.hpp>
 #include <components/interpreter/runtime.hpp>
+#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -484,7 +485,7 @@ namespace MWScript
                         if (!targetPtr.isEmpty() && targetPtr.getCellRef().getRefId() == testedTargetId)
                             targetsAreEqual = true;
                     }
-                    else if (testedTargetId == ESM::RefId::stringRefId("player")) // Currently the player ID is hardcoded
+                    else if (testedTargetId == ESM::sPlayerId) // Currently the player ID is hardcoded
                     {
                         MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
                         bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::Greet_InProgress;

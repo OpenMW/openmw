@@ -6,6 +6,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/records.hpp>
+#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/readerscache.hpp>
@@ -534,7 +535,7 @@ namespace MWWorld
     void ESMStore::movePlayerRecord()
     {
         auto& npcs = getWritable<ESM::NPC>();
-        auto player = npcs.find(ESM::RefId::stringRefId("player"));
+        auto player = npcs.find(ESM::sPlayerId);
         npcs.insert(*player);
     }
 
@@ -651,7 +652,7 @@ namespace MWWorld
     {
         setUp();
 
-        const ESM::NPC* player = get<ESM::NPC>().find(ESM::RefId::stringRefId("player"));
+        const ESM::NPC* player = get<ESM::NPC>().find(ESM::sPlayerId);
 
         if (!get<ESM::Race>().find(player->mRace) || !get<ESM::Class>().find(player->mClass))
             throw std::runtime_error("Invalid player record (race or class unavailable");
@@ -687,7 +688,7 @@ namespace MWWorld
     {
 
         auto& npcs = getWritable<ESM::NPC>();
-        if (npc.mId ==  ESM::RefId::stringRefId("player"))
+        if (npc.mId ==  ESM::sPlayerId)
         {
             return npcs.insert(npc);
         }

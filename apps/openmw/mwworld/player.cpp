@@ -5,6 +5,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/defs.hpp>
+#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadbsgn.hpp>
@@ -49,7 +50,7 @@ namespace MWWorld
     {
         ESM::CellRef cellRef;
         cellRef.blank();
-        cellRef.mRefID = ESM::RefId::stringRefId("player");
+        cellRef.mRefID = ESM::sPlayerId;
         mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
 
         ESM::Position playerPos = mPlayer.mData.getPosition();

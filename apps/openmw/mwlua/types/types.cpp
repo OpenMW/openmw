@@ -2,6 +2,7 @@
 
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm/refidhardcoded.hpp>
 
 namespace MWLua
 {
@@ -66,7 +67,7 @@ namespace MWLua
         if (ref == nullptr)
             throw std::runtime_error("Can't get type name from an empty object.");
         const ESM::RefId& id = ref->mRef.getRefId();
-        if (id == ESM::RefId::stringRefId("player"))
+        if (id == ESM::sPlayerId)
             return ESM::REC_INTERNAL_PLAYER;
         if (Misc::ResourceHelpers::isHiddenMarker(id))
             return ESM::REC_INTERNAL_MARKER;

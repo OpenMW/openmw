@@ -32,6 +32,7 @@
 #include <components/esm3/loadweap.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/esm/refidhardcoded.hpp>
 
 #include "../prefs/state.hpp"
 
@@ -681,7 +682,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc, npc.mId);
 
     // Detect if player is present
-    if (npc.mId ==  ESM::RefId::stringRefId("player")) // Happy now, scrawl?
+    if (npc.mId ==  ESM::sPlayerId) // Happy now, scrawl?
         mPlayerPresent = true;
 
     // Skip "Base" records (setting!)

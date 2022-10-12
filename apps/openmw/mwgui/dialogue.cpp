@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
+#include <components/esm/refidhardcoded.hpp>
 #include <components/translation/translation.hpp>
 #include <components/widgets/box.hpp>
 #include <components/widgets/list.hpp>
@@ -278,19 +279,19 @@ namespace MWGui
 
     void Choice::activated()
     {
-        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::sMenuClickSoundId);
         eventChoiceActivated(mChoiceId);
     }
 
     void Topic::activated()
     {
-        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::sMenuClickSoundId);
         eventTopicActivated(mTopicId);
     }
 
     void Goodbye::activated()
     {
-        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::sMenuClickSoundId);
         eventActivated();
     }
 

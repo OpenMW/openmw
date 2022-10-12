@@ -5,6 +5,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
+#include <components/esm/refidhardcoded.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -35,11 +36,11 @@ namespace MWClass
 
     bool Miscellaneous::isGold(const MWWorld::ConstPtr& ptr) const
     {
-        return ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_001")
-            || ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_005")
-            || ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_010")
-            || ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_025")
-            || ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("gold_100");
+        return ptr.getCellRef().getRefId() ==  ESM::sGoldId001
+            || ptr.getCellRef().getRefId() ==  ESM::sGoldId005
+            || ptr.getCellRef().getRefId() ==  ESM::sGoldId010
+            || ptr.getCellRef().getRefId() ==  ESM::sGoldId025
+            || ptr.getCellRef().getRefId() ==  ESM::sGoldId100;
     }
 
     void Miscellaneous::insertObjectRendering(
