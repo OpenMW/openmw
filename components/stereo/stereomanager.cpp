@@ -19,6 +19,7 @@
 
 #include <components/misc/constants.hpp>
 
+#include <components/sceneutil/color.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 

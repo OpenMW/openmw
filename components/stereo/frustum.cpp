@@ -15,6 +15,7 @@
 #include <map>
 #include <string>
 
+#include <components/sceneutil/color.hpp>
 #include <components/sceneutil/mwshadowtechnique.hpp>
 
 #include <components/settings/settings.hpp>
