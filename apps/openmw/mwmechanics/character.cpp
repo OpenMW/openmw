@@ -1061,25 +1061,31 @@ namespace MWMechanics
             else
                 mAnimation->showWeapons(false);
         }
-        else if (action == "chop hit")
-            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop, mAttackVictim, mAttackHitPos, mAttackSuccess);
-        else if (action == "slash hit")
-            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash, mAttackVictim, mAttackHitPos, mAttackSuccess);
-        else if (action == "thrust hit")
-            charClass.hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
-        else if (action == "hit")
+        else if (action == "chop hit" || action == "slash hit" || action == "thrust hit" || action == "hit")
         {
-            if (groupname == "attack1" || groupname == "swimattack1")
-                charClass.hit(
-                    mPtr, mAttackStrength, ESM::Weapon::AT_Chop, mAttackVictim, mAttackHitPos, mAttackSuccess);
-            else if (groupname == "attack2" || groupname == "swimattack2")
-                charClass.hit(
-                    mPtr, mAttackStrength, ESM::Weapon::AT_Slash, mAttackVictim, mAttackHitPos, mAttackSuccess);
-            else if (groupname == "attack3" || groupname == "swimattack3")
-                charClass.hit(
-                    mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
-            else
-                charClass.hit(mPtr, mAttackStrength, -1, mAttackVictim, mAttackHitPos, mAttackSuccess);
+            int attackType = -1;
+            if (action == "hit")
+            {
+                if (groupname == "attack1" || groupname == "swimattack1")
+                    attackType = ESM::Weapon::AT_Chop;
+                else if (groupname == "attack2" || groupname == "swimattack2")
+                    attackType = ESM::Weapon::AT_Slash;
+                else if (groupname == "attack3" || groupname == "swimattack3")
+                    attackType = ESM::Weapon::AT_Thrust;
+            }
+            else if (action == "chop hit")
+                attackType = ESM::Weapon::AT_Chop;
+            else if (action == "slash hit")
+                attackType = ESM::Weapon::AT_Slash;
+            else if (action == "thrust hit")
+                attackType = ESM::Weapon::AT_Thrust;
+            // We want to avoid hit keys that come out of nowhere (e.g. in the follow animation)
+            // and processing multiple hit keys for a single attack
+            if (mAttackStrength != -1.f)
+            {
+                charClass.hit(mPtr, mAttackStrength, attackType, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                mAttackStrength = -1.f;
+            }
         }
         else if (isRandomAttackAnimation(groupname) && action == "start")
         {
@@ -1102,7 +1108,7 @@ namespace MWMechanics
                 }
                 ++hitKey;
             }
-            if (!hasHitKey)
+            if (!hasHitKey && mAttackStrength != -1.f)
             {
                 if (groupname == "attack1" || groupname == "swimattack1")
                     charClass.hit(
@@ -1113,12 +1119,20 @@ namespace MWMechanics
                 else if (groupname == "attack3" || groupname == "swimattack3")
                     charClass.hit(
                         mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                mAttackStrength = -1.f;
             }
         }
         else if (action == "shoot attach")
             mAnimation->attachArrow();
         else if (action == "shoot release")
-            mAnimation->releaseArrow(mAttackStrength);
+        {
+            // See notes for melee release above
+            if (mAttackStrength != -1.f)
+            {
+                mAnimation->releaseArrow(mAttackStrength);
+                mAttackStrength = -1.f;
+            }
+        }
         else if (action == "shoot follow attach")
             mAnimation->attachArrow();
         // Make sure this key is actually for the RangeType we are casting. The flame atronach has
@@ -1446,7 +1460,7 @@ namespace MWMechanics
             if (mUpperBodyState == UpperBodyState::WeaponEquipped
                 && (mHitState == CharState_None || mHitState == CharState_Block))
             {
-                mAttackStrength = 0;
+                mAttackStrength = -1.f;
 
                 // Randomize attacks for non-bipedal creatures
                 if (!cls.isBipedal(mPtr)
@@ -1730,6 +1744,9 @@ namespace MWMechanics
                     start = strength + ' ' + start;
                     stop = strength + ' ' + stop;
                 }
+
+                // Reset attack strength to make extra sure hits that come out of nowhere aren't processed
+                mAttackStrength = -1.f;
 
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
