@@ -120,8 +120,8 @@ namespace
             Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
             list->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyQuestClicked);
 
-            //Gui::MWList* topicsList = getWidget<Gui::MWList>(TopicsList);
-            //topicsList->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyTopicSelected);
+            Gui::MWList* topicsList = getWidget<Gui::MWList>(TopicsList);
+            topicsList->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyTopicSelected);
 
             {
                 MWGui::BookPage::ClickCallback callback;
@@ -417,8 +417,9 @@ namespace
             MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
         }
 
-        void notifyTopicSelected(const ESM::RefId& topic, int id)
+        void notifyTopicSelected(const std::string& topicIdString, int id)
         {
+            ESM::RefId topic = ESM::RefId::stringRefId(topicIdString);
             const MWBase::Journal* journal = MWBase::Environment::get().getJournal();
             intptr_t topicId = 0; /// \todo get rid of intptr ids
             for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)

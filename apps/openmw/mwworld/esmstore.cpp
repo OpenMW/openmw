@@ -437,7 +437,7 @@ namespace MWWorld
         };
         Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, incrementRefCount);
         auto& store = getWritable<ESM::Miscellaneous>().mStatic;
-        for (const std::string& id : keyIDs)
+        for (const auto& id : keyIDs)
         {
             auto it = store.find(id);
             if (it != store.end())

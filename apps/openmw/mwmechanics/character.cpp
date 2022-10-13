@@ -2043,16 +2043,15 @@ namespace MWMechanics
             if (!godmode)
             {
                 // reduce fatigue
-                const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
                 float fatigueLoss = 0;
-                static const float fFatigueRunBase = gmst.find(ESM::RefId::stringRefId("fFatigueRunBase"))->mValue.getFloat();
-                static const float fFatigueRunMult = gmst.find(ESM::RefId::stringRefId("fFatigueRunMult"))->mValue.getFloat();
-                static const float fFatigueSwimWalkBase = gmst.find(ESM::RefId::stringRefId("fFatigueSwimWalkBase"))->mValue.getFloat();
-                static const float fFatigueSwimRunBase = gmst.find(ESM::RefId::stringRefId("fFatigueSwimRunBase"))->mValue.getFloat();
-                static const float fFatigueSwimWalkMult = gmst.find(ESM::RefId::stringRefId("fFatigueSwimWalkMult"))->mValue.getFloat();
-                static const float fFatigueSwimRunMult = gmst.find(ESM::RefId::stringRefId("fFatigueSwimRunMult"))->mValue.getFloat();
-                static const float fFatigueSneakBase = gmst.find(ESM::RefId::stringRefId("fFatigueSneakBase"))->mValue.getFloat();
-                static const float fFatigueSneakMult = gmst.find(ESM::RefId::stringRefId("fFatigueSneakMult"))->mValue.getFloat();
+                static const float fFatigueRunBase = gmst.find("fFatigueRunBase")->mValue.getFloat();
+                static const float fFatigueRunMult = gmst.find("fFatigueRunMult")->mValue.getFloat();
+                static const float fFatigueSwimWalkBase = gmst.find("fFatigueSwimWalkBase")->mValue.getFloat();
+                static const float fFatigueSwimRunBase = gmst.find("fFatigueSwimRunBase")->mValue.getFloat();
+                static const float fFatigueSwimWalkMult = gmst.find("fFatigueSwimWalkMult")->mValue.getFloat();
+                static const float fFatigueSwimRunMult = gmst.find("fFatigueSwimRunMult")->mValue.getFloat();
+                static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->mValue.getFloat();
+                static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->mValue.getFloat();
 
                     if (cls.getEncumbrance(mPtr) <= cls.getCapacity(mPtr))
                     {
@@ -2159,16 +2158,19 @@ namespace MWMechanics
 
                     if (mPtr.getClass().isNpc())
                     {
-                        std::string_view sound;
+                        const ESM::RefId* sound = nullptr;
+                        static const ESM::RefId defaultLandWater = ESM::RefId::stringRefId("DefaultLandWater");
+                        static const ESM::RefId defaultLand = ESM::RefId::stringRefId("DefaultLand");
+
                         osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
                         if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
-                            sound = "DefaultLandWater";
+                            sound = &defaultLandWater;
                         else if (onground)
-                            sound = "DefaultLand";
+                            sound = &defaultLand;
 
-                        if (!sound.empty())
+                        if (sound && !sound->empty())
                             sndMgr->playSound3D(
-                                mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
+                                mPtr, *sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
                     }
                 }
 

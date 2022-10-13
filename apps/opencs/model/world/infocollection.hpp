@@ -65,9 +65,9 @@ namespace CSMWorld
         /// Works like getAppendIndex unless an overloaded method uses the record pointer
         /// to get additional info about the record that results in an alternative index.
 
-        int getAppendIndex(const std::string& id, UniversalId::Type type) const override
+        int getAppendIndex(const ESM::RefId& id, UniversalId::Type type) const override
         {
-            return getInsertIndex(id, type);
+            return getInsertIndex(id.getRefIdString(), type);
         }
 
         bool reorderRows(int baseIndex, const std::vector<int>& newOrder) override;
