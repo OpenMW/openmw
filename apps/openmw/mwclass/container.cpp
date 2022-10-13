@@ -152,8 +152,8 @@ namespace MWClass
             return action;
         }
 
-        const ESM::RefId& lockedSound = ESM::RefId::stringRefId("LockedChest");
-        const ESM::RefId& trapActivationSound = ESM::RefId::stringRefId("Disarm Trap Fail");
+        static const ESM::RefId lockedSound = ESM::RefId::stringRefId("LockedChest");
+        static const ESM::RefId trapActivationSound = ESM::RefId::stringRefId("Disarm Trap Fail");
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);

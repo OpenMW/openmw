@@ -19,7 +19,7 @@ namespace ESM
         return os;
     }
 
-    RefId RefId::stringRefId(const std::string_view & id)
+    RefId RefId::stringRefId(std::string_view id)
     {
         RefId newRefId;
         newRefId.mId = Misc::StringUtils::lowerCase(id);

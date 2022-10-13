@@ -3,6 +3,7 @@
 #include <functional>
 #include <iosfwd>
 #include <string>
+#include <string_view>
 
 namespace ESM
 {
@@ -19,7 +20,7 @@ namespace ESM
 
         //The 2 following functions are used to move back and forth between string and RefID. Used for hard coded RefIds that are as string in the code.
         //For serialization, and display. Using explicit conversions make it very clear where in the code we need to convert from string to RefId and Vice versa.
-        static RefId stringRefId(const std::string_view& id); 
+        static RefId stringRefId(std::string_view id); 
         const std::string& getRefIdString() const { return mId; } 
 
 
