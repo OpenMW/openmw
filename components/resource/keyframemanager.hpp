@@ -18,7 +18,11 @@ namespace Resource
         RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target,
             osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, const std::string& normalized,
             const VFS::Manager* vfs);
+            
+        bool belongsToLeftUpperExtremity(const std::string& name);
+        bool belongsToRightUpperExtremity(const std::string& name);
 
+        void addKeyframeController(const std::string& name, const osg::Node& node);
         virtual void apply(osg::Node& node) override;
 
     private:
