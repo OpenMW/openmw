@@ -9,6 +9,7 @@
 #include <components/misc/rng.hpp>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -892,7 +893,7 @@ namespace MWClass
 
             if (damage > 0.0f)
             {
-                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
+                sndMgr->playSound3D(ptr, ESM::sHealthDamageSoundId, 1.0f, 1.0f);
                 if (ptr == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay();
                 if (!attacker.isEmpty())

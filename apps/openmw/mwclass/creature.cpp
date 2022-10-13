@@ -9,6 +9,7 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
+#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/aisetting.hpp"
@@ -448,7 +449,7 @@ namespace MWClass
                     MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
                 }
 
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::sHealthDamageSoundId, 1.0f, 1.0f);
 
                 MWMechanics::DynamicStat<float> health(stats.getHealth());
                 health.setCurrent(health.getCurrent() - damage);

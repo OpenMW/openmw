@@ -2635,7 +2635,7 @@ namespace MWWorld
                 if (actor == getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
 
-                auto healthDamage = ESM::RefId::stringRefId("Health Damage");
+                auto healthDamage = ESM::sHealthDamageSoundId;
                 if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor,healthDamage))
                     MWBase::Environment::get().getSoundManager()->playSound3D(actor, healthDamage, 1.0f, 1.0f);
             }
@@ -2669,7 +2669,7 @@ namespace MWWorld
                 if (actor == getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
 
-                auto healthDamage = ESM::RefId::stringRefId("Health Damage");
+                auto healthDamage = ESM::sHealthDamageSoundId;
                 if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, healthDamage ))
                     MWBase::Environment::get().getSoundManager()->playSound3D(actor, healthDamage, 1.0f, 1.0f);
             }

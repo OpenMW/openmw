@@ -9,6 +9,7 @@
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadsoun.hpp>
+#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -382,7 +383,7 @@ namespace MWMechanics
             health.setCurrent(health.getCurrent() - x);
             attackerStats.setHealth(health);
 
-            MWBase::Environment::get().getSoundManager()->playSound3D(attacker, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
+            MWBase::Environment::get().getSoundManager()->playSound3D(attacker, ESM::sHealthDamageSoundId, 1.0f, 1.0f);
         }
     }
 

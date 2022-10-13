@@ -376,7 +376,7 @@ namespace MWGui
         setFactions(PCstats.getFactionRanks());
         setExpelled(PCstats.getExpelled());
 
-        auto signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+        const auto& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
 
         setBirthSign(signId);
         setReputation(PCstats.getReputation());

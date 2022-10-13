@@ -26,7 +26,7 @@ namespace ESM
         return newRefId;
     }
 
-    const RefId RefId::sEmpty = RefId::stringRefId("");
+    const RefId RefId::sEmpty = {};
 }
 
 

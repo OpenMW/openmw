@@ -113,20 +113,21 @@ namespace MWClass
 
     const ESM::RefId& Miscellaneous::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        static ESM::RefId sound;
+        static const ESM::RefId soundGold = ESM::RefId::stringRefId("Item Gold Up");
+        static const ESM::RefId soundMisc = ESM::RefId::stringRefId("Item Misc Up");
         if (isGold(ptr))
-            sound = ESM::RefId::stringRefId("Item Gold Up");
-        sound = ESM::RefId::stringRefId("Item Misc Up");
-        return sound;
+            return soundGold;
+
+        return soundMisc;
     }
 
     const ESM::RefId& Miscellaneous::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        static ESM::RefId sound;
+        static const ESM::RefId soundGold = ESM::RefId::stringRefId("Item Gold Down");
+        static const ESM::RefId soundMisc = ESM::RefId::stringRefId("Item Misc Down");
         if (isGold(ptr))
-            sound = ESM::RefId::stringRefId("Item Gold Down");
-        sound = ESM::RefId::stringRefId("Item Misc Down");
-        return sound;
+            return soundGold;
+        return soundMisc;
     }
 
     const std::string& Miscellaneous::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -184,19 +185,19 @@ namespace MWClass
         {
             int goldAmount = getValue(ptr) * count;
 
-            std::string_view base = "Gold_001";
+            const ESM::RefId* base = &ESM::sGoldId001;
             if (goldAmount >= 100)
-                base = "Gold_100";
+                base = &ESM::sGoldId100;
             else if (goldAmount >= 25)
-                base = "Gold_025";
+                base = &ESM::sGoldId025;
             else if (goldAmount >= 10)
-                base = "Gold_010";
+                base = &ESM::sGoldId010;
             else if (goldAmount >= 5)
-                base = "Gold_005";
+                base = &ESM::sGoldId005;
 
             // Really, I have no idea why moving ref out of conditional
             // scope causes list::push_back throwing std::bad_alloc
-            MWWorld::ManualRef newRef(store,  ESM::RefId::stringRefId(base));
+            MWWorld::ManualRef newRef(store,  *base);
             const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
 
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);

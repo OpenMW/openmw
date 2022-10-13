@@ -435,7 +435,7 @@ namespace MWWorld
         else
             mStatic.insert(it, std::move(land));
 
-        return RecordId(ESM::RefId::stringRefId(""), isDeleted);
+        return RecordId(ESM::RefId::sEmpty, isDeleted);
     }
     void Store<ESM::Land>::setUp()
     {

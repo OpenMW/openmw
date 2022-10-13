@@ -84,7 +84,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
     // actor id
     if (!info.mActor.empty())
     {
-        if (!(info.mActor ==  mActor.getCellRef().getRefId()))
+        if (info.mActor !=  mActor.getCellRef().getRefId())
             return false;
     }
     else if (isCreature)

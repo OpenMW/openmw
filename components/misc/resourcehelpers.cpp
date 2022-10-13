@@ -160,8 +160,12 @@ std::string Misc::ResourceHelpers::correctSoundPath(std::string_view resPath, co
 
 bool Misc::ResourceHelpers::isHiddenMarker(const ESM::RefId& id)
 {
-    return id == ESM::RefId::stringRefId("prisonmarker") ||id == ESM::RefId::stringRefId("divinemarker")
-        || id == ESM::RefId::stringRefId("templemarker") || id == ESM::RefId::stringRefId("northmarker");
+    static const ESM::RefId prisonMarker = ESM::RefId::stringRefId("prisonmarker");
+    static const ESM::RefId divineMarker = ESM::RefId::stringRefId("divinemarker");
+    static const ESM::RefId templeMarker = ESM::RefId::stringRefId("templemarker");
+    static const ESM::RefId northMarker = ESM::RefId::stringRefId("northmarker");
+
+    return id == prisonMarker || id == divineMarker || id == templeMarker || id == northMarker;
 }
 
 namespace

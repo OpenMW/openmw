@@ -21,6 +21,7 @@
 
 #include <sstream>
 
+#include <components/esm/refidhardcoded.hpp>
 #include <components/esm/records.hpp>
 #include <components/misc/mathutil.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -2137,7 +2138,7 @@ namespace MWMechanics
                             float realHealthLost = healthLost * (1.0f - 0.25f * fatigueTerm);
                             health.setCurrent(health.getCurrent() - realHealthLost);
                             cls.getCreatureStats(mPtr).setHealth(health);
-                            sndMgr->playSound3D(mPtr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
+                            sndMgr->playSound3D(mPtr, ESM::sHealthDamageSoundId, 1.0f, 1.0f);
                             if (isPlayer)
                                 MWBase::Environment::get().getWindowManager()->activateHitOverlay();
                         }

@@ -10,6 +10,7 @@ namespace ESM
     const RefId sGoldId010 = ESM::RefId::stringRefId("gold_010");
     const RefId sGoldId025 = ESM::RefId::stringRefId("gold_025");
     const RefId sGoldId100 = ESM::RefId::stringRefId("gold_100");
+    const RefId sHealthDamageSoundId = ESM::RefId::stringRefId("Health Damage");
 }
 
 

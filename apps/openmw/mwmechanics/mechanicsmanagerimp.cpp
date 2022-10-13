@@ -914,7 +914,8 @@ namespace MWMechanics
             return false;
 
         // A special case for evidence chest - we should not allow to take items even if it is technically permitted
-        return !(cellref.getRefId() ==  ESM::RefId::stringRefId("stolen_goods"));
+        static const ESM::RefId stolenGoods = ESM::RefId::stringRefId("stolen_goods");
+        return !(cellref.getRefId() == stolenGoods);
     }
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed)

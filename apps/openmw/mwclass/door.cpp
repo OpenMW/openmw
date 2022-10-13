@@ -113,8 +113,8 @@ namespace MWClass
 
         const ESM::RefId& openSound = ref->mBase->mOpenSound;
         const ESM::RefId& closeSound = ref->mBase->mCloseSound;
-        const ESM::RefId lockedSound = ESM::RefId::stringRefId("LockedDoor");
-        const ESM::RefId trapActivationSound = ESM::RefId::stringRefId("Disarm Trap Fail");
+        static const ESM::RefId lockedSound = ESM::RefId::stringRefId("LockedDoor");
+        static const ESM::RefId trapActivationSound = ESM::RefId::stringRefId("Disarm Trap Fail");
 
         // FIXME: If NPC activate teleporting door, it can lead to crash due to iterator invalidation in the Actors
         // update. Make such activation a no-op for now, like how it is in the vanilla game.

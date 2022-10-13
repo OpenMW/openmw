@@ -191,9 +191,9 @@ namespace MWScript
                 ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                if (item == ESM::RefId::stringRefId("gold_005") ||item == ESM::RefId::stringRefId("gold_010")
-                    || item == ESM::RefId::stringRefId("gold_025") ||item == ESM::RefId::stringRefId("gold_100"))
-                    item =  ESM::RefId::stringRefId("gold_001");
+                if (item == ESM::sGoldId005 || item == ESM::sGoldId010
+                    || item == ESM::sGoldId025 || item == ESM::sGoldId100)
+                    item = ESM::sGoldId001;
 
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
 
@@ -222,9 +222,9 @@ namespace MWScript
                 if (count == 0)
                     return;
 
-                if (item == ESM::RefId::stringRefId("gold_005") || item == ESM::RefId::stringRefId("gold_010")
-                    || item == ESM::RefId::stringRefId("gold_025") || item == ESM::RefId::stringRefId("gold_100"))
-                    item =  ESM::RefId::stringRefId("gold_001");
+                if (item == ESM::sGoldId005 || item == ESM::sGoldId010
+                    || item == ESM::sGoldId025 || item == ESM::sGoldId100)
+                    item = ESM::sGoldId001;
 
                 // Explicit calls to non-unique actors affect the base record
                 if (!R::implicit && ptr.getClass().isActor()

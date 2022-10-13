@@ -38,7 +38,7 @@ namespace MWDialogue
         mEntries.push_back(entry);
     }
 
-    ESM::RefId Topic::getTopic() const
+    const ESM::RefId& Topic::getTopic() const
     {
         return mTopic;
     }

@@ -293,7 +293,8 @@ namespace MWWorld
         // NOTE: Don't show WerewolfRobe objects in the inventory, or allow them to be taken.
         // Vanilla likely uses a hack like this since there's no other way to prevent it from
         // being shown or taken.
-        return (ptr.getCellRef().getRefId() != ESM::RefId::stringRefId("werewolfrobe"));
+        static const ESM::RefId werewolfrobe = ESM::RefId::stringRefId("werewolfrobe");
+        return (ptr.getCellRef().getRefId() != werewolfrobe);
     }
 
     bool Class::hasToolTip(const ConstPtr& ptr) const

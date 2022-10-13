@@ -551,7 +551,7 @@ namespace MWGui
             unsigned combat = mGenerateClassSpecializations[0];
             unsigned magic = mGenerateClassSpecializations[1];
             unsigned stealth = mGenerateClassSpecializations[2];
-            std::string className;
+            std::string_view className;
             if (combat > 7)
             {
                 className = "Warrior";

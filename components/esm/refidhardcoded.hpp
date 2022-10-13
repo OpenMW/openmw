@@ -4,7 +4,7 @@
 
 namespace ESM
 {
-    extern const RefId sPlayerId, sMenuClickSoundId, sBookPageSoundId;
+    extern const RefId sPlayerId, sMenuClickSoundId, sBookPageSoundId, sHealthDamageSoundId;
     extern const RefId sGoldId001, sGoldId005, sGoldId010, sGoldId025, sGoldId100;
 
 }

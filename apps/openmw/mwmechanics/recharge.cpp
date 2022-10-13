@@ -97,7 +97,7 @@ namespace MWMechanics
 
             MWBase::Environment::get().getWindowManager()->messageBox(message);
 
-            ESM::RefId soulGemAzura = ESM::RefId::stringRefId("Misc_SoulGem_Azura");
+            static const ESM::RefId soulGemAzura = ESM::RefId::stringRefId("Misc_SoulGem_Azura");
             // special case: readd Azura's Star
             if (gem.get<ESM::Miscellaneous>()->mBase->mId ==  soulGemAzura)
                 player.getClass().getContainerStore(player).add(soulGemAzura, 1, player);

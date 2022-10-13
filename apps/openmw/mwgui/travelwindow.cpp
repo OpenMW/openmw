@@ -90,7 +90,7 @@ namespace MWGui
         else
             toAdd->setUserString("interior", "n");
 
-        std::string nameString = name.getRefIdString();
+        const std::string& nameString = name.getRefIdString();
         toAdd->setUserString("price", std::to_string(price));
         toAdd->setCaptionWithReplacing("#{sCell=" + nameString + "}   -   " + MyGUI::utility::toString(price) + "#{sgp}");
         toAdd->setSize(mDestinationsView->getWidth(), lineHeight);

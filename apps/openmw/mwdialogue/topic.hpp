@@ -42,7 +42,7 @@ namespace MWDialogue
         ///< Add entry without checking for redundant entries or modifying the state of the
         /// topic otherwise
 
-        ESM::RefId getTopic() const;
+        const ESM::RefId& getTopic() const;
 
         virtual std::string_view getName() const;
 

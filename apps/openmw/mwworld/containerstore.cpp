@@ -6,6 +6,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/inventorystate.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm/refidhardcoded.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -137,7 +138,7 @@ void MWWorld::ContainerStore::storeStates(
     }
 }
 
-const ESM::RefId MWWorld::ContainerStore::sGoldId = ESM::RefId::stringRefId("gold_001");
+const ESM::RefId MWWorld::ContainerStore::sGoldId = ESM::sGoldId001;
 
 MWWorld::ContainerStore::ContainerStore()
     : mListener(nullptr)
