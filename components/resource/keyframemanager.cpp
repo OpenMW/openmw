@@ -34,7 +34,8 @@ namespace Resource
     
     bool RetrieveAnimationsVisitor::belongsToLeftUpperExtremity(const std::string& name)
     {
-        static const std::string_view boneNames[25] = {
+        const int bodypartCount = 25;
+        static const std::array<std::string_view, bodypartCount> boneNames = {
             "bip01_l_clavicle",
             "left_clavicle",
             "bip01_l_upperarm",
@@ -61,19 +62,20 @@ namespace Resource
             "bip01_l_thumb3",
             "left_forearm"
         };
-
-        for (size_t i = 0; i < 25; i++)
+        
+        for (unsigned short int i = 0; i < bodypartCount; i++)
         {
             if (name == boneNames[i])
                 return true;
         }
-
+        
         return false;
     }
     
     bool RetrieveAnimationsVisitor::belongsToRightUpperExtremity(const std::string& name)
     {
-        static const std::string_view boneNames[25] = {
+        const int bodypartCount = 25;
+        static const std::array<std::string_view, bodypartCount> boneNames = {
             "bip01_r_clavicle",
             "right_clavicle",
             "bip01_r_upperarm",
@@ -100,15 +102,32 @@ namespace Resource
             "bip01_r_pointer3",
             "right_forearm"
         };
-
-        for (size_t i = 0; i < 25; i++)
+        
+        for (unsigned short int i = 0; i < bodypartCount; i++)
         {
             if (name == boneNames[i])
                 return true;
         }
-
+        
         return false;
     }
+
+    bool RetrieveAnimationsVisitor::belongsToTorso(const std::string& name)
+    {
+        const int bodypartCount = 8;
+        static const std::array<std::string_view, bodypartCount> boneNames = {
+            "bip01_spine1", "bip01_spine2", "bip01_neck", "bip01_head", "head", "neck", "chest", "groin"
+        };
+        
+        for (unsigned short int i = 0; i < bodypartCount; i++)
+        {
+            if (name == boneNames[i])
+                return true;
+        }
+        
+        return false;
+    }
+
 
     void RetrieveAnimationsVisitor::addKeyframeController(const std::string& name, const osg::Node& node)
     {
@@ -139,13 +158,23 @@ namespace Resource
                 { 
                     if (name == "Bip01 R Clavicle")
                     {
-                        if (!belongsToRightUpperExtremity(channel->getTargetName())) continue;
+                        if (!belongsToRightUpperExtremity(channel->getTargetName()))
+                            continue;
                     }
                     else if (name == "Bip01 L Clavicle")
                     {
-                        if (!belongsToLeftUpperExtremity(channel->getTargetName())) continue;
+                        if (!belongsToLeftUpperExtremity(channel->getTargetName()))
+                            continue;
                     }
-                    else if (belongsToRightUpperExtremity(channel->getTargetName()) || belongsToLeftUpperExtremity(channel->getTargetName())) continue;
+                    else if (name == "Bip01 Spine1")
+                    {
+                        if (!belongsToTorso(channel->getTargetName()))
+                            continue;
+                    }
+                    else if (belongsToRightUpperExtremity(channel->getTargetName())
+                        || belongsToLeftUpperExtremity(channel->getTargetName())
+                        || belongsToTorso(channel->getTargetName()))
+                            continue;
 
                     mergedAnimationTrack->addChannel(channel.get()->clone()); // is ->clone needed?
                 }
@@ -194,7 +223,7 @@ namespace Resource
             && Misc::StringUtils::lowerCase(node.getName()) == std::string_view("bip01"))
         {
             addKeyframeController("bip01", node); /* Character root */
-            //addKeyframeController("Bip01 Spine1", node); /* Torso */
+            addKeyframeController("Bip01 Spine1", node); /* Torso */
             addKeyframeController("Bip01 L Clavicle", node); /* Left arm */
             addKeyframeController("Bip01 R Clavicle", node); /* Right arm */
         }
