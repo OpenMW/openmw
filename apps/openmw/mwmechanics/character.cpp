@@ -954,7 +954,7 @@ namespace MWMechanics
                     else
                         mDeathState = static_cast<CharacterState>(CharState_Death1 + deathanim);
 
-                    mFloatToSurface = false;
+                    mFloatToSurface = cStats.getHealth().getBase() != 0;
                 }
                 // else: nothing to do, will detect death in the next frame and start playing death animation
             }
