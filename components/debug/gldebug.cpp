@@ -38,7 +38,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <components/debug/debuglog.hpp>
 
 // OpenGL constants not provided by OSG:
-#include <components/sceneutil/glext.hpp>
+#include <SDL_opengl_glext.h>
 
 namespace Debug
 {
