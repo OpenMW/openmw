@@ -207,7 +207,7 @@ namespace
 
         std::string_view getCurrentCellName() const override { return {}; }
 
-        int getMemberShort(const ESM::RefId id, std::string_view name, bool global) const override
+        int getMemberShort(const ESM::RefId& id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id.getRefIdString());
             if (it != mMembers.end())
@@ -215,7 +215,7 @@ namespace
             return {};
         }
 
-        int getMemberLong(const ESM::RefId id, std::string_view name, bool global) const override
+        int getMemberLong(const ESM::RefId& id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id.getRefIdString());
             if (it != mMembers.end())
@@ -223,7 +223,7 @@ namespace
             return {};
         }
 
-        float getMemberFloat(const ESM::RefId id, std::string_view name, bool global) const override
+        float getMemberFloat(const ESM::RefId& id, std::string_view name, bool global) const override
         {
             auto it = mMembers.find(id.getRefIdString());
             if (it != mMembers.end())
@@ -231,17 +231,17 @@ namespace
             return {};
         }
 
-        void setMemberShort(const ESM::RefId id, std::string_view name, int value, bool global) override
+        void setMemberShort(const ESM::RefId& id, std::string_view name, int value, bool global) override
         {
             mMembers[id.getRefIdString()].setShort(name, value);
         };
 
-        void setMemberLong(const ESM::RefId id, std::string_view name, int value, bool global) override
+        void setMemberLong(const ESM::RefId& id, std::string_view name, int value, bool global) override
         {
             mMembers[id.getRefIdString()].setLong(name, value);
         };
 
-        void setMemberFloat(const ESM::RefId id, std::string_view name, float value, bool global) override
+        void setMemberFloat(const ESM::RefId& id, std::string_view name, float value, bool global) override
         {
             mMembers[id.getRefIdString()].setFloat(name, value);
         };
