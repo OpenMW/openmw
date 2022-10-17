@@ -41,6 +41,9 @@ namespace MWLua
     void addMiscellaneousBindings(sol::table miscellaneous, const Context& context);
     void addPotionBindings(sol::table potion, const Context& context);
     void addIngredientBindings(sol::table Ingredient, const Context& context);
+    void addArmorBindings(sol::table armor, const Context& context);
+    void addStaticBindings(sol::table stat, const Context& context);
+    void addLightBindings(sol::table light, const Context& context);
 }
 
 #endif // MWLUA_TYPES_H

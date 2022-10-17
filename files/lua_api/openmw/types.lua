@@ -114,10 +114,10 @@
 
 ---
 -- Get equipment.
--- Has two overloads:  
+-- Has two overloads:
 -- 1) With single argument: returns a table `slot` -> @{openmw.core#GameObject} of currently equipped items.
 -- See @{#EQUIPMENT_SLOT}. Returns empty table if the actor doesn't have
--- equipment slots.  
+-- equipment slots.
 -- 2) With two arguments: returns an item equipped to the given slot.
 -- @function [parent=#Actor] equipment
 -- @param openmw.core#GameObject actor
@@ -522,6 +522,44 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+--- Armor.TYPE
+-- @type ArmorTYPE
+-- @field #number Helmet
+-- @field #number Cuirass
+-- @field #number LPauldron
+-- @field #number RPauldron
+-- @field #number Greaves
+-- @field #number Boots
+-- @field #number LGauntlet
+-- @field #number RGauntlet
+-- @field #number Shield
+-- @field #number LBracer
+-- @field #number RBracer
+
+--- @{#ArmorTYPE}
+-- @field [parent=#Armor] #ArmorTYPE TYPE
+
+---
+-- Returns the read-only @{#ArmorRecord} of an Armor
+-- @function [parent=#Armor] record
+-- @param #any objectOrRecordId
+-- @return #ArmorRecord
+
+---
+-- @type ArmorRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this armor (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #string enchant The enchantment ID of this armor (can be empty)
+-- @field #number weight
+-- @field #number value
+-- @field #number type See @{#Armor.TYPE}
+-- @field #number health
+-- @field #number baseArmor The base armor rating of this armor
+-- @field #number enchantCapacity
+
 
 
 --- @{#Book} functions
@@ -588,8 +626,8 @@
 -- @field #string text The text content of the book
 -- @field #number weight
 -- @field #number value
--- @field #string skill The skill that this book teaches. See @{#Book.SKILL} 
--- @field #boolean isScroll 
+-- @field #string skill The skill that this book teaches. See @{#Book.SKILL}
+-- @field #boolean isScroll
 -- @field #number enchantCapacity
 
 --- @{#Clothing} functions
@@ -655,6 +693,27 @@
 -- @function [parent=#Light] objectIsInstance
 -- @param openmw.core#GameObject object
 -- @return #boolean
+
+---
+-- Returns the read-only @{#LightRecord} of a Light
+-- @function [parent=#Light] record
+-- @param #any objectOrRecordId
+-- @return #LightRecord
+
+---
+-- @type LightRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this light (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #string sound VFS path to the sound
+-- @field #number weight
+-- @field #number value
+-- @field #number duration
+-- @field #number radius
+-- @field #number color
+-- @field #boolean isCarriable
 
 
 
@@ -824,7 +883,7 @@
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this apparatus (can be empty)
 -- @field #string icon VFS path to the icon
--- @field #number type The type of apparatus. See @{#Apparatus.TYPE} 
+-- @field #number type The type of apparatus. See @{#Apparatus.TYPE}
 -- @field #number weight
 -- @field #number value
 -- @field #number quality The quality of the apparatus
@@ -1058,6 +1117,17 @@
 -- @function [parent=#Static] objectIsInstance
 -- @param openmw.core#GameObject object
 -- @return #boolean
+
+---
+-- Returns the read-only @{#StaticRecord} of a Static
+-- @function [parent=#Static] record
+-- @param #any objectOrRecordId
+-- @return #StaticRecord
+
+---
+-- @type StaticRecord
+-- @field #string id Record id
+-- @field #string model VFS path to the model
 
 return nil
 

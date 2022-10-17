@@ -158,10 +158,10 @@ namespace MWLua
             addType(ObjectTypeName::NPC, { ESM::REC_INTERNAL_PLAYER, ESM::REC_NPC_ }, ObjectTypeName::Actor), context);
         addType(ObjectTypeName::Player, { ESM::REC_INTERNAL_PLAYER }, ObjectTypeName::NPC);
 
-        addType(ObjectTypeName::Armor, { ESM::REC_ARMO }, ObjectTypeName::Item);
+        addArmorBindings(addType(ObjectTypeName::Armor, { ESM::REC_ARMO }, ObjectTypeName::Item), context);
         addType(ObjectTypeName::Clothing, { ESM::REC_CLOT }, ObjectTypeName::Item);
         addIngredientBindings(addType(ObjectTypeName::Ingredient, { ESM::REC_INGR }, ObjectTypeName::Item), context);
-        addType(ObjectTypeName::Light, { ESM::REC_LIGH }, ObjectTypeName::Item);
+        addLightBindings(addType(ObjectTypeName::Light, { ESM::REC_LIGH }, ObjectTypeName::Item), context);
         addMiscellaneousBindings(addType(ObjectTypeName::MiscItem, { ESM::REC_MISC }, ObjectTypeName::Item), context);
         addPotionBindings(addType(ObjectTypeName::Potion, { ESM::REC_ALCH }, ObjectTypeName::Item), context);
         addWeaponBindings(addType(ObjectTypeName::Weapon, { ESM::REC_WEAP }, ObjectTypeName::Item), context);
@@ -174,7 +174,7 @@ namespace MWLua
         addActivatorBindings(addType(ObjectTypeName::Activator, { ESM::REC_ACTI }), context);
         addContainerBindings(addType(ObjectTypeName::Container, { ESM::REC_CONT }), context);
         addDoorBindings(addType(ObjectTypeName::Door, { ESM::REC_DOOR }), context);
-        addType(ObjectTypeName::Static, { ESM::REC_STAT });
+        addStaticBindings(addType(ObjectTypeName::Static, { ESM::REC_STAT }), context);
 
         sol::table typeToPackage = getTypeToPackageTable(context.mLua->sol());
         sol::table packageToType = getPackageToTypeTable(context.mLua->sol());
