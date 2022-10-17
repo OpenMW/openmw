@@ -1,6 +1,8 @@
 #ifndef CSV_FILTER_RECORDFILTERBOX_H
 #define CSV_FILTER_RECORDFILTERBOX_H
 
+#include <memory>
+
 #include <QWidget>
 
 namespace CSMFilter
