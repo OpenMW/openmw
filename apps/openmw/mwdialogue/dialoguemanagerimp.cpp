@@ -293,8 +293,7 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find(topic);
 
-        const ESM::DialInfo* info = mChoice == -1 && mActorKnownTopics.count(topic) ? mActorKnownTopics[topic].mInfo
-                                                                                    : filter.search(dialogue, true);
+        const ESM::DialInfo* info = filter.search(dialogue, true);
 
         if (info)
         {
