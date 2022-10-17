@@ -84,14 +84,14 @@ namespace MWDialogue
         std::list<std::string> getAvailableTopics() override;
         int getTopicFlag(const std::string& topicId) const override;
 
-        bool inJournal(const std::string& topicId, const std::string& infoId) override;
+        bool inJournal(const std::string& topicId, const std::string& infoId) const override;
 
         void addTopic(std::string_view topic) override;
 
         void addChoice(std::string_view text, int choice) override;
-        const std::vector<std::pair<std::string, int>>& getChoices() override;
+        const std::vector<std::pair<std::string, int>>& getChoices() const override;
 
-        bool isGoodbye() override;
+        bool isGoodbye() const override;
 
         void goodbye() override;
 
