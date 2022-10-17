@@ -21,6 +21,7 @@
     Bug #6993: Shooting your last round of ammunition causes the attack animation to cancel
     Bug #7009: Falling actors teleport to the ground without receiving any damage on cell loading
     Bug #7034: Misc items defined in one content file are not treated as keys if another content file uses them as such
+    Bug #7042: Weapon follow animations that immediately follow the hit animations cause multiple hits
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
     Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData

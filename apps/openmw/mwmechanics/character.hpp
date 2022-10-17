@@ -164,7 +164,7 @@ namespace MWMechanics
         int mWeaponType{ ESM::Weapon::None };
         std::string mCurrentWeapon;
 
-        float mAttackStrength{ 0.f };
+        float mAttackStrength{ -1.f };
         MWWorld::Ptr mAttackVictim;
         osg::Vec3f mAttackHitPos;
         bool mAttackSuccess{ false };
