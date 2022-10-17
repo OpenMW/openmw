@@ -257,7 +257,7 @@ namespace MWDialogue
         }
     }
 
-    bool DialogueManager::inJournal (const std::string& topicId, const std::string& infoId)
+    bool DialogueManager::inJournal(const std::string& topicId, const std::string& infoId) const
     {
         const MWDialogue::Topic *topicHistory = nullptr;
         MWBase::Journal *journal = MWBase::Environment::get().getJournal();
@@ -524,12 +524,12 @@ namespace MWDialogue
         mChoices.emplace_back(text, choice);
     }
 
-    const std::vector<std::pair<std::string, int> >& DialogueManager::getChoices()
+    const std::vector<std::pair<std::string, int>>& DialogueManager::getChoices() const
     {
         return mChoices;
     }
 
-    bool DialogueManager::isGoodbye()
+    bool DialogueManager::isGoodbye() const
     {
         return mGoodbye;
     }
