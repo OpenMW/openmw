@@ -424,9 +424,12 @@ namespace MWDialogue
         return keywordList;
     }
 
-    int DialogueManager::getTopicFlag(const std::string& topicId)
+    int DialogueManager::getTopicFlag(const std::string& topicId) const
     {
-        return mActorKnownTopics[topicId].mFlags;
+        auto known = mActorKnownTopics.find(topicId);
+        if (known != mActorKnownTopics.end())
+            return known->second.mFlags;
+        return 0;
     }
 
     void DialogueManager::keywordSelected(const std::string& keyword, ResponseCallback* callback)
