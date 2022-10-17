@@ -53,14 +53,14 @@ namespace MWBase
 
         virtual bool startDialogue(const MWWorld::Ptr& actor, ResponseCallback* callback) = 0;
 
-        virtual bool inJournal(const std::string& topicId, const std::string& infoId) = 0;
+        virtual bool inJournal(const std::string& topicId, const std::string& infoId) const = 0;
 
         virtual void addTopic(std::string_view topic) = 0;
 
         virtual void addChoice(std::string_view text, int choice) = 0;
-        virtual const std::vector<std::pair<std::string, int>>& getChoices() = 0;
+        virtual const std::vector<std::pair<std::string, int>>& getChoices() const = 0;
 
-        virtual bool isGoodbye() = 0;
+        virtual bool isGoodbye() const = 0;
 
         virtual void goodbye() = 0;
 
