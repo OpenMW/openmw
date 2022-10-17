@@ -82,7 +82,7 @@ namespace MWDialogue
         bool startDialogue(const MWWorld::Ptr& actor, ResponseCallback* callback) override;
 
         std::list<std::string> getAvailableTopics() override;
-        int getTopicFlag(const std::string& topicId) override;
+        int getTopicFlag(const std::string& topicId) const override;
 
         bool inJournal(const std::string& topicId, const std::string& infoId) override;
 

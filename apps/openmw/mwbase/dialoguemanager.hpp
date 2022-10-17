@@ -89,7 +89,7 @@ namespace MWBase
         };
 
         virtual std::list<std::string> getAvailableTopics() = 0;
-        virtual int getTopicFlag(const std::string&) = 0;
+        virtual int getTopicFlag(const std::string&) const = 0;
 
         virtual bool checkServiceRefused(ResponseCallback* callback, ServiceType service = ServiceType::Any) = 0;
 
