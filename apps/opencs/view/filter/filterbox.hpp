@@ -1,8 +1,8 @@
 #ifndef CSV_FILTER_FILTERBOX_H
 #define CSV_FILTER_FILTERBOX_H
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <QWidget>
 
