@@ -260,7 +260,7 @@ namespace MWDialogue
         }
     }
 
-    bool DialogueManager::inJournal(const std::string& topicId, const std::string& infoId)
+    bool DialogueManager::inJournal(const std::string& topicId, const std::string& infoId) const
     {
         const MWDialogue::Topic* topicHistory = nullptr;
         MWBase::Journal* journal = MWBase::Environment::get().getJournal();
@@ -293,8 +293,7 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find(topic);
 
-        const ESM::DialInfo* info = mChoice == -1 && mActorKnownTopics.count(topic) ? mActorKnownTopics[topic].mInfo
-                                                                                    : filter.search(dialogue, true);
+        const ESM::DialInfo* info = filter.search(dialogue, true);
 
         if (info)
         {
@@ -425,9 +424,12 @@ namespace MWDialogue
         return keywordList;
     }
 
-    int DialogueManager::getTopicFlag(const std::string& topicId)
+    int DialogueManager::getTopicFlag(const std::string& topicId) const
     {
-        return mActorKnownTopics[topicId].mFlags;
+        auto known = mActorKnownTopics.find(topicId);
+        if (known != mActorKnownTopics.end())
+            return known->second.mFlags;
+        return 0;
     }
 
     void DialogueManager::keywordSelected(const std::string& keyword, ResponseCallback* callback)
@@ -526,12 +528,12 @@ namespace MWDialogue
         mChoices.emplace_back(text, choice);
     }
 
-    const std::vector<std::pair<std::string, int>>& DialogueManager::getChoices()
+    const std::vector<std::pair<std::string, int>>& DialogueManager::getChoices() const
     {
         return mChoices;
     }
 
-    bool DialogueManager::isGoodbye()
+    bool DialogueManager::isGoodbye() const
     {
         return mGoodbye;
     }
