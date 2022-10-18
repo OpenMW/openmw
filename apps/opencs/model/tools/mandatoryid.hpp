@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
+#include "../doc/stage.hpp"
 #include "../world/universalid.hpp"
 #include <components/esm/refid.hpp>
-#include "../doc/stage.hpp"
 
 namespace CSMDoc
 {

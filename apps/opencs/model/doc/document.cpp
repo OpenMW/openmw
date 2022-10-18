@@ -504,7 +504,8 @@ void CSMDoc::Document::startRunning(const std::string& profile, const std::strin
         contentFiles.emplace_back(mContentFile.filename());
     }
 
-    mRunner.configure(getData().getDebugProfiles().getRecord(ESM::RefId::stringRefId(profile)).get(), contentFiles, startupInstruction);
+    mRunner.configure(getData().getDebugProfiles().getRecord(ESM::RefId::stringRefId(profile)).get(), contentFiles,
+        startupInstruction);
 
     int state = getState();
 

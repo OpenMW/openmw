@@ -4,8 +4,8 @@
 #include <memory>
 #include <stdexcept>
 
-#include <components/interpreter/context.hpp>
 #include <components/esm/refid.hpp>
+#include <components/interpreter/context.hpp>
 
 #include "globalscripts.hpp"
 

@@ -32,7 +32,6 @@
 #include <components/esm3/loadweap.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
-#include <components/esm/refidhardcoded.hpp>
 
 #include "../prefs/state.hpp"
 
@@ -520,10 +519,11 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
     {
         CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(creature.mOriginal);
         if (index.first == -1)
-            messages.add(
-                id, "Parent creature '" + creature.mOriginal.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Parent creature '" + creature.mOriginal.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
         else if (index.second != CSMWorld::UniversalId::Type_Creature)
-            messages.add(id, "'" + creature.mOriginal.getRefIdString() + "' is not a creature", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "'" + creature.mOriginal.getRefIdString() + "' is not a creature", "",
+                CSMDoc::Message::Severity_Error);
     }
 
     // Check inventory
@@ -682,7 +682,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc, npc.mId);
 
     // Detect if player is present
-    if (npc.mId ==  ESM::sPlayerId) // Happy now, scrawl?
+    if (npc.mId == "Player") // Happy now, scrawl?
         mPlayerPresent = true;
 
     // Skip "Base" records (setting!)
@@ -739,23 +739,27 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
 
     if (npc.mClass.empty())
         messages.add(id, "Class is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mClasses.searchId(npc.mClass.getRefIdString()) == -1)
-        messages.add(id, "Class '" + npc.mClass.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mClasses.searchId(npc.mClass) == -1)
+        messages.add(
+            id, "Class '" + npc.mClass.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mRace.empty())
         messages.add(id, "Race is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mRaces.searchId(npc.mRace.getRefIdString()) == -1)
-        messages.add(id, "Race '" + npc.mRace.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mRaces.searchId(npc.mRace) == -1)
+        messages.add(
+            id, "Race '" + npc.mRace.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
-    if (!npc.mFaction.empty() && mFactions.searchId(npc.mFaction.getRefIdString()) == -1)
-        messages.add(id, "Faction '" + npc.mFaction.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    if (!npc.mFaction.empty() && mFactions.searchId(npc.mFaction) == -1)
+        messages.add(
+            id, "Faction '" + npc.mFaction.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mHead.empty())
         messages.add(id, "Head is missing", "", CSMDoc::Message::Severity_Error);
     else
     {
-        if (mBodyParts.searchId(npc.mHead.getRefIdString()) == -1)
-            messages.add(id, "Head body part '" + npc.mHead.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        if (mBodyParts.searchId(npc.mHead) == -1)
+            messages.add(id, "Head body part '" + npc.mHead.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
         /// \todo Check gender, race and other body parts stuff validity for the specific NPC
     }
 
@@ -763,8 +767,9 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
         messages.add(id, "Hair is missing", "", CSMDoc::Message::Severity_Error);
     else
     {
-        if (mBodyParts.searchId(npc.mHair.getRefIdString()) == -1)
-            messages.add(id, "Hair body part '" + npc.mHair.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        if (mBodyParts.searchId(npc.mHair) == -1)
+            messages.add(id, "Hair body part '" + npc.mHair.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
         /// \todo Check gender, race and other body part stuff validity for the specific NPC
     }
 
@@ -785,22 +790,22 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
         return;
 
     const ESM::Weapon& weapon = (dynamic_cast<const CSMWorld::Record<ESM::Weapon>&>(baseRecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Weapon,  weapon.mId);
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Weapon, weapon.mId);
 
     // TODO, It seems that this stuff for spellcasting is obligatory and In fact We should check if records are present
     if ( // THOSE ARE HARDCODED!
-        !(weapon.mId == ESM::RefId::stringRefId("VFX_Hands") || weapon.mId == ESM::RefId::stringRefId("VFX_Absorb") || weapon.mId == ESM::RefId::stringRefId("VFX_Reflect")
-            || weapon.mId == ESM::RefId::stringRefId("VFX_DefaultBolt") ||
+        !(weapon.mId == "VFX_Hands" || weapon.mId == "VFX_Absorb" || weapon.mId == "VFX_Reflect"
+            || weapon.mId == "VFX_DefaultBolt" ||
             // TODO I don't know how to get full list of effects :/
             // DANGER!, ACHTUNG! FIXME! The following is the list of the magical bolts, valid for Morrowind.esm. However
             // those are not hardcoded.
-            weapon.mId == ESM::RefId::stringRefId("magic_bolt") || weapon.mId == ESM::RefId::stringRefId("shock_bolt") || weapon.mId == ESM::RefId::stringRefId("shield_bolt")
-            || weapon.mId == ESM::RefId::stringRefId("VFX_DestructBolt") || weapon.mId == ESM::RefId::stringRefId("VFX_PoisonBolt") || weapon.mId == ESM::RefId::stringRefId("VFX_RestoreBolt")
-            || weapon.mId == ESM::RefId::stringRefId("VFX_AlterationBolt") || weapon.mId == ESM::RefId::stringRefId("VFX_ConjureBolt") || weapon.mId == ESM::RefId::stringRefId("VFX_FrostBolt")
-            || weapon.mId == ESM::RefId::stringRefId("VFX_MysticismBolt") || weapon.mId == ESM::RefId::stringRefId("VFX_IllusionBolt") || weapon.mId == ESM::RefId::stringRefId("VFX_Multiple2")
-            || weapon.mId == ESM::RefId::stringRefId("VFX_Multiple3") || weapon.mId == ESM::RefId::stringRefId("VFX_Multiple4") || weapon.mId == ESM::RefId::stringRefId("VFX_Multiple5")
-            || weapon.mId == ESM::RefId::stringRefId("VFX_Multiple6") || weapon.mId == ESM::RefId::stringRefId("VFX_Multiple7") || weapon.mId == ESM::RefId::stringRefId("VFX_Multiple8")
-            || weapon.mId == ESM::RefId::stringRefId("VFX_Multiple9")))
+            weapon.mId == "magic_bolt" || weapon.mId == "shock_bolt" || weapon.mId == "shield_bolt"
+            || weapon.mId == "VFX_DestructBolt" || weapon.mId == "VFX_PoisonBolt" || weapon.mId == "VFX_RestoreBolt"
+            || weapon.mId == "VFX_AlterationBolt" || weapon.mId == "VFX_ConjureBolt" || weapon.mId == "VFX_FrostBolt"
+            || weapon.mId == "VFX_MysticismBolt" || weapon.mId == "VFX_IllusionBolt" || weapon.mId == "VFX_Multiple2"
+            || weapon.mId == "VFX_Multiple3" || weapon.mId == "VFX_Multiple4" || weapon.mId == "VFX_Multiple5"
+            || weapon.mId == "VFX_Multiple6" || weapon.mId == "VFX_Multiple7" || weapon.mId == "VFX_Multiple8"
+            || weapon.mId == "VFX_Multiple9"))
     {
         inventoryItemCheck<ESM::Weapon>(weapon, messages, id.toString(), true);
 
@@ -1037,8 +1042,8 @@ void CSMTools::ReferenceableCheckStage::listCheck(
     for (unsigned i = 0; i < someList.mList.size(); ++i)
     {
         if (mReferencables.searchId(someList.mList[i].mId).first == -1)
-            messages.add(
-                someID, "Object '" + someList.mList[i].mId.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(someID, "Object '" + someList.mList[i].mId.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
 
         if (someList.mList[i].mLevel < 1)
             messages.add(someID, "Level of item '" + someList.mList[i].mId.getRefIdString() + "' is non-positive", "",
@@ -1053,7 +1058,7 @@ void CSMTools::ReferenceableCheckStage::scriptCheck(
     if (!someTool.mScript.empty())
     {
         if (mScripts.searchId(someTool.mScript) == -1)
-            messages.add(
-                someID, "Script '" + someTool.mScript.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(someID, "Script '" + someTool.mScript.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
     }
 }

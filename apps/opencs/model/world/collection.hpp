@@ -68,7 +68,7 @@ namespace CSMWorld
     template <>
     inline const ESM::RefId IdAccessor<Land>::getId(const Land& record) const
     {
-        return ESM::RefId::stringRefId( Land::createUniqueRecordId(record.mX, record.mY));
+        return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
     template <>
@@ -554,7 +554,7 @@ namespace CSMWorld
             throw std::runtime_error("index out of range");
 
         std::unique_ptr<Record<ESXRecordT>> record2(static_cast<Record<ESXRecordT>*>(record.release()));
-        std::string id =IdAccessorT().getId(record2->get()).getRefIdString();
+        std::string id = IdAccessorT().getId(record2->get()).getRefIdString();
 
         if (index == size)
             mRecords.push_back(std::move(record2));
@@ -576,8 +576,7 @@ namespace CSMWorld
     template <typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::setRecord(int index, std::unique_ptr<Record<ESXRecordT>> record)
     {
-        if (IdAccessorT().getId(mRecords.at(index)->get())
-            != IdAccessorT().getId(record->get()))
+        if (IdAccessorT().getId(mRecords.at(index)->get()) != IdAccessorT().getId(record->get()))
             throw std::runtime_error("attempt to change the ID of a record");
 
         mRecords.at(index) = std::move(record);

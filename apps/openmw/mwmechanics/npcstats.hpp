@@ -1,12 +1,12 @@
 #ifndef GAME_MWMECHANICS_NPCSTATS_H
 #define GAME_MWMECHANICS_NPCSTATS_H
 
+#include "creaturestats.hpp"
+#include <components/esm/refid.hpp>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
-#include <components/esm/refid.hpp>
-#include "creaturestats.hpp"
 
 namespace ESM
 {

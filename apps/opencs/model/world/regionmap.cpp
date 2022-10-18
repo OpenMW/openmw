@@ -185,8 +185,7 @@ void CSMWorld::RegionMap::updateRegions(const std::vector<ESM::RefId>& regions)
     for (std::map<CellCoordinates, CellDescription>::const_iterator iter(mMap.begin()); iter != mMap.end(); ++iter)
     {
         if (!iter->second.mRegion.empty()
-            && std::find(regions2.begin(), regions2.end(),iter->second.mRegion)
-                != regions2.end())
+            && std::find(regions2.begin(), regions2.end(), iter->second.mRegion) != regions2.end())
         {
             QModelIndex index = getIndex(iter->first);
 
@@ -333,8 +332,7 @@ QVariant CSMWorld::RegionMap::data(const QModelIndex& index, int role) const
             if (cell->second.mDeleted)
                 return QBrush(Qt::red, Qt::DiagCrossPattern);
 
-            auto iter
-                = mColours.find(cell->second.mRegion);
+            auto iter = mColours.find(cell->second.mRegion);
 
             if (iter != mColours.end())
                 return QBrush(QColor(iter->second & 0xff, (iter->second >> 8) & 0xff, (iter->second >> 16) & 0xff));
@@ -370,8 +368,7 @@ QVariant CSMWorld::RegionMap::data(const QModelIndex& index, int role) const
             {
                 stream << "<br>";
 
-                auto iter
-                    = mColours.find(cell->second.mRegion);
+                auto iter = mColours.find(cell->second.mRegion);
 
                 if (iter != mColours.end())
                     stream << cell->second.mRegion;

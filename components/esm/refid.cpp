@@ -4,13 +4,21 @@
 
 #include "components/misc/strings/algorithm.hpp"
 
-
-
 namespace ESM
 {
     bool RefId::operator==(const RefId& rhs) const
     {
         return this->mId == rhs.mId;
+    }
+
+    bool RefId::operator<(const RefId& rhs) const
+    {
+        return mId < rhs.mId;
+    }
+
+    bool RefId::operator>(const RefId& rhs) const
+    {
+        return mId > rhs.mId;
     }
 
     std::ostream& operator<<(std::ostream& os, const RefId& refId)
@@ -26,9 +34,10 @@ namespace ESM
         return newRefId;
     }
 
+    bool RefId::operator==(std::string_view rhs) const
+    {
+        return Misc::StringUtils::ciEqual(mId, rhs);
+    }
+
     const RefId RefId::sEmpty = {};
 }
-
-
-
-

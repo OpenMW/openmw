@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_CONTENT_LESSBYID_H
 #define OPENMW_COMPONENTS_CONTENT_LESSBYID_H
 
-#include <string_view>
 #include <components/esm/refid.hpp>
+#include <string_view>
 
 namespace EsmLoader
 {

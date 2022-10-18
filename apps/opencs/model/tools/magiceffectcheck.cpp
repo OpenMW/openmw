@@ -124,12 +124,15 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages& messa
     }
 
     if (!effect.mCastSound.empty() && mSounds.searchId(effect.mCastSound) == -1)
-        messages.add(
-            id, "Casting sound '" + effect.mCastSound.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Casting sound '" + effect.mCastSound.getRefIdString() + "' does not exist", "",
+            CSMDoc::Message::Severity_Error);
     if (!effect.mHitSound.empty() && mSounds.searchId(effect.mHitSound) == -1)
-        messages.add(id, "Hit sound '" + effect.mHitSound.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Hit sound '" + effect.mHitSound.getRefIdString() + "' does not exist", "",
+            CSMDoc::Message::Severity_Error);
     if (!effect.mAreaSound.empty() && mSounds.searchId(effect.mAreaSound) == -1)
-        messages.add(id, "Area sound '" + effect.mAreaSound.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Area sound '" + effect.mAreaSound.getRefIdString() + "' does not exist", "",
+            CSMDoc::Message::Severity_Error);
     if (!effect.mBoltSound.empty() && mSounds.searchId(effect.mBoltSound) == -1)
-        messages.add(id, "Bolt sound '" + effect.mBoltSound.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Bolt sound '" + effect.mBoltSound.getRefIdString() + "' does not exist", "",
+            CSMDoc::Message::Severity_Error);
 }

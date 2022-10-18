@@ -2,8 +2,8 @@
 #define MWGUI_WAIT_DIALOG_H
 
 #include "timeadvancer.hpp"
-#include <components/esm/refid.hpp>
 #include "windowbase.hpp"
+#include <components/esm/refid.hpp>
 
 namespace MWGui
 {

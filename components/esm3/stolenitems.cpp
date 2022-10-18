@@ -11,8 +11,7 @@ namespace ESM
         for (StolenItemsMap::const_iterator it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
         {
             esm.writeHNString("NAME", it->first.getRefIdString());
-            for (auto ownerIt = it->second.begin();
-                 ownerIt != it->second.end(); ++ownerIt)
+            for (auto ownerIt = it->second.begin(); ownerIt != it->second.end(); ++ownerIt)
             {
                 if (ownerIt->first.second)
                     esm.writeHNString("FNAM", ownerIt->first.first.getRefIdString());

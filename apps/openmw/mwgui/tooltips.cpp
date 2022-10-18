@@ -721,7 +721,8 @@ namespace MWGui
             if (owner.second == std::numeric_limits<int>::max())
                 ret += std::string("\nStolen from ") + owner.first.getRefIdString(); // for legacy (ESS) savegames
             else
-                ret += std::string("\nStolen ") + MyGUI::utility::toString(owner.second) + " from " + owner.first.getRefIdString();
+                ret += std::string("\nStolen ") + MyGUI::utility::toString(owner.second) + " from "
+                    + owner.first.getRefIdString();
         }
 
         ret += getMiscString(cellref.getGlobalVariable(), "Global");

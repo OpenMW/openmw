@@ -325,7 +325,8 @@ namespace MWMechanics
             if (reflected)
             {
                 const ESM::Static* reflectStatic
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Reflect"));
+                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find(
+                        ESM::RefId::stringRefId("VFX_Reflect"));
                 MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
                 if (animation && !reflectStatic->mModel.empty())
                 {
@@ -418,9 +419,8 @@ namespace MWMechanics
 
     bool ActiveSpells::isSpellActive(const ESM::RefId& id) const
     {
-        return std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& spell) {
-            return spell.mId ==  id;
-        }) != mSpells.end();
+        return std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& spell) { return spell.mId == id; })
+            != mSpells.end();
     }
 
     void ActiveSpells::addSpell(const ActiveSpellParams& params)

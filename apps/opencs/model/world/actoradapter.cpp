@@ -521,7 +521,8 @@ namespace CSMWorld
             }
 
             auto& part = partRecord.get();
-            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin && !is1stPersonPart(part.mId.getRefIdString()))
+            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin
+                && !is1stPersonPart(part.mId.getRefIdString()))
             {
                 auto type = (ESM::BodyPart::MeshPart)part.mData.mPart;
                 bool female = part.mData.mFlags & ESM::BodyPart::BPF_Female;

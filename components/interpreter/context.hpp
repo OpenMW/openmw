@@ -1,10 +1,10 @@
 #ifndef INTERPRETER_CONTEXT_H_INCLUDED
 #define INTERPRETER_CONTEXT_H_INCLUDED
 
+#include <components/esm/refid.hpp>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <components/esm/refid.hpp>
 
 namespace Interpreter
 {

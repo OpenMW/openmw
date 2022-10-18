@@ -9,7 +9,6 @@
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadsoun.hpp>
-#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -45,7 +44,8 @@ namespace MWMechanics
     bool applyOnStrikeEnchantment(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object,
         const osg::Vec3f& hitPosition, const bool fromProjectile)
     {
-        const ESM::RefId& enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : ESM::RefId::sEmpty;
+        const ESM::RefId& enchantmentName
+            = !object.isEmpty() ? object.getClass().getEnchantment(object) : ESM::RefId::sEmpty;
         if (!enchantmentName.empty())
         {
             const ESM::Enchantment* enchantment
@@ -269,7 +269,8 @@ namespace MWMechanics
                 static const float fCombatKODamageMult = gmst.find("fCombatKODamageMult")->mValue.getFloat();
                 damage *= fCombatKODamageMult;
                 if (!knockedDown)
-                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, ESM::RefId::stringRefId("critical damage"), 1.0f, 1.0f);
+                    MWBase::Environment::get().getSoundManager()->playSound3D(
+                        victim, ESM::RefId::stringRefId("critical damage"), 1.0f, 1.0f);
             }
         }
 
@@ -383,7 +384,8 @@ namespace MWMechanics
             health.setCurrent(health.getCurrent() - x);
             attackerStats.setHealth(health);
 
-            MWBase::Environment::get().getSoundManager()->playSound3D(attacker, ESM::sHealthDamageSoundId, 1.0f, 1.0f);
+            MWBase::Environment::get().getSoundManager()->playSound3D(
+                attacker, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
         }
     }
 

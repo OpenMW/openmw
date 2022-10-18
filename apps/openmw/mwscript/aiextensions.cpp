@@ -10,7 +10,6 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/opcodes.hpp>
 #include <components/interpreter/runtime.hpp>
-#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -356,7 +355,8 @@ namespace MWScript
                 MWMechanics::AiFollow followPackage(actorID, duration, x, y, z, repeat);
                 ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(followPackage, ptr);
 
-                Log(Debug::Info) << "AiFollow: " << actorID.getRefIdString() << ", " << x << ", " << y << ", " << z << ", " << duration;
+                Log(Debug::Info) << "AiFollow: " << actorID.getRefIdString() << ", " << x << ", " << y << ", " << z
+                                 << ", " << duration;
             }
         };
 
@@ -396,7 +396,8 @@ namespace MWScript
 
                 MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y, z, repeat);
                 ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(followPackage, ptr);
-                Log(Debug::Info) << "AiFollow: " << actorID.getRefIdString() << ", " << x << ", " << y << ", " << z << ", " << duration;
+                Log(Debug::Info) << "AiFollow: " << actorID.getRefIdString() << ", " << x << ", " << y << ", " << z
+                                 << ", " << duration;
             }
         };
 
@@ -485,7 +486,7 @@ namespace MWScript
                         if (!targetPtr.isEmpty() && targetPtr.getCellRef().getRefId() == testedTargetId)
                             targetsAreEqual = true;
                     }
-                    else if (testedTargetId == ESM::sPlayerId) // Currently the player ID is hardcoded
+                    else if (testedTargetId == "Player") // Currently the player ID is hardcoded
                     {
                         MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
                         bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::Greet_InProgress;

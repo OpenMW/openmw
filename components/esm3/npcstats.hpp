@@ -1,11 +1,11 @@
 #ifndef OPENMW_ESM_NPCSTATS_H
 #define OPENMW_ESM_NPCSTATS_H
 
+#include "statstate.hpp"
+#include <components/esm/refid.hpp>
 #include <map>
 #include <string>
 #include <vector>
-#include <components/esm/refid.hpp>
-#include "statstate.hpp"
 
 namespace ESM
 {

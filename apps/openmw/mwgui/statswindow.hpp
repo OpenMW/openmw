@@ -1,9 +1,9 @@
 #ifndef MWGUI_STATS_WINDOW_H
 #define MWGUI_STATS_WINDOW_H
 
-#include <components/esm/refid.hpp>
 #include "statswatcher.hpp"
 #include "windowpinnablebase.hpp"
+#include <components/esm/refid.hpp>
 
 namespace MWGui
 {

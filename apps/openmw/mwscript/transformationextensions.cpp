@@ -65,8 +65,8 @@ namespace MWScript
                         from = container;
                     else
                     {
-                        std::string error
-                            = "Failed to find the container of object '" + from.getCellRef().getRefId().getRefIdString() + "'";
+                        std::string error = "Failed to find the container of object '"
+                            + from.getCellRef().getRefId().getRefIdString() + "'";
                         runtime.getContext().report(error);
                         Log(Debug::Error) << error;
                         runtime.push(0.f);

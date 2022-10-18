@@ -120,7 +120,7 @@ namespace ESM
             const int count = entry.second;
             for (auto& item : mItems)
             {
-                if (item.mCount == count && id ==  item.mRef.mRefID)
+                if (item.mCount == count && id == item.mRef.mRefID)
                     item.mCount = -count;
             }
         }
@@ -138,8 +138,7 @@ namespace ESM
             }
         }
 
-        for (auto it = mLevelledItemMap.begin();
-             it != mLevelledItemMap.end(); ++it)
+        for (auto it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
         {
             esm.writeHNString("LEVM", it->first.first.getRefIdString());
             esm.writeHNT("COUN", it->second);

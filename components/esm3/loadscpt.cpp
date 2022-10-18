@@ -188,7 +188,7 @@ namespace ESM
 
         mVarNames.clear();
         mScriptData.clear();
-        std::string stringId = mId.getRefIdString();
+        const std::string& stringId = mId.getRefIdString();
         if (stringId.find("::") != std::string::npos)
             mScriptText = "Begin \"" + stringId + "\"\n\nEnd " + stringId + "\n";
         else

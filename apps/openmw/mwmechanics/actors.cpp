@@ -208,7 +208,8 @@ namespace
                 if (caster == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
-                const ESM::Static* const fx = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Soul_Trap"));
+                const ESM::Static* const fx
+                    = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Soul_Trap"));
                 if (fx != nullptr)
                 {
                     const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -1833,8 +1834,8 @@ namespace MWMechanics
         {
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
 
-            const ESM::Static* fx
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_End"));
+            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().search(
+                ESM::RefId::stringRefId("VFX_Summon_End"));
             if (fx)
             {
                 const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();

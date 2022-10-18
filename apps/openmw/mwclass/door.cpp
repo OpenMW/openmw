@@ -113,8 +113,7 @@ namespace MWClass
 
         const ESM::RefId& openSound = ref->mBase->mOpenSound;
         const ESM::RefId& closeSound = ref->mBase->mCloseSound;
-        static const ESM::RefId lockedSound = ESM::RefId::stringRefId("LockedDoor");
-        static const ESM::RefId trapActivationSound = ESM::RefId::stringRefId("Disarm Trap Fail");
+        const ESM::RefId lockedSound = ESM::RefId::stringRefId("LockedDoor");
 
         // FIXME: If NPC activate teleporting door, it can lead to crash due to iterator invalidation in the Actors
         // update. Make such activation a no-op for now, like how it is in the vanilla game.
@@ -168,7 +167,8 @@ namespace MWClass
             if (isTrapped)
             {
                 ptr.getCellRef().setTrap(ESM::RefId::sEmpty);
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::RefId::stringRefId("Disarm Trap"), 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(
+                    ptr, ESM::RefId::stringRefId("Disarm Trap"), 1.0f, 1.0f);
                 isTrapped = false;
             }
         }
@@ -180,7 +180,7 @@ namespace MWClass
                 // Trap activation
                 std::unique_ptr<MWWorld::Action> action
                     = std::make_unique<MWWorld::ActionTrap>(ptr.getCellRef().getTrap(), ptr);
-                action->setSound(trapActivationSound);
+                action->setSound(ESM::RefId::stringRefId("Disarm Trap Fail"));
                 return action;
             }
 

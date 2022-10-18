@@ -24,7 +24,7 @@ namespace ESM
     bool SpellList::exists(const ESM::RefId& spell) const
     {
         for (auto it = mList.begin(); it != mList.end(); ++it)
-            if (*it ==  spell)
+            if (*it == spell)
                 return true;
         return false;
     }

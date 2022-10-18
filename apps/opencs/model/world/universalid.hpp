@@ -161,7 +161,6 @@ namespace CSMWorld
 
         UniversalId(Type type, const ESM::RefId& id);
 
-
         UniversalId(Type type, int index);
         ///< Using a type for a non-index-argument UniversalId will throw an exception.
 

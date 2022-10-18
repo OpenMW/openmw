@@ -96,13 +96,12 @@ bool CSVRender::Cell::addObjects(int start, int end)
     for (int i = start; i <= end; ++i)
     {
         auto cellId = collection.getRecord(i).get().mCell;
-        std::string cell = cellId.getRefIdString();
 
         CSMWorld::RecordBase::State state = collection.getRecord(i).mState;
 
         if (cellId == mId && state != CSMWorld::RecordBase::State_Deleted)
         {
-            std::string id =collection.getRecord(i).get().mId.getRefIdString();
+            const std::string& id = collection.getRecord(i).get().mId.getRefIdString();
 
             auto object = std::make_unique<Object>(mData, mCellNode, id, false);
 
@@ -269,8 +268,8 @@ bool CSVRender::Cell::referenceDataChanged(const QModelIndex& topLeft, const QMo
 
     for (int i = topLeft.row(); i <= bottomRight.row(); ++i)
     {
-        auto cell =ESM::RefId::stringRefId(
-            references.data(references.index(i, cellColumn)).toString().toUtf8().constData());
+        auto cell
+            = ESM::RefId::stringRefId(references.data(references.index(i, cellColumn)).toString().toUtf8().constData());
 
         if (cell == mId)
         {

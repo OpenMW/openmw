@@ -6,7 +6,6 @@
 
 #include <components/esm/records.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -85,7 +84,8 @@ namespace
         const MWWorld::CellRef& cellref = target.getCellRef();
 
         const ESM::RefId& owner = cellref.getOwner();
-        bool isOwned = !owner.empty() && owner != ESM::sPlayerId;
+        bool isOwned = !owner.empty() && owner != ESM::RefId::stringRefId("Player");
+        ;
 
         const ESM::RefId& faction = cellref.getFaction();
         bool isFactionOwned = false;
@@ -514,7 +514,7 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         static const float fDispRaceMod = gmst.find("fDispRaceMod")->mValue.getFloat();
-        if (npc->mBase->mRace ==  player->mBase->mRace)
+        if (npc->mBase->mRace == player->mBase->mRace)
             x += fDispRaceMod;
 
         static const float fDispPersonalityMult = gmst.find("fDispPersonalityMult")->mValue.getFloat();
@@ -892,7 +892,8 @@ namespace MWMechanics
             return true;
 
         // TODO: implement a better check to check if target is owned bed
-        if (target.getClass().isActivator() && target.getClass().getScript(target).getRefIdString().compare(0, 3, "Bed") != 0)
+        if (target.getClass().isActivator()
+            && target.getClass().getScript(target).getRefIdString().compare(0, 3, "Bed") != 0)
             return true;
 
         if (target.getClass().isNpc())
@@ -914,8 +915,7 @@ namespace MWMechanics
             return false;
 
         // A special case for evidence chest - we should not allow to take items even if it is technically permitted
-        static const ESM::RefId stolenGoods = ESM::RefId::stringRefId("stolen_goods");
-        return !(cellref.getRefId() == stolenGoods);
+        return !(cellref.getRefId() == "stolen_goods");
     }
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed)
@@ -989,8 +989,7 @@ namespace MWMechanics
         const ESM::RefId& factionid = ptr.getClass().getPrimaryFaction(ptr);
         if (!factionid.empty())
         {
-            OwnerMap::const_iterator factionOwnerFound
-                = owners.find(std::make_pair(factionid, true));
+            OwnerMap::const_iterator factionOwnerFound = owners.find(std::make_pair(factionid, true));
             return factionOwnerFound != owners.end();
         }
 
@@ -1014,8 +1013,7 @@ namespace MWMechanics
         owner.second = false;
 
         const ESM::RefId& victimFaction = victim.getClass().getPrimaryFaction(victim);
-        if (!victimFaction.empty()
-            && item.getCellRef().getFaction() ==  victimFaction) // Is the item faction-owned?
+        if (!victimFaction.empty() && item.getCellRef().getFaction() == victimFaction) // Is the item faction-owned?
         {
             owner.first = victimFaction;
             owner.second = true;
@@ -1048,8 +1046,7 @@ namespace MWMechanics
         MWWorld::ContainerStore& containerStore = targetContainer.getClass().getContainerStore(targetContainer);
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            StolenItemsMap::iterator stolenIt
-                = mStolenItems.find(it->getCellRef().getRefId());
+            StolenItemsMap::iterator stolenIt = mStolenItems.find(it->getCellRef().getRefId());
             if (stolenIt == mStolenItems.end())
                 continue;
             OwnerMap& owners = stolenIt->second;
@@ -1120,7 +1117,7 @@ namespace MWMechanics
             }
         }
 
-        if (!(item.getCellRef().getRefId() ==  MWWorld::ContainerStore::sGoldId))
+        if (!(item.getCellRef().getRefId() == MWWorld::ContainerStore::sGoldId))
         {
             if (victim.isEmpty()
                 || (victim.getClass().isActor() && victim.getRefData().getCount() > 0
@@ -1786,7 +1783,8 @@ namespace MWMechanics
                 || (target == getPlayer() && MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
             {
                 const ESM::GameSetting* iWerewolfFightMod
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWerewolfFightMod");
+                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                        "iWerewolfFightMod");
                 fight += iWerewolfFightMod->mValue.getInteger();
             }
         }
@@ -1840,7 +1838,8 @@ namespace MWMechanics
         if (werewolf)
         {
             inv.unequipAll(actor);
-            inv.equip(MWWorld::InventoryStore::Slot_Robe, inv.ContainerStore::add(ESM::RefId::stringRefId("werewolfrobe"), 1, actor), actor);
+            inv.equip(MWWorld::InventoryStore::Slot_Robe,
+                inv.ContainerStore::add(ESM::RefId::stringRefId("werewolfrobe"), 1, actor), actor);
         }
         else
         {

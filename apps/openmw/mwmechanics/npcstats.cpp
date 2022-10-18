@@ -493,8 +493,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     for (auto iter(mExpelled.begin()); iter != mExpelled.end(); ++iter)
         state.mFactions[*iter].mExpelled = true;
 
-    for (auto iter(mFactionReputation.begin()); iter != mFactionReputation.end();
-         ++iter)
+    for (auto iter(mFactionReputation.begin()); iter != mFactionReputation.end(); ++iter)
         state.mFactions[iter->first].mReputation = iter->second;
 
     state.mReputation = mReputation;
@@ -520,8 +519,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
 {
     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
-    for (auto iter(state.mFactions.begin());
-         iter != state.mFactions.end(); ++iter)
+    for (auto iter(state.mFactions.begin()); iter != state.mFactions.end(); ++iter)
         if (store.get<ESM::Faction>().search(iter->first))
         {
             if (iter->second.mExpelled)

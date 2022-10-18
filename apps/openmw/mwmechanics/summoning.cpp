@@ -1,9 +1,9 @@
 #include "summoning.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadstat.hpp>
-#include <components/esm/refid.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -94,7 +94,8 @@ namespace MWMechanics
                 MWRender::Animation* anim = world->getAnimation(placed);
                 if (anim)
                 {
-                    const ESM::Static* fx = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_Start"));
+                    const ESM::Static* fx
+                        = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_Start"));
                     if (fx)
                     {
                         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();

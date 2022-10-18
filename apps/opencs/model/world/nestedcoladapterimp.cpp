@@ -346,7 +346,8 @@ namespace CSMWorld
             case 0:
             {
                 reactions.erase(iter);
-                reactions.insert(std::make_pair(ESM::RefId::stringRefId(value.toString().toUtf8().constData()), reaction));
+                reactions.insert(
+                    std::make_pair(ESM::RefId::stringRefId(value.toString().toUtf8().constData()), reaction));
                 break;
             }
             case 1:

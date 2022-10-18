@@ -7,9 +7,9 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Widget.h>
 
+#include <components/esm/refid.hpp>
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadskil.hpp>
-#include <components/esm/refid.hpp>
 
 namespace MyGUI
 {

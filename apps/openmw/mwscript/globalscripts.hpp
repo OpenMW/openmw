@@ -10,8 +10,8 @@
 #include <utility>
 #include <variant>
 
-#include <components/misc/algorithm.hpp>
 #include <components/esm/refid.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include "locals.hpp"
 
@@ -54,8 +54,7 @@ namespace MWScript
     class GlobalScripts
     {
         const MWWorld::ESMStore& mStore;
-        std::unordered_map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>>
-            mScripts;
+        std::unordered_map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>> mScripts;
 
     public:
         GlobalScripts(const MWWorld::ESMStore& store);

@@ -100,8 +100,7 @@ namespace MWMechanics
 
             if (cap.mReachedLimit)
             {
-                auto found
-                    = std::find(selectedSpells.begin(), selectedSpells.end(), cap.mWeakestSpell);
+                auto found = std::find(selectedSpells.begin(), selectedSpells.end(), cap.mWeakestSpell);
                 if (found != selectedSpells.end())
                     selectedSpells.erase(found);
 
@@ -148,7 +147,8 @@ namespace MWMechanics
         return selectedSpells;
     }
 
-    std::vector<ESM::RefId> autoCalcPlayerSpells(const int* actorSkills, const int* actorAttributes, const ESM::Race* race)
+    std::vector<ESM::RefId> autoCalcPlayerSpells(
+        const int* actorSkills, const int* actorAttributes, const ESM::Race* race)
     {
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 

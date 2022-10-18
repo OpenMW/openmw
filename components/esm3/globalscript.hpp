@@ -2,8 +2,8 @@
 #define OPENMW_ESM_GLOBALSCRIPT_H
 
 #include "cellref.hpp"
-#include "locals.hpp"
 #include "components/esm/refid.hpp"
+#include "locals.hpp"
 
 namespace ESM
 {

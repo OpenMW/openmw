@@ -1,9 +1,9 @@
 #ifndef OPENMW_ESM_SPELLLIST_H
 #define OPENMW_ESM_SPELLLIST_H
 
+#include <components/esm/refid.hpp>
 #include <string>
 #include <vector>
-#include <components/esm/refid.hpp>
 
 namespace ESM
 {

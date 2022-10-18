@@ -26,7 +26,6 @@
 #include <components/sceneutil/shadow.hpp>
 #include <components/settings/settings.hpp>
 #include <components/stereo/multiview.hpp>
-#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -544,7 +543,7 @@ namespace MWRender
     void RaceSelectionPreview::setPrototype(const ESM::NPC& proto)
     {
         mBase = proto;
-        mBase.mId = ESM::sPlayerId;
+        mBase.mId = ESM::RefId::stringRefId("Player");
         rebuild();
     }
 

@@ -1,10 +1,10 @@
 #ifndef OPENMW_ESM_WEATHERSTATE_H
 #define OPENMW_ESM_WEATHERSTATE_H
 
+#include <components/esm/refid.hpp>
 #include <map>
 #include <string>
 #include <vector>
-#include <components/esm/refid.hpp>
 
 namespace ESM
 {

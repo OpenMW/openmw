@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESM_JOURNALENTRY_H
 #define OPENMW_ESM_JOURNALENTRY_H
 
-#include <string>
 #include <components/esm/refid.hpp>
+#include <string>
 
 namespace ESM
 {

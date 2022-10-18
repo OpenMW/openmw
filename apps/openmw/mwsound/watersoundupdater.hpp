@@ -1,8 +1,8 @@
 #ifndef GAME_SOUND_WATERSOUNDUPDATER_H
 #define GAME_SOUND_WATERSOUNDUPDATER_H
 
-#include <string>
 #include "components/esm/refid.hpp"
+#include <string>
 
 namespace MWBase
 {

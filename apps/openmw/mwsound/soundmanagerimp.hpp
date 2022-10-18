@@ -222,8 +222,8 @@ namespace MWSound
         ///< Play_NoTrack is specified.
         ///< @param offset Number of seconds into the sound to start playback.
 
-        Sound* playSound3D(const osg::Vec3f& initialPos, const ESM::RefId& soundId, float volume, float pitch, Type type,
-            PlayMode mode, float offset = 0) override;
+        Sound* playSound3D(const osg::Vec3f& initialPos, const ESM::RefId& soundId, float volume, float pitch,
+            Type type, PlayMode mode, float offset = 0) override;
         ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using
         ///< Sound::setPosition.
         ///< @param offset Number of seconds into the sound to start playback.

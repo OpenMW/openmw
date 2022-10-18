@@ -14,8 +14,8 @@
 #include "cellreflist.hpp"
 #include "livecellref.hpp"
 
-#include <components/esm3/fogstate.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm3/fogstate.hpp>
 #include <components/misc/tuplemeta.hpp>
 
 #include "ptr.hpp"

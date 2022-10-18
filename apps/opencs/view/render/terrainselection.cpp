@@ -338,8 +338,11 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
     {
         CSMDoc::Document& document = mWorldspaceWidget->getDocument();
         std::string cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
-        const ESM::Land::LandData* landData
-            = document.getData().getLand().getRecord(ESM::RefId::stringRefId(cellId)).get().getLandData(ESM::Land::DATA_VHGT);
+        const ESM::Land::LandData* landData = document.getData()
+                                                  .getLand()
+                                                  .getRecord(ESM::RefId::stringRefId(cellId))
+                                                  .get()
+                                                  .getLandData(ESM::Land::DATA_VHGT);
         return landData->mHeights[localY * ESM::Land::LAND_SIZE + localX];
     }
 

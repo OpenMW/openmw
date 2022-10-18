@@ -7,7 +7,6 @@
 #include <osg/ImageUtils>
 #include <osgDB/ReadFile>
 
-#include <components/esm/refidhardcoded.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -375,7 +374,7 @@ namespace ESSImport
         profile.mInGameTime.mYear = context.mYear;
         profile.mTimePlayed = 0;
         profile.mPlayerCell = ESM::RefId::stringRefId(header.mGameData.mCurrentCell.toString());
-        if (context.mPlayerBase.mClass == ESM::RefId::stringRefId("NEWCLASSID_CHARGEN"))
+        if (context.mPlayerBase.mClass == "NEWCLASSID_CHARGEN")
             profile.mPlayerClassName = context.mCustomPlayerClassName;
         else
             profile.mPlayerClassId = context.mPlayerBase.mClass;
@@ -398,7 +397,7 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_NPC_);
-        context.mPlayerBase.mId = ESM::sPlayerId;
+        context.mPlayerBase.mId = ESM::RefId::stringRefId("Player");
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 

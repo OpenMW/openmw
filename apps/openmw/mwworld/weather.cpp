@@ -185,10 +185,14 @@ namespace MWWorld
     {
         mDL.FogFactor = dlFactor;
         mDL.FogOffset = dlOffset;
-        mThunderSoundID[0] = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_0"));
-        mThunderSoundID[1] = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_1"));
-        mThunderSoundID[2] = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_2"));
-        mThunderSoundID[3] = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_3"));
+        mThunderSoundID[0]
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_0"));
+        mThunderSoundID[1]
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_1"));
+        mThunderSoundID[2]
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_2"));
+        mThunderSoundID[3]
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_3"));
 
         // TODO: support weathers that have both "Ambient Loop Sound ID" and "Rain Loop Sound ID", need to play both
         // sounds at the same time.
@@ -196,14 +200,16 @@ namespace MWWorld
         if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing
                                   // Using_Precip has no effect
         {
-            mAmbientLoopSoundID = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID"));
+            mAmbientLoopSoundID
+                = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID"));
             if (mAmbientLoopSoundID.empty()) // default to "rain" if not set
                 mAmbientLoopSoundID = ESM::RefId::stringRefId("rain");
         }
         else
-            mAmbientLoopSoundID = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
+            mAmbientLoopSoundID
+                = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
 
-        if (mAmbientLoopSoundID ==  ESM::RefId::stringRefId("None"))
+        if (mAmbientLoopSoundID == "None")
             mAmbientLoopSoundID = ESM::RefId::sEmpty;
     }
 
@@ -938,8 +944,7 @@ namespace MWWorld
                 mRegions.clear();
                 importRegions();
 
-                for (auto it = state.mRegions.begin();
-                     it != state.mRegions.end(); ++it)
+                for (auto it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
                 {
                     auto found = mRegions.find(it->first);
                     if (found != mRegions.end())
@@ -991,7 +996,7 @@ namespace MWWorld
         MWWorld::ConstPtr player = MWMechanics::getPlayer();
         if (player.isInCell())
         {
-            if (regionID ==  mCurrentRegion)
+            if (regionID == mCurrentRegion)
             {
                 addWeatherTransition(region.getWeather());
             }

@@ -92,8 +92,7 @@ namespace
     template <typename T>
     MWWorld::Ptr searchInContainerList(MWWorld::CellRefList<T>& containerList, const ESM::RefId& id)
     {
-        for (auto iter(containerList.mList.begin());
-             iter != containerList.mList.end(); ++iter)
+        for (auto iter(containerList.mList.begin()); iter != containerList.mList.end(); ++iter)
         {
             MWWorld::Ptr container(&*iter, nullptr);
 
@@ -169,7 +168,7 @@ namespace
             {
                 for (auto& item : state.mInventory.mItems)
                 {
-                    if (item.mCount > 0 && baseItem.mItem ==  item.mRef.mRefID)
+                    if (item.mCount > 0 && baseItem.mItem == item.mRef.mRefID)
                         item.mCount = -item.mCount;
                 }
             }
@@ -552,7 +551,10 @@ namespace MWWorld
     {
         PtrType mFound;
         const ESM::RefId& mIdToFind;
-        SearchVisitor(const ESM::RefId& id) : mIdToFind(id) {}
+        SearchVisitor(const ESM::RefId& id)
+            : mIdToFind(id)
+        {
+        }
         bool operator()(const PtrType& ptr)
         {
             if (ptr.getCellRef().getRefId() == mIdToFind)

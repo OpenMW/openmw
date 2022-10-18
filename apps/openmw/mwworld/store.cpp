@@ -254,7 +254,7 @@ namespace MWWorld
 
             while (sharedIter != mShared.end() && sharedIter != end)
             {
-                if ((*sharedIter)->mId ==  id)
+                if ((*sharedIter)->mId == id)
                 {
                     mShared.erase(sharedIter);
                     break;
@@ -359,7 +359,7 @@ namespace MWWorld
             ESM::LandTexture* tex = const_cast<ESM::LandTexture*>(search(lt.mIndex, i));
             if (tex)
             {
-                if (tex->mId ==  lt.mId)
+                if (tex->mId == lt.mId)
                     tex->mTexture = lt.mTexture;
             }
         }
@@ -716,7 +716,7 @@ namespace MWWorld
         const ESM::Cell* cell = nullptr;
         for (const ESM::Cell* sharedCell : mSharedExt)
         {
-            if (ESM::RefId::stringRefId(sharedCell->mName) ==  id)
+            if (ESM::RefId::stringRefId(sharedCell->mName) == id)
             {
                 if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
                     || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
@@ -732,7 +732,7 @@ namespace MWWorld
         const ESM::Cell* cell = nullptr;
         for (const ESM::Cell* sharedCell : mSharedExt)
         {
-            if (sharedCell->mRegion ==  id)
+            if (sharedCell->mRegion == id)
             {
                 if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
                     || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
@@ -972,7 +972,8 @@ namespace MWWorld
 
     const ESM::GameSetting* Store<ESM::GameSetting>::search(std::string_view id) const
     {
-        return TypedDynamicStore::search(ESM::RefId::stringRefId(id));;
+        return TypedDynamicStore::search(ESM::RefId::stringRefId(id));
+        ;
     }
 
     Store<ESM::MagicEffect>::Store() {}

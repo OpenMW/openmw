@@ -49,7 +49,7 @@ namespace MWDialogue
         bool hasFactionRankSkillRequirements(const MWWorld::Ptr& actor, const ESM::RefId& factionId, int rank) const;
 
         bool hasFactionRankReputationRequirements(
-            const MWWorld::Ptr& actor,const ESM::RefId& factionId, int rank) const;
+            const MWWorld::Ptr& actor, const ESM::RefId& factionId, int rank) const;
 
     public:
         Filter(const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);

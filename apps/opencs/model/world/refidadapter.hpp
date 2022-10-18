@@ -1,8 +1,9 @@
 #ifndef CSM_WOLRD_REFIDADAPTER_H
 #define CSM_WOLRD_REFIDADAPTER_H
 
-#include <string>
 #include <components/esm/refid.hpp>
+#include <string>
+#include <vector>
 
 /*! \brief
  * Adapters acts as indirection layer, abstracting details of the record types (in the wrappers) from the higher levels

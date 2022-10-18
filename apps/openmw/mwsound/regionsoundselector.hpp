@@ -1,9 +1,9 @@
 #ifndef GAME_SOUND_REGIONSOUNDSELECTOR_H
 #define GAME_SOUND_REGIONSOUNDSELECTOR_H
 
+#include <components/esm/refid.hpp>
 #include <optional>
 #include <string>
-#include <components/esm/refid.hpp>
 
 namespace MWBase
 {

@@ -2,7 +2,6 @@
 #define OPENMW_ESM_CELLID_H
 
 #include <string>
-#include <components/esm/refid.hpp>
 
 namespace ESM
 {

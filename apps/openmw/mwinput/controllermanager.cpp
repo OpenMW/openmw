@@ -8,7 +8,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
-#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -207,7 +206,8 @@ namespace MWInput
                         MyGUI::Button* b
                             = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
                         if (b && b->getEnabled())
-                            MWBase::Environment::get().getWindowManager()->playSound(ESM::sMenuClickSoundId);
+                            MWBase::Environment::get().getWindowManager()->playSound(
+                                ESM::RefId::stringRefId("Menu Click"));
                     }
 
                     mBindingsManager->setPlayerControlsEnabled(!mousePressSuccess);

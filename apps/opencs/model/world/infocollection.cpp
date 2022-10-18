@@ -342,7 +342,8 @@ void CSMWorld::InfoCollection::appendBlankRecord(const ESM::RefId& id, Universal
 
     record2->get().mId = id;
 
-    insertRecord(std::move(record2), getInsertIndex(id.getRefIdString(), type, nullptr), type); // call InfoCollection::insertRecord()
+    insertRecord(std::move(record2), getInsertIndex(id.getRefIdString(), type, nullptr),
+        type); // call InfoCollection::insertRecord()
 }
 
 int CSMWorld::InfoCollection::searchId(std::string_view id) const
@@ -357,7 +358,8 @@ int CSMWorld::InfoCollection::searchId(std::string_view id) const
 
 void CSMWorld::InfoCollection::appendRecord(std::unique_ptr<RecordBase> record, UniversalId::Type type)
 {
-    int index = getInsertIndex(static_cast<Record<Info>*>(record.get())->get().mId.getRefIdString(), type, record.get());
+    int index
+        = getInsertIndex(static_cast<Record<Info>*>(record.get())->get().mId.getRefIdString(), type, record.get());
 
     insertRecord(std::move(record), index, type);
 }

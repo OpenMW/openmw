@@ -1,9 +1,9 @@
 #ifndef GAME_MWDIALOGUE_JOURNALENTRY_H
 #define GAME_MWDIALOGUE_JOURNALENTRY_H
 
+#include <components/esm/refid.hpp>
 #include <string>
 #include <string_view>
-#include <components/esm/refid.hpp>
 
 namespace ESM
 {

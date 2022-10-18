@@ -39,7 +39,8 @@ namespace MWDialogue
                 return;
             }
 
-        throw std::runtime_error("unknown info ID " + mInfoId.getRefIdString() + " for topic " + topic.getRefIdString());
+        throw std::runtime_error(
+            "unknown info ID " + mInfoId.getRefIdString() + " for topic " + topic.getRefIdString());
     }
 
     Entry::Entry(const ESM::JournalEntry& record)
@@ -106,8 +107,8 @@ namespace MWDialogue
     {
     }
 
-    StampedJournalEntry::StampedJournalEntry(
-        const ESM::RefId& topic, const ESM::RefId& infoId, int day, int month, int dayOfMonth, const MWWorld::Ptr& actor)
+    StampedJournalEntry::StampedJournalEntry(const ESM::RefId& topic, const ESM::RefId& infoId, int day, int month,
+        int dayOfMonth, const MWWorld::Ptr& actor)
         : JournalEntry(topic, infoId, actor)
         , mDay(day)
         , mMonth(month)
@@ -131,7 +132,8 @@ namespace MWDialogue
         entry.mDayOfMonth = mDayOfMonth;
     }
 
-    StampedJournalEntry StampedJournalEntry::makeFromQuest(const ESM::RefId& topic, int index, const MWWorld::Ptr& actor)
+    StampedJournalEntry StampedJournalEntry::makeFromQuest(
+        const ESM::RefId& topic, int index, const MWWorld::Ptr& actor)
     {
         int day = MWBase::Environment::get().getWorld()->getGlobalInt("dayspassed");
         int month = MWBase::Environment::get().getWorld()->getGlobalInt("month");

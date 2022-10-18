@@ -11,8 +11,8 @@
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/subcellcollection.hpp"
-#include <components/esm/refid.hpp>
 #include "tagbase.hpp"
+#include <components/esm/refid.hpp>
 
 namespace osg
 {

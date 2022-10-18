@@ -86,7 +86,7 @@ namespace MWWorld
 
         ~RefData();
 
-        void write(ESM::ObjectState& objectState,const ESM::RefId& scriptId = ESM::RefId::sEmpty) const;
+        void write(ESM::ObjectState& objectState, const ESM::RefId& scriptId = ESM::RefId::sEmpty) const;
         ///< Ignores custom data (not enough context available here to
         /// perform this operations).
 

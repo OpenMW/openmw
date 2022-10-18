@@ -29,6 +29,7 @@
 #include <osg/ref_ptr>
 
 #include <algorithm>
+#include <components/esm/refid.hpp>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -36,7 +37,6 @@
 #include <tuple>
 #include <utility>
 #include <vector>
-#include <components/esm/refid.hpp>
 namespace NavMeshTool
 {
     namespace

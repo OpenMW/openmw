@@ -370,7 +370,8 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
     {
         auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(i));
         if (record.isModified())
-            reverseLookupMap.emplace(Misc::StringUtils::lowerCase(record.get().mTexture), idCollection()->getId(i).getRefIdString());
+            reverseLookupMap.emplace(
+                Misc::StringUtils::lowerCase(record.get().mTexture), idCollection()->getId(i).getRefIdString());
     }
 
     for (const std::string& id : ids)

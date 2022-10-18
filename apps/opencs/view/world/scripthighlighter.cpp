@@ -3,13 +3,13 @@
 #include <sstream>
 #include <utility>
 
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
 #include <apps/opencs/model/world/scriptcontext.hpp>
 #include <components/compiler/extensions0.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/tokenloc.hpp>
 #include <components/esm/refid.hpp>
-#include "../../model/prefs/category.hpp"
-#include "../../model/prefs/setting.hpp"
 
 class QTextDocument;
 

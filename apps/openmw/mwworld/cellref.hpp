@@ -77,7 +77,7 @@ namespace MWWorld
 
         // The NPC that owns this object (and will get angry if you steal it)
         const ESM::RefId& getOwner() const { return mCellRef.mOwner; }
-        void setOwner(const ESM::RefId&owner);
+        void setOwner(const ESM::RefId& owner);
 
         // Name of a global variable. If the global variable is set to '1', using the object is temporarily allowed
         // even if it has an Owner field.

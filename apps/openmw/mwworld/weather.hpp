@@ -7,8 +7,8 @@
 
 #include <osg/Vec4f>
 
-#include <components/fallback/fallback.hpp>
 #include <components/esm/refid.hpp>
+#include <components/fallback/fallback.hpp>
 
 #include "../mwbase/soundmanager.hpp"
 

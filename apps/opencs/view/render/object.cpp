@@ -597,7 +597,7 @@ bool CSVRender::Object::referenceDataChanged(const QModelIndex& topLeft, const Q
 
     const CSMWorld::RefCollection& references = mData.getReferences();
 
-    int index = references.searchId(mReferenceId.getRefIdString());
+    int index = references.searchId(mReferenceId);
 
     if (index != -1 && index >= topLeft.row() && index <= bottomRight.row())
     {
@@ -607,7 +607,8 @@ bool CSVRender::Object::referenceDataChanged(const QModelIndex& topLeft, const Q
 
         if (columnIndex >= topLeft.column() && columnIndex <= bottomRight.row())
         {
-            mReferenceableId = ESM::RefId::stringRefId(references.getData(index, columnIndex).toString().toUtf8().constData());
+            mReferenceableId
+                = ESM::RefId::stringRefId(references.getData(index, columnIndex).toString().toUtf8().constData());
 
             update();
             updateMarker();

@@ -11,6 +11,7 @@
 #include <QVariant>
 
 #include "cellcoordinates.hpp"
+#include <components/esm/refid.hpp>
 
 class QObject;
 

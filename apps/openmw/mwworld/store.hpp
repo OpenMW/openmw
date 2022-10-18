@@ -8,13 +8,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
-#include <components/esm3/loadgmst.hpp>
-#include <components/esm3/loadglob.hpp>
-#include <components/esm/refid.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
@@ -229,7 +229,6 @@ namespace MWWorld
     template <class T>
     class Store : public TypedDynamicStore<T>
     {
-
     };
 
     template <>
@@ -333,8 +332,7 @@ namespace MWWorld
             }
         };
 
-        typedef std::unordered_map<ESM::RefId, ESM::Cell>
-            DynamicInt;
+        typedef std::unordered_map<ESM::RefId, ESM::Cell> DynamicInt;
         typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp> DynamicExt;
 
         DynamicInt mInt;
@@ -394,8 +392,7 @@ namespace MWWorld
     class Store<ESM::Pathgrid> : public DynamicStore
     {
     private:
-        typedef std::unordered_map<ESM::RefId, ESM::Pathgrid>
-            Interior;
+        typedef std::unordered_map<ESM::RefId, ESM::Pathgrid> Interior;
         typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
 
         Interior mInt;
@@ -485,8 +482,7 @@ namespace MWWorld
     template <>
     class Store<ESM::Dialogue> : public DynamicStore
     {
-        typedef std::unordered_map<ESM::RefId, ESM::Dialogue>
-            Static;
+        typedef std::unordered_map<ESM::RefId, ESM::Dialogue> Static;
         Static mStatic;
         /// @par mShared usually preserves the record order as it came from the content files (this
         /// is relevant for the spell autocalc code and selection order

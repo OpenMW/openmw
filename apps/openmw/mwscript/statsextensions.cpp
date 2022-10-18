@@ -255,7 +255,7 @@ namespace MWScript
                 runtime.pop();
 
                 // workaround broken endgame scripts that kill dagoth ur
-                if (!R::implicit && ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("dagoth_ur_1"))
+                if (!R::implicit && ptr.getCellRef().getRefId() == "dagoth_ur_1")
                 {
                     runtime.push(peek);
 
@@ -870,7 +870,7 @@ namespace MWScript
 
                 const ESM::RefId& npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
 
-                runtime.push(race ==  npcRace);
+                runtime.push(race == npcRace);
             }
         };
 

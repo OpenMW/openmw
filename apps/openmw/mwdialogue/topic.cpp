@@ -11,7 +11,8 @@ namespace MWDialogue
 
     Topic::Topic(const ESM::RefId& topic)
         : mTopic(topic)
-        , mName(MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic)->mId.getRefIdString())
+        , mName(
+              MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic)->mId.getRefIdString())
     {
     }
 

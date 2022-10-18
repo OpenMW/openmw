@@ -1,9 +1,9 @@
 #ifndef COMPONENTS_ESM_MAGICEFFECTS_H
 #define COMPONENTS_ESM_MAGICEFFECTS_H
 
+#include <components/esm/refid.hpp>
 #include <map>
 #include <string>
-#include <components/esm/refid.hpp>
 
 namespace ESM
 {

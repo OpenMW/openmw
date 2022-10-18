@@ -100,7 +100,7 @@ namespace MWMechanics
             // try to find a new tool of the same ID
             for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
             {
-                if (iter->getCellRef().getRefId() ==  mTool.getCellRef().getRefId())
+                if (iter->getCellRef().getRefId() == mTool.getCellRef().getRefId())
                 {
                     mTool = *iter;
 

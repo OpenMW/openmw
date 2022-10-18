@@ -10,9 +10,9 @@
 #include <osgParticle/ConstantRateCounter>
 #include <osgParticle/Shooter>
 
+#include <components/esm/refid.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
-#include <components/esm/refid.hpp>
 
 namespace Resource
 {

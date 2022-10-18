@@ -206,16 +206,15 @@ namespace
     void removeBoundItem(const ESM::RefId& itemId, const MWWorld::Ptr& actor)
     {
         MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-        auto item = std::find_if(store.begin(), store.end(),
-            [&](const auto& it) { return it.getCellRef().getRefId() == itemId; });
+        auto item = std::find_if(
+            store.begin(), store.end(), [&](const auto& it) { return it.getCellRef().getRefId() == itemId; });
         if (item == store.end())
             return;
         int slot = getBoundItemSlot(*item);
 
         auto currentItem = store.getSlot(slot);
 
-        bool wasEquipped
-            = currentItem != store.end() && currentItem->getCellRef().getRefId() ==  itemId;
+        bool wasEquipped = currentItem != store.end() && currentItem->getCellRef().getRefId() == itemId;
 
         if (wasEquipped)
             store.remove(*currentItem, 1, actor);
@@ -457,7 +456,8 @@ namespace MWMechanics
                     {
                         MWRender::Animation* anim = world->getAnimation(caster);
                         anim->removeEffect(effect.mEffectId);
-                        const ESM::Static* fx = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_end"));
+                        const ESM::Static* fx
+                            = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_end"));
                         if (fx)
                         {
                             const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -565,8 +565,9 @@ namespace MWMechanics
                     const auto& magnitudes = target.getClass().getCreatureStats(target).getMagicEffects();
                     float volume = std::clamp(
                         (magnitudes.get(effect.mEffectId).getModifier() + effect.mMagnitude) / 100.f, 0.f, 1.f);
-                    MWBase::Environment::get().getSoundManager()->playSound3D(
-                        target, ESM::RefId::stringRefId("magic sound"), volume, 1.f, MWSound::Type::Sfx, MWSound::PlayMode::LoopNoEnv);
+                    MWBase::Environment::get().getSoundManager()->playSound3D(target,
+                        ESM::RefId::stringRefId("magic sound"), volume, 1.f, MWSound::Type::Sfx,
+                        MWSound::PlayMode::LoopNoEnv);
                 }
                 break;
             case ESM::MagicEffect::SummonScamp:
@@ -602,8 +603,10 @@ namespace MWMechanics
                     invalid = true;
                     break;
                 }
-                addBoundItem(ESM::RefId::stringRefId(
-                    world->getStore().get<ESM::GameSetting>().find("sMagicBoundRightGauntletID")->mValue.getString()),
+                addBoundItem(ESM::RefId::stringRefId(world->getStore()
+                                                         .get<ESM::GameSetting>()
+                                                         .find("sMagicBoundRightGauntletID")
+                                                         ->mValue.getString()),
                     target);
                 // left gauntlet added below
                 [[fallthrough]];
@@ -622,7 +625,9 @@ namespace MWMechanics
                 else
                 {
                     const std::string& item = sBoundItemsMap.at(effect.mEffectId);
-                    addBoundItem(ESM::RefId::stringRefId(world->getStore().get<ESM::GameSetting>().find(item)->mValue.getString()), target);
+                    addBoundItem(ESM::RefId::stringRefId(
+                                     world->getStore().get<ESM::GameSetting>().find(item)->mValue.getString()),
+                        target);
                 }
                 break;
             case ESM::MagicEffect::FireDamage:
@@ -946,7 +951,8 @@ namespace MWMechanics
                 {
                     if (target.getCellRef().getLockLevel() > 0)
                     {
-                        MWBase::Environment::get().getSoundManager()->playSound3D(target, ESM::RefId::stringRefId("Open Lock"), 1.f, 1.f);
+                        MWBase::Environment::get().getSoundManager()->playSound3D(
+                            target, ESM::RefId::stringRefId("Open Lock"), 1.f, 1.f);
 
                         if (caster == getPlayer())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
@@ -955,7 +961,8 @@ namespace MWMechanics
                 }
                 else
                 {
-                    MWBase::Environment::get().getSoundManager()->playSound3D(target, ESM::RefId::stringRefId("Open Lock Fail"), 1.f, 1.f);
+                    MWBase::Environment::get().getSoundManager()->playSound3D(
+                        target, ESM::RefId::stringRefId("Open Lock Fail"), 1.f, 1.f);
                 }
             }
             else
@@ -1105,7 +1112,8 @@ namespace MWMechanics
                 break;
             case ESM::MagicEffect::Sound:
                 if (magnitudes.get(effect.mEffectId).getModifier() <= 0.f && target == getPlayer())
-                    MWBase::Environment::get().getSoundManager()->stopSound3D(target, ESM::RefId::stringRefId("magic sound"));
+                    MWBase::Environment::get().getSoundManager()->stopSound3D(
+                        target, ESM::RefId::stringRefId("magic sound"));
                 break;
             case ESM::MagicEffect::SummonScamp:
             case ESM::MagicEffect::SummonClannfear:
@@ -1145,8 +1153,10 @@ namespace MWMechanics
             }
             break;
             case ESM::MagicEffect::BoundGloves:
-                removeBoundItem(
-                    ESM::RefId::stringRefId(world->getStore().get<ESM::GameSetting>().find("sMagicBoundRightGauntletID")->mValue.getString()),
+                removeBoundItem(ESM::RefId::stringRefId(world->getStore()
+                                                            .get<ESM::GameSetting>()
+                                                            .find("sMagicBoundRightGauntletID")
+                                                            ->mValue.getString()),
                     target);
                 [[fallthrough]];
             case ESM::MagicEffect::BoundDagger:
@@ -1161,7 +1171,9 @@ namespace MWMechanics
             case ESM::MagicEffect::BoundShield:
             {
                 const std::string& item = sBoundItemsMap.at(effect.mEffectId);
-                removeBoundItem(ESM::RefId::stringRefId(world->getStore().get<ESM::GameSetting>().find(item)->mValue.getString()), target);
+                removeBoundItem(
+                    ESM::RefId::stringRefId(world->getStore().get<ESM::GameSetting>().find(item)->mValue.getString()),
+                    target);
             }
             break;
             case ESM::MagicEffect::DrainHealth:

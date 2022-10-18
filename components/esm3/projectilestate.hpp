@@ -8,8 +8,8 @@
 
 #include "effectlist.hpp"
 
-#include "components/esm/util.hpp"
 #include "components/esm/refid.hpp"
+#include "components/esm/util.hpp"
 
 namespace ESM
 {

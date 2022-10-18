@@ -108,7 +108,7 @@ bool CSMWorld::ScriptContext::isId(const ESM::RefId& name) const
     if (!mIdsUpdated)
     {
         mIds = mData.getIds();
-        
+
         std::sort(mIds.begin(), mIds.end());
 
         mIdsUpdated = true;

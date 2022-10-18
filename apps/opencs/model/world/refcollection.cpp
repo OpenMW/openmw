@@ -87,7 +87,8 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
                 if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
                 {
                     ESM::RefId indexCell = ref.mCell;
-                    ref.mCell = ESM::RefId::stringRefId("#" + std::to_string(mref.mTarget[0]) + " " + std::to_string(mref.mTarget[1]));
+                    ref.mCell = ESM::RefId::stringRefId(
+                        "#" + std::to_string(mref.mTarget[0]) + " " + std::to_string(mref.mTarget[1]));
 
                     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Cell, mCells.getId(cellIndex));
                     messages.add(id, "The position of the moved reference " + ref.mRefID.getRefIdString() + " (cell " + indexCell.getRefIdString() + ")"
@@ -118,7 +119,8 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
 
                 messages.add(id,
                     "Attempt to move a non-existent reference - RefNum index " + std::to_string(ref.mRefNum.mIndex)
-                        + ", refID " + ref.mRefID.getRefIdString() + ", content file index " + std::to_string(ref.mRefNum.mContentFile),
+                        + ", refID " + ref.mRefID.getRefIdString() + ", content file index "
+                        + std::to_string(ref.mRefNum.mContentFile),
                     /*hint*/ "", CSMDoc::Message::Severity_Warning);
                 continue;
             }
@@ -148,7 +150,8 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
 
                 messages.add(id,
                     "Attempt to delete a non-existent reference - RefNum index " + std::to_string(ref.mRefNum.mIndex)
-                        + ", refID " + ref.mRefID.getRefIdString() + ", content file index " + std::to_string(ref.mRefNum.mContentFile),
+                        + ", refID " + ref.mRefID.getRefIdString() + ", content file index "
+                        + std::to_string(ref.mRefNum.mContentFile),
                     /*hint*/ "", CSMDoc::Message::Severity_Warning);
                 continue;
             }

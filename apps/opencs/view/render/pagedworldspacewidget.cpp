@@ -23,7 +23,6 @@
 
 #include <components/esm3/loadpgrd.hpp>
 #include <components/misc/constants.hpp>
-#include <components/esm/refid.hpp>
 
 #include <osg/Camera>
 #include <osg/Vec3f>

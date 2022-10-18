@@ -40,7 +40,7 @@ void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
     const ESM::GameSetting& gmst = record.get();
 
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Gmst, gmst.mId);
-    std::string gmstIdString = gmst.mId.getRefIdString();
+    const std::string& gmstIdString = gmst.mId.getRefIdString();
     // Test for empty string
     if (gmst.mValue.getType() == ESM::VT_String && gmst.mValue.getString().empty())
         messages.add(id, gmstIdString + " is an empty string", "", CSMDoc::Message::Severity_Warning);

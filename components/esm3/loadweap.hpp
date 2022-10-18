@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "loadskil.hpp"
 #include "components/esm/refid.hpp"
+#include "loadskil.hpp"
 
 namespace ESM
 {
@@ -76,8 +76,8 @@ namespace ESM
         WPDTstruct mData;
 
         unsigned int mRecordFlags;
-       RefId mId, mEnchant, mScript;
-       std::string mName, mModel, mIcon;
+        RefId mId, mEnchant, mScript;
+        std::string mName, mModel, mIcon;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

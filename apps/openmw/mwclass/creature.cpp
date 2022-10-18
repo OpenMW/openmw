@@ -9,7 +9,6 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
-#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/aisetting.hpp"
@@ -412,7 +411,8 @@ namespace MWClass
         {
             // Missed
             if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer())
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::RefId::stringRefId("miss"), 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(
+                    ptr, ESM::RefId::stringRefId("miss"), 1.0f, 1.0f);
             return;
         }
 
@@ -449,7 +449,8 @@ namespace MWClass
                     MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
                 }
 
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::sHealthDamageSoundId, 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(
+                    ptr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
 
                 MWMechanics::DynamicStat<float> health(stats.getHealth());
                 health.setCurrent(health.getCurrent() - damage);
@@ -642,15 +643,13 @@ namespace MWClass
 
         MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
-        const ESM::RefId& ourId
-            = (ref->mBase->mOriginal.empty()) ? ptr.getCellRef().getRefId() : ref->mBase->mOriginal;
+        const ESM::RefId& ourId = (ref->mBase->mOriginal.empty()) ? ptr.getCellRef().getRefId() : ref->mBase->mOriginal;
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         auto sound = store.get<ESM::SoundGenerator>().begin();
         while (sound != store.get<ESM::SoundGenerator>().end())
         {
-            if (type == sound->mType && !sound->mCreature.empty()
-                && ourId ==  sound->mCreature)
+            if (type == sound->mType && !sound->mCreature.empty() && ourId == sound->mCreature)
                 sounds.push_back(&*sound);
             if (type == sound->mType && sound->mCreature.empty())
                 fallbacksounds.push_back(&*sound);
@@ -673,8 +672,7 @@ namespace MWClass
                         sound = store.get<ESM::SoundGenerator>().begin();
                         while (sound != store.get<ESM::SoundGenerator>().end())
                         {
-                            if (type == sound->mType && !sound->mCreature.empty()
-                                && fallbackId ==  sound->mCreature)
+                            if (type == sound->mType && !sound->mCreature.empty() && fallbackId == sound->mCreature)
                                 sounds.push_back(&*sound);
                             ++sound;
                         }

@@ -33,8 +33,8 @@ namespace ESM
 
         unsigned int mRecordFlags;
         RefId mId;
-		std::string mModel;
-		
+        std::string mModel;
+
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
 

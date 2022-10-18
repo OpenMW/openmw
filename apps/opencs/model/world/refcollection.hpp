@@ -67,8 +67,7 @@ namespace CSMWorld
         virtual void appendBlankRecord(const std::string& id, UniversalId::Type type = UniversalId::Type_None);
         virtual void appendBlankRecord(const ESM::RefId& id, UniversalId::Type type = UniversalId::Type_None);
 
-        virtual void cloneRecord(
-            const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type);
+        virtual void cloneRecord(const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type);
 
         virtual int searchId(std::string_view id) const;
         virtual int searchId(const ESM::RefId& id) const;

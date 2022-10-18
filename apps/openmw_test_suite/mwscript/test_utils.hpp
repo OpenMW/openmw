@@ -147,7 +147,7 @@ namespace
         std::map<std::string, GlobalVariables, std::less<>> mMembers;
 
     public:
-        const ESM::RefId& getTarget() const override { return ESM::RefId::sEmpty; };
+        const ESM::RefId& getTarget() const override { return ESM::RefId::sEmpty; }
 
         int getLocalShort(int index) const override { return mLocals.getShort(index); }
 
@@ -234,17 +234,17 @@ namespace
         void setMemberShort(const ESM::RefId& id, std::string_view name, int value, bool global) override
         {
             mMembers[id.getRefIdString()].setShort(name, value);
-        };
+        }
 
         void setMemberLong(const ESM::RefId& id, std::string_view name, int value, bool global) override
         {
             mMembers[id.getRefIdString()].setLong(name, value);
-        };
+        }
 
         void setMemberFloat(const ESM::RefId& id, std::string_view name, float value, bool global) override
         {
             mMembers[id.getRefIdString()].setFloat(name, value);
-        };
+        }
     };
 
     struct CompiledScript

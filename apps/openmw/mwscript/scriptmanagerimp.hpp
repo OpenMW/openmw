@@ -57,11 +57,9 @@ namespace MWScript
             }
         };
 
-        std::unordered_map<ESM::RefId, CompiledScript>
-            mScripts;
+        std::unordered_map<ESM::RefId, CompiledScript> mScripts;
         GlobalScripts mGlobalScripts;
-        std::unordered_map<ESM::RefId, Compiler::Locals>
-            mOtherLocals;
+        std::unordered_map<ESM::RefId, Compiler::Locals> mOtherLocals;
         std::vector<std::string> mScriptBlacklist;
 
     public:

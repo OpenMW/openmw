@@ -36,7 +36,8 @@ namespace
     {
         EsmData data;
         GetParam().mPushBack(data);
-        EXPECT_EQ(EsmLoader::getModel(data, ESM::RefId::stringRefId(GetParam().mRefId), GetParam().mType), GetParam().mResult);
+        EXPECT_EQ(EsmLoader::getModel(data, ESM::RefId::stringRefId(GetParam().mRefId), GetParam().mType),
+            GetParam().mResult);
     }
 
     void pushBack(ESM::Activator&& value, EsmData& esmData)

@@ -1,10 +1,10 @@
 #ifndef GAME_MWWORLD_GROUNDCOVER_STORE_H
 #define GAME_MWWORLD_GROUNDCOVER_STORE_H
 
+#include <components/esm/refid.hpp>
 #include <map>
 #include <string>
 #include <vector>
-#include <components/esm/refid.hpp>
 
 namespace ESM
 {

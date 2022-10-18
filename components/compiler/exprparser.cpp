@@ -7,8 +7,8 @@
 #include <stack>
 #include <stdexcept>
 
-#include <components/misc/strings/lower.hpp>
 #include <components/esm/refid.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "context.hpp"
 #include "discardparser.hpp"
@@ -302,7 +302,6 @@ namespace Compiler
         if (mNextOperand)
         {
             start();
-
 
             char type = mLocals.getType(name);
 

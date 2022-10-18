@@ -22,7 +22,7 @@ namespace
     }
 }
 
-MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store,const ESM::RefId& name, const int count)
+MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& name, const int count)
 {
     switch (store.find(name))
     {

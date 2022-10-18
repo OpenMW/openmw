@@ -1,8 +1,8 @@
 #ifndef CSM_WOLRD_METADATA_H
 #define CSM_WOLRD_METADATA_H
 
-#include <string>
 #include <components/esm/refid.hpp>
+#include <string>
 
 namespace ESM
 {

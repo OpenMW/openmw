@@ -178,7 +178,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
             if ((*iter)->isModified() || (*iter)->mState == CSMWorld::RecordBase::State_Deleted)
             {
                 ESM::DialInfo info = (*iter)->get();
-                std::string infoIdString = info.mId.getRefIdString();
+                std::string_view infoIdString = info.mId.getRefIdString();
                 info.mId = ESM::RefId::stringRefId(infoIdString.substr(infoIdString.find_last_of('#') + 1));
 
                 info.mPrev = ESM::RefId::sEmpty;
@@ -269,7 +269,8 @@ void CSMDoc::CollectionReferencesStage::perform(int stage, Messages& messages)
 
             // An empty mOriginalCell is meant to indicate that it is the same as
             // the current cell.  It is possible that a moved ref is moved again.
-            if ((record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell) != ESM::RefId::stringRefId(stream.str())
+            if ((record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell)
+                    != ESM::RefId::stringRefId(stream.str())
                 && !interior && record.mState != CSMWorld::RecordBase::State_ModifiedOnly && !record.get().mNew)
                 indices.push_back(i);
             else
@@ -316,8 +317,7 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
 
             ESM::RefId streamId = ESM::RefId::stringRefId(stream.str());
             if (refRecord.mNew || refRecord.mRefNum.mIndex == 0
-                || (!interior && ref.mState == CSMWorld::RecordBase::State_ModifiedOnly
-                    && refRecord.mCell != streamId))
+                || (!interior && ref.mState == CSMWorld::RecordBase::State_ModifiedOnly && refRecord.mCell != streamId))
             {
                 refRecord.mRefNum.mIndex = newRefNum++;
             }
@@ -390,7 +390,8 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
                 if (refRecord.mNew
                     || (!interior && ref.mState == CSMWorld::RecordBase::State_ModifiedOnly &&
                         /// \todo consider worldspace
-                        ESM::RefId::stringRefId(CSMWorld::CellCoordinates( refRecord.getCellIndex()).getId("")) != refRecord.mCell))
+                        ESM::RefId::stringRefId(CSMWorld::CellCoordinates(refRecord.getCellIndex()).getId(""))
+                            != refRecord.mCell))
                     ++cellRecord.mRefNumCounter;
 
                 if (refRecord.mRefNum.mIndex >= newRefNum)

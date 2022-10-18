@@ -183,7 +183,7 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
 bool CSMTools::TopicInfoCheckStage::verifyActor(
     const ESM::RefId& actor, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
-    std::string actorString = actor.getRefIdString();
+    const std::string& actorString = actor.getRefIdString();
     CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(actor);
 
     if (index.first == -1)
@@ -193,7 +193,8 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(
     }
     else if (mReferencables.getRecord(index).isDeleted())
     {
-        messages.add(id, "Deleted actor '" + actorString + "' is being referenced", "", CSMDoc::Message::Severity_Error);
+        messages.add(
+            id, "Deleted actor '" + actorString + "' is being referenced", "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (index.second != CSMWorld::UniversalId::Type_Npc && index.second != CSMWorld::UniversalId::Type_Creature)
@@ -212,7 +213,7 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(
 bool CSMTools::TopicInfoCheckStage::verifyCell(
     const ESM::RefId& cell, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
-    std::string cellName = cell.getRefIdString();
+    const std::string& cellName = cell.getRefIdString();
     if (mCellNames.find(cellName) == mCellNames.end())
     {
         messages.add(id, "Cell '" + cellName + "' does not exist", "", CSMDoc::Message::Severity_Error);
@@ -260,7 +261,7 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(
 bool CSMTools::TopicInfoCheckStage::verifyItem(
     const ESM::RefId& item, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
-    std::string idString = item.getRefIdString();
+    const std::string& idString = item.getRefIdString();
     CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(item);
 
     if (index.first == -1)
@@ -440,7 +441,9 @@ bool CSMTools::TopicInfoCheckStage::verifyId(const ESM::RefId& name, const CSMWo
     }
     else if (collection.getRecord(index).isDeleted())
     {
-        messages.add(id, "Deleted " + std::string(T::getRecordType()) + " record '" + name.getRefIdString() + "' is being referenced",
+        messages.add(id,
+            "Deleted " + std::string(T::getRecordType()) + " record '" + name.getRefIdString()
+                + "' is being referenced",
             "", CSMDoc::Message::Severity_Error);
         return false;
     }

@@ -1172,7 +1172,8 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 messages.add(id, "Logic error: cell index out of bounds", "", CSMDoc::Message::Severity_Error);
                 index = mCells.getSize() - 1;
             }
-            std::string cellId = mCells.getId(index).getRefIdString();;
+            const std::string& cellId = mCells.getId(index).getRefIdString();
+
             mRefs.load(*mReader, index, mBase, mRefLoadCache[cellId], messages);
             break;
         }
@@ -1241,7 +1242,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
         case ESM::REC_DIAL:
         {
             ESM::Dialogue record;
-            std::string recordIdString = record.mId.getRefIdString();
+            const std::string& recordIdString = record.mId.getRefIdString();
             bool isDeleted = false;
 
             record.load(*mReader, isDeleted);

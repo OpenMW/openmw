@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <components/esm3/loadpgrd.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm3/loadpgrd.hpp>
 
 namespace ESM
 {

@@ -34,17 +34,20 @@ namespace MWLua
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Apparatus>();
         apparatus["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Apparatus* { return obj.ptr().get<ESM::Apparatus>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Apparatus* { return store->find(ESM::RefId::stringRefId(recordId)); });
+            [store](const std::string& recordId) -> const ESM::Apparatus* {
+                return store->find(ESM::RefId::stringRefId(recordId));
+            });
         sol::usertype<ESM::Apparatus> record = context.mLua->sol().new_usertype<ESM::Apparatus>("ESM3_Apparatus");
         record[sol::meta_function::to_string]
             = [](const ESM::Apparatus& rec) { return "ESM3_Apparatus[" + rec.mId.getRefIdString() + "]"; };
-        record["id"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mId.getRefIdString(); });
+        record["id"]
+            = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Apparatus& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mScript.getRefIdString(); });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Apparatus& rec) -> std::string { return rec.mScript.getRefIdString(); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Apparatus& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });

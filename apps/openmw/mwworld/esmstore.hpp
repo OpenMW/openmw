@@ -113,8 +113,7 @@ namespace MWWorld
 
         unsigned int mDynamicCount;
 
-        mutable std::unordered_map<ESM::RefId, std::weak_ptr<MWMechanics::SpellList>>
-            mSpellListCache;
+        mutable std::unordered_map<ESM::RefId, std::weak_ptr<MWMechanics::SpellList>> mSpellListCache;
 
         template <class T>
         Store<T>& getWritable()

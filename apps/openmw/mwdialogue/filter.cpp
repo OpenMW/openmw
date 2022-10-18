@@ -1,10 +1,10 @@
 #include "filter.hpp"
 
 #include <components/compiler/locals.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadmgef.hpp>
-#include <components/esm/refid.hpp>
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -84,7 +84,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
     // actor id
     if (!info.mActor.empty())
     {
-        if (info.mActor !=  mActor.getCellRef().getRefId())
+        if (info.mActor != mActor.getCellRef().getRefId())
             return false;
     }
     else if (isCreature)
@@ -101,7 +101,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC>* cellRef = mActor.get<ESM::NPC>();
 
-        if (!(info.mRace ==  cellRef->mBase->mRace))
+        if (!(info.mRace == cellRef->mBase->mRace))
             return false;
     }
 
@@ -113,7 +113,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC>* cellRef = mActor.get<ESM::NPC>();
 
-        if (!(info.mClass ==  cellRef->mBase->mClass))
+        if (!(info.mClass == cellRef->mBase->mClass))
             return false;
     }
 
@@ -131,7 +131,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
         if (isCreature)
             return true;
 
-        if (!(mActor.getClass().getPrimaryFaction(mActor) ==  info.mFaction))
+        if (!(mActor.getClass().getPrimaryFaction(mActor) == info.mFaction))
             return false;
 
         // check rank
@@ -168,8 +168,7 @@ bool MWDialogue::Filter::testPlayer(const ESM::DialInfo& info) const
     // check player faction and rank
     if (!info.mPcFaction.empty())
     {
-        std::map<ESM::RefId, int>::const_iterator iter
-            = stats.getFactionRanks().find(info.mPcFaction);
+        std::map<ESM::RefId, int>::const_iterator iter = stats.getFactionRanks().find(info.mPcFaction);
 
         if (iter == stats.getFactionRanks().end())
             return false;
@@ -366,7 +365,8 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
 
         case SelectWrapper::Function_Dead:
 
-            return MWBase::Environment::get().getMechanicsManager()->countDeaths(ESM::RefId::stringRefId(select.getName()));
+            return MWBase::Environment::get().getMechanicsManager()->countDeaths(
+                ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_Choice:
 
@@ -536,19 +536,19 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
         case SelectWrapper::Function_NotId:
 
-            return !(mActor.getCellRef().getRefId() ==  ESM::RefId::stringRefId(select.getName()));
+            return !(mActor.getCellRef().getRefId() == ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_NotFaction:
 
-            return !(mActor.getClass().getPrimaryFaction(mActor) ==  ESM::RefId::stringRefId(select.getName()));
+            return !(mActor.getClass().getPrimaryFaction(mActor) == ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_NotClass:
 
-            return !(mActor.get<ESM::NPC>()->mBase->mClass ==  ESM::RefId::stringRefId(select.getName()));
+            return !(mActor.get<ESM::NPC>()->mBase->mClass == ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_NotRace:
 
-            return !(mActor.get<ESM::NPC>()->mBase->mRace ==  ESM::RefId::stringRefId(select.getName()));
+            return !(mActor.get<ESM::NPC>()->mBase->mRace == ESM::RefId::stringRefId(select.getName()));
 
         case SelectWrapper::Function_NotCell:
         {

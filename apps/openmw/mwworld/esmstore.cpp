@@ -6,7 +6,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/records.hpp>
-#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/readerscache.hpp>
@@ -84,8 +83,7 @@ namespace
     }
 
     std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions,
-        const MWWorld::Store<ESM::Class>& classes,
-        const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
+        const MWWorld::Store<ESM::Class>& classes, const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
         const ESM::RefId& defaultCls = getDefaultClass(classes);
@@ -535,7 +533,7 @@ namespace MWWorld
     void ESMStore::movePlayerRecord()
     {
         auto& npcs = getWritable<ESM::NPC>();
-        auto player = npcs.find(ESM::sPlayerId);
+        auto player = npcs.find(ESM::RefId::stringRefId("Player"));
         npcs.insert(*player);
     }
 
@@ -652,7 +650,7 @@ namespace MWWorld
     {
         setUp();
 
-        const ESM::NPC* player = get<ESM::NPC>().find(ESM::sPlayerId);
+        const ESM::NPC* player = get<ESM::NPC>().find(ESM::RefId::stringRefId("Player"));
 
         if (!get<ESM::Race>().find(player->mRace) || !get<ESM::Class>().find(player->mClass))
             throw std::runtime_error("Invalid player record (race or class unavailable");
@@ -688,7 +686,7 @@ namespace MWWorld
     {
 
         auto& npcs = getWritable<ESM::NPC>();
-        if (npc.mId ==  ESM::sPlayerId)
+        if (npc.mId == "Player")
         {
             return npcs.insert(npc);
         }

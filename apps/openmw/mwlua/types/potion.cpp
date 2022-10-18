@@ -25,12 +25,16 @@ namespace MWLua
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>();
         potion["record"]
             = sol::overload([](const Object& obj) -> const ESM::Potion* { return obj.ptr().get<ESM::Potion>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::Potion* { return store->find(ESM::RefId::stringRefId(recordId)); });
+                [store](const std::string& recordId) -> const ESM::Potion* {
+                    return store->find(ESM::RefId::stringRefId(recordId));
+                });
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         sol::usertype<ESM::Potion> record = context.mLua->sol().new_usertype<ESM::Potion>("ESM3_Potion");
-        record[sol::meta_function::to_string] = [](const ESM::Potion& rec) { return "ESM3_Potion[" + rec.mId.getRefIdString() + "]"; };
-        record["id"] = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mId.getRefIdString(); });
+        record[sol::meta_function::to_string]
+            = [](const ESM::Potion& rec) { return "ESM3_Potion[" + rec.mId.getRefIdString() + "]"; };
+        record["id"]
+            = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Potion& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
@@ -38,7 +42,8 @@ namespace MWLua
         record["icon"] = sol::readonly_property([vfs](const ESM::Potion& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
-        record["mwscript"] = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mScript.getRefIdString(); });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Potion& rec) -> std::string { return rec.mScript.getRefIdString(); });
         record["weight"] = sol::readonly_property([](const ESM::Potion& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Potion& rec) -> int { return rec.mData.mValue; });
     }

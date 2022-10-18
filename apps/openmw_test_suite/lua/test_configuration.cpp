@@ -118,16 +118,22 @@ namespace
         EXPECT_EQ(LuaUtil::scriptCfgToString(conf[1]), "CUSTOM CONTAINER : Script2.lua");
 
         EXPECT_THAT(asVector(conf.getPlayerConf()), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, ESM::RefId::stringRefId("something"), ESM::RefNum())), ElementsAre(Pair(1, "")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, ESM::RefId::stringRefId("guar"), ESM::RefNum())), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, ESM::RefId::stringRefId("rat"), ESM::RefNum())), ElementsAre());
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, ESM::RefId::stringRefId("something"), ESM::RefNum())),
+            ElementsAre(Pair(1, "")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, ESM::RefId::stringRefId("guar"), ESM::RefNum())),
+            ElementsAre(Pair(0, "data1")));
         EXPECT_THAT(
-            asVector(conf.getLocalConf(ESM::REC_DOOR, ESM::RefId::stringRefId("record1"), ESM::RefNum())), ElementsAre(Pair(0, "dataRecord1")));
+            asVector(conf.getLocalConf(ESM::REC_CREA, ESM::RefId::stringRefId("rat"), ESM::RefNum())), ElementsAre());
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_DOOR, ESM::RefId::stringRefId("record1"), ESM::RefNum())),
+            ElementsAre(Pair(0, "dataRecord1")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_DOOR, ESM::RefId::stringRefId("record2"), ESM::RefNum())),
+            ElementsAre(Pair(0, "data1")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 1, 1 })),
+            ElementsAre(Pair(0, "data1")));
         EXPECT_THAT(
-            asVector(conf.getLocalConf(ESM::REC_DOOR, ESM::RefId::stringRefId("record2"), ESM::RefNum())), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 1, 1 })), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 2, 3 })), ElementsAre());
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 3, 5 })), ElementsAre(Pair(0, "dataRef35")));
+            asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 2, 3 })), ElementsAre());
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 3, 5 })),
+            ElementsAre(Pair(0, "dataRef35")));
         EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, ESM::RefId::stringRefId("record4"), { 2, 4 })),
             ElementsAre(Pair(0, "data1"), Pair(1, "")));
 

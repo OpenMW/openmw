@@ -32,7 +32,7 @@ namespace ESM
         unsigned int mRecordFlags;
         RefId mId;
         RefId mScript, mEnchant;
-        
+
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
 

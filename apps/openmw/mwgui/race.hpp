@@ -1,9 +1,9 @@
 #ifndef MWGUI_RACE_H
 #define MWGUI_RACE_H
 
-#include <memory>
-#include<components/esm/refid.hpp>
 #include "windowbase.hpp"
+#include <components/esm/refid.hpp>
+#include <memory>
 
 namespace MWRender
 {

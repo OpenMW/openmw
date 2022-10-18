@@ -81,7 +81,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                ESM::RefId region = ESM::RefId::stringRefId( runtime.getStringLiteral(runtime[0].mInteger) );
+                ESM::RefId region = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer id = runtime[0].mInteger;

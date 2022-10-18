@@ -13,10 +13,9 @@
 
 #include <components/misc/strings/format.hpp>
 
+#include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadskil.hpp>
-#include <components/esm/refidhardcoded.hpp>
-#include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -104,9 +103,8 @@ namespace MWScript
                 if (count == 0)
                     return;
 
-                if (item == ESM::sGoldId005 ||item == ESM::sGoldId010
-                    || item == ESM::sGoldId025||item == ESM::sGoldId100)
-                    item = ESM::sGoldId001;
+                if (item == "gold_005" || item == "gold_010" || item == "gold_025" || item == "gold_100")
+                    item = ESM::RefId::stringRefId("gold_001");
 
                 // Check if "item" can be placed in a container
                 MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), item, 1);
@@ -191,9 +189,8 @@ namespace MWScript
                 ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                if (item == ESM::sGoldId005 || item == ESM::sGoldId010
-                    || item == ESM::sGoldId025 || item == ESM::sGoldId100)
-                    item = ESM::sGoldId001;
+                if (item == "gold_005" || item == "gold_010" || item == "gold_025" || item == "gold_100")
+                    item = ESM::RefId::stringRefId("gold_001");
 
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
 
@@ -222,9 +219,8 @@ namespace MWScript
                 if (count == 0)
                     return;
 
-                if (item == ESM::sGoldId005 || item == ESM::sGoldId010
-                    || item == ESM::sGoldId025 || item == ESM::sGoldId100)
-                    item = ESM::sGoldId001;
+                if (item == "gold_005" || item == "gold_010" || item == "gold_025" || item == "gold_100")
+                    item = ESM::RefId::stringRefId("gold_001");
 
                 // Explicit calls to non-unique actors affect the base record
                 if (!R::implicit && ptr.getClass().isActor()
@@ -260,7 +256,7 @@ namespace MWScript
                 std::string_view itemName;
                 for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)
                 {
-                    if (iter->getCellRef().getRefId() ==  item)
+                    if (iter->getCellRef().getRefId() == item)
                     {
                         itemName = iter->getClass().getName(*iter);
                         break;
@@ -309,7 +305,7 @@ namespace MWScript
                 // With soul gems we prefer filled ones.
                 for (auto it = invStore.begin(); it != invStore.end(); ++it)
                 {
-                    if (it->getCellRef().getRefId() ==  item)
+                    if (it->getCellRef().getRefId() == item)
                     {
                         found = it;
                         const ESM::RefId& soul = it->getCellRef().getSoul();
@@ -425,7 +421,7 @@ namespace MWScript
                 for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                 {
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot(slot);
-                    if (it != invStore.end() && it->getCellRef().getRefId() ==  item)
+                    if (it != invStore.end() && it->getCellRef().getRefId() == item)
                     {
                         runtime.push(1);
                         return;
@@ -452,7 +448,7 @@ namespace MWScript
                      = invStore.cbegin(MWWorld::ContainerStore::Type_Miscellaneous);
                      it != invStore.cend(); ++it)
                 {
-                    if (it->getCellRef().getSoul() ==  name)
+                    if (it->getCellRef().getSoul() == name)
                         count += it->getRefData().getCount();
                 }
                 runtime.push(count);

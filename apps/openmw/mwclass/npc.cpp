@@ -9,7 +9,6 @@
 #include <components/misc/rng.hpp>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -688,7 +687,8 @@ namespace MWClass
             {
                 damage *= store.find("fCombatCriticalStrikeMult")->mValue.getFloat();
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-                MWBase::Environment::get().getSoundManager()->playSound3D(victim, ESM::RefId::stringRefId("critical damage"), 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(
+                    victim, ESM::RefId::stringRefId("critical damage"), 1.0f, 1.0f);
             }
         }
 
@@ -893,7 +893,7 @@ namespace MWClass
 
             if (damage > 0.0f)
             {
-                sndMgr->playSound3D(ptr, ESM::sHealthDamageSoundId, 1.0f, 1.0f);
+                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
                 if (ptr == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay();
                 if (!attacker.isEmpty())
@@ -1303,7 +1303,6 @@ namespace MWClass
         static const ESM::RefId footHeavyLeft = ESM::RefId::stringRefId("footHeavyLeft");
         static const ESM::RefId footHeavyRight = ESM::RefId::stringRefId("footHeavyRight");
 
-        const ESM::RefId* sound = nullptr;
         if (name == "left" || name == "right")
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
@@ -1311,9 +1310,9 @@ namespace MWClass
                 return ESM::RefId::sEmpty;
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if (world->isSwimming(ptr))
-                sound = (name == "left") ? &swimLeft : &swimRight;
+                return (name == "left") ? swimLeft : swimRight;
             if (world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                sound = (name == "left") ? &footWaterLeft : &footWaterRight;
+                return (name == "left") ? footWaterLeft : footWaterRight;
             if (world->isOnGround(ptr))
             {
                 if (getNpcStats(ptr).isWerewolf()
@@ -1328,16 +1327,19 @@ namespace MWClass
                 const MWWorld::InventoryStore& inv = Npc::getInventoryStore(ptr);
                 MWWorld::ConstContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if (boots == inv.end() || boots->getType() != ESM::Armor::sRecordId)
-                    sound = (name == "left") ? &footBareLeft : &footBareRight;
+                    return (name == "left") ? footBareLeft : footBareRight;
 
                 switch (boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
-                        sound = (name == "left") ? &footLightLeft : &footLightRight; break;
+                        return (name == "left") ? footLightLeft : footLightRight;
+                        break;
                     case ESM::Skill::MediumArmor:
-                        sound = (name == "left") ? &footMediumLeft : &footMediumRight; break;
+                        return (name == "left") ? footMediumLeft : footMediumRight;
+                        break;
                     case ESM::Skill::HeavyArmor:
-                        sound = (name == "left") ? &footHeavyLeft : &footHeavyRight; break;
+                        return (name == "left") ? footHeavyLeft : footHeavyRight;
+                        break;
                 }
             }
             return ESM::RefId::sEmpty;
@@ -1347,9 +1349,9 @@ namespace MWClass
         if (name == "land")
             return ESM::RefId::sEmpty;
         if (name == "swimleft")
-            sound = &swimLeft;
+            return swimLeft;
         if (name == "swimright")
-            sound = &swimRight;
+            return swimRight;
         // TODO: I have no idea what these are supposed to do for NPCs since they use
         // voiced dialog for various conditions like health loss and combat taunts. Maybe
         // only for biped creatures?
@@ -1361,12 +1363,7 @@ namespace MWClass
         if (name == "scream")
             return ESM::RefId::sEmpty;
 
-        if(sound == nullptr)
-            throw std::runtime_error("Unexpected soundgen type: " + std::string(name));
-        else
-        {
-            return *sound;
-        }
+        throw std::runtime_error("Unexpected soundgen type: " + std::string(name));
     }
 
     MWWorld::Ptr Npc::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const

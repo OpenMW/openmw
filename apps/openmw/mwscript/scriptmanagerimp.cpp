@@ -7,8 +7,8 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm3/loadscpt.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm3/loadscpt.hpp>
 
 #include <components/misc/strings/lower.hpp>
 
@@ -155,8 +155,8 @@ namespace MWScript
 
         for (auto& script : mStore.get<ESM::Script>())
         {
-            if (!std::binary_search(
-                    mScriptBlacklist.begin(), mScriptBlacklist.end(), Misc::StringUtils::lowerCase(script.mId.getRefIdString())))
+            if (!std::binary_search(mScriptBlacklist.begin(), mScriptBlacklist.end(),
+                    Misc::StringUtils::lowerCase(script.mId.getRefIdString())))
             {
                 ++count;
 
@@ -188,7 +188,8 @@ namespace MWScript
         {
             Compiler::Locals locals;
 
-            const Compiler::ContextOverride override(mErrorHandler, std::string{ name.getRefIdString() } + "[local variables]");
+            const Compiler::ContextOverride override(
+                mErrorHandler, std::string{ name.getRefIdString() } + "[local variables]");
 
             std::istringstream stream(script->mScriptText);
             Compiler::QuickFileParser parser(mErrorHandler, mCompilerContext, locals);

@@ -146,8 +146,8 @@ namespace MWLua
             if (esmCell->isExterior())
                 ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr);
             else
-                ai.stack(MWMechanics::AiEscort(
-                             refId, ESM::RefId::stringRefId(esmCell->mName), gameHoursDuration, dest.x(), dest.y(), dest.z(), false),
+                ai.stack(MWMechanics::AiEscort(refId, ESM::RefId::stringRefId(esmCell->mName), gameHoursDuration,
+                             dest.x(), dest.y(), dest.z(), false),
                     ptr);
         };
         selfAPI["_startAiWander"] = [](SelfObject& self, int distance, float duration) {

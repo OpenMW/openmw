@@ -45,8 +45,7 @@ namespace MWSound
             settings.mNearWaterPoints = Fallback::Map::getInt("Water_NearWaterPoints");
             settings.mNearWaterIndoorTolerance = Fallback::Map::getFloat("Water_NearWaterIndoorTolerance");
             settings.mNearWaterOutdoorTolerance = Fallback::Map::getFloat("Water_NearWaterOutdoorTolerance");
-            settings.mNearWaterIndoorID
-                = ESM::RefId::stringRefId(Fallback::Map::getString("Water_NearWaterIndoorID"));
+            settings.mNearWaterIndoorID = ESM::RefId::stringRefId(Fallback::Map::getString("Water_NearWaterIndoorID"));
             settings.mNearWaterOutdoorID
                 = ESM::RefId::stringRefId(Fallback::Map::getString("Water_NearWaterOutdoorID"));
 
@@ -1006,7 +1005,8 @@ namespace MWSound
         {
             // Play underwater sound (after updating sounds)
             if (!mUnderwaterSound)
-                mUnderwaterSound = playSound(ESM::RefId::stringRefId("Underwater"), 1.0f, 1.0f, Type::Sfx, PlayMode::LoopNoEnv);
+                mUnderwaterSound
+                    = playSound(ESM::RefId::stringRefId("Underwater"), 1.0f, 1.0f, Type::Sfx, PlayMode::LoopNoEnv);
         }
         mOutput->finishUpdate();
     }

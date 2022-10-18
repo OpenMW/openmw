@@ -165,13 +165,13 @@ namespace MWGui
 
         for (unsigned int i = 0; i < mAvailableHeads.size(); ++i)
         {
-            if (mAvailableHeads[i] ==  proto.mHead)
+            if (mAvailableHeads[i] == proto.mHead)
                 mFaceIndex = i;
         }
 
         for (unsigned int i = 0; i < mAvailableHairs.size(); ++i)
         {
-            if (mAvailableHairs[i] ==  proto.mHair)
+            if (mAvailableHairs[i] == proto.mHair)
                 mHairIndex = i;
         }
 
@@ -191,7 +191,7 @@ namespace MWGui
         size_t count = mRaceList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (ESM::RefId::stringRefId(*mRaceList->getItemDataAt<std::string>(i)) ==  raceId)
+            if (ESM::RefId::stringRefId(*mRaceList->getItemDataAt<std::string>(i)) == raceId)
             {
                 mRaceList->setIndexSelected(i);
                 break;
@@ -293,7 +293,7 @@ namespace MWGui
             return;
 
         ESM::RefId raceId = ESM::RefId::stringRefId(*mRaceList->getItemDataAt<std::string>(_index));
-        if (mCurrentRaceId ==  raceId)
+        if (mCurrentRaceId == raceId)
             return;
 
         mCurrentRaceId = raceId;
@@ -334,7 +334,7 @@ namespace MWGui
                 && idString[idString.size() - 2] == 's' && idString[idString.size() - 1] == 't';
             if (firstPerson)
                 continue;
-            if (bodypart.mRace ==  mCurrentRaceId)
+            if (bodypart.mRace == mCurrentRaceId)
                 out.push_back(bodypart.mId);
         }
     }
@@ -393,7 +393,7 @@ namespace MWGui
         for (auto& item : items)
         {
             mRaceList->addItem(item.second, item.first);
-            if (item.first ==  mCurrentRaceId)
+            if (item.first == mCurrentRaceId)
                 mRaceList->setIndexSelected(index);
             ++index;
         }

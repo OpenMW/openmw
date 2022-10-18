@@ -168,8 +168,7 @@ namespace MWClass
             for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end();
                  ++sound)
             {
-                if (type == sound->mType && !sound->mCreature.empty()
-                    && (*creatureId ==  sound->mCreature))
+                if (type == sound->mType && !sound->mCreature.empty() && (*creatureId == sound->mCreature))
                     sounds.push_back(&*sound);
                 if (type == sound->mType && sound->mCreature.empty())
                     fallbacksounds.push_back(&*sound);

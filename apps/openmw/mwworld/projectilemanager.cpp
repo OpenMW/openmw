@@ -56,8 +56,8 @@
 
 namespace
 {
-    ESM::EffectList getMagicBoltData(std::vector<ESM::RefId>& projectileIDs, std::set<ESM::RefId>& sounds,
-        float& speed, std::string& texture, std::string& sourceName, const ESM::RefId& id)
+    ESM::EffectList getMagicBoltData(std::vector<ESM::RefId>& projectileIDs, std::set<ESM::RefId>& sounds, float& speed,
+        std::string& texture, std::string& sourceName, const ESM::RefId& id)
     {
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         const ESM::EffectList* effects;
@@ -543,8 +543,7 @@ namespace MWWorld
             {
                 MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
                 MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                if (invIt != inv.end()
-                    && invIt->getCellRef().getRefId() ==  projectileState.mBowId)
+                if (invIt != inv.end() && invIt->getCellRef().getRefId() == projectileState.mBowId)
                     bow = *invIt;
             }
             if (projectile->getHitWater())

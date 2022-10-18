@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include <components/misc/strings/lower.hpp>
 #include <components/esm/refid.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "context.hpp"
 #include "declarationparser.hpp"

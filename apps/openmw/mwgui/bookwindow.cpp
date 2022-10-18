@@ -4,7 +4,6 @@
 #include <MyGUI_TextBox.h>
 
 #include <components/esm3/loadbook.hpp>
-#include <components/esm/refidhardcoded.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -203,7 +202,7 @@ namespace MWGui
     {
         if (mCurrentPage > 0)
         {
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::sBookPageSoundId);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
 
             --mCurrentPage;
 

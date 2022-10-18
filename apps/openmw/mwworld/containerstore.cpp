@@ -6,7 +6,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/inventorystate.hpp>
 #include <components/esm3/loadench.hpp>
-#include <components/esm/refidhardcoded.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -138,7 +137,7 @@ void MWWorld::ContainerStore::storeStates(
     }
 }
 
-const ESM::RefId MWWorld::ContainerStore::sGoldId = ESM::sGoldId001;
+const ESM::RefId MWWorld::ContainerStore::sGoldId = ESM::RefId::stringRefId("gold_001");
 
 MWWorld::ContainerStore::ContainerStore()
     : mListener(nullptr)
@@ -188,7 +187,7 @@ int MWWorld::ContainerStore::count(const ESM::RefId& id) const
 {
     int total = 0;
     for (const auto&& iter : *this)
-        if (iter.getCellRef().getRefId() ==  id)
+        if (iter.getCellRef().getRefId() == id)
             total += iter.getRefData().getCount();
     return total;
 }
@@ -253,7 +252,7 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
 
-    if (!(ptr1.getCellRef().getRefId() ==  ptr2.getCellRef().getRefId()))
+    if (!(ptr1.getCellRef().getRefId() == ptr2.getCellRef().getRefId()))
         return false;
 
     // If it has an enchantment, don't stack when some of the charge is already used
@@ -373,7 +372,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const Ptr& ptr, 
 
         for (MWWorld::ContainerStoreIterator iter(begin(type)); iter != end(); ++iter)
         {
-            if (iter->getCellRef().getRefId() ==  MWWorld::ContainerStore::sGoldId)
+            if (iter->getCellRef().getRefId() == MWWorld::ContainerStore::sGoldId)
             {
                 iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), realCount));
                 flagAsModified();
@@ -513,7 +512,7 @@ int MWWorld::ContainerStore::remove(
     int toRemove = count;
 
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
-        if (iter->getCellRef().getRefId() ==  itemId)
+        if (iter->getCellRef().getRefId() == itemId)
             toRemove -= remove(*iter, toRemove, actor, equipReplacement, resolveFirst);
 
     flagAsModified();
@@ -564,8 +563,7 @@ int MWWorld::ContainerStore::remove(
     return count - toRemove;
 }
 
-void MWWorld::ContainerStore::fill(
-    const ESM::InventoryList& items, const ESM::RefId& owner, Misc::Rng::Generator& prng)
+void MWWorld::ContainerStore::fill(const ESM::InventoryList& items, const ESM::RefId& owner, Misc::Rng::Generator& prng)
 {
     for (const ESM::ContItem& iter : items.mList)
     {
@@ -576,8 +574,7 @@ void MWWorld::ContainerStore::fill(
     mResolved = true;
 }
 
-void MWWorld::ContainerStore::fillNonRandom(
-    const ESM::InventoryList& items, const ESM::RefId& owner, unsigned int seed)
+void MWWorld::ContainerStore::fillNonRandom(const ESM::InventoryList& items, const ESM::RefId& owner, unsigned int seed)
 {
     mSeed = seed;
     for (const ESM::ContItem& iter : items.mList)
@@ -790,7 +787,7 @@ MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const ESM::RefId& id)
     for (auto&& iter : *this)
     {
         int iterHealth = iter.getClass().hasItemHealth(iter) ? iter.getClass().getItemHealth(iter) : 1;
-        if (iter.getCellRef().getRefId() ==  id)
+        if (iter.getCellRef().getRefId() == id)
         {
             // Prefer the stack with the lowest remaining uses
             // Try to get item with zero durability only if there are no other items found

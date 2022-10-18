@@ -253,8 +253,7 @@ void CSMWorld::RefIdData::erase(const LocalIndex& index, int count)
 
     for (int i = index.first; i < index.first + count; ++i)
     {
-        auto result
-            = mIndex.find(iter->second->getId(i));
+        auto result = mIndex.find(iter->second->getId(i));
 
         if (result != mIndex.end())
             mIndex.erase(result);
@@ -265,8 +264,7 @@ void CSMWorld::RefIdData::erase(const LocalIndex& index, int count)
     int recordCount = iter->second->getSize();
     while (recordIndex < recordCount)
     {
-        auto recordIndexFound
-            = mIndex.find(iter->second->getId(recordIndex));
+        auto recordIndexFound = mIndex.find(iter->second->getId(recordIndex));
         if (recordIndexFound != mIndex.end())
         {
             recordIndexFound->second.first -= count;

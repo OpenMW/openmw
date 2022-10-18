@@ -5,7 +5,6 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
-#include <components/esm/refidhardcoded.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -36,11 +35,9 @@ namespace MWClass
 
     bool Miscellaneous::isGold(const MWWorld::ConstPtr& ptr) const
     {
-        return ptr.getCellRef().getRefId() ==  ESM::sGoldId001
-            || ptr.getCellRef().getRefId() ==  ESM::sGoldId005
-            || ptr.getCellRef().getRefId() ==  ESM::sGoldId010
-            || ptr.getCellRef().getRefId() ==  ESM::sGoldId025
-            || ptr.getCellRef().getRefId() ==  ESM::sGoldId100;
+        return ptr.getCellRef().getRefId() == "gold_001" || ptr.getCellRef().getRefId() == "gold_005"
+            || ptr.getCellRef().getRefId() == "gold_010" || ptr.getCellRef().getRefId() == "gold_025"
+            || ptr.getCellRef().getRefId() == "gold_100";
     }
 
     void Miscellaneous::insertObjectRendering(
@@ -98,7 +95,7 @@ namespace MWClass
                     float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
 
                     // for Azura's star add the unfilled value
-                    if (ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("Misc_SoulGem_Azura"))
+                    if (ptr.getCellRef().getRefId() == "Misc_SoulGem_Azura")
                         value += soulValue;
                     else
                         value = soulValue;
@@ -185,19 +182,19 @@ namespace MWClass
         {
             int goldAmount = getValue(ptr) * count;
 
-            const ESM::RefId* base = &ESM::sGoldId001;
+            std::string_view base = "gold_001";
             if (goldAmount >= 100)
-                base = &ESM::sGoldId100;
+                base = "gold_100";
             else if (goldAmount >= 25)
-                base = &ESM::sGoldId025;
+                base = "gold_025";
             else if (goldAmount >= 10)
-                base = &ESM::sGoldId010;
+                base = "gold_010";
             else if (goldAmount >= 5)
-                base = &ESM::sGoldId005;
+                base = "gold_005";
 
             // Really, I have no idea why moving ref out of conditional
             // scope causes list::push_back throwing std::bad_alloc
-            MWWorld::ManualRef newRef(store,  *base);
+            MWWorld::ManualRef newRef(store, ESM::RefId::stringRefId(base));
             const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
 
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);

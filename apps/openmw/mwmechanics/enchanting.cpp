@@ -74,7 +74,7 @@ namespace MWMechanics
 
         // Exception for Azura Star, new one will be added after enchanting
         auto azurasStarId = ESM::RefId::stringRefId("Misc_SoulGem_Azura");
-        if (mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId ==  azurasStarId)
+        if (mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId == azurasStarId)
             store.add(azurasStarId, 1, player);
 
         if (mSelfEnchanting)

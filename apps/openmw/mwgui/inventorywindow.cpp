@@ -805,7 +805,7 @@ namespace MWGui
 
             // skip different stacks of the same item, or we will get stuck as stacking/unstacking them may change their
             // relative ordering
-            if (lastId ==  item.getCellRef().getRefId())
+            if (lastId == item.getCellRef().getRefId())
                 continue;
 
             lastId = item.getCellRef().getRefId();

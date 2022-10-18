@@ -12,7 +12,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm/refidhardcoded.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -326,7 +325,7 @@ namespace MWWorld
             mPlayer->clear();
             mPlayer->setCell(nullptr);
             mPlayer->getPlayer().getRefData() = RefData();
-            mPlayer->set(mStore.get<ESM::NPC>().find(ESM::sPlayerId));
+            mPlayer->set(mStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("Player")));
         }
 
         mWorldModel.clear();
@@ -573,8 +572,7 @@ namespace MWWorld
         if (cell)
             return cell;
         // treat "Wilderness" like an empty string
-        const std::string defaultName
-            = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
+        const std::string defaultName = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
         if (Misc::StringUtils::ciEqual(cellName, defaultName))
         {
             cell = mStore.get<ESM::Cell>().searchExtByName(ESM::RefId::sEmpty);
@@ -686,11 +684,10 @@ namespace MWWorld
     {
         Ptr ret;
         // the player is always in an active cell.
-        if (name == ESM::sPlayerId)
+        if (name == "Player")
         {
             return mPlayer->getPlayer();
         }
-
 
         for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
@@ -1154,12 +1151,12 @@ namespace MWWorld
         MWWorld::Ptr newPtr = ptr;
 
         if (!isPlayer && !currCell)
-            throw std::runtime_error(
-                "Can not move actor \"" + ptr.getCellRef().getRefId().getRefIdString() + "\" to another cell: current cell is nullptr");
+            throw std::runtime_error("Can not move actor \"" + ptr.getCellRef().getRefId().getRefIdString()
+                + "\" to another cell: current cell is nullptr");
 
         if (!newCell)
-            throw std::runtime_error(
-                "Can not move actor \"" + ptr.getCellRef().getRefId().getRefIdString() + "\" to another cell: new cell is nullptr");
+            throw std::runtime_error("Can not move actor \"" + ptr.getCellRef().getRefId().getRefIdString()
+                + "\" to another cell: new cell is nullptr");
 
         if (currCell != newCell)
         {
@@ -1760,13 +1757,12 @@ namespace MWWorld
     {
         bool update = false;
 
-        if (record.mId ==  ESM::sPlayerId)
+        if (record.mId == "Player")
         {
             const ESM::NPC* player = mPlayer->getPlayer().get<ESM::NPC>()->mBase;
 
-            update = record.isMale() != player->isMale() || !(record.mRace ==  player->mRace)
-                || !(record.mHead ==  player->mHead)
-                || !(record.mHair ==  player->mHair);
+            update = record.isMale() != player->isMale() || !(record.mRace == player->mRace)
+                || !(record.mHead == player->mHead) || !(record.mHair == player->mHair);
         }
         const ESM::NPC* ret = mStore.insert(record);
         if (update)
@@ -2437,7 +2433,7 @@ namespace MWWorld
 
     void World::setupPlayer()
     {
-        const ESM::NPC* player = mStore.get<ESM::NPC>().find(ESM::sPlayerId);
+        const ESM::NPC* player = mStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("Player"));
         if (!mPlayer)
             mPlayer = std::make_unique<MWWorld::Player>(player);
         else
@@ -2635,8 +2631,8 @@ namespace MWWorld
                 if (actor == getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
 
-                auto healthDamage = ESM::sHealthDamageSoundId;
-                if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor,healthDamage))
+                auto healthDamage = ESM::RefId::stringRefId("Health Damage");
+                if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, healthDamage))
                     MWBase::Environment::get().getSoundManager()->playSound3D(actor, healthDamage, 1.0f, 1.0f);
             }
         }
@@ -2669,8 +2665,8 @@ namespace MWWorld
                 if (actor == getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
 
-                auto healthDamage = ESM::sHealthDamageSoundId;
-                if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, healthDamage ))
+                auto healthDamage = ESM::RefId::stringRefId("Health Damage");
+                if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, healthDamage))
                     MWBase::Environment::get().getSoundManager()->playSound3D(actor, healthDamage, 1.0f, 1.0f);
             }
         }
@@ -2720,7 +2716,7 @@ namespace MWWorld
             if (ptr.getClass().getCapacity(ptr) <= 0.f)
                 return true;
 
-            if (ptr.getCellRef().getOwner() ==  mOwner.getCellRef().getRefId())
+            if (ptr.getCellRef().getOwner() == mOwner.getCellRef().getRefId())
                 mOut.push_back(ptr);
 
             return true;
@@ -2741,8 +2737,7 @@ namespace MWWorld
         for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
             cellstore->forEach([&](const auto& ptr) {
-                if (ptr.getRefData().getBaseNode()
-                    && ptr.getCellRef().getOwner() ==  npc.getCellRef().getRefId())
+                if (ptr.getRefData().getBaseNode() && ptr.getCellRef().getOwner() == npc.getCellRef().getRefId())
                     out.push_back(ptr);
                 return true;
             });
@@ -2872,7 +2867,8 @@ namespace MWWorld
             {
                 int x, y;
                 std::from_chars_result xResult = std::from_chars(cellName.data(), cellName.data() + comma, x);
-                std::from_chars_result yResult = std::from_chars(cellName.data() + comma + 1, cellName.data() + cellName.size(), y);
+                std::from_chars_result yResult
+                    = std::from_chars(cellName.data() + comma + 1, cellName.data() + cellName.size(), y);
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})

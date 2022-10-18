@@ -401,7 +401,8 @@ namespace CSVRender
 
             for (std::vector<unsigned short>::iterator row = mSelected.begin(); row != mSelected.end(); ++row)
             {
-                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId.getRefIdString(), static_cast<int>(*row), parentColumn));
+                commands.push(new CSMWorld::DeleteNestedCommand(
+                    *model, mId.getRefIdString(), static_cast<int>(*row), parentColumn));
             }
 
             // Fix/remove edges

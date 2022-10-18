@@ -1,9 +1,9 @@
 #ifndef GAME_MWWORLD_ACTIONAPPLY_H
 #define GAME_MWWORLD_ACTIONAPPLY_H
 
-#include <string>
-#include <components/esm/refid.hpp>
 #include "action.hpp"
+#include <components/esm/refid.hpp>
+#include <string>
 
 namespace MWWorld
 {

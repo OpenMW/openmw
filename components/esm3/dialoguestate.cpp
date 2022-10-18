@@ -40,13 +40,11 @@ namespace ESM
             esm.writeHNString("TOPI", iter->getRefIdString());
         }
 
-        for (auto iter = mChangedFactionReaction.begin();
-             iter != mChangedFactionReaction.end(); ++iter)
+        for (auto iter = mChangedFactionReaction.begin(); iter != mChangedFactionReaction.end(); ++iter)
         {
             esm.writeHNString("FACT", iter->first.getRefIdString());
 
-            for (auto reactIter = iter->second.begin();
-                 reactIter != iter->second.end(); ++reactIter)
+            for (auto reactIter = iter->second.begin(); reactIter != iter->second.end(); ++reactIter)
             {
                 esm.writeHNString("REA2", reactIter->first.getRefIdString());
                 esm.writeHNT("INTV", reactIter->second);

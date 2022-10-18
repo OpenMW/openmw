@@ -3,6 +3,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <components/compiler/locals.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadappa.hpp>
@@ -23,7 +24,6 @@
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/loadweap.hpp>
-#include <components/esm/refid.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"

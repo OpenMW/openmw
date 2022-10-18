@@ -82,7 +82,7 @@ namespace MWMechanics
         removeSpell(spell);
         mSpellList->remove(spell);
 
-        if (spellId ==  mSelectedSpell)
+        if (spellId == mSelectedSpell)
             mSelectedSpell = ESM::RefId::sEmpty;
     }
 
@@ -225,8 +225,7 @@ namespace MWMechanics
                 addSpell(spell);
         }
 
-        for (auto it = state.mUsedPowers.begin();
-             it != state.mUsedPowers.end(); ++it)
+        for (auto it = state.mUsedPowers.begin(); it != state.mUsedPowers.end(); ++it)
         {
             const ESM::Spell* spell
                 = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
@@ -237,9 +236,7 @@ namespace MWMechanics
 
         // Permanent effects are used only to keep the custom magnitude of corprus spells effects (after cure too), and
         // only in old saves. Convert data to the new approach.
-        for (auto it
-             = state.mPermanentSpellEffects.begin();
-             it != state.mPermanentSpellEffects.end(); ++it)
+        for (auto it = state.mPermanentSpellEffects.begin(); it != state.mPermanentSpellEffects.end(); ++it)
         {
             const ESM::Spell* spell
                 = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);

@@ -10,8 +10,8 @@
 #include <osg/ref_ptr>
 
 #include "../../model/world/cellcoordinates.hpp"
-#include <components/esm/refid.hpp>
 #include "instancedragmodes.hpp"
+#include <components/esm/refid.hpp>
 
 class QModelIndex;
 

@@ -316,7 +316,8 @@ namespace MWDialogue
                 title = topic;
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
-            callback->addResponse(title.getRefIdString(), Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            callback->addResponse(
+                title.getRefIdString(), Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
 
             if (dialogue.mType == ESM::Dialogue::Topic)
             {
@@ -327,8 +328,7 @@ namespace MWDialogue
                 {
                     if (iter->mId == info->mId)
                     {
-                        MWBase::Environment::get().getJournal()->addTopic(
-                            topic, info->mId, mActor);
+                        MWBase::Environment::get().getJournal()->addTopic(topic, info->mId, mActor);
                         break;
                     }
                 }
@@ -375,7 +375,7 @@ namespace MWDialogue
                     if (!inJournal(topicId, answer->mId))
                     {
                         // Does this dialogue contains some actor-specific answer?
-                        if (answer->mActor ==  mActor.getCellRef().getRefId())
+                        if (answer->mActor == mActor.getCellRef().getRefId())
                             topicFlags |= MWBase::DialogueManager::TopicType::Specific;
                     }
                     else
@@ -501,8 +501,7 @@ namespace MWDialogue
                         {
                             if (iter->mId == info->mId)
                             {
-                                MWBase::Environment::get().getJournal()->addTopic(
-                                    mLastTopic, info->mId, mActor);
+                                MWBase::Environment::get().getJournal()->addTopic(mLastTopic, info->mId, mActor);
                                 break;
                             }
                         }
@@ -739,12 +738,13 @@ namespace MWDialogue
         if (map != mChangedFactionReaction.end() && map->second.find(faction2) != map->second.end())
             return map->second.at(faction2);
 
-        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction1);
+        const ESM::Faction* faction
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction1);
 
         auto it = faction->mReactions.begin();
         for (; it != faction->mReactions.end(); ++it)
         {
-            if (it->first ==  faction2)
+            if (it->first == faction2)
                 return it->second;
         }
         return 0;

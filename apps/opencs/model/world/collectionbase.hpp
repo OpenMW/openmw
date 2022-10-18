@@ -83,8 +83,7 @@ namespace CSMWorld
             = 0;
         ///< If the record type does not match, an exception is thrown.
 
-        virtual void cloneRecord(
-            const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
+        virtual void cloneRecord(const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
             = 0;
 
         virtual bool touchRecord(const ESM::RefId& id) = 0;

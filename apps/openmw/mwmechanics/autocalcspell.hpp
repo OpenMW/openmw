@@ -1,9 +1,9 @@
 #ifndef OPENMW_AUTOCALCSPELL_H
 #define OPENMW_AUTOCALCSPELL_H
 
+#include <components/esm/refid.hpp>
 #include <string>
 #include <vector>
-#include <components/esm/refid.hpp>
 namespace ESM
 {
     struct Spell;

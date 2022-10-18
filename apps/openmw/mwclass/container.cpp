@@ -152,9 +152,6 @@ namespace MWClass
             return action;
         }
 
-        static const ESM::RefId lockedSound = ESM::RefId::stringRefId("LockedChest");
-        static const ESM::RefId trapActivationSound = ESM::RefId::stringRefId("Disarm Trap Fail");
-
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
@@ -182,7 +179,8 @@ namespace MWClass
             if (isTrapped)
             {
                 ptr.getCellRef().setTrap(ESM::RefId::sEmpty);
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ESM::RefId::stringRefId("Disarm Trap"), 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(
+                    ptr, ESM::RefId::stringRefId("Disarm Trap"), 1.0f, 1.0f);
                 isTrapped = false;
             }
         }
@@ -203,14 +201,14 @@ namespace MWClass
                 // Activate trap
                 std::unique_ptr<MWWorld::Action> action
                     = std::make_unique<MWWorld::ActionTrap>(ptr.getCellRef().getTrap(), ptr);
-                action->setSound(trapActivationSound);
+                action->setSound(ESM::RefId::stringRefId("Disarm Trap Fail"));
                 return action;
             }
         }
         else
         {
             std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>(std::string_view{}, ptr);
-            action->setSound(lockedSound);
+            action->setSound(ESM::RefId::stringRefId("LockedChest"));
             return action;
         }
     }
@@ -266,7 +264,7 @@ namespace MWClass
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
-            if (ptr.getCellRef().getRefId() ==  ESM::RefId::stringRefId("stolen_goods"))
+            if (ptr.getCellRef().getRefId() == "stolen_goods")
                 text += "\nYou can not use evidence chests";
         }
 
