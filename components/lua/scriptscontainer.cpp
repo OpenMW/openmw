@@ -438,7 +438,8 @@ namespace LuaUtil
 
                 try
                 {
-                    timer.mArg = deserialize(mLua.sol(), savedTimer.mCallbackArgument, mSavedDataDeserializer);
+                    timer.mArg = sol::main_object(
+                        deserialize(mLua.sol(), savedTimer.mCallbackArgument, mSavedDataDeserializer));
                     // It is important if the order of content files was changed. The deserialize-serialize procedure
                     // updates refnums, so timer.mSerializedArg may be not equal to savedTimer.mCallbackArgument.
                     timer.mSerializedArg = serialize(timer.mArg, mSerializer);
@@ -488,7 +489,8 @@ namespace LuaUtil
         return it->second;
     }
 
-    void ScriptsContainer::registerTimerCallback(int scriptId, std::string_view callbackName, sol::function callback)
+    void ScriptsContainer::registerTimerCallback(
+        int scriptId, std::string_view callbackName, sol::main_protected_function callback)
     {
         getScript(scriptId).mRegisteredCallbacks.emplace(std::string(callbackName), std::move(callback));
     }
@@ -500,7 +502,7 @@ namespace LuaUtil
     }
 
     void ScriptsContainer::setupSerializableTimer(
-        TimerType type, double time, int scriptId, std::string_view callbackName, sol::object callbackArg)
+        TimerType type, double time, int scriptId, std::string_view callbackName, sol::main_object callbackArg)
     {
         Timer t;
         t.mCallback = std::string(callbackName);
@@ -512,7 +514,8 @@ namespace LuaUtil
         insertTimer(type == TimerType::GAME_TIME ? mGameTimersQueue : mSimulationTimersQueue, std::move(t));
     }
 
-    void ScriptsContainer::setupUnsavableTimer(TimerType type, double time, int scriptId, sol::function callback)
+    void ScriptsContainer::setupUnsavableTimer(
+        TimerType type, double time, int scriptId, sol::main_protected_function callback)
     {
         Timer t;
         t.mScriptId = scriptId;

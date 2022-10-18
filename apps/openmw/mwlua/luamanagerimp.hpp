@@ -103,7 +103,7 @@ namespace MWLua
             const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) override;
 
         // Used to call Lua callbacks from C++
-        void queueCallback(LuaUtil::Callback callback, sol::object arg)
+        void queueCallback(LuaUtil::Callback callback, sol::main_object arg)
         {
             mQueuedCallbacks.push_back({ std::move(callback), std::move(arg) });
         }
@@ -114,7 +114,8 @@ namespace MWLua
         template <class Arg>
         std::function<void(Arg)> wrapLuaCallback(const LuaUtil::Callback& c)
         {
-            return [this, c](Arg arg) { this->queueCallback(c, sol::make_object(c.mFunc.lua_state(), arg)); };
+            return
+                [this, c](Arg arg) { this->queueCallback(c, sol::main_object(this->mLua.sol(), sol::in_place, arg)); };
         }
 
         LuaUi::ResourceManager* uiResourceManager() { return &mUiResourceManager; }
@@ -167,7 +168,7 @@ namespace MWLua
         struct CallbackWithData
         {
             LuaUtil::Callback mCallback;
-            sol::object mArg;
+            sol::main_object mArg;
         };
         std::vector<CallbackWithData> mQueuedCallbacks;
 
