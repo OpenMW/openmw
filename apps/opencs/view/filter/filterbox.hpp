@@ -2,9 +2,16 @@
 #define CSV_FILTER_FILTERBOX_H
 
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include <QWidget>
+
+class QDragEnterEvent;
+class QDragMoveEvent;
+class QDropEvent;
+class QObject;
 
 namespace CSMFilter
 {

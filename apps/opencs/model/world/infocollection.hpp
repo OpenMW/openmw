@@ -1,8 +1,16 @@
 #ifndef CSM_WOLRD_INFOCOLLECTION_H
 #define CSM_WOLRD_INFOCOLLECTION_H
 
+#include <memory>
+#include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
+#include <variant>
+#include <vector>
+
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include "collection.hpp"
 #include "info.hpp"
@@ -10,6 +18,7 @@
 namespace ESM
 {
     struct Dialogue;
+    class ESMReader;
 }
 
 namespace CSMWorld

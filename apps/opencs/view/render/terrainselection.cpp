@@ -1,14 +1,33 @@
 #include "terrainselection.hpp"
 
 #include <algorithm>
+#include <cmath>
 
+#include <osg/GL>
 #include <osg/Geometry>
 #include <osg/Group>
+#include <osg/PositionAttitudeTransform>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3f>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/record.hpp>
 
 #include <components/esm3/loadland.hpp>
 
 #include "cell.hpp"
 #include "worldspacewidget.hpp"
+
+namespace CSMWorld
+{
+    struct Cell;
+}
 
 CSVRender::TerrainSelection::TerrainSelection(
     osg::Group* parentNode, WorldspaceWidget* worldspaceWidget, TerrainSelectionType type)

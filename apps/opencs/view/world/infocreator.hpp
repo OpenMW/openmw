@@ -3,15 +3,28 @@
 
 #include "genericcreator.hpp"
 
+#include <string>
+
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/world/creator.hpp>
+
+class QUndoStack;
+
 namespace CSMWorld
 {
-    class InfoCollection;
     class IdCompletionManager;
+    class CreateCommand;
+    class Data;
 }
 
 namespace CSVWidget
 {
     class DropLineEdit;
+}
+
+namespace CSMDoc
+{
+    class Document;
 }
 
 namespace CSVWorld

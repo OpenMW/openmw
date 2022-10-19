@@ -1,11 +1,23 @@
 #ifndef CSM_TOOLS_GMSTCHECK_H
 #define CSM_TOOLS_GMSTCHECK_H
 
-#include <components/esm3/loadgmst.hpp>
+#include <string>
+
+#include <components/esm3/variant.hpp>
 
 #include "../world/idcollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace ESM
+{
+    struct GameSetting;
+}
 
 namespace CSMTools
 {

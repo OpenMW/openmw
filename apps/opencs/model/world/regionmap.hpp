@@ -3,17 +3,24 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <QAbstractTableModel>
+#include <QModelIndex>
+#include <QVariant>
 
-#include "cell.hpp"
 #include "cellcoordinates.hpp"
-#include "record.hpp"
+
+class QObject;
 
 namespace CSMWorld
 {
     class Data;
+    struct Cell;
+
+    template <typename ESXRecordT>
+    struct Record;
 
     /// \brief Model for the region map
     ///

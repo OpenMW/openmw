@@ -1,5 +1,9 @@
 #include "dialogue.hpp"
 
+#include <exception>
+#include <map>
+#include <utility>
+
 #include <QApplication>
 #include <QListWidgetItem>
 #include <QScreen>
@@ -7,6 +11,9 @@
 #include <QStackedWidget>
 
 #include <components/debug/debuglog.hpp>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/view/prefs/pagebase.hpp>
 
 #include "../../model/prefs/state.hpp"
 

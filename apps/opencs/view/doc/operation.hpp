@@ -6,6 +6,7 @@
 class QHBoxLayout;
 class QPushButton;
 class QProgressBar;
+class QWidget;
 
 namespace CSVDoc
 {

@@ -6,10 +6,12 @@
 class QComboBox;
 class QGridLayout;
 class QStackedLayout;
+class QWidget;
 
 namespace CSMPrefs
 {
     class Setting;
+    class Category;
 }
 
 namespace CSVPrefs

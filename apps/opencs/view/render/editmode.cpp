@@ -1,6 +1,16 @@
 #include "editmode.hpp"
 
+#include <apps/opencs/view/widget/modebutton.hpp>
+
 #include "worldspacewidget.hpp"
+
+class QMouseEvent;
+class QWidget;
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
 
 CSVRender::WorldspaceWidget& CSVRender::EditMode::getWorldspaceWidget()
 {

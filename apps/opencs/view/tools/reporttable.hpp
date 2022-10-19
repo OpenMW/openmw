@@ -2,11 +2,24 @@
 #define CSV_TOOLS_REPORTTABLE_H
 
 #include <map>
+#include <string>
+#include <vector>
+
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include "../world/dragrecordtable.hpp"
 
 class QAction;
 class QSortFilterProxyModel;
+class QContextMenuEvent;
+class QMouseEvent;
+class QObject;
+class QWidget;
+
+namespace CSMDoc
+{
+    class Document;
+}
 
 namespace CSMTools
 {

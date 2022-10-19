@@ -1,18 +1,34 @@
 #ifndef SCRIPTEDIT_H
 #define SCRIPTEDIT_H
 
-#include <QAction>
 #include <QFont>
 #include <QPlainTextEdit>
+#include <QRegExp>
 #include <QTimer>
 #include <QVector>
 #include <QWidget>
+
+#include <string>
 
 #include "../../model/world/universalid.hpp"
 
 #include "scripthighlighter.hpp"
 
-class QRegExp;
+class QAction;
+class QContextMenuEvent;
+class QDragEnterEvent;
+class QDragMoveEvent;
+class QDropEvent;
+class QEvent;
+class QObject;
+class QPaintEvent;
+class QRect;
+class QResizeEvent;
+
+namespace CSMPrefs
+{
+    class Setting;
+}
 
 namespace CSMDoc
 {

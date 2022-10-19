@@ -1,12 +1,14 @@
 #include "enumdelegate.hpp"
 
 #include <cassert>
-#include <stdexcept>
+#include <memory>
 
 #include <QApplication>
 #include <QComboBox>
 
 #include "../../model/world/commands.hpp"
+
+#include <apps/opencs/view/world/util.hpp>
 
 int CSVWorld::EnumDelegate::getValueIndex(const QModelIndex& index, int role) const
 {

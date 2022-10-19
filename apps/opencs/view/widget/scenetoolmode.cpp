@@ -4,7 +4,14 @@
 #include <QEvent>
 #include <QFrame>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QMenu>
+
+#include <apps/opencs/view/widget/pushbutton.hpp>
+#include <apps/opencs/view/widget/scenetool.hpp>
+
+#include <type_traits>
+#include <utility>
 
 #include "modebutton.hpp"
 #include "scenetoolbar.hpp"

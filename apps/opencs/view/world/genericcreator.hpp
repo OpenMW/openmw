@@ -1,13 +1,18 @@
 #ifndef CSV_WORLD_GENERICCREATOR_H
 #define CSV_WORLD_GENERICCREATOR_H
 
+#include <QString>
+
 #include <memory>
+#include <string>
+#include <vector>
+
+#include <apps/opencs/model/world/scope.hpp>
 
 #include "../../model/world/universalid.hpp"
 
 #include "creator.hpp"
 
-class QString;
 class QPushButton;
 class QLineEdit;
 class QHBoxLayout;

@@ -1,12 +1,17 @@
 #include "scriptedit.hpp"
 
-#include <algorithm>
+#include <vector>
 
 #include <QDragEnterEvent>
 #include <QMenu>
 #include <QPainter>
 #include <QString>
 #include <QTextDocumentFragment>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/view/world/scripthighlighter.hpp>
 
 #include "../../model/doc/document.hpp"
 

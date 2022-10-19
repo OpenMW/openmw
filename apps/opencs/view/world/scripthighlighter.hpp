@@ -4,13 +4,28 @@
 #include <map>
 #include <string>
 
+#include <QString>
 #include <QSyntaxHighlighter>
+#include <QTextCharFormat>
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/nullerrorhandler.hpp>
 #include <components/compiler/parser.hpp>
 
 #include "../../model/world/scriptcontext.hpp"
+
+class QTextDocument;
+
+namespace CSMWorld
+{
+    class Data;
+}
+
+namespace Compiler
+{
+    class Scanner;
+    struct TokenLoc;
+}
 
 namespace CSMPrefs
 {

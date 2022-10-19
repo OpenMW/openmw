@@ -1,20 +1,25 @@
 #ifndef CSV_RENDER_EDITMODE_H
 #define CSV_RENDER_EDITMODE_H
 
-#include <osg/ref_ptr>
-
 #include "../widget/modebutton.hpp"
 
 class QDragEnterEvent;
 class QDropEvent;
 class QDragMoveEvent;
 class QPoint;
+class QMouseEvent;
+class QObject;
+class QWidget;
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
 
 namespace CSVRender
 {
     class WorldspaceWidget;
     struct WorldspaceHitResult;
-    class TagBase;
 
     class EditMode : public CSVWidget::ModeButton
     {

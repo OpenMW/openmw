@@ -1,6 +1,21 @@
 #include "colordelegate.hpp"
 
+#include <QColor>
+#include <QModelIndex>
 #include <QPainter>
+#include <QRect>
+
+#include <apps/opencs/view/world/util.hpp>
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
 
 CSVWorld::ColorDelegate::ColorDelegate(
     CSMWorld::CommandDispatcher* dispatcher, CSMDoc::Document& document, QObject* parent)

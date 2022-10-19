@@ -3,14 +3,18 @@
 
 #include <QVBoxLayout>
 
+#include <string>
+
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include "../../model/world/commanddispatcher.hpp"
 
 #include "../doc/subview.hpp"
 
 class QModelIndex;
-class QLabel;
+class QObject;
 class QSplitter;
-class QTime;
+class QTimer;
 
 namespace CSMDoc
 {

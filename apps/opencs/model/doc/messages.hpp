@@ -1,6 +1,9 @@
 #ifndef CSM_DOC_MESSAGES_H
 #define CSM_DOC_MESSAGES_H
 
+#include <QMetaType>
+
+#include <algorithm>
 #include <string>
 #include <vector>
 

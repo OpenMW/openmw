@@ -3,6 +3,22 @@
 
 #include "genericcreator.hpp"
 
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/world/creator.hpp>
+
+class QUndoStack;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CreateCommand;
+    class Data;
+}
+
 namespace CSVWorld
 {
     class DialogueCreator : public GenericCreator

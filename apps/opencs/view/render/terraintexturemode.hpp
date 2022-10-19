@@ -5,32 +5,53 @@
 
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
-#include <QEvent>
 #include <QWidget>
 
 #ifndef Q_MOC_RUN
-#include "../../model/doc/document.hpp"
 #include "../../model/world/columnimp.hpp"
-#include "../../model/world/idtable.hpp"
 #include "../widget/brushshapes.hpp"
 #include "brushdraw.hpp"
 #endif
 
-#include "terrainselection.hpp"
+#include <components/esm3/loadland.hpp>
+
+class QDragMoveEvent;
+class QDropEvent;
+class QMouseEvent;
+class QObject;
+class QPoint;
+class QWidget;
 
 namespace osg
 {
     class Group;
 }
 
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class IdTable;
+}
+
 namespace CSVWidget
 {
     class SceneToolTextureBrush;
+    class SceneToolbar;
 }
 
 namespace CSVRender
 {
+    class TerrainSelection;
+    class WorldspaceWidget;
+    struct WorldspaceHitResult;
+
     class TerrainTextureMode : public EditMode
     {
         Q_OBJECT

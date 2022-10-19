@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <components/esm3/variant.hpp>
+
 const size_t CSMWorld::ConstInfoSelectWrapper::RuleMinSize = 5;
 
 const size_t CSMWorld::ConstInfoSelectWrapper::FunctionPrefixOffset = 1;

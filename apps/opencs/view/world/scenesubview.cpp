@@ -1,11 +1,20 @@
 #include "scenesubview.hpp"
 
+#include <algorithm>
+#include <cassert>
+#include <map>
 #include <sstream>
 
 #include <QHBoxLayout>
-#include <QLabel>
+#include <QMargins>
 #include <QVBoxLayout>
-#include <cassert>
+#include <QWidget>
+
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/view/doc/subview.hpp>
+#include <apps/opencs/view/render/worldspacewidget.hpp>
+
+#include <components/esm3/cellid.hpp>
 
 #include "../../model/doc/document.hpp"
 

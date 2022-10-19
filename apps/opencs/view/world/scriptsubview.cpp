@@ -1,9 +1,19 @@
 #include "scriptsubview.hpp"
 
-#include <stdexcept>
+#include <istream>
+#include <vector>
 
 #include <QSplitter>
 #include <QTimer>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/commanddispatcher.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/view/doc/subview.hpp>
+#include <apps/opencs/view/world/creator.hpp>
+#include <apps/opencs/view/world/scripthighlighter.hpp>
 
 #include <components/debug/debuglog.hpp>
 

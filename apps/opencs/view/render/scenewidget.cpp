@@ -1,16 +1,47 @@
 #include "scenewidget.hpp"
 
 #include <chrono>
+#include <exception>
 #include <thread>
 
 #include <QLayout>
 #include <QMouseEvent>
 
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/view/render/lightingbright.hpp>
+#include <apps/opencs/view/render/lightingday.hpp>
+#include <apps/opencs/view/render/lightingnight.hpp>
+
 #include <extern/osgQt/GraphicsWindowQt>
+
+#include <osg/Array>
+#include <osg/Camera>
+#include <osg/DisplaySettings>
+#include <osg/GL>
+#include <osg/Geometry>
 #include <osg/GraphicsContext>
+#include <osg/Group>
 #include <osg/LightModel>
 #include <osg/Material>
+#include <osg/Matrix>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Transform>
+#include <osg/Vec3>
+#include <osg/Vec4>
+#include <osg/Vec4ub>
+#include <osg/View>
+#include <osg/Viewport>
+
+#include <osgGA/EventQueue>
+#include <osgGA/GUIEventAdapter>
+
 #include <osgViewer/CompositeViewer>
+#include <osgViewer/GraphicsWindow>
+#include <osgViewer/View>
+#include <osgViewer/ViewerBase>
 #include <osgViewer/ViewerEventHandlers>
 
 #include <components/debug/debuglog.hpp>

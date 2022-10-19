@@ -3,10 +3,16 @@
 #include <QDrag>
 #include <QDragEnterEvent>
 
+#include <algorithm>
+#include <string>
+
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
+
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include "dragdroputils.hpp"
 

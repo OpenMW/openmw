@@ -5,6 +5,7 @@
 
 #include <osg/ref_ptr>
 
+#include <QModelIndex>
 #include <QObject>
 
 class QModelIndex;

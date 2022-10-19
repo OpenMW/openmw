@@ -1,10 +1,14 @@
 #include "scenetooltoggle2.hpp"
 
 #include <sstream>
+#include <type_traits>
+#include <utility>
 
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QIcon>
+
+#include <apps/opencs/view/widget/scenetool.hpp>
 
 #include "pushbutton.hpp"
 #include "scenetoolbar.hpp"

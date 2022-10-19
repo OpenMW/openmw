@@ -1,15 +1,32 @@
 #include "cellarrow.hpp"
 
+#include <osg/Array>
+#include <osg/GL>
 #include <osg/Geometry>
 #include <osg/Group>
+#include <osg/Math>
 #include <osg/PositionAttitudeTransform>
 #include <osg/PrimitiveSet>
+#include <osg/Quat>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include "../../model/prefs/state.hpp"
+
+#include <apps/opencs/model/prefs/shortcutmanager.hpp>
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/view/render/tagbase.hpp>
 
 #include <components/misc/constants.hpp>
 
 #include "mask.hpp"
+
+namespace CSVRender
+{
+    struct WorldspaceHitResult;
+}
 
 CSVRender::CellArrowTag::CellArrowTag(CellArrow* arrow)
     : TagBase(Mask_CellArrow)

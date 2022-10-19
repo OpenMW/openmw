@@ -1,12 +1,22 @@
 #include "regionmap.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <set>
 #include <sstream>
 
-#include <QContextMenuEvent>
+#include <QAbstractItemModel>
+#include <QAction>
+#include <QBrush>
+#include <QDropEvent>
 #include <QHeaderView>
+#include <QItemSelectionModel>
 #include <QMenu>
+#include <QTableView>
+
+#include <apps/opencs/view/world/dragrecordtable.hpp>
+
+#include <components/esm3/cellid.hpp>
 
 #include "../../model/doc/document.hpp"
 

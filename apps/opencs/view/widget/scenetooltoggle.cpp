@@ -1,11 +1,15 @@
 #include "scenetooltoggle.hpp"
 
 #include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QPainter>
+
+#include <apps/opencs/view/widget/scenetool.hpp>
 
 #include "pushbutton.hpp"
 #include "scenetoolbar.hpp"

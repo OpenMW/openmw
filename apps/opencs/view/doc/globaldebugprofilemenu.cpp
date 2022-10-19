@@ -3,10 +3,17 @@
 #include <algorithm>
 #include <vector>
 
+#include <QAction>
 #include <QActionGroup>
+#include <QMenu>
+#include <QModelIndex>
+
+#include <apps/opencs/model/world/columns.hpp>
 
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
+
+class QWidget;
 
 void CSVDoc::GlobalDebugProfileMenu::rebuild()
 {

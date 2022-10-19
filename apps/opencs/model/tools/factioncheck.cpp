@@ -1,7 +1,17 @@
 #include "factioncheck.hpp"
 
 #include <map>
+#include <string>
+#include <utility>
 
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
+#include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadskil.hpp>
 
 #include "../prefs/state.hpp"

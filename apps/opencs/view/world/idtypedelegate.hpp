@@ -2,10 +2,23 @@
 #define IDTYPEDELEGATE_HPP
 
 #include "datadisplaydelegate.hpp"
-#include "util.hpp"
+
+class QObject;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
 
 namespace CSVWorld
 {
+    class CommandDelegate;
+
     class IdTypeDelegate : public DataDisplayDelegate
     {
     public:

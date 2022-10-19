@@ -1,6 +1,15 @@
 #include "infotableproxymodel.hpp"
 
+#include <QModelIndex>
+#include <QObject>
+#include <QString>
+
+#include <apps/opencs/model/world/idtableproxymodel.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include <components/misc/strings/lower.hpp>
+
+#include <string>
 
 #include "columns.hpp"
 #include "idtablebase.hpp"

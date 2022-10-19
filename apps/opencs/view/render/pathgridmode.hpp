@@ -5,9 +5,16 @@
 
 #include "editmode.hpp"
 
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
 namespace CSVRender
 {
     class PathgridSelectionMode;
+    class WorldspaceWidget;
+    struct WorldspaceHitResult;
 
     class PathgridMode : public EditMode
     {

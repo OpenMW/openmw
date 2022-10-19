@@ -1,8 +1,22 @@
 #include "cellwater.hpp"
 
+#include <memory>
+#include <string_view>
+
 #include <osg/Geometry>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Vec3d>
+#include <osg/Vec3f>
+
+#include <apps/opencs/model/world/collection.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/esm3/loadland.hpp>
 #include <components/fallback/fallback.hpp>

@@ -1,6 +1,7 @@
 #ifndef CSV_DOC_VIEWMANAGER_H
 #define CSV_DOC_VIEWMANAGER_H
 
+#include <string>
 #include <vector>
 
 #include <QObject>

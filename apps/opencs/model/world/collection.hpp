@@ -19,6 +19,7 @@
 #include "columnbase.hpp"
 #include "land.hpp"
 #include "landtexture.hpp"
+#include "record.hpp"
 #include "ref.hpp"
 
 namespace CSMWorld

@@ -1,6 +1,8 @@
 #include "extendedcommandconfigurator.hpp"
 
 #include <algorithm>
+#include <type_traits>
+#include <utility>
 
 #include <QCheckBox>
 #include <QGroupBox>
@@ -11,6 +13,8 @@
 
 #include "../../model/world/commanddispatcher.hpp"
 #include "../../model/world/data.hpp"
+
+#include <apps/opencs/model/world/universalid.hpp>
 
 CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(
     CSMDoc::Document& document, const CSMWorld::UniversalId& id, QWidget* parent)

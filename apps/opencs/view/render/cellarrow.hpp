@@ -18,6 +18,7 @@ namespace osg
 namespace CSVRender
 {
     class CellArrow;
+    struct WorldspaceHitResult;
 
     class CellArrowTag : public TagBase
     {

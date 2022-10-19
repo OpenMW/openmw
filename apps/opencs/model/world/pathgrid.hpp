@@ -2,9 +2,13 @@
 #define CSM_WOLRD_PATHGRID_H
 
 #include <string>
-#include <vector>
 
 #include <components/esm3/loadpgrd.hpp>
+
+namespace ESM
+{
+    class ESMReader;
+}
 
 namespace CSMWorld
 {

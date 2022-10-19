@@ -3,10 +3,17 @@
 
 #include "setting.hpp"
 
+#include <string>
+#include <utility>
+
 class QLineEdit;
+class QMutex;
+class QObject;
+class QWidget;
 
 namespace CSMPrefs
 {
+    class Category;
     class StringSetting : public Setting
     {
         Q_OBJECT

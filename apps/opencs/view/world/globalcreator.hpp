@@ -3,6 +3,17 @@
 
 #include "genericcreator.hpp"
 
+class QObject;
+class QUndoStack;
+
+#include <apps/opencs/model/world/universalid.hpp>
+
+namespace CSMWorld
+{
+    class CreateCommand;
+    class Data;
+}
+
 namespace CSVWorld
 {
     class GlobalCreator : public GenericCreator

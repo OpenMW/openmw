@@ -1,15 +1,22 @@
 #ifndef CSM_PREFS_SHORTCUTSETTING_H
 #define CSM_PREFS_SHORTCUTSETTING_H
 
+#include <string>
+#include <utility>
+
 #include <QKeySequence>
 
 #include "setting.hpp"
 
 class QEvent;
+class QMutex;
+class QObject;
 class QPushButton;
+class QWidget;
 
 namespace CSMPrefs
 {
+    class Category;
     class ShortcutSetting : public Setting
     {
         Q_OBJECT

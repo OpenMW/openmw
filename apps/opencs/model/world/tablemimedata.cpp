@@ -1,8 +1,12 @@
 #include "tablemimedata.hpp"
 
+#include <algorithm>
+#include <memory>
+#include <stdexcept>
 #include <string>
 
 #include <QDebug>
+#include <QString>
 
 #include "columnbase.hpp"
 #include "universalid.hpp"

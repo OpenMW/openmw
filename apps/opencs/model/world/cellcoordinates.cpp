@@ -1,9 +1,8 @@
 #include "cellcoordinates.hpp"
 
 #include <cmath>
-
-#include <ostream>
 #include <sstream>
+#include <type_traits>
 
 #include <osg/Vec3d>
 

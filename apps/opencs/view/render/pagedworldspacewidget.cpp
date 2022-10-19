@@ -1,10 +1,33 @@
 #include "pagedworldspacewidget.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <type_traits>
 
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/world/cellselection.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/pathgrid.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/subcellcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/render/cell.hpp>
+#include <apps/opencs/view/render/instancedragmodes.hpp>
+#include <apps/opencs/view/render/tagbase.hpp>
+#include <apps/opencs/view/render/worldspacewidget.hpp>
+
+#include <components/esm3/loadpgrd.hpp>
 #include <components/misc/constants.hpp>
+
+#include <osg/Camera>
+#include <osg/Vec3f>
+#include <osg/ref_ptr>
+#include <osgViewer/View>
 
 #include "../../model/prefs/shortcut.hpp"
 
@@ -18,6 +41,18 @@
 #include "mask.hpp"
 #include "terrainshapemode.hpp"
 #include "terraintexturemode.hpp"
+
+class QWidget;
+
+namespace CSMWorld
+{
+    struct Cell;
+}
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {

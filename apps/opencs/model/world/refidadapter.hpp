@@ -2,7 +2,6 @@
 #define CSM_WOLRD_REFIDADAPTER_H
 
 #include <string>
-#include <vector>
 
 /*! \brief
  * Adapters acts as indirection layer, abstracting details of the record types (in the wrappers) from the higher levels
@@ -21,7 +20,6 @@ namespace CSMWorld
     class RefIdData;
     struct RecordBase;
     struct NestedTableWrapperBase;
-    class HelperBase;
 
     class RefIdAdapter
     {

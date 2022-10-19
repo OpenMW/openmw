@@ -7,8 +7,14 @@
 #include <QLabel>
 #include <QSpinBox>
 
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/view/world/genericcreator.hpp>
+
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtree.hpp"
+
+class QUndoStack;
 
 std::string CSVWorld::CellCreator::getId() const
 {

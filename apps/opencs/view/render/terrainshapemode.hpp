@@ -5,19 +5,35 @@
 
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
-#include <QEvent>
-#include <QWidget>
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+
+#include <osg/Vec3d>
 
 #ifndef Q_MOC_RUN
-#include "../../model/doc/document.hpp"
 #include "../../model/world/columnimp.hpp"
-#include "../../model/world/idtable.hpp"
 #include "../widget/brushshapes.hpp"
 #endif
 
 #include "brushdraw.hpp"
-#include "terrainselection.hpp"
+
+class QDragMoveEvent;
+class QMouseEvent;
+class QObject;
+class QPoint;
+class QWidget;
+
+namespace osg
+{
+    class Group;
+}
+
+namespace CSMDoc
+{
+    class Document;
+}
 
 namespace CSVWidget
 {
@@ -26,12 +42,16 @@ namespace CSVWidget
 
 namespace CSMWorld
 {
-    class CellCoordinates;
+    class IdTable;
 }
 
 namespace CSVRender
 {
     class PagedWorldspaceWidget;
+    class TerrainSelection;
+    class WorldspaceWidget;
+    struct WorldspaceHitResult;
+    class SceneToolbar;
 
     /// \brief EditMode for handling the terrain shape editing
     class TerrainShapeMode : public EditMode

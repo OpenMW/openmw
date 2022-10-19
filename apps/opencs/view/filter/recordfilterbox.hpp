@@ -2,6 +2,9 @@
 #define CSV_FILTER_RECORDFILTERBOX_H
 
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <QWidget>
 

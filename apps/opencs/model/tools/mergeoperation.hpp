@@ -9,6 +9,8 @@
 
 #include "mergestate.hpp"
 
+class QObject;
+
 namespace CSMDoc
 {
     class Document;

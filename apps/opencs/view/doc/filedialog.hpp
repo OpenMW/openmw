@@ -2,7 +2,6 @@
 #define FILEDIALOG_HPP
 
 #include <QDialog>
-#include <QModelIndex>
 
 #ifndef Q_MOC_RUN
 
@@ -16,6 +15,11 @@ Q_DECLARE_METATYPE(std::filesystem::path)
 #endif
 
 #include "ui_filedialog.h"
+
+#include <filesystem>
+#include <vector>
+
+class QModelIndex;
 
 namespace ContentSelectorView
 {

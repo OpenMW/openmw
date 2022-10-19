@@ -1,11 +1,12 @@
 #ifndef CSM_DOC_DOCUMENTMGR_H
 #define CSM_DOC_DOCUMENTMGR_H
 
-#include <string>
-#include <vector>
-
 #include <QObject>
 #include <QThread>
+
+#include <filesystem>
+#include <string>
+#include <vector>
 
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>

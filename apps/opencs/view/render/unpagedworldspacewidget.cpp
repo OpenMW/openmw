@@ -4,6 +4,22 @@
 
 #include <components/sceneutil/util.hpp>
 
+#include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/pathgrid.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/subcellcollection.hpp>
+#include <apps/opencs/view/render/cell.hpp>
+#include <apps/opencs/view/render/worldspacewidget.hpp>
+
+#include <components/esm3/loadcell.hpp>
+
+#include <osg/Camera>
+#include <osg/Vec4f>
+#include <osg/ref_ptr>
+#include <osgViewer/View>
+
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
@@ -13,7 +29,16 @@
 
 #include "cameracontroller.hpp"
 #include "mask.hpp"
-#include "tagbase.hpp"
+
+namespace CSVRender
+{
+    class TagBase;
+}
+
+namespace osg
+{
+    class Vec3f;
+}
 
 void CSVRender::UnpagedWorldspaceWidget::update()
 {

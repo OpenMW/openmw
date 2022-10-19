@@ -2,6 +2,7 @@
 #define CSV_WORLD_CREATOR_H
 
 #include <memory>
+#include <string>
 
 #include <QWidget>
 
@@ -11,11 +12,6 @@
 #include "../../model/world/scope.hpp"
 #include "../../model/world/universalid.hpp"
 #endif
-
-namespace CSMDoc
-{
-    class Document;
-}
 
 namespace CSVWorld
 {

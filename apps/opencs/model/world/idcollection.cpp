@@ -1,5 +1,20 @@
 #include "idcollection.hpp"
 
+#include <memory>
+#include <string>
+#include <utility>
+
+#include <apps/opencs/model/world/collection.hpp>
+#include <apps/opencs/model/world/pathgrid.hpp>
+#include <apps/opencs/model/world/record.hpp>
+
+#include <components/esm3/loadpgrd.hpp>
+
+namespace ESM
+{
+    class ESMReader;
+}
+
 namespace CSMWorld
 {
     template <>

@@ -12,6 +12,10 @@
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/universalid.hpp"
 
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/view/world/dragrecordtable.hpp>
+
 #include "tableeditidaction.hpp"
 #include "util.hpp"
 

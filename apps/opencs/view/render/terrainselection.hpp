@@ -1,23 +1,22 @@
 #ifndef CSV_RENDER_TERRAINSELECTION_H
 #define CSV_RENDER_TERRAINSELECTION_H
 
+#include <string>
 #include <utility>
 #include <vector>
 
-#include <osg/PositionAttitudeTransform>
-#include <osg/Vec3d>
+#include <osg/Array>
 #include <osg/ref_ptr>
-
-#include <components/esm3/loadland.hpp>
 
 namespace osg
 {
     class Group;
+    class Geometry;
+    class PositionAttitudeTransform;
 }
 
 namespace CSVRender
 {
-    struct WorldspaceHitResult;
     class WorldspaceWidget;
 
     enum class TerrainSelectionType

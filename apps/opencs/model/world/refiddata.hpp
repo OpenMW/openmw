@@ -1,10 +1,14 @@
 #ifndef CSM_WOLRD_REFIDDATA_H
 #define CSM_WOLRD_REFIDDATA_H
 
+#include <algorithm>
 #include <cassert>
 #include <map>
 #include <memory>
+#include <stdexcept>
+#include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <components/esm3/esmwriter.hpp>

@@ -1,5 +1,9 @@
 #include "nestedcollection.hpp"
 
+#include <apps/opencs/model/world/columns.hpp>
+
+#include <stdexcept>
+
 #include "columnbase.hpp"
 
 CSMWorld::NestedCollection::NestedCollection() {}

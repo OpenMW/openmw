@@ -1,15 +1,23 @@
 #ifndef CSM_TOOLS_PATHGRIDCHECK_H
 #define CSM_TOOLS_PATHGRIDCHECK_H
 
-#include "../world/collection.hpp"
+#include <algorithm>
+#include <vector>
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
 
 namespace CSMWorld
 {
     struct Pathgrid;
     template <typename T, typename AT>
     class SubCellCollection;
+    template <typename ESXRecordT>
+    struct IdAccessor;
 }
 
 namespace CSMTools

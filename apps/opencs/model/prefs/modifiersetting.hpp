@@ -3,6 +3,9 @@
 
 #include "setting.hpp"
 
+#include <string>
+#include <utility>
+
 class QMutex;
 class QObject;
 class QWidget;

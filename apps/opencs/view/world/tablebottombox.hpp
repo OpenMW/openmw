@@ -1,7 +1,11 @@
 #ifndef CSV_WORLD_BOTTOMBOX_H
 #define CSV_WORLD_BOTTOMBOX_H
 
+#include <string>
+#include <vector>
+
 #include <QWidget>
+
 #include <apps/opencs/model/world/universalid.hpp>
 
 #include "extendedcommandconfigurator.hpp"

@@ -1,6 +1,12 @@
 #ifndef CSM_FILTER_TEXTNODE_H
 #define CSM_FILTER_TEXTNODE_H
 
+#include <map>
+#include <string>
+#include <vector>
+
+#include <apps/opencs/model/world/idtablebase.hpp>
+
 #include "leafnode.hpp"
 
 namespace CSMFilter

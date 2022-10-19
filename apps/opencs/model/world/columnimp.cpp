@@ -1,5 +1,13 @@
 #include "columnimp.hpp"
 
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/landtexture.hpp>
+#include <apps/opencs/model/world/record.hpp>
+
+#include <components/esm3/loadland.hpp>
+
 #include <stdexcept>
 
 namespace CSMWorld

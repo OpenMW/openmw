@@ -3,14 +3,24 @@
 
 #include "../world/idcollection.hpp"
 #include "../world/refcollection.hpp"
-#include "../world/refidcollection.hpp"
-#include "../world/refiddata.hpp"
 
 #include "../doc/stage.hpp"
 
 namespace ESM
 {
     struct Faction;
+}
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace CSMWorld
+{
+    class RefIdCollection;
+    class RefIdData;
+    struct Cell;
 }
 
 namespace CSMTools

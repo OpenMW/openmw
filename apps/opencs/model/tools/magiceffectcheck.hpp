@@ -1,14 +1,32 @@
 #ifndef CSM_TOOLS_MAGICEFFECTCHECK_HPP
 #define CSM_TOOLS_MAGICEFFECTCHECK_HPP
 
-#include <components/esm3/loadmgef.hpp>
+#include <string>
+
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include <components/esm3/loadsoun.hpp>
 
 #include "../world/idcollection.hpp"
-#include "../world/refidcollection.hpp"
-#include "../world/resources.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace CSMWorld
+{
+    class RefIdCollection;
+    class Resources;
+}
+
+namespace ESM
+{
+    struct MagicEffect;
+    struct Sound;
+}
 
 namespace CSMTools
 {

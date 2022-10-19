@@ -2,11 +2,21 @@
 #define CSM_WOLRD_REFCOLLECTION_H
 
 #include <map>
+#include <memory>
+#include <string>
 #include <string_view>
+#include <vector>
+
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include "collection.hpp"
 #include "record.hpp"
 #include "ref.hpp"
+
+namespace ESM
+{
+    class ESMReader;
+}
 
 namespace CSMDoc
 {
@@ -16,7 +26,6 @@ namespace CSMDoc
 namespace CSMWorld
 {
     struct Cell;
-    class UniversalId;
 
     template <>
     void Collection<CellRef, IdAccessor<CellRef>>::removeRows(int index, int count);

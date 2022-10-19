@@ -2,6 +2,9 @@
 #define CSVWORLD_TABLEEDITIDACTION_HPP
 
 #include <QAction>
+#include <QString>
+
+#include <utility>
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/universalid.hpp"

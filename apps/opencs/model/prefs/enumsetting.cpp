@@ -1,10 +1,14 @@
-
 #include "enumsetting.hpp"
 
 #include <QComboBox>
 #include <QLabel>
 #include <QMutexLocker>
 #include <QString>
+
+#include <algorithm>
+#include <memory>
+
+#include <apps/opencs/model/prefs/setting.hpp>
 
 #include <components/settings/settings.hpp>
 

@@ -1,8 +1,12 @@
 #include "operation.hpp"
 
+#include <algorithm>
+#include <exception>
 #include <vector>
 
 #include <QTimer>
+
+#include <apps/opencs/model/doc/messages.hpp>
 
 #include "../world/universalid.hpp"
 

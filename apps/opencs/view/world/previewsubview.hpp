@@ -3,6 +3,10 @@
 
 #include "../doc/subview.hpp"
 
+#include <string>
+
+#include <apps/opencs/model/world/universalid.hpp>
+
 namespace CSMDoc
 {
     class Document;

@@ -2,6 +2,8 @@
 
 #include <QVBoxLayout>
 
+#include <memory>
+
 #include "../../model/prefs/shortcut.hpp"
 
 #include "scenetool.hpp"

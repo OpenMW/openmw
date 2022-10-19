@@ -1,9 +1,24 @@
 #ifndef CSV_WORLD_VARTYPEDELEGATE_H
 #define CSV_WORLD_VARTYPEDELEGATE_H
 
+#include <utility>
+#include <vector>
+
+#include <apps/opencs/view/world/util.hpp>
+
 #include <components/esm3/variant.hpp>
 
 #include "enumdelegate.hpp"
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
 
 namespace CSVWorld
 {

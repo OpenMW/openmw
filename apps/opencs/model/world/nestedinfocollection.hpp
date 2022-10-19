@@ -1,7 +1,10 @@
 #ifndef CSM_WOLRD_NESTEDINFOCOLLECTION_H
 #define CSM_WOLRD_NESTEDINFOCOLLECTION_H
 
+#include <QVariant>
+
 #include <map>
+#include <utility>
 
 #include "infocollection.hpp"
 #include "nestedcollection.hpp"
@@ -9,6 +12,9 @@
 namespace CSMWorld
 {
     struct NestedTableWrapperBase;
+    class NestableColumn;
+    struct ColumnBase;
+    struct Info;
 
     template <typename ESXRecordT>
     class NestedColumnAdapter;

@@ -1,11 +1,19 @@
 #ifndef CSM_TOOLS_REGIONCHECK_H
 #define CSM_TOOLS_REGIONCHECK_H
 
-#include <components/esm3/loadregn.hpp>
-
 #include "../world/idcollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace ESM
+{
+    struct Region;
+}
 
 namespace CSMTools
 {

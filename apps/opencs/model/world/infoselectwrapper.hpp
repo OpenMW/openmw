@@ -1,7 +1,16 @@
 #ifndef CSM_WORLD_INFOSELECTWRAPPER_H
 #define CSM_WORLD_INFOSELECTWRAPPER_H
 
+#include <stddef.h>
+#include <string>
+#include <utility>
+
 #include <components/esm3/loadinfo.hpp>
+
+namespace ESM
+{
+    class Variant;
+}
 
 namespace CSMWorld
 {

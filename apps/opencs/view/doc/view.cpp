@@ -1,8 +1,5 @@
 #include "view.hpp"
 
-#include <sstream>
-#include <stdexcept>
-
 #include <QApplication>
 #include <QCloseEvent>
 #include <QDesktopWidget>
@@ -11,6 +8,10 @@
 #include <QScreen>
 #include <QScrollArea>
 #include <QScrollBar>
+
+#include <algorithm>
+#include <filesystem>
+#include <sstream>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/doc/state.hpp"
@@ -27,6 +28,12 @@
 #include "../world/tablesubview.hpp"
 
 #include "../tools/subviews.hpp"
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/prefs/shortcutmanager.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/view/doc/subviewfactory.hpp>
 
 #include <components/files/conversion.hpp>
 #include <components/misc/helpviewer.hpp>

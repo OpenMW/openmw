@@ -3,11 +3,18 @@
 
 #include "util.hpp"
 
-class QRect;
+class QModelIndex;
+class QObject;
+class QPainter;
 
-namespace CSVWidget
+namespace CSMDoc
 {
-    class ColorEditButton;
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
 }
 
 namespace CSVWorld

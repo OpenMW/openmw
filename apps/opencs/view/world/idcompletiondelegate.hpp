@@ -3,6 +3,22 @@
 
 #include "util.hpp"
 
+#include <apps/opencs/model/world/columnbase.hpp>
+
+class QModelIndex;
+class QObject;
+class QWidget;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
+
 namespace CSVWorld
 {
     /// \brief Enables the Id completion for a column

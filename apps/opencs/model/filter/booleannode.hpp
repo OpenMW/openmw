@@ -1,7 +1,15 @@
 #ifndef CSM_FILTER_BOOLEANNODE_H
 #define CSM_FILTER_BOOLEANNODE_H
 
+#include <map>
+#include <string>
+
 #include "leafnode.hpp"
+
+namespace CSMWorld
+{
+    class IdTableBase;
+}
 
 namespace CSMFilter
 {

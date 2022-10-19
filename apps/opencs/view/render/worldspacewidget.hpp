@@ -1,15 +1,38 @@
 #ifndef OPENCS_VIEW_WORLDSPACEWIDGET_H
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
+#include <QPoint>
 #include <QTimer>
-#include <osg/Vec3>
 
-#include "../../model/doc/document.hpp"
+#include <osg/Vec3d>
+#include <osg/ref_ptr>
+
+#include <string>
+#include <vector>
 
 #include <apps/opencs/view/render/tagbase.hpp>
 
 #include "instancedragmodes.hpp"
 #include "scenewidget.hpp"
+
+class QDragEnterEvent;
+class QDragMoveEvent;
+class QDropEvent;
+class QModelIndex;
+class QMouseEvent;
+class QObject;
+class QWheelEvent;
+class QWidget;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace osg
+{
+    class Vec3f;
+}
 
 namespace CSMPrefs
 {

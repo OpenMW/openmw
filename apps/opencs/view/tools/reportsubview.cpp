@@ -2,6 +2,8 @@
 
 #include "reporttable.hpp"
 
+#include <apps/opencs/view/doc/subview.hpp>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/doc/state.hpp"
 

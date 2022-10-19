@@ -3,13 +3,17 @@
 
 #include "../doc/subview.hpp"
 
-class QModelIndex;
-class QWidget;
+#include <QModelIndex>
+#include <QWidget>
 
-namespace CSMWorld
-{
-    class IdTable;
-}
+#include <string>
+#include <vector>
+
+#include <apps/opencs/model/world/universalid.hpp>
+
+class QEvent;
+class QObject;
+class QWidget;
 
 namespace CSMDoc
 {

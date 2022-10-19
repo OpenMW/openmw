@@ -1,10 +1,15 @@
 #ifndef CSM_DOC_DOCUMENT_H
 #define CSM_DOC_DOCUMENT_H
 
-#include <string>
-
 #include <QObject>
 #include <QUndoStack>
+
+#include <filesystem>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>

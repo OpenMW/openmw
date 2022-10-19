@@ -6,6 +6,13 @@
 #include "../world/data.hpp"
 #include "../world/idtablebase.hpp"
 
+#include <vector>
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/doc/operation.hpp>
+#include <apps/opencs/model/tools/search.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include "searchstage.hpp"
 
 CSMTools::SearchOperation::SearchOperation(CSMDoc::Document& document)

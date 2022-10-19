@@ -1,11 +1,19 @@
 #ifndef CSM_TOOLS_CLASSCHECK_H
 #define CSM_TOOLS_CLASSCHECK_H
 
-#include <components/esm3/loadclas.hpp>
-
 #include "../world/idcollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace ESM
+{
+    struct Class;
+}
 
 namespace CSMTools
 {

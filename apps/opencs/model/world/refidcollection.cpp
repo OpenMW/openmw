@@ -1,10 +1,29 @@
 #include "refidcollection.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
+#include <type_traits>
 
-#include <components/esm3/esmreader.hpp>
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/refiddata.hpp>
+
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadlock.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadweap.hpp>
 
 #include "columns.hpp"
 #include "nestedcoladapterimp.hpp"

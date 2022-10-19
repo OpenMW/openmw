@@ -3,9 +3,12 @@
 
 #include <QHBoxLayout>
 
-#include "../doc/subview.hpp"
+#include <string>
+#include <vector>
 
-class QModelIndex;
+#include <apps/opencs/model/world/universalid.hpp>
+
+#include "../doc/subview.hpp"
 
 namespace CSMWorld
 {
@@ -27,13 +30,11 @@ namespace CSVRender
 namespace CSVWidget
 {
     class SceneToolbar;
-    class SceneToolMode;
 }
 
 namespace CSVWorld
 {
     class TableBottomBox;
-    class CreatorFactoryBase;
 
     class SceneSubView : public CSVDoc::SubView
     {

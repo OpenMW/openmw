@@ -5,10 +5,15 @@
 #include <vector>
 
 #include <QAbstractTableModel>
+#include <QModelIndex>
+#include <QVariant>
 
 #include "../doc/messages.hpp"
 
-#include "../world/universalid.hpp"
+namespace CSMWorld
+{
+    class UniversalId;
+}
 
 namespace CSMTools
 {

@@ -3,6 +3,8 @@
 #include <QEvent>
 #include <QKeyEvent>
 
+#include <apps/opencs/model/world/universalid.hpp>
+
 bool CSVDoc::SubView::event(QEvent* event)
 {
     if (event->type() == QEvent::ShortcutOverride)

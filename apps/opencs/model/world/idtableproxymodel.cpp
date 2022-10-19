@@ -1,9 +1,21 @@
 #include "idtableproxymodel.hpp"
 
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QSortFilterProxyModel>
+#include <QString>
+
+#include <compare>
+#include <type_traits>
 #include <vector>
+
+#include <apps/opencs/model/filter/node.hpp>
+#include <apps/opencs/model/world/columns.hpp>
 
 #include "columnbase.hpp"
 #include "idtablebase.hpp"
+
+class QObject;
 
 namespace
 {

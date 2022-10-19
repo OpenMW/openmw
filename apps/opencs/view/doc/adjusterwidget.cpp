@@ -1,12 +1,14 @@
 #include "adjusterwidget.hpp"
-#include <filesystem>
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QStyle>
 
+#include <filesystem>
+#include <stdexcept>
+#include <string>
+
 #include <components/files/qtconversion.hpp>
-#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 
 CSVDoc::AdjusterWidget::AdjusterWidget(QWidget* parent)

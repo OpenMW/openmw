@@ -2,6 +2,25 @@
 
 #include "../../model/world/columns.hpp"
 
+#include <apps/opencs/view/world/datadisplaydelegate.hpp>
+#include <apps/opencs/view/world/util.hpp>
+
+#include <string>
+#include <utility>
+#include <vector>
+
+class QObject;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
+
 CSVWorld::RecordStatusDelegate::RecordStatusDelegate(const ValueList& values, const IconList& icons,
     CSMWorld::CommandDispatcher* dispatcher, CSMDoc::Document& document, QObject* parent)
     : DataDisplayDelegate(values, icons, dispatcher, document, "Records", "status-format", parent)

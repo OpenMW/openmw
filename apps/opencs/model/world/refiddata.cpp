@@ -1,10 +1,18 @@
 #include "refiddata.hpp"
 
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include <components/misc/strings/lower.hpp>
 
-#include <cassert>
 #include <memory>
 #include <string_view>
+#include <type_traits>
+
+namespace ESM
+{
+    class ESMWriter;
+}
 
 CSMWorld::RefIdDataContainerBase::~RefIdDataContainerBase() {}
 

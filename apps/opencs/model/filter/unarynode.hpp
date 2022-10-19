@@ -1,6 +1,10 @@
 #ifndef CSM_FILTER_UNARYNODE_H
 #define CSM_FILTER_UNARYNODE_H
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "node.hpp"
 
 namespace CSMFilter

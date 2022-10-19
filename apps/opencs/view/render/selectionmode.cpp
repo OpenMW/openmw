@@ -3,7 +3,16 @@
 #include <QAction>
 #include <QMenu>
 
+#include <memory>
+
+#include <apps/opencs/view/widget/scenetoolmode.hpp>
+
 #include "worldspacewidget.hpp"
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
 
 namespace CSVRender
 {

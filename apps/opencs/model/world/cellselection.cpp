@@ -5,6 +5,7 @@
 #include <cmath>
 #include <limits>
 #include <stdexcept>
+#include <utility>
 
 CSMWorld::CellSelection::Iterator CSMWorld::CellSelection::begin() const
 {

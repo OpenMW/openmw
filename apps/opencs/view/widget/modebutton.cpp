@@ -1,5 +1,9 @@
 #include "modebutton.hpp"
 
+#include <apps/opencs/view/widget/pushbutton.hpp>
+
+class QWidget;
+
 CSVWidget::ModeButton::ModeButton(const QIcon& icon, const QString& tooltip, QWidget* parent)
     : PushButton(icon, Type_Mode, tooltip, parent)
 {

@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 
+#include <osg/Group>
 #include <osg/ref_ptr>
 
 #include <QObject>

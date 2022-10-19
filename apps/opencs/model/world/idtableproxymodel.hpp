@@ -1,18 +1,29 @@
 #ifndef CSM_WOLRD_IDTABLEPROXYMODEL_H
 #define CSM_WOLRD_IDTABLEPROXYMODEL_H
 
-#include <string>
-
 #include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include <QModelIndex>
 #include <QSortFilterProxyModel>
-
-#include "../filter/node.hpp"
+#include <QString>
 
 #include "columns.hpp"
 
+class QObject;
+
+namespace CSMFilter
+{
+    class Node;
+}
+
 namespace CSMWorld
 {
+    class IdTableBase;
+
     class IdTableProxyModel : public QSortFilterProxyModel
     {
         Q_OBJECT

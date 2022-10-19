@@ -3,9 +3,13 @@
 
 #include "scenewidget.hpp"
 
+#include <string>
+
 #include "object.hpp"
 
 class QModelIndex;
+class QObject;
+class QWidget;
 
 namespace CSMWorld
 {

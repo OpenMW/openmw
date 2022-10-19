@@ -1,5 +1,9 @@
-
 #include "page.hpp"
+
+#include <utility>
+#include <vector>
+
+#include <apps/opencs/view/prefs/pagebase.hpp>
 
 #include <QGridLayout>
 

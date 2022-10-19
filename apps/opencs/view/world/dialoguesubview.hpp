@@ -4,9 +4,13 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 #include <QAbstractItemDelegate>
+#include <QObject>
 #include <QScrollArea>
+#include <QStyleOptionViewItem>
 
 #ifndef Q_MOC_RUN
 #include "../doc/subview.hpp"
@@ -16,12 +20,16 @@
 #include "../../model/world/universalid.hpp"
 #endif
 
+class QAbstractItemModel;
+class QAction;
 class QDataWidgetMapper;
-class QSize;
-class QEvent;
-class QLabel;
-class QVBoxLayout;
 class QMenu;
+class QModelIndex;
+class QPainter;
+class QPoint;
+class QSize;
+class QVBoxLayout;
+class QWidget;
 
 namespace CSMWorld
 {

@@ -5,17 +5,14 @@
 
 #include <QDockWidget>
 
-class QUndoStack;
+#include <string>
 
-namespace CSMWorld
-{
-    class Data;
-}
+class QCloseEvent;
+class QEvent;
+class QObject;
 
 namespace CSVDoc
 {
-    class View;
-
     class SubView : public QDockWidget
     {
         Q_OBJECT

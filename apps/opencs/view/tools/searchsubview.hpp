@@ -5,6 +5,8 @@
 
 #include "../doc/subview.hpp"
 
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include "searchbox.hpp"
 
 namespace CSMDoc

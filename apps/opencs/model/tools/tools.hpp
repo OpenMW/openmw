@@ -4,6 +4,8 @@
 #include <map>
 #include <memory>
 
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include <components/to_utf8/to_utf8.hpp>
 
 #include <QObject>
@@ -13,13 +15,13 @@
 namespace CSMWorld
 {
     class Data;
-    class UniversalId;
 }
 
 namespace CSMDoc
 {
     class Operation;
     class Document;
+    struct Message;
 }
 
 namespace CSMTools

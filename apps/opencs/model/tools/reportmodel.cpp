@@ -1,7 +1,12 @@
 #include "reportmodel.hpp"
 
+#include <algorithm>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include "../world/columns.hpp"
 

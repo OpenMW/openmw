@@ -1,9 +1,11 @@
 #ifndef CSV_WORLD_REGIONMAPSUBVIEW_H
 #define CSV_WORLD_REGIONMAPSUBVIEW_H
 
+#include <string>
+
 #include "../doc/subview.hpp"
 
-class QAction;
+#include <apps/opencs/model/world/universalid.hpp>
 
 namespace CSMDoc
 {

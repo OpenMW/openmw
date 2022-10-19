@@ -2,7 +2,13 @@
 
 #include <QTableView>
 
+#include <memory>
+#include <type_traits>
+
 #include "../../model/world/tablemimedata.hpp"
+
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 CSVWorld::TableEditIdAction::CellData CSVWorld::TableEditIdAction::getCellData(int row, int column) const
 {

@@ -3,15 +3,35 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/render/instancedragmodes.hpp>
+
+#include <osg/Vec3d>
 
 #include "cell.hpp"
 #include "worldspacewidget.hpp"
 
 class QModelIndex;
+class QObject;
+class QWidget;
+
+namespace osg
+{
+    class Vec3f;
+    template <class T>
+    class ref_ptr;
+}
 
 namespace CSMDoc
 {
     class Document;
+}
+
+namespace CSVWidget
+{
+    class SceneToolToggle2;
 }
 
 namespace CSMWorld
@@ -22,6 +42,8 @@ namespace CSMWorld
 
 namespace CSVRender
 {
+    class TagBase;
+
     class UnpagedWorldspaceWidget : public WorldspaceWidget
     {
         Q_OBJECT

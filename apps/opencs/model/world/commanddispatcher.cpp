@@ -1,8 +1,24 @@
 #include "commanddispatcher.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
+#include <string>
 
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QObject>
+#include <QVariant>
+
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idtablebase.hpp>
+#include <apps/opencs/model/world/ref.hpp>
+#include <apps/opencs/model/world/refcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
+#include <components/esm3/loaddial.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/strings/lower.hpp>
 

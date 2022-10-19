@@ -6,23 +6,21 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QUndoCommand>
 #include <QVariant>
 
 #include "columnimp.hpp"
-#include "nestedtablewrapper.hpp"
 #include "universalid.hpp"
-
-class QAbstractItemModel;
 
 namespace CSMWorld
 {
     class IdTable;
     class IdTree;
-    struct RecordBase;
     struct NestedTableWrapperBase;
 
     class TouchCommand : public QUndoCommand

@@ -1,6 +1,8 @@
 #ifndef CSV_RENDER_PATHGRID_H
 #define CSV_RENDER_PATHGRID_H
 
+#include <algorithm>
+#include <string>
 #include <vector>
 
 #include <QString>
@@ -14,6 +16,7 @@
 
 namespace osg
 {
+    class Vec3f;
     class Geometry;
     class Group;
     class PositionAttitudeTransform;
@@ -29,6 +32,8 @@ namespace CSMWorld
 namespace CSVRender
 {
     class Pathgrid;
+
+    struct WorldspaceHitResult;
 
     class PathgridTag : public TagBase
     {

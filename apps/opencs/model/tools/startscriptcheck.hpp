@@ -2,11 +2,21 @@
 #define CSM_TOOLS_STARTSCRIPTCHECK_H
 
 #include <components/esm3/loadscpt.hpp>
-#include <components/esm3/loadsscr.hpp>
 
 #include "../doc/stage.hpp"
 
 #include "../world/idcollection.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace ESM
+{
+    class Script;
+    struct StartScript;
+}
 
 namespace CSMTools
 {

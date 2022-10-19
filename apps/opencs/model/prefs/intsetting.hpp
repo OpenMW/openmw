@@ -4,9 +4,14 @@
 #include "setting.hpp"
 
 class QSpinBox;
+class QMutex;
+class QObject;
+class QWidget;
 
 namespace CSMPrefs
 {
+    class Category;
+
     class IntSetting : public Setting
     {
         Q_OBJECT

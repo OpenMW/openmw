@@ -8,8 +8,14 @@
 #include <QProgressBar>
 #include <QVBoxLayout>
 
-#include <components/files/conversion.hpp>
+#include <apps/opencs/model/world/data.hpp>
 #include <components/files/qtconversion.hpp>
+
+#include <filesystem>
+#include <stddef.h>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "../../model/doc/document.hpp"
 

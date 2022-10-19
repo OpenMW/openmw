@@ -1,10 +1,14 @@
 #ifndef CSM_DOC_SAVING_H
 #define CSM_DOC_SAVING_H
 
+#include <QObject>
+
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "operation.hpp"
 #include "savingstate.hpp"
+
+#include <filesystem>
 
 namespace CSMDoc
 {

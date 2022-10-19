@@ -3,31 +3,38 @@
 
 #include <QFrame>
 #include <QGroupBox>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QModelIndex>
-#include <QPushButton>
-#include <QSlider>
-#include <QSpinBox>
-#include <QWidget>
 
 #ifndef Q_MOC_RUN
 #include "brushshapes.hpp"
 #include "scenetool.hpp"
-
-#include "../../model/doc/document.hpp"
 #endif
 
 class QTableWidget;
+class QDragEnterEvent;
+class QDropEvent;
+class QHBoxLayout;
+class QLabel;
+class QModelIndex;
+class QObject;
+class QPoint;
+class QPushButton;
+class QSlider;
+class QSpinBox;
+class QWidget;
 
 namespace CSVRender
 {
     class TerrainTextureMode;
 }
 
+namespace CSMDoc
+{
+    class Document;
+}
+
 namespace CSVWidget
 {
-    class SceneToolTextureBrush;
+    class SceneToolbar;
 
     /// \brief Layout-box for some brush button settings
     class BrushSizeControls : public QGroupBox
@@ -45,8 +52,6 @@ namespace CSVWidget
         friend class SceneToolTextureBrush;
         friend class CSVRender::TerrainTextureMode;
     };
-
-    class SceneToolTextureBrush;
 
     /// \brief Brush settings window
     class TextureBrushWindow : public QFrame

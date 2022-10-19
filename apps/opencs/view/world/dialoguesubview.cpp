@@ -1,21 +1,38 @@
 #include "dialoguesubview.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 #include <QAbstractItemModel>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDataWidgetMapper>
+#include <QFrame>
 #include <QGridLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
+#include <QModelIndex>
 #include <QPlainTextEdit>
+#include <QRect>
 #include <QScrollBar>
 #include <QSize>
+#include <QSizePolicy>
+#include <QVBoxLayout>
+#include <QVariant>
+#include <QWidget>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/commanddispatcher.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idtablebase.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/doc/subview.hpp>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -35,6 +52,10 @@
 #include "recordbuttonbar.hpp"
 #include "tablebottombox.hpp"
 #include "util.hpp"
+
+class QPainter;
+class QPoint;
+
 /*
 ==============================NotEditableSubDelegate==========================================
 */

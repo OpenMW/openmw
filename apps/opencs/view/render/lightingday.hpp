@@ -5,6 +5,11 @@
 
 #include <osg/Vec4f>
 
+namespace osg
+{
+    class Group;
+}
+
 namespace CSVRender
 {
     class LightingDay : public Lighting

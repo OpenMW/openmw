@@ -1,7 +1,13 @@
 #include "land.hpp"
 
 #include <sstream>
+#include <stddef.h>
 #include <stdexcept>
+
+namespace ESM
+{
+    class ESMReader;
+}
 
 namespace CSMWorld
 {

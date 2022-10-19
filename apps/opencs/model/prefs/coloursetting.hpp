@@ -5,6 +5,13 @@
 
 #include <QColor>
 
+#include <string>
+#include <utility>
+
+class QMutex;
+class QObject;
+class QWidget;
+
 namespace CSVWidget
 {
     class ColorEditor;
@@ -12,6 +19,7 @@ namespace CSVWidget
 
 namespace CSMPrefs
 {
+    class Category;
     class ColourSetting : public Setting
     {
         Q_OBJECT

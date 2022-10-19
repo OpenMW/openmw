@@ -1,12 +1,17 @@
 #include "keybindingpage.hpp"
 
 #include <cassert>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <QComboBox>
 #include <QGridLayout>
 #include <QPushButton>
 #include <QStackedLayout>
 #include <QVBoxLayout>
+
+#include <apps/opencs/view/prefs/pagebase.hpp>
 
 #include "../../model/prefs/category.hpp"
 #include "../../model/prefs/setting.hpp"

@@ -1,5 +1,20 @@
 #include "mergestages.hpp"
 
+#include <cstdint>
+#include <filesystem>
+#include <utility>
+#include <vector>
+
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/landtexture.hpp>
+#include <apps/opencs/model/world/metadata.hpp>
+#include <apps/opencs/model/world/ref.hpp>
+#include <apps/opencs/model/world/refcollection.hpp>
+#include <apps/opencs/model/world/refidcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/esmreader.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "mergestate.hpp"
@@ -8,6 +23,11 @@
 #include "../world/commands.hpp"
 #include "../world/data.hpp"
 #include "../world/idtable.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
 
 CSMTools::StartMergeStage::StartMergeStage(MergeState& state)
     : mState(state)

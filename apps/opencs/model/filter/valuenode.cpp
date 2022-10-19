@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 #include "../world/columns.hpp"
 #include "../world/idtablebase.hpp"

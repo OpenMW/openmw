@@ -1,6 +1,8 @@
 #ifndef CSM_DOC_LOADER_H
 #define CSM_DOC_LOADER_H
 
+#include <string>
+#include <utility>
 #include <vector>
 
 #include <QMutex>

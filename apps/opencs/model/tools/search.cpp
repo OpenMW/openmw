@@ -1,7 +1,16 @@
 #include "search.hpp"
 
+#include <QModelIndex>
+#include <QRegExp>
+#include <QString>
+
+#include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
+#include <vector>
+
+#include <apps/opencs/model/world/columns.hpp>
 
 #include "../doc/document.hpp"
 #include "../doc/messages.hpp"

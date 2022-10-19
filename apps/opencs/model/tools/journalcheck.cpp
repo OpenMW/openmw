@@ -1,6 +1,23 @@
 #include "journalcheck.hpp"
 
+#include <memory>
 #include <set>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/info.hpp>
+#include <apps/opencs/model/world/infocollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadinfo.hpp>
 
 #include "../prefs/state.hpp"
 

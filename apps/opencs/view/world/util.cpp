@@ -2,6 +2,8 @@
 
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 #include <QCheckBox>
 #include <QItemEditorFactory>
@@ -9,6 +11,10 @@
 #include <QPlainTextEdit>
 #include <QStyledItemDelegate>
 #include <QUndoStack>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/view/world/scripthighlighter.hpp>
 
 #include "../../model/world/commanddispatcher.hpp"
 

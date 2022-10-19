@@ -5,6 +5,14 @@
 
 #include "genericcreator.hpp"
 
+#include <apps/opencs/model/world/universalid.hpp>
+
+namespace CSMWorld
+{
+    class CreateCommand;
+    class Data;
+}
+
 class QLineEdit;
 class QSpinBox;
 

@@ -1,5 +1,13 @@
 #include "loader.hpp"
 
+#include <algorithm>
+#include <exception>
+#include <filesystem>
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include <components/files/conversion.hpp>
 
 #include <QTimer>

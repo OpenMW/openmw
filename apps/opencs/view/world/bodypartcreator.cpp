@@ -5,6 +5,8 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/universalid.hpp"
 
+#include <apps/opencs/view/world/genericcreator.hpp>
+
 std::string CSVWorld::BodyPartCreator::getId() const
 {
     std::string id = CSVWorld::GenericCreator::getId();

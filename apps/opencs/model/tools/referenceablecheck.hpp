@@ -1,17 +1,29 @@
 #ifndef REFERENCEABLECHECKSTAGE_H
 #define REFERENCEABLECHECKSTAGE_H
 
+#include <string>
+#include <vector>
+
 #include "../doc/stage.hpp"
 
 #include "../world/idcollection.hpp"
 #include "../world/refiddata.hpp"
-#include "../world/resources.hpp"
 
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadscpt.hpp>
+
+namespace CSMWorld
+{
+    class Resources;
+}
+
+namespace CSMDoc
+{
+    class Messages;
+}
 
 namespace CSMTools
 {

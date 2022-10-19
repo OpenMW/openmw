@@ -1,6 +1,7 @@
 #ifndef CSM_DOC_OPERATION_H
 #define CSM_DOC_OPERATION_H
 
+#include <utility>
 #include <vector>
 
 #include <QObject>

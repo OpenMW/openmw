@@ -7,6 +7,22 @@
 #include <QMetaObject>
 #include <QString>
 
+#include <algorithm>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/idtableproxymodel.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/world/dragrecordtable.hpp>
+
 #include <components/debug/debuglog.hpp>
 #include <components/misc/helpviewer.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -26,6 +42,11 @@
 #include "tableeditidaction.hpp"
 #include "tableheadermouseeventhandler.hpp"
 #include "util.hpp"
+
+namespace CSMFilter
+{
+    class Node;
+}
 
 void CSVWorld::Table::contextMenuEvent(QContextMenuEvent* event)
 {

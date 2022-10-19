@@ -2,12 +2,20 @@
 
 #include <algorithm>
 #include <sstream>
+#include <type_traits>
 
-#include <components/misc/strings/lower.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/refidcollection.hpp>
 
 #include <components/compiler/nullerrorhandler.hpp>
 #include <components/compiler/quickfileparser.hpp>
 #include <components/compiler/scanner.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadscpt.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "data.hpp"
 

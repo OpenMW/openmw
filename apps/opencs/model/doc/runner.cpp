@@ -7,10 +7,12 @@
 #include <QDir>
 #endif
 
+#include <QProcess>
+#include <QString>
+#include <QStringList>
 #include <QTemporaryFile>
 #include <QTextStream>
 
-#include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 
 #include "operationholder.hpp"
