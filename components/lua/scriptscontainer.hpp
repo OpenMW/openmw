@@ -134,20 +134,20 @@ namespace LuaUtil
 
         // Callbacks for serializable timers should be registered in advance.
         // The script with the given path should already present in the container.
-        void registerTimerCallback(int scriptId, std::string_view callbackName, sol::function callback);
+        void registerTimerCallback(int scriptId, std::string_view callbackName, sol::main_protected_function callback);
 
         // Sets up a timer, that can be automatically saved and loaded.
         //   type - the type of timer, either SIMULATION_TIME or GAME_TIME.
         //   time - the absolute game time (in seconds or in hours) when the timer should be executed.
-        //   scriptPath - script path in VFS is used as script id. The script with the given path should already present in the container.
-        //   callbackName - callback (should be registered in advance) for this timer.
-        //   callbackArg - parameter for the callback (should be serializable).
-        void setupSerializableTimer(TimerType type, double time, int scriptId,
-                                    std::string_view callbackName, sol::object callbackArg);
+        //   scriptPath - script path in VFS is used as script id. The script with the given path should already present
+        //   in the container. callbackName - callback (should be registered in advance) for this timer. callbackArg -
+        //   parameter for the callback (should be serializable).
+        void setupSerializableTimer(
+            TimerType type, double time, int scriptId, std::string_view callbackName, sol::main_object callbackArg);
 
         // Creates a timer. `callback` is an arbitrary Lua function. These timers are called "unsavable"
         // because they can not be stored in saves. I.e. loading a saved game will not fully restore the state.
-        void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::function callback);
+        void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
 
     protected:
         struct Handler
@@ -195,8 +195,8 @@ namespace LuaUtil
             std::optional<sol::table> mInterface;
             std::string mInterfaceName;
             sol::table mHiddenData;
-            std::map<std::string, sol::function> mRegisteredCallbacks;
-            std::map<int64_t, sol::function> mTemporaryCallbacks;
+            std::map<std::string, sol::main_protected_function> mRegisteredCallbacks;
+            std::map<int64_t, sol::main_protected_function> mTemporaryCallbacks;
             std::string mPath;
         };
         struct Timer
@@ -204,8 +204,8 @@ namespace LuaUtil
             double mTime;
             bool mSerializable;
             int mScriptId;
-            std::variant<std::string, int64_t> mCallback;  // string if serializable, integer otherwise
-            sol::object mArg;
+            std::variant<std::string, int64_t> mCallback; // string if serializable, integer otherwise
+            sol::main_object mArg;
             std::string mSerializedArg;
 
             bool operator<(const Timer& t) const { return mTime > t.mTime; }
@@ -251,8 +251,8 @@ namespace LuaUtil
     // Needed to prevent callback calls if the script was removed.
     struct Callback
     {
-        sol::function mFunc;
-        sol::table mHiddenData;  // same object as Script::mHiddenData in ScriptsContainer
+        sol::main_protected_function mFunc;
+        sol::table mHiddenData; // same object as Script::mHiddenData in ScriptsContainer
 
         bool isValid() const { return mHiddenData[ScriptsContainer::sScriptIdKey] != sol::nil; }
 

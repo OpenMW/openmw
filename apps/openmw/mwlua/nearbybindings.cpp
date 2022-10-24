@@ -109,14 +109,12 @@ namespace MWLua
             MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false);
             return res;
         };
-        api["asyncCastRenderingRay"] =
-            [manager=context.mLuaManager](const LuaUtil::Callback& callback, const osg::Vec3f& from, const osg::Vec3f& to)
-        {
-            manager->addAction([manager, callback, from, to]
-            {
+        api["asyncCastRenderingRay"] = [context](const LuaUtil::Callback& callback, const osg::Vec3f& from,
+                                           const osg::Vec3f& to) {
+            context.mLuaManager->addAction([context, callback, from, to] {
                 MWPhysics::RayCastingResult res;
                 MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false);
-                manager->queueCallback(callback, sol::make_object(callback.mFunc.lua_state(), res));
+                context.mLuaManager->queueCallback(callback, sol::main_object(context.mLua->sol(), sol::in_place, res));
             });
         };
 

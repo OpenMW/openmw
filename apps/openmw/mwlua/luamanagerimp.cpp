@@ -180,7 +180,7 @@ namespace MWLua
 
         // Run queued callbacks
         for (CallbackWithData& c : mQueuedCallbacks)
-            c.mCallback.call(c.mArg);
+            c.mCallback.tryCall(c.mArg);
         mQueuedCallbacks.clear();
 
         // Engine handlers in local scripts
