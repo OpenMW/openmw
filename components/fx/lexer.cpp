@@ -109,6 +109,7 @@ namespace fx
                 if (level == 0)
                 {
                     mHead--;
+                    mLine--;
                     auto sv = std::string_view{ start, static_cast<std::string_view::size_type>(mHead + 1 - start) };
                     mLastJumpBlock.content = sv;
                     return sv;
