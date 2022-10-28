@@ -69,13 +69,29 @@ namespace MWMechanics
 
         // If none of the effects need to apply, we can early-out
         bool found = false;
+        bool containsRecastable = false;
+        std::vector<const ESM::MagicEffect*> magicEffects;
+        magicEffects.reserve(effects.mList.size());
+        const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>();
         for (const ESM::ENAMstruct& effect : effects.mList)
         {
             if (effect.mRange == range)
             {
                 found = true;
-                break;
+                const ESM::MagicEffect* magicEffect = store.find(effect.mEffectID);
+                // caster needs to be an actor for linked effects (e.g. Absorb)
+                if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked
+                    && (mCaster.isEmpty() || !mCaster.getClass().isActor()))
+                {
+                    magicEffects.push_back(nullptr);
+                    continue;
+                }
+                if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NonRecastable))
+                    containsRecastable = true;
+                magicEffects.push_back(magicEffect);
             }
+            else
+                magicEffects.push_back(nullptr);
         }
         if (!found)
             return;
@@ -106,49 +122,39 @@ namespace MWMechanics
         if (targetIsActor)
             targetSpells = &target.getClass().getCreatureStats(target).getActiveSpells();
 
-        bool canCastAnEffect = false;    // For bound equipment.If this remains false
-                                         // throughout the iteration of this spell's 
-                                         // effects, we display a "can't re-cast" message
-
-        int currentEffectIndex = 0;
-        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
-             !target.isEmpty() && effectIt != effects.mList.end(); ++effectIt, ++currentEffectIndex)
+        // Re-casting a bound equipment effect has no effect if the spell is still active
+        if (!containsRecastable && targetSpells && targetSpells->isSpellActive(mId))
         {
-            if (effectIt->mRange != range)
+            if (castByPlayer)
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCannotRecast}");
+            return;
+        }
+
+        for (size_t currentEffectIndex = 0; !target.isEmpty() && currentEffectIndex < effects.mList.size();
+             ++currentEffectIndex)
+        {
+            const ESM::ENAMstruct& enam = effects.mList[currentEffectIndex];
+            if (enam.mRange != range)
                 continue;
 
-            const ESM::MagicEffect *magicEffect =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                effectIt->mEffectID);
-
-            // Re-casting a bound equipment effect has no effect if the spell is still active
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::NonRecastable && targetSpells && targetSpells->isSpellActive(mId))
-            {
-                if (effectIt == (effects.mList.end() - 1) && !canCastAnEffect && castByPlayer)
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCannotRecast}");
-                continue;
-            }
-            canCastAnEffect = true;
-
-            // caster needs to be an actor for linked effects (e.g. Absorb)
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked
-                    && (caster.isEmpty() || !caster.getClass().isActor()))
+            const ESM::MagicEffect* magicEffect = magicEffects[currentEffectIndex];
+            if (!magicEffect)
                 continue;
 
             ActiveSpells::ActiveEffect effect;
-            effect.mEffectId = effectIt->mEffectID;
-            effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
+            effect.mEffectId = enam.mEffectID;
+            effect.mArg = MWMechanics::EffectKey(enam).mArg;
             effect.mMagnitude = 0.f;
-            effect.mMinMagnitude = effectIt->mMagnMin;
-            effect.mMaxMagnitude = effectIt->mMagnMax;
+            effect.mMinMagnitude = enam.mMagnMin;
+            effect.mMaxMagnitude = enam.mMagnMax;
             effect.mTimeLeft = 0.f;
-            effect.mEffectIndex = currentEffectIndex;
+            effect.mEffectIndex = static_cast<int>(currentEffectIndex);
             effect.mFlags = ESM::ActiveEffect::Flag_None;
             if(mManualSpell)
                 effect.mFlags |= ESM::ActiveEffect::Flag_Ignore_Reflect;
 
             bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
-            effect.mDuration = hasDuration ? static_cast<float>(effectIt->mDuration) : 1.f;
+            effect.mDuration = hasDuration ? static_cast<float>(enam.mDuration) : 1.f;
 
             bool appliedOnce = magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce;
             if (!appliedOnce)
@@ -159,8 +165,9 @@ namespace MWMechanics
             // add to list of active effects, to apply in next frame
             params.getEffects().emplace_back(effect);
 
-            bool effectAffectsHealth = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful || effectIt->mEffectID == ESM::MagicEffect::RestoreHealth;
-            if (castByPlayer && target != caster && targetIsActor && effectAffectsHealth)
+            bool effectAffectsHealth = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful
+                || enam.mEffectID == ESM::MagicEffect::RestoreHealth;
+            if (castByPlayer && target != mCaster && targetIsActor && effectAffectsHealth)
             {
                 // If player is attempting to cast a harmful spell on or is healing a living target, show the target's HP bar.
                 MWBase::Environment::get().getWindowManager()->setEnemy(target);
