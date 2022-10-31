@@ -388,20 +388,21 @@ namespace MWScript
                         return;
 
                     bool isPlayer = ptr == MWMechanics::getPlayer();
+                    auto world = MWBase::Environment::get().getWorld();
                     if (isPlayer)
                     {
-                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                        world->getPlayer().setTeleported(true);
                     }
 
                     MWWorld::CellStore* store = nullptr;
                     try
                     {
-                        store = MWBase::Environment::get().getWorld()->getInterior(cellID);
+                        store = world->getInterior(cellID);
                     }
                     catch(std::exception&)
                     {
                         // cell not found, move to exterior instead if moving the player (vanilla PositionCell compatibility)
-                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
+                        const ESM::Cell* cell = world->getExterior(cellID);
                         if(!cell)
                         {
                             std::string error = "Warning: PositionCell: unknown interior cell (" + cellID + ")";
@@ -413,12 +414,12 @@ namespace MWScript
                                 return;
                         }
                         const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                        store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
+                        store = world->getExterior(cellIndex.x(), cellIndex.y());
                     }
                     if(store)
                     {
                         MWWorld::Ptr base = ptr;
-                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,store,osg::Vec3f(x,y,z));
+                        ptr = world->moveObject(ptr,store,osg::Vec3f(x,y,z));
                         dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
                         auto rot = ptr.getRefData().getPosition().asRotationVec3();
@@ -428,9 +429,9 @@ namespace MWScript
                         if(!isPlayer)
                             zRot = zRot/60.0f;
                         rot.z() = osg::DegreesToRadians(zRot);
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,rot);
+                        world->rotateObject(ptr,rot);
 
-                        ptr.getClass().adjustPosition(ptr, true);
+                        ptr.getClass().adjustPosition(ptr, isPlayer || !world->isCellActive(ptr.getCell()));
                     }
                 }
         };
@@ -456,23 +457,25 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    if (ptr == MWMechanics::getPlayer())
+                    bool isPlayer = ptr == MWMechanics::getPlayer();
+                    auto world = MWBase::Environment::get().getWorld();
+                    if (isPlayer)
                     {
-                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                        world->getPlayer().setTeleported(true);
                     }
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
 
                     // another morrowind oddity: player will be moved to the exterior cell at this location,
                     // non-player actors will move within the cell they are in.
                     MWWorld::Ptr base = ptr;
-                    if (ptr == MWMechanics::getPlayer())
+                    if (isPlayer)
                     {
-                        MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
-                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, cell, osg::Vec3(x, y, z));
+                        MWWorld::CellStore* cell = world->getExterior(cellIndex.x(), cellIndex.y());
+                        ptr = world->moveObject(ptr, cell, osg::Vec3(x, y, z));
                     }
                     else
                     {
-                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, osg::Vec3f(x, y, z), true, true);
+                        ptr = world->moveObject(ptr, osg::Vec3f(x, y, z), true, true);
                     }
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
@@ -480,11 +483,11 @@ namespace MWScript
                     // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                     // except for when you position the player, then degrees must be used.
                     // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
-                    if(ptr != MWMechanics::getPlayer())
+                    if(!isPlayer)
                         zRot = zRot/60.0f;
                     rot.z() = osg::DegreesToRadians(zRot);
-                    MWBase::Environment::get().getWorld()->rotateObject(ptr,rot);
-                    ptr.getClass().adjustPosition(ptr, true);
+                    world->rotateObject(ptr,rot);
+                    ptr.getClass().adjustPosition(ptr, isPlayer || !world->isCellActive(ptr.getCell()));
                 }
         };
 
