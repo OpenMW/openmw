@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <string>
 
 #include <components/esm/defs.hpp>
 
@@ -10,8 +11,8 @@ namespace MWWorld
     TimeStamp::TimeStamp (float hour, int day)
     : mHour (hour), mDay (day)
     {
-        if (hour<0 || hour>=24 || day<0)
-            throw std::runtime_error ("invalid time stamp");
+        if (hour < 0 || hour >= 24)
+            throw std::runtime_error("invalid time stamp hour: " + std::to_string(hour));
     }
 
     float TimeStamp::getHour() const
