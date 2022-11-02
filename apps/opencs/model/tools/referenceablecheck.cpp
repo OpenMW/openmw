@@ -661,7 +661,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
             return;
         }
     }
-    else
+    else if (npc.mNpdt.mHealth != 0)
     {
         if (npc.mNpdt.mStrength == 0)
             messages.add(id, "Strength is equal to zero", "", CSMDoc::Message::Severity_Warning);
