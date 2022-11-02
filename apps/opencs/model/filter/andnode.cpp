@@ -1,5 +1,8 @@
 #include "andnode.hpp"
 
+#include <apps/opencs/model/filter/narynode.hpp>
+#include <apps/opencs/model/filter/node.hpp>
+
 CSMFilter::AndNode::AndNode(const std::vector<std::shared_ptr<Node>>& nodes)
     : NAryNode(nodes, "and")
 {

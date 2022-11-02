@@ -7,6 +7,7 @@
 #include <QIcon>
 
 #include <components/debug/debugging.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/platform/platform.hpp>
 
 #include "model/doc/messages.hpp"
@@ -17,6 +18,9 @@
 #endif
 
 Q_DECLARE_METATYPE(std::string)
+
+class QEvent;
+class QObject;
 
 class Application : public QApplication
 {

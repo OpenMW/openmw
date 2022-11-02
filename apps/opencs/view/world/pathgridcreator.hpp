@@ -1,7 +1,12 @@
 #ifndef PATHGRIDCREATOR_HPP
 #define PATHGRIDCREATOR_HPP
 
+#include <string>
+
 #include "genericcreator.hpp"
+
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/world/creator.hpp>
 
 namespace CSMDoc
 {
@@ -13,7 +18,6 @@ namespace CSMWorld
     class Data;
     class IdCompletionManager;
     class IdTable;
-    class UniversalId;
 }
 
 namespace CSVWidget

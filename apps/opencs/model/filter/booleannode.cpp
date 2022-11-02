@@ -1,5 +1,10 @@
 #include "booleannode.hpp"
 
+namespace CSMWorld
+{
+    class IdTableBase;
+}
+
 CSMFilter::BooleanNode::BooleanNode(bool true_)
     : mTrue(true_)
 {

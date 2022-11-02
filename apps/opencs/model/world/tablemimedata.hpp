@@ -1,6 +1,7 @@
 #ifndef TABLEMIMEDATA_H
 #define TABLEMIMEDATA_H
 
+#include <string>
 #include <vector>
 
 #include <QStringList>

@@ -12,6 +12,11 @@
 #include "../world/creator.hpp"
 #include "../world/tablebottombox.hpp"
 
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/view/doc/subview.hpp>
+
 #include "reporttable.hpp"
 #include "searchbox.hpp"
 

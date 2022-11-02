@@ -1,7 +1,10 @@
 #include "nestedtableproxymodel.hpp"
 
 #include "idtree.hpp"
+
 #include <cassert>
+
+#include <apps/opencs/model/world/columnbase.hpp>
 
 CSMWorld::NestedTableProxyModel::NestedTableProxyModel(
     const QModelIndex& parent, ColumnBase::Display columnId, CSMWorld::IdTree* parentModel)

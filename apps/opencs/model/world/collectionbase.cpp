@@ -2,6 +2,9 @@
 
 #include <stdexcept>
 
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include "columnbase.hpp"
 
 CSMWorld::CollectionBase::CollectionBase() {}

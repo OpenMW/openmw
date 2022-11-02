@@ -3,10 +3,16 @@
 
 #include <QTableView>
 
+#include <vector>
+
 #include "../../model/world/columnbase.hpp"
 
+class QDragEnterEvent;
+class QDragMoveEvent;
+class QDropEvent;
+class QModelIndex;
+class QObject;
 class QWidget;
-class QAction;
 
 namespace CSMDoc
 {

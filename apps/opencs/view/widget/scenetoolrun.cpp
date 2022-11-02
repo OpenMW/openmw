@@ -8,6 +8,16 @@
 #include <QHeaderView>
 #include <QTableWidget>
 
+#include <apps/opencs/view/widget/pushbutton.hpp>
+#include <apps/opencs/view/widget/scenetool.hpp>
+
+class QPoint;
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
 void CSVWidget::SceneToolRun::adjustToolTips()
 {
     QString toolTip = mToolTip;

@@ -1,6 +1,9 @@
 #include "resourcetable.hpp"
 
 #include <stdexcept>
+#include <type_traits>
+
+#include <apps/opencs/model/world/idtablebase.hpp>
 
 #include "columnbase.hpp"
 #include "resources.hpp"

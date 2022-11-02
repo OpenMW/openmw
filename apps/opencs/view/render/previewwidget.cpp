@@ -1,7 +1,17 @@
 #include "previewwidget.hpp"
 
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/render/object.hpp>
+#include <apps/opencs/view/render/scenewidget.hpp>
+
+#include <osg/ref_ptr>
+
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
+
+class QWidget;
 
 CSVRender::PreviewWidget::PreviewWidget(
     CSMWorld::Data& data, const std::string& id, bool referenceable, QWidget* parent)

@@ -3,6 +3,26 @@
 
 #include "enumdelegate.hpp"
 
+#include <algorithm>
+#include <string>
+#include <utility>
+#include <vector>
+
+class QModelIndex;
+class QObject;
+class QPainter;
+class QPixmap;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
+
 namespace CSMPrefs
 {
     class Setting;
@@ -10,6 +30,8 @@ namespace CSMPrefs
 
 namespace CSVWorld
 {
+    class CommandDelegate;
+
     struct Icon
     {
         int mValue;

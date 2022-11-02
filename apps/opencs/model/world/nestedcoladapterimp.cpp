@@ -1,9 +1,24 @@
 #include "nestedcoladapterimp.hpp"
 
-#include <components/esm3/loadfact.hpp>
-#include <components/esm3/loadregn.hpp>
+#include <map>
+#include <stdint.h>
+#include <type_traits>
+#include <utility>
+#include <variant>
 
-#include "idcollection.hpp"
+#include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/nestedtablewrapper.hpp>
+#include <apps/opencs/model/world/record.hpp>
+
+#include <components/esm/attr.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadinfo.hpp>
+#include <components/esm3/loadpgrd.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/variant.hpp>
+
 #include "info.hpp"
 #include "infoselectwrapper.hpp"
 #include "pathgrid.hpp"

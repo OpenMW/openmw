@@ -1,9 +1,15 @@
 #include "infocreator.hpp"
 
 #include <algorithm>
+#include <memory>
 
 #include <QLabel>
+#include <QString>
 #include <QUuid>
+
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/view/world/genericcreator.hpp>
 
 #include <components/misc/strings/lower.hpp>
 
@@ -16,6 +22,8 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/droplineedit.hpp"
+
+class QUndoStack;
 
 std::string CSVWorld::InfoCreator::getId() const
 {

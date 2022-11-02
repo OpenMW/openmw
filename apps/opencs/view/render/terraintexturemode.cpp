@@ -1,14 +1,32 @@
 #include "terraintexturemode.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <exception>
+#include <limits>
 #include <string>
 
 #include <QDropEvent>
 #include <QIcon>
+#include <QSlider>
 #include <QWidget>
 
-#include <osg/Group>
+#include <osg/Vec2f>
+#include <osg/Vec3d>
+#include <osg/ref_ptr>
 
-#include "../widget/modebutton.hpp"
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/model/world/cellselection.hpp>
+#include <apps/opencs/model/world/columnimp.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/view/render/terrainselection.hpp>
+#include <apps/opencs/view/widget/scenetool.hpp>
+
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetooltexturebrush.hpp"
 
@@ -26,7 +44,6 @@
 #include "brushdraw.hpp"
 #include "editmode.hpp"
 #include "mask.hpp"
-#include "object.hpp" // Something small needed regarding pointers from here ()
 #include "pagedworldspacewidget.hpp"
 #include "worldspacewidget.hpp"
 

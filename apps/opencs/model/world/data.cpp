@@ -2,13 +2,42 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 #include <QAbstractItemModel>
 
-#include <components/esm/defs.hpp>
-#include <components/esm3/esmreader.hpp>
-#include <components/esm3/loadglob.hpp>
+#include <apps/opencs/model/world/actoradapter.hpp>
+#include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/collectionbase.hpp>
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/idtablebase.hpp>
+#include <apps/opencs/model/world/info.hpp>
+#include <apps/opencs/model/world/infocollection.hpp>
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/landtexture.hpp>
+#include <apps/opencs/model/world/metadata.hpp>
+#include <apps/opencs/model/world/nestedidcollection.hpp>
+#include <apps/opencs/model/world/nestedinfocollection.hpp>
+#include <apps/opencs/model/world/pathgrid.hpp>
+#include <apps/opencs/model/world/ref.hpp>
+#include <apps/opencs/model/world/refcollection.hpp>
+#include <apps/opencs/model/world/refidcollection.hpp>
+#include <apps/opencs/model/world/subcellcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/files/collections.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/shader/shadermanager.hpp>

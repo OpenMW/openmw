@@ -1,8 +1,14 @@
 #include "creator.hpp"
 
-#include <MyGUI_TextIterator.h>
+#include <apps/opencs/model/world/scope.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include <stdexcept>
+
+namespace CSMDoc
+{
+    class Document;
+}
 
 CSVWorld::Creator::~Creator() {}
 

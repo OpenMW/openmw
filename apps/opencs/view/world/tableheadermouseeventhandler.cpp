@@ -1,8 +1,12 @@
 #include "tableheadermouseeventhandler.hpp"
 #include "dragrecordtable.hpp"
 
+#include <QAction>
+#include <QEvent>
+#include <QHeaderView>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QObject>
 #include <QPoint>
 
 namespace CSVWorld

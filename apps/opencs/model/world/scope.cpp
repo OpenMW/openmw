@@ -1,6 +1,6 @@
 #include "scope.hpp"
 
-#include <stdexcept>
+#include <string_view>
 
 #include <components/misc/strings/lower.hpp>
 

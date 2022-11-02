@@ -1,9 +1,12 @@
 #ifndef CSM_WOLRD_NESTEDTABLEPROXYMODEL_H
 #define CSM_WOLRD_NESTEDTABLEPROXYMODEL_H
 
-#include <vector>
+#include <string>
 
 #include <QAbstractProxyModel>
+#include <QModelIndex>
+#include <QString>
+#include <QVariant>
 
 #include "columnbase.hpp"
 
@@ -13,8 +16,6 @@
 
 namespace CSMWorld
 {
-    class CollectionBase;
-    struct RecordBase;
     class IdTree;
 
     class NestedTableProxyModel : public QAbstractProxyModel

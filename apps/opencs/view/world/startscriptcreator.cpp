@@ -2,6 +2,12 @@
 
 #include <QLabel>
 
+#include <memory>
+
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/view/world/genericcreator.hpp>
+
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/columns.hpp"
@@ -10,6 +16,8 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/droplineedit.hpp"
+
+class QUndoStack;
 
 std::string CSVWorld::StartScriptCreator::getId() const
 {

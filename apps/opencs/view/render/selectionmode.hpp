@@ -5,6 +5,11 @@
 
 class QAction;
 
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
 namespace CSVRender
 {
     class WorldspaceWidget;

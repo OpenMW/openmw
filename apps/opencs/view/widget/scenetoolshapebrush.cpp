@@ -16,10 +16,19 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/view/widget/pushbutton.hpp>
+
 #include "brushshapes.hpp"
 #include "scenetool.hpp"
 
 #include "../../model/prefs/state.hpp"
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
 
 namespace CSMDoc
 {

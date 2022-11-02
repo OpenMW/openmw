@@ -1,10 +1,20 @@
 #include "idtable.hpp"
 
+#include <QModelIndex>
+#include <QVariant>
+
 #include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <map>
+#include <stddef.h>
 #include <stdexcept>
+#include <type_traits>
+
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/idtablebase.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/esm3/cellid.hpp>
 #include <components/misc/strings/lower.hpp>

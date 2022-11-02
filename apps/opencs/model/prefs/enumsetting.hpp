@@ -1,6 +1,8 @@
 #ifndef CSM_PREFS_ENUMSETTING_H
 #define CSM_PREFS_ENUMSETTING_H
 
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "setting.hpp"
@@ -9,6 +11,8 @@ class QComboBox;
 
 namespace CSMPrefs
 {
+    class Category;
+
     struct EnumValue
     {
         std::string mValue;

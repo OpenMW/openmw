@@ -4,11 +4,10 @@
 #include <QObject>
 #include <QThread>
 
-#include "messages.hpp"
-
 namespace CSMDoc
 {
     class Operation;
+    struct Message;
 
     class OperationHolder : public QObject
     {

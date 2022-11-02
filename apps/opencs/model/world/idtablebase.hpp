@@ -2,6 +2,10 @@
 #define CSM_WOLRD_IDTABLEBASE_H
 
 #include <QAbstractItemModel>
+#include <QModelIndex>
+
+#include <string>
+#include <utility>
 
 #include "columns.hpp"
 

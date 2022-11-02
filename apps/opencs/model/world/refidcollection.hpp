@@ -1,10 +1,17 @@
 #ifndef CSM_WOLRD_REFIDCOLLECTION_H
 #define CSM_WOLRD_REFIDCOLLECTION_H
 
+#include <QVariant>
+
 #include <deque>
 #include <map>
+#include <memory>
+#include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
+
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
@@ -13,12 +20,14 @@
 
 namespace ESM
 {
+    class ESMReader;
     class ESMWriter;
 }
 
 namespace CSMWorld
 {
     class RefIdAdapter;
+    struct RecordBase;
     struct NestedTableWrapperBase;
     class NestedRefIdAdapterBase;
 

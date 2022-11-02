@@ -1,11 +1,26 @@
 #ifndef CSV_WORLD_REFERENCECREATOR_H
 #define CSV_WORLD_REFERENCECREATOR_H
 
+#include <string>
+
 #include "genericcreator.hpp"
+
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/world/creator.hpp>
+
+class QObject;
+class QUndoStack;
 
 namespace CSMWorld
 {
     class IdCompletionManager;
+    class CreateCommand;
+    class Data;
+}
+
+namespace CSMDoc
+{
+    class Document;
 }
 
 namespace CSVWidget

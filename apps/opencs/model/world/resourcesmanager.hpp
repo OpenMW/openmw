@@ -3,6 +3,8 @@
 
 #include <map>
 
+#include <apps/opencs/model/world/resources.hpp>
+
 #include "universalid.hpp"
 
 namespace VFS
@@ -12,8 +14,6 @@ namespace VFS
 
 namespace CSMWorld
 {
-    class Resources;
-
     class ResourcesManager
     {
         std::map<UniversalId::Type, Resources> mResources;

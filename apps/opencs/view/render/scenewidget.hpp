@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QWidget>
 
+#include <osg/Timer>
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
 
@@ -17,6 +18,9 @@
 #include "lightingbright.hpp"
 #include "lightingday.hpp"
 #include "lightingnight.hpp"
+
+class QMouseEvent;
+class QWheelEvent;
 
 namespace Resource
 {
@@ -27,6 +31,12 @@ namespace osg
 {
     class Group;
     class Camera;
+    class Geometry;
+}
+
+namespace osg
+{
+    class View;
 }
 
 namespace CSVWidget

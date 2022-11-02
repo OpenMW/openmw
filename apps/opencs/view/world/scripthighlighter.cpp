@@ -1,12 +1,22 @@
 #include "scripthighlighter.hpp"
 
 #include <sstream>
+#include <utility>
 
+#include <apps/opencs/model/world/scriptcontext.hpp>
 #include <components/compiler/extensions0.hpp>
 #include <components/compiler/scanner.hpp>
+#include <components/compiler/tokenloc.hpp>
 
 #include "../../model/prefs/category.hpp"
 #include "../../model/prefs/setting.hpp"
+
+class QTextDocument;
+
+namespace CSMWorld
+{
+    class Data;
+}
 
 bool CSVWorld::ScriptHighlighter::parseInt(int value, const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
 {

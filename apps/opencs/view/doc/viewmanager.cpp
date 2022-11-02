@@ -1,13 +1,25 @@
 #include "viewmanager.hpp"
 
+#include <algorithm>
+#include <cstddef>
+#include <filesystem>
 #include <map>
+#include <type_traits>
+#include <utility>
 #include <vector>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/doc/loader.hpp>
+
+#include <components/esm3/variant.hpp>
+#include <components/files/qtconversion.hpp>
 
 #include <QApplication>
 #include <QMessageBox>
 #include <QPushButton>
-
-#include <components/files/qtconversion.hpp>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/doc/documentmanager.hpp"

@@ -5,6 +5,11 @@
 
 #include "search.hpp"
 
+namespace CSMDoc
+{
+    class Messages;
+}
+
 namespace CSMWorld
 {
     class IdTableBase;

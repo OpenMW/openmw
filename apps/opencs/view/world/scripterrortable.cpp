@@ -1,8 +1,14 @@
 #include "scripterrortable.hpp"
 
+#include <exception>
 #include <sstream>
 
 #include <QHeaderView>
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/scriptcontext.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>

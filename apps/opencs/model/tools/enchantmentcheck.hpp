@@ -1,11 +1,19 @@
 #ifndef CSM_TOOLS_ENCHANTMENTCHECK_H
 #define CSM_TOOLS_ENCHANTMENTCHECK_H
 
-#include <components/esm3/loadench.hpp>
-
 #include "../world/idcollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace ESM
+{
+    struct Enchantment;
+}
 
 namespace CSMTools
 {

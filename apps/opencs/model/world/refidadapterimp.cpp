@@ -2,8 +2,14 @@
 
 #include <stdexcept>
 
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/refiddata.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "nestedtablewrapper.hpp"
 

@@ -1,11 +1,19 @@
 #ifndef CSM_TOOLS_SKILLCHECK_H
 #define CSM_TOOLS_SKILLCHECK_H
 
-#include <components/esm3/loadskil.hpp>
-
 #include "../world/idcollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace ESM
+{
+    struct Skill;
+}
 
 namespace CSMTools
 {

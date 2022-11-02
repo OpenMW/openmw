@@ -3,6 +3,10 @@
 
 #include "pushbutton.hpp"
 
+class QMouseEvent;
+class QObject;
+class QPoint;
+
 namespace CSVWidget
 {
     class SceneToolbar;

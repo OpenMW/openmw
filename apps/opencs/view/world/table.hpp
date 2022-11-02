@@ -1,15 +1,26 @@
 #ifndef CSV_WORLD_TABLE_H
 #define CSV_WORLD_TABLE_H
 
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/universalid.hpp"
 #include "dragrecordtable.hpp"
 
 class QAction;
+class QContextMenuEvent;
+class QDropEvent;
+class QModelIndex;
+class QMouseEvent;
+class QObject;
+
+namespace CSMFilter
+{
+    class Node;
+}
 
 namespace CSMDoc
 {

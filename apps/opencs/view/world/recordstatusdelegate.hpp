@@ -1,15 +1,24 @@
 #ifndef RECORDSTATUSDELEGATE_H
 #define RECORDSTATUSDELEGATE_H
 
-#include "util.hpp"
-
 #include "datadisplaydelegate.hpp"
 
-class QIcon;
-class QFont;
+class QObject;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
 
 namespace CSVWorld
 {
+    class CommandDelegate;
+
     class RecordStatusDelegate : public DataDisplayDelegate
     {
     public:

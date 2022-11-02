@@ -8,6 +8,11 @@
 
 #include "../doc/stage.hpp"
 
+namespace CSMDoc
+{
+    class Messages;
+}
+
 namespace CSMWorld
 {
     class CollectionBase;

@@ -3,6 +3,11 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 
+#include <string>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+
 #include "../../model/prefs/shortcutmanager.hpp"
 #include "../../model/prefs/state.hpp"
 

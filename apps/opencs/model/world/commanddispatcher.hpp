@@ -1,9 +1,13 @@
 #ifndef CSM_WOLRD_COMMANDDISPATCHER_H
 #define CSM_WOLRD_COMMANDDISPATCHER_H
 
+#include <string>
 #include <vector>
 
+#include <QAbstractItemModel>
+#include <QModelIndex>
 #include <QObject>
+#include <QVariant>
 
 #include "universalid.hpp"
 

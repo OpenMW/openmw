@@ -5,6 +5,11 @@
 
 #include <components/esm3/loadcell.hpp>
 
+namespace ESM
+{
+    class ESMReader;
+}
+
 namespace CSMWorld
 {
     /// \brief Wrapper for Cell record

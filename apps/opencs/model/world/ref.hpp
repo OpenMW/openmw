@@ -1,6 +1,7 @@
 #ifndef CSM_WOLRD_REF_H
 #define CSM_WOLRD_REF_H
 
+#include <string>
 #include <utility>
 
 #include <components/esm3/cellref.hpp>

@@ -3,15 +3,20 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 #include "scenetool.hpp"
 
 class QFrame;
 class QTableWidget;
 class QModelIndex;
+class QObject;
+class QPoint;
 
 namespace CSVWidget
 {
+    class SceneToolbar;
+
     class SceneToolRun : public SceneTool
     {
         Q_OBJECT

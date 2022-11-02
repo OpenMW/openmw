@@ -4,9 +4,13 @@
 #include "scenetool.hpp"
 
 #include <map>
+#include <string>
 
 class QHBoxLayout;
 class QRect;
+class QObject;
+class QPoint;
+class QWidget;
 
 namespace CSVWidget
 {

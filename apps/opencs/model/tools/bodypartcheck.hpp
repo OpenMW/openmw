@@ -1,13 +1,27 @@
 #ifndef CSM_TOOLS_BODYPARTCHECK_H
 #define CSM_TOOLS_BODYPARTCHECK_H
 
-#include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadrace.hpp>
 
 #include "../world/idcollection.hpp"
-#include "../world/resources.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace CSMWorld
+{
+    class Resources;
+}
+
+namespace ESM
+{
+    struct BodyPart;
+    struct Race;
+}
 
 namespace CSMTools
 {

@@ -1,12 +1,20 @@
 #ifndef CSM_WOLRD_IDTABLE_H
 #define CSM_WOLRD_IDTABLE_H
 
+#include <QModelIndex>
+#include <QVariant>
+
+#include <map>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "columns.hpp"
 #include "idtablebase.hpp"
 #include "universalid.hpp"
+
+class QObject;
 
 namespace CSMWorld
 {

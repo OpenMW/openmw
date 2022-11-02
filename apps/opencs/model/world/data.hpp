@@ -1,11 +1,17 @@
 #ifndef CSM_WOLRD_DATA_H
 #define CSM_WOLRD_DATA_H
 
+#include <QObject>
+
+#include <filesystem>
 #include <map>
+#include <memory>
+#include <string>
+#include <variant>
 #include <vector>
 
-#include <QModelIndex>
-#include <QObject>
+#include <apps/opencs/model/world/collection.hpp>
+#include <apps/opencs/model/world/record.hpp>
 
 #include <components/esm3/debugprofile.hpp>
 #include <components/esm3/filter.hpp>
@@ -26,13 +32,9 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadsscr.hpp>
-
-#include <components/resource/resourcesystem.hpp>
-
 #include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
-#include "actoradapter.hpp"
 #include "cell.hpp"
 #include "idcollection.hpp"
 #include "infocollection.hpp"
@@ -51,26 +53,32 @@
 #endif
 
 class QAbstractItemModel;
+class QModelIndex;
+
+namespace Resource
+{
+    class ResourceSystem;
+}
 
 namespace VFS
 {
     class Manager;
 }
 
-namespace Fallback
-{
-    class Map;
-}
-
 namespace ESM
 {
     class ESMReader;
-    struct Dialogue;
+}
+
+namespace CSMDoc
+{
+    class Messages;
 }
 
 namespace CSMWorld
 {
-    class ResourcesManager;
+    class ActorAdapter;
+    class CollectionBase;
     class Resources;
 
     class Data : public QObject

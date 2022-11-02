@@ -3,8 +3,13 @@
 
 #include <QMenu>
 
-class QModelIndex;
+#include <string>
+
+class QAction;
 class QActionGroup;
+class QModelIndex;
+class QObject;
+class QWidget;
 
 namespace CSMWorld
 {

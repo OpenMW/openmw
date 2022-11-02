@@ -5,19 +5,27 @@
 #include <cstdint>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
-#include <QVector>
+#include <osg/Math>
 
+#include <components/esm/defs.hpp>
 #include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/esm3/variant.hpp>
+
+#include <QString>
+#include <QVariant>
+#include <QVector>
 
 #include "columnbase.hpp"
 #include "columns.hpp"
 #include "info.hpp"
-
 #include "land.hpp"
 #include "landtexture.hpp"
+#include "record.hpp"
 
 namespace CSMWorld
 {

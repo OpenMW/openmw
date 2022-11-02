@@ -1,8 +1,8 @@
 #include "cameracontroller.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <set>
-#include <string>
 
 #include <QWidget>
 
@@ -10,8 +10,11 @@
 #include <osg/Camera>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
+#include <osg/Math>
 #include <osg/Matrixd>
 #include <osg/Quat>
+#include <osg/Vec3>
+#include <osg/ref_ptr>
 
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>

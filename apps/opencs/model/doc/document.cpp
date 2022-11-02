@@ -2,9 +2,33 @@
 
 #include "state.hpp"
 
+#include <apps/opencs/model/doc/blacklist.hpp>
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/doc/operationholder.hpp>
+#include <apps/opencs/model/doc/runner.hpp>
+#include <apps/opencs/model/doc/saving.hpp>
+#include <apps/opencs/model/tools/tools.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+
+#include <components/debug/debuglog.hpp>
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/files/conversion.hpp>
+
+#include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <memory>
+#include <stddef.h>
+#include <stdexcept>
 #include <utility>
+#include <variant>
 
 #include "../world/defaultgmsts.hpp"
 
@@ -12,8 +36,10 @@
 #include <components/files/configurationmanager.hpp>
 #endif
 
-#include <components/debug/debuglog.hpp>
-#include <components/files/conversion.hpp>
+namespace CSMWorld
+{
+    class IdCompletionManager;
+}
 
 void CSMDoc::Document::addGmsts()
 {

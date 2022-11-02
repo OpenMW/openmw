@@ -1,16 +1,45 @@
-
 #include "instancemode.hpp"
 
 #include <QDragEnterEvent>
 #include <QPoint>
 #include <QString>
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <map>
+#include <memory>
+#include <utility>
+
 #include "../../model/prefs/state.hpp"
 
+#include <osg/BoundingBox>
+#include <osg/Camera>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
+#include <osg/Math>
+#include <osg/Matrix>
+#include <osg/Matrixd>
 #include <osg/Vec3d>
+#include <osg/Viewport>
+#include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/model/world/cellselection.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/refcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/render/editmode.hpp>
+#include <apps/opencs/view/render/instancedragmodes.hpp>
+#include <apps/opencs/view/render/tagbase.hpp>
+
+#include <components/esm/defs.hpp>
 
 #include "../../model/prefs/shortcut.hpp"
 #include "../../model/world/commandmacro.hpp"

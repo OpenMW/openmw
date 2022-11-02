@@ -1,6 +1,7 @@
 #include "reporttable.hpp"
 
 #include <algorithm>
+#include <utility>
 
 #include <QAction>
 #include <QContextMenuEvent>
@@ -11,6 +12,12 @@
 #include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
 #include <QTextDocument>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/view/world/dragrecordtable.hpp>
+#include <apps/opencs/view/world/util.hpp>
 
 #include "../../model/tools/reportmodel.hpp"
 

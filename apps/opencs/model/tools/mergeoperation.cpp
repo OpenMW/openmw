@@ -1,5 +1,37 @@
-
 #include "mergeoperation.hpp"
+
+#include <utility>
+#include <variant>
+
+#include <apps/opencs/model/doc/operation.hpp>
+#include <apps/opencs/model/tools/mergestate.hpp>
+#include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/info.hpp>
+#include <apps/opencs/model/world/infocollection.hpp>
+#include <apps/opencs/model/world/pathgrid.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/subcellcollection.hpp>
+
+#include <components/esm3/debugprofile.hpp>
+#include <components/esm3/filter.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/loadscpt.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadsndg.hpp>
+#include <components/esm3/loadsoun.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadsscr.hpp>
 
 #include "../doc/document.hpp"
 #include "../doc/state.hpp"

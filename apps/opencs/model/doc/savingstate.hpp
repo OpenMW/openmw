@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <string>
 
 #include <components/esm3/esmwriter.hpp>
 

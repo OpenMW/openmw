@@ -4,6 +4,13 @@
 #include "columns.hpp"
 #include "idtable.hpp"
 
+#include <QModelIndex>
+#include <QString>
+#include <QVariant>
+
+#include <string>
+#include <utility>
+
 /*! \brief
  * Class for holding the model. Uses typical qt table abstraction/interface for granting access
  * to the individiual fields of the records, Some records are holding nested data (for instance
@@ -17,8 +24,8 @@
 
 namespace CSMWorld
 {
+    class CollectionBase;
     class NestedCollection;
-    struct RecordBase;
     struct NestedTableWrapperBase;
 
     class IdTree : public IdTable

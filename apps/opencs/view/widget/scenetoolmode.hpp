@@ -4,15 +4,21 @@
 #include "scenetool.hpp"
 
 #include <map>
+#include <string>
 
 class QHBoxLayout;
 class QMenu;
 class QEvent;
+class QContextMenuEvent;
+class QObject;
+class QPoint;
+class QWidget;
 
 namespace CSVWidget
 {
     class SceneToolbar;
     class ModeButton;
+    class PushButton;
 
     ///< \brief Mode selector tool
     class SceneToolMode : public SceneTool

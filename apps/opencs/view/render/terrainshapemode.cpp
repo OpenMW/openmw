@@ -1,15 +1,34 @@
 #include "terrainshapemode.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 #include <string>
 
+#include <QComboBox>
 #include <QDropEvent>
 #include <QEvent>
 #include <QIcon>
 #include <QWidget>
 
+#include <osg/Camera>
 #include <osg/Vec3f>
+#include <osg/ref_ptr>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/cellselection.hpp>
+#include <apps/opencs/model/world/columnimp.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/idtable.hpp>
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/widget/brushshapes.hpp>
+#include <apps/opencs/view/widget/scenetool.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadland.hpp>
@@ -26,9 +45,21 @@
 #include "editmode.hpp"
 #include "mask.hpp"
 #include "pagedworldspacewidget.hpp"
-#include "tagbase.hpp"
 #include "terrainselection.hpp"
 #include "worldspacewidget.hpp"
+
+class QPoint;
+class QWidget;
+
+namespace CSMWorld
+{
+    struct Cell;
+}
+
+namespace osg
+{
+    class Group;
+}
 
 CSVRender::TerrainShapeMode::TerrainShapeMode(
     WorldspaceWidget* worldspaceWidget, osg::Group* parentNode, QWidget* parent)

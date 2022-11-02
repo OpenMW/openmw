@@ -42,6 +42,7 @@ namespace CSVRender
 {
     class Actor;
     class Object;
+    struct WorldspaceHitResult;
 
     // An object to attach as user data to the osg::Node, allows us to get an Object back from a Node when we are doing
     // a ray query

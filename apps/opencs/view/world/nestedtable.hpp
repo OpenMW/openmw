@@ -3,6 +3,9 @@
 
 #include "dragrecordtable.hpp"
 
+#include <string>
+#include <vector>
+
 class QAction;
 class QContextMenuEvent;
 

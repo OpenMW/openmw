@@ -2,6 +2,7 @@
 #define CSM_WOLRD_COLUMNS_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace CSMWorld

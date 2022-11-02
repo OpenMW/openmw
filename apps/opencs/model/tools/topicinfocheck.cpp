@@ -1,6 +1,30 @@
 #include "topicinfocheck.hpp"
 
 #include <sstream>
+#include <string>
+#include <vector>
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/info.hpp>
+#include <apps/opencs/model/world/infocollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/refiddata.hpp>
+#include <apps/opencs/model/world/resources.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadinfo.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/variant.hpp>
 
 #include "../prefs/state.hpp"
 

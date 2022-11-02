@@ -1,6 +1,8 @@
 #include "shortcutmanager.hpp"
 
 #include <algorithm>
+#include <string>
+#include <utility>
 
 #include <QStringList>
 

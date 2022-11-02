@@ -1,6 +1,10 @@
 #include "blacklist.hpp"
 
 #include <algorithm>
+#include <stddef.h>
+#include <utility>
+
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/misc/strings/lower.hpp>
 

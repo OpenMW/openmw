@@ -3,9 +3,10 @@
 #include <QGuiApplication>
 #include <QPainter>
 #include <QScreen>
-#include <QShowEvent>
 
 #include "colorpickerpopup.hpp"
+
+class QShowEvent;
 
 CSVWidget::ColorEditor::ColorEditor(const QColor& color, QWidget* parent, const bool popupOnStart)
     : ColorEditor(parent, popupOnStart)

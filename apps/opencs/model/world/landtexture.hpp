@@ -5,6 +5,11 @@
 
 #include <components/esm3/loadltex.hpp>
 
+namespace ESM
+{
+    class ESMReader;
+}
+
 namespace CSMWorld
 {
     /// \brief Wrapper for LandTexture record, providing info which plugin the LandTexture was loaded from.

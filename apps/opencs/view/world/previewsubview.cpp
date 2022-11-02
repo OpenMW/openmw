@@ -2,6 +2,13 @@
 
 #include <QHBoxLayout>
 
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/ref.hpp>
+#include <apps/opencs/model/world/refcollection.hpp>
+#include <apps/opencs/model/world/refidcollection.hpp>
+#include <apps/opencs/view/doc/subview.hpp>
+
 #include "../render/previewwidget.hpp"
 
 #include "../widget/scenetoolbar.hpp"

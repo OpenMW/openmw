@@ -2,6 +2,8 @@
 
 #include "../../model/doc/document.hpp"
 
+#include <apps/opencs/view/doc/subview.hpp>
+
 #include <QTextEdit>
 
 CSVDoc::RunLogSubView::RunLogSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document)

@@ -1,12 +1,16 @@
 #include "infocollection.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <iterator>
+#include <limits.h>
 #include <stdexcept>
 
-#include <components/esm3/esmreader.hpp>
-#include <components/esm3/loaddial.hpp>
+#include <apps/opencs/model/world/collection.hpp>
+#include <apps/opencs/model/world/info.hpp>
+#include <components/misc/strings/lower.hpp>
 
+#include <components/esm3/loaddial.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 namespace CSMWorld

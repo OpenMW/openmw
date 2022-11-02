@@ -4,9 +4,23 @@
 #include <QLineEdit>
 #include <QPalette>
 
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "../../model/filter/parser.hpp"
 
 class QModelIndex;
+class QAction;
+class QContextMenuEvent;
+class QObject;
+class QWidget;
+
+namespace CSMFilter
+{
+    class Node;
+}
 
 namespace CSMWorld
 {

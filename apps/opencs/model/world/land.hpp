@@ -5,6 +5,11 @@
 
 #include <components/esm3/loadland.hpp>
 
+namespace ESM
+{
+    class ESMReader;
+}
+
 namespace CSMWorld
 {
     /// \brief Wrapper for Land record. Encodes X and Y cell index in the ID.

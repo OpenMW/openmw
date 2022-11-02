@@ -1,7 +1,9 @@
 #include "textnode.hpp"
 
+#include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 #include <QRegExp>
 

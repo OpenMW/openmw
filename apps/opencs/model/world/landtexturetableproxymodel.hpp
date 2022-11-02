@@ -3,6 +3,9 @@
 
 #include "idtableproxymodel.hpp"
 
+class QModelIndex;
+class QObject;
+
 namespace CSMWorld
 {
     /// \brief Removes base records from filtered results.

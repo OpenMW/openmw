@@ -1,8 +1,13 @@
 #include "mandatoryid.hpp"
 
+#include <memory>
+
 #include "../world/collectionbase.hpp"
 
 #include "../world/record.hpp"
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 CSMTools::MandatoryIdStage::MandatoryIdStage(const CSMWorld::CollectionBase& idCollection,
     const CSMWorld::UniversalId& collectionId, const std::vector<std::string>& ids)

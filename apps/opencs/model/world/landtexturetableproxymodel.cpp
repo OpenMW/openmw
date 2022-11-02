@@ -1,5 +1,7 @@
 #include "landtexturetableproxymodel.hpp"
 
+#include <apps/opencs/model/world/idtableproxymodel.hpp>
+
 namespace CSMWorld
 {
     LandTextureTableProxyModel::LandTextureTableProxyModel(QObject* parent)

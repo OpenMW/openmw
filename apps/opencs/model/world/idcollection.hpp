@@ -1,14 +1,28 @@
 #ifndef CSM_WOLRD_IDCOLLECTION_H
 #define CSM_WOLRD_IDCOLLECTION_H
 
-#include <components/esm3/esmreader.hpp>
+#include <filesystem>
+#include <memory>
+#include <string>
+
+#include <apps/opencs/model/world/record.hpp>
+
+#include <components/esm/esmcommon.hpp>
+#include <components/esm3/loadland.hpp>
 
 #include "collection.hpp"
 #include "land.hpp"
 #include "pathgrid.hpp"
 
+namespace ESM
+{
+    class ESMReader;
+}
+
 namespace CSMWorld
 {
+    struct Pathgrid;
+
     /// \brief Single type collection of top level records
     template <typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT>>
     class IdCollection : public Collection<ESXRecordT, IdAccessorT>

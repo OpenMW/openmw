@@ -3,10 +3,15 @@
 
 #include "setting.hpp"
 
+#include <string>
+#include <utility>
+
 class QCheckBox;
 
 namespace CSMPrefs
 {
+    class Category;
+
     class BoolSetting : public Setting
     {
         Q_OBJECT

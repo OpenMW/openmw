@@ -1,11 +1,19 @@
 #ifndef CSM_TOOLS_FACTIONCHECK_H
 #define CSM_TOOLS_FACTIONCHECK_H
 
-#include <components/esm3/loadfact.hpp>
-
 #include "../world/idcollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace ESM
+{
+    struct Faction;
+}
 
 namespace CSMTools
 {

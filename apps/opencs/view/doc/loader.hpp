@@ -2,10 +2,12 @@
 #define CSV_DOC_LOADER_H
 
 #include <map>
+#include <string>
 
 #include <QObject>
 #include <QWidget>
 
+class QCloseEvent;
 class QLabel;
 class QProgressBar;
 class QDialogButtonBox;

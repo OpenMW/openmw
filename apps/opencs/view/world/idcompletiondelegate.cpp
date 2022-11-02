@@ -3,7 +3,20 @@
 #include "../../model/world/idcompletionmanager.hpp"
 #include "../../model/world/infoselectwrapper.hpp"
 
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/view/world/util.hpp>
+
+#include <memory>
+
 #include "../widget/droplineedit.hpp"
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
+
+class QObject;
+class QWidget;
 
 CSVWorld::IdCompletionDelegate::IdCompletionDelegate(
     CSMWorld::CommandDispatcher* dispatcher, CSMDoc::Document& document, QObject* parent)

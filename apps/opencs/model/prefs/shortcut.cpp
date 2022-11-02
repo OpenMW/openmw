@@ -1,6 +1,7 @@
 #include "shortcut.hpp"
 
 #include <cassert>
+#include <exception>
 
 #include <QAction>
 #include <QWidget>

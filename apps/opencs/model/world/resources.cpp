@@ -2,12 +2,15 @@
 
 #include <algorithm>
 #include <sstream>
+#include <stddef.h>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 
-#include <components/vfs/manager.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/misc/strings/lower.hpp>
+#include <components/vfs/manager.hpp>
 
 CSMWorld::Resources::Resources(
     const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type, const char* const* extensions)

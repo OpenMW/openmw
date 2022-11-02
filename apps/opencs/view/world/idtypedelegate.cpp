@@ -2,6 +2,23 @@
 
 #include "../../model/world/universalid.hpp"
 
+#include <apps/opencs/view/world/datadisplaydelegate.hpp>
+#include <apps/opencs/view/world/util.hpp>
+
+#include <string>
+
+class QObject;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
+
 CSVWorld::IdTypeDelegate::IdTypeDelegate(const ValueList& values, const IconList& icons,
     CSMWorld::CommandDispatcher* dispatcher, CSMDoc::Document& document, QObject* parent)
     : DataDisplayDelegate(values, icons, dispatcher, document, "Records", "type-format", parent)

@@ -1,5 +1,7 @@
 #include "regionmapsubview.hpp"
 
+#include <apps/opencs/view/doc/subview.hpp>
+
 #include "regionmap.hpp"
 
 CSVWorld::RegionMapSubView::RegionMapSubView(CSMWorld::UniversalId universalId, CSMDoc::Document& document)

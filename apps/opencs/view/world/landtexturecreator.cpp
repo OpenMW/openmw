@@ -2,10 +2,16 @@
 
 #include <cstdint>
 #include <limits>
+#include <stddef.h>
 
 #include <QLabel>
 #include <QLineEdit>
 #include <QSpinBox>
+
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/view/world/genericcreator.hpp>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"

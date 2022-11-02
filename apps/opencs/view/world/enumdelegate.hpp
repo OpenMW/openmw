@@ -1,13 +1,25 @@
 #ifndef CSV_WORLD_ENUMDELEGATE_H
 #define CSV_WORLD_ENUMDELEGATE_H
 
+#include <string>
+#include <utility>
 #include <vector>
 
 #include <QString>
 
-#include <components/esm/defs.hpp>
+#include <apps/opencs/model/world/columnbase.hpp>
 
 #include "util.hpp"
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
 
 namespace CSVWorld
 {

@@ -1,12 +1,23 @@
 #include "scriptcheck.hpp"
 
+#include <exception>
 #include <sstream>
+#include <string>
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/scriptcontext.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
 #include <components/compiler/fileparser.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/tokenloc.hpp>
+#include <components/esm3/loadscpt.hpp>
 
 #include "../doc/document.hpp"
 

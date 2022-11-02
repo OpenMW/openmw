@@ -2,9 +2,18 @@
 #define CSM_TOOLS_SOUNDGENCHECK_HPP
 
 #include "../world/idcollection.hpp"
-#include "../world/refidcollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace CSMWorld
+{
+    class RefIdCollection;
+}
 
 namespace ESM
 {

@@ -8,6 +8,9 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QIcon>
+#include <QLabel>
+#include <QMargins>
+#include <QModelIndex>
 #include <QSizePolicy>
 #include <QSlider>
 #include <QSpinBox>
@@ -15,7 +18,18 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include <algorithm>
+#include <limits>
+#include <memory>
+
 #include "scenetool.hpp"
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/view/widget/brushshapes.hpp>
+#include <apps/opencs/view/widget/pushbutton.hpp>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
@@ -25,6 +39,11 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexture.hpp"
 #include "../../model/world/universalid.hpp"
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
 
 CSVWidget::BrushSizeControls::BrushSizeControls(const QString& title, QWidget* parent)
     : QGroupBox(title, parent)

@@ -2,21 +2,28 @@
 #define CSV_WIDGET_SCENETOOLSHAPEBRUSH_H
 
 #include <QFrame>
-#include <QModelIndex>
-
-#include <QComboBox>
 #include <QGroupBox>
-#include <QPushButton>
 #include <QSlider>
 #include <QSpinBox>
-#include <QWidget>
 
 #ifndef Q_MOC_RUN
 #include "brushshapes.hpp"
 #include "scenetool.hpp"
-
-#include "../../model/doc/document.hpp"
 #endif
+
+class QComboBox;
+class QDragEnterEvent;
+class QDropEvent;
+class QModelIndex;
+class QObject;
+class QPoint;
+class QPushButton;
+class QWidget;
+
+namespace CSMDoc
+{
+    class Document;
+}
 
 class QTableWidget;
 
@@ -27,6 +34,8 @@ namespace CSVRender
 
 namespace CSVWidget
 {
+    class SceneToolbar;
+
     /// \brief Layout-box for some brush button settings
     class ShapeBrushSizeControls : public QGroupBox
     {

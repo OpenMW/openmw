@@ -20,8 +20,6 @@ namespace CSMPrefs
 
 namespace CSVRender
 {
-    class SceneWidget;
-
     class CameraController : public QObject
     {
         Q_OBJECT

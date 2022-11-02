@@ -1,25 +1,25 @@
 #ifndef CSV_DOC_VIEW_H
 #define CSV_DOC_VIEW_H
 
-#include <map>
+#include <string>
 #include <vector>
 
+#include <QList>
 #include <QMainWindow>
+
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include "subviewfactory.hpp"
 
 class QAction;
-class QDockWidget;
+class QCloseEvent;
+class QMenu;
+class QObject;
 class QScrollArea;
 
 namespace CSMDoc
 {
     class Document;
-}
-
-namespace CSMWorld
-{
-    class UniversalId;
 }
 
 namespace CSMPrefs
@@ -30,6 +30,7 @@ namespace CSMPrefs
 namespace CSVDoc
 {
     class ViewManager;
+    class SubView;
     class Operations;
     class GlobalDebugProfileMenu;
 

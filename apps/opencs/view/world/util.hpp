@@ -7,16 +7,19 @@
 #include <QStyledItemDelegate>
 
 #ifndef Q_MOC_RUN
-#include "../../model/doc/document.hpp"
 #include "../../model/world/columnbase.hpp"
 #endif
 
 class QUndoStack;
+class QWidget;
+
+namespace CSMDoc
+{
+    class Document;
+}
 
 namespace CSMWorld
 {
-    class TableMimeData;
-    class UniversalId;
     class CommandDispatcher;
 }
 

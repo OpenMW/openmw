@@ -2,6 +2,8 @@
 
 #include <QMouseEvent>
 
+#include <apps/opencs/view/widget/pushbutton.hpp>
+
 #include "scenetoolbar.hpp"
 
 CSVWidget::SceneTool::SceneTool(SceneToolbar* parent, Type type)

@@ -1,9 +1,13 @@
 #ifndef CSM_TOOLS_MERGESTAGES_H
 #define CSM_TOOLS_MERGESTAGES_H
 
-#include <algorithm>
 #include <map>
 #include <memory>
+#include <string>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/record.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -12,6 +16,11 @@
 #include "../world/data.hpp"
 
 #include "mergestate.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
 
 namespace CSMTools
 {

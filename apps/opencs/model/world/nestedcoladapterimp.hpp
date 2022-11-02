@@ -1,16 +1,17 @@
 #ifndef CSM_WOLRD_NESTEDCOLADAPTERIMP_H
 #define CSM_WOLRD_NESTEDCOLADAPTERIMP_H
 
+#include <QString>
 #include <QVariant>
 
-#include <components/esm/attr.hpp> // for converting attributes
+#include <algorithm>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadmgef.hpp> // for converting magic effect id to string & back
-#include <components/esm3/loadpgrd.hpp>
-#include <components/esm3/loadrace.hpp>
-#include <components/esm3/loadskil.hpp> // for converting skill names
 
-#include "cell.hpp"
 #include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"
 
@@ -18,12 +19,17 @@ namespace ESM
 {
     struct Faction;
     struct Region;
+    struct Race;
 }
 
 namespace CSMWorld
 {
     struct Pathgrid;
     struct Info;
+    struct Cell;
+
+    template <typename ESXRecordT>
+    struct Record;
 
     class PathgridPointListAdapter : public NestedColumnAdapter<Pathgrid>
     {

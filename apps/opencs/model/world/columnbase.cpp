@@ -1,5 +1,7 @@
 #include "columnbase.hpp"
 
+#include <algorithm>
+
 #include "columns.hpp"
 
 CSMWorld::ColumnBase::ColumnBase(int columnId, Display displayType, int flags)

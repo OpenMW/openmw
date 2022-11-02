@@ -7,10 +7,11 @@
 
 #include <QVariant>
 
-#include "record.hpp"
-
 namespace CSMWorld
 {
+    template <typename ESXRecordT>
+    struct Record;
+
     struct ColumnBase
     {
         enum TableEditModes

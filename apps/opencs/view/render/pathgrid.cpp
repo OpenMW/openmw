@@ -1,12 +1,39 @@
 #include "pathgrid.hpp"
 
 #include <algorithm>
+#include <functional>
+#include <memory>
+#include <set>
+#include <stddef.h>
 
 #include <osg/Array>
+#include <osg/Callback>
+#include <osg/GL>
 #include <osg/Geometry>
 #include <osg/Group>
+#include <osg/MixinVector>
+#include <osg/Node>
 #include <osg/PositionAttitudeTransform>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 
+#include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/cellcoordinates.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/pathgrid.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/subcellcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/render/mask.hpp>
+#include <apps/opencs/view/render/tagbase.hpp>
+
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadpgrd.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
 
 #include "../../model/world/commandmacro.hpp"
@@ -14,6 +41,11 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtree.hpp"
 #include "worldspacewidget.hpp"
+
+namespace osg
+{
+    class NodeVisitor;
+}
 
 namespace CSVRender
 {

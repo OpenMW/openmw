@@ -1,15 +1,35 @@
 #ifndef CSM_WOLRD_REFIDADAPTERIMP_H
 #define CSM_WOLRD_REFIDADAPTERIMP_H
 
+#include <algorithm>
 #include <map>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include <QVariant>
 
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm3/aipackage.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadcrea.hpp>
-#include <components/esm3/loadench.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/esm3/transport.hpp>
 
 #include "columnbase.hpp"
 #include "nestedtablewrapper.hpp"
@@ -20,6 +40,7 @@
 
 namespace CSMWorld
 {
+    class RefIdColumn;
     struct BaseColumns
     {
         const RefIdColumn* mId;
@@ -917,8 +938,6 @@ namespace CSMWorld
         void setData(const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const override;
         ///< If the data type does not match an exception is thrown.
     };
-
-    class NestedRefIdAdapterBase;
 
     class NpcAttributesRefIdAdapter : public NestedRefIdAdapterBase
     {

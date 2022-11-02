@@ -1,6 +1,7 @@
 #include "genericcreator.hpp"
 
 #include <memory>
+#include <utility>
 
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -8,6 +9,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QUndoStack>
+
+#include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/misc/strings/lower.hpp>
 

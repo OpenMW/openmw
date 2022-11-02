@@ -1,5 +1,13 @@
 #include "refcollection.hpp"
 
+#include <algorithm>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
+
+#include <apps/opencs/model/world/collection.hpp>
+
+#include <components/esm3/cellref.hpp>
 #include <components/esm3/loadcell.hpp>
 
 #include "cell.hpp"
@@ -8,8 +16,6 @@
 #include "universalid.hpp"
 
 #include "../doc/messages.hpp"
-
-#include <string_view>
 
 namespace CSMWorld
 {

@@ -2,22 +2,39 @@
 #define CSM_TOOLS_TOPICINFOCHECK_HPP
 
 #include <set>
+#include <string>
 
-#include <components/esm3/loadclas.hpp>
-#include <components/esm3/loaddial.hpp>
-#include <components/esm3/loadfact.hpp>
-#include <components/esm3/loadglob.hpp>
-#include <components/esm3/loadgmst.hpp>
-#include <components/esm3/loadrace.hpp>
-#include <components/esm3/loadregn.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
 
-#include "../world/cell.hpp"
+#include <components/esm3/loadinfo.hpp>
+
 #include "../world/idcollection.hpp"
-#include "../world/infocollection.hpp"
-#include "../world/refiddata.hpp"
-#include "../world/resources.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace CSMWorld
+{
+    class InfoCollection;
+    class RefIdData;
+    class Resources;
+    struct Cell;
+}
+
+namespace ESM
+{
+    struct Class;
+    struct Dialogue;
+    struct Faction;
+    struct GameSetting;
+    struct Global;
+    struct Race;
+    struct Region;
+}
 
 namespace CSMTools
 {

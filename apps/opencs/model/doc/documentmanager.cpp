@@ -1,6 +1,12 @@
 #include "documentmanager.hpp"
 
+#include <QWaitCondition>
+
+#include <algorithm>
 #include <filesystem>
+#include <stdexcept>
+
+#include <apps/opencs/model/doc/loader.hpp>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>

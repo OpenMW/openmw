@@ -3,7 +3,32 @@
 #include "../../model/prefs/state.hpp"
 
 #include <QApplication>
+#include <QIcon>
 #include <QPainter>
+#include <QRect>
+#include <QSize>
+#include <QString>
+#include <QStyle>
+
+#include <memory>
+
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/view/world/enumdelegate.hpp>
+#include <apps/opencs/view/world/util.hpp>
+
+class QModelIndex;
+class QObject;
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
 
 CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList& values, const IconList& icons,
     CSMWorld::CommandDispatcher* dispatcher, CSMDoc::Document& document, const std::string& pageName,

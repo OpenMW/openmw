@@ -1,6 +1,7 @@
 #include "operation.hpp"
 
 #include <sstream>
+#include <string>
 
 #include <QHBoxLayout>
 #include <QProgressBar>

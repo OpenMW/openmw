@@ -3,9 +3,18 @@
 
 #include "idtablebase.hpp"
 
+#include <QModelIndex>
+#include <QVariant>
+
+#include <string>
+#include <utility>
+
+#include <apps/opencs/model/world/columns.hpp>
+
 namespace CSMWorld
 {
     class Resources;
+    class UniversalId;
 
     class ResourceTable : public IdTableBase
     {

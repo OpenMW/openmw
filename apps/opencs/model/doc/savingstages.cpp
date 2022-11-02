@@ -1,10 +1,42 @@
 #include "savingstages.hpp"
 
-#include <filesystem>
-#include <sstream>
+#include <QUndoStack>
 
+#include <filesystem>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <apps/opencs/model/doc/savingstate.hpp>
+#include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
+#include <apps/opencs/model/world/info.hpp>
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/landtexture.hpp>
+#include <apps/opencs/model/world/metadata.hpp>
+#include <apps/opencs/model/world/pathgrid.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/ref.hpp>
+#include <apps/opencs/model/world/refcollection.hpp>
+#include <apps/opencs/model/world/refidcollection.hpp>
+#include <apps/opencs/model/world/refiddata.hpp>
+#include <apps/opencs/model/world/subcellcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
+#include <components/esm/esmcommon.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadinfo.hpp>
+#include <components/esm3/loadpgrd.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../world/cellcoordinates.hpp"
 #include "../world/infocollection.hpp"

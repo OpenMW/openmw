@@ -3,6 +3,16 @@
 
 #include "../widget/modebutton.hpp"
 
+class QAction;
+class QMenu;
+class QObject;
+class QWidget;
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
 namespace CSMPrefs
 {
     class Shortcut;

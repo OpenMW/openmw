@@ -1,12 +1,9 @@
 #ifndef CSM_DOC_STAGE_H
 #define CSM_DOC_STAGE_H
 
-#include "messages.hpp"
-
-class QString;
-
 namespace CSMDoc
 {
+    class Messages;
     class Stage
     {
     public:

@@ -1,7 +1,15 @@
 #include "pathgridcheck.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <sstream>
+
+#include <apps/opencs/model/doc/messages.hpp>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/record.hpp>
+
+#include <components/esm3/loadpgrd.hpp>
 
 #include "../prefs/state.hpp"
 

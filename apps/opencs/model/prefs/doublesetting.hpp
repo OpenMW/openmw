@@ -7,6 +7,8 @@ class QDoubleSpinBox;
 
 namespace CSMPrefs
 {
+    class Category;
+
     class DoubleSetting : public Setting
     {
         Q_OBJECT

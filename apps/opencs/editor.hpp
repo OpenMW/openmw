@@ -1,13 +1,17 @@
 #ifndef CS_EDITOR_H
 #define CS_EDITOR_H
 
-#include <fstream>
-
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options/variables_map.hpp>
 
 #include <QObject>
 #include <QString>
+
+#include <filesystem>
+#include <fstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
@@ -16,15 +20,12 @@
 #include <components/files/multidircollection.hpp>
 
 #include "model/doc/documentmanager.hpp"
-
 #include "model/prefs/state.hpp"
 
 #include "view/doc/filedialog.hpp"
 #include "view/doc/newgame.hpp"
 #include "view/doc/startup.hpp"
-
 #include "view/prefs/dialogue.hpp"
-
 #include "view/tools/merge.hpp"
 
 class QLocalServer;

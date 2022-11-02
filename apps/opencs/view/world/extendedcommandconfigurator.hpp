@@ -2,6 +2,7 @@
 #define CSVWORLD_EXTENDEDCOMMANDCONFIGURATOR_HPP
 
 #include <map>
+#include <vector>
 
 #include <QWidget>
 
@@ -10,8 +11,7 @@
 class QPushButton;
 class QGroupBox;
 class QCheckBox;
-class QLabel;
-class QHBoxLayout;
+class QResizeEvent;
 
 namespace CSMDoc
 {

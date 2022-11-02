@@ -2,6 +2,8 @@
 #define CSM_PREFS_SHORTCUTMANAGER_H
 
 #include <map>
+#include <string>
+#include <utility>
 
 #include <QKeySequence>
 #include <QObject>

@@ -5,6 +5,16 @@
 
 namespace CSVRender
 {
+    class WorldspaceWidget;
+}
+
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
+namespace CSVRender
+{
     class PathgridSelectionMode : public SelectionMode
     {
         Q_OBJECT

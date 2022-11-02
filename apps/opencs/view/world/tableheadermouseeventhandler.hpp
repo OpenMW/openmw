@@ -1,7 +1,12 @@
 #pragma once
 
-#include <QEvent>
-#include <QHeaderView>
+#include <QWidget>
+
+class QEvent;
+class QHeaderView;
+class QMenu;
+class QObject;
+class QPoint;
 
 namespace CSVWorld
 {

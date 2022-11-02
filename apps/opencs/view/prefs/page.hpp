@@ -4,9 +4,12 @@
 #include "pagebase.hpp"
 
 class QGridLayout;
+class QWidget;
+class QObject;
 
 namespace CSMPrefs
 {
+    class Category;
     class Setting;
 }
 

@@ -3,6 +3,11 @@
 
 #include <QPushButton>
 
+class QKeyEvent;
+class QMouseEvent;
+class QObject;
+class QWidget;
+
 namespace CSMPrefs
 {
     class Setting;

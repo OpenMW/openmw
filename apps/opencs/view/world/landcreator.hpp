@@ -3,6 +3,18 @@
 
 #include "genericcreator.hpp"
 
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <apps/opencs/model/world/universalid.hpp>
+
+namespace CSMWorld
+{
+    class CreateCommand;
+    class Data;
+}
+
 class QLabel;
 class QSpinBox;
 

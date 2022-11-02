@@ -1,8 +1,25 @@
 #include "vartypedelegate.hpp"
 
+#include <algorithm>
+#include <memory>
+#include <stdexcept>
+#include <string>
+
+#include <apps/opencs/view/world/enumdelegate.hpp>
+
 #include "../../model/world/columns.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/commands.hpp"
+
+namespace CSMDoc
+{
+    class Document;
+}
+
+namespace CSMWorld
+{
+    class CommandDispatcher;
+}
 
 void CSVWorld::VarTypeDelegate::addCommands(QAbstractItemModel* model, const QModelIndex& index, int type) const
 {

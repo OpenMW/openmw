@@ -6,6 +6,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <apps/opencs/model/prefs/setting.hpp>
+
 #include "../../view/widget/coloreditor.hpp"
 
 #include "category.hpp"

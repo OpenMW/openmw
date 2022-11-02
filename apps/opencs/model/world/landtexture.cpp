@@ -1,6 +1,7 @@
 #include "landtexture.hpp"
 
 #include <sstream>
+#include <stddef.h>
 #include <stdexcept>
 
 #include <components/esm3/esmreader.hpp>

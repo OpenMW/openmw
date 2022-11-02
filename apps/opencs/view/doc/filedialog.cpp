@@ -3,8 +3,11 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 
-#include "components/contentselector/model/esmfile.hpp"
-#include "components/contentselector/view/contentselector.hpp"
+#include <components/contentselector/model/contentmodel.hpp>
+#include <components/contentselector/model/esmfile.hpp>
+#include <components/contentselector/view/contentselector.hpp>
+
+#include <string>
 
 #include "adjusterwidget.hpp"
 #include "filewidget.hpp"

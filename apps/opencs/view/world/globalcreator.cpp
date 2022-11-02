@@ -1,9 +1,15 @@
 #include "globalcreator.hpp"
 
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/view/world/genericcreator.hpp>
+
 #include <components/esm3/variant.hpp>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
+
+class QUndoStack;
 
 namespace CSVWorld
 {

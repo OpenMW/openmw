@@ -1,8 +1,11 @@
 #include "universalid.hpp"
 
+#include <algorithm>
+#include <compare>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 namespace
 {

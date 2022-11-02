@@ -1,12 +1,24 @@
 #ifndef CSM_TOOLS_JOURNALCHECK_H
 #define CSM_TOOLS_JOURNALCHECK_H
 
-#include <components/esm3/loaddial.hpp>
-
 #include "../world/idcollection.hpp"
-#include "../world/infocollection.hpp"
 
 #include "../doc/stage.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
+
+namespace CSMWorld
+{
+    class InfoCollection;
+}
+
+namespace ESM
+{
+    struct Dialogue;
+}
 
 namespace CSMTools
 {

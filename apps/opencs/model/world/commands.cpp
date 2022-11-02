@@ -1,8 +1,19 @@
 #include "commands.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 #include <unordered_set>
+
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/land.hpp>
+#include <apps/opencs/model/world/landtexture.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadpgrd.hpp>
+#include <components/misc/constants.hpp>
 
 #include <QAbstractItemModel>
 #include <QAbstractProxyModel>

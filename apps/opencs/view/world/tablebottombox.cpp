@@ -8,6 +8,8 @@
 #include <QStackedLayout>
 #include <QStatusBar>
 
+#include <apps/opencs/view/world/extendedcommandconfigurator.hpp>
+
 #include "creator.hpp"
 
 void CSVWorld::TableBottomBox::updateSize()

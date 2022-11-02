@@ -5,24 +5,35 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
-#include <boost/program_options/options_description.hpp>
+#include <boost/program_options.hpp>
 
+#include <exception>
+
+#include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/doc/documentmanager.hpp>
+#include <apps/opencs/view/doc/adjusterwidget.hpp>
+#include <apps/opencs/view/doc/filedialog.hpp>
+#include <apps/opencs/view/doc/newgame.hpp>
+#include <apps/opencs/view/doc/startup.hpp>
+#include <apps/opencs/view/prefs/dialogue.hpp>
+#include <apps/opencs/view/tools/merge.hpp>
+
+#ifdef _WIN32
+#include <components/windows.hpp>
+#endif
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadtes3.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/misc/rng.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/settings/settings.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 #include "view/doc/viewmanager.hpp"
-
-#include "model/doc/document.hpp"
-
-#ifdef _WIN32
-#include <components/windows.hpp>
-#endif
 
 using namespace Fallback;
 

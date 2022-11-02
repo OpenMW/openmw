@@ -3,17 +3,37 @@
 #include <algorithm>
 #include <cmath>
 #include <exception>
+#include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
-#include <osg/Group>
-#include <osg/PositionAttitudeTransform>
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/ref.hpp>
+#include <apps/opencs/model/world/refcollection.hpp>
+#include <apps/opencs/model/world/refidcollection.hpp>
+#include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/render/tagbase.hpp>
 
+#include <osg/Array>
+#include <osg/BoundingSphere>
+#include <osg/GL>
 #include <osg/Geometry>
+#include <osg/Group>
+#include <osg/Math>
+#include <osg/Node>
+#include <osg/PositionAttitudeTransform>
 #include <osg/PrimitiveSet>
+#include <osg/Quat>
 #include <osg/Shape>
 #include <osg/ShapeDrawable>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3>
+#include <osg/Vec4f>
 
 #include <osgFX/Scribe>
 
@@ -24,12 +44,23 @@
 #include "../../model/world/data.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 
 #include "actor.hpp"
 #include "mask.hpp"
+
+namespace CSVRender
+{
+    struct WorldspaceHitResult;
+}
+
+namespace ESM
+{
+    struct Light;
+}
 
 const float CSVRender::Object::MarkerShaftWidth = 30;
 const float CSVRender::Object::MarkerShaftBaseLength = 70;

@@ -1,6 +1,19 @@
 #include "nestedinfocollection.hpp"
 
-#include "nestedcoladapterimp.hpp"
+#include <algorithm>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <variant>
+#include <vector>
+
+#include <apps/opencs/model/world/collection.hpp>
+#include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/info.hpp>
+#include <apps/opencs/model/world/infocollection.hpp>
+#include <apps/opencs/model/world/nestedcolumnadapter.hpp>
+#include <apps/opencs/model/world/nestedtablewrapper.hpp>
+#include <apps/opencs/model/world/record.hpp>
 
 namespace CSMWorld
 {

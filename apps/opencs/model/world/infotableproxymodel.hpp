@@ -7,10 +7,12 @@
 #include "idtableproxymodel.hpp"
 #include "universalid.hpp"
 
+class QAbstractItemModel;
+class QModelIndex;
+class QObject;
+
 namespace CSMWorld
 {
-    class IdTableBase;
-
     class InfoTableProxyModel : public IdTableProxyModel
     {
         Q_OBJECT

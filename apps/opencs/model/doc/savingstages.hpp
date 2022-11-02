@@ -3,17 +3,18 @@
 
 #include "stage.hpp"
 
+#include <deque>
+
 #include "../world/idcollection.hpp"
 #include "../world/record.hpp"
 #include "../world/scope.hpp"
-
-#include <components/esm/defs.hpp>
 
 #include "savingstate.hpp"
 
 namespace ESM
 {
     struct Dialogue;
+    class ESMWriter;
 }
 
 namespace CSMWorld
@@ -24,7 +25,7 @@ namespace CSMWorld
 namespace CSMDoc
 {
     class Document;
-    class SavingState;
+    class Messages;
 
     class OpenSaveStage : public Stage
     {

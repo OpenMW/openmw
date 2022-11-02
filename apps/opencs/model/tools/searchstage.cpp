@@ -2,7 +2,14 @@
 
 #include "../world/idtablebase.hpp"
 
+#include <apps/opencs/model/tools/search.hpp>
+
 #include "searchoperation.hpp"
+
+namespace CSMDoc
+{
+    class Messages;
+}
 
 CSMTools::SearchStage::SearchStage(const CSMWorld::IdTableBase* model)
     : mModel(model)

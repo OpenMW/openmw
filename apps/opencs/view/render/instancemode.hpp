@@ -3,17 +3,29 @@
 
 #include <QString>
 
+#include <string>
+#include <vector>
+
 #include <osg/Group>
+#include <osg/Node>
 #include <osg/Quat>
+#include <osg/Vec3d>
 #include <osg/Vec3f>
 #include <osg/ref_ptr>
 
 #include "editmode.hpp"
 #include "instancedragmodes.hpp"
 
+class QDragEnterEvent;
+class QDropEvent;
+class QObject;
+class QPoint;
+class QWidget;
+
 namespace CSVWidget
 {
     class SceneToolMode;
+    class SceneToolbar;
 }
 
 namespace CSVRender
@@ -21,6 +33,8 @@ namespace CSVRender
     class TagBase;
     class InstanceSelectionMode;
     class Object;
+    class WorldspaceWidget;
+    struct WorldspaceHitResult;
 
     class InstanceMode : public EditMode
     {

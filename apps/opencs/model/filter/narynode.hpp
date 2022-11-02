@@ -1,6 +1,7 @@
 #ifndef CSM_FILTER_NARYNODE_H
 #define CSM_FILTER_NARYNODE_H
 
+#include <memory>
 #include <string>
 #include <vector>
 

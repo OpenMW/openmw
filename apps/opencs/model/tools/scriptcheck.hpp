@@ -1,8 +1,12 @@
 #ifndef CSM_TOOLS_SCRIPTCHECK_H
 #define CSM_TOOLS_SCRIPTCHECK_H
 
+#include <string>
+
 #include <components/compiler/errorhandler.hpp>
 #include <components/compiler/extensions.hpp>
+
+#include <apps/opencs/model/doc/messages.hpp>
 
 #include "../doc/stage.hpp"
 
@@ -11,6 +15,11 @@
 namespace CSMDoc
 {
     class Document;
+}
+
+namespace Compiler
+{
+    struct TokenLoc;
 }
 
 namespace CSMTools

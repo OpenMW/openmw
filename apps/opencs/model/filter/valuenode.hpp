@@ -3,6 +3,12 @@
 
 #include "leafnode.hpp"
 
+#include <apps/opencs/model/world/idtablebase.hpp>
+
+#include <map>
+#include <string>
+#include <vector>
+
 namespace CSMFilter
 {
     class ValueNode : public LeafNode

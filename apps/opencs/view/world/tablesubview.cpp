@@ -10,12 +10,16 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+#include <algorithm>
+#include <utility>
+
+#include <apps/opencs/view/doc/subview.hpp>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
 #include "../doc/sizehint.hpp"
 #include "../filter/filterbox.hpp"
-#include "creator.hpp"
 #include "table.hpp"
 #include "tablebottombox.hpp"
 
