@@ -814,8 +814,7 @@ void OMW::Engine::prepareEngine()
     {
         std::pair<int, int> result = MWDialogue::ScriptTest::compileAll(&mExtensions, mWarningsMode);
         if (result.first)
-            Log(Debug::Info) << "compiled " << result.second << " of " << result.first
-                             << " dialogue script/actor combinations a("
+            Log(Debug::Info) << "compiled " << result.second << " of " << result.first << " dialogue scripts ("
                              << 100 * static_cast<double>(result.second) / result.first << "%)";
     }
 

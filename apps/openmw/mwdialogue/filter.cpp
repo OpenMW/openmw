@@ -24,6 +24,68 @@
 
 #include "selectwrapper.hpp"
 
+namespace
+{
+    bool matchesStaticFilters(const MWDialogue::SelectWrapper& select, const MWWorld::Ptr& actor)
+    {
+        if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotId)
+            return !Misc::StringUtils::ciEqual(actor.getCellRef().getRefId(), select.getName());
+        if (actor.getClass().isNpc())
+        {
+            switch (select.getFunction())
+            {
+                case MWDialogue::SelectWrapper::Function_NotFaction:
+                    return !Misc::StringUtils::ciEqual(actor.getClass().getPrimaryFaction(actor), select.getName());
+                case MWDialogue::SelectWrapper::Function_NotClass:
+                    return !Misc::StringUtils::ciEqual(actor.get<ESM::NPC>()->mBase->mClass, select.getName());
+                case MWDialogue::SelectWrapper::Function_NotRace:
+                    return !Misc::StringUtils::ciEqual(actor.get<ESM::NPC>()->mBase->mRace, select.getName());
+            }
+        }
+        return true;
+    }
+
+    bool matchesStaticFilters(const ESM::DialInfo& info, const MWWorld::Ptr& actor)
+    {
+        for (const ESM::DialInfo::SelectStruct& select : info.mSelects)
+        {
+            MWDialogue::SelectWrapper wrapper = select;
+
+            switch (wrapper.getType())
+            {
+                case MWDialogue::SelectWrapper::Type_Boolean:
+                {
+                    if (!wrapper.selectCompare(matchesStaticFilters(wrapper, actor)))
+                        return false;
+                    break;
+                }
+                case MWDialogue::SelectWrapper::Type_Inverted:
+                {
+                    if (!matchesStaticFilters(wrapper, actor))
+                        return false;
+                    break;
+                }
+                case MWDialogue::SelectWrapper::Type_Numeric:
+                {
+                    if (wrapper.getFunction() == MWDialogue::SelectWrapper::Function_Local)
+                    {
+                        std::string_view scriptName = actor.getClass().getScript(actor);
+                        if (scriptName.empty())
+                            return false;
+                        const Compiler::Locals& localDefs
+                            = MWBase::Environment::get().getScriptManager()->getLocals(scriptName);
+                        char type = localDefs.getType(wrapper.getName());
+                        if (type == ' ')
+                            return false; // script does not have a variable of this name.
+                    }
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+}
+
 bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
 {
     bool isCreature = (mActor.getType() != ESM::NPC::sRecordId);
@@ -144,9 +206,7 @@ bool MWDialogue::Filter::testPlayer(const ESM::DialInfo& info) const
     {
         // supports partial matches, just like getPcCell
         std::string_view playerCell = MWBase::Environment::get().getWorld()->getCellName(player.getCell());
-        bool match = playerCell.length() >= info.mCell.length()
-            && Misc::StringUtils::ciEqual(playerCell.substr(0, info.mCell.length()), info.mCell);
-        if (!match)
+        if (!Misc::StringUtils::ciStartsWith(playerCell, info.mCell))
             return false;
     }
 
@@ -183,7 +243,7 @@ bool MWDialogue::Filter::testFunctionLocal(const MWDialogue::SelectWrapper& sele
     if (scriptName.empty())
         return false; // no script
 
-    std::string name = Misc::StringUtils::lowerCase(select.getName());
+    std::string name = select.getName();
 
     const Compiler::Locals& localDefs = MWBase::Environment::get().getScriptManager()->getLocals(scriptName);
 
@@ -502,8 +562,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
         case SelectWrapper::Function_NotCell:
         {
             std::string_view actorCell = MWBase::Environment::get().getWorld()->getCellName(mActor.getCell());
-            return !(actorCell.length() >= select.getName().length()
-                && Misc::StringUtils::ciEqual(actorCell.substr(0, select.getName().length()), select.getName()));
+            return !Misc::StringUtils::ciStartsWith(actorCell, select.getName());
         }
         case SelectWrapper::Function_SameGender:
 
@@ -640,16 +699,9 @@ const ESM::DialInfo* MWDialogue::Filter::search(const ESM::Dialogue& dialogue, c
         return suitableInfos[0];
 }
 
-std::vector<const ESM::DialInfo*> MWDialogue::Filter::listAll(const ESM::Dialogue& dialogue) const
+bool MWDialogue::Filter::couldPotentiallyMatch(const ESM::DialInfo& info) const
 {
-    std::vector<const ESM::DialInfo*> infos;
-    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin(); iter != dialogue.mInfo.end();
-         ++iter)
-    {
-        if (testActor(*iter))
-            infos.push_back(&*iter);
-    }
-    return infos;
+    return testActor(info) && matchesStaticFilters(info, mActor);
 }
 
 std::vector<const ESM::DialInfo*> MWDialogue::Filter::list(

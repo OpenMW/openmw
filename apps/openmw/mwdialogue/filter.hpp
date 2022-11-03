@@ -58,9 +58,9 @@ namespace MWDialogue
         ///< List all infos that could be used on the given actor, using the current runtime state of the actor.
         /// \note If fallbackToInfoRefusal is used, the returned DialInfo might not be from the supplied ESM::Dialogue.
 
-        std::vector<const ESM::DialInfo*> listAll(const ESM::Dialogue& dialogue) const;
-        ///< List all infos that could possibly be used on the given actor, ignoring runtime state filters and ignoring
-        ///< player filters.
+        bool couldPotentiallyMatch(const ESM::DialInfo& info) const;
+        ///< Check if this INFO could potentially be said by the given actor, ignoring runtime state filters and
+        ///< ignoring player filters.
 
         const ESM::DialInfo* search(const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
         ///< Get a matching response for the requested dialogue.
