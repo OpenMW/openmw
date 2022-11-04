@@ -136,7 +136,6 @@ return {
                 saved[groupKey] = contextSection(groupKey):asTable()
             end
         end
-        groupSection:reset()
         return saved
     end,
     registerGroup = registerGroup,
