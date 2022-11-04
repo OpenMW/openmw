@@ -57,6 +57,9 @@ namespace CSVRender
         /// Default-implementation: Ignored.
         virtual void secondarySelectPressed(const WorldspaceHitResult& hit);
 
+        /// Default-implementation: Ignored.
+        virtual void tertiarySelectPressed(const WorldspaceHitResult& hit);
+
         /// Default-implementation: ignore and return false
         ///
         /// \return Drag accepted?

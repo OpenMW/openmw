@@ -87,6 +87,7 @@ namespace CSVRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
         osg::ref_ptr<osgFX::Scribe> mOutline;
         bool mSelected;
+        bool mSnapTarget;
         osg::Group* mParentNode;
         Resource::ResourceSystem* mResourceSystem;
         bool mForceBaseToZero;
@@ -139,6 +140,11 @@ namespace CSVRender
         void setSelected(bool selected);
 
         bool getSelected() const;
+
+        /// Mark Object as "snap target"
+        void setSnapTarget(bool isSnapTarget);
+
+        bool getSnapTarget() const;
 
         /// Get object node with GUI graphics
         osg::ref_ptr<osg::Group> getRootNode();

@@ -29,3 +29,4 @@ few chapters to familiarise yourself with the new interface.
     tables-assets
     record-types
     record-filters
+    cell-view

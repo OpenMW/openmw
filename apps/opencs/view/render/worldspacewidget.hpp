@@ -113,6 +113,7 @@ namespace CSVRender
             InteractionType_PrimarySelect,
             InteractionType_SecondaryEdit,
             InteractionType_SecondarySelect,
+            InteractionType_TertiarySelect,
             InteractionType_PrimaryOpen,
             InteractionType_None
         };
@@ -195,6 +196,8 @@ namespace CSVRender
         virtual Cell* getCell(const osg::Vec3d& point) const = 0;
 
         virtual Cell* getCell(const CSMWorld::CellCoordinates& coords) const = 0;
+
+        virtual osg::ref_ptr<TagBase> getSnapTarget(unsigned int elementMask) const = 0;
 
         virtual std::vector<osg::ref_ptr<TagBase>> getSelection(unsigned int elementMask) const = 0;
 
@@ -292,6 +295,8 @@ namespace CSVRender
         void primarySelect(bool activate);
 
         void secondarySelect(bool activate);
+
+        void tertiarySelect(bool activate);
 
         void speedMode(bool activate);
 

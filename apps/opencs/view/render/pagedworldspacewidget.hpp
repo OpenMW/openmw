@@ -159,6 +159,8 @@ namespace CSVRender
 
         void resetAllAlteredHeights();
 
+        osg::ref_ptr<TagBase> getSnapTarget(unsigned int elementMask) const override;
+
         std::vector<osg::ref_ptr<TagBase>> getSelection(unsigned int elementMask) const override;
 
         std::vector<osg::ref_ptr<TagBase>> getEdited(unsigned int elementMask) const override;

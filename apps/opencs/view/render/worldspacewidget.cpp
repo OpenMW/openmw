@@ -126,6 +126,10 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
     connect(secondarySelectShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), this,
         &WorldspaceWidget::secondarySelect);
 
+    CSMPrefs::Shortcut* tertiarySelectShortcut = new CSMPrefs::Shortcut("scene-select-tertiary", this);
+    connect(tertiarySelectShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::tertiarySelect);
+
     CSMPrefs::Shortcut* abortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
     connect(abortShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &WorldspaceWidget::abortDrag);
 
@@ -690,6 +694,8 @@ void CSVRender::WorldspaceWidget::handleInteractionPress(const WorldspaceHitResu
         editMode.primarySelectPressed(hit);
     else if (type == InteractionType_SecondarySelect)
         editMode.secondarySelectPressed(hit);
+    else if (type == InteractionType_TertiarySelect)
+        editMode.tertiarySelectPressed(hit);
     else if (type == InteractionType_PrimaryOpen)
         editMode.primaryOpenPressed(hit);
 }
@@ -717,6 +723,11 @@ void CSVRender::WorldspaceWidget::primarySelect(bool activate)
 void CSVRender::WorldspaceWidget::secondarySelect(bool activate)
 {
     handleInteraction(InteractionType_SecondarySelect, activate);
+}
+
+void CSVRender::WorldspaceWidget::tertiarySelect(bool activate)
+{
+    handleInteraction(InteractionType_TertiarySelect, activate);
 }
 
 void CSVRender::WorldspaceWidget::speedMode(bool activate)

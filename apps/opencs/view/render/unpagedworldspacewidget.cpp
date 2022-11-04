@@ -189,6 +189,11 @@ CSVRender::Cell* CSVRender::UnpagedWorldspaceWidget::getCell(const CSMWorld::Cel
     return mCell.get();
 }
 
+osg::ref_ptr<CSVRender::TagBase> CSVRender::UnpagedWorldspaceWidget::getSnapTarget(unsigned int elementMask) const
+{
+    return mCell->getSnapTarget(elementMask);
+}
+
 std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::UnpagedWorldspaceWidget::getSelection(
     unsigned int elementMask) const
 {

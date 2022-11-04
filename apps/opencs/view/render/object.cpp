@@ -487,11 +487,17 @@ void CSVRender::Object::setSelected(bool selected)
 {
     mSelected = selected;
 
+    if (mSnapTarget)
+    {
+        setSnapTarget(false);
+    }
+
     mOutline->removeChild(mBaseNode);
     mRootNode->removeChild(mOutline);
     mRootNode->removeChild(mBaseNode);
     if (selected)
     {
+        mOutline->setWireframeColor(osg::Vec4f(1, 1, 1, 1));
         mOutline->addChild(mBaseNode);
         mRootNode->addChild(mOutline);
     }
@@ -505,6 +511,36 @@ void CSVRender::Object::setSelected(bool selected)
 bool CSVRender::Object::getSelected() const
 {
     return mSelected;
+}
+
+void CSVRender::Object::setSnapTarget(bool isSnapTarget)
+{
+    mSnapTarget = isSnapTarget;
+
+    if (mSelected)
+    {
+        setSelected(false);
+    }
+
+    mOutline->removeChild(mBaseNode);
+    mRootNode->removeChild(mOutline);
+    mRootNode->removeChild(mBaseNode);
+    if (isSnapTarget)
+    {
+        mOutline->setWireframeColor(osg::Vec4f(1, 1, 0, 1));
+        mOutline->addChild(mBaseNode);
+        mRootNode->addChild(mOutline);
+    }
+    else
+        mRootNode->addChild(mBaseNode);
+
+    mMarkerTransparency = CSMPrefs::get()["Rendering"]["object-marker-alpha"].toDouble();
+    updateMarker();
+}
+
+bool CSVRender::Object::getSnapTarget() const
+{
+    return mSnapTarget;
 }
 
 osg::ref_ptr<osg::Group> CSVRender::Object::getRootNode()
