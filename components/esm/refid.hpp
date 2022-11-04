@@ -45,7 +45,7 @@ namespace std
     template <>
     struct hash<ESM::RefId>
     {
-        std::size_t operator()(const ESM::RefId& k) const { return std::hash<std::string>()(k.getRefIdString()); }
+        std::size_t operator()(const ESM::RefId& k) const;
     };
 }
 #endif

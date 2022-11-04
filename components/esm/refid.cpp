@@ -8,17 +8,17 @@ namespace ESM
 {
     bool RefId::operator==(const RefId& rhs) const
     {
-        return this->mId == rhs.mId;
+        return Misc::StringUtils::ciEqual(mId, rhs.mId);
     }
 
     bool RefId::operator<(const RefId& rhs) const
     {
-        return mId < rhs.mId;
+        return Misc::StringUtils::ciLess(mId, rhs.mId);
     }
 
     bool RefId::operator>(const RefId& rhs) const
     {
-        return mId > rhs.mId;
+        return Misc::StringUtils::ciMore(mId, rhs.mId);
     }
 
     std::ostream& operator<<(std::ostream& os, const RefId& refId)
@@ -30,7 +30,7 @@ namespace ESM
     RefId RefId::stringRefId(std::string_view id)
     {
         RefId newRefId;
-        newRefId.mId = Misc::StringUtils::lowerCase(id);
+        newRefId.mId = id;
         return newRefId;
     }
 
@@ -40,4 +40,9 @@ namespace ESM
     }
 
     const RefId RefId::sEmpty = {};
+}
+
+std::size_t std::hash<ESM::RefId>::operator()(const ESM::RefId& k) const
+{
+    return Misc::StringUtils::CiHash()(k.getRefIdString());
 }

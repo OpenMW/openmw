@@ -20,6 +20,16 @@ namespace Misc::StringUtils
         return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end(), CiCharLess());
     }
 
+    struct CiCharMore
+    {
+        bool operator()(char x, char y) const { return toLower(x) > toLower(y); }
+    };
+
+    inline bool ciMore(std::string_view x, std::string_view y)
+    {
+        return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end(), CiCharMore());
+    }
+
     inline bool ciEqual(std::string_view x, std::string_view y)
     {
         if (std::size(x) != std::size(y))
