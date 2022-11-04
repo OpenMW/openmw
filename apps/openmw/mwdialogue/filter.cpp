@@ -32,15 +32,12 @@ namespace
             return !Misc::StringUtils::ciEqual(actor.getCellRef().getRefId(), select.getName());
         if (actor.getClass().isNpc())
         {
-            switch (select.getFunction())
-            {
-                case MWDialogue::SelectWrapper::Function_NotFaction:
-                    return !Misc::StringUtils::ciEqual(actor.getClass().getPrimaryFaction(actor), select.getName());
-                case MWDialogue::SelectWrapper::Function_NotClass:
-                    return !Misc::StringUtils::ciEqual(actor.get<ESM::NPC>()->mBase->mClass, select.getName());
-                case MWDialogue::SelectWrapper::Function_NotRace:
-                    return !Misc::StringUtils::ciEqual(actor.get<ESM::NPC>()->mBase->mRace, select.getName());
-            }
+            if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotFaction)
+                return !Misc::StringUtils::ciEqual(actor.getClass().getPrimaryFaction(actor), select.getName());
+            else if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotClass)
+                return !Misc::StringUtils::ciEqual(actor.get<ESM::NPC>()->mBase->mClass, select.getName());
+            else if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotRace)
+                return !Misc::StringUtils::ciEqual(actor.get<ESM::NPC>()->mBase->mRace, select.getName());
         }
         return true;
     }
@@ -50,35 +47,28 @@ namespace
         for (const ESM::DialInfo::SelectStruct& select : info.mSelects)
         {
             MWDialogue::SelectWrapper wrapper = select;
-
-            switch (wrapper.getType())
+            if (wrapper.getType() == MWDialogue::SelectWrapper::Type_Boolean)
             {
-                case MWDialogue::SelectWrapper::Type_Boolean:
+                if (!wrapper.selectCompare(matchesStaticFilters(wrapper, actor)))
+                    return false;
+            }
+            else if (wrapper.getType() == MWDialogue::SelectWrapper::Type_Inverted)
+            {
+                if (!matchesStaticFilters(wrapper, actor))
+                    return false;
+            }
+            else if (wrapper.getType() == MWDialogue::SelectWrapper::Type_Numeric)
+            {
+                if (wrapper.getFunction() == MWDialogue::SelectWrapper::Function_Local)
                 {
-                    if (!wrapper.selectCompare(matchesStaticFilters(wrapper, actor)))
+                    std::string_view scriptName = actor.getClass().getScript(actor);
+                    if (scriptName.empty())
                         return false;
-                    break;
-                }
-                case MWDialogue::SelectWrapper::Type_Inverted:
-                {
-                    if (!matchesStaticFilters(wrapper, actor))
-                        return false;
-                    break;
-                }
-                case MWDialogue::SelectWrapper::Type_Numeric:
-                {
-                    if (wrapper.getFunction() == MWDialogue::SelectWrapper::Function_Local)
-                    {
-                        std::string_view scriptName = actor.getClass().getScript(actor);
-                        if (scriptName.empty())
-                            return false;
-                        const Compiler::Locals& localDefs
-                            = MWBase::Environment::get().getScriptManager()->getLocals(scriptName);
-                        char type = localDefs.getType(wrapper.getName());
-                        if (type == ' ')
-                            return false; // script does not have a variable of this name.
-                    }
-                    break;
+                    const Compiler::Locals& localDefs
+                        = MWBase::Environment::get().getScriptManager()->getLocals(scriptName);
+                    char type = localDefs.getType(wrapper.getName());
+                    if (type == ' ')
+                        return false; // script does not have a variable of this name.
                 }
             }
         }
