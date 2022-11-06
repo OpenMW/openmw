@@ -333,14 +333,6 @@ namespace MWBase
 
         virtual const MWPhysics::RayCastingInterface* getRayCasting() const = 0;
 
-        virtual bool castRay(float x1, float y1, float z1, float x2, float y2, float z2, int mask) = 0;
-        ///< cast a Ray and return true if there is an object in the ray path.
-
-        virtual bool castRay(float x1, float y1, float z1, float x2, float y2, float z2) = 0;
-
-        virtual bool castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore)
-            = 0;
-
         virtual bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
             bool ignorePlayer, bool ignoreActors)
             = 0;

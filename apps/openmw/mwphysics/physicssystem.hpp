@@ -222,6 +222,7 @@ namespace MWPhysics
             const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
             const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(), int mask = CollisionType_Default,
             int group = 0xff) const override;
+        using RayCastingInterface::castRay;
 
         RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius,
             int mask = CollisionType_Default, int group = 0xff) const override;

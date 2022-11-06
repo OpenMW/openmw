@@ -421,13 +421,6 @@ namespace MWWorld
 
         const MWPhysics::RayCastingInterface* getRayCasting() const override;
 
-        bool castRay(float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
-        ///< cast a Ray and return true if there is an object in the ray path.
-
-        bool castRay(float x1, float y1, float z1, float x2, float y2, float z2) override;
-
-        bool castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore) override;
-
         bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
             bool ignorePlayer, bool ignoreActors) override;
 

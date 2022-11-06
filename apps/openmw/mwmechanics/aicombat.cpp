@@ -10,7 +10,7 @@
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include "../mwphysics/collisiontype.hpp"
+#include "../mwphysics/raycasting.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -596,8 +596,8 @@ namespace MWMechanics
             osg::Vec3f fallbackDirection = actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0, -1, 0);
             osg::Vec3f destination = source + fallbackDirection * (halfExtents.y() + 16);
 
-            bool isObstacleDetected = MWBase::Environment::get().getWorld()->castRay(
-                source.x(), source.y(), source.z(), destination.x(), destination.y(), destination.z(), mask);
+            const auto* rayCasting = MWBase::Environment::get().getWorld()->getRayCasting();
+            bool isObstacleDetected = rayCasting->castRay(source, destination, mask).mHit;
             if (isObstacleDetected)
                 return;
 
@@ -606,8 +606,7 @@ namespace MWMechanics
             // If we did not hit anything, there is a cliff behind actor.
             source = pos + osg::Vec3f(0, 0, 0.75f * halfExtents.z()) + fallbackDirection * (halfExtents.y() + 96);
             destination = source - osg::Vec3f(0, 0, 0.75f * halfExtents.z() + 96);
-            bool isCliffDetected = !MWBase::Environment::get().getWorld()->castRay(
-                source.x(), source.y(), source.z(), destination.x(), destination.y(), destination.z(), mask);
+            bool isCliffDetected = !rayCasting->castRay(source, destination, mask).mHit;
             if (isCliffDetected)
                 return;
 

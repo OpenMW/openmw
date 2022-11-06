@@ -1412,7 +1412,7 @@ namespace MWWorld
                 targetPos = pos + (orientation * osg::Vec3f(1, 0, 0)) * distance;
 
             // destination is free
-            if (!castRay(pos.x(), pos.y(), pos.z(), targetPos.x(), targetPos.y(), targetPos.z()))
+            if (!mPhysics->castRay(pos, targetPos, MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door).mHit)
                 break;
         }
 
@@ -1479,7 +1479,8 @@ namespace MWWorld
             // check if spawn point is safe, fall back to another direction if not
             spawnPoint.z() += 30; // move up a little to account for slopes, will snap down later
 
-            if (!castRay(spawnPoint.x(), spawnPoint.y(), spawnPoint.z(), pos.x(), pos.y(), pos.z() + 20))
+            if (!mPhysics->castRay(spawnPoint, osg::Vec3f(pos.x(), pos.y(), pos.z() + 20),
+                                   MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door).mHit)
             {
                 // safe
                 break;
@@ -1566,27 +1567,6 @@ namespace MWWorld
     const MWPhysics::RayCastingInterface* World::getRayCasting() const
     {
         return mPhysics.get();
-    }
-
-    bool World::castRay(float x1, float y1, float z1, float x2, float y2, float z2)
-    {
-        int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door;
-        bool result = castRay(x1, y1, z1, x2, y2, z2, mask);
-        return result;
-    }
-
-    bool World::castRay(float x1, float y1, float z1, float x2, float y2, float z2, int mask)
-    {
-        osg::Vec3f a(x1, y1, z1);
-        osg::Vec3f b(x2, y2, z2);
-
-        MWPhysics::RayCastingResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
-        return result.mHit;
-    }
-
-    bool World::castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore)
-    {
-        return mPhysics->castRay(from, to, ignore, std::vector<MWWorld::Ptr>(), mask).mHit;
     }
 
     bool World::rotateDoor(const Ptr door, MWWorld::DoorState state, float duration)

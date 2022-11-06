@@ -34,6 +34,11 @@ namespace MWPhysics
             const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(), int mask = CollisionType_Default,
             int group = 0xff) const = 0;
 
+        RayCastingResult castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask) const
+        {
+            return castRay(from, to, MWWorld::ConstPtr(), std::vector<MWWorld::Ptr>(), mask);
+        }
+
         virtual RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius,
             int mask = CollisionType_Default, int group = 0xff) const = 0;
 
