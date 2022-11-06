@@ -772,6 +772,8 @@ void OMW::Engine::prepareEngine()
     mWorld->setupPlayer();
     mWorld->setRandomSeed(mRandomSeed);
     mEnvironment.setWorld(*mWorld);
+    mEnvironment.setWorldModel(mWorld->getWorldModel());
+    mEnvironment.setWorldScene(mWorld->getWorldScene());
 
     mWindowManager->setStore(mWorld->getStore());
     mWindowManager->initUI();

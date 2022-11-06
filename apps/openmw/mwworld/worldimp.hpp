@@ -189,6 +189,9 @@ namespace MWWorld
         MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id);
 
     public:
+        Cells& getWorldModel() { return mCells; }
+        Scene& getWorldScene() { return *mWorldScene; }
+
         // FIXME
         void addContainerScripts(const Ptr& reference, CellStore* cell) override;
         void removeContainerScripts(const Ptr& reference) override;
