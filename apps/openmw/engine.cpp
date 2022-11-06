@@ -242,7 +242,7 @@ bool OMW::Engine::frame(float frametime)
                         mScriptManager->getGlobalScripts().run();
                     }
 
-                    mWorld->markCellAsUnchanged();
+                    mWorld->getWorldScene().markCellAsUnchanged();
                 }
 
                 if (!guiActive)

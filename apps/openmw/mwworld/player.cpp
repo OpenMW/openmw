@@ -13,6 +13,7 @@
 #include <components/fallback/fallback.hpp>
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cells.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/magiceffects.hpp"
 
@@ -430,7 +431,7 @@ namespace MWWorld
 
             try
             {
-                mCellStore = world.getCell(player.mCellId);
+                mCellStore = MWBase::Environment::get().getWorldModel()->getCell(player.mCellId);
             }
             catch (...)
             {
@@ -467,7 +468,7 @@ namespace MWWorld
             if (player.mHasMark)
             {
                 mMarkedPosition = player.mMarkedPosition;
-                mMarkedCell = world.getCell(player.mMarkedCell);
+                mMarkedCell = MWBase::Environment::get().getWorldModel()->getCell(player.mMarkedCell);
             }
             else
             {

@@ -592,39 +592,6 @@ namespace MWWorld
         return nullptr;
     }
 
-    CellStore* World::getExterior(int x, int y)
-    {
-        return mCells.getExterior(x, y);
-    }
-
-    CellStore* World::getInterior(std::string_view name)
-    {
-        return mCells.getInterior(name);
-    }
-
-    CellStore* World::getCell(const ESM::CellId& id)
-    {
-        if (id.mPaged)
-            return getExterior(id.mIndex.mX, id.mIndex.mY);
-        else
-            return getInterior(id.mWorldspace);
-    }
-
-    bool World::isCellActive(CellStore* cell) const
-    {
-        return mWorldScene->getActiveCells().count(cell) > 0;
-    }
-
-    void World::testExteriorCells()
-    {
-        mWorldScene->testExteriorCells();
-    }
-
-    void World::testInteriorCells()
-    {
-        mWorldScene->testInteriorCells();
-    }
-
     void World::useDeathCamera()
     {
         mRendering->getCamera()->setMode(MWRender::Camera::Mode::ThirdPerson);
@@ -648,11 +615,6 @@ namespace MWWorld
     LocalScripts& World::getLocalScripts()
     {
         return mLocalScripts;
-    }
-
-    bool World::hasCellChanged() const
-    {
-        return mWorldScene->hasCellChanged();
     }
 
     void World::setGlobalInt(std::string_view name, int value)
@@ -1045,11 +1007,6 @@ namespace MWWorld
         mCurrentDate->setup(mGlobalVariables);
     }
 
-    void World::markCellAsUnchanged()
-    {
-        return mWorldScene->markCellAsUnchanged();
-    }
-
     float World::getMaxActivationDistance() const
     {
         if (mActivationDistanceOverride >= 0)
@@ -1305,7 +1262,7 @@ namespace MWWorld
         const osg::Vec2i index = positionToCellIndex(position.x(), position.y());
 
         CellStore* cell = ptr.getCell();
-        CellStore* newCell = getExterior(index.x(), index.y());
+        CellStore* newCell = mCells.getExterior(index.x(), index.y());
         bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
             && mWorldScene->isCellActive(*newCell);
 
@@ -2850,7 +2807,7 @@ namespace MWWorld
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
 
-        MWWorld::CellStore* cellStore = getInterior(name);
+        MWWorld::CellStore* cellStore = mCells.getInterior(name);
 
         if (!cellStore)
             return false;
@@ -2881,12 +2838,12 @@ namespace MWWorld
             {
                 ESM::Position doorDest = door->getDoorDest();
                 const osg::Vec2i index = positionToCellIndex(doorDest.pos[0], doorDest.pos[1]);
-                source = getExterior(index.x(), index.y());
+                source = mCells.getExterior(index.x(), index.y());
             }
             // door to interior
             else
             {
-                source = getInterior(door->getDestCell());
+                source = mCells.getInterior(door->getDestCell());
             }
             if (source)
             {
@@ -2933,7 +2890,7 @@ namespace MWWorld
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
-                    ext = getExterior(x, y)->getCell();
+                    ext = mCells.getExterior(x, y)->getCell();
                 // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell
                 // instead of comma separated coordinates
             }
@@ -3352,7 +3309,7 @@ namespace MWWorld
             nextCells.clear();
             for (const std::string& currentCell : currentCells)
             {
-                MWWorld::CellStore* next = getInterior(currentCell);
+                MWWorld::CellStore* next = mCells.getInterior(currentCell);
                 if (!next)
                     continue;
 
@@ -3406,7 +3363,7 @@ namespace MWWorld
             nextCells.clear();
             for (const std::string& cell : currentCells)
             {
-                MWWorld::CellStore* next = getInterior(cell);
+                MWWorld::CellStore* next = mCells.getInterior(cell);
                 checkedCells.insert(cell);
                 if (!next)
                     continue;
@@ -3704,7 +3661,7 @@ namespace MWWorld
             Log(Debug::Warning) << "Failed to confiscate items: prison marker not linked to prison interior";
             return;
         }
-        MWWorld::CellStore* prison = getInterior(prisonName);
+        MWWorld::CellStore* prison = mCells.getInterior(prisonName);
         if (!prison)
         {
             Log(Debug::Warning) << "Failed to confiscate items: failed to load cell " << prisonName;

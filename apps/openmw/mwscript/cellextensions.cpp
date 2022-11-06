@@ -16,6 +16,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/scene.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -30,7 +31,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                runtime.push(MWBase::Environment::get().getWorld()->hasCellChanged() ? 1 : 0);
+                runtime.push(MWBase::Environment::get().getWorldScene()->hasCellChanged() ? 1 : 0);
             }
         };
 
@@ -50,7 +51,7 @@ namespace MWScript
                 if (wasConsole)
                     MWBase::Environment::get().getWindowManager()->toggleConsole();
 
-                MWBase::Environment::get().getWorld()->testExteriorCells();
+                MWBase::Environment::get().getWorldScene()->testExteriorCells();
 
                 if (wasConsole)
                     MWBase::Environment::get().getWindowManager()->toggleConsole();
@@ -73,7 +74,7 @@ namespace MWScript
                 if (wasConsole)
                     MWBase::Environment::get().getWindowManager()->toggleConsole();
 
-                MWBase::Environment::get().getWorld()->testInteriorCells();
+                MWBase::Environment::get().getWorldScene()->testInteriorCells();
 
                 if (wasConsole)
                     MWBase::Environment::get().getWindowManager()->toggleConsole();

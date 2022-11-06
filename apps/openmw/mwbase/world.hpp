@@ -133,17 +133,6 @@ namespace MWBase
 
         virtual void readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap) = 0;
 
-        virtual MWWorld::CellStore* getExterior(int x, int y) = 0;
-
-        virtual MWWorld::CellStore* getInterior(std::string_view name) = 0;
-
-        virtual MWWorld::CellStore* getCell(const ESM::CellId& id) = 0;
-
-        virtual bool isCellActive(MWWorld::CellStore* cell) const = 0;
-
-        virtual void testExteriorCells() = 0;
-        virtual void testInteriorCells() = 0;
-
         virtual void useDeathCamera() = 0;
 
         virtual void setWaterHeight(const float height) = 0;
@@ -161,9 +150,6 @@ namespace MWBase
         virtual const std::vector<int>& getESMVersions() const = 0;
 
         virtual MWWorld::LocalScripts& getLocalScripts() = 0;
-
-        virtual bool hasCellChanged() const = 0;
-        ///< Has the set of active cells changed, since the last frame?
 
         virtual bool isCellExterior() const = 0;
 
@@ -278,8 +264,6 @@ namespace MWBase
 
         virtual const ESM::Cell* getExterior(std::string_view cellName) const = 0;
         ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
-
-        virtual void markCellAsUnchanged() = 0;
 
         virtual MWWorld::Ptr getFacedObject() = 0;
         ///< Return pointer to the object the player is looking at, if it is within activation range

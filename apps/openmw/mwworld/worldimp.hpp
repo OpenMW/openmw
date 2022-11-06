@@ -219,17 +219,6 @@ namespace MWWorld
 
         void readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap) override;
 
-        CellStore* getExterior(int x, int y) override;
-
-        CellStore* getInterior(std::string_view name) override;
-
-        CellStore* getCell(const ESM::CellId& id) override;
-
-        bool isCellActive(CellStore* cell) const override;
-
-        void testExteriorCells() override;
-        void testInteriorCells() override;
-
         // switch to POV before showing player's death animation
         void useDeathCamera() override;
 
@@ -252,9 +241,6 @@ namespace MWWorld
         const std::vector<int>& getESMVersions() const override;
 
         LocalScripts& getLocalScripts() override;
-
-        bool hasCellChanged() const override;
-        ///< Has the set of active cells changed, since the last frame?
 
         bool isCellExterior() const override;
 
@@ -374,8 +360,6 @@ namespace MWWorld
 
         const ESM::Cell* getExterior(std::string_view cellName) const override;
         ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
-
-        void markCellAsUnchanged() override;
 
         MWWorld::Ptr getFacedObject() override;
         ///< Return pointer to the object the player is looking at, if it is within activation range

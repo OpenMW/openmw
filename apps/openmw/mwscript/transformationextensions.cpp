@@ -13,11 +13,13 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/cells.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/scene.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -388,6 +390,7 @@ namespace MWScript
 
                 bool isPlayer = ptr == MWMechanics::getPlayer();
                 auto world = MWBase::Environment::get().getWorld();
+                auto worldModel = MWBase::Environment::get().getWorldModel();
                 if (isPlayer)
                 {
                     world->getPlayer().setTeleported(true);
@@ -396,7 +399,7 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 try
                 {
-                    store = world->getInterior(cellID);
+                    store = worldModel->getInterior(cellID);
                 }
                 catch (std::exception&)
                 {
@@ -415,7 +418,7 @@ namespace MWScript
                             return;
                     }
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = world->getExterior(cellIndex.x(), cellIndex.y());
+                    store = worldModel->getExterior(cellIndex.x(), cellIndex.y());
                 }
                 if (store)
                 {
@@ -432,7 +435,8 @@ namespace MWScript
                     rot.z() = osg::DegreesToRadians(zRot);
                     world->rotateObject(ptr, rot);
 
-                    ptr.getClass().adjustPosition(ptr, isPlayer || !world->isCellActive(ptr.getCell()));
+                    bool cellActive = MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell());
+                    ptr.getClass().adjustPosition(ptr, isPlayer || !cellActive);
                 }
             }
         };
@@ -470,7 +474,7 @@ namespace MWScript
                 MWWorld::Ptr base = ptr;
                 if (isPlayer)
                 {
-                    MWWorld::CellStore* cell = world->getExterior(cellIndex.x(), cellIndex.y());
+                    MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
                     ptr = world->moveObject(ptr, cell, osg::Vec3(x, y, z));
                 }
                 else
@@ -487,7 +491,8 @@ namespace MWScript
                     zRot = zRot / 60.0f;
                 rot.z() = osg::DegreesToRadians(zRot);
                 world->rotateObject(ptr, rot);
-                ptr.getClass().adjustPosition(ptr, isPlayer || !world->isCellActive(ptr.getCell()));
+                bool cellActive = MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell());
+                ptr.getClass().adjustPosition(ptr, isPlayer || !cellActive);
             }
         };
 
@@ -513,13 +518,13 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 try
                 {
-                    store = MWBase::Environment::get().getWorld()->getInterior(cellID);
+                    store = MWBase::Environment::get().getWorldModel()->getInterior(cellID);
                 }
                 catch (std::exception&)
                 {
                     const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
+                    store = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
                     if (!cell)
                     {
                         runtime.getContext().report("unknown cell (" + std::string(cellID) + ")");
@@ -569,7 +574,7 @@ namespace MWScript
                 if (player.getCell()->isExterior())
                 {
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
+                    store = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
                 }
                 else
                     store = player.getCell();
