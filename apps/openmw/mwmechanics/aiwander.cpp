@@ -81,7 +81,11 @@ namespace MWMechanics
                 + direction * std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
             const int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap
                 | MWPhysics::CollisionType_Door | MWPhysics::CollisionType_Actor;
-            return MWBase::Environment::get().getWorld()->getRayCasting()->castRay(position, visibleDestination, actor, {}, mask).mHit;
+            return MWBase::Environment::get()
+                .getWorld()
+                ->getRayCasting()
+                ->castRay(position, visibleDestination, actor, {}, mask)
+                .mHit;
         }
 
         void stopMovement(const MWWorld::Ptr& actor)

@@ -474,7 +474,8 @@ namespace MWScript
                 MWWorld::Ptr base = ptr;
                 if (isPlayer)
                 {
-                    MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                    MWWorld::CellStore* cell
+                        = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
                     ptr = world->moveObject(ptr, cell, osg::Vec3(x, y, z));
                 }
                 else

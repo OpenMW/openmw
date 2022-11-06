@@ -341,8 +341,12 @@ bool MWMechanics::AiPackage::shortcutPath(const osg::Vec3f& startPoint, const os
     if (!mShortcutProhibited || (mShortcutFailPos - startPoint).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
     {
         // check if target is clearly visible
-        isPathClear = !MWBase::Environment::get().getWorld()->getRayCasting()->castRay(
-            startPoint, endPoint, MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door).mHit;
+        isPathClear
+            = !MWBase::Environment::get()
+                   .getWorld()
+                   ->getRayCasting()
+                   ->castRay(startPoint, endPoint, MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door)
+                   .mHit;
 
         if (destInLOS != nullptr)
             *destInLOS = isPathClear;

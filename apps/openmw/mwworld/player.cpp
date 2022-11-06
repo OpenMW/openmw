@@ -12,8 +12,8 @@
 #include <components/esm3/player.hpp>
 #include <components/fallback/fallback.hpp>
 
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/cells.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/magiceffects.hpp"
 

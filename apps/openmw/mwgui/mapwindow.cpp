@@ -587,7 +587,8 @@ namespace MWGui
             if (!entry.mMapTexture)
             {
                 if (!mInterior)
-                    requestMapRender(MWBase::Environment::get().getWorldModel()->getExterior(entry.mCellX, entry.mCellY));
+                    requestMapRender(
+                        MWBase::Environment::get().getWorldModel()->getExterior(entry.mCellX, entry.mCellY));
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
                 if (texture)

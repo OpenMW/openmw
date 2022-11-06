@@ -43,7 +43,7 @@ namespace MWBase
         static Environment* sThis;
 
         World* mWorld = nullptr;
-        MWWorld::Cells* mWorldModel = nullptr;  // TODO: rename Cells -> WorldModel
+        MWWorld::Cells* mWorldModel = nullptr; // TODO: rename Cells -> WorldModel
         MWWorld::Scene* mWorldScene = nullptr;
         SoundManager* mSoundManager = nullptr;
         ScriptManager* mScriptManager = nullptr;

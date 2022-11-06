@@ -543,7 +543,8 @@ namespace MWWorld
         }
 
         mNavigator.setWorldspace(
-            mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace, navigatorUpdateGuard.get());
+            mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace,
+            navigatorUpdateGuard.get());
         mNavigator.updateBounds(pos, navigatorUpdateGuard.get());
 
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
@@ -1183,7 +1184,8 @@ namespace MWWorld
             {
                 for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
                 {
-                    mPreloader->preload(mWorld.getWorldModel().getExterior(x + dx, y + dy), mRendering.getReferenceTime());
+                    mPreloader->preload(
+                        mWorld.getWorldModel().getExterior(x + dx, y + dy), mRendering.getReferenceTime());
                     if (++numpreloaded >= mPreloader->getMaxCacheSize())
                         break;
                 }
