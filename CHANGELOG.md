@@ -8,6 +8,7 @@
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5714: Touch spells cast using ExplodeSpell don't always explode
     Bug #5849: Paralysis breaks landing
+    Bug #5883: Immobile creatures don't cause water ripples
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
