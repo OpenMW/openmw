@@ -385,8 +385,16 @@ namespace MWMechanics
         bool knockout = stats.getFatigue().getCurrent() < 0 || stats.getFatigue().getBase() == 0;
         bool recovery = stats.getHitRecovery();
         bool knockdown = stats.getKnockedDown();
-        bool block = stats.getBlock();
+        bool block = stats.getBlock() && !knockout && !recovery && !knockdown;
         bool isSwimming = world->isSwimming(mPtr);
+
+        stats.setBlock(false);
+
+        if (mPtr == getPlayer() && mHitState == CharState_Block && block)
+        {
+            mHitState = CharState_None;
+            resetCurrentIdleState();
+        }
 
         if (mHitState != CharState_None)
         {
@@ -396,7 +404,6 @@ namespace MWMechanics
                 mCurrentHit.clear();
                 stats.setKnockedDown(false);
                 stats.setHitRecovery(false);
-                stats.setBlock(false);
                 resetCurrentIdleState();
             }
             else if (isKnockedOut())
@@ -451,7 +458,6 @@ namespace MWMechanics
             mCurrentHit.clear();
             stats.setKnockedDown(false);
             stats.setHitRecovery(false);
-            stats.setBlock(false);
             resetCurrentIdleState();
             return;
         }
