@@ -8,6 +8,7 @@
 
 #include <osg/Vec3f>
 
+#include "components/esm/fourcc.hpp"
 #include <components/esm4/common.hpp>
 
 namespace ESM

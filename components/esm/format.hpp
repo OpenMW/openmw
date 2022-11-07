@@ -1,7 +1,7 @@
 #ifndef COMPONENT_ESM_FORMAT_H
 #define COMPONENT_ESM_FORMAT_H
 
-#include "defs.hpp"
+#include "components/esm/fourcc.hpp"
 
 #include <cstdint>
 #include <iosfwd>
