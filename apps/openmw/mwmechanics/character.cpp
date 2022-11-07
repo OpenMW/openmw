@@ -1145,8 +1145,6 @@ namespace MWMechanics
             mCastingManualSpell = false;
             mCanCast = false;
         }
-        else if (groupname == "shield" && action == "block hit")
-            charClass.block(mPtr);
         else if (groupname == "containeropen" && action == "loot")
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container, mPtr);
     }
