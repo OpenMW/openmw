@@ -84,6 +84,7 @@ void CSMDoc::Runner::start (bool delayed)
             QString::fromUtf8 (("--data=\""+mProjectPath.parent_path().string()+"\"").c_str());
 
         arguments << "--replace=content";
+        arguments << "--content=builtin.omwscripts";
 
         for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
             iter!=mContentFiles.end(); ++iter)
