@@ -80,8 +80,6 @@ namespace MWGui
 
         void layout();
 
-        MyGUI::TabItem* mTabConfiguration;
-
         ListWrapper* mActiveList;
         ListWrapper* mInactiveList;
 

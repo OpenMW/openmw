@@ -1,7 +1,8 @@
 Abovewater: "Над водой"
+ActiveShaders: "Включенные шейдеры"
 Author: "Автор"
-Configuration: "Настройки"
 Description: "Описание"
+InactiveShaders: "Выключенные шейдеры"
 InExteriors: "Вне помещений"
 InInteriors: "В помещениях"
 KeyboardControls: |

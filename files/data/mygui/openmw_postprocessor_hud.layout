@@ -3,102 +3,108 @@
   <Widget type="Window" skin="MW_Window" position="0 0 500 500" layer="Debug" name="_Main" align="Stretch">
     <Property key="Visible" value="false"/>
     <Property key="Caption" value="#{PostProcessing:PostProcessHUD}"/>
-	<Property key="MinSize" value="600 600"/>
+    <Property key="MinSize" value="600 600"/>
 
     <Widget type="TabControl" skin="TabControl_NoBorder" position="8 8 468 450" align="Stretch" name="TabControl">
         <Property key="ButtonAutoWidth" value="true"/>
 
-		<Widget type="AutoSizedTextBox" skin="NormalText" position="440 8 50 50" align="Top Right">
-			<Property key="Caption" value="[?]"/>
-			<UserString key="ToolTipType" value="Layout"/>
-			<UserString key="ToolTipLayout" value="TextToolTip"/>
-			<UserString key="Caption_Text" value="#{PostProcessing:KeyboardControls}"/>
-		</Widget>
+        <Widget type="AutoSizedTextBox" skin="NormalText" position="440 8 50 50" align="Top Right">
+            <Property key="Caption" value="[?]"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{PostProcessing:KeyboardControls}"/>
+            <Property key="Depth" value="-10"/>
+        </Widget>
 
-        <Widget type="TabItem" skin="" position_real="0 0 1 1" name="TabConfiguration">
-			<Property key="Caption" value="#{PostProcessing:Configuration}"/>
+        <Widget type="VBox" position_real="0 0.02 1 0.98" align="Stretch" name="Layout">
+            <Property key="Padding" value="0"/>
+            <Property key="Spacing" value="8"/>
 
-			<Widget type="VBox" position_real="0 0.02 1 0.98" align="Stretch" name="Layout">
-				<Property key="Padding" value="0"/>
-				<Property key="Spacing" value="8"/>
+            <Widget type="Widget" position ="0 0 0 300">
+                <UserString key="HStretch" value="true"/>
+                <UserString key="VStretch" value="false"/>
 
-				<Widget type="Widget" position ="0 0 0 300">
-					<UserString key="HStretch" value="true"/>
-					<UserString key="VStretch" value="false"/>
+                <Widget type="HBox" position_real="0 0 1 1" align="Stretch">
+                    <UserString key="VStretch" value="true"/>
+                    <UserString key="HStretch" value="true"/>
 
-					<Widget type="HBox" position_real="0 0 1 1" align="Stretch">
-						<UserString key="VStretch" value="true"/>
-						<UserString key="HStretch" value="true"/>
+                    <Widget type="Widget">
+                        <UserString key="VStretch" value="true"/>
+                        <UserString key="HStretch" value="true"/>
 
-						<Widget type="Widget">
-							<UserString key="VStretch" value="true"/>
-							<UserString key="HStretch" value="true"/>
+                        <Widget type="VBox" position_real="0 0 1 1" align="Stretch">
+                            <Widget type="AutoSizedTextBox" skin="NormalText" position="0 0 50 50" align="Top Right">
+                                <Property key="Caption" value="#{PostProcessing:InactiveShaders}"/>
+                            </Widget>
 
-							<Widget type="VBox" position_real="0 0 1 1" align="Stretch">
-								<Widget type="EditBox" skin="MW_TextBoxEditWithBorder" position="0 0 0 28" name="Filter">
-									<UserString key="HStretch" value="true"/>
-									<UserString key="AcceptTab" value="true"/>
-									<Property key="TextAlign" value="Left VCenter"/>
-								</Widget>
-								<Widget type="ListWrapper" skin="MW_List" name="InactiveList">
-									<UserString key="VStretch" value="true"/>
-									<UserString key="HStretch" value="true"/>
-								</Widget>
-							</Widget>
-						</Widget>
+                            <Widget type="EditBox" skin="MW_TextBoxEditWithBorder" position="0 0 0 28" name="Filter">
+                                <UserString key="HStretch" value="true"/>
+                                <UserString key="AcceptTab" value="true"/>
+                                <Property key="TextAlign" value="Left VCenter"/>
+                            </Widget>
+                            <Widget type="ListWrapper" skin="MW_List" name="InactiveList">
+                                <UserString key="VStretch" value="true"/>
+                                <UserString key="HStretch" value="true"/>
+                            </Widget>
+                        </Widget>
+                    </Widget>
 
-						<Widget type="VBox" position_real="0 0 1 1">
-							<Widget type="AutoSizedButton" skin="MW_Button" name="ButtonActivate">
-								<Widget type="Widget" skin="MW_ArrowRight" position="0 0 12 12" align="Center">
-									<Property key="NeedMouse" value="false"/>
-								</Widget>
-							</Widget>
-							<Widget type="AutoSizedButton" skin="MW_Button" name="ButtonDeactivate">
-								<Widget type="Widget" skin="MW_ArrowLeft" position="0 0 12 12" align="Center">
-									<Property key="NeedMouse" value="false"/>
-								</Widget>
-							</Widget>
+                    <Widget type="VBox" position_real="0 0 1 1">
+                        <Widget type="AutoSizedButton" skin="MW_Button" name="ButtonActivate">
+                            <Widget type="Widget" skin="MW_ArrowRight" position="0 0 12 12" align="Center">
+                                <Property key="NeedMouse" value="false"/>
+                            </Widget>
+                        </Widget>
+                        <Widget type="AutoSizedButton" skin="MW_Button" name="ButtonDeactivate">
+                            <Widget type="Widget" skin="MW_ArrowLeft" position="0 0 12 12" align="Center">
+                                <Property key="NeedMouse" value="false"/>
+                            </Widget>
+                        </Widget>
 
-							<Widget type="Widget" skin="" position="0 0 15 25"/>
+                        <Widget type="Widget" skin="" position="0 0 15 25"/>
 
-							<Widget type="AutoSizedButton" skin="MW_Button" name="ButtonUp">
-								<Widget type="Widget" skin="MW_ArrowUp" position="0 0 12 12" align="Center">
-									<Property key="NeedMouse" value="false"/>
-								</Widget>
-							</Widget>
-							<Widget type="AutoSizedButton" skin="MW_Button" name="ButtonDown">
-								<Widget type="Widget" skin="MW_ArrowDown" position="0 0 12 12" align="Center">
-									<Property key="NeedMouse" value="false"/>
-								</Widget>
-							</Widget>
+                        <Widget type="AutoSizedButton" skin="MW_Button" name="ButtonUp">
+                            <Widget type="Widget" skin="MW_ArrowUp" position="0 0 12 12" align="Center">
+                                <Property key="NeedMouse" value="false"/>
+                            </Widget>
+                        </Widget>
+                        <Widget type="AutoSizedButton" skin="MW_Button" name="ButtonDown">
+                            <Widget type="Widget" skin="MW_ArrowDown" position="0 0 12 12" align="Center">
+                                <Property key="NeedMouse" value="false"/>
+                            </Widget>
+                        </Widget>
+                    </Widget>
+                    <Widget type="Widget">
+                        <UserString key="VStretch" value="true"/>
+                        <UserString key="HStretch" value="true"/>
 
-						</Widget>
+                        <Widget type="VBox" position_real="0 0 1 1" align="Stretch">
+                            <Widget type="AutoSizedTextBox" skin="NormalText" position="0 0 50 50" align="Top Right">
+                                <Property key="Caption" value="#{PostProcessing:ActiveShaders}"/>
+                            </Widget>
 
-						<Widget type="ListWrapper" skin="MW_List" name="ActiveList">
-							<UserString key="VStretch" value="true"/>
-							<UserString key="HStretch" value="true"/>
-						</Widget>
+                            <Widget type="ListWrapper" skin="MW_List" name="ActiveList">
+                                <UserString key="VStretch" value="true"/>
+                                <UserString key="HStretch" value="true"/>
+                            </Widget>
+                        </Widget>
+                    </Widget>
+                </Widget>
+            </Widget>
 
-					</Widget>
+            <Widget type="Widget" skin="MW_Box">
+                <UserString key="VStretch" value="true"/>
+                <UserString key="HStretch" value="true"/>
 
-				</Widget>
-
-				<Widget type="Widget" skin="MW_Box">
-					<UserString key="VStretch" value="true"/>
-					<UserString key="HStretch" value="true"/>
-
-					<Widget type="VBox" position_real="0 0 1 1" align="Stretch">
-						<Property key="Padding" value="14"/>
-						<Widget type="ScrollView" skin="MW_ScrollView" position_real="0 0 1 1" align="Stretch" name="ConfigLayout">
-							<Property key="CanvasAlign" value="Left Top"/>
-							<Property key="NeedMouse" value="true"/>
-							<Property key="VisibleVScroll" value="true"/>
-						</Widget>
-					</Widget>
-				</Widget>
-
-			</Widget>
-
+                <Widget type="VBox" position_real="0 0 1 1" align="Stretch">
+                    <Property key="Padding" value="14"/>
+                    <Widget type="ScrollView" skin="MW_ScrollView" position_real="0 0 1 1" align="Stretch" name="ConfigLayout">
+                        <Property key="CanvasAlign" value="Left Top"/>
+                        <Property key="NeedMouse" value="true"/>
+                        <Property key="VisibleVScroll" value="true"/>
+                    </Widget>
+                </Widget>
+            </Widget>
         </Widget>
 
     </Widget>
