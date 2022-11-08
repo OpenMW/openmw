@@ -180,11 +180,11 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "")
     set(RECASTNAVIGATION_EXAMPLES OFF CACHE BOOL "")
 
-    # master on 15 Feb 2021
+    # master on 12 Oct 2022
     include(FetchContent)
     FetchContent_Declare(recastnavigation
-        URL https://github.com/recastnavigation/recastnavigation/archive/e75adf86f91eb3082220085e42dda62679f9a3ea.zip
-        URL_HASH SHA512=93a19490cdfa55e98a6af9cc050e94af88fdb95fae2059ceeff28b62f3b48515f5fdd2c806c910550933b6861a4f6a91173ee0ed1b61c1396f7b34d4c78f0793
+        URL https://github.com/recastnavigation/recastnavigation/archive/30edaf442c87e870e71a0e4509a96281418b1af8.zip
+        URL_HASH SHA512=c4268427afd779e9656436427cd4b2619e4f79a9068b5b51eb3ced95806e4fe9d5353feee05d52bf8f21740fa8ca3e4ac643d1921d2a803ebbca7dffdeb35ef0
         SOURCE_DIR fetched/recastnavigation
     )
     FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
