@@ -9,6 +9,7 @@
     Bug #5714: Touch spells cast using ExplodeSpell don't always explode
     Bug #5849: Paralysis breaks landing
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
+    Bug #6313: Followers with high Fight can turn hostile
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
