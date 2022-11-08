@@ -160,6 +160,7 @@ namespace MWMechanics
 
         JumpingState mJumpState{ JumpState_None };
         std::string mCurrentJump;
+        bool mInJump{ false };
 
         int mWeaponType{ ESM::Weapon::None };
         std::string mCurrentWeapon;

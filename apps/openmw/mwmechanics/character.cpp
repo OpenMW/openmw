@@ -2077,13 +2077,14 @@ namespace MWMechanics
                 }
             }
 
-            bool inJump = false;
+            bool wasInJump = mInJump;
+            mInJump = false;
             if (!inwater && !flying && solid)
             {
                 // In the air (either getting up —ascending part of jump— or falling).
                 if (!onground)
                 {
-                    inJump = true;
+                    mInJump = true;
                     jumpstate = JumpState_InAir;
 
                     static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->mValue.getFloat();
@@ -2101,7 +2102,7 @@ namespace MWMechanics
                     float z = cls.getJump(mPtr);
                     if (z > 0.f)
                     {
-                        inJump = true;
+                        mInJump = true;
                         if (vec.x() == 0 && vec.y() == 0)
                             vec.z() = z;
                         else
@@ -2114,9 +2115,9 @@ namespace MWMechanics
                 }
             }
 
-            if (!inJump)
+            if (!mInJump)
             {
-                if (mJumpState == JumpState_InAir && !flying && solid)
+                if (mJumpState == JumpState_InAir && !flying && solid && wasInJump)
                 {
                     float height = cls.getCreatureStats(mPtr).land(isPlayer);
                     float healthLost = 0.f;
@@ -2278,7 +2279,7 @@ namespace MWMechanics
             {
                 if (inwater)
                     idlestate = CharState_IdleSwim;
-                else if (sneak && !inJump)
+                else if (sneak && !mInJump)
                     idlestate = CharState_IdleSneak;
                 else
                     idlestate = CharState_Idle;
@@ -2292,7 +2293,7 @@ namespace MWMechanics
                 updateIdleStormState(inwater);
             }
 
-            if (inJump)
+            if (mInJump)
                 mMovementAnimationControlled = false;
 
             if (isTurning())
