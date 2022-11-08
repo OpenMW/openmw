@@ -599,6 +599,18 @@ bool CSVRender::Cell::isDeleted() const
     return mDeleted;
 }
 
+osg::ref_ptr<CSVRender::TagBase> CSVRender::Cell::getSnapTarget(unsigned int elementMask) const
+{
+    osg::ref_ptr<TagBase> result;
+
+    if (elementMask & Mask_Reference)
+        for (auto& obj : mObjects)
+            if (obj.second->getSnapTarget())
+                return obj.second->getTag();
+
+    return result;
+}
+
 std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::Cell::getSelection(unsigned int elementMask) const
 {
     std::vector<osg::ref_ptr<TagBase>> result;

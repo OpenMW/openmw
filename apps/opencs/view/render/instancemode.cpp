@@ -96,7 +96,35 @@ osg::Quat CSVRender::InstanceMode::eulerToQuat(const osg::Vec3f& euler) const
 
 float CSVRender::InstanceMode::roundFloatToMult(const float val, const double mult) const
 {
+    if (mult == 0)
+        return val;
     return round(val / mult) * mult;
+}
+
+osg::Vec3 CSVRender::InstanceMode::calculateSnapPositionRelativeToTarget(osg::Vec3 initalPosition,
+    osg::Vec3 targetPosition, osg::Vec3 targetRotation, osg::Vec3 translation, double snap) const
+{
+    auto quatTargetRotation
+        = osg::Quat(targetRotation[0], osg::X_AXIS, targetRotation[1], osg::Y_AXIS, targetRotation[2], osg::Z_AXIS);
+
+    // Break object world coords into snap target space
+    auto localWorld = osg::Matrix::translate(initalPosition)
+        * osg::Matrix::inverse(osg::Matrix::translate(targetPosition)) * osg::Matrix::rotate(quatTargetRotation);
+
+    osg::Vec3 localPosition = localWorld.getTrans();
+
+    osg::Vec3 newTranslation;
+    newTranslation[0] = CSVRender::InstanceMode::roundFloatToMult(localPosition[0] + translation[0], snap);
+    newTranslation[1] = CSVRender::InstanceMode::roundFloatToMult(localPosition[1] + translation[1], snap);
+    newTranslation[2] = CSVRender::InstanceMode::roundFloatToMult(localPosition[2] + translation[2], snap);
+
+    // rebuild object's world coordinates (note: inverse operations from local construction)
+    auto newObjectWorld = osg::Matrix::translate(newTranslation)
+        * osg::Matrix::inverse(osg::Matrix::rotate(quatTargetRotation)) * osg::Matrix::translate(targetPosition);
+
+    osg::Vec3 newObjectPosition = newObjectWorld.getTrans();
+
+    return newObjectPosition;
 }
 
 osg::Vec3f CSVRender::InstanceMode::getSelectionCenter(const std::vector<osg::ref_ptr<TagBase>>& selection) const
@@ -320,6 +348,27 @@ void CSVRender::InstanceMode::secondarySelectPressed(const WorldspaceHitResult& 
     }
 }
 
+void CSVRender::InstanceMode::tertiarySelectPressed(const WorldspaceHitResult& hit)
+{
+    auto* snapTarget = dynamic_cast<CSVRender::ObjectTag*>(getWorldspaceWidget().getSnapTarget(Mask_Reference).get());
+
+    if (snapTarget)
+    {
+        snapTarget->mObject->setSnapTarget(false);
+    }
+
+    if (hit.tag)
+    {
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
+        {
+            // hit an Object, toggle its selection state
+            CSVRender::Object* object = objectTag->mObject;
+            object->setSnapTarget(!object->getSnapTarget());
+            return;
+        }
+    }
+}
+
 bool CSVRender::InstanceMode::primaryEditStartDrag(const QPoint& pos)
 {
     if (mDragMode != DragMode_None || mLocked)
@@ -525,6 +574,7 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
     osg::Quat rotation;
 
     std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getEdited(Mask_Reference);
+    auto* snapTarget = dynamic_cast<CSVRender::ObjectTag*>(getWorldspaceWidget().getSnapTarget(Mask_Reference).get());
 
     if (mDragMode == DragMode_Move || mDragMode == DragMode_Move_Snap)
     {
@@ -649,9 +699,25 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
                 if (mDragMode == DragMode_Move_Snap)
                 {
                     double snap = CSMPrefs::get()["3D Scene Editing"]["gridsnap-movement"].toDouble();
-                    position.pos[0] = CSVRender::InstanceMode::roundFloatToMult(position.pos[0], snap);
-                    position.pos[1] = CSVRender::InstanceMode::roundFloatToMult(position.pos[1], snap);
-                    position.pos[2] = CSVRender::InstanceMode::roundFloatToMult(position.pos[2], snap);
+
+                    if (snapTarget)
+                    {
+                        osg::Vec3 translation(addToX, addToY, addToZ);
+
+                        auto snapTargetPosition = snapTarget->mObject->getPosition();
+                        auto newPosition = calculateSnapPositionRelativeToTarget(mObjectsAtDragStart[i],
+                            snapTargetPosition.asVec3(), snapTargetPosition.asRotationVec3(), translation, snap);
+
+                        position.pos[0] = newPosition[0];
+                        position.pos[1] = newPosition[1];
+                        position.pos[2] = newPosition[2];
+                    }
+                    else
+                    {
+                        position.pos[0] = CSVRender::InstanceMode::roundFloatToMult(position.pos[0], snap);
+                        position.pos[1] = CSVRender::InstanceMode::roundFloatToMult(position.pos[1], snap);
+                        position.pos[2] = CSVRender::InstanceMode::roundFloatToMult(position.pos[2], snap);
+                    }
                 }
 
                 // XYZ-locking
@@ -709,6 +775,8 @@ void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
 {
     std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getEdited(Mask_Reference);
 
+    auto* snapTarget = dynamic_cast<CSVRender::ObjectTag*>(getWorldspaceWidget().getSnapTarget(Mask_Reference).get());
+
     QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
 
     QString description;
@@ -755,6 +823,7 @@ void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
 
     CSMWorld::CommandMacro macro(undoStack, description);
 
+    // Is this even supposed to be here?
     for (std::vector<osg::ref_ptr<TagBase>>::iterator iter(selection.begin()); iter != selection.end(); ++iter)
     {
         if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
@@ -763,12 +832,29 @@ void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
             {
                 ESM::Position position = objectTag->mObject->getPosition();
                 double snap = CSMPrefs::get()["3D Scene Editing"]["gridsnap-rotation"].toDouble();
+
+                float xOffset = 0;
+                float yOffset = 0;
+                float zOffset = 0;
+
+                if (snapTarget)
+                {
+                    auto snapTargetPosition = snapTarget->mObject->getPosition();
+                    auto rotation = snapTargetPosition.rot;
+                    if (rotation)
+                    {
+                        xOffset = remainder(rotation[0], osg::DegreesToRadians(snap));
+                        yOffset = remainder(rotation[1], osg::DegreesToRadians(snap));
+                        zOffset = remainder(rotation[2], osg::DegreesToRadians(snap));
+                    }
+                }
+
                 position.rot[0]
-                    = CSVRender::InstanceMode::roundFloatToMult(position.rot[0], osg::DegreesToRadians(snap));
+                    = CSVRender::InstanceMode::roundFloatToMult(position.rot[0], osg::DegreesToRadians(snap)) + xOffset;
                 position.rot[1]
-                    = CSVRender::InstanceMode::roundFloatToMult(position.rot[1], osg::DegreesToRadians(snap));
+                    = CSVRender::InstanceMode::roundFloatToMult(position.rot[1], osg::DegreesToRadians(snap)) + yOffset;
                 position.rot[2]
-                    = CSVRender::InstanceMode::roundFloatToMult(position.rot[2], osg::DegreesToRadians(snap));
+                    = CSVRender::InstanceMode::roundFloatToMult(position.rot[2], osg::DegreesToRadians(snap)) + zOffset;
 
                 objectTag->mObject->setRotation(position.rot);
             }
@@ -802,6 +888,8 @@ void CSVRender::InstanceMode::dragWheel(int diff, double speedFactor)
         offset *= diff * speedFactor;
 
         std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getEdited(Mask_Reference);
+        auto snapTarget
+            = dynamic_cast<CSVRender::ObjectTag*>(getWorldspaceWidget().getSnapTarget(Mask_Reference).get());
 
         int j = 0;
 
@@ -810,15 +898,32 @@ void CSVRender::InstanceMode::dragWheel(int diff, double speedFactor)
             if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
             {
                 ESM::Position position = objectTag->mObject->getPosition();
+                auto preMovedObjectPosition = position.asVec3();
                 for (int i = 0; i < 3; ++i)
                     position.pos[i] += offset[i];
 
                 if (mDragMode == DragMode_Move_Snap)
                 {
                     double snap = CSMPrefs::get()["3D Scene Editing"]["gridsnap-movement"].toDouble();
-                    position.pos[0] = CSVRender::InstanceMode::roundFloatToMult(position.pos[0], snap);
-                    position.pos[1] = CSVRender::InstanceMode::roundFloatToMult(position.pos[1], snap);
-                    position.pos[2] = CSVRender::InstanceMode::roundFloatToMult(position.pos[2], snap);
+
+                    if (snapTarget)
+                    {
+                        osg::Vec3 translation(snap, snap, snap);
+
+                        auto snapTargetPosition = snapTarget->mObject->getPosition();
+                        auto newPosition = calculateSnapPositionRelativeToTarget(preMovedObjectPosition,
+                            snapTargetPosition.asVec3(), snapTargetPosition.asRotationVec3(), translation, snap);
+
+                        position.pos[0] = newPosition[0];
+                        position.pos[1] = newPosition[1];
+                        position.pos[2] = newPosition[2];
+                    }
+                    else
+                    {
+                        position.pos[0] = CSVRender::InstanceMode::roundFloatToMult(position.pos[0], snap);
+                        position.pos[1] = CSVRender::InstanceMode::roundFloatToMult(position.pos[1], snap);
+                        position.pos[2] = CSVRender::InstanceMode::roundFloatToMult(position.pos[2], snap);
+                    }
                 }
 
                 objectTag->mObject->setPosition(position.pos);

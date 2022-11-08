@@ -48,6 +48,8 @@ void CSVRender::EditMode::primarySelectPressed(const WorldspaceHitResult& hit) {
 
 void CSVRender::EditMode::secondarySelectPressed(const WorldspaceHitResult& hit) {}
 
+void CSVRender::EditMode::tertiarySelectPressed(const WorldspaceHitResult& hit) {}
+
 bool CSVRender::EditMode::primaryEditStartDrag(const QPoint& pos)
 {
     return false;

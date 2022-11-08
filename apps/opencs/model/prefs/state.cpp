@@ -397,6 +397,8 @@ void CSMPrefs::State::declare()
     declareShortcut("scene-select-primary", "Primary Select", QKeySequence(Qt::MiddleButton));
     declareShortcut(
         "scene-select-secondary", "Secondary Select", QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
+    declareShortcut(
+        "scene-select-tertiary", "Tertiary Select", QKeySequence(Qt::ShiftModifier | (int)Qt::MiddleButton));
     declareModifier("scene-speed-modifier", "Speed Modifier", Qt::Key_Shift);
     declareShortcut("scene-delete", "Delete Instance", QKeySequence(Qt::Key_Delete));
     declareShortcut("scene-instance-drop-terrain", "Drop to terrain level", QKeySequence(Qt::Key_G));

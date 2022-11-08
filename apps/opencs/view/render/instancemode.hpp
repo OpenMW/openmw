@@ -9,8 +9,7 @@
 #include <osg/Group>
 #include <osg/Node>
 #include <osg/Quat>
-#include <osg/Vec3d>
-#include <osg/Vec3f>
+#include <osg/Vec3>
 #include <osg/ref_ptr>
 
 #include "editmode.hpp"
@@ -59,23 +58,25 @@ namespace CSVRender
         bool mLocked;
         float mUnitScaleDist;
         osg::ref_ptr<osg::Group> mParentNode;
-        osg::Vec3f mDragStart;
-        std::vector<osg::Vec3f> mObjectsAtDragStart;
+        osg::Vec3 mDragStart;
+        std::vector<osg::Vec3> mObjectsAtDragStart;
 
         int getSubModeFromId(const std::string& id) const;
 
-        osg::Vec3f quatToEuler(const osg::Quat& quat) const;
-        osg::Quat eulerToQuat(const osg::Vec3f& euler) const;
+        osg::Vec3 quatToEuler(const osg::Quat& quat) const;
+        osg::Quat eulerToQuat(const osg::Vec3& euler) const;
 
         float roundFloatToMult(const float val, const double mult) const;
 
-        osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase>>& selection) const;
-        osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
-        osg::Vec3f getProjectionSpaceCoords(const osg::Vec3f& pos);
-        osg::Vec3f getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart);
+        osg::Vec3 getSelectionCenter(const std::vector<osg::ref_ptr<TagBase>>& selection) const;
+        osg::Vec3 getScreenCoords(const osg::Vec3& pos);
+        osg::Vec3 getProjectionSpaceCoords(const osg::Vec3& pos);
+        osg::Vec3 getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart);
         void handleSelectDrag(const QPoint& pos);
         void dropInstance(CSVRender::Object* object, float dropHeight);
         float calculateDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
+        osg::Vec3 calculateSnapPositionRelativeToTarget(osg::Vec3 initalPosition, osg::Vec3 targetPosition,
+            osg::Vec3 targetRotation, osg::Vec3 translation, double snap) const;
 
     public:
         InstanceMode(
@@ -96,6 +97,8 @@ namespace CSVRender
         void primarySelectPressed(const WorldspaceHitResult& hit) override;
 
         void secondarySelectPressed(const WorldspaceHitResult& hit) override;
+
+        void tertiarySelectPressed(const WorldspaceHitResult& hit) override;
 
         bool primaryEditStartDrag(const QPoint& pos) override;
 

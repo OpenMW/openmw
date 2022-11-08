@@ -844,6 +844,22 @@ void CSVRender::PagedWorldspaceWidget::resetAllAlteredHeights()
         cell.second->resetAlteredHeights();
 }
 
+osg::ref_ptr<CSVRender::TagBase> CSVRender::PagedWorldspaceWidget::getSnapTarget(unsigned int elementMask) const
+{
+    osg::ref_ptr<CSVRender::TagBase> result;
+
+    for (auto& [coords, cell] : mCells)
+    {
+        auto snapTarget = cell->getSnapTarget(elementMask);
+        if (snapTarget)
+        {
+            return snapTarget;
+        }
+    }
+
+    return result;
+}
+
 std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::getSelection(
     unsigned int elementMask) const
 {
