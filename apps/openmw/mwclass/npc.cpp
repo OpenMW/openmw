@@ -700,7 +700,10 @@ namespace MWClass
         MWMechanics::applyElementalShields(ptr, victim);
 
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
+        {
             damage = 0;
+            block(ptr);
+        }
 
         if (victim == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
             damage = 0;
