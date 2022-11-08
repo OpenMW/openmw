@@ -31,6 +31,7 @@
     Feature #6979: Add support of loading and displaying LOD assets purely based on their filename extension
     Feature #6983: PCVisionBonus script functions
     Feature #6995: Localize the "show effect duration" option
+    Feature #7058: Implement TestModels (T3D) console command
 
 0.48.0
 ------

@@ -19,11 +19,28 @@
 #include <components/misc/rng.hpp>
 
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadlevlist.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/loadweap.hpp>
 
 #include <components/files/conversion.hpp>
 #include <components/vfs/manager.hpp>
@@ -1574,6 +1591,57 @@ namespace MWScript
             }
         };
 
+        class OpTestModels : public Interpreter::Opcode0
+        {
+            template <class T>
+            void test(int& count) const
+            {
+                Resource::SceneManager* sceneManager
+                    = MWBase::Environment::get().getResourceSystem()->getSceneManager();
+                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                for (const T& record : store.get<T>())
+                {
+                    MWWorld::ManualRef ref(store, record.mId);
+                    std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
+                    if (!model.empty())
+                    {
+                        sceneManager->getTemplate(model);
+                        ++count;
+                    }
+                }
+            }
+
+        public:
+            void execute(Interpreter::Runtime& runtime) override
+            {
+                runtime.getContext().report("Loading all models. This may take a while...");
+                int count = 0;
+
+                test<ESM::Activator>(count);
+                test<ESM::Apparatus>(count);
+                test<ESM::Armor>(count);
+                test<ESM::Potion>(count);
+                test<ESM::BodyPart>(count);
+                test<ESM::Book>(count);
+                test<ESM::Clothing>(count);
+                test<ESM::Container>(count);
+                test<ESM::Creature>(count);
+                test<ESM::Door>(count);
+                test<ESM::Ingredient>(count);
+                test<ESM::Light>(count);
+                test<ESM::Lockpick>(count);
+                test<ESM::Miscellaneous>(count);
+                test<ESM::Probe>(count);
+                test<ESM::Repair>(count);
+                test<ESM::Static>(count);
+                test<ESM::Weapon>(count);
+
+                std::stringstream message;
+                message << "Attempted to load " << count << " models. Check the log for details.";
+                runtime.getContext().report(message.str());
+            }
+        };
+
         void installOpcodes(Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5<OpMenuMode>(Compiler::Misc::opcodeMenuMode);
@@ -1699,6 +1767,7 @@ namespace MWScript
             interpreter.installSegment5<OpToggleRecastMesh>(Compiler::Misc::opcodeToggleRecastMesh);
             interpreter.installSegment5<OpHelp>(Compiler::Misc::opcodeHelp);
             interpreter.installSegment5<OpReloadLua>(Compiler::Misc::opcodeReloadLua);
+            interpreter.installSegment5<OpTestModels>(Compiler::Misc::opcodeTestModels);
         }
     }
 }
