@@ -30,7 +30,6 @@ namespace MWGui
     PostProcessorHud::PostProcessorHud()
         : WindowBase("openmw_postprocessor_hud.layout")
     {
-        getWidget(mTabConfiguration, "TabConfiguration");
         getWidget(mActiveList, "ActiveList");
         getWidget(mInactiveList, "InactiveList");
         getWidget(mConfigLayout, "ConfigLayout");
