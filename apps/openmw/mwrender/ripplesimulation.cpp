@@ -127,6 +127,7 @@ namespace MWRender
         const MWBase::World* world = MWBase::Environment::get().getWorld();
         for (Emitter& emitter : mEmitters)
         {
+            emitter.mTimer -= dt;
             MWWorld::ConstPtr& ptr = emitter.mPtr;
             if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             {
@@ -139,9 +140,13 @@ namespace MWRender
 
             bool shouldEmit = (world->isUnderwater(ptr.getCell(), currentPos) && !world->isSubmerged(ptr))
                 || world->isWalkingOnWater(ptr);
-            if (shouldEmit && (currentPos - emitter.mLastEmitPosition).length() > 10)
+
+            if (!shouldEmit)
+                emitter.mTimer = 0.f;
+            else if (emitter.mTimer <= 0.f || (currentPos - emitter.mLastEmitPosition).length() > 10)
             {
                 emitter.mLastEmitPosition = currentPos;
+                emitter.mTimer = 1.5f;
 
                 currentPos.z() = mParticleNode->getPosition().z();
 
@@ -160,6 +165,7 @@ namespace MWRender
         newEmitter.mScale = scale;
         newEmitter.mForce = force;
         newEmitter.mLastEmitPosition = osg::Vec3f(0, 0, 0);
+        newEmitter.mTimer = 0.f;
         mEmitters.push_back(newEmitter);
     }
 

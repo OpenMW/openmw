@@ -35,6 +35,7 @@ namespace MWRender
         osg::Vec3f mLastEmitPosition;
         float mScale;
         float mForce;
+        float mTimer;
     };
 
     class RippleSimulation
