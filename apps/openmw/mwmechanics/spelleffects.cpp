@@ -217,10 +217,13 @@ namespace
         bool wasEquipped
             = currentItem != store.end() && Misc::StringUtils::ciEqual(currentItem->getCellRef().getRefId(), itemId);
 
-        if (actor != MWMechanics::getPlayer())
-        {
+        if (wasEquipped)
+            store.remove(*currentItem, 1, actor);
+        else
             store.remove(itemId, 1, actor);
 
+        if (actor != MWMechanics::getPlayer())
+        {
             // Equip a replacement
             if (!wasEquipped)
                 return;
@@ -258,8 +261,6 @@ namespace
                 action.execute(actor);
             }
         }
-
-        store.remove(itemId, 1, actor);
     }
 
     bool isCorprusEffect(const MWMechanics::ActiveSpells::ActiveEffect& effect, bool harmfulOnly = false)
