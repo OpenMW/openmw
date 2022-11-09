@@ -563,7 +563,6 @@ namespace MWMechanics
         {
             std::set<MWWorld::Ptr> allySet;
             getActorsSidingWith(ptr, allySet);
-            allySet.insert(ptr);
             std::vector<MWWorld::Ptr> allies(allySet.begin(), allySet.end());
             for (const auto& ally : allies)
                 ally.getClass().getCreatureStats(ally).getAiSequence().stopCombat(targets);
@@ -646,7 +645,7 @@ namespace MWMechanics
                 // Check that an ally of actor2 is also in combat with actor1
                 for (const MWWorld::Ptr& ally2 : allies2)
                 {
-                    if (ally2.getClass().getCreatureStats(ally2).getAiSequence().isInCombat(actor1))
+                    if (ally2 != actor2 && ally2.getClass().getCreatureStats(ally2).getAiSequence().isInCombat(actor1))
                     {
                         mechanicsManager->startCombat(actor1, actor2);
                         // Also have actor1's allies start combat
@@ -676,7 +675,7 @@ namespace MWMechanics
             {
                 for (const MWWorld::Ptr& ally : allies1)
                 {
-                    if (creatureStats2.getAiSequence().isInCombat(ally))
+                    if (ally != actor1 && creatureStats2.getAiSequence().isInCombat(ally))
                     {
                         aggressive = true;
                         break;
@@ -2071,6 +2070,7 @@ namespace MWMechanics
     std::vector<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actorPtr, bool excludeInfighting) const
     {
         std::vector<MWWorld::Ptr> list;
+        list.push_back(actorPtr);
         for (const Actor& actor : mActors)
         {
             const MWWorld::Ptr& iteratedActor = actor.getPtr();
@@ -2147,7 +2147,7 @@ namespace MWMechanics
     {
         auto followers = getActorsSidingWith(actor, excludeInfighting);
         for (const MWWorld::Ptr& follower : followers)
-            if (out.insert(follower).second)
+            if (out.insert(follower).second && follower != actor)
                 getActorsSidingWith(follower, out, excludeInfighting);
     }
 
@@ -2161,13 +2161,15 @@ namespace MWMechanics
         else
         {
             for (const MWWorld::Ptr& follower : getActorsSidingWith(actor, true))
-                if (out.insert(follower).second)
+                if (out.insert(follower).second && follower != actor)
                     getActorsSidingWith(follower, out, cachedAllies);
 
             // Cache ptrs and their sets of allies
             cachedAllies.insert(std::make_pair(actor, out));
             for (const MWWorld::Ptr& iter : out)
             {
+                if (iter == actor)
+                    continue;
                 search = cachedAllies.find(iter);
                 if (search == cachedAllies.end())
                     cachedAllies.insert(std::make_pair(iter, out));
