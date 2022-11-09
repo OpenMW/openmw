@@ -186,12 +186,7 @@ namespace MWRender
                     return nullptr;
 
                 if (children.size() == 1)
-                {
-                    osg::Group* n = new osg::Group;
-                    n->addChild(children.front().first);
-                    n->setDataVariance(osg::Object::STATIC);
-                    return n;
-                }
+                    return children.front().first.release();
                 else
                 {
                     osg::LOD* n = new osg::LOD;
@@ -572,7 +567,11 @@ namespace MWRender
         constexpr auto copyMask = ~Mask_UpdateVisitor;
 
         const auto smallestDistanceToChunk = (size > 1 / 8.f) ? (size * ESM::Land::REAL_SIZE) : 0.f;
-        const auto higherDistanceToChunk = ((size < 1) ? 5 : 3) * ESM::Land::REAL_SIZE * size + 1;
+        const auto higherDistanceToChunk = [&] {
+            if (!activeGrid)
+                return smallestDistanceToChunk + 1;
+            return ((size < 1) ? 5 : 3) * ESM::Land::REAL_SIZE * size + 1;
+        }();
 
         AnalyzeVisitor analyzeVisitor(copyMask);
         float minSize = mMinSize;
