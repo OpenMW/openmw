@@ -194,11 +194,11 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        const ESM::RefId* classId = mClassList->getItemDataAt<ESM::RefId>(_index);
-        if (mCurrentClassId == *classId)
+        const ESM::RefId& classId = *mClassList->getItemDataAt<ESM::RefId>(_index);
+        if (mCurrentClassId == classId)
             return;
 
-        mCurrentClassId = *classId;
+        mCurrentClassId = classId;
         updateStats();
     }
 

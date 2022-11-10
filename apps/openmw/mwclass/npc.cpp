@@ -506,11 +506,11 @@ namespace MWClass
 
                 for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
                 {
-                    const ESM::RefId* partname = female ? &it->mFemale : &it->mMale;
-                    if (partname->empty())
-                        partname = female ? &it->mMale : &it->mFemale;
+                    const ESM::RefId& partname
+                        = (female && !it->mFemale.empty()) || (!female && it->mMale.empty()) ? it->mFemale : it->mMale;
+
                     const ESM::BodyPart* part
-                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(*partname);
+                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
                     if (part && !part->mModel.empty())
                         models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel, vfs));
                 }

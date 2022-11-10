@@ -29,16 +29,17 @@ namespace
 {
     bool matchesStaticFilters(const MWDialogue::SelectWrapper& select, const MWWorld::Ptr& actor)
     {
+        const ESM::RefId selectId = ESM::RefId::stringRefId(select.getName());
         if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotId)
-            return !Misc::StringUtils::ciEqual(actor.getCellRef().getRefId(), select.getName());
+            return actor.getCellRef().getRefId() != selectId;
         if (actor.getClass().isNpc())
         {
             if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotFaction)
-                return !Misc::StringUtils::ciEqual(actor.getClass().getPrimaryFaction(actor), select.getName());
+                return actor.getClass().getPrimaryFaction(actor) != selectId;
             else if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotClass)
-                return !Misc::StringUtils::ciEqual(actor.get<ESM::NPC>()->mBase->mClass, select.getName());
+                return actor.get<ESM::NPC>()->mBase->mClass != selectId;
             else if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotRace)
-                return !Misc::StringUtils::ciEqual(actor.get<ESM::NPC>()->mBase->mRace, select.getName());
+                return actor.get<ESM::NPC>()->mBase->mRace != selectId;
         }
         return true;
     }
@@ -62,7 +63,7 @@ namespace
             {
                 if (wrapper.getFunction() == MWDialogue::SelectWrapper::Function_Local)
                 {
-                    std::string_view scriptName = actor.getClass().getScript(actor);
+                    const ESM::RefId& scriptName = actor.getClass().getScript(actor);
                     if (scriptName.empty())
                         return false;
                     const Compiler::Locals& localDefs
@@ -196,7 +197,7 @@ bool MWDialogue::Filter::testPlayer(const ESM::DialInfo& info) const
     {
         // supports partial matches, just like getPcCell
         std::string_view playerCell = MWBase::Environment::get().getWorld()->getCellName(player.getCell());
-        if (!Misc::StringUtils::ciStartsWith(playerCell, info.mCell))
+        if (!Misc::StringUtils::ciStartsWith(playerCell, info.mCell.getRefIdString()))
             return false;
     }
 
