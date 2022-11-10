@@ -1614,7 +1614,10 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                runtime.getContext().report("Loading all models. This may take a while...");
+                Resource::SceneManager* sceneManager
+                    = MWBase::Environment::get().getResourceSystem()->getSceneManager();
+                double delay = sceneManager->getExpiryDelay();
+                sceneManager->setExpiryDelay(0.0);
                 int count = 0;
 
                 test<ESM::Activator>(count);
@@ -1636,8 +1639,9 @@ namespace MWScript
                 test<ESM::Static>(count);
                 test<ESM::Weapon>(count);
 
+                sceneManager->setExpiryDelay(delay);
                 std::stringstream message;
-                message << "Attempted to load " << count << " models. Check the log for details.";
+                message << "Attempted to load models for " << count << " objects. Check the log for details.";
                 runtime.getContext().report(message.str());
             }
         };
