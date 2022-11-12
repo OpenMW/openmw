@@ -32,7 +32,7 @@ the tutorial is not clear on any particular thing.
 * ``data/meshes/the_barrel.dae`` – exported model
 * ``data/textures/the_barrel.dds`` – diffuse texture
 * ``data/textures/the_barrel_n.dds`` – normal map
-* ``data/textures/the_barrel_n.dds`` – specular map
+* ``data/textures/the_barrel_spec.dds`` – specular map
 * ``source_assets/the_barrel.blend`` – source file configured as this tutorial specifies
 
 Location, Rotation, Scale
