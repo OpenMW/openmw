@@ -113,11 +113,31 @@ namespace MWRender
         }
     };
 
+    namespace
+    {
+        using LODRange = osg::LOD::MinMaxPair;
+
+        LODRange intersection(const LODRange& left, const LODRange& right)
+        {
+            return { std::max(left.first, right.first), std::min(left.second, right.second) };
+        }
+
+        bool empty(const LODRange& r)
+        {
+            return r.first >= r.second;
+        }
+
+        LODRange operator/(const LODRange& r, float div)
+        {
+            return { r.first / div, r.second / div };
+        }
+    }
+
     class CopyOp : public osg::CopyOp
     {
     public:
         bool mOptimizeBillboards = true;
-        float mSqrDistance = 0.f;
+        LODRange mDistances = { 0.f, 0.f };
         osg::Vec3f mViewVector;
         osg::Node::NodeMask mCopyMask = ~0u;
         mutable std::vector<const osg::Node*> mNodePath;
@@ -158,13 +178,23 @@ namespace MWRender
             }
             if (const osg::LOD* lod = dynamic_cast<const osg::LOD*>(node))
             {
-                osg::Group* n = new osg::Group;
+                std::vector<std::pair<osg::ref_ptr<osg::Node>, LODRange>> children;
                 for (unsigned int i = 0; i < lod->getNumChildren(); ++i)
-                    if (lod->getMinRange(i) * lod->getMinRange(i) <= mSqrDistance
-                        && mSqrDistance < lod->getMaxRange(i) * lod->getMaxRange(i))
-                        n->addChild(operator()(lod->getChild(i)));
-                n->setDataVariance(osg::Object::STATIC);
-                return n;
+                    if (const auto r = intersection(lod->getRangeList()[i], mDistances); !empty(r))
+                        children.emplace_back(operator()(lod->getChild(i)), lod->getRangeList()[i]);
+                if (children.empty())
+                    return nullptr;
+
+                if (children.size() == 1)
+                    return children.front().first.release();
+                else
+                {
+                    osg::LOD* n = new osg::LOD;
+                    for (const auto& [child, range] : children)
+                        n->addChild(child, range.first, range.second);
+                    n->setDataVariance(osg::Object::STATIC);
+                    return n;
+                }
             }
             if (const osg::Sequence* sq = dynamic_cast<const osg::Sequence*>(node))
             {
@@ -299,7 +329,6 @@ namespace MWRender
         AnalyzeVisitor(osg::Node::NodeMask analyzeMask)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mCurrentStateSet(nullptr)
-            , mCurrentDistance(0.f)
         {
             setTraversalMask(analyzeMask);
         }
@@ -326,8 +355,7 @@ namespace MWRender
             if (osg::LOD* lod = dynamic_cast<osg::LOD*>(&node))
             {
                 for (unsigned int i = 0; i < lod->getNumChildren(); ++i)
-                    if (lod->getMinRange(i) * lod->getMinRange(i) <= mCurrentDistance
-                        && mCurrentDistance < lod->getMaxRange(i) * lod->getMaxRange(i))
+                    if (const auto r = intersection(lod->getRangeList()[i], mDistances); !empty(r))
                         traverse(*lod->getChild(i));
                 return;
             }
@@ -375,7 +403,7 @@ namespace MWRender
         Result mResult;
         osg::StateSet* mCurrentStateSet;
         StateSetCounter mGlobalStateSetCounter;
-        float mCurrentDistance;
+        LODRange mDistances = { 0.f, 0.f };
     };
 
     class DebugVisitor : public osg::NodeVisitor
@@ -538,8 +566,14 @@ namespace MWRender
         // Since ObjectPaging does not handle VisController, we can just ignore both types of nodes.
         constexpr auto copyMask = ~Mask_UpdateVisitor;
 
+        const auto smallestDistanceToChunk = (size > 1 / 8.f) ? (size * ESM::Land::REAL_SIZE) : 0.f;
+        const auto higherDistanceToChunk = [&] {
+            if (!activeGrid)
+                return smallestDistanceToChunk + 1;
+            return ((size < 1) ? 5 : 3) * ESM::Land::REAL_SIZE * size + 1;
+        }();
+
         AnalyzeVisitor analyzeVisitor(copyMask);
-        analyzeVisitor.mCurrentDistance = (viewPoint - worldCenter).length2();
         float minSize = mMinSize;
         if (mMinSizeMergeFactor)
             minSize *= mMinSizeMergeFactor;
@@ -634,6 +668,7 @@ namespace MWRender
             auto emplaced = nodes.emplace(cnode, InstanceList());
             if (emplaced.second)
             {
+                analyzeVisitor.mDistances = LODRange{ smallestDistanceToChunk, higherDistanceToChunk } / ref.mScale;
                 const_cast<osg::Node*>(cnode.get())
                     ->accept(
                         analyzeVisitor); // const-trickery required because there is no const version of NodeVisitor
@@ -715,7 +750,7 @@ namespace MWRender
                                           : osg::CopyOp::DEEP_COPY_NODES);
                 copyop.mOptimizeBillboards = (size > 1 / 4.f);
                 copyop.mNodePath.push_back(trans);
-                copyop.mSqrDistance = (viewPoint - pos).length2();
+                copyop.mDistances = LODRange{ smallestDistanceToChunk, higherDistanceToChunk } / ref.mScale;
                 copyop.mViewVector = (viewPoint - worldCenter);
                 copyop.copy(cnode, trans);
                 copyop.mNodePath.pop_back();
