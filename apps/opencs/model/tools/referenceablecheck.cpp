@@ -909,8 +909,8 @@ void CSMTools::ReferenceableCheckStage::inventoryListCheck(
 {
     for (size_t i = 0; i < itemList.size(); ++i)
     {
-        ESM::RefId item = itemList[i].mItem;
-        auto itemName = item.getRefIdString();
+        const ESM::RefId& item = itemList[i].mItem;
+        const auto& itemName = item.getRefIdString();
         CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(item);
 
         if (localIndex.first == -1)

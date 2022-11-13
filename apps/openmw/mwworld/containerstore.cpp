@@ -30,7 +30,7 @@ namespace
         auto& scripts = MWBase::Environment::get().getWorld()->getLocalScripts();
         for (const auto&& ptr : store)
         {
-            auto script = ptr.getClass().getScript(ptr);
+            const auto& script = ptr.getClass().getScript(ptr);
             if (!script.empty())
             {
                 MWWorld::Ptr item = ptr;

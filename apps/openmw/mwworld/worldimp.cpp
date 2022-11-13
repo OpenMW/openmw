@@ -801,7 +801,7 @@ namespace MWWorld
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for (MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                auto script = it->getClass().getScript(*it);
+                const auto& script = it->getClass().getScript(*it);
                 if (!script.empty())
                 {
                     MWWorld::Ptr item = *it;
@@ -844,7 +844,7 @@ namespace MWWorld
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for (MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                auto script = it->getClass().getScript(*it);
+                const ESM::RefId& script = it->getClass().getScript(*it);
                 if (!script.empty())
                 {
                     MWWorld::Ptr item = *it;
@@ -1128,7 +1128,7 @@ namespace MWWorld
                 && ptr.getRefData().isEnabled())
             {
                 mWorldScene->addObjectToScene(ptr);
-                auto script = ptr.getClass().getScript(ptr);
+                const auto& script = ptr.getClass().getScript(ptr);
                 if (!script.empty())
                     mLocalScripts.add(script, ptr);
                 addContainerScripts(ptr, ptr.getCell());
@@ -1189,7 +1189,7 @@ namespace MWWorld
                     if (newPtr.getRefData().isEnabled())
                         mWorldScene->addObjectToScene(newPtr);
 
-                    auto script = newPtr.getClass().getScript(newPtr);
+                    const auto& script = newPtr.getClass().getScript(newPtr);
                     if (!script.empty())
                     {
                         mLocalScripts.add(script, newPtr);
@@ -1219,7 +1219,7 @@ namespace MWWorld
                     MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, newPtr);
 
-                    auto script = ptr.getClass().getScript(ptr);
+                    const auto& script = ptr.getClass().getScript(ptr);
                     if (!script.empty())
                     {
                         mLocalScripts.remove(ptr);
@@ -2135,7 +2135,7 @@ namespace MWWorld
 
     void World::PCDropped(const Ptr& item)
     {
-        auto script = item.getClass().getScript(item);
+        const auto& script = item.getClass().getScript(item);
 
         // Set OnPCDrop Variable on item's script, if it has a script with that variable declared
         if (!script.empty())
@@ -2212,7 +2212,7 @@ namespace MWWorld
             {
                 mWorldScene->addObjectToScene(dropped);
             }
-            auto script = dropped.getClass().getScript(dropped);
+            const auto& script = dropped.getClass().getScript(dropped);
             if (!script.empty())
             {
                 mLocalScripts.add(script, dropped);
@@ -2861,14 +2861,12 @@ namespace MWWorld
         const ESM::Cell* ext = getExterior(name);
         if (!ext)
         {
-            std::string cellName = std::string(name);
-            size_t comma = cellName.find(',');
+            size_t comma = name.find(',');
             if (comma != std::string::npos)
             {
                 int x, y;
-                std::from_chars_result xResult = std::from_chars(cellName.data(), cellName.data() + comma, x);
-                std::from_chars_result yResult
-                    = std::from_chars(cellName.data() + comma + 1, cellName.data() + cellName.size(), y);
+                std::from_chars_result xResult = std::from_chars(name.data(), name.data() + comma, x);
+                std::from_chars_result yResult = std::from_chars(name.data() + comma + 1, name.data() + name.size(), y);
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
@@ -3431,7 +3429,7 @@ namespace MWWorld
             return;
         }
 
-        std::string cellName;
+        std::string_view cellName;
         if (!closestMarker.mCell->isExterior())
             cellName = closestMarker.mCell->getCell()->mName;
 

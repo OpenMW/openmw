@@ -757,7 +757,7 @@ namespace MWRender
 
     bool NpcAnimation::isFirstPersonPart(const ESM::BodyPart* bodypart)
     {
-        const auto partName = bodypart->mId.getRefIdString();
+        std::string_view partName = bodypart->mId.getRefIdString();
         return partName.size() >= 3 && partName.substr(partName.size() - 3, 3) == "1st";
     }
 

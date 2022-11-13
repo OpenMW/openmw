@@ -186,7 +186,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
                 {
                     CSMWorld::InfoCollection::RecordConstIterator prev = iter;
                     --prev;
-                    std::string prevIdString = (*prev)->get().mId.getRefIdString();
+                    std::string_view prevIdString = (*prev)->get().mId.getRefIdString();
                     info.mPrev = ESM::RefId::stringRefId(prevIdString.substr(prevIdString.find_last_of('#') + 1));
                 }
 
@@ -196,7 +196,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
                 info.mNext = ESM::RefId::sEmpty;
                 if (next != range.second)
                 {
-                    std::string nextIdString = (*next)->get().mId.getRefIdString();
+                    std::string_view nextIdString = (*next)->get().mId.getRefIdString();
                     info.mNext = ESM::RefId::stringRefId(nextIdString.substr(nextIdString.find_last_of('#') + 1));
                 }
 

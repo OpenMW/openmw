@@ -259,7 +259,7 @@ namespace CSVRender
     {
         CSMWorld::IdTree* model
             = &dynamic_cast<CSMWorld::IdTree&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids));
-        std::string idString = mId.getRefIdString();
+        const std::string& idString = mId.getRefIdString();
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {

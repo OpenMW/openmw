@@ -144,7 +144,7 @@ namespace
     class TestInterpreterContext : public Interpreter::Context
     {
         LocalVariables mLocals;
-        std::map<std::string, GlobalVariables, std::less<>> mMembers;
+        std::map<std::string, GlobalVariables, Misc::StringUtils::CiComp> mMembers;
 
     public:
         const ESM::RefId& getTarget() const override { return ESM::RefId::sEmpty; }

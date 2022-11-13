@@ -331,7 +331,7 @@ namespace CSMWorld
     {
         auto id = IdAccessorT().getId(record);
 
-        auto iter = mIndex.find(id.getRefIdString());
+        auto iter = mIndex.find(Misc::StringUtils::lowerCase(id.getRefIdString()));
 
         if (iter == mIndex.end())
         {
@@ -490,7 +490,8 @@ namespace CSMWorld
     int Collection<ESXRecordT, IdAccessorT>::searchId(const ESM::RefId& id) const
     {
 
-        std::map<std::string, int>::const_iterator iter = mIndex.find(id.getRefIdString());
+        std::map<std::string, int>::const_iterator iter
+            = mIndex.find(Misc::StringUtils::lowerCase(id.getRefIdString()));
 
         if (iter == mIndex.end())
             return -1;
@@ -554,7 +555,7 @@ namespace CSMWorld
             throw std::runtime_error("index out of range");
 
         std::unique_ptr<Record<ESXRecordT>> record2(static_cast<Record<ESXRecordT>*>(record.release()));
-        std::string id = IdAccessorT().getId(record2->get()).getRefIdString();
+        std::string id = Misc::StringUtils::lowerCase(IdAccessorT().getId(record2->get()).getRefIdString());
 
         if (index == size)
             mRecords.push_back(std::move(record2));
