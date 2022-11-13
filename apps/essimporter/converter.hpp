@@ -164,13 +164,13 @@ namespace ESSImport
             bool isDeleted = false;
 
             global.load(esm, isDeleted);
-            if (global.mId == ESM::RefId::stringRefId("gamehour"))
+            if (global.mId == "gamehour")
                 mContext->mHour = global.mValue.getFloat();
-            if (global.mId == ESM::RefId::stringRefId("day"))
+            if (global.mId == "day")
                 mContext->mDay = global.mValue.getInteger();
-            if (global.mId == ESM::RefId::stringRefId("month"))
+            if (global.mId == "month")
                 mContext->mMonth = global.mValue.getInteger();
-            if (global.mId == ESM::RefId::stringRefId("year"))
+            if (global.mId == "year")
                 mContext->mYear = global.mValue.getInteger();
             mRecords[global.mId] = global;
         }
@@ -185,7 +185,7 @@ namespace ESSImport
             bool isDeleted = false;
 
             class_.load(esm, isDeleted);
-            if (class_.mId == ESM::RefId::stringRefId("NEWCLASSID_CHARGEN"))
+            if (class_.mId == "NEWCLASSID_CHARGEN")
                 mContext->mCustomPlayerClassName = class_.mName;
 
             mRecords[class_.mId] = class_;
@@ -216,7 +216,7 @@ namespace ESSImport
             auto id = ESM::RefId::stringRefId(esm.getHNString("NAME"));
             NPCC npcc;
             npcc.load(esm);
-            if (id == ESM::RefId::stringRefId("PlayerSaveGame"))
+            if (id == "PlayerSaveGame")
             {
                 convertNPCC(npcc, mContext->mPlayer.mObject);
             }

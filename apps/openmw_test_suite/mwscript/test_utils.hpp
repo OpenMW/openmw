@@ -33,7 +33,7 @@ namespace
         {
             return { ' ', false };
         }
-        bool isId(const ESM::RefId& name) const override { return name == ESM::RefId::stringRefId("player"); }
+        bool isId(const ESM::RefId& name) const override { return name == "player"; }
     };
 
     class TestErrorHandler : public Compiler::ErrorHandler
