@@ -10,6 +10,8 @@
 #include <components/files/conversion.hpp>
 #include <components/vfs/manager.hpp>
 
+#include "scriptscontainer.hpp"
+
 namespace LuaUtil
 {
 
@@ -50,10 +52,98 @@ namespace LuaUtil
         "tonumber", "tostring", "type", "unpack", "xpcall", "rawequal", "rawget", "rawset", "setmetatable" };
     static const std::string safePackages[] = { "coroutine", "math", "string", "table" };
 
-    LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf)
-        : mConf(conf)
+    static constexpr int64_t countHookStep = 2000;
+
+    void LuaState::countHook(lua_State* L, lua_Debug* ar)
+    {
+        LuaState* THIS;
+        (void)lua_getallocf(L, reinterpret_cast<void**>(&THIS));
+        if (!THIS->mActiveScriptId.mContainer)
+            return;
+        THIS->mActiveScriptId.mContainer->addCPUusage(THIS->mActiveScriptId.mIndex, countHookStep);
+        THIS->mCurrentCallInstructionCounter += countHookStep;
+        if (THIS->mSettings.mInstructionLimit > 0
+            && THIS->mCurrentCallInstructionCounter > THIS->mSettings.mInstructionLimit)
+        {
+            lua_pushstring(L,
+                "Lua CPU usage exceeded, probably an infinite loop in a script. "
+                "To change the limit set \"[Lua] instruction limit per call\" in settings.cfg");
+            lua_error(L);
+        }
+    }
+
+    void* LuaState::trackingAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
+    {
+        LuaState* THIS = static_cast<LuaState*>(ud);
+        const uint64_t smallAllocSize = THIS->mSettings.mSmallAllocMaxSize;
+        const uint64_t memoryLimit = THIS->mSettings.mMemoryLimit;
+
+        if (!ptr)
+            osize = 0;
+        int64_t smallAllocDelta = 0, bigAllocDelta = 0;
+        if (osize <= smallAllocSize)
+            smallAllocDelta -= osize;
+        else
+            bigAllocDelta -= osize;
+        if (nsize <= smallAllocSize)
+            smallAllocDelta += nsize;
+        else
+            bigAllocDelta += nsize;
+
+        if (bigAllocDelta > 0 && memoryLimit > 0 && THIS->mTotalMemoryUsage + nsize - osize > memoryLimit)
+        {
+            Log(Debug::Error) << "Lua realloc " << osize << "->" << nsize
+                              << " is blocked because Lua memory limit (configurable in settings.cfg) is exceeded";
+            return nullptr;
+        }
+        THIS->mTotalMemoryUsage += smallAllocDelta + bigAllocDelta;
+        THIS->mSmallAllocMemoryUsage += smallAllocDelta;
+
+        void* newPtr = nullptr;
+        if (nsize == 0)
+            free(ptr);
+        else
+            newPtr = realloc(ptr, nsize);
+
+        if (bigAllocDelta != 0)
+        {
+            auto it = osize > smallAllocSize ? THIS->mBigAllocOwners.find(ptr) : THIS->mBigAllocOwners.end();
+            ScriptId id;
+            if (it != THIS->mBigAllocOwners.end())
+            {
+                if (it->second.mContainer)
+                    id = ScriptId{ *it->second.mContainer, it->second.mScriptIndex };
+                if (ptr != newPtr || nsize <= smallAllocSize)
+                    THIS->mBigAllocOwners.erase(it);
+            }
+            else if (bigAllocDelta > 0)
+            {
+                id = THIS->mActiveScriptId;
+                bigAllocDelta = nsize;
+            }
+            if (id.mContainer)
+            {
+                if (static_cast<size_t>(id.mIndex) >= THIS->mMemoryUsage.size())
+                    THIS->mMemoryUsage.resize(id.mIndex + 1);
+                THIS->mMemoryUsage[id.mIndex] += bigAllocDelta;
+                id.mContainer->addMemoryUsage(id.mIndex, bigAllocDelta);
+                if (newPtr && nsize > smallAllocSize)
+                    THIS->mBigAllocOwners.emplace(newPtr, AllocOwner{ id.mContainer->mThis, id.mIndex });
+            }
+        }
+
+        return newPtr;
+    }
+
+    LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf, const LuaStateSettings& settings)
+        : mSettings(settings)
+        , mLua(sol::default_at_panic, &trackingAllocator, this)
+        , mConf(conf)
         , mVFS(vfs)
     {
+        lua_sethook(mLua.lua_state(), &countHook, LUA_MASKCOUNT, countHookStep);
+        Log(Debug::Verbose) << "Initializing LuaUtil::LuaState";
+
         mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32, sol::lib::string,
             sol::lib::table, sol::lib::os, sol::lib::debug);
 
@@ -196,9 +286,15 @@ namespace LuaUtil
         env["_G"] = env;
         env[sol::metatable_key]["__metatable"] = false;
 
-        auto maybeRunLoader = [&hiddenData](const sol::object& package) -> sol::object {
+        ScriptId scriptId;
+        if (hiddenData.is<sol::table>())
+            scriptId = hiddenData.as<sol::table>()
+                           .get<sol::optional<ScriptId>>(ScriptsContainer::sScriptIdKey)
+                           .value_or(ScriptId{});
+
+        auto maybeRunLoader = [&hiddenData, scriptId](const sol::object& package) -> sol::object {
             if (package.is<sol::function>())
-                return call(package.as<sol::function>(), hiddenData);
+                return call(scriptId, package.as<sol::function>(), hiddenData);
             else
                 return package;
         };
@@ -207,19 +303,19 @@ namespace LuaUtil
             loaded[key] = maybeRunLoader(value);
         for (const auto& [key, value] : packages)
             loaded[key] = maybeRunLoader(value);
-        env["require"] = [this, env, loaded, hiddenData](std::string_view packageName) mutable {
+        env["require"] = [this, env, loaded, hiddenData, scriptId](std::string_view packageName) mutable {
             sol::object package = loaded[packageName];
             if (package != sol::nil)
                 return package;
             sol::protected_function packageLoader = loadScriptAndCache(packageNameToVfsPath(packageName, mVFS));
             sol::set_environment(env, packageLoader);
-            package = call(packageLoader, packageName);
+            package = call(scriptId, packageLoader, packageName);
             loaded[packageName] = package;
             return package;
         };
 
         sol::set_environment(env, script);
-        return call(script);
+        return call(scriptId, script);
     }
 
     sol::environment LuaState::newInternalLibEnvironment()
@@ -233,7 +329,7 @@ namespace LuaUtil
                 return loaded[module];
             sol::protected_function initializer = loadInternalLib(module);
             sol::set_environment(env, initializer);
-            loaded[module] = call(initializer, module);
+            loaded[module] = call({}, initializer, module);
             return loaded[module];
         };
         return env;

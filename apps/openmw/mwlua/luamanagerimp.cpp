@@ -139,6 +139,10 @@ namespace MWLua
 
         mWorldView.update();
 
+        mGlobalScripts.CPUusageNextFrame();
+        for (LocalScripts* scripts : mActiveLocalScripts)
+            scripts->CPUusageNextFrame();
+
         std::vector<GlobalEvent> globalEvents = std::move(mGlobalEvents);
         std::vector<LocalEvent> localEvents = std::move(mLocalEvents);
         mGlobalEvents = std::vector<GlobalEvent>();

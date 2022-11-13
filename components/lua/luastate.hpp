@@ -19,6 +19,21 @@ namespace LuaUtil
 
     std::string getLuaVersion();
 
+    class ScriptsContainer;
+    struct ScriptId
+    {
+        ScriptsContainer* mContainer = nullptr;
+        int mIndex; // index in LuaUtil::ScriptsConfiguration
+    };
+
+    struct LuaStateSettings
+    {
+        uint64_t mInstructionLimit = 0; // 0 is unlimited
+        uint64_t mMemoryLimit = 0; // 0 is unlimited
+        uint64_t mSmallAllocMaxSize = 1024 * 1024; // big default value efficiently disables memory tracking
+        bool mLogMemoryUsage = false;
+    };
+
     // Holds Lua state.
     // Provides additional features:
     //   - Load scripts from the virtual filesystem;
@@ -34,7 +49,11 @@ namespace LuaUtil
     class LuaState
     {
     public:
-        explicit LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf);
+        explicit LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf,
+            const LuaStateSettings& settings = LuaStateSettings{});
+        LuaState(const LuaState&) = delete;
+        LuaState(LuaState&&) = delete;
+
         ~LuaState();
 
         // Returns underlying sol::state.
@@ -86,12 +105,42 @@ namespace LuaUtil
         sol::function loadFromVFS(const std::string& path);
         sol::environment newInternalLibEnvironment();
 
+        uint64_t getTotalMemoryUsage() const { return mTotalMemoryUsage; }
+        uint64_t getSmallAllocMemoryUsage() const { return mSmallAllocMemoryUsage; }
+        uint64_t getMemoryUsageByScriptIndex(unsigned id) const
+        {
+            return id < mMemoryUsage.size() ? mMemoryUsage[id] : 0;
+        }
+
+        const LuaStateSettings& getSettings() const { return mSettings; }
+
     private:
         static sol::protected_function_result throwIfError(sol::protected_function_result&&);
         template <typename... Args>
         friend sol::protected_function_result call(const sol::protected_function& fn, Args&&... args);
+        template <typename... Args>
+        friend sol::protected_function_result call(
+            ScriptId scriptId, const sol::protected_function& fn, Args&&... args);
 
         sol::function loadScriptAndCache(const std::string& path);
+        static void countHook(lua_State* L, lua_Debug* ar);
+        static void* trackingAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
+
+        struct AllocOwner
+        {
+            std::shared_ptr<ScriptsContainer*> mContainer;
+            int mScriptIndex;
+        };
+
+        const LuaStateSettings mSettings;
+
+        // Needed to track resource usage per script, must be initialized before mLua.
+        ScriptId mActiveScriptId;
+        uint64_t mCurrentCallInstructionCounter = 0;
+        std::map<void*, AllocOwner> mBigAllocOwners;
+        uint64_t mTotalMemoryUsage = 0;
+        uint64_t mSmallAllocMemoryUsage = 0;
+        std::vector<int64_t> mMemoryUsage;
 
         sol::state mLua;
         const ScriptsConfiguration* mConf;
@@ -102,14 +151,18 @@ namespace LuaUtil
         std::vector<std::filesystem::path> mLibSearchPaths;
     };
 
-    // Should be used for every call of every Lua function.
-    // It is a workaround for a bug in `sol`. See https://github.com/ThePhD/sol2/issues/1078
+    // LuaUtil::call should be used for every call of every Lua function.
+    // 1) It is a workaround for a bug in `sol`. See https://github.com/ThePhD/sol2/issues/1078
+    // 2) When called with ScriptId it tracks resource usage (scriptId refers to the script that is responsible for this
+    // call).
+
     template <typename... Args>
     sol::protected_function_result call(const sol::protected_function& fn, Args&&... args)
     {
         try
         {
-            return LuaState::throwIfError(fn(std::forward<Args>(args)...));
+            auto res = LuaState::throwIfError(fn(std::forward<Args>(args)...));
+            return res;
         }
         catch (std::exception&)
         {
@@ -117,6 +170,33 @@ namespace LuaUtil
         }
         catch (...)
         {
+            throw std::runtime_error("Unknown error");
+        }
+    }
+
+    // Lua must be initialized through LuaUtil::LuaState, otherwise this function will segfault.
+    template <typename... Args>
+    sol::protected_function_result call(ScriptId scriptId, const sol::protected_function& fn, Args&&... args)
+    {
+        LuaState* luaState;
+        (void)lua_getallocf(fn.lua_state(), reinterpret_cast<void**>(&luaState));
+        assert(luaState->mActiveScriptId.mContainer == nullptr && "recursive call of LuaUtil::call(scriptId, ...) ?");
+        luaState->mActiveScriptId = scriptId;
+        luaState->mCurrentCallInstructionCounter = 0;
+        try
+        {
+            auto res = LuaState::throwIfError(fn(std::forward<Args>(args)...));
+            luaState->mActiveScriptId = {};
+            return res;
+        }
+        catch (std::exception&)
+        {
+            luaState->mActiveScriptId = {};
+            throw;
+        }
+        catch (...)
+        {
+            luaState->mActiveScriptId = {};
             throw std::runtime_error("Unknown error");
         }
     }

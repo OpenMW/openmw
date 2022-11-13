@@ -448,8 +448,7 @@ CUSTOM, PLAYER: useInterface.lua
     {
         LuaUtil::Callback callback{ mLua.sol()["print"], mLua.newTable() };
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptDebugNameKey] = "some_script.lua";
-        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey]
-            = LuaUtil::ScriptsContainer::ScriptId{ nullptr, 0 };
+        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{ nullptr, 0 };
 
         testing::internal::CaptureStdout();
         callback.call(1.5);

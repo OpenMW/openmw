@@ -18,6 +18,7 @@ namespace LuaUtil
     ScriptsContainer::ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix)
         : mNamePrefix(namePrefix)
         , mLua(*lua)
+        , mThis(std::make_shared<ScriptsContainer*>(this))
     {
         registerEngineHandlers({ &mUpdateHandlers });
         mPublicInterfaces = sol::table(lua->sol(), sol::create);
@@ -74,6 +75,16 @@ namespace LuaUtil
         script.mHiddenData[sScriptIdKey] = ScriptId{ this, scriptId };
         script.mHiddenData[sScriptDebugNameKey] = debugName;
         script.mPath = path;
+        script.mStats.mCPUusage = 0;
+
+        const auto oldMemoryUsageIt = mRemovedScriptsMemoryUsage.find(scriptId);
+        if (oldMemoryUsageIt != mRemovedScriptsMemoryUsage.end())
+        {
+            script.mStats.mMemoryUsage = oldMemoryUsageIt->second;
+            mRemovedScriptsMemoryUsage.erase(oldMemoryUsageIt);
+        }
+        else
+            script.mStats.mMemoryUsage = 0;
 
         try
         {
@@ -146,8 +157,10 @@ namespace LuaUtil
         }
         catch (std::exception& e)
         {
-            mScripts[scriptId].mHiddenData[sScriptIdKey] = sol::nil;
-            mScripts.erase(scriptId);
+            auto iter = mScripts.find(scriptId);
+            iter->second.mHiddenData[sScriptIdKey] = sol::nil;
+            mRemovedScriptsMemoryUsage[scriptId] = iter->second.mStats.mMemoryUsage;
+            mScripts.erase(iter);
             Log(Debug::Error) << "Can't start " << debugName << "; " << e.what();
             return false;
         }
@@ -162,6 +175,7 @@ namespace LuaUtil
         if (script.mInterface)
             removeInterface(scriptId, script);
         script.mHiddenData[sScriptIdKey] = sol::nil;
+        mRemovedScriptsMemoryUsage[scriptId] = script.mStats.mMemoryUsage;
         mScripts.erase(scriptIter);
         for (auto& [_, handlers] : mEngineHandlers)
             removeHandler(handlers->mList, scriptId);
@@ -192,7 +206,7 @@ namespace LuaUtil
         {
             try
             {
-                LuaUtil::call(*script.mOnOverride, *prev->mInterface);
+                LuaUtil::call({ this, scriptId }, *script.mOnOverride, *prev->mInterface);
             }
             catch (std::exception& e)
             {
@@ -203,7 +217,7 @@ namespace LuaUtil
         {
             try
             {
-                LuaUtil::call(*next->mOnOverride, *script.mInterface);
+                LuaUtil::call({ this, nextId }, *next->mOnOverride, *script.mInterface);
             }
             catch (std::exception& e)
             {
@@ -242,7 +256,7 @@ namespace LuaUtil
                     prevInterface = *prev->mInterface;
                 try
                 {
-                    LuaUtil::call(*next->mOnOverride, prevInterface);
+                    LuaUtil::call({ this, nextId }, *next->mOnOverride, prevInterface);
                 }
                 catch (std::exception& e)
                 {
@@ -298,16 +312,17 @@ namespace LuaUtil
         EventHandlerList& list = it->second;
         for (int i = list.size() - 1; i >= 0; --i)
         {
+            const Handler& h = list[i];
             try
             {
-                sol::object res = LuaUtil::call(list[i].mFn, data);
+                sol::object res = LuaUtil::call({ this, h.mScriptId }, h.mFn, data);
                 if (res != sol::nil && !res.as<bool>())
                     break; // Skip other handlers if 'false' was returned.
             }
             catch (std::exception& e)
             {
-                Log(Debug::Error) << mNamePrefix << "[" << scriptPath(list[i].mScriptId) << "] eventHandler["
-                                  << eventName << "] failed. " << e.what();
+                Log(Debug::Error) << mNamePrefix << "[" << scriptPath(h.mScriptId) << "] eventHandler[" << eventName
+                                  << "] failed. " << e.what();
             }
         }
     }
@@ -322,7 +337,7 @@ namespace LuaUtil
     {
         try
         {
-            LuaUtil::call(onInit, deserialize(mLua.sol(), data, mSerializer));
+            LuaUtil::call({ this, scriptId }, onInit, deserialize(mLua.sol(), data, mSerializer));
         }
         catch (std::exception& e)
         {
@@ -358,7 +373,7 @@ namespace LuaUtil
             {
                 try
                 {
-                    sol::object state = LuaUtil::call(*script.mOnSave);
+                    sol::object state = LuaUtil::call({ this, scriptId }, *script.mOnSave);
                     savedScript.mData = serialize(state, mSerializer);
                 }
                 catch (std::exception& e)
@@ -421,7 +436,7 @@ namespace LuaUtil
                 {
                     sol::object state = deserialize(mLua.sol(), scriptInfo.mSavedData->mData, mSavedDataDeserializer);
                     sol::object initializationData = deserialize(mLua.sol(), scriptInfo.mInitData, mSerializer);
-                    LuaUtil::call(*onLoad, state, initializationData);
+                    LuaUtil::call({ this, scriptId }, *onLoad, state, initializationData);
                 }
                 catch (std::exception& e)
                 {
@@ -464,14 +479,18 @@ namespace LuaUtil
     {
         for (auto& [_, script] : mScripts)
             script.mHiddenData[sScriptIdKey] = sol::nil;
+        *mThis = nullptr;
     }
 
     // Note: shouldn't be called from destructor because mEngineHandlers has pointers on
     // external objects that are already removed during child class destruction.
     void ScriptsContainer::removeAllScripts()
     {
-        for (auto& [_, script] : mScripts)
+        for (auto& [id, script] : mScripts)
+        {
             script.mHiddenData[sScriptIdKey] = sol::nil;
+            mRemovedScriptsMemoryUsage[id] = script.mStats.mMemoryUsage;
+        }
         mScripts.clear();
         for (auto& [_, handlers] : mEngineHandlers)
             handlers->mList.clear();
@@ -540,12 +559,12 @@ namespace LuaUtil
                 auto it = script.mRegisteredCallbacks.find(callbackName);
                 if (it == script.mRegisteredCallbacks.end())
                     throw std::logic_error("Callback '" + callbackName + "' doesn't exist");
-                LuaUtil::call(it->second, t.mArg);
+                LuaUtil::call({ this, t.mScriptId }, it->second, t.mArg);
             }
             else
             {
                 int64_t id = std::get<int64_t>(t.mCallback);
-                LuaUtil::call(script.mTemporaryCallbacks.at(id));
+                LuaUtil::call({ this, t.mScriptId }, script.mTemporaryCallbacks.at(id));
                 script.mTemporaryCallbacks.erase(id);
             }
         }
@@ -571,4 +590,60 @@ namespace LuaUtil
         updateTimerQueue(mGameTimersQueue, gameTime);
     }
 
+    static constexpr float CPUusageAvgCoef = 1.0 / 30; // averaging over approximately 30 frames
+
+    void ScriptsContainer::CPUusageNextFrame()
+    {
+        for (auto& [scriptId, script] : mScripts)
+        {
+            // The averaging formula is: averageValue = averageValue * (1-c) + newValue * c
+            script.mStats.mCPUusage *= 1 - CPUusageAvgCoef;
+            if (script.mStats.mCPUusage < 5)
+                script.mStats.mCPUusage = 0; // speeding up converge to zero if newValue is zero
+        }
+    }
+
+    void ScriptsContainer::addCPUusage(int scriptId, int64_t CPUusage)
+    {
+        auto it = mScripts.find(scriptId);
+        if (it != mScripts.end())
+            it->second.mStats.mCPUusage += CPUusage * CPUusageAvgCoef;
+    }
+
+    void ScriptsContainer::addMemoryUsage(int scriptId, int64_t memoryDelta)
+    {
+        int64_t* usage;
+        auto it = mScripts.find(scriptId);
+        if (it != mScripts.end())
+            usage = &it->second.mStats.mMemoryUsage;
+        else
+        {
+            auto [rIt, _] = mRemovedScriptsMemoryUsage.emplace(scriptId, 0);
+            usage = &rIt->second;
+        }
+        *usage += memoryDelta;
+
+        if (mLua.getSettings().mLogMemoryUsage)
+        {
+            int64_t after = *usage;
+            int64_t before = after - memoryDelta;
+            // Logging only if one of the most significant bits of used memory size was changed.
+            // Otherwise it is too verbose.
+            if ((before ^ after) * 8 > after)
+                Log(Debug::Verbose) << mNamePrefix << "[" << scriptPath(scriptId) << "] memory usage " << before
+                                    << " -> " << after;
+        }
+    }
+
+    void ScriptsContainer::collectStats(std::vector<ScriptStats>& stats) const
+    {
+        stats.resize(mLua.getConfiguration().size());
+        for (auto& [id, script] : mScripts)
+        {
+            stats[id].mCPUusage += script.mStats.mCPUusage;
+            stats[id].mMemoryUsage += script.mStats.mMemoryUsage;
+        }
+        for (auto& [id, mem] : mRemovedScriptsMemoryUsage)
+            stats[id].mMemoryUsage += mem;
+    }
 }

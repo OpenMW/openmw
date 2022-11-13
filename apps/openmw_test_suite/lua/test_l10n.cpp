@@ -82,9 +82,9 @@ you_have_arrows: "Arrows count: {count}"
 
     TEST_F(LuaL10nTest, L10n)
     {
-        internal::CaptureStdout();
         LuaUtil::LuaState lua{ mVFS.get(), &mCfg };
         sol::state& l = lua.sol();
+        internal::CaptureStdout();
         l10n::Manager l10nManager(mVFS.get());
         l10nManager.setPreferredLocales({ "de", "en" });
         EXPECT_THAT(internal::GetCapturedStdout(), "Preferred locales: de en\n");
