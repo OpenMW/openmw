@@ -557,7 +557,7 @@ namespace MWRender
             mResetAccumRootCallback->setAccumulate(mAccumulate);
     }
 
-    size_t Animation::detectBlendMask(const osg::Node* node) const
+    size_t Animation::detectBlendMask(const osg::Node* node, const std::string& controllerName) const // controllerName is used for Collada animated deforming models
     {
         static const std::string_view sBlendMaskRoots[sNumBlendMasks] = {
             "", /* Lower body / character root */
@@ -571,8 +571,7 @@ namespace MWRender
             const std::string& name = node->getName();
             for (size_t i = 1; i < sNumBlendMasks; i++)
             {
-                Log(Debug::Warning) << "blendmaskname:" << name;
-                if (name == sBlendMaskRoots[i])
+                if (name == sBlendMaskRoots[i] || controllerName == sBlendMaskRoots[i])
                     return i;
             }
 
@@ -580,27 +579,6 @@ namespace MWRender
 
             node = node->getParent(0);
         }
-
-        return 0;
-    }
-
-    size_t Animation::detectColladaBlendMask(const osg::Node* node, const std::string& blendmaskName) const
-    {
-        static const std::string_view sBlendMaskRoots[sNumBlendMasks] = {
-            "", /* Lower body / character root */
-            "Bip01 Spine1", /* Torso */
-            "Bip01 L Clavicle", /* Left arm */
-            "Bip01 R Clavicle", /* Right arm */
-        };
-
-        for (size_t i = 1; i < sNumBlendMasks; i++)
-        {
-            Log(Debug::Warning) << "blendmaskname:" << blendmaskName;
-            if (blendmaskName == sBlendMaskRoots[i])
-                return i;
-        }
-        assert(node->getNumParents() > 0);
-        node = node->getParent(0);
 
         return 0;
     }
@@ -668,8 +646,7 @@ namespace MWRender
 
             osg::Node* node = found->second;
 
-            size_t blendMask = detectColladaBlendMask(node, it->second->getName());
-            Log(Debug::Warning) << "blendmask " << blendMask << " ctrl name: " << it->second->getName();
+            size_t blendMask = detectBlendMask(node, it->second->getName());
 
             // clone the controller, because each Animation needs its own ControllerSource
             osg::ref_ptr<SceneUtil::KeyframeController> cloned

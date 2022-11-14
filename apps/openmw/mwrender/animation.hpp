@@ -292,8 +292,7 @@ namespace MWRender
          */
         void resetActiveGroups();
 
-        size_t detectBlendMask(const osg::Node* node) const;
-        size_t detectColladaBlendMask(const osg::Node* node, const std::string& blendmaskName) const;
+        size_t detectBlendMask(const osg::Node* node, const std::string& controllerName) const;
 
         /* Updates the position of the accum root node for the given time, and
          * returns the wanted movement vector from the previous time. */
