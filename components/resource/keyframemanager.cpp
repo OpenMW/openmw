@@ -34,19 +34,14 @@ namespace Resource
 
     bool RetrieveAnimationsVisitor::belongsToLeftUpperExtremity(const std::string& name)
     {
-        const int bodypartCount = 25;
-        static const std::array<std::string_view, bodypartCount> boneNames
+        static const std::array boneNames
             = { "bip01_l_clavicle", "left_clavicle", "bip01_l_upperarm", "left_upper_arm", "bip01_l_forearm",
                   "bip01_l_hand", "left_hand", "left_wrist", "shield_bone", "bip01_l_pinky1", "bip01_l_pinky2",
                   "bip01_l_pinky3", "bip01_l_ring1", "bip01_l_ring2", "bip01_l_ring3", "bip01_l_middle1",
                   "bip01_l_middle2", "bip01_l_middle3", "bip01_l_pointer1", "bip01_l_pointer2", "bip01_l_pointer3",
                   "bip01_l_thumb1", "bip01_l_thumb2", "bip01_l_thumb3", "left_forearm" };
 
-        for (unsigned short int i = 0; i < bodypartCount; i++)
-        {
-            if (name == boneNames[i])
-                return true;
-        }
+        if (std::find(boneNames.begin(), boneNames.end(), name) != boneNames.end()) return true;            
 
         return false;
     }
