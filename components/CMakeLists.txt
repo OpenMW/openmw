@@ -399,6 +399,8 @@ find_package(SQLite3 REQUIRED)
 add_library(components STATIC ${COMPONENT_FILES})
 
 target_link_libraries(components
+    ${COLLADA_DOM_LIBRARIES}
+
     # CMake's built-in OSG finder does not use pkgconfig, so we have to
     # manually ensure the order is correct for inter-library dependencies.
     # This only makes a difference with `-DOPENMW_USE_SYSTEM_OSG=ON -DOSG_STATIC=ON`.
@@ -411,6 +413,7 @@ target_link_libraries(components
     ${OSGTEXT_LIBRARIES}
     ${OSGDB_LIBRARIES}
     ${OSGUTIL_LIBRARIES}
+    ${OSGSIM_LIBRARIES}
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
 
