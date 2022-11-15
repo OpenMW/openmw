@@ -290,7 +290,8 @@ void CSMWorld::CommandDispatcher::executeExtendedDelete()
                 if (record.mState == RecordBase::State_Deleted)
                     continue;
 
-                if (!std::binary_search(mSelection.begin(), mSelection.end(), record.get().mCell.getRefIdString()))
+                if (!std::binary_search(mSelection.begin(), mSelection.end(),
+                        Misc::StringUtils::lowerCase(record.get().mCell.getRefIdString())))
                     continue;
 
                 macro.push(new CSMWorld::DeleteCommand(model, record.get().mId.getRefIdString()));
@@ -320,7 +321,8 @@ void CSMWorld::CommandDispatcher::executeExtendedRevert()
             {
                 const Record<CellRef>& record = collection.getRecord(i);
 
-                if (!std::binary_search(mSelection.begin(), mSelection.end(), record.get().mCell.getRefIdString()))
+                if (!std::binary_search(mSelection.begin(), mSelection.end(),
+                        Misc::StringUtils::lowerCase(record.get().mCell.getRefIdString())))
                     continue;
 
                 macro.push(new CSMWorld::RevertCommand(model, record.get().mId.getRefIdString()));

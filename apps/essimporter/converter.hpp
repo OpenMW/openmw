@@ -111,7 +111,7 @@ namespace ESSImport
             bool isDeleted = false;
 
             npc.load(esm, isDeleted);
-            if (npc.mId != ESM::RefId::stringRefId("player"))
+            if (npc.mId != "player")
             {
                 // Handles changes to the NPC struct, but since there is no index here
                 // it will apply to ALL instances of the class. seems to be the reason for the

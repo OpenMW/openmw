@@ -33,6 +33,7 @@
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadsscr.hpp>
 #include <components/files/multidircollection.hpp>
+#include <components/misc/algorithm.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "cell.hpp"
@@ -122,7 +123,7 @@ namespace CSMWorld
         const ESM::Dialogue* mDialogue; // last loaded dialogue
         bool mBase;
         bool mProject;
-        std::map<std::string, std::map<unsigned int, unsigned int>> mRefLoadCache;
+        std::map<std::string, std::map<unsigned int, unsigned int>, Misc::StringUtils::CiComp> mRefLoadCache;
         int mReaderIndex;
 
         bool mFsStrict;

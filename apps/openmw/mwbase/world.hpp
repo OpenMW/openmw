@@ -177,12 +177,12 @@ namespace MWBase
         virtual char getGlobalVariableType(std::string_view name) const = 0;
         ///< Return ' ', if there is no global variable with this name.
 
-        virtual const std::string& getCellName(const MWWorld::CellStore* cell = nullptr) const = 0;
+        virtual std::string_view getCellName(const MWWorld::CellStore* cell = nullptr) const = 0;
         ///< Return name of the cell.
         ///
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
-        virtual const std::string& getCellName(const ESM::Cell* cell) const = 0;
+        virtual std::string_view getCellName(const ESM::Cell* cell) const = 0;
 
         virtual void removeRefScript(MWWorld::RefData* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts
@@ -660,7 +660,8 @@ namespace MWBase
         virtual DetourNavigator::Navigator* getNavigator() const = 0;
 
         virtual void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
-            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end) const = 0;
+            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end) const
+            = 0;
 
         virtual void removeActorPath(const MWWorld::ConstPtr& actor) const = 0;
 
@@ -669,10 +670,12 @@ namespace MWBase
         virtual DetourNavigator::AgentBounds getPathfindingAgentBounds(const MWWorld::ConstPtr& actor) const = 0;
 
         virtual bool hasCollisionWithDoor(
-            const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
+            const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const
+            = 0;
 
         virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-            std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors = nullptr) const = 0;
+            std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors = nullptr) const
+            = 0;
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 

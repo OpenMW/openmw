@@ -8,6 +8,7 @@
 
 #include <components/compiler/context.hpp>
 #include <components/compiler/locals.hpp>
+#include <components/misc/algorithm.hpp>
 
 namespace CSMWorld
 {
@@ -18,7 +19,7 @@ namespace CSMWorld
         const Data& mData;
         mutable std::vector<ESM::RefId> mIds;
         mutable bool mIdsUpdated;
-        mutable std::map<std::string, Compiler::Locals> mLocals;
+        mutable std::map<std::string, Compiler::Locals, Misc::StringUtils::CiComp> mLocals;
 
     public:
         ScriptContext(const Data& data);

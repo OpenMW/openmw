@@ -2098,30 +2098,30 @@ namespace CSMWorld
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
-            ESM::RefId* string = nullptr;
+            ESM::RefId* id = nullptr;
 
             ESXRecordT record2 = record.get();
 
             switch (this->mColumnId)
             {
                 case Columns::ColumnId_CastingObject:
-                    string = &record2.mCasting;
+                    id = &record2.mCasting;
                     break;
                 case Columns::ColumnId_HitObject:
-                    string = &record2.mHit;
+                    id = &record2.mHit;
                     break;
                 case Columns::ColumnId_AreaObject:
-                    string = &record2.mArea;
+                    id = &record2.mArea;
                     break;
                 case Columns::ColumnId_BoltObject:
-                    string = &record2.mBolt;
+                    id = &record2.mBolt;
                     break;
             }
 
-            if (!string)
+            if (!id)
                 throw std::logic_error("Unsupported column ID");
 
-            *string = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
+            *id = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -2141,56 +2141,56 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            const ESM::RefId* string = nullptr;
+            const ESM::RefId* id = nullptr;
 
             switch (this->mColumnId)
             {
                 case Columns::ColumnId_CastingSound:
-                    string = &record.get().mCastSound;
+                    id = &record.get().mCastSound;
                     break;
                 case Columns::ColumnId_HitSound:
-                    string = &record.get().mHitSound;
+                    id = &record.get().mHitSound;
                     break;
                 case Columns::ColumnId_AreaSound:
-                    string = &record.get().mAreaSound;
+                    id = &record.get().mAreaSound;
                     break;
                 case Columns::ColumnId_BoltSound:
-                    string = &record.get().mBoltSound;
+                    id = &record.get().mBoltSound;
                     break;
             }
 
-            if (!string)
+            if (!id)
                 throw std::logic_error("Unsupported column ID");
 
-            return QString::fromUtf8(string->getRefIdString().c_str());
+            return QString::fromUtf8(id->getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
-            ESM::RefId* string = nullptr;
+            ESM::RefId* id = nullptr;
 
             ESXRecordT record2 = record.get();
 
             switch (this->mColumnId)
             {
                 case Columns::ColumnId_CastingSound:
-                    string = &record2.mCastSound;
+                    id = &record2.mCastSound;
                     break;
                 case Columns::ColumnId_HitSound:
-                    string = &record2.mHitSound;
+                    id = &record2.mHitSound;
                     break;
                 case Columns::ColumnId_AreaSound:
-                    string = &record2.mAreaSound;
+                    id = &record2.mAreaSound;
                     break;
                 case Columns::ColumnId_BoltSound:
-                    string = &record2.mBoltSound;
+                    id = &record2.mBoltSound;
                     break;
             }
 
-            if (!string)
+            if (!id)
                 throw std::logic_error("Unsupported column ID");
 
-            *string = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
+            *id = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }

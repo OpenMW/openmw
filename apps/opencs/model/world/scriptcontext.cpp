@@ -131,7 +131,7 @@ void CSMWorld::ScriptContext::clear()
 
 bool CSMWorld::ScriptContext::clearLocals(const std::string& script)
 {
-    std::map<std::string, Compiler::Locals>::iterator iter = mLocals.find(Misc::StringUtils::lowerCase(script));
+    std::map<std::string, Compiler::Locals>::iterator iter = mLocals.find(script);
 
     if (iter != mLocals.end())
     {
