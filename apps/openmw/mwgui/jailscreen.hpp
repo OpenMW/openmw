@@ -4,6 +4,11 @@
 #include "timeadvancer.hpp"
 #include "windowbase.hpp"
 
+namespace MyGUI
+{
+    class ScrollBar;
+}
+
 namespace MWGui
 {
     class JailScreen : public WindowBase

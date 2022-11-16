@@ -9,6 +9,8 @@
 #include "mathopcodes.hpp"
 #include "miscopcodes.hpp"
 
+#include <components/interpreter/types.hpp>
+
 namespace Interpreter
 {
     void installOpcodes(Interpreter& interpreter)

@@ -1,9 +1,23 @@
 #include "sdlinputwrapper.hpp"
 
-#include <components/debug/debuglog.hpp>
-#include <components/settings/settings.hpp>
+#include <ios>
+#include <stdexcept>
+
+#include <SDL_keyboard.h>
+#include <SDL_keycode.h>
+#include <SDL_mouse.h>
+#include <SDL_version.h>
+
+#include <osg/Camera>
+#include <osg/GraphicsContext>
+#include <osgGA/EventQueue>
+#include <osgGA/GUIEventAdapter>
 
 #include <osgViewer/Viewer>
+
+#include <components/debug/debuglog.hpp>
+#include <components/sdlutil/events.hpp>
+#include <components/settings/settings.hpp>
 
 namespace SDLUtil
 {

@@ -1,6 +1,7 @@
 #include "sdlmappings.hpp"
 
 #include <map>
+#include <utility>
 
 #include <MyGUI_MouseButton.h>
 

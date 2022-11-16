@@ -1,10 +1,27 @@
 #include "pingpongcanvas.hpp"
 
+#include <utility>
+#include <vector>
+
+#include <osg/Array>
+#include <osg/Camera>
+#include <osg/CopyOp>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/GLExtensions>
+#include <osg/PrimitiveSet>
+#include <osg/RenderInfo>
+#include <osg/Shader>
+#include <osg/State>
+#include <osg/Texture2D>
+#include <osg/Uniform>
+#include <osg/Vec3f>
+
+#include <apps/openmw/mwrender/luminancecalculator.hpp>
+
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
-
-#include <osg/Texture2DArray>
 
 #include "postprocessor.hpp"
 

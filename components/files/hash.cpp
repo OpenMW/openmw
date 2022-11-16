@@ -5,7 +5,9 @@
 
 #include <array>
 #include <cstdint>
+#include <exception>
 #include <istream>
+#include <stdexcept>
 #include <string>
 
 namespace Files

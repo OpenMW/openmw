@@ -26,8 +26,11 @@
 */
 #include "loadsgst.hpp"
 
-#include <cstring>
 #include <stdexcept>
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/effect.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"

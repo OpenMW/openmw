@@ -1,29 +1,74 @@
 #include "npcanimation.hpp"
 
+#include <algorithm>
+#include <exception>
+#include <stdlib.h>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
+
+#include <osg/Callback>
+#include <osg/Camera>
+#include <osg/ColorMask>
 #include <osg/Depth>
+#include <osg/FrameBufferObject>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/Group>
+#include <osg/Matrix>
 #include <osg/MatrixTransform>
+#include <osg/Matrixd>
+#include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/Quat>
+#include <osg/Referenced>
+#include <osg/RenderInfo>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Transform>
 #include <osg/UserDataContainer>
+#include <osg/Vec4f>
 
 #include <osgUtil/CullVisitor>
 #include <osgUtil/RenderBin>
 
+#include <apps/openmw/mwmechanics/creaturestats.hpp>
+#include <apps/openmw/mwmechanics/drawstate.hpp>
+#include <apps/openmw/mwmechanics/magiceffects.hpp>
+#include <apps/openmw/mwrender/actoranimation.hpp>
+#include <apps/openmw/mwrender/animation.hpp>
+#include <apps/openmw/mwrender/weaponanimation.hpp>
+#include <apps/openmw/mwsound/type.hpp>
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
 #include <components/debug/debuglog.hpp>
-
-#include <components/misc/rng.hpp>
-
-#include <components/misc/resourcehelpers.hpp>
-
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/misc/rng.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/actorutil.hpp>
+#include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/textkeymap.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/settings.hpp>
-
 #include <components/vfs/manager.hpp>
 
 #include "../mwworld/class.hpp"
@@ -43,6 +88,11 @@
 #include "renderbin.hpp"
 #include "rotatecontroller.hpp"
 #include "vismask.hpp"
+
+namespace osgUtil
+{
+    class RenderLeaf;
+}
 
 namespace
 {

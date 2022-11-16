@@ -1,16 +1,45 @@
 #include "myguirendermanager.hpp"
 
-#include <MyGUI_Timer.h>
+#include <ostream>
+#include <utility>
+#include <vector>
 
+#include <MyGUI_LogManager.h>
+#include <MyGUI_LogStream.h>
+#include <MyGUI_Timer.h>
+#include <MyGUI_VertexData.h>
+
+#include <osg/Array>
+#include <osg/BufferObject>
+#include <osg/Camera>
+#include <osg/CopyOp>
 #include <osg/Drawable>
+#include <osg/GL>
+#include <osg/Group>
+#include <osg/Matrix>
+#include <osg/MixinVector>
+#include <osg/Object>
+#include <osg/Program>
+#include <osg/RenderInfo>
+#include <osg/Shader>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/TexMat>
 #include <osg/Texture2D>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/Vec3f>
+#include <osg/Viewport>
 
 #include <osgViewer/Viewer>
 
-#include <osgGA/GUIEventHandler>
+namespace osg
+{
+    class Node;
+    class NodeVisitor;
+}
 
-#include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/shader/shadermanager.hpp>
 

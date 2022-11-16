@@ -1,5 +1,7 @@
 #include "magiceffects.hpp"
 
+#include <type_traits>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 

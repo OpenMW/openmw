@@ -1,19 +1,36 @@
 #include "technique.hpp"
 
+#include <algorithm>
 #include <array>
+#include <istream>
+#include <iterator>
+#include <optional>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
+#include <variant>
 
+#include <osg/GL>
+#include <osg/Shader>
 #include <osg/Texture1D>
 #include <osg/Texture2D>
 #include <osg/Texture3D>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include <SDL_opengl_glext.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
+#include <components/fx/lexer.hpp>
+#include <components/fx/pass.hpp>
+#include <components/fx/types.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/settings/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/vfs/manager.hpp>
 

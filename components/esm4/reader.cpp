@@ -33,6 +33,7 @@
 #include <iostream> // for debugging
 #include <sstream> // for debugging
 #include <stdexcept>
+#include <string_view>
 #include <unordered_map>
 
 #if defined(_MSC_VER)
@@ -47,8 +48,11 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 
 #include <components/bsa/memorystream.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/loadtes4.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
+#include <components/files/streamwithbuffer.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 

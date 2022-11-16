@@ -1,14 +1,16 @@
 #ifndef OPENMW_MWRENDER_WATER_H
 #define OPENMW_MWRENDER_WATER_H
 
+#include <filesystem>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <osg/Vec3d>
 #include <osg/Vec3f>
 #include <osg/ref_ptr>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/categories.hpp>
 
 namespace osg
 {
@@ -33,11 +35,6 @@ namespace MWWorld
 {
     class CellStore;
     class Ptr;
-}
-
-namespace Fallback
-{
-    class Map;
 }
 
 namespace MWRender

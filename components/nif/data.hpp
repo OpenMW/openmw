@@ -24,12 +24,24 @@
 #ifndef OPENMW_COMPONENTS_NIF_DATA_HPP
 #define OPENMW_COMPONENTS_NIF_DATA_HPP
 
+#include <string>
+#include <vector>
+
+#include <components/nif/record.hpp>
+
+#include <osg/Quat>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+
 #include "nifkey.hpp"
 #include "niftypes.hpp" // Transformation
 #include "recordptr.hpp"
 
 namespace Nif
 {
+    class NIFStream;
+    class Reader;
 
     // Common ancestor for several data classes
     struct NiGeometryData : public Record

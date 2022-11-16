@@ -1,14 +1,21 @@
 #include "settings.hpp"
 #include "parser.hpp"
 
+#include <algorithm>
 #include <cerrno>
 #include <charconv>
 #include <filesystem>
+#include <iterator>
+#include <map>
+#include <set>
 #include <sstream>
+#include <stdexcept>
 #include <system_error>
+#include <utility>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/settings/categories.hpp>
 
 namespace Settings
 {

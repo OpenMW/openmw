@@ -1,14 +1,21 @@
 #ifndef OPENMW_MWRENDER_LANDMANAGER_H
 #define OPENMW_MWRENDER_LANDMANAGER_H
 
-#include <osg/Object>
+#include <utility>
+
+#include <osg/ref_ptr>
 
 #include <components/esm3terrain/storage.hpp>
 #include <components/resource/resourcemanager.hpp>
 
-namespace ESM
+namespace ESMTerrain
 {
-    struct Land;
+    class LandObject;
+}
+
+namespace osg
+{
+    class Stats;
 }
 
 namespace MWRender

@@ -1,7 +1,20 @@
 #ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_SCALINGLAYER
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_SCALINGLAYER
 
+#include <string>
+
+#include <MyGUI_ILayerNode.h>
 #include <MyGUI_OverlappedLayer.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_XmlDocument.h>
+
+namespace MyGUI
+{
+    class ILayerItem;
+    class IRenderTarget;
+    class Version;
+}
 
 namespace osgMyGUI
 {

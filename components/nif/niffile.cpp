@@ -2,13 +2,18 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/hash.hpp>
+#include <components/nif/base.hpp>
+#include <components/nif/nifstream.hpp>
+#include <components/nif/node.hpp>
+#include <components/nif/record.hpp>
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <limits>
 #include <map>
 #include <sstream>
-#include <stdexcept>
+#include <utility>
 
 #include "controlled.hpp"
 #include "controller.hpp"

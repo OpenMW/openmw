@@ -2,8 +2,6 @@
 #define OPENMW_WIDGETS_TAGS_H
 
 #include <MyGUI_UString.h>
-#include <map>
-#include <string>
 
 namespace Gui
 {

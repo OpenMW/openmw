@@ -1,20 +1,33 @@
 #include "bulletshapemanager.hpp"
 
-#include <cstring>
+#include <memory>
+#include <string_view>
+#include <utility>
 
 #include <osg/Drawable>
+#include <osg/Group>
+#include <osg/Matrixf>
+#include <osg/Node>
 #include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/Stats>
 #include <osg/Transform>
 #include <osg/TriangleFunctor>
+#include <osg/ValueObject>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+
+#include <LinearMath/btVector3.h>
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/pathhelpers.hpp>
+#include <components/nif/niffile.hpp>
+#include <components/nifbullet/bulletnifloader.hpp>
+#include <components/resource/resourcemanager.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/vfs/manager.hpp>
-
-#include <components/nifbullet/bulletnifloader.hpp>
 
 #include "bulletshape.hpp"
 #include "multiobjectcache.hpp"

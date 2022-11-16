@@ -3,10 +3,15 @@
 
 #include <map>
 #include <set>
+#include <utility>
 #include <vector>
 
 #include <osg/BoundingBox>
+#include <osg/Image>
 #include <osg/Quat>
+#include <osg/Texture2D>
+#include <osg/Vec2f>
+#include <osg/Vec3d>
 #include <osg/ref_ptr>
 
 namespace MWWorld
@@ -21,11 +26,9 @@ namespace ESM
 
 namespace osg
 {
-    class Texture2D;
-    class Image;
-    class Camera;
     class Group;
     class Node;
+    class Vec3f;
 }
 
 namespace MWRender

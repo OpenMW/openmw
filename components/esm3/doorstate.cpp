@@ -4,6 +4,8 @@
 #include "esmwriter.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/objectstate.hpp>
 
 namespace ESM
 {

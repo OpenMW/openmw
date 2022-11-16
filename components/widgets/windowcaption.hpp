@@ -1,7 +1,17 @@
 #ifndef OPENMW_WIDGETS_WINDOWCAPTION_H
 #define OPENMW_WIDGETS_WINDOWCAPTION_H
 
+#include <string>
+
 #include <MyGUI_EditBox.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace Gui
 {

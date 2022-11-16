@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_FALLBACK_H
 #define OPENMW_COMPONENTS_FALLBACK_H
 
+#include <functional>
 #include <map>
 #include <string>
 #include <string_view>

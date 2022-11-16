@@ -1,14 +1,36 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_UTIL_H
 #define OPENMW_COMPONENTS_SCENEUTIL_UTIL_H
 
+#include <math.h>
+#include <string_view>
+#include <vector>
+
 #include <osg/Camera>
 #include <osg/Matrixf>
+#include <osg/OperationThread>
 #include <osg/Texture2D>
 #include <osg/Vec4f>
+#include <osg/ref_ptr>
 
 #include <components/resource/resourcesystem.hpp>
 
 #include "statesetupdater.hpp"
+
+namespace osg
+{
+    class Node;
+    class NodeVisitor;
+    class Object;
+    class StateSet;
+    class Texture;
+    template <typename VT>
+    class BoundingSphereImpl;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
 
 namespace SceneUtil
 {

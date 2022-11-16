@@ -4,6 +4,9 @@
 #include <list>
 #include <map>
 #include <string>
+#include <string_view>
+#include <utility>
+#include <variant>
 
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"

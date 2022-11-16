@@ -1,8 +1,16 @@
 #include "messagebundles.hpp"
 
 #include <cstring>
-#include <unicode/calendar.h>
+#include <exception>
+#include <type_traits>
+#include <utility>
+
 #include <unicode/errorcode.h>
+#include <unicode/fmtable.h>
+#include <unicode/parseerr.h>
+#include <unicode/stringpiece.h>
+#include <unicode/unistr.h>
+
 #include <yaml-cpp/yaml.h>
 
 #include <components/debug/debuglog.hpp>

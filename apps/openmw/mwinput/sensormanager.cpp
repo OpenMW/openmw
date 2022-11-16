@@ -1,12 +1,16 @@
 #include "sensormanager.hpp"
 
+#include <map>
+#include <string>
+#include <utility>
+
+#include <SDL_error.h>
+#include <SDL_video.h>
+
+#include <osg/Math>
+
 #include <components/debug/debuglog.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/inputmanager.hpp"
-#include "../mwbase/world.hpp"
-
-#include "../mwworld/player.hpp"
+#include <components/settings/settings.hpp>
 
 namespace MWInput
 {

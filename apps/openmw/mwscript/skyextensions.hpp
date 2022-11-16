@@ -1,11 +1,6 @@
 #ifndef GAME_SCRIPT_SKYEXTENSIONS_H
 #define GAME_SCRIPT_SKYEXTENSIONS_H
 
-namespace Compiler
-{
-    class Extensions;
-}
-
 namespace Interpreter
 {
     class Interpreter;

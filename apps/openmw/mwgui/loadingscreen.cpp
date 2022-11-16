@@ -1,16 +1,36 @@
 #include "loadingscreen.hpp"
 
+#include <algorithm>
 #include <array>
+#include <string_view>
+
+#include <MyGUI_ISubWidgetRect.h>
+#include <MyGUI_ITexture.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+
+#include <osg/BoundingSphere>
+#include <osg/Camera>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/Node>
+#include <osg/RenderInfo>
+#include <osg/Texture2D>
+#include <osg/Viewport>
 
 #include <osgViewer/Viewer>
 
-#include <osg/Texture2D>
+#include <osgUtil/IncrementalCompileOperation>
 
-#include <MyGUI_Gui.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_TextBox.h>
 
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+
 #include <components/debug/debuglog.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/myguiplatform/myguitexture.hpp>

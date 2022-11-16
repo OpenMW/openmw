@@ -2,17 +2,42 @@
 #define OPENMW_COMPONENTS_SCENEUTIL_LIGHTMANAGER_H
 
 #include <array>
+#include <map>
 #include <memory>
 #include <set>
+#include <stddef.h>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
+#include <osg/BoundingSphere>
+#include <osg/CopyOp>
 #include <osg/Group>
 #include <osg/Light>
+#include <osg/Matrix>
+#include <osg/Matrixf>
+#include <osg/Node>
 #include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/Program>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Uniform>
+#include <osg/Vec4f>
 #include <osg/observer_ptr>
+#include <osg/ref_ptr>
+
+#include <osgUtil/CullVisitor>
 
 #include <components/sceneutil/nodecallback.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/categories.hpp>
+
+namespace osg
+{
+    class Camera;
+    class GLExtensions;
+    class State;
+}
 
 namespace SceneUtil
 {

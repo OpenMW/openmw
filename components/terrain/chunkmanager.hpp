@@ -2,16 +2,25 @@
 #define OPENMW_COMPONENTS_TERRAIN_CHUNKMANAGER_H
 
 #include <tuple>
+#include <vector>
 
 #include <components/resource/resourcemanager.hpp>
+
+#include <osg/StateSet>
+#include <osg/ref_ptr>
 
 #include "buffercache.hpp"
 #include "quadtreeworld.hpp"
 
 namespace osg
 {
-    class Group;
     class Texture2D;
+    class Node;
+    class State;
+    class Stats;
+    class Vec2f;
+    class Vec3f;
+    class Vec4f;
 }
 
 namespace Resource

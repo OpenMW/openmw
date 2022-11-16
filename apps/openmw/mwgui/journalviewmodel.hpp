@@ -4,7 +4,10 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <stddef.h>
 #include <string>
+#include <string_view>
+#include <utility>
 
 #include <components/misc/utf8stream.hpp>
 

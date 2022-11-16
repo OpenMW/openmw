@@ -1,51 +1,83 @@
 #include "water.hpp"
 
+#include <algorithm>
+#include <fstream>
 #include <iomanip>
+#include <map>
+#include <string_view>
 
+#include <osg/BoundingSphere>
+#include <osg/Callback>
+#include <osg/Camera>
 #include <osg/ClipNode>
+#include <osg/ClipPlane>
+#include <osg/CopyOp>
+#include <osg/CullSettings>
+#include <osg/CullStack>
 #include <osg/Depth>
+#include <osg/Drawable>
 #include <osg/Fog>
 #include <osg/FrontFace>
+#include <osg/GL>
+#include <osg/GLExtensions>
 #include <osg/Geometry>
 #include <osg/Group>
-#include <osg/Material>
+#include <osg/Image>
+#include <osg/Matrix>
+#include <osg/Matrixd>
+#include <osg/Node>
+#include <osg/Object>
+#include <osg/Plane>
+#include <osg/Polytope>
 #include <osg/PositionAttitudeTransform>
-#include <osg/ViewportIndexed>
+#include <osg/Program>
+#include <osg/RenderInfo>
+#include <osg/Shader>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/Vec3>
 
-#include <osgDB/ReadFile>
-
-#include <fstream>
+#include <osgDB/ReaderWriter>
+#include <osgDB/Registry>
 
 #include <osgUtil/CullVisitor>
 #include <osgUtil/IncrementalCompileOperation>
+#include <osgUtil/RenderStage>
 
 #include <components/debug/debuglog.hpp>
-
+#include <components/esm3/loadcell.hpp>
+#include <components/fallback/fallback.hpp>
+#include <components/misc/constants.hpp>
+#include <components/nifosg/controller.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
-
+#include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/waterutil.hpp>
-
-#include <components/misc/constants.hpp>
-#include <components/stereo/stereomanager.hpp>
-
-#include <components/nifosg/controller.hpp>
-
+#include <components/settings/settings.hpp>
 #include <components/shader/shadermanager.hpp>
-
-#include <components/esm3/loadcell.hpp>
-
-#include <components/fallback/fallback.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include "../mwworld/cellstore.hpp"
 
 #include "renderbin.hpp"
 #include "ripplesimulation.hpp"
 #include "vismask.hpp"
+
+namespace osg
+{
+    class NodeVisitor;
+}
 
 namespace MWRender
 {

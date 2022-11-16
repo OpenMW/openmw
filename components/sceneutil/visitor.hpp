@@ -3,11 +3,23 @@
 
 #include <osg/MatrixTransform>
 #include <osg/NodeVisitor>
+#include <osg/ref_ptr>
 
+#include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include <components/misc/strings/algorithm.hpp>
+
+namespace osg
+{
+    class Drawable;
+    class Geometry;
+    class Group;
+    class Node;
+}
 
 // Commonly used scene graph visitors
 namespace SceneUtil

@@ -1,27 +1,27 @@
 #include "foreachbulletobject.hpp"
 
+#include <algorithm>
+#include <cstddef>
+#include <exception>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/cellref.hpp>
-#include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esmloader/esmdata.hpp>
 #include <components/esmloader/lessbyid.hpp>
 #include <components/esmloader/record.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/misc/strings/lower.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/vfs/manager.hpp>
 
 #include <osg/ref_ptr>
-
-#include <algorithm>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
 
 namespace Resource
 {

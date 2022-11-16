@@ -1,26 +1,56 @@
 #include "screenshotmanager.hpp"
 
+#include <algorithm>
 #include <condition_variable>
+#include <cstdlib>
+#include <map>
+#include <memory>
 #include <mutex>
+#include <string>
+#include <vector>
 
+#include <osg/Camera>
+#include <osg/Drawable>
+#include <osg/FrameBufferObject>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/GLExtensions>
+#include <osg/Group>
+#include <osg/Image>
 #include <osg/ImageUtils>
+#include <osg/Math>
+#include <osg/Program>
+#include <osg/Referenced>
+#include <osg/RenderInfo>
+#include <osg/Shader>
+#include <osg/Shape>
 #include <osg/ShapeDrawable>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/Texture2D>
+#include <osg/Texture>
 #include <osg/TextureCubeMap>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/Vec2i>
+#include <osg/Vec3>
+#include <osg/Viewport>
+#include <osgViewer/Viewer>
 
+#include <components/debug/debuglog.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
-#include <components/shader/shadermanager.hpp>
-#include <components/stereo/multiview.hpp>
-#include <components/stereo/stereomanager.hpp>
-
 #include <components/settings/settings.hpp>
+#include <components/shader/shadermanager.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwgui/loadingscreen.hpp"
 
 #include "postprocessor.hpp"
 #include "util.hpp"

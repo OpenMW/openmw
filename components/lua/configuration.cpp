@@ -1,10 +1,15 @@
 #include "configuration.hpp"
 
 #include <algorithm>
-#include <bitset>
-#include <cassert>
+#include <cctype>
+#include <cstdint>
 #include <sstream>
+#include <stdexcept>
+#include <utility>
 
+#include <components/esm/defs.hpp>
+#include <components/esm/luascripts.hpp>
+#include <components/esm3/cellref.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>

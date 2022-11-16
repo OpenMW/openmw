@@ -1,10 +1,21 @@
 #include "load.hpp"
-#include "esmdata.hpp"
-#include "lessbyid.hpp"
-#include "record.hpp"
+
+#include <algorithm>
+#include <cstddef>
+#include <filesystem>
+#include <iterator>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -21,17 +32,14 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/lower.hpp>
 
-#include <algorithm>
-#include <cstddef>
-#include <filesystem>
-#include <map>
-#include <set>
-#include <sstream>
-#include <string>
-#include <string_view>
-#include <type_traits>
-#include <utility>
-#include <vector>
+#include "esmdata.hpp"
+#include "lessbyid.hpp"
+#include "record.hpp"
+
+namespace ESM
+{
+    struct CellId;
+}
 
 namespace EsmLoader
 {

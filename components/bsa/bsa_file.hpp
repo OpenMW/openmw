@@ -26,6 +26,8 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <iosfwd>
+#include <stddef.h>
 #include <string>
 #include <vector>
 

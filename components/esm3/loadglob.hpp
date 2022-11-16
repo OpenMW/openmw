@@ -2,6 +2,7 @@
 #define OPENMW_ESM_GLOB_H
 
 #include <string>
+#include <string_view>
 
 #include "variant.hpp"
 

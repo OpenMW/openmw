@@ -26,8 +26,19 @@
 
 #include "base.hpp"
 
+#include <vector>
+
+#include <osg/Quat>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+
+#include <components/nif/record.hpp>
+#include <components/nif/recordptr.hpp>
+
 namespace Nif
 {
+    class NIFStream;
+    class Reader;
 
     // Base class for controllers that use NiInterpolators to animate objects.
     struct NiInterpController : public Controller

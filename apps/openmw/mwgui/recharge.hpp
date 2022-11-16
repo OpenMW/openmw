@@ -3,7 +3,16 @@
 
 #include <memory>
 
+#include <apps/openmw/mwgui/itemselection.hpp>
+
 #include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class Button;
+    class TextBox;
+    class Widget;
+}
 
 namespace MWWorld
 {
@@ -12,8 +21,6 @@ namespace MWWorld
 
 namespace MWGui
 {
-
-    class ItemSelectionDialog;
     class ItemWidget;
     class ItemChargeView;
 

@@ -1,7 +1,11 @@
 #include "aipackage.hpp"
 
+#include <memory>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <components/esm/esmcommon.hpp>
 
 namespace ESM
 {

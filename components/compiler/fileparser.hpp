@@ -1,12 +1,23 @@
 #ifndef COMPILER_FILEPARSER_H_INCLUDED
 #define COMPILER_FILEPARSER_H_INCLUDED
 
+#include <string>
+#include <vector>
+
+#include <components/interpreter/types.hpp>
+
 #include "locals.hpp"
 #include "parser.hpp"
 #include "scriptparser.hpp"
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+    class Scanner;
+
+    struct TokenLoc;
+
     // Top-level parser, to be used for global scripts, local scripts and targeted scripts
 
     class FileParser : public Parser

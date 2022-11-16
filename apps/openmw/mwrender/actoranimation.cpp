@@ -1,26 +1,45 @@
 #include "actoranimation.hpp"
+
+#include <algorithm>
+#include <memory>
+#include <set>
+#include <stdexcept>
+#include <type_traits>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include <osg/Group>
+#include <osg/Math>
+#include <osg/MatrixTransform>
 #include <osg/Node>
+#include <osg/Quat>
+#include <osg/Vec3f>
 #include <osg/Vec4f>
 
+#include <apps/openmw/mwrender/animation.hpp>
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadligh.hpp>
-
+#include <components/esm3/loadlock.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
-
 #include <components/sceneutil/attach.hpp>
+#include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/visitor.hpp>
-
-#include <components/misc/resourcehelpers.hpp>
-
 #include <components/settings/settings.hpp>
-
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"

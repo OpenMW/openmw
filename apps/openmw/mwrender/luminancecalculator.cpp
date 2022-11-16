@@ -1,9 +1,26 @@
 #include "luminancecalculator.hpp"
 
+#include <algorithm>
+#include <string>
+
+#include <osg/GL>
+#include <osg/GLExtensions>
+#include <osg/GraphicsContext>
+#include <osg/Image>
+#include <osg/Shader>
+#include <osg/State>
+#include <osg/Texture>
+#include <osg/Uniform>
+
 #include <components/settings/settings.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "pingpongcanvas.hpp"
+
+namespace osg
+{
+    class RenderInfo;
+}
 
 namespace MWRender
 {

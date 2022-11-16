@@ -34,10 +34,11 @@
 #include "actor.hpp"
 #include "inventory.hpp"
 
+#include <components/esm4/formid.hpp>
+
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct Creature
     {

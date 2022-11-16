@@ -1,16 +1,31 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
+#include <algorithm>
 #include <memory>
+#include <string>
+#include <vector>
 
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm/attr.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "widgets.hpp"
 #include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class Button;
+    class ImageBox;
+    class ListBox;
+    class TextBox;
+    class Widget;
+}
 
 namespace MWGui
 {

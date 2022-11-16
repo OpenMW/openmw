@@ -2,8 +2,12 @@
 #define MWGUI_STATSWATCHER_H
 
 #include <set>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include <components/esm/attr.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadskil.hpp>
 
 #include "../mwmechanics/stat.hpp"

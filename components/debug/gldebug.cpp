@@ -35,6 +35,10 @@ either expressed or implied, of the FreeBSD Project.
 #include <cstdlib>
 #include <memory>
 
+#include <osg/GLExtensions>
+#include <osg/GraphicsContext>
+#include <osg/State>
+
 #include <components/debug/debuglog.hpp>
 
 // OpenGL constants not provided by OSG:

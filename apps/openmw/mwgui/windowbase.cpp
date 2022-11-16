@@ -1,13 +1,27 @@
 #include "windowbase.hpp"
 
+#include <algorithm>
+#include <vector>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_ILayer.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_TPoint.h>
+#include <MyGUI_TSize.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetDefines.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/layout.hpp>
+
+#include <components/misc/notnullptr.hpp>
+#include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-
-#include <components/widgets/imagebutton.hpp>
 
 #include "draganddrop.hpp"
 #include "exposedwindow.hpp"

@@ -1,12 +1,29 @@
 #include "birth.hpp"
 
+#include <algorithm>
+#include <string>
+#include <utility>
+
+#include <MyGUI_Align.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
+#include <MyGUI_Macros.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadspel.hpp>
+#include <components/esm3/spelllist.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -19,6 +36,11 @@
 
 #include "ustring.hpp"
 #include "widgets.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace
 {

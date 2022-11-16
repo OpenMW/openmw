@@ -1,10 +1,26 @@
 #ifndef MWGUI_FORMATTING_H
 #define MWGUI_FORMATTING_H
 
-#include <MyGUI_Colour.h>
+#include <algorithm>
 #include <map>
+#include <stddef.h>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <components/widgets/box.hpp>
+#include <MyGUI_Align.h>
+#include <MyGUI_Colour.h>
+
+namespace Gui
+{
+    class EditBox;
+}
+
+namespace MyGUI
+{
+    class ImageBox;
+    class Widget;
+}
 
 namespace MWGui
 {

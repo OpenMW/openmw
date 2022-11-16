@@ -1,7 +1,17 @@
 #include "serialize.hpp"
 
+#include <stddef.h>
+#include <string>
+
+#include <osg/Drawable>
+#include <osg/Group>
+#include <osg/Object>
+#include <osg/Quat>
+#include <osg/Vec3f>
+
 #include <osgDB/ObjectWrapper>
 #include <osgDB/Registry>
+#include <osgDB/Serializer>
 
 #include <components/nifosg/matrixtransform.hpp>
 

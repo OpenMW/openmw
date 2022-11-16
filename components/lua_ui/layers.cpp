@@ -1,5 +1,7 @@
 #include "layers.hpp"
 
+#include <MyGUI_OverlappedLayer.h>
+
 #include <components/debug/debuglog.hpp>
 
 namespace LuaUi

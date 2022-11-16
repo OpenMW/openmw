@@ -1,7 +1,14 @@
 #include "screenfader.hpp"
 
+#include <MyGUI_Delegate.h>
+#include <MyGUI_Exception.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_Widget.h>
+
+#include <apps/openmw/mwgui/windowbase.hpp>
+
+#include <components/debug/debuglog.hpp>
 
 namespace MWGui
 {

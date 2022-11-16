@@ -2,18 +2,17 @@
 #define OPENMW_COMPONENTS_DEBUG_DEBUGDRAW_H
 
 #include <osg/Drawable>
+#include <osg/Geometry>
 #include <osg/Vec3>
+#include <osg/Vec3f>
 #include <osg/ref_ptr>
 
 #include <array>
-#include <memory>
 #include <vector>
 
 namespace osg
 {
     class Group;
-    class Geometry;
-    class Geometry;
     class RenderInfo;
 }
 namespace Shader

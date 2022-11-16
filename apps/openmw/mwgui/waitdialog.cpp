@@ -1,12 +1,35 @@
 #include "waitdialog.hpp"
 
-#include <MyGUI_InputManager.h>
+#include <algorithm>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <type_traits>
+
+#include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollBar.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
-#include <components/misc/rng.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/timeadvancer.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/stat.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+#include <apps/openmw/mwworld/timestamp.hpp>
 
+#include <components/esm/defs.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadregn.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/rng.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 #include <components/widgets/box.hpp>

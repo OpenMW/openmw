@@ -1,7 +1,21 @@
 #ifndef MWGUI_COUNTDIALOG_H
 #define MWGUI_COUNTDIALOG_H
 
+#include <stddef.h>
+#include <string>
+
+#include <MyGUI_Delegate.h>
+
 #include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class Button;
+    class EditBox;
+    class ScrollBar;
+    class TextBox;
+    class Widget;
+}
 
 namespace Gui
 {

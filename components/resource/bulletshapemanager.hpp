@@ -1,13 +1,22 @@
 #ifndef OPENMW_COMPONENTS_BULLETSHAPEMANAGER_H
 #define OPENMW_COMPONENTS_BULLETSHAPEMANAGER_H
 
-#include <map>
 #include <string>
 
 #include <osg/ref_ptr>
 
 #include "bulletshape.hpp"
 #include "resourcemanager.hpp"
+
+namespace VFS
+{
+    class Manager;
+}
+
+namespace osg
+{
+    class Stats;
+}
 
 namespace Resource
 {

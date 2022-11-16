@@ -1,21 +1,55 @@
 #include "settingswindow.hpp"
 
+#include <algorithm>
 #include <array>
+#include <assert.h>
+#include <compare>
+#include <initializer_list>
 #include <iomanip>
+#include <map>
+#include <memory>
 #include <numeric>
 #include <regex>
+#include <sstream>
+#include <stdint.h>
+#include <string_view>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-#include <unicode/locid.h>
-
+#include <MyGUI_Align.h>
+#include <MyGUI_Button.h>
 #include <MyGUI_ComboBox.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_Macros.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TSize.h>
 #include <MyGUI_TabControl.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetDefines.h>
+#include <MyGUI_WidgetInput.h>
 #include <MyGUI_Window.h>
 
+#include <unicode/locid.h>
+#include <unicode/unistr.h>
+
 #include <SDL_video.h>
+
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <components/lua_ui/adapter.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/settings/categories.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/lua_ui/scriptsettings.hpp>

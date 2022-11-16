@@ -1,17 +1,29 @@
 #include "actorspaths.hpp"
-#include "vismask.hpp"
+
+#include <algorithm>
+#include <utility>
 
 #include <components/detournavigator/settings.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/agentpath.hpp>
 
-#include <osg/PositionAttitudeTransform>
+#include <osg/Node>
+
+#include "vismask.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
-#include <algorithm>
+namespace osg
+{
+    class Vec3f;
+}
+
+namespace MWWorld
+{
+    class CellStore;
+}
 
 namespace MWRender
 {

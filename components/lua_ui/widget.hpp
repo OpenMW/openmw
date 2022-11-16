@@ -3,8 +3,18 @@
 
 #include <functional>
 #include <map>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_MouseButton.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
 #include <MyGUI_Widget.h>
+
 #include <sol/sol.hpp>
 
 #include <components/lua/scriptscontainer.hpp>

@@ -1,10 +1,14 @@
 #ifndef OPENMW_COMPONENTS_ESMLOADER_LOAD_H
 #define OPENMW_COMPONENTS_ESMLOADER_LOAD_H
 
-#include <components/esm3/esmreader.hpp>
-
+#include <cstddef>
 #include <string>
 #include <vector>
+
+namespace ESM
+{
+    class ReadersCache;
+}
 
 namespace ToUTF8
 {

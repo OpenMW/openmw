@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESM_PGRD_H
 #define OPENMW_ESM_PGRD_H
 
-#include <string>
+#include <string_view>
 #include <vector>
 
 #include "components/esm/defs.hpp"

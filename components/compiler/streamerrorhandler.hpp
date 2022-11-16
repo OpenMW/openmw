@@ -1,11 +1,13 @@
 #ifndef COMPILER_STREAMERRORHANDLER_H_INCLUDED
 #define COMPILER_STREAMERRORHANDLER_H_INCLUDED
 
+#include <string>
+
 #include "errorhandler.hpp"
 
 namespace Compiler
 {
-    class ContextOverride;
+    struct TokenLoc;
     /// \brief Error handler implementation: Write errors into logging stream
 
     class StreamErrorHandler : public ErrorHandler

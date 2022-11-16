@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESM_GLOBALSCRIPT_H
 #define OPENMW_ESM_GLOBALSCRIPT_H
 
+#include <string>
+
 #include "cellref.hpp"
 #include "components/esm/refid.hpp"
 #include "locals.hpp"

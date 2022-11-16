@@ -1,8 +1,10 @@
 #include "filesystemarchive.hpp"
 
 #include <algorithm>
-
 #include <filesystem>
+#include <iterator>
+#include <stddef.h>
+#include <utility>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
@@ -10,6 +12,7 @@
 
 namespace VFS
 {
+    class File;
 
     FileSystemArchive::FileSystemArchive(const std::filesystem::path& path)
         : mBuiltIndex(false)

@@ -26,6 +26,17 @@
 
 #include "base.hpp"
 
+#include <string>
+#include <vector>
+
+#include <components/nif/niffile.hpp>
+#include <components/nif/nifstream.hpp>
+#include <components/nif/recordptr.hpp>
+
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+
 namespace Nif
 {
 

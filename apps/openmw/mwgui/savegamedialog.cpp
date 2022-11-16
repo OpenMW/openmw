@@ -1,29 +1,56 @@
 #include "savegamedialog.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <filesystem>
 #include <iomanip>
+#include <list>
+#include <math.h>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <vector>
 
+#include <MyGUI_Button.h>
 #include <MyGUI_ComboBox.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_ISubWidgetRect.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_Macros.h>
+#include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <osg/GL>
 #include <osg/Texture2D>
-#include <osgDB/ReadFile>
+#include <osg/Texture>
+#include <osg/ref_ptr>
+
+#include <osgDB/ReaderWriter>
+#include <osgDB/Registry>
+
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/debug/debuglog.hpp>
-
-#include <components/myguiplatform/myguitexture.hpp>
-
-#include <components/misc/strings/lower.hpp>
-
-#include <components/settings/settings.hpp>
-
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/savedgame.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/memorystream.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/misc/timeconvert.hpp>
-
-#include <components/esm3/loadclas.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -35,6 +62,11 @@
 
 #include "confirmationdialog.hpp"
 #include "ustring.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWGui
 {

@@ -7,20 +7,16 @@
 #include <components/detournavigator/version.hpp>
 #include <components/misc/guarded.hpp>
 
+#include <osg/Group>
 #include <osg/ref_ptr>
 
 #include <cstddef>
 #include <map>
 #include <memory>
-#include <string_view>
 #include <vector>
-
-class dtNavMesh;
 
 namespace osg
 {
-    class Group;
-    class Geometry;
     class StateSet;
 }
 

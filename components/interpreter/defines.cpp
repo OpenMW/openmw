@@ -1,11 +1,15 @@
 #include "defines.hpp"
 
 #include <algorithm>
+#include <exception>
+#include <memory>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <components/debug/debuglog.hpp>
+#include <components/interpreter/context.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace Interpreter

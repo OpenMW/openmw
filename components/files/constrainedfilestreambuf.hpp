@@ -1,7 +1,9 @@
 #ifndef OPENMW_CONSTRAINEDFILESTREAMBUF_H
 #define OPENMW_CONSTRAINEDFILESTREAMBUF_H
 
+#include <cstddef>
 #include <filesystem>
+#include <ios>
 #include <streambuf>
 
 #include <components/platform/file.hpp>

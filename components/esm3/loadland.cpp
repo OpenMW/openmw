@@ -1,12 +1,18 @@
 #include "loadland.hpp"
 
-#include <algorithm>
-#include <limits>
-#include <utility>
-
-#include "components/esm/defs.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <algorithm>
+#include <filesystem>
+#include <iterator>
+#include <limits>
+#include <memory>
+#include <utility>
+
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
 
 namespace ESM
 {

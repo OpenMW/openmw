@@ -2,8 +2,12 @@
 #define OPENMW_GUI_SPELLVIEW_H
 
 #include <memory>
-#include <tuple>
+#include <string>
+#include <vector>
 
+#include <MyGUI_Delegate.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
 #include <MyGUI_Widget.h>
 
 #include "spellmodel.hpp"
@@ -15,8 +19,6 @@ namespace MyGUI
 
 namespace MWGui
 {
-
-    class SpellModel;
 
     ///@brief Displays a SpellModel in a list widget
     class SpellView final : public MyGUI::Widget

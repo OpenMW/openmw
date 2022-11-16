@@ -27,7 +27,11 @@
 #include "loadsndr.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/formid.hpp>
+#include <components/esm4/script.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"

@@ -1,8 +1,17 @@
 #include "list.hpp"
 
+#include <algorithm>
+#include <assert.h>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ISubWidgetText.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
 
 namespace Gui
 {

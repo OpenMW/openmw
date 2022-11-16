@@ -1,27 +1,58 @@
 #include "postprocessor.hpp"
 
-#include <SDL_opengl_glext.h>
 #include <algorithm>
 #include <chrono>
+#include <iterator>
+#include <map>
+#include <sstream>
 #include <thread>
+#include <utility>
 
+#include <SDL_opengl_glext.h>
+
+#include <osg/Camera>
+#include <osg/GL>
+#include <osg/GLExtensions>
+#include <osg/GraphicsContext>
+#include <osg/Image>
+#include <osg/Matrix>
+#include <osg/NodeVisitor>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/Texture1D>
 #include <osg/Texture2D>
 #include <osg/Texture2DArray>
 #include <osg/Texture2DMultisample>
 #include <osg/Texture3D>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/Vec2f>
+#include <osg/Vec2i>
+#include <osg/Vec4>
+#include <osg/Viewport>
+
+#include <osgUtil/CullVisitor>
+#include <osgUtil/RenderBin>
+#include <osgUtil/RenderStage>
+
+#include <apps/openmw/mwrender/pingpongcanvas.hpp>
 
 #include <components/files/conversion.hpp>
+#include <components/fx/pass.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/color.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/settings/settings.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
+#include <components/stereo/types.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"

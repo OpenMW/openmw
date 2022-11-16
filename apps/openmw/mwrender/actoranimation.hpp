@@ -2,6 +2,14 @@
 #define GAME_RENDER_ACTORANIMATION_H
 
 #include <map>
+#include <string>
+#include <string_view>
+
+#include <osg/Vec4f>
+
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <osg/ref_ptr>
 
@@ -11,18 +19,18 @@
 
 namespace osg
 {
+    class Group;
     class Node;
 }
 
-namespace MWWorld
+namespace ESM
 {
-    class ConstPtr;
+    struct Light;
 }
 
-namespace SceneUtil
+namespace Resource
 {
-    class LightSource;
-    class LightListCallback;
+    class ResourceSystem;
 }
 
 namespace MWRender

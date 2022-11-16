@@ -1,37 +1,62 @@
 #include "animation.hpp"
 
-#include <iomanip>
+#include <cmath>
+#include <cstdlib>
+#include <exception>
+#include <initializer_list>
+#include <iterator>
 #include <limits>
+#include <stdexcept>
+#include <type_traits>
 
 #include <osg/BlendFunc>
+#include <osg/Callback>
 #include <osg/ColorMaski>
+#include <osg/CopyOp>
+#include <osg/Drawable>
+#include <osg/FrameStamp>
+#include <osg/Group>
+#include <osg/Light>
 #include <osg/LightModel>
 #include <osg/Material>
+#include <osg/Matrix>
 #include <osg/MatrixTransform>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/Quat>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/Switch>
+#include <osg/Uniform>
+#include <osg/Vec3d>
+#include <osg/Vec4f>
 
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystem>
 
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
 #include <components/debug/debuglog.hpp>
-
-#include <components/resource/keyframemanager.hpp>
-#include <components/resource/scenemanager.hpp>
-
+#include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
-
-#include <components/sceneutil/keyframe.hpp>
-
-#include <components/vfs/manager.hpp>
-
+#include <components/misc/strings/lower.hpp>
+#include <components/resource/keyframemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/actorutil.hpp>
+#include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -39,8 +64,8 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/visitor.hpp>
-
 #include <components/settings/settings.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -54,6 +79,11 @@
 #include "rotatecontroller.hpp"
 #include "util.hpp"
 #include "vismask.hpp"
+
+namespace osg
+{
+    class Geometry;
+}
 
 namespace
 {

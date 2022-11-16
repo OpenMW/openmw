@@ -1,12 +1,33 @@
 #include "riggeometryosgaextension.hpp"
 
-#include <osgAnimation/RigGeometry>
-
+#include <osg/Array>
+#include <osg/BoundingBox>
+#include <osg/BoundingSphere>
+#include <osg/BufferObject>
+#include <osg/Callback>
 #include <osg/Drawable>
+#include <osg/GL>
+#include <osg/Geometry>
+#include <osg/Group>
+#include <osg/Matrix>
+#include <osg/MatrixTransform>
+#include <osg/Matrixd>
+#include <osg/Matrixf>
 #include <osg/NodeVisitor>
+#include <osg/UserDataContainer>
+#include <osg/observer_ptr>
+
+#include <osgAnimation/RigGeometry>
+#include <osgAnimation/RigTransform>
+#include <osgAnimation/Skeleton>
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
+
+namespace osg
+{
+    class PrimitiveFunctor;
+}
 
 namespace SceneUtil
 {

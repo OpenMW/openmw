@@ -1,13 +1,28 @@
 #include "controllermanager.hpp"
 
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
+
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_Widget.h>
 
-#include <SDL.h>
+#include <SDL_joystick.h>
+#include <SDL_keyboard.h>
+#include <SDL_keycode.h>
+#include <SDL_mouse.h>
+#include <SDL_sensor.h>
+#include <SDL_stdinc.h>
+#include <SDL_version.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"

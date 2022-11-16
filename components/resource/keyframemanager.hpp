@@ -1,13 +1,32 @@
 #ifndef OPENMW_COMPONENTS_KEYFRAMEMANAGER_H
 #define OPENMW_COMPONENTS_KEYFRAMEMANAGER_H
 
-#include <osg/ref_ptr>
-#include <osgAnimation/BasicAnimationManager>
 #include <string>
+
+#include <osg/NodeVisitor>
+#include <osg/ref_ptr>
+
+#include <osgAnimation/BasicAnimationManager>
 
 #include <components/sceneutil/keyframe.hpp>
 
 #include "resourcemanager.hpp"
+
+namespace SceneUtil
+{
+    class KeyframeHolder;
+}
+
+namespace VFS
+{
+    class Manager;
+}
+
+namespace osg
+{
+    class Node;
+    class Stats;
+}
 
 namespace Resource
 {

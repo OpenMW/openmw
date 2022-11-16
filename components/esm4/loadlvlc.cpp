@@ -27,7 +27,10 @@
 #include "loadlvlc.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/inventory.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"

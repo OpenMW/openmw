@@ -1,11 +1,23 @@
 #include "messagebox.hpp"
 
+#include <algorithm>
+#include <utility>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_TSize.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+#include <MyGUI_WidgetStyle.h>
+
+#include <apps/openmw/mwgui/windowbase.hpp>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 #include "../mwbase/environment.hpp"

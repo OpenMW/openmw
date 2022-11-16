@@ -1,24 +1,29 @@
 #ifndef MWRENDER_CHARACTERPREVIEW_H
 #define MWRENDER_CHARACTERPREVIEW_H
 
-#include <memory>
+#include <string>
+
+#include <osg/Vec3f>
+#include <osg/Viewport>
 #include <osg/ref_ptr>
 
-#include <osg/PositionAttitudeTransform>
+#include <apps/openmw/mwworld/livecellref.hpp>
 
 #include <components/esm3/loadnpc.hpp>
 
-#include <components/resource/resourcesystem.hpp>
-
 #include "../mwworld/ptr.hpp"
+
+namespace Resource
+{
+    class ResourceSystem;
+}
 
 namespace osg
 {
     class Texture2D;
-    class Camera;
     class Group;
-    class Viewport;
     class StateSet;
+    class PositionAttitudeTransform;
 }
 
 namespace MWRender

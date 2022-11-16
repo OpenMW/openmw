@@ -3,6 +3,13 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
+#include <components/esm3/effectlist.hpp>
+
+#include <vector>
+
 namespace ESM
 {
     void Enchantment::load(ESMReader& esm, bool& isDeleted)

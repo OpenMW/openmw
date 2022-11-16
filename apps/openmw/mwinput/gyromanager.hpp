@@ -1,7 +1,10 @@
 #ifndef MWINPUT_GYROMANAGER
 #define MWINPUT_GYROMANAGER
 
-#include <components/settings/settings.hpp>
+#include <array>
+#include <string_view>
+
+#include <components/settings/categories.hpp>
 
 namespace MWInput
 {

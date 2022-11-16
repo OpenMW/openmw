@@ -1,5 +1,15 @@
 #include "soulgemdialog.hpp"
 
+#include <string>
+#include <vector>
+
+#include <MyGUI_Delegate.h>
+
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/misc/notnullptr.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 

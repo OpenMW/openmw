@@ -31,12 +31,13 @@
 #include <string>
 #include <vector>
 
+#include <components/esm4/formid.hpp>
+
 #include "common.hpp"
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct World
     {

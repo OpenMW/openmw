@@ -3,7 +3,16 @@
 
 #include <components/nif/niftypes.hpp>
 
+#include <osg/CopyOp>
 #include <osg/MatrixTransform>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Quat>
+
+namespace osg
+{
+    class Vec3f;
+}
 
 namespace NifOsg
 {

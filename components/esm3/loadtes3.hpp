@@ -1,6 +1,8 @@
 #ifndef COMPONENT_ESM_TES3_H
 #define COMPONENT_ESM_TES3_H
 
+#include <stdint.h>
+#include <string>
 #include <vector>
 
 #include "components/esm/esmcommon.hpp"

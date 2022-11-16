@@ -1,8 +1,8 @@
 #ifndef MWGUI_SPELLICONS_H
 #define MWGUI_SPELLICONS_H
 
+#include <map>
 #include <string>
-#include <vector>
 
 #include "../mwmechanics/magiceffects.hpp"
 
@@ -10,11 +10,6 @@ namespace MyGUI
 {
     class Widget;
     class ImageBox;
-}
-namespace ESM
-{
-    struct ENAMstruct;
-    struct EffectList;
 }
 
 namespace MWGui

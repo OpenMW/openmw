@@ -1,9 +1,27 @@
 #ifndef GAME_RENDER_CREATUREANIMATION_H
 #define GAME_RENDER_CREATUREANIMATION_H
 
+#include <memory>
+#include <string>
+
+#include <osg/Vec3f>
+
+#include <apps/openmw/mwrender/animation.hpp>
+
 #include "../mwworld/inventorystore.hpp"
 #include "actoranimation.hpp"
 #include "weaponanimation.hpp"
+
+namespace Resource
+{
+    class ResourceSystem;
+}
+
+namespace osg
+{
+    class Group;
+    class Node;
+}
 
 namespace MWWorld
 {

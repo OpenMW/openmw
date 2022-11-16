@@ -4,19 +4,25 @@
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
 
-#include "itemmodel.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MyGUI
 {
-    class Gui;
+    class Button;
     class Widget;
 }
 
 namespace MWGui
 {
-    class ContainerWindow;
+    class DragAndDrop;
+    class ItemModel;
     class ItemView;
     class SortFilterItemModel;
+
+    struct ItemStack;
 }
 
 namespace MWGui

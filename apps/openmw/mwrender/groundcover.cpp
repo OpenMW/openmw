@@ -1,15 +1,38 @@
 #include "groundcover.hpp"
 
+#include <cmath>
+#include <cstddef>
+#include <memory>
+#include <utility>
+
 #include <osg/AlphaFunc>
+#include <osg/Array>
 #include <osg/BlendFunc>
+#include <osg/BoundingBox>
+#include <osg/BoundingSphere>
 #include <osg/ComputeBoundsVisitor>
+#include <osg/CopyOp>
 #include <osg/Geometry>
+#include <osg/Group>
+#include <osg/MixinVector>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/PrimitiveSet>
 #include <osg/Program>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Stats>
+#include <osg/UserDataContainer>
+#include <osg/Vec2i>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 #include <osg/VertexAttribDivisor>
 
-#include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/resource/objectcache.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -18,6 +41,11 @@
 #include "../mwworld/groundcoverstore.hpp"
 
 #include "vismask.hpp"
+
+namespace osg
+{
+    class Object;
+}
 
 namespace MWRender
 {

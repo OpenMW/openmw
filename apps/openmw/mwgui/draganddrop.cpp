@@ -1,7 +1,18 @@
 #include "draganddrop.hpp"
 
+#include <memory>
+#include <string_view>
+#include <type_traits>
+
+#include <MyGUI_Align.h>
+#include <MyGUI_ControllerItem.h>
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_Gui.h>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

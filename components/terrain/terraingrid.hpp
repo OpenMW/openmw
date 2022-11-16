@@ -1,16 +1,17 @@
 #ifndef COMPONENTS_TERRAIN_TERRAINGRID_H
 #define COMPONENTS_TERRAIN_TERRAINGRID_H
 
-#include <map>
-
-#include <osg/Vec2f>
+#include <osg/ref_ptr>
 
 #include "world.hpp"
 
+#include <components/terrain/cellborder.hpp>
+
 namespace osg
 {
+    class Node;
+    class Vec2f;
     class Group;
-    class Stats;
 }
 
 namespace Resource
@@ -21,6 +22,7 @@ namespace Resource
 namespace Terrain
 {
     class Storage;
+    class View;
 
     /// @brief Simple terrain implementation that loads cells in a grid, with no LOD. Only requested cells are loaded.
     class TerrainGrid : public Terrain::World

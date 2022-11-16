@@ -1,5 +1,7 @@
 #include "extensions0.hpp"
 
+#include <string>
+
 #include "extensions.hpp"
 #include "opcodes.hpp"
 

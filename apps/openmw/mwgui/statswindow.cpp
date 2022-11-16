@@ -1,20 +1,42 @@
 #include "statswindow.hpp"
 
+#include <algorithm>
+#include <array>
+#include <iterator>
+#include <sstream>
+
+#include <MyGUI_Align.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TSize.h>
+#include <MyGUI_TextBox.h>
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
 #include <MyGUI_Window.h>
 
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowpinnablebase.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/attr.hpp>
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
-
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -30,6 +52,17 @@
 
 #include "tooltips.hpp"
 #include "ustring.hpp"
+
+namespace ESM
+{
+    struct Class;
+    struct Race;
+}
+
+namespace MWGui
+{
+    class DragAndDrop;
+}
 
 namespace MWGui
 {

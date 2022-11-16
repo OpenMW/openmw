@@ -1,6 +1,14 @@
 #include "configurationmanager.hpp"
 
+#include <algorithm>
 #include <fstream>
+#include <iomanip>
+#include <iterator>
+#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <type_traits>
+#include <utility>
 
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>

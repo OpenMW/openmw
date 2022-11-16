@@ -1,14 +1,15 @@
 #ifndef STEREO_MANAGER_H
 #define STEREO_MANAGER_H
 
-#include <osg/Camera>
-#include <osg/Matrix>
-#include <osg/StateSet>
-#include <osg/Vec3>
+#include <osg/Matrixd>
+#include <osg/Vec2i>
+#include <osg/ref_ptr>
+
 #include <osgUtil/CullVisitor>
 
 #include <array>
 #include <memory>
+#include <string>
 
 #include <components/shader/shadermanager.hpp>
 
@@ -16,9 +17,12 @@
 
 namespace osg
 {
-    class FrameBufferObject;
-    class Texture2D;
-    class Texture2DArray;
+    class Callback;
+    class Camera;
+    class GraphicsContext;
+    class Node;
+    class NodeCallback;
+    class StateSet;
 }
 
 namespace osgViewer
@@ -35,7 +39,6 @@ namespace Stereo
 {
     class MultiviewFramebuffer;
     class StereoFrustumManager;
-    class MultiviewStereoStatesetUpdateCallback;
 
     bool getStereo();
 

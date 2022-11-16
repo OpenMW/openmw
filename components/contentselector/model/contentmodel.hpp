@@ -1,7 +1,6 @@
 #ifndef CONTENTMODEL_HPP
 #define CONTENTMODEL_HPP
 
-#include "loadordererror.hpp"
 #include <QAbstractTableModel>
 #include <QIcon>
 #include <QSet>
@@ -10,6 +9,7 @@
 namespace ContentSelectorModel
 {
     class EsmFile;
+    class LoadOrderError;
 
     typedef QList<EsmFile*> ContentFileList;
 

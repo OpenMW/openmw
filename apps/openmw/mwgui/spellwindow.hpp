@@ -3,12 +3,28 @@
 
 #include <memory>
 
+#include <apps/openmw/mwgui/windowbase.hpp>
+
+#include <components/esm/refid.hpp>
+
 #include "spellicons.hpp"
 #include "spellmodel.hpp"
 #include "windowpinnablebase.hpp"
 
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace MyGUI
+{
+    class EditBox;
+    class Widget;
+}
+
 namespace MWGui
 {
+    class DragAndDrop;
     class SpellView;
 
     class SpellWindow : public WindowPinnableBase, public NoDrop

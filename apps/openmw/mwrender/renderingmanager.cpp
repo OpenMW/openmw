@@ -1,62 +1,98 @@
 #include "renderingmanager.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <cstdlib>
-#include <limits>
+#include <exception>
+#include <map>
+#include <set>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
+#include <osg/Camera>
 #include <osg/ClipControl>
 #include <osg/ComputeBoundsVisitor>
+#include <osg/CullSettings>
+#include <osg/CullStack>
 #include <osg/Fog>
+#include <osg/FrameStamp>
+#include <osg/GL>
 #include <osg/Group>
 #include <osg/Light>
 #include <osg/LightModel>
+#include <osg/LightSource>
 #include <osg/Material>
+#include <osg/Math>
+#include <osg/Matrix>
+#include <osg/Matrixd>
+#include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Object>
 #include <osg/PolygonMode>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Stats>
+#include <osg/Texture>
+#include <osg/Uniform>
 #include <osg/UserDataContainer>
+#include <osg/Vec2f>
+#include <osg/Vec2i>
+#include <osg/Vec3>
+#include <osg/Vec3d>
+#include <osg/Vec4>
+#include <osg/View>
 
+#include <osgUtil/CullVisitor>
+#include <osgUtil/IncrementalCompileOperation>
+#include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
 
+#include <osgViewer/View>
 #include <osgViewer/Viewer>
 
-#include <components/nifosg/nifloader.hpp>
+#include <apps/openmw/mwrender/animation.hpp>
+#include <apps/openmw/mwrender/navmeshmode.hpp>
+#include <apps/openmw/mwrender/objects.hpp>
+#include <apps/openmw/mwrender/rendermode.hpp>
+#include <apps/openmw/mwworld/timestamp.hpp>
 
+#include <components/debug/debugdraw.hpp>
 #include <components/debug/debuglog.hpp>
-
-#include <components/stereo/multiview.hpp>
-#include <components/stereo/stereomanager.hpp>
-
+#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navmeshcacheitem.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/fx/stateupdater.hpp>
+#include <components/misc/constants.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/nif/niffile.hpp>
+#include <components/nifosg/nifloader.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
-
-#include <components/shader/removedalphafunc.hpp>
-#include <components/shader/shadermanager.hpp>
-
-#include <components/settings/settings.hpp>
-
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
-#include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
-
-#include <components/misc/constants.hpp>
-
+#include <components/settings/settings.hpp>
+#include <components/shader/removedalphafunc.hpp>
+#include <components/shader/shadermanager.hpp>
+#include <components/stereo/multiview.hpp>
+#include <components/stereo/stereomanager.hpp>
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/terrain/terraingrid.hpp>
-
-#include <components/esm3/loadcell.hpp>
-
-#include <components/debug/debugdraw.hpp>
-#include <components/detournavigator/navigator.hpp>
-#include <components/detournavigator/navmeshcacheitem.hpp>
+#include <components/terrain/world.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/groundcoverstore.hpp"
 
 #include "../mwgui/postprocessorhud.hpp"
 

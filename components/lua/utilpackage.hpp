@@ -1,10 +1,11 @@
 #ifndef COMPONENTS_LUA_UTILPACKAGE_H
 #define COMPONENTS_LUA_UTILPACKAGE_H
 
-#include <osg/Matrix>
-#include <osg/Vec2>
-#include <osg/Vec3>
-#include <osg/Vec4>
+#include <osg/Matrixf>
+#include <osg/Quat>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include <sol/sol.hpp>
 

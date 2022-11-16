@@ -1,6 +1,23 @@
 #ifndef GAME_RENDER_NPCANIMATION_H
 #define GAME_RENDER_NPCANIMATION_H
 
+#include <array>
+#include <map>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include <osg/Group>
+#include <osg/Node>
+#include <osg/Vec3f>
+#include <osg/ref_ptr>
+
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm3/loadarmo.hpp>
+#include <components/resource/resourcesystem.hpp>
+
 #include "animation.hpp"
 
 #include "../mwworld/inventorystore.hpp"
@@ -8,7 +25,10 @@
 #include "actoranimation.hpp"
 #include "weaponanimation.hpp"
 
-#include <array>
+namespace osg
+{
+    class Vec4f;
+}
 
 namespace ESM
 {

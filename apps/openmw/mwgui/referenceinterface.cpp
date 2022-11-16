@@ -1,5 +1,9 @@
 #include "referenceinterface.hpp"
 
+#include <type_traits>
+
+#include <apps/openmw/mwworld/ptr.hpp>
+
 namespace MWGui
 {
     ReferenceInterface::ReferenceInterface() {}

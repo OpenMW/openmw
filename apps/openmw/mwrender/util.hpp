@@ -1,13 +1,15 @@
 #ifndef OPENMW_MWRENDER_UTIL_H
 #define OPENMW_MWRENDER_UTIL_H
 
-#include <osg/NodeCallback>
+#include <osg/Callback>
 #include <osg/ref_ptr>
-#include <string>
+
+#include <string_view>
 
 namespace osg
 {
     class Node;
+    class NodeVisitor;
 }
 
 namespace Resource

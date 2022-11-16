@@ -3,7 +3,11 @@
 #include <cassert>
 #include <fstream>
 #include <stdexcept>
+#include <string_view>
+#include <vector>
 
+#include <components/esm/esmcommon.hpp>
+#include <components/esm3/loadtes3.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
 namespace ESM

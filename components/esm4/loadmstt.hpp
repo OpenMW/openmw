@@ -28,13 +28,13 @@
 #define ESM4_MSTT_H
 
 #include <cstdint>
+#include <string>
 
 #include "formid.hpp"
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct MovableStatic
     {

@@ -3,6 +3,9 @@
 
 #include <filesystem>
 #include <iostream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 namespace Debug
 {

@@ -1,13 +1,22 @@
 #include "pingpongcull.hpp"
 
-#include <osg/Camera>
-#include <osg/FrameBufferObject>
-#include <osg/Texture2DArray>
-#include <osg/Texture>
-#include <osgUtil/CullVisitor>
+#include <stddef.h>
+#include <stdexcept>
 
+#include <osg/Camera>
+#include <osg/Matrixd>
+#include <osg/Matrixf>
+#include <osg/Referenced>
+#include <osg/StateSet>
+#include <osg/Viewport>
+
+#include <osgUtil/CullVisitor>
+#include <osgUtil/RenderStage>
+
+#include <components/fx/stateupdater.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
+#include <components/stereo/types.hpp>
 
 #include "postprocessor.hpp"
 

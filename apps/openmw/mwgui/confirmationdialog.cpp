@@ -2,6 +2,13 @@
 
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/windowbase.hpp>
+
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

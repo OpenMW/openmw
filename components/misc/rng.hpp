@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_MISC_RNG_H
 #define OPENMW_COMPONENTS_MISC_RNG_H
 
-#include <cassert>
 #include <random>
+#include <string>
 #include <string_view>
 
 /*

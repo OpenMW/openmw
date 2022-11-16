@@ -1,10 +1,15 @@
 #ifndef OPENMW_MWGUI_LAYOUT_H
 #define OPENMW_MWGUI_LAYOUT_H
 
+#include <assert.h>
 #include <string>
 #include <string_view>
 
+#include <MyGUI_Exception.h>
 #include <MyGUI_Widget.h>
+#include <MyGUI_WidgetDefines.h>
+
+#include "MyGUI_LogManager.h"
 
 #include <components/debug/debuglog.hpp>
 

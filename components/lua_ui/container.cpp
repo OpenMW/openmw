@@ -1,6 +1,9 @@
 #include "container.hpp"
 
 #include <algorithm>
+#include <vector>
+
+#include <components/lua_ui/widget.hpp>
 
 namespace LuaUi
 {

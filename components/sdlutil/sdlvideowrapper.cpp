@@ -1,10 +1,17 @@
 #include "sdlvideowrapper.hpp"
 
+#include <cmath>
+#include <vector>
+
 #include <components/debug/debuglog.hpp>
 #include <components/settings/settings.hpp>
 
+#include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
+#include <osgViewer/ViewerBase>
 
+#include <SDL_error.h>
+#include <SDL_rect.h>
 #include <SDL_video.h>
 
 namespace SDLUtil

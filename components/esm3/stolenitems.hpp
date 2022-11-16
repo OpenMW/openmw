@@ -4,6 +4,7 @@
 #include <components/esm/refid.hpp>
 #include <map>
 #include <string>
+#include <utility>
 
 namespace ESM
 {

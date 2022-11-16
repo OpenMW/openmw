@@ -1,13 +1,27 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_SHADOWBIN_H
 #define OPENMW_COMPONENTS_SCENEUTIL_SHADOWBIN_H
+
 #include <array>
-#include <osgUtil/RenderBin>
 #include <unordered_set>
+
+#include <osg/CopyOp>
+#include <osg/GL>
+#include <osg/Object>
+#include <osg/StateSet>
+#include <osg/ref_ptr>
+
+#include <osgUtil/RenderBin>
 
 namespace osg
 {
     class Material;
     class AlphaFunc;
+    class Program;
+}
+
+namespace osgUtil
+{
+    class StateGraph;
 }
 
 namespace SceneUtil

@@ -1,10 +1,14 @@
 #ifndef OPENMW_ESM_CUSTOMMARKERSTATE_H
 #define OPENMW_ESM_CUSTOMMARKERSTATE_H
 
+#include <string>
+
 #include "cellid.hpp"
 
 namespace ESM
 {
+    class ESMReader;
+    class ESMWriter;
 
     // format 0, saved games only
     struct CustomMarker

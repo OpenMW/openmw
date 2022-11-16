@@ -1,12 +1,20 @@
 #include "util.hpp"
 
+#include <string>
+
+#include <osg/CopyOp>
 #include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Texture2D>
+#include <osg/Texture>
 #include <osg/ValueObject>
 
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/sceneutil/visitor.hpp>
 
 namespace MWRender
 {

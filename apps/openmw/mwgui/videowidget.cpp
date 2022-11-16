@@ -1,16 +1,29 @@
 #include "videowidget.hpp"
 
+#include <algorithm>
+#include <exception>
+#include <utility>
+
+#include <MyGUI_ISubWidgetRect.h>
+#include <MyGUI_ITexture.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Types.h>
+
+#include <osg/ref_ptr>
+
 #include <extern/osg-ffmpeg-videoplayer/videoplayer.hpp>
 
-#include <MyGUI_RenderManager.h>
-
-#include <osg/Texture2D>
-
 #include <components/debug/debuglog.hpp>
+#include <components/files/istreamptr.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwsound/movieaudiofactory.hpp"
+
+namespace osg
+{
+    class Texture2D;
+}
 
 namespace MWGui
 {

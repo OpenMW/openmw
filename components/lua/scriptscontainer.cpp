@@ -1,6 +1,15 @@
 #include "scriptscontainer.hpp"
 
+#include <algorithm>
+#include <cstdint>
+#include <memory>
+#include <queue>
+#include <stdexcept>
+#include <type_traits>
+
 #include <components/esm/luascripts.hpp>
+#include <components/lua/luastate.hpp>
+#include <components/lua/serialization.hpp>
 
 namespace LuaUtil
 {

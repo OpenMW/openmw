@@ -1,57 +1,109 @@
 #include "nifloader.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <filesystem>
+#include <memory>
 #include <mutex>
+#include <set>
+#include <sstream>
+#include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
+#include <osg/AlphaFunc>
 #include <osg/Array>
+#include <osg/BlendFunc>
+#include <osg/BoundingBox>
+#include <osg/BoundingSphere>
+#include <osg/CopyOp>
+#include <osg/Depth>
+#include <osg/Drawable>
+#include <osg/FrontFace>
+#include <osg/GL>
 #include <osg/Geometry>
+#include <osg/Group>
+#include <osg/Image>
 #include <osg/LOD>
+#include <osg/Material>
+#include <osg/Matrix>
+#include <osg/MatrixTransform>
 #include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/PolygonMode>
+#include <osg/PrimitiveSet>
+#include <osg/Quat>
 #include <osg/Sequence>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Stencil>
 #include <osg/Switch>
+#include <osg/TexEnv>
+#include <osg/TexEnvCombine>
 #include <osg/TexGen>
+#include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/UserDataContainer>
 #include <osg/ValueObject>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+#include <osg/Vec4>
+#include <osg/Vec4f>
 
-// resource
+#include <osgParticle/BoxPlacer>
+#include <osgParticle/ConstantRateCounter>
+#include <osgParticle/ModularProgram>
+#include <osgParticle/Particle>
+#include <osgParticle/ParticleProcessor>
+#include <osgParticle/ParticleSystem>
+#include <osgParticle/ParticleSystemUpdater>
+#include <osgParticle/range>
+
+#include <osgUtil/CullVisitor>
+
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
-#include <components/nif/parent.hpp>
-#include <components/resource/imagemanager.hpp>
-
-// particle
-#include <osgParticle/BoxPlacer>
-#include <osgParticle/ConstantRateCounter>
-#include <osgParticle/ModularProgram>
-#include <osgParticle/ParticleSystem>
-#include <osgParticle/ParticleSystemUpdater>
-
-#include <osg/AlphaFunc>
-#include <osg/BlendFunc>
-#include <osg/Depth>
-#include <osg/FrontFace>
-#include <osg/Material>
-#include <osg/PolygonMode>
-#include <osg/Stencil>
-#include <osg/TexEnv>
-#include <osg/TexEnvCombine>
-#include <osg/Texture2D>
-
+#include <components/nif/base.hpp>
 #include <components/nif/controlled.hpp>
+#include <components/nif/controller.hpp>
+#include <components/nif/data.hpp>
 #include <components/nif/effect.hpp>
 #include <components/nif/exception.hpp>
 #include <components/nif/extra.hpp>
+#include <components/nif/niftypes.hpp>
 #include <components/nif/node.hpp>
+#include <components/nif/parent.hpp>
 #include <components/nif/property.hpp>
+#include <components/nif/record.hpp>
+#include <components/nif/recordptr.hpp>
+#include <components/nifosg/controller.hpp>
+#include <components/resource/imagemanager.hpp>
+#include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/statesetupdater.hpp>
+#include <components/sceneutil/textkeymap.hpp>
 
 #include "matrixtransform.hpp"
 #include "particle.hpp"
+
+namespace osg
+{
+    class Callback;
+}
 
 namespace
 {

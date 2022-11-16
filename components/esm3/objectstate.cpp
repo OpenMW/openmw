@@ -3,10 +3,16 @@
 #include <array>
 #include <sstream>
 #include <stdexcept>
+#include <string.h>
 #include <typeinfo>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <components/esm/luascripts.hpp>
+#include <components/esm3/animationstate.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/locals.hpp>
 
 namespace ESM
 {

@@ -1,7 +1,11 @@
 #include "imagetosurface.hpp"
 
+#include <SDL_pixels.h>
+#include <SDL_stdinc.h>
 #include <SDL_surface.h>
+
 #include <osg/Image>
+#include <osg/Vec4f>
 
 namespace SDLUtil
 {

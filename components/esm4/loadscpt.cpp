@@ -26,9 +26,12 @@
 */
 #include "loadscpt.hpp"
 
-#include <iomanip>
-#include <iostream> // FIXME: debugging only
 #include <stdexcept>
+#include <vector>
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/script.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <filesystem>
 #include <limits>
+#include <streambuf>
+#include <string>
 
 namespace Files
 {

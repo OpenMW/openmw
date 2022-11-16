@@ -1,20 +1,48 @@
 #include "mapwindow.hpp"
 
-#include <osg/Texture2D>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <stdexcept>
+#include <type_traits>
 
+#include <osg/Vec2i>
+#include <osg/Vec3f>
+#include <osg/ref_ptr>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_Colour.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ISubWidget.h>
+#include <MyGUI_ISubWidgetRect.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
-#include <MyGUI_RenderManager.h>
+#include <MyGUI_RTTI.h>
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_TPoint.h>
+#include <MyGUI_TextBox.h>
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowpinnablebase.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/globalmap.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
 #include <components/settings/settings.hpp>
 
@@ -33,7 +61,15 @@
 
 #include "confirmationdialog.hpp"
 
-#include <numeric>
+namespace MWGui
+{
+    class DragAndDrop;
+}
+
+namespace osg
+{
+    class Texture2D;
+}
 
 namespace
 {

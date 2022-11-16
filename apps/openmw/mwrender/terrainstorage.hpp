@@ -2,10 +2,21 @@
 #define MWRENDER_TERRAINSTORAGE_H
 
 #include <memory>
+#include <string>
+
+#include <osg/ref_ptr>
 
 #include <components/esm3terrain/storage.hpp>
 
-#include <components/resource/resourcesystem.hpp>
+namespace ESM
+{
+    struct LandTexture;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
 
 namespace MWRender
 {

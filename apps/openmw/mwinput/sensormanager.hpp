@@ -1,23 +1,16 @@
 #ifndef MWINPUT_MWSENSORMANAGER_H
 #define MWINPUT_MWSENSORMANAGER_H
 
+#include <array>
+
+#include <SDL_events.h>
 #include <SDL_sensor.h>
 
 #include <osg/Matrixf>
 #include <osg/Vec3f>
 
 #include <components/sdlutil/events.hpp>
-#include <components/settings/settings.hpp>
-
-namespace SDLUtil
-{
-    class InputWrapper;
-}
-
-namespace MWWorld
-{
-    class Player;
-}
+#include <components/settings/categories.hpp>
 
 namespace MWInput
 {

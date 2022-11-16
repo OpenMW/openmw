@@ -1,18 +1,21 @@
 #include "util.hpp"
 
+#include <map>
+#include <memory>
+#include <utility>
+
 #include <MyGUI_FactoryManager.h>
 
 #include "adapter.hpp"
 #include "container.hpp"
+#include "element.hpp"
 #include "flex.hpp"
 #include "image.hpp"
+#include "registerscriptsettings.hpp"
 #include "text.hpp"
 #include "textedit.hpp"
 #include "widget.hpp"
 #include "window.hpp"
-
-#include "element.hpp"
-#include "registerscriptsettings.hpp"
 
 namespace LuaUi
 {

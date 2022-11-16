@@ -1,15 +1,21 @@
 #ifndef MWGUI_BOOKPAGE_HPP
 #define MWGUI_BOOKPAGE_HPP
 
-#include "MyGUI_Colour.h"
-#include "MyGUI_IFont.h"
-#include "MyGUI_Widget.h"
-
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <stddef.h>
+#include <string>
+#include <utility>
 
-#include <components/settings/settings.hpp>
+#include "MyGUI_Colour.h"
+#include "MyGUI_IFont.h"
+#include "MyGUI_Widget.h"
+#include <MyGUI_FontData.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
+
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

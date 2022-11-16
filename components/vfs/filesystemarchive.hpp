@@ -2,9 +2,12 @@
 #define OPENMW_COMPONENTS_RESOURCE_FILESYSTEMARCHIVE_H
 
 #include "archive.hpp"
-#include <filesystem>
 
+#include <filesystem>
+#include <map>
 #include <string>
+
+#include <components/files/istreamptr.hpp>
 
 namespace VFS
 {

@@ -1,30 +1,41 @@
 #ifndef OPENMW_MWRENDER_RENDERINGMANAGER_H
 #define OPENMW_MWRENDER_RENDERINGMANAGER_H
 
-#include <osg/Camera>
-#include <osg/Light>
+#include <cstddef>
+#include <deque>
+#include <filesystem>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include <osg/BoundingBox>
+#include <osg/Quat>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 #include <osg/ref_ptr>
 
-#include <components/settings/settings.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
 
-#include <osgUtil/IncrementalCompileOperation>
+#include <components/esm3/cellref.hpp>
+#include <components/settings/categories.hpp>
 
 #include "navmeshmode.hpp"
 #include "objects.hpp"
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
 
-#include <deque>
-#include <memory>
-
 namespace osg
 {
+    class Image;
+    class Light;
+    class Vec4i;
     class Group;
-    class PositionAttitudeTransform;
 }
 
 namespace osgUtil
 {
+    class IncrementalCompileOperation;
     class IntersectionVisitor;
     class Intersector;
 }
@@ -42,17 +53,11 @@ namespace osgViewer
 namespace ESM
 {
     struct Cell;
-    struct RefNum;
 }
 
 namespace Terrain
 {
     class World;
-}
-
-namespace Fallback
-{
-    class Map;
 }
 
 namespace SceneUtil
@@ -61,18 +66,19 @@ namespace SceneUtil
     class WorkQueue;
     class LightManager;
     class UnrefQueue;
+    class PositionAttitudeTransform;
 }
 
 namespace DetourNavigator
 {
     struct Navigator;
-    struct Settings;
     struct AgentBounds;
 }
 
 namespace MWWorld
 {
     class GroundcoverStore;
+    class CellStore;
 }
 
 namespace Debug
@@ -82,6 +88,7 @@ namespace Debug
 
 namespace MWRender
 {
+    class Animation;
     class StateUpdater;
     class SharedUniformStateUpdater;
     class PerViewUniformStateUpdater;

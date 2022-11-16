@@ -1,8 +1,30 @@
 #ifndef OPENMW_COMPONENTS_NIFOSG_RIGGEOMETRY_H
 #define OPENMW_COMPONENTS_NIFOSG_RIGGEOMETRY_H
 
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <osg/Array>
+#include <osg/BoundingBox>
+#include <osg/BoundingSphere>
+#include <osg/CopyOp>
+#include <osg/Drawable>
 #include <osg/Geometry>
+#include <osg/Matrix>
 #include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/Object>
+#include <osg/Referenced>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class NodeVisitor;
+    class PrimitiveFunctor;
+    class RenderInfo;
+}
 
 namespace SceneUtil
 {

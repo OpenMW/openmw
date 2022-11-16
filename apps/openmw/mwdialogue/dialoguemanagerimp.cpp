@@ -1,28 +1,39 @@
 #include "dialoguemanagerimp.hpp"
 
 #include <algorithm>
+#include <exception>
+#include <iterator>
 #include <list>
 #include <sstream>
+#include <stddef.h>
+#include <type_traits>
 
+#include <apps/openmw/mwbase/dialoguemanager.hpp>
+#include <apps/openmw/mwdialogue/journalentry.hpp>
+#include <apps/openmw/mwdialogue/topic.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/compiler/exception.hpp>
+#include <components/compiler/locals.hpp>
+#include <components/compiler/scanner.hpp>
+#include <components/compiler/scriptparser.hpp>
 #include <components/debug/debuglog.hpp>
-
+#include <components/esm/defs.hpp>
 #include <components/esm3/dialoguestate.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadinfo.hpp>
-
-#include <components/compiler/errorhandler.hpp>
-#include <components/compiler/exception.hpp>
-#include <components/compiler/locals.hpp>
-#include <components/compiler/output.hpp>
-#include <components/compiler/scanner.hpp>
-#include <components/compiler/scriptparser.hpp>
-
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/variant.hpp>
 #include <components/interpreter/defines.hpp>
 #include <components/interpreter/interpreter.hpp>
-
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/settings/settings.hpp>
+#include <components/translation/translation.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/journal.hpp"
@@ -46,6 +57,21 @@
 
 #include "filter.hpp"
 #include "hypertextparser.hpp"
+
+namespace Compiler
+{
+    class Extensions;
+}
+
+namespace ESM
+{
+    class ESMReader;
+}
+
+namespace Loading
+{
+    class Listener;
+}
 
 namespace MWDialogue
 {

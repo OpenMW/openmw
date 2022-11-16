@@ -8,6 +8,7 @@
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
 #include "components/esm/util.hpp"
+#include <components/esm/fourcc.hpp>
 
 namespace ESM
 {

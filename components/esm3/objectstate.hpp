@@ -1,13 +1,12 @@
 #ifndef OPENMW_ESM_OBJECTSTATE_H
 #define OPENMW_ESM_OBJECTSTATE_H
 
-#include <string>
-#include <vector>
-
 #include "animationstate.hpp"
 #include "cellref.hpp"
-#include "components/esm/luascripts.hpp"
 #include "locals.hpp"
+
+#include <components/esm/defs.hpp>
+#include <components/esm/luascripts.hpp>
 
 namespace ESM
 {

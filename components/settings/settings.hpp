@@ -3,6 +3,8 @@
 
 #include "categories.hpp"
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>

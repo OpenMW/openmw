@@ -1,9 +1,20 @@
 #include "waterutil.hpp"
 
+#include <memory>
+
+#include <osg/Array>
+#include <osg/BoundingBox>
 #include <osg/Depth>
+#include <osg/Drawable>
+#include <osg/GL>
 #include <osg/Geometry>
 #include <osg/Material>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
 #include <osg/StateSet>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include "depth.hpp"
 

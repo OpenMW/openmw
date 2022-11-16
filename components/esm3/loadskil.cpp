@@ -5,6 +5,9 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
+
 namespace ESM
 {
     const std::string Skill::sSkillNames[Length] = {

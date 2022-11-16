@@ -13,6 +13,10 @@
 
 namespace Interpreter
 {
+    class Context;
+    class Opcode0;
+    class Opcode1;
+
     class Interpreter
     {
         std::stack<Runtime> mCallstack;

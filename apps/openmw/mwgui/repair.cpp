@@ -1,19 +1,37 @@
 #include "repair.hpp"
 
 #include <iomanip>
+#include <ostream>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <type_traits>
 
-#include <MyGUI_ScrollView.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/repair.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/esm3/loadrepa.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/containerstore.hpp"
 
 #include "inventoryitemmodel.hpp"
 #include "itemchargeview.hpp"

@@ -1,7 +1,20 @@
 #ifndef OPENMW_COMPONENTS_DEBUG_GLDEBUG_H
 #define OPENMW_COMPONENTS_DEBUG_GLDEBUG_H
 
-#include <osgViewer/ViewerEventHandlers>
+#include <map>
+#include <string>
+#include <vector>
+
+#include <osg/CopyOp>
+#include <osg/GL>
+#include <osg/GraphicsThread>
+#include <osg/StateAttribute>
+
+namespace osg
+{
+    class GraphicsContext;
+    class State;
+}
 
 namespace Debug
 {

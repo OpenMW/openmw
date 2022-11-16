@@ -1,6 +1,12 @@
 #ifndef OPENMW_LUAUI_CONTAINER
 #define OPENMW_LUAUI_CONTAINER
 
+#include <string>
+
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+
 #include "widget.hpp"
 
 namespace LuaUi

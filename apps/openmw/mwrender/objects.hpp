@@ -4,15 +4,14 @@
 #include <map>
 #include <string>
 
+#include <osg/CopyOp>
+#include <osg/Group>
 #include <osg/Object>
 #include <osg/ref_ptr>
 
 #include "../mwworld/ptr.hpp"
 
-namespace osg
-{
-    class Group;
-}
+#include <apps/openmw/mwrender/animation.hpp>
 
 namespace Resource
 {
@@ -22,6 +21,7 @@ namespace Resource
 namespace MWWorld
 {
     class CellStore;
+    struct LiveCellRefBase;
 }
 
 namespace SceneUtil
@@ -31,9 +31,6 @@ namespace SceneUtil
 
 namespace MWRender
 {
-
-    class Animation;
-
     class PtrHolder : public osg::Object
     {
     public:

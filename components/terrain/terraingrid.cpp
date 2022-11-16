@@ -1,6 +1,13 @@
 #include "terraingrid.hpp"
 
+#include <map>
 #include <memory>
+#include <utility>
+
+#include <osg/BoundingBox>
+#include <osg/Node>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
 
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
@@ -9,7 +16,9 @@
 #include "heightcull.hpp"
 #include "storage.hpp"
 #include "view.hpp"
+
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/terrain/world.hpp>
 
 namespace Terrain
 {

@@ -1,11 +1,19 @@
 #include "registerarchives.hpp"
 
 #include <filesystem>
+#include <memory>
 #include <set>
 #include <stdexcept>
+#include <utility>
+
+#include <components/bsa/compressedbsafile.hpp>
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/files/collections.hpp>
+#include <components/files/multidircollection.hpp>
+
+#include <components/vfs/archive.hpp>
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
 #include <components/vfs/manager.hpp>

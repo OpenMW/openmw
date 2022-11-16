@@ -1,11 +1,20 @@
 #include "declarationparser.hpp"
 
+#include <string>
+
+#include <components/compiler/parser.hpp>
+#include <components/compiler/tokenloc.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "errorhandler.hpp"
 #include "locals.hpp"
 #include "scanner.hpp"
 #include "skipparser.hpp"
+
+namespace Compiler
+{
+    class Context;
+}
 
 Compiler::DeclarationParser::DeclarationParser(ErrorHandler& errorHandler, const Context& context, Locals& locals)
     : Parser(errorHandler, context)

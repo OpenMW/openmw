@@ -1,22 +1,42 @@
 #include "keyframemanager.hpp"
 
+#include <algorithm>
+#include <array>
+#include <exception>
+#include <istream>
+#include <memory>
+#include <stddef.h>
+#include <string_view>
+#include <vector>
+
+#include <components/debug/debuglog.hpp>
+#include <components/files/istreamptr.hpp>
+#include <components/misc/pathhelpers.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/nif/niffile.hpp>
+#include <components/nifosg/nifloader.hpp>
+#include <components/resource/resourcemanager.hpp>
+#include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/osgacontroller.hpp>
+#include <components/sceneutil/textkeymap.hpp>
 #include <components/vfs/manager.hpp>
 
+#include <osg/Callback>
+#include <osg/Node>
 #include <osg/Stats>
+
 #include <osgAnimation/Animation>
 #include <osgAnimation/BasicAnimationManager>
 #include <osgAnimation/Channel>
 
-#include <components/debug/debuglog.hpp>
-#include <components/misc/pathhelpers.hpp>
-#include <components/misc/strings/algorithm.hpp>
-#include <components/nifosg/nifloader.hpp>
-#include <components/sceneutil/keyframe.hpp>
-#include <components/sceneutil/osgacontroller.hpp>
-
 #include "animation.hpp"
 #include "objectcache.hpp"
 #include "scenemanager.hpp"
+
+namespace osg
+{
+    class Object;
+}
 
 namespace Resource
 {

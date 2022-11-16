@@ -27,10 +27,12 @@
 #include "loadaspc.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/formid.hpp>
 
 #include "reader.hpp"
-//#include "writer.hpp"
 
 void ESM4::AcousticSpace::load(ESM4::Reader& reader)
 {

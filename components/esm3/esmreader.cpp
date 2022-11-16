@@ -2,14 +2,22 @@
 
 #include "readerscache.hpp"
 
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/refid.hpp>
+#include <components/esm3/loadtes3.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
 
 namespace ESM
 {

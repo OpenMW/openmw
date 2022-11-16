@@ -1,10 +1,15 @@
 #include "loadmgef.hpp"
 
+#include <algorithm>
 #include <sstream>
+#include <stdexcept>
+#include <utility>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 namespace ESM

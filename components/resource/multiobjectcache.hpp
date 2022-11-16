@@ -5,12 +5,12 @@
 #include <mutex>
 #include <string>
 
+#include <osg/Object>
 #include <osg/Referenced>
 #include <osg/ref_ptr>
 
 namespace osg
 {
-    class Object;
     class State;
 }
 

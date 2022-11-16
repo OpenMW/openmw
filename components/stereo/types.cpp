@@ -1,5 +1,9 @@
 #include "types.hpp"
 
+#include <math.h>
+#include <ostream>
+
+#include <osg/Vec3d>
 #include <osg/io_utils>
 
 namespace Stereo

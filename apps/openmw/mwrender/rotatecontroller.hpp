@@ -1,12 +1,16 @@
 #ifndef OPENMW_MWRENDER_ROTATECONTROLLER_H
 #define OPENMW_MWRENDER_ROTATECONTROLLER_H
 
-#include <components/sceneutil/nodecallback.hpp>
+#include <osg/MatrixTransform>
 #include <osg/Quat>
+#include <osg/Vec3f>
+
+#include <components/sceneutil/nodecallback.hpp>
 
 namespace osg
 {
-    class MatrixTransform;
+    class Node;
+    class NodeVisitor;
 }
 
 namespace MWRender

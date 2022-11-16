@@ -1,9 +1,18 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_DEPTH_H
 #define OPENMW_COMPONENTS_SCENEUTIL_DEPTH_H
 
-#include <osg/Depth>
+#include <vector>
 
-#include "util.hpp"
+#include <osg/CopyOp>
+#include <osg/Depth>
+#include <osg/GL>
+#include <osg/GraphicsThread>
+#include <osg/Matrix>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 
 #ifndef GL_DEPTH32F_STENCIL8_NV
 #define GL_DEPTH32F_STENCIL8_NV 0x8DAC
@@ -28,6 +37,13 @@
 #ifndef GL_UNSIGNED_INT_24_8_EXT
 #define GL_UNSIGNED_INT_24_8_EXT 0x84FA
 #endif
+
+namespace osg
+{
+    class Camera;
+    class GraphicsContext;
+    class State;
+}
 
 namespace SceneUtil
 {

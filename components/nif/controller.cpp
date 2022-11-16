@@ -1,5 +1,12 @@
 #include "controller.hpp"
 
+#include <memory>
+#include <stddef.h>
+
+#include <components/nif/base.hpp>
+#include <components/nif/niffile.hpp>
+#include <components/nif/nifstream.hpp>
+
 #include "controlled.hpp"
 #include "data.hpp"
 #include "node.hpp"

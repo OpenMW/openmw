@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_FILES_MULTIDIRSOLLECTION_HPP
 #define COMPONENTS_FILES_MULTIDIRSOLLECTION_HPP
 
-#include <cctype>
+#include <compare>
 #include <filesystem>
 #include <map>
 #include <string>

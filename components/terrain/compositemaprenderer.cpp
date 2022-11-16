@@ -1,10 +1,20 @@
 #include "compositemaprenderer.hpp"
 
-#include <osg/FrameBufferObject>
-#include <osg/RenderInfo>
-#include <osg/Texture2D>
-
 #include <algorithm>
+#include <memory>
+#include <ostream>
+
+#include <osg/Camera>
+#include <osg/FrameBufferObject>
+#include <osg/GL>
+#include <osg/GLExtensions>
+#include <osg/GraphicsContext>
+#include <osg/Notify>
+#include <osg/RenderInfo>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Texture2D>
 
 namespace Terrain
 {

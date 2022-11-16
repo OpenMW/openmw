@@ -1,18 +1,18 @@
 #include "sdlcursormanager.hpp"
 
-#include <stdexcept>
+#include <exception>
+#include <memory>
+#include <utility>
 
-#include <SDL_endian.h>
 #include <SDL_hints.h>
 #include <SDL_mouse.h>
 #include <SDL_render.h>
+#include <SDL_surface.h>
 
-#include <osg/Geometry>
-#include <osg/GraphicsContext>
-#include <osg/TexMat>
-#include <osg/Texture2D>
+#include <osg/GL>
+#include <osg/Image>
 #include <osg/Version>
-#include <osgViewer/GraphicsWindow>
+#include <osg/ref_ptr>
 
 #include <components/debug/debuglog.hpp>
 

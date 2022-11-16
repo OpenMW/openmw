@@ -2,6 +2,8 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 #include "generator.hpp"
 #include "literals.hpp"

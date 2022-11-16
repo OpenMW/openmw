@@ -1,24 +1,37 @@
 #include <algorithm>
 
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+#include <compare>
+#include <stddef.h>
 
 #include <osg/Geometry>
 #include <osg/Group>
 #include <osg/Material>
+#include <osg/MixinVector>
+#include <osg/Node>
+#include <osg/Object>
+#include <osg/PolygonMode>
+#include <osg/PolygonOffset>
+#include <osg/PrimitiveSet>
+#include <osg/Shape>
+#include <osg/ShapeDrawable>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3f>
+#include <osg/Vec4>
+
+#include <LinearMath/btTransform.h>
+
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
-#include <osg/PolygonMode>
-#include <osg/PolygonOffset>
-#include <osg/ShapeDrawable>
-#include <osg/StateSet>
 
 #include "bulletdebugdraw.hpp"
 #include "vismask.hpp"
-
-#include <components/resource/resourcesystem.hpp>
-#include <components/resource/scenemanager.hpp>
 
 #include "../mwbase/environment.hpp"
 

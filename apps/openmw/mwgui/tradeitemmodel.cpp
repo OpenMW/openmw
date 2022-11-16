@@ -1,6 +1,13 @@
 #include "tradeitemmodel.hpp"
 
-#include <components/misc/strings/algorithm.hpp>
+#include <algorithm>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+
+#include <components/esm/refid.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/class.hpp"

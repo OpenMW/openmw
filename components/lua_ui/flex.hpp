@@ -1,6 +1,12 @@
 #ifndef OPENMW_LUAUI_FLEX
 #define OPENMW_LUAUI_FLEX
 
+#include <string>
+
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+
 #include "alignment.hpp"
 #include "widget.hpp"
 

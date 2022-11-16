@@ -1,10 +1,17 @@
 #include "fileparser.hpp"
 
+#include <components/compiler/parser.hpp>
+#include <components/compiler/scriptparser.hpp>
+
 #include "scanner.hpp"
 #include "tokenloc.hpp"
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+    class Locals;
+
     FileParser::FileParser(ErrorHandler& errorHandler, Context& context)
         : Parser(errorHandler, context)
         , mScriptParser(errorHandler, context, mLocals, true)

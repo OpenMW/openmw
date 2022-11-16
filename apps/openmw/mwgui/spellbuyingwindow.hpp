@@ -1,18 +1,29 @@
 #ifndef MWGUI_SpellBuyingWINDOW_H
 #define MWGUI_SpellBuyingWINDOW_H
 
+#include <map>
+
+#include <components/esm/refid.hpp>
+
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
-#include <components/esm/refid.hpp>
-namespace ESM
+
+namespace MWWorld
 {
-    struct Spell;
+    class Ptr;
 }
 
 namespace MyGUI
 {
-    class Gui;
+    class Button;
+    class ScrollView;
+    class TextBox;
     class Widget;
+}
+
+namespace ESM
+{
+    struct Spell;
 }
 
 namespace MWGui

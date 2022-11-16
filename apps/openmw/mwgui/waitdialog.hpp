@@ -1,9 +1,28 @@
 #ifndef MWGUI_WAIT_DIALOG_H
 #define MWGUI_WAIT_DIALOG_H
 
+#include <stddef.h>
+
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_Types.h>
+
 #include "timeadvancer.hpp"
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
+
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class ProgressBar;
+    class ScrollBar;
+    class TextBox;
+    class Widget;
+}
 
 namespace MWGui
 {

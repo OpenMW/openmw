@@ -1,5 +1,7 @@
 #include "widgets.hpp"
 
+#include <memory>
+
 #include <MyGUI_FactoryManager.h>
 
 #include "box.hpp"

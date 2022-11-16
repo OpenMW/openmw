@@ -1,46 +1,81 @@
 #include "objectpaging.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <exception>
+#include <list>
+#include <memory>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
+#include <osg/Array>
+#include <osg/BoundingSphere>
+#include <osg/Callback>
+#include <osg/Drawable>
+#include <osg/Geometry>
+#include <osg/Group>
 #include <osg/LOD>
 #include <osg/Material>
+#include <osg/Matrix>
 #include <osg/MatrixTransform>
+#include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Quat>
 #include <osg/Sequence>
+#include <osg/StateSet>
+#include <osg/Stats>
 #include <osg/Switch>
-#include <osgUtil/IncrementalCompileOperation>
-
-#include <components/esm3/esmreader.hpp>
-#include <components/esm3/loadacti.hpp>
-#include <components/esm3/loadcont.hpp>
-#include <components/esm3/loaddoor.hpp>
-#include <components/esm3/loadstat.hpp>
-
-#include <components/esm3/readerscache.hpp>
-#include <components/misc/resourcehelpers.hpp>
-#include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/optimizer.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/sceneutil/util.hpp>
-#include <components/vfs/manager.hpp>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/UserDataContainer>
+#include <osg/Vec2f>
+#include <osg/Vec2i>
+#include <osg/Vec3d>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+#include <osg/Vec4i>
 
 #include <osgParticle/ParticleProcessor>
+#include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
 
-#include <components/misc/rng.hpp>
-#include <components/sceneutil/lightmanager.hpp>
-#include <components/sceneutil/morphgeometry.hpp>
-#include <components/sceneutil/riggeometry.hpp>
-#include <components/sceneutil/riggeometryosgaextension.hpp>
-#include <components/settings/settings.hpp>
+#include <osgUtil/GLObjectsVisitor>
+#include <osgUtil/IncrementalCompileOperation>
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/defs.hpp>
+#include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadstat.hpp>
+#include <components/esm3/readerscache.hpp>
+#include <components/misc/constants.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/misc/rng.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/resource/objectcache.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/optimizer.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/riggeometry.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/util.hpp>
+#include <components/settings/settings.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "vismask.hpp"
-
-#include <condition_variable>
 
 namespace MWRender
 {

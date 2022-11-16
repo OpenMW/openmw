@@ -24,9 +24,16 @@
  */
 #include "compressedbsafile.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <filesystem>
 #include <fstream>
+#include <functional>
+#include <limits>
+#include <memory>
+#include <stddef.h>
+#include <utility>
+#include <vector>
 
 #include <lz4frame.h>
 
@@ -43,9 +50,11 @@
 #endif
 
 #include <boost/iostreams/device/array.hpp>
+
 #include <components/bsa/memorystream.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
+#include <components/files/streamwithbuffer.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace Bsa

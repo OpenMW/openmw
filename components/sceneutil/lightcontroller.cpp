@@ -1,7 +1,9 @@
 #include "lightcontroller.hpp"
 
-#include <cmath>
+#include <stdlib.h>
 
+#include <osg/FrameStamp>
+#include <osg/Light>
 #include <osg/NodeVisitor>
 
 #include <components/sceneutil/lightmanager.hpp>

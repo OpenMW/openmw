@@ -2,6 +2,8 @@
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIDATAMANAGER_H
 
 #include <MyGUI_DataManager.h>
+#include <MyGUI_IDataStream.h>
+#include <MyGUI_Types.h>
 
 #include <filesystem>
 #include <string>

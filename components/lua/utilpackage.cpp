@@ -1,8 +1,14 @@
 #include "utilpackage.hpp"
 
 #include <algorithm>
-#include <array>
+#include <exception>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 #include <components/misc/color.hpp>
 #include <components/misc/mathutil.hpp>

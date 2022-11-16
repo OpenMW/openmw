@@ -1,7 +1,13 @@
 #ifndef OPENMW_COMPONENTS_SDLUTIL_SDLGRAPHICSWINDOW_H
 #define OPENMW_COMPONENTS_SDLUTIL_SDLGRAPHICSWINDOW_H
 
+#include <string>
+
 #include <SDL_video.h>
+
+#include <osg/GraphicsContext>
+#include <osg/Object>
+#include <osg/Referenced>
 
 #include <osgViewer/GraphicsWindow>
 

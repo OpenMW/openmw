@@ -2,8 +2,11 @@
 
 #include <stdexcept>
 
+#include <osg/GL>
+#include <osg/Image>
 #include <osg/StateSet>
 #include <osg/Texture2D>
+#include <osg/Texture>
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/imagemanager.hpp>

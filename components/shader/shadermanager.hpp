@@ -5,7 +5,9 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <stddef.h>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <osg/ref_ptr>
@@ -13,6 +15,11 @@
 #include <filesystem>
 #include <osg/Program>
 #include <osg/Shader>
+
+namespace osg
+{
+    class State;
+}
 
 namespace osgViewer
 {

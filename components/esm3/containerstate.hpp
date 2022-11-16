@@ -6,6 +6,9 @@
 
 namespace ESM
 {
+    class ESMReader;
+    class ESMWriter;
+
     // format 0, saved games only
 
     struct ContainerState final : public ObjectState

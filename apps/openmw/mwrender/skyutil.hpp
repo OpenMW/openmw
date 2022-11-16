@@ -1,11 +1,26 @@
 #ifndef OPENMW_MWRENDER_SKYUTIL_H
 #define OPENMW_MWRENDER_SKYUTIL_H
 
+#include <map>
+#include <string>
+
+#include <osg/BoundingSphere>
+#include <osg/CopyOp>
+#include <osg/Geometry>
 #include <osg/Material>
+#include <osg/Matrix>
 #include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/OcclusionQueryNode>
+#include <osg/PositionAttitudeTransform>
 #include <osg/Texture2D>
 #include <osg/Transform>
+#include <osg/Vec3f>
 #include <osg/Vec4f>
+#include <osg/observer_ptr>
+#include <osg/ref_ptr>
 
 #include <osgParticle/ConstantRateCounter>
 #include <osgParticle/Shooter>
@@ -13,6 +28,18 @@
 #include <components/esm/refid.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
+
+namespace osg
+{
+    class Camera;
+    class Group;
+    class StateSet;
+}
+
+namespace osgParticle
+{
+    class Particle;
+}
 
 namespace Resource
 {

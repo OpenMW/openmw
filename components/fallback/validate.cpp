@@ -1,5 +1,7 @@
 #include "validate.hpp"
 
+#include <stddef.h>
+
 #include <boost/any.hpp>
 #include <boost/program_options/errors.hpp>
 

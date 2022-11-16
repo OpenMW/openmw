@@ -3,6 +3,9 @@
 #include "controlled.hpp"
 #include "node.hpp"
 
+#include <components/nif/niffile.hpp>
+#include <components/nif/nifstream.hpp>
+
 namespace Nif
 {
 

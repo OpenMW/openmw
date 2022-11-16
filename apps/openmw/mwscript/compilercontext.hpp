@@ -1,6 +1,9 @@
 #ifndef GAME_SCRIPT_COMPILERCONTEXT_H
 #define GAME_SCRIPT_COMPILERCONTEXT_H
 
+#include <string>
+#include <utility>
+
 #include <components/compiler/context.hpp>
 
 namespace ESM

@@ -1,19 +1,29 @@
 #include "material.hpp"
 
+#include <map>
+#include <mutex>
+#include <type_traits>
+#include <utility>
+
 #include <osg/BlendFunc>
 #include <osg/Capability>
 #include <osg/Depth>
-#include <osg/Fog>
+#include <osg/GL>
+#include <osg/Matrix>
+#include <osg/Matrixf>
+#include <osg/Shader>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
 #include <osg/Texture2D>
+#include <osg/Uniform>
+#include <osg/Vec3f>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/stereomanager.hpp>
-
-#include <mutex>
 
 namespace
 {

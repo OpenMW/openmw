@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>
-
+#include <stdio.h>
 #include <string>
 
 #include "formid.hpp"

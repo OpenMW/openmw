@@ -1,10 +1,15 @@
 #ifndef OPENMW_RTT_H
 #define OPENMW_RTT_H
 
-#include <osg/Node>
-
 #include <map>
 #include <memory>
+#include <stdint.h>
+
+#include <osg/Camera>
+#include <osg/GL>
+#include <osg/Node>
+#include <osg/Texture>
+#include <osg/ref_ptr>
 
 namespace osg
 {

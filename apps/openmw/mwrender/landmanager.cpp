@@ -1,12 +1,28 @@
 #include "landmanager.hpp"
 
+#include <memory>
+
 #include <osg/Stats>
 
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm3terrain/storage.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/resource/objectcache.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
+
+namespace osg
+{
+    class Object;
+}
+
+namespace ESM
+{
+    struct Land;
+}
 
 namespace MWRender
 {

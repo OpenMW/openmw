@@ -2,6 +2,7 @@
 #define OPENMW_ESM_SPEL_H
 
 #include <string>
+#include <string_view>
 
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"

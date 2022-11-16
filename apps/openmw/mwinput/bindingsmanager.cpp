@@ -1,6 +1,20 @@
 #include "bindingsmanager.hpp"
 
-#include <MyGUI_EditBox.h>
+#include <map>
+#include <utility>
+#include <vector>
+
+#include <SDL_mouse.h>
+
+#include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
+
+#include <extern/oics/ICSChannel.h>
+#include <extern/oics/ICSControl.h>
+#include <extern/oics/ICSPrerequisites.h>
+
+#include <components/misc/notnullptr.hpp>
+#include <components/sdlutil/events.hpp>
 
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>

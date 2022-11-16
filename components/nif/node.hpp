@@ -1,12 +1,22 @@
 #ifndef OPENMW_COMPONENTS_NIF_NODE_HPP
 #define OPENMW_COMPONENTS_NIF_NODE_HPP
 
+#include <string>
+#include <vector>
+
+#include <components/nif/niftypes.hpp>
+#include <components/nif/record.hpp>
+#include <components/nif/recordptr.hpp>
+
 #include <osg/Plane>
+#include <osg/Vec3f>
 
 #include "base.hpp"
 
 namespace Nif
 {
+    class NIFStream;
+    class Reader;
 
     struct NiNode;
 

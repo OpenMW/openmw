@@ -1,21 +1,52 @@
 #include "characterpreview.hpp"
 
+#include <algorithm>
 #include <cmath>
+#include <ios>
+#include <stdint.h>
 
 #include <osg/BlendFunc>
 #include <osg/Camera>
+#include <osg/CopyOp>
+#include <osg/CullSettings>
 #include <osg/Fog>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/Group>
+#include <osg/Light>
 #include <osg/LightModel>
 #include <osg/LightSource>
 #include <osg/Material>
+#include <osg/Math>
+#include <osg/Matrix>
+#include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
 #include <osg/PositionAttitudeTransform>
+#include <osg/Quat>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/TexEnvCombine>
 #include <osg/Texture2D>
-#include <osg/ValueObject>
+#include <osg/Texture>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/Vec2f>
+#include <osg/Vec3>
+#include <osg/Vec3d>
+#include <osg/Vec4>
+#include <osg/Vec4f>
+
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
 
+#include <apps/openmw/mwrender/animation.hpp>
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadweap.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>

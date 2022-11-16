@@ -1,6 +1,8 @@
 #ifndef MWINPUT_MWKEYBOARDMANAGER_H
 #define MWINPUT_MWKEYBOARDMANAGER_H
 
+#include <SDL_events.h>
+
 #include <components/sdlutil/events.hpp>
 
 namespace MWInput

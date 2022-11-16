@@ -1,8 +1,26 @@
 #include "camera.hpp"
 
-#include <osg/Camera>
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+#include <stdlib.h>
+#include <type_traits>
 
+#include <osg/Callback>
+#include <osg/Camera>
+#include <osg/Math>
+#include <osg/Matrix>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Quat>
+#include <osg/Transform>
+#include <osg/Vec2f>
+
+#include <apps/openmw/mwphysics/collisiontype.hpp>
+
+#include <components/esm/defs.hpp>
 #include <components/misc/mathutil.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -12,7 +30,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/refdata.hpp"
 
 #include "../mwmechanics/movement.hpp"
 

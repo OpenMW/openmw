@@ -26,10 +26,14 @@
 #ifndef BSA_COMPRESSED_BSA_FILE_H
 #define BSA_COMPRESSED_BSA_FILE_H
 
+#include <cstdint>
+#include <filesystem>
+#include <iosfwd>
 #include <map>
+#include <string>
 
 #include <components/bsa/bsa_file.hpp>
-#include <filesystem>
+#include <components/files/istreamptr.hpp>
 
 namespace Bsa
 {

@@ -4,6 +4,13 @@
 
 #include <limits>
 
+#include <components/esm/defs.hpp>
+#include <components/esm3/activespells.hpp>
+#include <components/esm3/aisequence.hpp>
+#include <components/esm3/magiceffects.hpp>
+#include <components/esm3/spellstate.hpp>
+#include <components/esm3/statstate.hpp>
+
 namespace ESM
 {
 

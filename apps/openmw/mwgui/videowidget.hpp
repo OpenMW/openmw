@@ -2,8 +2,15 @@
 #define OPENMW_MWGUI_VIDEOWIDGET_H
 
 #include <memory>
+#include <string>
 
+#include <MyGUI_RTTI.h>
 #include <MyGUI_Widget.h>
+
+namespace MyGUI
+{
+    class ITexture;
+}
 
 namespace Video
 {

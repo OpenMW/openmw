@@ -1,5 +1,11 @@
 #include "extra.hpp"
 
+#include <memory>
+
+#include <components/nif/base.hpp>
+#include <components/nif/niffile.hpp>
+#include <components/nif/nifstream.hpp>
+
 namespace Nif
 {
 

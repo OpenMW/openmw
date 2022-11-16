@@ -8,7 +8,6 @@
 #include <components/esm/refid.hpp>
 
 #include <components/misc/pathhelpers.hpp>
-#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include <components/vfs/manager.hpp>

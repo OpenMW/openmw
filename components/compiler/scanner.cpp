@@ -2,12 +2,14 @@
 
 #include <cassert>
 #include <sstream>
+#include <stddef.h>
 
 #include "errorhandler.hpp"
 #include "exception.hpp"
 #include "extensions.hpp"
 #include "parser.hpp"
 
+#include <components/compiler/tokenloc.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace Compiler

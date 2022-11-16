@@ -33,9 +33,14 @@
 #include <stdexcept>
 #include <string> // getline
 
+#include <components/esm/common.hpp>
+#include <components/esm4/actor.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/inventory.hpp>
+
 //#include <boost/iostreams/filtering_streambuf.hpp>
 //#include <boost/iostreams/copy.hpp>
-#include <boost/scoped_array.hpp>
+#include <boost/smart_ptr/scoped_array.hpp>
 
 #include "formid.hpp" // NOTE: for testing only
 #include "reader.hpp"

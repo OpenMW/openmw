@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_PLAYER_H
 #define OPENMW_ESM_PLAYER_H
 
+#include <map>
 #include <string>
 
 #include "cellid.hpp"

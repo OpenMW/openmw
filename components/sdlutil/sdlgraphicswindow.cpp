@@ -1,6 +1,17 @@
 #include "sdlgraphicswindow.hpp"
 
+#include <ostream>
+
+#include <SDL_error.h>
+#include <SDL_stdinc.h>
 #include <SDL_video.h>
+
+#include <osg/Notify>
+#include <osg/State>
+#include <osg/observer_ptr>
+#include <osg/ref_ptr>
+
+#include <osgGA/EventQueue>
 
 #ifdef OPENMW_GL4ES_MANUAL_INIT
 #include "gl4es_init.h"

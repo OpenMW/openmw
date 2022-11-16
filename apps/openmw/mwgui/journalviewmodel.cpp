@@ -1,9 +1,21 @@
 #include "journalviewmodel.hpp"
 
+#include <algorithm>
+#include <deque>
 #include <map>
+#include <ostream>
+#include <set>
+#include <vector>
 
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_UString.h>
 
+#include <apps/openmw/mwdialogue/journalentry.hpp>
+#include <apps/openmw/mwdialogue/quest.hpp>
+#include <apps/openmw/mwdialogue/topic.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/translation/translation.hpp>
 
@@ -16,8 +28,6 @@
 
 namespace MWGui
 {
-
-    struct JournalViewModelImpl;
 
     struct JournalViewModelImpl : JournalViewModel
     {

@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_ESM_GLOBALMAP_H
 
 #include <set>
+#include <utility>
 #include <vector>
 
 #include "components/esm/defs.hpp"

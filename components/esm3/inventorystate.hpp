@@ -2,6 +2,9 @@
 #define OPENMW_ESM_INVENTORYSTATE_H
 
 #include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "objectstate.hpp"
 #include <components/esm/refid.hpp>

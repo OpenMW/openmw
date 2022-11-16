@@ -1,16 +1,40 @@
 #include "quadtreeworld.hpp"
 
-#include <osg/Material>
-#include <osg/PolygonMode>
-#include <osg/ShapeDrawable>
-#include <osgUtil/CullVisitor>
-
+#include <algorithm>
+#include <cstdlib>
 #include <limits>
+
+#include <osg/BoundingBox>
+#include <osg/BoundingSphere>
+#include <osg/Camera>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/Group>
+#include <osg/Material>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/PolygonMode>
+#include <osg/Shape>
+#include <osg/ShapeDrawable>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Stats>
+#include <osg/Vec2f>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+#include <osg/Vec4i>
+
+#include <osgUtil/CullVisitor>
 
 #include <components/loadinglistener/reporter.hpp>
 #include <components/misc/constants.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/terrain/cellborder.hpp>
+#include <components/terrain/defs.hpp>
+#include <components/terrain/terraingrid.hpp>
+#include <components/terrain/world.hpp>
 
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
@@ -19,6 +43,21 @@
 #include "storage.hpp"
 #include "terraindrawable.hpp"
 #include "viewdata.hpp"
+
+namespace Resource
+{
+    class SceneManager;
+}
+
+namespace Terrain
+{
+    class View;
+}
+
+namespace osg
+{
+    class Object;
+}
 
 namespace
 {

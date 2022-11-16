@@ -1,6 +1,21 @@
 #include "widgets.hpp"
 
+#include <type_traits>
+#include <variant>
+
+#include <MyGUI_Align.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <components/fx/types.hpp>
 #include <components/widgets/box.hpp>
+
+namespace osg
+{
+    class Vec2f;
+    class Vec3f;
+    class Vec4f;
+}
 
 namespace
 {

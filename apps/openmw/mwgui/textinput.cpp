@@ -1,12 +1,26 @@
 #include "textinput.hpp"
 
+#include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/windowbase.hpp>
+
+#include <components/misc/notnullptr.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include <MyGUI_Button.h>
-#include <MyGUI_EditBox.h>
-
 #include "ustring.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWGui
 {

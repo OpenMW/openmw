@@ -2,6 +2,7 @@
 #define COMPILER_LINEPARSER_H_INCLUDED
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <components/interpreter/types.hpp>
@@ -12,8 +13,13 @@
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
     class Locals;
     class Literals;
+    class Scanner;
+
+    struct TokenLoc;
 
     /// \brief Line parser, to be used in console scripts and as part of ScriptParser
 

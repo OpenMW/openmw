@@ -1,7 +1,13 @@
 #ifndef COMPONENTS_L10N_MANAGER_H
 #define COMPONENTS_L10N_MANAGER_H
 
-#include <components/l10n/messagebundles.hpp>
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <unicode/locid.h>
 
 namespace VFS
 {
@@ -10,6 +16,7 @@ namespace VFS
 
 namespace l10n
 {
+    class MessageBundles;
 
     class Manager
     {

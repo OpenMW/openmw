@@ -4,10 +4,15 @@
 #define OPENMW_COMPONENTS_NIF_NIFSTREAM_HPP
 
 #include <cassert>
+#include <cstddef>
 #include <istream>
+#include <memory>
+#include <osg/Vec2f>
 #include <stdexcept>
 #include <stdint.h>
-#include <type_traits>
+#include <string>
+#include <typeinfo>
+#include <utility>
 #include <vector>
 
 #include <components/files/istreamptr.hpp>

@@ -26,12 +26,13 @@
 */
 #include "loadalch.hpp"
 
-#include <cstring>
 #include <stdexcept>
-//#include <iostream> // FIXME
 
 #include "reader.hpp"
-//#include "writer.hpp"
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/effect.hpp>
 
 void ESM4::Potion::load(ESM4::Reader& reader)
 {

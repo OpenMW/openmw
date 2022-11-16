@@ -3,6 +3,8 @@
 
 #include <list>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include "cellid.hpp"
@@ -10,11 +12,6 @@
 #include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
-
-namespace MWWorld
-{
-    class ESMStore;
-}
 
 namespace ESM
 {

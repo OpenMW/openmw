@@ -1,6 +1,12 @@
 #include "rotatecontroller.hpp"
 
+#include <osg/Matrix>
 #include <osg/MatrixTransform>
+#include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Transform>
+#include <osg/Vec3d>
 
 namespace MWRender
 {

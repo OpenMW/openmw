@@ -1,12 +1,26 @@
 #include "transparentpass.hpp"
 
-#include <osg/AlphaFunc>
-#include <osg/BlendFunc>
-#include <osg/Material>
-#include <osg/Texture2D>
-#include <osg/Texture2DArray>
+#include <vector>
 
+#include <osg/BlendFunc>
+#include <osg/Drawable>
+#include <osg/FrameBufferObject>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/GLExtensions>
+#include <osg/Image>
+#include <osg/Material>
+#include <osg/RenderInfo>
+#include <osg/Shader>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Vec4>
+
+#include <osgUtil/RenderLeaf>
 #include <osgUtil/RenderStage>
+#include <osgUtil/StateGraph>
 
 #include <components/sceneutil/depth.hpp>
 #include <components/shader/shadermanager.hpp>

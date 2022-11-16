@@ -1,9 +1,20 @@
 #include "stateupdater.hpp"
 
+#include <stdexcept>
+#include <tuple>
+#include <type_traits>
+
 #include <osg/BufferIndexBinding>
 #include <osg/BufferObject>
+#include <osg/BufferTemplate>
+#include <osg/NodeVisitor>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Uniform>
+#include <osg/ref_ptr>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 namespace fx
 {

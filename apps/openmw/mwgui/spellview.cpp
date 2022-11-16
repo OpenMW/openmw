@@ -1,9 +1,23 @@
 #include "spellview.hpp"
 
+#include <algorithm>
+#include <stdexcept>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/spellmodel.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

@@ -1,6 +1,16 @@
 #include "translation.hpp"
 
+#include <filesystem>
 #include <fstream>
+#include <stddef.h>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
+
+#include <components/files/collections.hpp>
+#include <components/files/multidircollection.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 namespace Translation
 {

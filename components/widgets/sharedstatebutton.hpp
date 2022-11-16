@@ -1,9 +1,19 @@
 #ifndef OPENMW_WIDGETS_SHAREDSTATEBUTTON_HPP
 #define OPENMW_WIDGETS_SHAREDSTATEBUTTON_HPP
 
+#include <string>
+#include <vector>
+
 #include <MyGUI_Button.h>
+#include <MyGUI_MouseButton.h>
+#include <MyGUI_RTTI.h>
 
 #include "fontwrapper.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace Gui
 {

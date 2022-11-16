@@ -1,7 +1,12 @@
 #include "base.hpp"
 
+#include <components/nif/nifstream.hpp>
+#include <components/nif/recordptr.hpp>
+
 namespace Nif
 {
+    class Reader;
+
     void Extra::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))

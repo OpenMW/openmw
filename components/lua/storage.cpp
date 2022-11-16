@@ -1,9 +1,18 @@
 #include "storage.hpp"
 
+#include <algorithm>
+#include <exception>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
+#include <optional>
+#include <stdexcept>
+#include <tuple>
+#include <type_traits>
 
 #include <components/debug/debuglog.hpp>
+#include <components/lua/scriptscontainer.hpp>
+#include <components/lua/serialization.hpp>
 
 namespace sol
 {

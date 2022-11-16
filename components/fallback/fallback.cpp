@@ -1,6 +1,8 @@
 #include "fallback.hpp"
 
 #include <sstream>
+#include <stdexcept>
+#include <utility>
 
 #include <components/debug/debuglog.hpp>
 

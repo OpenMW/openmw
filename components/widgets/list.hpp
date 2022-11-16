@@ -1,7 +1,20 @@
 #ifndef OPENMW_COMPONENTS_WIDGETS_LIST_HPP
 #define OPENMW_COMPONENTS_WIDGETS_LIST_HPP
 
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include <MyGUI_Delegate.h>
+#include <MyGUI_RTTI.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_Widget.h>
+
+namespace MyGUI
+{
+    class Button;
+    class ScrollView;
+}
 
 namespace Gui
 {

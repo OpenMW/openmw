@@ -2,11 +2,36 @@
 #define MWGUI_STATS_WINDOW_H
 
 #include "statswatcher.hpp"
+
+#include <map>
+#include <set>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_Window.h>
+
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/stat.hpp>
+
+#include <components/esm3/loadskil.hpp>
+
 #include "windowpinnablebase.hpp"
 #include <components/esm/refid.hpp>
 
+namespace MyGUI
+{
+    class ScrollView;
+    class TextBox;
+}
+
 namespace MWGui
 {
+    class DragAndDrop;
+
     class StatsWindow : public WindowPinnableBase, public NoDrop, public StatsListener
     {
     public:

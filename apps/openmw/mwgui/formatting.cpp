@@ -1,17 +1,31 @@
 #include "formatting.hpp"
 
-#include <MyGUI_EditBox.h>
+#include <istream>
+#include <memory>
+#include <stdexcept>
+
 #include <MyGUI_EditText.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ISubWidgetText.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextIterator.h>
+#include <MyGUI_TextViewData.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+
+#include <apps/openmw/mwworld/ptr.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/fontloader/fontloader.hpp>
 #include <components/interpreter/defines.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

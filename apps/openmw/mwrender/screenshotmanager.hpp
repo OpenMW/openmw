@@ -1,12 +1,19 @@
 #ifndef MWRENDER_SCREENSHOTMANAGER_H
 #define MWRENDER_SCREENSHOTMANAGER_H
 
-#include <memory>
-
-#include <osg/Group>
+#include <osg/Matrixd>
 #include <osg/ref_ptr>
 
-#include <osgViewer/Viewer>
+namespace osg
+{
+    class Camera;
+    class Group;
+    class Image;
+}
+namespace osgViewer
+{
+    class Viewer;
+}
 
 namespace Resource
 {

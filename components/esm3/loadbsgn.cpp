@@ -1,7 +1,14 @@
 #include "loadbsgn.hpp"
 
+#include <vector>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
+#include <components/esm3/spelllist.hpp>
 
 namespace ESM
 {

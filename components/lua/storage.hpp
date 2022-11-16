@@ -1,7 +1,16 @@
 #ifndef COMPONENTS_LUA_STORAGE_H
 #define COMPONENTS_LUA_STORAGE_H
 
+#include <filesystem>
+#include <functional>
 #include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
 #include <sol/sol.hpp>
 
 #include "scriptscontainer.hpp"

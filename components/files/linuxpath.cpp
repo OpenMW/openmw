@@ -5,6 +5,9 @@
 #include <cstring>
 #include <fstream>
 #include <pwd.h>
+#include <stdlib.h>
+#include <strings.h>
+#include <system_error>
 #include <unistd.h>
 
 #include <components/debug/debuglog.hpp>

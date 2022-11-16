@@ -2,7 +2,16 @@
 #define GAME_RENDER_CELLBORDER
 
 #include <map>
-#include <osg/Group>
+#include <utility>
+
+#include <osg/Node>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class Group;
+    class Vec4f;
+}
 
 namespace Resource
 {

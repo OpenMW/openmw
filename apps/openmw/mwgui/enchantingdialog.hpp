@@ -3,10 +3,28 @@
 
 #include <memory>
 
+#include <apps/openmw/mwgui/referenceinterface.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+
+#include <components/esm3/effectlist.hpp>
+
 #include "itemselection.hpp"
 #include "spellcreationdialog.hpp"
 
 #include "../mwmechanics/enchanting.hpp"
+
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class EditBox;
+    class TextBox;
+    class Widget;
+}
 
 namespace MWGui
 {

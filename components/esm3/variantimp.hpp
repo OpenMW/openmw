@@ -3,11 +3,15 @@
 
 #include <functional>
 #include <string>
+#include <variant>
 
 #include "variant.hpp"
 
 namespace ESM
 {
+    class ESMReader;
+    class ESMWriter;
+
     void readESMVariantValue(ESMReader& reader, Variant::Format format, VarType type, std::string& value);
 
     void readESMVariantValue(ESMReader& reader, Variant::Format format, VarType type, float& value);

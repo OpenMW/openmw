@@ -1,11 +1,14 @@
 #ifndef MWINPUT_MWCONTROLLERMANAGER_H
 #define MWINPUT_MWCONTROLLERMANAGER_H
 
-#include <string>
+#include <array>
+#include <filesystem>
+
+#include <SDL_events.h>
+#include <SDL_gamecontroller.h>
 
 #include <components/sdlutil/events.hpp>
-#include <components/settings/settings.hpp>
-#include <filesystem>
+#include <components/settings/categories.hpp>
 
 namespace MWInput
 {

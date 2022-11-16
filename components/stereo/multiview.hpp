@@ -1,20 +1,24 @@
 #ifndef STEREO_MULTIVIEW_H
 #define STEREO_MULTIVIEW_H
 
-#include <osg/Camera>
+#include <osg/BoundingBox>
 #include <osg/FrameBufferObject>
 #include <osg/GL>
+#include <osg/Matrix>
+#include <osg/observer_ptr>
 #include <osg/ref_ptr>
 
 #include <array>
-#include <memory>
 
 namespace osg
 {
-    class FrameBufferObject;
-    class Texture;
+    class Camera;
+    class CullStack;
+    class State;
+    class StateSet;
     class Texture2D;
     class Texture2DArray;
+    class Texture;
 }
 
 namespace osgUtil

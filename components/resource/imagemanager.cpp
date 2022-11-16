@@ -1,10 +1,25 @@
 #include "imagemanager.hpp"
 
 #include <cassert>
+#include <exception>
+#include <istream>
+#include <memory>
+#include <stdlib.h>
+#include <string_view>
+
+#include <osg/GL>
+#include <osg/GLExtensions>
+#include <osg/Image>
+#include <osg/Stats>
+
+#include <osgDB/Options>
+#include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/istreamptr.hpp>
 #include <components/misc/pathhelpers.hpp>
+#include <components/resource/resourcemanager.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "objectcache.hpp"
@@ -19,6 +34,11 @@ USE_OSGPLUGIN(bmp)
 USE_OSGPLUGIN(osg)
 USE_SERIALIZER_WRAPPER_LIBRARY(osg)
 #endif
+
+namespace osg
+{
+    class Object;
+}
 
 namespace
 {

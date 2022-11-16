@@ -1,7 +1,15 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_COLOR_H
 #define OPENMW_COMPONENTS_SCENEUTIL_COLOR_H
 
+#include <vector>
+
+#include <osg/GL>
 #include <osg/GraphicsThread>
+
+namespace osg
+{
+    class GraphicsContext;
+}
 
 namespace SceneUtil
 {

@@ -1,22 +1,21 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_BULLETSHAPE_H
 #define OPENMW_COMPONENTS_RESOURCE_BULLETSHAPE_H
 
-#include <array>
 #include <map>
 #include <memory>
+#include <string>
 
+#include <osg/CopyOp>
 #include <osg/Object>
 #include <osg/Vec3f>
 #include <osg/ref_ptr>
 
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
+#include <BulletCollision/CollisionShapes/btStridingMeshInterface.h>
+#include <BulletCollision/CollisionShapes/btTriangleInfoMap.h>
 
 class btCollisionShape;
-
-namespace NifBullet
-{
-    class BulletNifLoader;
-}
+class btVector3;
 
 namespace Resource
 {

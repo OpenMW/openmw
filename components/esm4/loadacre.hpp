@@ -28,13 +28,15 @@
 #define ESM4_ACRE_H
 
 #include <cstdint>
+#include <string>
+
+#include <components/esm4/formid.hpp>
 
 #include "reference.hpp" // FormId, Placement, EnableParent
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct ActorCreature
     {

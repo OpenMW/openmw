@@ -2,12 +2,32 @@
 #define COMPONENTS_ESM_TERRAIN_STORAGE_H
 
 #include <cassert>
+#include <map>
 #include <mutex>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <components/terrain/storage.hpp>
+#include <osg/Array>
+#include <osg/CopyOp>
+#include <osg/Object>
+#include <osg/ref_ptr>
 
 #include <components/esm3/loadland.hpp>
-#include <components/esm3/loadltex.hpp>
+#include <components/terrain/defs.hpp>
+#include <components/terrain/storage.hpp>
+
+namespace osg
+{
+    class Vec2f;
+    class Vec3f;
+    class Vec4ub;
+}
+
+namespace ESM
+{
+    struct LandTexture;
+}
 
 namespace VFS
 {

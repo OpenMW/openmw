@@ -9,13 +9,16 @@
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 
+#include <algorithm>
 #include <atomic>
 #include <cassert>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
-#include <sstream>
 #include <string>
+#include <type_traits>
+#include <utility>
 
 namespace
 {

@@ -2,7 +2,9 @@
 #define OPENMW_LUAUI_ADAPTER
 
 #include <memory>
+#include <string>
 
+#include <MyGUI_RTTI.h>
 #include <MyGUI_Widget.h>
 
 namespace LuaUi

@@ -1,6 +1,15 @@
 #include "image.hpp"
 
+#include <MyGUI_Align.h>
+#include <MyGUI_Colour.h>
+#include <MyGUI_ICroppedRectangle.h>
+#include <MyGUI_ISubWidgetRect.h>
+#include <MyGUI_ITexture.h>
 #include <MyGUI_RenderManager.h>
+
+#include <osg/Vec2f>
+
+#include <components/lua_ui/widget.hpp>
 
 #include "resources.hpp"
 

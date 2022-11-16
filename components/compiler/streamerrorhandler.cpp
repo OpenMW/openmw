@@ -2,6 +2,7 @@
 
 #include <sstream>
 
+#include <components/compiler/errorhandler.hpp>
 #include <components/debug/debuglog.hpp>
 
 #include "tokenloc.hpp"

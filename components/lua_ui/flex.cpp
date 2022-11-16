@@ -1,5 +1,11 @@
 #include "flex.hpp"
 
+#include <algorithm>
+#include <vector>
+
+#include <components/lua_ui/alignment.hpp>
+#include <components/lua_ui/widget.hpp>
+
 namespace LuaUi
 {
     void LuaFlex::updateProperties()

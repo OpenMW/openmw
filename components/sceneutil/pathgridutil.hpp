@@ -1,8 +1,14 @@
 #ifndef OPENMW_COMPONENTS_PATHGRIDUTIL_H
 #define OPENMW_COMPONENTS_PATHGRIDUTIL_H
 
-#include <osg/Geometry>
+#include <vector>
+
 #include <osg/ref_ptr>
+
+namespace osg
+{
+    class Geometry;
+}
 
 namespace ESM
 {

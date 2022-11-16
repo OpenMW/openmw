@@ -28,6 +28,7 @@
 #define ESM4_IDLM_H
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "formid.hpp"
@@ -35,7 +36,6 @@
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct IdleMarker
     {

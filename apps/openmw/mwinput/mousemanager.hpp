@@ -1,8 +1,12 @@
 #ifndef MWINPUT_MWMOUSEMANAGER_H
 #define MWINPUT_MWMOUSEMANAGER_H
 
+#include <SDL_events.h>
+#include <SDL_stdinc.h>
+#include <SDL_video.h>
+
 #include <components/sdlutil/events.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/categories.hpp>
 
 namespace SDLUtil
 {

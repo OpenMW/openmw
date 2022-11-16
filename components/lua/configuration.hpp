@@ -1,8 +1,15 @@
 #ifndef COMPONENTS_LUA_CONFIGURATION_H
 #define COMPONENTS_LUA_CONFIGURATION_H
 
+#include <functional>
 #include <map>
+#include <memory>
 #include <optional>
+#include <stddef.h>
+#include <stdint.h>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "components/esm/luascripts.hpp"
 #include "components/esm3/cellref.hpp"

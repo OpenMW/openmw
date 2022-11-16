@@ -3,6 +3,13 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
+#include <components/esm3/spelllist.hpp>
+
+#include <vector>
+
 namespace ESM
 {
     int Race::MaleFemale::getValue(bool male) const

@@ -1,6 +1,7 @@
 #include "gmock/gmock.h"
 #include <gtest/gtest.h>
 
+#include <components/lua/configuration.hpp>
 #include <components/lua/luastate.hpp>
 
 #include "../testing_util.hpp"

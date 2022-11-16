@@ -3,15 +3,23 @@
 
 #include <filesystem>
 #include <memory>
+#include <stddef.h>
 #include <string>
+#include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <osg/BlendEquation>
 #include <osg/BlendFunc>
+#include <osg/CopyOp>
 #include <osg/FrameBufferObject>
 #include <osg/StateSet>
 #include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/ref_ptr>
+
+#include <components/fx/lexer_types.hpp>
 
 #include "lexer.hpp"
 #include "pass.hpp"
@@ -29,6 +37,8 @@ namespace VFS
 
 namespace fx
 {
+    class Technique;
+
     using FlagsType = size_t;
 
     struct DispatchNode

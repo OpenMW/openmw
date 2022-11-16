@@ -5,6 +5,18 @@
 
 #include <array>
 #include <map>
+#include <vector>
+
+#include <osg/CopyOp>
+#include <osg/Object>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class Node;
+    class NodeVisitor;
+    class StateSet;
+}
 
 namespace osgUtil
 {

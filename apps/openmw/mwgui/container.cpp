@@ -1,7 +1,30 @@
 #include "container.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <map>
+#include <memory>
+#include <stddef.h>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/referenceinterface.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/aisequence.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

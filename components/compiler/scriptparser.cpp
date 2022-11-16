@@ -1,11 +1,20 @@
 #include "scriptparser.hpp"
 
+#include <components/compiler/controlparser.hpp>
+#include <components/compiler/lineparser.hpp>
+#include <components/compiler/output.hpp>
+#include <components/compiler/parser.hpp>
+
 #include "errorhandler.hpp"
 #include "scanner.hpp"
 #include "skipparser.hpp"
 
 namespace Compiler
 {
+    class Context;
+
+    struct TokenLoc;
+
     ScriptParser::ScriptParser(ErrorHandler& errorHandler, const Context& context, Locals& locals, bool end)
         : Parser(errorHandler, context)
         , mOutput(locals)

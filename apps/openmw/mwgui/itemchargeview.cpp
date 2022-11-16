@@ -1,13 +1,25 @@
 #include "itemchargeview.hpp"
 
 #include <set>
+#include <stddef.h>
+#include <stdexcept>
+#include <string_view>
+#include <type_traits>
 
+#include <MyGUI_Align.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/widgets.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

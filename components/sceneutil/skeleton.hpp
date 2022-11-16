@@ -1,10 +1,21 @@
 #ifndef OPENMW_COMPONENTS_NIFOSG_SKELETON_H
 #define OPENMW_COMPONENTS_NIFOSG_SKELETON_H
 
-#include <osg/Group>
-
 #include <memory>
+#include <string>
 #include <unordered_map>
+#include <vector>
+
+#include <osg/CopyOp>
+#include <osg/Group>
+#include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+
+namespace osg
+{
+    class MatrixTransform;
+}
 
 namespace SceneUtil
 {

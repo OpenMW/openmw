@@ -2,28 +2,42 @@
 #include "frustum.hpp"
 #include "multiview.hpp"
 
+#include <algorithm>
+#include <initializer_list>
+#include <map>
+#include <stdexcept>
+
+#include <osg/Callback>
+#include <osg/Camera>
 #include <osg/DisplaySettings>
-#include <osg/Texture2D>
-#include <osg/Texture2DArray>
-#include <osg/Texture2DMultisample>
-#include <osg/io_utils>
+#include <osg/GraphicsContext>
+#include <osg/Matrix>
+#include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/Quat>
+#include <osg/State>
+#include <osg/StateSet>
+#include <osg/Uniform>
+#include <osg/Vec3>
+#include <osg/Viewport>
 
 #include <osgUtil/CullVisitor>
-#include <osgUtil/RenderStage>
+#include <osgUtil/SceneView>
 
 #include <osgViewer/Renderer>
 #include <osgViewer/Viewer>
 
-#include <map>
-#include <string>
-
 #include <components/misc/constants.hpp>
-
-#include <components/sceneutil/color.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
-
 #include <components/settings/settings.hpp>
+#include <components/stereo/types.hpp>
+
+namespace osg
+{
+    class NodeVisitor;
+    class Object;
+}
 
 namespace Stereo
 {

@@ -2,6 +2,7 @@
 #define MWGUI_ITEM_MODEL_H
 
 #include <memory>
+#include <stddef.h>
 
 #include "../mwworld/ptr.hpp"
 

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <memory>
 
+#include <components/vfs/archive.hpp>
+
 namespace VFS
 {
 

@@ -1,18 +1,19 @@
 #ifndef COMPONENTS_TERRAIN_WORLD_H
 #define COMPONENTS_TERRAIN_WORLD_H
 
-#include <osg/Referenced>
-#include <osg/Vec3f>
-#include <osg/ref_ptr>
-
+#include <atomic>
 #include <memory>
 #include <set>
+#include <utility>
 
-#include "cellborder.hpp"
+#include <osg/Vec4i>
+#include <osg/ref_ptr>
 
 namespace osg
 {
     class Group;
+    class Callback;
+    class Vec3f;
     class Stats;
 }
 
@@ -28,13 +29,13 @@ namespace Loading
 
 namespace Terrain
 {
-    class Storage;
-
-    class TextureManager;
+    class CellBorder;
     class ChunkManager;
     class CompositeMapRenderer;
-    class View;
     class HeightCullCallback;
+    class Storage;
+    class TextureManager;
+    class View;
 
     /**
      * @brief The basic interface for a terrain world. How the terrain chunks are paged and displayed

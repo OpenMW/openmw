@@ -4,10 +4,11 @@
 
 #include "statesetupdater.hpp"
 
-#include <osg/Drawable>
+#include <osg/Callback>
+#include <osg/FrameStamp>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
-#include <osg/NodeCallback>
+#include <osg/Node>
 
 namespace SceneUtil
 {

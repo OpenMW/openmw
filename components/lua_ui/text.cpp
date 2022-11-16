@@ -1,5 +1,10 @@
 #include "text.hpp"
 
+#include <MyGUI_Colour.h>
+#include <MyGUI_TextBox.h>
+
+#include <components/lua_ui/widget.hpp>
+
 #include "alignment.hpp"
 
 namespace LuaUi

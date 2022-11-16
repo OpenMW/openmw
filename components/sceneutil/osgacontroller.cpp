@@ -1,18 +1,26 @@
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/osgacontroller.hpp>
 
+#include <osg/Matrixf>
 #include <osg/Node>
 #include <osg/NodeVisitor>
+#include <osg/Vec3d>
 #include <osg/ref_ptr>
 
-#include <osgAnimation/Animation>
 #include <osgAnimation/Channel>
 #include <osgAnimation/Sampler>
+#include <osgAnimation/StackedTransform>
+#include <osgAnimation/StackedTransformElement>
 #include <osgAnimation/UpdateMatrixTransform>
 
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/animation.hpp>
-#include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/keyframe.hpp>
+
+namespace osgAnimation
+{
+    class Target;
+}
 
 namespace SceneUtil
 {

@@ -28,6 +28,8 @@
 #define ESM4_QUST_H
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "formid.hpp"
 #include "script.hpp" // TargetCondition, ScriptDefinition
@@ -35,7 +37,6 @@
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
 #pragma pack(push, 1)
     struct QuestData

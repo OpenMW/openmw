@@ -2,9 +2,9 @@
 #include <gtest/gtest.h>
 
 #include <components/esm/luascripts.hpp>
-
 #include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
+#include <components/lua/serialization.hpp>
 
 #include "../testing_util.hpp"
 

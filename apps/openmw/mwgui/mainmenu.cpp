@@ -1,9 +1,28 @@
 #include "mainmenu.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <list>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#include <MyGUI_Align.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ImageBox.h>
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/layout.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/widgets/imagebutton.hpp>

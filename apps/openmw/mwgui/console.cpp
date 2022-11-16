@@ -1,18 +1,41 @@
 #include "console.hpp"
 
-#include <MyGUI_EditBox.h>
-#include <MyGUI_InputManager.h>
-#include <MyGUI_LayerManager.h>
-
+#include <algorithm>
+#include <compare>
+#include <exception>
 #include <filesystem>
 #include <fstream>
+#include <memory>
+#include <stddef.h>
+#include <type_traits>
+
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_LayerManager.h>
+#include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/referenceinterface.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwscript/compilercontext.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
 #include <components/compiler/lineparser.hpp>
 #include <components/compiler/locals.hpp>
+#include <components/compiler/output.hpp>
 #include <components/compiler/scanner.hpp>
+#include <components/compiler/tokenloc.hpp>
+#include <components/esm/refid.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/interpreter/interpreter.hpp>
+#include <components/interpreter/types.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../mwscript/extensions.hpp"
 #include "../mwscript/interpretercontext.hpp"
@@ -25,6 +48,11 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWGui
 {

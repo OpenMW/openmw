@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <string_view>
-#include <utility>
 
 struct sqlite3;
 struct sqlite3_stmt;

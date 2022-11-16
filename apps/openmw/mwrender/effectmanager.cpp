@@ -1,6 +1,9 @@
 #include "effectmanager.hpp"
 
+#include <osg/Group>
+#include <osg/Node>
 #include <osg/PositionAttitudeTransform>
+#include <osg/Vec3f>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -12,6 +15,7 @@
 #include "vismask.hpp"
 
 #include <algorithm>
+#include <utility>
 
 namespace MWRender
 {

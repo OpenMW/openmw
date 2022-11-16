@@ -4,10 +4,15 @@
 #include <stdexcept>
 #include <string>
 
+#include <components/interpreter/runtime.hpp>
+#include <components/interpreter/types.hpp>
+
 #include "opcodes.hpp"
 
 namespace Interpreter
 {
+    class Context;
+
     [[noreturn]] static void abortUnknownCode(int segment, int opcode)
     {
         const std::string error = "unknown opcode " + std::to_string(opcode) + " in segment " + std::to_string(segment);

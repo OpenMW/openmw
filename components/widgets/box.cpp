@@ -1,7 +1,20 @@
 #include "box.hpp"
 
+#include <algorithm>
+#include <memory>
+#include <stddef.h>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+
 #include <MyGUI_EditText.h>
+#include <MyGUI_ISubWidgetText.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_Prerequest.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TPoint.h>
+#include <MyGUI_TSize.h>
+#include <MyGUI_TextViewData.h>
 
 namespace Gui
 {

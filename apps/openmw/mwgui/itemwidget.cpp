@@ -1,12 +1,20 @@
 #include "itemwidget.hpp"
 
+#include <string_view>
+#include <utility>
+
 #include <MyGUI_FactoryManager.h>
+#include <MyGUI_ITexture.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_StringUtility.h>
 #include <MyGUI_TextBox.h>
 
+#include <apps/openmw/mwworld/ptr.hpp>
+
 #include <components/debug/debuglog.hpp>
-// correctIconPath
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/vfs/manager.hpp>

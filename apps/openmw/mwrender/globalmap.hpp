@@ -2,17 +2,17 @@
 #define GAME_RENDER_GLOBALMAP_H
 
 #include <map>
-#include <string>
+#include <utility>
 #include <vector>
 
+#include <osg/Camera>
+#include <osg/Image>
 #include <osg/ref_ptr>
 
 namespace osg
 {
     class Texture2D;
-    class Image;
     class Group;
-    class Camera;
 }
 
 namespace ESM

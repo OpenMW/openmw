@@ -22,11 +22,11 @@
 */
 #include "formid.hpp"
 
-#include <algorithm>
 #include <climits> // LONG_MIN, LONG_MAX for gcc
 #include <cstdlib> // strtol
-#include <sstream>
+#include <errno.h>
 #include <stdexcept>
+#include <stdio.h>
 
 #include <string>
 

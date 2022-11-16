@@ -3,7 +3,15 @@
 #include "nifkey.hpp"
 #include "node.hpp"
 
+#include <algorithm>
+#include <memory>
+#include <stddef.h>
+
 #include <components/debug/debuglog.hpp>
+#include <components/nif/niffile.hpp>
+#include <components/nif/nifstream.hpp>
+#include <components/nif/niftypes.hpp>
+#include <components/nif/recordptr.hpp>
 
 namespace Nif
 {

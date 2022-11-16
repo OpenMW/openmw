@@ -28,8 +28,11 @@
 
 #include <stdexcept>
 
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/formid.hpp>
+
 #include "reader.hpp"
-//#include "writer.hpp"
 
 void ESM4::IdleAnimation::load(ESM4::Reader& reader)
 {

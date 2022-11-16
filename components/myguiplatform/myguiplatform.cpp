@@ -1,5 +1,7 @@
 #include "myguiplatform.hpp"
 
+#include <MyGUI_LogManager.h>
+
 #include "myguidatamanager.hpp"
 #include "myguiloglistener.hpp"
 #include "myguirendermanager.hpp"

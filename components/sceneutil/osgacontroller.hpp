@@ -1,15 +1,30 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_OSGACONTROLLER_HPP
 #define OPENMW_COMPONENTS_SCENEUTIL_OSGACONTROLLER_HPP
 
-#include <osg/Node>
+#include <string>
+#include <vector>
+
+#include <osg/Callback>
+#include <osg/CopyOp>
 #include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/Vec3f>
 #include <osg/ref_ptr>
-#include <osgAnimation/UpdateMatrixTransform>
 
 #include "keyframe.hpp"
 #include "nodecallback.hpp"
 
 #include <components/resource/animation.hpp>
+
+namespace osg
+{
+    class Node;
+}
+
+namespace osgAnimation
+{
+    class UpdateMatrixTransform;
+}
 
 namespace SceneUtil
 {

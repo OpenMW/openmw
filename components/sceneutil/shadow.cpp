@@ -1,5 +1,21 @@
 #include "shadow.hpp"
 
+#include <algorithm>
+#include <limits>
+#include <map>
+#include <string>
+
+#include <osg/CullSettings>
+#include <osg/GL>
+#include <osg/Group>
+#include <osg/Image>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Uniform>
+#include <osg/Vec2s>
+
 #include <osgShadow/ShadowSettings>
 #include <osgShadow/ShadowedScene>
 

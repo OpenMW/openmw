@@ -1,17 +1,40 @@
 #include "race.hpp"
 
-#include <MyGUI_Gui.h>
-#include <MyGUI_ImageBox.h>
-#include <MyGUI_ListBox.h>
-#include <MyGUI_ScrollBar.h>
+#include <algorithm>
+#include <exception>
+#include <string>
+#include <utility>
 
+#include <osg/Math>
 #include <osg/Texture2D>
 
-#include <components/debug/debuglog.hpp>
-#include <components/myguiplatform/myguitexture.hpp>
+#include <MyGUI_Align.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_ISubWidgetRect.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_Macros.h>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/widgets.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/debug/debuglog.hpp>
 #include <components/esm3/loadbody.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/spelllist.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

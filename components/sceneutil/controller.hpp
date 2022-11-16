@@ -4,6 +4,13 @@
 #include <memory>
 #include <osg/NodeVisitor>
 
+namespace osg
+{
+    class Geometry;
+    class MatrixTransform;
+    class Node;
+}
+
 namespace SceneUtil
 {
 

@@ -1,8 +1,20 @@
 #include "objects.hpp"
 
-#include <osg/Group>
-#include <osg/UserDataContainer>
+#include <type_traits>
+#include <utility>
 
+#include <osg/Group>
+#include <osg/Node>
+#include <osg/Referenced>
+#include <osg/UserDataContainer>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+
+#include <apps/openmw/mwrender/actoranimation.hpp>
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/inventorystore.hpp>
+
+#include <components/esm/defs.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 

@@ -3,6 +3,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm3/variant.hpp>
+
 namespace ESM
 {
     void GameSetting::load(ESMReader& esm, bool& isDeleted)

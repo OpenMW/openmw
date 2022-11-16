@@ -6,6 +6,18 @@
 #include "waitdialog.hpp"
 #include "windowbase.hpp"
 
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class TextBox;
+    class Widget;
+}
+
 namespace MWMechanics
 {
     class NpcStats;

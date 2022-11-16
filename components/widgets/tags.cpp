@@ -1,8 +1,15 @@
 #include "tags.hpp"
 
-#include <components/fallback/fallback.hpp>
+#include <ostream>
+#include <stddef.h>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 
 #include <MyGUI_Colour.h>
+#include <MyGUI_StringUtility.h>
+
+#include <components/fallback/fallback.hpp>
 
 namespace Gui
 {

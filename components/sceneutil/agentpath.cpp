@@ -1,7 +1,11 @@
 #include "agentpath.hpp"
 #include "detourdebugdraw.hpp"
 
+#include <osg/Group>
 #include <osg/Material>
+#include <osg/PrimitiveSet>
+#include <osg/StateSet>
+#include <osg/Vec3f>
 
 #include <components/detournavigator/recastparams.hpp>
 #include <components/detournavigator/settings.hpp>

@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include <SDL_types.h>
+#include <SDL_stdinc.h>
 
 struct SDL_Cursor;
 struct SDL_Surface;

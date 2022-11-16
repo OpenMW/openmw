@@ -1,6 +1,11 @@
-#include <filesystem>
-
 #include "constrainedfilestream.hpp"
+
+#include <filesystem>
+#include <memory>
+
+#include <components/files/constrainedfilestreambuf.hpp>
+#include <components/files/istreamptr.hpp>
+#include <components/files/streamwithbuffer.hpp>
 
 namespace Files
 {

@@ -3,8 +3,9 @@
 
 #include <vector>
 
-#include <osg/Node>
+#include <osg/CopyOp>
 #include <osg/Object>
+#include <osg/ref_ptr>
 #include <osgAnimation/Channel>
 
 namespace Resource

@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_AIPACKAGE_H
 #define OPENMW_ESM_AIPACKAGE_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

@@ -2,11 +2,11 @@
 #define GAME_MWRENDER_CAMERA_H
 
 #include <optional>
-#include <string>
 
-#include <osg/Matrix>
-#include <osg/Vec3>
+#include <osg/Matrixf>
+#include <osg/Vec2d>
 #include <osg/Vec3d>
+#include <osg/Vec3f>
 #include <osg/ref_ptr>
 
 #include "../mwworld/ptr.hpp"

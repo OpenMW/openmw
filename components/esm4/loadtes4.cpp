@@ -30,10 +30,11 @@
 #undef NDEBUG
 #endif
 
-#include <cassert>
+#include <memory>
+#include <stddef.h>
 #include <stdexcept>
 
-#include <iostream> // FIXME: debugging only
+#include <components/esm/common.hpp>
 
 #include "common.hpp"
 #include "formid.hpp"

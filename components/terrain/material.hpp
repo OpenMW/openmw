@@ -1,11 +1,14 @@
 #ifndef COMPONENTS_TERRAIN_MATERIAL_H
 #define COMPONENTS_TERRAIN_MATERIAL_H
 
-#include <osg/StateSet>
+#include <vector>
+
+#include <osg/Texture2D>
+#include <osg/ref_ptr>
 
 namespace osg
 {
-    class Texture2D;
+    class StateSet;
 }
 
 namespace Resource

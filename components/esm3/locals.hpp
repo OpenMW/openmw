@@ -2,6 +2,7 @@
 #define OPENMW_ESM_LOCALS_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "variant.hpp"

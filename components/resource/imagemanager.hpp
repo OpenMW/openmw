@@ -1,18 +1,27 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_IMAGEMANAGER_H
 #define OPENMW_COMPONENTS_RESOURCE_IMAGEMANAGER_H
 
-#include <map>
 #include <string>
 
-#include <osg/Image>
 #include <osg/Texture2D>
 #include <osg/ref_ptr>
 
 #include "resourcemanager.hpp"
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace osgDB
 {
     class Options;
+}
+
+namespace osg
+{
+    class Image;
+    class Stats;
 }
 
 namespace Resource

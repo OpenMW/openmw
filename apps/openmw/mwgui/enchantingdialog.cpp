@@ -1,16 +1,36 @@
 #include "enchantingdialog.hpp"
 
-#include <iomanip>
+#include <algorithm>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <vector>
 
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_KeyCode.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/spellcreationdialog.hpp>
+#include <apps/openmw/mwmechanics/enchanting.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 #include <components/widgets/list.hpp>
-
-#include <components/esm3/loadgmst.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

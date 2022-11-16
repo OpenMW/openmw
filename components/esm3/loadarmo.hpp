@@ -2,6 +2,7 @@
 #define OPENMW_ESM_ARMO_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "components/esm/defs.hpp"

@@ -1,10 +1,22 @@
 #include "shadowsbin.hpp"
+
+#include <map>
+#include <stddef.h>
+#include <type_traits>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
 #include <osg/AlphaFunc>
 #include <osg/Material>
-#include <osg/Program>
+#include <osg/NodeVisitor>
+#include <osg/StateAttribute>
 #include <osg/StateSet>
+#include <osg/Uniform>
+#include <osg/Vec4>
 #include <osgUtil/StateGraph>
-#include <unordered_set>
+
+#include <osgUtil/RenderLeaf>
 
 using namespace osgUtil;
 

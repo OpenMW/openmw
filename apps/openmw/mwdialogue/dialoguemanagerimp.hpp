@@ -1,24 +1,49 @@
 #ifndef GAME_MWDIALOG_DIALOGUEMANAGERIMP_H
 #define GAME_MWDIALOG_DIALOGUEMANAGERIMP_H
 
-#include "../mwbase/dialoguemanager.hpp"
-
+#include <list>
 #include <map>
 #include <set>
+#include <stdint.h>
+#include <string>
+#include <string_view>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/esm3/loadinfo.hpp>
+#include <components/interpreter/types.hpp>
 #include <components/misc/strings/algorithm.hpp>
-#include <components/translation/translation.hpp>
+
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 
 #include "../mwscript/compilercontext.hpp"
 
+namespace Compiler
+{
+    class Extensions;
+}
+
+namespace Loading
+{
+    class Listener;
+}
+
+namespace Translation
+{
+    class Storage;
+}
+
 namespace ESM
 {
     struct Dialogue;
+    struct Dialogue;
+
+    class ESMReader;
+    class ESMWriter;
 }
 
 namespace MWDialogue

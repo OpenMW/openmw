@@ -1,10 +1,25 @@
 #include "spellmodel.hpp"
 
-#include <components/debug/debuglog.hpp>
-#include <components/misc/utf8stream.hpp>
+#include <algorithm>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
+#include <apps/openmw/mwmechanics/spells.hpp>
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/debug/debuglog.hpp>
+#include <components/esm/attr.hpp>
+#include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/utf8stream.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

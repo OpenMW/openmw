@@ -2,10 +2,8 @@
 #define STEREO_FRUSTUM_H
 
 #include <osg/BoundingBox>
-#include <osg/Camera>
 #include <osg/Matrix>
-#include <osg/StateSet>
-#include <osg/Vec3>
+#include <osg/ref_ptr>
 
 #include <array>
 #include <map>
@@ -13,18 +11,10 @@
 
 namespace osg
 {
-    class FrameBufferObject;
-    class Texture2D;
-    class Texture2DMultisample;
-    class Texture2DArray;
+    class Camera;
 }
 
-namespace osgViewer
-{
-    class Viewer;
-}
-
-namespace usgUtil
+namespace osgUtil
 {
     class CullVisitor;
 }

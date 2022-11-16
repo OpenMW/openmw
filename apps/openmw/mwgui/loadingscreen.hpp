@@ -2,6 +2,9 @@
 #define MWGUI_LOADINGSCREEN_H
 
 #include <memory>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 #include <osg/Timer>
 #include <osg/ref_ptr>
@@ -9,6 +12,14 @@
 #include "windowbase.hpp"
 
 #include <components/loadinglistener/loadinglistener.hpp>
+
+namespace MyGUI
+{
+    class ITexture;
+    class ScrollBar;
+    class TextBox;
+    class Widget;
+}
 
 namespace osgViewer
 {

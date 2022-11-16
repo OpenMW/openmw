@@ -26,8 +26,14 @@
 
 #include "node.hpp"
 
+#include <components/nif/recordptr.hpp>
+
+#include <osg/Vec3f>
+
 namespace Nif
 {
+    class NIFStream;
+    class Reader;
 
     struct NiDynamicEffect : public Node
     {

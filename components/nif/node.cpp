@@ -1,6 +1,9 @@
 #include "node.hpp"
 
 #include <components/misc/strings/algorithm.hpp>
+#include <components/nif/base.hpp>
+#include <components/nif/niffile.hpp>
+#include <components/nif/nifstream.hpp>
 
 #include "data.hpp"
 #include "exception.hpp"

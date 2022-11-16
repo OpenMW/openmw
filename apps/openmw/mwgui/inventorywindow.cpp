@@ -1,21 +1,58 @@
 #include "inventorywindow.hpp"
 
+#include <algorithm>
 #include <cmath>
+#include <stddef.h>
 #include <stdexcept>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_ISubWidgetRect.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_MouseButton.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TPoint.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 #include <MyGUI_Window.h>
 
 #include <osg/Texture2D>
 
-#include <components/misc/strings/algorithm.hpp>
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/widgets.hpp>
+#include <apps/openmw/mwgui/windowpinnablebase.hpp>
+#include <apps/openmw/mwmechanics/creaturestats.hpp>
+#include <apps/openmw/mwrender/characterpreview.hpp>
+#include <apps/openmw/mwscript/locals.hpp>
+#include <apps/openmw/mwworld/action.hpp>
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
 
+#include <components/esm/refid.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadappa.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadlock.hpp>
+#include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
-
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -23,7 +60,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/actionequip.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <components/compiler/parser.hpp>
+#include <components/compiler/tokenloc.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "context.hpp"
@@ -12,6 +14,8 @@
 
 namespace Compiler
 {
+    class ErrorHandler;
+
     StringParser::StringParser(ErrorHandler& errorHandler, const Context& context, Literals& literals)
         : Parser(errorHandler, context)
         , mLiterals(literals)

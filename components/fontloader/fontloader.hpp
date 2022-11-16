@@ -1,10 +1,10 @@
 #ifndef OPENMW_COMPONENTS_FONTLOADER_H
 #define OPENMW_COMPONENTS_FONTLOADER_H
 
-#include <MyGUI_Version.h>
+#include <string>
+
 #include <MyGUI_XmlDocument.h>
 
-#include <components/myguiplatform/myguidatamanager.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
 namespace VFS
@@ -14,8 +14,7 @@ namespace VFS
 
 namespace MyGUI
 {
-    class ITexture;
-    class ResourceManualFont;
+    class Version;
 }
 
 namespace Gui

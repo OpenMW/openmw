@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_WRITESCENE_H
 
 #include <filesystem>
+#include <string>
 
 namespace osg
 {

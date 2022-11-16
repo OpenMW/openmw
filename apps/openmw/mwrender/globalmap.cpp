@@ -1,23 +1,50 @@
 #include "globalmap.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <iosfwd>
+#include <limits.h>
+#include <stdexcept>
+#include <string.h>
+#include <string>
+
+#include <osg/Array>
+#include <osg/CopyOp>
+#include <osg/Depth>
+#include <osg/DisplaySettings>
+#include <osg/GL>
 #include <osg/Geometry>
 #include <osg/Group>
 #include <osg/Image>
+#include <osg/Matrix>
+#include <osg/NodeVisitor>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/TexEnvCombine>
 #include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Transform>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/Vec4>
 
-#include <osgDB/WriteFile>
+#include <osgDB/ReaderWriter>
+#include <osgDB/Registry>
 
-#include <components/files/memorystream.hpp>
-#include <components/settings/settings.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/debug/debuglog.hpp>
-
+#include <components/esm3/globalmap.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/files/memorystream.hpp>
+#include <components/misc/constants.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/workqueue.hpp>
-
-#include <components/esm3/globalmap.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

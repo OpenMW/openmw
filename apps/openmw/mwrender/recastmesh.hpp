@@ -1,18 +1,14 @@
 #ifndef OPENMW_MWRENDER_RECASTMESH_H
 #define OPENMW_MWRENDER_RECASTMESH_H
 
+#include <map>
+
 #include <components/detournavigator/recastmeshtiles.hpp>
+#include <components/detournavigator/tileposition.hpp>
 #include <components/detournavigator/version.hpp>
 
+#include <osg/Group>
 #include <osg/ref_ptr>
-
-#include <vector>
-
-namespace osg
-{
-    class Group;
-    class Geometry;
-}
 
 namespace DetourNavigator
 {

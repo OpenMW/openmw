@@ -3,6 +3,11 @@
 #include <algorithm>
 #include <array>
 
+namespace osg
+{
+    class GraphicsContext;
+}
+
 namespace SceneUtil
 {
 

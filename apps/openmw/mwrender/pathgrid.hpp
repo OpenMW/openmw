@@ -1,27 +1,15 @@
 #ifndef GAME_RENDER_MWSCENE_H
 #define GAME_RENDER_MWSCENE_H
 
-#include <utility>
-
 #include <map>
+#include <utility>
 #include <vector>
 
+#include <osg/Group>
 #include <osg/ref_ptr>
-
-namespace ESM
-{
-    struct Pathgrid;
-}
-
-namespace osg
-{
-    class Group;
-    class Geometry;
-}
 
 namespace MWWorld
 {
-    class Ptr;
     class CellStore;
 }
 

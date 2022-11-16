@@ -1,11 +1,15 @@
 #ifndef OPENMW_LUAUI_LAYERS
 #define OPENMW_LUAUI_LAYERS
 
+#include <stddef.h>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
+#include <MyGUI_ILayer.h>
 #include <MyGUI_LayerManager.h>
-#include <MyGUI_OverlappedLayer.h>
+#include <MyGUI_Types.h>
+
 #include <osg/Vec2f>
 
 namespace LuaUi

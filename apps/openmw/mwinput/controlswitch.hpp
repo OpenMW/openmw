@@ -1,13 +1,14 @@
 #ifndef MWINPUT_CONTROLSWITCH_H
 #define MWINPUT_CONTROLSWITCH_H
 
+#include <functional>
 #include <map>
+#include <stdint.h>
 #include <string>
 #include <string_view>
 
 namespace ESM
 {
-    struct ControlsState;
     class ESMReader;
     class ESMWriter;
 }

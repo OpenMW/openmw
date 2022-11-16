@@ -1,18 +1,35 @@
 #ifndef OPENMW_MWRENDER_GROUNDCOVER_H
 #define OPENMW_MWRENDER_GROUNDCOVER_H
 
-#include <components/esm3/loadcell.hpp>
-#include <components/resource/scenemanager.hpp>
+#include <map>
+#include <string>
+#include <tuple>
+#include <vector>
+
+#include <osg/Vec2f>
+#include <osg/ref_ptr>
+
+#include <components/esm/defs.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/resource/resourcemanager.hpp>
 #include <components/terrain/quadtreeworld.hpp>
+
+namespace Resource
+{
+    class SceneManager;
+}
 
 namespace MWWorld
 {
-    class ESMStore;
     class GroundcoverStore;
 }
 namespace osg
 {
     class Program;
+    class Node;
+    class StateSet;
+    class Stats;
+    class Vec3f;
 }
 
 namespace MWRender

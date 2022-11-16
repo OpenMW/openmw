@@ -1,8 +1,11 @@
 #include "loadweap.hpp"
 
-#include "components/esm/defs.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
 
 namespace ESM
 {

@@ -1,11 +1,24 @@
 #include "mousemanager.hpp"
 
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
+
+#include <SDL_mouse.h>
+
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
 
+#include <apps/openmw/mwgui/mode.hpp>
+
+#include <components/misc/notnullptr.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"

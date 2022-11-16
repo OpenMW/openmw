@@ -2,6 +2,8 @@
 #define COMPONENTS_FILES_COLLECTION_HPP
 
 #include <filesystem>
+#include <map>
+#include <string>
 
 #include "multidircollection.hpp"
 

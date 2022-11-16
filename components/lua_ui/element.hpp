@@ -1,10 +1,16 @@
 #ifndef OPENMW_LUAUI_ELEMENT
 #define OPENMW_LUAUI_ELEMENT
 
-#include "widget.hpp"
+#include <map>
+#include <memory>
+#include <string>
+
+#include <sol/sol.hpp>
 
 namespace LuaUi
 {
+    class WidgetExtension;
+
     struct Element
     {
         static std::shared_ptr<Element> make(sol::table layout);

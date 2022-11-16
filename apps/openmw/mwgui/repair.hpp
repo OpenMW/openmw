@@ -3,14 +3,27 @@
 
 #include <memory>
 
+#include <apps/openmw/mwgui/itemselection.hpp>
+
 #include "windowbase.hpp"
 
 #include "../mwmechanics/repair.hpp"
 
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class TextBox;
+    class Widget;
+}
+
 namespace MWGui
 {
 
-    class ItemSelectionDialog;
     class ItemWidget;
     class ItemChargeView;
 

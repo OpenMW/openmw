@@ -26,8 +26,16 @@
 
 #include "base.hpp"
 
+#include <stdint.h>
+#include <string>
+#include <vector>
+
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+
 namespace Nif
 {
+    class NIFStream;
 
     struct NiExtraData : public Extra
     {

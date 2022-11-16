@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <osg/ref_ptr>
+
 #include <components/resource/resourcemanager.hpp>
 
 namespace Resource
@@ -12,6 +14,7 @@ namespace Resource
 
 namespace osg
 {
+    class Stats;
     class Texture2D;
 }
 

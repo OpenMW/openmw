@@ -26,11 +26,12 @@
 */
 #include "loadclfm.hpp"
 
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
 
 void ESM4::Colour::load(ESM4::Reader& reader)
 {

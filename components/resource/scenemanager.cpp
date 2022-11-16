@@ -1,42 +1,76 @@
 #include "scenemanager.hpp"
 
+#include <algorithm>
+#include <cstdint>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
+#include <istream>
+#include <iterator>
+#include <list>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 #include <osg/AlphaFunc>
+#include <osg/BoundingBox>
+#include <osg/BoundingSphere>
+#include <osg/Depth>
+#include <osg/Drawable>
 #include <osg/Group>
+#include <osg/MatrixTransform>
+#include <osg/Matrixf>
 #include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Program>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Stats>
+#include <osg/Texture2D>
+#include <osg/Transform>
+#include <osg/Uniform>
 #include <osg/UserDataContainer>
+#include <osg/ValueObject>
+#include <osg/Vec4f>
 
-#include <osgAnimation/RigGeometry>
-
-#include <osgParticle/ParticleSystem>
-
-#include <osgUtil/IncrementalCompileOperation>
-
+#include <osgDB/Callbacks>
 #include <osgDB/FileUtils>
+#include <osgDB/Options>
+#include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 #include <osgDB/SharedStateManager>
 
+#include <osgParticle/Particle>
+#include <osgParticle/ParticleSystem>
+
+#include <osgAnimation/RigGeometry>
+
+#include <osgUtil/IncrementalCompileOperation>
+
 #include <components/debug/debuglog.hpp>
 
-#include <components/nifosg/controller.hpp>
-#include <components/nifosg/nifloader.hpp>
-
-#include <components/nif/niffile.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/hash.hpp>
+#include <components/files/memorystream.hpp>
 
 #include <components/misc/algorithm.hpp>
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
-#include <components/vfs/manager.hpp>
+#include <components/nif/niffile.hpp>
+
+#include <components/nifosg/controller.hpp>
+#include <components/nifosg/nifloader.hpp>
+
+#include <components/resource/resourcemanager.hpp>
 
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/extradata.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/util.hpp>
@@ -45,14 +79,22 @@
 #include <components/shader/shadermanager.hpp>
 #include <components/shader/shadervisitor.hpp>
 
-#include <components/files/conversion.hpp>
-#include <components/files/hash.hpp>
-#include <components/files/memorystream.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "errormarker.hpp"
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
+
+namespace OpenThreads
+{
+    class Mutex;
+}
+
+namespace osgAnimation
+{
+    class Skeleton;
+}
 
 namespace
 {

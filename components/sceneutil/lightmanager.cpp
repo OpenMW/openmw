@@ -4,22 +4,39 @@
 #include <array>
 #include <cstring>
 #include <iterator>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
+#include <osg/Array>
 #include <osg/BufferIndexBinding>
 #include <osg/BufferObject>
+#include <osg/Camera>
+#include <osg/CullStack>
 #include <osg/Endian>
-#include <osg/ValueObject>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/GLExtensions>
+#include <osg/Matrixd>
+#include <osg/MixinVector>
+#include <osg/Referenced>
+#include <osg/Shader>
+#include <osg/State>
+#include <osg/Transform>
+#include <osg/Vec3d>
+#include <osg/Vec3f>
+#include <osg/Vec4>
 
 #include <osgUtil/CullVisitor>
-
-#include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/util.hpp>
-#include <components/shader/shadermanager.hpp>
-
-#include <components/misc/constants.hpp>
-#include <components/misc/hash.hpp>
+#include <osgUtil/RenderStage>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/constants.hpp>
+#include <components/misc/hash.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/util.hpp>
+#include <components/settings/settings.hpp>
+#include <components/shader/shadermanager.hpp>
 
 namespace
 {

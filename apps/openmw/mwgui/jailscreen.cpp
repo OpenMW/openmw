@@ -1,5 +1,25 @@
+#include <algorithm>
+#include <set>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include <MyGUI_Delegate.h>
 #include <MyGUI_ScrollBar.h>
 
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/timeadvancer.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/activespells.hpp>
+#include <apps/openmw/mwmechanics/creaturestats.hpp>
+#include <apps/openmw/mwmechanics/stat.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/format.hpp>
 

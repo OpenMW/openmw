@@ -1,13 +1,21 @@
 #ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_ADDITIVELAYER
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_ADDITIVELAYER
 
+#include <string>
+
 #include <MyGUI_OverlappedLayer.h>
+#include <MyGUI_RTTI.h>
 
 #include <osg/ref_ptr>
 
 namespace osg
 {
     class StateSet;
+}
+
+namespace MyGUI
+{
+    class IRenderTarget;
 }
 
 namespace osgMyGUI

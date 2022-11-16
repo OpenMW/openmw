@@ -1,14 +1,34 @@
 #include "debugdraw.hpp"
+
+#include <cmath>
+#include <cstddef>
+
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include <osg/Array>
-#include <osg/Drawable>
+#include <osg/GL>
 #include <osg/GLExtensions>
 #include <osg/Geometry>
+#include <osg/Group>
+#include <osg/Math>
+#include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/PrimitiveSet>
 #include <osg/Program>
+#include <osg/RenderInfo>
+#include <osg/Shader>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/Uniform>
+#include <osg/Vec2i>
 #include <osg/Vec3>
+
+namespace osg
+{
+    class Node;
+}
 
 static osg::Vec3 sphereCoordToCartesian(float theta, float phi, float r)
 {

@@ -2,17 +2,30 @@
 #define MWGUI_ALCHEMY_H
 
 #include <memory>
+#include <stddef.h>
+#include <string>
 #include <vector>
 
-#include <MyGUI_ComboBox.h>
-#include <MyGUI_ControllerItem.h>
-
-#include <components/widgets/box.hpp>
-#include <components/widgets/numericeditbox.hpp>
+#include <MyGUI_MouseButton.h>
 
 #include "windowbase.hpp"
 
 #include "../mwmechanics/alchemy.hpp"
+
+namespace Gui
+{
+    class AutoSizedButton;
+    class NumericEditBox;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class ComboBox;
+    class ControllerItem;
+    class EditBox;
+    class Widget;
+}
 
 namespace MWGui
 {

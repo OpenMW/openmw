@@ -1,11 +1,24 @@
 #include "storage.hpp"
 
-#include <set>
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <memory>
+#include <stdint.h>
+#include <string.h>
+#include <type_traits>
 
+#include <osg/GL>
 #include <osg/Image>
+#include <osg/MixinVector>
 #include <osg/Plane>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/Vec4ub>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/loadltex.hpp>
+#include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/vfs/manager.hpp>

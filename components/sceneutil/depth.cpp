@@ -1,6 +1,15 @@
 #include "depth.hpp"
 
 #include <algorithm>
+#include <array>
+#include <cmath>
+
+#include <osg/Camera>
+#include <osg/GLExtensions>
+#include <osg/GraphicsContext>
+#include <osg/Math>
+#include <osg/State>
+#include <osg/ref_ptr>
 
 #include <components/debug/debuglog.hpp>
 #include <components/settings/settings.hpp>

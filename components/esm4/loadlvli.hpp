@@ -28,6 +28,7 @@
 #define ESM4_LVLI_H
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "formid.hpp"
@@ -36,7 +37,6 @@
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct LevelledItem
     {

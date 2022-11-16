@@ -1,9 +1,12 @@
 #include "myguidatamanager.hpp"
 
+#include <istream>
+#include <memory>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
-#include <MyGUI_DataFileStream.h>
+#include <MyGUI_DataStream.h>
 
 #include <components/files/conversion.hpp>
 #include <components/vfs/manager.hpp>

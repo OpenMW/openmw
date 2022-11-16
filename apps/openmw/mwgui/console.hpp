@@ -3,11 +3,16 @@
 
 #include <list>
 #include <string>
+#include <string_view>
 #include <vector>
+
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_Types.h>
+
+#include <apps/openmw/mwworld/ptr.hpp>
 
 #include <components/compiler/errorhandler.hpp>
 #include <components/compiler/extensions.hpp>
-#include <components/compiler/output.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 
@@ -15,6 +20,18 @@
 
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
+
+namespace Compiler
+{
+    class Output;
+    struct TokenLoc;
+}
+
+namespace MyGUI
+{
+    class EditBox;
+    class Widget;
+}
 
 namespace MWGui
 {

@@ -1,10 +1,11 @@
 #include "scriptsettings.hpp"
 
-#include <map>
-#include <sol/sol.hpp>
+#include <algorithm>
+#include <vector>
+
+#include <components/debug/debuglog.hpp>
 
 #include "adapter.hpp"
-#include "element.hpp"
 #include "registerscriptsettings.hpp"
 
 namespace LuaUi

@@ -13,6 +13,8 @@
 
 namespace ESM
 {
+    class ESMReader;
+    class ESMWriter;
 
     // format 0, savegames only
 

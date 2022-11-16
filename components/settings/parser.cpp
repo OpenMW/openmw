@@ -1,13 +1,20 @@
 #include "parser.hpp"
 
+#include <filesystem>
+#include <fstream>
+#include <functional>
+#include <iterator>
+#include <locale>
+#include <map>
 #include <sstream>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/algorithm.hpp>
-
-#include <filesystem>
-#include <fstream>
+#include <components/settings/categories.hpp>
 
 #include <Base64.h>
 

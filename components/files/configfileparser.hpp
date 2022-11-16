@@ -1,6 +1,9 @@
 #ifndef COMPONENTS_FILES_CONFIGFILEPARSER_HPP
 #define COMPONENTS_FILES_CONFIGFILEPARSER_HPP
 
+#include <istream>
+
+#include <boost/program_options/option.hpp>
 #include <boost/program_options/parsers.hpp>
 
 namespace Files

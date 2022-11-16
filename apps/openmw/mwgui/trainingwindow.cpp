@@ -1,7 +1,38 @@
 #include "trainingwindow.hpp"
 
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetDefines.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/timeadvancer.hpp>
+#include <apps/openmw/mwgui/waitdialog.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/stat.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -15,10 +46,14 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include <components/esm3/loadclas.hpp>
 #include <components/settings/settings.hpp>
 
 #include "tooltips.hpp"
+
+namespace ESM
+{
+    struct Class;
+}
 
 namespace
 {

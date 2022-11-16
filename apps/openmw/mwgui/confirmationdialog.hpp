@@ -1,7 +1,18 @@
 #ifndef MWGUI_CONFIRMATIONDIALOG_H
 #define MWGUI_CONFIRMATIONDIALOG_H
 
+#include <string>
+
+#include <MyGUI_Delegate.h>
+
 #include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class Button;
+    class EditBox;
+    class Widget;
+}
 
 namespace MWGui
 {

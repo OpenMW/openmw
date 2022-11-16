@@ -1,9 +1,11 @@
 #ifndef OPENMW_ESM_WRITER_H
 #define OPENMW_ESM_WRITER_H
 
+#include <cstddef>
 #include <iosfwd>
 #include <list>
-#include <type_traits>
+#include <stdint.h>
+#include <string>
 
 #include "components/esm/esmcommon.hpp"
 #include "loadtes3.hpp"

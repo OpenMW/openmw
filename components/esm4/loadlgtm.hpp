@@ -32,13 +32,11 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
 #include "lighting.hpp"
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
     typedef std::uint32_t FormId;
 
     struct LightingTemplate

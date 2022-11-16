@@ -5,10 +5,10 @@
 #include <vector>
 
 #include <osg/Array>
-#include <osg/PrimitiveSet>
 #include <osg/ref_ptr>
 
 #include <LinearMath/btIDebugDraw.h>
+#include <LinearMath/btVector3.h>
 
 class btCollisionWorld;
 
@@ -16,6 +16,7 @@ namespace osg
 {
     class Group;
     class Geometry;
+    class DrawArrays;
 }
 
 namespace MWRender

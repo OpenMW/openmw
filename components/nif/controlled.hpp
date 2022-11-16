@@ -26,8 +26,19 @@
 
 #include "base.hpp"
 
+#include <string>
+#include <vector>
+
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+
+#include <components/nif/record.hpp>
+#include <components/nif/recordptr.hpp>
+
 namespace Nif
 {
+    class NIFStream;
+    class Reader;
 
     struct NiSourceTexture : public Named
     {

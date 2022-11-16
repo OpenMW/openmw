@@ -3,15 +3,16 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
+#include <osg/PositionAttitudeTransform>
 #include <osg/ref_ptr>
 
 namespace osg
 {
     class Group;
     class Vec3f;
-    class PositionAttitudeTransform;
 }
 
 namespace Resource

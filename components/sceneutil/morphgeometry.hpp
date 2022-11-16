@@ -1,7 +1,22 @@
 #ifndef OPENMW_COMPONENTS_MORPHGEOMETRY_H
 #define OPENMW_COMPONENTS_MORPHGEOMETRY_H
 
+#include <vector>
+
+#include <osg/Array>
+#include <osg/BoundingBox>
+#include <osg/CopyOp>
+#include <osg/Drawable>
 #include <osg/Geometry>
+#include <osg/Object>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class NodeVisitor;
+    class PrimitiveFunctor;
+    class RenderInfo;
+}
 
 namespace SceneUtil
 {

@@ -1,6 +1,10 @@
 #include "resourceskin.hpp"
 
+#include <MyGUI_ITexture.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_TCoord.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Version.h>
 
 #include <components/misc/strings/algorithm.hpp>
 

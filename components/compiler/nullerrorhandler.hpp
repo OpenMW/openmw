@@ -1,10 +1,14 @@
 #ifndef COMPILER_NULLERRORHANDLER_H_INCLUDED
 #define COMPILER_NULLERRORHANDLER_H_INCLUDED
 
+#include <string>
+
 #include "errorhandler.hpp"
 
 namespace Compiler
 {
+    struct TokenLoc;
+
     /// \brief Error handler implementation: Ignore all error messages
 
     class NullErrorHandler : public ErrorHandler

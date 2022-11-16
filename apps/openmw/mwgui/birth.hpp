@@ -1,8 +1,21 @@
 #ifndef MWGUI_BIRTH_H
 #define MWGUI_BIRTH_H
 
+#include <stddef.h>
+#include <vector>
+
+#include <MyGUI_Delegate.h>
+
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
+
+namespace MyGUI
+{
+    class ImageBox;
+    class ListBox;
+    class ScrollView;
+    class Widget;
+}
 
 namespace MWGui
 {

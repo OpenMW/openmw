@@ -1,8 +1,13 @@
 #include "inventorystate.hpp"
 
+#include <algorithm>
+#include <variant>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/objectstate.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 namespace ESM

@@ -1,7 +1,12 @@
 #include "containerstate.hpp"
 
+#include <components/esm3/inventorystate.hpp>
+#include <components/esm3/objectstate.hpp>
+
 namespace ESM
 {
+    class ESMReader;
+    class ESMWriter;
 
     void ContainerState::load(ESMReader& esm)
     {

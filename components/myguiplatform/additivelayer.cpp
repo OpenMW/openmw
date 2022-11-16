@@ -3,7 +3,14 @@
 #include <osg/BlendFunc>
 #include <osg/StateSet>
 
+#include <MyGUI_RenderManager.h>
+
 #include "myguirendermanager.hpp"
+
+namespace MyGUI
+{
+    class IRenderTarget;
+}
 
 namespace osgMyGUI
 {

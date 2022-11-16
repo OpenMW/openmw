@@ -1,39 +1,56 @@
 #ifndef COMPONENTS_NIFOSG_CONTROLLER_H
 #define COMPONENTS_NIFOSG_CONTROLLER_H
 
+#include <memory>
+#include <set>
+#include <type_traits>
+#include <vector>
+
+#include <components/nif/base.hpp>
 #include <components/nif/controller.hpp>
 #include <components/nif/data.hpp>
 #include <components/nif/nifkey.hpp>
-
+#include <components/nifosg/matrixtransform.hpp>
+#include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
-#include <set>
-#include <type_traits>
-
+#include <osg/Callback>
+#include <osg/CopyOp>
+#include <osg/Material>
+#include <osg/MatrixTransform>
+#include <osg/Object>
+#include <osg/Quat>
 #include <osg/Texture2D>
+#include <osg/Vec3f>
+#include <osg/ref_ptr>
+#include <osgParticle/ParticleProcessor>
+
+namespace Nif
+{
+    struct NiAlphaController;
+    struct NiFlipController;
+    struct NiGeomMorpherController;
+    struct NiKeyframeController;
+    struct NiMaterialColorController;
+    struct NiParticleSystemController;
+    struct NiPathController;
+    struct NiRollController;
+    struct NiVisController;
+}
 
 namespace osg
 {
-    class Material;
-    class MatrixTransform;
-}
-
-namespace osgParticle
-{
-    class ParticleProcessor;
-}
-
-namespace SceneUtil
-{
-    class MorphGeometry;
+    class Node;
+    class NodeVisitor;
+    class StateSet;
+    class Vec4f;
 }
 
 namespace NifOsg
 {
-
-    class MatrixTransform;
 
     // interpolation of keyframes
     template <typename MapT>

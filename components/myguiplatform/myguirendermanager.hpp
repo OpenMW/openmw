@@ -1,9 +1,21 @@
 #ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIRENDERMANAGER_H
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIRENDERMANAGER_H
 
+#include <map>
+#include <stddef.h>
+#include <string>
+
+#include <MyGUI_IRenderTarget.h>
+#include <MyGUI_ITexture.h>
+#include <MyGUI_IVertexBuffer.h>
+#include <MyGUI_RenderFormat.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_RenderTargetInfo.h>
+#include <MyGUI_Types.h>
 
 #include <osg/ref_ptr>
+
+#include <components/myguiplatform/myguitexture.hpp>
 
 namespace Resource
 {
@@ -24,15 +36,12 @@ namespace osg
 {
     class Group;
     class Camera;
-    class RenderInfo;
     class StateSet;
 }
 
 namespace osgMyGUI
 {
-
     class Drawable;
-    class OSGTexture;
 
     class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
     {

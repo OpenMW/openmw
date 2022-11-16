@@ -4,6 +4,15 @@
 #include <array>
 
 #include <osg/AlphaFunc>
+#include <osg/CopyOp>
+#include <osg/GL>
+#include <osg/StateAttribute>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class State;
+}
 
 namespace Shader
 {

@@ -32,8 +32,14 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <string>
+#include <utility>
 
 #include <iostream> // FIXME: debug only
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/formid.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"

@@ -1,10 +1,32 @@
 #include "companionwindow.hpp"
 
 #include <cmath>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/referenceinterface.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwscript/locals.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -19,6 +41,11 @@
 #include "sortfilteritemmodel.hpp"
 #include "tooltips.hpp"
 #include "widgets.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace
 {

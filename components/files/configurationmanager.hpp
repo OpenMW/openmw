@@ -1,12 +1,16 @@
 #ifndef COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
+#include <filesystem>
+#include <iosfwd>
 #include <map>
 #include <optional>
 #include <stack>
+#include <string>
+#include <vector>
 
-#include <components/files/collections.hpp>
 #include <components/files/fixedpath.hpp>
+#include <components/files/multidircollection.hpp>
 
 namespace boost::program_options
 {

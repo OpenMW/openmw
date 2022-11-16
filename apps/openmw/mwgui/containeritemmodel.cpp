@@ -1,6 +1,17 @@
 #include "containeritemmodel.hpp"
 
 #include <algorithm>
+#include <assert.h>
+#include <memory>
+#include <stdexcept>
+#include <type_traits>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/refdata.hpp>
+
+#include <components/esm3/loadcont.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"

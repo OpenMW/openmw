@@ -1,8 +1,9 @@
 #include "manager.hpp"
 
-#include <unicode/errorcode.h>
+#include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
+#include <components/l10n/messagebundles.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace l10n

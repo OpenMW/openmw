@@ -29,13 +29,13 @@
 
 #include <array>
 #include <cstdint>
+#include <string>
 
 #include "formid.hpp"
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct HeadPart
     {

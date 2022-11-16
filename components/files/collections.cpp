@@ -1,6 +1,11 @@
 #include "collections.hpp"
 #include "conversion.hpp"
 
+#include <stdexcept>
+#include <utility>
+#include <vector>
+
+#include <components/files/multidircollection.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 

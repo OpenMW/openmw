@@ -1,8 +1,21 @@
 #include "scrollwindow.hpp"
 
-#include <MyGUI_ScrollView.h>
+#include <string_view>
 
+#include <MyGUI_Delegate.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_TPoint.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadbook.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"

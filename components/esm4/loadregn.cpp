@@ -31,10 +31,11 @@
 #endif
 
 #include <cassert>
+#include <cstddef>
 #include <stdexcept>
 
-//#include <iostream> // FIXME: debug only
-//#include "formid.hpp"
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"

@@ -1,8 +1,12 @@
 #ifndef COMPONENTS_LUAUI_CONTENT
 #define COMPONENTS_LUAUI_CONTENT
 
+#include <functional>
 #include <map>
+#include <stddef.h>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include <sol/sol.hpp>
 

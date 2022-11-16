@@ -1,26 +1,28 @@
 #include "multiview.hpp"
 
-#include <osg/DisplaySettings>
-#include <osg/Texture2D>
-#include <osg/Texture2DArray>
-#include <osg/Texture2DMultisample>
-#include <osg/io_utils>
+#include <initializer_list>
+#include <map>
+#include <utility>
 
-#include <osgUtil/CullVisitor>
-#include <osgUtil/RenderStage>
+#include <osg/Camera>
+#include <osg/CullSettings>
+#include <osg/CullStack>
+#include <osg/Matrixd>
+#include <osg/Vec3d>
+
+#include <osgUtil/SceneView>
 
 #include <osgViewer/Renderer>
-#include <osgViewer/Viewer>
 
-#include <map>
-#include <string>
-
-#include <components/sceneutil/color.hpp>
 #include <components/sceneutil/mwshadowtechnique.hpp>
-
 #include <components/settings/settings.hpp>
 
 #include "frustum.hpp"
+
+namespace osgUtil
+{
+    class CullVisitor;
+}
 
 namespace Stereo
 {

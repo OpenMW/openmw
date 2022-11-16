@@ -29,14 +29,17 @@
 
 #include <cstdint>
 #include <map>
+#include <string>
+#include <utility>
 #include <vector>
+
+#include <components/esm4/formid.hpp>
 
 #include "common.hpp" // CellGrid, Vertex
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct Navigation
     {

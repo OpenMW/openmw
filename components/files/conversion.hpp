@@ -2,6 +2,8 @@
 #define COMPONENTS_FILES_CONVERSION_HPP
 
 #include <filesystem>
+#include <string>
+#include <string_view>
 
 namespace Files
 {

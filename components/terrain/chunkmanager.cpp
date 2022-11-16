@@ -1,20 +1,45 @@
 #include "chunkmanager.hpp"
 
+#include <string>
+
+#include <osg/Array>
+#include <osg/BufferObject>
+#include <osg/CopyOp>
+#include <osg/Drawable>
+#include <osg/GL>
+#include <osg/Geometry>
+#include <osg/Image>
 #include <osg/Material>
+#include <osg/Node>
+#include <osg/Object>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
+#include <osg/Stats>
 #include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Vec2f>
+#include <osg/Vec3>
+#include <osg/Vec4f>
 
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <components/resource/objectcache.hpp>
 #include <components/resource/scenemanager.hpp>
-
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/terrain/buffercache.hpp>
+#include <components/terrain/defs.hpp>
 
 #include "compositemaprenderer.hpp"
 #include "material.hpp"
 #include "storage.hpp"
 #include "terraindrawable.hpp"
 #include "texturemanager.hpp"
+
+namespace osg
+{
+    class State;
+    class Vec3f;
+}
 
 namespace Terrain
 {

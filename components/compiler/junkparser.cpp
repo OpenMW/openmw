@@ -1,6 +1,15 @@
 #include "junkparser.hpp"
 
+#include <components/compiler/parser.hpp>
+
 #include "scanner.hpp"
+
+namespace Compiler
+{
+    class Context;
+    class ErrorHandler;
+    struct TokenLoc;
+}
 
 Compiler::JunkParser::JunkParser(ErrorHandler& errorHandler, const Context& context, int ignoreKeyword)
     : Parser(errorHandler, context)

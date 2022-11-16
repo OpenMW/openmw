@@ -2,15 +2,24 @@
 #define OPENMW_MWRENDER_PINGPONGCANVAS_H
 
 #include <array>
-#include <optional>
+#include <stddef.h>
 
 #include <osg/FrameBufferObject>
 #include <osg/Geometry>
-#include <osg/Texture2D>
+#include <osg/Program>
+#include <osg/StateSet>
+#include <osg/Texture>
+#include <osg/Viewport>
+#include <osg/ref_ptr>
 
 #include <components/fx/technique.hpp>
 
 #include "luminancecalculator.hpp"
+
+namespace osg
+{
+    class RenderInfo;
+}
 
 namespace Shader
 {

@@ -1,12 +1,12 @@
 #include "clone.hpp"
 
-#include <osg/StateSet>
+#include <utility>
 
 #include <osgAnimation/MorphGeometry>
 #include <osgAnimation/RigGeometry>
 
-#include <osgParticle/Emitter>
 #include <osgParticle/ParticleProcessor>
+#include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
 
 #include <components/sceneutil/morphgeometry.hpp>

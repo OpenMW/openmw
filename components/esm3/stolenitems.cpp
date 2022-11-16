@@ -1,5 +1,8 @@
 #include "stolenitems.hpp"
 
+#include <type_traits>
+
+#include <components/esm/esmcommon.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 

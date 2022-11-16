@@ -4,6 +4,7 @@
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 
 #include <filesystem>
+#include <string>
 
 /**
  * \namespace Files

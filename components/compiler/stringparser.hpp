@@ -1,6 +1,7 @@
 #ifndef COMPILER_STRINGPARSER_H_INCLUDED
 #define COMPILER_STRINGPARSER_H_INCLUDED
 
+#include <string>
 #include <vector>
 
 #include <components/interpreter/types.hpp>
@@ -10,7 +11,10 @@
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
     class Literals;
+    class Scanner;
 
     class StringParser : public Parser
     {

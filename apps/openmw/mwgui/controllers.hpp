@@ -1,8 +1,10 @@
 #ifndef MWGUI_CONTROLLERS_H
 #define MWGUI_CONTROLLERS_H
 
-#include <MyGUI_ControllerItem.h>
 #include <string>
+
+#include <MyGUI_ControllerItem.h>
+#include <MyGUI_RTTI.h>
 
 namespace MyGUI
 {

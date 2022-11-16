@@ -1,7 +1,16 @@
 #ifndef MWGUI_RESOURCESKIN_H
 #define MWGUI_RESOURCESKIN_H
 
+#include <string>
+
+#include <MyGUI_RTTI.h>
 #include <MyGUI_ResourceSkin.h>
+#include <MyGUI_XmlDocument.h>
+
+namespace MyGUI
+{
+    class Version;
+}
 
 namespace MWGui
 {

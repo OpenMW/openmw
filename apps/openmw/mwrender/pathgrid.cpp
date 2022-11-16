@@ -1,13 +1,20 @@
 #include "pathgrid.hpp"
 
+#include <algorithm>
 #include <cassert>
 
 #include <osg/Geometry>
 #include <osg/Group>
+#include <osg/Node>
 #include <osg/PositionAttitudeTransform>
+#include <osg/Vec3f>
 
-#include <components/esm3/loadpgrd.hpp>
+#include <apps/openmw/mwrender/rendermode.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm3/loadcell.hpp>
 #include <components/misc/coordinateconverter.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
@@ -15,11 +22,15 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 
-#include "../mwmechanics/pathfinding.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
+
+namespace ESM
+{
+    struct Pathgrid;
+}
 
 namespace MWRender
 {

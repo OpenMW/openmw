@@ -5,7 +5,6 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <unordered_set>
 
 #include <osg/BlendEquation>
 #include <osg/BlendFunc>

@@ -1,5 +1,16 @@
 #include "journalbooks.hpp"
 
+#include <memory>
+#include <stdio.h>
+#include <string.h>
+
+#include <MyGUI_Colour.h>
+
+#include <apps/openmw/mwgui/bookpage.hpp>
+#include <apps/openmw/mwgui/journalviewmodel.hpp>
+
+#include <components/misc/notnullptr.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 

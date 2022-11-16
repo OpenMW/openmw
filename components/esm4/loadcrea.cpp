@@ -31,11 +31,14 @@
 #endif
 
 #include <cassert>
-#include <cstring>
 #include <iostream> // FIXME
-#include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include <components/esm/common.hpp>
+#include <components/esm4/actor.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/inventory.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"

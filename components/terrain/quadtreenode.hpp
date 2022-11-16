@@ -1,9 +1,17 @@
 #ifndef OPENMW_COMPONENTS_TERRAIN_QUADTREENODE_H
 #define OPENMW_COMPONENTS_TERRAIN_QUADTREENODE_H
 
+#include <osg/BoundingBox>
 #include <osg/Group>
+#include <osg/Referenced>
+#include <osg/Vec2f>
 
 #include "defs.hpp"
+
+namespace osg
+{
+    class Vec3f;
+}
 
 namespace Terrain
 {

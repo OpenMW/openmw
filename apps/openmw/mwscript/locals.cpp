@@ -1,11 +1,20 @@
 #include "locals.hpp"
 #include "globalscripts.hpp"
 
+#include <exception>
+#include <memory>
+#include <string>
+#include <utility>
+#include <variant>
+
+#include <apps/openmw/mwworld/store.hpp>
+
 #include <components/compiler/locals.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/locals.hpp>
 #include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"

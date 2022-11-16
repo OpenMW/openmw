@@ -5,16 +5,14 @@
 #include <string>
 #include <vector>
 
+#include <osg/Vec3f>
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
-
-#include "skyutil.hpp"
 
 namespace osg
 {
     class Group;
     class Node;
-    class Material;
     class PositionAttitudeTransform;
     class Camera;
 }
@@ -37,6 +35,17 @@ namespace SceneUtil
 
 namespace MWRender
 {
+    class AtmosphereNightUpdater;
+    class AtmosphereUpdater;
+    class CloudUpdater;
+    class Moon;
+    class RainCounter;
+    class RainShooter;
+    class Sun;
+    class UnderwaterSwitchCallback;
+    struct MoonState;
+    struct WeatherResult;
+
     ///@brief The SkyManager handles rendering of the sky domes, celestial bodies as well as other objects that need to
     /// be rendered
     /// relative to the camera (e.g. weather particle effects)

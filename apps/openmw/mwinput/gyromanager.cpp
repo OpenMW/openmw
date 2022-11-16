@@ -1,5 +1,12 @@
 #include "gyromanager.hpp"
 
+#include <map>
+#include <string>
+#include <utility>
+
+#include <components/misc/notnullptr.hpp>
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/world.hpp"

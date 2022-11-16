@@ -1,11 +1,15 @@
 #include "loadcell.hpp"
 
+#include <cmath>
 #include <limits>
-#include <list>
 #include <string>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/strings/algorithm.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "cellid.hpp"
 #include "esmreader.hpp"

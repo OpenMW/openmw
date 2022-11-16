@@ -6,22 +6,41 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <vector>
+
+#include <osg/ref_ptr>
 
 namespace osg
 {
     class NodeVisitor;
+    class Node;
+    class Vec2f;
+    class Vec3f;
+    class Vec4i;
     class Group;
     class Stats;
 }
 
+namespace Loading
+{
+    class Reporter;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
+
 namespace Terrain
 {
-    class RootNode;
-    class ViewDataMap;
-    class ViewData;
-    struct ViewDataEntry;
-
     class DebugChunkManager;
+    class RootNode;
+    class Storage;
+    class View;
+    class ViewData;
+    class ViewDataMap;
+
+    struct ViewDataEntry;
 
     /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD.
     class QuadTreeWorld

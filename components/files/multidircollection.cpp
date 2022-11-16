@@ -2,6 +2,8 @@
 #include "conversion.hpp"
 
 #include <filesystem>
+#include <stdexcept>
+#include <utility>
 
 #include <components/debug/debuglog.hpp>
 

@@ -1,7 +1,17 @@
 #ifndef MWGUI_WINDOW_BASE_H
 #define MWGUI_WINDOW_BASE_H
 
+#include <string>
+#include <string_view>
+
+#include <MyGUI_Delegate.h>
+
 #include "layout.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWWorld
 {

@@ -1,11 +1,27 @@
 #ifndef OPENMW_COMPONENTS_FX_STATEUPDATER_H
 #define OPENMW_COMPONENTS_FX_STATEUPDATER_H
 
-#include <osg/BufferTemplate>
+#include <memory>
+#include <string>
+#include <string_view>
 
-#include <components/sceneutil/lightmanager.hpp>
+#include <osg/Matrixf>
+#include <osg/Vec2f>
+#include <osg/Vec4f>
+
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/std140/ubo.hpp>
+
+namespace SceneUtil
+{
+    class PPLightBuffer;
+}
+namespace osg
+{
+    class NodeVisitor;
+    class StateSet;
+    class Vec3f;
+}
 
 namespace fx
 {

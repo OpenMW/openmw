@@ -1,5 +1,10 @@
 #include "sharedstatebutton.hpp"
 
+namespace MyGUI
+{
+    class Widget;
+}
+
 namespace Gui
 {
 

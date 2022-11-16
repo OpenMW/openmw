@@ -3,11 +3,16 @@
 
 #include <DebugDraw.h>
 
-#include <osg/Geometry>
+#include <osg/Array>
+#include <osg/PrimitiveSet>
+#include <osg/StateSet>
+#include <osg/Vec3f>
+#include <osg/ref_ptr>
 
 namespace osg
 {
     class Group;
+    class Vec4f;
 }
 
 namespace SceneUtil

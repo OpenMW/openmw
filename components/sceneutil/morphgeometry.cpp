@@ -1,7 +1,21 @@
 #include "morphgeometry.hpp"
 
 #include <cassert>
+#include <memory>
+
 #include <components/resource/scenemanager.hpp>
+
+#include <osg/BufferObject>
+#include <osg/GL>
+#include <osg/MixinVector>
+#include <osg/NodeVisitor>
+#include <osg/UserDataContainer>
+#include <osg/Vec3f>
+
+namespace osg
+{
+    class PrimitiveFunctor;
+}
 
 namespace SceneUtil
 {

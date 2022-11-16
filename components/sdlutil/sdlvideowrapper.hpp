@@ -3,7 +3,7 @@
 
 #include <osg/ref_ptr>
 
-#include <SDL_types.h>
+#include <SDL_stdinc.h>
 
 struct SDL_Window;
 

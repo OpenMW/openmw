@@ -1,17 +1,36 @@
 #include "shadervisitor.hpp"
 
+#include <algorithm>
+#include <initializer_list>
+#include <iterator>
+#include <memory>
 #include <set>
+#include <string_view>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 #include <osg/AlphaFunc>
+#include <osg/Array>
 #include <osg/BlendFunc>
 #include <osg/ColorMaski>
+#include <osg/CopyOp>
+#include <osg/Drawable>
 #include <osg/GLExtensions>
 #include <osg/Geometry>
+#include <osg/Image>
 #include <osg/Material>
 #include <osg/Multisample>
+#include <osg/Node>
+#include <osg/Object>
+#include <osg/Shader>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Texture2D>
 #include <osg/Texture>
+#include <osg/Uniform>
+#include <osg/UserDataContainer>
 #include <osg/ValueObject>
 
 #include <osgParticle/ParticleSystem>

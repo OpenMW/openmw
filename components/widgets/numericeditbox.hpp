@@ -1,9 +1,21 @@
 #ifndef OPENMW_NUMERIC_EDIT_BOX_H
 #define OPENMW_NUMERIC_EDIT_BOX_H
 
+#include <limits>
+#include <string>
+
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
 
 #include "fontwrapper.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace Gui
 {

@@ -1,16 +1,41 @@
 #include "particle.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <limits>
+#include <memory>
 #include <optional>
+#include <stdlib.h>
 
+#include <osg/AttributeDispatchers>
+#include <osg/Camera>
+#include <osg/Drawable>
 #include <osg/Geometry>
+#include <osg/Group>
+#include <osg/Matrix>
 #include <osg/MatrixTransform>
+#include <osg/Matrixd>
+#include <osg/MixinVector>
+#include <osg/Quat>
+#include <osg/RenderInfo>
+#include <osg/State>
+#include <osg/Transform>
 #include <osg/ValueObject>
+#include <osg/Vec3>
+#include <osg/Vec3d>
+#include <osg/Vec4f>
+#include <osg/VertexArrayState>
+
+#include <osgParticle/ParticleProcessor>
+#include <osgParticle/Program>
+#include <osgParticle/range>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/nif/controlled.hpp>
+#include <components/nif/controller.hpp>
 #include <components/nif/data.hpp>
+#include <components/nifosg/controller.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 

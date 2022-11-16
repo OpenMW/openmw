@@ -1,9 +1,15 @@
 #include "discardparser.hpp"
 
+#include <components/compiler/parser.hpp>
+#include <components/compiler/tokenloc.hpp>
+
 #include "scanner.hpp"
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+
     DiscardParser::DiscardParser(ErrorHandler& errorHandler, const Context& context)
         : Parser(errorHandler, context)
         , mState(StartState)

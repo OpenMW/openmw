@@ -2,9 +2,11 @@
 
 #include <osg/Camera>
 #include <osg/Group>
+#include <osg/Matrix>
+#include <osg/Transform>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/scenemanager.hpp>
+#include <components/terrain/cellborder.hpp>
 
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"

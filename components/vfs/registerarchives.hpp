@@ -1,7 +1,13 @@
 #ifndef OPENMW_COMPONENTS_VFS_REGISTER_ARCHIVES_H
 #define OPENMW_COMPONENTS_VFS_REGISTER_ARCHIVES_H
 
-#include <components/files/collections.hpp>
+#include <string>
+#include <vector>
+
+namespace Files
+{
+    class Collections;
+}
 
 namespace VFS
 {

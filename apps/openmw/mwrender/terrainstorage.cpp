@@ -1,10 +1,22 @@
 #include "terrainstorage.hpp"
 
+#include <map>
+
+#include <apps/openmw/mwworld/store.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/resource/resourcesystem.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "landmanager.hpp"
+
+namespace ESM
+{
+    struct LandTexture;
+}
 
 namespace MWRender
 {

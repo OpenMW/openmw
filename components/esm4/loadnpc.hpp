@@ -31,13 +31,14 @@
 #include <string>
 #include <vector>
 
+#include <components/esm4/formid.hpp>
+
 #include "actor.hpp"
 #include "inventory.hpp"
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct Npc
     {

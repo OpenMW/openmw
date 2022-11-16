@@ -1,9 +1,14 @@
 #include "fogstate.hpp"
 
+#include <iosfwd>
+#include <stddef.h>
+#include <string>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-#include <osgDB/ReadFile>
+#include <osgDB/ReaderWriter>
+#include <osgDB/Registry>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/memorystream.hpp>

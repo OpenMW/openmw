@@ -1,13 +1,20 @@
 #ifndef OPENMW_LUAUI_WINDOW
 #define OPENMW_LUAUI_WINDOW
 
-#include <optional>
+#include <map>
+#include <string>
 
-#include "text.hpp"
+#include <MyGUI_MouseButton.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+
 #include "widget.hpp"
 
 namespace LuaUi
 {
+    class LuaText;
+
     class LuaWindow : public MyGUI::Widget, public WidgetExtension
     {
         MYGUI_RTTI_DERIVED(LuaWindow)

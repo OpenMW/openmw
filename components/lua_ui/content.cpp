@@ -1,5 +1,10 @@
 #include "content.hpp"
 
+#include <algorithm>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+
 namespace LuaUi
 {
     Content::Content(const sol::table& table)

@@ -1,8 +1,18 @@
 #ifndef OPENMW_GUI_SPELLMODEL_H
 #define OPENMW_GUI_SPELLMODEL_H
 
+#include <stddef.h>
+#include <string>
+#include <vector>
+
+#include <components/esm/refid.hpp>
+
 #include "../mwworld/ptr.hpp"
-#include <components/esm3/effectlist.hpp>
+
+namespace ESM
+{
+    struct EffectList;
+}
 
 namespace MWGui
 {

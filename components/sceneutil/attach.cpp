@@ -1,14 +1,26 @@
 #include "attach.hpp"
 
+#include <set>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
+#include <osg/CopyOp>
+#include <osg/Drawable>
 #include <osg/FrontFace>
-#include <osg/Geometry>
 #include <osg/Group>
+#include <osg/Matrix>
 #include <osg/MatrixTransform>
+#include <osg/Node>
 #include <osg/NodeVisitor>
+#include <osg/Object>
 #include <osg/PositionAttitudeTransform>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/UserDataContainer>
+#include <osg/Vec3f>
 
+#include <components/misc/strings/algorithm.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/skeleton.hpp>
 

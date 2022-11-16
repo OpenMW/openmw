@@ -1,8 +1,22 @@
 #include "window.hpp"
 
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include <MyGUI_Delegate.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_MouseButton.h>
+#include <MyGUI_TCoord.h>
 #include <MyGUI_Types.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <components/lua_ui/text.hpp>
+#include <components/lua_ui/widget.hpp>
+
+#include <osg/Vec2f>
+
+#include <sol/sol.hpp>
 
 namespace LuaUi
 {

@@ -1,9 +1,28 @@
 #ifndef MWGUI_SETTINGS_H
 #define MWGUI_SETTINGS_H
 
-#include <components/lua_ui/adapter.hpp>
+#include <stddef.h>
+#include <string>
 
 #include "windowbase.hpp"
+
+namespace LuaUi
+{
+    class LuaAdapter;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class ComboBox;
+    class EditBox;
+    class ListBox;
+    class ScrollBar;
+    class ScrollView;
+    class TabControl;
+    class Widget;
+    class Window;
+}
 
 namespace MWGui
 {

@@ -1,5 +1,19 @@
 #include "textedit.hpp"
 
+#include <algorithm>
+
+#include <MyGUI_Align.h>
+#include <MyGUI_Colour.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <sol/sol.hpp>
+
+#include <components/lua_ui/widget.hpp>
+
 #include "alignment.hpp"
 
 namespace LuaUi

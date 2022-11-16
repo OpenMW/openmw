@@ -2,12 +2,19 @@
 #define MWGUI_MESSAGE_BOX_H
 
 #include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include <MyGUI_Delegate.h>
+#include <MyGUI_Widget.h>
+
+#include <apps/openmw/mwgui/layout.hpp>
 
 #include "windowbase.hpp"
 
 namespace MyGUI
 {
-    class Widget;
     class Button;
     class EditBox;
 }
@@ -15,7 +22,6 @@ namespace MyGUI
 namespace MWGui
 {
     class InteractiveMessageBox;
-    class MessageBoxManager;
     class MessageBox;
     class MessageBoxManager
     {

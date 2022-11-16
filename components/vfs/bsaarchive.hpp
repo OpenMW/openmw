@@ -3,8 +3,15 @@
 
 #include "archive.hpp"
 
+#include <filesystem>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <components/bsa/bsa_file.hpp>
 #include <components/bsa/compressedbsafile.hpp>
+#include <components/files/istreamptr.hpp>
 
 namespace VFS
 {

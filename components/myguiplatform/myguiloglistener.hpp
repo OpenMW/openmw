@@ -8,6 +8,7 @@
 #include <MyGUI_ConsoleLogListener.h>
 #include <MyGUI_ILogListener.h>
 #include <MyGUI_LevelLogFilter.h>
+#include <MyGUI_LogLevel.h>
 #include <MyGUI_LogSource.h>
 
 namespace osgMyGUI

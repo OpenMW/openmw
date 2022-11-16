@@ -1,6 +1,7 @@
 #include "myguiloglistener.hpp"
 
 #include <iomanip>
+#include <sstream>
 
 #include <components/debug/debuglog.hpp>
 

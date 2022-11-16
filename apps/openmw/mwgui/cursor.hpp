@@ -1,8 +1,19 @@
 #ifndef MWGUI_CURSOR_H
 #define MWGUI_CURSOR_H
 
+#include <string>
+
 #include <MyGUI_IPointer.h>
+#include <MyGUI_RTTI.h>
 #include <MyGUI_ResourceImageSet.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_XmlDocument.h>
+
+namespace MyGUI
+{
+    class ImageBox;
+    class Version;
+}
 
 namespace MWGui
 {

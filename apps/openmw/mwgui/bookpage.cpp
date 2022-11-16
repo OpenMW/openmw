@@ -1,22 +1,46 @@
 #include "bookpage.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <list>
+#include <map>
 #include <optional>
+#include <stdexcept>
+#include <type_traits>
+#include <vector>
 
 #include "MyGUI_FactoryManager.h"
 #include "MyGUI_FontManager.h"
 #include "MyGUI_RenderItem.h"
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_TextureUtility.h"
+#include <MyGUI_Colour.h>
+#include <MyGUI_ICroppedRectangle.h>
+#include <MyGUI_IFont.h>
+#include <MyGUI_ILayerNode.h>
+#include <MyGUI_IRenderTarget.h>
+#include <MyGUI_ISubWidget.h>
+#include <MyGUI_ISubWidgetText.h>
+#include <MyGUI_MouseButton.h>
+#include <MyGUI_RenderFormat.h>
+#include <MyGUI_RenderTargetInfo.h>
+#include <MyGUI_TPoint.h>
+#include <MyGUI_VertexData.h>
+
+#include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/windowmanager.hpp>
 
 #include <components/misc/utf8stream.hpp>
 #include <components/sceneutil/depth.hpp>
 
+namespace MyGUI
+{
+    class ITexture;
+    class Widget;
+}
+
 namespace MWGui
 {
-    struct TypesetBookImpl;
-    class PageDisplay;
-    class BookPageImpl;
-
     static bool ucsSpace(int codePoint);
     static bool ucsLineBreak(int codePoint);
     static bool ucsCarriageReturn(int codePoint);

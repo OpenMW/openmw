@@ -1,9 +1,11 @@
 #ifndef OPENMW_ESM_LUASCRIPTS_H
 #define OPENMW_ESM_LUASCRIPTS_H
 
-#include <components/esm/refid.hpp>
+#include <cstdint>
 #include <string>
 #include <vector>
+
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {

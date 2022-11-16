@@ -35,7 +35,6 @@
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct AnimObject
     {

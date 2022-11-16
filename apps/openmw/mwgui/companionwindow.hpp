@@ -4,6 +4,19 @@
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
 
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class EditBox;
+    class TextBox;
+    class Widget;
+}
+
 namespace MWGui
 {
     namespace Widgets

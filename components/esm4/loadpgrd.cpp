@@ -26,11 +26,12 @@
 */
 #include "loadpgrd.hpp"
 
+#include <cstddef>
+#include <memory>
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
-//#include <iomanip>  // FIXME: for debugging only
 
-//#include <boost/scoped_array.hpp> // FIXME for debugging only
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
 
 #include "formid.hpp" // FIXME: for mEditorId workaround
 #include "reader.hpp"

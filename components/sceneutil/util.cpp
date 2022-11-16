@@ -2,18 +2,33 @@
 
 #include <algorithm>
 #include <iomanip>
+#include <map>
 #include <sstream>
+#include <string>
 
-#include <osg/FrameBufferObject>
+#include <osg/CopyOp>
+#include <osg/FrameStamp>
+#include <osg/GL>
 #include <osg/Node>
 #include <osg/NodeVisitor>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/TexEnvCombine>
 #include <osg/TexGen>
-#include <osgUtil/CullVisitor>
-#include <osgUtil/RenderStage>
+#include <osg/Texture>
+#include <osg/Uniform>
+#include <osg/UserDataContainer>
 
 #include <components/resource/imagemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/settings/settings.hpp>
+
+namespace osg
+{
+    class Image;
+    class Object;
+}
 
 namespace SceneUtil
 {

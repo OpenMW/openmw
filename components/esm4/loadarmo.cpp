@@ -27,10 +27,12 @@
 #include "loadarmo.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/formid.hpp>
 
 void ESM4::Armor::load(ESM4::Reader& reader)
 {

@@ -31,13 +31,14 @@
 #endif
 
 #include <cassert>
-#include <cfloat> // FLT_MAX for gcc
 #include <stdexcept>
 
-#include <iostream> // FIXME: debug only
-
 #include "reader.hpp"
-//#include "writer.hpp"
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/formid.hpp>
+#include <components/esm4/lighting.hpp>
 
 // TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
 //

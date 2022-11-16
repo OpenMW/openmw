@@ -3,15 +3,22 @@
 
 #include <apps/openmw/mwworld/ptr.hpp>
 
+#include <osg/Group>
 #include <osg/ref_ptr>
 
 #include <deque>
 #include <map>
-#include <unordered_map>
 
 namespace osg
 {
-    class Group;
+    class Vec3f;
+}
+
+namespace MWWorld
+{
+    struct LiveCellRefBase;
+
+    class CellStore;
 }
 
 namespace DetourNavigator

@@ -1,6 +1,9 @@
 #ifndef OPENMW_MWRENDER_RIPPLESIMULATION_H
 #define OPENMW_MWRENDER_RIPPLESIMULATION_H
 
+#include <vector>
+
+#include <osg/Vec3f>
 #include <osg/ref_ptr>
 
 #include "../mwworld/ptr.hpp"
@@ -21,9 +24,9 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace Fallback
+namespace MWWorld
 {
-    class Map;
+    class CellStore;
 }
 
 namespace MWRender

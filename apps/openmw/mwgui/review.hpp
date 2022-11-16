@@ -1,11 +1,31 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
-#include "widgets.hpp"
-#include "windowbase.hpp"
+#include <algorithm>
+#include <map>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include <MyGUI_Delegate.h>
+#include <MyGUI_Types.h>
+
+#include <apps/openmw/mwmechanics/stat.hpp>
+
 #include <components/esm/attr.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadskil.hpp>
+
+#include "widgets.hpp"
+#include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class ScrollView;
+    class TextBox;
+    class Widget;
+}
 
 namespace ESM
 {

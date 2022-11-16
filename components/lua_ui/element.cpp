@@ -1,10 +1,35 @@
 #include "element.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <stddef.h>
+#include <stdexcept>
+#include <stdint.h>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ILayer.h>
+#include <MyGUI_LayerManager.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+
+#include <sol/sol.hpp>
+
+#include <components/debug/debuglog.hpp>
+#include <components/lua/luastate.hpp>
 
 #include "content.hpp"
 #include "util.hpp"
 #include "widget.hpp"
+
+namespace LuaUtil
+{
+    struct Callback;
+}
 
 namespace LuaUi
 {

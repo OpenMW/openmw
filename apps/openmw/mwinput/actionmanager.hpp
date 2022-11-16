@@ -2,13 +2,9 @@
 #define MWINPUT_ACTIONMANAGER_H
 
 #include <osg/ref_ptr>
-#include <osgViewer/ViewerEventHandlers>
 
-namespace osgViewer
-{
-    class Viewer;
-    class ScreenCaptureHandler;
-}
+#include <osgViewer/Viewer>
+#include <osgViewer/ViewerEventHandlers>
 
 namespace MWInput
 {

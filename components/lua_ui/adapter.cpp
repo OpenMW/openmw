@@ -1,12 +1,20 @@
 #include "adapter.hpp"
 
+#include <functional>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_Types.h>
+
+#include <sol/sol.hpp>
 
 #include "container.hpp"
 #include "element.hpp"
 
 namespace LuaUi
 {
+    class WidgetExtension;
+
     namespace
     {
         sol::state luaState;

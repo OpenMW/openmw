@@ -26,8 +26,12 @@
 */
 #include "loadroad.hpp"
 
+#include <cstddef>
+#include <memory>
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
 
 #include "formid.hpp" // FIXME: for workaround
 #include "reader.hpp"

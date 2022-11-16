@@ -1,6 +1,7 @@
 #include "literals.hpp"
 
 #include <algorithm>
+#include <stddef.h>
 
 namespace Compiler
 {

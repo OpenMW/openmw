@@ -2,9 +2,16 @@
 #define OPENMW_COMPONENTS_TERRAIN_VIEWDATA_H
 
 #include <deque>
+#include <list>
+#include <map>
 #include <vector>
 
 #include <osg/Node>
+#include <osg/Object>
+#include <osg/Referenced>
+#include <osg/Vec3f>
+#include <osg/Vec4i>
+#include <osg/ref_ptr>
 
 #include "view.hpp"
 

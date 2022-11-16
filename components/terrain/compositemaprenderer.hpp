@@ -1,10 +1,14 @@
 #ifndef OPENMW_COMPONENTS_TERRAIN_COMPOSITEMAPRENDERER_H
 #define OPENMW_COMPONENTS_TERRAIN_COMPOSITEMAPRENDERER_H
 
-#include <osg/Drawable>
-
 #include <mutex>
 #include <set>
+#include <vector>
+
+#include <osg/Drawable>
+#include <osg/Referenced>
+#include <osg/Timer>
+#include <osg/ref_ptr>
 
 namespace osg
 {

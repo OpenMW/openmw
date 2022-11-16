@@ -1,10 +1,18 @@
 #include "imagebutton.hpp"
 
 #include <cmath>
+#include <stddef.h>
 
+#include <MyGUI_ITexture.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_TCoord.h>
 
 #include <components/debug/debuglog.hpp>
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace Gui
 {

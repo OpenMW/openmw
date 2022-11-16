@@ -1,8 +1,17 @@
 #include "cellborder.hpp"
 
+#include <osg/Array>
+#include <osg/GL>
 #include <osg/Geometry>
+#include <osg/Group>
 #include <osg/Material>
 #include <osg/PolygonMode>
+#include <osg/PrimitiveSet>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include "world.hpp"
 

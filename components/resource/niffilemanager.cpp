@@ -1,10 +1,13 @@
 #include "niffilemanager.hpp"
 
-#include <iostream>
+#include <memory>
 
+#include <osg/CopyOp>
 #include <osg/Object>
 #include <osg/Stats>
+#include <osg/ref_ptr>
 
+#include <components/resource/resourcemanager.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "objectcache.hpp"

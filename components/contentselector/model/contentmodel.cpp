@@ -2,12 +2,17 @@
 #include "esmfile.hpp"
 
 #include <stdexcept>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 #include <QDebug>
 #include <QDir>
 
+#include <components/contentselector/model/loadordererror.hpp>
 #include <components/esm3/esmreader.hpp>
+#include <components/esm3/loadtes3.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 ContentSelectorModel::ContentModel::ContentModel(QObject* parent, QIcon warningIcon, bool showOMWScripts)
     : QAbstractTableModel(parent)

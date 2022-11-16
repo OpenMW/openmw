@@ -1,8 +1,18 @@
 #include "sortfilteritemmodel.hpp"
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
+#include <algorithm>
+#include <assert.h>
+#include <limits>
+#include <stdexcept>
+#include <type_traits>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwworld/action.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadappa.hpp>
 #include <components/esm3/loadarmo.hpp>
@@ -16,14 +26,23 @@
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadprob.hpp>
 #include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadweap.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/utf8stream.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/nullaction.hpp"
 
 #include "../mwmechanics/alchemy.hpp"
+
+namespace ESM
+{
+    struct Creature;
+}
 
 namespace
 {

@@ -1,9 +1,14 @@
 #ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUITEXTURE_H
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUITEXTURE_H
 
+#include <MyGUI_IRenderTarget.h>
 #include <MyGUI_ITexture.h>
+#include <MyGUI_RenderFormat.h>
 
 #include <osg/ref_ptr>
+
+#include <stddef.h>
+#include <string>
 
 namespace osg
 {

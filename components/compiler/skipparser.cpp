@@ -2,8 +2,15 @@
 
 #include "scanner.hpp"
 
+#include <components/compiler/parser.hpp>
+
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+
+    struct TokenLoc;
+
     SkipParser::SkipParser(ErrorHandler& errorHandler, const Context& context)
         : Parser(errorHandler, context)
     {

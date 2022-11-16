@@ -1,6 +1,7 @@
 #include "textcolours.hpp"
 
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_UString.h>
 
 #include <string>
 

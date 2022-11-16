@@ -1,36 +1,57 @@
 #include "skyutil.hpp"
 
+#include <algorithm>
+#include <array>
 #include <cmath>
+#include <initializer_list>
+#include <memory>
 
 #include <osg/AlphaFunc>
+#include <osg/Array>
 #include <osg/BlendFunc>
+#include <osg/Camera>
 #include <osg/ColorMask>
+#include <osg/CullSettings>
+#include <osg/CullStack>
+#include <osg/CullingSet>
 #include <osg/Depth>
+#include <osg/GL>
 #include <osg/Geometry>
+#include <osg/Group>
 #include <osg/Material>
+#include <osg/Math>
+#include <osg/Matrixd>
+#include <osg/MixinVector>
 #include <osg/OcclusionQueryNode>
+#include <osg/Polytope>
 #include <osg/PositionAttitudeTransform>
+#include <osg/PrimitiveSet>
+#include <osg/Quat>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
+#include <osg/Texture>
 #include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/Vec2f>
+#include <osg/Vec3d>
+#include <osg/Vec4>
 #include <osg/observer_ptr>
 
 #include <osgUtil/CullVisitor>
+#include <osgUtil/RenderStage>
 
 #include <osgParticle/Particle>
 
+#include <components/fallback/fallback.hpp>
 #include <components/misc/rng.hpp>
-#include <components/stereo/multiview.hpp>
-#include <components/stereo/stereomanager.hpp>
-
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
-
 #include <components/sceneutil/depth.hpp>
-
-#include <components/fallback/fallback.hpp>
-
 #include <components/sceneutil/statesetupdater.hpp>
+#include <components/stereo/multiview.hpp>
+#include <components/stereo/stereomanager.hpp>
 
 #include "../mwbase/environment.hpp"
 

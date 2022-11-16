@@ -1,6 +1,19 @@
 #include "widget.hpp"
 
-#include <SDL_events.h>
+#include <exception>
+#include <stddef.h>
+#include <tuple>
+
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_TCoord.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <SDL_keyboard.h>
+
+#include <osg/Vec2f>
+
 #include <components/sdlutil/sdlmappings.hpp>
 
 namespace LuaUi

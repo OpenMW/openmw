@@ -1,9 +1,11 @@
 #ifndef COMPILER_SCANNER_H_INCLUDED
 #define COMPILER_SCANNER_H_INCLUDED
 
+#include <algorithm>
 #include <cctype>
 #include <iosfwd>
 #include <istream>
+#include <iterator>
 #include <string>
 #include <vector>
 

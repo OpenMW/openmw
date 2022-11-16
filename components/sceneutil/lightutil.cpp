@@ -1,7 +1,12 @@
 #include "lightutil.hpp"
 
+#include <cmath>
+#include <string_view>
+
+#include <osg/Drawable>
 #include <osg/Group>
 #include <osg/Light>
+#include <osg/NodeVisitor>
 
 #include <osgParticle/ParticleSystem>
 
@@ -12,6 +17,11 @@
 #include "lightmanager.hpp"
 #include "util.hpp"
 #include "visitor.hpp"
+
+namespace osg
+{
+    class Geometry;
+}
 
 namespace
 {

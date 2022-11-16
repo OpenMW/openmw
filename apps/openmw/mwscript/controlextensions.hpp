@@ -1,11 +1,6 @@
 #ifndef GAME_SCRIPT_CONTROLEXTENSIONS_H
 #define GAME_SCRIPT_CONTROLEXTENSIONS_H
 
-namespace Compiler
-{
-    class Extensions;
-}
-
 namespace Interpreter
 {
     class Interpreter;

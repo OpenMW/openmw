@@ -1,7 +1,11 @@
 #include "transport.hpp"
 
-#include <components/debug/debuglog.hpp>
+#include <memory>
 
+#include <components/debug/debuglog.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 

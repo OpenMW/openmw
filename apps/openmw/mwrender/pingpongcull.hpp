@@ -3,12 +3,16 @@
 
 #include <array>
 
-#include <components/sceneutil/nodecallback.hpp>
+#include <osg/Node>
+#include <osg/ref_ptr>
 
-#include "postprocessor.hpp"
+#include <osgUtil/CullVisitor>
+
+#include <components/sceneutil/nodecallback.hpp>
 
 namespace osg
 {
+    class Matrixf;
     class StateSet;
     class Viewport;
 }

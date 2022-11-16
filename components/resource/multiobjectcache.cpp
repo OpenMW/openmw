@@ -1,7 +1,11 @@
 #include "multiobjectcache.hpp"
 
+#include <ostream>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
+#include <osg/Notify>
 #include <osg/Object>
 
 namespace Resource

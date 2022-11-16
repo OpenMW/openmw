@@ -1,10 +1,18 @@
 #ifndef COMPILER_JUNKPARSER_H_INCLUDED
 #define COMPILER_JUNKPARSER_H_INCLUDED
 
+#include <string>
+
 #include "parser.hpp"
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+    class Scanner;
+
+    struct TokenLoc;
+
     /// \brief Parse an optional single junk token
     class JunkParser : public Parser
     {

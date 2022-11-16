@@ -1,5 +1,13 @@
 #include "itemmodel.hpp"
 
+#include <type_traits>
+#include <utility>
+
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 

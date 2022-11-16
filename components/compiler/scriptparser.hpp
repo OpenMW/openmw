@@ -1,6 +1,11 @@
 #ifndef COMPILER_SCRIPTPARSER_H_INCLUDED
 #define COMPILER_SCRIPTPARSER_H_INCLUDED
 
+#include <string>
+#include <vector>
+
+#include <components/interpreter/types.hpp>
+
 #include "controlparser.hpp"
 #include "lineparser.hpp"
 #include "output.hpp"
@@ -8,7 +13,12 @@
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+    class Scanner;
     class Locals;
+
+    struct TokenLoc;
 
     // Script parser, to be used in dialogue scripts and as part of FileParser
 

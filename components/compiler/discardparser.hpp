@@ -1,11 +1,17 @@
 #ifndef COMPILER_DISCARDPARSER_H_INCLUDED
 #define COMPILER_DISCARDPARSER_H_INCLUDED
 
+#include <string>
+
 #include "parser.hpp"
 #include "tokenloc.hpp"
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+    class Scanner;
+
     /// \brief Parse a single optional numeric value or string and discard it
     class DiscardParser : public Parser
     {

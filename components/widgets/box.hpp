@@ -1,10 +1,16 @@
 #ifndef OPENMW_WIDGETS_BOX_H
 #define OPENMW_WIDGETS_BOX_H
 
+#include <string>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_RTTI.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
 #include <MyGUI_Widget.h>
 
 #include "fontwrapper.hpp"

@@ -2,10 +2,34 @@
 #define MWGUI_QUICKKEYS_H
 
 #include <memory>
+#include <stdint.h>
+#include <string>
+#include <vector>
+
+#include <components/esm/refid.hpp>
 
 #include "itemselection.hpp"
 #include "spellmodel.hpp"
 #include "windowbase.hpp"
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
+
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class EditBox;
+    class TextBox;
+    class Widget;
+}
 
 namespace MWGui
 {

@@ -1,9 +1,16 @@
 #ifndef OPENMW_GAME_MWGUI_ITEMSELECTION_H
 #define OPENMW_GAME_MWGUI_ITEMSELECTION_H
 
+#include <string>
+
 #include <MyGUI_Delegate.h>
 
 #include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWWorld
 {

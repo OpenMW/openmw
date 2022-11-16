@@ -1,9 +1,17 @@
 #include "detourdebugdraw.hpp"
 #include "util.hpp"
 
+#include <stdexcept>
+#include <string>
+#include <utility>
+
 #include <osg/BlendFunc>
+#include <osg/GL>
+#include <osg/Geometry>
 #include <osg/Group>
 #include <osg/LineWidth>
+#include <osg/StateAttribute>
+#include <osg/Vec4f>
 
 namespace
 {

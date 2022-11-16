@@ -3,8 +3,16 @@
 
 #include "parser.hpp"
 
+#include <string>
+
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+    class Scanner;
+
+    struct TokenLoc;
+
     // \brief Skip parser for skipping a line
     //
     // This parser is mainly intended for skipping the rest of a faulty line.

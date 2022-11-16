@@ -4,19 +4,27 @@
 #include <array>
 #include <memory>
 
-#include <osg/FrameBufferObject>
 #include <osg/StateSet>
+#include <osg/ref_ptr>
 
 #include <osgUtil/RenderBin>
+
+#include <components/stereo/multiview.hpp>
 
 namespace Shader
 {
     class ShaderManager;
 }
 
-namespace Stereo
+namespace osg
 {
-    class MultiviewFramebufferResolve;
+    class FrameBufferObject;
+    class RenderInfo;
+}
+
+namespace osgUtil
+{
+    class RenderLeaf;
 }
 
 namespace MWRender

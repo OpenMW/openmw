@@ -1,9 +1,14 @@
 #include "statesetupdater.hpp"
 
+#include <memory>
+#include <utility>
+
 #include <components/stereo/stereomanager.hpp>
+#include <components/stereo/types.hpp>
 
 #include <osg/Node>
 #include <osg/NodeVisitor>
+#include <osg/StateSet>
 #include <osgUtil/CullVisitor>
 
 namespace SceneUtil

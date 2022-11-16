@@ -1,32 +1,23 @@
 #ifndef OPENMW_COMPONENTS_NIFBULLET_BULLETNIFLOADER_HPP
 #define OPENMW_COMPONENTS_NIFBULLET_BULLETNIFLOADER_HPP
 
-#include <cassert>
-#include <map>
-#include <set>
+#include <memory>
+#include <stdlib.h>
 #include <string>
 
-#include <osg/BoundingBox>
 #include <osg/Matrixf>
-#include <osg/Referenced>
 #include <osg/ref_ptr>
 
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/nif/niffile.hpp>
 #include <components/resource/bulletshape.hpp>
 
-class btTriangleMesh;
-class btCompoundShape;
-class btCollisionShape;
-
 namespace Nif
 {
     struct Node;
-    struct Transformation;
-    struct NiTriShape;
-    struct NiTriStrips;
     struct NiGeometry;
     struct Parent;
 }

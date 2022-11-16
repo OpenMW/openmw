@@ -3,6 +3,8 @@
 
 #include <components/shader/shadermanager.hpp>
 
+#include <osg/ref_ptr>
+
 namespace osg
 {
     class StateSet;

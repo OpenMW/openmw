@@ -3,6 +3,10 @@
 #include <fstream>
 #include <stdexcept>
 
+#include <osg/ref_ptr>
+
+#include <osgDB/Options>
+#include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 
 #include "serialize.hpp"

@@ -1,15 +1,29 @@
 #include "widgets.hpp"
 
 #include <iomanip>
+#include <ostream>
+#include <stdexcept>
 
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
-#include <MyGUI_ControllerManager.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_LogStream.h>
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+
+#include "MyGUI_LogManager.h"
+
+#include <apps/openmw/mwmechanics/stat.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/esm/attr.hpp>
+#include <components/esm/defs.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 

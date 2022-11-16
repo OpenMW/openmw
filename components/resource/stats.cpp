@@ -1,19 +1,53 @@
 #include "stats.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <functional>
 #include <iomanip>
+#include <iterator>
 #include <sstream>
+#include <stdlib.h>
+#include <string>
+#include <string_view>
+#include <vector>
 
+#include <osg/ApplicationUsage>
+#include <osg/Array>
+#include <osg/Drawable>
+#include <osg/FrameStamp>
+#include <osg/GL>
+#include <osg/Geometry>
+#include <osg/GraphicsContext>
+#include <osg/Group>
+#include <osg/Matrix>
+#include <osg/NodeVisitor>
 #include <osg/PolygonMode>
+#include <osg/PrimitiveSet>
+#include <osg/RenderInfo>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Stats>
+#include <osg/Transform>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+#include <osg/Vec4>
+
+#include <osgGA/GUIActionAdapter>
+#include <osgGA/GUIEventAdapter>
+
+#include <osgViewer/GraphicsWindow>
+#include <osgViewer/Renderer>
+#include <osgViewer/View>
+#include <osgViewer/Viewer>
+#include <osgViewer/ViewerBase>
 
 #include <osgText/Font>
 #include <osgText/Text>
 
 #include <osgDB/Registry>
 
-#include <osgViewer/Renderer>
-#include <osgViewer/Viewer>
-
+#include <components/files/istreamptr.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace Resource

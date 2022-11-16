@@ -1,22 +1,42 @@
 #include "ripplesimulation.hpp"
 
 #include <iomanip>
+#include <memory>
 #include <sstream>
+#include <string_view>
+#include <type_traits>
 
 #include <osg/Depth>
+#include <osg/GL>
+#include <osg/Group>
 #include <osg/Material>
+#include <osg/Math>
+#include <osg/Node>
 #include <osg/PolygonOffset>
 #include <osg/PositionAttitudeTransform>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Vec3d>
+#include <osg/Vec4f>
+
+#include <osgParticle/Particle>
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
+#include <osgParticle/range>
 
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/defs.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/rng.hpp>
 #include <components/nifosg/controller.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
 
 #include "vismask.hpp"

@@ -2,6 +2,7 @@
 #define OPENMW_ESM_LAND_H
 
 #include <stdint.h>
+#include <string_view>
 
 #include <components/misc/constants.hpp>
 

@@ -3,10 +3,20 @@
 
 #include <array>
 
+#include <osg/CopyOp>
 #include <osg/Drawable>
+#include <osg/Node>
+#include <osg/Object>
+#include <osg/ref_ptr>
+
 #include <osgAnimation/RigGeometry>
 
-#include <osg/NodeVisitor>
+namespace osg
+{
+    class MatrixTransform;
+    class NodeVisitor;
+    class PrimitiveFunctor;
+}
 
 namespace SceneUtil
 {

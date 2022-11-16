@@ -1,8 +1,11 @@
 #ifndef MWGUI_CONTAINER_ITEM_MODEL_H
 #define MWGUI_CONTAINER_ITEM_MODEL_H
 
+#include <stddef.h>
 #include <utility>
 #include <vector>
+
+#include <apps/openmw/mwworld/ptr.hpp>
 
 #include "itemmodel.hpp"
 

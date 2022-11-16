@@ -1,5 +1,8 @@
 #include "serialization.hpp"
 
+#include <cstring>
+#include <stdexcept>
+
 #include <osg/Matrixf>
 #include <osg/Quat>
 #include <osg/Vec2f>

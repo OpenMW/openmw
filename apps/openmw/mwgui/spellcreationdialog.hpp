@@ -1,13 +1,39 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
+#include <map>
 #include <memory>
+#include <stddef.h>
+#include <vector>
 
-#include <components/esm3/loadmgef.hpp>
+#include <MyGUI_Delegate.h>
+
+#include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadspel.hpp>
 
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
+
+namespace ESM
+{
+    struct MagicEffect;
+}
+
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class EditBox;
+    class ImageBox;
+    class ScrollBar;
+    class ScrollView;
+    class TextBox;
+    class Widget;
+}
 
 namespace Gui
 {

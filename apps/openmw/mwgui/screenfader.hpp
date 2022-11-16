@@ -3,6 +3,9 @@
 
 #include <deque>
 #include <memory>
+#include <string>
+
+#include <MyGUI_Types.h>
 
 #include "windowbase.hpp"
 

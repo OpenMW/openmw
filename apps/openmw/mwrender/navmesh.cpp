@@ -1,24 +1,35 @@
 #include "navmesh.hpp"
-#include "vismask.hpp"
+
+#include <algorithm>
+#include <atomic>
+#include <compare>
+#include <limits>
+#include <mutex>
+#include <type_traits>
+#include <utility>
+
+#include <osg/Node>
+#include <osg/StateSet>
+#include <osg/Vec2i>
+
+#include <apps/openmw/mwrender/navmeshmode.hpp>
 
 #include <components/detournavigator/guardednavmeshcacheitem.hpp>
 #include <components/detournavigator/navmeshcacheitem.hpp>
 #include <components/detournavigator/settings.hpp>
+#include <components/misc/guarded.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/detourdebugdraw.hpp>
 #include <components/sceneutil/navmesh.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
-#include <osg/PositionAttitudeTransform>
-#include <osg/StateSet>
-
 #include <DetourNavMesh.h>
 
 #include "../mwbase/environment.hpp"
 
-#include <algorithm>
-#include <limits>
+#include "vismask.hpp"
 
 namespace MWRender
 {

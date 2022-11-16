@@ -1,11 +1,32 @@
 #include "spellicons.hpp"
 
+#include <algorithm>
 #include <iomanip>
+#include <list>
 #include <sstream>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
+#include <MyGUI_Align.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
 
+#include <apps/openmw/mwmechanics/activespells.hpp>
+#include <apps/openmw/mwmechanics/magiceffects.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/attr.hpp>
+#include <components/esm3/activespells.hpp>
+#include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/settings.hpp>

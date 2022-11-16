@@ -1,7 +1,19 @@
 #include "pathgridutil.hpp"
 
+#include <stddef.h>
+
+#include <osg/Array>
+#include <osg/GL>
 #include <osg/Geometry>
 #include <osg/Material>
+#include <osg/Math>
+#include <osg/MixinVector>
+#include <osg/PrimitiveSet>
+#include <osg/Quat>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include <components/esm3/loadpgrd.hpp>
 

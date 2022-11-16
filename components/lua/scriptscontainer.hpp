@@ -1,18 +1,31 @@
 #ifndef COMPONENTS_LUA_SCRIPTSCONTAINER_H
 #define COMPONENTS_LUA_SCRIPTSCONTAINER_H
 
+#include <exception>
+#include <functional>
+#include <initializer_list>
 #include <map>
-#include <set>
+#include <memory>
+#include <optional>
+#include <stdint.h>
 #include <string>
+#include <string_view>
+#include <tuple>
+#include <utility>
+#include <variant>
+#include <vector>
+
+#include <sol/sol.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/luascripts.hpp>
+#include <components/lua/configuration.hpp>
 
 #include "luastate.hpp"
-#include "serialization.hpp"
 
 namespace LuaUtil
 {
+    class UserdataSerializer;
 
     // ScriptsContainer is a base class for all scripts containers (LocalScripts,
     // GlobalScripts, PlayerScripts, etc). Each script runs in a separate sandbox.

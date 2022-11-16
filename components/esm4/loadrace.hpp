@@ -30,15 +30,14 @@
 #include <array>
 #include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 
 #include "actor.hpp" // AttributeValues, BodyTemplate
-#include "formid.hpp"
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
     typedef std::uint32_t FormId;
 
     struct Race

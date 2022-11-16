@@ -2,10 +2,16 @@
 
 #include <osg/Stats>
 #include <osg/Texture2D>
+#include <osg/Texture>
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/objectcache.hpp>
 #include <components/resource/scenemanager.hpp>
+
+namespace osg
+{
+    class Object;
+}
 
 namespace Terrain
 {

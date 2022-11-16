@@ -1,7 +1,13 @@
 #ifndef OPENMW_COMPONENTS_POSITIONATTITUDE_TRANSFORM_H
 #define OPENMW_COMPONENTS_POSITIONATTITUDE_TRANSFORM_H
 
+#include <osg/CopyOp>
+#include <osg/Matrix>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Quat>
 #include <osg/Transform>
+#include <osg/Vec3f>
 
 namespace SceneUtil
 {

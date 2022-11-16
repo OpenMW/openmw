@@ -24,14 +24,20 @@
 #define ESM4_READER_H
 
 #include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <istream>
 #include <map>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "common.hpp"
 #include "loadtes4.hpp"
 
+#include <components/esm/common.hpp>
+#include <components/esm4/formid.hpp>
 #include <components/files/istreamptr.hpp>
 
 namespace ToUTF8

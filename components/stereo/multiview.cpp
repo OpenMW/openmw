@@ -1,10 +1,25 @@
 #include "multiview.hpp"
 
+#include <algorithm>
+#include <initializer_list>
+#include <stdexcept>
+#include <vector>
+
+#include <osg/Camera>
+#include <osg/DisplaySettings>
 #include <osg/FrameBufferObject>
 #include <osg/GLExtensions>
+#include <osg/Node>
+#include <osg/State>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/Texture2D>
 #include <osg/Texture2DArray>
 #include <osg/Texture2DMultisample>
+#include <osg/Texture>
+#include <osg/Uniform>
+#include <osg/Viewport>
+
 #include <osgUtil/CullVisitor>
 #include <osgUtil/RenderStage>
 
@@ -16,8 +31,6 @@
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/settings/settings.hpp>
 #include <components/stereo/stereomanager.hpp>
-
-#include <algorithm>
 
 namespace Stereo
 {

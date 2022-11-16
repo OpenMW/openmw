@@ -1,6 +1,12 @@
 #ifndef MWGUI_PICKPOCKET_ITEM_MODEL_H
 #define MWGUI_PICKPOCKET_ITEM_MODEL_H
 
+#include <memory>
+#include <stddef.h>
+#include <vector>
+
+#include <apps/openmw/mwworld/ptr.hpp>
+
 #include "itemmodel.hpp"
 
 namespace MWGui

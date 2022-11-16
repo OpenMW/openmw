@@ -1,10 +1,14 @@
 #include "controlswitch.hpp"
 
-#include <components/esm3/controlsstate.hpp>
-#include <components/esm3/esmreader.hpp>
-#include <components/esm3/esmwriter.hpp>
+#include <stdexcept>
+#include <utility>
 
-#include <components/loadinglistener/loadinglistener.hpp>
+#include <osg/Vec3f>
+
+#include <components/esm/defs.hpp>
+#include <components/esm3/controlsstate.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

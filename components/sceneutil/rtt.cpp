@@ -1,8 +1,12 @@
 #include "rtt.hpp"
 #include "util.hpp"
 
+#include <utility>
+
+#include <osg/FrameStamp>
 #include <osg/Texture2D>
 #include <osg/Texture2DArray>
+
 #include <osgUtil/CullVisitor>
 
 #include <components/sceneutil/color.hpp>
@@ -10,6 +14,7 @@
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
+#include <components/stereo/types.hpp>
 
 namespace SceneUtil
 {

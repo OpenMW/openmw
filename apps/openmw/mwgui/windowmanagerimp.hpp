@@ -7,40 +7,99 @@
    and retrieving information from the Gui.
 **/
 
+#include <algorithm>
+#include <filesystem>
+#include <map>
 #include <memory>
-#include <stack>
+#include <stdint.h>
+#include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
+
+#include <SDL_video.h>
+
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_Types.h>
 
 #include <osg/ref_ptr>
 
-#include "../mwbase/windowmanager.hpp"
-#include "../mwrender/localmap.hpp"
+#include <apps/openmw/mwgui/confirmationdialog.hpp>
+#include <apps/openmw/mwgui/countdialog.hpp>
+#include <apps/openmw/mwgui/inventorywindow.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/postprocessorhud.hpp>
+#include <apps/openmw/mwgui/tradewindow.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
 
 #include <components/misc/guarded.hpp>
-#include <components/myguiplatform/myguiplatform.hpp>
-#include <components/sdlutil/events.hpp>
-#include <components/sdlutil/sdlcursormanager.hpp>
-#include <components/sdlutil/sdlvideowrapper.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/categories.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
-#include "charactercreation.hpp"
-#include "draganddrop.hpp"
 #include "mapwindow.hpp"
-#include "messagebox.hpp"
-#include "soulgemdialog.hpp"
-#include "statswatcher.hpp"
 #include "textcolours.hpp"
-#include "tooltips.hpp"
-#include "windowbase.hpp"
 
-#include <MyGUI_Gui.h>
-#include <MyGUI_KeyCode.h>
-#include <MyGUI_Types.h>
-#include <filesystem>
+#include "../mwbase/windowmanager.hpp"
+
+namespace Loading
+{
+    class Listener;
+}
+
+namespace Translation
+{
+    class Storage;
+}
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
+
+namespace MWGui
+{
+    class BookWindow;
+    class CharacterCreation;
+    class Console;
+    class ContainerWindow;
+    class DialogueWindow;
+    class DragAndDrop;
+    class Layout;
+    class MessageBox;
+    class MessageBoxManager;
+    class ScrollWindow;
+    class SoulgemDialog;
+    class SpellWindow;
+    class StatsWatcher;
+    class ToolTips;
+    class WindowBase;
+}
+
+namespace MWRender
+{
+    class LocalMap;
+}
+
+namespace MWWorld
+{
+    class CellStore;
+}
+
+namespace SDLUtil
+{
+    class SDLCursorManager;
+    class VideoWrapper;
+}
+
+namespace osgMyGUI
+{
+    class Platform;
+}
 
 namespace MyGUI
 {
+    class Gui;
     class Widget;
     class Window;
     class UString;
@@ -50,16 +109,6 @@ namespace MyGUI
 namespace MWWorld
 {
     class ESMStore;
-}
-
-namespace Compiler
-{
-    class Extensions;
-}
-
-namespace Translation
-{
-    class Storage;
 }
 
 namespace osg
@@ -88,34 +137,18 @@ namespace Gui
 
 namespace MWGui
 {
-    class HUD;
-    class MapWindow;
-    class MainMenu;
-    class StatsWindow;
-    class InventoryWindow;
-    struct JournalWindow;
-    class TextInputDialog;
-    class InfoBoxDialog;
-    class SettingsWindow;
-    class AlchemyWindow;
-    class QuickKeysMenu;
-    class LoadingScreen;
-    class LevelupDialog;
-    class WaitDialog;
-    class SpellCreationDialog;
-    class EnchantingDialog;
-    class TrainingWindow;
-    class SpellIcons;
-    class MerchantRepair;
-    class Recharge;
-    class CompanionWindow;
-    class VideoWidget;
-    class WindowModal;
-    class ScreenFader;
     class DebugWindow;
-    class PostProcessorHud;
+    class HUD;
     class JailScreen;
     class KeyboardNavigation;
+    class LoadingScreen;
+    class QuickKeysMenu;
+    class ScreenFader;
+    class SettingsWindow;
+    class StatsWindow;
+    class VideoWidget;
+    class WaitDialog;
+    class WindowModal;
 
     class WindowManager : public MWBase::WindowManager
     {

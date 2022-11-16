@@ -1,14 +1,41 @@
 #include "alchemywindow.hpp"
 
+#include <algorithm>
+#include <limits>
+#include <set>
+#include <stdlib.h>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ControllerRepeatClick.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/widgets/box.hpp>
+#include <components/widgets/numericeditbox.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -29,6 +56,11 @@
 #include "sortfilteritemmodel.hpp"
 #include "ustring.hpp"
 #include "widgets.hpp"
+
+namespace MyGUI
+{
+    class ControllerItem;
+}
 
 namespace MWGui
 {

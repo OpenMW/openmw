@@ -1,7 +1,14 @@
 #include "npcstate.hpp"
 
+#include <components/esm3/creaturestats.hpp>
+#include <components/esm3/inventorystate.hpp>
+#include <components/esm3/npcstats.hpp>
+#include <components/esm3/objectstate.hpp>
+
 namespace ESM
 {
+    class ESMReader;
+    class ESMWriter;
 
     void NpcState::load(ESMReader& esm)
     {

@@ -5,8 +5,9 @@
 #include "istreamptr.hpp"
 #include "streamwithbuffer.hpp"
 
+#include <cstddef>
+#include <filesystem>
 #include <limits>
-#include <string>
 
 namespace Files
 {

@@ -3,6 +3,15 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
+#include <components/esm3/aipackage.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/spelllist.hpp>
+#include <components/esm3/transport.hpp>
+
 namespace ESM
 {
     void NPC::load(ESMReader& esm, bool& isDeleted)

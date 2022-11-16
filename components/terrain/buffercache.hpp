@@ -1,12 +1,18 @@
 #ifndef COMPONENTS_TERRAIN_BUFFERCACHE_H
 #define COMPONENTS_TERRAIN_BUFFERCACHE_H
 
-#include <osg/Array>
-#include <osg/PrimitiveSet>
-#include <osg/ref_ptr>
-
 #include <map>
 #include <mutex>
+#include <utility>
+
+#include <osg/Array>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class DrawElements;
+    class State;
+}
 
 namespace Terrain
 {

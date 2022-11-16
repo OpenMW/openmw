@@ -1,10 +1,17 @@
 #ifndef MWGUI_ITEMCHARGEVIEW_H
 #define MWGUI_ITEMCHARGEVIEW_H
 
+#include <algorithm>
 #include <memory>
+#include <string>
 #include <vector>
 
+#include <MyGUI_Delegate.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
 #include <MyGUI_Widget.h>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -18,7 +25,6 @@ namespace MyGUI
 
 namespace MWGui
 {
-    class ItemModel;
     class ItemWidget;
 
     class ItemChargeView final : public MyGUI::Widget

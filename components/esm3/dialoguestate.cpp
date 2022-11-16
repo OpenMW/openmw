@@ -1,5 +1,7 @@
 #include "dialoguestate.hpp"
 
+#include <utility>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 

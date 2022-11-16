@@ -1,6 +1,7 @@
 #include "fogmanager.hpp"
 
 #include <algorithm>
+#include <limits>
 
 #include <components/esm3/loadcell.hpp>
 #include <components/fallback/fallback.hpp>

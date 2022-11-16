@@ -2,6 +2,7 @@
 #define OPENMW_ESM_NPC_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "aipackage.hpp"

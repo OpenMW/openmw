@@ -1,10 +1,26 @@
 #include "recharge.hpp"
 
-#include <MyGUI_ScrollView.h>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <type_traits>
 
-#include <components/widgets/box.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/esm3/loadcrea.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

@@ -3,6 +3,9 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/defs.hpp>
+#include <components/esm3/cellid.hpp>
+
 namespace ESM
 {
 

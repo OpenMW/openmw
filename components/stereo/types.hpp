@@ -1,8 +1,12 @@
 #ifndef STEREO_TYPES_H
 #define STEREO_TYPES_H
 
+#include <iosfwd>
+
 #include <osg/Matrix>
+#include <osg/Quat>
 #include <osg/Vec3>
+#include <osg/Vec3f>
 
 namespace Stereo
 {

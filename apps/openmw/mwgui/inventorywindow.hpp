@@ -1,11 +1,29 @@
 #ifndef MGUI_Inventory_H
 #define MGUI_Inventory_H
 
+#include <memory>
+#include <string>
+
+#include <MyGUI_ITexture.h>
+#include <MyGUI_Types.h>
+
+#include <osg/Vec2f>
+
 #include "mode.hpp"
 #include "windowpinnablebase.hpp"
 
 #include "../mwrender/characterpreview.hpp"
 #include "../mwworld/ptr.hpp"
+
+namespace MyGUI
+{
+    class Button;
+    class EditBox;
+    class ImageBox;
+    class TextBox;
+    class Widget;
+    class Window;
+}
 
 namespace osg
 {

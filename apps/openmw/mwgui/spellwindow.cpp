@@ -1,10 +1,33 @@
 #include "spellwindow.hpp"
 
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/spellmodel.hpp>
+#include <apps/openmw/mwgui/windowpinnablebase.hpp>
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/spelllist.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 
@@ -29,6 +52,7 @@
 
 namespace MWGui
 {
+    class DragAndDrop;
 
     SpellWindow::SpellWindow(DragAndDrop* drag)
         : WindowPinnableBase("openmw_spell_window.layout")

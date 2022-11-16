@@ -1,6 +1,21 @@
 #include "terraindrawable.hpp"
 
+#include <algorithm>
+#include <string>
+
+#include <osg/Array>
+#include <osg/Camera>
 #include <osg/ClusterCullingCallback>
+#include <osg/CullSettings>
+#include <osg/CullStack>
+#include <osg/Math>
+#include <osg/Matrix>
+#include <osg/MixinVector>
+#include <osg/NodeVisitor>
+#include <osg/RenderInfo>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+
 #include <osgUtil/CullVisitor>
 
 #include <components/sceneutil/lightmanager.hpp>

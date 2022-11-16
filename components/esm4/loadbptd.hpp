@@ -27,6 +27,8 @@
 #ifndef ESM4_BPTD_H
 #define ESM4_BPTD_H
 
+#include <cstdint>
+#include <string>
 #include <vector>
 
 #include "formid.hpp"
@@ -34,7 +36,6 @@
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct BodyPartData
     {

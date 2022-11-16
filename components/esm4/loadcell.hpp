@@ -31,14 +31,11 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
 #include "lighting.hpp"
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
-    struct ReaderContext;
     struct CellGroup;
     typedef std::uint32_t FormId;
 

@@ -2,18 +2,43 @@
 #define MWGUI_MAPWINDOW_H
 
 #include <cstdint>
+#include <map>
 #include <memory>
+#include <set>
+#include <stddef.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <osg/Vec2f>
 
+#include <MyGUI_Delegate.h>
 #include <MyGUI_ITexture.h>
+#include <MyGUI_MouseButton.h>
+#include <MyGUI_Types.h>
 
 #include "windowpinnablebase.hpp"
+
+#include <apps/openmw/mwgui/windowbase.hpp>
 
 #include <components/esm3/cellid.hpp>
 
 #include <components/esm3/custommarkerstate.hpp>
 #include <components/misc/constants.hpp>
+
+namespace MWGui
+{
+    class DragAndDrop;
+}
+
+namespace MyGUI
+{
+    class Button;
+    class ImageBox;
+    class ScrollView;
+    class TextBox;
+    class Widget;
+}
 
 namespace MWRender
 {

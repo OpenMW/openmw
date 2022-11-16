@@ -1,6 +1,7 @@
 #include "rng.hpp"
 
 #include <chrono>
+#include <limits>
 #include <random>
 #include <sstream>
 

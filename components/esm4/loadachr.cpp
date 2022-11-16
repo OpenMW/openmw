@@ -27,10 +27,12 @@
 #include "loadachr.hpp"
 
 #include <stdexcept>
-//#include <iostream>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/reference.hpp>
 
 void ESM4::ActorCharacter::load(ESM4::Reader& reader)
 {

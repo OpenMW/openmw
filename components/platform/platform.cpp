@@ -1,6 +1,8 @@
 #include "platform.hpp"
 
+#ifdef WIN32
 #include <stdio.h>
+#endif
 
 namespace Platform
 {

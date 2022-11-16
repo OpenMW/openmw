@@ -1,15 +1,27 @@
 #include "journalwindow.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <functional>
 #include <set>
 #include <stack>
+#include <stdint.h>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_StringUtility.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
-#include <components/misc/strings/algorithm.hpp>
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
 

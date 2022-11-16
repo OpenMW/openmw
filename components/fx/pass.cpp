@@ -1,19 +1,25 @@
 #include "pass.hpp"
 
+#include <memory>
 #include <sstream>
+#include <stddef.h>
 #include <string>
+#include <type_traits>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
-#include <osg/BindImageTexture>
-#include <osg/FrameBufferObject>
+#include <osg/GL>
 #include <osg/Program>
 #include <osg/Shader>
-#include <osg/State>
 #include <osg/StateSet>
 
+#include <components/fx/types.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/clearcolor.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/settings/settings.hpp>
 #include <components/stereo/multiview.hpp>
 
 #include "stateupdater.hpp"

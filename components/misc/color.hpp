@@ -2,6 +2,7 @@
 #define COMPONENTS_MISC_COLOR
 
 #include <string>
+#include <string_view>
 
 namespace Misc
 {

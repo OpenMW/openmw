@@ -1,7 +1,14 @@
 #include "loadinfo.hpp"
 
+#include <variant>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
+#include <components/esm3/variant.hpp>
 
 namespace ESM
 {

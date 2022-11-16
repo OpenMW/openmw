@@ -9,8 +9,16 @@
 #include "scanner.hpp"
 #include "skipparser.hpp"
 
+#include <components/compiler/exprparser.hpp>
+#include <components/compiler/lineparser.hpp>
+#include <components/compiler/parser.hpp>
+
 namespace Compiler
 {
+    class Context;
+
+    struct TokenLoc;
+
     bool ControlParser::parseIfBody(int keyword, const TokenLoc& loc, Scanner& scanner)
     {
         if (keyword == Scanner::K_endif || keyword == Scanner::K_elseif || keyword == Scanner::K_else)

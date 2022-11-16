@@ -1,9 +1,14 @@
+#include <algorithm>
 #include <cassert>
+#include <type_traits>
+#include <utility>
 
 #include "npcstats.hpp"
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <components/esm3/statstate.hpp>
 
 namespace ESM
 {

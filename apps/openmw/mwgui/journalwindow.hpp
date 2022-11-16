@@ -7,11 +7,6 @@
 
 #include <memory>
 
-namespace MWBase
-{
-    class WindowManager;
-}
-
 namespace MWGui
 {
     struct JournalViewModel;

@@ -2,36 +2,38 @@
 #define OPENMW_MWRENDER_POSTPROCESSOR_H
 
 #include <array>
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <filesystem>
-
-#include <osg/Camera>
 #include <osg/FrameBufferObject>
+#include <osg/FrameStamp>
 #include <osg/Group>
-#include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/ref_ptr>
 
 #include <osgViewer/Viewer>
 
 #include <components/debug/debuglog.hpp>
 #include <components/fx/stateupdater.hpp>
 #include <components/fx/technique.hpp>
+#include <components/fx/types.hpp>
 
 #include "pingpongcanvas.hpp"
-#include "transparentpass.hpp"
 
 #include <memory>
 
-namespace osgViewer
+namespace osg
 {
-    class Viewer;
+    class Camera;
+    class NodeVisitor;
 }
 
-namespace Stereo
+namespace osgUtil
 {
-    class MultiviewFramebuffer;
+    class CullVisitor;
 }
 
 namespace VFS
@@ -39,16 +41,10 @@ namespace VFS
     class Manager;
 }
 
-namespace Shader
-{
-    class ShaderManager;
-}
-
 namespace MWRender
 {
     class RenderingManager;
     class PingPongCull;
-    class PingPongCanvas;
     class TransparentDepthBinCallback;
 
     class PostProcessor : public osg::Group

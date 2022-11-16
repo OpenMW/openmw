@@ -1,7 +1,13 @@
 #include "physics.hpp"
 
+#include <memory>
+
 #include "data.hpp"
 #include "node.hpp"
+
+#include <components/nif/niffile.hpp>
+#include <components/nif/nifstream.hpp>
+#include <components/nif/recordptr.hpp>
 
 namespace Nif
 {

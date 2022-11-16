@@ -1,7 +1,9 @@
 #ifndef OPENMW_GAME_MWGUI_MAINMENU_H
 #define OPENMW_GAME_MWGUI_MAINMENU_H
 
+#include <map>
 #include <memory>
+#include <string>
 
 #include "savegamedialog.hpp"
 #include "windowbase.hpp"
@@ -14,6 +16,13 @@ namespace Gui
 namespace VFS
 {
     class Manager;
+}
+
+namespace MyGUI
+{
+    class ImageBox;
+    class TextBox;
+    class Widget;
 }
 
 namespace MWGui

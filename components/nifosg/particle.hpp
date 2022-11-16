@@ -2,17 +2,44 @@
 #define OPENMW_COMPONENTS_NIFOSG_PARTICLE_H
 
 #include <optional>
+#include <vector>
+
+#include <osg/Array>
+#include <osg/BoundingSphere>
+#include <osg/CopyOp>
+#include <osg/MatrixTransform>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Object>
+#include <osg/Plane>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/observer_ptr>
+#include <osg/ref_ptr>
 
 #include <osgParticle/Counter>
 #include <osgParticle/Emitter>
 #include <osgParticle/Operator>
 #include <osgParticle/Particle>
+#include <osgParticle/ParticleSystem>
 #include <osgParticle/Placer>
 #include <osgParticle/Shooter>
 
 #include <components/sceneutil/nodecallback.hpp>
 
 #include "controller.hpp" // ValueInterpolator
+
+namespace osg
+{
+    class Geometry;
+    class Group;
+    class RenderInfo;
+}
+
+namespace osgParticle
+{
+    class Program;
+}
 
 namespace Nif
 {

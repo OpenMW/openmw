@@ -1,14 +1,17 @@
 #include "recastmesh.hpp"
 
 #include <algorithm>
+#include <memory>
+#include <utility>
 
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/settings.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/recastmesh.hpp>
 
-#include <osg/PositionAttitudeTransform>
+#include <osg/Node>
 
 #include "vismask.hpp"
 

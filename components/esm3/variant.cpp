@@ -1,12 +1,14 @@
 #include "variant.hpp"
 
-#include <cassert>
+#include <ostream>
 #include <stdexcept>
+#include <stdint.h>
 
 #include "esmreader.hpp"
 #include "variantimp.hpp"
 
-#include "components/esm/defs.hpp"
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
 
 namespace ESM
 {

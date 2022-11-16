@@ -1,10 +1,41 @@
 #include "windowmanagerimp.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <chrono>
 #include <filesystem>
 #include <thread>
+#include <type_traits>
+
+#include <MyGUI_Align.h>
+#include <MyGUI_Delegate.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_Exception.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_IResource.h>
+#include <MyGUI_ITexture.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ImageInfo.h>
+#include <MyGUI_RenderFormat.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_ResourceImageSet.h>
+#include <MyGUI_ResourceManager.h>
+#include <MyGUI_TextIterator.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
+#include <MyGUI_Window.h>
+
+#include <unicode/fmtable.h>
+#include <unicode/unistr.h>
+
+#include <osg/Camera>
+#include <osg/FrameStamp>
+#include <osg/Node>
+#include <osg/Quat>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+
+#include <osgUtil/UpdateVisitor>
 
 #include <osgViewer/Viewer>
 
@@ -15,42 +46,63 @@
 #include <MyGUI_PointerManager.h>
 #include <MyGUI_UString.h>
 
-// For BT_NO_PROFILE
-#include <LinearMath/btQuickprof.h>
-
 #include <SDL_clipboard.h>
 #include <SDL_keyboard.h>
+#include <SDL_stdinc.h>
+
+#include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/windowmanager.hpp>
+#include <apps/openmw/mwgui/charactercreation.hpp>
+#include <apps/openmw/mwgui/draganddrop.hpp>
+#include <apps/openmw/mwgui/layout.hpp>
+#include <apps/openmw/mwgui/mapwindow.hpp>
+#include <apps/openmw/mwgui/messagebox.hpp>
+#include <apps/openmw/mwgui/soulgemdialog.hpp>
+#include <apps/openmw/mwgui/spellcreationdialog.hpp>
+#include <apps/openmw/mwgui/statswatcher.hpp>
+#include <apps/openmw/mwgui/textcolours.hpp>
+#include <apps/openmw/mwgui/tooltips.hpp>
+#include <apps/openmw/mwgui/widgets.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/drawstate.hpp>
+#include <apps/openmw/mwrender/localmap.hpp>
+#include <apps/openmw/mwsound/type.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/debug/debuglog.hpp>
-
+#include <components/esm/defs.hpp>
+#include <components/esm3/custommarkerstate.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-
+#include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/variant.hpp>
 #include <components/fontloader/fontloader.hpp>
-
-#include <components/resource/imagemanager.hpp>
-#include <components/resource/resourcesystem.hpp>
-#include <components/resource/scenemanager.hpp>
-
-#include <components/sceneutil/workqueue.hpp>
-
-#include <components/translation/translation.hpp>
-
+#include <components/l10n/manager.hpp>
+#include <components/l10n/messagebundles.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
+#include <components/lua_ui/util.hpp>
+#include <components/misc/frameratelimiter.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/myguiplatform/additivelayer.hpp>
 #include <components/myguiplatform/myguiplatform.hpp>
 #include <components/myguiplatform/myguirendermanager.hpp>
 #include <components/myguiplatform/scalinglayer.hpp>
-
+#include <components/resource/imagemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/workqueue.hpp>
+#include <components/sdlutil/sdlcursormanager.hpp>
+#include <components/sdlutil/sdlvideowrapper.hpp>
+#include <components/settings/settings.hpp>
+#include <components/translation/translation.hpp>
 #include <components/vfs/manager.hpp>
-
+#include <components/widgets/imagebutton.hpp>
 #include <components/widgets/tags.hpp>
 #include <components/widgets/widgets.hpp>
-
-#include <components/misc/frameratelimiter.hpp>
-
-#include <components/l10n/manager.hpp>
-
-#include <components/lua_ui/util.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -116,6 +168,11 @@
 #include "ustring.hpp"
 #include "videowidget.hpp"
 #include "waitdialog.hpp"
+
+namespace osg
+{
+    class Image;
+}
 
 namespace MWGui
 {

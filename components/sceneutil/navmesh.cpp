@@ -2,6 +2,8 @@
 #include "depth.hpp"
 #include "detourdebugdraw.hpp"
 
+#include <cmath>
+
 #include <components/detournavigator/settings.hpp>
 
 #include <DetourDebugDraw.h>
@@ -9,8 +11,8 @@
 #include <osg/Group>
 #include <osg/Material>
 #include <osg/PolygonOffset>
-
-#include <algorithm>
+#include <osg/StateSet>
+#include <osg/Vec3f>
 
 namespace
 {

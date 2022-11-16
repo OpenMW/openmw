@@ -27,11 +27,14 @@
 #include "loadrace.hpp"
 
 #include <cstring>
-#include <iomanip> // FIXME: for debugging only
 #include <iostream> // FIXME: for debugging only
+#include <memory>
 #include <stdexcept>
 
-#include "formid.hpp"
+#include <components/esm/common.hpp>
+#include <components/esm4/actor.hpp>
+#include <components/esm4/common.hpp>
+
 #include "reader.hpp"
 //#include "writer.hpp"
 

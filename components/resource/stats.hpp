@@ -1,6 +1,12 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_STATS_H
 #define OPENMW_COMPONENTS_RESOURCE_STATS_H
 
+#include <osg/Camera>
+#include <osg/Switch>
+#include <osg/ref_ptr>
+#include <osgGA/GUIEventHandler>
+#include <osgText/Font>
+
 #include <osgViewer/ViewerEventHandlers>
 
 namespace osgViewer
@@ -10,12 +16,13 @@ namespace osgViewer
 
 namespace osg
 {
-    class Switch;
+    class ApplicationUsage;
 }
 
-namespace osgText
+namespace osgGA
 {
-    class Font;
+    class GUIActionAdapter;
+    class GUIEventAdapter;
 }
 
 namespace VFS

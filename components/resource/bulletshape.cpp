@@ -2,11 +2,18 @@
 
 #include <stdexcept>
 #include <string>
+#include <utility>
 
+#include <BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
+
+#include <LinearMath/btVector3.h>
+
+class btTransform;
 
 namespace Resource
 {

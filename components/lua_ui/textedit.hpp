@@ -1,9 +1,18 @@
 #ifndef OPENMW_LUAUI_TEXTEDIT
 #define OPENMW_LUAUI_TEXTEDIT
 
-#include <MyGUI_EditBox.h>
+#include <string>
+
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
 
 #include "widget.hpp"
+
+namespace MyGUI
+{
+    class EditBox;
+}
 
 namespace LuaUi
 {

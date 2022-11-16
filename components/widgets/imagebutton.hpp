@@ -1,7 +1,17 @@
 #ifndef OPENMW_COMPONENTS_WIDGETS_IMAGEBUTTON_H
 #define OPENMW_COMPONENTS_WIDGETS_IMAGEBUTTON_H
 
+#include <string>
+
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_MouseButton.h>
+#include <MyGUI_RTTI.h>
+#include <MyGUI_Types.h>
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace Gui
 {

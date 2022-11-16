@@ -1,13 +1,18 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_LIGHTCONTROLLER_H
 #define OPENMW_COMPONENTS_SCENEUTIL_LIGHTCONTROLLER_H
 
+#include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+
 #include <osg/Vec4f>
+
+namespace osg
+{
+    class NodeVisitor;
+}
 
 namespace SceneUtil
 {
-
-    class LightSource;
 
     /// @brief Controller class to handle a pulsing and/or flickering light
     class LightController : public SceneUtil::NodeCallback<LightController, SceneUtil::LightSource*>

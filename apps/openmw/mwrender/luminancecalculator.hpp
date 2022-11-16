@@ -2,10 +2,20 @@
 #define OPENMW_MWRENDER_LUMINANCECALCULATOR_H
 
 #include <array>
+#include <stddef.h>
 
 #include <osg/FrameBufferObject>
 #include <osg/Program>
+#include <osg/StateSet>
 #include <osg/Texture2D>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class GLExtensions;
+    class RenderInfo;
+    class State;
+}
 
 namespace Shader
 {

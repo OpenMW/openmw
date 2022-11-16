@@ -1,13 +1,21 @@
 #ifndef COMPONENTS_LUA_LUASTATE_H
 #define COMPONENTS_LUA_LUASTATE_H
 
+#include <cstdint>
+#include <exception>
+#include <filesystem>
+#include <initializer_list>
 #include <map>
+#include <memory>
+#include <stddef.h>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include <sol/sol.hpp>
-
-#include <filesystem>
-
-#include "configuration.hpp"
 
 namespace VFS
 {
@@ -16,6 +24,7 @@ namespace VFS
 
 namespace LuaUtil
 {
+    class ScriptsConfiguration;
 
     std::string getLuaVersion();
 

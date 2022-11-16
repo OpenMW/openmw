@@ -4,6 +4,8 @@
 #include <map>
 
 #include <osg/CopyOp>
+#include <osg/Drawable>
+#include <osg/Node>
 
 namespace osgParticle
 {

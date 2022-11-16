@@ -3,6 +3,9 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/esmcommon.hpp>
+#include <components/esm3/cellref.hpp>
+
 namespace ESM
 {
     namespace

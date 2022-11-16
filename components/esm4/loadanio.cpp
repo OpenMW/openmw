@@ -29,7 +29,9 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
 
 void ESM4::AnimObject::load(ESM4::Reader& reader)
 {

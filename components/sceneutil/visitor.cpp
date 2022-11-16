@@ -1,15 +1,21 @@
 #include "visitor.hpp"
 
-#include <osg/Drawable>
-#include <osg/MatrixTransform>
+#include <algorithm>
+#include <string_view>
 
-#include <osgParticle/ParticleSystem>
+#include <osg/Drawable>
+#include <osg/Group>
+#include <osg/MatrixTransform>
+#include <osg/Node>
+#include <osg/Object>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
-#include <cstring>
-#include <string_view>
+namespace osg
+{
+    class Geometry;
+}
 
 namespace SceneUtil
 {

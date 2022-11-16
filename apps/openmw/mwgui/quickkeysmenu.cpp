@@ -1,14 +1,41 @@
 #include "quickkeysmenu.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ITexture.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/spellmodel.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/drawstate.hpp>
+#include <apps/openmw/mwmechanics/spells.hpp>
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/defs.hpp>
+#include <components/esm3/effectlist.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadspel.hpp>
 #include <components/esm3/quickkeys.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -30,6 +57,11 @@
 #include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "spellview.hpp"
+
+namespace ESM
+{
+    class ESMReader;
+}
 
 namespace MWGui
 {

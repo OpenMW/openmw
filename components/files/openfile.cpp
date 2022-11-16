@@ -2,7 +2,10 @@
 #include "conversion.hpp"
 
 #include <cstring>
+#include <errno.h>
 #include <fstream>
+#include <stdexcept>
+#include <string>
 
 namespace Files
 {

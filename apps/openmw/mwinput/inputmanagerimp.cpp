@@ -2,15 +2,12 @@
 
 #include <osgViewer/ViewerEventHandlers>
 
-#include <components/esm3/esmreader.hpp>
-#include <components/esm3/esmwriter.hpp>
+#include <components/esm/defs.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/world.hpp"
-
-#include "../mwworld/esmstore.hpp"
 
 #include "actionmanager.hpp"
 #include "bindingsmanager.hpp"
@@ -20,6 +17,22 @@
 #include "keyboardmanager.hpp"
 #include "mousemanager.hpp"
 #include "sensormanager.hpp"
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
+
+namespace osgViewer
+{
+    class Viewer;
+}
+
+namespace Loading
+{
+    class Listener;
+}
 
 namespace MWInput
 {

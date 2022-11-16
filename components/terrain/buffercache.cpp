@@ -1,10 +1,19 @@
 #include "buffercache.hpp"
 
 #include <cassert>
+#include <stddef.h>
+#include <type_traits>
 
+#include <osg/BufferObject>
 #include <osg/PrimitiveSet>
+#include <osg/Vec2f>
 
 #include "defs.hpp"
+
+namespace osg
+{
+    class State;
+}
 
 namespace
 {

@@ -4,6 +4,7 @@
 #include <components/files/fixedpath.hpp>
 
 #include <components/l10n/manager.hpp>
+#include <components/lua/configuration.hpp>
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 

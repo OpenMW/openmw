@@ -4,10 +4,10 @@
 #include "esmreader.hpp"
 
 #include <cstddef>
+#include <filesystem>
 #include <list>
 #include <map>
 #include <optional>
-#include <string>
 
 namespace ESM
 {

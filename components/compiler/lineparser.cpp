@@ -1,7 +1,11 @@
 #include "lineparser.hpp"
 
-#include <memory>
+#include <stdexcept>
+#include <utility>
 
+#include <components/compiler/exprparser.hpp>
+#include <components/compiler/parser.hpp>
+#include <components/compiler/tokenloc.hpp>
 #include <components/esm/refid.hpp>
 #include <components/misc/strings/lower.hpp>
 

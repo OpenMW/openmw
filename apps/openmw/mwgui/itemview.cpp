@@ -1,11 +1,15 @@
 #include "itemview.hpp"
 
+#include <algorithm>
 #include <cmath>
+#include <stdexcept>
+#include <utility>
 
+#include <MyGUI_Align.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
-#include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_WidgetInput.h>
 
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"

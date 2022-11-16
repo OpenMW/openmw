@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include <MyGUI_Widget.h>
+
 namespace Gui
 {
 

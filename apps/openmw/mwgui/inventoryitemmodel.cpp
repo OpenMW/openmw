@@ -1,9 +1,16 @@
 #include "inventoryitemmodel.hpp"
 
 #include <sstream>
+#include <stdexcept>
+#include <type_traits>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwmechanics/creaturestats.hpp>
+
+#include <components/esm/refid.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
-#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"

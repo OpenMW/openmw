@@ -1,9 +1,21 @@
 #include "countdialog.hpp"
 
+#include <algorithm>
+
 #include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_KeyCode.h>
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollBar.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/windowbase.hpp>
+
+#include <components/misc/notnullptr.hpp>
 #include <components/widgets/numericeditbox.hpp>
 
 #include "../mwbase/environment.hpp"

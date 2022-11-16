@@ -1,5 +1,12 @@
 #include "matrixtransform.hpp"
 
+#include <osg/Matrix>
+
+namespace osg
+{
+    class Vec3f;
+}
+
 namespace NifOsg
 {
     MatrixTransform::MatrixTransform(const Nif::Transformation& trafo)

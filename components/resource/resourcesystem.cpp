@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <components/resource/resourcemanager.hpp>
+
 #include "imagemanager.hpp"
 #include "keyframemanager.hpp"
 #include "niffilemanager.hpp"

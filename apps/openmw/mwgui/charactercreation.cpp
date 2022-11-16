@@ -1,9 +1,28 @@
 #include "charactercreation.hpp"
 
-#include <MyGUI_ITexture.h>
+#include <array>
+#include <assert.h>
+#include <exception>
+#include <stddef.h>
+#include <string_view>
+#include <utility>
+
+#include <MyGUI_Delegate.h>
+#include <MyGUI_StringUtility.h>
+
+#include <apps/openmw/mwgui/layout.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/creaturestats.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/attr.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -13,7 +32,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
-#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"

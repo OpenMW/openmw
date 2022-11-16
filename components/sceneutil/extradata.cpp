@@ -1,9 +1,19 @@
 #include "extradata.hpp"
 
-#include <unordered_set>
+#include <string>
 
+#include <osg/Depth>
 #include <osg/Node>
+#include <osg/Object>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Uniform>
 #include <osg/ValueObject>
+#include <osg/ref_ptr>
+
+#include <osgParticle/Particle>
+#include <osgParticle/range>
+
 #include <osgParticle/ParticleSystem>
 
 #include <yaml-cpp/yaml.h>

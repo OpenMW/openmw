@@ -1,6 +1,11 @@
 #include "readerscache.hpp"
 
+#include <assert.h>
 #include <stdexcept>
+#include <string>
+#include <utility>
+
+#include <components/esm3/esmreader.hpp>
 
 namespace ESM
 {

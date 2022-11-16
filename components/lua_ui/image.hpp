@@ -1,8 +1,12 @@
 #ifndef OPENMW_LUAUI_IMAGE
 #define OPENMW_LUAUI_IMAGE
 
+#include <string>
+
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_RTTI.h>
 #include <MyGUI_TileRect.h>
+#include <MyGUI_Types.h>
 
 #include "widget.hpp"
 

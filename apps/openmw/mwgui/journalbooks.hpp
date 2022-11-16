@@ -1,6 +1,9 @@
 #ifndef MWGUI_JOURNALBOOKS_HPP
 #define MWGUI_JOURNALBOOKS_HPP
 
+#include <stdint.h>
+#include <string>
+
 #include "bookpage.hpp"
 #include "journalviewmodel.hpp"
 

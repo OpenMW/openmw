@@ -4,6 +4,8 @@
 #include <osg/Referenced>
 #include <osg/ref_ptr>
 
+#include <cstddef>
+#include <utility>
 #include <vector>
 
 namespace SceneUtil

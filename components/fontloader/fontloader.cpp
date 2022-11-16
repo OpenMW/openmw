@@ -1,31 +1,43 @@
 #include "fontloader.hpp"
 
+#include <algorithm>
 #include <array>
+#include <cmath>
+#include <istream>
+#include <map>
+#include <memory>
 #include <stdexcept>
+#include <string.h>
 #include <string_view>
+#include <utility>
+#include <vector>
 
-#include <osg/Image>
-
-#include <osgDB/WriteFile>
-
+#include <MyGUI_DataManager.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_FactoryManager.h>
+#include <MyGUI_FontData.h>
+#include <MyGUI_IDataStream.h>
+#include <MyGUI_ITexture.h>
+#include <MyGUI_RenderFormat.h>
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ResourceManager.h>
 #include <MyGUI_ResourceManualFont.h>
 #include <MyGUI_ResourceTrueTypeFont.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TSize.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_Version.h>
 #include <MyGUI_XmlDocument.h>
 
 #include <components/debug/debuglog.hpp>
-
 #include <components/fallback/fallback.hpp>
-
-#include <components/vfs/manager.hpp>
-
+#include <components/files/istreamptr.hpp>
 #include <components/misc/strings/algorithm.hpp>
-
+#include <components/misc/strings/lower.hpp>
+#include <components/myguiplatform/myguidatamanager.hpp>
 #include <components/myguiplatform/scalinglayer.hpp>
-
 #include <components/settings/settings.hpp>
+#include <components/vfs/manager.hpp>
 
 namespace
 {

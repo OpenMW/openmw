@@ -1,12 +1,19 @@
 #ifndef COMPILER_QUICKFILEPARSER_H_INCLUDED
 #define COMPILER_QUICKFILEPARSER_H_INCLUDED
 
+#include <string>
+
 #include "declarationparser.hpp"
 #include "parser.hpp"
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+    class Scanner;
     class Locals;
+
+    struct TokenLoc;
 
     /// \brief File parser variant that ignores everything but variable declarations
     class QuickFileParser : public Parser

@@ -1,10 +1,29 @@
 #include "levelupdialog.hpp"
 
+#include <algorithm>
+#include <string_view>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_Delegate.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TPoint.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Types.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetInput.h>
 
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwmechanics/stat.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+
+#include <components/esm/refid.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"

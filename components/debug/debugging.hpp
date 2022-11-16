@@ -3,6 +3,9 @@
 
 #include <filesystem>
 #include <functional>
+#include <ios>
+#include <string>
+#include <string_view>
 
 #include <components/misc/guarded.hpp>
 

@@ -1,31 +1,63 @@
 #include "sky.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <cmath>
+#include <string_view>
+
+#include <osg/Callback>
+#include <osg/Camera>
+#include <osg/CopyOp>
 #include <osg/Depth>
+#include <osg/GL>
+#include <osg/Group>
+#include <osg/Material>
+#include <osg/Math>
+#include <osg/Matrix>
+#include <osg/Matrixd>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Object>
 #include <osg/PositionAttitudeTransform>
+#include <osg/Program>
+#include <osg/Quat>
+#include <osg/Shader>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
+#include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/ValueObject>
+#include <osg/Vec2f>
+#include <osg/Vec3>
+#include <osg/Vec3d>
 
 #include <osgParticle/BoxPlacer>
 #include <osgParticle/ModularEmitter>
 #include <osgParticle/ModularProgram>
 #include <osgParticle/Operator>
+#include <osgParticle/Particle>
+#include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
+#include <osgParticle/range>
 
-#include <components/settings/settings.hpp>
-
+#include <components/fallback/fallback.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/nifosg/particle.hpp>
+#include <components/resource/imagemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
-
-#include <components/resource/imagemanager.hpp>
-#include <components/resource/scenemanager.hpp>
-
-#include <components/vfs/manager.hpp>
-
-#include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
+#include <components/shader/shadermanager.hpp>
 #include <components/stereo/stereomanager.hpp>
-
-#include <components/nifosg/particle.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "../mwworld/weather.hpp"
 

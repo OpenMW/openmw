@@ -1,11 +1,27 @@
 #include "riggeometry.hpp"
 
+#include <osg/BufferObject>
+#include <osg/GL>
+#include <osg/Group>
+#include <osg/MatrixTransform>
+#include <osg/Matrixd>
+#include <osg/MixinVector>
+#include <osg/NodeVisitor>
+#include <osg/Transform>
+#include <osg/UserDataContainer>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <osg/MatrixTransform>
 
 #include "skeleton.hpp"
 #include "util.hpp"
+
+namespace osg
+{
+    class PrimitiveFunctor;
+}
 
 namespace
 {

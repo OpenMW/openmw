@@ -1,7 +1,16 @@
 #include "statswatcher.hpp"
 
+#include <apps/openmw/mwmechanics/stat.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
 #include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

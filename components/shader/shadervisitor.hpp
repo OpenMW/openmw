@@ -1,8 +1,22 @@
 #ifndef OPENMW_COMPONENTS_SHADERVISITOR_H
 #define OPENMW_COMPONENTS_SHADERVISITOR_H
 
+#include <map>
+#include <string>
+#include <vector>
+
+#include <osg/GL>
 #include <osg/NodeVisitor>
 #include <osg/Program>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class Drawable;
+    class Geometry;
+    class Node;
+    class StateSet;
+}
 
 namespace Resource
 {

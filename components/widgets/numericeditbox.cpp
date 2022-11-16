@@ -1,6 +1,17 @@
+#include "numericeditbox.hpp"
+
+#include <algorithm>
 #include <stdexcept>
 
-#include "numericeditbox.hpp"
+#include <MyGUI_EventPair.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace Gui
 {

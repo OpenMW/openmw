@@ -1,7 +1,19 @@
 #include "player.hpp"
 
+#include <utility>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <components/esm/attr.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm3/cellid.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm3/creaturestats.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/npcstate.hpp>
+#include <components/esm3/npcstats.hpp>
+#include <components/esm3/statstate.hpp>
 
 namespace ESM
 {

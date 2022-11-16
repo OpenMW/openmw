@@ -28,13 +28,15 @@
 #define ESM4_REFR_H
 
 #include <cstdint>
+#include <string>
 
 #include "reference.hpp" // FormId, Placement, EnableParent
+
+#include <components/esm4/formid.hpp>
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     enum MapMarkerType
     {

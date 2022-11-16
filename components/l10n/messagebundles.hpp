@@ -1,7 +1,9 @@
 #ifndef COMPONENTS_L10N_MESSAGEBUNDLES_H
 #define COMPONENTS_L10N_MESSAGEBUNDLES_H
 
+#include <iosfwd>
 #include <map>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>

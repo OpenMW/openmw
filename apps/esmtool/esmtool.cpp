@@ -19,6 +19,8 @@
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include "arguments.hpp"
 #include "labels.hpp"
 #include "record.hpp"

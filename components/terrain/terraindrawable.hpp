@@ -1,11 +1,22 @@
 #ifndef OPENMW_COMPONENTS_TERRAIN_DRAWABLE_H
 #define OPENMW_COMPONENTS_TERRAIN_DRAWABLE_H
 
+#include <vector>
+
+#include <osg/BoundingBox>
+#include <osg/CopyOp>
 #include <osg/Geometry>
+#include <osg/Object>
+#include <osg/StateSet>
+#include <osg/ref_ptr>
+
+#include <components/terrain/compositemaprenderer.hpp>
 
 namespace osg
 {
     class ClusterCullingCallback;
+    class NodeVisitor;
+    class RenderInfo;
 }
 
 namespace osgUtil
@@ -20,10 +31,6 @@ namespace SceneUtil
 
 namespace Terrain
 {
-
-    class CompositeMap;
-    class CompositeMapRenderer;
-
     /**
      * Subclass of Geometry that supports built in multi-pass rendering and built in LightListCallback.
      */

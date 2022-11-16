@@ -1,14 +1,28 @@
 #include "debugging.hpp"
 
 #include <chrono>
+#include <cstdlib>
+#include <ctime>
+#include <exception>
 #include <fstream>
+#include <iostream>
+#include <map>
 #include <memory>
+#include <mutex>
+#include <stdio.h>
+#include <string.h>
+#include <utility>
 
-#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/categories.hpp>
+#include <boost/iostreams/concepts.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
 
 #include <components/crashcatcher/crashcatcher.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/lower.hpp>
+
 #ifdef _WIN32
 #include <components/crashcatcher/windows_crashcatcher.hpp>
 #include <components/files/conversion.hpp>

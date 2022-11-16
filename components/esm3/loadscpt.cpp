@@ -1,9 +1,16 @@
 #include "loadscpt.hpp"
 
 #include <algorithm>
+#include <filesystem>
+#include <memory>
 #include <sstream>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"

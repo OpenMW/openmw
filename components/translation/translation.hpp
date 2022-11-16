@@ -1,8 +1,22 @@
 #ifndef COMPONENTS_TRANSLATION_DATA_H
 #define COMPONENTS_TRANSLATION_DATA_H
 
+#include <iosfwd>
+#include <map>
+#include <string>
+
 #include <components/files/collections.hpp>
 #include <components/to_utf8/to_utf8.hpp>
+
+namespace Files
+{
+    class Collections;
+}
+
+namespace ToUTF8
+{
+    class Utf8Encoder;
+}
 
 namespace Translation
 {

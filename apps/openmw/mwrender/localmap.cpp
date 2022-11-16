@@ -1,21 +1,58 @@
 #include "localmap.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <cmath>
 #include <cstdint>
+#include <iosfwd>
+#include <memory>
+#include <stdexcept>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <string_view>
+#include <type_traits>
 
+#include <osg/BoundingSphere>
+#include <osg/BufferObject>
+#include <osg/Camera>
 #include <osg/ComputeBoundsVisitor>
+#include <osg/CullSettings>
 #include <osg/Fog>
+#include <osg/GL>
+#include <osg/Group>
+#include <osg/Light>
 #include <osg/LightModel>
 #include <osg/LightSource>
+#include <osg/Math>
+#include <osg/Matrix>
+#include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
 #include <osg/PolygonMode>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/Texture2D>
+#include <osg/Texture>
+#include <osg/Transform>
+#include <osg/Uniform>
+#include <osg/Vec3>
+#include <osg/Vec3f>
+#include <osg/Vec4>
 
-#include <osgDB/ReadFile>
+#include <osgDB/ReaderWriter>
+#include <osgDB/Registry>
+
+#include <apps/openmw/mwworld/ptr.hpp>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/fogstate.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/files/memorystream.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>

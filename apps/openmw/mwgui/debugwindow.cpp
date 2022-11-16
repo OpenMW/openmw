@@ -1,11 +1,25 @@
 #include "debugwindow.hpp"
 
+#include <algorithm>
+#include <stddef.h>
+#include <stdint.h>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include <LinearMath/btQuickprof.h>
+
+#include <MyGUI_Align.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_TabControl.h>
 #include <MyGUI_TabItem.h>
+#include <MyGUI_Types.h>
 
-#include <LinearMath/btQuickprof.h>
+#include <apps/openmw/mwgui/windowbase.hpp>
+
 #include <components/debug/debugging.hpp>
+#include <components/debug/debuglog.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"

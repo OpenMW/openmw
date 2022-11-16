@@ -1,15 +1,32 @@
 #include "review.hpp"
 
+#include <array>
+#include <assert.h>
 #include <cmath>
+#include <iterator>
+#include <set>
+#include <type_traits>
+#include <utility>
 
+#include <MyGUI_Align.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TCoord.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_WidgetInput.h>
+
+#include <apps/openmw/mwgui/widgets.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwworld/store.hpp>
 
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadspel.hpp>
+#include <components/esm3/spelllist.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -19,6 +36,11 @@
 
 #include "tooltips.hpp"
 #include "ustring.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace
 {

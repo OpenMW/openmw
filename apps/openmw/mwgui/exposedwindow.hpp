@@ -1,7 +1,16 @@
 #ifndef MWGUI_EXPOSEDWINDOW_H
 #define MWGUI_EXPOSEDWINDOW_H
 
+#include <string>
+
+#include <MyGUI_RTTI.h>
+#include <MyGUI_WidgetDefines.h>
 #include <MyGUI_Window.h>
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWGui
 {

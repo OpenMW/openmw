@@ -1,5 +1,7 @@
 #include "cellid.hpp"
 
+#include <compare>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 

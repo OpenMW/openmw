@@ -1,5 +1,7 @@
 #include "spelllist.hpp"
 
+#include <algorithm>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 

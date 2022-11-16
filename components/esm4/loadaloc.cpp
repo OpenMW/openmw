@@ -26,17 +26,13 @@
 */
 #include "loadaloc.hpp"
 
-#include <cstring>
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
-//#include <iomanip>  // FIXME: for debugging only
-
-//#include <boost/scoped_array.hpp> // FIXME
-
-//#include "formid.hpp" // FIXME:
 
 #include "reader.hpp"
-//#include "writer.hpp"
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/formid.hpp>
 
 void ESM4::MediaLocationController::load(ESM4::Reader& reader)
 {

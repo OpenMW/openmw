@@ -1,17 +1,23 @@
 #ifndef OPENMW_ESM_READER_H
 #define OPENMW_ESM_READER_H
 
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <istream>
+#include <iterator>
 #include <memory>
+#include <string>
 #include <vector>
-
-#include <components/to_utf8/to_utf8.hpp>
 
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
 #include "loadtes3.hpp"
+
+namespace ToUTF8
+{
+    class Utf8Encoder;
+}
 
 namespace ESM
 {

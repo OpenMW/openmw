@@ -1,7 +1,16 @@
 #ifndef MWGUI_WINDOW_PINNABLE_BASE_H
 #define MWGUI_WINDOW_PINNABLE_BASE_H
 
+#include <MyGUI_MouseButton.h>
+
+#include <string>
+
 #include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWGui
 {

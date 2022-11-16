@@ -27,7 +27,9 @@
 #include "loadhair.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
+
+#include <components/esm/common.hpp>
+#include <components/esm4/common.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"

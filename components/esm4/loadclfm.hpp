@@ -35,7 +35,6 @@
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     // FIXME: duplicate with Npc
     struct ColourRGB

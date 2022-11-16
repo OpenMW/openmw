@@ -1,19 +1,35 @@
 #ifndef OPENMW_MWRENDER_OBJECTPAGING_H
 #define OPENMW_MWRENDER_OBJECTPAGING_H
 
-#include <components/esm3/loadcell.hpp>
+#include <map>
+#include <mutex>
+#include <set>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+
+#include <osg/CopyOp>
+#include <osg/Object>
+#include <osg/ref_ptr>
+
+#include <components/esm3/cellref.hpp>
 #include <components/resource/resourcemanager.hpp>
 #include <components/terrain/quadtreeworld.hpp>
 
-#include <mutex>
+namespace osg
+{
+    class Node;
+    class Stats;
+    class Vec2f;
+    class Vec2i;
+    class Vec3f;
+    class Vec4i;
+}
 
 namespace Resource
 {
     class SceneManager;
-}
-namespace MWWorld
-{
-    class ESMStore;
 }
 
 namespace MWRender

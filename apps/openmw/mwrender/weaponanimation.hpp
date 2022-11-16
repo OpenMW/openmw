@@ -1,14 +1,37 @@
 #ifndef OPENMW_MWRENDER_WEAPONANIMATION_H
 #define OPENMW_MWRENDER_WEAPONANIMATION_H
 
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <osg/Quat>
+#include <osg/ref_ptr>
+
 #include <components/sceneutil/controller.hpp>
 
-#include "../mwworld/ptr.hpp"
 #include "animation.hpp"
+
+namespace osg
+{
+    class Callback;
+    class Group;
+    class Node;
+    class NodeVisitor;
+}
+
+namespace MWWorld
+{
+    class Ptr;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
 
 namespace MWRender
 {
-
     class RotateController;
 
     class WeaponAnimationTime : public SceneUtil::ControllerSource

@@ -4,7 +4,11 @@
 #define OPENMW_COMPONENTS_NIF_NIFFILE_HPP
 
 #include <atomic>
+#include <cstddef>
 #include <filesystem>
+#include <memory>
+#include <stdint.h>
+#include <string>
 #include <vector>
 
 #include <components/files/istreamptr.hpp>

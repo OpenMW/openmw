@@ -1,26 +1,39 @@
 #include "bulletnifloader.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <cstddef>
+#include <map>
 #include <sstream>
 #include <tuple>
+#include <utility>
 #include <variant>
 #include <vector>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
+#include <LinearMath/btQuaternion.h>
+#include <LinearMath/btTransform.h>
+#include <LinearMath/btVector3.h>
+
+#include <osg/Quat>
+#include <osg/Vec3d>
+#include <osg/Vec3f>
+
 #include <components/debug/debuglog.hpp>
-
+#include <components/files/conversion.hpp>
 #include <components/misc/convert.hpp>
-
 #include <components/misc/strings/algorithm.hpp>
-
+#include <components/nif/base.hpp>
 #include <components/nif/data.hpp>
 #include <components/nif/extra.hpp>
+#include <components/nif/niftypes.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/parent.hpp>
-
-#include <components/files/conversion.hpp>
+#include <components/nif/record.hpp>
+#include <components/nif/recordptr.hpp>
 
 namespace
 {

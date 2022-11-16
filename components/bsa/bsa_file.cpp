@@ -27,9 +27,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <compare>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <memory>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 using namespace Bsa;
 

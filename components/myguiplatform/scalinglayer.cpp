@@ -1,7 +1,19 @@
 #include "scalinglayer.hpp"
 
-#include <MyGUI_RenderManager.h>
 #include <algorithm>
+#include <stddef.h>
+
+#include <MyGUI_IRenderTarget.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_RenderTargetInfo.h>
+#include <MyGUI_Version.h>
+
+namespace MyGUI
+{
+    class ILayerItem;
+    class ITexture;
+    class IVertexBuffer;
+}
 
 namespace osgMyGUI
 {

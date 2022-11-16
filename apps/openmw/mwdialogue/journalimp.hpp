@@ -1,6 +1,10 @@
 #ifndef GAME_MWDIALOG_JOURNAL_H
 #define GAME_MWDIALOG_JOURNAL_H
 
+#include <stdint.h>
+#include <string>
+#include <string_view>
+
 #include "../mwbase/journal.hpp"
 
 #include "quest.hpp"

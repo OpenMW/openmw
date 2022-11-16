@@ -1,14 +1,50 @@
 #include "tooltips.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <initializer_list>
 #include <iomanip>
+#include <limits>
+#include <map>
+#include <ostream>
+#include <stddef.h>
+#include <stdexcept>
+#include <string_view>
+#include <type_traits>
+#include <utility>
 
+#include <MyGUI_Align.h>
+#include <MyGUI_Colour.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TPoint.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Widget.h>
 
-#include <components/esm/records.hpp>
+#include <apps/openmw/mwgui/layout.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/widgets.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/attr.hpp>
+#include <components/esm3/effectlist.hpp>
+#include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadrace.hpp>
+#include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/spelllist.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/settings/settings.hpp>
 #include <components/widgets/box.hpp>
 
@@ -26,6 +62,11 @@
 #include "mapwindow.hpp"
 
 #include "itemmodel.hpp"
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace MWGui
 {

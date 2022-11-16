@@ -1,7 +1,19 @@
 #ifndef MWGUI_LEVELUPDIALOG_H
 #define MWGUI_LEVELUPDIALOG_H
 
+#include <string>
+#include <vector>
+
 #include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class Button;
+    class EditBox;
+    class ImageBox;
+    class TextBox;
+    class Widget;
+}
 
 namespace MWGui
 {

@@ -1,13 +1,29 @@
 #include "controller.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+
+#include <osg/FrameStamp>
 #include <osg/Material>
+#include <osg/Matrix>
 #include <osg/MatrixTransform>
+#include <osg/Matrixf>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/StateAttribute>
+#include <osg/StateSet>
 #include <osg/TexMat>
 #include <osg/Texture2D>
+#include <osg/Vec3d>
+#include <osg/Vec4f>
 
-#include <osgParticle/Emitter>
+#include <osgParticle/ParticleSystem>
 
+#include <components/nif/controller.hpp>
 #include <components/nif/data.hpp>
+#include <components/nif/record.hpp>
+#include <components/nif/recordptr.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
 #include "matrixtransform.hpp"

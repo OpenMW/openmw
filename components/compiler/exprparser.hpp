@@ -1,6 +1,7 @@
 #ifndef COMPILER_EXPRPARSER_H_INCLUDED
 #define COMPILER_EXPRPARSER_H_INCLUDED
 
+#include <string>
 #include <vector>
 
 #include <components/interpreter/types.hpp>
@@ -10,6 +11,9 @@
 
 namespace Compiler
 {
+    class Context;
+    class ErrorHandler;
+    class Scanner;
     class Locals;
     class Literals;
 

@@ -5,8 +5,11 @@
 #include <components/serialization/format.hpp>
 #include <components/serialization/sizeaccumulator.hpp>
 
+#include <cstring>
+#include <iterator>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 namespace NavMeshTool
 {

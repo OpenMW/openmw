@@ -1,10 +1,15 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_SCENEMANAGER_H
 #define OPENMW_COMPONENTS_RESOURCE_SCENEMANAGER_H
 
+#include <array>
 #include <memory>
 #include <mutex>
+#include <stddef.h>
 #include <string>
+#include <vector>
 
+#include <osg/CopyOp>
+#include <osg/Object>
 #include <osg/Texture>
 #include <osg/ref_ptr>
 

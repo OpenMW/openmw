@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include <osgUtil/CullVisitor>
+#include <osg/Vec3f>
 
 #include "defs.hpp"
 #include "viewdata.hpp"

@@ -1,6 +1,8 @@
 #include "nifstream.hpp"
-// For error reporting
+
 #include "niffile.hpp"
+
+#include <components/nif/niftypes.hpp>
 
 namespace Nif
 {

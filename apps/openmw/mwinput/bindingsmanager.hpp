@@ -2,11 +2,19 @@
 #define MWINPUT_MWBINDINGSMANAGER_H
 
 #include <filesystem>
+#include <initializer_list>
 #include <memory>
 #include <string>
-#include <vector>
+#include <string_view>
 
-#include <components/sdlutil/events.hpp>
+#include <SDL_events.h>
+#include <SDL_gamecontroller.h>
+#include <SDL_scancode.h>
+
+namespace SDLUtil
+{
+    struct MouseMotionEvent;
+}
 
 namespace MWInput
 {

@@ -2,19 +2,32 @@
 
 #include <algorithm>
 #include <chrono>
+#include <compare>
+#include <filesystem>
+#include <fstream>
+#include <regex>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string.h>
+#include <type_traits>
+#include <unordered_map>
+
+#include <osg/CopyOp>
+#include <osg/Program>
+
+#include <osgViewer/Viewer>
+
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
-#include <filesystem>
-#include <fstream>
-#include <osg/Program>
-#include <osgViewer/Viewer>
-#include <regex>
-#include <set>
-#include <sstream>
-#include <unordered_map>
+
+namespace osg
+{
+    class State;
+}
 
 namespace Shader
 {

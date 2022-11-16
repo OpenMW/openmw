@@ -2,8 +2,12 @@
 
 #include "data.hpp"
 
+#include <components/nif/base.hpp>
+#include <components/nif/nifstream.hpp>
+
 namespace Nif
 {
+    class Reader;
 
     void NiSourceTexture::read(NIFStream* nif)
     {

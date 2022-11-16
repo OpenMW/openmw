@@ -4,6 +4,14 @@
 #include "../mwworld/ptr.hpp"
 #include "windowbase.hpp"
 
+namespace MyGUI
+{
+    class Button;
+    class ScrollView;
+    class TextBox;
+    class Widget;
+}
+
 namespace MWGui
 {
 

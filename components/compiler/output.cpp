@@ -4,6 +4,8 @@
 #include <cassert>
 #include <iterator>
 
+#include <components/compiler/literals.hpp>
+
 #include "locals.hpp"
 
 namespace Compiler

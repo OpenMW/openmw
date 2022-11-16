@@ -1,7 +1,28 @@
 #include "weaponanimation.hpp"
 
-#include <osg/MatrixTransform>
+#include <memory>
+#include <type_traits>
+#include <unordered_map>
 
+#include <osg/Callback>
+#include <osg/Matrix>
+#include <osg/MatrixTransform>
+#include <osg/Node>
+#include <osg/Transform>
+#include <osg/Vec3d>
+#include <osg/Vec3f>
+
+#include <apps/openmw/mwworld/containerstore.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadweap.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 
@@ -18,6 +39,12 @@
 
 #include "animation.hpp"
 #include "rotatecontroller.hpp"
+
+namespace osg
+{
+    class Group;
+    class NodeVisitor;
+}
 
 namespace MWRender
 {

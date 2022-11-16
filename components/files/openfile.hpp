@@ -4,7 +4,6 @@
 #include <filesystem>
 #include <iosfwd>
 #include <memory>
-#include <string>
 
 namespace Files
 {

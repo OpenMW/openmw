@@ -1,35 +1,45 @@
 #ifndef MWINPUT_MWINPUTMANAGERIMP_H
 #define MWINPUT_MWINPUTMANAGERIMP_H
 
+#include <filesystem>
+#include <initializer_list>
 #include <memory>
+#include <stdint.h>
+#include <string>
+#include <string_view>
 
 #include <osg/ref_ptr>
 #include <osgViewer/ViewerEventHandlers>
 
-#include <components/sdlutil/events.hpp>
-#include <components/settings/settings.hpp>
-#include <filesystem>
+#include <SDL_gamecontroller.h>
+#include <SDL_video.h>
+
+#include <components/settings/categories.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 
 #include "actions.hpp"
 
-namespace MWWorld
+namespace osgViewer
 {
-    class Player;
+    class Viewer;
 }
 
-namespace MWBase
+namespace Loading
 {
-    class WindowManager;
+    class Listener;
+}
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
 }
 
 namespace SDLUtil
 {
     class InputWrapper;
 }
-
-struct SDL_Window;
 
 namespace MWInput
 {

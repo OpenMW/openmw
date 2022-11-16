@@ -1,9 +1,16 @@
 #include "keyboardmanager.hpp"
 
 #include <cctype>
+#include <string>
+
+#include <SDL_keyboard.h>
+#include <SDL_keycode.h>
 
 #include <MyGUI_InputManager.h>
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_UString.h>
 
+#include <components/misc/notnullptr.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
 
 #include "../mwbase/environment.hpp"

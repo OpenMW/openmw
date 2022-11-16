@@ -1,5 +1,13 @@
 #include "companionitemmodel.hpp"
 
+#include <type_traits>
+
+#include <apps/openmw/mwgui/inventoryitemmodel.hpp>
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwscript/locals.hpp>
+
+#include <components/esm/refid.hpp>
+
 #include "../mwworld/class.hpp"
 
 namespace

@@ -4,6 +4,7 @@
 #include "categories.hpp"
 
 #include <filesystem>
+#include <stddef.h>
 #include <string>
 
 namespace Settings

@@ -2,6 +2,10 @@
 #define OPENMW_ESM_WEAP_H
 
 #include <string>
+#include <string_view>
+#include <utility>
+
+#include <components/esm/defs.hpp>
 
 #include "components/esm/refid.hpp"
 #include "loadskil.hpp"

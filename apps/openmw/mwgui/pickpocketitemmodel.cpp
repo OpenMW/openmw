@@ -1,6 +1,15 @@
 #include "pickpocketitemmodel.hpp"
 
+#include <algorithm>
+#include <stdexcept>
+#include <utility>
+
+#include <apps/openmw/mwgui/itemmodel.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/misc/rng.hpp>
 
 #include "../mwmechanics/actorutil.hpp"

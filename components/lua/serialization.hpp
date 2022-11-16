@@ -1,6 +1,12 @@
 #ifndef COMPONENTS_LUA_SERIALIZATION_H
 #define COMPONENTS_LUA_SERIALIZATION_H
 
+#include <functional>
+#include <stddef.h>
+#include <string>
+#include <string_view>
+#include <utility>
+
 #include <sol/sol.hpp>
 
 #include <components/esm3/cellref.hpp>

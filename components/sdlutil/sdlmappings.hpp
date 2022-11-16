@@ -6,6 +6,7 @@
 #include <MyGUI_KeyCode.h>
 
 #include <SDL_keycode.h>
+#include <SDL_stdinc.h>
 
 namespace MyGUI
 {

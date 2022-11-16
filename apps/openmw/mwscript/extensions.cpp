@@ -1,7 +1,6 @@
 #include "extensions.hpp"
 
 #include <components/interpreter/installopcodes.hpp>
-#include <components/interpreter/interpreter.hpp>
 
 #include "aiextensions.hpp"
 #include "animationextensions.hpp"

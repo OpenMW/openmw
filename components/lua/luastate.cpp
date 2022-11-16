@@ -4,7 +4,13 @@
 #include <luajit.h>
 #endif // NO_LUAJIT
 
+#include <algorithm>
+#include <ctime>
 #include <filesystem>
+#include <istream>
+#include <iterator>
+#include <memory>
+#include <type_traits>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
@@ -14,6 +20,7 @@
 
 namespace LuaUtil
 {
+    class ScriptsConfiguration;
 
     static std::string packageNameToVfsPath(std::string_view packageName, const VFS::Manager* vfs)
     {

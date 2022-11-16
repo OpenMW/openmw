@@ -1,11 +1,23 @@
 #include "keyboardnavigation.hpp"
 
+#include <algorithm>
+#include <assert.h>
+#include <stdlib.h>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <MyGUI_Delegate.h>
+#include <MyGUI_Exception.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_WidgetDefines.h>
 #include <MyGUI_WidgetManager.h>
 #include <MyGUI_Window.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

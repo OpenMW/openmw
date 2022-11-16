@@ -1,5 +1,8 @@
 #include "property.hpp"
 
+#include <memory>
+#include <stddef.h>
+
 #include "controlled.hpp"
 #include "data.hpp"
 

@@ -1,7 +1,21 @@
 #include "l10n.hpp"
 
+#include <exception>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
+#include <unicode/fmtable.h>
+#include <unicode/stringpiece.h>
+#include <unicode/unistr.h>
+
 #include <components/debug/debuglog.hpp>
 #include <components/l10n/manager.hpp>
+#include <components/l10n/messagebundles.hpp>
 
 namespace
 {

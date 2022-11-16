@@ -1,8 +1,9 @@
 #include "workqueue.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <numeric>
+#include <utility>
+
+#include <components/debug/debuglog.hpp>
 
 namespace SceneUtil
 {

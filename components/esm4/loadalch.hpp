@@ -30,12 +30,13 @@
 #include <cstdint>
 #include <string>
 
+#include <components/esm4/formid.hpp>
+
 #include "effect.hpp" // FormId, ScriptEffect
 
 namespace ESM4
 {
     class Reader;
-    class Writer;
 
     struct Potion
     {

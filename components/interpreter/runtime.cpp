@@ -4,6 +4,8 @@
 #include <cstring>
 #include <stdexcept>
 
+#include <components/interpreter/types.hpp>
+
 namespace Interpreter
 {
     Runtime::Runtime()

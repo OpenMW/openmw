@@ -1,5 +1,10 @@
 #include "exposedwindow.hpp"
 
+#include <ostream>
+
+#include <MyGUI_LogStream.h>
+#include <MyGUI_Widget.h>
+
 namespace MWGui
 {
     MyGUI::VectorWidgetPtr Window::getSkinWidgetsByName(const std::string& name)

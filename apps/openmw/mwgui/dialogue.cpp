@@ -1,13 +1,44 @@
 #include "dialogue.hpp"
 
+#include <algorithm>
+#include <functional>
+#include <limits>
+#include <string_view>
+#include <type_traits>
+
 #include <MyGUI_Button.h>
+#include <MyGUI_Colour.h>
+#include <MyGUI_EventPair.h>
+#include <MyGUI_ISubWidgetText.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollBar.h>
+#include <MyGUI_StringUtility.h>
+#include <MyGUI_TCoord.h>
+#include <MyGUI_TSize.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
+#include <MyGUI_WidgetInput.h>
 #include <MyGUI_Window.h>
 
+#include <apps/openmw/mwdialogue/keywordsearch.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
+#include <apps/openmw/mwgui/windowbase.hpp>
+#include <apps/openmw/mwscript/locals.hpp>
+#include <apps/openmw/mwworld/livecellref.hpp>
+#include <apps/openmw/mwworld/ptr.hpp>
+#include <apps/openmw/mwworld/store.hpp>
+#include <apps/openmw/mwworld/timestamp.hpp>
+
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/variant.hpp>
+#include <components/misc/notnullptr.hpp>
+#include <components/misc/strings/lower.hpp>
+#include <components/settings/settings.hpp>
 #include <components/translation/translation.hpp>
 #include <components/widgets/box.hpp>
 #include <components/widgets/list.hpp>

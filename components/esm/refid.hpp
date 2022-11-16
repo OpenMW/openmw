@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_ESM_REFID_HPP
 #define OPENMW_COMPONENTS_ESM_REFID_HPP
 
-#include <functional>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <string_view>

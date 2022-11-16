@@ -1,10 +1,15 @@
 #ifndef MWGUI_COMPANION_ITEM_MODEL_H
 #define MWGUI_COMPANION_ITEM_MODEL_H
 
+#include <stddef.h>
+
+#include <apps/openmw/mwworld/ptr.hpp>
+
 #include "inventoryitemmodel.hpp"
 
 namespace MWGui
 {
+    struct ItemStack;
 
     /// @brief The companion item model keeps track of the companion's profit by
     /// monitoring which items are being added to and removed from the model.
