@@ -3,7 +3,6 @@
 #include <sstream>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm/refid.hpp>
 
 #include "tokenloc.hpp"
 

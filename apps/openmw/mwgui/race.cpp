@@ -191,7 +191,7 @@ namespace MWGui
         size_t count = mRaceList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (ESM::RefId::stringRefId(*mRaceList->getItemDataAt<std::string>(i)) == raceId)
+            if (*mRaceList->getItemDataAt<ESM::RefId>(i) == raceId)
             {
                 mRaceList->setIndexSelected(i);
                 break;
@@ -292,7 +292,7 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        ESM::RefId raceId = ESM::RefId::stringRefId(*mRaceList->getItemDataAt<std::string>(_index));
+        ESM::RefId& raceId = *mRaceList->getItemDataAt<ESM::RefId>(_index);
         if (mCurrentRaceId == raceId)
             return;
 

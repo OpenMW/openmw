@@ -44,7 +44,7 @@ namespace MWMechanics
         if (creature)
             allLevels = levItem->mFlags & ESM::CreatureLevList::AllLevels;
 
-        std::pair<int, const ESM::RefId*> highest = { -1, {} };
+        std::pair<int, const ESM::RefId*> highest = { -1, nullptr };
         for (const auto& levelledItem : items)
         {
             if (playerLevel >= levelledItem.mLevel && (allLevels || levelledItem.mLevel == highestLevel))

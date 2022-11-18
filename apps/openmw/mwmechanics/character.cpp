@@ -1029,7 +1029,7 @@ namespace MWMechanics
                 }
             }
 
-            auto sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
+            const auto& sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
             if (!sound.empty())
             {
                 MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
@@ -2043,7 +2043,7 @@ namespace MWMechanics
                 if (!godmode)
                 {
                     // reduce fatigue
-                    float fatigueLoss = 0;
+                    float fatigueLoss = 0.f;
                     static const float fFatigueRunBase = gmst.find("fFatigueRunBase")->mValue.getFloat();
                     static const float fFatigueRunMult = gmst.find("fFatigueRunMult")->mValue.getFloat();
                     static const float fFatigueSwimWalkBase = gmst.find("fFatigueSwimWalkBase")->mValue.getFloat();
@@ -2159,7 +2159,6 @@ namespace MWMechanics
                     if (mPtr.getClass().isNpc())
                     {
                         std::string_view sound;
-
                         osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
                         if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
                             sound = "DefaultLandWater";

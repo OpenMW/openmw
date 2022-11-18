@@ -69,7 +69,7 @@ namespace MWRender
         ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
         if (weapclass == ESM::WeaponType::Thrown)
         {
-            auto soundid = weaponSlot->getClass().getUpSoundId(*weaponSlot);
+            const auto& soundid = weaponSlot->getClass().getUpSoundId(*weaponSlot);
             if (!soundid.empty())
             {
                 MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();

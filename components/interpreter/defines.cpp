@@ -214,7 +214,6 @@ namespace Interpreter
                         if (globals.empty())
                         {
                             globals = context.getGlobals();
-                            ;
                             sort(globals.begin(), globals.end(), longerStr);
                         }
 

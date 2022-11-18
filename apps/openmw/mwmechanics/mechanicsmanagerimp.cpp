@@ -524,7 +524,7 @@ namespace MWMechanics
 
         float reaction = 0;
         int rank = 0;
-        ESM::RefId npcFaction = ptr.getClass().getPrimaryFaction(ptr);
+        const ESM::RefId& npcFaction = ptr.getClass().getPrimaryFaction(ptr);
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {

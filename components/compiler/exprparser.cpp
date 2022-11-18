@@ -205,7 +205,7 @@ namespace Compiler
         mMemberOp = false;
 
         std::string name2 = Misc::StringUtils::lowerCase(name);
-        auto id = ESM::RefId::stringRefId(mExplicit);
+        auto id = ESM::RefId::stringRefId(Misc::StringUtils::lowerCase(mExplicit));
 
         std::pair<char, bool> type = getContext().getMemberType(name2, id);
 
@@ -303,29 +303,31 @@ namespace Compiler
         {
             start();
 
-            char type = mLocals.getType(name);
+            std::string name2 = Misc::StringUtils::lowerCase(name);
+
+            char type = mLocals.getType(name2);
 
             if (type != ' ')
             {
-                Generator::fetchLocal(mCode, type, mLocals.getIndex(name));
+                Generator::fetchLocal(mCode, type, mLocals.getIndex(name2));
                 mNextOperand = false;
                 mOperands.push_back(type == 'f' ? 'f' : 'l');
                 return true;
             }
 
-            type = getContext().getGlobalType(name);
+            type = getContext().getGlobalType(name2);
 
             if (type != ' ')
             {
-                Generator::fetchGlobal(mCode, mLiterals, type, name);
+                Generator::fetchGlobal(mCode, mLiterals, type, name2);
                 mNextOperand = false;
                 mOperands.push_back(type == 'f' ? 'f' : 'l');
                 return true;
             }
 
-            if (mExplicit.empty() && getContext().isId(ESM::RefId::stringRefId(name)))
+            if (mExplicit.empty() && getContext().isId(ESM::RefId::stringRefId(name2)))
             {
-                mExplicit = name;
+                mExplicit = name2;
                 return true;
             }
 
@@ -333,7 +335,7 @@ namespace Compiler
             // Convert the string to a number even if it's impossible and use it as a number literal.
             // Can't use stof/atof or to_string out of locale concerns.
             float number;
-            std::stringstream stream(name);
+            std::stringstream stream(name2);
             stream >> number;
             stream.str(std::string());
             stream.clear();
