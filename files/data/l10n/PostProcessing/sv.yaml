@@ -1,6 +1,8 @@
 Abovewater: "Ovan vatten"
+ActiveShaders: "Aktiva shaders"
 Author: "Skapare" # Author = Författare, but författare sounds very book-author-ish. Skapare, meaning "creator", sounds better in Swedish in this case. Ok?
 Description: "Beskrivning"
+ActiveShaders: "Inaktiva shaders"
 InExteriors: "Exteriörer"
 InInteriors: "Interiörer"
 KeyboardControls: |
