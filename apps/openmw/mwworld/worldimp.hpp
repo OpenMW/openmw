@@ -91,6 +91,7 @@ namespace MWWorld
         MWWorld::Globals mGlobalVariables;
         Misc::Rng::Generator mPrng;
         Cells mCells;
+        std::vector<int> mESMVersions; // the versions of esm files
 
         std::string mCurrentWorldSpace;
 
@@ -137,8 +138,6 @@ namespace MWWorld
         uint32_t mRandomSeed{};
 
         float mSimulationTimeScale = 1.0;
-
-        std::vector<int> mESMVersions; // the versions of esm files
 
         // not implemented
         World(const World&);
