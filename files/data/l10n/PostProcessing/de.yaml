@@ -1,6 +1,8 @@
 Abovewater: "Überwasser"
+ActiveShaders: "Aktive Shader"
 Author: "Autor"
 Description: "Beschreibung"
+InactiveShaders: "Inaktive Shader"
 InExteriors: "Außenbereich"
 InInteriors: "Innenbereich"
 KeyboardControls: |
