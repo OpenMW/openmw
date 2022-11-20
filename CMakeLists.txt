@@ -265,7 +265,15 @@ set(USED_OSG_PLUGINS
     osgdb_serializers_osg
     osgdb_tga)
 
-find_package(collada_dom)
+if(NOT COLLADA_DOM_VERSION_MAJOR)
+    set(COLLADA_DOM_VERSION_MAJOR 2)
+endif()
+
+if(NOT COLLADA_DOM_VERSION_MINOR)
+    set(COLLADA_DOM_VERSION_MINOR 5)
+endif()
+
+find_package(collada_dom 2.5)
 
 option(OPENMW_USE_SYSTEM_ICU "Use system ICU library instead of internal. If disabled, requires autotools" ON)
 if(OPENMW_USE_SYSTEM_ICU)
