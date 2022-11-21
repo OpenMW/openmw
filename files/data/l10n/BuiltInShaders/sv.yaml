@@ -1,4 +1,5 @@
-AdjustmentsDescription: "Colour adjustments."
+AdjustmentsDescription: "Färgjusteringar."
+BloomDescription: "Bloomshader som utför sina beräkningar i (ungefärligt) linjärt ljus."
 DebugDescription: "Felsökningsshader."
 DebugHeaderDepth: "Djupbuffert"
 DebugHeaderNormals: "Normalvektorer"
@@ -10,3 +11,13 @@ ContrastLevelDescription: "Kontrastnivå"
 ContrastLevelName: "Kontrast"
 GammaLevelDescription: "Gammanivå"
 # GammaLevelName: "Gamma" samma som engelska
+StrengthLevelName: "Styrka"
+StrengthLevelDescription: "Effektens styrka."
+RadiusLevelName: "Radie"
+RadiusLevelDescription: "Effektens radie."
+SkyFactorLevelName: "Himmelsfaktor"
+SkyFactorLevelDescription: "Multiplikationsfaktor för ljus som kommer direkt från himlen."
+BloomClampLevelName: "Låsnivå" # "Clamp Level", svåröversatt. Kan kanske översättas bättre.
+BloomClampLevelDescription: "Låser bloompixlar med ljusstyrka högre än detta värde när bloom beräknas in i bilden." # Svåröversatt.
+BloomThresholdLevelName: "Tröskelvärde"
+BloomThresholdLevelDescription: "Ignorera pixlar med ljusstyrka lägre än detta värde när oskärpa beräknas. Påverkar inte himmel."
