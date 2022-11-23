@@ -150,7 +150,7 @@ namespace MWMechanics
     {
         if (mIterating)
             return;
-        const auto& creatureStats = ptr.getClass().getCreatureStats(ptr);
+        auto& creatureStats = ptr.getClass().getCreatureStats(ptr);
         assert(&creatureStats.getActiveSpells() == this);
         IterationGuard guard{*this};
         // Erase no longer active spells and effects
@@ -307,6 +307,15 @@ namespace MWMechanics
                 continue;
             }
             ++spellIt;
+        }
+
+        static const bool keepCalm = Settings::Manager::getBool("classic calm spells behavior", "Game");
+        if (keepCalm)
+        {
+            ESM::MagicEffect::Effects effect
+                = ptr.getClass().isNpc() ? ESM::MagicEffect::CalmHumanoid : ESM::MagicEffect::CalmCreature;
+            if (creatureStats.getMagicEffects().get(effect).getMagnitude() > 0.f)
+                creatureStats.getAiSequence().stopCombat();
         }
     }
 
