@@ -124,7 +124,10 @@ namespace SceneUtil
         if (fileName.empty())
             mCallback("Failed to save screenshot");
         else
+        {
             mCallback(Files::pathToUnicodeString(fileName) + " has been saved");
+            Log(Debug::Info) << mScreenshotPath / fileName << " has been saved";
+        }
     }
 
     AsyncScreenCaptureOperation::AsyncScreenCaptureOperation(
