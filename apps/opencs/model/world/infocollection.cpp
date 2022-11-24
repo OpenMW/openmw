@@ -143,12 +143,12 @@ int CSMWorld::InfoCollection::getInsertIndex(const std::string& id, UniversalId:
     int index = -1;
 
     const Info& info = static_cast<Record<Info>*>(record)->get();
-    auto topic = info.mTopicId;
+    const std::string& topic = info.mTopicId.getRefIdString();
 
     // if the record has a prev, find its index value
     if (!info.mPrev.empty())
     {
-        index = getInfoIndex(info.mPrev.getRefIdString(), topic.getRefIdString());
+        index = getInfoIndex(info.mPrev.getRefIdString(), topic);
 
         if (index != -1)
             ++index; // if prev exists, set current index to one above prev
@@ -158,13 +158,13 @@ int CSMWorld::InfoCollection::getInsertIndex(const std::string& id, UniversalId:
     if (index == -1 && !info.mNext.empty())
     {
         // if next exists, use its index as the current index
-        index = getInfoIndex(info.mNext.getRefIdString(), topic.getRefIdString());
+        index = getInfoIndex(info.mNext.getRefIdString(), topic);
     }
 
     // if next doesn't exist or not found (i.e. neither exist yet) then start a new one
     if (index == -1)
     {
-        Range range = getTopicRange(topic.getRefIdString()); // getTopicRange converts topic to lower case first
+        Range range = getTopicRange(topic); // getTopicRange converts topic to lower case first
 
         index = std::distance(getRecords().begin(), range.second);
     }

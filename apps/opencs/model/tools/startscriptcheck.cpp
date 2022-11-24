@@ -35,7 +35,7 @@ void CSMTools::StartScriptCheckStage::perform(int stage, CSMDoc::Messages& messa
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    auto scriptId = record.get().mId;
+    const auto& scriptId = record.get().mId;
 
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_StartScript, scriptId);
 

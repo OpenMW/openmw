@@ -41,7 +41,7 @@ namespace ESM
         template <bool load>
         void loadDataImpl(ESMReader& esm, bool& isDeleted, CellRef& cellRef)
         {
-            const auto getRefIdOrSkip = [&](ESM::RefId refId) {
+            const auto getRefIdOrSkip = [&](ESM::RefId& refId) {
                 if constexpr (load)
                     refId = esm.getRefId();
                 else
