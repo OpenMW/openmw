@@ -17,10 +17,12 @@ namespace MWGui
 
     private:
         void updateLogView();
+        void updateLuaProfile();
         void updateBulletProfile();
 
         MyGUI::TabControl* mTabControl;
         MyGUI::EditBox* mLogView;
+        MyGUI::EditBox* mLuaProfiler;
         MyGUI::EditBox* mBulletProfilerEdit;
     };
 

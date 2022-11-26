@@ -188,6 +188,7 @@ namespace MWGui
         void updateSpellWindow() override;
 
         void setConsoleSelectedObject(const MWWorld::Ptr& object) override;
+        MWWorld::Ptr getConsoleSelectedObject() const override;
         void printToConsole(const std::string& msg, std::string_view color) override;
         void setConsoleMode(const std::string& mode) override;
 

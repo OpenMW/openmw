@@ -1,3 +1,4 @@
 DebugWindow: "Меню отладки"
 LogViewer: "Журнал логов"
+LuaProfiler: "Профилировщик Луа"
 PhysicsProfiler: "Профилировщик физики"

@@ -159,6 +159,7 @@ namespace MWBase
         virtual void updateSpellWindow() = 0;
 
         virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
+        virtual MWWorld::Ptr getConsoleSelectedObject() const = 0;
         virtual void setConsoleMode(const std::string& mode) = 0;
 
         static constexpr std::string_view sConsoleColor_Default = "#FFFFFF";
