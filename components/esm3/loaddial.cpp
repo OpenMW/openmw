@@ -89,7 +89,14 @@ namespace ESM
         if (lookup != mLookup.end())
         {
             auto it = lookup->second.first;
-            // Since the new version of this record may have changed the next/prev linked list connection, we need to re-insert the record
+            if (it->mPrev == info.mPrev)
+            {
+                *it = info;
+                lookup->second.second = isDeleted;
+                return;
+            }
+            // Since the new version of this record has a different prev linked list connection, we need to re-insert
+            // the record
             mInfo.erase(it);
             mLookup.erase(lookup);
         }
