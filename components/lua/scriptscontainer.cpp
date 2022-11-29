@@ -75,7 +75,7 @@ namespace LuaUtil
         script.mHiddenData[sScriptIdKey] = ScriptId{ this, scriptId };
         script.mHiddenData[sScriptDebugNameKey] = debugName;
         script.mPath = path;
-        script.mStats.mCPUusage = 0;
+        script.mStats.mAvgInstructionCount = 0;
 
         const auto oldMemoryUsageIt = mRemovedScriptsMemoryUsage.find(scriptId);
         if (oldMemoryUsageIt != mRemovedScriptsMemoryUsage.end())
@@ -590,24 +590,24 @@ namespace LuaUtil
         updateTimerQueue(mGameTimersQueue, gameTime);
     }
 
-    static constexpr float CPUusageAvgCoef = 1.0 / 30; // averaging over approximately 30 frames
+    static constexpr float instructionCountAvgCoef = 1.0 / 30; // averaging over approximately 30 frames
 
-    void ScriptsContainer::CPUusageNextFrame()
+    void ScriptsContainer::statsNextFrame()
     {
         for (auto& [scriptId, script] : mScripts)
         {
             // The averaging formula is: averageValue = averageValue * (1-c) + newValue * c
-            script.mStats.mCPUusage *= 1 - CPUusageAvgCoef;
-            if (script.mStats.mCPUusage < 5)
-                script.mStats.mCPUusage = 0; // speeding up converge to zero if newValue is zero
+            script.mStats.mAvgInstructionCount *= 1 - instructionCountAvgCoef;
+            if (script.mStats.mAvgInstructionCount < 5)
+                script.mStats.mAvgInstructionCount = 0; // speeding up converge to zero if newValue is zero
         }
     }
 
-    void ScriptsContainer::addCPUusage(int scriptId, int64_t CPUusage)
+    void ScriptsContainer::addInstructionCount(int scriptId, int64_t instructionCount)
     {
         auto it = mScripts.find(scriptId);
         if (it != mScripts.end())
-            it->second.mStats.mCPUusage += CPUusage * CPUusageAvgCoef;
+            it->second.mStats.mAvgInstructionCount += instructionCount * instructionCountAvgCoef;
     }
 
     void ScriptsContainer::addMemoryUsage(int scriptId, int64_t memoryDelta)
@@ -640,7 +640,7 @@ namespace LuaUtil
         stats.resize(mLua.getConfiguration().size());
         for (auto& [id, script] : mScripts)
         {
-            stats[id].mCPUusage += script.mStats.mCPUusage;
+            stats[id].mAvgInstructionCount += script.mStats.mAvgInstructionCount;
             stats[id].mMemoryUsage += script.mStats.mMemoryUsage;
         }
         for (auto& [id, mem] : mRemovedScriptsMemoryUsage)

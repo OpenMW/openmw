@@ -146,12 +146,12 @@ namespace LuaUtil
         // because they can not be stored in saves. I.e. loading a saved game will not fully restore the state.
         void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
 
-        // Informs that new frame is started. Needed to track CPU usage per frame.
-        void CPUusageNextFrame();
+        // Informs that new frame is started. Needed to track Lua instruction count per frame.
+        void statsNextFrame();
 
         struct ScriptStats
         {
-            float mCPUusage = 0; // averaged number of Lua instructions per frame
+            float mAvgInstructionCount = 0; // averaged number of Lua instructions per frame
             int64_t mMemoryUsage = 0; // bytes
         };
         void collectStats(std::vector<ScriptStats>& stats) const;
@@ -227,7 +227,7 @@ namespace LuaUtil
         using EventHandlerList = std::vector<Handler>;
 
         friend class LuaState;
-        void addCPUusage(int scriptId, int64_t CPUusage);
+        void addInstructionCount(int scriptId, int64_t instructionCount);
         void addMemoryUsage(int scriptId, int64_t memoryDelta);
 
         // Add to container without calling onInit/onLoad.

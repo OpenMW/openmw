@@ -39,6 +39,8 @@ namespace MWLua
 
     static LuaUtil::LuaStateSettings createLuaStateSettings()
     {
+        if (!Settings::Manager::getBool("lua profiler", "Lua"))
+            LuaUtil::LuaState::disableProfiler();
         return { .mInstructionLimit = Settings::Manager::getUInt64("instruction limit per call", "Lua"),
             .mMemoryLimit = Settings::Manager::getUInt64("memory limit", "Lua"),
             .mSmallAllocMaxSize = Settings::Manager::getUInt64("small alloc max size", "Lua"),
@@ -147,9 +149,9 @@ namespace MWLua
 
         mWorldView.update();
 
-        mGlobalScripts.CPUusageNextFrame();
+        mGlobalScripts.statsNextFrame();
         for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->CPUusageNextFrame();
+            scripts->statsNextFrame();
 
         std::vector<GlobalEvent> globalEvents = std::move(mGlobalEvents);
         std::vector<LocalEvent> localEvents = std::move(mLocalEvents);
@@ -620,17 +622,39 @@ namespace MWLua
 
     std::string LuaManager::formatResourceUsageStats() const
     {
+        if (!LuaUtil::LuaState::isProfilerEnabled())
+            return "Lua profiler is disabled";
+
         std::stringstream out;
 
+        constexpr int nameW = 50;
+        constexpr int valueW = 12;
+
+        auto outMemSize = [&](int64_t bytes) {
+            constexpr int64_t limit = 10000;
+            out << std::right << std::setw(valueW - 3);
+            if (bytes < limit)
+                out << bytes << " B ";
+            else if (bytes < limit * 1024)
+                out << (bytes / 1024) << " KB";
+            else if (bytes < limit * 1024 * 1024)
+                out << (bytes / (1024 * 1024)) << " MB";
+            else
+                out << (bytes / (1024 * 1024 * 1024)) << " GB";
+        };
+
         static const uint64_t smallAllocSize = Settings::Manager::getUInt64("small alloc max size", "Lua");
-        out << "Total memory usage: " << mLua.getTotalMemoryUsage() << "\n";
+        out << "Total memory usage:";
+        outMemSize(mLua.getTotalMemoryUsage());
+        out << "\n";
         out << "small alloc max size = " << smallAllocSize << " (section [Lua] in settings.cfg)\n";
         out << "Smaller values give more information for the profiler, but increase performance overhead.\n";
-        out << "  Memory allocations <= " << smallAllocSize << " bytes: " << mLua.getSmallAllocMemoryUsage()
-            << " (not tracked)\n";
-        out << "  Memory allocations >  " << smallAllocSize
-            << " bytes: " << mLua.getTotalMemoryUsage() - mLua.getSmallAllocMemoryUsage() << " (see the table below)\n";
-        out << "\n";
+        out << "  Memory allocations <= " << smallAllocSize << " bytes:";
+        outMemSize(mLua.getSmallAllocMemoryUsage());
+        out << " (not tracked)\n";
+        out << "  Memory allocations >  " << smallAllocSize << " bytes:";
+        outMemSize(mLua.getTotalMemoryUsage() - mLua.getSmallAllocMemoryUsage());
+        out << " (see the table below)\n\n";
 
         using Stats = LuaUtil::ScriptsContainer::ScriptStats;
 
@@ -653,16 +677,22 @@ namespace MWLua
             out << "No selected object. Use the in-game console to select an object for detailed profile.\n";
         out << "\n";
 
-        constexpr int nameW = 50;
-        constexpr int valueW = 12;
+        out << "Legend\n";
+        out << "  ops:        Averaged number of Lua instruction per frame;\n";
+        out << "  memory:     Aggregated size of Lua allocations > " << smallAllocSize << " bytes;\n";
+        out << "  [all]:      Sum over all instances of each script;\n";
+        out << "  [active]:   Sum over all active (i.e. currently in scene) instances of each script;\n";
+        out << "  [inactive]: Sum over all inactive instances of each script;\n";
+        out << "  [for selected object]: Only for the object that is selected in the console;\n";
+        out << "\n";
 
         out << std::left;
         out << " " << std::setw(nameW + 2) << "*** Resource usage per script";
         out << std::right;
-        out << std::setw(valueW) << "CPU";
+        out << std::setw(valueW) << "ops";
         out << std::setw(valueW) << "memory";
         out << std::setw(valueW) << "memory";
-        out << std::setw(valueW) << "CPU";
+        out << std::setw(valueW) << "ops";
         out << std::setw(valueW) << "memory";
         out << "\n";
         out << std::left << " " << std::setw(nameW + 2) << "[name]" << std::right;
@@ -681,19 +711,24 @@ namespace MWLua
             if (mConfiguration[i].mScriptPath.size() > nameW)
                 out << "\n " << std::setw(nameW) << ""; // if path is too long, break line
             out << std::right;
-            out << std::setw(valueW) << static_cast<int64_t>(activeStats[i].mCPUusage);
-            out << std::setw(valueW) << activeStats[i].mMemoryUsage;
-            out << std::setw(valueW) << mLua.getMemoryUsageByScriptIndex(i) - activeStats[i].mMemoryUsage;
+            out << std::setw(valueW) << static_cast<int64_t>(activeStats[i].mAvgInstructionCount);
+            outMemSize(activeStats[i].mMemoryUsage);
+            outMemSize(mLua.getMemoryUsageByScriptIndex(i) - activeStats[i].mMemoryUsage);
 
             if (isGlobal)
                 out << std::setw(valueW * 2) << "NA (global script)";
             else if (selectedPtr.isEmpty())
                 out << std::setw(valueW * 2) << "NA (not selected) ";
             else if (!selectedScripts || !selectedScripts->hasScript(i))
-                out << std::setw(valueW) << "-" << std::setw(valueW) << selectedStats[i].mMemoryUsage;
+            {
+                out << std::setw(valueW) << "-";
+                outMemSize(selectedStats[i].mMemoryUsage);
+            }
             else
-                out << std::setw(valueW) << static_cast<int64_t>(selectedStats[i].mCPUusage) << std::setw(valueW)
-                    << selectedStats[i].mMemoryUsage;
+            {
+                out << std::setw(valueW) << static_cast<int64_t>(selectedStats[i].mAvgInstructionCount);
+                outMemSize(selectedStats[i].mMemoryUsage);
+            }
             out << "\n";
         }
 

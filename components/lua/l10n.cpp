@@ -46,8 +46,9 @@ namespace sol
 
 namespace LuaUtil
 {
-    sol::function initL10nLoader(sol::state& lua, l10n::Manager* manager)
+    sol::function initL10nLoader(lua_State* L, l10n::Manager* manager)
     {
+        sol::state_view lua(L);
         sol::usertype<L10nContext> ctxDef = lua.new_usertype<L10nContext>("L10nContext");
         ctxDef[sol::meta_function::call]
             = [](const L10nContext& ctx, std::string_view key, sol::optional<sol::table> args) {

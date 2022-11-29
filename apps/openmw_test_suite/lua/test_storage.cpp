@@ -10,7 +10,7 @@ namespace
     using namespace testing;
 
     template <typename T>
-    T get(sol::state& lua, std::string luaCode)
+    T get(sol::state_view& lua, std::string luaCode)
     {
         return lua.safe_script("return " + luaCode).get<T>();
     }
@@ -19,7 +19,7 @@ namespace
     {
         // Note: LuaUtil::Callback can be used only if Lua is initialized via LuaUtil::LuaState
         LuaUtil::LuaState luaState{ nullptr, nullptr };
-        sol::state& mLua = luaState.sol();
+        sol::state_view& mLua = luaState.sol();
         LuaUtil::LuaStorage::initLuaBindings(mLua);
         LuaUtil::LuaStorage storage(mLua);
 

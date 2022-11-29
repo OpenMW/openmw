@@ -146,7 +146,7 @@ namespace MWLua
         void registerObjectList(const std::string& prefix, const Context& context)
         {
             using ListT = ObjectList<ObjectT>;
-            sol::state& lua = context.mLua->sol();
+            sol::state_view& lua = context.mLua->sol();
             ObjectRegistry* registry = context.mWorldView->getObjectRegistry();
             sol::usertype<ListT> listT = lua.new_usertype<ListT>(prefix + "ObjectList");
             listT[sol::meta_function::to_string]

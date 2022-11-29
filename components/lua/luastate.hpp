@@ -54,23 +54,21 @@ namespace LuaUtil
         LuaState(const LuaState&) = delete;
         LuaState(LuaState&&) = delete;
 
-        ~LuaState();
-
         // Returns underlying sol::state.
-        sol::state& sol() { return mLua; }
+        sol::state_view& sol() { return mSol; }
 
         // Can be used by a C++ function that is called from Lua to get the Lua traceback.
         // Makes no sense if called not from Lua code.
         // Note: It is a slow function, should be used for debug purposes only.
-        std::string debugTraceback() { return mLua["debug"]["traceback"]().get<std::string>(); }
+        std::string debugTraceback() { return mSol["debug"]["traceback"]().get<std::string>(); }
 
         // A shortcut to create a new Lua table.
-        sol::table newTable() { return sol::table(mLua, sol::create); }
+        sol::table newTable() { return sol::table(mSol, sol::create); }
 
         template <typename Key, typename Value>
         sol::table tableFromPairs(std::initializer_list<std::pair<Key, Value>> list)
         {
-            sol::table res(mLua, sol::create);
+            sol::table res(mSol, sol::create);
             for (const auto& [k, v] : list)
                 res[k] = v;
             return res;
@@ -105,7 +103,7 @@ namespace LuaUtil
         sol::function loadFromVFS(const std::string& path);
         sol::environment newInternalLibEnvironment();
 
-        uint64_t getTotalMemoryUsage() const { return mTotalMemoryUsage; }
+        uint64_t getTotalMemoryUsage() const { return mSol.memory_used(); }
         uint64_t getSmallAllocMemoryUsage() const { return mSmallAllocMemoryUsage; }
         uint64_t getMemoryUsageByScriptIndex(unsigned id) const
         {
@@ -113,6 +111,10 @@ namespace LuaUtil
         }
 
         const LuaStateSettings& getSettings() const { return mSettings; }
+
+        // Note: Lua profiler can not be re-enabled after disabling.
+        static void disableProfiler() { sProfilerEnabled = false; }
+        static bool isProfilerEnabled() { return sProfilerEnabled; }
 
     private:
         static sol::protected_function_result throwIfError(sol::protected_function_result&&);
@@ -126,6 +128,8 @@ namespace LuaUtil
         static void countHook(lua_State* L, lua_Debug* ar);
         static void* trackingAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 
+        lua_State* createLuaRuntime(LuaState* luaState);
+
         struct AllocOwner
         {
             std::shared_ptr<ScriptsContainer*> mContainer;
@@ -134,21 +138,43 @@ namespace LuaUtil
 
         const LuaStateSettings mSettings;
 
-        // Needed to track resource usage per script, must be initialized before mLua.
-        ScriptId mActiveScriptId;
-        uint64_t mCurrentCallInstructionCounter = 0;
+        // Needed to track resource usage per script, must be initialized before mLuaHolder.
+        std::vector<ScriptId> mActiveScriptIdStack;
+        uint64_t mWatchdogInstructionCounter = 0;
         std::map<void*, AllocOwner> mBigAllocOwners;
         uint64_t mTotalMemoryUsage = 0;
         uint64_t mSmallAllocMemoryUsage = 0;
         std::vector<int64_t> mMemoryUsage;
 
-        sol::state mLua;
+        class LuaStateHolder
+        {
+        public:
+            LuaStateHolder(lua_State* L)
+                : L(L)
+            {
+                sol::set_default_state(L);
+            }
+            ~LuaStateHolder() { lua_close(L); }
+            LuaStateHolder(const LuaStateHolder&) = delete;
+            LuaStateHolder(LuaStateHolder&&) = delete;
+            lua_State* get() { return L; }
+
+        private:
+            lua_State* L;
+        };
+
+        // Must be declared before mSol and all sol-related objects. Then on exit it will be destructed the last.
+        LuaStateHolder mLuaHolder;
+
+        sol::state_view mSol;
         const ScriptsConfiguration* mConf;
         sol::table mSandboxEnv;
         std::map<std::string, sol::bytecode> mCompiledScripts;
         std::map<std::string, sol::object> mCommonPackages;
         const VFS::Manager* mVFS;
         std::vector<std::filesystem::path> mLibSearchPaths;
+
+        static bool sProfilerEnabled;
     };
 
     // LuaUtil::call should be used for every call of every Lua function.
@@ -178,25 +204,30 @@ namespace LuaUtil
     template <typename... Args>
     sol::protected_function_result call(ScriptId scriptId, const sol::protected_function& fn, Args&&... args)
     {
-        LuaState* luaState;
-        (void)lua_getallocf(fn.lua_state(), reinterpret_cast<void**>(&luaState));
-        assert(luaState->mActiveScriptId.mContainer == nullptr && "recursive call of LuaUtil::call(scriptId, ...) ?");
-        luaState->mActiveScriptId = scriptId;
-        luaState->mCurrentCallInstructionCounter = 0;
+        LuaState* luaState = nullptr;
+        if (LuaState::sProfilerEnabled && scriptId.mContainer)
+        {
+            (void)lua_getallocf(fn.lua_state(), reinterpret_cast<void**>(&luaState));
+            luaState->mActiveScriptIdStack.push_back(scriptId);
+            luaState->mWatchdogInstructionCounter = 0;
+        }
         try
         {
             auto res = LuaState::throwIfError(fn(std::forward<Args>(args)...));
-            luaState->mActiveScriptId = {};
+            if (luaState)
+                luaState->mActiveScriptIdStack.pop_back();
             return res;
         }
         catch (std::exception&)
         {
-            luaState->mActiveScriptId = {};
+            if (luaState)
+                luaState->mActiveScriptIdStack.pop_back();
             throw;
         }
         catch (...)
         {
-            luaState->mActiveScriptId = {};
+            if (luaState)
+                luaState->mActiveScriptIdStack.pop_back();
             throw std::runtime_error("Unknown error");
         }
     }
