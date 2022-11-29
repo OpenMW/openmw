@@ -30,9 +30,9 @@ try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR
     )
 
 if (NOT ${COMPILE_RESULT_VAR})
-    message(FATAL_ERROR "Incorrect Lua library: can't compile checkluacustomallocator.c" )
+    message(WARNING "Incorrect Lua library: can't compile checkluacustomallocator.c" )
 elseif(NOT ${RUN_RESULT_VAR} EQUAL 0)
-    message(FATAL_ERROR "Incorrect Lua library: custom allocator not supported (likely LuaJit compiled with LJ_64 but without LJ_GC64)" )
+    message(WARNING "Incorrect Lua library: custom allocator not supported (likely LuaJit compiled with LJ_64 but without LJ_GC64)" )
 else()
     message(STATUS "Lua supports custom allocator")
 endif()
