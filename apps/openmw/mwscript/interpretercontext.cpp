@@ -414,7 +414,7 @@ namespace MWScript
 
     std::string_view InterpreterContext::getCurrentCellName() const
     {
-        return MWBase::Environment::get().getWorld()->getCellName().getRefIdString();
+        return MWBase::Environment::get().getWorld()->getCellName();
     }
 
     void InterpreterContext::executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor)

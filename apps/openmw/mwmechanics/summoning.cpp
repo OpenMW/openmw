@@ -29,9 +29,14 @@ namespace MWMechanics
             || (effectId >= ESM::MagicEffect::SummonFabricant && effectId <= ESM::MagicEffect::SummonCreature05));
     }
 
-    const ESM::RefId& getSummonedCreature(int effectId)
+    static const std::map<int, ESM::RefId>& getSummonMap()
     {
-        static const std::map<int, std::string_view> summonMap{
+        static std::map<int, ESM::RefId> summonMap;
+
+        if (summonMap.size() > 0)
+            return summonMap;
+
+        const std::map<int, std::string_view> summonMapToGameSetting{
             { ESM::MagicEffect::SummonAncestralGhost, "sMagicAncestralGhostID" },
             { ESM::MagicEffect::SummonBonelord, "sMagicBonelordID" },
             { ESM::MagicEffect::SummonBonewalker, "sMagicLeastBonewalkerID" },
@@ -56,16 +61,25 @@ namespace MWMechanics
             { ESM::MagicEffect::SummonCreature05, "sMagicCreature05ID" },
         };
 
+        for (const auto& it : summonMapToGameSetting)
+        {
+            summonMap[it.first] = ESM::RefId::stringRefId(MWBase::Environment::get()
+                                                              .getWorld()
+                                                              ->getStore()
+                                                              .get<ESM::GameSetting>()
+                                                              .find(it.second)
+                                                              ->mValue.getString());
+        }
+        return summonMap;
+    }
+
+    const ESM::RefId& getSummonedCreature(int effectId)
+    {
+        const auto& summonMap = getSummonMap();
         auto it = summonMap.find(effectId);
         if (it != summonMap.end())
         {
-            static ESM::RefId val = ESM::RefId::stringRefId(MWBase::Environment::get()
-                                                                .getWorld()
-                                                                ->getStore()
-                                                                .get<ESM::GameSetting>()
-                                                                .find(it->second)
-                                                                ->mValue.getString());
-            return val;
+            return it->second;
         }
         return ESM::RefId::sEmpty;
     }

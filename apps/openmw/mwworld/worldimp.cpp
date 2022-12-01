@@ -572,7 +572,7 @@ namespace MWWorld
         if (cell)
             return cell;
         // treat "Wilderness" like an empty string
-        const ESM::RefId defaultName
+        static const ESM::RefId defaultName
             = ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
         if (cellName == defaultName)
         {
@@ -584,7 +584,7 @@ namespace MWWorld
         // didn't work -> now check for regions
         for (const ESM::Region& region : mStore.get<ESM::Region>())
         {
-            if (Misc::StringUtils::ciEqual(cellName.getRefIdString(), region.mName))
+            if (cellName == ESM::RefId::stringRefId(region.mName))
             {
                 return mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
             }
@@ -656,24 +656,25 @@ namespace MWWorld
         return mCurrentDate->getMonthName(month);
     }
 
-    const ESM::RefId& World::getCellName(const MWWorld::CellStore* cell) const
+    std::string_view World::getCellName(const MWWorld::CellStore* cell) const
     {
         if (!cell)
             cell = mWorldScene->getCurrentCell();
         return getCellName(cell->getCell());
     }
 
-    const ESM::RefId World::getCellName(const ESM::Cell* cell) const
+    std::string_view World::getCellName(const ESM::Cell* cell) const
     {
         if (cell)
         {
             if (!cell->isExterior() || !cell->mName.empty())
-                return cell->mName;
+                return cell->mName.getRefIdString();
 
             if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell->mRegion))
-                return ESM::RefId::stringRefId(region->mName);
+                return region->mName;
         }
-        return ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
+
+        return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
     }
 
     void World::removeRefScript(MWWorld::RefData* ref)
@@ -1422,7 +1423,7 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            const ESM::RefId* cell;
+            const ESM::RefId* cell = &ESM::RefId::sEmpty;
             if (!actor.getCell()->isExterior())
                 cell = &actor.getCell()->getCell()->mName;
             MWWorld::ActionTeleport(*cell, esmPos, false).execute(actor);
@@ -3430,7 +3431,7 @@ namespace MWWorld
             return;
         }
 
-        const ESM::RefId* cellName;
+        const ESM::RefId* cellName = &ESM::RefId::sEmpty;
         if (!closestMarker.mCell->isExterior())
             cellName = &closestMarker.mCell->getCell()->mName;
 

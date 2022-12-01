@@ -957,7 +957,7 @@ namespace MWWorld
 
     Store<ESM::Skill>::Store() {}
 
-    // Magic effect
+    // Game Settings
     //=========================================================================
 
     const ESM::GameSetting* Store<ESM::GameSetting>::search(const ESM::RefId& id) const
@@ -973,9 +973,10 @@ namespace MWWorld
     const ESM::GameSetting* Store<ESM::GameSetting>::search(std::string_view id) const
     {
         return TypedDynamicStore::search(ESM::RefId::stringRefId(id));
-        ;
     }
 
+    // Magic effect
+    //=========================================================================
     Store<ESM::MagicEffect>::Store() {}
 
     // Attribute

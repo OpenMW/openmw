@@ -65,7 +65,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
         auto result = mInteriors.find(cell->mName);
 
         if (result == mInteriors.end())
-            result = mInteriors.emplace(std::move(cell->mName), CellStore(cell, mStore, mReaders)).first;
+            result = mInteriors.emplace(cell->mName, CellStore(cell, mStore, mReaders)).first;
 
         return &result->second;
     }

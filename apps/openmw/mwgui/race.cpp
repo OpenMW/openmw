@@ -330,7 +330,7 @@ namespace MWGui
                 continue;
             if (mGenderIndex != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                 continue;
-            bool firstPerson = idString.ends_with("1st");
+            bool firstPerson = Misc::StringUtils::ciEndsWith(idString, "1st");
             if (firstPerson)
                 continue;
             if (bodypart.mRace == mCurrentRaceId)

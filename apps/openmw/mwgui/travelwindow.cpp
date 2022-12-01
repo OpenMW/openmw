@@ -123,7 +123,7 @@ namespace MWGui
 
         for (unsigned int i = 0; i < transport.size(); i++)
         {
-            ESM::RefId cellname = transport[i].mCellName;
+            std::string_view cellname = transport[i].mCellName.getRefIdString();
             bool interior = true;
             const osg::Vec2i cellIndex
                 = MWWorld::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
@@ -134,7 +134,7 @@ namespace MWGui
                 cellname = MWBase::Environment::get().getWorld()->getCellName(cell);
                 interior = false;
             }
-            addDestination(cellname, transport[i].mPos, interior);
+            addDestination(ESM::RefId::stringRefId(cellname), transport[i].mPos, interior);
         }
 
         updateLabels();
