@@ -101,7 +101,7 @@ namespace ESM
         };
 
         Cell()
-            : mName("")
+            : mName(ESM::RefId::sEmpty)
             , mRegion(ESM::RefId())
             , mHasAmbi(true)
             , mWater(0)
@@ -113,7 +113,7 @@ namespace ESM
 
         // Interior cells are indexed by this (it's the 'id'), for exterior
         // cells it is optional.
-        std::string mName;
+        ESM::RefId mName;
 
         // Optional region name for exterior and quasi-exterior cells.
         RefId mRegion;

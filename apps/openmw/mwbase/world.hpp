@@ -177,12 +177,12 @@ namespace MWBase
         virtual char getGlobalVariableType(std::string_view name) const = 0;
         ///< Return ' ', if there is no global variable with this name.
 
-        virtual std::string_view getCellName(const MWWorld::CellStore* cell = nullptr) const = 0;
+        virtual const ESM::RefId& getCellName(const MWWorld::CellStore* cell = nullptr) const = 0;
         ///< Return name of the cell.
         ///
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
-        virtual std::string_view getCellName(const ESM::Cell* cell) const = 0;
+        virtual const ESM::RefId getCellName(const ESM::Cell* cell) const = 0;
 
         virtual void removeRefScript(MWWorld::RefData* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts
@@ -248,7 +248,7 @@ namespace MWBase
         virtual void setSimulationTimeScale(float scale) = 0;
 
         virtual void changeToInteriorCell(
-            const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
+            const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
             = 0;
         ///< Move to interior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
@@ -263,7 +263,7 @@ namespace MWBase
             = 0;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        virtual const ESM::Cell* getExterior(std::string_view cellName) const = 0;
+        virtual const ESM::Cell* getExterior(const ESM::RefId& cellName) const = 0;
         ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
         virtual MWWorld::Ptr getFacedObject() = 0;
@@ -519,11 +519,11 @@ namespace MWBase
 
         /// Find default position inside exterior cell specified by name
         /// \return false if exterior with given name not exists, true otherwise
-        virtual bool findExteriorPosition(std::string_view name, ESM::Position& pos) = 0;
+        virtual bool findExteriorPosition(const ESM::RefId& name, ESM::Position& pos) = 0;
 
         /// Find default position inside interior cell specified by name
         /// \return false if interior with given name not exists, true otherwise
-        virtual bool findInteriorPosition(std::string_view name, ESM::Position& pos) = 0;
+        virtual bool findInteriorPosition(const ESM::RefId& name, ESM::Position& pos) = 0;
 
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         virtual void enableTeleporting(bool enable) = 0;

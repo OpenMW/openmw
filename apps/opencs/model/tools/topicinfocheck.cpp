@@ -75,7 +75,7 @@ int CSMTools::TopicInfoCheckStage::setup()
         if (regionRecord.isDeleted())
             continue;
 
-        mCellNames.insert(regionRecord.get().mName);
+        mCellNames.insert(ESM::RefId::stringRefId(regionRecord.get().mName));
     }
     // Default cell name
     int index = mGameSettings.searchId("sDefaultCellname");
@@ -85,7 +85,7 @@ int CSMTools::TopicInfoCheckStage::setup()
 
         if (!gmstRecord.isDeleted() && gmstRecord.get().mValue.getType() == ESM::VT_String)
         {
-            mCellNames.insert(gmstRecord.get().mValue.getString());
+            mCellNames.insert(ESM::RefId::stringRefId(gmstRecord.get().mValue.getString()));
         }
     }
 
@@ -213,10 +213,9 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(
 bool CSMTools::TopicInfoCheckStage::verifyCell(
     const ESM::RefId& cell, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
-    const std::string& cellName = cell.getRefIdString();
-    if (mCellNames.find(cellName) == mCellNames.end())
+    if (mCellNames.find(cell) == mCellNames.end())
     {
-        messages.add(id, "Cell '" + cellName + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Cell '" + cell.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
 

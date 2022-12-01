@@ -94,7 +94,7 @@ namespace MWWorld
         WorldModel mWorldModel;
         std::vector<int> mESMVersions; // the versions of esm files
 
-        std::string mCurrentWorldSpace;
+        ESM::RefId mCurrentWorldSpace;
 
         std::unique_ptr<MWWorld::Player> mPlayer;
         std::unique_ptr<MWPhysics::PhysicsSystem> mPhysics;
@@ -118,7 +118,7 @@ namespace MWWorld
 
         int mActivationDistanceOverride;
 
-        std::string mStartCell;
+        ESM::RefId mStartCell;
 
         float mSwimHeightScale;
 
@@ -200,7 +200,7 @@ namespace MWWorld
             SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue,
             const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
             const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
-            int activationDistanceOverride, const std::string& startCell, const std::string& startupScript,
+            int activationDistanceOverride, const ESM::RefId& startCell, const std::string& startupScript,
             const std::filesystem::path& resourcePath, const std::filesystem::path& userDataPath);
 
         virtual ~World();
@@ -267,12 +267,12 @@ namespace MWWorld
         char getGlobalVariableType(std::string_view name) const override;
         ///< Return ' ', if there is no global variable with this name.
 
-        std::string_view getCellName(const MWWorld::CellStore* cell = nullptr) const override;
+        const ESM::RefId& getCellName(const MWWorld::CellStore* cell = nullptr) const override;
         ///< Return name of the cell.
         ///
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
-        std::string_view getCellName(const ESM::Cell* cell) const override;
+        const ESM::RefId getCellName(const ESM::Cell* cell) const override;
 
         void removeRefScript(MWWorld::RefData* ref) override;
         //< Remove the script attached to ref from mLocalScripts
@@ -344,7 +344,7 @@ namespace MWWorld
 
         void setSimulationTimeScale(float scale) override;
 
-        void changeToInteriorCell(const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos,
+        void changeToInteriorCell(const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
         ///< Move to interior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
@@ -358,7 +358,7 @@ namespace MWWorld
             bool changeEvent = true) override;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        const ESM::Cell* getExterior(std::string_view cellName) const override;
+        const ESM::Cell* getExterior(const ESM::RefId& cellName) const override;
         ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
         MWWorld::Ptr getFacedObject() override;
@@ -609,11 +609,11 @@ namespace MWWorld
 
         /// Find center of exterior cell above land surface
         /// \return false if exterior with given name not exists, true otherwise
-        bool findExteriorPosition(std::string_view name, ESM::Position& pos) override;
+        bool findExteriorPosition(const ESM::RefId& name, ESM::Position& pos) override;
 
         /// Find position in interior cell near door entrance
         /// \return false if interior with given name not exists, true otherwise
-        bool findInteriorPosition(std::string_view name, ESM::Position& pos) override;
+        bool findInteriorPosition(const ESM::RefId& name, ESM::Position& pos) override;
 
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         void enableTeleporting(bool enable) override;

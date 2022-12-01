@@ -79,7 +79,7 @@ namespace MWLua
         WorldView* worldView = context.mWorldView;
         addTimeBindings(api, context, true);
         api["getCellByName"] = [worldView = context.mWorldView](const std::string& name) -> sol::optional<GCell> {
-            MWWorld::CellStore* cell = worldView->findNamedCell(name);
+            MWWorld::CellStore* cell = worldView->findNamedCell(ESM::RefId::stringRefId(name));
             if (cell)
                 return GCell{ cell };
             else

@@ -78,7 +78,7 @@ namespace MWMechanics
             }
         }
 
-        if (!mCellId.empty() && mCellId.getRefIdString() != actor.getCell()->getCell()->getCellId().mWorldspace)
+        if (!mCellId.empty() && mCellId != actor.getCell()->getCell()->getCellId().mWorldspace)
             return false; // Not in the correct cell, pause and rely on the player to go back through a teleport door
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);

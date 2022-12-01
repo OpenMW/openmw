@@ -175,7 +175,7 @@ namespace MWMechanics
                         return true;
                     }
                 }
-                else if (mCellId.getRefIdString() == actor.getCell()->getCell()->mName) // Cell to travel to
+                else if (mCellId == actor.getCell()->getCell()->mName) // Cell to travel to
                 {
                     mRemainingDuration = mDuration;
                     return true;

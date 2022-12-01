@@ -16,6 +16,7 @@ namespace ESM
 {
     struct Cell;
     struct Pathgrid;
+    struct RefId;
 }
 
 namespace Loading
@@ -90,6 +91,8 @@ namespace DetourNavigator
          * @param worldspace
          */
         virtual void setWorldspace(std::string_view worldspace, const UpdateGuard* guard) = 0;
+
+        virtual void setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard) = 0;
 
         /**
          * @brief updateBounds should be called before adding object from loading cell

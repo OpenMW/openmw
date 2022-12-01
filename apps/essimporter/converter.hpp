@@ -351,7 +351,7 @@ namespace ESSImport
             std::vector<unsigned int> mFogOfWar;
         };
 
-        std::map<std::string, Cell> mIntCells;
+        std::map<ESM::RefId, Cell> mIntCells;
         std::map<std::pair<int, int>, Cell> mExtCells;
 
         std::vector<ESM::CustomMarker> mMarkers;

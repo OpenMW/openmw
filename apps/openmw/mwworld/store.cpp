@@ -455,7 +455,7 @@ namespace MWWorld
         {
             return search(cell.getGridX(), cell.getGridY());
         }
-        return search(ESM::RefId::stringRefId(cell.mName));
+        return search(cell.mName);
     }
 
     // this method *must* be called right after esm3.loadCell()
@@ -613,7 +613,7 @@ namespace MWWorld
         if (cell.mData.mFlags & ESM::Cell::Interior)
         {
             // Store interior cell by name, try to merge with existing parent data.
-            ESM::Cell* oldcell = const_cast<ESM::Cell*>(search(ESM::RefId::stringRefId(cell.mName)));
+            ESM::Cell* oldcell = const_cast<ESM::Cell*>(search(cell.mName));
             if (oldcell)
             {
                 // merge new cell into old cell
@@ -628,7 +628,7 @@ namespace MWWorld
                 // spawn a new cell
                 cell.loadCell(esm, true);
 
-                mInt[ESM::RefId::stringRefId(cell.mName)] = cell;
+                mInt[cell.mName] = cell;
             }
         }
         else
@@ -693,7 +693,7 @@ namespace MWWorld
             }
         }
 
-        return RecordId(ESM::RefId::stringRefId(cell.mName), isDeleted);
+        return RecordId(cell.mName, isDeleted);
     }
     Store<ESM::Cell>::iterator Store<ESM::Cell>::intBegin() const
     {
@@ -716,7 +716,7 @@ namespace MWWorld
         const ESM::Cell* cell = nullptr;
         for (const ESM::Cell* sharedCell : mSharedExt)
         {
-            if (ESM::RefId::stringRefId(sharedCell->mName) == id)
+            if (sharedCell->mName == id)
             {
                 if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
                     || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
@@ -761,7 +761,7 @@ namespace MWWorld
 
         for (const ESM::Cell* sharedCell : mSharedInt)
         {
-            list.push_back(ESM::RefId::stringRefId(sharedCell->mName));
+            list.push_back(sharedCell->mName);
         }
     }
     ESM::Cell* Store<ESM::Cell>::insert(const ESM::Cell& cell)
@@ -783,7 +783,7 @@ namespace MWWorld
         else
         {
             // duplicate insertions are avoided by search(ESM::Cell &)
-            DynamicInt::iterator result = mDynamicInt.emplace(ESM::RefId::stringRefId(cell.mName), cell).first;
+            DynamicInt::iterator result = mDynamicInt.emplace(cell.mName, cell).first;
             mSharedInt.push_back(&result->second);
             return &result->second;
         }
@@ -794,7 +794,7 @@ namespace MWWorld
         {
             return erase(cell.getGridX(), cell.getGridY());
         }
-        return erase(ESM::RefId::stringRefId(cell.mName));
+        return erase(cell.mName);
     }
     bool Store<ESM::Cell>::erase(const ESM::RefId& id)
     {
@@ -942,14 +942,14 @@ namespace MWWorld
         if (!(cell.mData.mFlags & ESM::Cell::Interior))
             return search(cell.mData.mX, cell.mData.mY);
         else
-            return search(ESM::RefId::stringRefId(cell.mName));
+            return search(cell.mName);
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const ESM::Cell& cell) const
     {
         if (!(cell.mData.mFlags & ESM::Cell::Interior))
             return find(cell.mData.mX, cell.mData.mY);
         else
-            return find(ESM::RefId::stringRefId(cell.mName));
+            return find(cell.mName);
     }
 
     // Skill

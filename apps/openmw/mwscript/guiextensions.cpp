@@ -126,8 +126,9 @@ namespace MWScript
 
                 for (auto it = cells.extBegin(); it != cells.extEnd(); ++it)
                 {
-                    if (Misc::StringUtils::ciStartsWith(it->mName, cell))
-                        winMgr->addVisitedLocation(it->mName, it->getGridX(), it->getGridY());
+                    const auto& cellName = it->mName.getRefIdString();
+                    if (Misc::StringUtils::ciStartsWith(cellName, cell))
+                        winMgr->addVisitedLocation(cellName, it->getGridX(), it->getGridY());
                 }
             }
         };
@@ -142,7 +143,7 @@ namespace MWScript
 
                 for (auto it = cells.extBegin(); it != cells.extEnd(); ++it)
                 {
-                    const std::string& name = it->mName;
+                    const std::string& name = it->mName.getRefIdString();
                     if (!name.empty())
                         MWBase::Environment::get().getWindowManager()->addVisitedLocation(
                             name, it->getGridX(), it->getGridY());

@@ -462,7 +462,7 @@ namespace MWWorld
                 // interior cell -> need to check if it exists (exterior cell will be
                 // generated on the fly)
 
-                if (!world.getStore().get<ESM::Cell>().search(ESM::RefId::stringRefId(player.mMarkedCell.mWorldspace)))
+                if (!world.getStore().get<ESM::Cell>().search(player.mMarkedCell.mWorldspace))
                     player.mHasMark = false; // drop mark silently
             }
 

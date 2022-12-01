@@ -17,7 +17,7 @@
 
 namespace MWWorld
 {
-    ActionTeleport::ActionTeleport(std::string_view cellName, const ESM::Position& position, bool teleportFollowers)
+    ActionTeleport::ActionTeleport(const ESM::RefId& cellName, const ESM::Position& position, bool teleportFollowers)
         : Action(true)
         , mCellName(cellName)
         , mPosition(position)

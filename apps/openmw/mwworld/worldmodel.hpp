@@ -32,7 +32,7 @@ namespace MWWorld
         typedef std::vector<std::pair<ESM::RefId, CellStore*>> IdCache;
         const MWWorld::ESMStore& mStore;
         ESM::ReadersCache& mReaders;
-        mutable std::map<std::string, CellStore> mInteriors;
+        mutable std::map<ESM::RefId, CellStore> mInteriors;
         mutable std::map<std::pair<int, int>, CellStore> mExteriors;
         IdCache mIdCache;
         std::size_t mIdCacheIndex;
@@ -55,7 +55,7 @@ namespace MWWorld
 
         CellStore* getExterior(int x, int y);
 
-        CellStore* getInterior(std::string_view name);
+        CellStore* getInterior(const ESM::RefId& name);
 
         CellStore* getCell(const ESM::CellId& id);
 

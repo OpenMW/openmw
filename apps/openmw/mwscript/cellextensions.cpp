@@ -86,7 +86,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view cell = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId cell = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 ESM::Position pos;
@@ -165,7 +165,7 @@ namespace MWScript
                 }
                 const MWWorld::CellStore* cell = MWMechanics::getPlayer().getCell();
 
-                std::string_view current = MWBase::Environment::get().getWorld()->getCellName(cell);
+                std::string_view current = MWBase::Environment::get().getWorld()->getCellName(cell).getRefIdString();
                 bool match = Misc::StringUtils::ciCompareLen(name, current, name.length()) == 0;
 
                 runtime.push(match ? 1 : 0);

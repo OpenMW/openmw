@@ -122,7 +122,7 @@ namespace MWGui
                  it != store.get<ESM::Cell>().extEnd(); ++it)
             {
                 if (!it->mName.empty())
-                    mNames.push_back(it->mName);
+                    mNames.push_back(it->mName.getRefIdString());
             }
 
             // sort

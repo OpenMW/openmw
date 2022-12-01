@@ -62,11 +62,10 @@ MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
 {
     if (cell->mData.mFlags & ESM::Cell::Interior)
     {
-        std::string lowerName(Misc::StringUtils::lowerCase(cell->mName));
-        auto result = mInteriors.find(lowerName);
+        auto result = mInteriors.find(cell->mName);
 
         if (result == mInteriors.end())
-            result = mInteriors.emplace(std::move(lowerName), CellStore(cell, mStore, mReaders)).first;
+            result = mInteriors.emplace(std::move(cell->mName), CellStore(cell, mStore, mReaders)).first;
 
         return &result->second;
     }
@@ -170,16 +169,15 @@ MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
     return &result->second;
 }
 
-MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
+MWWorld::CellStore* MWWorld::WorldModel::getInterior(const ESM::RefId& name)
 {
-    std::string lowerName = Misc::StringUtils::lowerCase(name);
-    auto result = mInteriors.find(lowerName);
+    auto result = mInteriors.find(name);
 
     if (result == mInteriors.end())
     {
-        const ESM::Cell* cell = mStore.get<ESM::Cell>().find(ESM::RefId::stringRefId(name));
+        const ESM::Cell* cell = mStore.get<ESM::Cell>().find(name);
 
-        result = mInteriors.emplace(lowerName, CellStore(cell, mStore, mReaders)).first;
+        result = mInteriors.emplace(name, CellStore(cell, mStore, mReaders)).first;
     }
 
     if (result->second.getState() != CellStore::State_Loaded)

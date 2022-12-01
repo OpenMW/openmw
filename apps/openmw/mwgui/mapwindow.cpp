@@ -353,7 +353,7 @@ namespace MWGui
             {
                 ESM::CellId cellId;
                 cellId.mPaged = !mInterior;
-                cellId.mWorldspace = (mInterior ? mPrefix : ESM::CellId::sDefaultWorldspace);
+                cellId.mWorldspace = (mInterior ? ESM::RefId::stringRefId(mPrefix) : ESM::CellId::sDefaultWorldspace);
                 cellId.mIndex.mX = mCurX + dX;
                 cellId.mIndex.mY = mCurY + dY;
 
@@ -637,7 +637,7 @@ namespace MWGui
             for (MyGUI::Widget* widget : mExteriorDoorMarkerWidgets)
                 widget->setVisible(false);
 
-            MWWorld::CellStore* cell = worldModel->getInterior(mPrefix);
+            MWWorld::CellStore* cell = worldModel->getInterior(ESM::RefId::stringRefId(mPrefix));
             world->getDoorMarkers(cell, doors);
         }
         else
@@ -705,7 +705,7 @@ namespace MWGui
         ESM::Position markedPosition;
         MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
         if (markedCell && markedCell->isExterior() == !mInterior
-            && (!mInterior || Misc::StringUtils::ciEqual(markedCell->getCell()->mName, mPrefix)))
+            && (!mInterior || Misc::StringUtils::ciEqual(markedCell->getCell()->mName.getRefIdString(), mPrefix)))
         {
             MarkerUserData markerPos(mLocalMapRender);
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
@@ -888,7 +888,7 @@ namespace MWGui
 
         mEditingMarker.mCell.mPaged = !mInterior;
         if (mInterior)
-            mEditingMarker.mCell.mWorldspace = LocalMapBase::mPrefix;
+            mEditingMarker.mCell.mWorldspace = ESM::RefId::stringRefId(LocalMapBase::mPrefix);
         else
         {
             mEditingMarker.mCell.mWorldspace = ESM::CellId::sDefaultWorldspace;
@@ -1333,7 +1333,7 @@ namespace MWGui
                 const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(
                     cellId.first, cellId.second);
                 if (cell && !cell->mName.empty())
-                    addVisitedLocation(cell->mName, cellId.first, cellId.second);
+                    addVisitedLocation(cell->mName.getRefIdString(), cellId.first, cellId.second);
             }
         }
     }

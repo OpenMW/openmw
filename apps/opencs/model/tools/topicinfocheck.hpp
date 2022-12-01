@@ -72,7 +72,7 @@ namespace CSMTools
         const CSMWorld::RefIdData& mReferencables;
         const CSMWorld::Resources& mSoundFiles;
 
-        std::set<std::string> mCellNames;
+        std::set<ESM::RefId> mCellNames;
 
         bool mIgnoreBaseRecords;
 

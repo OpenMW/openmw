@@ -382,7 +382,7 @@ namespace MWScript
                 runtime.pop();
                 Interpreter::Type_Float zRot = runtime[0].mFloat;
                 runtime.pop();
-                std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId cellID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 if (ptr.getContainerStore())
@@ -409,7 +409,7 @@ namespace MWScript
                     if (!cell)
                     {
                         std::string error
-                            = "Warning: PositionCell: unknown interior cell (" + std::string(cellID) + ")";
+                            = "Warning: PositionCell: unknown interior cell (" + cellID.getRefIdString() + ")";
                         if (isPlayer)
                             error += ", moving to exterior instead";
                         runtime.getContext().report(error);
@@ -504,7 +504,7 @@ namespace MWScript
             {
                 const ESM::RefId itemID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
-                std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
+                auto cellID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Float x = runtime[0].mFloat;
@@ -528,7 +528,7 @@ namespace MWScript
                     store = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
                     if (!cell)
                     {
-                        runtime.getContext().report("unknown cell (" + std::string(cellID) + ")");
+                        runtime.getContext().report("unknown cell (" + cellID.getRefIdString() + ")");
                         Log(Debug::Error) << "Error: unknown cell (" << cellID << ")";
                     }
                 }

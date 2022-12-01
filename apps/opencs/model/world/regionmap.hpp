@@ -42,7 +42,7 @@ namespace CSMWorld
         {
             bool mDeleted;
             ESM::RefId mRegion;
-            std::string mName;
+            ESM::RefId mName;
 
             CellDescription();
 

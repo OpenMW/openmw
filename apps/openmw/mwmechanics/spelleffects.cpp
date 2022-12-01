@@ -489,8 +489,8 @@ namespace MWMechanics
                     {
                         ESM::RefId dest;
                         if (!markedCell->isExterior())
-                            dest = ESM::RefId::stringRefId(markedCell->getCell()->mName);
-                        MWWorld::ActionTeleport action(dest.getRefIdString(), markedPosition, false);
+                            dest = markedCell->getCell()->mName;
+                        MWWorld::ActionTeleport action(dest, markedPosition, false);
                         action.execute(target);
                         if (!caster.isEmpty())
                         {

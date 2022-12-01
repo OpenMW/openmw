@@ -841,7 +841,7 @@ namespace MWWorld
     }
 
     void Scene::changeToInteriorCell(
-        const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
+        const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         CellStore* cell = mWorld.getWorldModel().getInterior(cellName);
         bool useFading = (mCurrentCell != nullptr);

@@ -933,7 +933,7 @@ namespace MWGui
     {
         mMap->requestMapRender(cell);
 
-        std::string name = std::string(MWBase::Environment::get().getWorld()->getCellName(cell));
+        std::string name = MWBase::Environment::get().getWorld()->getCellName(cell).getRefIdString();
 
         mMap->setCellName(name);
         mHud->setCellName(name);
@@ -949,8 +949,8 @@ namespace MWGui
         }
         else
         {
-            mMap->setCellPrefix(cell->getCell()->mName);
-            mHud->setCellPrefix(cell->getCell()->mName);
+            mMap->setCellPrefix(cell->getCell()->mName.getRefIdString());
+            mHud->setCellPrefix(cell->getCell()->mName.getRefIdString());
 
             osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))

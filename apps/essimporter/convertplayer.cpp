@@ -70,7 +70,7 @@ namespace ESSImport
             // TODO: Figure out a better way to detect interiors. (0, 0) is a valid exterior cell.
             if (mark.mCellX == 0 && mark.mCellY == 0)
             {
-                cell.mWorldspace = pcdt.mMNAM;
+                cell.mWorldspace = ESM::RefId::stringRefId(pcdt.mMNAM);
                 cell.mPaged = false;
             }
 

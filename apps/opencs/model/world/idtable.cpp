@@ -333,7 +333,7 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view(int row) c
         return std::make_pair(UniversalId::Type_None, "");
 
     if (id[0] == '#')
-        id = ESM::CellId::sDefaultWorldspace;
+        id = ESM::CellId::sDefaultWorldspace.getRefIdString();
 
     return std::make_pair(UniversalId(UniversalId::Type_Scene, id), hint);
 }

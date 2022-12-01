@@ -299,7 +299,7 @@ namespace MWClass
 
     std::string Door::getDestination(const MWWorld::LiveCellRef<ESM::Door>& door)
     {
-        std::string dest = door.mRef.getDestCell();
+        auto dest = door.mRef.getDestCell();
         if (dest.empty())
         {
             // door leads to exterior, use cell name (if any), otherwise translated region name
@@ -310,7 +310,7 @@ namespace MWClass
             dest = world->getCellName(cell);
         }
 
-        return "#{sCell=" + dest + "}";
+        return "#{sCell=" + dest.getRefIdString() + "}";
     }
 
     MWWorld::Ptr Door::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const

@@ -146,7 +146,7 @@ namespace MWLua
             if (esmCell->isExterior())
                 ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr);
             else
-                ai.stack(MWMechanics::AiEscort(refId, ESM::RefId::stringRefId(esmCell->mName), gameHoursDuration,
+                ai.stack(MWMechanics::AiEscort(refId, esmCell->mName, gameHoursDuration,
                              dest.x(), dest.y(), dest.z(), false),
                     ptr);
         };

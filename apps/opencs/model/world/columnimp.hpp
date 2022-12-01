@@ -15,6 +15,7 @@
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/variant.hpp>
+#include <apps/opencs/model/world/cell.hpp>
 
 #include <QString>
 #include <QVariant>
@@ -326,6 +327,31 @@ namespace CSMWorld
             ESXRecordT record2 = record.get();
 
             record2.mName = data.toString().toUtf8().constData();
+
+            record.setModified(record2);
+        }
+
+        bool isEditable() const override { return true; }
+    };
+
+    template<>
+        struct NameColumn<CSMWorld::Cell> : public Column < CSMWorld::Cell>
+    {
+        NameColumn(ColumnBase::Display display = ColumnBase::Display_String)
+            : Column<CSMWorld::Cell>(Columns::ColumnId_Name, display)
+        {
+        }
+
+        QVariant get(const Record<CSMWorld::Cell>& record) const override
+        {
+            return QString::fromUtf8(record.get().mName.getRefIdString().c_str());
+        }
+
+        void set(Record<CSMWorld::Cell>& record, const QVariant& data) override
+        {
+            CSMWorld::Cell record2 = record.get();
+
+            record2.mName = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }
@@ -1121,14 +1147,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mDestCell.c_str());
+            return QString::fromUtf8(record.get().mDestCell.getRefIdString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mDestCell = data.toString().toUtf8().constData();
+            record2.mDestCell = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
             record.setModified(record2);
         }

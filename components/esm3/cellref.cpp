@@ -109,7 +109,7 @@ namespace ESM
                             cellRef.mTeleport = true;
                         break;
                     case fourCC("DNAM"):
-                        getHStringOrSkip(cellRef.mDestCell);
+                        getRefIdOrSkip(cellRef.mDestCell);
                         break;
                     case fourCC("FLTV"):
                         getHTOrSkip(cellRef.mLockLevel);
@@ -235,7 +235,7 @@ namespace ESM
         if (!inInventory && mTeleport)
         {
             esm.writeHNT("DODT", mDoorDest);
-            esm.writeHNOCString("DNAM", mDestCell);
+            esm.writeHNOCString("DNAM", mDestCell.getRefIdString());
         }
 
         if (!inInventory && mLockLevel != 0)
@@ -270,7 +270,7 @@ namespace ESM
         mChargeIntRemainder = 0.0f;
         mEnchantmentCharge = -1;
         mGoldValue = 1;
-        mDestCell.clear();
+        mDestCell = ESM::RefId::sEmpty;
         mLockLevel = 0;
         mKey = ESM::RefId::sEmpty;
         mTrap = ESM::RefId::sEmpty;

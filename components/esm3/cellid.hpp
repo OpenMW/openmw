@@ -2,6 +2,7 @@
 #define OPENMW_ESM_CELLID_H
 
 #include <string>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -16,11 +17,11 @@ namespace ESM
             int mY;
         };
 
-        std::string mWorldspace;
+        ESM::RefId mWorldspace;
         CellIndex mIndex;
         bool mPaged;
 
-        static const std::string sDefaultWorldspace;
+        static const ESM::RefId sDefaultWorldspace;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
