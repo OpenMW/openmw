@@ -973,7 +973,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                ESM::RefId factionID = ptr.getClass().getPrimaryFaction(ptr);
+                const ESM::RefId& factionID = ptr.getClass().getPrimaryFaction(ptr);
                 if (factionID.empty())
                     return;
 
@@ -1007,7 +1007,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                ESM::RefId factionID = ptr.getClass().getPrimaryFaction(ptr);
+                const ESM::RefId& factionID = ptr.getClass().getPrimaryFaction(ptr);
                 if (factionID.empty())
                     return;
 

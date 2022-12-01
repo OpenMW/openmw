@@ -9,13 +9,13 @@
 
 #include <osg/Math>
 
+#include <apps/opencs/model/world/cell.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/variant.hpp>
-#include <apps/opencs/model/world/cell.hpp>
 
 #include <QString>
 #include <QVariant>
@@ -334,8 +334,8 @@ namespace CSMWorld
         bool isEditable() const override { return true; }
     };
 
-    template<>
-        struct NameColumn<CSMWorld::Cell> : public Column < CSMWorld::Cell>
+    template <>
+    struct NameColumn<CSMWorld::Cell> : public Column<CSMWorld::Cell>
     {
         NameColumn(ColumnBase::Display display = ColumnBase::Display_String)
             : Column<CSMWorld::Cell>(Columns::ColumnId_Name, display)

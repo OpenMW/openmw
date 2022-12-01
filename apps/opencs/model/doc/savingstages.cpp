@@ -253,7 +253,8 @@ void CSMDoc::CollectionReferencesStage::perform(int stage, Messages& messages)
 
         if (record.isModified() || record.mState == CSMWorld::RecordBase::State_Deleted)
         {
-            const ESM::RefId& cellId = record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell;
+            const ESM::RefId& cellId
+                = record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell;
 
             std::deque<int>& indices = mState.getSubRecords()[cellId.getRefIdString()];
 

@@ -330,8 +330,7 @@ namespace MWGui
                 continue;
             if (mGenderIndex != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                 continue;
-            bool firstPerson = (idString.size() >= 3) && idString[idString.size() - 3] == '1'
-                && idString[idString.size() - 2] == 's' && idString[idString.size() - 1] == 't';
+            bool firstPerson = idString.ends_with("1st");
             if (firstPerson)
                 continue;
             if (bodypart.mRace == mCurrentRaceId)

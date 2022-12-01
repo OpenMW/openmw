@@ -246,8 +246,8 @@ namespace MWLua
                                           const sol::optional<osg::Vec3f>& optRot) {
                     MWWorld::Ptr ptr = object.ptr();
                     osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                    auto action
-                        = std::make_unique<TeleportAction>(context.mLua, object.id(), ESM::RefId::stringRefId(cell), pos, rot);
+                    auto action = std::make_unique<TeleportAction>(
+                        context.mLua, object.id(), ESM::RefId::stringRefId(cell), pos, rot);
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         context.mLuaManager->addTeleportPlayerAction(std::move(action));
                     else

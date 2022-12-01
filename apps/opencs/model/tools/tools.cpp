@@ -77,14 +77,12 @@ CSMDoc::OperationHolder* CSMTools::Tools::getVerifier()
         connect(&mVerifier, &CSMDoc::OperationHolder::done, this, &Tools::done);
         connect(&mVerifier, &CSMDoc::OperationHolder::reportMessage, this, &Tools::verifierMessage);
 
-
         std::vector<ESM::RefId> mandatoryRefIds;
         {
             auto mandatoryIds = { "Day", "DaysPassed", "GameHour", "Month", "PCRace" };
             for (auto& id : mandatoryIds)
                 mandatoryRefIds.push_back(ESM::RefId::stringRefId(id));
         }
-
 
         mVerifierOperation->appendStage(new MandatoryIdStage(
             mData.getGlobals(), CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Globals), mandatoryRefIds));

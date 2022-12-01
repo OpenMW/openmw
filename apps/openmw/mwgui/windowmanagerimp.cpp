@@ -804,7 +804,7 @@ namespace MWGui
         return mMessageBoxManager->readPressedButton();
     }
 
-    std::string_view WindowManager::getGameSettingString(const std::string_view id, std::string_view default_)
+    std::string_view WindowManager::getGameSettingString(std::string_view id, std::string_view default_)
     {
         const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(id);
 

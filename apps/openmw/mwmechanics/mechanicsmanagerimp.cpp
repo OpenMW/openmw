@@ -85,7 +85,6 @@ namespace
 
         const ESM::RefId& owner = cellref.getOwner();
         bool isOwned = !owner.empty() && owner != ESM::RefId::stringRefId("Player");
-        ;
 
         const ESM::RefId& faction = cellref.getFaction();
         bool isFactionOwned = false;
@@ -866,7 +865,7 @@ namespace MWMechanics
         }
 
         // Perform bound item check and assign the Flag_Bound bit if it passes
-        ESM::RefId tempItemID = item.getCellRef().getRefId();
+        const ESM::RefId& tempItemID = item.getCellRef().getRefId();
 
         if (boundItemIDCache.count(tempItemID) != 0)
             return true;
@@ -893,7 +892,7 @@ namespace MWMechanics
 
         // TODO: implement a better check to check if target is owned bed
         if (target.getClass().isActivator()
-            && target.getClass().getScript(target).getRefIdString().compare(0, 3, "Bed") != 0)
+            && target.getClass().getScript(target).getRefIdString().starts_with("Bed") != 0)
             return true;
 
         if (target.getClass().isNpc())

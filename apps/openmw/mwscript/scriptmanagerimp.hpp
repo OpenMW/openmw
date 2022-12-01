@@ -60,11 +60,11 @@ namespace MWScript
         std::unordered_map<ESM::RefId, CompiledScript> mScripts;
         GlobalScripts mGlobalScripts;
         std::unordered_map<ESM::RefId, Compiler::Locals> mOtherLocals;
-        std::vector<std::string> mScriptBlacklist;
+        std::vector<ESM::RefId> mScriptBlacklist;
 
     public:
         ScriptManager(const MWWorld::ESMStore& store, Compiler::Context& compilerContext, int warningsMode,
-            const std::vector<std::string>& scriptBlacklist);
+            const std::vector<ESM::RefId>& scriptBlacklist);
 
         void clear() override;
 

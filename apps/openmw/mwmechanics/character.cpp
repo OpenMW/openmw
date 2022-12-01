@@ -1442,7 +1442,7 @@ namespace MWMechanics
 
         if (isWerewolf)
         {
-            const ESM::RefId wolfRun = ESM::RefId::stringRefId("WorldRun");
+            const ESM::RefId wolfRun = ESM::RefId::stringRefId("WolfRun");
             if (isRunning() && !world->isSwimming(mPtr) && mWeaponType == ESM::Weapon::None)
             {
                 if (!sndMgr->getSoundPlaying(mPtr, wolfRun))

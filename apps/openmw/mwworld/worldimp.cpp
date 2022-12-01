@@ -572,7 +572,8 @@ namespace MWWorld
         if (cell)
             return cell;
         // treat "Wilderness" like an empty string
-        const ESM::RefId defaultName = ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
+        const ESM::RefId defaultName
+            = ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
         if (cellName == defaultName)
         {
             cell = mStore.get<ESM::Cell>().searchExtByName(ESM::RefId::sEmpty);
@@ -670,7 +671,7 @@ namespace MWWorld
                 return cell->mName;
 
             if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell->mRegion))
-                return ESM::RefId::stringRefId( region->mName);
+                return ESM::RefId::stringRefId(region->mName);
         }
         return ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
     }

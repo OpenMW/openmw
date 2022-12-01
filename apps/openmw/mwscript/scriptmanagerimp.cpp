@@ -25,7 +25,7 @@
 namespace MWScript
 {
     ScriptManager::ScriptManager(const MWWorld::ESMStore& store, Compiler::Context& compilerContext, int warningsMode,
-        const std::vector<std::string>& scriptBlacklist)
+        const std::vector<ESM::RefId>& scriptBlacklist)
         : mErrorHandler()
         , mStore(store)
         , mCompilerContext(compilerContext)
@@ -37,8 +37,6 @@ namespace MWScript
 
         mScriptBlacklist.resize(scriptBlacklist.size());
 
-        std::transform(scriptBlacklist.begin(), scriptBlacklist.end(), mScriptBlacklist.begin(),
-            [](const std::string& s) { return Misc::StringUtils::lowerCase(s); });
         std::sort(mScriptBlacklist.begin(), mScriptBlacklist.end());
     }
 
@@ -112,7 +110,7 @@ namespace MWScript
         }
 
         // execute script
-        auto target = interpreterContext.getTarget();
+        const auto& target = interpreterContext.getTarget();
         if (!iter->second.mByteCode.empty() && iter->second.mInactive.find(target) == iter->second.mInactive.end())
             try
             {
@@ -155,8 +153,7 @@ namespace MWScript
 
         for (auto& script : mStore.get<ESM::Script>())
         {
-            if (!std::binary_search(mScriptBlacklist.begin(), mScriptBlacklist.end(),
-                    Misc::StringUtils::lowerCase(script.mId.getRefIdString())))
+            if (!std::binary_search(mScriptBlacklist.begin(), mScriptBlacklist.end(), script.mId))
             {
                 ++count;
 
@@ -188,8 +185,7 @@ namespace MWScript
         {
             Compiler::Locals locals;
 
-            const Compiler::ContextOverride override(
-                mErrorHandler, std::string{ name.getRefIdString() } + "[local variables]");
+            const Compiler::ContextOverride override(mErrorHandler, name.getRefIdString() + "[local variables]");
 
             std::istringstream stream(script->mScriptText);
             Compiler::QuickFileParser parser(mErrorHandler, mCompilerContext, locals);

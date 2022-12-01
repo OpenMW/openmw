@@ -790,7 +790,7 @@ void OMW::Engine::prepareEngine()
     mScriptContext->setExtensions(&mExtensions);
 
     mScriptManager = std::make_unique<MWScript::ScriptManager>(mWorld->getStore(), *mScriptContext, mWarningsMode,
-        mScriptBlacklistUse ? mScriptBlacklist : std::vector<std::string>());
+        mScriptBlacklistUse ? mScriptBlacklist : std::vector<ESM::RefId>());
     mEnvironment.setScriptManager(*mScriptManager);
 
     // Create game mechanics system
@@ -1003,7 +1003,7 @@ void OMW::Engine::setWarningsMode(int mode)
     mWarningsMode = mode;
 }
 
-void OMW::Engine::setScriptBlacklist(const std::vector<std::string>& list)
+void OMW::Engine::setScriptBlacklist(const std::vector<ESM::RefId>& list)
 {
     mScriptBlacklist = list;
 }

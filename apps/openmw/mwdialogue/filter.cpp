@@ -196,7 +196,8 @@ bool MWDialogue::Filter::testPlayer(const ESM::DialInfo& info) const
     if (!info.mCell.empty())
     {
         // supports partial matches, just like getPcCell
-        std::string_view playerCell = MWBase::Environment::get().getWorld()->getCellName(player.getCell()).getRefIdString();
+        std::string_view playerCell
+            = MWBase::Environment::get().getWorld()->getCellName(player.getCell()).getRefIdString();
         if (!Misc::StringUtils::ciStartsWith(playerCell, info.mCell.getRefIdString()))
             return false;
     }
@@ -553,7 +554,8 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
         case SelectWrapper::Function_NotCell:
         {
-            std::string_view actorCell = MWBase::Environment::get().getWorld()->getCellName(mActor.getCell()).getRefIdString();
+            std::string_view actorCell
+                = MWBase::Environment::get().getWorld()->getCellName(mActor.getCell()).getRefIdString();
             return !Misc::StringUtils::ciStartsWith(actorCell, select.getName());
         }
         case SelectWrapper::Function_SameGender:

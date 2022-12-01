@@ -628,7 +628,7 @@ void MWWorld::ContainerStore::addInitialItemImp(
         }
         else
         {
-            auto itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *prng);
+            const auto& itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *prng);
             if (itemId.empty())
                 return;
             addInitialItem(itemId, owner, count, prng, false);

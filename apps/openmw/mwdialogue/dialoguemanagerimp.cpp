@@ -367,7 +367,7 @@ namespace MWDialogue
             if (dialog.mType == ESM::Dialogue::Topic)
             {
                 const auto* answer = filter.search(dialog, true);
-                auto topicId = dialog.mId;
+                const auto& topicId = dialog.mId;
 
                 if (answer != nullptr)
                 {

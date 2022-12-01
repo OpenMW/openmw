@@ -50,7 +50,6 @@ namespace MWWorld
         ESM::CellRef cellRef;
         cellRef.blank();
         cellRef.mRefID = ESM::RefId::stringRefId("Player");
-        ;
         mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
 
         ESM::Position playerPos = mPlayer.mData.getPosition();

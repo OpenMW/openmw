@@ -4,10 +4,10 @@
 #include <filesystem>
 
 #include <components/compiler/extensions.hpp>
+#include <components/esm/refid.hpp>
 #include <components/files/collections.hpp>
 #include <components/settings/settings.hpp>
 #include <components/translation/translation.hpp>
-#include <components/esm/refid.hpp>
 
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
@@ -179,7 +179,7 @@ namespace OMW
         Files::Collections mFileCollections;
         bool mFSStrict;
         Translation::Storage mTranslationDataStorage;
-        std::vector<std::string> mScriptBlacklist;
+        std::vector<ESM::RefId> mScriptBlacklist;
         bool mScriptBlacklistUse;
         bool mNewGame;
 
@@ -260,7 +260,7 @@ namespace OMW
 
         void setWarningsMode(int mode);
 
-        void setScriptBlacklist(const std::vector<std::string>& list);
+        void setScriptBlacklist(const std::vector<ESM::RefId>& list);
 
         void setScriptBlacklistUse(bool use);
 

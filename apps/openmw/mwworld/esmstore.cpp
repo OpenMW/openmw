@@ -429,7 +429,6 @@ namespace MWWorld
             if (value.mRefID != deletedRefID)
             {
                 ESM::RefId& refId = refIDs[value.mRefID];
-                // We manually lower case IDs here for the time being to improve performance.
                 ++mRefCount[std::move(refId)];
             }
         };
