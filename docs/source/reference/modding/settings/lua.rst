@@ -87,3 +87,14 @@ If exceeded (e.g. because of an infinite loop) the function will be terminated.
 
 This setting can only be configured by editing the settings configuration file.
 
+gc steps per frame
+------------------
+
+:Type:		integer
+:Range:		>= 0
+:Default:	100
+
+Lua garbage collector steps per frame. The higher the value the more time Lua runtime can spend on freeing unused memory.
+
+This setting can only be configured by editing the settings configuration file.
+

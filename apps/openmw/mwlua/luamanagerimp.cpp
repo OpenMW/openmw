@@ -132,6 +132,10 @@ namespace MWLua
     void LuaManager::update()
     {
         static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
+        static const int gcStepCount = Settings::Manager::getInt("gc steps per frame", "Lua");
+        if (gcStepCount > 0)
+            lua_gc(mLua.sol(), LUA_GCSTEP, gcStepCount);
+
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
 
