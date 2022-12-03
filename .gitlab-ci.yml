@@ -455,7 +455,7 @@ macOS12_Xcode13:
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-v4
+    key: ninja-v5
     paths:
     - ccache
     - deps
@@ -556,7 +556,7 @@ macOS12_Xcode13:
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-v4
+    key: msbuild-v5
     paths:
     - ccache
     - deps
