@@ -564,7 +564,18 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE)
             return;
 
-        Settings::Manager::setInt("window mode", "Video", static_cast<int>(_sender->getIndexSelected()));
+        int index = static_cast<int>(_sender->getIndexSelected());
+        if (index == static_cast<size_t>(Settings::WindowMode::WindowedFullscreen))
+            mResolutionList->setEnabled(false);
+        else
+            mResolutionList->setEnabled(true);
+
+        if (index == static_cast<size_t>(Settings::WindowMode::Windowed))
+            mWindowBorderButton->setEnabled(true);
+        else
+            mWindowBorderButton->setEnabled(false);
+
+        Settings::Manager::setInt("window mode", "Video", index);
         apply();
     }
 
@@ -642,6 +653,12 @@ namespace MWGui
         else
             Log(Debug::Warning) << "Unexpected option pos " << pos;
         apply();
+    }
+
+    void SettingsWindow::onResChange(int width, int height)
+    {
+        center();
+        highlightCurrentResolution();
     }
 
     void SettingsWindow::onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
@@ -839,6 +856,9 @@ namespace MWGui
 
             mWindowBorderButton->setEnabled(false);
         }
+
+        if (index == static_cast<size_t>(Settings::WindowMode::WindowedFullscreen))
+            mResolutionList->setEnabled(false);
     }
 
     void SettingsWindow::layoutControlsBox()

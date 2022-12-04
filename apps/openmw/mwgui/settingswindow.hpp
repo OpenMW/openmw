@@ -20,7 +20,7 @@ namespace MWGui
 
         void updateWindowModeSettings();
 
-        void onResChange(int, int) override { center(); }
+        void onResChange(int, int) override;
 
     protected:
         MyGUI::TabControl* mSettingsTab;
