@@ -43,6 +43,8 @@ namespace MWGui
         MyGUI::ComboBox* mPrimaryLanguage;
         MyGUI::ComboBox* mSecondaryLanguage;
 
+        MyGUI::Widget* mWindowModeHint;
+
         // controls
         MyGUI::ScrollView* mControlsBox;
         MyGUI::Button* mResetControlsButton;

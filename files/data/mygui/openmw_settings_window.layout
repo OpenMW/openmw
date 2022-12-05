@@ -275,7 +275,7 @@
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem">
                         <Property key="Caption" value=" #{sVideo} "/>
-                        <Widget type="ListBox" skin="MW_List" position="0 4 185 215" align="Left Top" name="ResolutionList"/>
+                        <Widget type="ListBox" skin="MW_List" position="0 4 185 225" align="Left Top" name="ResolutionList"/>
                         <Widget type="TextBox" skin="NormalText" position="197 4 185 18" align="Left Top">
                             <Property key="Caption" value="#{SettingsMenu:WindowMode}"/>
                         </Widget>
@@ -323,10 +323,13 @@
                         <Widget type="AutoSizedTextBox" skin="SandText" position="197 154 300 32" align="Left Top">
                             <Property key="Caption" value="#{SettingsMenu:FrameRateHint}"/>
                         </Widget>
-
-                        <Widget type="TextBox" skin="NormalText" position="0 228 352 18" align="Left Top" name="FovText">
+                        <Widget type="AutoSizedTextBox" skin="SandText" position="197 196 300 32" align="Left Top" name="WindowModeHint">
+                            <Property key="Caption" value="#{SettingsMenu:WindowModeHint}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 252 352 18" align="HStretch Top">
+
+                        <Widget type="TextBox" skin="NormalText" position="0 238 352 18" align="Left Top" name="FovText">
+                        </Widget>
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 262 352 18" align="HStretch Top">
                             <Property key="Range" value="81"/>
                             <Property key="Page" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -338,18 +341,18 @@
                             <UserString key="SettingLabelWidget" value="FovText"/>
                             <UserString key="SettingLabelCaption" value="#{SettingsMenu:FieldOfView} (%s)"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 276 352 18" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="0 286 352 18" align="Left Top">
                             <Property key="Caption" value="#{sLow}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 276 352 18" align="Right Top">
+                        <Widget type="TextBox" skin="SandText" position="0 286 352 18" align="Right Top">
                             <Property key="Caption" value="#{sHigh}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
-                        <Widget type="TextBox" skin="NormalText" position="0 298 352 18" align="Left Top" name="GammaText">
+                        <Widget type="TextBox" skin="NormalText" position="0 308 352 18" align="Left Top" name="GammaText">
                             <Property key="Caption" value="#{sGamma_Correction}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 322 352 18" align="HStretch Top" name="GammaSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 332 352 18" align="HStretch Top" name="GammaSlider">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -359,11 +362,11 @@
                             <UserString key="SettingMin" value="0.1"/>
                             <UserString key="SettingMax" value="3.0"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 346 352 18" align="Left Top" name="GammaTextDark">
+                        <Widget type="TextBox" skin="SandText" position="0 356 352 18" align="Left Top" name="GammaTextDark">
                             <Property key="Caption" value="#{sDark_Gamma}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 346 352 18" align="Right Top" name="GammaTextLight">
+                        <Widget type="TextBox" skin="SandText" position="0 356 352 18" align="Right Top" name="GammaTextLight">
                             <Property key="Caption" value="#{sLight_Gamma}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
