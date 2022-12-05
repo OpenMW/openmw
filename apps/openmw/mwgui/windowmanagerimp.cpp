@@ -546,6 +546,7 @@ namespace MWGui
             mWindows.clear();
             mMessageBoxManager.reset();
             mToolTips.reset();
+            mCharGen.reset();
 
             mKeyboardNavigation.reset();
 
