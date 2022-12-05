@@ -5,7 +5,7 @@ Sound Effects
 Every game needs sound effects to create the best possible player experience.
 Audio files are played during a variety of in-game situations and this is how
 they are set up in OpenMW. Some are user-definable, while a lot of them are
-hard-coded to specific names.
+hardcoded to specific names.
 
 
 Supported Formats
@@ -18,7 +18,7 @@ For sound effects we suggest using 16-bit ``.wav`` files.
 Sound File, Sound, Sound Gen
 ****************************
 
-* `Sound File` record in OpenMW-CS is the audio file on the disk. When files are placed in ``data/sounds`` and its subfolders, OpenMW-CS will list them in a table. `Sound File` records aren't used directly in OpenMW-CS but must first be assigned to a `Sound` record. 
+* `Sound File` record in OpenMW-CS is the audio file on the disk. When files are placed in ``data/sound`` and its subfolders, OpenMW-CS will list them in a table. `Sound File` records aren't used directly in OpenMW-CS but must first be assigned to a `Sound` record. 
 * `Sound` is the record that can be assigned to other records in OpenMW-CS. It needs a `Sound File` assigned, has volume, min range, and max range properties.
 * `Sound Generator` record is used for creature animation events (groan, get hit, die, footsteps). It takes the `Sound` record and defines what creature uses this effect and when.
 
@@ -29,7 +29,7 @@ Sound File, Sound, Sound Gen
 Hardcoded Effects
 *****************
 
-The following sound effects are hard-coded. They require a properly named `Sound` record and will then be used in their relevant in-game situations. 
+The following sound effects are hardcoded. They require a properly named `Sound` record and will then be used in their relevant in-game situations. 
 
 Ambient
 =======
@@ -148,6 +148,10 @@ Combat
      - Start of a crossbow attack
    * - ``crossbowshoot``
      - A crossbow is released and fires a bolt
+   * - ``hand to hand hit``
+     - Hitting a valid target with fists
+   * - ``hand to hand hit 2``
+     - Hitting a valid target with fists
    * - ``heavy armor hit``
      - A character wearing heavy armour is hit   
    * - ``light armor hit``
@@ -158,10 +162,6 @@ Combat
      - An attack misses
    * - ``weapon swish``
      - Melee weapon attack. The sound is modulated based on attack strength.
-   * - ``hand to hand hit``
-     - Hitting a valid target with fists
-   * - ``hand to hand hit 2``
-     - Hitting a valid target with fists
 
 
 UI
@@ -191,7 +191,7 @@ Movement
 ========
 
 Movement sounds apply to the player and NPCs, together reffered to as characters.
-Each sound is played in a specific in-game situation and most require a corresponding textkey.
+Each sound is played in a specific in-game situation and requires a textkey.
 
 * When the sound name ends in ``left`` it plays when ``soundgen: left`` occurs.
 * When the sound name ends in ``right`` it plays when ``soundgen: right`` occurs.
@@ -207,10 +207,6 @@ Each sound is played in a specific in-game situation and most require a correspo
      - When a character lands on the ground
    * - ``defaultlandwater``
      - When a character lands in water
-   * - ``swim left``
-     - When swimming
-   * - ``swim right``
-     - When swimming
    * - ``footbareleft``
      - While walking, running, or sneaking on land and not wearing armour
    * - ``footbareright``
@@ -231,6 +227,10 @@ Each sound is played in a specific in-game situation and most require a correspo
      - While walking, running, or sneaking in shallow water
    * - ``footwaterright``
      - While walking, running, or sneaking in shallow water
+   * - ``swim left``
+     - When swimming
+   * - ``swim right``
+     - When swimming
 
 
 Interactions
@@ -267,13 +267,9 @@ Interactions
    * - ``repair fail``
      - Repair attempt of an item fails
    * - ``spellmake fail``
-     - Creating a new spell is successful
-   * - ``spellmake success``
      - Attempt at creating a new spell fails
-   * - ``drink``
-     - The player consumes a potion
-   * - ``swallow``
-     - The player consumes an ingredient
+   * - ``spellmake success``
+     - Creating a new spell is successful
 
      
 Misc
@@ -284,15 +280,19 @@ Misc
    :header-rows: 1
 
    * - `Sound` name
-     - Situation used    
-   * - ``torch out``
-     - When the currently equipped torch is extinguished
-   * - ``skillraise``
-     - When a skill is raised.
+     - Situation used 
+   * - ``drink``
+     - The player consumes a potion
    * - ``drown``
-     - Looping while the player is underwater and out of breath 
+     - Looping while the player is underwater and out of breath
    * - ``health damage``
      - When a character or creature takes damage
+   * - ``skillraise``
+     - When a skill is raised
+   * - ``swallow``
+     - The player consumes an ingredient
+   * - ``torch out``
+     - When the currently equipped torch is extinguished
 
 
 User-defined Sound Effects
