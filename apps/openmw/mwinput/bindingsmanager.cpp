@@ -681,65 +681,25 @@ namespace MWInput
 
     void BindingsManager::actionValueChanged(int action, float currentValue, float previousValue)
     {
-        MWBase::Environment::get().getInputManager()->resetIdleTime();
+        auto manager = MWBase::Environment::get().getInputManager();
+        manager->resetIdleTime();
 
         if (mDragDrop && action != A_GameMenu && action != A_Inventory)
             return;
 
-        if ((previousValue == 1 || previousValue == 0) && (currentValue == 1 || currentValue == 0))
+        if (manager->joystickLastUsed() && manager->getControlSwitch("playercontrols"))
         {
-            // Is a normal button press, so don't change it at all
-        }
-        // Otherwise only trigger button presses as they go through specific points
-        else if (previousValue >= 0.8 && currentValue < 0.8)
-        {
-            currentValue = 0.0;
-            previousValue = 1.0;
-        }
-        else if (previousValue <= 0.6 && currentValue > 0.6)
-        {
-            currentValue = 1.0;
-            previousValue = 0.0;
-        }
-        else
-        {
-            // If it's not switching between those values, ignore the channel change.
-            return;
+            if (action == A_Use && actionIsActive(A_ToggleWeapon))
+                action = A_CycleWeaponRight;
+            else if (action == A_Use && actionIsActive(A_ToggleSpell))
+                action = A_CycleSpellRight;
+            else if (action == A_Jump && actionIsActive(A_ToggleWeapon))
+                action = A_CycleWeaponLeft;
+            else if (action == A_Jump && actionIsActive(A_ToggleSpell))
+                action = A_CycleSpellLeft;
         }
 
-        if (MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
-        {
-            bool joystickUsed = MWBase::Environment::get().getInputManager()->joystickLastUsed();
-            if (action == A_Use)
-            {
-                if (joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
-                    action = A_CycleWeaponRight;
-
-                else if (joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleSpell))
-                    action = A_CycleSpellRight;
-
-                else
-                {
-                    MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-                    MWMechanics::DrawState state = player.getDrawState();
-                    player.setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState::Nothing);
-                }
-            }
-            else if (action == A_Jump)
-            {
-                if (joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
-                    action = A_CycleWeaponLeft;
-
-                else if (joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleSpell))
-                    action = A_CycleSpellLeft;
-
-                else
-                    MWBase::Environment::get().getInputManager()->setAttemptJump(
-                        currentValue == 1.0 && previousValue == 0.0);
-            }
-        }
-
-        if (currentValue == 1)
-            MWBase::Environment::get().getInputManager()->executeAction(action);
+        if (previousValue <= 0.6 && currentValue > 0.6)
+            manager->executeAction(action);
     }
 }

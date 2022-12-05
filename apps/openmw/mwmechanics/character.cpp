@@ -1907,13 +1907,6 @@ namespace MWMechanics
             movementSettings.mSpeedFactor = std::min(vec.length(), 1.f);
             vec.normalize();
 
-            // TODO: Move this check to mwinput.
-            // Joystick analogue movement.
-            // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a
-            // keyboard was used.
-            if (isPlayer && !isrunning && !sneak && !flying && movementSettings.mSpeedFactor <= 0.5f)
-                movementSettings.mSpeedFactor *= 2.f;
-
             static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
             if (smoothMovement)
             {

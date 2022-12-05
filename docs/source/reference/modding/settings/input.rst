@@ -27,33 +27,6 @@ to prevent the mouse cursor from becoming unusable when the game pauses on a bre
 
 This setting can only be configured by editing the settings configuration file.
 
-toggle sneak
-------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-This setting causes the behavior of the sneak key (bound to Ctrl by default)
-to toggle sneaking on and off rather than requiring the key to be held down while sneaking.
-Players that spend significant time sneaking may find the character easier to control with this option enabled.
-
-This setting can be toggled in the launcher under "Advanced" -> "Game Mechanics" -> "Toggle sneak".
-
-always run
-----------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-If this setting is true, the character is running by default, otherwise the character is walking by default.
-The shift key will temporarily invert this setting, and the caps lock key will invert this setting while it's "locked".
-This setting is updated every time you exit the game,
-based on whether the caps lock key was on or off at the time you exited.
-
-This settings can be toggled in game by pressing the CapsLock key and exiting.
-
 camera sensitivity
 ------------------
 

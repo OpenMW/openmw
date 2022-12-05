@@ -63,16 +63,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="toggleSneakCheckBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting causes the behavior of the sneak key (bound to Ctrl by default) to toggle sneaking on and off rather than requiring the key to be held down while sneaking. Players that spend significant time sneaking may find the character easier to control with this option enabled. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>Toggle sneak</string>
-           </property>
-          </widget>
-         </item>
          <item row="5" column="0">
           <widget class="QCheckBox" name="permanentBarterDispositionChangeCheckBox">
            <property name="toolTip">
@@ -83,7 +73,7 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
+         <item row="0" column="0">
           <widget class="QCheckBox" name="stealingFromKnockedOutCheckBox">
           <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make stealing items from NPCs that were knocked down possible during combat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

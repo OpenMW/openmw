@@ -33,6 +33,7 @@
 -- @field [parent=#ActorControls] #number yawChange Turn right (radians); if negative - turn left
 -- @field [parent=#ActorControls] #number pitchChange Look down (radians); if negative - look up
 -- @field [parent=#ActorControls] #boolean run true - run, false - walk
+-- @field [parent=#ActorControls] #boolean sneak If true - sneak
 -- @field [parent=#ActorControls] #boolean jump If true - initiate a jump
 -- @field [parent=#ActorControls] #number use if 1 - activates the readied weapon/spell. For weapons, keeping at 1 will charge the attack until set to 0.
 

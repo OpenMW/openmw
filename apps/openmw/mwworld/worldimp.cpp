@@ -3683,7 +3683,7 @@ namespace MWWorld
         {
             if (MWBase::Environment::get().getMechanicsManager()->isAttackPreparing(player))
             {
-                mPlayer->setAttackingOrSpell(false);
+                player.getClass().getCreatureStats(player).setAttackingOrSpell(false);
             }
 
             mPlayer->setDrawState(MWMechanics::DrawState::Nothing);

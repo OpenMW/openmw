@@ -48,6 +48,7 @@ namespace MWLua
         controls["pitchChange"] = CONTROL(float, mPitchChange);
         controls["yawChange"] = CONTROL(float, mYawChange);
         controls["run"] = CONTROL(bool, mRun);
+        controls["sneak"] = CONTROL(bool, mSneak);
         controls["jump"] = CONTROL(bool, mJump);
         controls["use"] = CONTROL(int, mUse);
 #undef CONTROL

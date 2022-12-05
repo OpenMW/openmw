@@ -9,20 +9,19 @@
 
 namespace MWInput
 {
-    class ActionManager;
     class BindingsManager;
     class MouseManager;
 
     class ControllerManager : public SDLUtil::ControllerListener
     {
     public:
-        ControllerManager(BindingsManager* bindingsManager, ActionManager* actionManager, MouseManager* mouseManager,
+        ControllerManager(BindingsManager* bindingsManager, MouseManager* mouseManager,
             const std::filesystem::path& userControllerBindingsFile,
             const std::filesystem::path& controllerBindingsFile);
 
         virtual ~ControllerManager() = default;
 
-        bool update(float dt);
+        void update(float dt);
 
         void buttonPressed(int deviceID, const SDL_ControllerButtonEvent& arg) override;
         void buttonReleased(int deviceID, const SDL_ControllerButtonEvent& arg) override;
@@ -58,17 +57,14 @@ namespace MWInput
         void enableGyroSensor();
 
         BindingsManager* mBindingsManager;
-        ActionManager* mActionManager;
         MouseManager* mMouseManager;
 
         bool mJoystickEnabled;
         bool mGyroAvailable;
         float mGamepadCursorSpeed;
-        float mSneakToggleShortcutTimer;
         bool mGamepadGuiCursorEnabled;
         bool mGuiCursorEnabled;
         bool mJoystickLastUsed;
-        bool mSneakGamepadShortcut;
     };
 }
 #endif

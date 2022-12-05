@@ -29,6 +29,7 @@ Lua API reference
     openmw_aux_ui
     interface_ai
     interface_camera
+    interface_controls
     interface_mwui
     interface_settings
     iterables
@@ -73,6 +74,10 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
     - by player scripts
     - | Allows to alter behavior of the built-in camera script
       | without overriding the script completely.
+  * - :ref:`Controls <Interface Controls>`
+    - by player scripts
+    - | Allows to alter behavior of the built-in script
+      | that handles player controls.
   * - :ref:`Settings <Interface Settings>`
     - by player and global scripts
     - Save, display and track changes of setting values.

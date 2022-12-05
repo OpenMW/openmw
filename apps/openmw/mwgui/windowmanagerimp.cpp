@@ -53,6 +53,7 @@
 #include <components/lua_ui/util.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
@@ -794,11 +795,6 @@ namespace MWGui
         mMessageBoxManager->removeStaticMessageBox();
     }
 
-    const std::vector<std::unique_ptr<MWGui::MessageBox>>& WindowManager::getActiveMessageBoxes() const
-    {
-        return mMessageBoxManager->getActiveMessageBoxes();
-    }
-
     int WindowManager::readPressedButton()
     {
         return mMessageBoxManager->readPressedButton();
@@ -904,13 +900,34 @@ namespace MWGui
         // We should display message about crime only once per frame, even if there are several crimes.
         // Otherwise we will get message spam when stealing several items via Take All button.
         const MWWorld::Ptr player = MWMechanics::getPlayer();
-        int currentBounty = player.getClass().getNpcStats(player).getBounty();
+        const MWWorld::Class& playerCls = player.getClass();
+        int currentBounty = playerCls.getNpcStats(player).getBounty();
         if (currentBounty != mPlayerBounty)
         {
             if (mPlayerBounty >= 0 && currentBounty > mPlayerBounty)
                 messageBox("#{sCrimeMessage}");
 
             mPlayerBounty = currentBounty;
+        }
+
+        MWBase::LuaManager::ActorControls* playerControls
+            = MWBase::Environment::get().getLuaManager()->getActorControls(player);
+        bool triedToMove = playerControls
+            && (playerControls->mMovement != 0 || playerControls->mSideMovement != 0 || playerControls->mJump);
+        if (triedToMove && playerCls.getEncumbrance(player) > playerCls.getCapacity(player))
+        {
+            const auto& msgboxs = mMessageBoxManager->getActiveMessageBoxes();
+            auto it
+                = std::find_if(msgboxs.begin(), msgboxs.end(), [](const std::unique_ptr<MWGui::MessageBox>& msgbox) {
+                      return (msgbox->getMessage() == "#{sNotifyMessage59}");
+                  });
+
+            // if an overencumbered messagebox is already present, reset its expiry timer,
+            // otherwise create a new one.
+            if (it != msgboxs.end())
+                (*it)->mCurrentTime = 0;
+            else
+                messageBox("#{sNotifyMessage59}");
         }
 
         mDragAndDrop->onFrame();

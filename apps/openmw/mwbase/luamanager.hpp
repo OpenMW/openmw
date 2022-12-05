@@ -70,6 +70,7 @@ namespace MWBase
 
             bool mJump = false;
             bool mRun = false;
+            bool mSneak = false;
             float mMovement = 0;
             float mSideMovement = 0;
             float mPitchChange = 0;

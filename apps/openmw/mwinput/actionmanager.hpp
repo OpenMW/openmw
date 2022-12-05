@@ -21,23 +21,18 @@ namespace MWInput
             osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
             osg::ref_ptr<osgViewer::Viewer> viewer, osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler);
 
-        void update(float dt, bool triedToMove);
+        void update(float dt);
 
         void executeAction(int action);
 
         bool checkAllowedToUseItems() const;
 
         void toggleMainMenu();
-        void toggleSpell();
-        void toggleWeapon();
         void toggleInventory();
         void toggleConsole();
         void screenshot();
         void toggleJournal();
         void activate();
-        void toggleWalking();
-        void toggleSneaking();
-        void toggleAutoMove();
         void rest();
         void quickLoad();
         void quickSave();
@@ -48,10 +43,7 @@ namespace MWInput
         void resetIdleTime();
         float getIdleTime() const { return mTimeIdle; }
 
-        bool isAlwaysRunActive() const { return mAlwaysRunActive; }
         bool isSneaking() const;
-
-        void setAttemptJump(bool enabled) { mAttemptJump = enabled; }
 
     private:
         void handleGuiArrowKey(int action);
@@ -60,9 +52,6 @@ namespace MWInput
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
         osgViewer::ScreenCaptureHandler::CaptureOperation* mScreenCaptureOperation;
-
-        bool mAlwaysRunActive;
-        bool mAttemptJump;
 
         float mTimeIdle;
     };
