@@ -22,11 +22,11 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/cells.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwrender/globalmap.hpp"
 #include "../mwrender/localmap.hpp"
@@ -626,7 +626,7 @@ namespace MWGui
     {
         std::vector<MWBase::World::DoorMarker> doors;
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        MWWorld::Cells* worldModel = MWBase::Environment::get().getWorldModel();
+        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
 
         mDoorMarkersToRecycle.insert(
             mDoorMarkersToRecycle.end(), mInteriorDoorMarkerWidgets.begin(), mInteriorDoorMarkerWidgets.end());

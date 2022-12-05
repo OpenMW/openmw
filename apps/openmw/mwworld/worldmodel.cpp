@@ -1,4 +1,4 @@
-#include "cells.hpp"
+#include "worldmodel.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
@@ -58,7 +58,7 @@ namespace
     };
 }
 
-MWWorld::CellStore* MWWorld::Cells::getCellStore(const ESM::Cell* cell)
+MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
 {
     if (cell->mData.mFlags & ESM::Cell::Interior)
     {
@@ -84,7 +84,7 @@ MWWorld::CellStore* MWWorld::Cells::getCellStore(const ESM::Cell* cell)
     }
 }
 
-void MWWorld::Cells::clear()
+void MWWorld::WorldModel::clear()
 {
     mInteriors.clear();
     mExteriors.clear();
@@ -92,7 +92,7 @@ void MWWorld::Cells::clear()
     mIdCacheIndex = 0;
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtrAndCache(std::string_view name, CellStore& cellStore)
+MWWorld::Ptr MWWorld::WorldModel::getPtrAndCache(std::string_view name, CellStore& cellStore)
 {
     Ptr ptr = getPtr(name, cellStore);
 
@@ -107,7 +107,7 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache(std::string_view name, CellStore& ce
     return ptr;
 }
 
-void MWWorld::Cells::writeCell(ESM::ESMWriter& writer, CellStore& cell) const
+void MWWorld::WorldModel::writeCell(ESM::ESMWriter& writer, CellStore& cell) const
 {
     if (cell.getState() != CellStore::State_Loaded)
         cell.load();
@@ -124,7 +124,7 @@ void MWWorld::Cells::writeCell(ESM::ESMWriter& writer, CellStore& cell) const
     writer.endRecord(ESM::REC_CSTA);
 }
 
-MWWorld::Cells::Cells(const MWWorld::ESMStore& store, ESM::ReadersCache& readers)
+MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& readers)
     : mStore(store)
     , mReaders(readers)
     , mIdCacheIndex(0)
@@ -133,7 +133,7 @@ MWWorld::Cells::Cells(const MWWorld::ESMStore& store, ESM::ReadersCache& readers
     mIdCache = IdCache(cacheSize, std::pair<std::string, CellStore*>("", (CellStore*)nullptr));
 }
 
-MWWorld::CellStore* MWWorld::Cells::getExterior(int x, int y)
+MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
 {
     std::map<std::pair<int, int>, CellStore>::iterator result = mExteriors.find(std::make_pair(x, y));
 
@@ -170,7 +170,7 @@ MWWorld::CellStore* MWWorld::Cells::getExterior(int x, int y)
     return &result->second;
 }
 
-MWWorld::CellStore* MWWorld::Cells::getInterior(std::string_view name)
+MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
 {
     std::string lowerName = Misc::StringUtils::lowerCase(name);
     std::map<std::string, CellStore>::iterator result = mInteriors.find(lowerName);
@@ -190,7 +190,7 @@ MWWorld::CellStore* MWWorld::Cells::getInterior(std::string_view name)
     return &result->second;
 }
 
-void MWWorld::Cells::rest(double hours)
+void MWWorld::WorldModel::rest(double hours)
 {
     for (auto& interior : mInteriors)
     {
@@ -203,7 +203,7 @@ void MWWorld::Cells::rest(double hours)
     }
 }
 
-void MWWorld::Cells::recharge(float duration)
+void MWWorld::WorldModel::recharge(float duration)
 {
     for (auto& interior : mInteriors)
     {
@@ -216,7 +216,7 @@ void MWWorld::Cells::recharge(float duration)
     }
 }
 
-MWWorld::CellStore* MWWorld::Cells::getCell(const ESM::CellId& id)
+MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::CellId& id)
 {
     if (id.mPaged)
         return getExterior(id.mIndex.mX, id.mIndex.mY);
@@ -224,7 +224,7 @@ MWWorld::CellStore* MWWorld::Cells::getCell(const ESM::CellId& id)
     return getInterior(id.mWorldspace);
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtr(std::string_view name, CellStore& cell, bool searchInContainers)
+MWWorld::Ptr MWWorld::WorldModel::getPtr(std::string_view name, CellStore& cell, bool searchInContainers)
 {
     if (cell.getState() == CellStore::State_Unloaded)
         cell.preload();
@@ -250,7 +250,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr(std::string_view name, CellStore& cell, bool
     return Ptr();
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtr(const std::string& name)
+MWWorld::Ptr MWWorld::WorldModel::getPtr(const std::string& name)
 {
     // First check the cache
     for (IdCache::iterator iter(mIdCache.begin()); iter != mIdCache.end(); ++iter)
@@ -307,7 +307,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr(const std::string& name)
     return Ptr();
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtr(const std::string& id, const ESM::RefNum& refNum)
+MWWorld::Ptr MWWorld::WorldModel::getPtr(const std::string& id, const ESM::RefNum& refNum)
 {
     for (auto& pair : mInteriors)
     {
@@ -324,7 +324,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr(const std::string& id, const ESM::RefNum& re
     return Ptr();
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtr(CellStore& cellStore, const std::string& id, const ESM::RefNum& refNum)
+MWWorld::Ptr MWWorld::WorldModel::getPtr(CellStore& cellStore, const std::string& id, const ESM::RefNum& refNum)
 {
     if (cellStore.getState() == CellStore::State_Unloaded)
         cellStore.preload();
@@ -338,7 +338,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr(CellStore& cellStore, const std::string& id,
     return cellStore.searchViaRefNum(refNum);
 }
 
-void MWWorld::Cells::getExteriorPtrs(std::string_view name, std::vector<MWWorld::Ptr>& out)
+void MWWorld::WorldModel::getExteriorPtrs(std::string_view name, std::vector<MWWorld::Ptr>& out)
 {
     const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
     for (MWWorld::Store<ESM::Cell>::iterator iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
@@ -352,7 +352,7 @@ void MWWorld::Cells::getExteriorPtrs(std::string_view name, std::vector<MWWorld:
     }
 }
 
-void MWWorld::Cells::getInteriorPtrs(const std::string& name, std::vector<MWWorld::Ptr>& out)
+void MWWorld::WorldModel::getInteriorPtrs(const std::string& name, std::vector<MWWorld::Ptr>& out)
 {
     const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
     for (MWWorld::Store<ESM::Cell>::iterator iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
@@ -366,7 +366,7 @@ void MWWorld::Cells::getInteriorPtrs(const std::string& name, std::vector<MWWorl
     }
 }
 
-std::vector<MWWorld::Ptr> MWWorld::Cells::getAll(const std::string& id)
+std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const std::string& id)
 {
     PtrCollector visitor;
     if (forEachInStore(id, visitor, mInteriors))
@@ -374,7 +374,7 @@ std::vector<MWWorld::Ptr> MWWorld::Cells::getAll(const std::string& id)
     return visitor.mPtrs;
 }
 
-int MWWorld::Cells::countSavedGameRecords() const
+int MWWorld::WorldModel::countSavedGameRecords() const
 {
     int count = 0;
 
@@ -390,7 +390,7 @@ int MWWorld::Cells::countSavedGameRecords() const
     return count;
 }
 
-void MWWorld::Cells::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
+void MWWorld::WorldModel::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
 {
     for (std::map<std::pair<int, int>, CellStore>::iterator iter(mExteriors.begin()); iter != mExteriors.end(); ++iter)
         if (iter->second.hasState())
@@ -410,12 +410,12 @@ void MWWorld::Cells::write(ESM::ESMWriter& writer, Loading::Listener& progress) 
 struct GetCellStoreCallback : public MWWorld::CellStore::GetCellStoreCallback
 {
 public:
-    GetCellStoreCallback(MWWorld::Cells& cells)
+    GetCellStoreCallback(MWWorld::WorldModel& cells)
         : mCells(cells)
     {
     }
 
-    MWWorld::Cells& mCells;
+    MWWorld::WorldModel& mCells;
 
     MWWorld::CellStore* getCellStore(const ESM::CellId& cellId) override
     {
@@ -430,7 +430,7 @@ public:
     }
 };
 
-bool MWWorld::Cells::readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap)
+bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap)
 {
     if (type == ESM::REC_CSTA)
     {

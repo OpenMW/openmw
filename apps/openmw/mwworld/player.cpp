@@ -12,10 +12,10 @@
 #include <components/esm3/player.hpp>
 #include <components/fallback/fallback.hpp>
 
-#include "../mwworld/cells.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/magiceffects.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

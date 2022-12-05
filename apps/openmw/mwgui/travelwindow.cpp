@@ -13,13 +13,13 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/actionteleport.hpp"
-#include "../mwworld/cells.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/store.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"

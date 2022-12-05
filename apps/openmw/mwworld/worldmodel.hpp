@@ -1,5 +1,5 @@
-#ifndef GAME_MWWORLD_CELLS_H
-#define GAME_MWWORLD_CELLS_H
+#ifndef GAME_MWWORLD_WORLDMODEL_H
+#define GAME_MWWORLD_WORLDMODEL_H
 
 #include <list>
 #include <map>
@@ -27,7 +27,7 @@ namespace MWWorld
     class ESMStore;
 
     /// \brief Cell container
-    class Cells
+    class WorldModel
     {
         typedef std::vector<std::pair<std::string, CellStore*>> IdCache;
         const MWWorld::ESMStore& mStore;
@@ -37,8 +37,8 @@ namespace MWWorld
         IdCache mIdCache;
         std::size_t mIdCacheIndex;
 
-        Cells(const Cells&);
-        Cells& operator=(const Cells&);
+        WorldModel(const WorldModel&);
+        WorldModel& operator=(const WorldModel&);
 
         CellStore* getCellStore(const ESM::Cell* cell);
 
@@ -51,7 +51,7 @@ namespace MWWorld
     public:
         void clear();
 
-        explicit Cells(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
+        explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
 
         CellStore* getExterior(int x, int y);
 

@@ -8,10 +8,10 @@
 
 #include "../mwclass/container.hpp"
 
-#include "../mwworld/cells.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 namespace MWLua
 {
@@ -127,7 +127,7 @@ namespace MWLua
     // sections.
     MWWorld::CellStore* WorldView::findCell(const std::string& name, osg::Vec3f position)
     {
-        MWWorld::Cells* cells = MWBase::Environment::get().getWorldModel();
+        MWWorld::WorldModel* cells = MWBase::Environment::get().getWorldModel();
         bool exterior = name.empty() || MWBase::Environment::get().getWorld()->getExterior(name);
         if (exterior)
         {
@@ -140,7 +140,7 @@ namespace MWLua
 
     MWWorld::CellStore* WorldView::findNamedCell(const std::string& name)
     {
-        MWWorld::Cells* cells = MWBase::Environment::get().getWorldModel();
+        MWWorld::WorldModel* cells = MWBase::Environment::get().getWorldModel();
         const ESM::Cell* esmCell = MWBase::Environment::get().getWorld()->getExterior(name);
         if (esmCell)
             return cells->getExterior(esmCell->getGridX(), esmCell->getGridY());
