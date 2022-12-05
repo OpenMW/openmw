@@ -70,13 +70,13 @@ namespace Files
 
     std::filesystem::path WindowsPath::getLocalPath() const
     {
-        std::filesystem::path localPath = std::filesystem::current_path();
+        std::filesystem::path localPath = std::filesystem::current_path() / "";
 
         WCHAR path[MAX_PATH + 1] = {};
 
         if (GetModuleFileNameW(nullptr, path, MAX_PATH + 1) > 0)
         {
-            localPath = std::filesystem::path(path).parent_path();
+            localPath = std::filesystem::path(path).parent_path() / "";
         }
 
         // lookup exe path

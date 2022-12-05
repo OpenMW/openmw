@@ -83,7 +83,8 @@ namespace Files
 
     std::filesystem::path LinuxPath::getLocalPath() const
     {
-        auto localPath = std::filesystem::current_path();
+        auto localPath = std::filesystem::current_path() / "";
+
         static const std::filesystem::path statusPaths[]
             = { "/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file" };
 
@@ -93,7 +94,7 @@ namespace Files
             const auto binPath = read_symlink(path, ec);
             if (ec.value() != -1)
             {
-                localPath = binPath.parent_path();
+                localPath = binPath.parent_path() / "";
                 break;
             }
         }
