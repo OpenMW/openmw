@@ -8,6 +8,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 
+#include "../mwworld/cells.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
@@ -42,6 +43,7 @@ namespace MWWorld
     void ActionTeleport::teleport(const Ptr& actor)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
+        MWWorld::Cells* worldModel = MWBase::Environment::get().getWorldModel();
         actor.getClass().getCreatureStats(actor).land(actor == world->getPlayerPtr());
         if (actor == world->getPlayerPtr())
         {
@@ -58,10 +60,10 @@ namespace MWWorld
             else if (mCellName.empty())
             {
                 const osg::Vec2i index = positionToCellIndex(mPosition.pos[0], mPosition.pos[1]);
-                world->moveObject(actor, world->getExterior(index.x(), index.y()), mPosition.asVec3(), true, true);
+                world->moveObject(actor, worldModel->getExterior(index.x(), index.y()), mPosition.asVec3(), true, true);
             }
             else
-                world->moveObject(actor, world->getInterior(mCellName), mPosition.asVec3(), true, true);
+                world->moveObject(actor, worldModel->getInterior(mCellName), mPosition.asVec3(), true, true);
         }
     }
 

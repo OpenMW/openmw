@@ -14,7 +14,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwphysics/collisiontype.hpp"
+#include "../mwphysics/raycasting.hpp"
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -252,8 +252,12 @@ namespace MWMechanics
                     // Add Z offset since path node can overlap with other objects.
                     // Also ignore doors in raytesting.
                     const int mask = MWPhysics::CollisionType_World;
-                    bool isPathClear = !MWBase::Environment::get().getWorld()->castRay(
-                        startPoint.x(), startPoint.y(), startPoint.z() + 16, temp.mX, temp.mY, temp.mZ + 16, mask);
+                    bool isPathClear = !MWBase::Environment::get()
+                                            .getWorld()
+                                            ->getRayCasting()
+                                            ->castRay(osg::Vec3f(startPoint.x(), startPoint.y(), startPoint.z() + 16),
+                                                osg::Vec3f(temp.mX, temp.mY, temp.mZ + 16), mask)
+                                            .mHit;
                     if (isPathClear)
                         path.pop_front();
                 }

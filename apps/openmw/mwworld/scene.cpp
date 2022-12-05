@@ -543,7 +543,8 @@ namespace MWWorld
         }
 
         mNavigator.setWorldspace(
-            mWorld.getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace, navigatorUpdateGuard.get());
+            mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace,
+            navigatorUpdateGuard.get());
         mNavigator.updateBounds(pos, navigatorUpdateGuard.get());
 
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
@@ -566,7 +567,7 @@ namespace MWWorld
                 {
                     if (!isCellInCollection(x, y, collection))
                     {
-                        refsToLoad += mWorld.getExterior(x, y)->count();
+                        refsToLoad += mWorld.getWorldModel().getExterior(x, y)->count();
                         cellsPositionsToLoad.emplace_back(x, y);
                     }
                 }
@@ -601,7 +602,7 @@ namespace MWWorld
         {
             if (!isCellInCollection(x, y, mActiveCells))
             {
-                CellStore* cell = mWorld.getExterior(x, y);
+                CellStore* cell = mWorld.getWorldModel().getExterior(x, y);
                 loadCell(cell, loadingListener, changeEvent, pos, navigatorUpdateGuard.get());
             }
         }
@@ -610,7 +611,7 @@ namespace MWWorld
 
         navigatorUpdateGuard.reset();
 
-        CellStore* current = mWorld.getExterior(playerCellX, playerCellY);
+        CellStore* current = mWorld.getWorldModel().getExterior(playerCellX, playerCellY);
         MWBase::Environment::get().getWindowManager()->changeCell(current);
 
         if (changeEvent)
@@ -663,7 +664,7 @@ namespace MWWorld
             loadingListener->setLabel(
                 "Testing exterior cells (" + std::to_string(i) + "/" + std::to_string(cells.getExtSize()) + ")...");
 
-            CellStore* cell = mWorld.getExterior(it->mData.mX, it->mData.mY);
+            CellStore* cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
             mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace, navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
@@ -720,7 +721,7 @@ namespace MWWorld
             loadingListener->setLabel(
                 "Testing interior cells (" + std::to_string(i) + "/" + std::to_string(cells.getIntSize()) + ")...");
 
-            CellStore* cell = mWorld.getInterior(it->mName);
+            CellStore* cell = mWorld.getWorldModel().getInterior(it->mName);
             mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace, navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
@@ -842,7 +843,7 @@ namespace MWWorld
     void Scene::changeToInteriorCell(
         const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
-        CellStore* cell = mWorld.getInterior(cellName);
+        CellStore* cell = mWorld.getWorldModel().getInterior(cellName);
         bool useFading = (mCurrentCell != nullptr);
         if (useFading)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
@@ -917,7 +918,7 @@ namespace MWWorld
 
         changeCellGrid(position.asVec3(), cellIndex.x(), cellIndex.y(), changeEvent);
 
-        CellStore* current = mWorld.getExterior(cellIndex.x(), cellIndex.y());
+        CellStore* current = mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y());
         changePlayerCell(current, position, adjustPlayerPos);
 
         if (changeEvent)
@@ -1116,12 +1117,12 @@ namespace MWWorld
                 try
                 {
                     if (!door.getCellRef().getDestCell().empty())
-                        preloadCell(mWorld.getInterior(door.getCellRef().getDestCell()));
+                        preloadCell(mWorld.getWorldModel().getInterior(door.getCellRef().getDestCell()));
                     else
                     {
                         osg::Vec3f pos = door.getCellRef().getDoorDest().asVec3();
                         const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
-                        preloadCell(mWorld.getExterior(cellIndex.x(), cellIndex.y()), true);
+                        preloadCell(mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y()), true);
                         exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
                     }
                 }
@@ -1167,7 +1168,7 @@ namespace MWWorld
                     + mPreloadDistance;
 
                 if (dist < loadDist)
-                    preloadCell(mWorld.getExterior(cellX + dx, cellY + dy));
+                    preloadCell(mWorld.getWorldModel().getExterior(cellX + dx, cellY + dy));
             }
         }
     }
@@ -1183,7 +1184,8 @@ namespace MWWorld
             {
                 for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
                 {
-                    mPreloader->preload(mWorld.getExterior(x + dx, y + dy), mRendering.getReferenceTime());
+                    mPreloader->preload(
+                        mWorld.getWorldModel().getExterior(x + dx, y + dy), mRendering.getReferenceTime());
                     if (++numpreloaded >= mPreloader->getMaxCacheSize())
                         break;
                 }
@@ -1263,12 +1265,12 @@ namespace MWWorld
         for (ESM::Transport::Dest& dest : listVisitor.mList)
         {
             if (!dest.mCellName.empty())
-                preloadCell(mWorld.getInterior(dest.mCellName));
+                preloadCell(mWorld.getWorldModel().getInterior(dest.mCellName));
             else
             {
                 osg::Vec3f pos = dest.mPos.asVec3();
                 const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
-                preloadCell(mWorld.getExterior(cellIndex.x(), cellIndex.y()), true);
+                preloadCell(mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y()), true);
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }
         }

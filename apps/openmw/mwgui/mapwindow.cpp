@@ -22,6 +22,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/cells.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -586,7 +587,8 @@ namespace MWGui
             if (!entry.mMapTexture)
             {
                 if (!mInterior)
-                    requestMapRender(MWBase::Environment::get().getWorld()->getExterior(entry.mCellX, entry.mCellY));
+                    requestMapRender(
+                        MWBase::Environment::get().getWorldModel()->getExterior(entry.mCellX, entry.mCellY));
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
                 if (texture)
@@ -624,6 +626,7 @@ namespace MWGui
     {
         std::vector<MWBase::World::DoorMarker> doors;
         MWBase::World* world = MWBase::Environment::get().getWorld();
+        MWWorld::Cells* worldModel = MWBase::Environment::get().getWorldModel();
 
         mDoorMarkersToRecycle.insert(
             mDoorMarkersToRecycle.end(), mInteriorDoorMarkerWidgets.begin(), mInteriorDoorMarkerWidgets.end());
@@ -634,7 +637,7 @@ namespace MWGui
             for (MyGUI::Widget* widget : mExteriorDoorMarkerWidgets)
                 widget->setVisible(false);
 
-            MWWorld::CellStore* cell = world->getInterior(mPrefix);
+            MWWorld::CellStore* cell = worldModel->getInterior(mPrefix);
             world->getDoorMarkers(cell, doors);
         }
         else
@@ -642,7 +645,7 @@ namespace MWGui
             for (MapEntry& entry : mMaps)
             {
                 if (!entry.mMapTexture && !widgetCropped(entry.mMapWidget, mLocalMap))
-                    world->getDoorMarkers(world->getExterior(entry.mCellX, entry.mCellY), doors);
+                    world->getDoorMarkers(worldModel->getExterior(entry.mCellX, entry.mCellY), doors);
             }
             if (doors.empty())
                 return;

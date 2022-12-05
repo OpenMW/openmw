@@ -188,6 +188,9 @@ namespace MWWorld
         MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id);
 
     public:
+        Cells& getWorldModel() { return mCells; }
+        Scene& getWorldScene() { return *mWorldScene; }
+
         // FIXME
         void addContainerScripts(const Ptr& reference, CellStore* cell) override;
         void removeContainerScripts(const Ptr& reference) override;
@@ -215,17 +218,6 @@ namespace MWWorld
 
         void readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap) override;
 
-        CellStore* getExterior(int x, int y) override;
-
-        CellStore* getInterior(std::string_view name) override;
-
-        CellStore* getCell(const ESM::CellId& id) override;
-
-        bool isCellActive(CellStore* cell) const override;
-
-        void testExteriorCells() override;
-        void testInteriorCells() override;
-
         // switch to POV before showing player's death animation
         void useDeathCamera() override;
 
@@ -248,9 +240,6 @@ namespace MWWorld
         const std::vector<int>& getESMVersions() const override;
 
         LocalScripts& getLocalScripts() override;
-
-        bool hasCellChanged() const override;
-        ///< Has the set of active cells changed, since the last frame?
 
         bool isCellExterior() const override;
 
@@ -371,8 +360,6 @@ namespace MWWorld
         const ESM::Cell* getExterior(std::string_view cellName) const override;
         ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
-        void markCellAsUnchanged() override;
-
         MWWorld::Ptr getFacedObject() override;
         ///< Return pointer to the object the player is looking at, if it is within activation range
 
@@ -432,13 +419,6 @@ namespace MWWorld
         void updateAnimatedCollisionShape(const Ptr& ptr) override;
 
         const MWPhysics::RayCastingInterface* getRayCasting() const override;
-
-        bool castRay(float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
-        ///< cast a Ray and return true if there is an object in the ray path.
-
-        bool castRay(float x1, float y1, float z1, float x2, float y2, float z2) override;
-
-        bool castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore) override;
 
         bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
             bool ignorePlayer, bool ignoreActors) override;

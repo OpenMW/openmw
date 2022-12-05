@@ -15,6 +15,12 @@ namespace l10n
     class Manager;
 }
 
+namespace MWWorld
+{
+    class Cells;
+    class Scene;
+}
+
 namespace MWBase
 {
     class World;
@@ -37,6 +43,8 @@ namespace MWBase
         static Environment* sThis;
 
         World* mWorld = nullptr;
+        MWWorld::Cells* mWorldModel = nullptr; // TODO: rename Cells -> WorldModel
+        MWWorld::Scene* mWorldScene = nullptr;
         SoundManager* mSoundManager = nullptr;
         ScriptManager* mScriptManager = nullptr;
         WindowManager* mWindowManager = nullptr;
@@ -61,6 +69,8 @@ namespace MWBase
         Environment& operator=(const Environment&) = delete;
 
         void setWorld(World& value) { mWorld = &value; }
+        void setWorldModel(MWWorld::Cells& value) { mWorldModel = &value; }
+        void setWorldScene(MWWorld::Scene& value) { mWorldScene = &value; }
 
         void setSoundManager(SoundManager& value) { mSoundManager = &value; }
 
@@ -85,6 +95,8 @@ namespace MWBase
         void setL10nManager(l10n::Manager& value) { mL10nManager = &value; }
 
         Misc::NotNullPtr<World> getWorld() const { return mWorld; }
+        Misc::NotNullPtr<MWWorld::Cells> getWorldModel() const { return mWorldModel; }
+        Misc::NotNullPtr<MWWorld::Scene> getWorldScene() const { return mWorldScene; }
 
         Misc::NotNullPtr<SoundManager> getSoundManager() const { return mSoundManager; }
 

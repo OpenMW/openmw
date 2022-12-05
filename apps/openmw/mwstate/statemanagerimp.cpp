@@ -30,9 +30,11 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/cells.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/scene.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -554,7 +556,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         {
             // Cell no longer exists (i.e. changed game files), choose a default cell
             Log(Debug::Warning) << "Warning: Player character's cell no longer exists, changing to the default cell";
-            MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(0, 0);
+            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->getExterior(0, 0);
             float x, y;
             MWBase::Environment::get().getWorld()->indexToPosition(0, 0, x, y, false);
             ESM::Position pos;
@@ -575,7 +577,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         // Since we passed "changeEvent=false" to changeCell, we shouldn't have triggered the cell change flag.
         // But make sure the flag is cleared anyway in case it was set from an earlier game.
-        MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+        MWBase::Environment::get().getWorldScene()->markCellAsUnchanged();
 
         MWBase::Environment::get().getLuaManager()->gameLoaded();
     }

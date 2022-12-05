@@ -242,7 +242,7 @@ bool OMW::Engine::frame(float frametime)
                         mScriptManager->getGlobalScripts().run();
                     }
 
-                    mWorld->markCellAsUnchanged();
+                    mWorld->getWorldScene().markCellAsUnchanged();
                 }
 
                 if (!guiActive)
@@ -772,6 +772,8 @@ void OMW::Engine::prepareEngine()
     mWorld->setupPlayer();
     mWorld->setRandomSeed(mRandomSeed);
     mEnvironment.setWorld(*mWorld);
+    mEnvironment.setWorldModel(mWorld->getWorldModel());
+    mEnvironment.setWorldScene(mWorld->getWorldScene());
 
     mWindowManager->setStore(mWorld->getStore());
     mWindowManager->initUI();

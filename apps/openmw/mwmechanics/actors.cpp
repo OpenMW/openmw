@@ -22,6 +22,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/scene.hpp"
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -1570,7 +1571,8 @@ namespace MWMechanics
                 }
                 else
                 {
-                    const bool cellChanged = world->hasCellChanged();
+                    MWWorld::Scene* worldScene = MWBase::Environment::get().getWorldScene();
+                    const bool cellChanged = worldScene->hasCellChanged();
                     const MWWorld::Ptr actorPtr = actor.getPtr(); // make a copy of the map key to avoid it being
                                                                   // invalidated when the player teleports
                     updateActor(actorPtr, duration);
@@ -1582,7 +1584,7 @@ namespace MWMechanics
                     // There needs to be a magic effect update in between.
                     ctrl.updateContinuousVfx();
 
-                    if (!cellChanged && world->hasCellChanged())
+                    if (!cellChanged && worldScene->hasCellChanged())
                     {
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
                                 // a better solution might be to apply cell changes at the end of the frame

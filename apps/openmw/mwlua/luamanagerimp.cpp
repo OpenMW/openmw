@@ -27,6 +27,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/scene.hpp"
 
 #include "debugbindings.hpp"
 #include "luabindings.hpp"
@@ -402,7 +403,7 @@ namespace MWLua
         {
             localScripts = createLocalScripts(ptr);
             localScripts->addAutoStartedScripts();
-            if (ptr.isInCell() && MWBase::Environment::get().getWorld()->isCellActive(ptr.getCell()))
+            if (ptr.isInCell() && MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell()))
                 mActiveLocalScripts.insert(localScripts);
         }
         localScripts->addCustomScript(scriptId);

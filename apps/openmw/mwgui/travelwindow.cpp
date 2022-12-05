@@ -13,6 +13,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/actionteleport.hpp"
+#include "../mwworld/cells.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
@@ -127,7 +128,7 @@ namespace MWGui
             if (cellname.empty())
             {
                 MWWorld::CellStore* cell
-                    = MWBase::Environment::get().getWorld()->getExterior(cellIndex.x(), cellIndex.y());
+                    = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
                 cellname = MWBase::Environment::get().getWorld()->getCellName(cell);
                 interior = false;
             }

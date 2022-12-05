@@ -15,6 +15,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwphysics/raycasting.hpp"
+
 #include "actorutil.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
@@ -339,8 +341,12 @@ bool MWMechanics::AiPackage::shortcutPath(const osg::Vec3f& startPoint, const os
     if (!mShortcutProhibited || (mShortcutFailPos - startPoint).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
     {
         // check if target is clearly visible
-        isPathClear = !MWBase::Environment::get().getWorld()->castRay(
-            startPoint.x(), startPoint.y(), startPoint.z(), endPoint.x(), endPoint.y(), endPoint.z());
+        isPathClear
+            = !MWBase::Environment::get()
+                   .getWorld()
+                   ->getRayCasting()
+                   ->castRay(startPoint, endPoint, MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door)
+                   .mHit;
 
         if (destInLOS != nullptr)
             *destInLOS = isPathClear;
