@@ -100,6 +100,8 @@ namespace MWBase
         virtual void handleConsoleCommand(
             const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr)
             = 0;
+
+        virtual std::string formatResourceUsageStats() const = 0;
     };
 
 }

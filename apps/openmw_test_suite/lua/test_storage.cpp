@@ -10,14 +10,16 @@ namespace
     using namespace testing;
 
     template <typename T>
-    T get(sol::state& lua, std::string luaCode)
+    T get(sol::state_view& lua, std::string luaCode)
     {
         return lua.safe_script("return " + luaCode).get<T>();
     }
 
     TEST(LuaUtilStorageTest, Basic)
     {
-        sol::state mLua;
+        // Note: LuaUtil::Callback can be used only if Lua is initialized via LuaUtil::LuaState
+        LuaUtil::LuaState luaState{ nullptr, nullptr };
+        sol::state_view& mLua = luaState.sol();
         LuaUtil::LuaStorage::initLuaBindings(mLua);
         LuaUtil::LuaStorage storage(mLua);
 
@@ -30,7 +32,7 @@ namespace
                                                 callbackCalls.push_back(section + "_*");
                                         }),
             sol::table(mLua, sol::create) };
-        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = "fakeId";
+        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{};
 
         mLua["mutable"] = storage.getMutableSection("test");
         mLua["ro"] = storage.getReadOnlySection("test");

@@ -63,7 +63,7 @@ namespace MWLua
             = [](const LuaUtil::Callback& callback, sol::variadic_args va) { return callback.call(sol::as_args(va)); };
 
         auto initializer = [](sol::table hiddenData) {
-            LuaUtil::ScriptsContainer::ScriptId id = hiddenData[LuaUtil::ScriptsContainer::sScriptIdKey];
+            LuaUtil::ScriptId id = hiddenData[LuaUtil::ScriptsContainer::sScriptIdKey];
             return AsyncPackageId{ id.mContainer, id.mIndex, hiddenData };
         };
         return sol::make_object(context.mLua->sol(), initializer);

@@ -15,7 +15,7 @@ namespace
     using namespace TestingOpenMW;
 
     template <typename T>
-    T get(sol::state& lua, const std::string& luaCode)
+    T get(sol::state_view& lua, const std::string& luaCode)
     {
         return lua.safe_script("return " + luaCode).get<T>();
     }
@@ -82,9 +82,9 @@ you_have_arrows: "Arrows count: {count}"
 
     TEST_F(LuaL10nTest, L10n)
     {
-        internal::CaptureStdout();
         LuaUtil::LuaState lua{ mVFS.get(), &mCfg };
-        sol::state& l = lua.sol();
+        sol::state_view& l = lua.sol();
+        internal::CaptureStdout();
         l10n::Manager l10nManager(mVFS.get());
         l10nManager.setPreferredLocales({ "de", "en" });
         EXPECT_THAT(internal::GetCapturedStdout(), "Preferred locales: de en\n");
@@ -164,5 +164,4 @@ you_have_arrows: "Arrows count: {count}"
         l10nManager.setPreferredLocales({ "en" });
         EXPECT_EQ(get<std::string>(l, "t3('Hello {name}!', {name='World'})"), "Hallo World!");
     }
-
 }

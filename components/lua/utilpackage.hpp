@@ -34,8 +34,7 @@ namespace LuaUtil
         return { q };
     }
 
-    sol::table initUtilPackage(sol::state&);
-
+    sol::table initUtilPackage(lua_State*);
 }
 
 #endif // COMPONENTS_LUA_UTILPACKAGE_H

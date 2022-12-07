@@ -20,8 +20,9 @@ namespace MWLua
             saveLuaBinaryData(esm, event.mEventData);
     }
 
-    void loadEvents(sol::state& lua, ESM::ESMReader& esm, GlobalEventQueue& globalEvents, LocalEventQueue& localEvents,
-        const std::map<int, int>& contentFileMapping, const LuaUtil::UserdataSerializer* serializer)
+    void loadEvents(sol::state_view& lua, ESM::ESMReader& esm, GlobalEventQueue& globalEvents,
+        LocalEventQueue& localEvents, const std::map<int, int>& contentFileMapping,
+        const LuaUtil::UserdataSerializer* serializer)
     {
         while (esm.isNextSub("LUAE"))
         {

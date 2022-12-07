@@ -122,7 +122,8 @@ namespace MWLua
 
         bool isProcessingInputEvents() const { return mProcessingInputEvents; }
 
-        void reportStats(unsigned int frameNumber, osg::Stats& stats);
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+        std::string formatResourceUsageStats() const override;
 
     private:
         void initConfiguration();

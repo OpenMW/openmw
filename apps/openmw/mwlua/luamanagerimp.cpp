@@ -38,8 +38,18 @@
 namespace MWLua
 {
 
+    static LuaUtil::LuaStateSettings createLuaStateSettings()
+    {
+        if (!Settings::Manager::getBool("lua profiler", "Lua"))
+            LuaUtil::LuaState::disableProfiler();
+        return { .mInstructionLimit = Settings::Manager::getUInt64("instruction limit per call", "Lua"),
+            .mMemoryLimit = Settings::Manager::getUInt64("memory limit", "Lua"),
+            .mSmallAllocMaxSize = Settings::Manager::getUInt64("small alloc max size", "Lua"),
+            .mLogMemoryUsage = Settings::Manager::getBool("log memory usage", "Lua") };
+    }
+
     LuaManager::LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir)
-        : mLua(vfs, &mConfiguration)
+        : mLua(vfs, &mConfiguration, createLuaStateSettings())
         , mUiResourceManager(vfs)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
@@ -123,6 +133,10 @@ namespace MWLua
     void LuaManager::update()
     {
         static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
+        static const int gcStepCount = Settings::Manager::getInt("gc steps per frame", "Lua");
+        if (gcStepCount > 0)
+            lua_gc(mLua.sol(), LUA_GCSTEP, gcStepCount);
+
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
 
@@ -139,6 +153,10 @@ namespace MWLua
         }
 
         mWorldView.update();
+
+        mGlobalScripts.statsNextFrame();
+        for (LocalScripts* scripts : mActiveLocalScripts)
+            scripts->statsNextFrame();
 
         std::vector<GlobalEvent> globalEvents = std::move(mGlobalEvents);
         std::vector<LocalEvent> localEvents = std::move(mLocalEvents);
@@ -602,9 +620,123 @@ namespace MWLua
         mActionQueue.push_back(std::make_unique<FunctionAction>(&mLua, std::move(action), name));
     }
 
-    void LuaManager::reportStats(unsigned int frameNumber, osg::Stats& stats)
+    void LuaManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        const sol::state_view state(mLua.sol());
-        stats.setAttribute(frameNumber, "Lua UsedMemory", state.memory_used());
+        stats.setAttribute(frameNumber, "Lua UsedMemory", mLua.getTotalMemoryUsage());
+    }
+
+    std::string LuaManager::formatResourceUsageStats() const
+    {
+        if (!LuaUtil::LuaState::isProfilerEnabled())
+            return "Lua profiler is disabled";
+
+        std::stringstream out;
+
+        constexpr int nameW = 50;
+        constexpr int valueW = 12;
+
+        auto outMemSize = [&](int64_t bytes) {
+            constexpr int64_t limit = 10000;
+            out << std::right << std::setw(valueW - 3);
+            if (bytes < limit)
+                out << bytes << " B ";
+            else if (bytes < limit * 1024)
+                out << (bytes / 1024) << " KB";
+            else if (bytes < limit * 1024 * 1024)
+                out << (bytes / (1024 * 1024)) << " MB";
+            else
+                out << (bytes / (1024 * 1024 * 1024)) << " GB";
+        };
+
+        static const uint64_t smallAllocSize = Settings::Manager::getUInt64("small alloc max size", "Lua");
+        out << "Total memory usage:";
+        outMemSize(mLua.getTotalMemoryUsage());
+        out << "\n";
+        out << "small alloc max size = " << smallAllocSize << " (section [Lua] in settings.cfg)\n";
+        out << "Smaller values give more information for the profiler, but increase performance overhead.\n";
+        out << "  Memory allocations <= " << smallAllocSize << " bytes:";
+        outMemSize(mLua.getSmallAllocMemoryUsage());
+        out << " (not tracked)\n";
+        out << "  Memory allocations >  " << smallAllocSize << " bytes:";
+        outMemSize(mLua.getTotalMemoryUsage() - mLua.getSmallAllocMemoryUsage());
+        out << " (see the table below)\n\n";
+
+        using Stats = LuaUtil::ScriptsContainer::ScriptStats;
+
+        std::vector<Stats> activeStats;
+        mGlobalScripts.collectStats(activeStats);
+        for (LocalScripts* scripts : mActiveLocalScripts)
+            scripts->collectStats(activeStats);
+
+        std::vector<Stats> selectedStats;
+        MWWorld::Ptr selectedPtr = MWBase::Environment::get().getWindowManager()->getConsoleSelectedObject();
+        LocalScripts* selectedScripts = nullptr;
+        if (!selectedPtr.isEmpty())
+        {
+            selectedScripts = selectedPtr.getRefData().getLuaScripts();
+            if (selectedScripts)
+                selectedScripts->collectStats(selectedStats);
+            out << "Profiled object (selected in the in-game console): " << ptrToString(selectedPtr) << "\n";
+        }
+        else
+            out << "No selected object. Use the in-game console to select an object for detailed profile.\n";
+        out << "\n";
+
+        out << "Legend\n";
+        out << "  ops:        Averaged number of Lua instruction per frame;\n";
+        out << "  memory:     Aggregated size of Lua allocations > " << smallAllocSize << " bytes;\n";
+        out << "  [all]:      Sum over all instances of each script;\n";
+        out << "  [active]:   Sum over all active (i.e. currently in scene) instances of each script;\n";
+        out << "  [inactive]: Sum over all inactive instances of each script;\n";
+        out << "  [for selected object]: Only for the object that is selected in the console;\n";
+        out << "\n";
+
+        out << std::left;
+        out << " " << std::setw(nameW + 2) << "*** Resource usage per script";
+        out << std::right;
+        out << std::setw(valueW) << "ops";
+        out << std::setw(valueW) << "memory";
+        out << std::setw(valueW) << "memory";
+        out << std::setw(valueW) << "ops";
+        out << std::setw(valueW) << "memory";
+        out << "\n";
+        out << std::left << " " << std::setw(nameW + 2) << "[name]" << std::right;
+        out << std::setw(valueW) << "[all]";
+        out << std::setw(valueW) << "[active]";
+        out << std::setw(valueW) << "[inactive]";
+        out << std::setw(valueW * 2) << "[for selected object]";
+        out << "\n";
+
+        for (size_t i = 0; i < mConfiguration.size(); ++i)
+        {
+            bool isGlobal = mConfiguration[i].mFlags & ESM::LuaScriptCfg::sGlobal;
+
+            out << std::left;
+            out << " " << std::setw(nameW) << mConfiguration[i].mScriptPath;
+            if (mConfiguration[i].mScriptPath.size() > nameW)
+                out << "\n " << std::setw(nameW) << ""; // if path is too long, break line
+            out << std::right;
+            out << std::setw(valueW) << static_cast<int64_t>(activeStats[i].mAvgInstructionCount);
+            outMemSize(activeStats[i].mMemoryUsage);
+            outMemSize(mLua.getMemoryUsageByScriptIndex(i) - activeStats[i].mMemoryUsage);
+
+            if (isGlobal)
+                out << std::setw(valueW * 2) << "NA (global script)";
+            else if (selectedPtr.isEmpty())
+                out << std::setw(valueW * 2) << "NA (not selected) ";
+            else if (!selectedScripts || !selectedScripts->hasScript(i))
+            {
+                out << std::setw(valueW) << "-";
+                outMemSize(selectedStats[i].mMemoryUsage);
+            }
+            else
+            {
+                out << std::setw(valueW) << static_cast<int64_t>(selectedStats[i].mAvgInstructionCount);
+                outMemSize(selectedStats[i].mMemoryUsage);
+            }
+            out << "\n";
+        }
+
+        return out.str();
     }
 }

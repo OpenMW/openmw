@@ -2159,6 +2159,11 @@ namespace MWGui
         mConsole->setSelectedObject(object);
     }
 
+    MWWorld::Ptr WindowManager::getConsoleSelectedObject() const
+    {
+        return mConsole->getSelectedObject();
+    }
+
     void WindowManager::printToConsole(const std::string& msg, std::string_view color)
     {
         mConsole->print(msg, color);

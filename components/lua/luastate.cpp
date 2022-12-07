@@ -10,6 +10,8 @@
 #include <components/files/conversion.hpp>
 #include <components/vfs/manager.hpp>
 
+#include "scriptscontainer.hpp"
+
 namespace LuaUtil
 {
 
@@ -50,26 +52,141 @@ namespace LuaUtil
         "tonumber", "tostring", "type", "unpack", "xpcall", "rawequal", "rawget", "rawset", "setmetatable" };
     static const std::string safePackages[] = { "coroutine", "math", "string", "table" };
 
-    LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf)
-        : mConf(conf)
+    static constexpr int64_t countHookStep = 1000;
+
+    bool LuaState::sProfilerEnabled = true;
+
+    void LuaState::countHook(lua_State* L, lua_Debug* ar)
+    {
+        LuaState* self;
+        (void)lua_getallocf(L, reinterpret_cast<void**>(&self));
+        if (self->mActiveScriptIdStack.empty())
+            return;
+        const ScriptId& activeScript = self->mActiveScriptIdStack.back();
+        activeScript.mContainer->addInstructionCount(activeScript.mIndex, countHookStep);
+        self->mWatchdogInstructionCounter += countHookStep;
+        if (self->mSettings.mInstructionLimit > 0
+            && self->mWatchdogInstructionCounter > self->mSettings.mInstructionLimit)
+        {
+            lua_pushstring(L,
+                "Lua instruction count exceeded, probably an infinite loop in a script. "
+                "To change the limit set \"[Lua] instruction limit per call\" in settings.cfg");
+            lua_error(L);
+        }
+    }
+
+    void* LuaState::trackingAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
+    {
+        LuaState* self = static_cast<LuaState*>(ud);
+        const uint64_t smallAllocSize = self->mSettings.mSmallAllocMaxSize;
+        const uint64_t memoryLimit = self->mSettings.mMemoryLimit;
+
+        if (!ptr)
+            osize = 0;
+        int64_t smallAllocDelta = 0, bigAllocDelta = 0;
+        if (osize <= smallAllocSize)
+            smallAllocDelta -= osize;
+        else
+            bigAllocDelta -= osize;
+        if (nsize <= smallAllocSize)
+            smallAllocDelta += nsize;
+        else
+            bigAllocDelta += nsize;
+
+        if (bigAllocDelta > 0 && memoryLimit > 0 && self->mTotalMemoryUsage + nsize - osize > memoryLimit)
+        {
+            Log(Debug::Error) << "Lua realloc " << osize << "->" << nsize
+                              << " is blocked because Lua memory limit (configurable in settings.cfg) is exceeded";
+            return nullptr;
+        }
+        self->mTotalMemoryUsage += smallAllocDelta + bigAllocDelta;
+        self->mSmallAllocMemoryUsage += smallAllocDelta;
+
+        void* newPtr = nullptr;
+        if (nsize == 0)
+            free(ptr);
+        else
+            newPtr = realloc(ptr, nsize);
+
+        if (bigAllocDelta != 0)
+        {
+            auto it = osize > smallAllocSize ? self->mBigAllocOwners.find(ptr) : self->mBigAllocOwners.end();
+            ScriptId id;
+            if (it != self->mBigAllocOwners.end())
+            {
+                if (it->second.mContainer)
+                    id = ScriptId{ *it->second.mContainer, it->second.mScriptIndex };
+                if (ptr != newPtr || nsize <= smallAllocSize)
+                    self->mBigAllocOwners.erase(it);
+            }
+            else if (bigAllocDelta > 0)
+            {
+                if (!self->mActiveScriptIdStack.empty())
+                    id = self->mActiveScriptIdStack.back();
+                bigAllocDelta = nsize;
+            }
+            if (id.mContainer)
+            {
+                if (static_cast<size_t>(id.mIndex) >= self->mMemoryUsage.size())
+                    self->mMemoryUsage.resize(id.mIndex + 1);
+                self->mMemoryUsage[id.mIndex] += bigAllocDelta;
+                id.mContainer->addMemoryUsage(id.mIndex, bigAllocDelta);
+                if (newPtr && nsize > smallAllocSize)
+                    self->mBigAllocOwners.emplace(newPtr, AllocOwner{ id.mContainer->mThis, id.mIndex });
+            }
+        }
+
+        return newPtr;
+    }
+
+    lua_State* LuaState::createLuaRuntime(LuaState* luaState)
+    {
+        if (sProfilerEnabled)
+        {
+            Log(Debug::Info) << "Initializing LuaUtil::LuaState with profiler";
+            lua_State* L = lua_newstate(&trackingAllocator, luaState);
+            if (L)
+                return L;
+            else
+            {
+                sProfilerEnabled = false;
+                Log(Debug::Error)
+                    << "Failed to initialize LuaUtil::LuaState with custom allocator; disabling Lua profiler";
+            }
+        }
+        Log(Debug::Info) << "Initializing LuaUtil::LuaState without profiler";
+        lua_State* L = luaL_newstate();
+        if (!L)
+            throw std::runtime_error("Can't create Lua runtime");
+        return L;
+    }
+
+    LuaState::LuaState(const VFS::Manager* vfs, const ScriptsConfiguration* conf, const LuaStateSettings& settings)
+        : mSettings(settings)
+        , mLuaHolder(createLuaRuntime(this))
+        , mSol(mLuaHolder.get())
+        , mConf(conf)
         , mVFS(vfs)
     {
-        mLua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32, sol::lib::string,
+        if (sProfilerEnabled)
+            lua_sethook(mLuaHolder.get(), &countHook, LUA_MASKCOUNT, countHookStep);
+
+        mSol.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32, sol::lib::string,
             sol::lib::table, sol::lib::os, sol::lib::debug);
 
-        mLua["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
-        mLua["math"]["randomseed"] = [] {};
+        mSol["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
+        mSol["math"]["randomseed"] = [] {};
 
-        mLua["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
+        mSol["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
 
         // Some fixes for compatibility between different Lua versions
-        if (mLua["unpack"] == sol::nil)
-            mLua["unpack"] = mLua["table"]["unpack"];
-        else if (mLua["table"]["unpack"] == sol::nil)
-            mLua["table"]["unpack"] = mLua["unpack"];
+        if (mSol["unpack"] == sol::nil)
+            mSol["unpack"] = mSol["table"]["unpack"];
+        else if (mSol["table"]["unpack"] == sol::nil)
+            mSol["table"]["unpack"] = mSol["unpack"];
         if (LUA_VERSION_NUM <= 501)
         {
-            mLua.script(R"(
+            mSol.script(R"(
                 local _pairs = pairs
                 local _ipairs = ipairs
                 pairs = function(v) return (rawget(getmetatable(v) or {}, '__pairs') or _pairs)(v) end
@@ -77,7 +194,7 @@ namespace LuaUtil
             )");
         }
 
-        mLua.script(R"(
+        mSol.script(R"(
             local printToLog = function(...)
                 local strs = {}
                 for i = 1, select('#', ...) do
@@ -122,31 +239,24 @@ namespace LuaUtil
             end
         )");
 
-        mSandboxEnv = sol::table(mLua, sol::create);
-        mSandboxEnv["_VERSION"] = mLua["_VERSION"];
+        mSandboxEnv = sol::table(mSol, sol::create);
+        mSandboxEnv["_VERSION"] = mSol["_VERSION"];
         for (const std::string& s : safeFunctions)
         {
-            if (mLua[s] == sol::nil)
+            if (mSol[s] == sol::nil)
                 throw std::logic_error("Lua function not found: " + s);
-            mSandboxEnv[s] = mLua[s];
+            mSandboxEnv[s] = mSol[s];
         }
         for (const std::string& s : safePackages)
         {
-            if (mLua[s] == sol::nil)
+            if (mSol[s] == sol::nil)
                 throw std::logic_error("Lua package not found: " + s);
-            mCommonPackages[s] = mSandboxEnv[s] = makeReadOnly(mLua[s]);
+            mCommonPackages[s] = mSandboxEnv[s] = makeReadOnly(mSol[s]);
         }
-        mSandboxEnv["getmetatable"] = mLua["getSafeMetatable"];
+        mSandboxEnv["getmetatable"] = mSol["getSafeMetatable"];
         mCommonPackages["os"] = mSandboxEnv["os"]
-            = makeReadOnly(tableFromPairs<std::string_view, sol::function>({ { "date", mLua["os"]["date"] },
-                { "difftime", mLua["os"]["difftime"] }, { "time", mLua["os"]["time"] } }));
-    }
-
-    LuaState::~LuaState()
-    {
-        // Should be cleaned before destructing mLua.
-        mCommonPackages.clear();
-        mSandboxEnv = sol::nil;
+            = makeReadOnly(tableFromPairs<std::string_view, sol::function>({ { "date", mSol["os"]["date"] },
+                { "difftime", mSol["os"]["difftime"] }, { "time", mSol["os"]["time"] } }));
     }
 
     sol::table makeReadOnly(const sol::table& table, bool strictIndex)
@@ -190,19 +300,25 @@ namespace LuaUtil
     {
         sol::protected_function script = loadScriptAndCache(path);
 
-        sol::environment env(mLua, sol::create, mSandboxEnv);
+        sol::environment env(mSol, sol::create, mSandboxEnv);
         std::string envName = namePrefix + "[" + path + "]:";
-        env["print"] = mLua["printGen"](envName);
+        env["print"] = mSol["printGen"](envName);
         env["_G"] = env;
         env[sol::metatable_key]["__metatable"] = false;
 
-        auto maybeRunLoader = [&hiddenData](const sol::object& package) -> sol::object {
+        ScriptId scriptId;
+        if (hiddenData.is<sol::table>())
+            scriptId = hiddenData.as<sol::table>()
+                           .get<sol::optional<ScriptId>>(ScriptsContainer::sScriptIdKey)
+                           .value_or(ScriptId{});
+
+        auto maybeRunLoader = [&hiddenData, scriptId](const sol::object& package) -> sol::object {
             if (package.is<sol::function>())
-                return call(package.as<sol::function>(), hiddenData);
+                return call(scriptId, package.as<sol::function>(), hiddenData);
             else
                 return package;
         };
-        sol::table loaded(mLua, sol::create);
+        sol::table loaded(mSol, sol::create);
         for (const auto& [key, value] : mCommonPackages)
             loaded[key] = maybeRunLoader(value);
         for (const auto& [key, value] : packages)
@@ -219,13 +335,13 @@ namespace LuaUtil
         };
 
         sol::set_environment(env, script);
-        return call(script);
+        return call(scriptId, script);
     }
 
     sol::environment LuaState::newInternalLibEnvironment()
     {
-        sol::environment env(mLua, sol::create, mSandboxEnv);
-        sol::table loaded(mLua, sol::create);
+        sol::environment env(mSol, sol::create, mSandboxEnv);
+        sol::table loaded(mSol, sol::create);
         for (const std::string& s : safePackages)
             loaded[s] = static_cast<sol::object>(mSandboxEnv[s]);
         env["require"] = [this, loaded, env](const std::string& module) mutable {
@@ -233,7 +349,7 @@ namespace LuaUtil
                 return loaded[module];
             sol::protected_function initializer = loadInternalLib(module);
             sol::set_environment(env, initializer);
-            loaded[module] = call(initializer, module);
+            loaded[module] = call({}, initializer, module);
             return loaded[module];
         };
         return env;
@@ -251,7 +367,7 @@ namespace LuaUtil
     {
         auto iter = mCompiledScripts.find(path);
         if (iter != mCompiledScripts.end())
-            return mLua.load(iter->second.as_string_view(), path, sol::load_mode::binary);
+            return mSol.load(iter->second.as_string_view(), path, sol::load_mode::binary);
         sol::function res = loadFromVFS(path);
         mCompiledScripts[path] = res.dump();
         return res;
@@ -260,7 +376,7 @@ namespace LuaUtil
     sol::function LuaState::loadFromVFS(const std::string& path)
     {
         std::string fileContent(std::istreambuf_iterator<char>(*mVFS->get(path)), {});
-        sol::load_result res = mLua.load(fileContent, path, sol::load_mode::text);
+        sol::load_result res = mSol.load(fileContent, path, sol::load_mode::text);
         if (!res.valid())
             throw std::runtime_error("Lua error: " + res.get<std::string>());
         return res;
@@ -269,7 +385,7 @@ namespace LuaUtil
     sol::function LuaState::loadInternalLib(std::string_view libName)
     {
         const auto path = packageNameToPath(libName, mLibSearchPaths);
-        sol::load_result res = mLua.load_file(Files::pathToUnicodeString(path), sol::load_mode::text);
+        sol::load_result res = mSol.load_file(Files::pathToUnicodeString(path), sol::load_mode::text);
         if (!res.valid())
             throw std::runtime_error("Lua error: " + res.get<std::string>());
         return res;

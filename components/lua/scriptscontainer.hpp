@@ -69,11 +69,6 @@ namespace LuaUtil
         // Present in mHiddenData even after removal of the script from ScriptsContainer.
         constexpr static std::string_view sScriptDebugNameKey = "_name";
 
-        struct ScriptId
-        {
-            ScriptsContainer* mContainer;
-            int mIndex; // index in LuaUtil::ScriptsConfiguration
-        };
         using TimerType = ESM::LuaTimer::Type;
 
         // `namePrefix` is a common prefix for all scripts in the container. Used in logs for error messages and `print`
@@ -151,6 +146,16 @@ namespace LuaUtil
         // because they can not be stored in saves. I.e. loading a saved game will not fully restore the state.
         void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
 
+        // Informs that new frame is started. Needed to track Lua instruction count per frame.
+        void statsNextFrame();
+
+        struct ScriptStats
+        {
+            float mAvgInstructionCount = 0; // averaged number of Lua instructions per frame
+            int64_t mMemoryUsage = 0; // bytes
+        };
+        void collectStats(std::vector<ScriptStats>& stats) const;
+
     protected:
         struct Handler
         {
@@ -178,7 +183,7 @@ namespace LuaUtil
             {
                 try
                 {
-                    LuaUtil::call(handler.mFn, args...);
+                    LuaUtil::call({ this, handler.mScriptId }, handler.mFn, args...);
                 }
                 catch (std::exception& e)
                 {
@@ -206,6 +211,7 @@ namespace LuaUtil
             std::map<std::string, sol::main_protected_function> mRegisteredCallbacks;
             std::map<int64_t, sol::main_protected_function> mTemporaryCallbacks;
             std::string mPath;
+            ScriptStats mStats;
         };
         struct Timer
         {
@@ -219,6 +225,10 @@ namespace LuaUtil
             bool operator<(const Timer& t) const { return mTime > t.mTime; }
         };
         using EventHandlerList = std::vector<Handler>;
+
+        friend class LuaState;
+        void addInstructionCount(int scriptId, int64_t instructionCount);
+        void addMemoryUsage(int scriptId, int64_t memoryDelta);
 
         // Add to container without calling onInit/onLoad.
         bool addScript(int scriptId, std::optional<sol::function>& onInit, std::optional<sol::function>& onLoad);
@@ -252,6 +262,9 @@ namespace LuaUtil
         std::vector<Timer> mSimulationTimersQueue;
         std::vector<Timer> mGameTimersQueue;
         int64_t mTemporaryCallbackCounter = 0;
+
+        std::map<int, int64_t> mRemovedScriptsMemoryUsage;
+        std::shared_ptr<ScriptsContainer*> mThis; // used by LuaState to track ownership of memory allocations
     };
 
     // Wrapper for a Lua function.
@@ -267,8 +280,9 @@ namespace LuaUtil
         template <typename... Args>
         sol::object call(Args&&... args) const
         {
-            if (isValid())
-                return LuaUtil::call(mFunc, std::forward<Args>(args)...);
+            sol::optional<ScriptId> scriptId = mHiddenData[ScriptsContainer::sScriptIdKey];
+            if (scriptId.has_value())
+                return LuaUtil::call(scriptId.value(), mFunc, std::forward<Args>(args)...);
             else
                 Log(Debug::Debug) << "Ignored callback to the removed script "
                                   << mHiddenData.get<std::string>(ScriptsContainer::sScriptDebugNameKey);

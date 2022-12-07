@@ -15,41 +15,40 @@ namespace
     {
         void SetUp() override
         {
-            mLua.open_libraries(sol::lib::coroutine);
-            mLua["callback"] = [&](sol::protected_function fn) -> LuaUtil::Callback {
-                sol::table hiddenData(mLua, sol::create);
-                hiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = sol::table(mLua, sol::create);
+            mLua.sol()["callback"] = [&](sol::protected_function fn) -> LuaUtil::Callback {
+                sol::table hiddenData(mLua.sol(), sol::create);
+                hiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{};
                 return LuaUtil::Callback{ std::move(fn), hiddenData };
             };
-            mLua["pass"] = [this](LuaUtil::Callback callback) { mCb = callback; };
+            mLua.sol()["pass"] = [this](LuaUtil::Callback callback) { mCb = callback; };
         }
 
-        sol::state mLua;
+        LuaUtil::LuaState mLua{ nullptr, nullptr };
         LuaUtil::Callback mCb;
     };
 
     TEST_F(LuaCoroutineCallbackTest, CoroutineCallbacks)
     {
         internal::CaptureStdout();
-        mLua.safe_script(R"X(
+        mLua.sol().safe_script(R"X(
             local s = 'test'
             coroutine.wrap(function()
                 pass(callback(function(v) print(s) end))
             end)()
         )X");
-        mLua.collect_garbage();
+        mLua.sol().collect_garbage();
         mCb.call();
         EXPECT_THAT(internal::GetCapturedStdout(), "test\n");
     }
 
     TEST_F(LuaCoroutineCallbackTest, ErrorInCoroutineCallbacks)
     {
-        mLua.safe_script(R"X(
+        mLua.sol().safe_script(R"X(
             coroutine.wrap(function()
                 pass(callback(function() error('COROUTINE CALLBACK') end))
             end)()
         )X");
-        mLua.collect_garbage();
+        mLua.sol().collect_garbage();
         EXPECT_ERROR(mCb.call(), "COROUTINE CALLBACK");
     }
 }

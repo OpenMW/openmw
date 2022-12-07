@@ -8,6 +8,9 @@
 #include <components/debug/debugging.hpp>
 #include <components/settings/settings.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
+
 #include <mutex>
 
 #ifndef BT_NO_PROFILE
@@ -105,6 +108,12 @@ namespace MWGui
         mLogView
             = itemLV->createWidgetReal<MyGUI::EditBox>("LogEdit", MyGUI::FloatCoord(0, 0, 1, 1), MyGUI::Align::Stretch);
         mLogView->setEditReadOnly(true);
+
+        MyGUI::TabItem* itemLuaProfiler = mTabControl->addItem("Lua Profiler");
+        itemLuaProfiler->setCaptionWithReplacing(" #{DebugMenu:LuaProfiler} ");
+        mLuaProfiler = itemLuaProfiler->createWidgetReal<MyGUI::EditBox>(
+            "LogEdit", MyGUI::FloatCoord(0, 0, 1, 1), MyGUI::Align::Stretch);
+        mLuaProfiler->setEditReadOnly(true);
 
 #ifndef BT_NO_PROFILE
         MyGUI::TabItem* item = mTabControl->addItem("Physics Profiler");
@@ -206,6 +215,16 @@ namespace MWGui
             mLogView->setVScrollPosition(scrollPos);
     }
 
+    void DebugWindow::updateLuaProfile()
+    {
+        if (mLuaProfiler->isTextSelection())
+            return;
+
+        size_t previousPos = mLuaProfiler->getVScrollPosition();
+        mLuaProfiler->setCaption(MWBase::Environment::get().getLuaManager()->formatResourceUsageStats());
+        mLuaProfiler->setVScrollPosition(std::min(previousPos, mLuaProfiler->getVScrollRange() - 1));
+    }
+
     void DebugWindow::updateBulletProfile()
     {
 #ifndef BT_NO_PROFILE
@@ -229,9 +248,18 @@ namespace MWGui
             return;
         timer = 0.25;
 
-        if (mTabControl->getIndexSelected() == 0)
-            updateLogView();
-        else
-            updateBulletProfile();
+        switch (mTabControl->getIndexSelected())
+        {
+            case 0:
+                updateLogView();
+                break;
+            case 1:
+                updateLuaProfile();
+                break;
+            case 2:
+                updateBulletProfile();
+                break;
+            default:;
+        }
     }
 }
