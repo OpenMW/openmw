@@ -125,6 +125,20 @@ This is how Morrowind behaves.
 
 This setting can be toggled in Advanced tab of the launcher.
 
+classic calm spells behavior
+----------------------------------------
+
+:Type:		boolean
+:Range: 	True/False
+:Default:	True
+
+If this setting is true, Calm spells will take their target out of combat every frame.
+This means that a Calm spell of any magnitude will always take actors out of combat for the entirety of its duration.
+This is how Morrowind behaves without the Morrowind Code Patch. If this setting is off,
+Calm spells will only take their target out of combat once. Allowing them to re-engage if the spell was not sufficiently strong.
+
+This setting can be toggled in Advanced tab of the launcher.
+
 use magic item animations
 -------------------------
 
