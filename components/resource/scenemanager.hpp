@@ -145,6 +145,7 @@ namespace Resource
         SceneUtil::LightingMethod getLightingMethod() const;
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
+        void setAdjustCoverageForAlphaTest(bool adjustCoverage);
 
         void setShaderPath(const std::filesystem::path& path);
 
@@ -240,6 +241,7 @@ namespace Resource
         SceneUtil::LightingMethod mLightingMethod;
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mConvertAlphaTestToAlphaToCoverage;
+        bool mAdjustCoverageForAlphaTest;
         bool mSupportsNormalsRT;
         std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
         bool mSoftParticles = false;

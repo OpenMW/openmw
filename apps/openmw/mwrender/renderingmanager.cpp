@@ -388,6 +388,8 @@ namespace MWRender
         resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(
             Settings::Manager::getBool("antialias alpha test", "Shaders")
             && Settings::Manager::getInt("antialiasing", "Video") > 1);
+        resourceSystem->getSceneManager()->setAdjustCoverageForAlphaTest(
+            Settings::Manager::getBool("adjust coverage for alpha test", "Shaders"));
 
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this
         // depends on support for various OpenGL extensions.

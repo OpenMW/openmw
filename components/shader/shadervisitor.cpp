@@ -196,6 +196,7 @@ namespace Shader
         , mAutoUseSpecularMaps(false)
         , mApplyLightingToEnvMaps(false)
         , mConvertAlphaTestToAlphaToCoverage(false)
+        , mAdjustCoverageForAlphaTest(false)
         , mSupportsNormalsRT(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
@@ -656,7 +657,7 @@ namespace Shader
             // Adjusting coverage isn't safe with blending on as blending requires the alpha to be intact.
             // Maybe we could also somehow (e.g. userdata) detect when the diffuse map has coverage-preserving mip maps
             // in the future
-            if (!reqs.mAlphaBlend)
+            if (mAdjustCoverageForAlphaTest && !reqs.mAlphaBlend)
                 defineMap["adjustCoverage"] = "1";
 
             // Preventing alpha tested stuff shrinking as lower mip levels are used requires knowing the texture size
@@ -975,6 +976,11 @@ namespace Shader
     void ShaderVisitor::setConvertAlphaTestToAlphaToCoverage(bool convert)
     {
         mConvertAlphaTestToAlphaToCoverage = convert;
+    }
+
+    void ShaderVisitor::setAdjustCoverageForAlphaTest(bool adjustCoverage)
+    {
+        mAdjustCoverageForAlphaTest = adjustCoverage;
     }
 
     ReinstateRemovedStateVisitor::ReinstateRemovedStateVisitor(bool allowedToModifyStateSets)
