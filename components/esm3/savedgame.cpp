@@ -6,7 +6,7 @@
 namespace ESM
 {
 
-    int SavedGame::sCurrentFormat = 21;
+    int SavedGame::sCurrentFormat = 22;
 
     void SavedGame::load(ESMReader& esm)
     {

@@ -792,7 +792,7 @@ namespace MWGui
 
         int incr = next ? 1 : -1;
         bool found = false;
-        const ESM::RefId* lastId = nullptr;
+        const ESM::RefId* lastId = &ESM::RefId::sEmpty;
         if (selected != -1)
             lastId = &model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;
