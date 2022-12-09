@@ -455,7 +455,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
+              <item row="3" column="0">
                <widget class="QCheckBox" name="softParticlesCheckBox">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables soft particles for particle effects. This technique softens the intersection between individual particles and other opaque geometry by blending between them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -465,6 +465,16 @@
                 </property>
                </widget>
               </item>
+              <item row="3" column="1">
+                <widget class="QCheckBox" name="adjustCoverageForAlphaTestCheckBox">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate coverage-preserving mipmaps to prevent alpha-tested meshes shrinking as they get further away. Will cause meshes whose textures have coverage-preserving mipmaps to grow, though, so refer to mod installation instructions for how to set this.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Adjust coverage for alpha test</string>
+                 </property>
+                </widget>
+               </item>
              </layout>
             </widget>
            </item>

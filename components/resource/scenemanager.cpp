@@ -346,6 +346,7 @@ namespace Resource
         , mApplyLightingToEnvMaps(false)
         , mLightingMethod(SceneUtil::LightingMethod::FFP)
         , mConvertAlphaTestToAlphaToCoverage(false)
+        , mAdjustCoverageForAlphaTest(false)
         , mSupportsNormalsRT(false)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
@@ -454,6 +455,11 @@ namespace Resource
     void SceneManager::setConvertAlphaTestToAlphaToCoverage(bool convert)
     {
         mConvertAlphaTestToAlphaToCoverage = convert;
+    }
+
+    void SceneManager::setAdjustCoverageForAlphaTest(bool adjustCoverage)
+    {
+        mAdjustCoverageForAlphaTest = adjustCoverage;
     }
 
     void SceneManager::setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong)
@@ -1046,6 +1052,7 @@ namespace Resource
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
+        shaderVisitor->setAdjustCoverageForAlphaTest(mAdjustCoverageForAlphaTest);
         shaderVisitor->setSupportsNormalsRT(mSupportsNormalsRT);
         return shaderVisitor;
     }

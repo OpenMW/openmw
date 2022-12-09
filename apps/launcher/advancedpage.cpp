@@ -127,6 +127,7 @@ bool Launcher::AdvancedPage::loadSettings()
         if (Settings::Manager::getInt("antialiasing", "Video") == 0) {
             antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
         }
+        loadSettingBool(adjustCoverageForAlphaTestCheckBox, "adjust coverage for alpha test", "Shaders");
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
@@ -281,6 +282,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(radialFogCheckBox, "radial fog", "Fog");
         saveSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
         saveSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
+        saveSettingBool(adjustCoverageForAlphaTestCheckBox, "adjust coverage for alpha test", "Shaders");
         saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
         saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");

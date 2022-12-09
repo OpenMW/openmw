@@ -412,6 +412,7 @@ namespace MWRender
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
         resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
+        resourceSystem->getSceneManager()->setAdjustCoverageForAlphaTest(Settings::Manager::getBool("adjust coverage for alpha test", "Shaders"));
 
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this depends on support for various OpenGL extensions.
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(lightingMethod == SceneUtil::LightingMethod::FFP);
