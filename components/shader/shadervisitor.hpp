@@ -47,6 +47,7 @@ namespace Shader
         void setApplyLightingToEnvMaps(bool apply);
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
+        void setAdjustCoverageForAlphaTest(bool adjustCoverage);
 
         void setSupportsNormalsRT(bool supports) { mSupportsNormalsRT = supports; }
 
@@ -74,6 +75,7 @@ namespace Shader
         bool mApplyLightingToEnvMaps;
 
         bool mConvertAlphaTestToAlphaToCoverage;
+        bool mAdjustCoverageForAlphaTest;
 
         bool mSupportsNormalsRT;
 

@@ -259,6 +259,19 @@ Convert the alpha test (cutout/punchthrough alpha) to alpha-to-coverage when :re
 This allows MSAA to work with alpha-tested meshes, producing better-looking edges without pixelation.
 When MSAA is off, this setting will have no visible effect, but might have a performance cost.
 
+
+adjust coverage for alpha test
+------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Attempt to simulate coverage-preserving mipmaps in textures created without them which are used for alpha testing anyway.
+This will somewhat mitigate these objects appearing to shrink as they get further from the camera, but isn't perfect.
+Better results can be achieved by generating more appropriate mipmaps in the first place, but if this workaround is used with such textures, affected objects will appear to grow as they get further from the camera.
+It is recommended that mod authors specify how this setting should be set, and mod users follow their advice.
+
 soft particles
 --------------
 
