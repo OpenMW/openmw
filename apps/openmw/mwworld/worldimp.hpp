@@ -90,7 +90,7 @@ namespace MWWorld
         LocalScripts mLocalScripts;
         MWWorld::Globals mGlobalVariables;
         Misc::Rng::Generator mPrng;
-        WorldModel mCells;
+        WorldModel mWorldModel;
         std::vector<int> mESMVersions; // the versions of esm files
 
         std::string mCurrentWorldSpace;
@@ -188,7 +188,7 @@ namespace MWWorld
         MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id);
 
     public:
-        WorldModel& getWorldModel() { return mCells; }
+        WorldModel& getWorldModel() { return mWorldModel; }
         Scene& getWorldScene() { return *mWorldScene; }
 
         // FIXME

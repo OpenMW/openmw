@@ -160,7 +160,7 @@ namespace MWWorld
         const std::filesystem::path& userDataPath)
         : mResourceSystem(resourceSystem)
         , mLocalScripts(mStore)
-        , mCells(mStore, mReaders)
+        , mWorldModel(mStore, mReaders)
         , mSky(true)
         , mGodMode(false)
         , mScriptsEnabled(true)
@@ -328,7 +328,7 @@ namespace MWWorld
             mPlayer->set(mStore.get<ESM::NPC>().find("player"));
         }
 
-        mCells.clear();
+        mWorldModel.clear();
 
         mDoorStates.clear();
 
@@ -343,7 +343,7 @@ namespace MWWorld
 
     int World::countSavedGameRecords() const
     {
-        return mCells.countSavedGameRecords() + mStore.countSavedGameRecords()
+        return mWorldModel.countSavedGameRecords() + mStore.countSavedGameRecords()
             + mGlobalVariables.countSavedGameRecords() + mProjectileManager->countSavedGameRecords()
             + 1 // player record
             + 1 // weather record
@@ -355,7 +355,7 @@ namespace MWWorld
 
     int World::countSavedGameCells() const
     {
-        return mCells.countSavedGameRecords();
+        return mWorldModel.countSavedGameRecords();
     }
 
     void World::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -375,7 +375,7 @@ namespace MWWorld
         mStore.write(writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                         // references to custom made records will be recognized
         mPlayer->write(writer, progress);
-        mCells.write(writer, progress);
+        mWorldModel.write(writer, progress);
         mGlobalVariables.write(writer, progress);
         mWeatherManager->write(writer, progress);
         mProjectileManager->write(writer, progress);
@@ -419,7 +419,8 @@ namespace MWWorld
                 break;
             default:
                 if (!mStore.readRecord(reader, type) && !mGlobalVariables.readRecord(reader, type)
-                    && !mWeatherManager->readRecord(reader, type) && !mCells.readRecord(reader, type, contentFileMap)
+                    && !mWeatherManager->readRecord(reader, type)
+                    && !mWorldModel.readRecord(reader, type, contentFileMap)
                     && !mProjectileManager->readRecord(reader, type))
                 {
                     throw std::runtime_error("unknown record in saved game");
@@ -695,7 +696,7 @@ namespace MWWorld
         {
             // TODO: caching still doesn't work efficiently here (only works for the one CellStore that the reference is
             // in)
-            Ptr ptr = mCells.getPtr(lowerCaseName, *cellstore, false);
+            Ptr ptr = mWorldModel.getPtr(lowerCaseName, *cellstore, false);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -703,7 +704,7 @@ namespace MWWorld
 
         if (!activeOnly)
         {
-            ret = mCells.getPtr(lowerCaseName);
+            ret = mWorldModel.getPtr(lowerCaseName);
             if (!ret.isEmpty())
                 return ret;
         }
@@ -745,7 +746,7 @@ namespace MWWorld
 
     Ptr World::searchPtrViaRefNum(const std::string& id, const ESM::RefNum& refNum)
     {
-        return mCells.getPtr(id, refNum);
+        return mWorldModel.getPtr(id, refNum);
     }
 
     struct FindContainerVisitor
@@ -1262,7 +1263,7 @@ namespace MWWorld
         const osg::Vec2i index = positionToCellIndex(position.x(), position.y());
 
         CellStore* cell = ptr.getCell();
-        CellStore* newCell = mCells.getExterior(index.x(), index.y());
+        CellStore* newCell = mWorldModel.getExterior(index.x(), index.y());
         bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
             && mWorldScene->isCellActive(*newCell);
 
@@ -2200,7 +2201,7 @@ namespace MWWorld
         if (cell->isExterior())
         {
             const osg::Vec2i index = positionToCellIndex(pos.pos[0], pos.pos[1]);
-            cell = mCells.getExterior(index.x(), index.y());
+            cell = mWorldModel.getExterior(index.x(), index.y());
         }
 
         MWWorld::Ptr dropped = object.getClass().copyToCell(object, *cell, pos, count);
@@ -2789,7 +2790,7 @@ namespace MWWorld
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
 
-        MWWorld::CellStore* cellStore = mCells.getInterior(name);
+        MWWorld::CellStore* cellStore = mWorldModel.getInterior(name);
 
         if (!cellStore)
             return false;
@@ -2820,12 +2821,12 @@ namespace MWWorld
             {
                 ESM::Position doorDest = door->getDoorDest();
                 const osg::Vec2i index = positionToCellIndex(doorDest.pos[0], doorDest.pos[1]);
-                source = mCells.getExterior(index.x(), index.y());
+                source = mWorldModel.getExterior(index.x(), index.y());
             }
             // door to interior
             else
             {
-                source = mCells.getInterior(door->getDestCell());
+                source = mWorldModel.getInterior(door->getDestCell());
             }
             if (source)
             {
@@ -2872,7 +2873,7 @@ namespace MWWorld
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
-                    ext = mCells.getExterior(x, y)->getCell();
+                    ext = mWorldModel.getExterior(x, y)->getCell();
                 // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell
                 // instead of comma separated coordinates
             }
@@ -3291,7 +3292,7 @@ namespace MWWorld
             nextCells.clear();
             for (const std::string& currentCell : currentCells)
             {
-                MWWorld::CellStore* next = mCells.getInterior(currentCell);
+                MWWorld::CellStore* next = mWorldModel.getInterior(currentCell);
                 if (!next)
                     continue;
 
@@ -3345,7 +3346,7 @@ namespace MWWorld
             nextCells.clear();
             for (const std::string& cell : currentCells)
             {
-                MWWorld::CellStore* next = mCells.getInterior(cell);
+                MWWorld::CellStore* next = mWorldModel.getInterior(cell);
                 checkedCells.insert(cell);
                 if (!next)
                     continue;
@@ -3385,7 +3386,7 @@ namespace MWWorld
         float closestDistance = std::numeric_limits<float>::max();
 
         std::vector<MWWorld::Ptr> markers;
-        mCells.getExteriorPtrs(id, markers);
+        mWorldModel.getExteriorPtrs(id, markers);
         for (const Ptr& marker : markers)
         {
             osg::Vec3f markerPos = marker.getRefData().getPosition().asVec3();
@@ -3402,7 +3403,7 @@ namespace MWWorld
 
     void World::rest(double hours)
     {
-        mCells.rest(hours);
+        mWorldModel.rest(hours);
     }
 
     void World::rechargeItems(double duration, bool activeOnly)
@@ -3418,7 +3419,7 @@ namespace MWWorld
             }
         }
         else
-            mCells.recharge(duration);
+            mWorldModel.recharge(duration);
     }
 
     void World::teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id)
@@ -3643,7 +3644,7 @@ namespace MWWorld
             Log(Debug::Warning) << "Failed to confiscate items: prison marker not linked to prison interior";
             return;
         }
-        MWWorld::CellStore* prison = mCells.getInterior(prisonName);
+        MWWorld::CellStore* prison = mWorldModel.getInterior(prisonName);
         if (!prison)
         {
             Log(Debug::Warning) << "Failed to confiscate items: failed to load cell " << prisonName;
@@ -3958,7 +3959,7 @@ namespace MWWorld
 
     std::vector<MWWorld::Ptr> World::getAll(const std::string& id)
     {
-        return mCells.getAll(id);
+        return mWorldModel.getAll(id);
     }
 
     Misc::Rng::Generator& World::getPrng()

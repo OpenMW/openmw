@@ -410,18 +410,18 @@ void MWWorld::WorldModel::write(ESM::ESMWriter& writer, Loading::Listener& progr
 struct GetCellStoreCallback : public MWWorld::CellStore::GetCellStoreCallback
 {
 public:
-    GetCellStoreCallback(MWWorld::WorldModel& cells)
-        : mCells(cells)
+    GetCellStoreCallback(MWWorld::WorldModel& worldModel)
+        : mWorldModel(worldModel)
     {
     }
 
-    MWWorld::WorldModel& mCells;
+    MWWorld::WorldModel& mWorldModel;
 
     MWWorld::CellStore* getCellStore(const ESM::CellId& cellId) override
     {
         try
         {
-            return mCells.getCell(cellId);
+            return mWorldModel.getCell(cellId);
         }
         catch (...)
         {
