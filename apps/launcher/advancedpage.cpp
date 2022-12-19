@@ -95,6 +95,7 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
         loadSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
         loadSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
+        loadSettingBool(classicCalmSpellsCheckBox, "classic calm spells behavior", "Game");
         loadSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
         loadSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
         loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
@@ -258,6 +259,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
         saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
         saveSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
+        saveSettingBool(classicCalmSpellsCheckBox, "classic calm spells behavior", "Game");
         saveSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
         saveSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
         saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
