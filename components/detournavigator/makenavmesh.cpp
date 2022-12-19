@@ -7,12 +7,15 @@
 #include "navmeshtilescache.hpp"
 #include "offmeshconnection.hpp"
 #include "preparednavmeshdata.hpp"
+#include "recastcontext.hpp"
 #include "recastmesh.hpp"
 #include "recastmeshbuilder.hpp"
 #include "recastparams.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "sharednavmesh.hpp"
+
+#include "components/debug/debuglog.hpp"
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
@@ -138,8 +141,8 @@ namespace DetourNavigator
             return result;
         }
 
-        void initHeightfield(rcContext& context, const TilePosition& tilePosition, float minZ, float maxZ,
-            const RecastSettings& settings, rcHeightfield& solid)
+        [[nodiscard]] bool initHeightfield(RecastContext& context, const TilePosition& tilePosition, float minZ,
+            float maxZ, const RecastSettings& settings, rcHeightfield& solid)
         {
             const int size = settings.mTileSize + settings.mBorderSize * 2;
             const int width = size;
@@ -150,14 +153,37 @@ namespace DetourNavigator
             const osg::Vec3f bmin(shift.x() - halfBoundsSize, minZ, shift.y() - halfBoundsSize);
             const osg::Vec3f bmax(shift.x() + halfBoundsSize, maxZ, shift.y() + halfBoundsSize);
 
-            const auto result = rcCreateHeightfield(
-                &context, solid, width, height, bmin.ptr(), bmax.ptr(), settings.mCellSize, settings.mCellHeight);
+            if (width < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix() << "Invalid width to init heightfield: " << width;
+                return false;
+            }
 
-            if (!result)
-                throw NavigatorException("Failed to create heightfield for navmesh");
+            if (height < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix() << "Invalid height to init heightfield: " << height;
+                return false;
+            }
+
+            if (settings.mCellHeight <= 0)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid cell height to init heightfield: " << settings.mCellHeight;
+                return false;
+            }
+
+            if (settings.mCellSize <= 0)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid cell size to init heightfield: " << settings.mCellSize;
+                return false;
+            }
+
+            return rcCreateHeightfield(
+                &context, solid, width, height, bmin.ptr(), bmax.ptr(), settings.mCellSize, settings.mCellHeight);
         }
 
-        bool rasterizeTriangles(rcContext& context, const Mesh& mesh, const RecastSettings& settings,
+        [[nodiscard]] bool rasterizeTriangles(RecastContext& context, const Mesh& mesh, const RecastSettings& settings,
             const RecastParams& params, rcHeightfield& solid)
         {
             std::vector<unsigned char> areas(mesh.getAreaTypes().begin(), mesh.getAreaTypes().end());
@@ -178,7 +204,7 @@ namespace DetourNavigator
                 mesh.getIndices().data(), areas.data(), static_cast<int>(areas.size()), solid, params.mWalkableClimb);
         }
 
-        bool rasterizeTriangles(rcContext& context, const Rectangle& rectangle, AreaType areaType,
+        [[nodiscard]] bool rasterizeTriangles(RecastContext& context, const Rectangle& rectangle, AreaType areaType,
             const RecastParams& params, rcHeightfield& solid)
         {
             const std::array vertices{
@@ -199,9 +225,9 @@ namespace DetourNavigator
                 indices.data(), areas.data(), static_cast<int>(areas.size()), solid, params.mWalkableClimb);
         }
 
-        bool rasterizeTriangles(rcContext& context, float agentHalfExtentsZ, const std::vector<CellWater>& water,
-            const RecastSettings& settings, const RecastParams& params, const TileBounds& realTileBounds,
-            rcHeightfield& solid)
+        [[nodiscard]] bool rasterizeTriangles(RecastContext& context, float agentHalfExtentsZ,
+            const std::vector<CellWater>& water, const RecastSettings& settings, const RecastParams& params,
+            const TileBounds& realTileBounds, rcHeightfield& solid)
         {
             for (const CellWater& cellWater : water)
             {
@@ -219,7 +245,7 @@ namespace DetourNavigator
             return true;
         }
 
-        bool rasterizeTriangles(rcContext& context, const TileBounds& realTileBounds,
+        [[nodiscard]] bool rasterizeTriangles(RecastContext& context, const TileBounds& realTileBounds,
             const std::vector<FlatHeightfield>& heightfields, const RecastSettings& settings,
             const RecastParams& params, rcHeightfield& solid)
         {
@@ -237,7 +263,7 @@ namespace DetourNavigator
             return true;
         }
 
-        bool rasterizeTriangles(rcContext& context, const std::vector<Heightfield>& heightfields,
+        [[nodiscard]] bool rasterizeTriangles(RecastContext& context, const std::vector<Heightfield>& heightfields,
             const RecastSettings& settings, const RecastParams& params, rcHeightfield& solid)
         {
             for (const Heightfield& heightfield : heightfields)
@@ -249,9 +275,9 @@ namespace DetourNavigator
             return true;
         }
 
-        bool rasterizeTriangles(rcContext& context, const TilePosition& tilePosition, float agentHalfExtentsZ,
-            const RecastMesh& recastMesh, const RecastSettings& settings, const RecastParams& params,
-            rcHeightfield& solid)
+        [[nodiscard]] bool rasterizeTriangles(RecastContext& context, const TilePosition& tilePosition,
+            float agentHalfExtentsZ, const RecastMesh& recastMesh, const RecastSettings& settings,
+            const RecastParams& params, rcHeightfield& solid)
         {
             const TileBounds realTileBounds = makeRealTileBoundsWithBorder(settings, tilePosition);
             return rasterizeTriangles(context, recastMesh.getMesh(), settings, params, solid)
@@ -262,66 +288,119 @@ namespace DetourNavigator
                     context, realTileBounds, recastMesh.getFlatHeightfields(), settings, params, solid);
         }
 
-        void buildCompactHeightfield(rcContext& context, const int walkableHeight, const int walkableClimb,
-            rcHeightfield& solid, rcCompactHeightfield& compact)
+        [[nodiscard]] bool buildCompactHeightfield(RecastContext& context, const int walkableHeight,
+            const int walkableClimb, rcHeightfield& solid, rcCompactHeightfield& compact)
         {
-            const auto result = rcBuildCompactHeightfield(&context, walkableHeight, walkableClimb, solid, compact);
+            if (walkableHeight < 3)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid walkableHeight to build compact heightfield: " << walkableHeight;
+                return false;
+            }
 
-            if (!result)
-                throw NavigatorException("Failed to build compact heightfield for navmesh");
+            if (walkableClimb < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid walkableClimb to build compact heightfield: " << walkableClimb;
+                return false;
+            }
+
+            return rcBuildCompactHeightfield(&context, walkableHeight, walkableClimb, solid, compact);
         }
 
-        void erodeWalkableArea(rcContext& context, int walkableRadius, rcCompactHeightfield& compact)
+        [[nodiscard]] bool erodeWalkableArea(RecastContext& context, int walkableRadius, rcCompactHeightfield& compact)
         {
-            const auto result = rcErodeWalkableArea(&context, walkableRadius, compact);
+            if (walkableRadius <= 0 || 255 <= walkableRadius)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid walkableRadius to erode walkable area: " << walkableRadius;
+                return false;
+            }
 
-            if (!result)
-                throw NavigatorException("Failed to erode walkable area for navmesh");
+            return rcErodeWalkableArea(&context, walkableRadius, compact);
         }
 
-        void buildDistanceField(rcContext& context, rcCompactHeightfield& compact)
+        [[nodiscard]] bool buildDistanceField(RecastContext& context, rcCompactHeightfield& compact)
         {
-            const auto result = rcBuildDistanceField(&context, compact);
-
-            if (!result)
-                throw NavigatorException("Failed to build distance field for navmesh");
+            return rcBuildDistanceField(&context, compact);
         }
 
-        void buildRegions(rcContext& context, rcCompactHeightfield& compact, const int borderSize,
+        [[nodiscard]] bool buildRegions(RecastContext& context, rcCompactHeightfield& compact, const int borderSize,
             const int minRegionArea, const int mergeRegionArea)
         {
-            const auto result = rcBuildRegions(&context, compact, borderSize, minRegionArea, mergeRegionArea);
+            if (borderSize < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix() << "Invalid borderSize to build regions: " << borderSize;
+                return false;
+            }
 
-            if (!result)
-                throw NavigatorException("Failed to build distance field for navmesh");
+            if (minRegionArea < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid minRegionArea to build regions: " << minRegionArea;
+                return false;
+            }
+
+            if (mergeRegionArea < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid mergeRegionArea to build regions: " << mergeRegionArea;
+                return false;
+            }
+
+            return rcBuildRegions(&context, compact, borderSize, minRegionArea, mergeRegionArea);
         }
 
-        void buildContours(rcContext& context, rcCompactHeightfield& compact, const float maxError,
+        [[nodiscard]] bool buildContours(RecastContext& context, rcCompactHeightfield& compact, const float maxError,
             const int maxEdgeLen, rcContourSet& contourSet, const int buildFlags = RC_CONTOUR_TESS_WALL_EDGES)
         {
-            const auto result = rcBuildContours(&context, compact, maxError, maxEdgeLen, contourSet, buildFlags);
+            if (maxError < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix() << "Invalid maxError to build contours: " << maxError;
+                return false;
+            }
 
-            if (!result)
-                throw NavigatorException("Failed to build contours for navmesh");
+            if (maxEdgeLen < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix() << "Invalid maxEdgeLen to build contours: " << maxEdgeLen;
+                return false;
+            }
+
+            return rcBuildContours(&context, compact, maxError, maxEdgeLen, contourSet, buildFlags);
         }
 
-        void buildPolyMesh(
-            rcContext& context, rcContourSet& contourSet, const int maxVertsPerPoly, rcPolyMesh& polyMesh)
+        [[nodiscard]] bool buildPolyMesh(
+            RecastContext& context, rcContourSet& contourSet, const int maxVertsPerPoly, rcPolyMesh& polyMesh)
         {
-            const auto result = rcBuildPolyMesh(&context, contourSet, maxVertsPerPoly, polyMesh);
+            if (maxVertsPerPoly < 3)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid maxVertsPerPoly to build poly mesh: " << maxVertsPerPoly;
+                return false;
+            }
 
-            if (!result)
-                throw NavigatorException("Failed to build poly mesh for navmesh");
+            return rcBuildPolyMesh(&context, contourSet, maxVertsPerPoly, polyMesh);
         }
 
-        void buildPolyMeshDetail(rcContext& context, const rcPolyMesh& polyMesh, const rcCompactHeightfield& compact,
-            const float sampleDist, const float sampleMaxError, rcPolyMeshDetail& polyMeshDetail)
+        [[nodiscard]] bool buildPolyMeshDetail(RecastContext& context, const rcPolyMesh& polyMesh,
+            const rcCompactHeightfield& compact, const float sampleDist, const float sampleMaxError,
+            rcPolyMeshDetail& polyMeshDetail)
         {
-            const auto result
-                = rcBuildPolyMeshDetail(&context, polyMesh, compact, sampleDist, sampleMaxError, polyMeshDetail);
+            if (sampleDist < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid sampleDist to build poly mesh detail: " << sampleDist;
+                return false;
+            }
 
-            if (!result)
-                throw NavigatorException("Failed to build detail poly mesh for navmesh");
+            if (sampleMaxError < 0)
+            {
+                Log(Debug::Warning) << context.getPrefix()
+                                    << "Invalid sampleMaxError to build poly mesh detail: " << sampleMaxError;
+                return false;
+            }
+
+            return rcBuildPolyMeshDetail(&context, polyMesh, compact, sampleDist, sampleMaxError, polyMeshDetail);
         }
 
         void setPolyMeshFlags(rcPolyMesh& polyMesh)
@@ -330,25 +409,36 @@ namespace DetourNavigator
                 polyMesh.flags[i] = getFlag(static_cast<AreaType>(polyMesh.areas[i]));
         }
 
-        bool fillPolyMesh(rcContext& context, const RecastSettings& settings, const RecastParams& params,
-            rcHeightfield& solid, rcPolyMesh& polyMesh, rcPolyMeshDetail& polyMeshDetail)
+        [[nodiscard]] bool fillPolyMesh(RecastContext& context, const RecastSettings& settings,
+            const RecastParams& params, rcHeightfield& solid, rcPolyMesh& polyMesh, rcPolyMeshDetail& polyMeshDetail)
         {
             rcCompactHeightfield compact;
-            buildCompactHeightfield(context, params.mWalkableHeight, params.mWalkableClimb, solid, compact);
+            if (!buildCompactHeightfield(context, params.mWalkableHeight, params.mWalkableClimb, solid, compact))
+                return false;
 
-            erodeWalkableArea(context, params.mWalkableRadius, compact);
-            buildDistanceField(context, compact);
-            buildRegions(context, compact, settings.mBorderSize, settings.mRegionMinArea, settings.mRegionMergeArea);
+            if (!erodeWalkableArea(context, params.mWalkableRadius, compact))
+                return false;
+
+            if (!buildDistanceField(context, compact))
+                return false;
+
+            if (!buildRegions(
+                    context, compact, settings.mBorderSize, settings.mRegionMinArea, settings.mRegionMergeArea))
+                return false;
 
             rcContourSet contourSet;
-            buildContours(context, compact, settings.mMaxSimplificationError, params.mMaxEdgeLen, contourSet);
+            if (!buildContours(context, compact, settings.mMaxSimplificationError, params.mMaxEdgeLen, contourSet))
+                return false;
 
             if (contourSet.nconts == 0)
                 return false;
 
-            buildPolyMesh(context, contourSet, settings.mMaxVertsPerPoly, polyMesh);
+            if (!buildPolyMesh(context, contourSet, settings.mMaxVertsPerPoly, polyMesh))
+                return false;
 
-            buildPolyMeshDetail(context, polyMesh, compact, params.mSampleDist, params.mSampleMaxError, polyMeshDetail);
+            if (!buildPolyMeshDetail(
+                    context, polyMesh, compact, params.mSampleDist, params.mSampleMaxError, polyMeshDetail))
+                return false;
 
             setPolyMeshFlags(polyMesh);
 
@@ -410,13 +500,14 @@ namespace DetourNavigator
     std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
         const TilePosition& tilePosition, const AgentBounds& agentBounds, const RecastSettings& settings)
     {
-        rcContext context;
+        RecastContext context(tilePosition, agentBounds);
 
         const auto [minZ, maxZ] = getBoundsByZ(recastMesh, agentBounds.mHalfExtents.z(), settings);
 
         rcHeightfield solid;
-        initHeightfield(context, tilePosition, toNavMeshCoordinates(settings, minZ),
-            toNavMeshCoordinates(settings, maxZ), settings, solid);
+        if (!initHeightfield(context, tilePosition, toNavMeshCoordinates(settings, minZ),
+                toNavMeshCoordinates(settings, maxZ), settings, solid))
+            return nullptr;
 
         const RecastParams params = makeRecastParams(settings, agentBounds);
 
