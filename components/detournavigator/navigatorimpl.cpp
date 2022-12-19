@@ -18,7 +18,8 @@ namespace DetourNavigator
 
     void NavigatorImpl::addAgent(const AgentBounds& agentBounds)
     {
-        if(agentBounds.mHalfExtents.length2() <= 0)
+        if (agentBounds.mHalfExtents.x() == 0.f || agentBounds.mHalfExtents.y() == 0.f
+            || agentBounds.mHalfExtents.z() == 0.f)
             return;
         ++mAgents[agentBounds];
         mNavMeshManager.addAgent(agentBounds);
