@@ -8,10 +8,10 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 
-#include "../mwworld/cells.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "player.hpp"
 
@@ -43,7 +43,7 @@ namespace MWWorld
     void ActionTeleport::teleport(const Ptr& actor)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        MWWorld::Cells* worldModel = MWBase::Environment::get().getWorldModel();
+        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         actor.getClass().getCreatureStats(actor).land(actor == world->getPlayerPtr());
         if (actor == world->getPlayerPtr())
         {

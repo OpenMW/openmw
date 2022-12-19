@@ -8,10 +8,10 @@
 
 #include "../mwclass/container.hpp"
 
-#include "../mwworld/cells.hpp"
 #include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 namespace MWLua
 {
@@ -127,25 +127,25 @@ namespace MWLua
     // sections.
     MWWorld::CellStore* WorldView::findCell(const std::string& name, osg::Vec3f position)
     {
-        MWWorld::Cells* cells = MWBase::Environment::get().getWorldModel();
+        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         bool exterior = name.empty() || MWBase::Environment::get().getWorld()->getExterior(name);
         if (exterior)
         {
             const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(position.x(), position.y());
-            return cells->getExterior(cellIndex.x(), cellIndex.y());
+            return worldModel->getExterior(cellIndex.x(), cellIndex.y());
         }
         else
-            return cells->getInterior(name);
+            return worldModel->getInterior(name);
     }
 
     MWWorld::CellStore* WorldView::findNamedCell(const std::string& name)
     {
-        MWWorld::Cells* cells = MWBase::Environment::get().getWorldModel();
+        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         const ESM::Cell* esmCell = MWBase::Environment::get().getWorld()->getExterior(name);
         if (esmCell)
-            return cells->getExterior(esmCell->getGridX(), esmCell->getGridY());
+            return worldModel->getExterior(esmCell->getGridX(), esmCell->getGridY());
         else
-            return cells->getInterior(name);
+            return worldModel->getInterior(name);
     }
 
     MWWorld::CellStore* WorldView::findExteriorCell(int x, int y)

@@ -10,7 +10,6 @@
 
 #include "../mwbase/world.hpp"
 
-#include "cells.hpp"
 #include "contentloader.hpp"
 #include "esmstore.hpp"
 #include "globals.hpp"
@@ -19,6 +18,7 @@
 #include "ptr.hpp"
 #include "scene.hpp"
 #include "timestamp.hpp"
+#include "worldmodel.hpp"
 
 namespace osg
 {
@@ -90,7 +90,7 @@ namespace MWWorld
         LocalScripts mLocalScripts;
         MWWorld::Globals mGlobalVariables;
         Misc::Rng::Generator mPrng;
-        Cells mCells;
+        WorldModel mWorldModel;
         std::vector<int> mESMVersions; // the versions of esm files
 
         std::string mCurrentWorldSpace;
@@ -188,7 +188,7 @@ namespace MWWorld
         MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, std::string_view id);
 
     public:
-        Cells& getWorldModel() { return mCells; }
+        WorldModel& getWorldModel() { return mWorldModel; }
         Scene& getWorldScene() { return *mWorldScene; }
 
         // FIXME
