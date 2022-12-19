@@ -199,10 +199,10 @@ std::string Misc::ResourceHelpers::getLODMeshName(
                 return "";
         }
     }();
-    for (char l = lod; l >= 0; --l)
+    for (int l = lod; l >= 0; --l)
     {
         std::stringstream patern;
-        patern << distantMeshPattern << "_" << int(l);
+        patern << distantMeshPattern << "_" << l;
         std::string const meshName = getBestLODMeshName(resPath, vfs, patern.str());
         if (meshName != resPath)
             return meshName;
