@@ -315,6 +315,7 @@ add_component_dir(detournavigator
     collisionshapetype
     stats
     commulativeaabb
+    recastcontext
     )
 
 add_component_dir(loadinglistener

@@ -1203,4 +1203,29 @@ namespace
 
         EXPECT_EQ(mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion(), version);
     }
+
+    TEST_F(DetourNavigatorNavigatorTest, add_agent_with_zero_coordinate_should_not_have_nav_mesh)
+    {
+        constexpr std::array<float, 5 * 5> heightfieldData{ {
+            0, 0, 0, 0, 0, // row 0
+            0, -25, -25, -25, -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
+        } };
+        const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
+        const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
+
+        const AgentBounds agentBounds{ CollisionShapeType::RotatingBox, { 0, 1, 1 } };
+        mNavigator->addAgent(agentBounds);
+        auto updateGuard = mNavigator->makeUpdateGuard();
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, updateGuard.get());
+        mNavigator->update(mPlayerPosition, updateGuard.get());
+        updateGuard.reset();
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
+
+        EXPECT_EQ(
+            findPath(*mNavigator, agentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+            Status::StartPolygonNotFound);
+    }
 }
