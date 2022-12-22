@@ -1,3 +1,24 @@
+# Debug window
+
+DebugWindow: "Debug"
+LogViewer: "Protokollansicht"
+LuaProfiler: "Lua-Profiler"
+PhysicsProfiler: "Physik-Profiler"
+
+
+# Messages
+
+BuildingNavigationMesh: "Baue Navigationsgitter"
+
+
+# Save game menu
+
+SelectCharacter: "Charakterauswahl..."
+TimePlayed: "Spielzeit"
+
+
+# Settings menu
+
 ActorsProcessingRange: "Akteur-Verarbeitungsreichweite"
 Anisotropy: "Anisotropie"
 CameraSensitivity: "Kameraempfindlichkeit"

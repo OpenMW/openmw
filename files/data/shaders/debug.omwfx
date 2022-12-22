@@ -1,7 +1,7 @@
 uniform_bool uDisplayDepth {
-    header = "#{BuiltInShaders:DebugHeaderDepth}";
+    header = "#{OMWShaders:DebugHeaderDepth}";
     default = true;
-    display_name = "#{BuiltInShaders:DisplayDepthName}";
+    display_name = "#{OMWShaders:DisplayDepthName}";
 }
 
 uniform_float uDepthFactor {
@@ -9,14 +9,14 @@ uniform_float uDepthFactor {
     min = 0.01;
     max = 20.0;
     default = 1.0;
-    display_name = "#{BuiltInShaders:DisplayDepthFactorName}";
-    description = "#{BuiltInShaders:DisplayDepthFactorDescription}";
+    display_name = "#{OMWShaders:DisplayDepthFactorName}";
+    description = "#{OMWShaders:DisplayDepthFactorDescription}";
 }
 
 uniform_bool uDisplayNormals {
-    header = "#{BuiltInShaders:DebugHeaderNormals}";
+    header = "#{OMWShaders:DebugHeaderNormals}";
     default = true;
-    display_name = "#{BuiltInShaders:DisplayNormalsName}";
+    display_name = "#{OMWShaders:DisplayNormalsName}";
 }
 
 fragment main {
@@ -38,7 +38,7 @@ fragment main {
 
 technique {
     passes = main;
-    description = "#{BuiltInShaders:DebugDescription}";
+    description = "#{OMWShaders:DebugDescription}";
     author = "OpenMW";
     version = "1.0";
     pass_normals = true;

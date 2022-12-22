@@ -1,3 +1,23 @@
+# Debug window
+
+DebugWindow: "Felsökning"
+LogViewer: "Loggvisare"
+PhysicsProfiler: "Fysikprofilerare"
+
+
+# Messages
+
+BuildingNavigationMesh: "Bygger navigeringsmesh"
+
+
+# Save game menu
+
+SelectCharacter: "Välj spelfigur..."
+TimePlayed: "Speltid"
+
+
+# Settings menu
+
 ActorsProcessingRange: "Processavstånd för figurer"
 Anisotropy: "Anisotropi"
 CameraSensitivity: "Kamerakänslighet"

@@ -59,7 +59,7 @@
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 22 22" name="Reset">
                     <UserString key="HStretch" value="false"/>
                     <UserString key="VStretch" value="false"/>
-                    <Property key="Caption" value="#{PostProcessing:ShaderResetUniform}"/>
+                    <Property key="Caption" value="#{OMWShaders:ShaderResetUniform}"/>
                 </Widget>
                 <Widget type="Widget" skin="BlackBG" position="0 0 225 22" name="Client">
                     <UserString key="HStretch" value="false"/>

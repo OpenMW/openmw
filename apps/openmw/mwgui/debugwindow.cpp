@@ -104,20 +104,20 @@ namespace MWGui
         // - Shader editor
 
         MyGUI::TabItem* itemLV = mTabControl->addItem("Log Viewer");
-        itemLV->setCaptionWithReplacing(" #{DebugMenu:LogViewer} ");
+        itemLV->setCaptionWithReplacing(" #{OMWEngine:LogViewer} ");
         mLogView
             = itemLV->createWidgetReal<MyGUI::EditBox>("LogEdit", MyGUI::FloatCoord(0, 0, 1, 1), MyGUI::Align::Stretch);
         mLogView->setEditReadOnly(true);
 
         MyGUI::TabItem* itemLuaProfiler = mTabControl->addItem("Lua Profiler");
-        itemLuaProfiler->setCaptionWithReplacing(" #{DebugMenu:LuaProfiler} ");
+        itemLuaProfiler->setCaptionWithReplacing(" #{OMWEngine:LuaProfiler} ");
         mLuaProfiler = itemLuaProfiler->createWidgetReal<MyGUI::EditBox>(
             "LogEdit", MyGUI::FloatCoord(0, 0, 1, 1), MyGUI::Align::Stretch);
         mLuaProfiler->setEditReadOnly(true);
 
 #ifndef BT_NO_PROFILE
         MyGUI::TabItem* item = mTabControl->addItem("Physics Profiler");
-        item->setCaptionWithReplacing(" #{DebugMenu:PhysicsProfiler} ");
+        item->setCaptionWithReplacing(" #{OMWEngine:PhysicsProfiler} ");
         mBulletProfilerEdit
             = item->createWidgetReal<MyGUI::EditBox>("LogEdit", MyGUI::FloatCoord(0, 0, 1, 1), MyGUI::Align::Stretch);
 #else
