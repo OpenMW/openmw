@@ -3401,7 +3401,7 @@ namespace MWWorld
 
     void World::rest(double hours)
     {
-        mWorldModel.rest(hours);
+        mWorldModel.forEachLoadedCellStore([hours](CellStore& store) { store.rest(hours); });
     }
 
     void World::rechargeItems(double duration, bool activeOnly)
@@ -3417,7 +3417,7 @@ namespace MWWorld
             }
         }
         else
-            mWorldModel.recharge(duration);
+            mWorldModel.forEachLoadedCellStore([duration](CellStore& store) { store.recharge(duration); });
     }
 
     void World::teleportToClosestMarker(const MWWorld::Ptr& ptr, const ESM::RefId& id)

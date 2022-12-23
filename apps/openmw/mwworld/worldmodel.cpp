@@ -212,32 +212,6 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(const ESM::RefId& name)
     return &result->second;
 }
 
-void MWWorld::WorldModel::rest(double hours)
-{
-    for (auto& interior : mInteriors)
-    {
-        interior.second.rest(hours);
-    }
-
-    for (auto& exterior : mExteriors)
-    {
-        exterior.second.rest(hours);
-    }
-}
-
-void MWWorld::WorldModel::recharge(float duration)
-{
-    for (auto& interior : mInteriors)
-    {
-        interior.second.recharge(duration);
-    }
-
-    for (auto& exterior : mExteriors)
-    {
-        exterior.second.recharge(duration);
-    }
-}
-
 MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::CellId& id)
 {
     if (id.mPaged)

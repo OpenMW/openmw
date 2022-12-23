@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "cellstore.hpp"
 #include "ptr.hpp"
 
 namespace ESM
@@ -82,8 +83,14 @@ namespace MWWorld
 
         Ptr getPtr(const ESM::RefId& id, const ESM::RefNum& refNum);
 
-        void rest(double hours);
-        void recharge(float duration);
+        template <typename Fn>
+        void forEachLoadedCellStore(Fn&& fn)
+        {
+            for (auto& [_, store] : mInteriors)
+                fn(store);
+            for (auto& [_, store] : mExteriors)
+                fn(store);
+        }
 
         /// Get all Ptrs referencing \a name in exterior cells
         /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.
