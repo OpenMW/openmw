@@ -55,10 +55,10 @@ namespace MWLua
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
         mLua.addInternalLibSearchPath(libsDir);
 
-        mGlobalSerializer = createUserdataSerializer(false, mWorldView.getObjectRegistry());
-        mLocalSerializer = createUserdataSerializer(true, mWorldView.getObjectRegistry());
-        mGlobalLoader = createUserdataSerializer(false, mWorldView.getObjectRegistry(), &mContentFileMapping);
-        mLocalLoader = createUserdataSerializer(true, mWorldView.getObjectRegistry(), &mContentFileMapping);
+        mGlobalSerializer = createUserdataSerializer(false);
+        mLocalSerializer = createUserdataSerializer(true);
+        mGlobalLoader = createUserdataSerializer(false, &mContentFileMapping);
+        mLocalLoader = createUserdataSerializer(true, &mContentFileMapping);
 
         mGlobalScripts.setSerializer(mGlobalSerializer.get());
     }
@@ -141,7 +141,6 @@ namespace MWLua
             return; // The game is not started yet.
 
         float frameDuration = MWBase::Environment::get().getFrameDuration();
-        ObjectRegistry* objectRegistry = mWorldView.getObjectRegistry();
 
         MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (!(getId(mPlayer) == getId(newPlayerPtr)))
@@ -149,7 +148,7 @@ namespace MWLua
         if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
         {
             mPlayer = newPlayerPtr; // player was moved to another cell, update ptr in registry
-            objectRegistry->registerPtr(mPlayer);
+            MWBase::Environment::get().getWorldModel()->registerPtr(mPlayer);
         }
 
         mWorldView.update();
@@ -179,7 +178,7 @@ namespace MWLua
             mGlobalScripts.receiveEvent(e.mEventName, e.mEventData);
         for (LocalEvent& e : localEvents)
         {
-            LObject obj(e.mDest, objectRegistry);
+            LObject obj(e.mDest);
             LocalScripts* scripts = obj.isValid() ? obj.ptr().getRefData().getLuaScripts() : nullptr;
             if (scripts)
                 scripts->receiveEvent(e.mEventName, e.mEventData);
@@ -196,7 +195,7 @@ namespace MWLua
         // Engine handlers in local scripts
         for (const LocalEngineEvent& e : mLocalEngineEvents)
         {
-            LObject obj(e.mDest, objectRegistry);
+            LObject obj(e.mDest);
             if (!obj.isValid())
             {
                 if (luaDebug)
@@ -220,7 +219,7 @@ namespace MWLua
         if (mPlayerChanged)
         {
             mPlayerChanged = false;
-            mGlobalScripts.playerAdded(GObject(getId(mPlayer), objectRegistry));
+            mGlobalScripts.playerAdded(GObject(getId(mPlayer)));
         }
         if (mNewGameStarted)
         {
@@ -230,7 +229,7 @@ namespace MWLua
 
         for (ObjectId id : mObjectAddedEvents)
         {
-            GObject obj(id, objectRegistry);
+            GObject obj(id);
             if (obj.isValid())
             {
                 mGlobalScripts.objectActive(obj);
@@ -378,32 +377,20 @@ namespace MWLua
         if (localScripts)
         {
             mActiveLocalScripts.erase(localScripts);
-            if (!mWorldView.getObjectRegistry()->getPtr(getId(ptr), true).isEmpty())
+            if (!MWBase::Environment::get().getWorldModel()->getPtr(getId(ptr)).isEmpty())
                 mLocalEngineEvents.push_back({ getId(ptr), LocalScripts::OnInactive{} });
         }
     }
 
-    void LuaManager::registerObject(const MWWorld::Ptr& ptr)
-    {
-        mWorldView.getObjectRegistry()->registerPtr(ptr);
-    }
-
-    void LuaManager::deregisterObject(const MWWorld::Ptr& ptr)
-    {
-        mWorldView.getObjectRegistry()->deregisterPtr(ptr);
-    }
-
     void LuaManager::itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor)
     {
-        mWorldView.getObjectRegistry()->registerPtr(consumable);
-        mLocalEngineEvents.push_back(
-            { getId(actor), LocalScripts::OnConsume{ LObject(getId(consumable), mWorldView.getObjectRegistry()) } });
+        MWBase::Environment::get().getWorldModel()->registerPtr(consumable);
+        mLocalEngineEvents.push_back({ getId(actor), LocalScripts::OnConsume{ LObject(getId(consumable)) } });
     }
 
     void LuaManager::objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor)
     {
-        mLocalEngineEvents.push_back(
-            { getId(object), LocalScripts::OnActivated{ LObject(getId(actor), mWorldView.getObjectRegistry()) } });
+        mLocalEngineEvents.push_back({ getId(object), LocalScripts::OnActivated{ LObject(getId(actor)) } });
     }
 
     MWBase::LuaManager::ActorControls* LuaManager::getActorControls(const MWWorld::Ptr& ptr) const
@@ -437,7 +424,7 @@ namespace MWLua
             throw std::runtime_error("Lua scripts on static objects are not allowed");
         else if (type == ESM::REC_INTERNAL_PLAYER)
         {
-            scripts = std::make_shared<PlayerScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
+            scripts = std::make_shared<PlayerScripts>(&mLua, LObject(getId(ptr)));
             scripts->setAutoStartConf(mConfiguration.getPlayerConf());
             scripts->addPackage("openmw.ui", mUserInterfacePackage);
             scripts->addPackage("openmw.camera", mCameraPackage);
@@ -448,7 +435,7 @@ namespace MWLua
         }
         else
         {
-            scripts = std::make_shared<LocalScripts>(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
+            scripts = std::make_shared<LocalScripts>(&mLua, LObject(getId(ptr)));
             if (!autoStartConf.has_value())
                 autoStartConf = mConfiguration.getLocalConf(type, ptr.getCellRef().getRefId(), getId(ptr));
             scripts->setAutoStartConf(std::move(*autoStartConf));
@@ -507,7 +494,7 @@ namespace MWLua
             return;
         }
 
-        mWorldView.getObjectRegistry()->registerPtr(ptr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
         LocalScripts* scripts = createLocalScripts(ptr);
 
         scripts->setSerializer(mLocalSerializer.get());
@@ -515,7 +502,7 @@ namespace MWLua
         scripts->load(data);
 
         // LiveCellRef is usually copied after loading, so this Ptr will become invalid and should be deregistered.
-        mWorldView.getObjectRegistry()->deregisterPtr(ptr);
+        MWBase::Environment::get().getWorldModel()->deregisterPtr(ptr);
     }
 
     void LuaManager::reloadAllScripts()
@@ -536,7 +523,7 @@ namespace MWLua
             mGlobalScripts.load(data);
         }
 
-        for (const auto& [id, ptr] : mWorldView.getObjectRegistry()->mObjectMapping)
+        for (const auto& [id, ptr] : MWBase::Environment::get().getWorldModel()->getAllPtrs())
         { // Reload local scripts
             LocalScripts* scripts = ptr.getRefData().getLuaScripts();
             if (scripts == nullptr)
@@ -564,7 +551,7 @@ namespace MWLua
         }
         sol::object selected = sol::nil;
         if (!selectedPtr.isEmpty())
-            selected = sol::make_object(mLua.sol(), LObject(getId(selectedPtr), mWorldView.getObjectRegistry()));
+            selected = sol::make_object(mLua.sol(), LObject(getId(selectedPtr)));
         if (!playerScripts->consoleCommand(consoleMode, command, selected))
             MWBase::Environment::get().getWindowManager()->printToConsole(
                 "No Lua handlers for console\n", MWBase::WindowManager::sConsoleColor_Error);

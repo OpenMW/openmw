@@ -92,14 +92,13 @@ namespace MWLua
                     return "Unknown";
             }
         });
-        aiPackage["target"]
-            = sol::readonly_property([worldView = context.mWorldView](const AiPackage& p) -> sol::optional<LObject> {
-                  MWWorld::Ptr target = p.getTarget();
-                  if (target.isEmpty())
-                      return sol::nullopt;
-                  else
-                      return LObject(getId(target), worldView->getObjectRegistry());
-              });
+        aiPackage["target"] = sol::readonly_property([](const AiPackage& p) -> sol::optional<LObject> {
+            MWWorld::Ptr target = p.getTarget();
+            if (target.isEmpty())
+                return sol::nullopt;
+            else
+                return LObject(getId(target));
+        });
         aiPackage["sideWithTarget"] = sol::readonly_property([](const AiPackage& p) { return p.sideWithTarget(); });
         aiPackage["destPosition"] = sol::readonly_property([](const AiPackage& p) { return p.getDestination(); });
 

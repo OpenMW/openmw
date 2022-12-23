@@ -317,6 +317,7 @@ namespace MWWorld
         mLocalScripts.clear();
 
         mWorldScene->clear();
+        mWorldModel.clear();
 
         mStore.clearDynamic();
 
@@ -327,8 +328,6 @@ namespace MWWorld
             mPlayer->getPlayer().getRefData() = RefData();
             mPlayer->set(mStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("Player")));
         }
-
-        mWorldModel.clear();
 
         mDoorStates.clear();
 
@@ -816,7 +815,7 @@ namespace MWWorld
 
     void World::enable(const Ptr& reference)
     {
-        MWBase::Environment::get().getLuaManager()->registerObject(reference);
+        MWBase::Environment::get().getWorldModel()->registerPtr(reference);
 
         if (!reference.isInCell())
             return;
@@ -868,7 +867,7 @@ namespace MWWorld
         if (reference == getPlayerPtr())
             throw std::runtime_error("can not disable player object");
 
-        MWBase::Environment::get().getLuaManager()->deregisterObject(reference);
+        MWBase::Environment::get().getWorldModel()->deregisterPtr(reference);
         reference.getRefData().disable();
 
         if (reference.getCellRef().getRefNum().hasContentFile())

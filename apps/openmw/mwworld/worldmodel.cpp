@@ -85,10 +85,34 @@ MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
 
 void MWWorld::WorldModel::clear()
 {
+    mPtrIndex.clear();
+    mPtrIndexUpdateCounter = 0;
+    mLastGeneratedRefnum.unset();
     mInteriors.clear();
     mExteriors.clear();
     std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair(ESM::RefId::sEmpty, (MWWorld::CellStore*)nullptr));
     mIdCacheIndex = 0;
+}
+
+void MWWorld::WorldModel::registerPtr(const MWWorld::Ptr& ptr)
+{
+    mPtrIndex[ptr.getCellRef().getOrAssignRefNum(mLastGeneratedRefnum)] = ptr;
+    mPtrIndexUpdateCounter++;
+}
+
+void MWWorld::WorldModel::deregisterPtr(const MWWorld::Ptr& ptr)
+{
+    mPtrIndex.erase(ptr.getCellRef().getRefNum());
+    mPtrIndexUpdateCounter++;
+}
+
+MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefNum& refNum) const
+{
+    auto it = mPtrIndex.find(refNum);
+    if (it != mPtrIndex.end())
+        return it->second;
+    else
+        return MWWorld::Ptr();
 }
 
 MWWorld::Ptr MWWorld::WorldModel::getPtrAndCache(const ESM::RefId& name, CellStore& cellStore)

@@ -18,7 +18,6 @@ namespace MWLua
 
     void WorldView::update()
     {
-        mObjectRegistry.update();
         mActivatorsInScene.updateList();
         mActorsInScene.updateList();
         mContainersInScene.updateList();
@@ -29,7 +28,6 @@ namespace MWLua
 
     void WorldView::clear()
     {
-        mObjectRegistry.clear();
         mActivatorsInScene.clear();
         mActorsInScene.clear();
         mContainersInScene.clear();
@@ -59,7 +57,7 @@ namespace MWLua
 
     void WorldView::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
-        mObjectRegistry.registerPtr(ptr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
         ObjectGroup* group = chooseGroup(ptr);
         if (group)
             addToGroup(*group, ptr);
@@ -84,13 +82,13 @@ namespace MWLua
         esm.getHNT(mSimulationTime, "LUAW");
         ObjectId lastAssignedId;
         lastAssignedId.load(esm, true);
-        mObjectRegistry.setLastAssignedId(lastAssignedId);
+        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastAssignedId);
     }
 
     void WorldView::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT("LUAW", mSimulationTime);
-        mObjectRegistry.getLastAssignedId().save(esm, true);
+        MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum().save(esm, true);
     }
 
     void WorldView::ObjectGroup::updateList()

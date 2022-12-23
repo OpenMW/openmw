@@ -53,6 +53,7 @@
 #include "containerstore.hpp"
 #include "esmstore.hpp"
 #include "ptr.hpp"
+#include "worldmodel.hpp"
 
 namespace
 {
@@ -266,7 +267,7 @@ namespace
                         MWBase::Environment::get().getWorld()->disable(MWWorld::Ptr(&*iter, cellstore));
                     }
                     else
-                        MWBase::Environment::get().getLuaManager()->registerObject(MWWorld::Ptr(&*iter, cellstore));
+                        MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(&*iter, cellstore));
                     return;
                 }
 
@@ -281,7 +282,7 @@ namespace
         collection.mList.push_back(ref);
 
         MWWorld::LiveCellRefBase* base = &collection.mList.back();
-        MWBase::Environment::get().getLuaManager()->registerObject(MWWorld::Ptr(base, cellstore));
+        MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(base, cellstore));
     }
 
     // this function allows us to link a CellRefList<T> to the associated recNameInt, and apply a function
@@ -416,7 +417,7 @@ namespace MWWorld
         if (searchViaRefNum(object.getCellRef().getRefNum()).isEmpty())
             throw std::runtime_error("moveTo: object is not in this cell");
 
-        MWBase::Environment::get().getLuaManager()->registerObject(MWWorld::Ptr(object.getBase(), cellToMoveTo));
+        MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(object.getBase(), cellToMoveTo));
 
         MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
         if (found != mMovedHere.end())

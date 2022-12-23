@@ -99,7 +99,7 @@ namespace MWLua
 
             void apply(WorldView& worldView) const override
             {
-                LObject obj(mId, worldView.getObjectRegistry());
+                LObject obj(mId);
                 LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
                 if (scripts)
                     scripts->applyStatsCache();

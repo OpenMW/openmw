@@ -4,6 +4,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <unordered_map>
 
 #include "ptr.hpp"
 
@@ -48,6 +49,10 @@ namespace MWWorld
 
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
 
+        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
+        size_t mPtrIndexUpdateCounter;
+        ESM::RefNum mLastGeneratedRefnum;
+
     public:
         void clear();
 
@@ -55,11 +60,20 @@ namespace MWWorld
 
         CellStore* getExterior(int x, int y);
 
-        CellStore* getInterior(const ESM::RefId& name);
+        CellStore* getInterior(std::string_view name);
 
         CellStore* getCell(const ESM::CellId& id);
 
-        Ptr getPtr(const ESM::RefId& name, CellStore& cellStore, bool searchInContainers = false);
+        void registerPtr(const MWWorld::Ptr& ptr);
+        void deregisterPtr(const MWWorld::Ptr& ptr);
+        ESM::RefNum getLastGeneratedRefNum() const { return mLastGeneratedRefnum; }
+        void setLastGeneratedRefNum(ESM::RefNum v) { mLastGeneratedRefnum = v; }
+        size_t getPtrIndexUpdateCounter() const { return mPtrIndexUpdateCounter; }
+        const std::unordered_map<ESM::RefNum, Ptr>& getAllPtrs() const { return mPtrIndex; }
+
+        Ptr getPtr(const ESM::RefNum& refNum) const;
+
+        Ptr getPtr(std::string_view name, CellStore& cellStore, bool searchInContainers = false);
         ///< \param searchInContainers Only affect loaded cells.
         /// @note name must be lower case
 

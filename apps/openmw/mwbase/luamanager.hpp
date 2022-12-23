@@ -36,8 +36,6 @@ namespace MWBase
 
         virtual void newGameStarted() = 0;
         virtual void gameLoaded() = 0;
-        virtual void registerObject(const MWWorld::Ptr& ptr) = 0;
-        virtual void deregisterObject(const MWWorld::Ptr& ptr) = 0;
         virtual void objectAddedToScene(const MWWorld::Ptr& ptr) = 0;
         virtual void objectRemovedFromScene(const MWWorld::Ptr& ptr) = 0;
         virtual void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) = 0;
