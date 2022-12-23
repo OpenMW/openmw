@@ -1226,6 +1226,6 @@ namespace
 
         EXPECT_EQ(
             findPath(*mNavigator, agentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
-            Status::StartPolygonNotFound);
+            Status::NavMeshNotFound);
     }
 }
