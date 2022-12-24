@@ -246,9 +246,6 @@ namespace MWWorld
 
         bool isCellQuasiExterior() const override;
 
-        osg::Vec2f getNorthVector(const CellStore* cell) override;
-        ///< get north vector for given interior cell
-
         void getDoorMarkers(MWWorld::CellStore* cell, std::vector<DoorMarker>& out) override;
         ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 

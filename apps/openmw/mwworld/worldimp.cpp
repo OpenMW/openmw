@@ -2022,19 +2022,6 @@ namespace MWWorld
         mWeatherManager->modRegion(regionid, chances);
     }
 
-    osg::Vec2f World::getNorthVector(const CellStore* cell)
-    {
-        MWWorld::ConstPtr northmarker = cell->searchConst(ESM::RefId::stringRefId("northmarker"));
-
-        if (northmarker.isEmpty())
-            return osg::Vec2f(0, 1);
-
-        osg::Quat orient(-northmarker.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, 1));
-        osg::Vec3f dir = orient * osg::Vec3f(0, 1, 0);
-        osg::Vec2f d(dir.x(), dir.y());
-        return d;
-    }
-
     struct GetDoorMarkerVisitor
     {
         std::vector<World::DoorMarker>& mOut;

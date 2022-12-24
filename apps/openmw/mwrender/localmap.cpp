@@ -281,6 +281,19 @@ namespace MWRender
         }
     }
 
+    static osg::Vec2f getNorthVector(const MWWorld::CellStore* cell)
+    {
+        MWWorld::ConstPtr northmarker = cell->searchConst(ESM::RefId::stringRefId("northmarker"));
+
+        if (northmarker.isEmpty())
+            return osg::Vec2f(0, 1);
+
+        osg::Quat orient(-northmarker.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, 1));
+        osg::Vec3f dir = orient * osg::Vec3f(0, 1, 0);
+        osg::Vec2f d(dir.x(), dir.y());
+        return d;
+    }
+
     void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
     {
         osg::ComputeBoundsVisitor computeBoundsVisitor;
@@ -299,7 +312,7 @@ namespace MWRender
         mBounds = bounds;
 
         // Get the cell's NorthMarker rotation. This is used to rotate the entire map.
-        osg::Vec2f north = MWBase::Environment::get().getWorld()->getNorthVector(cell);
+        osg::Vec2f north = getNorthVector(cell);
 
         mAngle = std::atan2(north.x(), north.y());
 
