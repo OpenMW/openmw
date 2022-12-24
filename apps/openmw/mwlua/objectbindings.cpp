@@ -61,7 +61,7 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView&) const override
+            void apply() const override
             {
                 MWWorld::WorldModel& wm = *MWBase::Environment::get().getWorldModel();
                 MWWorld::CellStore* cell = wm.getCellByPosition(mPos, mCell);
@@ -109,7 +109,7 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView& worldView) const override
+            void apply() const override
             {
                 MWWorld::Ptr object = MWBase::Environment::get().getWorldModel()->getPtr(mObject);
                 if (object.isEmpty())

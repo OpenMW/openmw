@@ -276,11 +276,11 @@ namespace MWLua
         mInGameConsoleMessages.clear();
 
         for (std::unique_ptr<Action>& action : mActionQueue)
-            action->safeApply(mWorldView);
+            action->safeApply();
         mActionQueue.clear();
 
         if (mTeleportPlayerAction)
-            mTeleportPlayerAction->safeApply(mWorldView);
+            mTeleportPlayerAction->safeApply();
         mTeleportPlayerAction.reset();
     }
 
@@ -564,11 +564,11 @@ namespace MWLua
             mCallerTraceback = state->debugTraceback();
     }
 
-    void LuaManager::Action::safeApply(WorldView& w) const
+    void LuaManager::Action::safeApply() const
     {
         try
         {
-            apply(w);
+            apply();
         }
         catch (const std::exception& e)
         {
@@ -593,7 +593,7 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView&) const override { mFn(); }
+            void apply() const override { mFn(); }
             std::string toString() const override { return "FunctionAction " + mName; }
 
         private:

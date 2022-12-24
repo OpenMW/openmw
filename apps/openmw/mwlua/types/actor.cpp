@@ -29,7 +29,7 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView& worldView) const override
+            void apply() const override
             {
                 MWWorld::Ptr actor = MWBase::Environment::get().getWorldModel()->getPtr(mActor);
                 MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);

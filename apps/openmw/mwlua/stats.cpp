@@ -97,7 +97,7 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView& worldView) const override
+            void apply() const override
             {
                 LObject obj(mId);
                 LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();

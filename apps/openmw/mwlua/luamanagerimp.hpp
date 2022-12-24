@@ -73,8 +73,8 @@ namespace MWLua
             Action(LuaUtil::LuaState* state);
             virtual ~Action() {}
 
-            void safeApply(WorldView&) const;
-            virtual void apply(WorldView&) const = 0;
+            void safeApply() const;
+            virtual void apply() const = 0;
             virtual std::string toString() const = 0;
 
         private:
