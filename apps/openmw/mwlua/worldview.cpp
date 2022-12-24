@@ -120,35 +120,4 @@ namespace MWLua
         group.mSet.erase(getId(ptr));
         group.mChanged = true;
     }
-
-    // TODO: If Lua scripts will use several threads at the same time, then `find*Cell` functions should have critical
-    // sections.
-    MWWorld::CellStore* WorldView::findCell(const ESM::RefId& name, osg::Vec3f position)
-    {
-        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
-        bool exterior = name.empty() || MWBase::Environment::get().getWorld()->getExterior(name);
-        if (exterior)
-        {
-            const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(position.x(), position.y());
-            return worldModel->getExterior(cellIndex.x(), cellIndex.y());
-        }
-        else
-            return worldModel->getInterior(name);
-    }
-
-    MWWorld::CellStore* WorldView::findNamedCell(const ESM::RefId& name)
-    {
-        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
-        const ESM::Cell* esmCell = MWBase::Environment::get().getWorld()->getExterior(name);
-        if (esmCell)
-            return worldModel->getExterior(esmCell->getGridX(), esmCell->getGridY());
-        else
-            return worldModel->getInterior(name);
-    }
-
-    MWWorld::CellStore* WorldView::findExteriorCell(int x, int y)
-    {
-        return MWBase::Environment::get().getWorldModel()->getExterior(x, y);
-    }
-
 }

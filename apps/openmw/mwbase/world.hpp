@@ -263,9 +263,6 @@ namespace MWBase
             = 0;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        virtual const ESM::Cell* getExterior(const ESM::RefId& cellName) const = 0;
-        ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
-
         virtual MWWorld::Ptr getFacedObject() = 0;
         ///< Return pointer to the object the player is looking at, if it is within activation range
 

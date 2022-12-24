@@ -358,9 +358,6 @@ namespace MWWorld
             bool changeEvent = true) override;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        const ESM::Cell* getExterior(const ESM::RefId& cellName) const override;
-        ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
-
         MWWorld::Ptr getFacedObject() override;
         ///< Return pointer to the object the player is looking at, if it is within activation range
 

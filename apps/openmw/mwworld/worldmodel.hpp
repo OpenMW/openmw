@@ -42,6 +42,7 @@ namespace MWWorld
         WorldModel(const WorldModel&);
         WorldModel& operator=(const WorldModel&);
 
+        const ESM::Cell* getESMCellByName(const ESM::RefId& name);
         CellStore* getCellStore(const ESM::Cell* cell);
 
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
@@ -60,10 +61,14 @@ namespace MWWorld
         explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
 
         CellStore* getExterior(int x, int y);
-
-        CellStore* getInterior(std::string_view name);
-
+        CellStore* getInterior(const ESM::RefId& name);
+        CellStore* getCell(const ESM::RefId& name); // interior or named exterior
         CellStore* getCell(const ESM::CellId& id);
+
+        // If cellNameInSameWorldSpace is an interior - returns this interior.
+        // Otherwise returns exterior cell for given position in the same world space.
+        // At the moment multiple world spaces are not supported, so all exteriors are in one world space.
+        CellStore* getCellByPosition(const osg::Vec3f& pos, const ESM::RefId& cellNameInSameWorldSpace);
 
         void registerPtr(const MWWorld::Ptr& ptr);
         void deregisterPtr(const MWWorld::Ptr& ptr);
@@ -74,7 +79,7 @@ namespace MWWorld
 
         Ptr getPtr(const ESM::RefNum& refNum) const;
 
-        Ptr getPtr(std::string_view name, CellStore& cellStore, bool searchInContainers = false);
+        Ptr getPtr(const ESM::RefId& name, CellStore& cellStore, bool searchInContainers = false);
         ///< \param searchInContainers Only affect loaded cells.
         /// @note name must be lower case
 

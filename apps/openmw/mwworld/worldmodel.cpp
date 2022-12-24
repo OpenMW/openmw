@@ -6,6 +6,7 @@
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/loadregn.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
 
@@ -13,6 +14,7 @@
 #include "../mwbase/world.hpp"
 
 #include "cellstore.hpp"
+#include "cellutils.hpp"
 #include "esmstore.hpp"
 
 namespace
@@ -218,6 +220,57 @@ MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::CellId& id)
         return getExterior(id.mIndex.mX, id.mIndex.mY);
 
     return getInterior(id.mWorldspace);
+}
+
+const ESM::Cell* MWWorld::WorldModel::getESMCellByName(const ESM::RefId& name)
+{
+    const ESM::Cell* cell = mStore.get<ESM::Cell>().search(name); // first try interiors
+    if (!cell) // try named exteriors
+        cell = mStore.get<ESM::Cell>().searchExtByName(name);
+    if (!cell)
+    {
+        // treat "Wilderness" like an empty string
+        static const ESM::RefId defaultName
+            = ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
+        if (name == defaultName)
+            cell = mStore.get<ESM::Cell>().searchExtByName(ESM::RefId::sEmpty);
+    }
+    if (!cell)
+    {
+        // now check for regions
+        for (const ESM::Region& region : mStore.get<ESM::Region>())
+        {
+            if (name == ESM::RefId::stringRefId(region.mName))
+            {
+                cell = mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
+                break;
+            }
+        }
+    }
+    if (!cell)
+        throw std::runtime_error(std::string("Can't find cell with name ") + name.getRefIdString());
+    return cell;
+}
+
+MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& name)
+{
+    const ESM::Cell* cell = getESMCellByName(name);
+    if (cell->isExterior())
+        return getExterior(cell->getGridX(), cell->getGridY());
+    else
+        return getInterior(name);
+}
+
+MWWorld::CellStore* MWWorld::WorldModel::getCellByPosition(
+    const osg::Vec3f& pos, const ESM::RefId& cellNameInSameWorldSpace)
+{
+    if (cellNameInSameWorldSpace.empty() || getESMCellByName(cellNameInSameWorldSpace)->isExterior())
+    {
+        const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
+        return getExterior(cellIndex.x(), cellIndex.y());
+    }
+    else
+        return getInterior(cellNameInSameWorldSpace);
 }
 
 MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name, CellStore& cell, bool searchInContainers)

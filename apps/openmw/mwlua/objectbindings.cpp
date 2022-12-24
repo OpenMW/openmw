@@ -61,14 +61,12 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView& worldView) const override
+            void apply(WorldView&) const override
             {
-                MWWorld::CellStore* cell = worldView.findCell(mCell, mPos);
-                if (!cell)
-                    throw std::runtime_error(std::string("cell not found: '") + mCell.getRefIdString() + "'");
-
+                MWWorld::WorldModel& wm = *MWBase::Environment::get().getWorldModel();
+                MWWorld::CellStore* cell = wm.getCellByPosition(mPos, mCell);
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr obj = MWBase::Environment::get().getWorldModel()->getPtr(mObject);
+                MWWorld::Ptr obj = wm.getPtr(mObject);
                 const MWWorld::Class& cls = obj.getClass();
                 bool isPlayer = obj == world->getPlayerPtr();
                 if (cls.isActor())
@@ -166,7 +164,7 @@ namespace MWLua
         {
             objectT["isValid"] = [](const ObjectT& o) { return o.isValid(); };
             objectT["recordId"] = sol::readonly_property(
-                [](const ObjectT& o) -> ESM::RefId { return o.ptr().getCellRef().getRefId(); });
+                [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().getRefIdString(); });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
                 if (ptr.isInCell())
@@ -334,10 +332,10 @@ namespace MWLua
                 return ObjectList<ObjectT>{ list };
             };
 
-            inventoryT["countOf"] = [](const InventoryT& inventory, const ESM::RefId& recordId) {
+            inventoryT["countOf"] = [](const InventoryT& inventory, const std::string& recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                return store.count(recordId);
+                return store.count(ESM::RefId::stringRefId(recordId));
             };
 
             if constexpr (std::is_same_v<ObjectT, GObject>)

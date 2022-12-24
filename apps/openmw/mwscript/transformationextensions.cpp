@@ -399,24 +399,20 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 try
                 {
-                    store = worldModel->getInterior(cellID);
+                    store = worldModel->getCell(cellID);
                 }
                 catch (std::exception&)
                 {
                     // cell not found, move to exterior instead if moving the player (vanilla PositionCell
                     // compatibility)
-                    const ESM::Cell* cell = world->getExterior(cellID);
-                    if (!cell)
-                    {
-                        std::string error
-                            = "Warning: PositionCell: unknown interior cell (" + cellID.getRefIdString() + ")";
-                        if (isPlayer)
-                            error += ", moving to exterior instead";
-                        runtime.getContext().report(error);
-                        Log(Debug::Warning) << error;
-                        if (!isPlayer)
-                            return;
-                    }
+                    std::string error
+                        = "Warning: PositionCell: unknown interior cell (" + cellID.getRefIdString() + ")";
+                    if (isPlayer)
+                        error += ", moving to exterior instead";
+                    runtime.getContext().report(error);
+                    Log(Debug::Warning) << error;
+                    if (!isPlayer)
+                        return;
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
                     store = worldModel->getExterior(cellIndex.x(), cellIndex.y());
                 }
@@ -519,18 +515,12 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 try
                 {
-                    store = MWBase::Environment::get().getWorldModel()->getInterior(cellID);
+                    store = MWBase::Environment::get().getWorldModel()->getCell(cellID);
                 }
                 catch (std::exception&)
                 {
-                    const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
-                    const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
-                    if (!cell)
-                    {
-                        runtime.getContext().report("unknown cell (" + cellID.getRefIdString() + ")");
-                        Log(Debug::Error) << "Error: unknown cell (" << cellID << ")";
-                    }
+                    runtime.getContext().report("unknown cell (" + cellID.getRefIdString() + ")");
+                    Log(Debug::Error) << "Error: unknown cell (" << cellID << ")";
                 }
                 if (store)
                 {

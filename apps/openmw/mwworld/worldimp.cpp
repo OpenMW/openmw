@@ -564,34 +564,6 @@ namespace MWWorld
         mRandomSeed = seed;
     }
 
-    const ESM::Cell* World::getExterior(const ESM::RefId& cellName) const
-    {
-        // first try named cells
-        const ESM::Cell* cell = mStore.get<ESM::Cell>().searchExtByName(cellName);
-        if (cell)
-            return cell;
-        // treat "Wilderness" like an empty string
-        static const ESM::RefId defaultName
-            = ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
-        if (cellName == defaultName)
-        {
-            cell = mStore.get<ESM::Cell>().searchExtByName(ESM::RefId::sEmpty);
-            if (cell)
-                return cell;
-        }
-
-        // didn't work -> now check for regions
-        for (const ESM::Region& region : mStore.get<ESM::Region>())
-        {
-            if (cellName == ESM::RefId::stringRefId(region.mName))
-            {
-                return mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
-            }
-        }
-
-        return nullptr;
-    }
-
     void World::useDeathCamera()
     {
         mRendering->getCamera()->setMode(MWRender::Camera::Mode::ThirdPerson);
@@ -2859,7 +2831,17 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         const std::string& name = nameId.getRefIdString();
-        const ESM::Cell* ext = getExterior(nameId);
+
+        const ESM::Cell* ext = nullptr;
+        try
+        {
+            ext = mWorldModel.getCell(nameId)->getCell();
+            if (!ext->isExterior())
+                return false;
+        }
+        catch (std::exception&)
+        {
+        }
         if (!ext)
         {
             size_t comma = name.find(',');
