@@ -766,6 +766,7 @@ namespace MWGui
         , mEventBoxLocal(nullptr)
         , mGlobalMapRender(std::make_unique<MWRender::GlobalMap>(localMapRender->getRoot(), workQueue))
         , mEditNoteDialog()
+        , mAllowZooming(Settings::Manager::getBool("allow zooming", "Map"))
     {
         static bool registered = false;
         if (!registered)
@@ -804,8 +805,7 @@ namespace MWGui
         getWidget(mEventBoxGlobal, "EventBoxGlobal");
         mEventBoxGlobal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxGlobal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
-        const bool allowZooming = Settings::Manager::getBool("allow zooming", "Map");
-        if(allowZooming)
+        if (mAllowZooming)
             mEventBoxGlobal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
         mEventBoxGlobal->setDepth(Global_ExploreOverlayLayer);
 
@@ -813,7 +813,7 @@ namespace MWGui
         mEventBoxLocal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         mEventBoxLocal->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onMapDoubleClicked);
-        if (allowZooming)
+        if (mAllowZooming)
             mEventBoxLocal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
 
         LocalMapBase::init(mLocalMap, mPlayerArrowLocal, getLocalViewingDistance());
@@ -1067,7 +1067,8 @@ namespace MWGui
         markerWidget->setColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
         markerWidget->setDepth(Global_MarkerLayer);
         markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
-        markerWidget->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
+        if (mAllowZooming)
+            markerWidget->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
         markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
 
         return markerWidget;
@@ -1351,14 +1352,16 @@ namespace MWGui
         marker->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         marker->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         marker->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onCustomMarkerDoubleClicked);
-        marker->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
+        if (mAllowZooming)
+            marker->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
     }
 
     void MapWindow::doorMarkerCreated(MyGUI::Widget *marker)
     {
         marker->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         marker->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
-        marker->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
+        if (mAllowZooming)
+            marker->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
     }
 
     void MapWindow::asyncPrepareSaveMap()
