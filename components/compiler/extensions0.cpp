@@ -325,6 +325,8 @@ namespace Compiler
             extensions.registerInstruction("togglerecastmesh", "", opcodeToggleRecastMesh);
             extensions.registerInstruction("help", "", opcodeHelp);
             extensions.registerInstruction("reloadlua", "", opcodeReloadLua);
+            extensions.registerInstruction("testmodels", "", opcodeTestModels);
+            extensions.registerInstruction("t3d", "", opcodeTestModels);
         }
     }
 
