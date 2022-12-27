@@ -14,6 +14,7 @@
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
+    Bug #6807: Ultimate Galleon is not working properly
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
