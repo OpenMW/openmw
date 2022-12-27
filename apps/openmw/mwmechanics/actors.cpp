@@ -598,7 +598,8 @@ namespace MWMechanics
         }
 
         std::set<MWWorld::Ptr> playerAllies;
-        getActorsSidingWith(MWMechanics::getPlayer(), playerAllies, cachedAllies);
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        getActorsSidingWith(player, playerAllies, cachedAllies);
 
         bool isPlayerFollowerOrEscorter = playerAllies.find(actor1) != playerAllies.end();
 
@@ -621,7 +622,8 @@ namespace MWMechanics
                         mechanicsManager->startCombat(actor1, actor2);
                         // Also have actor1's allies start combat
                         for (const MWWorld::Ptr& ally1 : allies1)
-                            mechanicsManager->startCombat(ally1, actor2);
+                            if (ally1 != player)
+                                mechanicsManager->startCombat(ally1, actor2);
                         return;
                     }
                 }
@@ -721,7 +723,10 @@ namespace MWMechanics
             {
                 bool actorKilled = false;
 
-                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.getCasterActorId());
+                MWWorld::Ptr caster
+                    = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.getCasterActorId());
+                if (caster.isEmpty())
+                    continue;
                 for (const auto& effect : spell.getEffects())
                 {
                     static const std::array<int, 7> damageEffects{
