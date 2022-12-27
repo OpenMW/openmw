@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadnpc.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -61,6 +62,14 @@ namespace
         // Calculate damage/fortification based on the clamped base value
         stat.setBase(std::clamp(base + amount, 0.f, 100.f), true);
         stat.setModifier(newModified - stat.getBase());
+    }
+
+    template <class T>
+    void updateBaseRecord(MWWorld::Ptr& ptr)
+    {
+        const auto& store = MWBase::Environment::get().getWorld()->getStore();
+        const T* base = store.get<T>().find(ptr.getCellRef().getRefId());
+        ptr.get<T>()->mBase = base;
     }
 }
 
@@ -1130,6 +1139,12 @@ namespace MWScript
                     windowManager->onDeleteCustomData(ptr);
                     // HACK: disable/enable object to re-add it to the scene properly (need a new Animation).
                     MWBase::Environment::get().getWorld()->disable(ptr);
+                    // The actor's base record may have changed after this specific reference was created.
+                    // So we need to update to the current version
+                    if (ptr.getClass().isNpc())
+                        updateBaseRecord<ESM::NPC>(ptr);
+                    else
+                        updateBaseRecord<ESM::Creature>(ptr);
                     if (wasOpen && !windowManager->containsMode(MWGui::GM_Container))
                     {
                         // Reopen the loot GUI if it was closed because we resurrected the actor we were looting
