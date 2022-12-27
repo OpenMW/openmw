@@ -6,6 +6,8 @@
 
 #include <components/esm/defs.hpp>
 
+#include "duration.hpp"
+
 namespace MWWorld
 {
     TimeStamp::TimeStamp (float hour, int day)
@@ -30,11 +32,10 @@ namespace MWWorld
         if (hours<0)
             throw std::runtime_error ("can't move time stamp backwards in time");
 
-        hours += mHour;
+        const Duration duration = Duration::fromHours(mHour + hours);
 
-        mHour = static_cast<float> (std::fmod (hours, 24));
-
-        mDay += static_cast<int>(hours / 24);
+        mHour = duration.getHours();
+        mDay += duration.getDays();
 
         return *this;
     }
