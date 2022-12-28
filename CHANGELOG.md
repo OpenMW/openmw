@@ -36,6 +36,7 @@
     Feature #6983: PCVisionBonus script functions
     Feature #6995: Localize the "show effect duration" option
     Feature #7058: Implement TestModels (T3D) console command
+    Feature #7087: Block resolution change in the Windowed Fullscreen mode
 
 0.48.0
 ------

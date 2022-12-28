@@ -267,6 +267,7 @@ namespace MWGui
         getWidget(mWaterRainRippleDetail, "WaterRainRippleDetail");
         getWidget(mPrimaryLanguage, "PrimaryLanguage");
         getWidget(mSecondaryLanguage, "SecondaryLanguage");
+        getWidget(mWindowModeHint, "WindowModeHint");
         getWidget(mLightingMethodButton, "LightingMethodButton");
         getWidget(mLightsResetButton, "LightsResetButton");
         getWidget(mMaxLights, "MaxLights");
@@ -378,6 +379,8 @@ namespace MWGui
             = static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video"));
         mWindowBorderButton->setEnabled(
             windowMode != Settings::WindowMode::Fullscreen && windowMode != Settings::WindowMode::WindowedFullscreen);
+
+        mWindowModeHint->setVisible(windowMode == Settings::WindowMode::WindowedFullscreen);
 
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
@@ -564,7 +567,24 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE)
             return;
 
-        Settings::Manager::setInt("window mode", "Video", static_cast<int>(_sender->getIndexSelected()));
+        int index = static_cast<int>(_sender->getIndexSelected());
+        if (index == static_cast<size_t>(Settings::WindowMode::WindowedFullscreen))
+        {
+            mResolutionList->setEnabled(false);
+            mWindowModeHint->setVisible(true);
+        }
+        else
+        {
+            mResolutionList->setEnabled(true);
+            mWindowModeHint->setVisible(false);
+        }
+
+        if (index == static_cast<size_t>(Settings::WindowMode::Windowed))
+            mWindowBorderButton->setEnabled(true);
+        else
+            mWindowBorderButton->setEnabled(false);
+
+        Settings::Manager::setInt("window mode", "Video", index);
         apply();
     }
 
@@ -642,6 +662,12 @@ namespace MWGui
         else
             Log(Debug::Warning) << "Unexpected option pos " << pos;
         apply();
+    }
+
+    void SettingsWindow::onResChange(int width, int height)
+    {
+        center();
+        highlightCurrentResolution();
     }
 
     void SettingsWindow::onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
@@ -839,6 +865,9 @@ namespace MWGui
 
             mWindowBorderButton->setEnabled(false);
         }
+
+        if (index == static_cast<size_t>(Settings::WindowMode::WindowedFullscreen))
+            mResolutionList->setEnabled(false);
     }
 
     void SettingsWindow::layoutControlsBox()
