@@ -27,6 +27,7 @@ namespace Compiler
             mLoc.mColumn = 0;
             ++mLoc.mLine;
             mLoc.mLiteral.clear();
+            mIgnoreSpecial = true;
         }
         else
         {
@@ -119,6 +120,7 @@ namespace Compiler
         }
         else if (c.isAlpha() || c == '_' || c == '"')
         {
+            mIgnoreSpecial = false;
             bool cont = false;
 
             if (scanName(c, parser, cont))
@@ -129,6 +131,7 @@ namespace Compiler
         }
         else if (c.isDigit())
         {
+            mIgnoreSpecial = false;
             bool cont = false;
 
             bool scanned = mExpectName ? scanName(c, parser, cont) : scanInt(c, parser, cont);
@@ -402,6 +405,23 @@ namespace Compiler
 
         if (c == '\n')
             special = S_newline;
+        else if (mIgnoreSpecial)
+        {
+            // Ignore junk special characters
+            TokenLoc loc = mLoc;
+            while (get(c))
+            {
+                if (c.isAlpha() || c == '_' || c == '"' || c.isDigit() || c == ';' || c == '\n')
+                {
+                    putback(c);
+                    break;
+                }
+                c.appendTo(loc.mLiteral);
+            }
+            mErrorHandler.warning("Stray special character at start of line", loc);
+            cont = true;
+            return true;
+        }
         else if (c == '(' || c == '[') /// \todo option to disable the use of [ as alias for (
             special = S_open;
         else if (c == ')' || c == ']') /// \todo option to disable the use of ] as alias for )
@@ -598,6 +618,7 @@ namespace Compiler
         , mTolerantNames(false)
         , mIgnoreNewline(false)
         , mExpectName(false)
+        , mIgnoreSpecial(true)
     {
     }
 

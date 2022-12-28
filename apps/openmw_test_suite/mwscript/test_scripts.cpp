@@ -441,6 +441,28 @@ messagebox,"this is a %g",a
 
 ,End,)mwscript";
 
+    const std::string sIssue6807 = R"mwscript(---Begin issue6807
+
+short a
+
+----------------------
++++++++++++
+***************
+/////////////////////
+?????????
+@@@@@@@@
+~~~~~~~~~~~~~~~~~~
+
+set a to 1
+
+;-------------------------------------------------------------------------------------------------------------------------------------------------------------
+; Collision Detection Check
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-+'\/.,><$@---!=\/?--------(){}------ show a
+
+End)mwscript";
+
     TEST_F(MWScriptTest, mwscript_test_invalid)
     {
         EXPECT_THROW(compile("this is not a valid script", true), Compiler::SourceException);
@@ -858,5 +880,11 @@ messagebox,"this is a %g",a
     TEST_F(MWScriptTest, mwscript_test_6380)
     {
         EXPECT_FALSE(!compile(sIssue6380));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_6807)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue6807));
     }
 }

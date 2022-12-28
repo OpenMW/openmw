@@ -195,6 +195,7 @@ namespace Compiler
         bool mTolerantNames;
         bool mIgnoreNewline;
         bool mExpectName;
+        bool mIgnoreSpecial;
 
     public:
         enum keyword
